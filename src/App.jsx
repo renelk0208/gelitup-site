@@ -1421,12 +1421,21 @@ function applyManualCatalogueOrder(items = [], rule = null) {
 function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()) {
   if (!payload || typeof payload !== 'object') return []
 
+  const blockedCategoryTokens = new Set(['CRACK', 'THERMO'])
+  const isBlockedImagePath = (imagePath = '') => {
+    const normalizedPath = normalizeCatalogueToken(imagePath)
+    if (!normalizedPath) return false
+
+    return Array.from(blockedCategoryTokens).some((token) => normalizedPath.includes(`/${token}/`) || normalizedPath.endsWith(`/${token}`) || normalizedPath.includes(token))
+  }
+
   const uniqueImagePaths = new Set(
     Object.values(payload)
       .filter((value) => typeof value === 'string')
       .map((value) => String(value).trim())
       .filter((value) => value.includes('/gelitup-content/product-images/'))
       .filter((value) => !isCategoryHeroAssetPath(value))
+      .filter((value) => !isBlockedImagePath(value))
   )
 
   const grouped = new Map()
@@ -1602,7 +1611,7 @@ function FullCataloguePage() {
         setSections(nextSections)
         setHeroCandidateIndexByCategory({})
         const firstCategory = nextSections[0]?.category || ''
-        const firstSubcategory = ''
+        const firstSubcategory = nextSections[0]?.subcategories?.[0]?.name || ''
         setActiveCategory(firstCategory)
         setActiveSubcategory(firstSubcategory)
         setActiveColorFamily('ALL')
@@ -1845,7 +1854,7 @@ function FullCataloguePage() {
                     key={section.category}
                     onClick={() => {
                       setActiveCategory(section.category)
-                      setActiveSubcategory('')
+                      setActiveSubcategory(section.subcategories?.[0]?.name || '')
                       setActiveColorFamily('ALL')
                     }}
                     className={`group relative overflow-hidden rounded-[12px] border bg-[#E8E8E8] text-left transition duration-300 hover:scale-[1.02] hover:border-fuchsia-500/70 hover:shadow-[0_0_0_2px_rgba(217,70,239,0.28)] ${isColorsTile ? 'h-[280px] sm:col-span-2 sm:h-[350px] lg:h-[360px] xl:row-span-2 xl:h-[100%]' : 'h-[190px] sm:h-[210px]'} ${isActiveCategory ? 'border-fuchsia-600 shadow-[0_0_0_1px_rgba(217,70,239,0.35)]' : 'border-[#4A4A4A]'}`}
