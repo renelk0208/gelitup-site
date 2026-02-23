@@ -55,6 +55,12 @@ const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03
 const CPNP_ICON_PATH = '/gelitup-content/certification%20logos/cpnp-icon.png'
 const HEMA_TPO_ICON_PATH = '/gelitup-content/certification%20logos/hema-tpo-free-icon.png'
 const LEAPING_BUNNY_ICON_PATH = '/gelitup-content/certification%20logos/leaping-bunny-icon.png'
+const LEEUKOPF_DISTRIBUTORS_MAP_URL = 'https://www.google.com/maps/embed?origin=mfe&pb=!1m3!2m1!1sEurope!6i3'
+const LEEUKOPF_DISTRIBUTORS_SOURCE_URL = 'https://leeukopf.com/our-brands'
+const VERIFIED_DISTRIBUTOR_COUNTRIES = [
+  'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Denmark', 'France', 'Greece', 'Holland', 'Israel',
+  'Italy', 'Moldova', 'New Zealand', 'Qatar', 'Kingdom of Saudi Arabia', 'Serbia', 'South Africa', 'United Kingdom',
+]
 const SILVER_FREE_GUARANTEE_BADGE = 'Silver-Free Guarantee'
 const CI77820_MAIN_STATEMENT = 'All Gelitup products manufactured from December 2025 onwards are 100% CI 77820 (Silver) FREE.'
 const CI77820_TRANSPARENCY_NOTE = 'Legacy stock (pre-Dec 2025) may contain traces (<0.2%) in full compliance with original EC 1223/2009 standards. All current batches have transitioned to Aluminium and Mica-based pigments.'
@@ -1083,25 +1089,24 @@ function DistributorPackagesPage() {
 
   return (
     <section className="space-y-5">
-      <div className="rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700 p-5 text-white sm:p-8">
-        <p className="text-xs uppercase tracking-[0.16em] text-slate-300">B2B Merchandising</p>
-        <h1 className="mt-2 text-2xl font-bold sm:text-4xl">Distributor Packages</h1>
-        <p className="mt-3 max-w-3xl text-sm text-slate-200 sm:text-base">
-          Three tiered assortment models designed to help new nail salons launch faster, improve sell-through,
-          and increase service profitability with a clear step-up path.
+      <div className="rounded-2xl bg-gradient-to-br from-[#1A1A1A] to-[#4A4A4A] p-5 text-white sm:p-8">
+        <p className="text-xs uppercase tracking-[0.16em] text-white/80">B2B Merchandising</p>
+        <h1 className="heading-on-dark mt-2 text-2xl font-extrabold sm:text-4xl">Distributor Packages</h1>
+        <p className="mt-3 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] text-white/95 sm:text-base">
+          EU REGULATED. HEMA-FREE. PROFESSIONAL EXCELLENCE.
         </p>
-        <NavLink to="/full-catalogue" className="mt-4 inline-flex rounded-lg border border-slate-400 px-4 py-2 text-sm font-semibold text-white">
+        <NavLink to="/full-catalogue" className="mt-4 inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
           Quick View: The Collection
         </NavLink>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {HERO_PRODUCT_COPY.map((product) => (
-          <article key={product.name} className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
-            <p className="text-xs uppercase tracking-[0.14em] text-slate-500">Hero Product</p>
-            <h2 className="mt-1 text-base font-semibold text-slate-900">{product.name}</h2>
-            <p className="mt-2 text-sm font-semibold text-slate-800">{product.headline}</p>
-            <ul className="mt-2 space-y-1 text-xs text-slate-700">
+          <article key={product.name} className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5">
+            <p className="text-xs uppercase tracking-[0.14em] text-[#4A4A4A]">Hero Product</p>
+            <h2 className="heading-on-light mt-1 text-base font-semibold text-[#1A1A1A]">{product.name}</h2>
+            <p className="mt-2 text-sm font-semibold text-[#1A1A1A]">{product.headline}</p>
+            <ul className="mt-2 space-y-1 text-xs text-[#4A4A4A]">
               {product.bullets.map((bullet) => (
                 <li key={bullet}>• {bullet}</li>
               ))}
@@ -1112,19 +1117,19 @@ function DistributorPackagesPage() {
 
       <div className="grid gap-4">
         {packageTiers.map((tier) => (
-          <article key={tier.name} className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+          <article key={tier.name} className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-6">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-xl font-semibold text-slate-900">{tier.name}</h2>
-              <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">{tier.badge}</span>
+              <h2 className="heading-on-light text-xl font-semibold text-[#1A1A1A]">{tier.name}</h2>
+              <span className="rounded-full bg-[#E8E8E8] px-2 py-1 text-xs font-semibold text-[#1A1A1A]">{tier.badge}</span>
             </div>
-            <p className="mt-2 text-sm font-medium text-slate-700">ROI Focus: {tier.roi}</p>
-            <p className="mt-1 text-sm text-slate-600">{tier.value}</p>
+            <p className="mt-2 text-sm font-medium text-[#1A1A1A]">ROI Focus: {tier.roi}</p>
+            <p className="mt-1 text-sm text-[#4A4A4A]">{tier.value}</p>
 
             <div className="mt-4 space-y-4">
               {tier.groups.map((group) => (
-                <div key={group.title} className="rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
-                  <h3 className="text-sm font-semibold text-slate-900">{group.title}</h3>
-                  <ul className="mt-2 grid gap-1 text-xs text-slate-700 sm:grid-cols-2">
+                <div key={group.title} className="rounded-xl border border-[#4A4A4A]/30 bg-[#E8E8E8] p-3 sm:p-4">
+                  <h3 className="text-sm font-semibold text-[#1A1A1A]">{group.title}</h3>
+                  <ul className="mt-2 grid gap-1 text-xs text-[#4A4A4A] sm:grid-cols-2">
                     {group.items.map((item) => (
                       <li key={item}>• {item}</li>
                     ))}
@@ -1709,7 +1714,7 @@ function FullCataloguePage() {
                       setActiveSubcategory('')
                       setActiveColorFamily('ALL')
                     }}
-                    className={`group relative overflow-hidden rounded-[12px] border bg-[#E8E8E8] text-left transition duration-300 hover:scale-[1.02] hover:border-fuchsia-500/70 hover:shadow-[0_0_0_2px_rgba(217,70,239,0.28)] ${isColorsTile ? 'h-[280px] sm:col-span-2 sm:h-[350px] lg:h-[360px] xl:row-span-2 xl:h-[100%]' : 'h-[190px] sm:h-[210px]'} ${isActiveCategory ? 'border-fuchsia-600 shadow-[0_0_0_1px_rgba(217,70,239,0.35)]' : 'border-[#4A4A4A]/35'}`}
+                    className={`group relative overflow-hidden rounded-[12px] border bg-[#E8E8E8] text-left transition duration-300 hover:scale-[1.02] hover:border-fuchsia-500/70 hover:shadow-[0_0_0_2px_rgba(217,70,239,0.28)] ${isColorsTile ? 'h-[280px] sm:col-span-2 sm:h-[350px] lg:h-[360px] xl:row-span-2 xl:h-[100%]' : 'h-[190px] sm:h-[210px]'} ${isActiveCategory ? 'border-fuchsia-600 shadow-[0_0_0_1px_rgba(217,70,239,0.35)]' : 'border-[#4A4A4A]'}`}
                   >
                     <img
                       src={coverImage}
@@ -1724,11 +1729,11 @@ function FullCataloguePage() {
                         }))
                       }}
                     />
-                    <div className="absolute inset-x-2 bottom-2 rounded-[12px] border border-white/40 bg-black/35 px-3 py-2 backdrop-blur-md">
-                      <p className="text-sm font-bold uppercase tracking-[0.04em] text-white">{section.category}</p>
-                      <p className="text-[11px] text-white/90">{imageCount} items</p>
+                    <div className="absolute inset-x-2 bottom-2 rounded-[12px] border border-[#4A4A4A]/45 bg-[#E8E8E8]/90 px-3 py-2 backdrop-blur-md">
+                      <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{section.category}</p>
+                      <p className="text-[11px] text-[#1A1A1A]/75">{imageCount} items</p>
                       {isColorsTile && (
-                        <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/90">Best-selling shades carousel</p>
+                        <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-fuchsia-600">761 SHADES</p>
                       )}
                     </div>
                   </button>
@@ -1890,12 +1895,18 @@ function FullCataloguePage() {
 }
 
 function InfoCard({ id, title, children, tone = 'white' }) {
-  const toneClass = tone === 'muted' ? 'bg-slate-50' : 'bg-white'
+  const toneClass = tone === 'muted'
+    ? 'bg-slate-50'
+    : tone === 'dark'
+      ? 'bg-[#1A1A1A] border-[#4A4A4A] text-white'
+      : 'bg-white'
+  const headingClass = tone === 'dark' ? 'heading-on-dark text-xl font-extrabold' : 'text-xl font-semibold text-slate-900'
+  const bodyClass = tone === 'dark' ? 'mt-2 text-sm text-white/90' : 'mt-2 text-sm text-slate-600'
 
   return (
     <div id={id} className={`rounded-2xl border border-slate-200 ${toneClass} p-5 sm:p-6`}>
-      <h2 className="text-xl font-semibold text-slate-900">{title}</h2>
-      <div className="mt-2 text-sm text-slate-600">{children}</div>
+      <h2 className={headingClass}>{title}</h2>
+      <div className={bodyClass}>{children}</div>
     </div>
   )
 }
@@ -2281,73 +2292,68 @@ function HomePage({ onOpenRegulatoryStatement = () => {} }) {
               />
               )}
 
-          <div className="absolute inset-0 bg-black/55" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/75" />
 
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
-            <h1 className="heading-on-dark max-w-5xl text-3xl font-black uppercase leading-tight tracking-[0.06em] sm:text-4xl lg:text-6xl">
-              761 SHADES. CLEAN SCIENCE. ZERO COMPROMISE.
+            <h1 className="hero-copy-shadow heading-on-dark max-w-5xl text-3xl font-black uppercase leading-tight tracking-[0.06em] sm:text-4xl lg:text-6xl">
+              GELITUP: THE ARCHITECTS OF PROFESSIONAL COLOR
             </h1>
-            <h2 className="heading-on-dark mt-3 max-w-5xl text-base font-extrabold uppercase tracking-[0.08em] sm:text-xl lg:text-2xl">
-              GEL.IT.UP: THE GOLD STANDARD IN CLEAN SCIENCE.
-            </h2>
-            <p className="mt-4 max-w-3xl text-sm text-white/95 sm:text-base">
-              Since 2011, GEL.IT.UP by GIUP® supports nail professionals with EU/GMP-aligned formulas, cruelty-free standards, and high-performance systems.
+            <p className="hero-copy-shadow mt-4 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] text-white/95 sm:text-base">
+              A DECADE OF PROFESSIONAL MASTERY. EU REGULATED. HEMA-FREE.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              <NavLink to="/become-distributor" className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-[#1A1A1A]">
+              <NavLink to="/become-distributor" className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
                 Apply as Distributor
               </NavLink>
-              <a href={`mailto:${B2B_EMAIL}`} className="rounded-lg border border-white/60 px-4 py-2 text-sm font-semibold text-white">
+              <a href={`mailto:${B2B_EMAIL}`} className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
                 Contact Distribution
               </a>
             </div>
           </div>
 
           <div className="pointer-events-none fixed bottom-3 left-1/2 z-30 w-full max-w-5xl -translate-x-1/2 px-3 md:bottom-4 md:px-6">
-            <div className="pointer-events-auto mx-auto flex flex-wrap items-center justify-center gap-2 rounded-full border border-white/30 bg-white/10 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur-[10px] sm:gap-3 sm:px-3 sm:text-[11px]">
-              <button
-                type="button"
-                onClick={() => setIsManifestoOpen(true)}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-2.5 py-1.5 text-white transition duration-300 hover:bg-white/20"
-              >
-                <img src={CPNP_ICON_PATH} alt="CPNP" className="h-4 w-4 object-contain" />
-                <span>CPNP</span>
+            <div className="pointer-events-auto mx-auto flex flex-wrap items-center justify-center gap-2 rounded-full border border-white/55 bg-black/70 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur-[10px] sm:gap-3 sm:px-3 sm:text-[11px]">
+              <button type="button" onClick={() => setIsManifestoOpen(true)} title="CPNP" aria-label="CPNP" className="inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 p-2 text-white transition duration-300 hover:bg-white/20">
+                <img src={CPNP_ICON_PATH} alt="" className="h-5 w-5 object-contain brightness-0 invert" />
               </button>
               <button
                 type="button"
                 onClick={() => setIsManifestoOpen(true)}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-2.5 py-1.5 text-white transition duration-300 hover:bg-white/20"
+                title="HEMA/TPO Free"
+                aria-label="HEMA/TPO Free"
+                className="inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 p-2 text-white transition duration-300 hover:bg-white/20"
               >
-                <img src={HEMA_TPO_ICON_PATH} alt="HEMA/TPO Free" className="h-4 w-4 object-contain" />
-                <span>HEMA/TPO Free</span>
+                <img src={HEMA_TPO_ICON_PATH} alt="" className="h-5 w-5 object-contain brightness-0 invert" />
               </button>
               <button
                 type="button"
                 onClick={() => setIsManifestoOpen(true)}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-2.5 py-1.5 text-white transition duration-300 hover:bg-white/20"
+                title="Leaping Bunny"
+                aria-label="Leaping Bunny"
+                className="inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 p-2 text-white transition duration-300 hover:bg-white/20"
               >
-                <img src={LEAPING_BUNNY_ICON_PATH} alt="Leaping Bunny" className="h-4 w-4 object-contain" />
-                <span>Leaping Bunny</span>
+                <img src={LEAPING_BUNNY_ICON_PATH} alt="" className="h-5 w-5 object-contain brightness-0 invert" />
               </button>
               <button
                 type="button"
                 onClick={() => setIsManifestoOpen(true)}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-2.5 py-1.5 text-white transition duration-300 hover:bg-white/20"
+                title="EU Regulation"
+                aria-label="EU Regulation"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-white/10 text-sm font-bold text-white transition duration-300 hover:bg-white/20"
               >
-                <span className="text-xs leading-none" aria-hidden="true">🇪🇺</span>
-                <span>EU Regulation</span>
+                EU
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5">
+      <div className="rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 pb-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/50">Live Regulatory Feed</p>
-            <h2 className="mt-1 text-lg font-black uppercase tracking-[0.05em] text-black sm:text-xl">Regulatory Leadership: The CI 77820 (Silver) Update.</h2>
-            <p className="mt-1 text-sm text-black/70">Proactive compliance ensuring the future-proof safety of your salon inventory.</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/80">Live Regulatory Feed</p>
+            <h2 className="heading-on-dark mt-1 text-lg font-black uppercase tracking-[0.05em] sm:text-xl">Regulatory Leadership: The CI 77820 (Silver) Update.</h2>
+            <p className="mt-1 text-sm text-white/90">Proactive compliance ensuring the future-proof safety of your salon inventory.</p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
             <span className="relative inline-flex h-2.5 w-2.5">
@@ -2358,8 +2364,8 @@ function HomePage({ onOpenRegulatoryStatement = () => {} }) {
           </div>
         </div>
 
-        <p className="mt-3 text-sm font-semibold text-black">{CI77820_MAIN_STATEMENT}</p>
-        <p className="mt-2 text-xs text-black/65">{CI77820_TRANSPARENCY_NOTE}</p>
+        <p className="mt-3 text-sm font-semibold text-white">{CI77820_MAIN_STATEMENT}</p>
+        <p className="mt-2 text-xs text-white/80">{CI77820_TRANSPARENCY_NOTE}</p>
 
         <button
           type="button"
@@ -2376,7 +2382,7 @@ function HomePage({ onOpenRegulatoryStatement = () => {} }) {
           Nail Polishes, Nail Art, Consumables, and Skin & Nail Care.
           We also maintain a broad color portfolio (800+ shades) for professional channels.
         </p>
-        <NavLink to="/full-catalogue" className="mt-3 inline-flex rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700">
+        <NavLink to="/full-catalogue" className="mt-3 inline-flex rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
           Open The Collection
         </NavLink>
         {media.gallery.length > 0 && (
@@ -2402,10 +2408,9 @@ function HomePage({ onOpenRegulatoryStatement = () => {} }) {
         </ul>
       </InfoCard>
 
-      <InfoCard title="Distributor Packages">
+      <InfoCard title="Distributor Packages" tone="dark">
         <p>
-          Package terms are tailored by territory, business type, and expected volume.
-          After application review, the distribution team shares starter options, regional support, and launch materials.
+          TRUSTED B2B INVENTORY SYSTEMS. VERIFIED DATABASE. STRUCTURED SCALE-UP.
         </p>
       </InfoCard>
 
@@ -2418,12 +2423,12 @@ function HomePage({ onOpenRegulatoryStatement = () => {} }) {
         </div>
       </InfoCard>
 
-      <InfoCard title="Client Registration" tone="muted">
+      <InfoCard title="Client Registration" tone="dark">
         <p>
           Submit your distributor application form and our team will review it.
           Portal credentials are issued only after contract confirmation and approval.
         </p>
-        <NavLink to="/become-distributor" className="mt-4 inline-flex rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+        <NavLink to="/become-distributor" className="mt-4 inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
           Open Registration Form
         </NavLink>
       </InfoCard>
@@ -2540,6 +2545,58 @@ function PortalLanding() {
         >
           Apply as Distributor
         </a>
+      </div>
+    </section>
+  )
+}
+
+function DistributorsPage() {
+  return (
+    <section className="space-y-5">
+      <div className="rounded-2xl bg-[#1A1A1A] p-5 text-white sm:p-8">
+        <p className="text-xs uppercase tracking-[0.16em] text-white/80">Verified Distribution Network</p>
+        <h1 className="heading-on-dark mt-2 text-2xl font-extrabold sm:text-4xl">Official Gelitup Distributors</h1>
+        <p className="mt-3 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] text-white/95 sm:text-base">
+          LIVE COVERAGE DATA. VERIFIED NETWORK. LEGITIMATE B2B DATABASE.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {VERIFIED_DISTRIBUTOR_COUNTRIES.map((country) => (
+            <span key={country} className="rounded-full border border-white/30 bg-white/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-white">
+              {country}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-[#4A4A4A] bg-[#E8E8E8] p-4 sm:p-5">
+        <h2 className="heading-on-light text-lg font-extrabold text-[#1A1A1A] sm:text-xl">Distributor Coverage Map</h2>
+        <p className="mt-2 text-sm text-[#1A1A1A]">
+          Source: Leeukopf distributors network data.
+          {' '}
+          <a href={LEEUKOPF_DISTRIBUTORS_SOURCE_URL} target="_blank" rel="noreferrer" className="font-semibold underline">
+            View source
+          </a>
+        </p>
+
+        <div className="mt-3 overflow-hidden rounded-xl border border-[#4A4A4A] bg-white">
+          <iframe
+            title="Gelitup distributors map"
+            src={LEEUKOPF_DISTRIBUTORS_MAP_URL}
+            className="h-[320px] w-full sm:h-[420px]"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-4 text-white sm:p-5">
+        <h2 className="heading-on-dark text-lg font-extrabold sm:text-xl">Register Now for Distribution</h2>
+        <p className="mt-2 text-sm text-white/90">Client onboarding for verified trade partners is handled through the official B2B registration workflow.</p>
+        <div className="mt-4">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
+            Open Client Registration
+          </NavLink>
+        </div>
       </div>
     </section>
   )
@@ -7057,11 +7114,11 @@ function App() {
           <Route path="/our-products" element={<Navigate to="/distributor-packages" replace />} />
           <Route
             path="/distributors"
-            element={LEGACY_MIRROR_ENABLED ? <LegacyMirrorPage pagePath="/distributors" /> : <Navigate to="/become-distributor" replace />}
+            element={<DistributorsPage />}
           />
           <Route
             path="/contact-us"
-            element={LEGACY_MIRROR_ENABLED ? <LegacyMirrorPage pagePath="/contact-us" /> : <Navigate to="/pages/contact-us" replace />}
+            element={<Navigate to="/become-distributor" replace />}
           />
           <Route path="/products" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
@@ -7072,9 +7129,10 @@ function App() {
           <Route path="/cookie-policy" element={<CookiePolicyPage />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditionsPage />} />
           <Route path="/certifications" element={<HomePage />} />
-          <Route path="/contact" element={<HomePage />} />
+          <Route path="/contact" element={<Navigate to="/become-distributor" replace />} />
           <Route path="/baseline" element={<Navigate to="/" replace />} />
           <Route path="/baseline/:slug" element={<Navigate to="/" replace />} />
+          <Route path="/pages/contact-us" element={<Navigate to="/become-distributor" replace />} />
           <Route path="/pages/:slug" element={<ImportedAnyPage />} />
           <Route path="/become-distributor" element={<PortalRegister onRegister={handlePortalRegister} />} />
 
@@ -7160,7 +7218,7 @@ function App() {
               <NavLink to="/full-catalogue" className="block transition duration-300 hover:text-fuchsia-300">Catalogue</NavLink>
               <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distributor Packages</NavLink>
               <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Become Distributor</NavLink>
-              <NavLink to="/pages/contact-us" className="block transition duration-300 hover:text-fuchsia-300">Contact Us</NavLink>
+              <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Client Registration</NavLink>
             </div>
           </div>
 
