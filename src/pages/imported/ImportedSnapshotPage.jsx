@@ -176,12 +176,8 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
       return manifestVideo.localPath
     }
 
-    if (manifestoVisual && (manifestoVisual.displayUrl.toLowerCase().includes('.mp4') || manifestoVisual.displayUrl.toLowerCase().includes('.webm'))) {
-      return manifestoVisual.displayUrl
-    }
-
     return ''
-  }, [manifestoVisual, mediaItems])
+  }, [mediaItems])
 
   const structuredContent = useMemo(() => {
     if (!activePage) {
