@@ -2674,6 +2674,25 @@ function HomePage() {
   const countdownHours = Math.floor((countdownRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
   const countdownMinutes = Math.floor((countdownRemaining % (1000 * 60 * 60)) / (1000 * 60))
   const countdownSeconds = Math.floor((countdownRemaining % (1000 * 60)) / 1000)
+  const reminderReturnUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/full-catalogue`
+    : '/full-catalogue'
+  const reminderMessage = `Reminder: GEL.IT.UP new arrivals drop Monday at 09:00. Return here: ${reminderReturnUrl}`
+  const whatsappReminderHref = `https://wa.me/?text=${encodeURIComponent(reminderMessage)}`
+  const emailReminderHref = `mailto:?subject=${encodeURIComponent('GEL.IT.UP Reminder: New Arrivals Monday 09:00')}&body=${encodeURIComponent(reminderMessage)}`
+  const formatCalendarUtc = (timestamp) => {
+    const date = new Date(timestamp)
+    const year = date.getUTCFullYear()
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+    const day = String(date.getUTCDate()).padStart(2, '0')
+    const hours = String(date.getUTCHours()).padStart(2, '0')
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0')
+    const seconds = String(date.getUTCSeconds()).padStart(2, '0')
+    return `${year}${month}${day}T${hours}${minutes}${seconds}Z`
+  }
+  const calendarStart = formatCalendarUtc(countdownTarget)
+  const calendarEnd = formatCalendarUtc(countdownTarget + (30 * 60 * 1000))
+  const calendarReminderHref = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('GEL.IT.UP New Arrivals')}&dates=${calendarStart}/${calendarEnd}&details=${encodeURIComponent(reminderMessage)}`
 
   return (
     <section className="space-y-6">
@@ -2807,6 +2826,31 @@ function HomePage() {
         <p className="mt-3 text-3xl font-extrabold uppercase tracking-[0.12em] text-white sm:text-5xl">
           {String(countdownDays).padStart(2, '0')} : {String(countdownHours).padStart(2, '0')} : {String(countdownMinutes).padStart(2, '0')} : {String(countdownSeconds).padStart(2, '0')}
         </p>
+        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.08em] text-white/85">Click here to be reminded and come back to this page:</p>
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+          <a
+            href={whatsappReminderHref}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex rounded-lg border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] text-white transition duration-300 hover:border-[#D43790] hover:text-[#D43790]"
+          >
+            WhatsApp Reminder
+          </a>
+          <a
+            href={emailReminderHref}
+            className="inline-flex rounded-lg border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] text-white transition duration-300 hover:border-[#D43790] hover:text-[#D43790]"
+          >
+            Email Reminder
+          </a>
+          <a
+            href={calendarReminderHref}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex rounded-lg border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] text-white transition duration-300 hover:border-[#D43790] hover:text-[#D43790]"
+          >
+            Add to Calendar
+          </a>
+        </div>
       </section>
 
       <section className="rounded-2xl border border-[#1A1A1A]/15 bg-[#FFFFFF] p-4 sm:p-6">
