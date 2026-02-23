@@ -37,17 +37,17 @@ const PROFORMA_LEEUKOPF_COMPANY = import.meta.env.VITE_PROFORMA_LEEUKOPF_COMPANY
 const PROFORMA_LEEUKOPF_ADDRESS = import.meta.env.VITE_PROFORMA_LEEUKOPF_ADDRESS || '8 Racho Dimchev, Sofia, Bulgaria'
 const PROFORMA_LEEUKOPF_PHONE = import.meta.env.VITE_PROFORMA_LEEUKOPF_PHONE || '(+359) 73 891 041'
 const PROFORMA_LEEUKOPF_EMAIL = import.meta.env.VITE_PROFORMA_LEEUKOPF_EMAIL || 'info@leeukopf.com'
-const TIKTOK_URL = import.meta.env.VITE_TIKTOK_URL || 'https://www.tiktok.com/@gelitup'
+const TIKTOK_URL = import.meta.env.VITE_TIKTOK_URL || 'https://www.tiktok.com/@gelitupgreece'
 const INSTAGRAM_URL = import.meta.env.VITE_INSTAGRAM_URL || 'https://www.instagram.com/gelitup'
-const LINKEDIN_URL = import.meta.env.VITE_LINKEDIN_URL || 'https://www.linkedin.com/company/gelitup'
-const FACEBOOK_URL = import.meta.env.VITE_FACEBOOK_URL || 'https://www.facebook.com/gelitup'
-const TIKTOK_HANDLE = import.meta.env.VITE_TIKTOK_HANDLE || '@gelitup'
-const INSTAGRAM_HANDLE = import.meta.env.VITE_INSTAGRAM_HANDLE || '@gelitup'
+const LINKEDIN_URL = import.meta.env.VITE_LINKEDIN_URL || 'https://gr.linkedin.com/company/gel-it-up-by-giup'
+const FACEBOOK_URL = import.meta.env.VITE_FACEBOOK_URL || 'https://www.facebook.com/GEL.IT.UP.Greece/'
+const TIKTOK_HANDLE = import.meta.env.VITE_TIKTOK_HANDLE || 'GELITUPGREECE'
+const INSTAGRAM_HANDLE = import.meta.env.VITE_INSTAGRAM_HANDLE || 'gelitup'
 const LINKEDIN_HANDLE = import.meta.env.VITE_LINKEDIN_HANDLE || 'GEL.IT.UP'
 const FACEBOOK_HANDLE = import.meta.env.VITE_FACEBOOK_HANDLE || '@gelitup'
 const PORTAL_FONT_TTF_URL = import.meta.env.VITE_PORTAL_FONT_TTF_URL || '/fonts/PF-Futura-Neu.ttf'
 const CLIENT_PROFILE_STORAGE_KEY = 'gelitup.portal.client_profile.v1'
-const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v1'
+const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const FOOTER_SOCIAL_LINKS = [
   { key: 'tiktok', label: 'TikTok', handle: TIKTOK_HANDLE, href: TIKTOK_URL },
   { key: 'instagram', label: 'Instagram', handle: INSTAGRAM_HANDLE, href: INSTAGRAM_URL },

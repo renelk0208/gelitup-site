@@ -194,7 +194,6 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
     <section className="space-y-4">
       <div className="grid gap-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700 p-4 text-white sm:p-6 md:grid-cols-2 md:items-center">
         <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-300">GEL.IT.UP Imported Layout</p>
           <h1 className="mt-2 text-2xl font-bold leading-tight sm:text-3xl">{structuredContent.heroTitle}</h1>
           {structuredContent.heroSubtitle && (
             <p className="mt-2 text-sm font-semibold text-slate-200">{structuredContent.heroSubtitle}</p>
@@ -207,9 +206,6 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           <div className="mt-4 flex flex-wrap gap-2">
             <NavLink to="/become-distributor" className="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-slate-900 sm:text-sm">
               Become Distributor
-            </NavLink>
-            <NavLink to="/baseline" className="rounded-lg border border-slate-400 px-3 py-2 text-xs font-semibold text-white sm:text-sm">
-              Open Baseline
             </NavLink>
           </div>
         </div>
@@ -287,14 +283,6 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
         </SnapshotCard>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        <NavLink to="/baseline" className="inline-flex rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700">
-          Back to Baseline List
-        </NavLink>
-        <NavLink to={`/baseline/${slug}`} className="inline-flex rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700">
-          Open Dynamic Snapshot
-        </NavLink>
-      </div>
     </section>
   )
 }
