@@ -1621,7 +1621,7 @@ function FullCataloguePage() {
     <section className="space-y-5">
       <div className="rounded-2xl border border-black/10 bg-white p-5 sm:p-6">
         <p className="text-xs uppercase tracking-[0.2em] text-black/50">Luxury Colour Library</p>
-        <h1 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-black sm:text-3xl">Full Product Catalogue</h1>
+        <h1 className="mt-2 text-xl font-black uppercase tracking-[0.04em] text-black sm:text-3xl sm:tracking-[0.06em]">Full Product Catalogue</h1>
         <p className="mt-2 text-sm text-black/65">
           Keep the main product pages as they are, and use this quick-click catalogue to open what is available by category.
         </p>
@@ -1775,12 +1775,12 @@ function FullCataloguePage() {
                 <div
                   ref={virtualContainerRef}
                   onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
-                  className="mt-4 max-h-[72vh] overflow-auto rounded-[14px] border border-black/10 bg-white"
+                  className="mt-4 max-h-[62vh] overflow-auto rounded-[14px] border border-black/10 bg-white md:max-h-[72vh]"
                 >
                   <div style={{ height: topSpacerHeight }} />
 
                   <div
-                    className={`grid gap-3 p-3 ${bulkMode ? 'grid-cols-1' : ''}`}
+                    className={`grid gap-3 p-2 sm:p-3 ${bulkMode ? 'grid-cols-1' : ''}`}
                     style={bulkMode ? undefined : { gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))` }}
                   >
                     {virtualItems.map(({ item, itemIndex }) => {
@@ -1899,7 +1899,7 @@ function Nav() {
 
 function MobileNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/15 bg-black/85 px-2 py-2 backdrop-blur md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/15 bg-black/90 px-2 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur md:hidden">
       <div className="mx-auto grid max-w-xl gap-1" style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}>
         {navItems.map((item) => (
           <NavLink
@@ -1907,7 +1907,7 @@ function MobileNav() {
             to={item.to}
             className={({ isActive }) =>
               `rounded-md px-2 py-2 text-center text-xs font-medium uppercase tracking-[0.03em] transition duration-300 ${
-                isActive ? 'bg-fuchsia-600 text-white' : 'text-white/75'
+                isActive ? 'bg-fuchsia-600 text-white shadow-[0_0_0_1px_rgba(217,70,239,0.5)]' : 'text-white/75 hover:bg-white/10 hover:text-white'
               }`
             }
           >
@@ -6731,22 +6731,22 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen pb-20 md:pb-8">
+    <div className="min-h-screen pb-24 md:pb-8">
       <ScrollToTopOnRouteChange />
       <header className="sticky top-0 z-40 border-b border-white/15 bg-black/80 backdrop-blur-[10px]">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-3 py-2.5 md:px-6 md:py-3">
           <div className="flex items-center gap-3">
-            <img src={appLogo} alt="Gelitup logo" className="h-10 w-10 rounded-lg object-cover" />
+            <img src={appLogo} alt="Gelitup logo" className="h-9 w-9 rounded-lg object-cover md:h-10 md:w-10" />
             <div>
-              <p className="text-sm font-black uppercase leading-none tracking-[0.08em] text-white">GEL.IT.UP</p>
-              <p className="text-xs text-white/65">Distributor Website</p>
+              <p className="text-xs font-black uppercase leading-none tracking-[0.07em] text-white md:text-sm md:tracking-[0.08em]">GEL.IT.UP</p>
+              <p className="text-[11px] text-white/65 md:text-xs">Distributor Website</p>
             </div>
           </div>
           <Nav />
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-6 md:py-10">
+      <main className="mx-auto max-w-6xl px-3 py-4 md:px-6 md:py-10">
         <Routes>
           <Route path="/" element={LEGACY_MIRROR_ENABLED ? <LegacyMirrorPage pagePath="/" /> : <HomePage />} />
           <Route path="/home" element={<Navigate to="/" replace />} />
@@ -6819,17 +6819,17 @@ function App() {
       </main>
 
       {!hasAcceptedCookies && (
-        <div className="fixed bottom-16 left-0 right-0 z-40 px-4 md:bottom-4 md:px-6">
-          <div className="mx-auto flex max-w-6xl flex-col gap-3 rounded-xl border border-slate-300 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-slate-600">
+        <div className="fixed bottom-20 left-0 right-0 z-40 px-3 md:bottom-4 md:px-6">
+          <div className="mx-auto flex max-w-6xl flex-col gap-3 rounded-xl border border-white/20 bg-black/90 p-3 text-white shadow-sm backdrop-blur-[10px] sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-white/80">
               We use cookies to improve your experience. By continuing, you agree to our cookie use.
               {' '}
-              <NavLink to="/cookie-policy" className="font-semibold text-slate-900 underline">Read Cookie Policy</NavLink>
+              <NavLink to="/cookie-policy" className="font-semibold text-fuchsia-300 underline">Read Cookie Policy</NavLink>
             </p>
             <button
               type="button"
               onClick={handleAcceptCookies}
-              className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white"
+              className="rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
             >
               Accept Cookies
             </button>
@@ -6837,7 +6837,7 @@ function App() {
         </div>
       )}
 
-      <footer className="mx-auto mt-8 max-w-6xl space-y-5 rounded-2xl border border-white/15 bg-black/85 px-4 pb-4 pt-5 text-xs text-white/80 backdrop-blur-[10px] md:px-6">
+      <footer className="mx-auto mt-6 max-w-6xl space-y-5 rounded-2xl border border-white/15 bg-black/85 px-3 pb-4 pt-4 text-xs text-white/80 backdrop-blur-[10px] md:mt-8 md:px-6 md:pt-5">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Company</p>

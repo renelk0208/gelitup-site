@@ -56,6 +56,11 @@ article {
   transition: all 0.3s ease;
 }
 
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
 .lux-pulse {
   animation: luxPulse 0.32s ease;
 }
@@ -80,4 +85,17 @@ button,
 textarea,
 select {
   font: inherit;
+}
+
+@media (max-width: 640px) {
+  body {
+    line-height: 1.35;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: 0.03em;
+  }
 }
