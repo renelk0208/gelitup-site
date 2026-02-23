@@ -2253,19 +2253,29 @@ function HomePage({ onOpenRegulatoryStatement = () => {} }) {
           </div>
         </div>
 
-        <div className="space-y-3">
-          <img src={media.heroImage} alt="GEL.IT.UP distributor visual" className="h-48 w-full rounded-xl object-cover sm:h-56" loading="lazy" />
-          {media.heroVideo && (
-            <video
-              className="h-40 w-full rounded-xl object-cover sm:h-48"
-              src={media.heroVideo}
-              muted
-              autoPlay
-              loop
-              playsInline
-              controls={false}
-            />
-          )}
+        <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
+          <div className="aspect-[16/10] w-full">
+            {media.heroVideo
+              ? (
+                <video
+                  className="h-full w-full object-cover"
+                  src={media.heroVideo}
+                  muted
+                  autoPlay
+                  loop
+                  playsInline
+                  controls={false}
+                />
+                )
+              : (
+                <img
+                  src={media.heroImage}
+                  alt="GEL.IT.UP distributor visual"
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
+                )}
+          </div>
         </div>
       </div>
 
