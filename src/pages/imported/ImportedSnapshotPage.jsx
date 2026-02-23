@@ -200,45 +200,46 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
 
     return (
       <section className="space-y-4 bg-white">
-        <div className="rounded-2xl border border-[#E8E8E8] bg-white p-5 sm:p-7">
-          <p
-            className="text-2xl font-extrabold uppercase leading-tight tracking-[0.15em] text-[#1A1A1A] sm:text-4xl"
-            style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
-          >
-            THE ARCHITECTS OF PROFESSIONAL COLOR.
-          </p>
+        <div className="relative overflow-hidden rounded-2xl border border-[#E8E8E8] bg-[#1A1A1A]">
+          {visualIsVideo
+            ? (
+              <video
+                src={manifestoVisual.displayUrl}
+                className="absolute inset-0 h-full min-h-[360px] w-full object-cover"
+                muted
+                playsInline
+                autoPlay
+                loop
+                controls={false}
+              />
+              )
+            : (
+              <img
+                src={manifestoVisual?.displayUrl || '/logo.png'}
+                alt="High-resolution macro texture"
+                className="absolute inset-0 h-full min-h-[360px] w-full object-cover"
+                loading="lazy"
+              />
+              )}
+
+          <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/45 to-black/75" />
+
+          <div className="relative z-10 min-h-[360px] p-5 sm:p-7">
+            <p
+              className="text-2xl font-extrabold uppercase leading-tight tracking-[0.15em] text-white sm:text-4xl"
+              style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
+            >
+              THE ARCHITECTS OF PROFESSIONAL COLOR.
+            </p>
+            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#D43790]">CLEAN SCIENCE</p>
+            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white sm:text-base">
+              At GEL.IT.UP by GIUP®, we don’t just manufacture color; we engineer professional confidence. Our entire collection is 100% HEMA &amp; TPO Free, ensuring the highest level of safety for both technician and client.
+            </p>
+          </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
-          <article className="rounded-2xl border border-[#E8E8E8] bg-white p-5 lg:col-span-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#D43790]">CLEAN SCIENCE</p>
-            <p className="mt-3 text-sm leading-relaxed text-[#4A4A4A] sm:text-base">
-              At Gelitup, we don’t just manufacture color; we engineer professional confidence. Our entire collection is 100% HEMA &amp; TPO Free, ensuring the highest level of safety for both technician and client.
-            </p>
-          </article>
-
-          <article className="overflow-hidden rounded-2xl border border-[#E8E8E8] bg-[#E8E8E8]">
-            {visualIsVideo
-              ? (
-                <video
-                  src={manifestoVisual.displayUrl}
-                  className="h-full min-h-[220px] w-full object-cover"
-                  muted
-                  playsInline
-                  controls
-                />
-                )
-              : (
-                <img
-                  src={manifestoVisual?.displayUrl || '/logo.png'}
-                  alt="High-resolution macro texture"
-                  className="h-full min-h-[220px] w-full object-cover"
-                  loading="lazy"
-                />
-                )}
-          </article>
-
-          <article className="rounded-2xl border border-[#E8E8E8] bg-[#E8E8E8] p-5 lg:col-span-3">
+        <div className="grid gap-4 lg:grid-cols-1">
+          <article className="rounded-2xl border border-[#E8E8E8] bg-[#E8E8E8] p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#D43790]">REGULATORY LEADERSHIP</p>
             <p className="mt-3 text-sm leading-relaxed text-[#4A4A4A] sm:text-base">
               Fully EU Regulated, CPNP Notified, and Leaping Bunny Approved, we provide the legal and ethical peace of mind that modern salons demand.
