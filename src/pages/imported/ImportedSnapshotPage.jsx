@@ -164,6 +164,18 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
   }, [activePage?.mediaRefs, mediaBySourceUrl, mediaItems])
 
   const fallbackVideo = useMemo(() => {
+    const preferredVideo = mediaItems.find((item) => {
+      const mediaType = String(item?.mediaType || '').toLowerCase()
+      const localPath = String(item?.localPath || '')
+      if (mediaType !== 'video') return false
+      if (!localPath) return false
+      return localPath.includes('superior_innovation_cat_eye_french')
+    })
+
+    if (preferredVideo?.localPath) {
+      return preferredVideo.localPath
+    }
+
     const manifestVideo = mediaItems.find((item) => {
       const mediaType = String(item?.mediaType || '').toLowerCase()
       const localPath = String(item?.localPath || '')
@@ -341,12 +353,14 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                 {fallbackVideo && fallbackVideo.toLowerCase().includes('.mp4') || fallbackVideo?.toLowerCase().includes('.webm') ? (
                   <video
                     src={fallbackVideo}
+                    poster={heroMedia?.displayUrl || undefined}
                     className="h-72 w-full object-cover sm:h-96"
                     muted
                     playsInline
                     autoPlay
                     loop
                     controls={false}
+                    preload="metadata"
                   />
                 ) : (
                   <img
