@@ -41,10 +41,12 @@ const TIKTOK_URL = import.meta.env.VITE_TIKTOK_URL || 'https://www.tiktok.com/@g
 const INSTAGRAM_URL = import.meta.env.VITE_INSTAGRAM_URL || 'https://www.instagram.com/gelitup'
 const LINKEDIN_URL = import.meta.env.VITE_LINKEDIN_URL || 'https://gr.linkedin.com/company/gel-it-up-by-giup'
 const FACEBOOK_URL = import.meta.env.VITE_FACEBOOK_URL || 'https://www.facebook.com/GEL.IT.UP.Greece/'
+const YOUTUBE_URL = import.meta.env.VITE_YOUTUBE_URL || 'https://www.youtube.com/@GELITUP'
 const TIKTOK_HANDLE = import.meta.env.VITE_TIKTOK_HANDLE || 'GELITUPGREECE'
 const INSTAGRAM_HANDLE = import.meta.env.VITE_INSTAGRAM_HANDLE || 'gelitup'
 const LINKEDIN_HANDLE = import.meta.env.VITE_LINKEDIN_HANDLE || 'GEL.IT.UP'
 const FACEBOOK_HANDLE = import.meta.env.VITE_FACEBOOK_HANDLE || '@gelitup'
+const YOUTUBE_HANDLE = import.meta.env.VITE_YOUTUBE_HANDLE || '@GELITUP'
 const PORTAL_FONT_TTF_URL = import.meta.env.VITE_PORTAL_FONT_TTF_URL || '/fonts/PF-Futura-Neu.ttf'
 const CLIENT_PROFILE_STORAGE_KEY = 'gelitup.portal.client_profile.v1'
 const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
@@ -53,6 +55,7 @@ const FOOTER_SOCIAL_LINKS = [
   { key: 'instagram', label: 'Instagram', handle: INSTAGRAM_HANDLE, href: INSTAGRAM_URL },
   { key: 'linkedin', label: 'LinkedIn', handle: LINKEDIN_HANDLE, href: LINKEDIN_URL },
   { key: 'facebook', label: 'Facebook', handle: FACEBOOK_HANDLE, href: FACEBOOK_URL },
+  { key: 'youtube', label: 'YouTube', handle: YOUTUBE_HANDLE, href: YOUTUBE_URL },
 ]
 const COUNTRY_OPTIONS = [
   'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France',
@@ -6234,6 +6237,15 @@ function FooterSocialIcon({ platform }) {
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
         <rect x="3.5" y="3.5" width="17" height="17" rx="3" stroke="currentColor" strokeWidth="1.8" />
         <path d="M13.7 8H15V5.9H13.3C11.7 5.9 10.7 7 10.7 8.7V10H9V12.2H10.7V18H13.2V12.2H15L15.4 10H13.2V8.9C13.2 8.3 13.4 8 13.7 8Z" fill="currentColor" />
+      </svg>
+    )
+  }
+
+  if (platform === 'youtube') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
+        <rect x="3.5" y="6.5" width="17" height="11" rx="3" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M11 10.1L14.8 12L11 13.9V10.1Z" fill="currentColor" />
       </svg>
     )
   }
