@@ -183,7 +183,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
     return (
       <section className="space-y-3">
         <p className="text-sm text-slate-600">Page snapshot not found for this slug.</p>
-        <NavLink to="/baseline" className="inline-flex rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700">
+        <NavLink to="/baseline" className="inline-flex rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition duration-200 hover:border-fuchsia-500 hover:text-fuchsia-700 active:bg-fuchsia-600 active:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2">
           Back to Baseline List
         </NavLink>
       </section>
@@ -204,7 +204,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
             ))}
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            <NavLink to="/become-distributor" className="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-slate-900 sm:text-sm">
+            <NavLink to="/become-distributor" className="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-slate-900 transition duration-200 hover:bg-fuchsia-500 hover:text-white active:bg-fuchsia-600 active:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 sm:text-sm">
               Become Distributor
             </NavLink>
           </div>
@@ -230,7 +230,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                 href={link.href}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-full border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700"
+                className="rounded-full border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 transition duration-200 hover:border-fuchsia-500 hover:bg-fuchsia-50 hover:text-fuchsia-700 active:border-fuchsia-600 active:bg-fuchsia-600 active:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2"
               >
                 {link.text}
               </a>

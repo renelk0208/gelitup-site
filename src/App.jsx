@@ -1952,8 +1952,8 @@ function Nav() {
           key={item.to}
           to={item.to}
           className={({ isActive }) =>
-            `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 ${
-              isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white'
+            `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
+              isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
             }`
           }
         >
@@ -1973,8 +1973,8 @@ function MobileNav() {
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
-              `rounded-md px-2 py-2 text-center text-xs font-medium uppercase tracking-[0.03em] transition duration-300 ${
-                isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.5)]' : '!text-white/85 hover:bg-white/10 hover:!text-white'
+              `rounded-md px-2 py-2 text-center text-xs font-medium uppercase tracking-[0.03em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
+                isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.5)]' : '!text-white/85 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
               }`
             }
           >
