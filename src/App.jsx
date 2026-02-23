@@ -1346,19 +1346,19 @@ function DistributorPackagesPage() {
           <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="bg-[#1A1A1A]">
-                <th className="border border-[#4A4A4A] px-4 py-3 text-left font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Feature</th>
-                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Boutique</th>
-                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Professional</th>
-                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Authority</th>
+                <th className="border border-[#4A4A4A] px-4 py-3 text-left font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Attribute</th>
+                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Boutique (Silver)</th>
+                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Professional (Gold)</th>
+                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Authority (Platinum)</th>
               </tr>
             </thead>
             <tbody>
               {[
-                { feature: 'Education & Training', boutique: 'Email templates & guides', professional: 'Video library + webinars', authority: 'Personal consultant + custom training' },
-                { feature: 'Marketing Support', boutique: 'Social media asset library', professional: 'Campaign kits + co-branding', authority: 'Co-branded campaigns + regional support' },
-                { feature: 'Technical Support', boutique: 'Email support', professional: 'Priority email & phone', authority: 'Dedicated account manager + hotline' },
-                { feature: 'HEMA-Free Status', boutique: '✓ Confirmed', professional: '✓ Confirmed', authority: '✓ Confirmed' },
-                { feature: 'TPO-Free Status', boutique: '✓ Confirmed', professional: '✓ Confirmed', authority: '✓ Confirmed' },
+                { feature: 'Market Focus', boutique: 'Localized Studio Supply', professional: 'Regional Salon Networks', authority: 'Total Territory Dominance' },
+                { feature: 'Product Spectrum', boutique: 'Top 30 Core Shades', professional: '150+ Curated Trends', authority: 'Full 800+ Shade Portfolio' },
+                { feature: 'Support Package', boutique: 'Digital Brand Assets', professional: 'Branded Salon Displays', authority: 'Exclusive Event Support' },
+                { feature: 'Standard: HEMA-Free', boutique: '✓ Certified', professional: '✓ Certified', authority: '✓ Certified' },
+                { feature: 'Standard: TPO-Free', boutique: '✓ Certified', professional: '✓ Certified', authority: '✓ Certified' },
               ].map((row, index) => (
                 <tr key={row.feature} className={`border border-[#4A4A4A] ${index % 2 === 0 ? 'bg-[#E8E8E8]' : 'bg-white'}`}>
                   <td className="px-4 py-3 font-semibold text-[#1A1A1A]">{row.feature}</td>
