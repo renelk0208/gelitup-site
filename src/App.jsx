@@ -24,6 +24,7 @@ const PRODUCT_CATEGORIES = ['Solid Colours', 'Builder Gels', 'Base & Top', 'Nail
 const DEFAULT_PRODUCTS_TABLE = 'b2b_products'
 const DEFAULT_ORDERS_TABLE = 'b2b_orders'
 const DEFAULT_REGISTRATIONS_TABLE = 'b2b_registrations'
+const DEFAULT_FAVORITES_TABLE = 'user_favorites'
 const PORTAL_ENABLED = import.meta.env.VITE_ENABLE_PORTAL === 'true'
 const LEGACY_MIRROR_ENABLED = import.meta.env.VITE_ENABLE_LEGACY_MIRROR === 'true'
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
@@ -372,6 +373,179 @@ function buildColorAliases(value) {
   }
 
   return Array.from(aliases)
+}
+
+function getFavoriteKey(candidate) {
+  const codeKey = normalizeSkuCode(candidate?.product_code || candidate?.code || candidate?.sku)
+  if (codeKey && codeKey !== 'SKU') return codeKey
+  return normalizeProductName(candidate?.product_name || candidate?.name)
+}
+
+function buildFavoritePayload(candidate, userId) {
+  const name = String(candidate?.product_name || candidate?.name || '').trim()
+  const code = String(candidate?.product_code || candidate?.code || candidate?.sku || '').trim()
+  const imageUrl = String(candidate?.image_url || candidate?.imageUrl || '').trim()
+  const category = String(candidate?.category || candidate?.subcategory || '').trim()
+  const resolvedName = name || code
+
+  if (!resolvedName) return null
+
+  return {
+    user_id: userId,
+    product_code: code || null,
+    product_name: resolvedName,
+    image_url: imageUrl || null,
+    category: category || '',
+  }
+}
+
+function useUserFavorites() {
+  const favoritesTable = import.meta.env.VITE_B2B_FAVORITES_TABLE || DEFAULT_FAVORITES_TABLE
+  const [favorites, setFavorites] = useState([])
+  const [favoriteStatus, setFavoriteStatus] = useState({
+    isLoading: false,
+    error: '',
+    userId: null,
+  })
+
+  const favoritesByKey = useMemo(() => {
+    const map = new Map()
+    favorites.forEach((favorite) => {
+      const key = getFavoriteKey(favorite)
+      if (key) map.set(key, favorite)
+    })
+    return map
+  }, [favorites])
+
+  const loadFavorites = useCallback(async () => {
+    if (!hasSupabaseConfig || !supabase) {
+      setFavorites([])
+      setFavoriteStatus({
+        isLoading: false,
+        error: 'Favorites are unavailable because Supabase is not configured.',
+        userId: null,
+      })
+      return
+    }
+
+    setFavoriteStatus((current) => ({ ...current, isLoading: true, error: '' }))
+
+    const { data: userData, error: userError } = await supabase.auth.getUser()
+    const userId = userData?.user?.id || null
+
+    if (userError || !userId) {
+      setFavorites([])
+      setFavoriteStatus({
+        isLoading: false,
+        error: '',
+        userId: null,
+      })
+      return
+    }
+
+    setFavoriteStatus((current) => ({ ...current, userId }))
+
+    const { data, error } = await supabase
+      .from(favoritesTable)
+      .select('id, product_code, product_name, image_url, category, created_at')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      const missingTableError = error.message?.includes('Could not find the table')
+        || error.message?.includes('relation')
+      const message = missingTableError
+        ? `Favorites table "${favoritesTable}" is missing. Run the SQL from /supabase/sql/create_user_favorites.sql.`
+        : error.message
+      setFavorites([])
+      setFavoriteStatus((current) => ({ ...current, isLoading: false, error: message }))
+      return
+    }
+
+    setFavorites(data || [])
+    setFavoriteStatus((current) => ({ ...current, isLoading: false, error: '' }))
+  }, [favoritesTable])
+
+  useEffect(() => {
+    void loadFavorites()
+  }, [loadFavorites])
+
+  const toggleFavorite = useCallback(async (candidate) => {
+    if (!hasSupabaseConfig || !supabase) {
+      return { ok: false, message: 'Favorites are unavailable because Supabase is not configured.' }
+    }
+
+    let userId = favoriteStatus.userId
+
+    if (!userId) {
+      const { data: userData } = await supabase.auth.getUser()
+      userId = userData?.user?.id || null
+      if (userId) {
+        setFavoriteStatus((current) => ({ ...current, userId }))
+      }
+    }
+
+    if (!userId) {
+      return { ok: false, message: 'Sign in to save favorites.' }
+    }
+
+    const key = getFavoriteKey(candidate)
+    if (!key) {
+      return { ok: false, message: 'Missing product info for favorites.' }
+    }
+
+    const existing = favoritesByKey.get(key)
+    if (existing) {
+      const { error } = await supabase
+        .from(favoritesTable)
+        .delete()
+        .eq('id', existing.id)
+
+      if (error) {
+        setFavoriteStatus((current) => ({ ...current, error: error.message }))
+        return { ok: false, message: error.message }
+      }
+
+      setFavorites((current) => current.filter((item) => item.id !== existing.id))
+      setFavoriteStatus((current) => ({ ...current, error: '' }))
+      return { ok: true, action: 'removed' }
+    }
+
+    const payload = buildFavoritePayload(candidate, userId)
+    if (!payload) {
+      return { ok: false, message: 'Missing product info for favorites.' }
+    }
+
+    const { data, error } = await supabase
+      .from(favoritesTable)
+      .insert([payload])
+      .select('id, product_code, product_name, image_url, category, created_at')
+      .single()
+
+    if (error) {
+      const missingTableError = error.message?.includes('Could not find the table')
+        || error.message?.includes('relation')
+      const message = missingTableError
+        ? `Favorites table "${favoritesTable}" is missing. Run the SQL from /supabase/sql/create_user_favorites.sql.`
+        : error.message
+      setFavoriteStatus((current) => ({ ...current, error: message }))
+      return { ok: false, message }
+    }
+
+    if (data) {
+      setFavorites((current) => [data, ...current])
+    }
+    setFavoriteStatus((current) => ({ ...current, error: '' }))
+    return { ok: true, action: 'added' }
+  }, [favoriteStatus.userId, favoritesByKey, favoritesTable])
+
+  return {
+    favorites,
+    favoritesByKey,
+    isLoadingFavorites: favoriteStatus.isLoading,
+    favoritesError: favoriteStatus.error,
+    isSignedIn: Boolean(favoriteStatus.userId),
+    toggleFavorite,
+  }
 }
 
 async function sendPortalEmailNotification(payload) {
@@ -1489,21 +1663,7 @@ function DistributorPackagesPage() {
                 onClick={() => toggleTier('boutique')}
                 className="inline-flex rounded-lg border border-[#D43790]/40 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790] transition duration-300 hover:border-[#D43790] hover:bg-[#D43790]/10"
               >
-                {expandedTier === 'boutique' ? 'SHOW ME: HIDE' : 'SHOW ME'}
-              </button>
-              <button
-                type="button"
-                onClick={() => toggleTier('boutique')}
-                className="inline-flex rounded-full border border-[#D43790]/40 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#D43790] transition duration-300 hover:border-[#D43790] hover:bg-[#D43790]/10"
-              >
-                Option 1
-              </button>
-              <button
-                type="button"
-                onClick={() => toggleTier('boutique')}
-                className="inline-flex rounded-full border border-[#D43790]/40 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#D43790] transition duration-300 hover:border-[#D43790] hover:bg-[#D43790]/10"
-              >
-                Option 2
+                {expandedTier === 'boutique' ? 'HIDE' : 'SHOW ME'}
               </button>
             </div>
           ) : null}
@@ -1577,21 +1737,7 @@ function DistributorPackagesPage() {
                 onClick={() => toggleTier('professional')}
                 className="inline-flex rounded-lg border border-[#D43790]/40 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790] transition duration-300 hover:border-[#D43790] hover:bg-[#D43790]/10"
               >
-                {expandedTier === 'professional' ? 'SHOW ME: HIDE' : 'SHOW ME'}
-              </button>
-              <button
-                type="button"
-                onClick={() => toggleTier('professional')}
-                className="inline-flex rounded-full border border-[#D43790]/40 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#D43790] transition duration-300 hover:border-[#D43790] hover:bg-[#D43790]/10"
-              >
-                Option 1
-              </button>
-              <button
-                type="button"
-                onClick={() => toggleTier('professional')}
-                className="inline-flex rounded-full border border-[#D43790]/40 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#D43790] transition duration-300 hover:border-[#D43790] hover:bg-[#D43790]/10"
-              >
-                Option 2
+                {expandedTier === 'professional' ? 'HIDE' : 'SHOW ME'}
               </button>
             </div>
           ) : null}
@@ -1664,21 +1810,7 @@ function DistributorPackagesPage() {
                 onClick={() => toggleTier('authority')}
                 className="inline-flex rounded-lg border border-white/40 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white transition duration-300 hover:border-white/70 hover:bg-white/20"
               >
-                {expandedTier === 'authority' ? 'SHOW ME: HIDE' : 'SHOW ME'}
-              </button>
-              <button
-                type="button"
-                onClick={() => toggleTier('authority')}
-                className="inline-flex rounded-full border border-white/40 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition duration-300 hover:border-white/70 hover:bg-white/20"
-              >
-                Option 1
-              </button>
-              <button
-                type="button"
-                onClick={() => toggleTier('authority')}
-                className="inline-flex rounded-full border border-white/40 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition duration-300 hover:border-white/70 hover:bg-white/20"
-              >
-                Option 2
+                {expandedTier === 'authority' ? 'HIDE' : 'SHOW ME'}
               </button>
             </div>
           ) : null}
@@ -2089,8 +2221,16 @@ function FullCataloguePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
+  const { favoritesByKey, toggleFavorite } = useUserFavorites()
   const virtualContainerRef = useRef(null)
   const categoryPanelRef = useRef(null)
+
+  const handleFavoriteToggle = useCallback(async (candidate) => {
+    const result = await toggleFavorite(candidate)
+    if (!result.ok && result.message) {
+      window.alert(result.message)
+    }
+  }, [toggleFavorite])
 
   useEffect(() => {
     let mounted = true
@@ -2456,11 +2596,45 @@ function FullCataloguePage() {
                   >
                     {virtualItems.map(({ item, itemIndex }) => {
                       const itemCode = extractProductCode(item.name)
+                      const favoriteCode = itemCode !== 'SKU' ? itemCode : ''
+                      const favoriteKey = getFavoriteKey({
+                        product_code: favoriteCode,
+                        product_name: item.name,
+                        name: item.name,
+                        code: favoriteCode,
+                      })
+                      const isFavorite = favoriteKey ? favoritesByKey.has(favoriteKey) : false
+                      const favoritePayload = {
+                        product_code: favoriteCode,
+                        product_name: item.name,
+                        image_url: item.imageUrl || '',
+                        category: item.subcategory || activeSection?.category || '',
+                      }
 
                       return (
                         <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 hover:scale-[1.05] hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`}>
-                          <div className="flex h-56 w-full items-center justify-center bg-white p-2 sm:h-60">
+                          <div className="relative flex h-56 w-full items-center justify-center bg-white p-2 sm:h-60">
                             <img src={item.imageUrl} alt={item.name} loading="lazy" className="max-h-full w-full object-contain" />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                void handleFavoriteToggle(favoritePayload)
+                              }}
+                              aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                              aria-pressed={isFavorite}
+                              className={`absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border text-[10px] ${
+                                isFavorite
+                                  ? 'border-fuchsia-300 bg-fuchsia-50 text-fuchsia-600'
+                                  : 'border-slate-200 bg-white text-slate-400'
+                              }`}
+                            >
+                              <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+                                <path
+                                  fill="currentColor"
+                                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 3.99 4 6.5 4c1.74 0 3.41 1 4.5 2.09C12.09 5 13.76 4 15.5 4 18.01 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                                />
+                              </svg>
+                            </button>
                           </div>
                           <div className="border-t border-black/10 px-2.5 py-2">
                             <p className="truncate text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
@@ -3691,6 +3865,81 @@ function PortalAdminLogin({ onAdminLogin }) {
   )
 }
 
+function FavoritesPanel({
+  title = 'Favorites',
+  note = 'Saved to your account.',
+  favorites,
+  isLoading,
+  error,
+  isSignedIn,
+  onToggleFavorite,
+  emptyMessage = 'No favorites yet. Tap the heart on any product to save it.',
+}) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <p className="text-xs font-semibold text-slate-900">{title}</p>
+          {note && <p className="mt-0.5 text-[11px] text-slate-500">{note}</p>}
+        </div>
+        <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+          {favorites.length}
+        </span>
+      </div>
+
+      {isLoading && <p className="mt-2 text-xs text-slate-500">Loading favorites...</p>}
+      {!isLoading && error && <p className="mt-2 text-xs text-rose-600">{error}</p>}
+      {!isLoading && !error && !isSignedIn && (
+        <p className="mt-2 text-xs text-slate-500">Sign in to view your saved favorites.</p>
+      )}
+      {!isLoading && !error && isSignedIn && favorites.length === 0 && (
+        <p className="mt-2 text-xs text-slate-500">{emptyMessage}</p>
+      )}
+      {!isLoading && !error && isSignedIn && favorites.length > 0 && (
+        <ul className="mt-2 space-y-2">
+          {favorites.map((favorite) => {
+            const label = favorite.product_code
+              ? `${favorite.product_code} - ${favorite.product_name}`
+              : favorite.product_name
+
+            return (
+              <li key={favorite.id} className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-2 py-2">
+                <div className="h-10 w-10 overflow-hidden rounded border border-slate-200 bg-slate-100">
+                  {favorite.image_url ? (
+                    <img
+                      src={favorite.image_url}
+                      alt={favorite.product_name}
+                      loading="lazy"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-[9px] font-semibold text-slate-400">
+                      No Img
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-semibold text-slate-800">{label}</p>
+                  <p className="truncate text-[11px] text-slate-500">{favorite.category || 'Uncategorized'}</p>
+                </div>
+                {onToggleFavorite && (
+                  <button
+                    type="button"
+                    onClick={() => onToggleFavorite(favorite)}
+                    className="rounded-md border border-slate-300 px-2 py-1 text-[11px] font-semibold text-slate-600"
+                  >
+                    Remove
+                  </button>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
+  )
+}
+
 function PortalRegister({ onRegister }) {
   const [application, setApplication] = useState({
     customerType: 'company',
@@ -3722,6 +3971,13 @@ function PortalRegister({ onRegister }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const {
+    favorites,
+    isLoadingFavorites,
+    favoritesError,
+    isSignedIn,
+    toggleFavorite,
+  } = useUserFavorites()
 
   const setField = (fieldName, value) => {
     setApplication((current) => ({
@@ -3729,6 +3985,13 @@ function PortalRegister({ onRegister }) {
       [fieldName]: value,
     }))
   }
+
+  const handleFavoriteToggle = useCallback(async (candidate) => {
+    const result = await toggleFavorite(candidate)
+    if (!result.ok && result.message) {
+      window.alert(result.message)
+    }
+  }, [toggleFavorite])
 
   return (
     <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
@@ -3742,6 +4005,17 @@ function PortalRegister({ onRegister }) {
 
       <div className="p-8">
         <h3 className="text-xl font-semibold text-slate-900">B2B Client Application</h3>
+        <div className="mt-4">
+          <FavoritesPanel
+            title="Favorites"
+            note="Saved to your account and visible in the portal order form."
+            favorites={favorites}
+            isLoading={isLoadingFavorites}
+            error={favoritesError}
+            isSignedIn={isSignedIn}
+            onToggleFavorite={handleFavoriteToggle}
+          />
+        </div>
         <form className="mt-5 space-y-4" onSubmit={async (event) => {
           event.preventDefault()
           setIsSubmitting(true)
@@ -4166,6 +4440,21 @@ function ProductsModule({ moduleView = 'products' }) {
   const productsTable = import.meta.env.VITE_B2B_PRODUCTS_TABLE || DEFAULT_PRODUCTS_TABLE
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
+  const {
+    favorites,
+    favoritesByKey,
+    isLoadingFavorites,
+    favoritesError,
+    isSignedIn,
+    toggleFavorite,
+  } = useUserFavorites()
+
+  const handleFavoriteToggle = useCallback(async (candidate) => {
+    const result = await toggleFavorite(candidate)
+    if (!result.ok && result.message) {
+      window.alert(result.message)
+    }
+  }, [toggleFavorite])
 
   useEffect(() => {
     localStorage.setItem(CLIENT_PROFILE_STORAGE_KEY, JSON.stringify(clientProfile))
@@ -5786,6 +6075,17 @@ function ProductsModule({ moduleView = 'products' }) {
         </div>
         <p className="mt-2 text-xs text-slate-500">{isLoadingFeed ? 'Loading live feed...' : feedMessage}</p>
         <p className="mt-1 text-[11px] text-slate-500">{shippingMetadataStatus}</p>
+        <div className="mt-3">
+          <FavoritesPanel
+            title="Favorites"
+            note="Saved to your account for quick reference on this order."
+            favorites={favorites}
+            isLoading={isLoadingFavorites}
+            error={favoritesError}
+            isSignedIn={isSignedIn}
+            onToggleFavorite={handleFavoriteToggle}
+          />
+        </div>
         <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
           <p className="text-xs font-semibold text-slate-900">Client details (saved for next orders)</p>
           <p className="mt-1 text-[11px] text-slate-500">
@@ -6098,6 +6398,20 @@ function ProductsModule({ moduleView = 'products' }) {
                     <ul className="space-y-1 text-xs text-slate-700">
                       {visiblePackagePreviewItems.map((item) => {
                         const resolvedImageUrl = resolveCatalogImageUrl(item)
+                        const favoriteKey = getFavoriteKey({
+                          product_code: item.code || item.sku,
+                          product_name: item.name,
+                          code: item.code,
+                          name: item.name,
+                          sku: item.sku,
+                        })
+                        const isFavorite = favoriteKey ? favoritesByKey.has(favoriteKey) : false
+                        const favoritePayload = {
+                          product_code: item.code || item.sku || '',
+                          product_name: item.name,
+                          image_url: resolvedImageUrl || item.imageUrl || '',
+                          category: item.category || item.group || '',
+                        }
 
                         return (
                         <li key={`${item.sku}-${item.code}`} className="flex items-center gap-2 rounded border border-slate-100 bg-slate-50 px-2 py-1">
@@ -6124,6 +6438,26 @@ function ProductsModule({ moduleView = 'products' }) {
                             {' '}
                             {item.name}
                           </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              void handleFavoriteToggle(favoritePayload)
+                            }}
+                            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                            aria-pressed={isFavorite}
+                            className={`ml-auto flex h-6 w-6 items-center justify-center rounded-full border text-[10px] ${
+                              isFavorite
+                                ? 'border-fuchsia-300 bg-fuchsia-50 text-fuchsia-600'
+                                : 'border-slate-200 bg-white text-slate-400'
+                            }`}
+                          >
+                            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
+                              <path
+                                fill="currentColor"
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 3.99 4 6.5 4c1.74 0 3.41 1 4.5 2.09C12.09 5 13.76 4 15.5 4 18.01 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                              />
+                            </svg>
+                          </button>
                           {!resolvedImageUrl && (
                             <span className="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
                               Missing image
@@ -6226,11 +6560,33 @@ function ProductsModule({ moduleView = 'products' }) {
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
           {filteredProducts.map((product) => {
             const selected = selectedCodes.includes(product.code)
+            const favoriteKey = getFavoriteKey({
+              product_code: product.code,
+              product_name: product.name,
+              code: product.code,
+              name: product.name,
+              sku: product.sku,
+            })
+            const isFavorite = favoriteKey ? favoritesByKey.has(favoriteKey) : false
+            const favoritePayload = {
+              product_code: product.code || product.sku || '',
+              product_name: product.name,
+              image_url: product.imageUrl || '',
+              category: product.category || '',
+            }
 
             return (
-              <button
+              <div
                 key={product.code}
                 onClick={() => toggleSelection(product.code)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    toggleSelection(product.code)
+                  }
+                }}
+                role="button"
+                tabIndex={0}
                 className={`rounded-xl border p-3 text-left transition ${
                   selected ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-800'
                 }`}
@@ -6250,6 +6606,27 @@ function ProductsModule({ moduleView = 'products' }) {
                       Missing image
                     </span>
                   )}
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      void handleFavoriteToggle(favoritePayload)
+                    }}
+                    aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                    aria-pressed={isFavorite}
+                    className={`absolute right-2 top-2 z-20 flex h-6 w-6 items-center justify-center rounded-full border text-[10px] ${
+                      isFavorite
+                        ? 'border-fuchsia-300 bg-fuchsia-50 text-fuchsia-600'
+                        : 'border-slate-200 bg-white text-slate-400'
+                    }`}
+                  >
+                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
+                      <path
+                        fill="currentColor"
+                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 3.99 4 6.5 4c1.74 0 3.41 1 4.5 2.09C12.09 5 13.76 4 15.5 4 18.01 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                      />
+                    </svg>
+                  </button>
                 </div>
                 <p className="mt-2 text-xs font-semibold">{product.code}</p>
                 <p className={`truncate text-[11px] ${selected ? 'text-slate-300' : 'text-slate-500'}`}>{product.name}</p>
@@ -6262,7 +6639,7 @@ function ProductsModule({ moduleView = 'products' }) {
                     HEMA-FREE | TPO-FREE | CI 77820-FREE
                   </p>
                 )}
-              </button>
+              </div>
             )
           })}
         </div>
