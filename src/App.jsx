@@ -1901,6 +1901,13 @@ function buildCategoryHeroImageCandidates(categoryName = '', fallbackImageUrl = 
     })
   }
 
+  // Add specific path for Solid Colours category with solid colour hero image
+  if (normalizedCategory.includes('SOLID')) {
+    extensions.forEach((extension) => {
+      candidates.push(`/gelitup-content/product-images/COLORS/SOLID%20GEL%20POLISH/solid.colour.hero.image.${extension}`)
+    })
+  }
+
   if (fallbackImageUrl) {
     candidates.push(fallbackImageUrl)
   }
