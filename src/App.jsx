@@ -52,26 +52,153 @@ const CLIENT_PROFILE_STORAGE_KEY = 'gelitup.portal.client_profile.v1'
 const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
-const CPNP_ICON_PATH = '/gelitup-content/certification%20logos/cpnp-icon.png'
-const HEMA_TPO_ICON_PATH = '/gelitup-content/certification%20logos/hema-tpo-free-icon.png'
-const LEAPING_BUNNY_ICON_PATH = '/gelitup-content/certification%20logos/leaping-bunny-icon.png'
 const LEEUKOPF_DISTRIBUTORS_MAP_URL = 'https://www.google.com/maps/embed?origin=mfe&pb=!1m3!2m1!1sEurope!6i3'
 const LEEUKOPF_DISTRIBUTORS_SOURCE_URL = 'https://leeukopf.com/our-brands'
-const VERIFIED_DISTRIBUTOR_COUNTRIES = [
-  'Belgium', 'Bulgaria', 'Cyprus', 'France', 'Greece', 'Israel',
-  'Qatar', 'Kingdom of Saudi Arabia', 'United Kingdom',
+const DISTRIBUTOR_DIRECTORY = [
+  {
+    country: 'Belgium',
+    coordinates: '43.8563,25.9568',
+    mapUrl: 'https://www.google.com/maps?q=43.8563,25.9568&z=11&output=embed',
+    distributors: [
+      {
+        name: 'GEL.IT.UP Belgium',
+        address: 'Gentsesteenweg 200, 9800 Deinze, Belgium',
+        phone: '+32 484963975',
+      },
+    ],
+  },
+  {
+    country: 'Bulgaria',
+    coordinates: '43.8563,25.9568',
+    mapUrl: 'https://www.google.com/maps?q=43.8563,25.9568&z=11&output=embed',
+    distributors: [
+      {
+        name: 'GEL.IT.UP Bulgaria and GEL.IT.UP Nails School',
+        address: 'INFINITY NAILS Ltd., Midia Enos No. 3, Entrance 1, Floor 9, Ruse, UIC (Company ID): 203055670, Bulgaria',
+        phone: '+359876850055',
+        email: 'gelitup_professional@abv.bg',
+        website: 'https://gelitup.bg',
+      },
+    ],
+  },
+  {
+    country: 'France',
+    coordinates: '48.8566,2.3522',
+    mapUrl: 'https://www.google.com/maps?q=48.8566,2.3522&z=11&output=embed',
+    distributors: [
+      {
+        name: 'GEL.IT.UP France',
+        address: "7 Rue du Chemin Blanc, 63800 Cournon d'Auvergne, France",
+        phone: '(+33) 0473845460',
+        email: 'info@gelitup.fr',
+        website: 'https://gelitup.fr/',
+      },
+    ],
+  },
+  {
+    country: 'Greece',
+    coordinates: '37.9838,23.7275',
+    mapUrl: 'https://www.google.com/maps?q=37.9838,23.7275&z=10&output=embed',
+    distributors: [
+      {
+        name: 'GEL.IT.UP Corinth',
+        address: 'Sikyōnos 1, Kiato, 20200, Greece',
+        phone: '+30 2742 402617',
+        email: 'info@nailtalesacademy.gr',
+        website: 'https://nailtalesacademy.gr/',
+      },
+      {
+        name: 'GEL.IT.UP Greece / GEL.IT.UP Nail College',
+        address: '4 Kalamon, Peristeri, 12131, Greece',
+        phone: '+30 210 291 4373',
+        email: 'orders@gelitup.gr',
+        website: 'https://gelitup.gr',
+      },
+      {
+        name: 'Comoprof',
+        address: '5 Pyrsinella Vasileiou Street, Ioannina 453 32, Greece',
+        phone: '+30 2651 039850',
+        email: 'info@comoprof.gr',
+        website: 'https://comoprof.gr/',
+      },
+      {
+        name: 'Sonothing',
+        address: '3 Thanou Mikroutsikou Street (134 Knossou Avenue), Heraklion, Crete, Greece',
+        phone: '+30 2810324235',
+        email: 'info@sonothing.gr',
+        website: 'https://sonothing.gr/',
+      },
+      {
+        name: 'Bagatouris',
+        address: '48 Vasilissis Olgas Avenue, Thessaloniki 546 42, Greece',
+        phone: '+30 2311824834',
+        email: 'info@beautycompany.gr',
+        website: 'https://beautycompany.gr',
+      },
+      {
+        name: 'Centrecare',
+        address: 'P.P GERMANOU 14, Thessaloniki, 54622, Greece',
+        phone: '+30 2310 265200',
+        email: 'Centrecare@centercare.gr',
+      },
+      {
+        name: 'Nails Services Institute Elena Chiou',
+        address: 'Greece',
+        phone: '+30 2241300919, +30 2241112572',
+        email: 'nsinailsgr@gmail.com',
+      },
+      {
+        name: 'Master Educator Nails Artist and Podology Trade and Training Center',
+        address: 'Karpathoy 17, RHODES, 85100, Greece',
+      },
+      {
+        name: 'HairMod - Vrettakos Panagiotis',
+        address: 'Ippodamou 8 Patra, Patra, 26442, Greece',
+        phone: '+30 2614008088',
+        email: 'info@hairmod.gr',
+      },
+    ],
+  },
+  {
+    country: 'Kingdom of Saudi Arabia',
+    coordinates: '21.5433,39.1728',
+    mapUrl: 'https://www.google.com/maps?q=21.5433,39.1728&z=11&output=embed',
+    distributors: [
+      {
+        name: 'GEL.IT.UP Saudi Arabia - BEAUTY ADDRESS TRADING CO.LTD',
+        address: 'AL KHAYAT CENTER, AL TAHLIA STREET ROLEX BOUTIQUE, 2ND FLOOR # 405, Jeddah, 23322, Kingdom of Saudi Arabia',
+        phone: '+966 55 337 4320',
+      },
+    ],
+  },
+  {
+    country: 'Qatar',
+    coordinates: '25.4052,51.4892',
+    mapUrl: 'https://www.google.com/maps?q=25.4052,51.4892&z=11&output=embed',
+    distributors: [
+      {
+        name: 'GEL.IT.UP Qatar',
+        address: 'Burj Marina Tower, 11th Floor, Bldg. No-108 Street-303, Zone-69, PO Box-5774 Lusail City Doha, Qatar',
+        phone: '+974 4418 0270',
+      },
+    ],
+  },
+  {
+    country: 'United States',
+    coordinates: '25.7907,-80.1300',
+    mapUrl: 'https://www.google.com/maps?q=25.7907,-80.1300&z=11&output=embed',
+    distributors: [
+      {
+        name: 'GEL.IT.UP USA',
+        address: '400 Alton Rd Ste 105, Miami Beach, FL 33139, United States',
+        phone: '(+1) 786 395-8506, (+1) 786 200-2062',
+        email: 'usagelitup@gmail.com',
+        website: 'https://gelitup.us.com',
+      },
+    ],
+  },
 ]
-const DISTRIBUTOR_DIRECTORY = VERIFIED_DISTRIBUTOR_COUNTRIES.map((country) => {
-  const mapQuery = encodeURIComponent(`${country} gelitup distributor`)
-  return {
-    country,
-    distributorName: `Authorized Gelitup Distributor - ${country}`,
-    address: PROFORMA_LEEUKOPF_ADDRESS,
-    phone: PROFORMA_LEEUKOPF_PHONE,
-    email: PROFORMA_LEEUKOPF_EMAIL,
-    mapUrl: `https://www.google.com/maps?q=${mapQuery}&output=embed`,
-  }
-})
+const VERIFIED_DISTRIBUTOR_COUNTRIES = DISTRIBUTOR_DIRECTORY.map((item) => item.country)
 const SILVER_FREE_GUARANTEE_BADGE = 'Silver-Free Guarantee'
 const CI77820_MAIN_STATEMENT = 'All Gelitup products manufactured from December 2025 onwards are 100% CI 77820 (Silver) FREE.'
 const CI77820_TRANSPARENCY_NOTE = 'All current batches have transitioned to Aluminium and Mica-based pigments.'
@@ -2280,7 +2407,7 @@ function HomePage() {
 
   return (
     <section className="space-y-6">
-      <div className="mx-auto w-full max-w-[1380px] overflow-hidden bg-black">
+      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-black">
         <div className="relative h-[66vh] min-h-[420px] w-full sm:h-[74vh]">
           {(HERO_CINEMATIC_VIDEO_URL || media.heroVideo)
             ? (
@@ -2306,8 +2433,8 @@ function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/75" />
 
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
-            <h1 className="hero-copy-shadow heading-on-dark max-w-5xl text-3xl font-black uppercase leading-tight tracking-[0.06em] sm:text-4xl lg:text-6xl">
-              GELITUP: THE ARCHITECTS OF PROFESSIONAL COLOR
+            <h1 className="hero-copy-shadow heading-on-dark max-w-5xl text-3xl font-black uppercase leading-tight tracking-[0.15em] text-white sm:text-4xl lg:text-6xl">
+              GELITUP: THE ARCHITECTS OF PROFESSIONAL COLOR.
             </h1>
             <p className="hero-copy-shadow mt-4 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] text-white/95 sm:text-base">
               A DECADE OF PROFESSIONAL MASTERY. EU REGULATED. HEMA-FREE.
@@ -2322,38 +2449,12 @@ function HomePage() {
             </div>
           </div>
 
-          <div className="pointer-events-none fixed bottom-3 left-1/2 z-30 w-full max-w-5xl -translate-x-1/2 px-3 md:bottom-4 md:px-6">
-            <div className="pointer-events-auto mx-auto flex flex-wrap items-center justify-center gap-2 rounded-full border border-white/55 bg-black/70 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur-[10px] sm:gap-3 sm:px-3 sm:text-[11px]">
-              <button type="button" onClick={() => setIsManifestoOpen(true)} title="CPNP" aria-label="CPNP" className="inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 p-2 text-white transition duration-300 hover:bg-white/20">
-                <img src={CPNP_ICON_PATH} alt="" className="h-5 w-5 object-contain brightness-0 invert" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsManifestoOpen(true)}
-                title="HEMA/TPO Free"
-                aria-label="HEMA/TPO Free"
-                className="inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 p-2 text-white transition duration-300 hover:bg-white/20"
-              >
-                <img src={HEMA_TPO_ICON_PATH} alt="" className="h-5 w-5 object-contain brightness-0 invert" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsManifestoOpen(true)}
-                title="Leaping Bunny"
-                aria-label="Leaping Bunny"
-                className="inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 p-2 text-white transition duration-300 hover:bg-white/20"
-              >
-                <img src={LEAPING_BUNNY_ICON_PATH} alt="" className="h-5 w-5 object-contain brightness-0 invert" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsManifestoOpen(true)}
-                title="EU Regulation"
-                aria-label="EU Regulation"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-white/10 text-sm font-bold text-white transition duration-300 hover:bg-white/20"
-              >
-                EU
-              </button>
+          <div className="absolute inset-x-0 bottom-3 z-30 px-3 md:bottom-4 md:px-6">
+            <div className="mx-auto flex flex-wrap items-center justify-center gap-2 rounded-full border border-white/35 bg-black/60 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur-[15px] sm:gap-3 sm:px-3 sm:text-[11px]">
+              <button type="button" onClick={() => setIsManifestoOpen(true)} title="CPNP" aria-label="CPNP" className="inline-flex min-h-9 items-center justify-center rounded-full border border-white/35 bg-white/10 px-3 text-white transition duration-300 hover:bg-white/20">CPNP</button>
+              <button type="button" onClick={() => setIsManifestoOpen(true)} title="HEMA/TPO Free" aria-label="HEMA/TPO Free" className="inline-flex min-h-9 items-center justify-center rounded-full border border-white/35 bg-white/10 px-3 text-white transition duration-300 hover:bg-white/20">HEMA/TPO</button>
+              <button type="button" onClick={() => setIsManifestoOpen(true)} title="Leaping Bunny" aria-label="Leaping Bunny" className="inline-flex min-h-9 items-center justify-center rounded-full border border-white/35 bg-white/10 px-3 text-white transition duration-300 hover:bg-white/20">BUNNY</button>
+              <button type="button" onClick={() => setIsManifestoOpen(true)} title="EU Regulation" aria-label="EU Regulation" className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/35 bg-white/10 text-sm font-bold text-white transition duration-300 hover:bg-white/20">EU</button>
             </div>
           </div>
         </div>
@@ -2419,17 +2520,17 @@ function HomePage() {
         </ul>
       </InfoCard>
 
-      <InfoCard title="Distributor Packages" tone="dark">
+      <InfoCard title="DISTRIBUTOR PACKAGES" tone="dark">
         <p>
           TRUSTED B2B INVENTORY SYSTEMS. VERIFIED DATABASE. STRUCTURED SCALE-UP.
         </p>
       </InfoCard>
 
-      <InfoCard id="contact" title="Contact Information">
-        <div className="mt-2 space-y-1 text-sm text-slate-600">
-          <p>Distribution Email: <a href={`mailto:${B2B_EMAIL}`} className="font-medium text-slate-800 underline">{B2B_EMAIL}</a></p>
-          <p>General Email: <a href="mailto:info@leeukopf.com" className="font-medium text-slate-800 underline">info@leeukopf.com</a></p>
-          <p>Phone: <a href="tel:+35973891041" className="font-medium text-slate-800 underline">(+359) 73 891 041</a></p>
+      <InfoCard id="contact" title="OFFICIAL INFORMATION" tone="dark">
+        <div className="mt-2 space-y-1 text-sm text-white/90">
+          <p>Distribution Email: <a href={`mailto:${B2B_EMAIL}`} className="font-medium text-white underline">{B2B_EMAIL}</a></p>
+          <p>General Email: <a href="mailto:info@leeukopf.com" className="font-medium text-white underline">info@leeukopf.com</a></p>
+          <p>Phone: <a href="tel:+35973891041" className="font-medium text-white underline">(+359) 73 891 041</a></p>
           <p>Address: 8 Racho Dimchev, Sofia, Bulgaria</p>
         </div>
       </InfoCard>
@@ -2563,7 +2664,7 @@ function PortalLanding() {
 
 function DistributorsPage() {
   const [selectedCountry, setSelectedCountry] = useState(DISTRIBUTOR_DIRECTORY[0]?.country ?? '')
-  const selectedDistributor = DISTRIBUTOR_DIRECTORY.find((item) => item.country === selectedCountry) ?? DISTRIBUTOR_DIRECTORY[0]
+  const selectedDirectory = DISTRIBUTOR_DIRECTORY.find((item) => item.country === selectedCountry) ?? DISTRIBUTOR_DIRECTORY[0]
 
   return (
     <section className="space-y-5">
@@ -2589,34 +2690,59 @@ function DistributorsPage() {
         </div>
       </div>
 
-      {selectedDistributor && (
+      {selectedDirectory && (
         <div className="rounded-2xl border border-[#4A4A4A] bg-white p-4 sm:p-5">
           <h2 className="heading-on-light text-lg font-extrabold text-[#1A1A1A] sm:text-xl">
-            {selectedDistributor.country}
+            {selectedDirectory.country}
             {' '}
             Distributor Details
           </h2>
-          <div className="mt-3 grid gap-3 text-sm text-[#1A1A1A] sm:grid-cols-2">
-            <div className="rounded-xl border border-[#E8E8E8] bg-[#E8E8E8] p-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Distributor</p>
-              <p className="mt-1 font-semibold">{selectedDistributor.distributorName}</p>
-            </div>
-            <div className="rounded-xl border border-[#E8E8E8] bg-[#E8E8E8] p-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Telephone</p>
-              <a href={`tel:${selectedDistributor.phone}`} className="mt-1 block font-semibold underline">
-                {selectedDistributor.phone}
-              </a>
-            </div>
-            <div className="rounded-xl border border-[#E8E8E8] bg-[#E8E8E8] p-3 sm:col-span-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Address</p>
-              <p className="mt-1 font-semibold">{selectedDistributor.address}</p>
-            </div>
-            <div className="rounded-xl border border-[#E8E8E8] bg-[#E8E8E8] p-3 sm:col-span-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Email</p>
-              <a href={`mailto:${selectedDistributor.email}`} className="mt-1 block font-semibold underline">
-                {selectedDistributor.email}
-              </a>
-            </div>
+          <p className="mt-2 text-sm text-[#4A4A4A]">
+            Coordinates:
+            {' '}
+            <span className="font-semibold text-[#1A1A1A]">{selectedDirectory.coordinates}</span>
+          </p>
+          <div className="mt-3 grid gap-3 text-sm text-[#1A1A1A]">
+            {selectedDirectory.distributors.map((distributor) => (
+              <div key={`${selectedDirectory.country}-${distributor.name}`} className="rounded-xl border border-[#E8E8E8] bg-[#E8E8E8] p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Distributor</p>
+                <p className="mt-1 font-semibold">{distributor.name}</p>
+
+                {distributor.address && (
+                  <>
+                    <p className="mt-3 text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Address</p>
+                    <p className="mt-1 font-semibold">{distributor.address}</p>
+                  </>
+                )}
+
+                {distributor.phone && (
+                  <>
+                    <p className="mt-3 text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Telephone</p>
+                    <a href={`tel:${distributor.phone}`} className="mt-1 block font-semibold underline">
+                      {distributor.phone}
+                    </a>
+                  </>
+                )}
+
+                {distributor.email && (
+                  <>
+                    <p className="mt-3 text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Email</p>
+                    <a href={`mailto:${distributor.email}`} className="mt-1 block font-semibold underline">
+                      {distributor.email}
+                    </a>
+                  </>
+                )}
+
+                {distributor.website && (
+                  <>
+                    <p className="mt-3 text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Website</p>
+                    <a href={distributor.website} target="_blank" rel="noreferrer" className="mt-1 block font-semibold underline">
+                      {distributor.website.replace(/^https?:\/\//, '')}
+                    </a>
+                  </>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -2634,7 +2760,7 @@ function DistributorsPage() {
         <div className="mt-3 overflow-hidden rounded-xl border border-[#4A4A4A] bg-white">
           <iframe
             title="Gelitup distributors map"
-            src={selectedDistributor?.mapUrl ?? LEEUKOPF_DISTRIBUTORS_MAP_URL}
+            src={selectedDirectory?.mapUrl ?? LEEUKOPF_DISTRIBUTORS_MAP_URL}
             className="h-[320px] w-full sm:h-[420px]"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
