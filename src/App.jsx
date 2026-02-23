@@ -2423,40 +2423,51 @@ function HomePage() {
             </div>
           </div>
 
-          <div className="absolute inset-x-0 bottom-3 z-30 px-3 md:bottom-4 md:px-6">
-            <div className="mx-auto flex flex-wrap items-center justify-center gap-2 rounded-full border border-white/35 bg-black/60 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur-[15px] sm:gap-3 sm:px-3 sm:text-[11px]">
-              <span className="inline-flex min-h-9 items-center justify-center rounded-full border border-white/35 bg-white/10 px-3 text-white">CPNP</span>
-              <span className="inline-flex min-h-9 items-center justify-center rounded-full border border-white/35 bg-white/10 px-3 text-white">HEMA/TPO</span>
-              <span className="inline-flex min-h-9 items-center justify-center rounded-full border border-white/35 bg-white/10 px-3 text-white">BUNNY</span>
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/35 bg-white/10 text-sm font-bold text-white">EU</span>
-            </div>
-          </div>
         </div>
       </div>
 
       <div className="rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-4 sm:p-6">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <article className="rounded-xl border border-white/15 bg-black/20 p-4">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-xs font-bold text-white">CPNP</div>
-            <h3 className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] text-[#D43790]">CPNP NOTIFIED</h3>
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M5 12l4 4 10-10" />
+              </svg>
+            </div>
+            <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790]">CPNP NOTIFIED</p>
             <p className="mt-2 text-sm leading-relaxed text-white">Every formula in The Spectrum is CPNP Notified. This is your legal guarantee that GEL.IT.UP by GIUP® is fully authorized for sale across every EU member state.</p>
           </article>
 
           <article className="rounded-xl border border-white/15 bg-black/20 p-4">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-xs font-bold text-white">EU</div>
-            <h3 className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] text-[#D43790]">STRICTEST SAFETY</h3>
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M12 3l7 3v6c0 5-3.5 8-7 9-3.5-1-7-4-7-9V6l7-3z" />
+              </svg>
+            </div>
+            <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790]">STRICTEST SAFETY</p>
             <p className="mt-2 text-sm leading-relaxed text-white">We operate under the world’s strictest safety protocols. Our manufacturing is ISO-certified, ensuring zero hazardous contaminants and 100% batch consistency.</p>
           </article>
 
           <article className="rounded-xl border border-white/15 bg-black/20 p-4">
-            <div className="inline-flex h-10 items-center justify-center rounded-full border border-white/30 bg-white/10 px-3 text-xs font-bold text-white">HEMA/TPO</div>
-            <h3 className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] text-[#D43790]">CLEAN SCIENCE</h3>
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M12 3v8" />
+                <path d="M8 9v5a4 4 0 0 0 8 0V9" />
+              </svg>
+            </div>
+            <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790]">CLEAN SCIENCE</p>
             <p className="mt-2 text-sm leading-relaxed text-white">Our clean-science policy enforces HEMA-free and TPO-free formulation standards across current production lines, prioritizing professional safety.</p>
           </article>
 
           <article className="rounded-xl border border-white/15 bg-black/20 p-4">
-            <div className="inline-flex h-10 items-center justify-center rounded-full border border-white/30 bg-white/10 px-3 text-xs font-bold text-white">BUNNY</div>
-            <h3 className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] text-[#D43790]">CRUELTY-FREE</h3>
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M8 8c0-2 1-4 2-5 1 1 2 3 2 5" />
+                <path d="M12 8c0-2 1-4 2-5 1 1 2 3 2 5" />
+                <circle cx="12" cy="14" r="5" />
+              </svg>
+            </div>
+            <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790]">CRUELTY-FREE</p>
             <p className="mt-2 text-sm leading-relaxed text-white">Ethics without compromise. We are 100% Leaping Bunny Approved—the global gold standard for cruelty-free cosmetics.</p>
           </article>
         </div>

@@ -193,62 +193,130 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
   }
 
   if (isAboutUsManifesto) {
+    const countdownTarget = useMemo(() => {
+      const now = new Date()
+      const target = new Date(now)
+      const dayOfWeek = now.getDay()
+      const daysUntilMonday = dayOfWeek === 1 ? 7 : (8 - dayOfWeek) % 7
+      target.setDate(now.getDate() + daysUntilMonday)
+      target.setHours(9, 0, 0, 0)
+      return target.getTime()
+    }, [])
+
+    const [countdownNow, setCountdownNow] = useState(() => Date.now())
+
+    useEffect(() => {
+      const intervalId = window.setInterval(() => {
+        setCountdownNow(Date.now())
+      }, 1000)
+
+      return () => {
+        window.clearInterval(intervalId)
+      }
+    }, [])
+
+    const countdownRemaining = Math.max(0, countdownTarget - countdownNow)
+    const countdownDays = Math.floor(countdownRemaining / (1000 * 60 * 60 * 24))
+    const countdownHours = Math.floor((countdownRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+    const countdownMinutes = Math.floor((countdownRemaining % (1000 * 60 * 60)) / (1000 * 60))
+    const countdownSeconds = Math.floor((countdownRemaining % (1000 * 60)) / 1000)
+
+    const socialTiles = Array.from({ length: 9 }, (_, index) => previewMedia[index] || null)
     const visualIsVideo = Boolean(
       manifestoVisual
       && (manifestoVisual.displayUrl.toLowerCase().includes('.mp4') || manifestoVisual.displayUrl.toLowerCase().includes('.webm')),
     )
 
     return (
-      <section className="space-y-4 bg-white">
-        <div className="relative overflow-hidden rounded-2xl border border-[#E8E8E8] bg-[#1A1A1A]">
-          {visualIsVideo
-            ? (
-              <video
-                src={manifestoVisual.displayUrl}
-                className="absolute inset-0 h-full min-h-[360px] w-full object-cover"
-                muted
-                playsInline
-                autoPlay
-                loop
-                controls={false}
-              />
-              )
-            : (
-              <img
-                src={manifestoVisual?.displayUrl || '/logo.png'}
-                alt="High-resolution macro texture"
-                className="absolute inset-0 h-full min-h-[360px] w-full object-cover"
-                loading="lazy"
-              />
-              )}
-
-          <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/45 to-black/75" />
-
-          <div className="relative z-10 min-h-[360px] p-5 sm:p-7">
+      <section className="space-y-6 bg-white">
+        <div className="grid overflow-hidden rounded-2xl border border-[#E8E8E8] bg-white lg:grid-cols-2">
+          <article className="p-5 sm:p-8">
             <p
-              className="text-2xl font-extrabold uppercase leading-tight tracking-[0.15em] text-white sm:text-4xl"
+              className="text-2xl font-extrabold uppercase leading-tight tracking-[0.15em] text-[#1A1A1A] sm:text-4xl"
               style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
             >
               THE ARCHITECTS OF PROFESSIONAL COLOR.
             </p>
             <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#D43790]">CLEAN SCIENCE</p>
-            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white sm:text-base">
-              At GEL.IT.UP by GIUP®, we don’t just manufacture color; we engineer professional confidence. Our entire collection is 100% HEMA &amp; TPO Free, ensuring the highest level of safety for both technician and client.
+            <p className="mt-2 text-sm leading-relaxed text-[#1A1A1A] sm:text-base">
+              100% HEMA &amp; TPO Free chemistry engineered for professional confidence.
+            </p>
+          </article>
+
+          <article className="relative min-h-[300px] overflow-hidden bg-[#1A1A1A] sm:min-h-[360px]">
+            {visualIsVideo
+              ? (
+                <video
+                  src={manifestoVisual.displayUrl}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  muted
+                  playsInline
+                  autoPlay
+                  loop
+                  controls={false}
+                />
+                )
+              : (
+                <img
+                  src={manifestoVisual?.displayUrl || '/logo.png'}
+                  alt="Cinematic GEL.IT.UP by GIUP® texture visual"
+                  className="absolute inset-0 h-full w-full object-cover"
+                  loading="lazy"
+                />
+                )}
+            <div className="absolute inset-0 bg-black/30" />
+          </article>
+        </div>
+
+        <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-10 sm:px-8 sm:py-12">
+          <div className="mx-auto max-w-6xl text-center">
+            <p className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#D43790] sm:text-5xl">
+              {String(countdownDays).padStart(2, '0')} : {String(countdownHours).padStart(2, '0')} : {String(countdownMinutes).padStart(2, '0')} : {String(countdownSeconds).padStart(2, '0')}
+            </p>
+            <p className="mt-4 text-sm font-extrabold uppercase tracking-[0.1em] text-white sm:text-lg">
+              NEW COLOUR REVEAL COMING SOON. WATCH THIS SPACE.
             </p>
           </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-1">
-          <article className="rounded-2xl border border-[#E8E8E8] bg-[#E8E8E8] p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#D43790]">REGULATORY LEADERSHIP</p>
-            <p className="mt-3 text-sm leading-relaxed text-[#4A4A4A] sm:text-base">
-              Fully EU Regulated, CPNP Notified, and Leaping Bunny Approved, we provide the legal and ethical peace of mind that modern salons demand.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="inline-flex min-h-9 items-center rounded-full border border-[#1A1A1A]/20 bg-white px-3 text-xs font-semibold uppercase tracking-[0.08em] text-[#1A1A1A]">CPNP</span>
-              <span className="inline-flex min-h-9 items-center rounded-full border border-[#1A1A1A]/20 bg-white px-3 text-xs font-semibold uppercase tracking-[0.08em] text-[#1A1A1A]">LEAPING BUNNY</span>
-            </div>
-          </article>
+        <div className="rounded-2xl border border-[#E8E8E8] bg-white p-5 sm:p-7">
+          <h2 className="text-2xl font-extrabold uppercase tracking-[0.15em] text-[#1A1A1A] sm:text-3xl">GEL.IT.UP by GIUP® IN THE WILD.</h2>
+          <p className="mt-2 text-sm font-medium text-[#1A1A1A]">Real salon outputs that prove market demand for distributors.</p>
+
+          <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+            {socialTiles.map((tile, index) => {
+              const isVideo = Boolean(tile && (tile.displayUrl.toLowerCase().includes('.mp4') || tile.displayUrl.toLowerCase().includes('.webm')))
+              const tileUrl = tile?.displayUrl || '/logo.png'
+
+              return (
+                <a
+                  key={`social-tile-${index}`}
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group relative overflow-hidden rounded-lg border border-[#E8E8E8] bg-[#E8E8E8]"
+                  aria-label="Open GEL.IT.UP by GIUP® Instagram"
+                >
+                  {isVideo
+                    ? (
+                      <video src={tileUrl} className="h-24 w-full object-cover sm:h-32" muted playsInline autoPlay loop controls={false} />
+                      )
+                    : (
+                      <img src={tileUrl} alt="GEL.IT.UP by GIUP® salon result" className="h-24 w-full object-cover sm:h-32" loading="lazy" />
+                      )}
+                </a>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="pb-2 text-center">
+          <NavLink
+            to="/become-distributor"
+            className="inline-flex rounded-lg bg-[#D43790] px-5 py-3 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]"
+          >
+            JOIN THE EXCLUSIVE GLOBAL NETWORK
+          </NavLink>
         </div>
       </section>
     )
