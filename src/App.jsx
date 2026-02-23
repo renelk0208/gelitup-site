@@ -2060,6 +2060,7 @@ function InfoCard({ id, title, children, tone = 'white' }) {
 function pickHomepageMedia(items = []) {
   const images = items.filter((item) => item.mediaType === 'image')
   const videos = items.filter((item) => item.mediaType === 'video')
+  const nonLogoImages = images.filter((item) => !String(item.localPath || '').toLowerCase().includes('logo'))
 
   const heroImage = images.find((item) => item.localPath.includes('com_web_1280x1280_18'))
     || images.find((item) => item.localPath.includes('1-1024x1024'))
@@ -2072,10 +2073,37 @@ function pickHomepageMedia(items = []) {
     .filter((item) => item.localPath !== heroImage?.localPath)
     .slice(0, 4)
 
+  const spectrumVisualTokens = ['spectrum', 'swatch', 'texture', 'neon', 'shimmer', 'creme', 'solid', 'colour', 'color']
+  const collectionVisual = nonLogoImages.find((item) => {
+    const path = String(item.localPath || '').toLowerCase()
+    return spectrumVisualTokens.some((token) => path.includes(token))
+  }) || nonLogoImages[0] || heroImage
+
+  const instagramTiles = []
+  const seenInstagramSources = new Set()
+  for (const item of items) {
+    const sourceUrl = String(item?.sourceUrl || '').trim()
+    const localPath = String(item?.localPath || '').trim()
+    if (!sourceUrl || !localPath) continue
+    if (!/instagram\.com/i.test(sourceUrl)) continue
+    if (seenInstagramSources.has(sourceUrl)) continue
+
+    seenInstagramSources.add(sourceUrl)
+    instagramTiles.push({
+      sourceUrl,
+      localPath,
+      mediaType: item?.mediaType || 'image',
+    })
+
+    if (instagramTiles.length >= 9) break
+  }
+
   return {
     heroImage: heroImage?.localPath || '/logo.png',
     heroVideo: heroVideo?.localPath || null,
     gallery,
+    collectionVisual: collectionVisual?.localPath || heroImage?.localPath || '/logo.png',
+    instagramTiles,
   }
 }
 
@@ -2395,6 +2423,8 @@ function HomePage() {
     heroImage: '/logo.png',
     heroVideo: null,
     gallery: [],
+    collectionVisual: '/logo.png',
+    instagramTiles: [],
   }))
 
   useEffect(() => {
@@ -2425,6 +2455,33 @@ function HomePage() {
       isMounted = false
     }
   }, [])
+
+  const countdownTarget = useMemo(() => {
+    const now = new Date()
+    const target = new Date(now)
+    const dayOfWeek = now.getDay()
+    const daysUntilMonday = dayOfWeek === 1 ? 7 : (8 - dayOfWeek) % 7
+    target.setDate(now.getDate() + daysUntilMonday)
+    target.setHours(9, 0, 0, 0)
+    return target.getTime()
+  }, [])
+  const [countdownNow, setCountdownNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setCountdownNow(Date.now())
+    }, 1000)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [])
+
+  const countdownRemaining = Math.max(0, countdownTarget - countdownNow)
+  const countdownDays = Math.floor(countdownRemaining / (1000 * 60 * 60 * 24))
+  const countdownHours = Math.floor((countdownRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  const countdownMinutes = Math.floor((countdownRemaining % (1000 * 60 * 60)) / (1000 * 60))
+  const countdownSeconds = Math.floor((countdownRemaining % (1000 * 60)) / 1000)
 
   return (
     <section className="space-y-6">
@@ -2524,37 +2581,81 @@ function HomePage() {
         </p>
       </div>
 
-      <InfoCard id="products" title="The Collection">
-        <p>
-          The GEL.IT.UP lineup includes Soak-off Gel Polish, Base and Top Coats, Builder System,
-          Nail Polishes, Nail Art, Consumables, and Skin & Nail Care.
-          We also maintain a broad color portfolio (800+ shades) for professional channels.
-        </p>
-        <NavLink to="/full-catalogue" className="mt-3 inline-flex rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
-          Open The Collection
-        </NavLink>
-        {media.gallery.length > 0 && (
-          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {media.gallery.map((item) => (
-              <img
-                key={item.localPath}
-                src={item.localPath}
-                alt="GEL.IT.UP product preview"
-                className="h-24 w-full rounded-lg object-cover sm:h-28"
-                loading="lazy"
-              />
-            ))}
-          </div>
-        )}
-      </InfoCard>
+      <section id="products" className="rounded-2xl border border-[#1A1A1A]/15 bg-[#FFFFFF] p-4 sm:p-6">
+        <h2
+          className="text-center text-lg font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-2xl"
+          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
+        >
+          EXPLORE THE SPECTRUM: 761+ SHADES OF PROFESSIONAL EXCELLENCE.
+        </h2>
 
-      <InfoCard id="certifications" title="Certifications & Compliance">
-        <ul className="mt-3 space-y-2 text-sm text-slate-600">
-          <li>• Leaping Bunny certified cruelty-free standards for in-house cosmetic and personal care products.</li>
-          <li>• EU regulation alignment and GMP (Good Manufacturing Practices) commitment.</li>
-          <li>• Professionals-only commercial policy to protect quality and industry standards.</li>
-        </ul>
-      </InfoCard>
+        <div className="mt-4 overflow-hidden rounded-2xl border border-[#1A1A1A]/20 bg-[#1A1A1A]">
+          <img
+            src={media.collectionVisual || media.heroImage}
+            alt="Macro spectrum visual showing shimmer, neon, and creme gel textures"
+            className="h-60 w-full object-cover sm:h-72 lg:h-80"
+            loading="lazy"
+          />
+        </div>
+
+        <div className="mt-4 flex justify-center">
+          <NavLink
+            to="/full-catalogue"
+            className="inline-flex rounded-lg bg-[#D43790] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]"
+          >
+            Open The Collection
+          </NavLink>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-[#1A1A1A] bg-[#1A1A1A] px-4 py-6 text-center sm:px-6 sm:py-8">
+        <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#D43790] sm:text-sm">
+          WATCH THIS SPACE: NEW ARRIVALS MONDAY 09:00 AM.
+        </p>
+        <p className="mt-3 text-3xl font-extrabold uppercase tracking-[0.12em] text-white sm:text-5xl">
+          {String(countdownDays).padStart(2, '0')} : {String(countdownHours).padStart(2, '0')} : {String(countdownMinutes).padStart(2, '0')} : {String(countdownSeconds).padStart(2, '0')}
+        </p>
+      </section>
+
+      <section className="rounded-2xl border border-[#1A1A1A]/15 bg-[#FFFFFF] p-4 sm:p-6">
+        <h3 className="text-center text-base font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-xl">Community Proof</h3>
+        <p className="mt-2 text-center text-sm text-[#1A1A1A]">Live salon demand from GEL.IT.UP by GIUP® on Instagram.</p>
+
+        <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+          {media.instagramTiles.map((tile, index) => {
+            const isVideo = String(tile.mediaType || '').toLowerCase() === 'video'
+
+            return (
+              <a
+                key={`homepage-instagram-${tile.sourceUrl}-${index}`}
+                href={tile.sourceUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="group relative overflow-hidden rounded-2xl border border-[#1A1A1A]/15 bg-white transition duration-300 hover:-translate-y-0.5 hover:border-[#D43790]/60"
+                aria-label="Open Instagram post"
+              >
+                {isVideo
+                  ? <video src={tile.localPath} className="h-24 w-full object-cover sm:h-32 lg:h-40" muted playsInline autoPlay loop controls={false} />
+                  : <img src={tile.localPath} alt="Instagram salon result" className="h-24 w-full object-cover sm:h-32 lg:h-40" loading="lazy" />}
+              </a>
+            )
+          })}
+
+          {media.instagramTiles.length === 0 && (
+            <div className="col-span-3 rounded-2xl border border-[#1A1A1A]/15 bg-[#FFFFFF] px-4 py-5 text-center">
+              <p className="text-sm font-medium text-[#1A1A1A]">Instagram feed coming soon.</p>
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]"
+              >
+                View Instagram
+              </a>
+            </div>
+          )}
+        </div>
+      </section>
 
       <InfoCard title="DISTRIBUTOR PACKAGES" tone="dark">
         <p>
