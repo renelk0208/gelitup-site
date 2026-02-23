@@ -16,6 +16,10 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --lux-black: #000000;
+  --lux-white: #FFFFFF;
+  --lux-gallery: #F8F8F6;
+  --lux-fuchsia: #d946ef;
 }
 
 a {
@@ -27,10 +31,48 @@ body {
   margin: 0;
   min-height: 100vh;
   min-width: 320px;
-  background-color: rgb(248 250 252);
-  color: rgb(15 23 42);
+  background-color: var(--lux-gallery);
+  color: var(--lux-black);
   min-height: 100vh;
-  font-family: 'PF Futura Neu', 'Futura PT', 'Futura', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-family: 'Inter', 'PF Futura Neu', 'Futura PT', 'Futura', 'Avenir Next', 'Segoe UI', sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 800;
+  color: var(--lux-black);
+}
+
+a,
+button,
+input,
+select,
+textarea,
+article {
+  transition: all 0.3s ease;
+}
+
+.lux-pulse {
+  animation: luxPulse 0.32s ease;
+}
+
+@keyframes luxPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(217, 70, 239, 0.45);
+  }
+  60% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(217, 70, 239, 0.05);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(217, 70, 239, 0);
+  }
 }
 
 input,

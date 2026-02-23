@@ -1404,12 +1404,15 @@ function FullCataloguePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [bulkMode, setBulkMode] = useState(false)
   const [heroCandidateIndexByCategory, setHeroCandidateIndexByCategory] = useState({})
-  const [visibleCount, setVisibleCount] = useState(96)
   const [itemQuantities, setItemQuantities] = useState({})
   const [quickCart, setQuickCart] = useState({})
+  const [pulseItemKey, setPulseItemKey] = useState('')
+  const [gridColumns, setGridColumns] = useState(5)
+  const [scrollTop, setScrollTop] = useState(0)
+  const [viewportHeight, setViewportHeight] = useState(720)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
-  const loadMoreRef = useRef(null)
+  const virtualContainerRef = useRef(null)
 
   useEffect(() => {
     let mounted = true
@@ -1504,36 +1507,73 @@ function FullCataloguePage() {
   }, [activeColorFamily, baseItems, isColorsCategory, searchQuery])
 
   useEffect(() => {
-    setVisibleCount(96)
+    setScrollTop(0)
   }, [activeCategory, activeSubcategory, activeColorFamily])
 
   useEffect(() => {
-    setVisibleCount(96)
+    setScrollTop(0)
   }, [searchQuery])
 
   useEffect(() => {
-    const target = loadMoreRef.current
-    if (!target) return undefined
-    if (visibleCount >= filteredItems.length) return undefined
+    const updateLayout = () => {
+      const width = window.innerWidth
+      if (bulkMode) {
+        setGridColumns(1)
+        return
+      }
+      if (width >= 1280) {
+        setGridColumns(5)
+        return
+      }
+      if (width >= 1024) {
+        setGridColumns(4)
+        return
+      }
+      if (width >= 640) {
+        setGridColumns(3)
+        return
+      }
+      setGridColumns(2)
+    }
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return
-        setVisibleCount((current) => Math.min(current + 96, filteredItems.length))
-      })
-    }, {
-      rootMargin: '400px 0px',
-      threshold: 0.01,
-    })
+    updateLayout()
+    window.addEventListener('resize', updateLayout)
+    return () => window.removeEventListener('resize', updateLayout)
+  }, [bulkMode])
 
-    observer.observe(target)
-    return () => observer.disconnect()
-  }, [filteredItems.length, visibleCount])
+  useEffect(() => {
+    const node = virtualContainerRef.current
+    if (!node) return undefined
 
-  const visibleItems = useMemo(
-    () => filteredItems.slice(0, visibleCount),
-    [filteredItems, visibleCount],
-  )
+    const updateHeight = () => {
+      setViewportHeight(node.clientHeight || 720)
+    }
+
+    updateHeight()
+    window.addEventListener('resize', updateHeight)
+    return () => window.removeEventListener('resize', updateHeight)
+  }, [])
+
+  const virtualRowHeight = bulkMode ? 74 : 372
+  const totalRows = Math.max(1, Math.ceil(filteredItems.length / gridColumns))
+  const overscanRows = 3
+  const startRow = Math.max(0, Math.floor(scrollTop / virtualRowHeight) - overscanRows)
+  const endRow = Math.min(totalRows, Math.ceil((scrollTop + viewportHeight) / virtualRowHeight) + overscanRows)
+
+  const virtualItems = useMemo(() => {
+    const items = []
+    for (let row = startRow; row < endRow; row += 1) {
+      for (let column = 0; column < gridColumns; column += 1) {
+        const itemIndex = row * gridColumns + column
+        if (itemIndex >= filteredItems.length) break
+        items.push({ item: filteredItems[itemIndex], row, column, itemIndex })
+      }
+    }
+    return items
+  }, [endRow, filteredItems, gridColumns, startRow])
+
+  const topSpacerHeight = startRow * virtualRowHeight
+  const bottomSpacerHeight = Math.max(0, (totalRows - endRow) * virtualRowHeight)
 
   const quickCartUnits = useMemo(
     () => Object.values(quickCart).reduce((sum, qty) => sum + Number(qty || 0), 0),
@@ -1543,32 +1583,52 @@ function FullCataloguePage() {
   const getQty = useCallback((itemKey) => Number(itemQuantities[itemKey] || 1), [itemQuantities])
 
   const updateQty = useCallback((itemKey, nextValue) => {
+    const normalized = Math.max(1, Number(nextValue || 1))
     setItemQuantities((current) => ({
       ...current,
-      [itemKey]: Math.max(1, Number(nextValue || 1)),
+      [itemKey]: normalized,
     }))
   }, [])
 
   const addQuickItem = useCallback((itemKey) => {
     const qty = Math.max(1, Number(itemQuantities[itemKey] || 1))
+    setPulseItemKey(itemKey)
+    window.setTimeout(() => {
+      setPulseItemKey('')
+    }, 320)
     setQuickCart((current) => ({
       ...current,
       [itemKey]: Number(current[itemKey] || 0) + qty,
     }))
   }, [itemQuantities])
 
+  const quickProgress = Math.min(100, Math.round((quickCartUnits / 100) * 100))
+
+  const extractProductCode = useCallback((name = '') => {
+    const cleaned = String(name || '').trim()
+    const codeMatch = cleaned.match(/[A-Z]{2,8}\s*-?\s*\d+[A-Z0-9-]*/i)
+    return codeMatch ? codeMatch[0].toUpperCase() : 'SKU'
+  }, [])
+
+  const getTileVariant = useCallback((index) => {
+    const variant = index % 6
+    if (variant === 0) return 'ring-1 ring-fuchsia-300/60'
+    if (variant === 3) return 'bg-gradient-to-b from-white to-fuchsia-50/30'
+    return ''
+  }, [])
+
   return (
     <section className="space-y-5">
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
-        <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Quick Catalogue Access</p>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900 sm:text-3xl">Full Product Catalogue</h1>
-        <p className="mt-2 text-sm text-slate-600">
+      <div className="rounded-2xl border border-black/10 bg-white p-5 sm:p-6">
+        <p className="text-xs uppercase tracking-[0.2em] text-black/50">Luxury Colour Library</p>
+        <h1 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-black sm:text-3xl">Full Product Catalogue</h1>
+        <p className="mt-2 text-sm text-black/65">
           Keep the main product pages as they are, and use this quick-click catalogue to open what is available by category.
         </p>
       </div>
 
       {isLoading && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
+        <div className="rounded-2xl border border-black/10 bg-white p-5 text-sm text-black/65">
           Loading catalogue images...
         </div>
       )}
@@ -1581,14 +1641,14 @@ function FullCataloguePage() {
 
       {!isLoading && !errorMessage && sections.length > 0 && (
         <>
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+          <div className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Category Tiles</p>
-              <label className="inline-flex items-center gap-2 text-xs text-slate-600">
-                <span>Bulk Mode</span>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/55">Category Tiles</p>
+              <label className="inline-flex items-center gap-2 text-xs text-black/70">
+                <span>Quick Order</span>
                 <button
                   onClick={() => setBulkMode((current) => !current)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${bulkMode ? 'bg-slate-900' : 'bg-slate-300'}`}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition duration-300 ${bulkMode ? 'bg-fuchsia-600' : 'bg-black/20'}`}
                   aria-label="Toggle bulk mode"
                 >
                   <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${bulkMode ? 'translate-x-6' : 'translate-x-1'}`} />
@@ -1613,12 +1673,12 @@ function FullCataloguePage() {
                       setActiveSubcategory('')
                       setActiveColorFamily('ALL')
                     }}
-                    className={`group relative aspect-[4/3] overflow-hidden rounded-[12px] border ${isActiveCategory ? 'border-slate-900' : 'border-slate-200'} bg-white text-left`}
+                    className={`group relative aspect-[4/3] overflow-hidden rounded-[12px] border bg-white text-left transition duration-300 hover:scale-[1.02] hover:border-fuchsia-500/70 hover:shadow-[0_0_0_2px_rgba(217,70,239,0.28)] ${isActiveCategory ? 'border-fuchsia-600 shadow-[0_0_0_1px_rgba(217,70,239,0.35)]' : 'border-black/10'}`}
                   >
                     <img
                       src={coverImage}
                       alt={section.category}
-                      className="h-full w-full bg-slate-50 object-contain p-1"
+                      className="h-full w-full bg-white object-contain p-1"
                       loading="lazy"
                       onError={() => {
                         if (coverIndex >= coverCandidates.length - 1) return
@@ -1629,8 +1689,8 @@ function FullCataloguePage() {
                       }}
                     />
                     <div className="absolute inset-x-2 bottom-2 rounded-[12px] border border-white/40 bg-white/45 px-3 py-2 backdrop-blur-md">
-                      <p className="text-sm font-semibold text-slate-900">{section.category}</p>
-                      <p className="text-[11px] text-slate-700">{imageCount} items</p>
+                      <p className="text-sm font-semibold uppercase tracking-[0.04em] text-black">{section.category}</p>
+                      <p className="text-[11px] text-black/70">{imageCount} items</p>
                     </div>
                   </button>
                 )
@@ -1638,15 +1698,22 @@ function FullCataloguePage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+          <div className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900">{activeSection?.category || 'Catalogue'}</h2>
-                <p className="mt-1 text-xs text-slate-500">{filteredItems.length} matching items</p>
+                <h2 className="text-lg font-black uppercase tracking-[0.05em] text-black">{activeSection?.category || 'Catalogue'}</h2>
+                <p className="mt-1 text-xs text-black/55">{filteredItems.length} matching items</p>
               </div>
-              <div className="rounded-[12px] border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
+              <div className="rounded-[12px] border border-black/10 bg-white px-3 py-2 text-xs text-black/70">
                 Quick Basket: {quickCartUnits} units
               </div>
+            </div>
+
+            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
+              <div
+                className="h-full rounded-full bg-fuchsia-600 transition-all duration-300"
+                style={{ width: `${quickProgress}%` }}
+              />
             </div>
 
             <div className="mt-3 flex flex-wrap gap-2">
@@ -1656,7 +1723,7 @@ function FullCataloguePage() {
                   <button
                     key={`subcategory-${subcategory}`}
                     onClick={() => setActiveSubcategory(subcategory)}
-                    className={`rounded-[12px] border px-3 py-1.5 text-xs font-semibold ${isActive ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-300 bg-white text-slate-700'}`}
+                    className={`rounded-[12px] border px-3 py-1.5 text-xs font-semibold transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-black/20 bg-white text-black/75 hover:border-fuchsia-500'}`}
                   >
                     {subcategory}
                   </button>
@@ -1665,7 +1732,7 @@ function FullCataloguePage() {
             </div>
 
             {!activeSubcategory && (
-              <div className="mt-3 rounded-[12px] border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+              <div className="mt-3 rounded-[12px] border border-black/10 bg-black/[0.02] px-3 py-2 text-xs text-black/60">
                 Select a subcategory to view products.
               </div>
             )}
@@ -1680,13 +1747,13 @@ function FullCataloguePage() {
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     placeholder="Search product name, code, or subcategory..."
-                    className="w-full rounded-[12px] border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none ring-slate-900/10 focus:ring"
+                    className="w-full rounded-[12px] border border-black/20 bg-white px-3 py-2 text-sm text-black outline-none ring-fuchsia-500/20 focus:ring"
                   />
                 </div>
 
                 {isColorsCategory && (
-                  <div className="mt-3 rounded-[12px] border border-slate-200 bg-slate-50 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Quick Filter</p>
+                  <div className="mt-3 rounded-[12px] border border-black/10 bg-black/[0.02] p-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/55">Quick Filter</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {COLOR_FAMILY_FILTERS.map((family) => {
                         const isActive = activeColorFamily === family.key
@@ -1694,7 +1761,7 @@ function FullCataloguePage() {
                           <button
                             key={family.key}
                             onClick={() => setActiveColorFamily(family.key)}
-                            className={`inline-flex items-center gap-2 rounded-[12px] border px-2.5 py-1.5 text-xs ${isActive ? 'border-slate-900 bg-white text-slate-900' : 'border-slate-300 bg-white text-slate-700'}`}
+                            className={`inline-flex items-center gap-2 rounded-[12px] border px-2.5 py-1.5 text-xs transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-black/20 bg-white text-black/70 hover:border-fuchsia-500'}`}
                           >
                             <span className={`h-3 w-3 rounded-full ${family.swatchClass}`} />
                             {family.label}
@@ -1705,60 +1772,69 @@ function FullCataloguePage() {
                   </div>
                 )}
 
-                {!bulkMode
-                  ? (
-                    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                      {visibleItems.map((item) => {
-                        const itemKey = item.imageUrl
-                        const qty = getQty(itemKey)
+                <div
+                  ref={virtualContainerRef}
+                  onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
+                  className="mt-4 max-h-[72vh] overflow-auto rounded-[14px] border border-black/10 bg-white"
+                >
+                  <div style={{ height: topSpacerHeight }} />
 
+                  <div
+                    className={`grid gap-3 p-3 ${bulkMode ? 'grid-cols-1' : ''}`}
+                    style={bulkMode ? undefined : { gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))` }}
+                  >
+                    {virtualItems.map(({ item, itemIndex }) => {
+                      const itemKey = item.imageUrl
+                      const qty = getQty(itemKey)
+                      const hasChangedQty = qty > 1
+                      const itemCode = extractProductCode(item.name)
+
+                      if (bulkMode) {
                         return (
-                          <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="overflow-hidden rounded-[12px] border border-slate-200 bg-white">
-                            <div className="flex h-56 w-full items-center justify-center bg-white p-2 sm:h-60">
-                              <img src={item.imageUrl} alt={item.name} loading="lazy" className="max-h-full w-full object-contain" />
-                            </div>
-                            <div className="border-t border-slate-200 px-2.5 py-2">
-                              <p className="truncate text-xs font-medium text-slate-800">{item.name}</p>
-                              <p className="truncate text-[11px] text-slate-500">{item.subcategory}</p>
-                              <div className="mt-2 flex items-center gap-1">
-                                <button onClick={() => updateQty(itemKey, qty - 1)} className="h-7 w-7 rounded-[10px] border border-slate-300 text-sm text-slate-700">−</button>
-                                <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className="h-7 w-10 rounded-[10px] border border-slate-300 text-center text-xs" />
-                                <button onClick={() => updateQty(itemKey, qty + 1)} className="h-7 w-7 rounded-[10px] border border-slate-300 text-sm text-slate-700">+</button>
-                                <button onClick={() => addQuickItem(itemKey)} className="ml-auto rounded-[10px] bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white">Add</button>
-                              </div>
-                            </div>
-                          </article>
-                        )
-                      })}
-                    </div>
-                    )
-                  : (
-                    <div className="mt-4 overflow-hidden rounded-[12px] border border-slate-200 bg-white">
-                      {visibleItems.map((item) => {
-                        const itemKey = item.imageUrl
-                        const qty = getQty(itemKey)
-                        return (
-                          <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 border-b border-slate-100 px-3 py-2 last:border-b-0">
-                            <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-slate-200 object-contain" loading="lazy" />
+                          <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 rounded-[12px] border border-black/10 bg-white px-3 py-2 transition duration-300 hover:border-fuchsia-500/70 hover:shadow-[0_0_0_1px_rgba(217,70,239,0.26)]">
+                            <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-black/10 bg-white object-contain" loading="lazy" />
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-xs font-medium text-slate-800">{item.name}</p>
-                              <p className="truncate text-[11px] text-slate-500">{item.subcategory}</p>
+                              <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
+                              <p className="truncate text-[11px] font-light text-black/55">{itemCode}</p>
                             </div>
-                            <button onClick={() => updateQty(itemKey, qty - 1)} className="h-7 w-7 rounded-[10px] border border-slate-300 text-sm text-slate-700">−</button>
-                            <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className="h-7 w-10 rounded-[10px] border border-slate-300 text-center text-xs" />
-                            <button onClick={() => updateQty(itemKey, qty + 1)} className="h-7 w-7 rounded-[10px] border border-slate-300 text-sm text-slate-700">+</button>
-                            <button onClick={() => addQuickItem(itemKey)} className="rounded-[10px] bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white">Add</button>
+                            <button onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>−</button>
+                            <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className={`h-7 w-10 rounded-[10px] border text-center text-xs ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/20 text-black/70'}`} />
+                            <button onClick={() => updateQty(itemKey, qty + 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>+</button>
+                            <button onClick={() => addQuickItem(itemKey)} className={`rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition duration-300 ${pulseItemKey === itemKey ? 'lux-pulse bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`}>Add</button>
                           </div>
                         )
-                      })}
-                    </div>
-                  )}
+                      }
 
-                {visibleCount < filteredItems.length && (
-                  <div ref={loadMoreRef} className="mt-4 rounded-[12px] border border-slate-200 bg-slate-50 px-3 py-2 text-center text-xs text-slate-600">
-                    Loading more products… ({visibleItems.length}/{filteredItems.length})
+                      return (
+                        <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`overflow-hidden rounded-[14px] border border-black/10 bg-white transition duration-300 hover:scale-[1.05] hover:border-fuchsia-500/70 hover:shadow-[0_0_0_2px_rgba(217,70,239,0.24)] ${getTileVariant(itemIndex)}`}>
+                          <div className="flex h-56 w-full items-center justify-center bg-white p-2 sm:h-60">
+                            <img src={item.imageUrl} alt={item.name} loading="lazy" className="max-h-full w-full object-contain" />
+                          </div>
+                          <div className="border-t border-black/10 px-2.5 py-2">
+                            <p className="truncate text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
+                            <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
+                            <div className="mt-2 flex items-center gap-1">
+                              <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
+                              <p className="truncate text-[11px] font-light text-black/55">{item.subcategory}</p>
+                            </div>
+                            <div className="mt-2 flex items-center gap-1">
+                              <button onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>−</button>
+                              <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className={`h-7 w-10 rounded-[10px] border text-center text-xs ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/20 text-black/70'}`} />
+                              <button onClick={() => updateQty(itemKey, qty + 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>+</button>
+                              <button onClick={() => addQuickItem(itemKey)} className={`ml-auto rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition duration-300 ${pulseItemKey === itemKey ? 'lux-pulse bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`}>Add</button>
+                            </div>
+                          </div>
+                        </article>
+                      )
+                    })}
                   </div>
-                )}
+
+                  <div style={{ height: bottomSpacerHeight }} />
+                </div>
+
+                <div className="mt-2 text-xs text-black/55">
+                  Virtualized view active: showing {virtualItems.length} / {filteredItems.length} items.
+                </div>
               </>
             )}
           </div>
@@ -1809,8 +1885,8 @@ function Nav() {
           key={item.to}
           to={item.to}
           className={({ isActive }) =>
-            `rounded-lg px-4 py-2 text-sm font-medium transition ${
-              isActive ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-200'
+            `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 ${
+              isActive ? 'bg-fuchsia-600 text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : 'text-white/85 hover:bg-white/10 hover:text-white'
             }`
           }
         >
@@ -1823,15 +1899,15 @@ function Nav() {
 
 function MobileNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-2 py-2 backdrop-blur md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/15 bg-black/85 px-2 py-2 backdrop-blur md:hidden">
       <div className="mx-auto grid max-w-xl gap-1" style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}>
         {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
-              `rounded-md px-2 py-2 text-center text-xs font-medium ${
-                isActive ? 'bg-slate-900 text-white' : 'text-slate-600'
+              `rounded-md px-2 py-2 text-center text-xs font-medium uppercase tracking-[0.03em] transition duration-300 ${
+                isActive ? 'bg-fuchsia-600 text-white' : 'text-white/75'
               }`
             }
           >
@@ -6657,13 +6733,13 @@ function App() {
   return (
     <div className="min-h-screen pb-20 md:pb-8">
       <ScrollToTopOnRouteChange />
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-white/15 bg-black/80 backdrop-blur-[10px]">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">
           <div className="flex items-center gap-3">
             <img src={appLogo} alt="Gelitup logo" className="h-10 w-10 rounded-lg object-cover" />
             <div>
-              <p className="text-sm font-bold leading-none text-slate-900">GEL.IT.UP</p>
-              <p className="text-xs text-slate-500">Distributor Website</p>
+              <p className="text-sm font-black uppercase leading-none tracking-[0.08em] text-white">GEL.IT.UP</p>
+              <p className="text-xs text-white/65">Distributor Website</p>
             </div>
           </div>
           <Nav />
@@ -6761,44 +6837,44 @@ function App() {
         </div>
       )}
 
-      <footer className="mx-auto mt-8 max-w-6xl space-y-5 border-t border-slate-200 px-4 pb-4 pt-5 text-xs text-slate-600 md:px-6">
+      <footer className="mx-auto mt-8 max-w-6xl space-y-5 rounded-2xl border border-white/15 bg-black/85 px-4 pb-4 pt-5 text-xs text-white/80 backdrop-blur-[10px] md:px-6">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Company</p>
-            <p className="mt-2 text-sm font-semibold text-slate-900">{PROFORMA_LEEUKOPF_COMPANY}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Company</p>
+            <p className="mt-2 text-sm font-semibold text-white">{PROFORMA_LEEUKOPF_COMPANY}</p>
             <p className="mt-1">{PROFORMA_LEEUKOPF_ADDRESS}</p>
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Contact</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Contact</p>
             <p className="mt-2">Phone: {PROFORMA_LEEUKOPF_PHONE}</p>
             <p className="mt-1">Email: {PROFORMA_LEEUKOPF_EMAIL}</p>
             <p className="mt-1">Orders: {ORDER_INBOX_EMAIL}</p>
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Menu</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Menu</p>
             <div className="mt-2 space-y-1.5">
-              <NavLink to="/" className="block hover:text-slate-900">Home</NavLink>
-              <NavLink to="/pages/about-us" className="block hover:text-slate-900">About Us</NavLink>
-              <NavLink to="/full-catalogue" className="block hover:text-slate-900">Catalogue</NavLink>
-              <NavLink to="/distributor-packages" className="block hover:text-slate-900">Distributor Packages</NavLink>
-              <NavLink to="/become-distributor" className="block hover:text-slate-900">Become Distributor</NavLink>
-              <NavLink to="/pages/contact-us" className="block hover:text-slate-900">Contact Us</NavLink>
+              <NavLink to="/" className="block transition duration-300 hover:text-fuchsia-300">Home</NavLink>
+              <NavLink to="/pages/about-us" className="block transition duration-300 hover:text-fuchsia-300">About Us</NavLink>
+              <NavLink to="/full-catalogue" className="block transition duration-300 hover:text-fuchsia-300">Catalogue</NavLink>
+              <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distributor Packages</NavLink>
+              <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Become Distributor</NavLink>
+              <NavLink to="/pages/contact-us" className="block transition duration-300 hover:text-fuchsia-300">Contact Us</NavLink>
             </div>
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Legal</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Legal</p>
             <div className="mt-2 space-y-1.5">
-              <NavLink to="/privacy-policy" className="block hover:text-slate-900">Privacy Policy</NavLink>
-              <NavLink to="/cookie-policy" className="block hover:text-slate-900">Cookie Policy</NavLink>
-              <NavLink to="/terms-and-conditions" className="block hover:text-slate-900">Terms and Conditions</NavLink>
+              <NavLink to="/privacy-policy" className="block transition duration-300 hover:text-fuchsia-300">Privacy Policy</NavLink>
+              <NavLink to="/cookie-policy" className="block transition duration-300 hover:text-fuchsia-300">Cookie Policy</NavLink>
+              <NavLink to="/terms-and-conditions" className="block transition duration-300 hover:text-fuchsia-300">Terms and Conditions</NavLink>
             </div>
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Social</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Social</p>
             <div className="mt-2 space-y-2">
               {FOOTER_SOCIAL_LINKS.map((social) => (
                 <a
@@ -6806,20 +6882,20 @@ function App() {
                   href={social.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 hover:text-slate-900"
+                  className="flex items-center gap-2 transition duration-300 hover:text-fuchsia-300"
                 >
-                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-slate-300 text-slate-700">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-white/30 text-white/85">
                     <FooterSocialIcon platform={social.key} />
                   </span>
                   <span className="font-medium">{social.label}</span>
-                  <span className="text-slate-500">{social.handle}</span>
+                  <span className="text-white/55">{social.handle}</span>
                 </a>
               ))}
             </div>
           </div>
         </div>
 
-        <p className="border-t border-slate-200 pt-3 text-slate-500">© 2026 GEL.IT.UP by GIUP®</p>
+        <p className="border-t border-white/15 pt-3 text-white/55">© 2026 GEL.IT.UP by GIUP®</p>
       </footer>
 
       <MobileNav />
