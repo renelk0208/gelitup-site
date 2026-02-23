@@ -1180,6 +1180,12 @@ function isTechnicalSku(code) {
 
 function DistributorPackagesPage() {
   const [studioTab, setStudioTab] = useState('overview')
+  const [tierVisuals, setTierVisuals] = useState(() => ({
+    boutiqueFerrari: '/logo.png',
+    boutiqueBase: '/logo.png',
+    professional: '/logo.png',
+    authority: '/logo.png',
+  }))
   const studioMaintenanceEssentials = [
     'Superbond',
     '5-in-1 Base',
@@ -1204,43 +1210,50 @@ function DistributorPackagesPage() {
     'Studio buffers (high-frequency turnover packs)',
     'LED curing hardware (salon-grade lamps)',
   ]
-  const packageTiers = [
-    {
-      name: 'Silver (Boutique)',
-      badge: 'Starter Tier',
-      roi: 'Built for new salons focused on fast-turn maintenance services and repeat bookings from classic shades.',
-      value: 'Lowest opening inventory risk with high-frequency products that convert quickly and stabilize weekly cash flow.',
-      groups: [
-        { title: 'Maintenance Essentials', items: SILVER_MAINTENANCE_SKUS },
-        { title: 'Core 30 Classic Colors (Whites, Nudes, Reds)', items: SILVER_CORE_30_COLORS },
-      ],
-    },
-    {
-      name: 'Gold (Professional)',
-      badge: 'Growth Tier',
-      roi: 'Designed for salons ready to raise average ticket value with builder services and a wider color menu.',
-      value: 'Expands margin opportunities by adding structure services and trend-driven shades while keeping proven core sellers.',
-      groups: [
-        { title: 'Includes Silver Package', items: [...SILVER_MAINTENANCE_SKUS, ...SILVER_CORE_30_COLORS] },
-        { title: '3-in-1 Builder Gels (Pink / Cover)', items: GOLD_BUILDER_SKUS },
-        { title: 'Modern Aesthetic Colors (Additional 30, Total 60)', items: GOLD_MODERN_30_COLORS },
-      ],
-    },
-    {
-      name: 'Platinum (Elite)',
-      badge: 'Scale Tier',
-      roi: 'Best for high-volume salons and academies seeking full technical range and premium service differentiation.',
-      value: 'Maximizes service mix, premium pricing potential, and retention through complete systems plus advanced effects.',
-      groups: [
-        {
-          title: 'Includes Gold Package',
-          items: [...SILVER_MAINTENANCE_SKUS, ...SILVER_CORE_30_COLORS, ...GOLD_BUILDER_SKUS, ...GOLD_MODERN_30_COLORS],
-        },
-        { title: 'Complete Synthogel System', items: PLATINUM_SYNTHOGEL_SKUS },
-        { title: 'Special Effects Colors (Additional 60, Total 120)', items: PLATINUM_SPECIAL_EFFECTS_60 },
-      ],
-    },
-  ]
+
+  useEffect(() => {
+    let isMounted = true
+
+    const pickByTokens = (images = [], tokenGroups = [], fallback = '/logo.png') => {
+      for (const tokens of tokenGroups) {
+        const candidate = images.find((item) => {
+          const path = String(item?.localPath || '').toLowerCase()
+          return tokens.every((token) => path.includes(token))
+        })
+        if (candidate?.localPath) return candidate.localPath
+      }
+      return images[0]?.localPath || fallback
+    }
+
+    const loadTierVisuals = async () => {
+      try {
+        const response = await fetch('/gelitup-media/manifest.json')
+        if (!response.ok) return
+
+        const payload = await response.json()
+        if (!isMounted || !Array.isArray(payload?.items)) return
+
+        const images = payload.items.filter((item) => item?.mediaType === 'image' && item?.localPath)
+        const nextTierVisuals = {
+          boutiqueFerrari: pickByTokens(images, [['2316'], ['ferrari'], ['red']], '/logo.png'),
+          boutiqueBase: pickByTokens(images, [['5in1'], ['base'], ['superior', 'base']], '/logo.png'),
+          professional: pickByTokens(images, [['color', 'palette'], ['collection'], ['swatch']], '/logo.png'),
+          authority: pickByTokens(images, [['spectrum'], ['grid'], ['collection']], '/logo.png'),
+        }
+
+        setTierVisuals(nextTierVisuals)
+      }
+      catch {
+        if (!isMounted) return
+      }
+    }
+
+    void loadTierVisuals()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   return (
     <section className="space-y-5">
@@ -1254,6 +1267,73 @@ function DistributorPackagesPage() {
           Quick View: The Collection
         </NavLink>
       </div>
+
+      <section className="rounded-2xl border border-[#1A1A1A]/15 bg-[#FFFFFF] p-4 sm:p-6">
+        <h2
+          className="text-2xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A]"
+          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
+        >
+          BOUTIQUE: THE FOUNDATION.
+        </h2>
+        <p className="mt-2 text-sm font-medium text-[#1A1A1A] sm:text-base">
+          Perfect for localized salon supply. This tier focuses on high-frequency maintenance essentials and the top-selling 30 shades to ensure rapid ROI.
+        </p>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <img src={tierVisuals.boutiqueFerrari} alt="Ferrari Red 2316 macro studio visual" className="h-56 w-full rounded-2xl border border-[#1A1A1A]/20 object-cover sm:h-64" loading="lazy" />
+          <img src={tierVisuals.boutiqueBase} alt="5-in-1 Base coat macro technical visual" className="h-56 w-full rounded-2xl border border-[#1A1A1A]/20 object-cover sm:h-64" loading="lazy" />
+        </div>
+
+        <div className="mt-4 text-center">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]">
+            REQUEST TIER PRICING
+          </NavLink>
+        </div>
+      </section>
+
+      <section className="rounded-2xl bg-[#1A1A1A] p-4 sm:p-6">
+        <h2
+          className="text-2xl font-extrabold uppercase tracking-[0.12em] text-[#FFFFFF]"
+          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
+        >
+          PROFESSIONAL: THE EXPANDED SPECTRUM.
+        </h2>
+        <p className="mt-2 text-sm font-medium text-white sm:text-base">
+          Designed for distributors ready to scale. Includes a curated selection of our most popular seasonal collections and specialized builder systems.
+        </p>
+
+        <div className="mt-4 overflow-hidden rounded-2xl border border-white/15">
+          <img src={tierVisuals.professional} alt="Professional tier dynamic color palette composition" className="h-64 w-full object-cover sm:h-72" loading="lazy" />
+        </div>
+
+        <div className="mt-4 text-center">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]">
+            REQUEST TIER PRICING
+          </NavLink>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-[#1A1A1A]/15 bg-[#FFFFFF] p-4 sm:p-6">
+        <h2
+          className="text-2xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A]"
+          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
+        >
+          AUTHORITY: THE FULL MASTER COLLECTION.
+        </h2>
+        <p className="mt-2 text-sm font-medium text-[#1A1A1A] sm:text-base">
+          For the market leader. Access the complete 761+ shade spectrum, all HEMA/TPO-free formulations, and exclusive regional marketing support.
+        </p>
+
+        <div className="mt-4 overflow-hidden rounded-2xl border border-[#1A1A1A]/20">
+          <img src={tierVisuals.authority} alt="Authority tier cinematic infinity grid collection visual" className="h-64 w-full object-cover sm:h-80" loading="lazy" />
+        </div>
+
+        <div className="mt-4 text-center">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]">
+            REQUEST TIER PRICING
+          </NavLink>
+        </div>
+      </section>
 
       <section className="rounded-2xl border border-[#1A1A1A]/15 bg-[#FFFFFF] p-4 sm:p-6">
         <div className="rounded-2xl bg-[#1A1A1A] p-4 text-white sm:p-6">
