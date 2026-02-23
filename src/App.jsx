@@ -1318,125 +1318,13 @@ function DistributorPackagesPage() {
         </NavLink>
       </div>
 
-      <section className="rounded-2xl border border-[#1A1A1A]/15 bg-[#FFFFFF] p-4 sm:p-6">
-        <h2
-          className="text-2xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A]"
-          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
-        >
-          BOUTIQUE: THE FOUNDATION.
-        </h2>
-        <p className="mt-2 text-sm font-medium text-[#1A1A1A] sm:text-base">
-          Perfect for localized salon supply. This tier focuses on high-frequency maintenance essentials and the top-selling 30 shades to ensure rapid ROI.
-        </p>
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <img src={tierVisuals.boutiqueFerrari} alt="Ferrari Red 2316 macro studio visual" className="h-56 w-full rounded-2xl border border-[#1A1A1A]/20 object-cover sm:h-64" loading="lazy" />
-          <img src={tierVisuals.boutiqueBase} alt="5-in-1 Base coat macro technical visual" className="h-56 w-full rounded-2xl border border-[#1A1A1A]/20 object-cover sm:h-64" loading="lazy" />
-        </div>
-
-        <div className="mt-4 text-center">
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]">
-            REQUEST TIER PRICING
-          </NavLink>
-        </div>
-      </section>
-
-      <section className="rounded-2xl bg-[#1A1A1A] p-4 sm:p-6">
-        <h2
-          className="text-2xl font-extrabold uppercase tracking-[0.12em] text-[#FFFFFF]"
-          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
-        >
-          PROFESSIONAL: THE EXPANDED SPECTRUM.
-        </h2>
-        <p className="mt-2 text-sm font-medium text-white sm:text-base">
-          Designed for distributors ready to scale. Includes a curated selection of our most popular seasonal collections and specialized builder systems.
-        </p>
-
-        <div className="mt-4 overflow-hidden rounded-2xl border border-white/15">
-          <img src={tierVisuals.professional} alt="Professional tier dynamic color palette composition" className="h-64 w-full object-cover sm:h-72" loading="lazy" />
-        </div>
-
-        <div className="mt-4 text-center">
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]">
-            REQUEST TIER PRICING
-          </NavLink>
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-[#1A1A1A]/15 bg-[#FFFFFF] p-4 sm:p-6">
-        <h2
-          className="text-2xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A]"
-          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
-        >
-          AUTHORITY: THE FULL MASTER COLLECTION.
-        </h2>
-        <p className="mt-2 text-sm font-medium text-[#1A1A1A] sm:text-base">
-          For the market leader. Access the complete 761+ shade spectrum, all HEMA/TPO-free formulations, and exclusive regional marketing support.
-        </p>
-
-        <div className="mt-4 overflow-hidden rounded-2xl border border-[#1A1A1A]/20">
-          <img src={tierVisuals.authority} alt="Authority tier cinematic infinity grid collection visual" className="h-64 w-full object-cover sm:h-80" loading="lazy" />
-        </div>
-
-        <div className="mt-4 text-center">
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]">
-            REQUEST TIER PRICING
-          </NavLink>
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-[#4A4A4A] bg-white p-4 sm:p-6">
-        <h2
-          className="text-2xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A]"
-          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
-        >
-          Tier Comparison
-        </h2>
-        <div className="mt-5 overflow-x-auto">
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="bg-[#1A1A1A]">
-                <th className="border border-[#4A4A4A] px-4 py-3 text-left font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Attribute</th>
-                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Boutique (Silver)</th>
-                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Professional (Gold)</th>
-                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Authority (Platinum)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { feature: 'Market Focus', boutique: 'Localized Studio Supply', professional: 'Regional Salon Networks', authority: 'Total Territory Dominance' },
-                { feature: 'Product Spectrum', boutique: 'Top 30 Core Shades', professional: '150+ Curated Trends', authority: 'Full 800+ Shade Portfolio' },
-                { feature: 'Support Package', boutique: 'Digital Brand Assets', professional: 'Branded Salon Displays', authority: 'Exclusive Event Support' },
-                { feature: 'Standard: HEMA-Free', boutique: '✓ Certified', professional: '✓ Certified', authority: '✓ Certified' },
-                { feature: 'Standard: TPO-Free', boutique: '✓ Certified', professional: '✓ Certified', authority: '✓ Certified' },
-              ].map((row, index) => (
-                <tr key={row.feature} className={`border border-[#4A4A4A] ${index % 2 === 0 ? 'bg-[#E8E8E8]' : 'bg-white'}`}>
-                  <td className="px-4 py-3 font-semibold text-[#1A1A1A]">{row.feature}</td>
-                  <td className="px-4 py-3 text-center text-[#1A1A1A]">{row.boutique}</td>
-                  <td className="px-4 py-3 text-center text-[#1A1A1A]">{row.professional}</td>
-                  <td className="px-4 py-3 text-center text-[#1A1A1A]">{row.authority}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-6 flex justify-center">
-          <NavLink
-            to="/become-distributor"
-            className="inline-flex rounded-lg bg-[#D43790] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]"
-          >
-            INQUIRE ABOUT REGIONAL PARTNERSHIPS
-          </NavLink>
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-[#1A1A1A]/15 bg-[#FFFFFF] p-4 sm:p-6">
+      <section className="rounded-2xl border border-[#4A4A4A]/30 bg-[#E8E8E8] p-4 sm:p-6">
         <div className="rounded-2xl bg-[#1A1A1A] p-4 text-white sm:p-6">
           <h2
             className="text-xl font-extrabold uppercase tracking-[0.12em] text-[#FFFFFF] sm:text-2xl"
             style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
           >
-            SALON READY: THE STUDIO ELITE WORKFLOW
+            STUDIO ELITE: THE BEGINNER FOUNDATION
           </h2>
           <p className="mt-2 text-sm text-white/90 sm:text-base">
             Curated for high-traffic studios. A complete 360° system for the professional technician.
@@ -1514,6 +1402,118 @@ function DistributorPackagesPage() {
               EQUIP MY STUDIO
             </NavLink>
           </div>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-[#1A1A1A]/15 bg-[#FFFFFF] p-4 sm:p-6">
+        <h2
+          className="text-2xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A]"
+          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
+        >
+          BOUTIQUE: THE FOUNDATION.
+        </h2>
+        <p className="mt-2 text-sm font-medium text-[#1A1A1A] sm:text-base">
+          Perfect for localized salon supply. This tier focuses on high-frequency maintenance essentials and the top-selling 30 shades to ensure rapid ROI.
+        </p>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <img src={tierVisuals.boutiqueFerrari} alt="Ferrari Red 2316 macro studio visual" className="h-56 w-full rounded-2xl border border-[#1A1A1A]/20 object-cover sm:h-64" loading="lazy" />
+          <img src={tierVisuals.boutiqueBase} alt="5-in-1 Base coat macro technical visual" className="h-56 w-full rounded-2xl border border-[#1A1A1A]/20 object-cover sm:h-64" loading="lazy" />
+        </div>
+
+        <div className="mt-4 text-center">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]">
+            REQUEST TIER PRICING
+          </NavLink>
+        </div>
+      </section>
+
+      <section className="rounded-2xl bg-[#1A1A1A] p-4 sm:p-6">
+        <h2
+          className="text-2xl font-extrabold uppercase tracking-[0.12em] text-[#FFFFFF]"
+          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
+        >
+          PROFESSIONAL: THE EXPANDED SPECTRUM.
+        </h2>
+        <p className="mt-2 text-sm font-medium text-white sm:text-base">
+          Designed for distributors ready to scale. Includes a curated selection of our most popular seasonal collections and specialized builder systems.
+        </p>
+
+        <div className="mt-4 overflow-hidden rounded-2xl border border-white/15">
+          <img src={tierVisuals.professional} alt="Professional tier dynamic color palette composition" className="h-64 w-full object-cover sm:h-72" loading="lazy" />
+        </div>
+
+        <div className="mt-4 text-center">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]">
+            REQUEST TIER PRICING
+          </NavLink>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-[#1A1A1A]/15 bg-[#F5F5F5] p-4 sm:p-6">
+        <h2
+          className="text-2xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A]"
+          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
+        >
+          AUTHORITY: THE FULL MASTER COLLECTION.
+        </h2>
+        <p className="mt-2 text-sm font-medium text-[#1A1A1A] sm:text-base">
+          For the market leader. Access the complete 761+ shade spectrum, all HEMA/TPO-free formulations, and exclusive regional marketing support.
+        </p>
+
+        <div className="mt-4 overflow-hidden rounded-2xl border border-[#1A1A1A]/20">
+          <img src={tierVisuals.authority} alt="Authority tier cinematic infinity grid collection visual" className="h-64 w-full object-cover sm:h-80" loading="lazy" />
+        </div>
+
+        <div className="mt-4 text-center">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]">
+            REQUEST TIER PRICING
+          </NavLink>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-[#4A4A4A] bg-white p-4 sm:p-6">
+        <h2
+          className="text-2xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A]"
+          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
+        >
+          Tier Comparison
+        </h2>
+        <div className="mt-5 overflow-x-auto">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="bg-[#1A1A1A]">
+                <th className="border border-[#4A4A4A] px-4 py-3 text-left font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Attribute</th>
+                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Boutique (Silver)</th>
+                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Professional (Gold)</th>
+                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Authority (Platinum)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { feature: 'Market Focus', boutique: 'Localized Studio Supply', professional: 'Regional Salon Networks', authority: 'Total Territory Dominance' },
+                { feature: 'Product Spectrum', boutique: 'Top 30 Core Shades', professional: '150+ Curated Trends', authority: 'Full 800+ Shade Portfolio' },
+                { feature: 'Support Package', boutique: 'Digital Brand Assets', professional: 'Branded Salon Displays', authority: 'Exclusive Event Support' },
+                { feature: 'Standard: HEMA-Free', boutique: '✓ Certified', professional: '✓ Certified', authority: '✓ Certified' },
+                { feature: 'Standard: TPO-Free', boutique: '✓ Certified', professional: '✓ Certified', authority: '✓ Certified' },
+              ].map((row, index) => (
+                <tr key={row.feature} className={`border border-[#4A4A4A] ${index % 2 === 0 ? 'bg-[#E8E8E8]' : 'bg-white'}`}>
+                  <td className="px-4 py-3 font-semibold text-[#1A1A1A]">{row.feature}</td>
+                  <td className="px-4 py-3 text-center text-[#1A1A1A]">{row.boutique}</td>
+                  <td className="px-4 py-3 text-center text-[#1A1A1A]">{row.professional}</td>
+                  <td className="px-4 py-3 text-center text-[#1A1A1A]">{row.authority}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-6 flex justify-center">
+          <NavLink
+            to="/become-distributor"
+            className="inline-flex rounded-lg bg-[#D43790] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]"
+          >
+            INQUIRE ABOUT REGIONAL PARTNERSHIPS
+          </NavLink>
         </div>
       </section>
 
