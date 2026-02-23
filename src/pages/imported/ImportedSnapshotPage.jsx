@@ -23,6 +23,7 @@ function chunkBySize(items = [], size = 2) {
 export default function ImportedSnapshotPage({ slug, editorFile }) {
   const [snapshotPages, setSnapshotPages] = useState([])
   const [customPagesBySlug, setCustomPagesBySlug] = useState({})
+  const [mediaItems, setMediaItems] = useState([])
   const [mediaBySourceUrl, setMediaBySourceUrl] = useState({})
   const [sourceMode, setSourceMode] = useState('snapshot')
   const [isLoading, setIsLoading] = useState(true)
@@ -53,6 +54,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
         if (!isMounted) return
 
         setSnapshotPages(Array.isArray(snapshotPayload?.pages) ? snapshotPayload.pages : [])
+        setMediaItems(Array.isArray(mediaPayload?.items) ? mediaPayload.items : [])
 
         const customMap = {}
         for (const page of customPayload?.pages || []) {
@@ -129,6 +131,36 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
       displayUrl: mediaBySourceUrl[sourceUrl] || sourceUrl,
     }))
   }, [activePage, mediaBySourceUrl])
+
+  const instagramTiles = useMemo(() => {
+    const refs = Array.isArray(activePage?.mediaRefs) ? activePage.mediaRefs : []
+    const referenceSet = new Set(refs)
+
+    const fromPageRefs = mediaItems.filter((item) => referenceSet.has(item?.sourceUrl))
+    const sourcePool = [...fromPageRefs, ...mediaItems]
+
+    const deduped = []
+    const seen = new Set()
+
+    for (const item of sourcePool) {
+      const sourceUrl = String(item?.sourceUrl || '').trim()
+      if (!sourceUrl || seen.has(sourceUrl)) continue
+      if (!/instagram\.com/i.test(sourceUrl)) continue
+
+      const displayUrl = String(item?.localPath || mediaBySourceUrl[sourceUrl] || sourceUrl).trim()
+      if (!displayUrl) continue
+
+      seen.add(sourceUrl)
+      deduped.push({
+        sourceUrl,
+        displayUrl,
+      })
+
+      if (deduped.length >= 9) break
+    }
+
+    return deduped
+  }, [activePage?.mediaRefs, mediaBySourceUrl, mediaItems])
 
   const structuredContent = useMemo(() => {
     if (!activePage) {
@@ -225,7 +257,6 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
   }
 
   if (isAboutUsManifesto) {
-    const socialTiles = Array.from({ length: 9 }, (_, index) => previewMedia[index] || null)
     const visualIsVideo = Boolean(
       manifestoVisual
       && (manifestoVisual.displayUrl.toLowerCase().includes('.mp4') || manifestoVisual.displayUrl.toLowerCase().includes('.webm')),
@@ -287,14 +318,14 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           <p className="mt-2 text-sm font-medium text-[#1A1A1A]">Real salon outputs that prove market demand for distributors.</p>
 
           <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
-            {socialTiles.map((tile, index) => {
+            {instagramTiles.map((tile, index) => {
               const isVideo = Boolean(tile && (tile.displayUrl.toLowerCase().includes('.mp4') || tile.displayUrl.toLowerCase().includes('.webm')))
-              const tileUrl = tile?.displayUrl || '/logo.png'
+              const tileUrl = tile?.displayUrl
 
               return (
                 <a
                   key={`social-tile-${index}`}
-                  href={INSTAGRAM_URL}
+                  href={tile.sourceUrl || INSTAGRAM_URL}
                   target="_blank"
                   rel="noreferrer"
                   className="group relative overflow-hidden rounded-2xl border border-[#4A4A4A]/20 bg-white shadow-[0_10px_24px_rgba(26,26,26,0.08)] transition duration-300 hover:-translate-y-0.5 hover:border-fuchsia-400/60 hover:shadow-[0_12px_28px_rgba(212,55,144,0.14)]"
@@ -311,6 +342,20 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                 </a>
               )
             })}
+
+            {instagramTiles.length === 0 && (
+              <div className="col-span-3 rounded-2xl border border-[#E8E8E8] bg-[#FAFAFA] px-4 py-5 text-center">
+                <p className="text-sm font-medium text-[#1A1A1A]">Instagram feed coming soon.</p>
+                <a
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-3 inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]"
+                >
+                  View Instagram
+                </a>
+              </div>
+            )}
           </div>
         </div>
 
