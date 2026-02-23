@@ -1179,6 +1179,31 @@ function isTechnicalSku(code) {
 }
 
 function DistributorPackagesPage() {
+  const [studioTab, setStudioTab] = useState('overview')
+  const studioMaintenanceEssentials = [
+    'Superbond',
+    '5-in-1 Base',
+    'Non-Wipe Top',
+    'Satin Matte',
+    '3-in-1 Builder',
+  ]
+  const studioCoreColors = [
+    'Ferrari Red (2316)',
+    'Marsh Mallow',
+    'Milkyway',
+    'Coco Nude',
+    'Rose Beige',
+    'Soft Almond',
+    'Classic Blush',
+    'Deep Berry',
+    'Cool Mauve',
+    'French Porcelain',
+  ]
+  const studioExpansionItems = [
+    'Professional nail files (180/240 grit)',
+    'Studio buffers (high-frequency turnover packs)',
+    'LED curing hardware (salon-grade lamps)',
+  ]
   const packageTiers = [
     {
       name: 'Silver (Boutique)',
@@ -1219,7 +1244,7 @@ function DistributorPackagesPage() {
 
   return (
     <section className="space-y-5">
-      <div className="rounded-2xl bg-gradient-to-br from-[#1A1A1A] to-[#4A4A4A] p-5 text-white sm:p-8">
+      <div className="rounded-2xl bg-[#1A1A1A] p-5 text-white sm:p-8">
         <p className="text-xs uppercase tracking-[0.16em] text-white/80">B2B Merchandising</p>
         <h1 className="heading-on-dark mt-2 text-2xl font-extrabold sm:text-4xl">Distributor Packages</h1>
         <p className="mt-3 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] text-white/95 sm:text-base">
@@ -1229,6 +1254,93 @@ function DistributorPackagesPage() {
           Quick View: The Collection
         </NavLink>
       </div>
+
+      <section className="rounded-2xl border border-[#1A1A1A]/15 bg-[#FFFFFF] p-4 sm:p-6">
+        <div className="rounded-2xl bg-[#1A1A1A] p-4 text-white sm:p-6">
+          <h2
+            className="text-xl font-extrabold uppercase tracking-[0.12em] text-[#FFFFFF] sm:text-2xl"
+            style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
+          >
+            SALON READY: THE STUDIO ELITE WORKFLOW
+          </h2>
+          <p className="mt-2 text-sm text-white/90 sm:text-base">
+            Curated for high-traffic studios. A complete 360° system for the professional technician.
+          </p>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <article className="rounded-2xl border border-white/15 bg-black/20 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">The System</p>
+              <h3 className="mt-1 text-base font-semibold uppercase tracking-[0.06em] text-white">Foundation Layer</h3>
+              <ul className="mt-3 space-y-1 text-sm text-white/90">
+                {studioMaintenanceEssentials.map((item) => (
+                  <li key={item}>• {item}</li>
+                ))}
+              </ul>
+            </article>
+
+            <article className="rounded-2xl border border-white/15 bg-black/20 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">The Palette</p>
+              <h3 className="mt-1 text-base font-semibold uppercase tracking-[0.06em] text-white">Service Spectrum</h3>
+              <ul className="mt-3 grid gap-1 text-sm text-white/90 sm:grid-cols-2">
+                {studioCoreColors.map((item) => (
+                  <li key={item} className={item.includes('Ferrari Red (2316)') ? 'font-semibold text-white' : ''}>• {item}</li>
+                ))}
+              </ul>
+            </article>
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-white/15 bg-black/20 p-3 sm:p-4">
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setStudioTab('overview')}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition duration-300 ${studioTab === 'overview' ? 'bg-[#D43790] text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
+              >
+                Workflow Overview
+              </button>
+              <button
+                type="button"
+                onClick={() => setStudioTab('specs')}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition duration-300 ${studioTab === 'specs' ? 'bg-[#D43790] text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
+              >
+                Technical Specs
+              </button>
+            </div>
+
+            {studioTab === 'specs'
+              ? (
+                <div className="mt-3 rounded-xl border border-white/15 bg-[#1A1A1A] p-3 text-sm text-white/90">
+                  <p>• HEMA-Free: Confirmed for current production workflow.</p>
+                  <p className="mt-1">• TPO-Free: Confirmed for studio-safe professional use.</p>
+                  <p className="mt-1">• CPNP Notification: Registered and compliant for EU market operations.</p>
+                </div>
+                )
+              : (
+                <div className="mt-3 rounded-xl border border-white/15 bg-[#1A1A1A] p-3 text-sm text-white/90">
+                  Designed for workflow speed: prep-to-finish consistency, high-pigment performance, and service-repeat reliability under studio pressure.
+                </div>
+                )}
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-white/15 bg-black/20 p-4">
+            <h3 className="text-sm font-semibold uppercase tracking-[0.1em] text-[#D43790]">Studio Expansion</h3>
+            <ul className="mt-2 space-y-1 text-sm text-white/90">
+              {studioExpansionItems.map((item) => (
+                <li key={item}>• {item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mt-5 flex justify-center">
+            <NavLink
+              to="/become-distributor"
+              className="inline-flex rounded-lg bg-[#D43790] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]"
+            >
+              EQUIP MY STUDIO
+            </NavLink>
+          </div>
+        </div>
+      </section>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {HERO_PRODUCT_COPY.map((product) => (
