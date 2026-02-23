@@ -1854,11 +1854,7 @@ function FullCataloguePage() {
   const [activeSubcategory, setActiveSubcategory] = useState('')
   const [activeColorFamily, setActiveColorFamily] = useState('ALL')
   const [searchQuery, setSearchQuery] = useState('')
-  const [bulkMode, setBulkMode] = useState(false)
   const [heroCandidateIndexByCategory, setHeroCandidateIndexByCategory] = useState({})
-  const [itemQuantities, setItemQuantities] = useState({})
-  const [quickCart, setQuickCart] = useState({})
-  const [pulseItemKey, setPulseItemKey] = useState('')
   const [gridColumns, setGridColumns] = useState(5)
   const [scrollTop, setScrollTop] = useState(0)
   const [viewportHeight, setViewportHeight] = useState(720)
@@ -1972,10 +1968,6 @@ function FullCataloguePage() {
   useEffect(() => {
     const updateLayout = () => {
       const width = window.innerWidth
-      if (bulkMode) {
-        setGridColumns(1)
-        return
-      }
       if (width >= 1280) {
         setGridColumns(5)
         return
@@ -1994,7 +1986,7 @@ function FullCataloguePage() {
     updateLayout()
     window.addEventListener('resize', updateLayout)
     return () => window.removeEventListener('resize', updateLayout)
-  }, [bulkMode])
+  }, [])
 
   useEffect(() => {
     const node = virtualContainerRef.current
@@ -2119,16 +2111,6 @@ function FullCataloguePage() {
           <div className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5">
             <div className="flex items-center justify-between gap-3">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/55">Category Tiles</p>
-              <label className="inline-flex items-center gap-2 text-xs text-black/70">
-                <span>Quick Order</span>
-                <button
-                  onClick={() => setBulkMode((current) => !current)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition duration-300 ${bulkMode ? 'bg-fuchsia-600' : 'bg-black/20'}`}
-                  aria-label="Toggle bulk mode"
-                >
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${bulkMode ? 'translate-x-6' : 'translate-x-1'}`} />
-                </button>
-              </label>
             </div>
 
             <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -2181,16 +2163,14 @@ function FullCataloguePage() {
                 <h2 className="text-lg font-black uppercase tracking-[0.05em] text-black">{activeSection?.category || 'The Collection'}</h2>
                 <p className="mt-1 text-xs text-black/55">{filteredItems.length} matching items</p>
               </div>
-              <div className="rounded-[12px] border border-[#4A4A4A]/30 bg-white px-3 py-2 text-xs text-black/70">
-                Quick Basket: {quickCartUnits} units
-              </div>
-            </div>
-
-            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
-              <div
-                className="h-full rounded-full bg-fuchsia-600 transition-all duration-300"
-                style={{ width: `${quickProgress}%` }}
-              />
+              <a 
+                href="https://portal.gelitup.com" 
+                target="_blank" 
+                rel="noreferrer"
+                className="inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-[#BF3182]"
+              >
+                Purchase on B2B Portal
+              </a>
             </div>
 
             <div className="mt-3 flex flex-wrap gap-2">
@@ -2257,33 +2237,11 @@ function FullCataloguePage() {
                   <div style={{ height: topSpacerHeight }} />
 
                   <div
-                    className={`grid gap-3 p-2 sm:p-3 ${bulkMode ? 'grid-cols-1' : ''}`}
-                    style={bulkMode ? undefined : { gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))` }}
+                    className="grid gap-3 p-2 sm:p-3"
+                    style={{ gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))` }}
                   >
                     {virtualItems.map(({ item, itemIndex }) => {
-                      const itemKey = item.imageUrl
-                      const qty = getQty(itemKey)
-                      const hasChangedQty = qty > 1
                       const itemCode = extractProductCode(item.name)
-
-                      if (bulkMode) {
-                        return (
-                          <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 rounded-[12px] border border-[#4A4A4A]/30 bg-[#E8E8E8] px-3 py-2 transition duration-300 hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_1px_rgba(212,55,144,0.26)]">
-                            <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-black/10 bg-white object-contain" loading="lazy" />
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                              <p className="truncate text-[11px] font-light text-black/55">{itemCode}</p>
-                              {silverFreeGuarantee && (
-                                <p className="truncate text-[10px] font-semibold uppercase tracking-[0.06em] text-fuchsia-600">HEMA-FREE | TPO-FREE | CI 77820-FREE</p>
-                              )}
-                            </div>
-                            <button onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>−</button>
-                            <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className={`h-7 w-10 rounded-[10px] border text-center text-xs ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/20 text-black/70'}`} />
-                            <button onClick={() => updateQty(itemKey, qty + 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>+</button>
-                            <button onClick={() => addQuickItem(itemKey)} className={`rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition duration-300 ${pulseItemKey === itemKey ? 'lux-pulse bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`}>Add</button>
-                          </div>
-                        )
-                      }
 
                       return (
                         <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 hover:scale-[1.05] hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`}>
@@ -2299,12 +2257,6 @@ function FullCataloguePage() {
                             <div className="mt-2 flex items-center gap-1">
                               <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
                               <p className="truncate text-[11px] font-light text-black/55">{item.subcategory}</p>
-                            </div>
-                            <div className="mt-2 flex items-center gap-1">
-                              <button onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>−</button>
-                              <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className={`h-7 w-10 rounded-[10px] border text-center text-xs ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/20 text-black/70'}`} />
-                              <button onClick={() => updateQty(itemKey, qty + 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>+</button>
-                              <button onClick={() => addQuickItem(itemKey)} className={`ml-auto rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition duration-300 ${pulseItemKey === itemKey ? 'lux-pulse bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`}>Add</button>
                             </div>
                           </div>
                         </article>
