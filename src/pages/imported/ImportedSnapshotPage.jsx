@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 
+const INSTAGRAM_URL = 'https://www.instagram.com/gelitup_official/'
+
 function SnapshotCard({ title, children }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -284,7 +286,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           <h2 className="text-2xl font-extrabold uppercase tracking-[0.15em] text-[#1A1A1A] sm:text-3xl">GEL.IT.UP by GIUP® IN THE WILD.</h2>
           <p className="mt-2 text-sm font-medium text-[#1A1A1A]">Real salon outputs that prove market demand for distributors.</p>
 
-          <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
             {socialTiles.map((tile, index) => {
               const isVideo = Boolean(tile && (tile.displayUrl.toLowerCase().includes('.mp4') || tile.displayUrl.toLowerCase().includes('.webm')))
               const tileUrl = tile?.displayUrl || '/logo.png'
@@ -295,16 +297,17 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                   href={INSTAGRAM_URL}
                   target="_blank"
                   rel="noreferrer"
-                  className="group relative overflow-hidden rounded-lg border border-[#E8E8E8] bg-[#E8E8E8]"
+                  className="group relative overflow-hidden rounded-2xl border border-[#4A4A4A]/20 bg-white shadow-[0_10px_24px_rgba(26,26,26,0.08)] transition duration-300 hover:-translate-y-0.5 hover:border-fuchsia-400/60 hover:shadow-[0_12px_28px_rgba(212,55,144,0.14)]"
                   aria-label="Open GEL.IT.UP by GIUP® Instagram"
                 >
                   {isVideo
                     ? (
-                      <video src={tileUrl} className="h-24 w-full object-cover sm:h-32" muted playsInline autoPlay loop controls={false} />
+                      <video src={tileUrl} className="h-24 w-full object-cover sm:h-32 lg:h-40 xl:h-44" muted playsInline autoPlay loop controls={false} />
                       )
                     : (
-                      <img src={tileUrl} alt="GEL.IT.UP by GIUP® salon result" className="h-24 w-full object-cover sm:h-32" loading="lazy" />
+                      <img src={tileUrl} alt="GEL.IT.UP by GIUP® salon result" className="h-24 w-full object-cover sm:h-32 lg:h-40 xl:h-44" loading="lazy" />
                       )}
+                  <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-white/35" aria-hidden="true" />
                 </a>
               )
             })}

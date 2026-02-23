@@ -1584,6 +1584,7 @@ function FullCataloguePage() {
   const [errorMessage, setErrorMessage] = useState('')
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
   const virtualContainerRef = useRef(null)
+  const categoryPanelRef = useRef(null)
 
   useEffect(() => {
     let mounted = true
@@ -1798,6 +1799,16 @@ function FullCataloguePage() {
     return ''
   }, [])
 
+  const handleCategorySelect = useCallback((category, firstSubcategory) => {
+    setActiveCategory(category)
+    setActiveSubcategory(firstSubcategory || '')
+    setActiveColorFamily('ALL')
+
+    window.requestAnimationFrame(() => {
+      categoryPanelRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' })
+    })
+  }, [])
+
   return (
     <section className="space-y-5">
       <div className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-5 sm:p-6">
@@ -1852,11 +1863,7 @@ function FullCataloguePage() {
                 return (
                   <button
                     key={section.category}
-                    onClick={() => {
-                      setActiveCategory(section.category)
-                      setActiveSubcategory(section.subcategories?.[0]?.name || '')
-                      setActiveColorFamily('ALL')
-                    }}
+                    onClick={() => handleCategorySelect(section.category, section.subcategories?.[0]?.name || '')}
                     className={`group relative overflow-hidden rounded-[12px] border bg-[#E8E8E8] text-left transition duration-300 hover:scale-[1.02] hover:border-fuchsia-500/70 hover:shadow-[0_0_0_2px_rgba(217,70,239,0.28)] ${isColorsTile ? 'h-[280px] sm:col-span-2 sm:h-[350px] lg:h-[360px] xl:row-span-2 xl:h-[100%]' : 'h-[190px] sm:h-[210px]'} ${isActiveCategory ? 'border-fuchsia-600 shadow-[0_0_0_1px_rgba(217,70,239,0.35)]' : 'border-[#4A4A4A]'}`}
                   >
                     <img
@@ -1885,7 +1892,7 @@ function FullCataloguePage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5">
+          <div ref={categoryPanelRef} className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-black uppercase tracking-[0.05em] text-black">{activeSection?.category || 'The Collection'}</h2>
@@ -1910,7 +1917,7 @@ function FullCataloguePage() {
                   <button
                     key={`subcategory-${subcategory}`}
                     onClick={() => setActiveSubcategory(subcategory)}
-                    className={`rounded-[12px] border px-3 py-1.5 text-xs font-semibold transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-[#4A4A4A]/35 bg-white text-black/75 hover:border-fuchsia-500'}`}
+                    className={`rounded-[12px] border px-3 py-1.5 text-xs font-semibold transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-fuchsia-300 bg-fuchsia-50 text-fuchsia-700 hover:border-fuchsia-500 hover:bg-fuchsia-100'}`}
                   >
                     {subcategory}
                   </button>
@@ -2126,6 +2133,41 @@ function ScrollToTopOnRouteChange() {
   }, [location.pathname])
 
   return null
+}
+
+function RouteUtilityButtons() {
+  const navigate = useNavigate()
+
+  const handleGoBack = useCallback(() => {
+    if (window.history.length > 1) {
+      navigate(-1)
+      return
+    }
+    navigate('/')
+  }, [navigate])
+
+  const handleBackToTop = useCallback(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
+  }, [])
+
+  return (
+    <div className="fixed bottom-20 right-3 z-40 flex flex-col gap-2 md:bottom-6 md:right-6">
+      <button
+        type="button"
+        onClick={handleGoBack}
+        className="rounded-lg border border-white/25 bg-black/85 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:border-fuchsia-400 hover:text-fuchsia-200"
+      >
+        Back
+      </button>
+      <button
+        type="button"
+        onClick={handleBackToTop}
+        className="rounded-lg border border-white/25 bg-black/85 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:border-fuchsia-400 hover:text-fuchsia-200"
+      >
+        Top
+      </button>
+    </div>
+  )
 }
 
 function LegacyMirrorPage({ pagePath }) {
@@ -7416,6 +7458,7 @@ function App() {
         <p className="border-t border-white/15 pt-3 text-white/55">© 2026 GEL.IT.UP by GIUP®</p>
       </footer>
 
+      <RouteUtilityButtons />
       <MobileNav />
       <PWABadge />
     </div>
