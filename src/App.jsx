@@ -74,7 +74,7 @@ const DISTRIBUTOR_DIRECTORY = VERIFIED_DISTRIBUTOR_COUNTRIES.map((country) => {
 })
 const SILVER_FREE_GUARANTEE_BADGE = 'Silver-Free Guarantee'
 const CI77820_MAIN_STATEMENT = 'All Gelitup products manufactured from December 2025 onwards are 100% CI 77820 (Silver) FREE.'
-const CI77820_TRANSPARENCY_NOTE = 'Legacy stock (pre-Dec 2025) may contain traces (<0.2%) in full compliance with original EC 1223/2009 standards. All current batches have transitioned to Aluminium and Mica-based pigments.'
+const CI77820_TRANSPARENCY_NOTE = 'All current batches have transitioned to Aluminium and Mica-based pigments.'
 const FOOTER_SOCIAL_LINKS = [
   { key: 'tiktok', label: 'TikTok', handle: TIKTOK_HANDLE, href: TIKTOK_URL },
   { key: 'instagram', label: 'Instagram', handle: INSTAGRAM_HANDLE, href: INSTAGRAM_URL },
@@ -2220,7 +2220,7 @@ function BaselinePageView() {
   )
 }
 
-function HomePage({ onOpenRegulatoryStatement = () => {} }) {
+function HomePage() {
   const [media, setMedia] = useState(() => ({
     heroImage: '/logo.png',
     heroVideo: null,
@@ -2280,12 +2280,12 @@ function HomePage({ onOpenRegulatoryStatement = () => {} }) {
 
   return (
     <section className="space-y-6">
-      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-black">
-        <div className="relative h-[58vh] min-h-[360px] w-full sm:h-[66vh]">
+      <div className="mx-auto w-full max-w-[1380px] overflow-hidden bg-black">
+        <div className="relative h-[66vh] min-h-[420px] w-full sm:h-[74vh]">
           {(HERO_CINEMATIC_VIDEO_URL || media.heroVideo)
             ? (
               <video
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover object-[50%_35%]"
                 src={HERO_CINEMATIC_VIDEO_URL || media.heroVideo}
                 muted
                 autoPlay
@@ -2380,7 +2380,7 @@ function HomePage({ onOpenRegulatoryStatement = () => {} }) {
 
         <button
           type="button"
-          onClick={onOpenRegulatoryStatement}
+          onClick={() => setIsManifestoOpen(true)}
           className="mt-3 inline-flex rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
         >
           Regulatory Transparency: CI 77820 Statement
