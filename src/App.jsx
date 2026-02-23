@@ -52,13 +52,10 @@ const CLIENT_PROFILE_STORAGE_KEY = 'gelitup.portal.client_profile.v1'
 const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
-const LEEUKOPF_DISTRIBUTORS_MAP_URL = 'https://www.google.com/maps/embed?origin=mfe&pb=!1m3!2m1!1sEurope!6i3'
 const LEEUKOPF_DISTRIBUTORS_SOURCE_URL = 'https://leeukopf.com/our-brands'
 const DISTRIBUTOR_DIRECTORY = [
   {
     country: 'Belgium',
-    coordinates: '43.8563,25.9568',
-    mapUrl: 'https://www.google.com/maps?q=43.8563,25.9568&z=11&output=embed',
     distributors: [
       {
         name: 'GEL.IT.UP Belgium',
@@ -69,8 +66,6 @@ const DISTRIBUTOR_DIRECTORY = [
   },
   {
     country: 'Bulgaria',
-    coordinates: '43.8563,25.9568',
-    mapUrl: 'https://www.google.com/maps?q=43.8563,25.9568&z=11&output=embed',
     distributors: [
       {
         name: 'GEL.IT.UP Bulgaria and GEL.IT.UP Nails School',
@@ -83,8 +78,6 @@ const DISTRIBUTOR_DIRECTORY = [
   },
   {
     country: 'France',
-    coordinates: '48.8566,2.3522',
-    mapUrl: 'https://www.google.com/maps?q=48.8566,2.3522&z=11&output=embed',
     distributors: [
       {
         name: 'GEL.IT.UP France',
@@ -97,8 +90,6 @@ const DISTRIBUTOR_DIRECTORY = [
   },
   {
     country: 'Greece',
-    coordinates: '37.9838,23.7275',
-    mapUrl: 'https://www.google.com/maps?q=37.9838,23.7275&z=10&output=embed',
     distributors: [
       {
         name: 'GEL.IT.UP Corinth',
@@ -161,8 +152,6 @@ const DISTRIBUTOR_DIRECTORY = [
   },
   {
     country: 'Kingdom of Saudi Arabia',
-    coordinates: '21.5433,39.1728',
-    mapUrl: 'https://www.google.com/maps?q=21.5433,39.1728&z=11&output=embed',
     distributors: [
       {
         name: 'GEL.IT.UP Saudi Arabia - BEAUTY ADDRESS TRADING CO.LTD',
@@ -173,8 +162,6 @@ const DISTRIBUTOR_DIRECTORY = [
   },
   {
     country: 'Qatar',
-    coordinates: '25.4052,51.4892',
-    mapUrl: 'https://www.google.com/maps?q=25.4052,51.4892&z=11&output=embed',
     distributors: [
       {
         name: 'GEL.IT.UP Qatar',
@@ -185,8 +172,6 @@ const DISTRIBUTOR_DIRECTORY = [
   },
   {
     country: 'United States',
-    coordinates: '25.7907,-80.1300',
-    mapUrl: 'https://www.google.com/maps?q=25.7907,-80.1300&z=11&output=embed',
     distributors: [
       {
         name: 'GEL.IT.UP USA',
@@ -534,11 +519,11 @@ function createFallbackProducts(count = 120) {
 
 const navItems = [
   { to: '/', label: 'Home' },
-  { to: '/about-us', label: 'About us' },
+  { to: '/pages/about-us', label: 'About us' },
   { to: '/distributor-packages', label: 'Packages' },
   { to: '/full-catalogue', label: 'The Collection' },
   { to: '/distributors', label: 'Distributors' },
-  { to: '/contact-us', label: 'Contact us' },
+  { to: '/pages/contact-us', label: 'Contact us' },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -699,7 +684,7 @@ const PLATINUM_SPECIAL_EFFECTS_60 = [
 const HERO_PRODUCT_COPY = [
   {
     name: '5-in-1 Superior Base Coat',
-    headline: 'Five Services. One HEMA-Free Power Base.',
+    headline: 'Five Services. One HEMA & TPO-Free Power Base.',
     bullets: [
       'Adhesion + reinforcement + shaping in one step',
       'Strong grip for rhinestones and short extensions',
@@ -1231,7 +1216,7 @@ function DistributorPackagesPage() {
         <p className="text-xs uppercase tracking-[0.16em] text-white/80">B2B Merchandising</p>
         <h1 className="heading-on-dark mt-2 text-2xl font-extrabold sm:text-4xl">Distributor Packages</h1>
         <p className="mt-3 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] text-white/95 sm:text-base">
-          EU REGULATED. HEMA-FREE. PROFESSIONAL EXCELLENCE.
+          EU REGULATED. HEMA & TPO-FREE. PROFESSIONAL EXCELLENCE.
         </p>
         <NavLink to="/full-catalogue" className="mt-4 inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
           Quick View: The Collection
@@ -2437,7 +2422,7 @@ function HomePage() {
               GELITUP: THE ARCHITECTS OF PROFESSIONAL COLOR.
             </h1>
             <p className="hero-copy-shadow mt-4 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] text-white/95 sm:text-base">
-              A DECADE OF PROFESSIONAL MASTERY. EU REGULATED. HEMA-FREE.
+              A DECADE OF PROFESSIONAL MASTERY. EU REGULATED. HEMA & TPO-FREE.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <NavLink to="/become-distributor" className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
@@ -2664,7 +2649,39 @@ function PortalLanding() {
 
 function DistributorsPage() {
   const [selectedCountry, setSelectedCountry] = useState(DISTRIBUTOR_DIRECTORY[0]?.country ?? '')
-  const selectedDirectory = DISTRIBUTOR_DIRECTORY.find((item) => item.country === selectedCountry) ?? DISTRIBUTOR_DIRECTORY[0]
+  const [selectedDistributorIndex, setSelectedDistributorIndex] = useState(0)
+
+  const selectedDirectory = useMemo(
+    () => DISTRIBUTOR_DIRECTORY.find((item) => item.country === selectedCountry),
+    [selectedCountry],
+  )
+
+  useEffect(() => {
+    setSelectedDistributorIndex(0)
+  }, [selectedCountry])
+
+  const selectedDistributor = useMemo(() => {
+    if (!selectedDirectory || !Array.isArray(selectedDirectory.distributors) || selectedDirectory.distributors.length === 0) {
+      return null
+    }
+
+    const safeIndex = Math.min(
+      Math.max(0, selectedDistributorIndex),
+      selectedDirectory.distributors.length - 1,
+    )
+
+    return selectedDirectory.distributors[safeIndex]
+  }, [selectedDirectory, selectedDistributorIndex])
+
+  const mapEmbedUrl = useMemo(() => {
+    if (!selectedDirectory) return ''
+    if (selectedDistributor?.address) return `https://www.google.com/maps?q=${encodeURIComponent(selectedDistributor.address)}&z=13&output=embed`
+
+    const firstAddress = selectedDirectory.distributors.find((item) => item?.address)?.address
+    if (firstAddress) return `https://www.google.com/maps?q=${encodeURIComponent(firstAddress)}&z=12&output=embed`
+
+    return `https://www.google.com/maps?q=${encodeURIComponent(selectedDirectory.country)}&z=6&output=embed`
+  }, [selectedDirectory, selectedDistributor])
 
   return (
     <section className="space-y-5">
@@ -2697,14 +2714,17 @@ function DistributorsPage() {
             {' '}
             Distributor Details
           </h2>
-          <p className="mt-2 text-sm text-[#4A4A4A]">
-            Coordinates:
-            {' '}
-            <span className="font-semibold text-[#1A1A1A]">{selectedDirectory.coordinates}</span>
-          </p>
           <div className="mt-3 grid gap-3 text-sm text-[#1A1A1A]">
-            {selectedDirectory.distributors.map((distributor) => (
-              <div key={`${selectedDirectory.country}-${distributor.name}`} className="rounded-xl border border-[#E8E8E8] bg-[#E8E8E8] p-3">
+            {selectedDirectory.distributors.map((distributor, distributorIndex) => {
+              const isActiveDistributor = distributorIndex === selectedDistributorIndex
+
+              return (
+              <button
+                key={`${selectedDirectory.country}-${distributor.name}`}
+                type="button"
+                onClick={() => setSelectedDistributorIndex(distributorIndex)}
+                className={`rounded-xl border bg-[#E8E8E8] p-3 text-left transition ${isActiveDistributor ? 'border-fuchsia-500 ring-1 ring-fuchsia-400/60' : 'border-[#E8E8E8] hover:border-fuchsia-300'}`}
+              >
                 <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Distributor</p>
                 <p className="mt-1 font-semibold">{distributor.name}</p>
 
@@ -2718,7 +2738,7 @@ function DistributorsPage() {
                 {distributor.phone && (
                   <>
                     <p className="mt-3 text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Telephone</p>
-                    <a href={`tel:${distributor.phone}`} className="mt-1 block font-semibold underline">
+                    <a href={`tel:${String(distributor.phone).replace(/[^+\d]/g, '')}`} className="mt-1 block font-semibold underline">
                       {distributor.phone}
                     </a>
                   </>
@@ -2741,8 +2761,9 @@ function DistributorsPage() {
                     </a>
                   </>
                 )}
-              </div>
-            ))}
+              </button>
+              )
+            })}
           </div>
         </div>
       )}
@@ -2760,7 +2781,7 @@ function DistributorsPage() {
         <div className="mt-3 overflow-hidden rounded-xl border border-[#4A4A4A] bg-white">
           <iframe
             title="Gelitup distributors map"
-            src={selectedDirectory?.mapUrl ?? LEEUKOPF_DISTRIBUTORS_MAP_URL}
+            src={mapEmbedUrl}
             className="h-[320px] w-full sm:h-[420px]"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
@@ -5601,7 +5622,7 @@ function ProductsModule({ moduleView = 'products' }) {
         </div>
 
         <div className="mt-3 rounded-lg border border-fuchsia-200 bg-fuchsia-50 p-3 text-xs text-fuchsia-900">
-          <p className="font-semibold uppercase tracking-wide">Why HEMA-Free matters?</p>
+          <p className="font-semibold uppercase tracking-wide">Why HEMA & TPO-Free standards matter?</p>
           <p className="mt-1">Reduce insurance risks and client reactions by switching to Gelitup’s regulated, clean chemistry.</p>
         </div>
 
