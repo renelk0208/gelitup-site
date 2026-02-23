@@ -172,6 +172,36 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
   const quickLinks = (activePage?.links || []).slice(0, 8)
   const isAboutUsManifesto = slug === 'about-us'
   const manifestoVisual = heroMedia || galleryMedia[0] || null
+  const countdownTarget = useMemo(() => {
+    const now = new Date()
+    const target = new Date(now)
+    const dayOfWeek = now.getDay()
+    const daysUntilMonday = dayOfWeek === 1 ? 7 : (8 - dayOfWeek) % 7
+    target.setDate(now.getDate() + daysUntilMonday)
+    target.setHours(9, 0, 0, 0)
+    return target.getTime()
+  }, [])
+  const [countdownNow, setCountdownNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    if (!isAboutUsManifesto) {
+      return undefined
+    }
+
+    const intervalId = window.setInterval(() => {
+      setCountdownNow(Date.now())
+    }, 1000)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [isAboutUsManifesto])
+
+  const countdownRemaining = Math.max(0, countdownTarget - countdownNow)
+  const countdownDays = Math.floor(countdownRemaining / (1000 * 60 * 60 * 24))
+  const countdownHours = Math.floor((countdownRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  const countdownMinutes = Math.floor((countdownRemaining % (1000 * 60 * 60)) / (1000 * 60))
+  const countdownSeconds = Math.floor((countdownRemaining % (1000 * 60)) / 1000)
 
   if (isLoading) {
     return <p className="text-sm text-slate-600">Loading page baseline...</p>
@@ -193,34 +223,6 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
   }
 
   if (isAboutUsManifesto) {
-    const countdownTarget = useMemo(() => {
-      const now = new Date()
-      const target = new Date(now)
-      const dayOfWeek = now.getDay()
-      const daysUntilMonday = dayOfWeek === 1 ? 7 : (8 - dayOfWeek) % 7
-      target.setDate(now.getDate() + daysUntilMonday)
-      target.setHours(9, 0, 0, 0)
-      return target.getTime()
-    }, [])
-
-    const [countdownNow, setCountdownNow] = useState(() => Date.now())
-
-    useEffect(() => {
-      const intervalId = window.setInterval(() => {
-        setCountdownNow(Date.now())
-      }, 1000)
-
-      return () => {
-        window.clearInterval(intervalId)
-      }
-    }, [])
-
-    const countdownRemaining = Math.max(0, countdownTarget - countdownNow)
-    const countdownDays = Math.floor(countdownRemaining / (1000 * 60 * 60 * 24))
-    const countdownHours = Math.floor((countdownRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-    const countdownMinutes = Math.floor((countdownRemaining % (1000 * 60 * 60)) / (1000 * 60))
-    const countdownSeconds = Math.floor((countdownRemaining % (1000 * 60)) / 1000)
-
     const socialTiles = Array.from({ length: 9 }, (_, index) => previewMedia[index] || null)
     const visualIsVideo = Boolean(
       manifestoVisual
@@ -229,21 +231,8 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
 
     return (
       <section className="space-y-6 bg-white">
-        <div className="grid overflow-hidden rounded-2xl border border-[#E8E8E8] bg-white lg:grid-cols-2">
-          <article className="p-5 sm:p-8">
-            <p
-              className="text-2xl font-extrabold uppercase leading-tight tracking-[0.15em] text-[#1A1A1A] sm:text-4xl"
-              style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
-            >
-              THE ARCHITECTS OF PROFESSIONAL COLOR.
-            </p>
-            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#D43790]">CLEAN SCIENCE</p>
-            <p className="mt-2 text-sm leading-relaxed text-[#1A1A1A] sm:text-base">
-              100% HEMA &amp; TPO Free chemistry engineered for professional confidence.
-            </p>
-          </article>
-
-          <article className="relative min-h-[300px] overflow-hidden bg-[#1A1A1A] sm:min-h-[360px]">
+        <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#1A1A1A]">
+          <article className="relative min-h-[320px] overflow-hidden bg-[#1A1A1A] sm:min-h-[420px]">
             {visualIsVideo
               ? (
                 <video
@@ -264,8 +253,20 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                   loading="lazy"
                 />
                 )}
-            <div className="absolute inset-0 bg-black/30" />
           </article>
+        </div>
+
+        <div className="rounded-2xl border border-[#E8E8E8] bg-white p-5 sm:p-8">
+          <p
+            className="text-2xl font-extrabold uppercase leading-tight tracking-[0.15em] text-[#1A1A1A] sm:text-4xl"
+            style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
+          >
+            THE ARCHITECTS OF PROFESSIONAL COLOR.
+          </p>
+          <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#D43790]">CLEAN SCIENCE</p>
+          <p className="mt-2 text-sm leading-relaxed text-[#1A1A1A] sm:text-base">
+            100% HEMA &amp; TPO Free chemistry engineered for professional confidence.
+          </p>
         </div>
 
         <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-10 sm:px-8 sm:py-12">
