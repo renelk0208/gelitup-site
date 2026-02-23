@@ -170,6 +170,8 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
   const heroMedia = previewMedia[0] || null
   const galleryMedia = previewMedia.slice(1, 7)
   const quickLinks = (activePage?.links || []).slice(0, 8)
+  const isAboutUsManifesto = slug === 'about-us'
+  const manifestoVisual = heroMedia || galleryMedia[0] || null
 
   if (isLoading) {
     return <p className="text-sm text-slate-600">Loading page baseline...</p>
@@ -186,6 +188,67 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
         <NavLink to="/baseline" className="inline-flex rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition duration-200 hover:border-fuchsia-500 hover:text-fuchsia-700 active:bg-fuchsia-600 active:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2">
           Back to Baseline List
         </NavLink>
+      </section>
+    )
+  }
+
+  if (isAboutUsManifesto) {
+    const visualIsVideo = Boolean(
+      manifestoVisual
+      && (manifestoVisual.displayUrl.toLowerCase().includes('.mp4') || manifestoVisual.displayUrl.toLowerCase().includes('.webm')),
+    )
+
+    return (
+      <section className="space-y-4 bg-white">
+        <div className="rounded-2xl border border-[#E8E8E8] bg-white p-5 sm:p-7">
+          <p
+            className="text-2xl font-extrabold uppercase leading-tight tracking-[0.15em] text-[#1A1A1A] sm:text-4xl"
+            style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
+          >
+            THE ARCHITECTS OF PROFESSIONAL COLOR.
+          </p>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-3">
+          <article className="rounded-2xl border border-[#E8E8E8] bg-white p-5 lg:col-span-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#D43790]">CLEAN SCIENCE</p>
+            <p className="mt-3 text-sm leading-relaxed text-[#4A4A4A] sm:text-base">
+              At Gelitup, we don’t just manufacture color; we engineer professional confidence. Our entire collection is 100% HEMA &amp; TPO Free, ensuring the highest level of safety for both technician and client.
+            </p>
+          </article>
+
+          <article className="overflow-hidden rounded-2xl border border-[#E8E8E8] bg-[#E8E8E8]">
+            {visualIsVideo
+              ? (
+                <video
+                  src={manifestoVisual.displayUrl}
+                  className="h-full min-h-[220px] w-full object-cover"
+                  muted
+                  playsInline
+                  controls
+                />
+                )
+              : (
+                <img
+                  src={manifestoVisual?.displayUrl || '/logo.png'}
+                  alt="High-resolution macro texture"
+                  className="h-full min-h-[220px] w-full object-cover"
+                  loading="lazy"
+                />
+                )}
+          </article>
+
+          <article className="rounded-2xl border border-[#E8E8E8] bg-[#E8E8E8] p-5 lg:col-span-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#D43790]">REGULATORY LEADERSHIP</p>
+            <p className="mt-3 text-sm leading-relaxed text-[#4A4A4A] sm:text-base">
+              Fully EU Regulated, CPNP Notified, and Leaping Bunny Approved, we provide the legal and ethical peace of mind that modern salons demand.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="inline-flex min-h-9 items-center rounded-full border border-[#1A1A1A]/20 bg-white px-3 text-xs font-semibold uppercase tracking-[0.08em] text-[#1A1A1A]">CPNP</span>
+              <span className="inline-flex min-h-9 items-center rounded-full border border-[#1A1A1A]/20 bg-white px-3 text-xs font-semibold uppercase tracking-[0.08em] text-[#1A1A1A]">LEAPING BUNNY</span>
+            </div>
+          </article>
+        </div>
       </section>
     )
   }
