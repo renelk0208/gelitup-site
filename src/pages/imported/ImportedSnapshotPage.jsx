@@ -176,7 +176,8 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
       return manifestVideo.localPath
     }
 
-    return ''
+    // Default fallback to the gel.it.up live demo video
+    return '/gelitup-media/videos/superior_innovation_cat_eye_french-fe10f199.mp4'
   }, [mediaItems])
 
   const structuredContent = useMemo(() => {
