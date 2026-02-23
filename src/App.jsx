@@ -1289,12 +1289,19 @@ function isTechnicalSku(code) {
 
 function DistributorPackagesPage() {
   const [studioTab, setStudioTab] = useState('overview')
+  const [expandedTier, setExpandedTier] = useState('')
   const [tierVisuals, setTierVisuals] = useState(() => ({
     boutiqueFerrari: '/logo.png',
     boutiqueBase: '/logo.png',
     professional: '/logo.png',
     authority: '/logo.png',
   }))
+  const boutiqueTier = packageTiers.find((tier) => tier.badge === 'Silver')
+  const professionalTier = packageTiers.find((tier) => tier.badge === 'Gold')
+  const authorityTier = packageTiers.find((tier) => tier.badge === 'Platinum')
+  const toggleTier = (tierKey) => {
+    setExpandedTier((current) => (current === tierKey ? '' : tierKey))
+  }
   const studioMaintenanceEssentials = [
     'Superbond Primer (GIUP-MNT-SB01)',
     '5-in-1 Superior Base Coat',
@@ -1475,6 +1482,47 @@ function DistributorPackagesPage() {
             Perfect for localized salon supply. This tier focuses on high-frequency maintenance essentials and the top-selling 30 shades to ensure rapid ROI.
           </p>
 
+          {boutiqueTier?.groups?.length ? (
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => toggleTier('boutique')}
+                className="inline-flex rounded-lg border border-[#D43790]/40 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790] transition duration-300 hover:border-[#D43790] hover:bg-[#D43790]/10"
+              >
+                {expandedTier === 'boutique' ? 'SHOW ME: HIDE' : 'SHOW ME'}
+              </button>
+              <button
+                type="button"
+                onClick={() => toggleTier('boutique')}
+                className="inline-flex rounded-full border border-[#D43790]/40 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#D43790] transition duration-300 hover:border-[#D43790] hover:bg-[#D43790]/10"
+              >
+                Option 1
+              </button>
+              <button
+                type="button"
+                onClick={() => toggleTier('boutique')}
+                className="inline-flex rounded-full border border-[#D43790]/40 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#D43790] transition duration-300 hover:border-[#D43790] hover:bg-[#D43790]/10"
+              >
+                Option 2
+              </button>
+            </div>
+          ) : null}
+
+          {expandedTier === 'boutique' && boutiqueTier?.groups?.length ? (
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {boutiqueTier.groups.map((group) => (
+                <div key={group.title} className="rounded-2xl border border-[#D43790]/15 bg-[#F5F5F5] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">{group.title}</p>
+                  <ul className="mt-2 space-y-1 text-sm text-[#4A4A4A]">
+                    {group.items.map((item) => (
+                      <li key={item}>• {item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <img src={tierVisuals.boutiqueFerrari} alt="Ferrari Red 2316 macro studio visual" className="h-56 w-full rounded-2xl border border-[#D43790]/15 object-cover sm:h-64" loading="lazy" />
             <img src={tierVisuals.boutiqueBase} alt="5-in-1 Base coat macro technical visual" className="h-56 w-full rounded-2xl border border-[#D43790]/15 object-cover sm:h-64" loading="lazy" />
@@ -1522,6 +1570,47 @@ function DistributorPackagesPage() {
             Designed for distributors ready to scale. Includes a curated selection of our most popular seasonal collections and specialized builder systems.
           </p>
 
+          {professionalTier?.groups?.length ? (
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => toggleTier('professional')}
+                className="inline-flex rounded-lg border border-[#D43790]/40 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790] transition duration-300 hover:border-[#D43790] hover:bg-[#D43790]/10"
+              >
+                {expandedTier === 'professional' ? 'SHOW ME: HIDE' : 'SHOW ME'}
+              </button>
+              <button
+                type="button"
+                onClick={() => toggleTier('professional')}
+                className="inline-flex rounded-full border border-[#D43790]/40 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#D43790] transition duration-300 hover:border-[#D43790] hover:bg-[#D43790]/10"
+              >
+                Option 1
+              </button>
+              <button
+                type="button"
+                onClick={() => toggleTier('professional')}
+                className="inline-flex rounded-full border border-[#D43790]/40 bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#D43790] transition duration-300 hover:border-[#D43790] hover:bg-[#D43790]/10"
+              >
+                Option 2
+              </button>
+            </div>
+          ) : null}
+
+          {expandedTier === 'professional' && professionalTier?.groups?.length ? (
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {professionalTier.groups.map((group) => (
+                <div key={group.title} className="rounded-2xl border border-[#D43790]/15 bg-white p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">{group.title}</p>
+                  <ul className="mt-2 space-y-1 text-sm text-[#4A4A4A]">
+                    {group.items.map((item) => (
+                      <li key={item}>• {item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
           <div className="mt-4 overflow-hidden rounded-2xl border border-[#D43790]/15">
             <img src={tierVisuals.professional} alt="Professional tier dynamic color palette composition" className="h-64 w-full object-cover sm:h-72" loading="lazy" />
           </div>
@@ -1567,6 +1656,47 @@ function DistributorPackagesPage() {
           <p className="mt-2 text-sm font-medium text-white/90 sm:text-base">
             For the market leader. Access the complete 761+ shade spectrum, all HEMA/TPO-free formulations, and exclusive regional marketing support.
           </p>
+
+          {authorityTier?.groups?.length ? (
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => toggleTier('authority')}
+                className="inline-flex rounded-lg border border-white/40 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white transition duration-300 hover:border-white/70 hover:bg-white/20"
+              >
+                {expandedTier === 'authority' ? 'SHOW ME: HIDE' : 'SHOW ME'}
+              </button>
+              <button
+                type="button"
+                onClick={() => toggleTier('authority')}
+                className="inline-flex rounded-full border border-white/40 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition duration-300 hover:border-white/70 hover:bg-white/20"
+              >
+                Option 1
+              </button>
+              <button
+                type="button"
+                onClick={() => toggleTier('authority')}
+                className="inline-flex rounded-full border border-white/40 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition duration-300 hover:border-white/70 hover:bg-white/20"
+              >
+                Option 2
+              </button>
+            </div>
+          ) : null}
+
+          {expandedTier === 'authority' && authorityTier?.groups?.length ? (
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {authorityTier.groups.map((group) => (
+                <div key={group.title} className="rounded-2xl border border-white/10 bg-white/10 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">{group.title}</p>
+                  <ul className="mt-2 space-y-1 text-sm text-white/90">
+                    {group.items.map((item) => (
+                      <li key={item}>• {item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          ) : null}
 
           <div className="mt-4 overflow-hidden rounded-2xl border border-[#D43790]/15">
             <img src={tierVisuals.authority} alt="Authority tier cinematic infinity grid collection visual" className="h-64 w-full object-cover sm:h-80" loading="lazy" />
@@ -2108,7 +2238,7 @@ function FullCataloguePage() {
     }
   }, [])
 
-  const virtualRowHeight = bulkMode ? 74 : 372
+  const virtualRowHeight = 372
   const totalRows = Math.max(1, Math.ceil(filteredItems.length / gridColumns))
   const overscanRows = 3
   const startRow = Math.max(0, Math.floor(scrollTop / virtualRowHeight) - overscanRows)
@@ -2128,35 +2258,6 @@ function FullCataloguePage() {
 
   const topSpacerHeight = startRow * virtualRowHeight
   const bottomSpacerHeight = Math.max(0, (totalRows - endRow) * virtualRowHeight)
-
-  const quickCartUnits = useMemo(
-    () => Object.values(quickCart).reduce((sum, qty) => sum + Number(qty || 0), 0),
-    [quickCart],
-  )
-
-  const getQty = useCallback((itemKey) => Number(itemQuantities[itemKey] || 1), [itemQuantities])
-
-  const updateQty = useCallback((itemKey, nextValue) => {
-    const normalized = Math.max(1, Number(nextValue || 1))
-    setItemQuantities((current) => ({
-      ...current,
-      [itemKey]: normalized,
-    }))
-  }, [])
-
-  const addQuickItem = useCallback((itemKey) => {
-    const qty = Math.max(1, Number(itemQuantities[itemKey] || 1))
-    setPulseItemKey(itemKey)
-    window.setTimeout(() => {
-      setPulseItemKey('')
-    }, 320)
-    setQuickCart((current) => ({
-      ...current,
-      [itemKey]: Number(current[itemKey] || 0) + qty,
-    }))
-  }, [itemQuantities])
-
-  const quickProgress = Math.min(100, Math.round((quickCartUnits / 100) * 100))
 
   const extractProductCode = useCallback((name = '') => {
     const cleaned = String(name || '').trim()
@@ -2965,7 +3066,7 @@ function HomePage() {
             src={media.collectionVisual || media.heroImage}
             alt="Macro spectrum visual showing shimmer, neon, and creme gel textures"
             className="h-80 w-full object-cover sm:h-96 lg:h-[28rem]"
-            style={{ objectPosition: '50% 35%' }}
+            style={{ objectPosition: '50% 70%' }}
             loading="lazy"
           />
         </div>
