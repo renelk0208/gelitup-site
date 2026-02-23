@@ -1281,9 +1281,9 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
           name,
           items: applyManualCatalogueOrder(items, manualRuleIndex.get(`${category}::${name}`) || null),
         }))
-        .sort((a, b) => a.name.localeCompare(b.name)),
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base', numeric: true })),
     }))
-    .sort((a, b) => a.category.localeCompare(b.category))
+    .sort((a, b) => a.category.localeCompare(b.category, undefined, { sensitivity: 'base', numeric: true }))
 }
 
 const COLOR_FAMILY_FILTERS = [
@@ -1381,7 +1381,7 @@ function flattenSectionItems(section) {
 function FullCataloguePage() {
   const [sections, setSections] = useState([])
   const [activeCategory, setActiveCategory] = useState('')
-  const [activeSubcategory, setActiveSubcategory] = useState('All')
+  const [activeSubcategory, setActiveSubcategory] = useState('')
   const [activeColorFamily, setActiveColorFamily] = useState('ALL')
   const [searchQuery, setSearchQuery] = useState('')
   const [bulkMode, setBulkMode] = useState(false)
@@ -1419,7 +1419,7 @@ function FullCataloguePage() {
         setSections(nextSections)
         setHeroCandidateIndexByCategory({})
         const firstCategory = nextSections[0]?.category || ''
-        const firstSubcategory = 'All'
+        const firstSubcategory = ''
         setActiveCategory(firstCategory)
         setActiveSubcategory(firstSubcategory)
         setActiveColorFamily('ALL')
@@ -1428,7 +1428,7 @@ function FullCataloguePage() {
         if (!mounted) return
         setSections([])
         setActiveCategory('')
-        setActiveSubcategory('All')
+        setActiveSubcategory('')
         setActiveColorFamily('ALL')
         setErrorMessage(error instanceof Error ? error.message : 'Unable to load catalogue.')
       }
@@ -1446,16 +1446,14 @@ function FullCataloguePage() {
 
   const activeSection = sections.find((section) => section.category === activeCategory) || null
   const subcategoryOptions = useMemo(() => {
-    if (!activeSection) return ['All']
-    return ['All', ...activeSection.subcategories.map((subcategory) => subcategory.name)]
+    if (!activeSection) return []
+    return activeSection.subcategories
+      .map((subcategory) => subcategory.name)
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true }))
   }, [activeSection])
 
   const baseItems = useMemo(() => {
-    if (!activeSection) return []
-
-    if (activeSubcategory === 'All') {
-      return flattenSectionItems(activeSection)
-    }
+    if (!activeSection || !activeSubcategory) return []
 
     const subcategory = activeSection.subcategories.find((item) => item.name === activeSubcategory)
     if (!subcategory) return []
@@ -1594,7 +1592,7 @@ function FullCataloguePage() {
                     key={section.category}
                     onClick={() => {
                       setActiveCategory(section.category)
-                      setActiveSubcategory('All')
+                      setActiveSubcategory('')
                       setActiveColorFamily('ALL')
                     }}
                     className={`group relative aspect-[4/3] overflow-hidden rounded-[12px] border ${isActiveCategory ? 'border-slate-900' : 'border-slate-200'} bg-white text-left`}
@@ -1648,92 +1646,102 @@ function FullCataloguePage() {
               })}
             </div>
 
-            <div className="mt-3">
-              <label className="sr-only" htmlFor="catalog-search">Search catalogue</label>
-              <input
-                id="catalog-search"
-                type="text"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search product name, code, or subcategory..."
-                className="w-full rounded-[12px] border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none ring-slate-900/10 focus:ring"
-              />
-            </div>
-
-            {isColorsCategory && (
-              <div className="mt-3 rounded-[12px] border border-slate-200 bg-slate-50 p-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Quick Filter</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {COLOR_FAMILY_FILTERS.map((family) => {
-                    const isActive = activeColorFamily === family.key
-                    return (
-                      <button
-                        key={family.key}
-                        onClick={() => setActiveColorFamily(family.key)}
-                        className={`inline-flex items-center gap-2 rounded-[12px] border px-2.5 py-1.5 text-xs ${isActive ? 'border-slate-900 bg-white text-slate-900' : 'border-slate-300 bg-white text-slate-700'}`}
-                      >
-                        <span className={`h-3 w-3 rounded-full ${family.swatchClass}`} />
-                        {family.label}
-                      </button>
-                    )
-                  })}
-                </div>
+            {!activeSubcategory && (
+              <div className="mt-3 rounded-[12px] border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                Select a subcategory to view products.
               </div>
             )}
 
-            {!bulkMode
-              ? (
-                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                  {visibleItems.map((item) => {
-                    const itemKey = item.imageUrl
-                    const qty = getQty(itemKey)
+            {!!activeSubcategory && (
+              <>
+                <div className="mt-3">
+                  <label className="sr-only" htmlFor="catalog-search">Search catalogue</label>
+                  <input
+                    id="catalog-search"
+                    type="text"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Search product name, code, or subcategory..."
+                    className="w-full rounded-[12px] border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none ring-slate-900/10 focus:ring"
+                  />
+                </div>
 
-                    return (
-                      <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="overflow-hidden rounded-[12px] border border-slate-200 bg-white">
-                        <div className="flex h-56 w-full items-center justify-center bg-white p-2 sm:h-60">
-                          <img src={item.imageUrl} alt={item.name} loading="lazy" className="max-h-full w-full object-contain" />
-                        </div>
-                        <div className="border-t border-slate-200 px-2.5 py-2">
-                          <p className="truncate text-xs font-medium text-slate-800">{item.name}</p>
-                          <p className="truncate text-[11px] text-slate-500">{item.subcategory}</p>
-                          <div className="mt-2 flex items-center gap-1">
+                {isColorsCategory && (
+                  <div className="mt-3 rounded-[12px] border border-slate-200 bg-slate-50 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Quick Filter</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {COLOR_FAMILY_FILTERS.map((family) => {
+                        const isActive = activeColorFamily === family.key
+                        return (
+                          <button
+                            key={family.key}
+                            onClick={() => setActiveColorFamily(family.key)}
+                            className={`inline-flex items-center gap-2 rounded-[12px] border px-2.5 py-1.5 text-xs ${isActive ? 'border-slate-900 bg-white text-slate-900' : 'border-slate-300 bg-white text-slate-700'}`}
+                          >
+                            <span className={`h-3 w-3 rounded-full ${family.swatchClass}`} />
+                            {family.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {!bulkMode
+                  ? (
+                    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                      {visibleItems.map((item) => {
+                        const itemKey = item.imageUrl
+                        const qty = getQty(itemKey)
+
+                        return (
+                          <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="overflow-hidden rounded-[12px] border border-slate-200 bg-white">
+                            <div className="flex h-56 w-full items-center justify-center bg-white p-2 sm:h-60">
+                              <img src={item.imageUrl} alt={item.name} loading="lazy" className="max-h-full w-full object-contain" />
+                            </div>
+                            <div className="border-t border-slate-200 px-2.5 py-2">
+                              <p className="truncate text-xs font-medium text-slate-800">{item.name}</p>
+                              <p className="truncate text-[11px] text-slate-500">{item.subcategory}</p>
+                              <div className="mt-2 flex items-center gap-1">
+                                <button onClick={() => updateQty(itemKey, qty - 1)} className="h-7 w-7 rounded-[10px] border border-slate-300 text-sm text-slate-700">−</button>
+                                <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className="h-7 w-10 rounded-[10px] border border-slate-300 text-center text-xs" />
+                                <button onClick={() => updateQty(itemKey, qty + 1)} className="h-7 w-7 rounded-[10px] border border-slate-300 text-sm text-slate-700">+</button>
+                                <button onClick={() => addQuickItem(itemKey)} className="ml-auto rounded-[10px] bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white">Add</button>
+                              </div>
+                            </div>
+                          </article>
+                        )
+                      })}
+                    </div>
+                    )
+                  : (
+                    <div className="mt-4 overflow-hidden rounded-[12px] border border-slate-200 bg-white">
+                      {visibleItems.map((item) => {
+                        const itemKey = item.imageUrl
+                        const qty = getQty(itemKey)
+                        return (
+                          <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 border-b border-slate-100 px-3 py-2 last:border-b-0">
+                            <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-slate-200 object-contain" loading="lazy" />
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-xs font-medium text-slate-800">{item.name}</p>
+                              <p className="truncate text-[11px] text-slate-500">{item.subcategory}</p>
+                            </div>
                             <button onClick={() => updateQty(itemKey, qty - 1)} className="h-7 w-7 rounded-[10px] border border-slate-300 text-sm text-slate-700">−</button>
                             <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className="h-7 w-10 rounded-[10px] border border-slate-300 text-center text-xs" />
                             <button onClick={() => updateQty(itemKey, qty + 1)} className="h-7 w-7 rounded-[10px] border border-slate-300 text-sm text-slate-700">+</button>
-                            <button onClick={() => addQuickItem(itemKey)} className="ml-auto rounded-[10px] bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white">Add</button>
+                            <button onClick={() => addQuickItem(itemKey)} className="rounded-[10px] bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white">Add</button>
                           </div>
-                        </div>
-                      </article>
-                    )
-                  })}
-                </div>
-                )
-              : (
-                <div className="mt-4 overflow-hidden rounded-[12px] border border-slate-200 bg-white">
-                  {visibleItems.map((item) => {
-                    const itemKey = item.imageUrl
-                    const qty = getQty(itemKey)
-                    return (
-                      <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 border-b border-slate-100 px-3 py-2 last:border-b-0">
-                        <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-slate-200 object-contain" loading="lazy" />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-xs font-medium text-slate-800">{item.name}</p>
-                          <p className="truncate text-[11px] text-slate-500">{item.subcategory}</p>
-                        </div>
-                        <button onClick={() => updateQty(itemKey, qty - 1)} className="h-7 w-7 rounded-[10px] border border-slate-300 text-sm text-slate-700">−</button>
-                        <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className="h-7 w-10 rounded-[10px] border border-slate-300 text-center text-xs" />
-                        <button onClick={() => updateQty(itemKey, qty + 1)} className="h-7 w-7 rounded-[10px] border border-slate-300 text-sm text-slate-700">+</button>
-                        <button onClick={() => addQuickItem(itemKey)} className="rounded-[10px] bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white">Add</button>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
+                        )
+                      })}
+                    </div>
+                  )}
 
-            {visibleCount < filteredItems.length && (
-              <div ref={loadMoreRef} className="mt-4 rounded-[12px] border border-slate-200 bg-slate-50 px-3 py-2 text-center text-xs text-slate-600">
-                Loading more products… ({visibleItems.length}/{filteredItems.length})
-              </div>
+                {visibleCount < filteredItems.length && (
+                  <div ref={loadMoreRef} className="mt-4 rounded-[12px] border border-slate-200 bg-slate-50 px-3 py-2 text-center text-xs text-slate-600">
+                    Loading more products… ({visibleItems.length}/{filteredItems.length})
+                  </div>
+                )}
+              </>
             )}
           </div>
         </>
