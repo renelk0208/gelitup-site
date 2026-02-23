@@ -1,0 +1,54 @@
+{
+  "name": "gelitup-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "sync:gelitup-products": "node scripts/sync-gelitup-products.mjs",
+    "generate:product-image-map": "node scripts/generate-product-image-map.mjs",
+    "sync:product-images-local": "node scripts/sync-product-images-from-local.mjs",
+    "normalize:product-image-map": "node scripts/normalize-product-image-map.mjs",
+    "import:product-images": "node scripts/import-product-images-from-map.mjs",
+    "remap:product-image-skus": "node scripts/remap-image-skus-from-csv.mjs",
+    "import:gelitup-media": "node scripts/import-gelitup-media.mjs",
+    "snapshot:gelitup-pages": "node scripts/snapshot-gelitup-pages.mjs",
+    "generate:imported-pages": "node scripts/generate-imported-pages.mjs",
+    "refresh:gelitup-baseline": "npm run import:gelitup-media; npm run snapshot:gelitup-pages; npm run generate:imported-pages"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.97.0",
+    "jspdf": "^4.2.0",
+    "jspdf-autotable": "^5.0.7",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.13.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@tailwindcss/postcss": "^4.2.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vite-pwa/assets-generator": "^1.0.2",
+    "@vitejs/plugin-react": "^5.0.4",
+    "autoprefixer": "^10.4.24",
+    "eslint": "^10.0.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.23",
+    "globals": "^16.4.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.2.0",
+    "vite": "^7.1.9",
+    "vite-plugin-pwa": "^1.2.0",
+    "workbox-core": "^7.3.0",
+    "workbox-window": "^7.4.0"
+  },
+  "overrides": {
+    "minimatch": "^10.2.1",
+    "sharp": "^0.33.5",
+    "sharp-ico": "^0.1.5"
+  }
+}

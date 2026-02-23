@@ -1,0 +1,27 @@
+{
+  "rules": [
+    {
+      "category": "BUILDER GEL",
+      "subcategory": "3INI BUILDER",
+      "groups": [
+        {
+          "hero": "3in1cover",
+          "swatches": [
+            "GIUP 3IN1 40COV",
+            "GIUP 3IN1 40P",
+            "GIUP G3N1CC",
+            "GIUP G3N1CIS",
+            "GIUP G3N1CS",
+            "GIUP G3N1LJ",
+            "GIUP G3N1PMA"
+          ]
+        },
+        {
+          "hero": "3in1pink",
+          "swatches": []
+        }
+      ],
+      "order": []
+    }
+  ]
+}

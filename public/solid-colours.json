@@ -1,0 +1,22 @@
+{
+  "items": [
+    { "code": "GIUP-SC-0001", "family": "Reds", "preview": "#D7263D" },
+    { "code": "GIUP-SC-0002", "family": "Reds", "preview": "#C1121F" },
+    { "code": "GIUP-SC-0003", "family": "Reds", "preview": "#9B2226" },
+    { "code": "GIUP-SC-0004", "family": "Pinks", "preview": "#FF8FAB" },
+    { "code": "GIUP-SC-0005", "family": "Pinks", "preview": "#FF5D8F" },
+    { "code": "GIUP-SC-0006", "family": "Pinks", "preview": "#F72585" },
+    { "code": "GIUP-SC-0007", "family": "Nudes", "preview": "#D4A373" },
+    { "code": "GIUP-SC-0008", "family": "Nudes", "preview": "#C38E70" },
+    { "code": "GIUP-SC-0009", "family": "Nudes", "preview": "#B08968" },
+    { "code": "GIUP-SC-0010", "family": "Neons", "preview": "#39FF14" },
+    { "code": "GIUP-SC-0011", "family": "Neons", "preview": "#CCFF00" },
+    { "code": "GIUP-SC-0012", "family": "Neons", "preview": "#00F5D4" },
+    { "code": "GIUP-SC-0013", "family": "Blues", "preview": "#3A86FF" },
+    { "code": "GIUP-SC-0014", "family": "Blues", "preview": "#4361EE" },
+    { "code": "GIUP-SC-0015", "family": "Blues", "preview": "#1D4ED8" },
+    { "code": "GIUP-SC-0016", "family": "Greens", "preview": "#2DC653" },
+    { "code": "GIUP-SC-0017", "family": "Greens", "preview": "#16A34A" },
+    { "code": "GIUP-SC-0018", "family": "Greens", "preview": "#15803D" }
+  ]
+}

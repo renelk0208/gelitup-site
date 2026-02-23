@@ -1,0 +1,40 @@
+{
+  "brand": "GEL.IT.UP by GIUP®",
+  "version": "2.0_B2B_Launch",
+  "technical_essentials": {
+    "bases": [
+      {"id": "5IN1_CLR", "name": "5-in-1 Superior Base Coat Clear", "category": "Base", "best_seller": true},
+      {"id": "5IN1_MPK", "name": "5-in-1 Superior Base Coat Milky Pink", "category": "Base", "best_seller": true},
+      {"id": "5IN1_MWH", "name": "5-in-1 Superior Base Coat Milky White", "category": "Base", "best_seller": true},
+      {"id": "5IN1_SNU", "name": "5-in-1 Superior Base Coat Soft Nude", "category": "Base", "best_seller": true}
+    ],
+    "tops": [
+      {"id": "NW_TOP", "name": "Non-Wipe Top Coat", "category": "Top", "best_seller": true},
+      {"id": "RS_MATTE", "name": "Satin Matte RS Non-Wipe Top Coat", "category": "Top", "best_seller": true},
+      {"id": "STF_01", "name": "Shimmer Top Coat - Dandelion", "category": "Top", "best_seller": false}
+    ],
+    "building_systems": [
+      {"id": "3IN1_CLR", "name": "3-in-1 Premium Builder Gel Clear", "feature": "Fiberglass Infused"},
+      {"id": "3IN1_COV", "name": "3-in-1 Premium Builder Gel Cover", "feature": "Fiberglass Infused"},
+      {"id": "SYN_MWH", "name": "Multimix Synthogel Milky White", "category": "Acrygel"},
+      {"id": "CREME_COV", "name": "Crème de la Crème Builder Gel Cover", "category": "Self-Leveling"}
+    ],
+    "prep": [
+      {"id": "SUPERBOND", "name": "Superbond Acid-Free Primer", "mandatory": true}
+    ]
+  },
+  "top_selling_colors_sample": [
+    {"code": "01", "name": "Ice Ice Baby", "group": "Whites/French"},
+    {"code": "102", "name": "Marsh Mallow", "group": "Whites/French"},
+    {"code": "09", "name": "Coco Nude", "group": "Nudes"},
+    {"code": "08", "name": "Ivory", "group": "Nudes"},
+    {"code": "010", "name": "Bridal Bliss", "group": "Nudes"},
+    {"code": "120", "name": "Wisteria Lane", "group": "Pastels"},
+    {"code": "051A", "name": "Raspberry Ripple", "group": "Reds"},
+    {"code": "1803", "name": "Don’t Pout", "group": "Reds"},
+    {"code": "015", "name": "Total Eclipse", "group": "Darks"},
+    {"code": "2113J", "name": "Blue Flashing Star", "group": "Flash/Reflective"},
+    {"code": "2026", "name": "Whaat? Pistachio?", "group": "2026 Trend"},
+    {"code": "2037", "name": "Salty Caramel", "group": "2026 Trend"}
+  ]
+}

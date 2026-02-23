@@ -1,0 +1,76 @@
+{
+  "defaults": {
+    "unitWeightKg": 0.06,
+    "unitLengthCm": 3.5,
+    "unitWidthCm": 3.5,
+    "unitHeightCm": 7.0,
+    "description": "Standard GEL color bottle"
+  },
+  "byPrefix": {
+    "GIUP-COL": {
+      "unitWeightKg": 0.06,
+      "unitLengthCm": 3.5,
+      "unitWidthCm": 3.5,
+      "unitHeightCm": 7.0,
+      "description": "GEL color bottle"
+    },
+    "GIUP-MNT": {
+      "unitWeightKg": 0.08,
+      "unitLengthCm": 4.0,
+      "unitWidthCm": 4.0,
+      "unitHeightCm": 8.0,
+      "description": "Maintenance SKU bottle"
+    }
+  },
+  "bySku": {
+    "SUPERBOND": {
+      "unitWeightKg": 0.05,
+      "unitLengthCm": 3.2,
+      "unitWidthCm": 3.2,
+      "unitHeightCm": 7.0,
+      "description": "Superbond primer bottle"
+    },
+    "5IN1_CLR": {
+      "unitWeightKg": 0.08,
+      "unitLengthCm": 4.0,
+      "unitWidthCm": 4.0,
+      "unitHeightCm": 8.0,
+      "description": "5-in-1 base bottle"
+    },
+    "NW_TOP": {
+      "unitWeightKg": 0.08,
+      "unitLengthCm": 4.0,
+      "unitWidthCm": 4.0,
+      "unitHeightCm": 8.0,
+      "description": "Non-wipe top bottle"
+    },
+    "3IN1_CLR": {
+      "unitWeightKg": 0.1,
+      "unitLengthCm": 4.4,
+      "unitWidthCm": 4.4,
+      "unitHeightCm": 8.3,
+      "description": "3-in-1 builder bottle"
+    },
+    "SYN_MWH": {
+      "unitWeightKg": 0.12,
+      "unitLengthCm": 4.8,
+      "unitWidthCm": 4.8,
+      "unitHeightCm": 8.8,
+      "description": "Synthogel jar"
+    },
+    "5IN1_CLR_6PACK": {
+      "unitWeightKg": 0.58,
+      "unitLengthCm": 17.0,
+      "unitWidthCm": 12.0,
+      "unitHeightCm": 9.0,
+      "description": "6-pack bundled carton"
+    }
+  },
+  "packaging": {
+    "maxBoxWeightKg": 18,
+    "maxBoxVolumeCm3": 50000,
+    "suggestedBoxLengthCm": 40,
+    "suggestedBoxWidthCm": 30,
+    "suggestedBoxHeightCm": 25
+  }
+}
