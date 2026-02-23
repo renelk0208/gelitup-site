@@ -51,6 +51,10 @@ const PORTAL_FONT_TTF_URL = import.meta.env.VITE_PORTAL_FONT_TTF_URL || '/fonts/
 const CLIENT_PROFILE_STORAGE_KEY = 'gelitup.portal.client_profile.v1'
 const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const COMPLIANCE_DATE = '2025-12-01'
+const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
+const CPNP_ICON_PATH = '/gelitup-content/certification%20logos/cpnp-icon.png'
+const HEMA_TPO_ICON_PATH = '/gelitup-content/certification%20logos/hema-tpo-free-icon.png'
+const LEAPING_BUNNY_ICON_PATH = '/gelitup-content/certification%20logos/leaping-bunny-icon.png'
 const SILVER_FREE_GUARANTEE_BADGE = 'Silver-Free Guarantee'
 const CI77820_MAIN_STATEMENT = 'All Gelitup products manufactured from December 2025 onwards are 100% CI 77820 (Silver) FREE.'
 const CI77820_TRANSPARENCY_NOTE = 'Legacy stock (pre-Dec 2025) may contain traces (<0.2%) in full compliance with original EC 1223/2009 standards. All current batches have transitioned to Aluminium and Mica-based pigments.'
@@ -1427,6 +1431,7 @@ function FullCataloguePage() {
   const [gridColumns, setGridColumns] = useState(5)
   const [scrollTop, setScrollTop] = useState(0)
   const [viewportHeight, setViewportHeight] = useState(720)
+  const [colorTileFrame, setColorTileFrame] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
@@ -1572,6 +1577,16 @@ function FullCataloguePage() {
     return () => window.removeEventListener('resize', updateHeight)
   }, [])
 
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setColorTileFrame((current) => current + 1)
+    }, 3200)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [])
+
   const virtualRowHeight = bulkMode ? 74 : 372
   const totalRows = Math.max(1, Math.ceil(filteredItems.length / gridColumns))
   const overscanRows = 3
@@ -1637,7 +1652,7 @@ function FullCataloguePage() {
 
   return (
     <section className="space-y-5">
-      <div className="rounded-2xl border border-black/10 bg-white p-5 sm:p-6">
+      <div className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-5 sm:p-6">
         <p className="text-xs uppercase tracking-[0.2em] text-black/50">Luxury Colour Library</p>
         <h1 className="mt-2 text-xl font-black uppercase tracking-[0.04em] text-black sm:text-3xl sm:tracking-[0.06em]">The Collection</h1>
         <p className="mt-2 text-sm text-black/65">
@@ -1659,7 +1674,7 @@ function FullCataloguePage() {
 
       {!isLoading && !errorMessage && sections.length > 0 && (
         <>
-          <div className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5">
+          <div className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5">
             <div className="flex items-center justify-between gap-3">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/55">Category Tiles</p>
               <label className="inline-flex items-center gap-2 text-xs text-black/70">
@@ -1677,11 +1692,14 @@ function FullCataloguePage() {
             <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {sections.map((section) => {
                 const isActiveCategory = activeCategory === section.category
+                const isColorsTile = isColorsCategoryName(section.category)
                 const imageCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
                 const sectionFallbackImage = section.subcategories.find((sub) => sub.items.length > 0)?.items?.[0]?.imageUrl || '/logo.png'
                 const coverCandidates = buildCategoryHeroImageCandidates(section.category, sectionFallbackImage)
                 const coverIndex = heroCandidateIndexByCategory[section.category] || 0
-                const coverImage = coverCandidates[Math.min(coverIndex, coverCandidates.length - 1)] || '/logo.png'
+                const safeCoverLength = Math.max(coverCandidates.length, 1)
+                const rotatingIndex = isColorsTile ? (colorTileFrame % safeCoverLength) : coverIndex
+                const coverImage = coverCandidates[Math.min(rotatingIndex, coverCandidates.length - 1)] || '/logo.png'
 
                 return (
                   <button
@@ -1691,12 +1709,12 @@ function FullCataloguePage() {
                       setActiveSubcategory('')
                       setActiveColorFamily('ALL')
                     }}
-                    className={`group relative aspect-[4/3] overflow-hidden rounded-[12px] border bg-white text-left transition duration-300 hover:scale-[1.02] hover:border-fuchsia-500/70 hover:shadow-[0_0_0_2px_rgba(217,70,239,0.28)] ${isActiveCategory ? 'border-fuchsia-600 shadow-[0_0_0_1px_rgba(217,70,239,0.35)]' : 'border-black/10'}`}
+                    className={`group relative overflow-hidden rounded-[12px] border bg-[#E8E8E8] text-left transition duration-300 hover:scale-[1.02] hover:border-fuchsia-500/70 hover:shadow-[0_0_0_2px_rgba(217,70,239,0.28)] ${isColorsTile ? 'h-[280px] sm:col-span-2 sm:h-[350px] lg:h-[360px] xl:row-span-2 xl:h-[100%]' : 'h-[190px] sm:h-[210px]'} ${isActiveCategory ? 'border-fuchsia-600 shadow-[0_0_0_1px_rgba(217,70,239,0.35)]' : 'border-[#4A4A4A]/35'}`}
                   >
                     <img
                       src={coverImage}
                       alt={section.category}
-                      className="h-full w-full bg-white object-contain p-1"
+                      className="h-full w-full bg-[#E8E8E8] object-cover"
                       loading="lazy"
                       onError={() => {
                         if (coverIndex >= coverCandidates.length - 1) return
@@ -1706,9 +1724,12 @@ function FullCataloguePage() {
                         }))
                       }}
                     />
-                    <div className="absolute inset-x-2 bottom-2 rounded-[12px] border border-white/40 bg-white/45 px-3 py-2 backdrop-blur-md">
-                      <p className="text-sm font-semibold uppercase tracking-[0.04em] text-black">{section.category}</p>
-                      <p className="text-[11px] text-black/70">{imageCount} items</p>
+                    <div className="absolute inset-x-2 bottom-2 rounded-[12px] border border-white/40 bg-black/35 px-3 py-2 backdrop-blur-md">
+                      <p className="text-sm font-bold uppercase tracking-[0.04em] text-white">{section.category}</p>
+                      <p className="text-[11px] text-white/90">{imageCount} items</p>
+                      {isColorsTile && (
+                        <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/90">Best-selling shades carousel</p>
+                      )}
                     </div>
                   </button>
                 )
@@ -1716,13 +1737,13 @@ function FullCataloguePage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5">
+          <div className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-black uppercase tracking-[0.05em] text-black">{activeSection?.category || 'The Collection'}</h2>
                 <p className="mt-1 text-xs text-black/55">{filteredItems.length} matching items</p>
               </div>
-              <div className="rounded-[12px] border border-black/10 bg-white px-3 py-2 text-xs text-black/70">
+              <div className="rounded-[12px] border border-[#4A4A4A]/30 bg-white px-3 py-2 text-xs text-black/70">
                 Quick Basket: {quickCartUnits} units
               </div>
             </div>
@@ -1741,7 +1762,7 @@ function FullCataloguePage() {
                   <button
                     key={`subcategory-${subcategory}`}
                     onClick={() => setActiveSubcategory(subcategory)}
-                    className={`rounded-[12px] border px-3 py-1.5 text-xs font-semibold transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-black/20 bg-white text-black/75 hover:border-fuchsia-500'}`}
+                    className={`rounded-[12px] border px-3 py-1.5 text-xs font-semibold transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-[#4A4A4A]/35 bg-white text-black/75 hover:border-fuchsia-500'}`}
                   >
                     {subcategory}
                   </button>
@@ -1750,7 +1771,7 @@ function FullCataloguePage() {
             </div>
 
             {!activeSubcategory && (
-              <div className="mt-3 rounded-[12px] border border-black/10 bg-black/[0.02] px-3 py-2 text-xs text-black/60">
+              <div className="mt-3 rounded-[12px] border border-[#4A4A4A]/30 bg-black/[0.02] px-3 py-2 text-xs text-black/60">
                 Select a subcategory to view products.
               </div>
             )}
@@ -1765,12 +1786,12 @@ function FullCataloguePage() {
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     placeholder="Search product name, code, or subcategory..."
-                    className="w-full rounded-[12px] border border-black/20 bg-white px-3 py-2 text-sm text-black outline-none ring-fuchsia-500/20 focus:ring"
+                    className="w-full rounded-[12px] border border-[#4A4A4A]/35 bg-white px-3 py-2 text-sm text-black outline-none ring-fuchsia-500/20 focus:ring"
                   />
                 </div>
 
                 {isColorsCategory && (
-                  <div className="mt-3 rounded-[12px] border border-black/10 bg-black/[0.02] p-3">
+                  <div className="mt-3 rounded-[12px] border border-[#4A4A4A]/30 bg-black/[0.02] p-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/55">Quick Filter</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {COLOR_FAMILY_FILTERS.map((family) => {
@@ -1779,7 +1800,7 @@ function FullCataloguePage() {
                           <button
                             key={family.key}
                             onClick={() => setActiveColorFamily(family.key)}
-                            className={`inline-flex items-center gap-2 rounded-[12px] border px-2.5 py-1.5 text-xs transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-black/20 bg-white text-black/70 hover:border-fuchsia-500'}`}
+                            className={`inline-flex items-center gap-2 rounded-[12px] border px-2.5 py-1.5 text-xs transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-[#4A4A4A]/35 bg-white text-black/70 hover:border-fuchsia-500'}`}
                           >
                             <span className={`h-3 w-3 rounded-full ${family.swatchClass}`} />
                             {family.label}
@@ -1793,7 +1814,7 @@ function FullCataloguePage() {
                 <div
                   ref={virtualContainerRef}
                   onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
-                  className="mt-4 max-h-[62vh] overflow-auto rounded-[14px] border border-black/10 bg-white md:max-h-[72vh]"
+                  className="mt-4 max-h-[62vh] overflow-auto rounded-[14px] border border-[#4A4A4A]/30 bg-white md:max-h-[72vh]"
                 >
                   <div style={{ height: topSpacerHeight }} />
 
@@ -1809,7 +1830,7 @@ function FullCataloguePage() {
 
                       if (bulkMode) {
                         return (
-                          <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 rounded-[12px] border border-[#E8E8E8] bg-[#E8E8E8] px-3 py-2 transition duration-300 hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_1px_rgba(212,55,144,0.26)]">
+                          <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 rounded-[12px] border border-[#4A4A4A]/30 bg-[#E8E8E8] px-3 py-2 transition duration-300 hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_1px_rgba(212,55,144,0.26)]">
                             <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-black/10 bg-white object-contain" loading="lazy" />
                             <div className="min-w-0 flex-1">
                               <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
@@ -1827,7 +1848,7 @@ function FullCataloguePage() {
                       }
 
                       return (
-                        <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`overflow-hidden rounded-[14px] border border-[#E8E8E8] bg-[#E8E8E8] transition duration-300 hover:scale-[1.05] hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`}>
+                        <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 hover:scale-[1.05] hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`}>
                           <div className="flex h-56 w-full items-center justify-center bg-white p-2 sm:h-60">
                             <img src={item.imageUrl} alt={item.name} loading="lazy" className="max-h-full w-full object-contain" />
                           </div>
@@ -1910,7 +1931,7 @@ function Nav() {
           to={item.to}
           className={({ isActive }) =>
             `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 ${
-              isActive ? 'bg-fuchsia-600 text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : 'text-white/85 hover:bg-white/10 hover:text-white'
+              isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white'
             }`
           }
         >
@@ -1931,7 +1952,7 @@ function MobileNav() {
             to={item.to}
             className={({ isActive }) =>
               `rounded-md px-2 py-2 text-center text-xs font-medium uppercase tracking-[0.03em] transition duration-300 ${
-                isActive ? 'bg-fuchsia-600 text-white shadow-[0_0_0_1px_rgba(217,70,239,0.5)]' : 'text-white/75 hover:bg-white/10 hover:text-white'
+                isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.5)]' : '!text-white/85 hover:bg-white/10 hover:!text-white'
               }`
             }
           >
@@ -2237,76 +2258,87 @@ function HomePage({ onOpenRegulatoryStatement = () => {} }) {
 
   return (
     <section className="space-y-6">
-      <div className="grid gap-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700 p-5 text-white sm:p-8 md:grid-cols-2 md:items-center">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-300">GEL.IT.UP by GIUP®</p>
-          <h1 className="mt-3 text-3xl font-bold leading-tight md:text-5xl">Official Distributor Information</h1>
-          <p className="mt-4 max-w-2xl text-sm text-slate-200 md:text-base">
-            Since 2011, GEL.IT.UP by GIUP® supports nail professionals with an extended product range, cruelty-free standards,
-            and EU/GMP-aligned quality. This website is for distributor information and applications only.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <NavLink to="/become-distributor" className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900">
-              Apply as Distributor
-            </NavLink>
-            <a href={`mailto:${B2B_EMAIL}`} className="rounded-lg border border-slate-400 px-4 py-2 text-sm font-semibold text-white">Contact Distribution</a>
-          </div>
-        </div>
+      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-black">
+        <div className="relative h-[58vh] min-h-[360px] w-full sm:h-[66vh]">
+          {(HERO_CINEMATIC_VIDEO_URL || media.heroVideo)
+            ? (
+              <video
+                className="h-full w-full object-cover"
+                src={HERO_CINEMATIC_VIDEO_URL || media.heroVideo}
+                muted
+                autoPlay
+                loop
+                playsInline
+                controls={false}
+              />
+              )
+            : (
+              <img
+                src={media.heroImage}
+                alt="GEL.IT.UP cinematic hero"
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+              )}
 
-        <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
-          <div className="aspect-[16/10] w-full">
-            {media.heroVideo
-              ? (
-                <video
-                  className="h-full w-full object-cover"
-                  src={media.heroVideo}
-                  muted
-                  autoPlay
-                  loop
-                  playsInline
-                  controls={false}
-                />
-                )
-              : (
-                <img
-                  src={media.heroImage}
-                  alt="GEL.IT.UP distributor visual"
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                />
-                )}
-          </div>
-        </div>
-      </div>
+          <div className="absolute inset-0 bg-black/55" />
 
-      <div className="rounded-2xl border border-white/20 bg-black px-4 py-3 text-white sm:px-5">
-        <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.16em] sm:text-xs">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1.5">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full border border-white/40 text-[10px]">C</span>
-            <span>CPNP</span>
-            <button
-              type="button"
-              onClick={() => setIsManifestoOpen(true)}
-              className="border-b border-transparent text-fuchsia-300 hover:border-fuchsia-500 hover:text-fuchsia-200"
-            >
-              Learn More
-            </button>
-          </span>
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1.5">
-            <span className="text-base leading-none" aria-hidden="true">🇪🇺</span>
-            <span>EU Regulation</span>
-            <button
-              type="button"
-              onClick={() => setIsManifestoOpen(true)}
-              className="border-b border-transparent text-fuchsia-300 hover:border-fuchsia-500 hover:text-fuchsia-200"
-            >
-              Learn More
-            </button>
-          </span>
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1.5">
-            <span className="text-sm">🐇</span>
-            <span>Leaping Bunny</span>
-          </span>
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
+            <h1 className="heading-on-dark max-w-5xl text-3xl font-black uppercase leading-tight tracking-[0.06em] sm:text-4xl lg:text-6xl">
+              761 SHADES. CLEAN SCIENCE. ZERO COMPROMISE.
+            </h1>
+            <h2 className="heading-on-dark mt-3 max-w-5xl text-base font-extrabold uppercase tracking-[0.08em] sm:text-xl lg:text-2xl">
+              GEL.IT.UP: THE GOLD STANDARD IN CLEAN SCIENCE.
+            </h2>
+            <p className="mt-4 max-w-3xl text-sm text-white/95 sm:text-base">
+              Since 2011, GEL.IT.UP by GIUP® supports nail professionals with EU/GMP-aligned formulas, cruelty-free standards, and high-performance systems.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <NavLink to="/become-distributor" className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-[#1A1A1A]">
+                Apply as Distributor
+              </NavLink>
+              <a href={`mailto:${B2B_EMAIL}`} className="rounded-lg border border-white/60 px-4 py-2 text-sm font-semibold text-white">
+                Contact Distribution
+              </a>
+            </div>
+          </div>
+
+          <div className="pointer-events-none fixed bottom-3 left-1/2 z-30 w-full max-w-5xl -translate-x-1/2 px-3 md:bottom-4 md:px-6">
+            <div className="pointer-events-auto mx-auto flex flex-wrap items-center justify-center gap-2 rounded-full border border-white/30 bg-white/10 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur-[10px] sm:gap-3 sm:px-3 sm:text-[11px]">
+              <button
+                type="button"
+                onClick={() => setIsManifestoOpen(true)}
+                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-2.5 py-1.5 text-white transition duration-300 hover:bg-white/20"
+              >
+                <img src={CPNP_ICON_PATH} alt="CPNP" className="h-4 w-4 object-contain" />
+                <span>CPNP</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsManifestoOpen(true)}
+                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-2.5 py-1.5 text-white transition duration-300 hover:bg-white/20"
+              >
+                <img src={HEMA_TPO_ICON_PATH} alt="HEMA/TPO Free" className="h-4 w-4 object-contain" />
+                <span>HEMA/TPO Free</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsManifestoOpen(true)}
+                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-2.5 py-1.5 text-white transition duration-300 hover:bg-white/20"
+              >
+                <img src={LEAPING_BUNNY_ICON_PATH} alt="Leaping Bunny" className="h-4 w-4 object-contain" />
+                <span>Leaping Bunny</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsManifestoOpen(true)}
+                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-2.5 py-1.5 text-white transition duration-300 hover:bg-white/20"
+              >
+                <span className="text-xs leading-none" aria-hidden="true">🇪🇺</span>
+                <span>EU Regulation</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2430,6 +2462,11 @@ function HomePage({ onOpenRegulatoryStatement = () => {} }) {
               <section>
                 <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-fuchsia-200">EU Regulation</h3>
                 <p className="mt-2">We operate under the world’s strictest safety protocols. Our manufacturing is ISO-certified, ensuring zero hazardous contaminants and 100% batch consistency.</p>
+              </section>
+
+              <section>
+                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-fuchsia-200">HEMA / TPO Free</h3>
+                <p className="mt-2">Our clean-science policy enforces HEMA-free and TPO-free formulation standards across current production lines, prioritizing professional safety and long-term salon trust.</p>
               </section>
 
               <section>
@@ -6991,6 +7028,8 @@ function App() {
     localStorage.removeItem('portalAuth')
   }
 
+  const isPortalRoute = location.pathname.startsWith('/portal') || location.pathname === '/admin-login'
+
   return (
     <div className="lux-theme min-h-screen pb-24 md:pb-8">
       <ScrollToTopOnRouteChange />
@@ -7007,7 +7046,7 @@ function App() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-3 py-4 md:px-6 md:py-10">
+      <main className={`mx-auto max-w-6xl px-3 py-4 md:px-6 md:py-10 ${isPortalRoute ? 'portal-luxe' : ''}`}>
         <Routes>
           <Route path="/" element={LEGACY_MIRROR_ENABLED ? <LegacyMirrorPage pagePath="/" /> : <HomePage />} />
           <Route path="/home" element={<Navigate to="/" replace />} />
