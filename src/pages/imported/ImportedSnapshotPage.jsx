@@ -192,38 +192,6 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
 
   return (
     <section className="space-y-4">
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
-        <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Dedicated Imported Page</p>
-        <p className="mt-1 text-xs text-slate-500">Source: {page.url}</p>
-        <p className="mt-1 text-xs text-slate-500">Editable file: {editorFile}</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setSourceMode('snapshot')}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
-              sourceMode === 'snapshot' ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700'
-            }`}
-          >
-            Snapshot Source
-          </button>
-          <button
-            type="button"
-            disabled={!hasCustomContent}
-            onClick={() => setSourceMode('custom')}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${
-              sourceMode === 'custom' ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700'
-            }`}
-          >
-            Custom Source
-          </button>
-        </div>
-        {!hasCustomContent && (
-          <p className="mt-2 text-xs text-amber-700">
-            No custom override exists for this slug yet. Add one in `/public/gelitup-content/custom-pages.json`.
-          </p>
-        )}
-      </div>
-
       <div className="grid gap-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700 p-4 text-white sm:p-6 md:grid-cols-2 md:items-center">
         <div>
           <p className="text-xs uppercase tracking-[0.18em] text-slate-300">GEL.IT.UP Imported Layout</p>

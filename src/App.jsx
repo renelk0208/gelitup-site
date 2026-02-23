@@ -37,8 +37,23 @@ const PROFORMA_LEEUKOPF_COMPANY = import.meta.env.VITE_PROFORMA_LEEUKOPF_COMPANY
 const PROFORMA_LEEUKOPF_ADDRESS = import.meta.env.VITE_PROFORMA_LEEUKOPF_ADDRESS || '8 Racho Dimchev, Sofia, Bulgaria'
 const PROFORMA_LEEUKOPF_PHONE = import.meta.env.VITE_PROFORMA_LEEUKOPF_PHONE || '(+359) 73 891 041'
 const PROFORMA_LEEUKOPF_EMAIL = import.meta.env.VITE_PROFORMA_LEEUKOPF_EMAIL || 'info@leeukopf.com'
+const TIKTOK_URL = import.meta.env.VITE_TIKTOK_URL || 'https://www.tiktok.com/@gelitup'
+const INSTAGRAM_URL = import.meta.env.VITE_INSTAGRAM_URL || 'https://www.instagram.com/gelitup'
+const LINKEDIN_URL = import.meta.env.VITE_LINKEDIN_URL || 'https://www.linkedin.com/company/gelitup'
+const FACEBOOK_URL = import.meta.env.VITE_FACEBOOK_URL || 'https://www.facebook.com/gelitup'
+const TIKTOK_HANDLE = import.meta.env.VITE_TIKTOK_HANDLE || '@gelitup'
+const INSTAGRAM_HANDLE = import.meta.env.VITE_INSTAGRAM_HANDLE || '@gelitup'
+const LINKEDIN_HANDLE = import.meta.env.VITE_LINKEDIN_HANDLE || 'GEL.IT.UP'
+const FACEBOOK_HANDLE = import.meta.env.VITE_FACEBOOK_HANDLE || '@gelitup'
 const PORTAL_FONT_TTF_URL = import.meta.env.VITE_PORTAL_FONT_TTF_URL || '/fonts/PF-Futura-Neu.ttf'
 const CLIENT_PROFILE_STORAGE_KEY = 'gelitup.portal.client_profile.v1'
+const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v1'
+const FOOTER_SOCIAL_LINKS = [
+  { key: 'tiktok', label: 'TikTok', handle: TIKTOK_HANDLE, href: TIKTOK_URL },
+  { key: 'instagram', label: 'Instagram', handle: INSTAGRAM_HANDLE, href: INSTAGRAM_URL },
+  { key: 'linkedin', label: 'LinkedIn', handle: LINKEDIN_HANDLE, href: LINKEDIN_URL },
+  { key: 'facebook', label: 'Facebook', handle: FACEBOOK_HANDLE, href: FACEBOOK_URL },
+]
 const COUNTRY_OPTIONS = [
   'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France',
   'Germany', 'Greece', 'Hungary', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands',
@@ -6114,12 +6129,135 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady }) {
   return <PortalDashboard onLogout={onLogout} />
 }
 
+function LegalPageLayout({ title, children }) {
+  return (
+    <section className="space-y-4">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+        <h1 className="text-2xl font-semibold text-slate-900 sm:text-3xl">{title}</h1>
+        <p className="mt-2 text-sm text-slate-500">Last updated: February 2026</p>
+      </div>
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-700 sm:p-6">
+        {children}
+      </div>
+    </section>
+  )
+}
+
+function PrivacyPolicyPage() {
+  return (
+    <LegalPageLayout title="Privacy Policy">
+      <div className="space-y-3">
+        <p>
+          GEL.IT.UP processes personal data to provide services, respond to requests, manage distributor applications,
+          and maintain account security.
+        </p>
+        <p>
+          We collect only the data needed for business operations, including contact information, billing and shipping details,
+          and account activity.
+        </p>
+        <p>
+          Data may be shared with trusted service providers for hosting, authentication, transactional messaging, and operational support.
+        </p>
+        <p>
+          You may request access, correction, or deletion of your personal data by contacting us at {PROFORMA_LEEUKOPF_EMAIL}.
+        </p>
+      </div>
+    </LegalPageLayout>
+  )
+}
+
+function CookiePolicyPage() {
+  return (
+    <LegalPageLayout title="Cookie Policy">
+      <div className="space-y-3">
+        <p>
+          This site uses cookies and similar technologies to keep core functionality working, remember your preferences,
+          and improve user experience.
+        </p>
+        <p>
+          Essential cookies are required for basic site operations. Optional analytics or preference cookies may be added as needed.
+        </p>
+        <p>
+          By clicking “Accept Cookies”, you confirm consent to cookie use as described in this policy.
+        </p>
+      </div>
+    </LegalPageLayout>
+  )
+}
+
+function TermsAndConditionsPage() {
+  return (
+    <LegalPageLayout title="Terms and Conditions">
+      <div className="space-y-3">
+        <p>
+          By using this website, you agree to these terms. Product information, pricing, and availability are provided for
+          commercial reference and may be updated without prior notice.
+        </p>
+        <p>
+          Orders, account approvals, and distribution relationships are subject to eligibility checks and separate commercial agreements.
+        </p>
+        <p>
+          Unauthorized copying, scraping, or misuse of content is prohibited.
+        </p>
+        <p>
+          For account and legal questions, contact us at {PROFORMA_LEEUKOPF_EMAIL}.
+        </p>
+      </div>
+    </LegalPageLayout>
+  )
+}
+
+function FooterSocialIcon({ platform }) {
+  if (platform === 'instagram') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
+        <rect x="3.5" y="3.5" width="17" height="17" rx="5" stroke="currentColor" strokeWidth="1.8" />
+        <circle cx="12" cy="12" r="3.8" stroke="currentColor" strokeWidth="1.8" />
+        <circle cx="17" cy="7" r="1.1" fill="currentColor" />
+      </svg>
+    )
+  }
+
+  if (platform === 'linkedin') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
+        <rect x="3.5" y="3.5" width="17" height="17" rx="3" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M8.2 10.4V16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <circle cx="8.2" cy="7.8" r="1" fill="currentColor" />
+        <path d="M12 16V10.4M12 12.1C12 11 12.9 10.2 14 10.2C15.1 10.2 16 11 16 12.1V16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    )
+  }
+
+  if (platform === 'facebook') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
+        <rect x="3.5" y="3.5" width="17" height="17" rx="3" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M13.7 8H15V5.9H13.3C11.7 5.9 10.7 7 10.7 8.7V10H9V12.2H10.7V18H13.2V12.2H15L15.4 10H13.2V8.9C13.2 8.3 13.4 8 13.7 8Z" fill="currentColor" />
+      </svg>
+    )
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
+      <path d="M15.2 7.8c-1.1 0-2 .9-2 2v4.1c0 .8-.6 1.4-1.4 1.4-.8 0-1.4-.6-1.4-1.4 0-.8.6-1.4 1.4-1.4.2 0 .5.1.7.1v-2.3a4 4 0 0 0-.7-.1 3.7 3.7 0 0 0-3.7 3.7 3.7 3.7 0 0 0 3.7 3.7 3.7 3.7 0 0 0 3.7-3.7v-2.7c.7.5 1.5.9 2.3.9V9.7c-1.3 0-2.2-.9-2.6-1.9Z" fill="currentColor" />
+      <rect x="3.5" y="3.5" width="17" height="17" rx="3" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  )
+}
+
 function App() {
   const [isPortalAuthenticated, setIsPortalAuthenticated] = useState(() => localStorage.getItem('portalAuth') === 'true')
   const [authReady, setAuthReady] = useState(!hasSupabaseConfig)
+  const [hasAcceptedCookies, setHasAcceptedCookies] = useState(() => localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY) === 'accepted')
   const registrationsTable = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || DEFAULT_REGISTRATIONS_TABLE
   const adminsTable = import.meta.env.VITE_B2B_ADMINS_TABLE || 'b2b_admins'
   const requireApproval = import.meta.env.VITE_REQUIRE_B2B_APPROVAL !== 'false'
+
+  const handleAcceptCookies = useCallback(() => {
+    localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, 'accepted')
+    setHasAcceptedCookies(true)
+  }, [])
 
   useEffect(() => {
     if (hasSupabaseConfig) {
@@ -6542,10 +6680,13 @@ function App() {
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="/cookie-policy" element={<CookiePolicyPage />} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditionsPage />} />
           <Route path="/certifications" element={<HomePage />} />
           <Route path="/contact" element={<HomePage />} />
-          <Route path="/baseline" element={<BaselinePagesIndex />} />
-          <Route path="/baseline/:slug" element={<BaselinePageView />} />
+          <Route path="/baseline" element={<Navigate to="/" replace />} />
+          <Route path="/baseline/:slug" element={<Navigate to="/" replace />} />
           <Route path="/pages/:slug" element={<ImportedAnyPage />} />
           <Route path="/become-distributor" element={<PortalRegister onRegister={handlePortalRegister} />} />
 
@@ -6589,8 +6730,84 @@ function App() {
         </Routes>
       </main>
 
-      <footer className="mx-auto max-w-6xl px-4 pb-4 text-xs text-slate-500 md:px-6">
-        © 2026 GEL.IT.UP by GIUP®
+      {!hasAcceptedCookies && (
+        <div className="fixed bottom-16 left-0 right-0 z-40 px-4 md:bottom-4 md:px-6">
+          <div className="mx-auto flex max-w-6xl flex-col gap-3 rounded-xl border border-slate-300 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-slate-600">
+              We use cookies to improve your experience. By continuing, you agree to our cookie use.
+              {' '}
+              <NavLink to="/cookie-policy" className="font-semibold text-slate-900 underline">Read Cookie Policy</NavLink>
+            </p>
+            <button
+              type="button"
+              onClick={handleAcceptCookies}
+              className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white"
+            >
+              Accept Cookies
+            </button>
+          </div>
+        </div>
+      )}
+
+      <footer className="mx-auto mt-8 max-w-6xl space-y-5 border-t border-slate-200 px-4 pb-4 pt-5 text-xs text-slate-600 md:px-6">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Company</p>
+            <p className="mt-2 text-sm font-semibold text-slate-900">{PROFORMA_LEEUKOPF_COMPANY}</p>
+            <p className="mt-1">{PROFORMA_LEEUKOPF_ADDRESS}</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Contact</p>
+            <p className="mt-2">Phone: {PROFORMA_LEEUKOPF_PHONE}</p>
+            <p className="mt-1">Email: {PROFORMA_LEEUKOPF_EMAIL}</p>
+            <p className="mt-1">Orders: {ORDER_INBOX_EMAIL}</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Menu</p>
+            <div className="mt-2 space-y-1.5">
+              <NavLink to="/" className="block hover:text-slate-900">Home</NavLink>
+              <NavLink to="/pages/about-us" className="block hover:text-slate-900">About Us</NavLink>
+              <NavLink to="/full-catalogue" className="block hover:text-slate-900">Catalogue</NavLink>
+              <NavLink to="/distributor-packages" className="block hover:text-slate-900">Distributor Packages</NavLink>
+              <NavLink to="/become-distributor" className="block hover:text-slate-900">Become Distributor</NavLink>
+              <NavLink to="/pages/contact-us" className="block hover:text-slate-900">Contact Us</NavLink>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Legal</p>
+            <div className="mt-2 space-y-1.5">
+              <NavLink to="/privacy-policy" className="block hover:text-slate-900">Privacy Policy</NavLink>
+              <NavLink to="/cookie-policy" className="block hover:text-slate-900">Cookie Policy</NavLink>
+              <NavLink to="/terms-and-conditions" className="block hover:text-slate-900">Terms and Conditions</NavLink>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Social</p>
+            <div className="mt-2 space-y-2">
+              {FOOTER_SOCIAL_LINKS.map((social) => (
+                <a
+                  key={social.key}
+                  href={social.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-2 hover:text-slate-900"
+                >
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-slate-300 text-slate-700">
+                    <FooterSocialIcon platform={social.key} />
+                  </span>
+                  <span className="font-medium">{social.label}</span>
+                  <span className="text-slate-500">{social.handle}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <p className="border-t border-slate-200 pt-3 text-slate-500">© 2026 GEL.IT.UP by GIUP®</p>
       </footer>
 
       <MobileNav />
