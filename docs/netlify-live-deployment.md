@@ -15,6 +15,10 @@ This project is ready for Netlify with SPA routing and Netlify Functions.
 
 ## 2) Set production environment variables
 
+If you want fast bulk import with correct Netlify scopes, use:
+
+- `docs/netlify-env-import-scopes.md`
+
 In Netlify site settings → **Environment variables**, add:
 
 ### Required core

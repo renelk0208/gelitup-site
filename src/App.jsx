@@ -1109,6 +1109,11 @@ function formatCatalogueItemName(rawPath = '') {
     .trim()
 }
 
+function isCategoryHeroAssetPath(rawPath = '') {
+  const fileName = String(rawPath || '').split('/').pop() || ''
+  return /hero\.image/i.test(fileName)
+}
+
 function normalizeCatalogueToken(value = '') {
   return String(value || '')
     .toUpperCase()
@@ -1242,7 +1247,8 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     Object.values(payload)
       .filter((value) => typeof value === 'string')
       .map((value) => String(value).trim())
-      .filter((value) => value.includes('/gelitup-content/product-images/')),
+      .filter((value) => value.includes('/gelitup-content/product-images/'))
+      .filter((value) => !isCategoryHeroAssetPath(value))
   )
 
   const grouped = new Map()
