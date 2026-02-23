@@ -1335,6 +1335,51 @@ function DistributorPackagesPage() {
         </div>
       </section>
 
+      <section className="rounded-2xl border border-[#4A4A4A] bg-white p-4 sm:p-6">
+        <h2
+          className="text-2xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A]"
+          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
+        >
+          Tier Comparison
+        </h2>
+        <div className="mt-5 overflow-x-auto">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="bg-[#1A1A1A]">
+                <th className="border border-[#4A4A4A] px-4 py-3 text-left font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Feature</th>
+                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Boutique</th>
+                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Professional</th>
+                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Authority</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { feature: 'Education & Training', boutique: 'Email templates & guides', professional: 'Video library + webinars', authority: 'Personal consultant + custom training' },
+                { feature: 'Marketing Support', boutique: 'Social media asset library', professional: 'Campaign kits + co-branding', authority: 'Co-branded campaigns + regional support' },
+                { feature: 'Technical Support', boutique: 'Email support', professional: 'Priority email & phone', authority: 'Dedicated account manager + hotline' },
+                { feature: 'HEMA-Free Status', boutique: '✓ Confirmed', professional: '✓ Confirmed', authority: '✓ Confirmed' },
+                { feature: 'TPO-Free Status', boutique: '✓ Confirmed', professional: '✓ Confirmed', authority: '✓ Confirmed' },
+              ].map((row, index) => (
+                <tr key={row.feature} className={`border border-[#4A4A4A] ${index % 2 === 0 ? 'bg-[#E8E8E8]' : 'bg-white'}`}>
+                  <td className="px-4 py-3 font-semibold text-[#1A1A1A]">{row.feature}</td>
+                  <td className="px-4 py-3 text-center text-[#1A1A1A]">{row.boutique}</td>
+                  <td className="px-4 py-3 text-center text-[#1A1A1A]">{row.professional}</td>
+                  <td className="px-4 py-3 text-center text-[#1A1A1A]">{row.authority}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-6 flex justify-center">
+          <NavLink
+            to="/become-distributor"
+            className="inline-flex rounded-lg bg-[#D43790] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]"
+          >
+            INQUIRE ABOUT REGIONAL PARTNERSHIPS
+          </NavLink>
+        </div>
+      </section>
+
       <section className="rounded-2xl border border-[#1A1A1A]/15 bg-[#FFFFFF] p-4 sm:p-6">
         <div className="rounded-2xl bg-[#1A1A1A] p-4 text-white sm:p-6">
           <h2
