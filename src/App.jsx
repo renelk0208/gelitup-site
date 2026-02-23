@@ -735,12 +735,47 @@ const packageTiers = [
     value: 'Perfect for solo studios entering the GEL.IT.UP ecosystem. Fast-moving essentials and top 30 core shades.',
     groups: [
       {
-        title: 'Foundation Colors',
-        items: ['Top 30 best sellers', 'Nudes, camels, pinks', 'High pigment classics'],
+        title: 'Core Maintenance Suite',
+        items: [
+          'GIUP-MNT-SB01 — Superbond Primer',
+          'GIUP-MNT-5C01 — 5-in-1 Clear Builder',
+          'GIUP-MNT-NW01 — Non-Wipe Top Coat',
+        ],
       },
       {
-        title: 'Technical Basics',
-        items: ['5-in-1 Base', 'Non-Wipe Top', 'Superbond', 'Basic files & buffers'],
+        title: 'Core 30 Classic Colors',
+        items: [
+          'GIUP-COL-01 — Ice Ice Baby (Pure White)',
+          'GIUP-COL-05 — Snow Queen',
+          'GIUP-COL-09 — Coco Nude',
+          'GIUP-COL-010 — Bridal Bliss',
+          'GIUP-COL-2511 — Skin Shock',
+          'GIUP-COL-02 — Cotton Candy',
+          'GIUP-COL-11 — Pinky Promise',
+          'GIUP-COL-051A — Raspberry Ripple',
+          'GIUP-COL-2316 — Ferrari Red',
+          'GIUP-COL-015 — Total Eclipse (Deep Black)',
+          'GIUP-COL-019 — Slate',
+          'GIUP-COL-120 — Wisteria Lane',
+          'GIUP-COL-2020 — Soft n Sweet',
+          'GIUP-COL-2026 — Whaat? Pistachio?',
+          'GIUP-COL-GCE01 — Glass Cat Eye Clear',
+          'GIUP-COL-102 — Marsh Mallow',
+          'GIUP-COL-04 — Milkyway',
+          'GIUP-COL-08 — Ivory',
+          'GIUP-COL-07B — Liberte',
+          'GIUP-COL-100A — She Bangs',
+          'GIUP-COL-06 — Ballerina',
+          'GIUP-COL-1801 — Sweet Pea',
+          'GIUP-COL-1803 — Don\'t Pout',
+          'GIUP-COL-025 — Cherry Bomb',
+          'GIUP-COL-1802 — Grey Matter',
+          'GIUP-COL-152 — Frisco',
+          'GIUP-COL-07 — Lavender Dreams',
+          'GIUP-COL-2037 — Salty Caramel',
+          'GIUP-COL-2113J — Blue Flashing Star',
+          'GIUP-COL-F01 — Foil Gel Adhesive',
+        ],
       },
     ],
   },
@@ -751,12 +786,22 @@ const packageTiers = [
     value: 'For distributors managing multiple locations. Curated seasonal trends, expanded technical support, and branded displays.',
     groups: [
       {
-        title: 'Extended Palette',
-        items: ['150+ curated shades', 'Seasonal collections', 'Neon + metallics', 'Thermo & cat eye'],
+        title: 'Gold Tier Portfolio (150+ Professional Codes)',
+        items: [
+          'Foundation 30 codes + maintenance suite (incl. GIUP-COL-2316, GIUP-COL-01)',
+          'Neon & Summer expansion (1200/1300 series e.g., GIUP-COL-1205, GIUP-COL-1310)',
+          'Shimmer & Pastel suite (1800/1900 series e.g., GIUP-COL-1804 to GIUP-COL-1812)',
+          'Art & Effects portfolio (GIUP-COL-GCE01, GIUP-COL-F01)',
+          'Advanced Brush-on Builder codes (professional skin-tone shades)',
+        ],
       },
       {
-        title: 'Studio Systems',
-        items: ['3-in-1 Builder package', 'Satin Matte collection', 'Specialized liquids', 'Professional displays'],
+        title: 'Selection Model',
+        items: [
+          'Dynamic inventory access for 120+ high-performance codes',
+          'Curated seasonal injections based on salon demand',
+          'Distributor-selected mix across specialty categories',
+        ],
       },
     ],
   },
@@ -767,12 +812,26 @@ const packageTiers = [
     value: 'Complete 800+ shade portfolio + exclusive regional marketing. Position as the market authority for nail professionals.',
     groups: [
       {
-        title: 'Master Spectrum',
-        items: ['Full 800+ shade range', 'All seasonal releases', 'Exclusive colorways', 'Priority new launches'],
+        title: 'Total Portfolio Access',
+        items: [
+          'Full 800+ shade spectrum (Creme, Neon, Pastel, Glitter, Magnetics)',
+          'Complete builder systems (Hard Gels, Acrygel, Brush-on-Builder colors)',
+        ],
       },
       {
-        title: 'Enterprise Support',
-        items: ['Dedicated account manager', 'Co-branded campaigns', 'Event support', 'Custom solutions'],
+        title: 'Specialized Lines',
+        items: [
+          'Soak-off Gel Polishes: complete professional range',
+          'Nail Art & Consumables: art gels, foils, prep solutions',
+          'Skin & Nail Care: professional therapeutic range',
+        ],
+      },
+      {
+        title: 'Safety Assurance',
+        items: [
+          '100% HEMA & TPO-free across the catalog',
+          'Every formula CPNP-notified for EU compliance',
+        ],
       },
     ],
   },
@@ -1237,23 +1296,22 @@ function DistributorPackagesPage() {
     authority: '/logo.png',
   }))
   const studioMaintenanceEssentials = [
-    'Superbond',
-    '5-in-1 Base',
-    'Non-Wipe Top',
-    'Satin Matte',
-    '3-in-1 Builder',
+    'Superbond Primer (GIUP-MNT-SB01)',
+    '5-in-1 Superior Base Coat',
+    '3-in-1 Brush-on Builder',
+    'Non-Wipe Top Coat (GIUP-MNT-NW01)',
   ]
   const studioCoreColors = [
-    'Ferrari Red (2316)',
-    'Marsh Mallow',
-    'Milkyway',
-    'Coco Nude',
-    'Rose Beige',
-    'Soft Almond',
-    'Classic Blush',
-    'Deep Berry',
-    'Cool Mauve',
-    'French Porcelain',
+    'Ferrari Red (GIUP-COL-2316)',
+    'Ice Ice Baby (GIUP-COL-01)',
+    'Total Eclipse (GIUP-COL-015)',
+    'Blue Flashing Star (GIUP-COL-2113J)',
+    'Lavender Dreams (GIUP-COL-07)',
+    'Cotton Candy (GIUP-COL-02)',
+    'Coco Nude (GIUP-COL-09)',
+    'Marsh Mallow (GIUP-COL-102)',
+    'Milkyway (GIUP-COL-04)',
+    'Ivory (GIUP-COL-08)',
   ]
   const studioExpansionItems = [
     'Professional nail files (180/240 grit)',
@@ -1589,46 +1647,6 @@ function DistributorPackagesPage() {
         </div>
       </section>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {HERO_PRODUCT_COPY.map((product) => (
-          <article key={product.name} className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5">
-            <p className="text-xs uppercase tracking-[0.14em] text-[#4A4A4A]">Hero Product</p>
-            <h2 className="heading-on-light mt-1 text-base font-semibold text-[#1A1A1A]">{product.name}</h2>
-            <p className="mt-2 text-sm font-semibold text-[#1A1A1A]">{product.headline}</p>
-            <ul className="mt-2 space-y-1 text-xs text-[#4A4A4A]">
-              {product.bullets.map((bullet) => (
-                <li key={bullet}>• {bullet}</li>
-              ))}
-            </ul>
-          </article>
-        ))}
-      </div>
-
-      <div className="grid gap-4">
-        {packageTiers.map((tier) => (
-          <article key={tier.name} className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-6">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="heading-on-light text-xl font-semibold text-[#1A1A1A]">{tier.name}</h2>
-              <span className="rounded-full bg-[#E8E8E8] px-2 py-1 text-xs font-semibold text-[#1A1A1A]">{tier.badge}</span>
-            </div>
-            <p className="mt-2 text-sm font-medium text-[#1A1A1A]">ROI Focus: {tier.roi}</p>
-            <p className="mt-1 text-sm text-[#4A4A4A]">{tier.value}</p>
-
-            <div className="mt-4 space-y-4">
-              {tier.groups.map((group) => (
-                <div key={group.title} className="rounded-xl border border-[#4A4A4A]/30 bg-[#E8E8E8] p-3 sm:p-4">
-                  <h3 className="text-sm font-semibold text-[#1A1A1A]">{group.title}</h3>
-                  <ul className="mt-2 grid gap-1 text-xs text-[#4A4A4A] sm:grid-cols-2">
-                    {group.items.map((item) => (
-                      <li key={item}>• {item}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </article>
-        ))}
-      </div>
     </section>
   )
 }
@@ -2236,11 +2254,27 @@ function FullCataloguePage() {
             </div>
           </div>
 
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {HERO_PRODUCT_COPY.map((product) => (
+              <article key={product.name} className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5">
+                <p className="text-xs uppercase tracking-[0.14em] text-[#4A4A4A]">Hero Product</p>
+                <h2 className="heading-on-light mt-1 text-base font-semibold text-[#1A1A1A]">{product.name}</h2>
+                <p className="mt-2 text-sm font-semibold text-[#1A1A1A]">{product.headline}</p>
+                <ul className="mt-2 space-y-1 text-xs text-[#4A4A4A]">
+                  {product.bullets.map((bullet) => (
+                    <li key={bullet}>• {bullet}</li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </div>
+
           <div ref={categoryPanelRef} className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-black uppercase tracking-[0.05em] text-black">{activeSection?.category || 'The Collection'}</h2>
                 <p className="mt-1 text-xs text-black/55">{filteredItems.length} matching items</p>
+                <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/50">View-only catalogue. Orders placed on the B2B portal.</p>
               </div>
               <a 
                 href="https://portal.gelitup.com" 
@@ -2248,7 +2282,7 @@ function FullCataloguePage() {
                 rel="noreferrer"
                 className="inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-[#BF3182]"
               >
-                Purchase on B2B Portal
+                Go to B2B Portal
               </a>
             </div>
 
