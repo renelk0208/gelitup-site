@@ -727,6 +727,56 @@ const PACKAGE_TECH_ESSENTIALS = [
   { sku: '3IN1_CLR', code: '3IN1_CLR', name: '3-in-1 Premium Builder Gel Clear', category: 'Technical', group: 'Essentials' },
   { sku: 'SYN_MWH', code: 'SYN_MWH', name: 'Multimix Synthogel Milky White', category: 'Technical', group: 'Essentials' },
 ]
+const packageTiers = [
+  {
+    name: 'Boutique Starter',
+    badge: 'Silver',
+    roi: 'Localized Studio Supply',
+    value: 'Perfect for solo studios entering the GEL.IT.UP ecosystem. Fast-moving essentials and top 30 core shades.',
+    groups: [
+      {
+        title: 'Foundation Colors',
+        items: ['Top 30 best sellers', 'Nudes, camels, pinks', 'High pigment classics'],
+      },
+      {
+        title: 'Technical Basics',
+        items: ['5-in-1 Base', 'Non-Wipe Top', 'Superbond', 'Basic files & buffers'],
+      },
+    ],
+  },
+  {
+    name: 'Professional Scale',
+    badge: 'Gold',
+    roi: 'Regional Salon Networks',
+    value: 'For distributors managing multiple locations. Curated seasonal trends, expanded technical support, and branded displays.',
+    groups: [
+      {
+        title: 'Extended Palette',
+        items: ['150+ curated shades', 'Seasonal collections', 'Neon + metallics', 'Thermo & cat eye'],
+      },
+      {
+        title: 'Studio Systems',
+        items: ['3-in-1 Builder package', 'Satin Matte collection', 'Specialized liquids', 'Professional displays'],
+      },
+    ],
+  },
+  {
+    name: 'Authority Master',
+    badge: 'Platinum',
+    roi: 'Total Territory Dominance',
+    value: 'Complete 800+ shade portfolio + exclusive regional marketing. Position as the market authority for nail professionals.',
+    groups: [
+      {
+        title: 'Master Spectrum',
+        items: ['Full 800+ shade range', 'All seasonal releases', 'Exclusive colorways', 'Priority new launches'],
+      },
+      {
+        title: 'Enterprise Support',
+        items: ['Dedicated account manager', 'Co-branded campaigns', 'Event support', 'Custom solutions'],
+      },
+    ],
+  },
+]
 const PROFESSIONAL_BASE_PACK = {
   sku: '5IN1_CLR_6PACK',
   description: '5-in-1 Superior Base Professional 6-pack (15% discount)',
