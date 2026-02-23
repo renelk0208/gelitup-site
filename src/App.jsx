@@ -485,7 +485,7 @@ function useUserFavorites() {
     }
 
     if (!userId) {
-      return { ok: false, message: 'Sign in to save favorites.' }
+      return { ok: false, action: 'auth_required', message: 'Sign in to save favorites.' }
     }
 
     const key = getFavoriteKey(candidate)
@@ -2208,6 +2208,7 @@ function flattenSectionItems(section) {
 }
 
 function FullCataloguePage() {
+  const navigate = useNavigate()
   const [sections, setSections] = useState([])
   const [activeCategory, setActiveCategory] = useState('')
   const [activeSubcategory, setActiveSubcategory] = useState('')
@@ -2227,10 +2228,14 @@ function FullCataloguePage() {
 
   const handleFavoriteToggle = useCallback(async (candidate) => {
     const result = await toggleFavorite(candidate)
+    if (!result.ok && result.action === 'auth_required') {
+      navigate('/become-distributor')
+      return
+    }
     if (!result.ok && result.message) {
       window.alert(result.message)
     }
-  }, [toggleFavorite])
+  }, [navigate, toggleFavorite])
 
   useEffect(() => {
     let mounted = true
@@ -2628,12 +2633,23 @@ function FullCataloguePage() {
                                   : 'border-slate-200 bg-white text-slate-400'
                               }`}
                             >
-                              <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-                                <path
-                                  fill="currentColor"
-                                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 3.99 4 6.5 4c1.74 0 3.41 1 4.5 2.09C12.09 5 13.76 4 15.5 4 18.01 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                                />
-                              </svg>
+                              {isFavorite ? (
+                                <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+                                  <path
+                                    fill="currentColor"
+                                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 3.99 4 6.5 4c1.74 0 3.41 1 4.5 2.09C12.09 5 13.76 4 15.5 4 18.01 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                                  />
+                                </svg>
+                              ) : (
+                                <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+                                  <path
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="1.7"
+                                    d="M12 20.6l-1.32-1.2C5.8 14.84 3 12.26 3 8.9 3 6.78 4.68 5.1 6.8 5.1c1.53 0 2.99.74 3.9 1.9.91-1.16 2.37-1.9 3.9-1.9 2.12 0 3.8 1.68 3.8 3.8 0 3.36-2.8 5.94-7.68 10.5L12 20.6z"
+                                  />
+                                </svg>
+                              )}
                             </button>
                           </div>
                           <div className="border-t border-black/10 px-2.5 py-2">
@@ -3988,10 +4004,14 @@ function PortalRegister({ onRegister }) {
 
   const handleFavoriteToggle = useCallback(async (candidate) => {
     const result = await toggleFavorite(candidate)
+    if (!result.ok && result.action === 'auth_required') {
+      navigate('/become-distributor')
+      return
+    }
     if (!result.ok && result.message) {
       window.alert(result.message)
     }
-  }, [toggleFavorite])
+  }, [navigate, toggleFavorite])
 
   return (
     <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
@@ -6451,12 +6471,23 @@ function ProductsModule({ moduleView = 'products' }) {
                                 : 'border-slate-200 bg-white text-slate-400'
                             }`}
                           >
-                            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
-                              <path
-                                fill="currentColor"
-                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 3.99 4 6.5 4c1.74 0 3.41 1 4.5 2.09C12.09 5 13.76 4 15.5 4 18.01 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                              />
-                            </svg>
+                            {isFavorite ? (
+                              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
+                                <path
+                                  fill="currentColor"
+                                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 3.99 4 6.5 4c1.74 0 3.41 1 4.5 2.09C12.09 5 13.76 4 15.5 4 18.01 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                                />
+                              </svg>
+                            ) : (
+                              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
+                                <path
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="1.7"
+                                  d="M12 20.6l-1.32-1.2C5.8 14.84 3 12.26 3 8.9 3 6.78 4.68 5.1 6.8 5.1c1.53 0 2.99.74 3.9 1.9.91-1.16 2.37-1.9 3.9-1.9 2.12 0 3.8 1.68 3.8 3.8 0 3.36-2.8 5.94-7.68 10.5L12 20.6z"
+                                />
+                              </svg>
+                            )}
                           </button>
                           {!resolvedImageUrl && (
                             <span className="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
@@ -6620,12 +6651,23 @@ function ProductsModule({ moduleView = 'products' }) {
                         : 'border-slate-200 bg-white text-slate-400'
                     }`}
                   >
-                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
-                      <path
-                        fill="currentColor"
-                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 3.99 4 6.5 4c1.74 0 3.41 1 4.5 2.09C12.09 5 13.76 4 15.5 4 18.01 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                      />
-                    </svg>
+                    {isFavorite ? (
+                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
+                        <path
+                          fill="currentColor"
+                          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 3.99 4 6.5 4c1.74 0 3.41 1 4.5 2.09C12.09 5 13.76 4 15.5 4 18.01 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                        />
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
+                        <path
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.7"
+                          d="M12 20.6l-1.32-1.2C5.8 14.84 3 12.26 3 8.9 3 6.78 4.68 5.1 6.8 5.1c1.53 0 2.99.74 3.9 1.9.91-1.16 2.37-1.9 3.9-1.9 2.12 0 3.8 1.68 3.8 3.8 0 3.36-2.8 5.94-7.68 10.5L12 20.6z"
+                        />
+                      </svg>
+                    )}
                   </button>
                 </div>
                 <p className="mt-2 text-xs font-semibold">{product.code}</p>
