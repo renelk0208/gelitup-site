@@ -16,10 +16,14 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --lux-black: #000000;
+  --brand-pink: #D43790;
+  --text-main: #1A1A1A;
+  --accent-dark-grey: #4A4A4A;
+  --accent-light-grey: #E8E8E8;
+  --lux-black: #1A1A1A;
   --lux-white: #FFFFFF;
   --lux-gallery: #F8F8F6;
-  --lux-fuchsia: #d946ef;
+  --lux-fuchsia: #D43790;
 }
 
 a {
@@ -35,6 +39,43 @@ body {
   color: var(--lux-black);
   min-height: 100vh;
   font-family: 'Inter', 'PF Futura Neu', 'Futura PT', 'Futura', 'Avenir Next', 'Segoe UI', sans-serif;
+}
+
+.lux-theme {
+  color: var(--text-main);
+}
+
+.lux-theme .bg-fuchsia-600 {
+  background-color: var(--brand-pink) !important;
+}
+
+.lux-theme .text-fuchsia-600,
+.lux-theme .text-fuchsia-300,
+.lux-theme .text-fuchsia-400 {
+  color: var(--brand-pink) !important;
+}
+
+.lux-theme .border-fuchsia-600,
+.lux-theme .border-fuchsia-500,
+.lux-theme .border-fuchsia-300,
+.lux-theme .border-fuchsia-200 {
+  border-color: var(--brand-pink) !important;
+}
+
+.lux-theme .hover\:bg-fuchsia-500:hover {
+  background-color: #BF3182 !important;
+}
+
+.lux-theme button[class*='border-slate-300'],
+.lux-theme a[class*='border-slate-300'] {
+  background-color: var(--accent-light-grey);
+  border-color: var(--accent-light-grey);
+  color: var(--text-main);
+}
+
+.lux-theme button[class*='border-slate-300']:hover,
+.lux-theme a[class*='border-slate-300']:hover {
+  background-color: #DEDEDE;
 }
 
 h1,
@@ -68,15 +109,15 @@ a {
 @keyframes luxPulse {
   0% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(217, 70, 239, 0.45);
+    box-shadow: 0 0 0 0 rgba(212, 55, 144, 0.45);
   }
   60% {
     transform: scale(1.05);
-    box-shadow: 0 0 0 8px rgba(217, 70, 239, 0.05);
+    box-shadow: 0 0 0 8px rgba(212, 55, 144, 0.05);
   }
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(217, 70, 239, 0);
+    box-shadow: 0 0 0 0 rgba(212, 55, 144, 0);
   }
 }
 

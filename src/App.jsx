@@ -50,6 +50,10 @@ const YOUTUBE_HANDLE = import.meta.env.VITE_YOUTUBE_HANDLE || '@GELITUP'
 const PORTAL_FONT_TTF_URL = import.meta.env.VITE_PORTAL_FONT_TTF_URL || '/fonts/PF-Futura-Neu.ttf'
 const CLIENT_PROFILE_STORAGE_KEY = 'gelitup.portal.client_profile.v1'
 const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
+const COMPLIANCE_DATE = '2025-12-01'
+const SILVER_FREE_GUARANTEE_BADGE = 'Silver-Free Guarantee'
+const CI77820_MAIN_STATEMENT = 'All Gelitup products manufactured from December 2025 onwards are 100% CI 77820 (Silver) FREE.'
+const CI77820_TRANSPARENCY_NOTE = 'Legacy stock (pre-Dec 2025) may contain traces (<0.2%) in full compliance with original EC 1223/2009 standards. All current batches have transitioned to Aluminium and Mica-based pigments.'
 const FOOTER_SOCIAL_LINKS = [
   { key: 'tiktok', label: 'TikTok', handle: TIKTOK_HANDLE, href: TIKTOK_URL },
   { key: 'instagram', label: 'Instagram', handle: INSTAGRAM_HANDLE, href: INSTAGRAM_URL },
@@ -161,6 +165,16 @@ function composeAddress({ line1, line2, area, region, country, postalCode }) {
     .map((value) => String(value || '').trim())
     .filter(Boolean)
     .join(', ')
+}
+
+function hasReachedComplianceDate(referenceDate = new Date()) {
+  const complianceStart = new Date(`${COMPLIANCE_DATE}T00:00:00.000Z`)
+  const comparedDate = referenceDate instanceof Date ? referenceDate : new Date(referenceDate)
+  return Number.isFinite(comparedDate.getTime()) && comparedDate.getTime() >= complianceStart.getTime()
+}
+
+function getSilverFreeGuaranteeText(referenceDate = new Date()) {
+  return hasReachedComplianceDate(referenceDate) ? `${SILVER_FREE_GUARANTEE_BADGE} • CI 77820-FREE` : ''
 }
 
 function normalizeSkuCode(value) {
@@ -374,7 +388,7 @@ const navItems = [
   { to: '/', label: 'Home' },
   { to: '/about-us', label: 'About us' },
   { to: '/distributor-packages', label: 'Packages' },
-  { to: '/full-catalogue', label: 'Full Catalogue' },
+  { to: '/full-catalogue', label: 'The Collection' },
   { to: '/distributors', label: 'Distributors' },
   { to: '/contact-us', label: 'Contact us' },
 ]
@@ -764,6 +778,8 @@ function buildPackageDraftInvoice(
 }
 
 function formatDraftInvoiceText(invoice) {
+  const silverFreeLine = getSilverFreeGuaranteeText(invoice?.createdAt)
+
   const lines = [
     'GEL.IT.UP by GIUP® - B2B DRAFT INVOICE',
     `Invoice #: ${invoice.invoiceNumber}`,
@@ -777,6 +793,7 @@ function formatDraftInvoiceText(invoice) {
     `Color Codes Included (${invoice.colorCodes.length}): ${invoice.colorCodes.join(', ')}`,
     `Total Units: ${invoice.totalUnits}`,
     '',
+    ...(silverFreeLine ? [silverFreeLine, ''] : []),
     'Status: Draft (B2B user review required)',
   ]
 
@@ -1070,7 +1087,7 @@ function DistributorPackagesPage() {
           and increase service profitability with a clear step-up path.
         </p>
         <NavLink to="/full-catalogue" className="mt-4 inline-flex rounded-lg border border-slate-400 px-4 py-2 text-sm font-semibold text-white">
-          Quick View: Full Catalogue
+          Quick View: The Collection
         </NavLink>
       </div>
 
@@ -1412,6 +1429,7 @@ function FullCataloguePage() {
   const [viewportHeight, setViewportHeight] = useState(720)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+  const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
   const virtualContainerRef = useRef(null)
 
   useEffect(() => {
@@ -1621,7 +1639,7 @@ function FullCataloguePage() {
     <section className="space-y-5">
       <div className="rounded-2xl border border-black/10 bg-white p-5 sm:p-6">
         <p className="text-xs uppercase tracking-[0.2em] text-black/50">Luxury Colour Library</p>
-        <h1 className="mt-2 text-xl font-black uppercase tracking-[0.04em] text-black sm:text-3xl sm:tracking-[0.06em]">Full Product Catalogue</h1>
+        <h1 className="mt-2 text-xl font-black uppercase tracking-[0.04em] text-black sm:text-3xl sm:tracking-[0.06em]">The Collection</h1>
         <p className="mt-2 text-sm text-black/65">
           Keep the main product pages as they are, and use this quick-click catalogue to open what is available by category.
         </p>
@@ -1701,7 +1719,7 @@ function FullCataloguePage() {
           <div className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-lg font-black uppercase tracking-[0.05em] text-black">{activeSection?.category || 'Catalogue'}</h2>
+                <h2 className="text-lg font-black uppercase tracking-[0.05em] text-black">{activeSection?.category || 'The Collection'}</h2>
                 <p className="mt-1 text-xs text-black/55">{filteredItems.length} matching items</p>
               </div>
               <div className="rounded-[12px] border border-black/10 bg-white px-3 py-2 text-xs text-black/70">
@@ -1791,11 +1809,14 @@ function FullCataloguePage() {
 
                       if (bulkMode) {
                         return (
-                          <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 rounded-[12px] border border-black/10 bg-white px-3 py-2 transition duration-300 hover:border-fuchsia-500/70 hover:shadow-[0_0_0_1px_rgba(217,70,239,0.26)]">
+                          <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 rounded-[12px] border border-[#E8E8E8] bg-[#E8E8E8] px-3 py-2 transition duration-300 hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_1px_rgba(212,55,144,0.26)]">
                             <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-black/10 bg-white object-contain" loading="lazy" />
                             <div className="min-w-0 flex-1">
                               <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                               <p className="truncate text-[11px] font-light text-black/55">{itemCode}</p>
+                              {silverFreeGuarantee && (
+                                <p className="truncate text-[10px] font-semibold uppercase tracking-[0.06em] text-fuchsia-600">HEMA-FREE | TPO-FREE | CI 77820-FREE</p>
+                              )}
                             </div>
                             <button onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>−</button>
                             <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className={`h-7 w-10 rounded-[10px] border text-center text-xs ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/20 text-black/70'}`} />
@@ -1806,13 +1827,16 @@ function FullCataloguePage() {
                       }
 
                       return (
-                        <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`overflow-hidden rounded-[14px] border border-black/10 bg-white transition duration-300 hover:scale-[1.05] hover:border-fuchsia-500/70 hover:shadow-[0_0_0_2px_rgba(217,70,239,0.24)] ${getTileVariant(itemIndex)}`}>
+                        <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`overflow-hidden rounded-[14px] border border-[#E8E8E8] bg-[#E8E8E8] transition duration-300 hover:scale-[1.05] hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`}>
                           <div className="flex h-56 w-full items-center justify-center bg-white p-2 sm:h-60">
                             <img src={item.imageUrl} alt={item.name} loading="lazy" className="max-h-full w-full object-contain" />
                           </div>
                           <div className="border-t border-black/10 px-2.5 py-2">
                             <p className="truncate text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                             <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
+                            {silverFreeGuarantee && (
+                              <p className="mt-1 truncate text-[10px] font-semibold uppercase tracking-[0.06em] text-fuchsia-600">HEMA-FREE | TPO-FREE | CI 77820-FREE</p>
+                            )}
                             <div className="mt-2 flex items-center gap-1">
                               <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
                               <p className="truncate text-[11px] font-light text-black/55">{item.subcategory}</p>
@@ -2153,7 +2177,7 @@ function BaselinePageView() {
   )
 }
 
-function HomePage() {
+function HomePage({ onOpenRegulatoryStatement = () => {} }) {
   const [media, setMedia] = useState(() => ({
     heroImage: '/logo.png',
     heroVideo: null,
@@ -2276,14 +2300,42 @@ function HomePage() {
         </div>
       </div>
 
-      <InfoCard id="products" title="Product Families">
+      <div className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 pb-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/50">Live Regulatory Feed</p>
+            <h2 className="mt-1 text-lg font-black uppercase tracking-[0.05em] text-black sm:text-xl">Regulatory Leadership: The CI 77820 (Silver) Update.</h2>
+            <p className="mt-1 text-sm text-black/70">Proactive compliance ensuring the future-proof safety of your salon inventory.</p>
+          </div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+            <span className="relative inline-flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+            </span>
+            {new Date(`${COMPLIANCE_DATE}T00:00:00.000Z`).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+          </div>
+        </div>
+
+        <p className="mt-3 text-sm font-semibold text-black">{CI77820_MAIN_STATEMENT}</p>
+        <p className="mt-2 text-xs text-black/65">{CI77820_TRANSPARENCY_NOTE}</p>
+
+        <button
+          type="button"
+          onClick={onOpenRegulatoryStatement}
+          className="mt-3 inline-flex rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
+        >
+          Regulatory Transparency: CI 77820 Statement
+        </button>
+      </div>
+
+      <InfoCard id="products" title="The Collection">
         <p>
           The GEL.IT.UP lineup includes Soak-off Gel Polish, Base and Top Coats, Builder System,
           Nail Polishes, Nail Art, Consumables, and Skin & Nail Care.
           We also maintain a broad color portfolio (800+ shades) for professional channels.
         </p>
         <NavLink to="/full-catalogue" className="mt-3 inline-flex rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700">
-          Open Full Catalogue (Quick Click)
+          Open The Collection
         </NavLink>
         {media.gallery.length > 0 && (
           <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -2460,9 +2512,9 @@ function PortalLogin({ onLogin, onResendConfirmation, onCheckApproval }) {
     <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
       <div className="bg-slate-900 p-8 text-white">
         <p className="text-xs uppercase tracking-[0.2em] text-slate-300">GEL.IT.UP Trade</p>
-        <h2 className="mt-3 text-3xl font-bold">Distributor Portal</h2>
+        <h2 className="mt-3 text-3xl font-bold">Professional Access</h2>
         <p className="mt-4 text-sm text-slate-300">
-          Sign in to access wholesale pricing, order history, order intake, and account support.
+          Professional Access. Enter your archives and locked pro-pricing.
         </p>
         <ul className="mt-6 space-y-2 text-sm text-slate-300">
           <li>• Real-time account overview</li>
@@ -2526,7 +2578,7 @@ function PortalLogin({ onLogin, onResendConfirmation, onCheckApproval }) {
           </label>
 
           <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
-            {isSubmitting ? 'Signing in...' : 'Access Portal'}
+            {isSubmitting ? 'Signing in...' : 'Enter Professional Access'}
           </button>
         </form>
 
@@ -3178,6 +3230,7 @@ function ProductsModule({ moduleView = 'products' }) {
   const [category, setCategory] = useState('All')
   const [selectedCodes, setSelectedCodes] = useState([])
   const [showSelectedOnly, setShowSelectedOnly] = useState(false)
+  const [showCleanScienceOnly, setShowCleanScienceOnly] = useState(false)
   const [packageTier, setPackageTier] = useState('Silver')
   const [draftInvoice, setDraftInvoice] = useState('')
   const [dismissedTechnicalUpsell, setDismissedTechnicalUpsell] = useState(false)
@@ -3211,6 +3264,7 @@ function ProductsModule({ moduleView = 'products' }) {
   const [shippingMetadataStatus, setShippingMetadataStatus] = useState('Using embedded shipping metadata rules.')
   const productsTable = import.meta.env.VITE_B2B_PRODUCTS_TABLE || DEFAULT_PRODUCTS_TABLE
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
+  const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
 
   useEffect(() => {
     localStorage.setItem(CLIENT_PROFILE_STORAGE_KEY, JSON.stringify(clientProfile))
@@ -3812,10 +3866,11 @@ function ProductsModule({ moduleView = 'products' }) {
         || (product.name || '').toLowerCase().includes(query.toLowerCase())
       const matchesCategory = category === 'All' || product.category === category
       const matchesSelected = !showSelectedOnly || selectedCodes.includes(product.code)
+      const matchesCleanScience = !showCleanScienceOnly || hasReachedComplianceDate(new Date())
 
-      return matchesSearch && matchesCategory && matchesSelected
+      return matchesSearch && matchesCategory && matchesSelected && matchesCleanScience
     })
-  }, [category, products, query, selectedCodes, showSelectedOnly])
+  }, [category, products, query, selectedCodes, showSelectedOnly, showCleanScienceOnly])
 
   const toggleSelection = (code) => {
     setSelectedCodes((current) =>
@@ -4122,9 +4177,17 @@ function ProductsModule({ moduleView = 'products' }) {
 
     const tableEndY = doc.lastAutoTable?.finalY || cursorY + 8
     const footerY = Math.min(tableEndY + 22, pageHeight - 64)
+    const silverFreeBadge = getSilverFreeGuaranteeText(lastProformaInvoice?.createdAtIso)
 
     doc.setFontSize(12)
     doc.text(`Grand Total (EUR): ${currencyFormatter(lastProformaInvoice.grandTotalEur)}`, pageWidth - margin, footerY, { align: 'right' })
+
+    if (silverFreeBadge) {
+      doc.setFontSize(9)
+      doc.setTextColor(217, 70, 239)
+      doc.text(silverFreeBadge, margin, footerY)
+      doc.setTextColor(...textColor)
+    }
 
     doc.setFontSize(9)
     doc.text(
@@ -4289,7 +4352,7 @@ function ProductsModule({ moduleView = 'products' }) {
 
   const submitOrder = async () => {
     if (!selectedCodes.length && !packageCartItems.length && !includeProfessionalBasePack) {
-      setCheckoutError('Select at least one product to submit checkout.')
+      setCheckoutError('Select at least one product to finalize order.')
       setCheckoutMessage('')
       return
     }
@@ -4796,11 +4859,11 @@ function ProductsModule({ moduleView = 'products' }) {
             <p className="font-semibold text-slate-900">Product Feed</p>
             <div className="mt-1 flex items-center gap-2">
               <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${feedBadgeClass}`}>{feedStatus}</span>
-              <span>{isLoadingFeed ? 'Fetching products' : 'Catalog source'}</span>
+              <span>{isLoadingFeed ? 'Fetching products' : 'Collection source'}</span>
             </div>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
-            <p className="font-semibold text-slate-900">Checkout Endpoint</p>
+            <p className="font-semibold text-slate-900">Finalize Order Endpoint</p>
             <div className="mt-1 flex items-center gap-2">
               <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${checkoutBadgeClass}`}>
                 {checkoutIsLive ? 'Live' : 'Fallback'}
@@ -4996,7 +5059,7 @@ function ProductsModule({ moduleView = 'products' }) {
             disabled={isSubmittingOrder}
             className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
           >
-            {isSubmittingOrder ? 'Submitting...' : `Submit Order (${totalUnits})`}
+            {isSubmittingOrder ? 'Submitting...' : `Finalize Order (${totalUnits})`}
           </button>
           <a
             href={checkoutHref}
@@ -5207,7 +5270,7 @@ function ProductsModule({ moduleView = 'products' }) {
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
         <div className="mb-3 flex items-center justify-between gap-2">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">GEL.IT.UP Product Catalog</h3>
+            <h3 className="text-lg font-semibold text-slate-900">GEL.IT.UP The Collection</h3>
             <p className="mt-1 text-xs text-slate-500">Add extra products outside package tiers.</p>
           </div>
           <button
@@ -5217,7 +5280,7 @@ function ProductsModule({ moduleView = 'products' }) {
             Back to Tiers
           </button>
         </div>
-        <p className="mt-1 text-xs text-slate-500">Distributor ordering workflow for all GEL.IT.UP products.</p>
+        <p className="mt-1 text-xs text-slate-500">Professional ordering workflow for The Collection.</p>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           <input
@@ -5231,7 +5294,7 @@ function ProductsModule({ moduleView = 'products' }) {
             onChange={(event) => setCategory(event.target.value)}
             className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
           >
-            <option value="All">All categories</option>
+            <option value="All">All collection categories</option>
             {PRODUCT_CATEGORIES.map((item) => (
               <option key={item} value={item}>{item}</option>
             ))}
@@ -5244,6 +5307,19 @@ function ProductsModule({ moduleView = 'products' }) {
             />
             Show selected only
           </label>
+          <label className="flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={showCleanScienceOnly}
+              onChange={(event) => setShowCleanScienceOnly(event.target.checked)}
+            />
+            Clean Science only
+          </label>
+        </div>
+
+        <div className="mt-3 rounded-lg border border-fuchsia-200 bg-fuchsia-50 p-3 text-xs text-fuchsia-900">
+          <p className="font-semibold uppercase tracking-wide">Why HEMA-Free matters?</p>
+          <p className="mt-1">Reduce insurance risks and client reactions by switching to Gelitup’s regulated, clean chemistry.</p>
         </div>
 
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
@@ -5280,6 +5356,11 @@ function ProductsModule({ moduleView = 'products' }) {
                   {product.description || 'No description'}
                 </p>
                 <p className={`text-[11px] ${selected ? 'text-slate-300' : 'text-slate-500'}`}>{product.category}</p>
+                {silverFreeGuarantee && (
+                  <p className={`mt-1 text-[10px] font-semibold uppercase tracking-[0.06em] ${selected ? 'text-fuchsia-200' : 'text-fuchsia-600'}`}>
+                    HEMA-FREE | TPO-FREE | CI 77820-FREE
+                  </p>
+                )}
               </button>
             )
           })}
@@ -5935,6 +6016,58 @@ function PortalDashboard({ onLogout }) {
     topSellingColor: '09 Coco Nude',
   })
 
+  const printComplianceCertificate = useCallback(async () => {
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' })
+    const margin = 44
+    const titleY = 72
+    const now = new Date()
+    const dateLabel = now.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+    let distributorLabel = 'Approved GEL.IT.UP Distributor'
+
+    if (hasSupabaseConfig && supabase) {
+      const { data } = await supabase.auth.getUser()
+      const user = data?.user
+      const userMeta = user?.user_metadata || {}
+      const companyName = String(userMeta.company_name || userMeta.full_name || user?.email || '').trim()
+      if (companyName) distributorLabel = companyName
+    }
+
+    doc.setTextColor(0, 0, 0)
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(18)
+    doc.text('GEL.IT.UP COMPLIANCE CERTIFICATE', margin, titleY)
+
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(10)
+    doc.text(`Issued: ${dateLabel}`, margin, titleY + 24)
+    doc.text(`Certificate Holder: ${distributorLabel}`, margin, titleY + 40)
+
+    doc.setDrawColor(217, 70, 239)
+    doc.line(margin, titleY + 52, 550, titleY + 52)
+
+    const statements = [
+      'Declaration 1: HEMA-FREE formulation standard is active across current production lines.',
+      'Declaration 2: TPO-FREE photoinitiator policy is active across current production lines.',
+      `Declaration 3: CI 77820 (Silver) FREE transition has been active since ${new Date(`${COMPLIANCE_DATE}T00:00:00.000Z`).toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}.`,
+      'Regulatory Note: Legacy stock (pre-Dec 2025) may contain trace levels (<0.2%) in line with EC 1223/2009 requirements at time of manufacture.',
+      'Current Pigment Strategy: Aluminium and mica-based alternatives, including CI 77000, CI 77891, Synthetic Fluorphlogopite, and Calcium Aluminium Borosilicate.',
+    ]
+
+    doc.setFontSize(11)
+    let cursorY = titleY + 84
+    statements.forEach((line) => {
+      const wrapped = doc.splitTextToSize(line, 510)
+      doc.text(wrapped, margin, cursorY)
+      cursorY += (wrapped.length * 15) + 6
+    })
+
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(217, 70, 239)
+    doc.text('Professional Choice. Professional Results.', margin, Math.min(cursorY + 16, 760))
+
+    doc.save(`gelitup-compliance-certificate-${now.toISOString().slice(0, 10)}.pdf`)
+  }, [])
+
   const modules = useMemo(
     () => [
       { key: 'overview', label: 'Overview' },
@@ -6187,7 +6320,7 @@ function PortalDashboard({ onLogout }) {
               to={`/portal/dashboard/${module.key}`}
               className={({ isActive }) =>
                 `block rounded-lg px-3 py-2 text-sm font-medium ${
-                  isActive ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100'
+                  isActive ? 'bg-[#1A1A1A] text-white' : 'text-[#4A4A4A] hover:bg-[#E8E8E8]'
                 }`
               }
             >
@@ -6195,7 +6328,7 @@ function PortalDashboard({ onLogout }) {
             </NavLink>
           ))}
         </nav>
-        <button onClick={onLogout} className="mt-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700">
+        <button onClick={onLogout} className="mt-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-[#4A4A4A]">
           Sign Out
         </button>
       </aside>
@@ -6278,6 +6411,22 @@ function PortalDashboard({ onLogout }) {
                     </button>
                   </article>
                 </div>
+              </div>
+            )}
+
+            {activeModule === 'overview' && (
+              <div className="rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-4 sm:p-5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-700">B2B Regulatory Docs</p>
+                <p className="mt-2 text-sm text-fuchsia-900">Generate the inspector-ready certificate including HEMA-Free, TPO-Free, and CI 77820-Free declarations.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void printComplianceCertificate()
+                  }}
+                  className="mt-3 inline-flex rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
+                >
+                  Print Compliance Certificate
+                </button>
               </div>
             )}
 
@@ -6833,7 +6982,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen pb-24 md:pb-8">
+    <div className="lux-theme min-h-screen pb-24 md:pb-8">
       <ScrollToTopOnRouteChange />
       <header className="sticky top-0 z-40 border-b border-white/15 bg-black/80 backdrop-blur-[10px]">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-3 py-2.5 md:px-6 md:py-3">
