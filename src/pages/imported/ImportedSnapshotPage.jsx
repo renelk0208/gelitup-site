@@ -331,65 +331,43 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
         </div>
 
         <div className="rounded-2xl border border-[#E8E8E8] bg-white p-5 sm:p-7">
-          <h2 className="text-2xl font-extrabold uppercase tracking-[0.15em] text-[#1A1A1A] sm:text-3xl">GEL.IT.UP by GIUP® IN THE WILD.</h2>
+          <h2 className="text-2xl font-extrabold uppercase tracking-[0.15em] text-[#1A1A1A] sm:text-3xl">GEL.IT.UP by GIUP® LIVE.</h2>
           <p className="mt-2 text-sm font-medium text-[#1A1A1A]">Real salon outputs that prove market demand for distributors.</p>
 
-          {instagramTiles.length > 0
-            ? (
-              <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
-                {instagramTiles.map((tile, index) => {
-                  const isVideo = Boolean(tile && (tile.displayUrl.toLowerCase().includes('.mp4') || tile.displayUrl.toLowerCase().includes('.webm')))
-                  const tileUrl = tile?.displayUrl
-
-                  return (
-                    <a
-                      key={`social-tile-${index}`}
-                      href={tile.sourceUrl || INSTAGRAM_URL}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="group relative overflow-hidden rounded-2xl border border-[#4A4A4A]/20 bg-white shadow-[0_10px_24px_rgba(26,26,26,0.08)] transition duration-300 hover:-translate-y-0.5 hover:border-fuchsia-400/60 hover:shadow-[0_12px_28px_rgba(212,55,144,0.14)]"
-                      aria-label="Open GEL.IT.UP by GIUP® Instagram"
-                    >
-                      {isVideo
-                        ? (
-                          <video src={tileUrl} className="h-24 w-full object-cover sm:h-32 lg:h-40 xl:h-44" muted playsInline autoPlay loop controls={false} />
-                          )
-                        : (
-                          <img src={tileUrl} alt="GEL.IT.UP by GIUP® salon result" className="h-24 w-full object-cover sm:h-32 lg:h-40 xl:h-44" loading="lazy" />
-                          )}
-                      <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-white/35" aria-hidden="true" />
-                    </a>
-                  )
-                })}
-              </div>
-              )
-            : (
-              <div className="mt-4 space-y-3">
-                {!!fallbackVideo && (
-                  <div className="overflow-hidden rounded-2xl border border-[#4A4A4A]/20 bg-[#1A1A1A]">
-                    <video
-                      src={fallbackVideo}
-                      className="h-56 w-full object-cover sm:h-72"
-                      muted
-                      playsInline
-                      autoPlay
-                      loop
-                      controls={false}
-                    />
-                  </div>
+          <div className="mt-4 space-y-3">
+            {(fallbackVideo || heroMedia?.displayUrl) && (
+              <div className="overflow-hidden rounded-2xl border border-[#4A4A4A]/20 bg-[#1A1A1A]">
+                {fallbackVideo && fallbackVideo.toLowerCase().includes('.mp4') || fallbackVideo?.toLowerCase().includes('.webm') ? (
+                  <video
+                    src={fallbackVideo}
+                    className="h-72 w-full object-cover sm:h-96"
+                    muted
+                    playsInline
+                    autoPlay
+                    loop
+                    controls={false}
+                  />
+                ) : (
+                  <img
+                    src={heroMedia?.displayUrl || fallbackVideo}
+                    alt="GEL.IT.UP live salon work"
+                    className="h-72 w-full object-cover sm:h-96"
+                    loading="lazy"
+                  />
                 )}
-                <div className="text-center">
-                  <a
-                    href={INSTAGRAM_URL}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]"
-                  >
-                    Follow Us on Instagram
-                  </a>
-                </div>
               </div>
-              )}
+            )}
+            <div className="text-center">
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]"
+              >
+                Follow Us on Instagram
+              </a>
+            </div>
+          </div>
         </div>
 
         <div className="pb-2 text-center">
