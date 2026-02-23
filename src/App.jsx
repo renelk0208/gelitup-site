@@ -58,9 +58,20 @@ const LEAPING_BUNNY_ICON_PATH = '/gelitup-content/certification%20logos/leaping-
 const LEEUKOPF_DISTRIBUTORS_MAP_URL = 'https://www.google.com/maps/embed?origin=mfe&pb=!1m3!2m1!1sEurope!6i3'
 const LEEUKOPF_DISTRIBUTORS_SOURCE_URL = 'https://leeukopf.com/our-brands'
 const VERIFIED_DISTRIBUTOR_COUNTRIES = [
-  'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Denmark', 'France', 'Greece', 'Holland', 'Israel',
-  'Italy', 'Moldova', 'New Zealand', 'Qatar', 'Kingdom of Saudi Arabia', 'Serbia', 'South Africa', 'United Kingdom',
+  'Belgium', 'Bulgaria', 'Cyprus', 'France', 'Greece', 'Israel',
+  'Qatar', 'Kingdom of Saudi Arabia', 'United Kingdom',
 ]
+const DISTRIBUTOR_DIRECTORY = VERIFIED_DISTRIBUTOR_COUNTRIES.map((country) => {
+  const mapQuery = encodeURIComponent(`${country} gelitup distributor`)
+  return {
+    country,
+    distributorName: `Authorized Gelitup Distributor - ${country}`,
+    address: PROFORMA_LEEUKOPF_ADDRESS,
+    phone: PROFORMA_LEEUKOPF_PHONE,
+    email: PROFORMA_LEEUKOPF_EMAIL,
+    mapUrl: `https://www.google.com/maps?q=${mapQuery}&output=embed`,
+  }
+})
 const SILVER_FREE_GUARANTEE_BADGE = 'Silver-Free Guarantee'
 const CI77820_MAIN_STATEMENT = 'All Gelitup products manufactured from December 2025 onwards are 100% CI 77820 (Silver) FREE.'
 const CI77820_TRANSPARENCY_NOTE = 'Legacy stock (pre-Dec 2025) may contain traces (<0.2%) in full compliance with original EC 1223/2009 standards. All current batches have transitioned to Aluminium and Mica-based pigments.'
@@ -2551,6 +2562,9 @@ function PortalLanding() {
 }
 
 function DistributorsPage() {
+  const [selectedCountry, setSelectedCountry] = useState(DISTRIBUTOR_DIRECTORY[0]?.country ?? '')
+  const selectedDistributor = DISTRIBUTOR_DIRECTORY.find((item) => item.country === selectedCountry) ?? DISTRIBUTOR_DIRECTORY[0]
+
   return (
     <section className="space-y-5">
       <div className="rounded-2xl bg-[#1A1A1A] p-5 text-white sm:p-8">
@@ -2560,18 +2574,57 @@ function DistributorsPage() {
           LIVE COVERAGE DATA. VERIFIED NETWORK. LEGITIMATE B2B DATABASE.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          {VERIFIED_DISTRIBUTOR_COUNTRIES.map((country) => (
-            <span key={country} className="rounded-full border border-white/30 bg-white/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-white">
-              {country}
-            </span>
+          {DISTRIBUTOR_DIRECTORY.map((item) => (
+            <button
+              key={item.country}
+              type="button"
+              onClick={() => setSelectedCountry(item.country)}
+              className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] transition ${selectedCountry === item.country
+                ? 'border-white bg-white text-[#1A1A1A]'
+                : 'border-white/30 bg-white/10 text-white hover:bg-white/20'}`}
+            >
+              {item.country}
+            </button>
           ))}
         </div>
       </div>
 
+      {selectedDistributor && (
+        <div className="rounded-2xl border border-[#4A4A4A] bg-white p-4 sm:p-5">
+          <h2 className="heading-on-light text-lg font-extrabold text-[#1A1A1A] sm:text-xl">
+            {selectedDistributor.country}
+            {' '}
+            Distributor Details
+          </h2>
+          <div className="mt-3 grid gap-3 text-sm text-[#1A1A1A] sm:grid-cols-2">
+            <div className="rounded-xl border border-[#E8E8E8] bg-[#E8E8E8] p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Distributor</p>
+              <p className="mt-1 font-semibold">{selectedDistributor.distributorName}</p>
+            </div>
+            <div className="rounded-xl border border-[#E8E8E8] bg-[#E8E8E8] p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Telephone</p>
+              <a href={`tel:${selectedDistributor.phone}`} className="mt-1 block font-semibold underline">
+                {selectedDistributor.phone}
+              </a>
+            </div>
+            <div className="rounded-xl border border-[#E8E8E8] bg-[#E8E8E8] p-3 sm:col-span-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Address</p>
+              <p className="mt-1 font-semibold">{selectedDistributor.address}</p>
+            </div>
+            <div className="rounded-xl border border-[#E8E8E8] bg-[#E8E8E8] p-3 sm:col-span-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Email</p>
+              <a href={`mailto:${selectedDistributor.email}`} className="mt-1 block font-semibold underline">
+                {selectedDistributor.email}
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-2xl border border-[#4A4A4A] bg-[#E8E8E8] p-4 sm:p-5">
         <h2 className="heading-on-light text-lg font-extrabold text-[#1A1A1A] sm:text-xl">Distributor Coverage Map</h2>
         <p className="mt-2 text-sm text-[#1A1A1A]">
-          Source: Leeukopf distributors network data.
+          Click a country above to load the map focus and distributor details.
           {' '}
           <a href={LEEUKOPF_DISTRIBUTORS_SOURCE_URL} target="_blank" rel="noreferrer" className="font-semibold underline">
             View source
@@ -2581,7 +2634,7 @@ function DistributorsPage() {
         <div className="mt-3 overflow-hidden rounded-xl border border-[#4A4A4A] bg-white">
           <iframe
             title="Gelitup distributors map"
-            src={LEEUKOPF_DISTRIBUTORS_MAP_URL}
+            src={selectedDistributor?.mapUrl ?? LEEUKOPF_DISTRIBUTORS_MAP_URL}
             className="h-[320px] w-full sm:h-[420px]"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
