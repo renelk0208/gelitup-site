@@ -80,6 +80,35 @@ a {
   }
 }
 
+.manifesto-overlay {
+  animation: manifestoOverlayIn 0.24s ease both;
+}
+
+.manifesto-panel {
+  border-radius: 1rem 1rem 0 0;
+  animation: manifestoPanelIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes manifestoOverlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes manifestoPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 input,
 button,
 textarea,
@@ -97,5 +126,20 @@ select {
   h3,
   h4 {
     letter-spacing: 0.03em;
+  }
+
+  .manifesto-panel {
+    animation: manifestoDrawerUp 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes manifestoDrawerUp {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }

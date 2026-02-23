@@ -2159,6 +2159,7 @@ function HomePage() {
     heroVideo: null,
     gallery: [],
   }))
+  const [isManifestoOpen, setIsManifestoOpen] = useState(false)
 
   useEffect(() => {
     let isMounted = true
@@ -2188,6 +2189,27 @@ function HomePage() {
       isMounted = false
     }
   }, [])
+
+  useEffect(() => {
+    if (!isManifestoOpen) {
+      return undefined
+    }
+
+    const previousOverflow = document.body.style.overflow
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsManifestoOpen(false)
+      }
+    }
+
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isManifestoOpen])
 
   return (
     <section className="space-y-6">
@@ -2220,6 +2242,37 @@ function HomePage() {
               controls={false}
             />
           )}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-white/20 bg-black px-4 py-3 text-white sm:px-5">
+        <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.16em] sm:text-xs">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1.5">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full border border-white/40 text-[10px]">C</span>
+            <span>CPNP</span>
+            <button
+              type="button"
+              onClick={() => setIsManifestoOpen(true)}
+              className="border-b border-transparent text-fuchsia-300 hover:border-fuchsia-500 hover:text-fuchsia-200"
+            >
+              Learn More
+            </button>
+          </span>
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1.5">
+            <span className="text-base leading-none" aria-hidden="true">🇪🇺</span>
+            <span>EU Regulation</span>
+            <button
+              type="button"
+              onClick={() => setIsManifestoOpen(true)}
+              className="border-b border-transparent text-fuchsia-300 hover:border-fuchsia-500 hover:text-fuchsia-200"
+            >
+              Learn More
+            </button>
+          </span>
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1.5">
+            <span className="text-sm">🐇</span>
+            <span>Leaping Bunny</span>
+          </span>
         </div>
       </div>
 
@@ -2280,6 +2333,55 @@ function HomePage() {
           Open Registration Form
         </NavLink>
       </InfoCard>
+
+      {isManifestoOpen && (
+        <div
+          className="manifesto-overlay fixed inset-0 z-[90] flex items-end justify-center bg-black/75 p-0 sm:items-center sm:p-6"
+          style={{ backdropFilter: 'blur(15px)' }}
+          onClick={() => setIsManifestoOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Compliance Manifesto"
+        >
+          <div
+            className="manifesto-panel relative w-full border border-fuchsia-500 bg-black px-5 pb-6 pt-12 text-white sm:max-w-3xl sm:rounded-2xl sm:px-8 sm:pb-8 sm:pt-14"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              aria-label="Close manifesto modal"
+              onClick={() => setIsManifestoOpen(false)}
+              className="absolute right-4 top-4 text-xl font-bold leading-none text-fuchsia-400 hover:text-fuchsia-300"
+            >
+              ×
+            </button>
+
+            <p className="text-xs uppercase tracking-[0.2em] text-fuchsia-300">Compliance Manifesto</p>
+            <h2 className="mt-3 text-2xl font-extrabold leading-tight sm:text-3xl">BEYOND COLOR: THE STANDARDS OF A LEADER.</h2>
+
+            <div className="mt-6 space-y-5 text-sm leading-relaxed text-white/90 sm:text-base">
+              <section>
+                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-fuchsia-200">CPNP</h3>
+                <p className="mt-2">Every formula in The Spectrum is CPNP Notified. This is your legal guarantee that Gelitup is fully authorized for sale and professional use across every EU member state.</p>
+              </section>
+
+              <section>
+                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-fuchsia-200">EU Regulation</h3>
+                <p className="mt-2">We operate under the world’s strictest safety protocols. Our manufacturing is ISO-certified, ensuring zero hazardous contaminants and 100% batch consistency.</p>
+              </section>
+
+              <section>
+                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-fuchsia-200">Leaping Bunny</h3>
+                <p className="mt-2">Ethics without compromise. We are 100% Leaping Bunny Approved—the global gold standard for cruelty-free cosmetics.</p>
+              </section>
+            </div>
+
+            <p className="mt-7 border-t border-white/20 pt-5 text-sm font-semibold uppercase tracking-[0.08em] text-white sm:text-base">
+              When you choose Gelitup, you aren’t just buying gel; you are buying the peace of mind that comes with total regulatory compliance.
+            </p>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
