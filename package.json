@@ -28,14 +28,14 @@
     "react-router-dom": "^7.13.0"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "^9.39.3",
     "@tailwindcss/postcss": "^4.2.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vite-pwa/assets-generator": "^1.0.2",
     "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.4.24",
-    "eslint": "^10.0.1",
+    "eslint": "^9.39.3",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.23",
     "globals": "^16.4.0",
