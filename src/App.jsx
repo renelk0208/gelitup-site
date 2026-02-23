@@ -2,11 +2,22 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
+import L from 'leaflet'
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
+import markerIcon from 'leaflet/dist/images/marker-icon.png'
+import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import appLogo from '/logo.png'
 import PWABadge from './PWABadge.jsx'
 import ImportedAnyPage from './pages/imported/ImportedAnyPage.jsx'
 import { hasSupabaseConfig, supabase } from './lib/supabaseClient'
 import useB2BIntelligence from './lib/useB2BIntelligence'
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+})
 
 const B2B_EMAIL = 'distribution@gelitup.com'
 const PRODUCT_CATEGORIES = ['Solid Colours', 'Builder Gels', 'Base & Top', 'Nail Care', 'Accessories']
@@ -2338,7 +2349,6 @@ function HomePage() {
     heroVideo: null,
     gallery: [],
   }))
-  const [isManifestoOpen, setIsManifestoOpen] = useState(false)
 
   useEffect(() => {
     let isMounted = true
@@ -2369,31 +2379,10 @@ function HomePage() {
     }
   }, [])
 
-  useEffect(() => {
-    if (!isManifestoOpen) {
-      return undefined
-    }
-
-    const previousOverflow = document.body.style.overflow
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        setIsManifestoOpen(false)
-      }
-    }
-
-    document.body.style.overflow = 'hidden'
-    window.addEventListener('keydown', handleKeyDown)
-
-    return () => {
-      document.body.style.overflow = previousOverflow
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [isManifestoOpen])
-
   return (
     <section className="space-y-6">
-      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-black">
-        <div className="relative h-[66vh] min-h-[420px] w-full sm:h-[74vh]">
+      <div className="mx-auto w-full max-w-6xl overflow-hidden rounded-2xl bg-black">
+        <div className="relative h-[70vh] min-h-[460px] w-full sm:h-[78vh]">
           {(HERO_CINEMATIC_VIDEO_URL || media.heroVideo)
             ? (
               <video
@@ -2419,7 +2408,7 @@ function HomePage() {
 
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
             <h1 className="hero-copy-shadow heading-on-dark max-w-5xl text-3xl font-black uppercase leading-tight tracking-[0.15em] text-white sm:text-4xl lg:text-6xl">
-              GELITUP: THE ARCHITECTS OF PROFESSIONAL COLOR.
+              GEL.IT.UP by GIUP®: THE ARCHITECTS OF PROFESSIONAL COLOR.
             </h1>
             <p className="hero-copy-shadow mt-4 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] text-white/95 sm:text-base">
               A DECADE OF PROFESSIONAL MASTERY. EU REGULATED. HEMA & TPO-FREE.
@@ -2436,41 +2425,45 @@ function HomePage() {
 
           <div className="absolute inset-x-0 bottom-3 z-30 px-3 md:bottom-4 md:px-6">
             <div className="mx-auto flex flex-wrap items-center justify-center gap-2 rounded-full border border-white/35 bg-black/60 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur-[15px] sm:gap-3 sm:px-3 sm:text-[11px]">
-              <button type="button" onClick={() => setIsManifestoOpen(true)} title="CPNP" aria-label="CPNP" className="inline-flex min-h-9 items-center justify-center rounded-full border border-white/35 bg-white/10 px-3 text-white transition duration-300 hover:bg-white/20">CPNP</button>
-              <button type="button" onClick={() => setIsManifestoOpen(true)} title="HEMA/TPO Free" aria-label="HEMA/TPO Free" className="inline-flex min-h-9 items-center justify-center rounded-full border border-white/35 bg-white/10 px-3 text-white transition duration-300 hover:bg-white/20">HEMA/TPO</button>
-              <button type="button" onClick={() => setIsManifestoOpen(true)} title="Leaping Bunny" aria-label="Leaping Bunny" className="inline-flex min-h-9 items-center justify-center rounded-full border border-white/35 bg-white/10 px-3 text-white transition duration-300 hover:bg-white/20">BUNNY</button>
-              <button type="button" onClick={() => setIsManifestoOpen(true)} title="EU Regulation" aria-label="EU Regulation" className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/35 bg-white/10 text-sm font-bold text-white transition duration-300 hover:bg-white/20">EU</button>
+              <span className="inline-flex min-h-9 items-center justify-center rounded-full border border-white/35 bg-white/10 px-3 text-white">CPNP</span>
+              <span className="inline-flex min-h-9 items-center justify-center rounded-full border border-white/35 bg-white/10 px-3 text-white">HEMA/TPO</span>
+              <span className="inline-flex min-h-9 items-center justify-center rounded-full border border-white/35 bg-white/10 px-3 text-white">BUNNY</span>
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/35 bg-white/10 text-sm font-bold text-white">EU</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-4 sm:p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 pb-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/80">Live Regulatory Feed</p>
-            <h2 className="heading-on-dark mt-1 text-lg font-black uppercase tracking-[0.05em] sm:text-xl">Regulatory Leadership: The CI 77820 (Silver) Update.</h2>
-            <p className="mt-1 text-sm text-white/90">Proactive compliance ensuring the future-proof safety of your salon inventory.</p>
-          </div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-            <span className="relative inline-flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
-            </span>
-            {new Date(`${COMPLIANCE_DATE}T00:00:00.000Z`).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
-          </div>
+      <div className="rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-4 sm:p-6">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <article className="rounded-xl border border-white/15 bg-black/20 p-4">
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-xs font-bold text-white">CPNP</div>
+            <h3 className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] text-[#D43790]">CPNP NOTIFIED</h3>
+            <p className="mt-2 text-sm leading-relaxed text-white">Every formula in The Spectrum is CPNP Notified. This is your legal guarantee that GEL.IT.UP by GIUP® is fully authorized for sale across every EU member state.</p>
+          </article>
+
+          <article className="rounded-xl border border-white/15 bg-black/20 p-4">
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-xs font-bold text-white">EU</div>
+            <h3 className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] text-[#D43790]">STRICTEST SAFETY</h3>
+            <p className="mt-2 text-sm leading-relaxed text-white">We operate under the world’s strictest safety protocols. Our manufacturing is ISO-certified, ensuring zero hazardous contaminants and 100% batch consistency.</p>
+          </article>
+
+          <article className="rounded-xl border border-white/15 bg-black/20 p-4">
+            <div className="inline-flex h-10 items-center justify-center rounded-full border border-white/30 bg-white/10 px-3 text-xs font-bold text-white">HEMA/TPO</div>
+            <h3 className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] text-[#D43790]">CLEAN SCIENCE</h3>
+            <p className="mt-2 text-sm leading-relaxed text-white">Our clean-science policy enforces HEMA-free and TPO-free formulation standards across current production lines, prioritizing professional safety.</p>
+          </article>
+
+          <article className="rounded-xl border border-white/15 bg-black/20 p-4">
+            <div className="inline-flex h-10 items-center justify-center rounded-full border border-white/30 bg-white/10 px-3 text-xs font-bold text-white">BUNNY</div>
+            <h3 className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] text-[#D43790]">CRUELTY-FREE</h3>
+            <p className="mt-2 text-sm leading-relaxed text-white">Ethics without compromise. We are 100% Leaping Bunny Approved—the global gold standard for cruelty-free cosmetics.</p>
+          </article>
         </div>
 
-        <p className="mt-3 text-sm font-semibold text-white">{CI77820_MAIN_STATEMENT}</p>
-        <p className="mt-2 text-xs text-white/80">{CI77820_TRANSPARENCY_NOTE}</p>
-
-        <button
-          type="button"
-          onClick={() => setIsManifestoOpen(true)}
-          className="mt-3 inline-flex rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
-        >
-          Regulatory Transparency: CI 77820 Statement
-        </button>
+        <p className="mt-5 border-t border-white/20 pt-4 text-center text-sm font-extrabold uppercase tracking-[0.08em] text-white sm:text-base">
+          WHEN YOU CHOOSE GEL.IT.UP by GIUP®, YOU ARE BUYING TOTAL REGULATORY PEACE OF MIND.
+        </p>
       </div>
 
       <InfoCard id="products" title="The Collection">
@@ -2530,59 +2523,6 @@ function HomePage() {
         </NavLink>
       </InfoCard>
 
-      {isManifestoOpen && (
-        <div
-          className="manifesto-overlay fixed inset-0 z-[90] flex items-end justify-center bg-black/75 p-0 sm:items-center sm:p-6"
-          style={{ backdropFilter: 'blur(15px)' }}
-          onClick={() => setIsManifestoOpen(false)}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Compliance Manifesto"
-        >
-          <div
-            className="manifesto-panel relative w-full border border-fuchsia-500 bg-black px-5 pb-6 pt-12 text-white sm:max-w-3xl sm:rounded-2xl sm:px-8 sm:pb-8 sm:pt-14"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              aria-label="Close manifesto modal"
-              onClick={() => setIsManifestoOpen(false)}
-              className="absolute right-4 top-4 text-xl font-bold leading-none text-fuchsia-400 hover:text-fuchsia-300"
-            >
-              ×
-            </button>
-
-            <p className="text-xs uppercase tracking-[0.2em] text-fuchsia-300">Compliance Manifesto</p>
-            <h2 className="mt-3 text-2xl font-extrabold leading-tight sm:text-3xl">BEYOND COLOR: THE STANDARDS OF A LEADER.</h2>
-
-            <div className="mt-6 space-y-5 text-sm leading-relaxed text-white/90 sm:text-base">
-              <section>
-                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-fuchsia-200">CPNP</h3>
-                <p className="mt-2">Every formula in The Spectrum is CPNP Notified. This is your legal guarantee that Gelitup is fully authorized for sale and professional use across every EU member state.</p>
-              </section>
-
-              <section>
-                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-fuchsia-200">EU Regulation</h3>
-                <p className="mt-2">We operate under the world’s strictest safety protocols. Our manufacturing is ISO-certified, ensuring zero hazardous contaminants and 100% batch consistency.</p>
-              </section>
-
-              <section>
-                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-fuchsia-200">HEMA / TPO Free</h3>
-                <p className="mt-2">Our clean-science policy enforces HEMA-free and TPO-free formulation standards across current production lines, prioritizing professional safety and long-term salon trust.</p>
-              </section>
-
-              <section>
-                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-fuchsia-200">Leaping Bunny</h3>
-                <p className="mt-2">Ethics without compromise. We are 100% Leaping Bunny Approved—the global gold standard for cruelty-free cosmetics.</p>
-              </section>
-            </div>
-
-            <p className="mt-7 border-t border-white/20 pt-5 text-sm font-semibold uppercase tracking-[0.08em] text-white sm:text-base">
-              When you choose Gelitup, you aren’t just buying gel; you are buying the peace of mind that comes with total regulatory compliance.
-            </p>
-          </div>
-        </div>
-      )}
     </section>
   )
 }
@@ -2687,7 +2627,7 @@ function DistributorsPage() {
     <section className="space-y-5">
       <div className="rounded-2xl bg-[#1A1A1A] p-5 text-white sm:p-8">
         <p className="text-xs uppercase tracking-[0.16em] text-white/80">Verified Distribution Network</p>
-        <h1 className="heading-on-dark mt-2 text-2xl font-extrabold sm:text-4xl">Official Gelitup Distributors</h1>
+        <h1 className="heading-on-dark mt-2 text-2xl font-extrabold sm:text-4xl">Official GEL.IT.UP by GIUP® Distributors</h1>
         <p className="mt-3 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] text-white/95 sm:text-base">
           LIVE COVERAGE DATA. VERIFIED NETWORK. LEGITIMATE B2B DATABASE.
         </p>
@@ -2780,7 +2720,7 @@ function DistributorsPage() {
 
         <div className="mt-3 overflow-hidden rounded-xl border border-[#4A4A4A] bg-white">
           <iframe
-            title="Gelitup distributors map"
+            title="GEL.IT.UP by GIUP® distributors map"
             src={mapEmbedUrl}
             className="h-[320px] w-full sm:h-[420px]"
             loading="lazy"
@@ -7399,14 +7339,14 @@ function App() {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Company</p>
-            <p className="mt-2 text-sm font-semibold text-white">{PROFORMA_LEEUKOPF_COMPANY}</p>
-            <p className="mt-1">{PROFORMA_LEEUKOPF_ADDRESS}</p>
+            <p className="mt-2 text-sm font-semibold text-white">GEL.IT.UP by GIUP® Professional</p>
+            <p className="mt-1">Global Professional Distribution Network</p>
           </div>
 
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Contact</p>
             <p className="mt-2">Phone: {PROFORMA_LEEUKOPF_PHONE}</p>
-            <p className="mt-1">Email: {PROFORMA_LEEUKOPF_EMAIL}</p>
+            <p className="mt-1">Email: {B2B_EMAIL}</p>
             <p className="mt-1">Orders: {ORDER_INBOX_EMAIL}</p>
           </div>
 
