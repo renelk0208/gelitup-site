@@ -145,13 +145,9 @@ const DISTRIBUTOR_DIRECTORY = [
       },
       {
         name: 'Nails Services Institute Elena Chiou',
-        address: 'Greece',
-        phone: '+30 2241300919, +30 2241112572',
+        address: 'Karpathou 17, Rodos 851 00',
+        phone: '2241 300919',
         email: 'nsinailsgr@gmail.com',
-      },
-      {
-        name: 'Master Educator Nails Artist and Podology Trade and Training Center',
-        address: 'Karpathoy 17, RHODES, 85100, Greece',
       },
       {
         name: 'HairMod - Vrettakos Panagiotis',
