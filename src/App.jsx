@@ -1318,53 +1318,53 @@ function DistributorPackagesPage() {
         </NavLink>
       </div>
 
-      <section className="rounded-2xl border border-[#4A4A4A]/30 bg-[#E8E8E8] p-4 sm:p-6">
-        <div className="rounded-2xl bg-[#1A1A1A] p-4 text-white sm:p-6">
+      <section className="rounded-2xl border border-[#4A4A4A]/20 bg-[#F5F5F5] p-4 sm:p-6">
+        <div className="rounded-2xl bg-white p-4 sm:p-6">
           <h2
-            className="text-xl font-extrabold uppercase tracking-[0.12em] text-[#FFFFFF] sm:text-2xl"
+            className="text-xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-2xl"
             style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
           >
             STUDIO ELITE: THE BEGINNER FOUNDATION
           </h2>
-          <p className="mt-2 text-sm text-white/90 sm:text-base">
+          <p className="mt-2 text-sm font-medium text-[#4A4A4A] sm:text-base">
             Curated for high-traffic studios. A complete 360° system for the professional technician.
           </p>
 
           <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <article className="rounded-2xl border border-white/15 bg-black/20 p-4">
+            <article className="rounded-2xl border border-[#D43790]/15 bg-[#F5F5F5] p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">The System</p>
-              <h3 className="mt-1 text-base font-semibold uppercase tracking-[0.06em] text-white">Foundation Layer</h3>
-              <ul className="mt-3 space-y-1 text-sm text-white/90">
+              <h3 className="mt-1 text-base font-semibold uppercase tracking-[0.06em] text-[#1A1A1A]">Foundation Layer</h3>
+              <ul className="mt-3 space-y-1 text-sm text-[#4A4A4A]">
                 {studioMaintenanceEssentials.map((item) => (
                   <li key={item}>• {item}</li>
                 ))}
               </ul>
             </article>
 
-            <article className="rounded-2xl border border-white/15 bg-black/20 p-4">
+            <article className="rounded-2xl border border-[#D43790]/15 bg-[#F5F5F5] p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">The Palette</p>
-              <h3 className="mt-1 text-base font-semibold uppercase tracking-[0.06em] text-white">Service Spectrum</h3>
-              <ul className="mt-3 grid gap-1 text-sm text-white/90 sm:grid-cols-2">
+              <h3 className="mt-1 text-base font-semibold uppercase tracking-[0.06em] text-[#1A1A1A]">Service Spectrum</h3>
+              <ul className="mt-3 grid gap-1 text-sm text-[#4A4A4A] sm:grid-cols-2">
                 {studioCoreColors.map((item) => (
-                  <li key={item} className={item.includes('Ferrari Red (2316)') ? 'font-semibold text-white' : ''}>• {item}</li>
+                  <li key={item} className={item.includes('Ferrari Red (2316)') ? 'font-semibold text-[#D43790]' : ''}>• {item}</li>
                 ))}
               </ul>
             </article>
           </div>
 
-          <div className="mt-4 rounded-2xl border border-white/15 bg-black/20 p-3 sm:p-4">
+          <div className="mt-4 rounded-2xl border border-[#D43790]/15 bg-[#F5F5F5] p-3 sm:p-4">
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => setStudioTab('overview')}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition duration-300 ${studioTab === 'overview' ? 'bg-[#D43790] text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition duration-300 ${studioTab === 'overview' ? 'bg-[#D43790] text-white' : 'bg-[#E8E8E8] text-[#1A1A1A] hover:bg-[#D43790]/10'}`}
               >
                 Workflow Overview
               </button>
               <button
                 type="button"
                 onClick={() => setStudioTab('specs')}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition duration-300 ${studioTab === 'specs' ? 'bg-[#D43790] text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition duration-300 ${studioTab === 'specs' ? 'bg-[#D43790] text-white' : 'bg-[#E8E8E8] text-[#1A1A1A] hover:bg-[#D43790]/10'}`}
               >
                 Technical Specs
               </button>
@@ -1372,22 +1372,22 @@ function DistributorPackagesPage() {
 
             {studioTab === 'specs'
               ? (
-                <div className="mt-3 rounded-xl border border-white/15 bg-[#1A1A1A] p-3 text-sm text-white/90">
+                <div className="mt-3 rounded-xl border border-[#D43790]/15 bg-[#F5F5F5] p-3 text-sm text-[#4A4A4A]">
                   <p>• HEMA-Free: Confirmed for current production workflow.</p>
                   <p className="mt-1">• TPO-Free: Confirmed for studio-safe professional use.</p>
                   <p className="mt-1">• CPNP Notification: Registered and compliant for EU market operations.</p>
                 </div>
                 )
               : (
-                <div className="mt-3 rounded-xl border border-white/15 bg-[#1A1A1A] p-3 text-sm text-white/90">
+                <div className="mt-3 rounded-xl border border-[#D43790]/15 bg-[#F5F5F5] p-3 text-sm text-[#4A4A4A]">
                   Designed for workflow speed: prep-to-finish consistency, high-pigment performance, and service-repeat reliability under studio pressure.
                 </div>
                 )}
           </div>
 
-          <div className="mt-4 rounded-2xl border border-white/15 bg-black/20 p-4">
+          <div className="mt-4 rounded-2xl border border-[#D43790]/15 bg-[#F5F5F5] p-4">
             <h3 className="text-sm font-semibold uppercase tracking-[0.1em] text-[#D43790]">Studio Expansion</h3>
-            <ul className="mt-2 space-y-1 text-sm text-white/90">
+            <ul className="mt-2 space-y-1 text-sm text-[#4A4A4A]">
               {studioExpansionItems.map((item) => (
                 <li key={item}>• {item}</li>
               ))}
