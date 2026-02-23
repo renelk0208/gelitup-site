@@ -2930,7 +2930,8 @@ function HomePage() {
           <img
             src={media.collectionVisual || media.heroImage}
             alt="Macro spectrum visual showing shimmer, neon, and creme gel textures"
-            className="h-80 w-full object-contain sm:h-96 lg:h-[28rem]"
+            className="h-80 w-full object-cover sm:h-96 lg:h-[28rem]"
+            style={{ objectPosition: '50% 35%' }}
             loading="lazy"
           />
         </div>
