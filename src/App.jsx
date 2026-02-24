@@ -531,7 +531,7 @@ function createFallbackProducts(count = 120) {
 const navItems = [
   { to: '/', label: 'Home' },
   { to: '/pages/about-us', label: 'About us' },
-  { to: '/distributor-packages', label: 'Distribution' },
+  { to: '/distributor-packages', label: 'Packages' },
   { to: '/full-catalogue', label: 'The Collection' },
   { to: '/distributors', label: 'Distributors' },
   { to: '/pages/contact-us', label: 'Contact us' },
@@ -1186,6 +1186,7 @@ function DistributorPackagesPage() {
   return (
     <section className="space-y-5">
       <div className="rounded-2xl bg-gradient-to-br from-[#1A1A1A] to-[#4A4A4A] p-5 text-white sm:p-8">
+        <p className="text-xs uppercase tracking-[0.16em] text-white/80">B2B Merchandising</p>
         <h1 className="heading-on-dark mt-2 text-2xl font-extrabold sm:text-4xl">Distributor Packages</h1>
         <p className="mt-3 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] text-white/95 sm:text-base">
           EU REGULATED. HEMA & TPO-FREE. PROFESSIONAL EXCELLENCE.
@@ -1782,9 +1783,6 @@ function FullCataloguePage() {
         if (!mounted) return
 
         const nextSections = buildCatalogueSectionsFromImageMap(payload, manualRuleIndex)
-        if (!nextSections.length) {
-          throw new Error('No catalogue items found in product-image-map.json')
-        }
         setSections(nextSections)
         setHeroCandidateIndexByCategory({})
         setActiveCategory('')
@@ -3773,14 +3771,14 @@ function PortalRegister({ onRegister }) {
     <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
       <div className="bg-slate-900 p-8 text-white">
         <p className="text-xs uppercase tracking-[0.2em] text-slate-300">GEL.IT.UP Trade</p>
-        <h2 className="heading-on-dark mt-3 text-3xl font-bold">B2B Registration</h2>
+        <h2 className="mt-3 text-3xl font-bold">Distributor Registration</h2>
         <p className="mt-4 text-sm text-slate-300">
           Submit your company details. Applications are uploaded automatically and reviewed by the B2B team.
         </p>
       </div>
 
       <div className="p-8">
-        <h3 className="text-xl font-semibold text-slate-900">B2B Registration</h3>
+        <h3 className="text-xl font-semibold text-slate-900">B2B Client Application</h3>
         <form className="mt-5 space-y-4" onSubmit={async (event) => {
           event.preventDefault()
           setIsSubmitting(true)
@@ -8021,7 +8019,6 @@ function App() {
           <Route path="/products" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
-          <Route path="/full-catalogue/*" element={<FullCataloguePage />} />
           <Route path="/admin/missing-images" element={<MissingImagesReport />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
