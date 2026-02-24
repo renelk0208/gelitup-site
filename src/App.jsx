@@ -19,7 +19,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 })
 
-const B2B_EMAIL = 'distribution@gelitup.com'
+const B2B_EMAIL = 'gelitup.portal@gelitup.com'
 const PRODUCT_CATEGORIES = ['Solid Colours', 'Builder Gels', 'Base & Top', 'Nail Care', 'Accessories']
 const DEFAULT_PRODUCTS_TABLE = 'b2b_products'
 const DEFAULT_ORDERS_TABLE = 'b2b_orders'
@@ -37,7 +37,7 @@ const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEG
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL
 const EMAIL_WEBHOOK_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-const EMAIL_FROM = import.meta.env.VITE_EMAIL_FROM || 'distributors@gelitup.com'
+const EMAIL_FROM = import.meta.env.VITE_EMAIL_FROM || 'gelitup.portal@gelitup.com'
 const EMAIL_REPLY_TO = import.meta.env.VITE_EMAIL_REPLY_TO || B2B_EMAIL
 const ORDER_INBOX_EMAIL = import.meta.env.VITE_B2B_ORDER_INBOX || B2B_EMAIL
 const ZOHO_SYNC_WEBHOOK_URL = import.meta.env.VITE_ZOHO_SYNC_WEBHOOK_URL
@@ -55,7 +55,7 @@ const PROFORMA_RIGHT_LOGO_PATH = import.meta.env.VITE_PROFORMA_RIGHT_LOGO || '/l
 const PROFORMA_LEEUKOPF_COMPANY = import.meta.env.VITE_PROFORMA_LEEUKOPF_COMPANY || 'Leeukopf'
 const PROFORMA_LEEUKOPF_ADDRESS = import.meta.env.VITE_PROFORMA_LEEUKOPF_ADDRESS || '8 Racho Dimchev, Sofia, Bulgaria'
 const PROFORMA_LEEUKOPF_PHONE = import.meta.env.VITE_PROFORMA_LEEUKOPF_PHONE || '(+359) 73 891 041'
-const PROFORMA_LEEUKOPF_EMAIL = import.meta.env.VITE_PROFORMA_LEEUKOPF_EMAIL || 'info@leeukopf.com'
+const PROFORMA_LEEUKOPF_EMAIL = import.meta.env.VITE_PROFORMA_LEEUKOPF_EMAIL || 'gelitup.portal@gelitup.com'
 const TIKTOK_URL = import.meta.env.VITE_TIKTOK_URL || 'https://www.tiktok.com/@gelitupgreece'
 const INSTAGRAM_URL = import.meta.env.VITE_INSTAGRAM_URL || 'https://www.instagram.com/gelitup'
 const LINKEDIN_URL = import.meta.env.VITE_LINKEDIN_URL || 'https://gr.linkedin.com/company/gel-it-up-by-giup'
@@ -3548,7 +3548,7 @@ function HomePage() {
       <InfoCard id="contact" title="OFFICIAL INFORMATION" tone="dark">
         <div className="mt-2 space-y-1 text-sm text-white/90">
           <p>Distribution Email: <a href={`mailto:${B2B_EMAIL}`} className="font-medium text-white underline">{B2B_EMAIL}</a></p>
-          <p>General Email: <a href="mailto:info@leeukopf.com" className="font-medium text-white underline">info@leeukopf.com</a></p>
+          <p>General Email: <a href={`mailto:${B2B_EMAIL}`} className="font-medium text-white underline">{B2B_EMAIL}</a></p>
           <p>Phone: <a href="tel:+35973891041" className="font-medium text-white underline">(+359) 73 891 041</a></p>
           <p>Address: 8 Racho Dimchev, Sofia, Bulgaria</p>
         </div>
@@ -4812,6 +4812,7 @@ function ProductsModule({ moduleView = 'products' }) {
   const [packageTier, setPackageTier] = useState('Silver')
   const [draftInvoice, setDraftInvoice] = useState('')
   const [dismissedTechnicalUpsell, setDismissedTechnicalUpsell] = useState(false)
+  const [dismissedMagnetUpsell, setDismissedMagnetUpsell] = useState(false)
   const [includeProfessionalBasePack, setIncludeProfessionalBasePack] = useState(false)
   const [showAddOnRemovedToast, setShowAddOnRemovedToast] = useState(false)
   const [showOrderConfetti, setShowOrderConfetti] = useState(false)
@@ -5143,6 +5144,49 @@ function ProductsModule({ moduleView = 'products' }) {
     () => Array.from(catalogByName.entries()),
     [catalogByName],
   )
+  const hasCatEyeSignal = useCallback((...values) => {
+    return values.some((value) => {
+      const normalizedToken = normalizeCatalogueToken(value)
+      const normalizedSku = normalizeSkuCode(value)
+
+      return normalizedToken.includes('CAT EYE')
+        || normalizedSku.includes('GCE')
+        || normalizedSku.includes('CATEYE')
+        || normalizedSku.includes('CAT_EYE')
+    })
+  }, [])
+  const hasMagnetSignal = useCallback((...values) => {
+    return values.some((value) => {
+      const normalizedToken = normalizeCatalogueToken(value)
+      const normalizedSku = normalizeSkuCode(value)
+
+      return normalizedToken.includes('MAGNET') || normalizedSku.includes('MAGNET')
+    })
+  }, [])
+  const hasCatEyeInCart = useMemo(() => {
+    const selectedHasCatEye = selectedCodes.some((code) => {
+      const product = catalogBySku.get(normalizeSkuCode(code))
+      return hasCatEyeSignal(code, product?.name, product?.subcategory, product?.category)
+    })
+
+    if (selectedHasCatEye) return true
+
+    return packageCartItems.some((item) => hasCatEyeSignal(item?.sku, item?.code, item?.name, item?.subcategory, item?.category))
+  }, [catalogBySku, hasCatEyeSignal, packageCartItems, selectedCodes])
+  const hasMagnetInCart = useMemo(() => {
+    const selectedHasMagnet = selectedCodes.some((code) => {
+      const product = catalogBySku.get(normalizeSkuCode(code))
+      return hasMagnetSignal(code, product?.name, product?.subcategory, product?.category)
+    })
+
+    if (selectedHasMagnet) return true
+
+    return packageCartItems.some((item) => hasMagnetSignal(item?.sku, item?.code, item?.name, item?.subcategory, item?.category))
+  }, [catalogBySku, hasMagnetSignal, packageCartItems, selectedCodes])
+  const shouldShowMagnetUpsellToast = hasCatEyeInCart && !hasMagnetInCart
+  const magnetUpsellProduct = useMemo(() => {
+    return products.find((product) => hasMagnetSignal(product?.code, product?.sku, product?.name, product?.subcategory, product?.category)) || null
+  }, [hasMagnetSignal, products])
   const resolveCatalogImageUrl = useCallback((item) => {
     const localMapKeys = [
       normalizeSkuCode(item?.sku),
@@ -5195,6 +5239,12 @@ function ProductsModule({ moduleView = 'products' }) {
       setDismissedTechnicalUpsell(false)
     }
   }, [shouldShowTechnicalUpsellToast])
+
+  useEffect(() => {
+    if (!shouldShowMagnetUpsellToast) {
+      setDismissedMagnetUpsell(false)
+    }
+  }, [shouldShowMagnetUpsellToast])
 
   useEffect(() => {
     let mounted = true
@@ -6186,13 +6236,37 @@ function ProductsModule({ moduleView = 'products' }) {
       totalValueEurBase: proformaInvoice.grandTotalEur,
     })
 
+    const customerEmailTarget = String(invoice.contactEmail || userData?.user?.email || '').trim().toLowerCase()
+
+    const customerNotificationResult = customerEmailTarget
+      ? await sendPortalEmailNotification({
+          eventType: 'b2b_order_customer_copy',
+          to: customerEmailTarget,
+          subject: `Your GEL.IT.UP B2B Order Copy [#${insertedOrder?.id ?? '-'}]`,
+          html: `<p>Hello,</p><p>Thank you for your GEL.IT.UP by GIUP® order submission.</p><p><strong>Order ID:</strong> ${insertedOrder?.id ?? '-'}</p><p><strong>Total Units:</strong> ${totalUnits}</p>${invoiceBlockHtml}${shippingBlockHtml}<p><strong>Items:</strong> ${checkoutItems.join(', ')}</p><p>You can keep this email as your order record. You can also download your pro-forma PDF directly from the portal.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
+          orderId: insertedOrder?.id,
+          customerEmail: customerEmailTarget,
+          totalUnits,
+          items: checkoutItems,
+          invoice,
+          shipping,
+          totalValueEurBase: proformaInvoice.grandTotalEur,
+        })
+      : { ok: false, skipped: true, message: 'No customer email available for order copy.' }
+
     const inboxEmailStatusText = inboxNotificationResult.ok
       ? `Inbox notification sent to ${ORDER_INBOX_EMAIL}.`
       : inboxNotificationResult.skipped
         ? `Inbox notification skipped: ${inboxNotificationResult.message}`
         : `Inbox notification failed: ${inboxNotificationResult.message}`
 
-    setOrderInboxEmailStatus(inboxEmailStatusText)
+    const customerEmailStatusText = customerNotificationResult.ok
+      ? `Customer order copy sent to ${customerEmailTarget}.`
+      : customerNotificationResult.skipped
+        ? `Customer order copy skipped: ${customerNotificationResult.message}`
+        : `Customer order copy failed: ${customerNotificationResult.message}`
+
+    setOrderInboxEmailStatus(`${inboxEmailStatusText} ${customerEmailStatusText}`)
 
     const zohoStatusNote = zohoSyncResult.ok
       ? ` Zoho sync queued successfully (${ZOHO_SYNC_TARGET}).`
@@ -6212,7 +6286,7 @@ function ProductsModule({ moduleView = 'products' }) {
       orderId: insertedOrder?.id ?? '-',
     })
 
-    setCheckoutMessage(`Order received (#${insertedOrder?.id ?? '-'} | ${totalUnits} units). Invoicing is handled offline via ${ORDER_INBOX_EMAIL}.${zohoStatusNote}`)
+    setCheckoutMessage(`Order received (#${insertedOrder?.id ?? '-'} | ${totalUnits} units). A copy was sent to your email and to ${ORDER_INBOX_EMAIL}, and the order is stored in the portal backup.${zohoStatusNote}`)
     setSelectedCodes([])
     setPackageCartItems([])
     setGeneratedPackageTier('')
@@ -6387,6 +6461,34 @@ function ProductsModule({ moduleView = 'products' }) {
             <button
               onClick={() => setDismissedTechnicalUpsell(true)}
               className="rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-800"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
+      {shouldShowMagnetUpsellToast && !dismissedMagnetUpsell && (
+        <div className={`fixed right-4 z-50 w-[min(92vw,440px)] rounded-xl border border-fuchsia-200 bg-fuchsia-50 p-4 shadow-sm ${shouldShowTechnicalUpsellToast && !dismissedTechnicalUpsell ? 'bottom-40' : 'bottom-4'}`}>
+          <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-700">Cat Eye Upsell</p>
+          <p className="mt-1 text-sm text-fuchsia-900">
+            Don’t forget your magnet—Cat Eye shades need it to create the signature effect.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {magnetUpsellProduct && magnetUpsellProduct.code ? (
+              <button
+                onClick={() => {
+                  setSelectedCodes((current) => (current.includes(magnetUpsellProduct.code) ? current : [...current, magnetUpsellProduct.code]))
+                  setDismissedMagnetUpsell(true)
+                }}
+                className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white"
+              >
+                Add Magnet
+              </button>
+            ) : null}
+            <button
+              onClick={() => setDismissedMagnetUpsell(true)}
+              className="rounded-lg border border-fuchsia-300 px-3 py-1.5 text-xs font-semibold text-fuchsia-800"
             >
               Dismiss
             </button>
@@ -9001,8 +9103,8 @@ function App() {
       return {
         ok: true,
         message: isDistributorApplication
-          ? 'Distributor application submitted, sent to distribution@gelitup.com, and queued for admin approval.'
-          : 'B2B order request submitted, sent to distribution@gelitup.com, and stored in admin submissions.',
+          ? `Distributor application submitted, sent to ${ORDER_INBOX_EMAIL}, and queued for admin approval.`
+          : `B2B order request submitted, sent to ${ORDER_INBOX_EMAIL}, and stored in admin submissions.`,
       }
     }
 

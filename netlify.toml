@@ -10,6 +10,18 @@
   node_bundler = "esbuild"
 
 [[redirects]]
+  from = "https://gelitup.netlify.app/*"
+  to = "https://gelitup.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.gelitup.com/*"
+  to = "https://gelitup.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
