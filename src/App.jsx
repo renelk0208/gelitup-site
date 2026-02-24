@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -222,6 +222,99 @@ const COUNTRY_OPTIONS = [
   'United Arab Emirates', 'Saudi Arabia', 'Qatar', 'Israel', 'Egypt', 'South Africa',
   'India', 'China', 'Japan', 'South Korea', 'Singapore', 'Australia', 'New Zealand',
 ]
+
+const COUNTRY_DIAL_CODES = {
+  Austria: '+43',
+  Belgium: '+32',
+  Bulgaria: '+359',
+  Croatia: '+385',
+  Cyprus: '+357',
+  'Czech Republic': '+420',
+  Denmark: '+45',
+  Estonia: '+372',
+  Finland: '+358',
+  France: '+33',
+  Germany: '+49',
+  Greece: '+30',
+  Hungary: '+36',
+  Ireland: '+353',
+  Italy: '+39',
+  Latvia: '+371',
+  Lithuania: '+370',
+  Luxembourg: '+352',
+  Malta: '+356',
+  Netherlands: '+31',
+  Poland: '+48',
+  Portugal: '+351',
+  Romania: '+40',
+  Slovakia: '+421',
+  Slovenia: '+386',
+  Spain: '+34',
+  Sweden: '+46',
+  'United Kingdom': '+44',
+  Norway: '+47',
+  Switzerland: '+41',
+  Turkey: '+90',
+  Ukraine: '+380',
+  'United States': '+1',
+  Canada: '+1',
+  Mexico: '+52',
+  Brazil: '+55',
+  Argentina: '+54',
+  Chile: '+56',
+  'United Arab Emirates': '+971',
+  'Saudi Arabia': '+966',
+  Qatar: '+974',
+  Israel: '+972',
+  Egypt: '+20',
+  'South Africa': '+27',
+  India: '+91',
+  China: '+86',
+  Japan: '+81',
+  'South Korea': '+82',
+  Singapore: '+65',
+  Australia: '+61',
+  'New Zealand': '+64',
+}
+
+function withCountryDialCode(phoneValue = '', country = '') {
+  const dialCode = COUNTRY_DIAL_CODES[country] || ''
+  const current = String(phoneValue || '').trim()
+  if (!dialCode) return current
+  if (!current) return `${dialCode} `
+  if (current.startsWith('+')) return current
+  return `${dialCode} ${current}`
+}
+
+function extractTaggedValue(notesValue, tagName) {
+  const notes = String(notesValue || '')
+  const match = notes.match(new RegExp(`\\[${tagName}:([^\\]]+)\\]`, 'i'))
+  return String(match?.[1] || '').trim().toLowerCase()
+}
+
+function getApplicationTypeFromRecord(record) {
+  const explicit = String(record?.application_type || '').trim().toLowerCase()
+  if (explicit) return explicit
+
+  const tagged = extractTaggedValue(record?.notes, 'APPLICATION_TYPE')
+  if (tagged) return tagged
+
+  return 'distributor'
+}
+
+function getOrderProfileFromRecord(record) {
+  const explicit = String(record?.order_profile || '').trim().toLowerCase()
+  if (explicit) return explicit
+
+  const tagged = extractTaggedValue(record?.notes, 'ORDER_PROFILE')
+  if (tagged) return tagged
+
+  return 'business'
+}
+
+function isDistributorSubmission(record) {
+  return getApplicationTypeFromRecord(record) === 'distributor'
+}
 
 const defaultClientProfile = {
   customerType: 'company',
@@ -539,7 +632,7 @@ function createFallbackProducts(count = 120) {
 const navItems = [
   { to: '/', label: 'Home' },
   { to: '/pages/about-us', label: 'About us' },
-  { to: '/distributor-packages', label: 'Packages' },
+  { to: '/distributor-packages', label: 'Distribution Options' },
   { to: '/full-catalogue', label: 'The Collection' },
   { to: '/distributors', label: 'Distributors' },
   { to: '/application-services', label: 'Application Services' },
@@ -1195,7 +1288,6 @@ function DistributorPackagesPage() {
   return (
     <section className="space-y-5">
       <div className="rounded-2xl bg-gradient-to-br from-[#1A1A1A] to-[#4A4A4A] p-5 text-white sm:p-8">
-        <p className="text-xs uppercase tracking-[0.16em] text-white/80">B2B Merchandising</p>
         <h1 className="heading-on-dark mt-2 text-2xl font-extrabold sm:text-4xl">Distributor Packages</h1>
         <p className="mt-3 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] text-white/95 sm:text-base">
           EU REGULATED. HEMA & TPO-FREE. PROFESSIONAL EXCELLENCE.
@@ -1542,7 +1634,8 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
   uniqueImagePaths.forEach((imagePath) => {
     const afterRoot = imagePath.split('/gelitup-content/product-images/')[1] || ''
     const segments = afterRoot.split('/').filter(Boolean)
-    let category = segments[0] || 'Other'
+    const sourceCategory = segments[0] || 'Other'
+    let category = sourceCategory
     
     // Apply category remapping (e.g., BY THE OCEAN → COLORS)
     const remappedCategory = categoryRemapping.get(category)
@@ -1553,10 +1646,16 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     
     // Determine subcategory based on folder structure
     let subcategory
-    if (isRemapped && segments.length >= 2) {
-      // For remapped categories with subfolders, use the subfolder name
-      // e.g., BUILDER GEL/3INI BUILDER → subcategory = "3INI BUILDER"
-      subcategory = segments[1] || segments[0]
+    if (isRemapped) {
+      if (segments.length > 2) {
+        // For remapped categories with real subfolders, use the path between root and filename
+        // e.g., BUILDER GEL/3INI BUILDER/item.jpg → "3INI BUILDER"
+        subcategory = segments.slice(1, -1).join(' / ') || sourceCategory
+      } else {
+        // For remapped categories with files directly under root, keep root as subcategory
+        // e.g., CREME DE LA CREME/item.jpg → "CREME DE LA CREME"
+        subcategory = sourceCategory
+      }
     } else if (category === 'COLORS' && segments.length > 2) {
       // For COLORS, use only the last folder name to avoid "CAT EYE / CAT EYE"
       subcategory = segments[segments.length - 2] || 'General'
@@ -1640,7 +1739,7 @@ function formatSubcategoryDisplayName(subcategoryName = '') {
   if (normalized === 'ALL') return 'All Colors'
   
   // Color subcategories
-  if (normalized === 'RONE') return 'GIUP #1'
+  if (normalized === 'RONE') return 'GIUP1'
   if (normalized === 'CAT EYE') return 'Cat Eye'
   if (normalized === 'JELLY') return 'Jelly'
   if (normalized === 'METALLIC COLLECTION') return 'Metallic Collection'
@@ -1748,6 +1847,156 @@ function flattenSectionItems(section) {
   )
 }
 
+const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
+  'BASES::SUPERBOND': {
+    paragraphs: [
+      'The Superbond Primer is a professional-grade, non-acid adhesive agent designed to create a powerful chemical bond between the natural nail and the product. It is a vital first step for ensuring long-term wear and preventing lifting.',
+    ],
+    listItems: [
+      'Key Benefits: Superior adhesion, non-acid formula, rapid ROI, and 100% HEMA/TPO-free safety.',
+      'Application — Prep: Perform a dry manicure and cleanse the nail to remove surface oils.',
+      'Application — Apply: Wipe excess and apply a very thin layer to the natural nail plate.',
+      'Application — Dry: Air-dry for ~30 seconds (do not cure); slight tackiness is normal.',
+      'Application — Next: Proceed immediately with GEL.IT.UP by GIUP® Base Coat.',
+    ],
+  },
+  'BASES::5IN1 SUPERIOR BASE': {
+    paragraphs: [
+      'The 5-in-1 Superior Base Coat is a high-performance, multi-functional clear foundation designed for maximum efficiency in the professional studio. This versatile formula serves as a base coat, a strength overlay, and a short extension medium, all in one bottle.',
+    ],
+    listItems: [
+      'Key Benefits: Five-in-one versatility, exceptional adhesion, self-leveling mastery, and 100% HEMA/TPO-free clean science standard.',
+      'Application — Prep: Perform dry manicure and cleanse nail plate thoroughly.',
+      'Application — Prime: Apply Superbond Primer and air-dry for 30 seconds.',
+      'Application — Apply: Add a thin scrub layer; for strength/ridge fill, add a slightly thicker self-leveling bead.',
+      'Application — Cure: 60s LED or 120s UV.',
+      'Application — Next: Proceed with GEL.IT.UP by GIUP® color polish.',
+    ],
+  },
+  'BUILDER GEL SYSTEMS::3INI BUILDER': {
+    paragraphs: [
+      'The 3-in-1 Premium Builder Gel is a single-phase structural system engineered for extreme durability and professional control. Infused with fiberglass fibers, this gel provides structural integrity for long extensions and hard-wearing overlays without separate base or top coats.',
+    ],
+    listItems: [
+      'Key Benefits: Fiber-reinforced strength, single-phase efficiency, cool-cure comfort, and 100% HEMA/TPO-free performance.',
+      'Application — Preparation: Perform a thorough dry manicure and cleanse the nail plate.',
+      'Application — Adhesion: Apply Superbond Primer and air-dry for 30 seconds.',
+      'Application — Foundation: Apply a thin slip layer over nail/form (do not cure).',
+      'Application — Building: Place a larger bead centrally and guide to edges/apex as it self-levels.',
+      'Application — Cure: 60–90s LED (120s UV).',
+      'Application — Refinement & Finish: Wipe inhibition layer, file shape, then final gloss layer or proceed with GEL.IT.UP by GIUP® color.',
+      'Dual Forms Application — Prep and prime as standard, then apply a thin slip layer of 3-in-1 Premium Builder Gel.',
+      'Dual Forms Application — Select the correct dual form size, place a controlled bead in the form, and spread evenly to avoid trapped air.',
+      'Dual Forms Application — Press form from cuticle toward free edge, flash cure to lock position, then full-cure and gently remove the form before refinement.',
+    ],
+  },
+  'BUILDER GEL SYSTEMS::PREMIUM BUILDER': {
+    paragraphs: [
+      'The 3-in-1 Premium Builder Gel is a single-phase structural system engineered for extreme durability and professional control. Infused with fiberglass fibers, this gel provides structural integrity for long extensions and hard-wearing overlays without separate base or top coats.',
+    ],
+    listItems: [
+      'Key Benefits: Fiber-reinforced strength, single-phase efficiency, cool-cure comfort, and 100% HEMA/TPO-free performance.',
+      'Application — Preparation: Perform a thorough dry manicure and cleanse the nail plate.',
+      'Application — Adhesion: Apply Superbond Primer and air-dry for 30 seconds.',
+      'Application — Foundation: Apply a thin slip layer over nail/form (do not cure).',
+      'Application — Building: Place a larger bead centrally and guide to edges/apex as it self-levels.',
+      'Application — Cure: 60–90s LED (120s UV).',
+      'Application — Refinement & Finish: Wipe inhibition layer, file shape, then final gloss layer or proceed with GEL.IT.UP by GIUP® color.',
+      'Dual Forms Application — Prep and prime as standard, then apply a thin slip layer of 3-in-1 Premium Builder Gel.',
+      'Dual Forms Application — Select the correct dual form size, place a controlled bead in the form, and spread evenly to avoid trapped air.',
+      'Dual Forms Application — Press form from cuticle toward free edge, flash cure to lock position, then full-cure and gently remove the form before refinement.',
+    ],
+  },
+  'BUILDER GEL SYSTEMS::MULTIMIX': {
+    paragraphs: [
+      'MultiMix Synthogel is the ultimate hybrid system, combining the legendary strength of acrylic with the flexible, odorless benefits of gel. This putty-like consistency provides unlimited playtime and cures only when placed in the lamp.',
+      'It is ideal for technicians who need hard-system durability without the time pressure of traditional acrylic monomer.',
+    ],
+    listItems: [
+      'Key Benefits: Hybrid strength, zero-gravity feel, odorless environment, and 100% HEMA/TPO-free clean science standard.',
+      'Application — Prep: Perform a standard dry manicure and cleanse the nail plate.',
+      'Application — Prime: Apply Superbond Primer and air-dry for 30 seconds.',
+      'Application — Foundation: Apply a thin layer of 5-in-1 Superior Base and cure (60s LED).',
+      'Application — Placement: Dispense MultiMix Synthogel and position with a spatula.',
+      'Application — Sculpting: Use a brush with Cleanser/Slip Solution (lightly) to pat and smooth; product remains workable until cured.',
+      'Application — Curing: Cure for 60-90 seconds in LED.',
+      'Application — Refine: Wipe inhibition layer, file to shape, and finish with GEL.IT.UP by GIUP® color or top coat.',
+    ],
+  },
+  'BUILDER GEL SYSTEMS::30 ML': {
+    paragraphs: [
+      'MultiMix Synthogel is the ultimate hybrid system, combining the legendary strength of acrylic with the flexible, odorless benefits of gel. This putty-like consistency provides unlimited playtime and cures only when placed in the lamp.',
+      'It is ideal for technicians who need hard-system durability without the time pressure of traditional acrylic monomer.',
+    ],
+    listItems: [
+      'Key Benefits: Hybrid strength, zero-gravity feel, odorless environment, and 100% HEMA/TPO-free clean science standard.',
+      'Application — Prep: Perform a standard dry manicure and cleanse the nail plate.',
+      'Application — Prime: Apply Superbond Primer and air-dry for 30 seconds.',
+      'Application — Foundation: Apply a thin layer of 5-in-1 Superior Base and cure (60s LED).',
+      'Application — Placement: Dispense MultiMix Synthogel and position with a spatula.',
+      'Application — Sculpting: Use a brush with Cleanser/Slip Solution (lightly) to pat and smooth; product remains workable until cured.',
+      'Application — Curing: Cure for 60-90 seconds in LED.',
+      'Application — Refine: Wipe inhibition layer, file to shape, and finish with GEL.IT.UP by GIUP® color or top coat.',
+    ],
+  },
+  'BUILDER GEL SYSTEMS::60 ML': {
+    paragraphs: [
+      'MultiMix Synthogel is the ultimate hybrid system, combining the legendary strength of acrylic with the flexible, odorless benefits of gel. This putty-like consistency provides unlimited playtime and cures only when placed in the lamp.',
+      'It is ideal for technicians who need hard-system durability without the time pressure of traditional acrylic monomer.',
+    ],
+    listItems: [
+      'Key Benefits: Hybrid strength, zero-gravity feel, odorless environment, and 100% HEMA/TPO-free clean science standard.',
+      'Application — Prep: Perform a standard dry manicure and cleanse the nail plate.',
+      'Application — Prime: Apply Superbond Primer and air-dry for 30 seconds.',
+      'Application — Foundation: Apply a thin layer of 5-in-1 Superior Base and cure (60s LED).',
+      'Application — Placement: Dispense MultiMix Synthogel and position with a spatula.',
+      'Application — Sculpting: Use a brush with Cleanser/Slip Solution (lightly) to pat and smooth; product remains workable until cured.',
+      'Application — Curing: Cure for 60-90 seconds in LED.',
+      'Application — Refine: Wipe inhibition layer, file to shape, and finish with GEL.IT.UP by GIUP® color or top coat.',
+    ],
+  },
+  'BUILDER GEL SYSTEMS::COMPETE': {
+    paragraphs: [
+      'The GEL.IT.UP by GIUP® Acrylic System is a high-performance sculpting range designed for technicians who demand ultimate strength and traditional structural control.',
+      'Engineered to work with specialized powders, the system includes two monomer options for different workflows: Professional Fast Liquid for rapid set/high-speed service, and Beginner Slow Liquid for extended playtime and precision architecture.',
+    ],
+    listItems: [
+      'Key Benefits: Superior bond, non-yellowing UV-stable formula, exceptional clarity and strength, and ethical CPNP-notified compliance.',
+      'Application — Prep: Conduct a thorough dry manicure and cleanse the nail plate.',
+      'Application — Adhesion: Apply Superbond Primer and allow to air-dry for 30 seconds.',
+      'Application — Dip: Submerge acrylic brush in chosen liquid (Fast or Slow) and wipe excess on dappen dish side.',
+      'Application — Pick-up: Dip brush tip into acrylic powder to create a creamy bead.',
+      'Application — Sculpt: Place and guide bead; use Slow for more playtime or Fast for quicker setting.',
+      'Application — Refine: Once polymerized, file to shape with professional-grade nail files.',
+      'Application — Seal: Finish with GEL.IT.UP by GIUP® Non-Wipe Top Coat and cure 90–120 seconds for a TPO-free high-gloss seal.',
+    ],
+  },
+  'BUILDER GEL SYSTEMS::ACRYLIC': {
+    paragraphs: [
+      'The GEL.IT.UP by GIUP® Acrylic System is a high-performance sculpting range designed for technicians who demand ultimate strength and traditional structural control.',
+      'Engineered to work with specialized powders, the system includes two monomer options for different workflows: Professional Fast Liquid for rapid set/high-speed service, and Beginner Slow Liquid for extended playtime and precision architecture.',
+    ],
+    listItems: [
+      'Key Benefits: Superior bond, non-yellowing UV-stable formula, exceptional clarity and strength, and ethical CPNP-notified compliance.',
+      'Application — Prep: Conduct a thorough dry manicure and cleanse the nail plate.',
+      'Application — Adhesion: Apply Superbond Primer and allow to air-dry for 30 seconds.',
+      'Application — Dip: Submerge acrylic brush in chosen liquid (Fast or Slow) and wipe excess on dappen dish side.',
+      'Application — Pick-up: Dip brush tip into acrylic powder to create a creamy bead.',
+      'Application — Sculpt: Place and guide bead; use Slow for more playtime or Fast for quicker setting.',
+      'Application — Refine: Once polymerized, file to shape with professional-grade nail files.',
+      'Application — Seal: Finish with GEL.IT.UP by GIUP® Non-Wipe Top Coat and cure 90–120 seconds for a TPO-free high-gloss seal.',
+    ],
+  },
+}
+
+function getSubcategoryProductInformation(categoryName = '', subcategoryName = '') {
+  const categoryToken = normalizeCatalogueToken(categoryName)
+  const subcategoryToken = normalizeCatalogueToken(subcategoryName)
+  if (!categoryToken || !subcategoryToken || subcategoryToken === 'ALL') return null
+
+  return PRODUCT_INFORMATION_BY_SUBCATEGORY[`${categoryToken}::${subcategoryToken}`] || null
+}
+
 function FullCataloguePage() {
   const [sections, setSections] = useState([])
   const [activeCategory, setActiveCategory] = useState('')
@@ -1765,7 +2014,8 @@ function FullCataloguePage() {
   const [colorTileFrame, setColorTileFrame] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
-  const [categoryMetadata, setCategoryMetadata] = useState({})
+  const [showSuperbondDetails, setShowSuperbondDetails] = useState(false)
+  const [showFiveInOneDetails, setShowFiveInOneDetails] = useState(false)
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
   const virtualContainerRef = useRef(null)
 
@@ -1824,13 +2074,14 @@ function FullCataloguePage() {
     const sorted = activeSection.subcategories
       .map((subcategory) => subcategory.name)
       .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true }))
-    return isColorsCategoryName(activeSection.category) ? ['ALL', ...sorted] : sorted
+    return ['ALL', ...sorted]
   }, [activeSection])
 
   const baseItems = useMemo(() => {
-    if (!activeSection || !activeSubcategory) return []
+    if (!activeSection) return []
+    if (!activeSubcategory) return flattenSectionItems(activeSection)
 
-    if (isColorsCategoryName(activeSection.category) && activeSubcategory === 'ALL') {
+    if (activeSubcategory === 'ALL') {
       return flattenSectionItems(activeSection)
     }
 
@@ -1871,6 +2122,12 @@ function FullCataloguePage() {
   useEffect(() => {
     setScrollTop(0)
   }, [searchQuery])
+
+  useEffect(() => {
+    if (activeCategory && !activeSubcategory) {
+      setActiveSubcategory('ALL')
+    }
+  }, [activeCategory, activeSubcategory])
 
   useEffect(() => {
     const updateLayout = () => {
@@ -1988,6 +2245,10 @@ function FullCataloguePage() {
   const chapter02Categories = ['BUILDER GEL SYSTEMS', 'BASES', 'CREME DE LA CREME', 'MULTIMIX']
   const chapter03Categories = ['TOPS', 'TOOLS', 'EQUIPMENT']
   const chapter04Categories = ['NAIL ART', 'CONSUMABLES', 'LIQUIDS', 'BY THE OCEAN']
+  const activeProductInformation = useMemo(
+    () => getSubcategoryProductInformation(activeCategory, activeSubcategory),
+    [activeCategory, activeSubcategory],
+  )
 
   const categoryDetail = activeCategory
     ? (
@@ -2058,11 +2319,19 @@ function FullCataloguePage() {
         {!!activeSubcategory && (
           <>
             {(() => {
-              const categoryKey = normalizeCatalogueToken(activeCategory)
-              const metadata = categoryMetadata[categoryKey]
+              const metadata = activeProductInformation
               if (!metadata) return null
               const hasContent = metadata.paragraphs?.length > 0 || metadata.listItems?.length > 0
               if (!hasContent) return null
+
+              const listItems = Array.isArray(metadata.listItems) ? metadata.listItems : []
+              const dualFormsItems = listItems
+                .filter((item) => /^Dual Forms Application\s*[—-]\s*/i.test(String(item || '')))
+                .map((item) => String(item).replace(/^Dual Forms Application\s*[—-]\s*/i, '').trim())
+              const applicationItems = listItems
+                .filter((item) => /^Application\s*[—-]\s*/i.test(String(item || '')))
+                .map((item) => String(item).replace(/^Application\s*[—-]\s*/i, '').trim())
+              const nonApplicationItems = listItems.filter((item) => !/^Application\s*[—-]\s*/i.test(String(item || '')) && !/^Dual Forms Application\s*[—-]\s*/i.test(String(item || '')))
 
               return (
                 <div className="mt-4 rounded-[12px] border border-fuchsia-400/40 bg-gradient-to-br from-fuchsia-50/60 to-purple-50/40 p-4 sm:p-5">
@@ -2074,15 +2343,41 @@ function FullCataloguePage() {
                       ))}
                     </div>
                   )}
-                  {metadata.listItems?.length > 0 && (
+                  {nonApplicationItems.length > 0 && (
                     <ul className="mt-3 space-y-1.5">
-                      {metadata.listItems.map((item, idx) => (
+                      {nonApplicationItems.map((item, idx) => (
                         <li key={idx} className="flex gap-2 text-sm text-fuchsia-900/90">
                           <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-fuchsia-600" />
                           <span>{item}</span>
                         </li>
                       ))}
                     </ul>
+                  )}
+                  {applicationItems.length > 0 && (
+                    <>
+                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.1em] text-fuchsia-900/70">Application</p>
+                      <ul className="mt-2 space-y-1.5">
+                        {applicationItems.map((item, idx) => (
+                          <li key={`application-${idx}`} className="flex gap-2 text-sm text-fuchsia-900/90">
+                            <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-fuchsia-600" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  {dualFormsItems.length > 0 && (
+                    <details className="mt-3 rounded-[10px] border border-fuchsia-300/50 bg-white/70 p-3">
+                      <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.1em] text-fuchsia-900/80">Learn More: Dual Forms Application</summary>
+                      <ul className="mt-2 space-y-1.5">
+                        {dualFormsItems.map((item, idx) => (
+                          <li key={`dual-forms-${idx}`} className="flex gap-2 text-sm text-fuchsia-900/90">
+                            <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-fuchsia-600" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
                   )}
                 </div>
               )
@@ -2250,22 +2545,45 @@ function FullCataloguePage() {
                     Superbond Primer
                   </h3>
                   <p className="mt-3 text-base text-white/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                    The non-acid adhesive essential for long-term wear. Professional-grade formulation engineered to deliver superior adhesion and durability for every nail service.
+                    The Superbond Primer is a professional-grade, non-acid adhesive agent designed to create a powerful chemical bond between the natural nail and the product. It is a vital first step for ensuring long-term wear and preventing lifting.
                   </p>
-                  <ul className="mt-5 space-y-2 text-sm text-white/75">
-                    <li className="flex items-start gap-3">
-                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                      <span>Non-acid formulation for sensitive clients</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                      <span>Maximum adhesion for extended wear</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                      <span>SKU: GIUP-MNT-SB01</span>
-                    </li>
-                  </ul>
+                  <button
+                    type="button"
+                    onClick={() => setShowSuperbondDetails((current) => !current)}
+                    className="mt-5 rounded-lg border border-[#D43790]/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-white transition duration-300 hover:bg-[#D43790]/20"
+                  >
+                    {showSuperbondDetails ? 'Show Less' : 'Learn More'}
+                  </button>
+                  {showSuperbondDetails && (
+                    <>
+                      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-white/70">Key Benefits</p>
+                      <ul className="mt-2 space-y-2 text-sm text-white/75">
+                        <li className="flex items-start gap-3">
+                          <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                          <span>Superior adhesion: acts as double-sided tape, significantly increasing bond strength for gel polish and builder systems.</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                          <span>Non-acid formula: gentler on the natural nail plate than traditional acid primers while maintaining high performance.</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                          <span>Rapid ROI: one bottle supports hundreds of services, making it a high-value essential for busy studios.</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                          <span>Total safety: 100% HEMA and TPO free for a safer technician and client environment.</span>
+                        </li>
+                      </ul>
+                      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-white/70">How to Use / Application</p>
+                      <ol className="mt-2 list-decimal space-y-2 pl-5 text-sm text-white/75">
+                        <li><span className="font-semibold text-white/90">Prep:</span> Perform a dry manicure and thoroughly cleanse the nail with cleanser or alcohol to remove all surface oils.</li>
+                        <li><span className="font-semibold text-white/90">Application:</span> Wipe excess from the brush and apply a very thin, sparing layer to the natural nail plate.</li>
+                        <li><span className="font-semibold text-white/90">Drying:</span> Do not cure. Let it air-dry for about 30 seconds; slight tackiness is normal and required for adhesion.</li>
+                        <li><span className="font-semibold text-white/90">Next Step:</span> Proceed immediately with your chosen GEL.IT.UP by GIUP® Base Coat.</li>
+                      </ol>
+                    </>
+                  )}
                   <button
                     onClick={() => {
                       const qty = Math.max(1, Number(itemQuantities['Superbond Primer (GIUP-MNT-SB01)'] || 1))
@@ -2334,7 +2652,7 @@ function FullCataloguePage() {
                 <div className="grid items-center gap-8 sm:grid-cols-2">
                   {/* Product Image */}
                   <div className="flex justify-center">
-                    <div className="relative h-96 w-64 rounded-xl border border-[#4A4A4A]/30 bg-gradient-to-b from-white to-neutral-50 p-8 flex items-center justify-center">
+                    <div className="relative h-96 w-64 rounded-xl border border-[#4A4A4A]/30 bg-white p-8 flex items-center justify-center">
                       <img
                         src="/gelitup-content/product-images/BASES/5IN1 SUPERIOR BASE/5in1-superior-base.jpg"
                         alt="5-in-1 Superior Base Coat - Clear self-leveling texture"
@@ -2352,26 +2670,46 @@ function FullCataloguePage() {
                       The All-in-One Foundation
                     </h3>
                     <p className="mt-4 text-base text-[#1A1A1A]/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                      5-in-1 Superior Base Coat combines primer, base, leveler, strengthener, and adhesion booster in one revolutionary formula. The clear, self-leveling texture ensures flawless application every single time.
+                      The 5-in-1 Superior Base Coat is a high-performance, multi-functional clear foundation designed for maximum efficiency in the professional studio. This versatile formula serves as a base coat, a strength overlay, and a short extension medium, all in one bottle.
                     </p>
-                    <ul className="mt-6 space-y-3 text-sm text-[#1A1A1A]/75">
-                      <li className="flex items-start gap-3">
-                        <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                        <span>5-in-1 multitask formula eliminates intermediate steps</span>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                        <span>Self-leveling technology for perfect application</span>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                        <span>HEMA & TPO-Free formulation</span>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                        <span>Essential foundation for all GEL.IT.UP systems</span>
-                      </li>
-                    </ul>
+                    <button
+                      type="button"
+                      onClick={() => setShowFiveInOneDetails((current) => !current)}
+                      className="mt-5 rounded-lg border border-[#D43790]/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-[#1A1A1A] transition duration-300 hover:bg-[#D43790]/10"
+                    >
+                      {showFiveInOneDetails ? 'Show Less' : 'Learn More'}
+                    </button>
+                    {showFiveInOneDetails && (
+                      <>
+                        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-[#1A1A1A]/70">Key Benefits</p>
+                        <ul className="mt-2 space-y-2 text-sm text-[#1A1A1A]/80">
+                          <li className="flex items-start gap-3">
+                            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                            <span>Five-in-one versatility: base coat, nail strengthener, ridge filler, repair gel, and short extension medium.</span>
+                          </li>
+                          <li className="flex items-start gap-3">
+                            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                            <span>Exceptional adhesion: resilient bond that helps prevent lifting and supports 3+ weeks of wear.</span>
+                          </li>
+                          <li className="flex items-start gap-3">
+                            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                            <span>Self-leveling mastery: high-viscosity formula corrects nail imperfections for a flawless color-ready surface.</span>
+                          </li>
+                          <li className="flex items-start gap-3">
+                            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                            <span>Clean science standard: 100% HEMA and TPO free.</span>
+                          </li>
+                        </ul>
+                        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-[#1A1A1A]/70">How to Use / Application</p>
+                        <ol className="mt-2 list-decimal space-y-2 pl-5 text-sm text-[#1A1A1A]/80">
+                          <li><span className="font-semibold text-[#1A1A1A]">Prep:</span> Begin with a standard dry manicure and thoroughly cleanse the nail plate to remove surface oils.</li>
+                          <li><span className="font-semibold text-[#1A1A1A]">Prime:</span> Apply a thin layer of Superbond Primer and allow it to air-dry for 30 seconds.</li>
+                          <li><span className="font-semibold text-[#1A1A1A]">Application:</span> Use the Precision Oval Brush for a thin scrub layer; for strength/ridge filling, add a second slightly thicker bead and let it self-level.</li>
+                          <li><span className="font-semibold text-[#1A1A1A]">Curing:</span> Cure for 60 seconds in LED or 120 seconds in UV.</li>
+                          <li><span className="font-semibold text-[#1A1A1A]">Next Step:</span> Proceed directly with your chosen GEL.IT.UP by GIUP® color polish.</li>
+                        </ol>
+                      </>
+                    )}
                     <button
                       onClick={() => {
                         const qty = Math.max(1, Number(itemQuantities['5-in-1 Superior Base Coat'] || 1))
@@ -2403,16 +2741,16 @@ function FullCataloguePage() {
                 const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
                 const coverImage = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
                 return (
-                  <React.Fragment key={categoryName}>
+                  <Fragment key={categoryName}>
                     <button
                       onClick={() => {
                         setActiveCategory(categoryName)
-                        setActiveSubcategory(section.subcategories?.[0]?.name || '')
+                        setActiveSubcategory('ALL')
                       }}
                       className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
                     >
-                      <div className="relative h-48 overflow-hidden bg-[#E8E8E8]">
-                        <img src={coverImage} alt={categoryName} className="h-full w-full object-cover" loading="lazy" />
+                      <div className="relative h-52 bg-white p-2">
+                        <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" />
                         <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
                       </div>
                       <div className="border-t border-[#4A4A4A]/20 p-3">
@@ -2421,7 +2759,7 @@ function FullCataloguePage() {
                       </div>
                     </button>
                     {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
-                  </React.Fragment>
+                  </Fragment>
                 )
               })}
             </div>
@@ -2446,16 +2784,16 @@ function FullCataloguePage() {
                 const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
                 const coverImage = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
                 return (
-                  <React.Fragment key={categoryName}>
+                  <Fragment key={categoryName}>
                     <button
                       onClick={() => {
                         setActiveCategory(categoryName)
-                        setActiveSubcategory(section.subcategories?.[0]?.name || '')
+                        setActiveSubcategory('ALL')
                       }}
                       className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
                     >
-                      <div className="relative h-48 overflow-hidden bg-[#E8E8E8]">
-                        <img src={coverImage} alt={categoryName} className="h-full w-full object-cover" loading="lazy" />
+                      <div className="relative h-52 bg-white p-2">
+                        <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" />
                         <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
                       </div>
                       <div className="border-t border-[#4A4A4A]/20 p-3">
@@ -2464,7 +2802,7 @@ function FullCataloguePage() {
                       </div>
                     </button>
                     {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
-                  </React.Fragment>
+                  </Fragment>
                 )
               })}
             </div>
@@ -2489,16 +2827,16 @@ function FullCataloguePage() {
                 const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
                 const coverImage = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
                 return (
-                  <React.Fragment key={categoryName}>
+                  <Fragment key={categoryName}>
                     <button
                       onClick={() => {
                         setActiveCategory(categoryName)
-                        setActiveSubcategory(section.subcategories?.[0]?.name || '')
+                        setActiveSubcategory('ALL')
                       }}
                       className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
                     >
-                      <div className="relative h-48 overflow-hidden bg-[#E8E8E8]">
-                        <img src={coverImage} alt={categoryName} className="h-full w-full object-cover" loading="lazy" />
+                      <div className="relative h-52 bg-white p-2">
+                        <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" />
                         <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
                       </div>
                       <div className="border-t border-[#4A4A4A]/20 p-3">
@@ -2507,7 +2845,7 @@ function FullCataloguePage() {
                       </div>
                     </button>
                     {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
-                  </React.Fragment>
+                  </Fragment>
                 )
               })}
             </div>
@@ -3445,15 +3783,27 @@ function DistributorsPage() {
   )
 }
 
-function PortalLogin({ onLogin, onResendConfirmation, onCheckApproval }) {
+function PortalLogin({ onLogin, onResendConfirmation, onCheckApproval, onCreatePassword }) {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const location = useLocation()
+  const loginParams = useMemo(() => new URLSearchParams(location.search), [location.search])
+  const prefilledEmail = String(loginParams.get('email') || '').trim().toLowerCase()
+  const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
+  const [email, setEmail] = useState(prefilledEmail || localStorage.getItem('portalRememberedEmail') || '')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isCheckingApproval, setIsCheckingApproval] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [infoMessage, setInfoMessage] = useState('')
   const [applicationStatus, setApplicationStatus] = useState('')
+
+  useEffect(() => {
+    if (prefilledEmail) {
+      setEmail(prefilledEmail)
+    }
+  }, [prefilledEmail])
 
   return (
     <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
@@ -3471,13 +3821,40 @@ function PortalLogin({ onLogin, onResendConfirmation, onCheckApproval }) {
       </div>
 
       <div className="p-8">
-        <h3 className="text-xl font-semibold text-slate-900">Sign In</h3>
+        <h3 className="text-xl font-semibold text-slate-900">{isCreatePasswordMode ? 'Create Password' : 'Sign In'}</h3>
         <form autoComplete="on" className="mt-5 space-y-4" onSubmit={async (event) => {
           event.preventDefault()
           setIsSubmitting(true)
           setErrorMessage('')
           setInfoMessage('')
           setApplicationStatus('')
+
+          if (isCreatePasswordMode) {
+            const result = await onCreatePassword({
+              email,
+              password,
+              confirmPassword,
+              rememberMe,
+            })
+
+            setIsSubmitting(false)
+
+            if (!result.ok) {
+              setErrorMessage(result.message || 'Unable to create password.')
+              return
+            }
+
+            if (result.infoMessage) {
+              setInfoMessage(result.infoMessage)
+            }
+
+            if (result.navigateToDashboard) {
+              navigate('/portal/dashboard/overview')
+            }
+
+            return
+          }
+
           const result = await onLogin(email, password)
           setIsSubmitting(false)
 
@@ -3504,18 +3881,19 @@ function PortalLogin({ onLogin, onResendConfirmation, onCheckApproval }) {
               autoComplete="email"
               required
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) => setEmail(event.target.value.trim().toLowerCase())}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
               placeholder="you@company.com"
+              readOnly={Boolean(prefilledEmail)}
             />
           </label>
           <label className="block text-sm font-medium text-slate-700">
-            Password
+            {isCreatePasswordMode ? 'Create Password' : 'Password'}
             <input
               id="portal-login-password"
               name="password"
               type="password"
-              autoComplete="current-password"
+              autoComplete={isCreatePasswordMode ? 'new-password' : 'current-password'}
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -3524,8 +3902,36 @@ function PortalLogin({ onLogin, onResendConfirmation, onCheckApproval }) {
             />
           </label>
 
+          {isCreatePasswordMode && (
+            <label className="block text-sm font-medium text-slate-700">
+              Confirm Password
+              <input
+                id="portal-login-confirm-password"
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                placeholder="••••••••"
+              />
+            </label>
+          )}
+
+          <label className="flex items-center gap-2 text-xs text-slate-700">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(event) => setRememberMe(event.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20"
+              required={isCreatePasswordMode}
+            />
+            Remember me
+          </label>
+
           <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
-            {isSubmitting ? 'Signing in...' : 'Enter Professional Access'}
+            {isSubmitting ? (isCreatePasswordMode ? 'Creating password...' : 'Signing in...') : (isCreatePasswordMode ? 'Create Password & Continue' : 'Enter Professional Access')}
           </button>
         </form>
 
@@ -3547,6 +3953,8 @@ function PortalLogin({ onLogin, onResendConfirmation, onCheckApproval }) {
                     ? 'bg-emerald-100 text-emerald-800'
                     : applicationStatus === 'rejected'
                       ? 'bg-rose-100 text-rose-800'
+                      : applicationStatus === 'submitted'
+                        ? 'bg-sky-100 text-sky-800'
                       : 'bg-amber-100 text-amber-800'
                 }`}
               >
@@ -3557,6 +3965,8 @@ function PortalLogin({ onLogin, onResendConfirmation, onCheckApproval }) {
                   ? 'Approved for portal access.'
                   : applicationStatus === 'rejected'
                     ? 'Rejected. Contact distribution support.'
+                    : applicationStatus === 'submitted'
+                      ? 'Order request is stored. Portal access still requires approved distributor application.'
                     : 'Pending review by B2B team.'}
               </span>
             </div>
@@ -3656,29 +4066,63 @@ function PortalLogin({ onLogin, onResendConfirmation, onCheckApproval }) {
   )
 }
 
-function PortalAdminLogin({ onAdminLogin }) {
+function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const location = useLocation()
+  const loginParams = useMemo(() => new URLSearchParams(location.search), [location.search])
+  const prefilledEmail = String(loginParams.get('email') || '').trim().toLowerCase()
+  const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
+  const [email, setEmail] = useState(prefilledEmail || localStorage.getItem('adminRememberedEmail') || '')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [infoMessage, setInfoMessage] = useState('')
+
+  useEffect(() => {
+    if (prefilledEmail) {
+      setEmail(prefilledEmail)
+    }
+  }, [prefilledEmail])
 
   return (
     <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
       <div className="bg-slate-900 p-8 text-white">
         <p className="text-xs uppercase tracking-[0.2em] text-slate-300">GEL.IT.UP Trade</p>
-        <h2 className="mt-3 text-3xl font-bold">Admin Login</h2>
+        <h2 className="mt-3 text-3xl font-bold">{isCreatePasswordMode ? 'Admin Setup' : 'Admin Login'}</h2>
         <p className="mt-4 text-sm text-slate-300">
-          Reviewer access for approving pending B2B applications.
+          {isCreatePasswordMode
+            ? 'Create your admin password, confirm it, and verify your email before first sign-in.'
+            : 'Reviewer access for approving pending B2B applications.'}
         </p>
       </div>
 
       <div className="p-8">
-        <h3 className="text-xl font-semibold text-slate-900">Sign In as Admin</h3>
+        <h3 className="text-xl font-semibold text-slate-900">{isCreatePasswordMode ? 'Create Admin Password' : 'Sign In as Admin'}</h3>
         <form autoComplete="on" className="mt-5 space-y-4" onSubmit={async (event) => {
           event.preventDefault()
           setIsSubmitting(true)
           setErrorMessage('')
+          setInfoMessage('')
+
+          if (isCreatePasswordMode) {
+            const createResult = await onAdminCreatePassword({
+              email,
+              password,
+              confirmPassword,
+              rememberMe,
+            })
+            setIsSubmitting(false)
+
+            if (!createResult.ok) {
+              setErrorMessage(createResult.message || 'Unable to create admin password.')
+              return
+            }
+
+            setInfoMessage(createResult.message || 'Verification email sent. Please verify your email before admin sign-in.')
+            return
+          }
 
           const result = await onAdminLogin(email, password)
           setIsSubmitting(false)
@@ -3699,18 +4143,19 @@ function PortalAdminLogin({ onAdminLogin }) {
               autoComplete="email"
               required
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) => setEmail(event.target.value.trim().toLowerCase())}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
               placeholder="admin@company.com"
+              readOnly={Boolean(prefilledEmail)}
             />
           </label>
           <label className="block text-sm font-medium text-slate-700">
-            Password
+            {isCreatePasswordMode ? 'Create Password' : 'Password'}
             <input
               id="portal-admin-login-password"
               name="password"
               type="password"
-              autoComplete="current-password"
+              autoComplete={isCreatePasswordMode ? 'new-password' : 'current-password'}
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -3719,18 +4164,66 @@ function PortalAdminLogin({ onAdminLogin }) {
             />
           </label>
 
+          {isCreatePasswordMode && (
+            <label className="block text-sm font-medium text-slate-700">
+              Confirm Password
+              <input
+                id="portal-admin-login-confirm-password"
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                placeholder="••••••••"
+              />
+            </label>
+          )}
+
+          <label className="flex items-center gap-2 text-xs text-slate-700">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(event) => setRememberMe(event.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20"
+              required={isCreatePasswordMode}
+            />
+            Remember me
+          </label>
+
           <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
-            {isSubmitting ? 'Signing in...' : 'Access Applications'}
+            {isSubmitting
+              ? (isCreatePasswordMode ? 'Creating password...' : 'Signing in...')
+              : (isCreatePasswordMode ? 'Create Password & Send Verification' : 'Access Applications')}
           </button>
         </form>
 
         {errorMessage && <p className="mt-2 text-xs text-rose-600">{errorMessage}</p>}
+        {infoMessage && <p className="mt-2 text-xs text-emerald-700">{infoMessage}</p>}
 
         <div className="mt-4 text-xs text-slate-600">
-          Not an admin?{' '}
-          <NavLink to="/portal/login" className="font-semibold text-slate-900 hover:underline">
-            Back to Portal Login
-          </NavLink>
+          {isCreatePasswordMode
+            ? (
+              <>
+                Already set up?{' '}
+                <NavLink to="/portal/admin-login" className="font-semibold text-slate-900 hover:underline">
+                  Back to Admin Sign In
+                </NavLink>
+              </>
+            )
+            : (
+              <>
+                First-time admin?{' '}
+                <NavLink to="/portal/admin-login?mode=create-password" className="font-semibold text-slate-900 hover:underline">
+                  Create password
+                </NavLink>
+                {' • '}
+                <NavLink to="/portal/login" className="font-semibold text-slate-900 hover:underline">
+                  Back to Portal Login
+                </NavLink>
+              </>
+            )}
         </div>
       </div>
     </section>
@@ -3739,6 +4232,8 @@ function PortalAdminLogin({ onAdminLogin }) {
 
 function PortalRegister({ onRegister }) {
   const [application, setApplication] = useState({
+    applicationType: 'distributor',
+    orderProfile: 'business',
     customerType: 'company',
     companyName: '',
     vatNumber: '',
@@ -3763,11 +4258,17 @@ function PortalRegister({ onRegister }) {
     shippingCountry: '',
     shippingPostalCode: '',
     businessType: '',
+    yearsInBusiness: '',
+    distributionCountryInterests: '',
     notes: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+
+  const isDistributorFlow = application.applicationType === 'distributor'
+  const isB2BOrderFlow = application.applicationType === 'b2b_order'
+  const isBusinessOrderProfile = application.orderProfile === 'business'
 
   const setField = (fieldName, value) => {
     setApplication((current) => ({
@@ -3780,14 +4281,46 @@ function PortalRegister({ onRegister }) {
     <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
       <div className="bg-slate-900 p-8 text-white">
         <p className="text-xs uppercase tracking-[0.2em] text-slate-300">GEL.IT.UP Trade</p>
-        <h2 className="mt-3 text-3xl font-bold">Distributor Registration</h2>
+        <h2 className="mt-3 text-3xl font-bold">Choose Application Type</h2>
         <p className="mt-4 text-sm text-slate-300">
-          Submit your company details. Applications are uploaded automatically and reviewed by the B2B team.
+          Choose Distribution Application or B2B (Client) Request. Submissions are uploaded automatically and reviewed by the B2B team.
         </p>
       </div>
 
       <div className="p-8">
-        <h3 className="text-xl font-semibold text-slate-900">B2B Client Application</h3>
+        <h3 className="text-xl font-semibold text-slate-900">
+          {isDistributorFlow ? 'Distributor Application' : 'B2B Order Request'}
+        </h3>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setApplication((current) => ({
+                ...current,
+                applicationType: 'distributor',
+                customerType: 'company',
+              }))
+            }}
+            className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${isDistributorFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
+          >
+            Distribution Application
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setApplication((current) => ({
+                ...current,
+                applicationType: 'b2b_order',
+                customerType: current.orderProfile === 'personal' ? 'personal' : 'company',
+              }))
+            }}
+            className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${isB2BOrderFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
+          >
+            B2B (Client)
+          </button>
+        </div>
+
         <form className="mt-5 space-y-4" onSubmit={async (event) => {
           event.preventDefault()
           setIsSubmitting(true)
@@ -3805,39 +4338,92 @@ function PortalRegister({ onRegister }) {
           setSuccessMessage(result.message || 'Application submitted and marked as pending approval. You will be notified by email after review.')
         }}>
           <div className="grid gap-4 md:grid-cols-2">
+            <label className="block text-sm font-medium text-slate-700 md:col-span-2">
+              Application Service
+              <select
+                required
+                value={application.applicationType}
+                onChange={(event) => {
+                  const nextType = event.target.value
+                  setApplication((current) => ({
+                    ...current,
+                    applicationType: nextType,
+                    customerType: nextType === 'distributor' ? 'company' : current.customerType,
+                  }))
+                }}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+              >
+                <option value="distributor">Distributor Application</option>
+                <option value="b2b_order">B2B Order Form</option>
+              </select>
+            </label>
+
+            {isB2BOrderFlow && (
+              <label className="block text-sm font-medium text-slate-700 md:col-span-2">
+                Buyer Type
+                <select
+                  required
+                  value={application.orderProfile}
+                  onChange={(event) => {
+                    const nextProfile = event.target.value
+                    setApplication((current) => ({
+                      ...current,
+                      orderProfile: nextProfile,
+                      customerType: nextProfile === 'personal' ? 'personal' : 'company',
+                    }))
+                  }}
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                >
+                  <option value="business">Business (VAT required)</option>
+                  <option value="personal">Personal (EU purchases)</option>
+                </select>
+              </label>
+            )}
+
             <label className="block text-sm font-medium text-slate-700">
-              Client Type
+              {isDistributorFlow ? 'Client Type' : 'Order Account'}
               <select
                 required
                 value={application.customerType}
                 onChange={(event) => setField('customerType', event.target.value)}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
               >
-                <option value="company">Company</option>
-                <option value="client">Client</option>
+                {isDistributorFlow
+                  ? (
+                    <>
+                      <option value="company">Company</option>
+                      <option value="client">Client</option>
+                    </>
+                  )
+                  : (
+                    <>
+                      <option value="company">Business</option>
+                      <option value="personal">Personal</option>
+                    </>
+                  )}
               </select>
             </label>
 
             <label className="block text-sm font-medium text-slate-700">
-              {application.customerType === 'company' ? 'Company Name' : 'Client Name'}
+              {(application.customerType === 'company' || isDistributorFlow) ? 'Company Name' : 'Full Name'}
               <input
                 type="text"
                 required
                 value={application.companyName}
                 onChange={(event) => setField('companyName', event.target.value)}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                placeholder={application.customerType === 'company' ? 'Company Ltd' : 'Client Name'}
+                placeholder={(application.customerType === 'company' || isDistributorFlow) ? 'Company Ltd' : 'Full Name'}
               />
             </label>
             <label className="block text-sm font-medium text-slate-700">
               VAT Number
               <input
                 type="text"
-                required
+                required={isDistributorFlow || isBusinessOrderProfile}
                 value={application.vatNumber}
                 onChange={(event) => setField('vatNumber', event.target.value)}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                placeholder="EU123456789"
+                placeholder={(isDistributorFlow || isBusinessOrderProfile) ? 'EU123456789' : 'Optional for personal purchases'}
               />
             </label>
             <label className="block text-sm font-medium text-slate-700">
@@ -3961,7 +4547,17 @@ function PortalRegister({ onRegister }) {
               <select
                 required
                 value={application.invoiceCountry}
-                onChange={(event) => setField('invoiceCountry', event.target.value)}
+                onChange={(event) => {
+                  const nextCountry = event.target.value
+                  setApplication((current) => ({
+                    ...current,
+                    invoiceCountry: nextCountry,
+                    phone: withCountryDialCode(current.phone, nextCountry),
+                    shippingPhone: current.shippingSameAsInvoice
+                      ? withCountryDialCode(current.shippingPhone || current.phone, nextCountry)
+                      : current.shippingPhone,
+                  }))
+                }}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
               >
                 <option value="">Select country</option>
@@ -4066,7 +4662,14 @@ function PortalRegister({ onRegister }) {
                   <select
                     required={!application.shippingSameAsInvoice}
                     value={application.shippingCountry}
-                    onChange={(event) => setField('shippingCountry', event.target.value)}
+                    onChange={(event) => {
+                      const nextCountry = event.target.value
+                      setApplication((current) => ({
+                        ...current,
+                        shippingCountry: nextCountry,
+                        shippingPhone: withCountryDialCode(current.shippingPhone, nextCountry),
+                      }))
+                    }}
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
                   >
                     <option value="">Select country</option>
@@ -4081,7 +4684,7 @@ function PortalRegister({ onRegister }) {
             <label className="block text-sm font-medium text-slate-700">
               Business Type
               <select
-                required
+                required={isDistributorFlow}
                 value={application.businessType}
                 onChange={(event) => setField('businessType', event.target.value)}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
@@ -4093,6 +4696,34 @@ function PortalRegister({ onRegister }) {
                 <option value="Academy">Academy</option>
               </select>
             </label>
+
+            {isDistributorFlow && (
+              <>
+                <label className="block text-sm font-medium text-slate-700">
+                  Years in Business
+                  <input
+                    type="text"
+                    required
+                    value={application.yearsInBusiness}
+                    onChange={(event) => setField('yearsInBusiness', event.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                    placeholder="e.g. 5"
+                  />
+                </label>
+                <label className="block text-sm font-medium text-slate-700 md:col-span-2">
+                  Distribution Country Interests
+                  <input
+                    type="text"
+                    required
+                    value={application.distributionCountryInterests}
+                    onChange={(event) => setField('distributionCountryInterests', event.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                    placeholder="Countries or regions you want distribution rights for"
+                  />
+                </label>
+              </>
+            )}
+
             <label className="block text-sm font-medium text-slate-700 md:col-span-2">
               Notes
               <textarea
@@ -6322,6 +6953,7 @@ function OrdersModule() {
   const [orders, setOrders] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [copiedOrderId, setCopiedOrderId] = useState(null)
+  const [showBuilderDetails, setShowBuilderDetails] = useState(false)
   const [errorMessage, setErrorMessage] = useState(
     !hasSupabaseConfig || !supabase
       ? 'Live orders are unavailable because Supabase is not configured.'
@@ -6470,11 +7102,51 @@ function OrdersModule() {
                           3-in-1 Premium Builder Gel delivers resilient structure with professional clarity and precision. Available in Clear, Pink, and Cover to match every studio system.
                         </p>
                         <button
+                          type="button"
+                          onClick={() => setShowBuilderDetails((current) => !current)}
+                          className="mt-5 rounded-lg border border-[#D43790]/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-white transition duration-300 hover:bg-[#D43790]/20"
+                        >
+                          {showBuilderDetails ? 'Show Less' : 'Learn More'}
+                        </button>
+                        {showBuilderDetails && (
+                          <>
+                            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-white/70">Key Benefits</p>
+                            <ul className="mt-2 space-y-2 text-sm text-white/75">
+                              <li className="flex items-start gap-3">
+                                <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                                <span>Fiber-reinforced strength: fiberglass particles create a cross-linked mesh for resistance against cracking and snapping.</span>
+                              </li>
+                              <li className="flex items-start gap-3">
+                                <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                                <span>Single-phase efficiency: functions as base, builder, and high-shine top coat in one service flow.</span>
+                              </li>
+                              <li className="flex items-start gap-3">
+                                <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                                <span>Cool cure technology: formulated to minimize heat spikes during curing for improved client comfort.</span>
+                              </li>
+                              <li className="flex items-start gap-3">
+                                <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                                <span>Toxin-free performance: 100% HEMA and TPO free.</span>
+                              </li>
+                            </ul>
+                            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-white/70">How to Use / Application</p>
+                            <ol className="mt-2 list-decimal space-y-2 pl-5 text-sm text-white/75">
+                              <li><span className="font-semibold text-white/90">Preparation:</span> Perform a thorough dry manicure and cleanse the nail plate.</li>
+                              <li><span className="font-semibold text-white/90">Adhesion:</span> Apply Superbond Primer and allow to air-dry for 30 seconds.</li>
+                              <li><span className="font-semibold text-white/90">Foundation Layer:</span> Apply a thin slip layer over the nail (and form if extending). Do not cure.</li>
+                              <li><span className="font-semibold text-white/90">Building:</span> Place a larger bead in the center and guide to edges, allowing self-leveling apex formation.</li>
+                              <li><span className="font-semibold text-white/90">Curing:</span> Cure for 60-90 seconds in LED or 120 seconds in UV.</li>
+                              <li><span className="font-semibold text-white/90">Refinement:</span> Wipe inhibition layer with cleanser and file to shape.</li>
+                              <li><span className="font-semibold text-white/90">Finishing:</span> Apply a final thin layer of the same gel for gloss, or proceed with GEL.IT.UP by GIUP® color.</li>
+                            </ol>
+                          </>
+                        )}
+                        <button
                           onClick={() => {
                             const builderSection = sections.find((s) => s.category === 'BUILDER GEL SYSTEMS')
                             if (builderSection) {
                               setActiveCategory(builderSection.category)
-                              setActiveSubcategory(builderSection.subcategories?.[0]?.name || '')
+                              setActiveSubcategory('ALL')
                             }
                           }}
                           className="mt-8 rounded-lg bg-[#D43790] px-8 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-[#C32680]"
@@ -6527,6 +7199,7 @@ function OrdersModule() {
 function PendingApplicationsModule() {
   const [applications, setApplications] = useState([])
   const [reviewedApplications, setReviewedApplications] = useState([])
+  const [actionDrafts, setActionDrafts] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const [isSavingId, setIsSavingId] = useState(null)
   const [copiedApplicationId, setCopiedApplicationId] = useState(null)
@@ -6548,13 +7221,13 @@ function PendingApplicationsModule() {
 
     const { data, error } = await supabase
       .from(registrationsTable)
-      .select('id, created_at, customer_type, company_name, vat_number, contact_name, contact_email, phone, shipping_type, country, business_type, status, invoice_address_line1, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_area, shipping_region, shipping_country, shipping_postal_code')
-      .eq('status', 'pending')
+      .select('id, created_at, customer_type, company_name, vat_number, contact_name, contact_email, phone, shipping_type, country, business_type, status, notes, application_type, order_profile, admin_comment, order_action, order_payment_status, order_shipping_status, tracking_number, tracking_url, action_updated_at, action_updated_by, invoice_address_line1, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_area, shipping_region, shipping_country, shipping_postal_code')
+      .in('status', ['pending', 'submitted'])
       .order('created_at', { ascending: false })
 
     const { data: reviewedData, error: reviewedError } = await supabase
       .from(registrationsTable)
-      .select('id, created_at, reviewed_at, reviewed_by, customer_type, company_name, vat_number, contact_name, contact_email, phone, shipping_type, country, business_type, status, invoice_address_line1, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_area, shipping_region, shipping_country, shipping_postal_code')
+      .select('id, created_at, reviewed_at, reviewed_by, customer_type, company_name, vat_number, contact_name, contact_email, phone, shipping_type, country, business_type, status, notes, application_type, order_profile, admin_comment, order_action, order_payment_status, order_shipping_status, tracking_number, tracking_url, action_updated_at, action_updated_by, invoice_address_line1, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_area, shipping_region, shipping_country, shipping_postal_code')
       .in('status', ['approved', 'rejected'])
       .order('reviewed_at', { ascending: false })
       .limit(80)
@@ -6590,7 +7263,75 @@ function PendingApplicationsModule() {
     }
   }, [loadPendingApplications])
 
+  const getActionDraft = (application) => {
+    const storedDraft = actionDrafts[application.id]
+    if (storedDraft) return storedDraft
+
+    return {
+      adminComment: String(application.admin_comment || ''),
+      orderAction: String(application.order_action || (isDistributorSubmission(application) ? '' : 'requested')),
+      paymentStatus: String(application.order_payment_status || (isDistributorSubmission(application) ? '' : 'unpaid')),
+      shippingStatus: String(application.order_shipping_status || (isDistributorSubmission(application) ? '' : 'not_ready')),
+      trackingNumber: String(application.tracking_number || ''),
+      trackingUrl: String(application.tracking_url || ''),
+    }
+  }
+
+  const setActionDraftField = (applicationId, fieldName, value) => {
+    setActionDrafts((current) => ({
+      ...current,
+      [applicationId]: {
+        ...(current[applicationId] || {}),
+        [fieldName]: value,
+      },
+    }))
+  }
+
+  const saveWorkflowAction = async (application) => {
+    if (!hasSupabaseConfig || !supabase) {
+      setErrorMessage('Supabase is not configured.')
+      return
+    }
+
+    const draft = getActionDraft(application)
+
+    setIsSavingId(application.id)
+    setErrorMessage('')
+    setSuccessMessage('')
+
+    const { data: userData } = await supabase.auth.getUser()
+    const reviewerEmail = userData?.user?.email ?? null
+
+    const updates = {
+      admin_comment: draft.adminComment.trim() || null,
+      order_action: draft.orderAction.trim() || null,
+      order_payment_status: draft.paymentStatus.trim() || null,
+      order_shipping_status: draft.shippingStatus.trim() || null,
+      tracking_number: draft.trackingNumber.trim() || null,
+      tracking_url: draft.trackingUrl.trim() || null,
+      action_updated_at: new Date().toISOString(),
+      action_updated_by: reviewerEmail,
+    }
+
+    const { error } = await supabase
+      .from(registrationsTable)
+      .update(updates)
+      .eq('id', application.id)
+
+    if (error) {
+      setErrorMessage(error.message)
+      setIsSavingId(null)
+      return
+    }
+
+    setSuccessMessage(`Workflow details saved for #${application.id}.`)
+    setIsSavingId(null)
+    await loadPendingApplications()
+  }
+
   const copyApplicationDetails = async (application) => {
+    const applicationType = getApplicationTypeFromRecord(application)
+    const orderProfile = getOrderProfileFromRecord(application)
     const shippingSameAsInvoice = application.shipping_same_as_invoice !== false
     const invoiceAddress = [
       application.invoice_address_line1,
@@ -6616,6 +7357,9 @@ function PendingApplicationsModule() {
 
     const lines = [
       `Application #${application.id}`,
+      `Type: ${applicationType === 'distributor' ? 'Distributor Application' : 'B2B Order Request'}`,
+      `Order Profile: ${applicationType === 'b2b_order' ? orderProfile : '-'}`,
+      `Submission Status: ${application.status || '-'}`,
       `Company/Client: ${application.company_name || '-'}`,
       `Customer Type: ${application.customer_type === 'client' ? 'Client' : 'Company'}`,
       `Business Type: ${application.business_type || '-'}`,
@@ -6626,6 +7370,12 @@ function PendingApplicationsModule() {
       `Shipping Address: ${shippingAddress || '-'}`,
       `Shipping Contact: ${shippingContact}`,
       shippingSameAsInvoice ? 'Shipping same as invoice: Yes' : 'Shipping same as invoice: No',
+      `Admin Comment: ${application.admin_comment || '-'}`,
+      `Order Action: ${application.order_action || '-'}`,
+      `Payment Status: ${application.order_payment_status || '-'}`,
+      `Shipping Status: ${application.order_shipping_status || '-'}`,
+      `Tracking Number: ${application.tracking_number || '-'}`,
+      `Tracking URL: ${application.tracking_url || '-'}`,
     ]
 
     await navigator.clipboard.writeText(lines.join('\n'))
@@ -6701,6 +7451,11 @@ function PendingApplicationsModule() {
   }
 
   const reviewApplication = async (application, status) => {
+    if (!isDistributorSubmission(application)) {
+      setErrorMessage('Approve/reject is available only for distributor applications.')
+      return
+    }
+
     if (!hasSupabaseConfig || !supabase) {
       setErrorMessage('Supabase is not configured.')
       return
@@ -6727,12 +7482,14 @@ function PendingApplicationsModule() {
       return
     }
 
+    const createPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(application.contact_email || '')}`
+
     const subject = status === 'approved'
       ? `Welcome to GEL.IT.UP Portal, ${application.contact_name}`
       : `GEL.IT.UP Portal application update`
 
     const html = status === 'approved'
-      ? `<p>Hello ${application.contact_name},</p><p>Welcome to the GEL.IT.UP B2B Portal. Your distributor/salon account for <strong>${application.company_name}</strong> has been approved.</p><p>You can now sign in and start ordering from the portal.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`
+      ? `<p>Hello ${application.contact_name},</p><p>Welcome to <strong>GEL.IT.UP by GIUP®</strong>.</p><p>Your distributor account for <strong>${application.company_name}</strong> has been approved.</p><p>Please open your login page below. Your email is prefilled; create your password, confirm it, and tick the Remember me checkbox.</p><p><a href="${createPasswordLink}">Create password and continue to login</a></p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`
       : `<p>Hello ${application.contact_name},</p><p>Your GEL.IT.UP B2B Portal application for <strong>${application.company_name}</strong> has been reviewed and marked as rejected.</p><p>If you need support or want to re-apply, contact us at ${B2B_EMAIL}.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`
 
     const notificationResult = await sendPortalEmailNotification({
@@ -6763,17 +7520,17 @@ function PendingApplicationsModule() {
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
-        <h3 className="text-lg font-semibold text-slate-900">Pending Applications</h3>
+        <h3 className="text-lg font-semibold text-slate-900">Approvals & Order Requests</h3>
         <p className="mt-1 text-xs text-slate-500">
-          Review client registration submissions and approve/reject access requests.
+          Manage distributor approvals and B2B order workflow updates in one queue.
         </p>
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
-        {isLoading && <p className="text-sm text-slate-600">Loading pending applications...</p>}
+        {isLoading && <p className="text-sm text-slate-600">Loading active submissions...</p>}
         {!isLoading && errorMessage && <p className="text-sm text-rose-600">Unable to load applications: {errorMessage}</p>}
         {!isLoading && !errorMessage && !applications.length && (
-          <p className="text-sm text-slate-600">No pending applications.</p>
+          <p className="text-sm text-slate-600">No active submissions.</p>
         )}
 
         {!isLoading && !errorMessage && applications.length > 0 && (
@@ -6783,19 +7540,35 @@ function PendingApplicationsModule() {
                 <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
                   <th className="py-2 pr-4">ID</th>
                   <th className="py-2 pr-4">Created</th>
+                  <th className="py-2 pr-4">Type</th>
+                  <th className="py-2 pr-4">Status</th>
                   <th className="py-2 pr-4">Company</th>
                   <th className="py-2 pr-4">Contact</th>
                   <th className="py-2 pr-4">Business</th>
                   <th className="py-2 pr-4">Invoice</th>
                   <th className="py-2 pr-4">Shipping</th>
+                  <th className="py-2 pr-4">Workflow</th>
                   <th className="py-2 pr-4">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {applications.map((application) => (
+                {applications.map((application) => {
+                  const isDistributor = isDistributorSubmission(application)
+                  const draft = getActionDraft(application)
+                  return (
                   <tr key={application.id} className="border-b border-slate-100 text-slate-700">
                     <td className="py-2 pr-4 font-semibold">#{application.id}</td>
                     <td className="py-2 pr-4">{new Date(application.created_at).toLocaleString()}</td>
+                    <td className="py-2 pr-4">
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${isDistributor ? 'bg-fuchsia-100 text-fuchsia-800' : 'bg-sky-100 text-sky-800'}`}>
+                        {isDistributor ? 'Distributor' : 'B2B Order'}
+                      </span>
+                    </td>
+                    <td className="py-2 pr-4">
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${application.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-800'}`}>
+                        {application.status || '-'}
+                      </span>
+                    </td>
                     <td className="py-2 pr-4">{application.company_name}</td>
                     <td className="py-2 pr-4">
                       <div>{application.contact_name}</div>
@@ -6839,22 +7612,120 @@ function PendingApplicationsModule() {
                           </>
                         )}
                     </td>
-                    <td className="py-2 pr-4">
-                      <div className="flex flex-wrap gap-2">
+                    <td className="py-2 pr-4 align-top">
+                      <div className="grid min-w-[220px] gap-2">
+                        <label className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                          Admin Comment
+                          <textarea
+                            rows={2}
+                            value={draft.adminComment}
+                            onChange={(event) => setActionDraftField(application.id, 'adminComment', event.target.value)}
+                            className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-xs"
+                            placeholder="Reviewer notes"
+                          />
+                        </label>
+
+                        {!isDistributor && (
+                          <>
+                            <label className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                              Order Action
+                              <select
+                                value={draft.orderAction}
+                                onChange={(event) => setActionDraftField(application.id, 'orderAction', event.target.value)}
+                                className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-xs"
+                              >
+                                <option value="requested">Requested</option>
+                                <option value="order_placed">Order Placed</option>
+                                <option value="payment_received">Payment Received</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                              </select>
+                            </label>
+                            <label className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                              Payment
+                              <select
+                                value={draft.paymentStatus}
+                                onChange={(event) => setActionDraftField(application.id, 'paymentStatus', event.target.value)}
+                                className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-xs"
+                              >
+                                <option value="unpaid">Unpaid</option>
+                                <option value="paid">Paid</option>
+                                <option value="refunded">Refunded</option>
+                              </select>
+                            </label>
+                            <label className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                              Shipping
+                              <select
+                                value={draft.shippingStatus}
+                                onChange={(event) => setActionDraftField(application.id, 'shippingStatus', event.target.value)}
+                                className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-xs"
+                              >
+                                <option value="not_ready">Not Ready</option>
+                                <option value="packed">Packed</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                              </select>
+                            </label>
+                            <label className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                              Tracking Number
+                              <input
+                                type="text"
+                                value={draft.trackingNumber}
+                                onChange={(event) => setActionDraftField(application.id, 'trackingNumber', event.target.value)}
+                                className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-xs"
+                                placeholder="Tracking code"
+                              />
+                            </label>
+                            <label className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                              Tracking URL
+                              <input
+                                type="url"
+                                value={draft.trackingUrl}
+                                onChange={(event) => setActionDraftField(application.id, 'trackingUrl', event.target.value)}
+                                className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-xs"
+                                placeholder="https://"
+                              />
+                            </label>
+                          </>
+                        )}
+
                         <button
-                          onClick={() => reviewApplication(application, 'approved')}
-                          disabled={isSavingId === application.id}
-                          className="rounded-md bg-emerald-600 px-2 py-1 text-xs font-semibold text-white disabled:opacity-60"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => reviewApplication(application, 'rejected')}
+                          onClick={() => {
+                            void saveWorkflowAction(application)
+                          }}
                           disabled={isSavingId === application.id}
                           className="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 disabled:opacity-60"
                         >
-                          Reject
+                          {isSavingId === application.id ? 'Saving...' : 'Save workflow'}
                         </button>
+
+                        <div className="text-[10px] text-slate-500">
+                          {application.action_updated_at
+                            ? `Updated ${new Date(application.action_updated_at).toLocaleString()}${application.action_updated_by ? ` by ${application.action_updated_by}` : ''}`
+                            : 'No workflow updates yet.'}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-2 pr-4">
+                      <div className="flex flex-wrap gap-2">
+                        {isDistributor && (
+                          <>
+                            <button
+                              onClick={() => reviewApplication(application, 'approved')}
+                              disabled={isSavingId === application.id}
+                              className="rounded-md bg-emerald-600 px-2 py-1 text-xs font-semibold text-white disabled:opacity-60"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => reviewApplication(application, 'rejected')}
+                              disabled={isSavingId === application.id}
+                              className="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 disabled:opacity-60"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
                         <button
                           onClick={() => {
                             void copyApplicationDetails(application)
@@ -6882,7 +7753,8 @@ function PendingApplicationsModule() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -6894,7 +7766,7 @@ function PendingApplicationsModule() {
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
         <div className="mb-3">
           <h4 className="text-sm font-semibold text-slate-900">Reviewed Applications</h4>
-          <p className="text-xs text-slate-500">Recently approved/rejected applications with copy shortcuts.</p>
+          <p className="text-xs text-slate-500">Recently reviewed submissions, including workflow notes and tracking values.</p>
         </div>
 
         {isLoading && <p className="text-sm text-slate-600">Loading reviewed applications...</p>}
@@ -6909,21 +7781,30 @@ function PendingApplicationsModule() {
                 <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
                   <th className="py-2 pr-4">ID</th>
                   <th className="py-2 pr-4">Status</th>
+                  <th className="py-2 pr-4">Type</th>
                   <th className="py-2 pr-4">Reviewed</th>
                   <th className="py-2 pr-4">Company</th>
                   <th className="py-2 pr-4">Contact</th>
                   <th className="py-2 pr-4">Invoice</th>
                   <th className="py-2 pr-4">Shipping</th>
+                  <th className="py-2 pr-4">Workflow</th>
                   <th className="py-2 pr-4">Copy</th>
                 </tr>
               </thead>
               <tbody>
-                {reviewedApplications.map((application) => (
+                {reviewedApplications.map((application) => {
+                  const isDistributor = isDistributorSubmission(application)
+                  return (
                   <tr key={`reviewed-${application.id}`} className="border-b border-slate-100 text-slate-700">
                     <td className="py-2 pr-4 font-semibold">#{application.id}</td>
                     <td className="py-2 pr-4">
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${application.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
                         {application.status}
+                      </span>
+                    </td>
+                    <td className="py-2 pr-4">
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${isDistributor ? 'bg-fuchsia-100 text-fuchsia-800' : 'bg-sky-100 text-sky-800'}`}>
+                        {isDistributor ? 'Distributor' : 'B2B Order'}
                       </span>
                     </td>
                     <td className="py-2 pr-4">
@@ -6971,6 +7852,13 @@ function PendingApplicationsModule() {
                         )}
                     </td>
                     <td className="py-2 pr-4">
+                      <div className="text-xs text-slate-700">Comment: {application.admin_comment || '-'}</div>
+                      <div className="text-xs text-slate-500">Action: {application.order_action || '-'}</div>
+                      <div className="text-xs text-slate-500">Payment: {application.order_payment_status || '-'}</div>
+                      <div className="text-xs text-slate-500">Shipping: {application.order_shipping_status || '-'}</div>
+                      <div className="text-xs text-slate-500">Tracking: {application.tracking_number || '-'}</div>
+                    </td>
+                    <td className="py-2 pr-4">
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => {
@@ -6999,7 +7887,8 @@ function PendingApplicationsModule() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -7641,19 +8530,18 @@ function App() {
 
   const handlePortalLogin = async (email, password) => {
     if (hasSupabaseConfig && supabase) {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      const normalizedEmail = String(email || '').trim().toLowerCase()
+      const { error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password })
 
       if (error) {
         return { ok: false, message: error.message, applicationStatus: '' }
       }
 
       if (requireApproval) {
-        const normalizedEmail = email.trim().toLowerCase()
-
         const { data: adminRows, error: adminError } = await supabase
           .from(adminsTable)
           .select('email')
-          .eq('email', normalizedEmail)
+          .ilike('email', normalizedEmail)
           .limit(1)
 
         if (adminError) {
@@ -7705,6 +8593,14 @@ function App() {
               ok: false,
               message: 'Your B2B application is pending approval. Access is enabled after manual review.',
               applicationStatus: 'pending',
+            }
+          }
+
+          if (status === 'submitted') {
+            return {
+              ok: false,
+              message: 'Your order request is stored and under processing. Portal sign-in requires an approved distributor application.',
+              applicationStatus: 'submitted',
             }
           }
 
@@ -7779,7 +8675,7 @@ function App() {
     const { data: adminRows, error: adminError } = await supabase
       .from(adminsTable)
       .select('email')
-      .eq('email', normalizedEmail)
+      .ilike('email', normalizedEmail)
       .limit(1)
 
     if (adminError) {
@@ -7796,14 +8692,131 @@ function App() {
     return { ok: true }
   }
 
+  const handleCreateAdminPassword = async ({ email, password, confirmPassword, rememberMe }) => {
+    const normalizedEmail = String(email || '').trim().toLowerCase()
+
+    if (!normalizedEmail) {
+      return { ok: false, message: 'Admin email is required.' }
+    }
+
+    if (!password || password.length < 8) {
+      return { ok: false, message: 'Password must be at least 8 characters.' }
+    }
+
+    if (password !== confirmPassword) {
+      return { ok: false, message: 'Password and confirmation do not match.' }
+    }
+
+    if (!rememberMe) {
+      return { ok: false, message: 'Please confirm the remember me checkbox.' }
+    }
+
+    if (!hasSupabaseConfig || !supabase) {
+      return { ok: false, message: 'Live auth is not configured.' }
+    }
+
+    const signUpResult = await supabase.auth.signUp({
+      email: normalizedEmail,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/portal/admin-login`,
+      },
+    })
+
+    const signUpMessage = signUpResult?.error?.message || ''
+    const isAlreadyRegistered = /already registered|already been registered/i.test(signUpMessage)
+
+    if (signUpResult.error && !isAlreadyRegistered) {
+      return { ok: false, message: signUpResult.error.message }
+    }
+
+    if (isAlreadyRegistered) {
+      await supabase.auth.resend({
+        type: 'signup',
+        email: normalizedEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/portal/admin-login`,
+        },
+      })
+    }
+
+    localStorage.setItem('adminRememberedEmail', normalizedEmail)
+
+    return {
+      ok: true,
+      message: 'Verification email sent. Confirm your email, then sign in as admin.',
+    }
+  }
+
+  const handleCreatePortalPassword = async ({ email, password, confirmPassword, rememberMe }) => {
+    const normalizedEmail = String(email || '').trim().toLowerCase()
+
+    if (!normalizedEmail) {
+      return { ok: false, message: 'Business email is required.' }
+    }
+
+    if (!password || password.length < 8) {
+      return { ok: false, message: 'Password must be at least 8 characters.' }
+    }
+
+    if (password !== confirmPassword) {
+      return { ok: false, message: 'Password and confirmation do not match.' }
+    }
+
+    if (!rememberMe) {
+      return { ok: false, message: 'Please confirm the remember me checkbox.' }
+    }
+
+    if (!hasSupabaseConfig || !supabase) {
+      return { ok: false, message: 'Live auth is not configured.' }
+    }
+
+    const signUpResult = await supabase.auth.signUp({
+      email: normalizedEmail,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/portal/login`,
+      },
+    })
+
+    const signUpMessage = signUpResult?.error?.message || ''
+    const isAlreadyRegistered = /already registered|already been registered/i.test(signUpMessage)
+
+    if (signUpResult.error && !isAlreadyRegistered) {
+      return { ok: false, message: signUpResult.error.message }
+    }
+
+    if (isAlreadyRegistered) {
+      await supabase.auth.resend({
+        type: 'signup',
+        email: normalizedEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/portal/login`,
+        },
+      })
+    }
+
+    localStorage.setItem('portalRememberedEmail', normalizedEmail)
+    return {
+      ok: true,
+      infoMessage: 'Verification email sent. Confirm your email, then sign in with your password.',
+    }
+  }
+
   const handlePortalRegister = async (application) => {
     if (hasSupabaseConfig && supabase) {
+      const applicationType = String(application.applicationType || 'distributor').trim().toLowerCase()
+      const orderProfile = String(application.orderProfile || 'business').trim().toLowerCase()
+      const isDistributorApplication = applicationType === 'distributor'
+      const isBusinessOrder = orderProfile !== 'personal'
       const shippingSameAsInvoice = application.shippingSameAsInvoice !== false
       const invoiceCountry = application.invoiceCountry.trim()
       const invoiceArea = application.invoiceArea.trim()
       const invoiceRegion = application.invoiceRegion.trim()
       const invoicePostalCode = application.invoicePostalCode.trim()
       const invoiceAddressLine1 = application.invoiceAddressLine1.trim()
+      const yearsInBusiness = String(application.yearsInBusiness || '').trim()
+      const distributionCountryInterests = String(application.distributionCountryInterests || '').trim()
 
       const shippingName = shippingSameAsInvoice ? application.contactName.trim() : application.shippingName.trim()
       const shippingPhone = shippingSameAsInvoice ? application.phone.trim() : application.shippingPhone.trim()
@@ -7817,7 +8830,6 @@ function App() {
       const requiredFields = [
         ['client type', application.customerType],
         ['company/client name', application.companyName],
-        ['VAT number', application.vatNumber],
         ['contact name', application.contactName],
         ['contact email', application.contactEmail],
         ['phone', application.phone],
@@ -7827,8 +8839,19 @@ function App() {
         ['invoice region/state', invoiceRegion],
         ['invoice country', invoiceCountry],
         ['invoice postal code', invoicePostalCode],
-        ['business type', application.businessType],
       ]
+
+      if (isDistributorApplication || isBusinessOrder) {
+        requiredFields.push(['VAT number', application.vatNumber])
+      }
+
+      if (isDistributorApplication) {
+        requiredFields.push(
+          ['business type', application.businessType],
+          ['years in business', yearsInBusiness],
+          ['distribution country interests', distributionCountryInterests],
+        )
+      }
 
       if (!shippingSameAsInvoice) {
         requiredFields.push(
@@ -7847,10 +8870,31 @@ function App() {
         return { ok: false, message: `Please complete ${missingField[0]}.` }
       }
 
+      const submissionStatus = isDistributorApplication ? 'pending' : 'submitted'
+      const derivedBusinessType = isDistributorApplication
+        ? application.businessType.trim()
+        : `B2B Order - ${isBusinessOrder ? 'Business' : 'Personal'}`
+
+      const notesSections = [
+        `[APPLICATION_TYPE:${isDistributorApplication ? 'distributor' : 'b2b_order'}]`,
+        `[ORDER_PROFILE:${isBusinessOrder ? 'business' : 'personal'}]`,
+      ]
+
+      if (isDistributorApplication) {
+        notesSections.push(
+          `Years in business: ${yearsInBusiness}`,
+          `Distribution country interests: ${distributionCountryInterests}`,
+        )
+      }
+
+      if (application.notes?.trim()) {
+        notesSections.push(`Additional notes: ${application.notes.trim()}`)
+      }
+
       const payload = {
         customer_type: application.customerType.trim(),
         company_name: application.companyName.trim(),
-        vat_number: application.vatNumber.trim(),
+        vat_number: application.vatNumber.trim() || null,
         contact_name: application.contactName.trim(),
         contact_email: application.contactEmail.trim().toLowerCase(),
         phone: application.phone.trim(),
@@ -7875,9 +8919,19 @@ function App() {
         shipping_region: shippingRegion || null,
         shipping_country: shippingCountry || null,
         shipping_postal_code: shippingPostalCode || null,
-        business_type: application.businessType.trim(),
-        notes: application.notes.trim() || null,
-        status: 'pending',
+        business_type: derivedBusinessType,
+        application_type: isDistributorApplication ? 'distributor' : 'b2b_order',
+        order_profile: isBusinessOrder ? 'business' : 'personal',
+        admin_comment: null,
+        order_action: null,
+        order_payment_status: isDistributorApplication ? null : 'unpaid',
+        order_shipping_status: isDistributorApplication ? null : 'not_ready',
+        tracking_number: null,
+        tracking_url: null,
+        action_updated_at: null,
+        action_updated_by: null,
+        notes: notesSections.join('\n'),
+        status: submissionStatus,
       }
 
       const { data: createdApplication, error } = await supabase
@@ -7900,31 +8954,56 @@ function App() {
         return { ok: false, message: error.message }
       }
 
-      const notificationResult = await sendPortalEmailNotification({
+      const inboxNotificationResult = await sendPortalEmailNotification({
+        eventType: isDistributorApplication ? 'distributor_application_submitted' : 'b2b_order_request_submitted',
+        to: ORDER_INBOX_EMAIL,
+        subject: `${isDistributorApplication ? 'Distributor Application' : 'B2B Order Request'} #${createdApplication?.id} — ${payload.company_name}`,
+        html: `<p>New ${isDistributorApplication ? 'distributor application' : 'B2B order request'} received.</p><p><strong>Application ID:</strong> ${createdApplication?.id}</p><p><strong>Company/Client:</strong> ${payload.company_name}</p><p><strong>Contact:</strong> ${payload.contact_name} (${payload.contact_email})</p><p><strong>Status:</strong> ${payload.status}</p><p><strong>Business Type:</strong> ${payload.business_type}</p><p><strong>VAT:</strong> ${payload.vat_number || '-'}</p><p><strong>Invoice Country:</strong> ${payload.invoice_country}</p>`,
+        applicationId: createdApplication?.id,
+        companyName: payload.company_name,
+        contactName: payload.contact_name,
+        status: payload.status,
+      })
+
+      const applicantNotificationResult = await sendPortalEmailNotification({
         eventType: 'application_received',
         to: payload.contact_email,
-        subject: `Application received: ${payload.company_name}`,
-        html: `<p>Hello ${payload.contact_name},</p><p>Thank you for applying to the GEL.IT.UP B2B Portal for <strong>${payload.company_name}</strong>.</p><p>Your application is now pending manual review. We will notify you as soon as it is approved.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
+        subject: `${isDistributorApplication ? 'Distributor application received' : 'B2B order request received'}: ${payload.company_name}`,
+        html: isDistributorApplication
+          ? `<p>Hello ${payload.contact_name},</p><p>Welcome to <strong>GEL.IT.UP by GIUP®</strong>.</p><p>Thank you for submitting your distributor information for <strong>${payload.company_name}</strong>.</p><p>Your submission has been sent to ${ORDER_INBOX_EMAIL}. You will soon receive an approval email confirming that you can log in to the portal.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`
+          : `<p>Hello ${payload.contact_name},</p><p>Thank you for your B2B order request for <strong>${payload.company_name}</strong>.</p><p>Your request has been sent to ${ORDER_INBOX_EMAIL} and stored in our admin portal for processing.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
         applicationId: createdApplication?.id,
         companyName: payload.company_name,
         contactName: payload.contact_name,
       })
 
-      if (!notificationResult.ok && !notificationResult.skipped) {
+      if (!applicantNotificationResult.ok && !applicantNotificationResult.skipped) {
         return {
           ok: true,
-          message: `Application submitted, but confirmation email failed: ${notificationResult.message}`,
+          message: `Submission stored, but confirmation email failed: ${applicantNotificationResult.message}`,
         }
       }
 
-      if (notificationResult.skipped) {
+      if (!inboxNotificationResult.ok && !inboxNotificationResult.skipped) {
         return {
           ok: true,
-          message: 'Application submitted. Email webhook is not configured yet.',
+          message: `Submission stored, but inbox notification failed: ${inboxNotificationResult.message}`,
         }
       }
 
-      return { ok: true }
+      if (applicantNotificationResult.skipped || inboxNotificationResult.skipped) {
+        return {
+          ok: true,
+          message: 'Submission stored. Email webhook is not configured yet.',
+        }
+      }
+
+      return {
+        ok: true,
+        message: isDistributorApplication
+          ? 'Distributor application submitted, sent to distribution@gelitup.com, and queued for admin approval.'
+          : 'B2B order request submitted, sent to distribution@gelitup.com, and stored in admin submissions.',
+      }
     }
 
     return { ok: false, message: 'Live registration is not configured.' }
@@ -8055,11 +9134,18 @@ function App() {
                       onLogin={handlePortalLogin}
                       onResendConfirmation={handleResendConfirmation}
                       onCheckApproval={handleCheckApproval}
+                      onCreatePassword={handleCreatePortalPassword}
                     />
                   )}
                 />
-                <Route path="/portal/admin-login" element={<PortalAdminLogin onAdminLogin={handleAdminLogin} />} />
-                <Route path="/portal/admin-login/*" element={<PortalAdminLogin onAdminLogin={handleAdminLogin} />} />
+                <Route
+                  path="/portal/admin-login"
+                  element={<PortalAdminLogin onAdminLogin={handleAdminLogin} onAdminCreatePassword={handleCreateAdminPassword} />}
+                />
+                <Route
+                  path="/portal/admin-login/*"
+                  element={<PortalAdminLogin onAdminLogin={handleAdminLogin} onAdminCreatePassword={handleCreateAdminPassword} />}
+                />
                 <Route path="/admin-login" element={<Navigate to="/portal/admin-login" replace />} />
                 <Route path="/portal/register" element={<PortalRegister onRegister={handlePortalRegister} />} />
                 <Route path="/portal/forgot-password" element={<PortalForgotPassword />} />
@@ -8124,7 +9210,7 @@ function App() {
               <NavLink to="/" className="block transition duration-300 hover:text-fuchsia-300">Home</NavLink>
               <NavLink to="/pages/about-us" className="block transition duration-300 hover:text-fuchsia-300">About Us</NavLink>
               <NavLink to="/full-catalogue" className="block transition duration-300 hover:text-fuchsia-300">Catalogue</NavLink>
-              <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distributor Packages</NavLink>
+              <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
               <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Become Distributor</NavLink>
               <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Client Registration</NavLink>
             </div>
@@ -8158,6 +9244,19 @@ function App() {
                 </a>
               ))}
             </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-white/20 bg-white/5 p-3 sm:p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Admin Portal</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <NavLink
+              to="/portal/admin-login"
+              className="inline-flex rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
+            >
+              Admin Login
+            </NavLink>
+            <span className="text-[11px] text-white/60">Reviewer access for approvals and order actions</span>
           </div>
         </div>
 
