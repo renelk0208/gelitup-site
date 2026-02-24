@@ -24,8 +24,16 @@ const PRODUCT_CATEGORIES = ['Solid Colours', 'Builder Gels', 'Base & Top', 'Nail
 const DEFAULT_PRODUCTS_TABLE = 'b2b_products'
 const DEFAULT_ORDERS_TABLE = 'b2b_orders'
 const DEFAULT_REGISTRATIONS_TABLE = 'b2b_registrations'
-const PORTAL_ENABLED = import.meta.env.VITE_ENABLE_PORTAL === 'true'
-const LEGACY_MIRROR_ENABLED = import.meta.env.VITE_ENABLE_LEGACY_MIRROR === 'true'
+function readBooleanEnvFlag(value, fallbackValue = false) {
+  if (value === undefined || value === null || value === '') {
+    return fallbackValue
+  }
+
+  return /^(1|true|yes|on)$/i.test(String(value).trim())
+}
+
+const PORTAL_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_PORTAL, false)
+const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL
 const EMAIL_WEBHOOK_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
@@ -33,7 +41,7 @@ const EMAIL_FROM = import.meta.env.VITE_EMAIL_FROM || 'distributors@gelitup.com'
 const EMAIL_REPLY_TO = import.meta.env.VITE_EMAIL_REPLY_TO || B2B_EMAIL
 const ORDER_INBOX_EMAIL = import.meta.env.VITE_B2B_ORDER_INBOX || B2B_EMAIL
 const ZOHO_SYNC_WEBHOOK_URL = import.meta.env.VITE_ZOHO_SYNC_WEBHOOK_URL
-const ZOHO_SYNC_ENABLED = import.meta.env.VITE_ENABLE_ZOHO_SYNC === 'true'
+const ZOHO_SYNC_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_ZOHO_SYNC, false)
 const ZOHO_SYNC_TIMEOUT_MS = Number.parseInt(import.meta.env.VITE_ZOHO_SYNC_TIMEOUT_MS || '12000', 10)
 const ZOHO_SYNC_AUTH_TOKEN = import.meta.env.VITE_ZOHO_SYNC_AUTH_TOKEN || ''
 const ZOHO_SYNC_TARGET = import.meta.env.VITE_ZOHO_SYNC_TARGET || 'books'
@@ -534,6 +542,7 @@ const navItems = [
   { to: '/distributor-packages', label: 'Packages' },
   { to: '/full-catalogue', label: 'The Collection' },
   { to: '/distributors', label: 'Distributors' },
+  { to: '/application-services', label: 'Application Services' },
   { to: '/pages/contact-us', label: 'Contact us' },
 ]
 
@@ -8030,6 +8039,8 @@ function App() {
           <Route path="/baseline" element={<Navigate to="/" replace />} />
           <Route path="/baseline/:slug" element={<Navigate to="/" replace />} />
           <Route path="/pages/contact-us" element={<Navigate to="/become-distributor" replace />} />
+          <Route path="/application-services" element={<Navigate to="/become-distributor" replace />} />
+          <Route path="/application-services/*" element={<Navigate to="/become-distributor" replace />} />
           <Route path="/pages/:slug" element={<ImportedAnyPage />} />
           <Route path="/become-distributor" element={<PortalRegister onRegister={handlePortalRegister} />} />
 
