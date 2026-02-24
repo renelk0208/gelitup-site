@@ -24,7 +24,6 @@ const PRODUCT_CATEGORIES = ['Solid Colours', 'Builder Gels', 'Base & Top', 'Nail
 const DEFAULT_PRODUCTS_TABLE = 'b2b_products'
 const DEFAULT_ORDERS_TABLE = 'b2b_orders'
 const DEFAULT_REGISTRATIONS_TABLE = 'b2b_registrations'
-const DEFAULT_FAVORITES_TABLE = 'user_favorites'
 const PORTAL_ENABLED = import.meta.env.VITE_ENABLE_PORTAL === 'true'
 const LEGACY_MIRROR_ENABLED = import.meta.env.VITE_ENABLE_LEGACY_MIRROR === 'true'
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
@@ -146,9 +145,13 @@ const DISTRIBUTOR_DIRECTORY = [
       },
       {
         name: 'Nails Services Institute Elena Chiou',
-        address: 'Karpathou 17, Rodos 851 00',
-        phone: '2241 300919',
+        address: 'Greece',
+        phone: '+30 2241300919, +30 2241112572',
         email: 'nsinailsgr@gmail.com',
+      },
+      {
+        name: 'Master Educator Nails Artist and Podology Trade and Training Center',
+        address: 'Karpathoy 17, RHODES, 85100, Greece',
       },
       {
         name: 'HairMod - Vrettakos Panagiotis',
@@ -375,179 +378,6 @@ function buildColorAliases(value) {
   return Array.from(aliases)
 }
 
-function getFavoriteKey(candidate) {
-  const codeKey = normalizeSkuCode(candidate?.product_code || candidate?.code || candidate?.sku)
-  if (codeKey && codeKey !== 'SKU') return codeKey
-  return normalizeProductName(candidate?.product_name || candidate?.name)
-}
-
-function buildFavoritePayload(candidate, userId) {
-  const name = String(candidate?.product_name || candidate?.name || '').trim()
-  const code = String(candidate?.product_code || candidate?.code || candidate?.sku || '').trim()
-  const imageUrl = String(candidate?.image_url || candidate?.imageUrl || '').trim()
-  const category = String(candidate?.category || candidate?.subcategory || '').trim()
-  const resolvedName = name || code
-
-  if (!resolvedName) return null
-
-  return {
-    user_id: userId,
-    product_code: code || null,
-    product_name: resolvedName,
-    image_url: imageUrl || null,
-    category: category || '',
-  }
-}
-
-function useUserFavorites() {
-  const favoritesTable = import.meta.env.VITE_B2B_FAVORITES_TABLE || DEFAULT_FAVORITES_TABLE
-  const [favorites, setFavorites] = useState([])
-  const [favoriteStatus, setFavoriteStatus] = useState({
-    isLoading: false,
-    error: '',
-    userId: null,
-  })
-
-  const favoritesByKey = useMemo(() => {
-    const map = new Map()
-    favorites.forEach((favorite) => {
-      const key = getFavoriteKey(favorite)
-      if (key) map.set(key, favorite)
-    })
-    return map
-  }, [favorites])
-
-  const loadFavorites = useCallback(async () => {
-    if (!hasSupabaseConfig || !supabase) {
-      setFavorites([])
-      setFavoriteStatus({
-        isLoading: false,
-        error: 'Favorites are unavailable because Supabase is not configured.',
-        userId: null,
-      })
-      return
-    }
-
-    setFavoriteStatus((current) => ({ ...current, isLoading: true, error: '' }))
-
-    const { data: userData, error: userError } = await supabase.auth.getUser()
-    const userId = userData?.user?.id || null
-
-    if (userError || !userId) {
-      setFavorites([])
-      setFavoriteStatus({
-        isLoading: false,
-        error: '',
-        userId: null,
-      })
-      return
-    }
-
-    setFavoriteStatus((current) => ({ ...current, userId }))
-
-    const { data, error } = await supabase
-      .from(favoritesTable)
-      .select('id, product_code, product_name, image_url, category, created_at')
-      .order('created_at', { ascending: false })
-
-    if (error) {
-      const missingTableError = error.message?.includes('Could not find the table')
-        || error.message?.includes('relation')
-      const message = missingTableError
-        ? `Favorites table "${favoritesTable}" is missing. Run the SQL from /supabase/sql/create_user_favorites.sql.`
-        : error.message
-      setFavorites([])
-      setFavoriteStatus((current) => ({ ...current, isLoading: false, error: message }))
-      return
-    }
-
-    setFavorites(data || [])
-    setFavoriteStatus((current) => ({ ...current, isLoading: false, error: '' }))
-  }, [favoritesTable])
-
-  useEffect(() => {
-    void loadFavorites()
-  }, [loadFavorites])
-
-  const toggleFavorite = useCallback(async (candidate) => {
-    if (!hasSupabaseConfig || !supabase) {
-      return { ok: false, message: 'Favorites are unavailable because Supabase is not configured.' }
-    }
-
-    let userId = favoriteStatus.userId
-
-    if (!userId) {
-      const { data: userData } = await supabase.auth.getUser()
-      userId = userData?.user?.id || null
-      if (userId) {
-        setFavoriteStatus((current) => ({ ...current, userId }))
-      }
-    }
-
-    if (!userId) {
-      return { ok: false, action: 'auth_required', message: 'Sign in to save favorites.' }
-    }
-
-    const key = getFavoriteKey(candidate)
-    if (!key) {
-      return { ok: false, message: 'Missing product info for favorites.' }
-    }
-
-    const existing = favoritesByKey.get(key)
-    if (existing) {
-      const { error } = await supabase
-        .from(favoritesTable)
-        .delete()
-        .eq('id', existing.id)
-
-      if (error) {
-        setFavoriteStatus((current) => ({ ...current, error: error.message }))
-        return { ok: false, message: error.message }
-      }
-
-      setFavorites((current) => current.filter((item) => item.id !== existing.id))
-      setFavoriteStatus((current) => ({ ...current, error: '' }))
-      return { ok: true, action: 'removed' }
-    }
-
-    const payload = buildFavoritePayload(candidate, userId)
-    if (!payload) {
-      return { ok: false, message: 'Missing product info for favorites.' }
-    }
-
-    const { data, error } = await supabase
-      .from(favoritesTable)
-      .insert([payload])
-      .select('id, product_code, product_name, image_url, category, created_at')
-      .single()
-
-    if (error) {
-      const missingTableError = error.message?.includes('Could not find the table')
-        || error.message?.includes('relation')
-      const message = missingTableError
-        ? `Favorites table "${favoritesTable}" is missing. Run the SQL from /supabase/sql/create_user_favorites.sql.`
-        : error.message
-      setFavoriteStatus((current) => ({ ...current, error: message }))
-      return { ok: false, message }
-    }
-
-    if (data) {
-      setFavorites((current) => [data, ...current])
-    }
-    setFavoriteStatus((current) => ({ ...current, error: '' }))
-    return { ok: true, action: 'added' }
-  }, [favoriteStatus.userId, favoritesByKey, favoritesTable])
-
-  return {
-    favorites,
-    favoritesByKey,
-    isLoadingFavorites: favoriteStatus.isLoading,
-    favoritesError: favoriteStatus.error,
-    isSignedIn: Boolean(favoriteStatus.userId),
-    toggleFavorite,
-  }
-}
-
 async function sendPortalEmailNotification(payload) {
   if (!EMAIL_WEBHOOK_URL) {
     return { ok: false, skipped: true, message: 'Email webhook is not configured.' }
@@ -701,7 +531,7 @@ function createFallbackProducts(count = 120) {
 const navItems = [
   { to: '/', label: 'Home' },
   { to: '/pages/about-us', label: 'About us' },
-  { to: '/distributor-packages', label: 'Packages' },
+  { to: '/distributor-packages', label: 'Distribution' },
   { to: '/full-catalogue', label: 'The Collection' },
   { to: '/distributors', label: 'Distributors' },
   { to: '/pages/contact-us', label: 'Contact us' },
@@ -900,115 +730,6 @@ const PACKAGE_TECH_ESSENTIALS = [
   { sku: 'NW_TOP', code: 'NW_TOP', name: 'Non-Wipe Top Coat', category: 'Technical', group: 'Essentials' },
   { sku: '3IN1_CLR', code: '3IN1_CLR', name: '3-in-1 Premium Builder Gel Clear', category: 'Technical', group: 'Essentials' },
   { sku: 'SYN_MWH', code: 'SYN_MWH', name: 'Multimix Synthogel Milky White', category: 'Technical', group: 'Essentials' },
-]
-const packageTiers = [
-  {
-    name: 'Boutique Starter',
-    badge: 'Silver',
-    roi: 'Localized Studio Supply',
-    value: 'Perfect for solo studios entering the GEL.IT.UP ecosystem. Fast-moving essentials and top 30 core shades.',
-    groups: [
-      {
-        title: 'Core Maintenance Suite',
-        items: [
-          'GIUP-MNT-SB01 — Superbond Primer',
-          'GIUP-MNT-5C01 — 5-in-1 Clear Builder',
-          'GIUP-MNT-NW01 — Non-Wipe Top Coat',
-        ],
-      },
-      {
-        title: 'Core 30 Classic Colors',
-        items: [
-          'GIUP-COL-01 — Ice Ice Baby (Pure White)',
-          'GIUP-COL-05 — Snow Queen',
-          'GIUP-COL-09 — Coco Nude',
-          'GIUP-COL-010 — Bridal Bliss',
-          'GIUP-COL-2511 — Skin Shock',
-          'GIUP-COL-02 — Cotton Candy',
-          'GIUP-COL-11 — Pinky Promise',
-          'GIUP-COL-051A — Raspberry Ripple',
-          'GIUP-COL-2316 — Ferrari Red',
-          'GIUP-COL-015 — Total Eclipse (Deep Black)',
-          'GIUP-COL-019 — Slate',
-          'GIUP-COL-120 — Wisteria Lane',
-          'GIUP-COL-2020 — Soft n Sweet',
-          'GIUP-COL-2026 — Whaat? Pistachio?',
-          'GIUP-COL-GCE01 — Glass Cat Eye Clear',
-          'GIUP-COL-102 — Marsh Mallow',
-          'GIUP-COL-04 — Milkyway',
-          'GIUP-COL-08 — Ivory',
-          'GIUP-COL-07B — Liberte',
-          'GIUP-COL-100A — She Bangs',
-          'GIUP-COL-06 — Ballerina',
-          'GIUP-COL-1801 — Sweet Pea',
-          'GIUP-COL-1803 — Don\'t Pout',
-          'GIUP-COL-025 — Cherry Bomb',
-          'GIUP-COL-1802 — Grey Matter',
-          'GIUP-COL-152 — Frisco',
-          'GIUP-COL-07 — Lavender Dreams',
-          'GIUP-COL-2037 — Salty Caramel',
-          'GIUP-COL-2113J — Blue Flashing Star',
-          'GIUP-COL-F01 — Foil Gel Adhesive',
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Professional Scale',
-    badge: 'Gold',
-    roi: 'Regional Salon Networks',
-    value: 'For distributors managing multiple locations. Curated seasonal trends, expanded technical support, and branded displays.',
-    groups: [
-      {
-        title: 'Gold Tier Portfolio (150+ Professional Codes)',
-        items: [
-          'Foundation 30 codes + maintenance suite (incl. GIUP-COL-2316, GIUP-COL-01)',
-          'Neon & Summer expansion (1200/1300 series e.g., GIUP-COL-1205, GIUP-COL-1310)',
-          'Shimmer & Pastel suite (1800/1900 series e.g., GIUP-COL-1804 to GIUP-COL-1812)',
-          'Art & Effects portfolio (GIUP-COL-GCE01, GIUP-COL-F01)',
-          'Advanced Brush-on Builder codes (professional skin-tone shades)',
-        ],
-      },
-      {
-        title: 'Selection Model',
-        items: [
-          'Dynamic inventory access for 120+ high-performance codes',
-          'Curated seasonal injections based on salon demand',
-          'Distributor-selected mix across specialty categories',
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Authority Master',
-    badge: 'Platinum',
-    roi: 'Total Territory Dominance',
-    value: 'Complete 800+ shade portfolio + exclusive regional marketing. Position as the market authority for nail professionals.',
-    groups: [
-      {
-        title: 'Total Portfolio Access',
-        items: [
-          'Full 800+ shade spectrum (Creme, Neon, Pastel, Glitter, Magnetics)',
-          'Complete builder systems (Hard Gels, Acrygel, Brush-on-Builder colors)',
-        ],
-      },
-      {
-        title: 'Specialized Lines',
-        items: [
-          'Soak-off Gel Polishes: complete professional range',
-          'Nail Art & Consumables: art gels, foils, prep solutions',
-          'Skin & Nail Care: professional therapeutic range',
-        ],
-      },
-      {
-        title: 'Safety Assurance',
-        items: [
-          '100% HEMA & TPO-free across the catalog',
-          'Every formula CPNP-notified for EU compliance',
-        ],
-      },
-    ],
-  },
 ]
 const PROFESSIONAL_BASE_PACK = {
   sku: '5IN1_CLR_6PACK',
@@ -1462,92 +1183,9 @@ function isTechnicalSku(code) {
 }
 
 function DistributorPackagesPage() {
-  const [studioTab, setStudioTab] = useState('overview')
-  const [expandedTier, setExpandedTier] = useState('')
-  const [tierVisuals, setTierVisuals] = useState(() => ({
-    boutiqueFerrari: '/logo.png',
-    boutiqueBase: '/logo.png',
-    professional: '/logo.png',
-    authority: '/logo.png',
-  }))
-  const boutiqueTier = packageTiers.find((tier) => tier.badge === 'Silver')
-  const professionalTier = packageTiers.find((tier) => tier.badge === 'Gold')
-  const authorityTier = packageTiers.find((tier) => tier.badge === 'Platinum')
-  const toggleTier = (tierKey) => {
-    setExpandedTier((current) => (current === tierKey ? '' : tierKey))
-  }
-  const studioMaintenanceEssentials = [
-    'Superbond Primer (GIUP-MNT-SB01)',
-    '5-in-1 Superior Base Coat',
-    '3-in-1 Brush-on Builder',
-    'Non-Wipe Top Coat (GIUP-MNT-NW01)',
-  ]
-  const studioCoreColors = [
-    'Ferrari Red (GIUP-COL-2316)',
-    'Ice Ice Baby (GIUP-COL-01)',
-    'Total Eclipse (GIUP-COL-015)',
-    'Blue Flashing Star (GIUP-COL-2113J)',
-    'Lavender Dreams (GIUP-COL-07)',
-    'Cotton Candy (GIUP-COL-02)',
-    'Coco Nude (GIUP-COL-09)',
-    'Marsh Mallow (GIUP-COL-102)',
-    'Milkyway (GIUP-COL-04)',
-    'Ivory (GIUP-COL-08)',
-  ]
-  const studioExpansionItems = [
-    'Professional nail files (180/240 grit)',
-    'Studio buffers (high-frequency turnover packs)',
-    'LED curing hardware (salon-grade lamps)',
-  ]
-
-  useEffect(() => {
-    let isMounted = true
-
-    const pickByTokens = (images = [], tokenGroups = [], fallback = '/logo.png') => {
-      for (const tokens of tokenGroups) {
-        const candidate = images.find((item) => {
-          const path = String(item?.localPath || '').toLowerCase()
-          return tokens.every((token) => path.includes(token))
-        })
-        if (candidate?.localPath) return candidate.localPath
-      }
-      return images[0]?.localPath || fallback
-    }
-
-    const loadTierVisuals = async () => {
-      try {
-        const response = await fetch('/gelitup-media/manifest.json')
-        if (!response.ok) return
-
-        const payload = await response.json()
-        if (!isMounted || !Array.isArray(payload?.items)) return
-
-        const images = payload.items.filter((item) => item?.mediaType === 'image' && item?.localPath)
-        const nextTierVisuals = {
-          boutiqueFerrari: pickByTokens(images, [['2316'], ['ferrari'], ['red']], '/logo.png'),
-          boutiqueBase: pickByTokens(images, [['5in1'], ['base'], ['superior', 'base']], '/logo.png'),
-          professional: pickByTokens(images, [['color', 'palette'], ['collection'], ['swatch']], '/logo.png'),
-          authority: pickByTokens(images, [['spectrum'], ['grid'], ['collection']], '/logo.png'),
-        }
-
-        setTierVisuals(nextTierVisuals)
-      }
-      catch {
-        if (!isMounted) return
-      }
-    }
-
-    void loadTierVisuals()
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
-
   return (
     <section className="space-y-5">
-      <div className="rounded-2xl bg-[#1A1A1A] p-5 text-white sm:p-8">
-        <p className="text-xs uppercase tracking-[0.16em] text-white/80">B2B Merchandising</p>
+      <div className="rounded-2xl bg-gradient-to-br from-[#1A1A1A] to-[#4A4A4A] p-5 text-white sm:p-8">
         <h1 className="heading-on-dark mt-2 text-2xl font-extrabold sm:text-4xl">Distributor Packages</h1>
         <p className="mt-3 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] text-white/95 sm:text-base">
           EU REGULATED. HEMA & TPO-FREE. PROFESSIONAL EXCELLENCE.
@@ -1557,358 +1195,157 @@ function DistributorPackagesPage() {
         </NavLink>
       </div>
 
-      <section className="rounded-2xl border border-[#4A4A4A]/20 bg-[#F5F5F5] p-4 sm:p-6">
-        <div className="rounded-2xl bg-white p-4 sm:p-6">
-          <h2
-            className="text-xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-2xl"
-            style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
-          >
-            STUDIO ELITE: THE BEGINNER FOUNDATION
-          </h2>
-          <p className="mt-2 text-sm font-medium text-[#4A4A4A] sm:text-base">
-            Curated for high-traffic studios. A complete 360° system for the professional technician.
-          </p>
+      {/* BOUTIQUE PACKAGE */}
+      <article className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-5 sm:p-6">
+        <h2 className="text-xl font-black uppercase tracking-[0.04em] text-black sm:text-2xl">BOUTIQUE: THE FOUNDATION.</h2>
+        <p className="mt-2 text-sm text-black/70">
+          Perfect for localized salon supply. This tier focuses on high-frequency maintenance essentials and the top-selling 30 shades to ensure rapid ROI.
+        </p>
 
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <article className="rounded-2xl border border-[#D43790]/15 bg-[#F5F5F5] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">The System</p>
-              <h3 className="mt-1 text-base font-semibold uppercase tracking-[0.06em] text-[#1A1A1A]">Foundation Layer</h3>
-              <ul className="mt-3 space-y-1 text-sm text-[#4A4A4A]">
-                {studioMaintenanceEssentials.map((item) => (
-                  <li key={item}>• {item}</li>
-                ))}
-              </ul>
-            </article>
-
-            <article className="rounded-2xl border border-[#D43790]/15 bg-[#F5F5F5] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">The Palette</p>
-              <h3 className="mt-1 text-base font-semibold uppercase tracking-[0.06em] text-[#1A1A1A]">Service Spectrum</h3>
-              <ul className="mt-3 grid gap-1 text-sm text-[#4A4A4A] sm:grid-cols-2">
-                {studioCoreColors.map((item) => (
-                  <li key={item} className={item.includes('Ferrari Red (2316)') ? 'font-semibold text-[#D43790]' : ''}>• {item}</li>
-                ))}
-              </ul>
-            </article>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">MARKET FOCUS</p>
+            <p className="mt-1 text-sm font-bold text-black">Localized Studio Supply</p>
           </div>
-
-          <div className="mt-4 rounded-2xl border border-[#D43790]/15 bg-[#F5F5F5] p-3 sm:p-4">
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setStudioTab('overview')}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition duration-300 ${studioTab === 'overview' ? 'bg-[#D43790] text-white' : 'bg-[#E8E8E8] text-[#1A1A1A] hover:bg-[#D43790]/10'}`}
-              >
-                Workflow Overview
-              </button>
-              <button
-                type="button"
-                onClick={() => setStudioTab('specs')}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.06em] transition duration-300 ${studioTab === 'specs' ? 'bg-[#D43790] text-white' : 'bg-[#E8E8E8] text-[#1A1A1A] hover:bg-[#D43790]/10'}`}
-              >
-                Technical Specs
-              </button>
-            </div>
-
-            {studioTab === 'specs'
-              ? (
-                <div className="mt-3 rounded-xl border border-[#D43790]/15 bg-[#F5F5F5] p-3 text-sm text-[#4A4A4A]">
-                  <p>• HEMA-Free: Confirmed for current production workflow.</p>
-                  <p className="mt-1">• TPO-Free: Confirmed for studio-safe professional use.</p>
-                  <p className="mt-1">• CPNP Notification: Registered and compliant for EU market operations.</p>
-                </div>
-                )
-              : (
-                <div className="mt-3 rounded-xl border border-[#D43790]/15 bg-[#F5F5F5] p-3 text-sm text-[#4A4A4A]">
-                  Designed for workflow speed: prep-to-finish consistency, high-pigment performance, and service-repeat reliability under studio pressure.
-                </div>
-                )}
+          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">PRODUCT SPECTRUM</p>
+            <p className="mt-1 text-sm font-bold text-black">Top 30 Core Shades</p>
           </div>
-
-          <div className="mt-4 rounded-2xl border border-[#D43790]/15 bg-[#F5F5F5] p-4">
-            <h3 className="text-sm font-semibold uppercase tracking-[0.1em] text-[#D43790]">Studio Expansion</h3>
-            <ul className="mt-2 space-y-1 text-sm text-[#4A4A4A]">
-              {studioExpansionItems.map((item) => (
-                <li key={item}>• {item}</li>
-              ))}
-            </ul>
+          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">SUPPORT PACKAGE</p>
+            <p className="mt-1 text-sm font-bold text-black">Digital Brand Assets</p>
           </div>
-
-          <div className="mt-5 flex justify-center">
-            <NavLink
-              to="/become-distributor"
-              className="inline-flex rounded-lg bg-[#D43790] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]"
-            >
-              EQUIP MY STUDIO
-            </NavLink>
+          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">STANDARDS</p>
+            <p className="mt-1 text-sm font-bold text-fuchsia-600">✓ HEMA-Free & TPO-Free Certified</p>
           </div>
         </div>
-      </section>
 
-      <section className="rounded-2xl border border-[#4A4A4A]/20 bg-[#E8E8E8] p-4 sm:p-6">
-        <div className="rounded-2xl bg-white p-4 sm:p-6">
-          <h2
-            className="text-2xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A]"
-            style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
-          >
-            BOUTIQUE: THE FOUNDATION.
-          </h2>
-          <p className="mt-2 text-sm font-medium text-[#4A4A4A] sm:text-base">
-            Perfect for localized salon supply. This tier focuses on high-frequency maintenance essentials and the top-selling 30 shades to ensure rapid ROI.
-          </p>
+        <NavLink to="/become-distributor" className="mt-4 inline-flex rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
+          REQUEST TIER PRICING
+        </NavLink>
+      </article>
 
-          {boutiqueTier?.groups?.length ? (
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => toggleTier('boutique')}
-                className="inline-flex rounded-lg border border-[#D43790]/40 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790] transition duration-300 hover:border-[#D43790] hover:bg-[#D43790]/10"
-              >
-                {expandedTier === 'boutique' ? 'HIDE' : 'SHOW ME'}
-              </button>
-            </div>
-          ) : null}
+      {/* PROFESSIONAL PACKAGE */}
+      <article className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-5 sm:p-6">
+        <h2 className="text-xl font-black uppercase tracking-[0.04em] text-black sm:text-2xl">PROFESSIONAL: THE EXPANDED SPECTRUM.</h2>
+        <p className="mt-2 text-sm text-black/70">
+          Designed for distributors ready to scale. Includes a curated selection of our most popular seasonal collections and specialized builder systems.
+        </p>
 
-          {expandedTier === 'boutique' && boutiqueTier?.groups?.length ? (
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {boutiqueTier.groups.map((group) => (
-                <div key={group.title} className="rounded-2xl border border-[#D43790]/15 bg-[#F5F5F5] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">{group.title}</p>
-                  <ul className="mt-2 space-y-1 text-sm text-[#4A4A4A]">
-                    {group.items.map((item) => (
-                      <li key={item}>• {item}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          ) : null}
-
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <img src={tierVisuals.boutiqueFerrari} alt="Ferrari Red 2316 macro studio visual" className="h-56 w-full rounded-2xl border border-[#D43790]/15 object-cover sm:h-64" loading="lazy" />
-            <img src={tierVisuals.boutiqueBase} alt="5-in-1 Base coat macro technical visual" className="h-56 w-full rounded-2xl border border-[#D43790]/15 object-cover sm:h-64" loading="lazy" />
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">MARKET FOCUS</p>
+            <p className="mt-1 text-sm font-bold text-black">Regional Salon Networks</p>
           </div>
-
-          <div className="mt-4 flex justify-center">
-            <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#D43790] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]">
-              REQUEST TIER PRICING
-            </NavLink>
+          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">PRODUCT SPECTRUM</p>
+            <p className="mt-1 text-sm font-bold text-black">150+ Curated Trends</p>
+          </div>
+          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">SUPPORT PACKAGE</p>
+            <p className="mt-1 text-sm font-bold text-black">Branded Salon Displays</p>
+          </div>
+          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">STANDARDS</p>
+            <p className="mt-1 text-sm font-bold text-fuchsia-600">✓ HEMA-Free & TPO-Free Certified</p>
           </div>
         </div>
-      </section>
 
-      <section className="rounded-2xl border border-[#4A4A4A]/20 bg-white p-4 sm:p-6">
-        <h3 className="text-lg font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A]" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Boutique Specifications</h3>
-        <div className="mt-4 space-y-3">
-          <div className="flex items-start gap-3 rounded-lg border border-[#D43790]/15 bg-[#F5F5F5] p-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[#D43790] min-w-fit">Market Focus</span>
-            <span className="text-sm text-[#4A4A4A]">Localized Studio Supply</span>
+        <NavLink to="/become-distributor" className="mt-4 inline-flex rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
+          REQUEST TIER PRICING
+        </NavLink>
+      </article>
+
+      {/* AUTHORITY PACKAGE */}
+      <article className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-5 sm:p-6">
+        <h2 className="text-xl font-black uppercase tracking-[0.04em] text-black sm:text-2xl">AUTHORITY: THE FULL MASTER COLLECTION.</h2>
+        <p className="mt-2 text-sm text-black/70">
+          For the market leader. Access the complete 761+ shade spectrum, all HEMA/TPO-free formulations, and exclusive regional marketing support.
+        </p>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">MARKET FOCUS</p>
+            <p className="mt-1 text-sm font-bold text-black">Total Territory Dominance</p>
           </div>
-          <div className="flex items-start gap-3 rounded-lg border border-[#D43790]/15 bg-[#F5F5F5] p-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[#D43790] min-w-fit">Product Spectrum</span>
-            <span className="text-sm text-[#4A4A4A]">Top 30 Core Shades</span>
+          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">PRODUCT SPECTRUM</p>
+            <p className="mt-1 text-sm font-bold text-black">Full 800+ Shade Portfolio</p>
           </div>
-          <div className="flex items-start gap-3 rounded-lg border border-[#D43790]/15 bg-[#F5F5F5] p-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[#D43790] min-w-fit">Support Package</span>
-            <span className="text-sm text-[#4A4A4A]">Digital Brand Assets</span>
+          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">SUPPORT PACKAGE</p>
+            <p className="mt-1 text-sm font-bold text-black">Exclusive Event Support</p>
           </div>
-          <div className="flex items-start gap-3 rounded-lg border border-[#D43790]/15 bg-[#F5F5F5] p-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[#D43790] min-w-fit">Standards</span>
-            <span className="text-sm text-[#4A4A4A]">✓ HEMA-Free & TPO-Free Certified</span>
+          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">STANDARDS</p>
+            <p className="mt-1 text-sm font-bold text-fuchsia-600">✓ HEMA-Free & TPO-Free Certified</p>
           </div>
         </div>
-      </section>
 
-      <section className="rounded-2xl border border-[#4A4A4A]/20 bg-[#1A1A1A] p-4 sm:p-6">
-        <div className="rounded-2xl bg-[#E8E8E8] p-4 sm:p-6">
-          <h2
-            className="text-2xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A]"
-            style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
-          >
-            PROFESSIONAL: THE EXPANDED SPECTRUM.
-          </h2>
-          <p className="mt-2 text-sm font-medium text-[#4A4A4A] sm:text-base">
-            Designed for distributors ready to scale. Includes a curated selection of our most popular seasonal collections and specialized builder systems.
-          </p>
+        <NavLink to="/become-distributor" className="mt-4 inline-flex rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
+          REQUEST TIER PRICING
+        </NavLink>
+      </article>
 
-          {professionalTier?.groups?.length ? (
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => toggleTier('professional')}
-                className="inline-flex rounded-lg border border-[#D43790]/40 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790] transition duration-300 hover:border-[#D43790] hover:bg-[#D43790]/10"
-              >
-                {expandedTier === 'professional' ? 'HIDE' : 'SHOW ME'}
-              </button>
-            </div>
-          ) : null}
-
-          {expandedTier === 'professional' && professionalTier?.groups?.length ? (
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {professionalTier.groups.map((group) => (
-                <div key={group.title} className="rounded-2xl border border-[#D43790]/15 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">{group.title}</p>
-                  <ul className="mt-2 space-y-1 text-sm text-[#4A4A4A]">
-                    {group.items.map((item) => (
-                      <li key={item}>• {item}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          ) : null}
-
-          <div className="mt-4 overflow-hidden rounded-2xl border border-[#D43790]/15">
-            <img src={tierVisuals.professional} alt="Professional tier dynamic color palette composition" className="h-64 w-full object-cover sm:h-72" loading="lazy" />
-          </div>
-
-          <div className="mt-4 flex justify-center">
-            <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#D43790] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]">
-              REQUEST TIER PRICING
-            </NavLink>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-[#4A4A4A]/20 bg-[#1A1A1A] p-4 sm:p-6">
-        <h3 className="text-lg font-extrabold uppercase tracking-[0.12em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Professional Specifications</h3>
-        <div className="mt-4 space-y-3">
-          <div className="flex items-start gap-3 rounded-lg border border-[#D43790]/15 bg-white/10 p-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[#D43790] min-w-fit">Market Focus</span>
-            <span className="text-sm text-white/90">Regional Salon Networks</span>
-          </div>
-          <div className="flex items-start gap-3 rounded-lg border border-[#D43790]/15 bg-white/10 p-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[#D43790] min-w-fit">Product Spectrum</span>
-            <span className="text-sm text-white/90">150+ Curated Trends</span>
-          </div>
-          <div className="flex items-start gap-3 rounded-lg border border-[#D43790]/15 bg-white/10 p-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[#D43790] min-w-fit">Support Package</span>
-            <span className="text-sm text-white/90">Branded Salon Displays</span>
-          </div>
-          <div className="flex items-start gap-3 rounded-lg border border-[#D43790]/15 bg-white/10 p-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[#D43790] min-w-fit">Standards</span>
-            <span className="text-sm text-white/90">✓ HEMA-Free & TPO-Free Certified</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-[#4A4A4A]/20 bg-[#E8E8E8] p-4 sm:p-6">
-        <div className="rounded-2xl bg-[#1A1A1A] p-4 sm:p-6">
-          <h2
-            className="text-2xl font-extrabold uppercase tracking-[0.12em] text-white"
-            style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
-          >
-            AUTHORITY: THE FULL MASTER COLLECTION.
-          </h2>
-          <p className="mt-2 text-sm font-medium text-white/90 sm:text-base">
-            For the market leader. Access the complete 761+ shade spectrum, all HEMA/TPO-free formulations, and exclusive regional marketing support.
-          </p>
-
-          {authorityTier?.groups?.length ? (
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => toggleTier('authority')}
-                className="inline-flex rounded-lg border border-white/40 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white transition duration-300 hover:border-white/70 hover:bg-white/20"
-              >
-                {expandedTier === 'authority' ? 'HIDE' : 'SHOW ME'}
-              </button>
-            </div>
-          ) : null}
-
-          {expandedTier === 'authority' && authorityTier?.groups?.length ? (
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {authorityTier.groups.map((group) => (
-                <div key={group.title} className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">{group.title}</p>
-                  <ul className="mt-2 space-y-1 text-sm text-white/90">
-                    {group.items.map((item) => (
-                      <li key={item}>• {item}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          ) : null}
-
-          <div className="mt-4 overflow-hidden rounded-2xl border border-[#D43790]/15">
-            <img src={tierVisuals.authority} alt="Authority tier cinematic infinity grid collection visual" className="h-64 w-full object-cover sm:h-80" loading="lazy" />
-          </div>
-
-          <div className="mt-4 flex justify-center">
-            <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#D43790] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]">
-              REQUEST TIER PRICING
-            </NavLink>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-[#4A4A4A]/20 bg-[#E8E8E8] p-4 sm:p-6">
-        <h3 className="text-lg font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A]" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Authority Specifications</h3>
-        <div className="mt-4 space-y-3">
-          <div className="flex items-start gap-3 rounded-lg border border-[#D43790]/15 bg-white p-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[#D43790] min-w-fit">Market Focus</span>
-            <span className="text-sm text-[#4A4A4A]">Total Territory Dominance</span>
-          </div>
-          <div className="flex items-start gap-3 rounded-lg border border-[#D43790]/15 bg-white p-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[#D43790] min-w-fit">Product Spectrum</span>
-            <span className="text-sm text-[#4A4A4A]">Full 800+ Shade Portfolio</span>
-          </div>
-          <div className="flex items-start gap-3 rounded-lg border border-[#D43790]/15 bg-white p-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[#D43790] min-w-fit">Support Package</span>
-            <span className="text-sm text-[#4A4A4A]">Exclusive Event Support</span>
-          </div>
-          <div className="flex items-start gap-3 rounded-lg border border-[#D43790]/15 bg-white p-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[#D43790] min-w-fit">Standards</span>
-            <span className="text-sm text-[#4A4A4A]">✓ HEMA-Free & TPO-Free Certified</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-[#4A4A4A]/20 bg-white p-4 sm:p-6">
-        <h2
-          className="text-2xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A]"
-          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
-        >
-          Tier Comparison
-        </h2>
-        <div className="mt-5 overflow-x-auto">
-          <table className="w-full border-collapse text-sm">
+      {/* TIER COMPARISON TABLE */}
+      <article className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-5 sm:p-6">
+        <h2 className="text-xl font-black uppercase tracking-[0.04em] text-black sm:text-2xl">TIER COMPARISON</h2>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full text-left text-sm">
             <thead>
-              <tr className="bg-[#1A1A1A]">
-                <th className="border border-[#4A4A4A] px-4 py-3 text-left font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Attribute</th>
-                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Boutique (Silver)</th>
-                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Professional (Gold)</th>
-                <th className="border border-[#4A4A4A] px-4 py-3 text-center font-extrabold uppercase tracking-[0.08em] text-white" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>Authority (Platinum)</th>
+              <tr className="border-b border-[#4A4A4A]/20">
+                <th className="pb-3 pr-4 font-semibold text-black"></th>
+                <th className="pb-3 pr-4 font-semibold text-black">STUDIO ELITE</th>
+                <th className="pb-3 pr-4 font-semibold text-black">BOUTIQUE</th>
+                <th className="pb-3 pr-4 font-semibold text-black">PROFESSIONAL</th>
+                <th className="pb-3 font-semibold text-black">AUTHORITY</th>
               </tr>
             </thead>
-            <tbody>
-              {[
-                { feature: 'Market Focus', boutique: 'Localized Studio Supply', professional: 'Regional Salon Networks', authority: 'Total Territory Dominance' },
-                { feature: 'Product Spectrum', boutique: 'Top 30 Core Shades', professional: '150+ Curated Trends', authority: 'Full 800+ Shade Portfolio' },
-                { feature: 'Support Package', boutique: 'Digital Brand Assets', professional: 'Branded Salon Displays', authority: 'Exclusive Event Support' },
-                { feature: 'Standard: HEMA-Free', boutique: '✓ Certified', professional: '✓ Certified', authority: '✓ Certified' },
-                { feature: 'Standard: TPO-Free', boutique: '✓ Certified', professional: '✓ Certified', authority: '✓ Certified' },
-              ].map((row, index) => (
-                <tr key={row.feature} className={`border border-[#4A4A4A] ${index % 2 === 0 ? 'bg-[#E8E8E8]' : 'bg-white'}`}>
-                  <td className="px-4 py-3 font-semibold text-[#1A1A1A]">{row.feature}</td>
-                  <td className="px-4 py-3 text-center text-[#1A1A1A]">{row.boutique}</td>
-                  <td className="px-4 py-3 text-center text-[#1A1A1A]">{row.professional}</td>
-                  <td className="px-4 py-3 text-center text-[#1A1A1A]">{row.authority}</td>
-                </tr>
-              ))}
+            <tbody className="text-black/75">
+              <tr className="border-b border-[#4A4A4A]/10">
+                <td className="py-3 pr-4 font-medium">Market Focus</td>
+                <td className="py-3 pr-4">High-Traffic Studios</td>
+                <td className="py-3 pr-4">Localized Studio Supply</td>
+                <td className="py-3 pr-4">Regional Salon Networks</td>
+                <td className="py-3">Total Territory Dominance</td>
+              </tr>
+              <tr className="border-b border-[#4A4A4A]/10">
+                <td className="py-3 pr-4 font-medium">Product Spectrum</td>
+                <td className="py-3 pr-4">360° Complete System</td>
+                <td className="py-3 pr-4">Top 30 Core Shades</td>
+                <td className="py-3 pr-4">150+ Curated Trends</td>
+                <td className="py-3">Full 800+ Shade Portfolio</td>
+              </tr>
+              <tr className="border-b border-[#4A4A4A]/10">
+                <td className="py-3 pr-4 font-medium">Support Package</td>
+                <td className="py-3 pr-4">Workflow Tools</td>
+                <td className="py-3 pr-4">Digital Brand Assets</td>
+                <td className="py-3 pr-4">Branded Salon Displays</td>
+                <td className="py-3">Exclusive Event Support</td>
+              </tr>
+              <tr className="border-b border-[#4A4A4A]/10">
+                <td className="py-3 pr-4 font-medium">Standard: HEMA-Free</td>
+                <td className="py-3 pr-4 text-fuchsia-600">✓ Certified</td>
+                <td className="py-3 pr-4 text-fuchsia-600">✓ Certified</td>
+                <td className="py-3 pr-4 text-fuchsia-600">✓ Certified</td>
+                <td className="py-3 text-fuchsia-600">✓ Certified</td>
+              </tr>
+              <tr className="border-b border-[#4A4A4A]/10">
+                <td className="py-3 pr-4 font-medium">Standard: TPO-Free</td>
+                <td className="py-3 pr-4 text-fuchsia-600">✓ Certified</td>
+                <td className="py-3 pr-4 text-fuchsia-600">✓ Certified</td>
+                <td className="py-3 pr-4 text-fuchsia-600">✓ Certified</td>
+                <td className="py-3 text-fuchsia-600">✓ Certified</td>
+              </tr>
             </tbody>
           </table>
         </div>
-        <div className="mt-6 flex justify-center">
-          <NavLink
-            to="/become-distributor"
-            className="inline-flex rounded-lg bg-[#D43790] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]"
-          >
-            INQUIRE ABOUT REGIONAL PARTNERSHIPS
-          </NavLink>
-        </div>
-      </section>
 
+        <NavLink to="/become-distributor" className="mt-5 inline-flex rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
+          INQUIRE ABOUT REGIONAL PARTNERSHIPS
+        </NavLink>
+      </article>
     </section>
   )
 }
@@ -2057,6 +1494,23 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
   if (!payload || typeof payload !== 'object') return []
 
   const blockedCategoryTokens = new Set(['CRACK', 'THERMO'])
+  
+  // Map certain folders to be subcategories of parent categories
+  const categoryRemapping = new Map([
+    // Colors subcategories
+    ['BY THE OCEAN', 'COLORS'],
+    ['ODE TO AUTUMN', 'COLORS'],
+    // Nail Art subcategories
+    ['COBWEB', 'NAIL ART'],
+    ['LINE-IT-UP', 'NAIL ART'],
+    ['LINE IT UP', 'NAIL ART'],
+    // Builder Gel Systems subcategories
+    ['BUILDER GEL', 'BUILDER GEL SYSTEMS'],
+    ['ACRYLIC', 'BUILDER GEL SYSTEMS'],
+    ['MULTIMIX', 'BUILDER GEL SYSTEMS'],
+    ['CREME DE LA CREME', 'BUILDER GEL SYSTEMS'],
+  ])
+  
   const isBlockedImagePath = (imagePath = '') => {
     const normalizedPath = normalizeCatalogueToken(imagePath)
     if (!normalizedPath) return false
@@ -2078,10 +1532,31 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
   uniqueImagePaths.forEach((imagePath) => {
     const afterRoot = imagePath.split('/gelitup-content/product-images/')[1] || ''
     const segments = afterRoot.split('/').filter(Boolean)
-    const category = segments[0] || 'Other'
-    const subcategory = segments.length > 2
-      ? segments.slice(1, -1).join(' / ')
-      : (segments[1] ? 'General' : 'General')
+    let category = segments[0] || 'Other'
+    
+    // Apply category remapping (e.g., BY THE OCEAN → COLORS)
+    const remappedCategory = categoryRemapping.get(category)
+    const isRemapped = !!remappedCategory
+    if (remappedCategory) {
+      category = remappedCategory
+    }
+    
+    // Determine subcategory based on folder structure
+    let subcategory
+    if (isRemapped && segments.length >= 2) {
+      // For remapped categories with subfolders, use the subfolder name
+      // e.g., BUILDER GEL/3INI BUILDER → subcategory = "3INI BUILDER"
+      subcategory = segments[1] || segments[0]
+    } else if (category === 'COLORS' && segments.length > 2) {
+      // For COLORS, use only the last folder name to avoid "CAT EYE / CAT EYE"
+      subcategory = segments[segments.length - 2] || 'General'
+    } else if (segments.length > 2) {
+      // For other categories with deep nesting, join middle segments
+      subcategory = segments.slice(1, -1).join(' / ')
+    } else {
+      // Simple structure: just use first subfolder or 'General'
+      subcategory = segments[1] || 'General'
+    }
 
     const categoryBucket = grouped.get(category) || new Map()
     const subcategoryItems = categoryBucket.get(subcategory) || []
@@ -2148,6 +1623,67 @@ function isColorsCategoryName(categoryName = '') {
   return normalizeCatalogueToken(categoryName).includes('COLOR')
 }
 
+function formatSubcategoryDisplayName(subcategoryName = '') {
+  // Transform specific subcategory names for display
+  const normalized = normalizeCatalogueToken(subcategoryName)
+
+  if (normalized === 'ALL') return 'All Colors'
+  
+  // Color subcategories
+  if (normalized === 'RONE') return 'GIUP #1'
+  if (normalized === 'CAT EYE') return 'Cat Eye'
+  if (normalized === 'JELLY') return 'Jelly'
+  if (normalized === 'METALLIC COLLECTION') return 'Metallic Collection'
+  if (normalized === 'NEW YORK') return 'New York'
+  if (normalized === 'PMA') return 'PMA'
+  if (normalized === 'SHIMMER COLORS') return 'Shimmer Colors'
+  if (normalized === 'SOLID GEL POLISH') return 'Solid Gel Polish'
+  if (normalized === 'SPIX & SPEX' || normalized === 'SPIX  SPEX') return 'Spix & Spex'
+  if (normalized === 'TUTTI FRUTTI GLASS') return 'Tutti Frutti Glass'
+  
+  // Builder Gel Systems subcategories
+  if (normalized === '3INI BUILDER') return '3-in-1 Builder Gel'
+  if (normalized === 'PREMIUM BUILDER') return '3-in-1 Premium Builder Gel'
+  if (normalized === 'LIQUID POLYGEL') return 'Liquid Polygel'
+  if (normalized === 'COMPETE') return 'Compete Acrylic'
+  if (normalized === 'MULTIMIX' || normalized === '30 ML') return 'Multimix 30g'
+  if (normalized === '60 ML') return 'Multimix 60g'
+  if (normalized === 'CDC' || normalized === 'CREME DE LA CREME') return 'Creme de La Creme'
+  
+  // Bases subcategories
+  if (normalized === '5IN1 SUPERIOR BASE') return '5-in-1 Superior Base'
+  if (normalized === 'BRUSH ON BUILDER') return 'Brush On Builder'
+  if (normalized === 'FLEXI BASE') return 'Flexi Base'
+  if (normalized === 'SUPERBOND') return 'Superbond'
+  
+  // Tops subcategories
+  if (normalized === 'CLASSIC TOP COATS') return 'Classic Top Coats'
+  if (normalized === 'EFFECT TOPS') return 'Effect Tops'
+  if (normalized === 'SHIMMER TOP') return 'Shimmer Top'
+  if (normalized === 'SPOT MY TOPS') return 'Spot My Tops'
+  
+  // Consumables subcategories
+  if (normalized === 'CREAMS AND SCRUBS') return 'Creams and Scrubs'
+  if (normalized === 'CUTICLE OILS -REMOVERS' || normalized === 'CUTICLE OILS REMOVERS') return 'Cuticle Oils & Removers'
+  if (normalized === 'NAIL FILES') return 'Nail Files'
+  if (normalized === 'NAIL TIPS') return 'Nail Tips'
+  
+  // Nail Art subcategories
+  if (normalized === 'CUSHION GEL') return 'Cushion Gel'
+  if (normalized === 'GLITTER EFFECTS POWEDER' || normalized === 'GLITTER EFFECTS POWDER') return 'Glitter Effects Powder'
+  if (normalized === 'MARBLE INK') return 'Marble Ink'
+  if (normalized === 'MIRROR POWDERS') return 'Mirror Powders'
+  if (normalized === 'STICKERS') return 'Stickers'
+  
+  // Packages
+  if (normalized === 'STUDIO ELITE') return 'Studio Elite'
+  if (normalized === 'BOUTIQUE') return 'Boutique'
+  if (normalized === 'PROFESSIONAL') return 'Professional'
+  if (normalized === 'AUTHORITY') return 'Authority'
+  
+  return subcategoryName
+}
+
 function buildCategoryHeroImageCandidates(categoryName = '', fallbackImageUrl = '') {
   const normalizedCategory = normalizeCatalogueToken(categoryName)
   const tokens = normalizedCategory.split(' ').filter(Boolean)
@@ -2165,26 +1701,21 @@ function buildCategoryHeroImageCandidates(categoryName = '', fallbackImageUrl = 
   if (baseNames.has('colours')) baseNames.add('colors')
   if (baseNames.has('colors')) baseNames.add('colours')
 
-  const extensions = ['png', 'webp', 'jpg', 'jpeg']
+  const extensions = ['jpg', 'jpeg', 'png', 'webp']
   const candidates = []
 
+  // Prioritize catalog-heroes (centralized hero images folder)
   baseNames.forEach((baseName) => {
     extensions.forEach((extension) => {
       candidates.push(`/gelitup-content/catalog-heroes/${baseName}.hero.image.${extension}`)
     })
   })
 
+  // Fallback to product-images category folders
   const encodedCategory = encodeURIComponent(String(categoryName || '').trim())
   if (encodedCategory) {
     extensions.forEach((extension) => {
       candidates.push(`/gelitup-content/product-images/${encodedCategory}/hero.image.${extension}`)
-    })
-  }
-
-  // Add specific path for Solid Colours category with solid colour hero image
-  if (normalizedCategory.includes('SOLID')) {
-    extensions.forEach((extension) => {
-      candidates.push(`/gelitup-content/product-images/COLORS/SOLID%20GEL%20POLISH/solid.colour.hero.image.${extension}`)
     })
   }
 
@@ -2208,34 +1739,25 @@ function flattenSectionItems(section) {
 }
 
 function FullCataloguePage() {
-  const navigate = useNavigate()
   const [sections, setSections] = useState([])
   const [activeCategory, setActiveCategory] = useState('')
   const [activeSubcategory, setActiveSubcategory] = useState('')
   const [activeColorFamily, setActiveColorFamily] = useState('ALL')
   const [searchQuery, setSearchQuery] = useState('')
+  const [bulkMode, setBulkMode] = useState(false)
   const [heroCandidateIndexByCategory, setHeroCandidateIndexByCategory] = useState({})
+  const [itemQuantities, setItemQuantities] = useState({})
+  const [quickCart, setQuickCart] = useState({})
+  const [pulseItemKey, setPulseItemKey] = useState('')
   const [gridColumns, setGridColumns] = useState(5)
   const [scrollTop, setScrollTop] = useState(0)
   const [viewportHeight, setViewportHeight] = useState(720)
   const [colorTileFrame, setColorTileFrame] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+  const [categoryMetadata, setCategoryMetadata] = useState({})
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
-  const { favoritesByKey, toggleFavorite } = useUserFavorites()
   const virtualContainerRef = useRef(null)
-  const categoryPanelRef = useRef(null)
-
-  const handleFavoriteToggle = useCallback(async (candidate) => {
-    const result = await toggleFavorite(candidate)
-    if (!result.ok && result.action === 'auth_required') {
-      navigate('/become-distributor')
-      return
-    }
-    if (!result.ok && result.message) {
-      window.alert(result.message)
-    }
-  }, [navigate, toggleFavorite])
 
   useEffect(() => {
     let mounted = true
@@ -2260,12 +1782,13 @@ function FullCataloguePage() {
         if (!mounted) return
 
         const nextSections = buildCatalogueSectionsFromImageMap(payload, manualRuleIndex)
+        if (!nextSections.length) {
+          throw new Error('No catalogue items found in product-image-map.json')
+        }
         setSections(nextSections)
         setHeroCandidateIndexByCategory({})
-        const firstCategory = nextSections[0]?.category || ''
-        const firstSubcategory = nextSections[0]?.subcategories?.[0]?.name || ''
-        setActiveCategory(firstCategory)
-        setActiveSubcategory(firstSubcategory)
+        setActiveCategory('')
+        setActiveSubcategory('')
         setActiveColorFamily('ALL')
       }
       catch (error) {
@@ -2291,13 +1814,18 @@ function FullCataloguePage() {
   const activeSection = sections.find((section) => section.category === activeCategory) || null
   const subcategoryOptions = useMemo(() => {
     if (!activeSection) return []
-    return activeSection.subcategories
+    const sorted = activeSection.subcategories
       .map((subcategory) => subcategory.name)
       .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true }))
+    return isColorsCategoryName(activeSection.category) ? ['ALL', ...sorted] : sorted
   }, [activeSection])
 
   const baseItems = useMemo(() => {
     if (!activeSection || !activeSubcategory) return []
+
+    if (isColorsCategoryName(activeSection.category) && activeSubcategory === 'ALL') {
+      return flattenSectionItems(activeSection)
+    }
 
     const subcategory = activeSection.subcategories.find((item) => item.name === activeSubcategory)
     if (!subcategory) return []
@@ -2340,6 +1868,10 @@ function FullCataloguePage() {
   useEffect(() => {
     const updateLayout = () => {
       const width = window.innerWidth
+      if (bulkMode) {
+        setGridColumns(1)
+        return
+      }
       if (width >= 1280) {
         setGridColumns(5)
         return
@@ -2358,7 +1890,7 @@ function FullCataloguePage() {
     updateLayout()
     window.addEventListener('resize', updateLayout)
     return () => window.removeEventListener('resize', updateLayout)
-  }, [])
+  }, [bulkMode])
 
   useEffect(() => {
     const node = virtualContainerRef.current
@@ -2383,7 +1915,7 @@ function FullCataloguePage() {
     }
   }, [])
 
-  const virtualRowHeight = 372
+  const virtualRowHeight = bulkMode ? 74 : 372
   const totalRows = Math.max(1, Math.ceil(filteredItems.length / gridColumns))
   const overscanRows = 3
   const startRow = Math.max(0, Math.floor(scrollTop / virtualRowHeight) - overscanRows)
@@ -2404,6 +1936,35 @@ function FullCataloguePage() {
   const topSpacerHeight = startRow * virtualRowHeight
   const bottomSpacerHeight = Math.max(0, (totalRows - endRow) * virtualRowHeight)
 
+  const quickCartUnits = useMemo(
+    () => Object.values(quickCart).reduce((sum, qty) => sum + Number(qty || 0), 0),
+    [quickCart],
+  )
+
+  const getQty = useCallback((itemKey) => Number(itemQuantities[itemKey] || 1), [itemQuantities])
+
+  const updateQty = useCallback((itemKey, nextValue) => {
+    const normalized = Math.max(1, Number(nextValue || 1))
+    setItemQuantities((current) => ({
+      ...current,
+      [itemKey]: normalized,
+    }))
+  }, [])
+
+  const addQuickItem = useCallback((itemKey) => {
+    const qty = Math.max(1, Number(itemQuantities[itemKey] || 1))
+    setPulseItemKey(itemKey)
+    window.setTimeout(() => {
+      setPulseItemKey('')
+    }, 320)
+    setQuickCart((current) => ({
+      ...current,
+      [itemKey]: Number(current[itemKey] || 0) + qty,
+    }))
+  }, [itemQuantities])
+
+  const quickProgress = Math.min(100, Math.round((quickCartUnits / 100) * 100))
+
   const extractProductCode = useCallback((name = '') => {
     const cleaned = String(name || '').trim()
     const codeMatch = cleaned.match(/[A-Z]{2,8}\s*-?\s*\d+[A-Z0-9-]*/i)
@@ -2417,29 +1978,233 @@ function FullCataloguePage() {
     return ''
   }, [])
 
-  const handleCategorySelect = useCallback((category, firstSubcategory) => {
-    setActiveCategory(category)
-    setActiveSubcategory(firstSubcategory || '')
-    setActiveColorFamily('ALL')
+  const chapter02Categories = ['BUILDER GEL SYSTEMS', 'BASES', 'CREME DE LA CREME', 'MULTIMIX']
+  const chapter03Categories = ['TOPS', 'TOOLS', 'EQUIPMENT']
+  const chapter04Categories = ['NAIL ART', 'CONSUMABLES', 'LIQUIDS', 'BY THE OCEAN']
 
-    window.requestAnimationFrame(() => {
-      categoryPanelRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' })
-    })
-  }, [])
+  const categoryDetail = activeCategory
+    ? (
+      <div className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5">
+        <div className="mb-3">
+          <button
+            onClick={() => {
+              setActiveCategory('')
+              setActiveSubcategory('')
+              setActiveColorFamily('ALL')
+            }}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[#4A4A4A]/30 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-black/70 transition hover:border-fuchsia-500/50 hover:text-fuchsia-600"
+          >
+            <span>←</span>
+            <span>Back to Categories</span>
+          </button>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-black uppercase tracking-[0.05em] text-black">{activeSection?.category || 'The Collection'}</h2>
+            <p className="mt-1 text-xs text-black/55">{filteredItems.length} matching items</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <label className="inline-flex items-center gap-2 text-xs text-black/70">
+              <span>Quick Order</span>
+              <button
+                onClick={() => setBulkMode((current) => !current)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition duration-300 ${bulkMode ? 'bg-fuchsia-600' : 'bg-black/20'}`}
+                aria-label="Toggle bulk mode"
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${bulkMode ? 'translate-x-6' : 'translate-x-1'}`} />
+              </button>
+            </label>
+            <div className="rounded-[12px] border border-[#4A4A4A]/30 bg-white px-3 py-2 text-xs text-black/70">
+              Quick Basket: {quickCartUnits} units
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
+          <div
+            className="h-full rounded-full bg-fuchsia-600 transition-all duration-300"
+            style={{ width: `${quickProgress}%` }}
+          />
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {subcategoryOptions.map((subcategory) => {
+            const isActive = activeSubcategory === subcategory
+            return (
+              <button
+                key={`subcategory-${subcategory}`}
+                onClick={() => setActiveSubcategory(subcategory)}
+                className={`rounded-[12px] border px-3 py-1.5 text-xs font-semibold transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-[#4A4A4A]/35 bg-white text-black/75 hover:border-fuchsia-500'}`}
+              >
+                {formatSubcategoryDisplayName(subcategory)}
+              </button>
+            )
+          })}
+        </div>
+
+        {!activeSubcategory && (
+          <div className="mt-3 rounded-[12px] border border-[#4A4A4A]/30 bg-black/[0.02] px-3 py-2 text-xs text-black/60">
+            Select a subcategory to view products.
+          </div>
+        )}
+
+        {!!activeSubcategory && (
+          <>
+            {(() => {
+              const categoryKey = normalizeCatalogueToken(activeCategory)
+              const metadata = categoryMetadata[categoryKey]
+              if (!metadata) return null
+              const hasContent = metadata.paragraphs?.length > 0 || metadata.listItems?.length > 0
+              if (!hasContent) return null
+
+              return (
+                <div className="mt-4 rounded-[12px] border border-fuchsia-400/40 bg-gradient-to-br from-fuchsia-50/60 to-purple-50/40 p-4 sm:p-5">
+                  <h3 className="text-base font-bold uppercase tracking-[0.06em] text-fuchsia-900 sm:text-lg">Product Information</h3>
+                  {metadata.paragraphs?.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      {metadata.paragraphs.map((para, idx) => (
+                        <p key={idx} className="text-sm leading-relaxed text-fuchsia-900/80">{para}</p>
+                      ))}
+                    </div>
+                  )}
+                  {metadata.listItems?.length > 0 && (
+                    <ul className="mt-3 space-y-1.5">
+                      {metadata.listItems.map((item, idx) => (
+                        <li key={idx} className="flex gap-2 text-sm text-fuchsia-900/90">
+                          <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-fuchsia-600" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )
+            })()}
+
+            <div className="mt-3">
+              <label className="sr-only" htmlFor="catalog-search">Search catalogue</label>
+              <input
+                id="catalog-search"
+                type="text"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search product name, code, or subcategory..."
+                className="w-full rounded-[12px] border border-[#4A4A4A]/35 bg-white px-3 py-2 text-sm text-black outline-none ring-fuchsia-500/20 focus:ring"
+              />
+            </div>
+
+            {isColorsCategory && (
+              <div className="mt-3 rounded-[12px] border border-[#4A4A4A]/30 bg-black/[0.02] p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/55">Quick Filter</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {COLOR_FAMILY_FILTERS.map((family) => {
+                    const isActive = activeColorFamily === family.key
+                    return (
+                      <button
+                        key={family.key}
+                        onClick={() => setActiveColorFamily(family.key)}
+                        className={`inline-flex items-center gap-2 rounded-[12px] border px-2.5 py-1.5 text-xs transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-[#4A4A4A]/35 bg-white text-black/70 hover:border-fuchsia-500'}`}
+                      >
+                        <span className={`h-3 w-3 rounded-full ${family.swatchClass}`} />
+                        {family.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div
+              ref={virtualContainerRef}
+              onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
+              className="mt-4 max-h-[62vh] overflow-auto rounded-[14px] border border-[#4A4A4A]/30 bg-white md:max-h-[72vh]"
+            >
+              <div style={{ height: topSpacerHeight }} />
+
+              <div
+                className={`grid gap-3 p-2 sm:p-3 ${bulkMode ? 'grid-cols-1' : ''}`}
+                style={bulkMode ? undefined : { gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))` }}
+              >
+                {virtualItems.map(({ item, itemIndex }) => {
+                  const itemKey = item.imageUrl
+                  const qty = getQty(itemKey)
+                  const hasChangedQty = qty > 1
+                  const itemCode = extractProductCode(item.name)
+
+                  if (bulkMode) {
+                    return (
+                      <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 rounded-[12px] border border-[#4A4A4A]/30 bg-[#E8E8E8] px-3 py-2 transition duration-300 hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_1px_rgba(212,55,144,0.26)]">
+                        <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-black/10 bg-white object-contain" loading="lazy" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
+                          <p className="truncate text-[11px] font-light text-black/55">{itemCode}</p>
+                          {silverFreeGuarantee && (
+                            <p className="truncate text-[10px] font-semibold uppercase tracking-[0.06em] text-fuchsia-600">HEMA-FREE | TPO-FREE | CI 77820-FREE</p>
+                          )}
+                        </div>
+                        <button onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>−</button>
+                        <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className={`h-7 w-10 rounded-[10px] border text-center text-xs ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/20 text-black/70'}`} />
+                        <button onClick={() => updateQty(itemKey, qty + 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>+</button>
+                        <button onClick={() => addQuickItem(itemKey)} className={`rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition duration-300 ${pulseItemKey === itemKey ? 'lux-pulse bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`}>Add</button>
+                      </div>
+                    )
+                  }
+
+                  return (
+                    <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 hover:scale-[1.05] hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`}>
+                      <div className="flex h-56 w-full items-center justify-center bg-white p-2 sm:h-60">
+                        <img src={item.imageUrl} alt={item.name} loading="lazy" className="max-h-full w-full object-contain" />
+                      </div>
+                      <div className="border-t border-black/10 px-2.5 py-2">
+                        <p className="truncate text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
+                        <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
+                        {silverFreeGuarantee && (
+                          <p className="mt-1 truncate text-[10px] font-semibold uppercase tracking-[0.06em] text-fuchsia-600">HEMA-FREE | TPO-FREE | CI 77820-FREE</p>
+                        )}
+                        <div className="mt-2 flex items-center gap-1">
+                          <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
+                          <p className="truncate text-[11px] font-light text-black/55">{item.subcategory}</p>
+                        </div>
+                        <div className="mt-2 flex items-center gap-1">
+                          <button onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>−</button>
+                          <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className={`h-7 w-10 rounded-[10px] border text-center text-xs ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/20 text-black/70'}`} />
+                          <button onClick={() => updateQty(itemKey, qty + 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>+</button>
+                          <button onClick={() => addQuickItem(itemKey)} className={`ml-auto rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition duration-300 ${pulseItemKey === itemKey ? 'lux-pulse bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`}>Add</button>
+                        </div>
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+
+              <div style={{ height: bottomSpacerHeight }} />
+            </div>
+
+            <div className="mt-2 text-xs text-black/55">
+              Virtualized view active: showing {virtualItems.length} / {filteredItems.length} items.
+            </div>
+          </>
+        )}
+      </div>
+    )
+    : null
 
   return (
     <section className="space-y-5">
-      <div className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-5 sm:p-6">
-        <p className="text-xs uppercase tracking-[0.2em] text-black/50">Luxury Colour Library</p>
-        <h1 className="mt-2 text-xl font-black uppercase tracking-[0.04em] text-black sm:text-3xl sm:tracking-[0.06em]">The Collection</h1>
-        <p className="mt-2 text-sm text-black/65">
-          Keep the main product pages as they are, and use this quick-click catalogue to open what is available by category.
-        </p>
+      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
+        <div className="mx-auto max-w-6xl">
+          <h1 className="heading-on-dark text-4xl font-extrabold uppercase tracking-[0.15em] text-white sm:text-5xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
+            The Collection
+          </h1>
+          <p className="mt-4 max-w-3xl text-base leading-relaxed text-white/90 sm:text-lg" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
+            Everything you need delivered as one complete system. HEMA & TPO-Free formulations, Cruelty-Free certified, and engineered for professional excellence. Explore every shade, tool, and accessory in our global collection.
+          </p>
+        </div>
       </div>
 
       {isLoading && (
         <div className="rounded-2xl border border-black/10 bg-white p-5 text-sm text-black/65">
-          Loading catalogue images...
+          Loading catalogue...
         </div>
       )}
 
@@ -2451,231 +2216,457 @@ function FullCataloguePage() {
 
       {!isLoading && !errorMessage && sections.length > 0 && (
         <>
-          <div className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/55">Category Tiles</p>
-            </div>
-
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {sections.map((section) => {
-                const isActiveCategory = activeCategory === section.category
-                const isColorsTile = isColorsCategoryName(section.category)
-                const imageCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
-                const sectionFallbackImage = section.subcategories.find((sub) => sub.items.length > 0)?.items?.[0]?.imageUrl || '/logo.png'
-                const coverCandidates = buildCategoryHeroImageCandidates(section.category, sectionFallbackImage)
-                const coverIndex = heroCandidateIndexByCategory[section.category] || 0
-                const safeCoverLength = Math.max(coverCandidates.length, 1)
-                const rotatingIndex = isColorsTile ? (colorTileFrame % safeCoverLength) : coverIndex
-                const coverImage = coverCandidates[Math.min(rotatingIndex, coverCandidates.length - 1)] || '/logo.png'
-
-                return (
-                  <button
-                    key={section.category}
-                    onClick={() => handleCategorySelect(section.category, section.subcategories?.[0]?.name || '')}
-                    className={`group relative overflow-hidden rounded-[12px] border bg-[#E8E8E8] text-left transition duration-300 hover:scale-[1.02] hover:border-fuchsia-500/70 hover:shadow-[0_0_0_2px_rgba(217,70,239,0.28)] ${isColorsTile ? 'h-[280px] sm:col-span-2 sm:h-[350px] lg:h-[360px] xl:row-span-2 xl:h-[100%]' : 'h-[190px] sm:h-[210px]'} ${isActiveCategory ? 'border-fuchsia-600 shadow-[0_0_0_1px_rgba(217,70,239,0.35)]' : 'border-[#4A4A4A]'}`}
-                  >
+          {/* FEATURED HERO: SUPERBOND PRIMER */}
+          <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
+            <div className="mx-auto max-w-6xl">
+              <div className="grid items-center gap-8 sm:grid-cols-2">
+                {/* Product Image */}
+                <div className="flex justify-center">
+                  <div className="relative h-96 w-64 rounded-xl border border-white/20 bg-gradient-to-b from-[#2A2A2A] to-[#1A1A1A] p-8 flex items-center justify-center">
                     <img
-                      src={coverImage}
-                      alt={section.category}
-                      className="h-full w-full bg-[#E8E8E8] object-cover"
-                      loading="lazy"
-                      onError={() => {
-                        if (coverIndex >= coverCandidates.length - 1) return
-                        setHeroCandidateIndexByCategory((current) => ({
-                          ...current,
-                          [section.category]: coverIndex + 1,
-                        }))
+                      src="/gelitup-content/product-images/BASES/SUPERBOND/superbond-primer.jpg"
+                      alt="Superbond Primer - White bottle with black matte cap"
+                      className="h-full w-full object-contain"
+                      onError={(e) => {
+                        e.currentTarget.src = '/logo.png'
                       }}
                     />
-                    <div className="absolute inset-x-2 bottom-2 rounded-[12px] border border-[#4A4A4A]/45 bg-[#E8E8E8]/90 px-3 py-2 backdrop-blur-md">
-                      <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{section.category}</p>
-                      <p className="text-[11px] text-[#1A1A1A]/75">{imageCount} items</p>
-                      {isColorsTile && (
-                        <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-fuchsia-600">761 SHADES</p>
-                      )}
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+                  </div>
+                </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {HERO_PRODUCT_COPY.map((product) => (
-              <article key={product.name} className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5">
-                <p className="text-xs uppercase tracking-[0.14em] text-[#4A4A4A]">Hero Product</p>
-                <h2 className="heading-on-light mt-1 text-base font-semibold text-[#1A1A1A]">{product.name}</h2>
-                <p className="mt-2 text-sm font-semibold text-[#1A1A1A]">{product.headline}</p>
-                <ul className="mt-2 space-y-1 text-xs text-[#4A4A4A]">
-                  {product.bullets.map((bullet) => (
-                    <li key={bullet}>• {bullet}</li>
-                  ))}
-                </ul>
-              </article>
-            ))}
-          </div>
-
-          <div ref={categoryPanelRef} className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-black uppercase tracking-[0.05em] text-black">{activeSection?.category || 'The Collection'}</h2>
-                <p className="mt-1 text-xs text-black/55">{filteredItems.length} matching items</p>
-                <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/50">View-only catalogue. Orders placed on the B2B portal.</p>
-              </div>
-              <a 
-                href="https://portal.gelitup.com" 
-                target="_blank" 
-                rel="noreferrer"
-                className="inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-[#BF3182]"
-              >
-                Go to B2B Portal
-              </a>
-            </div>
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              {subcategoryOptions.map((subcategory) => {
-                const isActive = activeSubcategory === subcategory
-                return (
+                {/* Product Details */}
+                <div>
+                  <div className="inline-flex rounded-full bg-[#D43790] px-4 py-1.5 mb-4">
+                    <span className="text-xs font-extrabold uppercase tracking-[0.12em] text-white">HEMA/TPO FREE</span>
+                  </div>
+                  <h3 className="text-3xl font-extrabold uppercase tracking-[0.08em] text-white sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
+                    Superbond Primer
+                  </h3>
+                  <p className="mt-3 text-base text-white/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
+                    The non-acid adhesive essential for long-term wear. Professional-grade formulation engineered to deliver superior adhesion and durability for every nail service.
+                  </p>
+                  <ul className="mt-5 space-y-2 text-sm text-white/75">
+                    <li className="flex items-start gap-3">
+                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                      <span>Non-acid formulation for sensitive clients</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                      <span>Maximum adhesion for extended wear</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                      <span>SKU: GIUP-MNT-SB01</span>
+                    </li>
+                  </ul>
                   <button
-                    key={`subcategory-${subcategory}`}
-                    onClick={() => setActiveSubcategory(subcategory)}
-                    className={`rounded-[12px] border px-3 py-1.5 text-xs font-semibold transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-fuchsia-300 bg-fuchsia-50 text-fuchsia-700 hover:border-fuchsia-500 hover:bg-fuchsia-100'}`}
+                    onClick={() => {
+                      const qty = Math.max(1, Number(itemQuantities['Superbond Primer (GIUP-MNT-SB01)'] || 1))
+                      setPulseItemKey('Superbond Primer (GIUP-MNT-SB01)')
+                      window.setTimeout(() => {
+                        setPulseItemKey('')
+                      }, 320)
+                      setQuickCart((current) => ({
+                        ...current,
+                        ['Superbond Primer (GIUP-MNT-SB01)']: Number(current['Superbond Primer (GIUP-MNT-SB01)'] || 0) + qty,
+                      }))
+                    }}
+                    className="mt-6 rounded-lg bg-[#D43790] px-8 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-[#C32680]"
                   >
-                    {subcategory}
+                    Add to Studio Order
                   </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CHAPTER 01: THE INFINITE SPECTRUM */}
+          <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
+            <div className="mx-auto max-w-6xl">
+              <h2 className="heading-on-dark text-3xl font-extrabold uppercase tracking-[0.12em] text-white sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
+                Chapter 01: The Infinite Spectrum
+              </h2>
+              <p className="mt-3 max-w-2xl text-base text-white/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
+                Explore 761+ professional shades including Core Classics, Specialty Series, Effects, and our flagship GIUP® #1 Range.
+              </p>
+              <div className="mt-6">
+                <button
+                  onClick={() => {
+                    const colorsSection = sections.find((s) => isColorsCategoryName(s.category))
+                    if (colorsSection) {
+                      setActiveCategory(colorsSection.category)
+                      setActiveSubcategory('ALL')
+                      setActiveColorFamily('ALL')
+                    }
+                  }}
+                  className="rounded-lg bg-fuchsia-600 px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
+                >
+                  Explore Spectrum
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {isColorsCategoryName(activeCategory) && categoryDetail}
+
+          {/* CHAPTER 02: STRUCTURAL ENGINEERING */}
+          <div className="space-y-4 py-12 px-4 sm:px-8">
+            <div className="mx-auto max-w-6xl px-4 sm:px-8">
+              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
+                Chapter 02: Structural Engineering
+              </h2>
+              <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
+                Advanced building and prep systems: Superbond Primer, Superior Bases, 3-in-1 Premium Builders, Crème de la Crème, and MultiMix Synthogel.
+              </p>
+            </div>
+
+             {/* FEATURED HERO: 5-IN-1 SUPERIOR BASE COAT */}
+            {!activeCategory && (
+            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-white px-4 py-12 sm:px-8 sm:py-16">
+              <div className="mx-auto max-w-6xl">
+                <div className="grid items-center gap-8 sm:grid-cols-2">
+                  {/* Product Image */}
+                  <div className="flex justify-center">
+                    <div className="relative h-96 w-64 rounded-xl border border-[#4A4A4A]/30 bg-gradient-to-b from-white to-neutral-50 p-8 flex items-center justify-center">
+                      <img
+                        src="/gelitup-content/product-images/BASES/5IN1 SUPERIOR BASE/5in1-superior-base.jpg"
+                        alt="5-in-1 Superior Base Coat - Clear self-leveling texture"
+                        className="h-full w-full object-contain"
+                        onError={(e) => {
+                          e.currentTarget.src = '/logo.png'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Product Details */}
+                  <div>
+                    <h3 className="text-4xl font-extrabold uppercase tracking-[0.08em] text-[#1A1A1A] sm:text-5xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
+                      The All-in-One Foundation
+                    </h3>
+                    <p className="mt-4 text-base text-[#1A1A1A]/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
+                      5-in-1 Superior Base Coat combines primer, base, leveler, strengthener, and adhesion booster in one revolutionary formula. The clear, self-leveling texture ensures flawless application every single time.
+                    </p>
+                    <ul className="mt-6 space-y-3 text-sm text-[#1A1A1A]/75">
+                      <li className="flex items-start gap-3">
+                        <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                        <span>5-in-1 multitask formula eliminates intermediate steps</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                        <span>Self-leveling technology for perfect application</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                        <span>HEMA & TPO-Free formulation</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                        <span>Essential foundation for all GEL.IT.UP systems</span>
+                      </li>
+                    </ul>
+                    <button
+                      onClick={() => {
+                        const qty = Math.max(1, Number(itemQuantities['5-in-1 Superior Base Coat'] || 1))
+                        setPulseItemKey('5-in-1 Superior Base Coat')
+                        window.setTimeout(() => {
+                          setPulseItemKey('')
+                        }, 320)
+                        setQuickCart((current) => ({
+                          ...current,
+                          ['5-in-1 Superior Base Coat']: Number(current['5-in-1 Superior Base Coat'] || 0) + qty,
+                        }))
+                      }}
+                      className="mt-8 rounded-lg bg-[#D43790] px-8 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-[#C32680]"
+                    >
+                      Add to Technical Suite
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            )}
+
+            {/* CATEGORY GRID */}
+            <div className="mx-auto max-w-6xl">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {chapter02Categories.map((categoryName) => {
+                const section = sections.find((s) => s.category === categoryName)
+                if (!section) return null
+                const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
+                const coverImage = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
+                return (
+                  <React.Fragment key={categoryName}>
+                    <button
+                      onClick={() => {
+                        setActiveCategory(categoryName)
+                        setActiveSubcategory(section.subcategories?.[0]?.name || '')
+                      }}
+                      className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
+                    >
+                      <div className="relative h-48 overflow-hidden bg-[#E8E8E8]">
+                        <img src={coverImage} alt={categoryName} className="h-full w-full object-cover" loading="lazy" />
+                        <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
+                      </div>
+                      <div className="border-t border-[#4A4A4A]/20 p-3">
+                        <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
+                        <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
+                      </div>
+                    </button>
+                    {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
+                  </React.Fragment>
                 )
               })}
             </div>
+            </div>
+          </div>
 
-            {!activeSubcategory && (
-              <div className="mt-3 rounded-[12px] border border-[#4A4A4A]/30 bg-black/[0.02] px-3 py-2 text-xs text-black/60">
-                Select a subcategory to view products.
+          {/* CHAPTER 03: THE PROFESSIONAL TOOLSET */}
+          <div className="space-y-4 py-12 px-4 sm:px-8">
+            <div className="mx-auto max-w-6xl px-4 sm:px-8">
+              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
+                Chapter 03: The Professional Toolset
+              </h2>
+              <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
+                Precision finishing products, expert hardware, and maintenance tools for flawless studio finishes.
+              </p>
+            </div>
+            <div className="mx-auto max-w-6xl">
+            <div className="grid gap-4 sm:grid-cols-3">
+              {chapter03Categories.map((categoryName) => {
+                const section = sections.find((s) => s.category === categoryName)
+                if (!section) return null
+                const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
+                const coverImage = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
+                return (
+                  <React.Fragment key={categoryName}>
+                    <button
+                      onClick={() => {
+                        setActiveCategory(categoryName)
+                        setActiveSubcategory(section.subcategories?.[0]?.name || '')
+                      }}
+                      className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
+                    >
+                      <div className="relative h-48 overflow-hidden bg-[#E8E8E8]">
+                        <img src={coverImage} alt={categoryName} className="h-full w-full object-cover" loading="lazy" />
+                        <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
+                      </div>
+                      <div className="border-t border-[#4A4A4A]/20 p-3">
+                        <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
+                        <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
+                      </div>
+                    </button>
+                    {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
+                  </React.Fragment>
+                )
+              })}
+            </div>
+            </div>
+          </div>
+
+          {/* CHAPTER 04: ARTISTIC MASTERY & CARE */}
+          <div className="space-y-4 py-12 px-4 sm:px-8">
+            <div className="mx-auto max-w-6xl px-4 sm:px-8">
+              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
+                Chapter 04: Artistic Mastery & Care
+              </h2>
+              <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
+                Nail art ecosystem and therapeutic formulations for creative details and professional aftercare.
+              </p>
+            </div>
+            <div className="mx-auto max-w-6xl">
+            <div className="grid gap-4 sm:grid-cols-2">
+              {chapter04Categories.map((categoryName) => {
+                const section = sections.find((s) => s.category === categoryName)
+                if (!section) return null
+                const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
+                const coverImage = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
+                return (
+                  <React.Fragment key={categoryName}>
+                    <button
+                      onClick={() => {
+                        setActiveCategory(categoryName)
+                        setActiveSubcategory(section.subcategories?.[0]?.name || '')
+                      }}
+                      className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
+                    >
+                      <div className="relative h-48 overflow-hidden bg-[#E8E8E8]">
+                        <img src={coverImage} alt={categoryName} className="h-full w-full object-cover" loading="lazy" />
+                        <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
+                      </div>
+                      <div className="border-t border-[#4A4A4A]/20 p-3">
+                        <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
+                        <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
+                      </div>
+                    </button>
+                    {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
+                  </React.Fragment>
+                )
+              })}
+            </div>
+            </div>
+
+            {chapter04Categories.includes(activeCategory) && categoryDetail}
+          </div>
+
+          {/* PERSISTENT FOOTER */}
+          <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen border-t border-[#4A4A4A]/30 bg-[#1A1A1A] px-4 py-8 text-center sm:px-8">
+            <p className="text-sm font-semibold uppercase tracking-[0.12em] text-white/90">
+              ALL SYSTEMS ARE 100% HEMA & TPO FREE | CPNP NOTIFIED
+            </p>
+          </div>
+
+        </>
+      )}
+    </section>
+  )
+}
+
+function MissingImagesReport() {
+  const [sections, setSections] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  useEffect(() => {
+    let mounted = true
+
+    const loadCatalogue = async () => {
+      setIsLoading(true)
+      setErrorMessage('')
+
+      try {
+        const response = await fetch('/gelitup-content/product-image-map.json')
+        if (!response.ok) {
+          throw new Error(`Catalogue map unavailable (${response.status})`)
+        }
+
+        const payload = await response.json()
+        if (!mounted) return
+
+        const nextSections = buildCatalogueSectionsFromImageMap(payload, new Map())
+        setSections(nextSections)
+      }
+      catch (error) {
+        if (!mounted) return
+        setSections([])
+        setErrorMessage(error instanceof Error ? error.message : 'Unable to load catalogue.')
+      }
+      finally {
+        if (mounted) setIsLoading(false)
+      }
+    }
+
+    void loadCatalogue()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  const missingImages = useMemo(() => {
+    const items = []
+    sections.forEach((section) => {
+      section.subcategories.forEach((subcategory) => {
+        subcategory.items.forEach((item) => {
+          if (!item.imageUrl || item.imageUrl === '/logo.png' || item.imageUrl.includes('placeholder')) {
+            items.push({
+              category: section.category,
+              subcategory: subcategory.name,
+              name: item.name,
+              imageUrl: item.imageUrl || 'N/A',
+            })
+          }
+        })
+      })
+    })
+    return items
+  }, [sections])
+
+  const categoryGroups = useMemo(() => {
+    const groups = new Map()
+    missingImages.forEach((item) => {
+      if (!groups.has(item.category)) {
+        groups.set(item.category, [])
+      }
+      groups.get(item.category).push(item)
+    })
+    return Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b))
+  }, [missingImages])
+
+  return (
+    <section className="space-y-5">
+      <div className="rounded-2xl border border-amber-400/40 bg-amber-50 p-5 sm:p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-amber-700">Graphics Designer Report</p>
+            <h1 className="mt-2 text-xl font-black uppercase tracking-[0.04em] text-amber-900 sm:text-3xl sm:tracking-[0.06em]">Missing or Placeholder Images</h1>
+            <p className="mt-2 text-sm text-amber-800">
+              Products with missing, placeholder, or default images that need proper photographs.
+            </p>
+          </div>
+          <NavLink
+            to="/full-catalogue"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/60 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-amber-900 transition hover:border-amber-600"
+          >
+            <span>←</span>
+            <span>Back to Catalogue</span>
+          </NavLink>
+        </div>
+      </div>
+
+      {isLoading && (
+        <div className="rounded-2xl border border-black/10 bg-white p-5 text-sm text-black/65">
+          Loading catalogue data...
+        </div>
+      )}
+
+      {!isLoading && errorMessage && (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-700">
+          Unable to load catalogue: {errorMessage}
+        </div>
+      )}
+
+      {!isLoading && !errorMessage && missingImages.length === 0 && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-700">
+          ✓ All products have images! No missing images found.
+        </div>
+      )}
+
+      {!isLoading && !errorMessage && missingImages.length > 0 && (
+        <>
+          <div className="rounded-2xl border border-amber-400/40 bg-white p-5">
+            <p className="text-sm font-semibold text-amber-900">
+              Total items needing images: <span className="text-lg">{missingImages.length}</span>
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {categoryGroups.map(([category, items]) => (
+              <div key={category} className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-5">
+                <h2 className="text-lg font-bold uppercase tracking-[0.04em] text-black">{category}</h2>
+                <p className="mt-1 text-xs text-black/55">{items.length} items</p>
+                <div className="mt-3 overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-[#4A4A4A]/20">
+                        <th className="pb-2 pr-4 font-semibold text-black/70">Subcategory</th>
+                        <th className="pb-2 pr-4 font-semibold text-black/70">Product Name</th>
+                        <th className="pb-2 font-semibold text-black/70">Current Image</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {items.map((item, idx) => (
+                        <tr key={idx} className="border-b border-[#4A4A4A]/10">
+                          <td className="py-2 pr-4 text-black/70">{item.subcategory}</td>
+                          <td className="py-2 pr-4 font-medium text-black">{item.name}</td>
+                          <td className="py-2 text-xs text-rose-600">{item.imageUrl}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            )}
-
-            {!!activeSubcategory && (
-              <>
-                <div className="mt-3">
-                  <label className="sr-only" htmlFor="catalog-search">Search catalogue</label>
-                  <input
-                    id="catalog-search"
-                    type="text"
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                    placeholder="Search product name, code, or subcategory..."
-                    className="w-full rounded-[12px] border border-[#4A4A4A]/35 bg-white px-3 py-2 text-sm text-black outline-none ring-fuchsia-500/20 focus:ring"
-                  />
-                </div>
-
-                {isColorsCategory && (
-                  <div className="mt-3 rounded-[12px] border border-[#4A4A4A]/30 bg-black/[0.02] p-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/55">Quick Filter</p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {COLOR_FAMILY_FILTERS.map((family) => {
-                        const isActive = activeColorFamily === family.key
-                        return (
-                          <button
-                            key={family.key}
-                            onClick={() => setActiveColorFamily(family.key)}
-                            className={`inline-flex items-center gap-2 rounded-[12px] border px-2.5 py-1.5 text-xs transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-[#4A4A4A]/35 bg-white text-black/70 hover:border-fuchsia-500'}`}
-                          >
-                            <span className={`h-3 w-3 rounded-full ${family.swatchClass}`} />
-                            {family.label}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                <div
-                  ref={virtualContainerRef}
-                  onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
-                  className="mt-4 max-h-[62vh] overflow-auto rounded-[14px] border border-[#4A4A4A]/30 bg-white md:max-h-[72vh]"
-                >
-                  <div style={{ height: topSpacerHeight }} />
-
-                  <div
-                    className="grid gap-3 p-2 sm:p-3"
-                    style={{ gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))` }}
-                  >
-                    {virtualItems.map(({ item, itemIndex }) => {
-                      const itemCode = extractProductCode(item.name)
-                      const favoriteCode = itemCode !== 'SKU' ? itemCode : ''
-                      const favoriteKey = getFavoriteKey({
-                        product_code: favoriteCode,
-                        product_name: item.name,
-                        name: item.name,
-                        code: favoriteCode,
-                      })
-                      const isFavorite = favoriteKey ? favoritesByKey.has(favoriteKey) : false
-                      const favoritePayload = {
-                        product_code: favoriteCode,
-                        product_name: item.name,
-                        image_url: item.imageUrl || '',
-                        category: item.subcategory || activeSection?.category || '',
-                      }
-
-                      return (
-                        <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 hover:scale-[1.05] hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`}>
-                          <div className="relative flex h-56 w-full items-center justify-center bg-white p-2 sm:h-60">
-                            <img src={item.imageUrl} alt={item.name} loading="lazy" className="max-h-full w-full object-contain" />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                void handleFavoriteToggle(favoritePayload)
-                              }}
-                              aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                              aria-pressed={isFavorite}
-                              className={`absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border text-[10px] ${
-                                isFavorite
-                                  ? 'border-fuchsia-300 bg-fuchsia-50 text-fuchsia-600'
-                                  : 'border-slate-200 bg-white text-slate-400'
-                              }`}
-                            >
-                              {isFavorite ? (
-                                <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-                                  <path
-                                    fill="currentColor"
-                                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 3.99 4 6.5 4c1.74 0 3.41 1 4.5 2.09C12.09 5 13.76 4 15.5 4 18.01 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                                  />
-                                </svg>
-                              ) : (
-                                <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-                                  <path
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="1.7"
-                                    d="M12 20.6l-1.32-1.2C5.8 14.84 3 12.26 3 8.9 3 6.78 4.68 5.1 6.8 5.1c1.53 0 2.99.74 3.9 1.9.91-1.16 2.37-1.9 3.9-1.9 2.12 0 3.8 1.68 3.8 3.8 0 3.36-2.8 5.94-7.68 10.5L12 20.6z"
-                                  />
-                                </svg>
-                              )}
-                            </button>
-                          </div>
-                          <div className="border-t border-black/10 px-2.5 py-2">
-                            <p className="truncate text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
-                            <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                            {silverFreeGuarantee && (
-                              <p className="mt-1 truncate text-[10px] font-semibold uppercase tracking-[0.06em] text-fuchsia-600">HEMA-FREE | TPO-FREE | CI 77820-FREE</p>
-                            )}
-                            <div className="mt-2 flex items-center gap-1">
-                              <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
-                              <p className="truncate text-[11px] font-light text-black/55">{item.subcategory}</p>
-                            </div>
-                          </div>
-                        </article>
-                      )
-                    })}
-                  </div>
-
-                  <div style={{ height: bottomSpacerHeight }} />
-                </div>
-
-                <div className="mt-2 text-xs text-black/55">
-                  Virtualized view active: showing {virtualItems.length} / {filteredItems.length} items.
-                </div>
-              </>
-            )}
+            ))}
           </div>
         </>
       )}
@@ -2703,7 +2694,6 @@ function InfoCard({ id, title, children, tone = 'white' }) {
 function pickHomepageMedia(items = []) {
   const images = items.filter((item) => item.mediaType === 'image')
   const videos = items.filter((item) => item.mediaType === 'video')
-  const nonLogoImages = images.filter((item) => !String(item.localPath || '').toLowerCase().includes('logo'))
 
   const heroImage = images.find((item) => item.localPath.includes('com_web_1280x1280_18'))
     || images.find((item) => item.localPath.includes('1-1024x1024'))
@@ -2716,37 +2706,10 @@ function pickHomepageMedia(items = []) {
     .filter((item) => item.localPath !== heroImage?.localPath)
     .slice(0, 4)
 
-  const spectrumVisualTokens = ['spectrum', 'swatch', 'texture', 'neon', 'shimmer', 'creme', 'solid', 'colour', 'color']
-  const collectionVisual = nonLogoImages.find((item) => {
-    const path = String(item.localPath || '').toLowerCase()
-    return spectrumVisualTokens.some((token) => path.includes(token))
-  }) || nonLogoImages[0] || heroImage
-
-  const instagramTiles = []
-  const seenInstagramSources = new Set()
-  for (const item of items) {
-    const sourceUrl = String(item?.sourceUrl || '').trim()
-    const localPath = String(item?.localPath || '').trim()
-    if (!sourceUrl || !localPath) continue
-    if (!/instagram\.com/i.test(sourceUrl)) continue
-    if (seenInstagramSources.has(sourceUrl)) continue
-
-    seenInstagramSources.add(sourceUrl)
-    instagramTiles.push({
-      sourceUrl,
-      localPath,
-      mediaType: item?.mediaType || 'image',
-    })
-
-    if (instagramTiles.length >= 9) break
-  }
-
   return {
     heroImage: heroImage?.localPath || '/logo.png',
     heroVideo: heroVideo?.localPath || null,
     gallery,
-    collectionVisual: collectionVisual?.localPath || heroImage?.localPath || '/logo.png',
-    instagramTiles,
   }
 }
 
@@ -2800,41 +2763,6 @@ function ScrollToTopOnRouteChange() {
   }, [location.pathname])
 
   return null
-}
-
-function RouteUtilityButtons() {
-  const navigate = useNavigate()
-
-  const handleGoBack = useCallback(() => {
-    if (window.history.length > 1) {
-      navigate(-1)
-      return
-    }
-    navigate('/')
-  }, [navigate])
-
-  const handleBackToTop = useCallback(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
-  }, [])
-
-  return (
-    <div className="fixed bottom-20 right-3 z-40 flex flex-col gap-2 md:bottom-6 md:right-6">
-      <button
-        type="button"
-        onClick={handleGoBack}
-        className="rounded-lg border border-white/25 bg-black/85 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:border-fuchsia-400 hover:text-fuchsia-200"
-      >
-        Back
-      </button>
-      <button
-        type="button"
-        onClick={handleBackToTop}
-        className="rounded-lg border border-white/25 bg-black/85 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:border-fuchsia-400 hover:text-fuchsia-200"
-      >
-        Top
-      </button>
-    </div>
-  )
 }
 
 function LegacyMirrorPage({ pagePath }) {
@@ -3066,9 +2994,19 @@ function HomePage() {
     heroImage: '/logo.png',
     heroVideo: null,
     gallery: [],
-    collectionVisual: '/logo.png',
-    instagramTiles: [],
   }))
+
+  const countdownTarget = useMemo(() => {
+    const now = new Date()
+    const target = new Date(now)
+    const dayOfWeek = now.getDay()
+    const daysUntilMonday = dayOfWeek === 1 ? 7 : (8 - dayOfWeek) % 7
+    target.setDate(now.getDate() + daysUntilMonday)
+    target.setHours(9, 0, 0, 0)
+    return target.getTime()
+  }, [])
+  
+  const [countdownNow, setCountdownNow] = useState(() => Date.now())
 
   useEffect(() => {
     let isMounted = true
@@ -3099,17 +3037,6 @@ function HomePage() {
     }
   }, [])
 
-  const countdownTarget = useMemo(() => {
-    const now = new Date()
-    const target = new Date(now)
-    const dayOfWeek = now.getDay()
-    const daysUntilMonday = dayOfWeek === 1 ? 7 : (8 - dayOfWeek) % 7
-    target.setDate(now.getDate() + daysUntilMonday)
-    target.setHours(9, 0, 0, 0)
-    return target.getTime()
-  }, [])
-  const [countdownNow, setCountdownNow] = useState(() => Date.now())
-
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       setCountdownNow(Date.now())
@@ -3125,25 +3052,6 @@ function HomePage() {
   const countdownHours = Math.floor((countdownRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
   const countdownMinutes = Math.floor((countdownRemaining % (1000 * 60 * 60)) / (1000 * 60))
   const countdownSeconds = Math.floor((countdownRemaining % (1000 * 60)) / 1000)
-  const reminderReturnUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/full-catalogue`
-    : '/full-catalogue'
-  const reminderMessage = `Reminder: GEL.IT.UP new arrivals drop Monday at 09:00. Return here: ${reminderReturnUrl}`
-  const whatsappReminderHref = `https://wa.me/?text=${encodeURIComponent(reminderMessage)}`
-  const emailReminderHref = `mailto:?subject=${encodeURIComponent('GEL.IT.UP Reminder: New Arrivals Monday 09:00')}&body=${encodeURIComponent(reminderMessage)}`
-  const formatCalendarUtc = (timestamp) => {
-    const date = new Date(timestamp)
-    const year = date.getUTCFullYear()
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0')
-    const day = String(date.getUTCDate()).padStart(2, '0')
-    const hours = String(date.getUTCHours()).padStart(2, '0')
-    const minutes = String(date.getUTCMinutes()).padStart(2, '0')
-    const seconds = String(date.getUTCSeconds()).padStart(2, '0')
-    return `${year}${month}${day}T${hours}${minutes}${seconds}Z`
-  }
-  const calendarStart = formatCalendarUtc(countdownTarget)
-  const calendarEnd = formatCalendarUtc(countdownTarget + (30 * 60 * 1000))
-  const calendarReminderHref = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('GEL.IT.UP New Arrivals')}&dates=${calendarStart}/${calendarEnd}&details=${encodeURIComponent(reminderMessage)}`
 
   return (
     <section className="space-y-6">
@@ -3243,107 +3151,48 @@ function HomePage() {
         </p>
       </div>
 
-      <section id="products" className="rounded-2xl border border-[#1A1A1A]/15 bg-[#FFFFFF] p-4 sm:p-6">
-        <h2
-          className="text-center text-lg font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-2xl"
-          style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
-        >
-          EXPLORE THE SPECTRUM: 761+ SHADES OF PROFESSIONAL EXCELLENCE.
-        </h2>
-
-        <div className="mt-4 overflow-hidden rounded-2xl border border-[#1A1A1A]/20 bg-[#1A1A1A]">
-          <img
-            src={media.collectionVisual || media.heroImage}
-            alt="Macro spectrum visual showing shimmer, neon, and creme gel textures"
-            className="h-80 w-full object-cover sm:h-96 lg:h-[28rem]"
-            style={{ objectPosition: '50% 70%' }}
-            loading="lazy"
-          />
+      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-10 sm:px-8 sm:py-12">
+        <div className="mx-auto max-w-6xl text-center">
+          <p className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#D43790] sm:text-5xl">
+            {String(countdownDays).padStart(2, '0')} : {String(countdownHours).padStart(2, '0')} : {String(countdownMinutes).padStart(2, '0')} : {String(countdownSeconds).padStart(2, '0')}
+          </p>
+          <p className="mt-4 text-sm font-extrabold uppercase tracking-[0.1em] text-white sm:text-lg">
+            NEW COLOUR REVEAL COMING SOON. WATCH THIS SPACE.
+          </p>
         </div>
+      </div>
 
-        <div className="mt-4 flex justify-center">
-          <NavLink
-            to="/full-catalogue"
-            className="inline-flex rounded-lg bg-[#D43790] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]"
-          >
-            Open The Collection
-          </NavLink>
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-[#1A1A1A] bg-[#1A1A1A] px-4 py-6 text-center sm:px-6 sm:py-8">
-        <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#D43790] sm:text-sm">
-          WATCH THIS SPACE: NEW ARRIVALS MONDAY 09:00 AM.
+      <InfoCard id="products" title="The Collection">
+        <p>
+          The GEL.IT.UP lineup includes Soak-off Gel Polish, Base and Top Coats, Builder System,
+          Nail Polishes, Nail Art, Consumables, and Skin & Nail Care.
+          We also maintain a broad color portfolio (800+ shades) for professional channels.
         </p>
-        <p className="mt-3 text-3xl font-extrabold uppercase tracking-[0.12em] text-white sm:text-5xl">
-          {String(countdownDays).padStart(2, '0')} : {String(countdownHours).padStart(2, '0')} : {String(countdownMinutes).padStart(2, '0')} : {String(countdownSeconds).padStart(2, '0')}
-        </p>
-        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.08em] text-white/85">Click here to be reminded and come back to this page:</p>
-        <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-          <a
-            href={whatsappReminderHref}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex rounded-lg border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] text-white transition duration-300 hover:border-[#D43790] hover:text-[#D43790]"
-          >
-            WhatsApp Reminder
-          </a>
-          <a
-            href={emailReminderHref}
-            className="inline-flex rounded-lg border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] text-white transition duration-300 hover:border-[#D43790] hover:text-[#D43790]"
-          >
-            Email Reminder
-          </a>
-          <a
-            href={calendarReminderHref}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex rounded-lg border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] text-white transition duration-300 hover:border-[#D43790] hover:text-[#D43790]"
-          >
-            Add to Calendar
-          </a>
-        </div>
-      </section>
+        <NavLink to="/full-catalogue" className="mt-3 inline-flex rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
+          Open The Collection
+        </NavLink>
+        {media.gallery.length > 0 && (
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {media.gallery.map((item) => (
+              <img
+                key={item.localPath}
+                src={item.localPath}
+                alt="GEL.IT.UP product preview"
+                className="h-24 w-full rounded-lg object-cover sm:h-28"
+                loading="lazy"
+              />
+            ))}
+          </div>
+        )}
+      </InfoCard>
 
-      <section className="rounded-2xl border border-[#1A1A1A]/15 bg-[#FFFFFF] p-4 sm:p-6">
-        <h3 className="text-center text-base font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-xl">Community Proof</h3>
-        <p className="mt-2 text-center text-sm text-[#1A1A1A]">Live salon demand from GEL.IT.UP by GIUP® on Instagram.</p>
-
-        <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
-          {media.instagramTiles.map((tile, index) => {
-            const isVideo = String(tile.mediaType || '').toLowerCase() === 'video'
-
-            return (
-              <a
-                key={`homepage-instagram-${tile.sourceUrl}-${index}`}
-                href={tile.sourceUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="group relative overflow-hidden rounded-2xl border border-[#1A1A1A]/15 bg-white transition duration-300 hover:-translate-y-0.5 hover:border-[#D43790]/60"
-                aria-label="Open Instagram post"
-              >
-                {isVideo
-                  ? <video src={tile.localPath} className="h-24 w-full object-cover sm:h-32 lg:h-40" muted playsInline autoPlay loop controls={false} />
-                  : <img src={tile.localPath} alt="Instagram salon result" className="h-24 w-full object-cover sm:h-32 lg:h-40" loading="lazy" />}
-              </a>
-            )
-          })}
-
-          {media.instagramTiles.length === 0 && (
-            <div className="col-span-3 rounded-2xl border border-[#1A1A1A]/15 bg-[#FFFFFF] px-4 py-5 text-center">
-              <p className="text-sm font-medium text-[#1A1A1A]">Instagram feed coming soon.</p>
-              <a
-                href={INSTAGRAM_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]"
-              >
-                View Instagram
-              </a>
-            </div>
-          )}
-        </div>
-      </section>
+      <InfoCard id="certifications" title="Certifications & Compliance">
+        <ul className="mt-3 space-y-2 text-sm text-slate-600">
+          <li>• Leaping Bunny certified cruelty-free standards for in-house cosmetic and personal care products.</li>
+          <li>• EU regulation alignment and GMP (Good Manufacturing Practices) commitment.</li>
+          <li>• Professionals-only commercial policy to protect quality and industry standards.</li>
+        </ul>
+      </InfoCard>
 
       <InfoCard title="DISTRIBUTOR PACKAGES" tone="dark">
         <p>
@@ -3881,81 +3730,6 @@ function PortalAdminLogin({ onAdminLogin }) {
   )
 }
 
-function FavoritesPanel({
-  title = 'Favorites',
-  note = 'Saved to your account.',
-  favorites,
-  isLoading,
-  error,
-  isSignedIn,
-  onToggleFavorite,
-  emptyMessage = 'No favorites yet. Tap the heart on any product to save it.',
-}) {
-  return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <p className="text-xs font-semibold text-slate-900">{title}</p>
-          {note && <p className="mt-0.5 text-[11px] text-slate-500">{note}</p>}
-        </div>
-        <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-          {favorites.length}
-        </span>
-      </div>
-
-      {isLoading && <p className="mt-2 text-xs text-slate-500">Loading favorites...</p>}
-      {!isLoading && error && <p className="mt-2 text-xs text-rose-600">{error}</p>}
-      {!isLoading && !error && !isSignedIn && (
-        <p className="mt-2 text-xs text-slate-500">Sign in to view your saved favorites.</p>
-      )}
-      {!isLoading && !error && isSignedIn && favorites.length === 0 && (
-        <p className="mt-2 text-xs text-slate-500">{emptyMessage}</p>
-      )}
-      {!isLoading && !error && isSignedIn && favorites.length > 0 && (
-        <ul className="mt-2 space-y-2">
-          {favorites.map((favorite) => {
-            const label = favorite.product_code
-              ? `${favorite.product_code} - ${favorite.product_name}`
-              : favorite.product_name
-
-            return (
-              <li key={favorite.id} className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-2 py-2">
-                <div className="h-10 w-10 overflow-hidden rounded border border-slate-200 bg-slate-100">
-                  {favorite.image_url ? (
-                    <img
-                      src={favorite.image_url}
-                      alt={favorite.product_name}
-                      loading="lazy"
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[9px] font-semibold text-slate-400">
-                      No Img
-                    </div>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-semibold text-slate-800">{label}</p>
-                  <p className="truncate text-[11px] text-slate-500">{favorite.category || 'Uncategorized'}</p>
-                </div>
-                {onToggleFavorite && (
-                  <button
-                    type="button"
-                    onClick={() => onToggleFavorite(favorite)}
-                    className="rounded-md border border-slate-300 px-2 py-1 text-[11px] font-semibold text-slate-600"
-                  >
-                    Remove
-                  </button>
-                )}
-              </li>
-            )
-          })}
-        </ul>
-      )}
-    </div>
-  )
-}
-
 function PortalRegister({ onRegister }) {
   const [application, setApplication] = useState({
     customerType: 'company',
@@ -3987,13 +3761,6 @@ function PortalRegister({ onRegister }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
-  const {
-    favorites,
-    isLoadingFavorites,
-    favoritesError,
-    isSignedIn,
-    toggleFavorite,
-  } = useUserFavorites()
 
   const setField = (fieldName, value) => {
     setApplication((current) => ({
@@ -4002,40 +3769,18 @@ function PortalRegister({ onRegister }) {
     }))
   }
 
-  const handleFavoriteToggle = useCallback(async (candidate) => {
-    const result = await toggleFavorite(candidate)
-    if (!result.ok && result.action === 'auth_required') {
-      navigate('/become-distributor')
-      return
-    }
-    if (!result.ok && result.message) {
-      window.alert(result.message)
-    }
-  }, [navigate, toggleFavorite])
-
   return (
     <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
       <div className="bg-slate-900 p-8 text-white">
         <p className="text-xs uppercase tracking-[0.2em] text-slate-300">GEL.IT.UP Trade</p>
-        <h2 className="mt-3 text-3xl font-bold">Distributor Registration</h2>
+        <h2 className="heading-on-dark mt-3 text-3xl font-bold">B2B Registration</h2>
         <p className="mt-4 text-sm text-slate-300">
           Submit your company details. Applications are uploaded automatically and reviewed by the B2B team.
         </p>
       </div>
 
       <div className="p-8">
-        <h3 className="text-xl font-semibold text-slate-900">B2B Client Application</h3>
-        <div className="mt-4">
-          <FavoritesPanel
-            title="Favorites"
-            note="Saved to your account and visible in the portal order form."
-            favorites={favorites}
-            isLoading={isLoadingFavorites}
-            error={favoritesError}
-            isSignedIn={isSignedIn}
-            onToggleFavorite={handleFavoriteToggle}
-          />
-        </div>
+        <h3 className="text-xl font-semibold text-slate-900">B2B Registration</h3>
         <form className="mt-5 space-y-4" onSubmit={async (event) => {
           event.preventDefault()
           setIsSubmitting(true)
@@ -4460,21 +4205,6 @@ function ProductsModule({ moduleView = 'products' }) {
   const productsTable = import.meta.env.VITE_B2B_PRODUCTS_TABLE || DEFAULT_PRODUCTS_TABLE
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
-  const {
-    favorites,
-    favoritesByKey,
-    isLoadingFavorites,
-    favoritesError,
-    isSignedIn,
-    toggleFavorite,
-  } = useUserFavorites()
-
-  const handleFavoriteToggle = useCallback(async (candidate) => {
-    const result = await toggleFavorite(candidate)
-    if (!result.ok && result.message) {
-      window.alert(result.message)
-    }
-  }, [toggleFavorite])
 
   useEffect(() => {
     localStorage.setItem(CLIENT_PROFILE_STORAGE_KEY, JSON.stringify(clientProfile))
@@ -6095,17 +5825,6 @@ function ProductsModule({ moduleView = 'products' }) {
         </div>
         <p className="mt-2 text-xs text-slate-500">{isLoadingFeed ? 'Loading live feed...' : feedMessage}</p>
         <p className="mt-1 text-[11px] text-slate-500">{shippingMetadataStatus}</p>
-        <div className="mt-3">
-          <FavoritesPanel
-            title="Favorites"
-            note="Saved to your account for quick reference on this order."
-            favorites={favorites}
-            isLoading={isLoadingFavorites}
-            error={favoritesError}
-            isSignedIn={isSignedIn}
-            onToggleFavorite={handleFavoriteToggle}
-          />
-        </div>
         <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
           <p className="text-xs font-semibold text-slate-900">Client details (saved for next orders)</p>
           <p className="mt-1 text-[11px] text-slate-500">
@@ -6418,20 +6137,6 @@ function ProductsModule({ moduleView = 'products' }) {
                     <ul className="space-y-1 text-xs text-slate-700">
                       {visiblePackagePreviewItems.map((item) => {
                         const resolvedImageUrl = resolveCatalogImageUrl(item)
-                        const favoriteKey = getFavoriteKey({
-                          product_code: item.code || item.sku,
-                          product_name: item.name,
-                          code: item.code,
-                          name: item.name,
-                          sku: item.sku,
-                        })
-                        const isFavorite = favoriteKey ? favoritesByKey.has(favoriteKey) : false
-                        const favoritePayload = {
-                          product_code: item.code || item.sku || '',
-                          product_name: item.name,
-                          image_url: resolvedImageUrl || item.imageUrl || '',
-                          category: item.category || item.group || '',
-                        }
 
                         return (
                         <li key={`${item.sku}-${item.code}`} className="flex items-center gap-2 rounded border border-slate-100 bg-slate-50 px-2 py-1">
@@ -6458,37 +6163,6 @@ function ProductsModule({ moduleView = 'products' }) {
                             {' '}
                             {item.name}
                           </span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              void handleFavoriteToggle(favoritePayload)
-                            }}
-                            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                            aria-pressed={isFavorite}
-                            className={`ml-auto flex h-6 w-6 items-center justify-center rounded-full border text-[10px] ${
-                              isFavorite
-                                ? 'border-fuchsia-300 bg-fuchsia-50 text-fuchsia-600'
-                                : 'border-slate-200 bg-white text-slate-400'
-                            }`}
-                          >
-                            {isFavorite ? (
-                              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
-                                <path
-                                  fill="currentColor"
-                                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 3.99 4 6.5 4c1.74 0 3.41 1 4.5 2.09C12.09 5 13.76 4 15.5 4 18.01 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                                />
-                              </svg>
-                            ) : (
-                              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
-                                <path
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="1.7"
-                                  d="M12 20.6l-1.32-1.2C5.8 14.84 3 12.26 3 8.9 3 6.78 4.68 5.1 6.8 5.1c1.53 0 2.99.74 3.9 1.9.91-1.16 2.37-1.9 3.9-1.9 2.12 0 3.8 1.68 3.8 3.8 0 3.36-2.8 5.94-7.68 10.5L12 20.6z"
-                                />
-                              </svg>
-                            )}
-                          </button>
                           {!resolvedImageUrl && (
                             <span className="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
                               Missing image
@@ -6591,33 +6265,11 @@ function ProductsModule({ moduleView = 'products' }) {
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
           {filteredProducts.map((product) => {
             const selected = selectedCodes.includes(product.code)
-            const favoriteKey = getFavoriteKey({
-              product_code: product.code,
-              product_name: product.name,
-              code: product.code,
-              name: product.name,
-              sku: product.sku,
-            })
-            const isFavorite = favoriteKey ? favoritesByKey.has(favoriteKey) : false
-            const favoritePayload = {
-              product_code: product.code || product.sku || '',
-              product_name: product.name,
-              image_url: product.imageUrl || '',
-              category: product.category || '',
-            }
 
             return (
-              <div
+              <button
                 key={product.code}
                 onClick={() => toggleSelection(product.code)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault()
-                    toggleSelection(product.code)
-                  }
-                }}
-                role="button"
-                tabIndex={0}
                 className={`rounded-xl border p-3 text-left transition ${
                   selected ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-800'
                 }`}
@@ -6637,38 +6289,6 @@ function ProductsModule({ moduleView = 'products' }) {
                       Missing image
                     </span>
                   )}
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      void handleFavoriteToggle(favoritePayload)
-                    }}
-                    aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                    aria-pressed={isFavorite}
-                    className={`absolute right-2 top-2 z-20 flex h-6 w-6 items-center justify-center rounded-full border text-[10px] ${
-                      isFavorite
-                        ? 'border-fuchsia-300 bg-fuchsia-50 text-fuchsia-600'
-                        : 'border-slate-200 bg-white text-slate-400'
-                    }`}
-                  >
-                    {isFavorite ? (
-                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
-                        <path
-                          fill="currentColor"
-                          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 3.99 4 6.5 4c1.74 0 3.41 1 4.5 2.09C12.09 5 13.76 4 15.5 4 18.01 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                        />
-                      </svg>
-                    ) : (
-                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
-                        <path
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.7"
-                          d="M12 20.6l-1.32-1.2C5.8 14.84 3 12.26 3 8.9 3 6.78 4.68 5.1 6.8 5.1c1.53 0 2.99.74 3.9 1.9.91-1.16 2.37-1.9 3.9-1.9 2.12 0 3.8 1.68 3.8 3.8 0 3.36-2.8 5.94-7.68 10.5L12 20.6z"
-                        />
-                      </svg>
-                    )}
-                  </button>
                 </div>
                 <p className="mt-2 text-xs font-semibold">{product.code}</p>
                 <p className={`truncate text-[11px] ${selected ? 'text-slate-300' : 'text-slate-500'}`}>{product.name}</p>
@@ -6681,7 +6301,7 @@ function ProductsModule({ moduleView = 'products' }) {
                     HEMA-FREE | TPO-FREE | CI 77820-FREE
                   </p>
                 )}
-              </div>
+              </button>
             )
           })}
         </div>
@@ -6826,6 +6446,68 @@ function OrdersModule() {
                     </td>
                   </tr>
                 ))}
+
+                {/* STRUCTURAL EXCELLENCE: 3-IN-1 PREMIUM BUILDER GEL */}
+                <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
+                  <div className="mx-auto max-w-6xl">
+                    <div className="grid items-center gap-8 sm:grid-cols-2">
+                      {/* Product Details */}
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 600 }}>
+                          Structural Excellence
+                        </p>
+                        <h3 className="mt-3 text-4xl font-extrabold uppercase tracking-[0.08em] text-white sm:text-5xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
+                          The Architect of Strength
+                        </h3>
+                        <p className="mt-4 text-base text-white/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
+                          3-in-1 Premium Builder Gel delivers resilient structure with professional clarity and precision. Available in Clear, Pink, and Cover to match every studio system.
+                        </p>
+                        <button
+                          onClick={() => {
+                            const builderSection = sections.find((s) => s.category === 'BUILDER GEL SYSTEMS')
+                            if (builderSection) {
+                              setActiveCategory(builderSection.category)
+                              setActiveSubcategory(builderSection.subcategories?.[0]?.name || '')
+                            }
+                          }}
+                          className="mt-8 rounded-lg bg-[#D43790] px-8 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-[#C32680]"
+                        >
+                          Shop the Builder System
+                        </button>
+                      </div>
+
+                      {/* Product Visuals */}
+                      <div className="flex flex-col items-center gap-5">
+                        <div className="relative h-80 w-64 rounded-xl border border-white/20 bg-gradient-to-b from-[#2A2A2A] to-[#1A1A1A] p-6 flex items-center justify-center">
+                          <img
+                            src="/gelitup-content/product-images/BUILDER GEL/3INI BUILDER/3-in-1-builder-gel.hero.image.jpg"
+                            alt="3-in-1 Premium Builder Gel bottle"
+                            className="h-full w-full object-contain"
+                            onError={(e) => {
+                              e.currentTarget.src = '/logo.png'
+                            }}
+                          />
+                        </div>
+                        <div className="grid w-full grid-cols-3 gap-3">
+                          {[
+                            { label: 'Clear', src: '/gelitup-content/product-images/BUILDER GEL/3INI BUILDER/3-in-1_clear.jpg' },
+                            { label: 'Pink', src: '/gelitup-content/product-images/BUILDER GEL/3INI BUILDER/3in1pink.jpg' },
+                            { label: 'Cover', src: '/gelitup-content/product-images/BUILDER GEL/3INI BUILDER/3in1cover.jpg' },
+                          ].map((shade) => (
+                            <div key={shade.label} className="rounded-lg border border-white/15 bg-[#111111] p-2 text-center">
+                              <div className="h-20 w-full overflow-hidden rounded-md bg-black/20">
+                                <img src={shade.src} alt={`${shade.label} Builder Gel shade`} className="h-full w-full object-cover" loading="lazy" />
+                              </div>
+                              <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-white/70" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 600 }}>
+                                {shade.label}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </tbody>
             </table>
           </div>
@@ -8339,6 +8021,8 @@ function App() {
           <Route path="/products" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
+          <Route path="/full-catalogue/*" element={<FullCataloguePage />} />
+          <Route path="/admin/missing-images" element={<MissingImagesReport />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
@@ -8472,7 +8156,6 @@ function App() {
         <p className="border-t border-white/15 pt-3 text-white/55">© 2026 GEL.IT.UP by GIUP®</p>
       </footer>
 
-      <RouteUtilityButtons />
       <MobileNav />
       <PWABadge />
     </div>
