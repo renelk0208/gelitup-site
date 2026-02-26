@@ -2741,7 +2741,6 @@ function FullCataloguePage() {
                       const pages = Array.isArray(group?.pages) ? group.pages : []
                       const keyPage = pages[0] || null
                       const keyPageType = String(keyPage?.mediaType || '').toLowerCase()
-                      const pageCount = pages.length
                       const pageRows = buildRowsOfFour(pages)
 
                       return (
@@ -2779,9 +2778,6 @@ function FullCataloguePage() {
                                       />
                                       )}
                                 </div>
-                              </div>
-                              <div className="absolute right-5 top-5 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white">
-                                {pageCount} pages
                               </div>
                             </div>
 
