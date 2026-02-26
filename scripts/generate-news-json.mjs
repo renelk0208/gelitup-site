@@ -13,8 +13,8 @@ const homeCarouselFolderPrefix = 'Spring Summer/NEWS Carousel/'
 const homeCarouselPrimaryBaseName = 'Primary Image - Starting on Carousel'
 
 const ABOUT_DEFAULTS = {
-  introText: 'Inspired by bold summer tones, luminous finishes, and editorial nail artistry for the 2026 season.',
-  title: 'Spring/Summer 2026',
+  introText: 'The new professional neutral. 2026 begins with softness, refinement, and intention. Cloud Dancer Series introduces illuminated tones that enhance the nail without overpowering it. Modern shades designed to feel effortless, elevated, and timeless. Minimalism becomes the new expression of confidence.',
+  title: 'Cloud Dancer - The Story',
   portalLabel: 'Enter Portal',
   portalLink: '/portal/login',
 }
@@ -92,6 +92,22 @@ function getMediaTypeFromExt(ext = '') {
   if (supportedVideoExtensions.has(normalized)) return 'video'
   if (supportedPdfExtensions.has(normalized)) return 'pdf'
   return 'unknown'
+}
+
+function isCollectionLookbookMedia(relativePath = '') {
+  const normalized = String(relativePath || '').replace(/\\/g, '/').trim()
+  if (!normalized) return false
+
+  const segments = normalized.split('/').filter(Boolean)
+  if (segments.length < 3) return false
+
+  const collectionRoot = segments[0]
+  const groupFolder = segments[1]
+
+  if (collectionRoot !== 'Spring Summer') return false
+  if (!/^\d{4}$/.test(groupFolder)) return false
+
+  return true
 }
 
 function extractFirstNumber(value = '') {
@@ -324,11 +340,13 @@ async function main() {
   const existingLookbook = await readJsonObject(lookbookPath, {})
 
   const mediaItems = buildMediaItems(mediaFiles, lookbookDocumentLink)
+  const lookbookMediaFiles = mediaFiles.filter((file) => isCollectionLookbookMedia(file?.relativePath))
+  const lookbookMediaItems = buildMediaItems(lookbookMediaFiles, lookbookDocumentLink)
   const homeCarouselItems = buildHomeCarouselItems(mediaFiles)
-  const firstImagePreview = mediaItems.find((item) => item.mediaType === 'image')?.imageUrl || '/logo.png'
+  const firstImagePreview = lookbookMediaItems.find((item) => item.mediaType === 'image')?.imageUrl || '/logo.png'
   const pdfItems = buildPdfItems(pdfFiles, firstImagePreview)
-  const { lookbookGroups, shallowImageItems } = deriveLookbookGroups(mediaFiles, lookbookDocumentLink)
-  const fallbackLookbookItems = mediaItems.length ? mediaItems : pdfItems
+  const { lookbookGroups, shallowImageItems } = deriveLookbookGroups(lookbookMediaFiles, lookbookDocumentLink)
+  const fallbackLookbookItems = lookbookMediaItems.length ? lookbookMediaItems : pdfItems
   const fallbackGroups = fallbackLookbookItems.length
     ? [{
       id: 'default',
