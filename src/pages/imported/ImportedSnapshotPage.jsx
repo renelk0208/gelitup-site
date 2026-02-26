@@ -701,7 +701,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
 
             <div
               ref={newsCarouselRef}
-              className="mt-5 mx-auto flex w-full max-w-[94vw] snap-x overflow-x-auto pb-1 [scrollbar-width:thin] sm:max-w-[620px] lg:max-w-[760px]"
+              className="mt-5 mx-auto flex w-full max-w-[90vw] snap-x overflow-x-auto pb-1 [scrollbar-width:thin] sm:max-w-[420px] lg:max-w-[460px]"
             >
               {aboutUsNews.items.map((item, index) => {
                 const mediaType = resolveNewsMediaType(item)
