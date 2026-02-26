@@ -360,6 +360,11 @@ function buildHomeCarouselItems(mediaFiles = []) {
   const carouselFiles = mediaFiles
     .filter((file) => String(file?.relativePath || '').startsWith(homeCarouselFolderPrefix))
     .filter((file) => getMediaTypeFromExt(file?.ext) === 'image')
+    .filter((file) => {
+      const relativePath = String(file?.relativePath || '').trim()
+      const baseName = path.basename(relativePath, path.extname(relativePath)).trim().toLowerCase()
+      return baseName !== homeCarouselPrimaryBaseName.toLowerCase() && !baseName.includes(homeCarouselPrimaryBaseName.toLowerCase())
+    })
 
   const ordered = sortHomeCarouselFiles(carouselFiles)
   const deduped = []
@@ -377,7 +382,7 @@ function buildHomeCarouselItems(mediaFiles = []) {
     const relativePath = String(file?.relativePath || '').trim()
     const imageUrl = toPublicNewsPath(relativePath)
     const baseName = path.basename(relativePath, path.extname(relativePath)).trim()
-    const isPrimary = baseName.toLowerCase() === homeCarouselPrimaryBaseName.toLowerCase()
+    const isPrimary = false
 
     return {
       id: `home-news-carousel-${index + 1}`,

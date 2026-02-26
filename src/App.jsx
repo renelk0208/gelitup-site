@@ -71,6 +71,7 @@ const CLIENT_PROFILE_STORAGE_KEY = 'gelitup.portal.client_profile.v1'
 const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
+const HOME_HERO_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
 const HOME_NEWS_CLOUD_VIDEO_URL = '/gelitup-media/videos/floatingclouds.mp4'
 const HOME_CLOUD_DANCER_DEFAULT = {
   title: 'Cloud Dancer - The Story',
@@ -3841,11 +3842,11 @@ function HomePage() {
     <section className="space-y-6">
       <div className="mx-auto w-full max-w-6xl overflow-hidden rounded-2xl bg-black">
         <div className="relative h-[70vh] min-h-[460px] w-full sm:h-[78vh]">
-          {(HERO_CINEMATIC_VIDEO_URL || media.heroVideo)
+          {(HOME_HERO_VIDEO_URL || HERO_CINEMATIC_VIDEO_URL || media.heroVideo)
             ? (
               <video
                 className="h-full w-full object-cover object-[50%_35%]"
-                src={HERO_CINEMATIC_VIDEO_URL || media.heroVideo}
+                src={HOME_HERO_VIDEO_URL || HERO_CINEMATIC_VIDEO_URL || media.heroVideo}
                 muted
                 autoPlay
                 loop
@@ -3865,10 +3866,10 @@ function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/75" />
 
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
-            <h1 className="hero-copy-shadow heading-on-dark max-w-5xl text-3xl font-black uppercase leading-tight tracking-[0.15em] text-white sm:text-4xl lg:text-6xl">
+            <h1 className="hero-copy-shadow heading-on-dark max-w-5xl text-3xl font-black uppercase leading-[1.2] tracking-[0.19em] text-white sm:text-4xl lg:text-6xl">
               GEL.IT.UP by GIUP®: THE ARCHITECTS OF PROFESSIONAL COLOR.
             </h1>
-            <p className="hero-copy-shadow mt-4 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] text-white/95 sm:text-base">
+            <p className="hero-copy-shadow mt-5 max-w-3xl text-sm font-semibold uppercase leading-[1.7] tracking-[0.12em] text-white/95 sm:text-base">
               A DECADE OF PROFESSIONAL MASTERY. EU REGULATED. HEMA & TPO-FREE.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -3950,7 +3951,7 @@ function HomePage() {
         <div className="absolute inset-0 bg-[#1A1A1A]/70" />
 
         <div className="relative mx-auto max-w-6xl">
-          <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8">
+          <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,600px)] lg:gap-8">
             <div className="rounded-2xl border border-white/20 bg-black/35 p-5 sm:p-7">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Spring / Summer News</p>
               <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-3xl">{homeCloudStory.title}</h2>
@@ -3967,13 +3968,13 @@ function HomePage() {
 
             <div className="w-full">
               {activeHomeNewsItem && (
-                <div className="mx-auto w-full max-w-[460px]">
+                <div className="mx-auto w-full max-w-[560px]">
                   <div className="overflow-hidden rounded-xl border border-white/20 bg-black/20 p-2">
-                    <div className="aspect-[9/16] w-full overflow-hidden rounded-lg bg-[#F8F8F8]">
+                    <div className="aspect-[4/5] w-full overflow-hidden rounded-lg bg-[#F8F8F8]">
                       <img
                         src={activeHomeNewsItem.imageUrl}
                         alt="Spring/Summer carousel visual"
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-contain"
                         loading="lazy"
                         onError={(event) => {
                           event.currentTarget.src = '/logo.png'

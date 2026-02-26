@@ -701,9 +701,11 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
               autoPlay
               loop
               controls={false}
+              preload="metadata"
+              aria-hidden="true"
             />
           )}
-          <div className="absolute inset-0 bg-[#1A1A1A]/62" />
+          <div className="absolute inset-0 bg-[#1A1A1A]/76" />
 
           <div className="relative mx-auto max-w-6xl">
             <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8">
