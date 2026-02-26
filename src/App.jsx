@@ -631,7 +631,7 @@ function createFallbackProducts(count = 120) {
 
 const navItems = [
   { to: '/', label: 'Home' },
-  { to: '/pages/about-us', label: 'About us' },
+  { to: '/about-us', label: 'About us' },
   { to: '/distributor-packages', label: 'Distribution Options' },
   { to: '/full-catalogue', label: 'The Collection' },
   { to: '/distributors', label: 'Distributors' },
@@ -9584,11 +9584,14 @@ function App() {
 
       <main className={`mx-auto max-w-6xl px-3 py-4 md:px-6 md:py-10 ${isPortalRoute ? 'portal-luxe' : ''}`}>
         <Routes>
-          <Route path="/" element={LEGACY_MIRROR_ENABLED ? <LegacyMirrorPage pagePath="/" /> : <HomePage />} />
-          <Route path="/home" element={<Navigate to="/" replace />} />
+          <Route
+            path="/"
+            element={LEGACY_MIRROR_ENABLED ? <LegacyMirrorPage pagePath="/about-us" /> : <Navigate to="/pages/about-us" replace />}
+          />
+          <Route path="/home" element={<Navigate to="/about-us" replace />} />
           <Route
             path="/about-us"
-            element={LEGACY_MIRROR_ENABLED ? <LegacyMirrorPage pagePath="/about-us" /> : <Navigate to="/pages/about-us" replace />}
+            element={LEGACY_MIRROR_ENABLED ? <LegacyMirrorPage pagePath="/" /> : <HomePage />}
           />
           <Route path="/our-products" element={<Navigate to="/distributor-packages" replace />} />
           <Route
@@ -9703,7 +9706,7 @@ function App() {
             <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Menu</p>
             <div className="mt-2 space-y-1.5">
               <NavLink to="/" className="block transition duration-300 hover:text-fuchsia-300">Home</NavLink>
-              <NavLink to="/pages/about-us" className="block transition duration-300 hover:text-fuchsia-300">About Us</NavLink>
+              <NavLink to="/about-us" className="block transition duration-300 hover:text-fuchsia-300">About Us</NavLink>
               <NavLink to="/full-catalogue" className="block transition duration-300 hover:text-fuchsia-300">Catalogue</NavLink>
               <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
               <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Become Distributor</NavLink>
