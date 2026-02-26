@@ -646,6 +646,10 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
       manifestoVisual
       && (manifestoVisual.displayUrl.toLowerCase().includes('.mp4') || manifestoVisual.displayUrl.toLowerCase().includes('.webm')),
     )
+    const newsBackdropVideoUrl =
+      aboutUsNews.items.find((item) => /\.(mp4|webm|mov|m4v)(\?|$)/i.test(String(item?.backgroundVideoUrl || '').trim()))?.backgroundVideoUrl
+      || (visualIsVideo ? manifestoVisual?.displayUrl : '')
+      || (/\.(mp4|webm|mov|m4v)(\?|$)/i.test(String(fallbackVideo || '').trim()) ? fallbackVideo : '')
 
     return (
       <section className="space-y-6 bg-white">
@@ -687,101 +691,116 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           </p>
         </div>
 
-        <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-10 sm:px-8 sm:py-12">
-          <div className="mx-auto max-w-6xl">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-sm text-white/80 sm:text-base">{aboutUsNews.introText}</p>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#D43790]">News</p>
+        <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#1A1A1A] px-4 py-10 sm:px-8 sm:py-12">
+          {newsBackdropVideoUrl && (
+            <video
+              src={newsBackdropVideoUrl}
+              className="absolute inset-0 h-full w-full object-cover"
+              muted
+              playsInline
+              autoPlay
+              loop
+              controls={false}
+            />
+          )}
+          <div className="absolute inset-0 bg-[#1A1A1A]/75" />
+
+          <div className="relative mx-auto max-w-6xl">
+            <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,460px)] lg:gap-8">
+              <div className="rounded-2xl border border-white/15 bg-black/30 p-5 sm:p-6">
+                <p className="text-3xl font-black uppercase tracking-[0.18em] text-[#D43790] sm:text-4xl">News</p>
                 <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.12em] text-white sm:text-3xl">{aboutUsNews.title}</h2>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base">{aboutUsNews.introText}</p>
+                <NavLink
+                  to={aboutUsNews.portalLink}
+                  className="mt-5 inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-[#BF3182]"
+                >
+                  {aboutUsNews.portalLabel}
+                </NavLink>
               </div>
-              <NavLink
-                to={aboutUsNews.portalLink}
-                className="inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-[#BF3182]"
-              >
-                {aboutUsNews.portalLabel}
-              </NavLink>
-            </div>
 
-            <div
-              ref={newsCarouselRef}
-              className="mt-5 mx-auto flex w-full max-w-[90vw] snap-x overflow-x-auto pb-1 [scrollbar-width:thin] sm:max-w-[420px] lg:max-w-[460px]"
-            >
-              {aboutUsNews.items.map((item, index) => {
-                const mediaType = resolveNewsMediaType(item)
-                const mediaHref = item.link || item.imageUrl
-                const pdfHref = /\.pdf(\?|$)/i.test(mediaHref) ? mediaHref : item.imageUrl
+              <div>
+                <div
+                  ref={newsCarouselRef}
+                  className="mx-auto flex w-full max-w-[90vw] snap-x overflow-x-auto pb-1 [scrollbar-width:thin] sm:max-w-[420px] lg:mx-0 lg:max-w-[460px]"
+                >
+                  {aboutUsNews.items.map((item, index) => {
+                    const mediaType = resolveNewsMediaType(item)
+                    const mediaHref = item.link || item.imageUrl
+                    const pdfHref = /\.pdf(\?|$)/i.test(mediaHref) ? mediaHref : item.imageUrl
 
-                return (
-                  <article key={`${item.imageUrl}-${index}`} data-news-slide="true" className="w-full shrink-0 snap-start overflow-hidden rounded-2xl border border-white/15 bg-black/20">
-                  <div className="w-full" style={mediaType === 'pdf' ? undefined : { aspectRatio: '1088 / 1440' }}>
-                    {mediaType === 'video'
-                      ? (
-                        <a href={mediaHref} target="_blank" rel="noreferrer" className="block h-full w-full">
-                          <video
-                            src={item.imageUrl}
-                            className="h-full w-full object-cover"
-                            autoPlay
-                            muted
-                            loop
-                            playsInline
-                            controls
-                            preload="metadata"
-                          />
-                        </a>
-                        )
-                      : mediaType === 'pdf'
-                        ? (
-                          <PdfPreviewSlide
-                            pdfUrl={pdfHref}
-                            fallbackImageUrl={item.imageUrl}
-                            altText="Spring/Summer lookbook PDF preview"
-                            backgroundVideoUrl={item.backgroundVideoUrl}
-                          />
-                          )
-                        : (
-                          <a href={mediaHref} target="_blank" rel="noreferrer" className="block h-full w-full">
-                            <img
-                              src={item.imageUrl}
-                              alt="Spring/Summer lookbook"
-                              className="h-full w-full bg-black object-contain"
-                              loading="lazy"
-                              onError={(event) => {
-                                event.currentTarget.src = '/logo.png'
-                              }}
-                            />
-                          </a>
-                          )}
+                    return (
+                      <article key={`${item.imageUrl}-${index}`} data-news-slide="true" className="w-full shrink-0 snap-start overflow-hidden rounded-2xl border border-white/15 bg-black/20">
+                      <div className="w-full" style={mediaType === 'pdf' ? undefined : { aspectRatio: '1088 / 1440' }}>
+                        {mediaType === 'video'
+                          ? (
+                            <a href={mediaHref} target="_blank" rel="noreferrer" className="block h-full w-full">
+                              <video
+                                src={item.imageUrl}
+                                className="h-full w-full object-cover"
+                                autoPlay
+                                muted
+                                loop
+                                playsInline
+                                controls
+                                preload="metadata"
+                              />
+                            </a>
+                            )
+                          : mediaType === 'pdf'
+                            ? (
+                              <PdfPreviewSlide
+                                pdfUrl={pdfHref}
+                                fallbackImageUrl={item.imageUrl}
+                                altText="Spring/Summer lookbook PDF preview"
+                                backgroundVideoUrl={item.backgroundVideoUrl}
+                              />
+                              )
+                            : (
+                              <a href={mediaHref} target="_blank" rel="noreferrer" className="block h-full w-full">
+                                <img
+                                  src={item.imageUrl}
+                                  alt="Spring/Summer lookbook"
+                                  className="h-full w-full bg-black object-contain"
+                                  loading="lazy"
+                                  onError={(event) => {
+                                    event.currentTarget.src = '/logo.png'
+                                  }}
+                                />
+                              </a>
+                              )}
+                      </div>
+                    </article>
+                    )
+                  })}
+                </div>
+                {aboutUsNews.items.length > 1 && (
+                  <div className="mx-auto mt-3 flex w-full max-w-[90vw] items-center justify-center gap-2 sm:max-w-[420px] lg:mx-0 lg:max-w-[460px]">
+                    {aboutUsNews.items.map((item, index) => (
+                      <button
+                        key={`${item.imageUrl}-dot`}
+                        type="button"
+                        aria-label={`Go to slide ${index + 1}`}
+                        onClick={() => {
+                          const container = newsCarouselRef.current
+                          if (!container) {
+                            return
+                          }
+
+                          const step = getNewsSlideStep(container)
+                          if (!step) return
+
+                          const targetLeft = index * step
+                          container.scrollTo({ left: targetLeft, behavior: 'smooth' })
+                          setActiveNewsSlide(index)
+                        }}
+                        className={`h-2.5 w-2.5 rounded-full transition ${activeNewsSlide === index ? 'bg-[#D43790]' : 'bg-white/35 hover:bg-white/55'}`}
+                      />
+                    ))}
                   </div>
-                </article>
-                )
-              })}
-            </div>
-            {aboutUsNews.items.length > 1 && (
-              <div className="mx-auto mt-3 flex w-full max-w-[90vw] items-center justify-center gap-2 sm:max-w-[420px] lg:max-w-[460px]">
-                {aboutUsNews.items.map((item, index) => (
-                  <button
-                    key={`${item.imageUrl}-dot`}
-                    type="button"
-                    aria-label={`Go to slide ${index + 1}`}
-                    onClick={() => {
-                      const container = newsCarouselRef.current
-                      if (!container) {
-                        return
-                      }
-
-                      const step = getNewsSlideStep(container)
-                      if (!step) return
-
-                      const targetLeft = index * step
-                      container.scrollTo({ left: targetLeft, behavior: 'smooth' })
-                      setActiveNewsSlide(index)
-                    }}
-                    className={`h-2.5 w-2.5 rounded-full transition ${activeNewsSlide === index ? 'bg-[#D43790]' : 'bg-white/35 hover:bg-white/55'}`}
-                  />
-                ))}
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
 
