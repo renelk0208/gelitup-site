@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-02-22T10:15:55.236Z",
+  "generatedAt": "2026-02-26T22:06:08.749Z",
   "siteOrigin": "https://www.gelitup.com",
   "sitemapEnabled": true,
   "crawlEnabled": true,
@@ -11,262 +11,22 @@
   ],
   "pageMediaMap": {
     "https://www.gelitup.com/": [
-      "https://gelitup.com/wp-content/uploads/2025/03/cropped-NEW-LOGO-2024-01-32x32.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/cropped-NEW-LOGO-2024-01-192x192.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/cropped-NEW-LOGO-2024-01-180x180.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03.png",
-      "https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4",
-      "https://gelitup.com/wp-content/uploads/2024/03/com_web_1280x1280_18.jpg",
-      "https://gelitup.com/wp-content/plugins/instagram-feed/img/placeholder.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-300x226.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-1024x770.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-768x578.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-1536x1155.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-2048x1541.png",
-      "https://gelitup.com/wp-content/uploads/2024/03/com_web_1280x1280_18-300x300.jpg",
-      "https://gelitup.com/wp-content/uploads/2024/03/com_web_1280x1280_18-1024x1024.jpg",
-      "https://gelitup.com/wp-content/uploads/2024/03/com_web_1280x1280_18-150x150.jpg",
-      "https://gelitup.com/wp-content/uploads/2024/03/com_web_1280x1280_18-768x768.jpg"
+      "https://www.gelitup.com/logo.png"
     ],
     "https://www.gelitup.com/about-us": [
-      "https://gelitup.com/wp-content/uploads/2025/03/cropped-NEW-LOGO-2024-01-32x32.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/cropped-NEW-LOGO-2024-01-192x192.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/cropped-NEW-LOGO-2024-01-180x180.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/5.webp",
-      "https://gelitup.com/wp-content/uploads/2024/03/superior_innovation_cat_eye_french.mp4",
-      "https://gelitup.com/wp-content/uploads/2025/03/1.webp",
-      "https://gelitup.com/wp-content/uploads/2025/03/1-1024x1024.webp",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-300x226.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-1024x770.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-768x578.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-1536x1155.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-2048x1541.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/5-300x113.webp",
-      "https://gelitup.com/wp-content/uploads/2025/03/5-1024x384.webp",
-      "https://gelitup.com/wp-content/uploads/2025/03/5-768x288.webp",
-      "https://gelitup.com/wp-content/uploads/2025/03/5-1536x576.webp",
-      "https://gelitup.com/wp-content/uploads/2025/03/1-300x300.webp",
-      "https://gelitup.com/wp-content/uploads/2025/03/1-150x150.webp",
-      "https://gelitup.com/wp-content/uploads/2025/03/1-768x768.webp",
-      "https://gelitup.com/wp-content/uploads/2025/03/1-1536x1536.webp"
+      "https://www.gelitup.com/logo.png"
     ],
     "https://www.gelitup.com/contact-us": [
-      "https://gelitup.com/wp-content/uploads/2025/03/cropped-NEW-LOGO-2024-01-32x32.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/cropped-NEW-LOGO-2024-01-192x192.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/cropped-NEW-LOGO-2024-01-180x180.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03.png",
-      "https://gelitup.com/wp-content/uploads/2024/01/7.webp",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-300x226.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-1024x770.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-768x578.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-1536x1155.png",
-      "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-2048x1541.png",
-      "https://gelitup.com/wp-content/uploads/2024/01/7-300x113.webp",
-      "https://gelitup.com/wp-content/uploads/2024/01/7-1024x384.webp",
-      "https://gelitup.com/wp-content/uploads/2024/01/7-768x288.webp",
-      "https://gelitup.com/wp-content/uploads/2024/01/7-1536x576.webp"
+      "https://www.gelitup.com/logo.png"
     ]
   },
-  "itemCount": 33,
+  "itemCount": 1,
   "items": [
     {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/cropped-NEW-LOGO-2024-01-32x32.png",
-      "localPath": "/gelitup-media/images/cropped-NEW-LOGO-2024-01-32x32-3f42b44b.png",
+      "sourceUrl": "https://www.gelitup.com/logo.png",
+      "localPath": "/gelitup-media/images/logo-be14a9b0.png",
       "mediaType": "image",
-      "sizeBytes": 457
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/cropped-NEW-LOGO-2024-01-192x192.png",
-      "localPath": "/gelitup-media/images/cropped-NEW-LOGO-2024-01-192x192-d9ab7ea9.png",
-      "mediaType": "image",
-      "sizeBytes": 2903
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/cropped-NEW-LOGO-2024-01-180x180.png",
-      "localPath": "/gelitup-media/images/cropped-NEW-LOGO-2024-01-180x180-30d474d3.png",
-      "mediaType": "image",
-      "sizeBytes": 2639
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03.png",
-      "localPath": "/gelitup-media/images/NEW-LOGO-2024-03-ab420f13.png",
-      "mediaType": "image",
-      "sizeBytes": 87743
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4",
-      "localPath": "/gelitup-media/videos/SarriGelItUp-9c83ba62.mp4",
-      "mediaType": "video",
-      "sizeBytes": 97874138
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2024/03/com_web_1280x1280_18.jpg",
-      "localPath": "/gelitup-media/images/com_web_1280x1280_18-d88a854b.jpg",
-      "mediaType": "image",
-      "sizeBytes": 1532710
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/plugins/instagram-feed/img/placeholder.png",
-      "localPath": "/gelitup-media/images/placeholder-cfbb2811.png",
-      "mediaType": "image",
-      "sizeBytes": 176
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-300x226.png",
-      "localPath": "/gelitup-media/images/NEW-LOGO-2024-03-300x226-f0f229e9.png",
-      "mediaType": "image",
-      "sizeBytes": 6926
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-1024x770.png",
-      "localPath": "/gelitup-media/images/NEW-LOGO-2024-03-1024x770-cbf270f2.png",
-      "mediaType": "image",
-      "sizeBytes": 30163
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-768x578.png",
-      "localPath": "/gelitup-media/images/NEW-LOGO-2024-03-768x578-c85def8e.png",
-      "mediaType": "image",
-      "sizeBytes": 21327
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-1536x1155.png",
-      "localPath": "/gelitup-media/images/NEW-LOGO-2024-03-1536x1155-84f78daa.png",
-      "mediaType": "image",
-      "sizeBytes": 48130
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/NEW-LOGO-2024-03-2048x1541.png",
-      "localPath": "/gelitup-media/images/NEW-LOGO-2024-03-2048x1541-203b2281.png",
-      "mediaType": "image",
-      "sizeBytes": 66096
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2024/03/com_web_1280x1280_18-300x300.jpg",
-      "localPath": "/gelitup-media/images/com_web_1280x1280_18-300x300-c3e6d58c.jpg",
-      "mediaType": "image",
-      "sizeBytes": 39769
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2024/03/com_web_1280x1280_18-1024x1024.jpg",
-      "localPath": "/gelitup-media/images/com_web_1280x1280_18-1024x1024-13901096.jpg",
-      "mediaType": "image",
-      "sizeBytes": 226515
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2024/03/com_web_1280x1280_18-150x150.jpg",
-      "localPath": "/gelitup-media/images/com_web_1280x1280_18-150x150-61032621.jpg",
-      "mediaType": "image",
-      "sizeBytes": 23901
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2024/03/com_web_1280x1280_18-768x768.jpg",
-      "localPath": "/gelitup-media/images/com_web_1280x1280_18-768x768-3aff3db9.jpg",
-      "mediaType": "image",
-      "sizeBytes": 139819
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/5.webp",
-      "localPath": "/gelitup-media/images/5-361d54e1.webp",
-      "mediaType": "image",
-      "sizeBytes": 383554
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2024/03/superior_innovation_cat_eye_french.mp4",
-      "localPath": "/gelitup-media/videos/superior_innovation_cat_eye_french-fe10f199.mp4",
-      "mediaType": "video",
-      "sizeBytes": 65677256
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/1.webp",
-      "localPath": "/gelitup-media/images/1-7a073eb5.webp",
-      "mediaType": "image",
-      "sizeBytes": 559712
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/1-1024x1024.webp",
-      "localPath": "/gelitup-media/images/1-1024x1024-5fd97fad.webp",
-      "mediaType": "image",
-      "sizeBytes": 58872
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/5-300x113.webp",
-      "localPath": "/gelitup-media/images/5-300x113-3cdb2a91.webp",
-      "mediaType": "image",
-      "sizeBytes": 8926
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/5-1024x384.webp",
-      "localPath": "/gelitup-media/images/5-1024x384-a6534909.webp",
-      "mediaType": "image",
-      "sizeBytes": 36746
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/5-768x288.webp",
-      "localPath": "/gelitup-media/images/5-768x288-1809f964.webp",
-      "mediaType": "image",
-      "sizeBytes": 24722
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/5-1536x576.webp",
-      "localPath": "/gelitup-media/images/5-1536x576-9a19bd06.webp",
-      "mediaType": "image",
-      "sizeBytes": 67816
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/1-300x300.webp",
-      "localPath": "/gelitup-media/images/1-300x300-9aae71f4.webp",
-      "mediaType": "image",
-      "sizeBytes": 10618
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/1-150x150.webp",
-      "localPath": "/gelitup-media/images/1-150x150-d606f657.webp",
-      "mediaType": "image",
-      "sizeBytes": 4116
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/1-768x768.webp",
-      "localPath": "/gelitup-media/images/1-768x768-cf42fa96.webp",
-      "mediaType": "image",
-      "sizeBytes": 40050
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2025/03/1-1536x1536.webp",
-      "localPath": "/gelitup-media/images/1-1536x1536-66cc4c4d.webp",
-      "mediaType": "image",
-      "sizeBytes": 105784
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2024/01/7.webp",
-      "localPath": "/gelitup-media/images/7-4a55e44e.webp",
-      "mediaType": "image",
-      "sizeBytes": 574654
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2024/01/7-300x113.webp",
-      "localPath": "/gelitup-media/images/7-300x113-ceb18c91.webp",
-      "mediaType": "image",
-      "sizeBytes": 11572
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2024/01/7-1024x384.webp",
-      "localPath": "/gelitup-media/images/7-1024x384-dd7de89f.webp",
-      "mediaType": "image",
-      "sizeBytes": 65498
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2024/01/7-768x288.webp",
-      "localPath": "/gelitup-media/images/7-768x288-6ee1de6b.webp",
-      "mediaType": "image",
-      "sizeBytes": 41234
-    },
-    {
-      "sourceUrl": "https://gelitup.com/wp-content/uploads/2024/01/7-1536x576.webp",
-      "localPath": "/gelitup-media/images/7-1536x576-3bf68287.webp",
-      "mediaType": "image",
-      "sizeBytes": 125998
+      "sizeBytes": 82646
     }
   ]
 }
