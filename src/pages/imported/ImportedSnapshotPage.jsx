@@ -710,7 +710,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
 
                 return (
                   <article key={`${item.imageUrl}-${index}`} data-news-slide="true" className="w-full shrink-0 snap-start overflow-hidden rounded-2xl border border-white/15 bg-black/20">
-                  <div className="w-full" style={mediaType === 'pdf' ? undefined : { aspectRatio: '1080 / 1440' }}>
+                  <div className="w-full" style={mediaType === 'pdf' ? undefined : { aspectRatio: '1088 / 1440' }}>
                     {mediaType === 'video'
                       ? (
                         <a href={mediaHref} target="_blank" rel="noreferrer" className="block h-full w-full">

@@ -5,11 +5,70 @@
   "portalLink": "/portal/login",
   "items": [
     {
-      "title": "Gelitup Cloud Dancer Collection Pamphlet (PDF)",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/2600/2600-1.jpg",
-      "mediaType": "pdf",
-      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf",
-      "backgroundVideoUrl": "/gelitup-media/videos/floatingclouds.mp4"
+      "title": "2600 2",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2600-2.jpg",
+      "mediaType": "image",
+      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
+    },
+    {
+      "title": "2601 2",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2601-2.jpg",
+      "mediaType": "image",
+      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
+    },
+    {
+      "title": "2602 1",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2602-1.jpg",
+      "mediaType": "image",
+      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
+    },
+    {
+      "title": "2603 1",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2603-1.jpg",
+      "mediaType": "image",
+      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
+    },
+    {
+      "title": "2604 1",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2604-1.jpg",
+      "mediaType": "image",
+      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
+    },
+    {
+      "title": "2605 1",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2605-1.jpg",
+      "mediaType": "image",
+      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
+    },
+    {
+      "title": "2606 1",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2606-1.jpg",
+      "mediaType": "image",
+      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
+    },
+    {
+      "title": "2607 1",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2607-1.jpg",
+      "mediaType": "image",
+      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
+    },
+    {
+      "title": "2608 1",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2608-1.jpg",
+      "mediaType": "image",
+      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
+    },
+    {
+      "title": "2609 1",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2609-1.jpg",
+      "mediaType": "image",
+      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
+    },
+    {
+      "title": "2610 1",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2610-1.jpg",
+      "mediaType": "image",
+      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
     }
   ]
 }

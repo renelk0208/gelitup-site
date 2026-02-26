@@ -11,6 +11,7 @@ const supportedPdfExtensions = new Set(['.pdf'])
 const supportedVideoExtensions = new Set(['.mp4', '.webm', '.mov', '.m4v'])
 const homeCarouselFolderPrefix = 'Spring Summer/NEWS Carousel/'
 const homeCarouselPrimaryBaseName = 'Primary Image - Starting on Carousel'
+const aboutPortraitFolderPrefix = 'Spring Summer/1088x1440/'
 
 const ABOUT_DEFAULTS = {
   introText: 'The new professional neutral. 2026 begins with softness, refinement, and intention. Cloud Dancer Series introduces illuminated tones that enhance the nail without overpowering it. Modern shades designed to feel effortless, elevated, and timeless. Minimalism becomes the new expression of confidence.',
@@ -376,6 +377,26 @@ function buildHomeCarouselItems(mediaFiles = []) {
   })
 }
 
+function buildAboutPortraitItems(mediaFiles = [], itemLink = '/portal/login') {
+  const portraitFiles = mediaFiles
+    .filter((file) => String(file?.relativePath || '').startsWith(aboutPortraitFolderPrefix))
+    .filter((file) => getMediaTypeFromExt(file?.ext) === 'image')
+
+  const ordered = sortWithNumbers(portraitFiles.map((file) => String(file?.relativePath || '').trim()))
+  return ordered
+    .map((relativePath) => portraitFiles.find((file) => file.relativePath === relativePath))
+    .filter(Boolean)
+    .map((file, index) => {
+      const relativePath = String(file?.relativePath || '').trim()
+      return {
+        title: formatPageTitle(path.basename(relativePath, path.extname(relativePath)), index),
+        imageUrl: toPublicNewsPath(relativePath),
+        mediaType: 'image',
+        link: itemLink,
+      }
+    })
+}
+
 async function main() {
   const dirExists = await fs.access(newsImagesDir).then(() => true).catch(() => false)
   if (!dirExists) {
@@ -401,6 +422,7 @@ async function main() {
   const mediaItems = buildMediaItems(mediaFiles, lookbookDocumentLink)
   const lookbookMediaFiles = mediaFiles.filter((file) => isCollectionLookbookMedia(file?.relativePath))
   const lookbookMediaItems = buildMediaItems(lookbookMediaFiles, lookbookDocumentLink)
+  const aboutPortraitItems = buildAboutPortraitItems(mediaFiles, lookbookDocumentLink)
   const homeCarouselItems = buildHomeCarouselItems(mediaFiles)
   const firstImagePreview = lookbookMediaItems.find((item) => item.mediaType === 'image')?.imageUrl || '/logo.png'
   const pdfItems = buildPdfItems(pdfFiles, firstImagePreview)
@@ -417,9 +439,22 @@ async function main() {
   const nextGroups = lookbookGroups.length ? lookbookGroups : fallbackGroups
   const firstGroupPages = nextGroups[0]?.pages || []
 
-  const aboutItems = pdfItems.length
-    ? pdfItems
-    : shallowImageItems
+  const aboutImageItems = []
+  const seenAboutImageUrls = new Set()
+  for (const group of nextGroups) {
+    const pages = Array.isArray(group?.pages) ? group.pages : []
+    for (const page of pages) {
+      if (page?.mediaType !== 'image') continue
+      const imageUrl = String(page?.imageUrl || '').trim()
+      if (!imageUrl || seenAboutImageUrls.has(imageUrl)) continue
+      seenAboutImageUrls.add(imageUrl)
+      aboutImageItems.push(page)
+    }
+  }
+
+  const aboutItems = aboutPortraitItems.length
+    ? aboutPortraitItems
+    : (aboutImageItems.length ? aboutImageItems.slice(0, 12) : (pdfItems.length ? pdfItems : shallowImageItems))
 
   const nextAbout = {
     introText: String(existingAbout?.introText || ABOUT_DEFAULTS.introText).trim() || ABOUT_DEFAULTS.introText,
