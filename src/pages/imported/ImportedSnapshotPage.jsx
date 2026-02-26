@@ -477,13 +477,15 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
             >
               {aboutUsNews.items.map((item, index) => {
                 const mediaType = resolveNewsMediaType(item)
+                const mediaHref = item.link || item.imageUrl
+                const pdfHref = /\.pdf(\?|$)/i.test(mediaHref) ? mediaHref : item.imageUrl
 
                 return (
                   <article key={`${item.imageUrl}-${index}`} data-news-slide="true" className="w-full shrink-0 snap-start overflow-hidden rounded-2xl border border-white/15 bg-black/20">
                   <div className="w-full" style={{ aspectRatio: '210 / 297' }}>
-                    <a href={item.link || item.imageUrl} target="_blank" rel="noreferrer" className="block h-full w-full">
-                      {mediaType === 'video'
-                        ? (
+                    {mediaType === 'video'
+                      ? (
+                        <a href={mediaHref} target="_blank" rel="noreferrer" className="block h-full w-full">
                           <video
                             src={item.imageUrl}
                             className="h-full w-full object-cover"
@@ -494,27 +496,50 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                             controls
                             preload="metadata"
                           />
+                        </a>
+                        )
+                      : mediaType === 'pdf'
+                        ? (
+                          <div className="relative h-full w-full bg-black">
+                            <object
+                              data={`${pdfHref}#view=FitH`}
+                              type="application/pdf"
+                              className="h-full w-full"
+                              aria-label="Spring/Summer lookbook PDF"
+                            >
+                              <img
+                                src={item.imageUrl}
+                                alt="Spring/Summer lookbook cover"
+                                className="h-full w-full object-cover"
+                                loading="lazy"
+                                onError={(event) => {
+                                  event.currentTarget.src = '/logo.png'
+                                }}
+                              />
+                            </object>
+                            <a
+                              href={pdfHref}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="absolute bottom-3 left-3 right-3 inline-flex justify-center rounded-lg bg-[#D43790] px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]"
+                            >
+                              Open PDF
+                            </a>
+                          </div>
                           )
-                        : mediaType === 'pdf'
-                          ? (
-                            <iframe
-                              src={`${item.link || item.imageUrl}#view=FitH`}
-                              title="Spring/Summer lookbook"
-                              className="h-full w-full border-0"
-                            />
-                            )
                         : (
-                          <img
-                            src={item.imageUrl}
-                            alt="Spring/Summer lookbook"
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                            onError={(event) => {
-                              event.currentTarget.src = '/logo.png'
-                            }}
-                          />
+                          <a href={mediaHref} target="_blank" rel="noreferrer" className="block h-full w-full">
+                            <img
+                              src={item.imageUrl}
+                              alt="Spring/Summer lookbook"
+                              className="h-full w-full object-cover"
+                              loading="lazy"
+                              onError={(event) => {
+                                event.currentTarget.src = '/logo.png'
+                              }}
+                            />
+                          </a>
                           )}
-                    </a>
                   </div>
                 </article>
                 )
