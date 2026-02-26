@@ -72,6 +72,12 @@ const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
 const HOME_NEWS_CLOUD_VIDEO_URL = '/gelitup-media/videos/floatingclouds.mp4'
+const HOME_CLOUD_DANCER_DEFAULT = {
+  title: 'Cloud Dancer - The Story',
+  introText: 'The new professional neutral. 2026 begins with softness, refinement, and intention. Cloud Dancer Series introduces illuminated tones that enhance the nail without overpowering it. Modern shades designed to feel effortless, elevated, and timeless.',
+  ctaLabel: 'View Story PDF',
+  ctaLink: '/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf',
+}
 const LEEUKOPF_DISTRIBUTORS_SOURCE_URL = 'https://leeukopf.com/our-brands'
 const DISTRIBUTOR_DIRECTORY = [
   {
@@ -3712,6 +3718,7 @@ function HomePage() {
   }))
   const [homeNewsCarousel, setHomeNewsCarousel] = useState([])
   const [activeHomeNewsSlide, setActiveHomeNewsSlide] = useState(0)
+  const [homeCloudStory, setHomeCloudStory] = useState(HOME_CLOUD_DANCER_DEFAULT)
 
   useEffect(() => {
     let isMounted = true
@@ -3772,6 +3779,41 @@ function HomePage() {
     }
 
     void loadHomeCarousel()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    let mounted = true
+
+    const loadHomeCloudStory = async () => {
+      try {
+        const response = await fetch('/gelitup-content/about-us-news.json')
+        if (!response.ok) return
+
+        const payload = await response.json()
+        if (!mounted) return
+
+        const title = String(payload?.title || '').trim()
+        const introText = String(payload?.introText || '').trim()
+        const ctaLabel = String(payload?.portalLabel || '').trim()
+        const ctaLink = String(payload?.items?.[0]?.link || payload?.portalLink || '').trim()
+
+        setHomeCloudStory({
+          title: title || HOME_CLOUD_DANCER_DEFAULT.title,
+          introText: introText || HOME_CLOUD_DANCER_DEFAULT.introText,
+          ctaLabel: ctaLabel || HOME_CLOUD_DANCER_DEFAULT.ctaLabel,
+          ctaLink: ctaLink || HOME_CLOUD_DANCER_DEFAULT.ctaLink,
+        })
+      }
+      catch {
+        if (!mounted) return
+      }
+    }
+
+    void loadHomeCloudStory()
 
     return () => {
       mounted = false
@@ -3907,41 +3949,56 @@ function HomePage() {
         />
         <div className="absolute inset-0 bg-[#1A1A1A]/70" />
 
-        <div className="relative mx-auto max-w-6xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Spring / Summer News</p>
-          <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-3xl">Collection Carousel</h2>
+        <div className="relative mx-auto max-w-6xl">
+          <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8">
+            <div className="rounded-2xl border border-white/20 bg-black/35 p-5 sm:p-7">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Spring / Summer News</p>
+              <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-3xl">{homeCloudStory.title}</h2>
+              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/90 sm:text-base">{homeCloudStory.introText}</p>
+              <a
+                href={homeCloudStory.ctaLink}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-5 inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]"
+              >
+                {homeCloudStory.ctaLabel}
+              </a>
+            </div>
 
-          {activeHomeNewsItem && (
-            <div className="mt-5 mx-auto w-full max-w-[320px]">
-              <div className="overflow-hidden rounded-xl border border-white/20 bg-black/20 p-2">
-                <div className="aspect-[9/16] w-full overflow-hidden rounded-lg bg-[#F8F8F8]">
-                  <img
-                    src={activeHomeNewsItem.imageUrl}
-                    alt="Spring/Summer carousel visual"
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                    onError={(event) => {
-                      event.currentTarget.src = '/logo.png'
-                    }}
-                  />
+            <div className="w-full">
+              {activeHomeNewsItem && (
+                <div className="mx-auto w-full max-w-[460px]">
+                  <div className="overflow-hidden rounded-xl border border-white/20 bg-black/20 p-2">
+                    <div className="aspect-[9/16] w-full overflow-hidden rounded-lg bg-[#F8F8F8]">
+                      <img
+                        src={activeHomeNewsItem.imageUrl}
+                        alt="Spring/Summer carousel visual"
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                        onError={(event) => {
+                          event.currentTarget.src = '/logo.png'
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
+              )}
 
-          {homeNewsCarousel.length > 1 && (
-            <div className="mt-4 flex items-center justify-center gap-2">
-              {homeNewsCarousel.map((item, index) => (
-                <button
-                  key={`${item.id || item.imageUrl}-${index}`}
-                  type="button"
-                  onClick={() => setActiveHomeNewsSlide(index)}
-                  aria-label={`Go to carousel slide ${index + 1}`}
-                  className={`h-2.5 rounded-full transition ${index === safeHomeNewsIndex ? 'w-7 bg-[#D43790]' : 'w-2.5 bg-white/35 hover:bg-white/55'}`}
-                />
-              ))}
+              {homeNewsCarousel.length > 1 && (
+                <div className="mt-4 flex items-center justify-center gap-2">
+                  {homeNewsCarousel.map((item, index) => (
+                    <button
+                      key={`${item.id || item.imageUrl}-${index}`}
+                      type="button"
+                      onClick={() => setActiveHomeNewsSlide(index)}
+                      aria-label={`Go to carousel slide ${index + 1}`}
+                      className={`h-2.5 rounded-full transition ${index === safeHomeNewsIndex ? 'w-7 bg-[#D43790]' : 'w-2.5 bg-white/35 hover:bg-white/55'}`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -9627,12 +9684,12 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={LEGACY_MIRROR_ENABLED ? <LegacyMirrorPage pagePath="/about-us" /> : <HomePage />}
+            element={<HomePage />}
           />
           <Route path="/home" element={<HomePage />} />
           <Route
             path="/about-us"
-            element={LEGACY_MIRROR_ENABLED ? <LegacyMirrorPage pagePath="/" /> : <Navigate to="/pages/about-us" replace />}
+            element={<Navigate to="/pages/about-us" replace />}
           />
           <Route path="/our-products" element={<Navigate to="/distributor-packages" replace />} />
           <Route
