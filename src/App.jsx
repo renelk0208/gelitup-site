@@ -2285,7 +2285,7 @@ function FullCataloguePage() {
   }, [])
 
   const displayedLookbookGroups = useMemo(
-    () => lookbookGroups.slice(0, 10),
+    () => lookbookGroups,
     [lookbookGroups],
   )
 
