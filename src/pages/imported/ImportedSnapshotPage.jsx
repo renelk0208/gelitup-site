@@ -212,7 +212,7 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl
         <video
           ref={backgroundVideoRef}
           src={backgroundVideoUrl}
-          className="absolute inset-0 z-0 h-full w-full object-cover opacity-60"
+          className="absolute -inset-4 z-0 h-[calc(100%+2rem)] w-[calc(100%+2rem)] max-w-none object-cover opacity-70"
           autoPlay
           muted
           loop
@@ -224,7 +224,7 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl
         />
       )}
 
-      <div className="relative z-[1] h-full w-full p-4 sm:p-5 lg:p-6">
+      <div className="relative z-[1] h-full w-full p-2 sm:p-3">
         {hasRenderError
           ? (
             <img
