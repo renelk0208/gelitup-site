@@ -4,7 +4,7 @@ import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/gelitup_official/'
-const CLOUDS_BACKDROP_VIDEO_URL = '/gelitup-media/videos/floatingclouds.mp4'
+const EXHIBITIONS_BACKDROP_VIDEO_URL = '/gelitup-media/videos/pink%20nails%20video.mp4'
 const ABOUT_US_NEWS_DEFAULT = {
   introText: 'Inspired by bold summer tones, luminous finishes, and editorial nail artistry for the 2026 season.',
   title: 'Spring/Summer 2026',
@@ -648,7 +648,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
       manifestoVisual
       && (manifestoVisual.displayUrl.toLowerCase().includes('.mp4') || manifestoVisual.displayUrl.toLowerCase().includes('.webm')),
     )
-    const exhibitionsBackdropVideoUrl = CLOUDS_BACKDROP_VIDEO_URL
+    const exhibitionsBackdropVideoUrl = EXHIBITIONS_BACKDROP_VIDEO_URL
     const sortedExhibitionEvents = sortEventsByDate(aboutUsExhibitions.events || [])
 
     return (
@@ -708,22 +708,22 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           <div className="relative mx-auto max-w-6xl">
             <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8">
               <div className="rounded-2xl border border-white/15 bg-black/30 p-5 sm:p-6">
-                <p className="text-3xl font-black uppercase tracking-[0.18em] text-[#D43790] drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-4xl">Exhibitions</p>
-                <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.12em] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.65)] sm:text-3xl">{aboutUsExhibitions.title}</h2>
-                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/90 drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)] sm:text-base">{aboutUsExhibitions.introText}</p>
+                <p className="text-3xl font-black uppercase tracking-[0.18em] !text-[#D43790] drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-4xl">Exhibitions</p>
+                <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.12em] !text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.65)] sm:text-3xl">{aboutUsExhibitions.title}</h2>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed !text-white/95 drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)] sm:text-base">{aboutUsExhibitions.introText}</p>
               </div>
 
               <div className="space-y-3">
                 {sortedExhibitionEvents.map((event, index) => (
                   <article key={event.id || `${event.name}-${index}`} className="overflow-hidden rounded-2xl border border-white/15 bg-black/30 p-4 sm:p-5">
-                    <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
+                    <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_240px]">
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#D43790]">Exhibition {index + 1}</p>
-                        <h3 className="mt-1 text-xl font-extrabold uppercase tracking-[0.08em] text-white">{event.name}</h3>
-                        <p className="mt-2 text-sm font-semibold uppercase tracking-[0.08em] text-white/90">{formatEventDateRange(event.startDate, event.endDate)}</p>
-                        {event.location && <p className="mt-1 text-sm text-white/80">{event.location}</p>}
-                        {event.stand && <p className="mt-2 text-sm font-bold uppercase tracking-[0.06em] text-white">{event.stand}</p>}
-                        {event.notes && <p className="mt-1 text-sm text-white/80">{event.notes}</p>}
+                        <p className="text-xs font-semibold uppercase tracking-[0.15em] !text-[#D43790]">Exhibition {index + 1}</p>
+                        <h3 className="mt-1 text-xl font-extrabold uppercase tracking-[0.08em] !text-white">{event.name}</h3>
+                        <p className="mt-2 text-sm font-semibold uppercase tracking-[0.08em] !text-white">{formatEventDateRange(event.startDate, event.endDate)}</p>
+                        {event.location && <p className="mt-1 text-sm !text-white/90">{event.location}</p>}
+                        {event.stand && <p className="mt-2 text-sm font-bold uppercase tracking-[0.06em] !text-white">{event.stand}</p>}
+                        {event.notes && <p className="mt-1 text-sm !text-white/90">{event.notes}</p>}
                         {event.link && (
                           <a
                             href={event.link}
@@ -737,17 +737,23 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                       </div>
 
                       {event.imageUrl && (
-                        <div className="overflow-hidden rounded-xl border border-white/20 bg-black/40">
+                        <a
+                          href={event.imageUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block overflow-hidden rounded-xl border border-white/20 bg-black/40"
+                          aria-label={`Open full exhibition image for ${event.name}`}
+                        >
                           <img
                             src={event.imageUrl}
                             alt={event.name}
-                            className="h-full w-full object-cover"
+                            className="h-44 w-full object-contain sm:h-52"
                             loading="lazy"
                             onError={(eventTarget) => {
                               eventTarget.currentTarget.src = '/logo.png'
                             }}
                           />
-                        </div>
+                        </a>
                       )}
                     </div>
                   </article>
