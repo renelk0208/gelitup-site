@@ -722,26 +722,6 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                 )
               })}
             </div>
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              <p className="text-xs text-white/70">
-                {isActiveNewsSlidePdf
-                  ? 'Auto sliding paused on PDF slide.'
-                  : isNewsAutoplayEnabled
-                    ? 'Auto sliding enabled.'
-                    : 'Auto sliding paused.'}
-              </p>
-              <button
-                type="button"
-                disabled={isActiveNewsSlidePdf}
-                onClick={() => {
-                  if (isActiveNewsSlidePdf) return
-                  setIsNewsAutoplayEnabled((current) => !current)
-                }}
-                className={`inline-flex rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white transition duration-200 ${isActiveNewsSlidePdf ? 'cursor-not-allowed bg-white/30 text-white/60' : 'bg-[#D43790] hover:bg-[#BF3182]'}`}
-              >
-                {isActiveNewsSlidePdf ? 'Paused for PDF' : isNewsAutoplayEnabled ? 'Pause' : 'Play'}
-              </button>
-            </div>
             {aboutUsNews.items.length > 1 && (
               <div className="mt-3 flex items-center gap-2">
                 {aboutUsNews.items.map((item, index) => (
