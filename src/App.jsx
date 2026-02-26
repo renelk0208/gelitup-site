@@ -2161,6 +2161,7 @@ function FullCataloguePage() {
               return {
                 title: String(item?.title || `Page ${index + 1}`).trim() || `Page ${index + 1}`,
                 imageUrl,
+                mediaType: String(item?.mediaType || '').trim().toLowerCase() || 'image',
                 link: String(item?.link || '').trim(),
               }
             })
@@ -2180,6 +2181,7 @@ function FullCataloguePage() {
                     return {
                       title: String(item?.title || `Page ${index + 1}`).trim() || `Page ${index + 1}`,
                       imageUrl,
+                      mediaType: String(item?.mediaType || '').trim().toLowerCase() || 'image',
                       link: String(item?.link || '').trim(),
                     }
                   })
@@ -2770,19 +2772,31 @@ function FullCataloguePage() {
                               className="group overflow-hidden rounded-lg border border-[#4A4A4A]/20 bg-white transition hover:border-[#D43790]/60"
                             >
                               <div className="aspect-[9/16] w-full bg-[#F8F8F8] p-1.5">
-                                <img
-                                  src={page.imageUrl}
-                                  alt={page.title}
-                                  className="h-full w-full rounded-md object-cover transition duration-300 group-hover:scale-[1.01]"
-                                  loading="lazy"
-                                  onError={(event) => {
-                                    event.currentTarget.src = '/logo.png'
-                                  }}
-                                />
+                                {String(page?.mediaType || '').toLowerCase() === 'video'
+                                  ? (
+                                    <video
+                                      src={page.imageUrl}
+                                      className="h-full w-full rounded-md object-cover"
+                                      autoPlay
+                                      muted
+                                      loop
+                                      playsInline
+                                      controls
+                                      preload="metadata"
+                                    />
+                                    )
+                                  : (
+                                    <img
+                                      src={page.imageUrl}
+                                      alt="Spring/Summer lookbook page"
+                                      className="h-full w-full rounded-md object-cover transition duration-300 group-hover:scale-[1.01]"
+                                      loading="lazy"
+                                      onError={(event) => {
+                                        event.currentTarget.src = '/logo.png'
+                                      }}
+                                    />
+                                    )}
                               </div>
-                              <p className="truncate border-t border-[#4A4A4A]/10 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#1A1A1A]/75">
-                                {page.title}
-                              </p>
                             </a>
                           ))}
                         </div>
@@ -3616,18 +3630,8 @@ function HomePage() {
     heroVideo: null,
     gallery: [],
   }))
-
-  const countdownTarget = useMemo(() => {
-    const now = new Date()
-    const target = new Date(now)
-    const dayOfWeek = now.getDay()
-    const daysUntilMonday = dayOfWeek === 1 ? 7 : (8 - dayOfWeek) % 7
-    target.setDate(now.getDate() + daysUntilMonday)
-    target.setHours(9, 0, 0, 0)
-    return target.getTime()
-  }, [])
-  
-  const [countdownNow, setCountdownNow] = useState(() => Date.now())
+  const [homeNewsCarousel, setHomeNewsCarousel] = useState([])
+  const [activeHomeNewsSlide, setActiveHomeNewsSlide] = useState(0)
 
   useEffect(() => {
     let isMounted = true
@@ -3659,20 +3663,57 @@ function HomePage() {
   }, [])
 
   useEffect(() => {
+    let mounted = true
+
+    const loadHomeCarousel = async () => {
+      try {
+        const response = await fetch('/gelitup-content/home-news-carousel.json')
+        if (!response.ok) return
+
+        const payload = await response.json()
+        if (!mounted) return
+
+        const items = Array.isArray(payload?.items)
+          ? payload.items
+            .map((item) => ({
+              id: String(item?.id || '').trim(),
+              imageUrl: String(item?.imageUrl || '').trim(),
+              order: Number(item?.order || 0),
+            }))
+            .filter((item) => item.imageUrl)
+          : []
+
+        setHomeNewsCarousel(items)
+        setActiveHomeNewsSlide(0)
+      }
+      catch {
+        if (!mounted) return
+      }
+    }
+
+    void loadHomeCarousel()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (homeNewsCarousel.length <= 1) return undefined
+
     const intervalId = window.setInterval(() => {
-      setCountdownNow(Date.now())
-    }, 1000)
+      setActiveHomeNewsSlide((current) => (current + 1) % homeNewsCarousel.length)
+    }, 3500)
 
     return () => {
       window.clearInterval(intervalId)
     }
-  }, [])
+  }, [homeNewsCarousel.length])
 
-  const countdownRemaining = Math.max(0, countdownTarget - countdownNow)
-  const countdownDays = Math.floor(countdownRemaining / (1000 * 60 * 60 * 24))
-  const countdownHours = Math.floor((countdownRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-  const countdownMinutes = Math.floor((countdownRemaining % (1000 * 60 * 60)) / (1000 * 60))
-  const countdownSeconds = Math.floor((countdownRemaining % (1000 * 60)) / 1000)
+  const safeHomeNewsIndex = homeNewsCarousel.length
+    ? Math.min(activeHomeNewsSlide, homeNewsCarousel.length - 1)
+    : 0
+  const activeHomeNewsItem = homeNewsCarousel[safeHomeNewsIndex] || null
 
   return (
     <section className="space-y-6">
@@ -3774,12 +3815,40 @@ function HomePage() {
 
       <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-10 sm:px-8 sm:py-12">
         <div className="mx-auto max-w-6xl text-center">
-          <p className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#D43790] sm:text-5xl">
-            {String(countdownDays).padStart(2, '0')} : {String(countdownHours).padStart(2, '0')} : {String(countdownMinutes).padStart(2, '0')} : {String(countdownSeconds).padStart(2, '0')}
-          </p>
-          <p className="mt-4 text-sm font-extrabold uppercase tracking-[0.1em] text-white sm:text-lg">
-            NEW COLOUR REVEAL COMING SOON. WATCH THIS SPACE.
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Spring / Summer News</p>
+          <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-3xl">Collection Carousel</h2>
+
+          {activeHomeNewsItem && (
+            <div className="mt-5 mx-auto w-full max-w-[320px]">
+              <div className="overflow-hidden rounded-xl border border-white/20 bg-black/20 p-2">
+                <div className="aspect-[9/16] w-full overflow-hidden rounded-lg bg-[#F8F8F8]">
+                  <img
+                    src={activeHomeNewsItem.imageUrl}
+                    alt="Spring/Summer carousel visual"
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                    onError={(event) => {
+                      event.currentTarget.src = '/logo.png'
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {homeNewsCarousel.length > 1 && (
+            <div className="mt-4 flex items-center justify-center gap-2">
+              {homeNewsCarousel.map((item, index) => (
+                <button
+                  key={`${item.id || item.imageUrl}-${index}`}
+                  type="button"
+                  onClick={() => setActiveHomeNewsSlide(index)}
+                  aria-label={`Go to carousel slide ${index + 1}`}
+                  className={`h-2.5 rounded-full transition ${index === safeHomeNewsIndex ? 'w-7 bg-[#D43790]' : 'w-2.5 bg-white/35 hover:bg-white/55'}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

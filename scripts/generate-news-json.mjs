@@ -5,8 +5,12 @@ const projectRoot = process.cwd()
 const newsImagesDir = path.join(projectRoot, 'public', 'gelitup-media', 'images', 'news')
 const aboutNewsPath = path.join(projectRoot, 'public', 'gelitup-content', 'about-us-news.json')
 const lookbookPath = path.join(projectRoot, 'public', 'gelitup-content', 'spring-summer-catalogue.json')
+const homeCarouselPath = path.join(projectRoot, 'public', 'gelitup-content', 'home-news-carousel.json')
 const supportedExtensions = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif'])
 const supportedPdfExtensions = new Set(['.pdf'])
+const supportedVideoExtensions = new Set(['.mp4', '.webm', '.mov', '.m4v'])
+const homeCarouselFolderPrefix = 'Spring Summer/NEWS Carousel/'
+const homeCarouselPrimaryBaseName = 'Primary Image - Starting on Carousel'
 
 const ABOUT_DEFAULTS = {
   introText: 'Inspired by bold summer tones, luminous finishes, and editorial nail artistry for the 2026 season.',
@@ -82,6 +86,56 @@ function sortWithNumbers(files = []) {
   return [...files].sort((left, right) => left.localeCompare(right, undefined, { numeric: true, sensitivity: 'base' }))
 }
 
+function getMediaTypeFromExt(ext = '') {
+  const normalized = String(ext || '').toLowerCase()
+  if (supportedExtensions.has(normalized)) return 'image'
+  if (supportedVideoExtensions.has(normalized)) return 'video'
+  if (supportedPdfExtensions.has(normalized)) return 'pdf'
+  return 'unknown'
+}
+
+function extractFirstNumber(value = '') {
+  const text = String(value || '')
+  const match = text.match(/\d+/)
+  return match ? Number.parseInt(match[0], 10) : Number.POSITIVE_INFINITY
+}
+
+function sortHomeCarouselFiles(files = []) {
+  const prepared = files
+    .map((file) => {
+      const relativePath = String(file?.relativePath || '').trim()
+      if (!relativePath) return null
+
+      const baseName = path.basename(relativePath, path.extname(relativePath)).trim()
+      const lowerBaseName = baseName.toLowerCase()
+      const primaryLower = homeCarouselPrimaryBaseName.toLowerCase()
+      const isPrimary = lowerBaseName === primaryLower
+      const numberToken = extractFirstNumber(baseName)
+
+      return {
+        file,
+        relativePath,
+        baseName,
+        isPrimary,
+        numberToken,
+      }
+    })
+    .filter(Boolean)
+
+  prepared.sort((left, right) => {
+    if (left.isPrimary && !right.isPrimary) return -1
+    if (!left.isPrimary && right.isPrimary) return 1
+
+    if (left.numberToken !== right.numberToken) {
+      return left.numberToken - right.numberToken
+    }
+
+    return left.baseName.localeCompare(right.baseName, undefined, { numeric: true, sensitivity: 'base' })
+  })
+
+  return prepared.map((entry) => entry.file)
+}
+
 async function walkFiles(dirPath, basePath = dirPath) {
   const entries = await fs.readdir(dirPath, { withFileTypes: true })
   const files = []
@@ -96,7 +150,7 @@ async function walkFiles(dirPath, basePath = dirPath) {
     }
 
     const ext = path.extname(entry.name).toLowerCase()
-    if (!supportedExtensions.has(ext) && !supportedPdfExtensions.has(ext)) continue
+    if (!supportedExtensions.has(ext) && !supportedPdfExtensions.has(ext) && !supportedVideoExtensions.has(ext)) continue
 
     const relativePath = path.relative(basePath, fullPath).replace(/\\/g, '/')
     files.push({
@@ -118,19 +172,23 @@ async function getNewsAssets() {
     .filter(Boolean)
 
   const imageFiles = sortedAssets.filter((item) => supportedExtensions.has(item.ext))
+  const videoFiles = sortedAssets.filter((item) => supportedVideoExtensions.has(item.ext))
   const pdfFiles = sortedAssets.filter((item) => supportedPdfExtensions.has(item.ext))
+  const mediaFiles = sortedAssets.filter((item) => supportedExtensions.has(item.ext) || supportedVideoExtensions.has(item.ext))
 
-  return { imageFiles, pdfFiles }
+  return { imageFiles, videoFiles, mediaFiles, pdfFiles }
 }
 
-function buildImageItems(imageFiles = [], itemLink = '/portal/login') {
-  return imageFiles.map((file, index) => {
+function buildMediaItems(mediaFiles = [], itemLink = '/portal/login') {
+  return mediaFiles.map((file, index) => {
     const relative = String(file.relativePath || '').trim()
-    const imageUrl = toPublicNewsPath(relative)
+    const mediaUrl = toPublicNewsPath(relative)
+    const mediaType = getMediaTypeFromExt(file.ext)
 
     return {
       title: formatPageTitle(path.basename(relative, path.extname(relative)), index),
-      imageUrl,
+      imageUrl: mediaUrl,
+      mediaType,
       link: itemLink,
     }
   })
@@ -174,8 +232,8 @@ function collectGroupedImages(imageFiles = []) {
   return groups
 }
 
-function deriveLookbookGroups(imageFiles = [], itemLink = '/portal/login') {
-  const groupedImages = collectGroupedImages(imageFiles)
+function deriveLookbookGroups(mediaFiles = [], itemLink = '/portal/login') {
+  const groupedImages = collectGroupedImages(mediaFiles)
   const groupKeys = sortWithNumbers(Array.from(groupedImages.keys()))
 
   const groupsWithChildren = new Set(
@@ -183,14 +241,15 @@ function deriveLookbookGroups(imageFiles = [], itemLink = '/portal/login') {
   )
 
   const leafGroupKeys = groupKeys.filter((key) => key !== '__root__' && !groupsWithChildren.has(key))
-  const shallowFiles = imageFiles.filter((file) => getDirectoryDepth(file?.relativePath || '') <= 1)
-  const shallowImageItems = buildImageItems(shallowFiles, itemLink)
+  const shallowFiles = mediaFiles.filter((file) => getDirectoryDepth(file?.relativePath || '') <= 1)
+  const shallowImageItems = buildMediaItems(shallowFiles, itemLink)
 
   const lookbookGroups = leafGroupKeys.map((groupKey) => {
     const files = groupedImages.get(groupKey) || []
-    const pages = buildImageItems(files, itemLink)
-    const fallbackHero = pages[0]?.imageUrl || '/logo.png'
-    const heroImage = pages[0]?.imageUrl || fallbackHero
+    const pages = buildMediaItems(files, itemLink)
+    const firstImagePage = pages.find((page) => page.mediaType === 'image')
+    const fallbackHero = firstImagePage?.imageUrl || pages[0]?.imageUrl || '/logo.png'
+    const heroImage = fallbackHero
 
     return {
       id: groupKey,
@@ -206,15 +265,38 @@ function deriveLookbookGroups(imageFiles = [], itemLink = '/portal/login') {
   }
 }
 
-function buildPdfItems(pdfFiles = []) {
+function buildPdfItems(pdfFiles = [], previewImage = '/logo.png') {
   return pdfFiles.map((file, index) => {
     const relative = String(file.relativePath || '').trim()
     const pdfUrl = toPublicNewsPath(relative)
 
     return {
       title: `${toDisplayTitle(path.basename(relative, path.extname(relative)), 'Spring/Summer Catalogue')} (PDF${pdfFiles.length > 1 ? ` ${index + 1}` : ''})`,
-      imageUrl: '/logo.png',
+      imageUrl: previewImage,
+      mediaType: 'pdf',
       link: pdfUrl,
+    }
+  })
+}
+
+function buildHomeCarouselItems(mediaFiles = []) {
+  const carouselFiles = mediaFiles
+    .filter((file) => String(file?.relativePath || '').startsWith(homeCarouselFolderPrefix))
+    .filter((file) => getMediaTypeFromExt(file?.ext) === 'image')
+
+  const ordered = sortHomeCarouselFiles(carouselFiles)
+
+  return ordered.map((file, index) => {
+    const relativePath = String(file?.relativePath || '').trim()
+    const imageUrl = toPublicNewsPath(relativePath)
+    const baseName = path.basename(relativePath, path.extname(relativePath)).trim()
+    const isPrimary = baseName.toLowerCase() === homeCarouselPrimaryBaseName.toLowerCase()
+
+    return {
+      id: `home-news-carousel-${index + 1}`,
+      imageUrl,
+      order: index + 1,
+      isPrimary,
     }
   })
 }
@@ -228,21 +310,25 @@ async function main() {
 
   const assets = await getNewsAssets()
   const imageFiles = Array.isArray(assets?.imageFiles) ? assets.imageFiles : []
+  const videoFiles = Array.isArray(assets?.videoFiles) ? assets.videoFiles : []
+  const mediaFiles = Array.isArray(assets?.mediaFiles) ? assets.mediaFiles : []
   const pdfFiles = Array.isArray(assets?.pdfFiles) ? assets.pdfFiles : []
   const lookbookDocumentLink = getPreferredPamphletLink(pdfFiles)
 
-  if (!imageFiles.length && !pdfFiles.length) {
-    console.log('No images or PDFs found in public/gelitup-media/images/news. Add files first, then run this script again.')
+  if (!mediaFiles.length && !pdfFiles.length) {
+    console.log('No images, videos, or PDFs found in public/gelitup-media/images/news. Add files first, then run this script again.')
     process.exit(0)
   }
 
   const existingAbout = await readJsonObject(aboutNewsPath, {})
   const existingLookbook = await readJsonObject(lookbookPath, {})
 
-  const imageItems = buildImageItems(imageFiles, lookbookDocumentLink)
-  const pdfItems = buildPdfItems(pdfFiles)
-  const { lookbookGroups, shallowImageItems } = deriveLookbookGroups(imageFiles, lookbookDocumentLink)
-  const fallbackLookbookItems = imageItems.length ? imageItems : pdfItems
+  const mediaItems = buildMediaItems(mediaFiles, lookbookDocumentLink)
+  const homeCarouselItems = buildHomeCarouselItems(mediaFiles)
+  const firstImagePreview = mediaItems.find((item) => item.mediaType === 'image')?.imageUrl || '/logo.png'
+  const pdfItems = buildPdfItems(pdfFiles, firstImagePreview)
+  const { lookbookGroups, shallowImageItems } = deriveLookbookGroups(mediaFiles, lookbookDocumentLink)
+  const fallbackLookbookItems = mediaItems.length ? mediaItems : pdfItems
   const fallbackGroups = fallbackLookbookItems.length
     ? [{
       id: 'default',
@@ -254,8 +340,8 @@ async function main() {
   const nextGroups = lookbookGroups.length ? lookbookGroups : fallbackGroups
   const firstGroupPages = nextGroups[0]?.pages || []
 
-  const aboutItems = imageItems.length
-    ? imageItems
+  const aboutItems = pdfItems.length
+    ? pdfItems
     : shallowImageItems
 
   const nextAbout = {
@@ -273,12 +359,19 @@ async function main() {
     pages: firstGroupPages,
   }
 
+  const nextHomeCarousel = {
+    title: 'Spring/Summer News Carousel',
+    items: homeCarouselItems,
+  }
+
   await fs.writeFile(aboutNewsPath, `${JSON.stringify(nextAbout, null, 2)}\n`, 'utf8')
   await fs.writeFile(lookbookPath, `${JSON.stringify(nextLookbook, null, 2)}\n`, 'utf8')
+  await fs.writeFile(homeCarouselPath, `${JSON.stringify(nextHomeCarousel, null, 2)}\n`, 'utf8')
 
-  console.log(`Scanned ${imageFiles.length} image(s) and ${pdfFiles.length} PDF file(s) in public/gelitup-media/images/news`) 
+  console.log(`Scanned ${imageFiles.length} image(s), ${videoFiles.length} video file(s), and ${pdfFiles.length} PDF file(s) in public/gelitup-media/images/news`) 
   console.log('Updated: public/gelitup-content/about-us-news.json')
   console.log('Updated: public/gelitup-content/spring-summer-catalogue.json')
+  console.log('Updated: public/gelitup-content/home-news-carousel.json')
 }
 
 main().catch((error) => {

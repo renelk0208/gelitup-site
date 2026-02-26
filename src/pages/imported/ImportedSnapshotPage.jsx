@@ -47,6 +47,18 @@ function getNewsSlideStep(container) {
   return firstSlide.getBoundingClientRect().width
 }
 
+function resolveNewsMediaType(item = {}) {
+  const explicitType = String(item?.mediaType || '').trim().toLowerCase()
+  if (explicitType) return explicitType
+
+  const imageUrl = String(item?.imageUrl || '').toLowerCase()
+  const linkUrl = String(item?.link || '').toLowerCase()
+
+  if (/\.(mp4|webm|mov|m4v)(\?|$)/i.test(imageUrl)) return 'video'
+  if (/\.pdf(\?|$)/i.test(linkUrl)) return 'pdf'
+  return 'image'
+}
+
 export default function ImportedSnapshotPage({ slug, editorFile }) {
   const [snapshotPages, setSnapshotPages] = useState([])
   const [customPagesBySlug, setCustomPagesBySlug] = useState({})
@@ -179,9 +191,10 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
             .map((item) => ({
               title: String(item?.title || '').trim(),
               imageUrl: String(item?.imageUrl || '').trim(),
+              mediaType: String(item?.mediaType || '').trim().toLowerCase(),
               link: String(item?.link || '').trim(),
             }))
-            .filter((item) => item.title && item.imageUrl)
+            .filter((item) => item.imageUrl)
           : []
 
         if (!items.length) {
@@ -462,21 +475,39 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
               ref={newsCarouselRef}
               className="mt-5 mx-auto flex w-full max-w-[280px] snap-x overflow-x-auto pb-1 [scrollbar-width:thin] sm:max-w-[320px]"
             >
-              {aboutUsNews.items.map((item) => (
-                <article key={item.imageUrl} data-news-slide="true" className="w-full shrink-0 snap-start overflow-hidden rounded-2xl border border-white/15 bg-black/20">
+              {aboutUsNews.items.map((item, index) => {
+                const mediaType = resolveNewsMediaType(item)
+
+                return (
+                  <article key={`${item.imageUrl}-${index}`} data-news-slide="true" className="w-full shrink-0 snap-start overflow-hidden rounded-2xl border border-white/15 bg-black/20">
                   <div className="w-full" style={{ aspectRatio: '210 / 297' }}>
                     <a href={item.link || item.imageUrl} target="_blank" rel="noreferrer" className="block h-full w-full">
-                      <img
-                        src={item.imageUrl}
-                        alt={item.title}
-                        className="h-full w-full object-cover"
-                        loading="lazy"
-                      />
+                      {mediaType === 'video'
+                        ? (
+                          <video
+                            src={item.imageUrl}
+                            className="h-full w-full object-cover"
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                            controls
+                            preload="metadata"
+                          />
+                          )
+                        : (
+                          <img
+                            src={item.imageUrl}
+                            alt="Spring/Summer lookbook"
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                          )}
                     </a>
                   </div>
-                  <p className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/90">{item.title}</p>
                 </article>
-              ))}
+                )
+              })}
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <p className="text-xs text-white/70">

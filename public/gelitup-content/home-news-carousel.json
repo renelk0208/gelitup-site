@@ -1,0 +1,143 @@
+{
+  "title": "Spring/Summer News Carousel",
+  "items": [
+    {
+      "id": "home-news-carousel-1",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/Primary Image - Starting on Carousel.jpg",
+      "order": 1,
+      "isPrimary": true
+    },
+    {
+      "id": "home-news-carousel-2",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2600-1.jpg",
+      "order": 2,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-3",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2600-2.jpg",
+      "order": 3,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-4",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2601-1.jpg",
+      "order": 4,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-5",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2601-2.jpg",
+      "order": 5,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-6",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2602-1.jpg",
+      "order": 6,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-7",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2602-2.jpg",
+      "order": 7,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-8",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2603-1.jpg",
+      "order": 8,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-9",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2603-2.jpg",
+      "order": 9,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-10",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2604-1.jpg",
+      "order": 10,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-11",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2604-2.jpg",
+      "order": 11,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-12",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2605-1 (1).jpg",
+      "order": 12,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-13",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2605-2.jpg",
+      "order": 13,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-14",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2606-1 (1).jpg",
+      "order": 14,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-15",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2606-2.jpg",
+      "order": 15,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-16",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2607-1.jpg",
+      "order": 16,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-17",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2607-2.jpg",
+      "order": 17,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-18",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2608-1.jpg",
+      "order": 18,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-19",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2608-2.jpg",
+      "order": 19,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-20",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2609-1.jpg",
+      "order": 20,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-21",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2609-2.jpg",
+      "order": 21,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-22",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2610-1.jpg",
+      "order": 22,
+      "isPrimary": false
+    },
+    {
+      "id": "home-news-carousel-23",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2610-2.jpg",
+      "order": 23,
+      "isPrimary": false
+    }
+  ]
+}
