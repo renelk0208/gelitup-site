@@ -679,7 +679,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
 
                 return (
                   <article key={`${item.imageUrl}-${index}`} data-news-slide="true" className="w-full shrink-0 snap-start overflow-hidden rounded-2xl border border-white/15 bg-black/20">
-                  <div className="w-full" style={mediaType === 'pdf' ? undefined : { aspectRatio: '210 / 297' }}>
+                  <div className="w-full" style={mediaType === 'pdf' ? undefined : { aspectRatio: '1080 / 1440' }}>
                     {mediaType === 'video'
                       ? (
                         <a href={mediaHref} target="_blank" rel="noreferrer" className="block h-full w-full">
@@ -709,7 +709,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                             <img
                               src={item.imageUrl}
                               alt="Spring/Summer lookbook"
-                              className="h-full w-full object-cover"
+                              className="h-full w-full bg-black object-contain"
                               loading="lazy"
                               onError={(event) => {
                                 event.currentTarget.src = '/logo.png'
