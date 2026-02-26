@@ -1,0 +1,28 @@
+{
+  "title": "Upcoming Exhibitions",
+  "introText": "Meet GEL.IT.UP by GIUP® at the next professional beauty events and discover our seasonal launches live.",
+  "events": [
+    {
+      "id": "exhibition-1-athens-2026",
+      "name": "Beauty Festival",
+      "location": "Exhibition Centre, Peristeri, Athens",
+      "startDate": "2026-03-28",
+      "endDate": "2026-03-30",
+      "stand": "Hall C Stand 300",
+      "notes": "Exhibition #1",
+      "imageUrl": "/gelitup-media/images/exhibitions/Screenshot%202026-02-27%20005221.png",
+      "link": ""
+    },
+    {
+      "id": "beauty-greece-spring-2026",
+      "name": "Beauty Greece",
+      "location": "M.E.C Paianias, Greece",
+      "startDate": "2026-04-25",
+      "endDate": "2026-04-27",
+      "stand": "STAND 119-123",
+      "notes": "Exhibition #2 · GEL.IT.UP Greece",
+      "imageUrl": "/gelitup-media/images/exhibitions/beauty%20greece.png",
+      "link": ""
+    }
+  ]
+}

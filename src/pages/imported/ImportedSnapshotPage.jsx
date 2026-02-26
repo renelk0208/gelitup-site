@@ -25,6 +25,71 @@ const ABOUT_US_NEWS_DEFAULT = {
   ],
 }
 
+const ABOUT_US_EXHIBITIONS_DEFAULT = {
+  title: 'Upcoming Exhibitions',
+  introText: 'Meet GEL.IT.UP by GIUP® at the next professional beauty events and discover our seasonal launches live.',
+  events: [
+    {
+      id: 'beauty-greece-spring-2026',
+      name: 'Beauty Greece',
+      location: 'M.E.C Paianias, Greece',
+      startDate: '2026-04-25',
+      endDate: '2026-04-27',
+      stand: 'STAND 119-123',
+      notes: 'Exhibition #2 · GEL.IT.UP Greece',
+      imageUrl: '/gelitup-media/images/exhibitions/beauty%20greece.png',
+      link: '',
+    },
+  ],
+}
+
+function parseDateValue(value = '') {
+  const raw = String(value || '').trim()
+  if (!raw) return Number.POSITIVE_INFINITY
+
+  const timestamp = Date.parse(raw)
+  return Number.isNaN(timestamp) ? Number.POSITIVE_INFINITY : timestamp
+}
+
+function sortEventsByDate(events = []) {
+  return [...events].sort((left, right) => {
+    const leftStart = parseDateValue(left?.startDate)
+    const rightStart = parseDateValue(right?.startDate)
+    if (leftStart !== rightStart) return leftStart - rightStart
+
+    const leftEnd = parseDateValue(left?.endDate)
+    const rightEnd = parseDateValue(right?.endDate)
+    if (leftEnd !== rightEnd) return leftEnd - rightEnd
+
+    const leftName = String(left?.name || '')
+    const rightName = String(right?.name || '')
+    return leftName.localeCompare(rightName, undefined, { sensitivity: 'base' })
+  })
+}
+
+function formatEventDateRange(startDate = '', endDate = '') {
+  const start = parseDateValue(startDate)
+  const end = parseDateValue(endDate)
+
+  if (!Number.isFinite(start) && !Number.isFinite(end)) return 'Date to be announced'
+
+  const formatter = new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+
+  if (!Number.isFinite(end) || start === end) {
+    return Number.isFinite(start) ? formatter.format(new Date(start)) : formatter.format(new Date(end))
+  }
+
+  if (!Number.isFinite(start)) {
+    return formatter.format(new Date(end))
+  }
+
+  return `${formatter.format(new Date(start))} – ${formatter.format(new Date(end))}`
+}
+
 GlobalWorkerOptions.workerSrc = pdfWorkerUrl
 
 function SnapshotCard({ title, children }) {
@@ -291,10 +356,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
   const [sourceMode, setSourceMode] = useState('snapshot')
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
-  const [aboutUsNews, setAboutUsNews] = useState(ABOUT_US_NEWS_DEFAULT)
-  const [isNewsAutoplayEnabled, setIsNewsAutoplayEnabled] = useState(true)
-  const [activeNewsSlide, setActiveNewsSlide] = useState(0)
-  const newsCarouselRef = useRef(null)
+  const [aboutUsExhibitions, setAboutUsExhibitions] = useState(ABOUT_US_EXHIBITIONS_DEFAULT)
 
   useEffect(() => {
     let isMounted = true
@@ -398,9 +460,9 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
 
     let isMounted = true
 
-    const loadAboutUsNews = async () => {
+    const loadAboutUsExhibitions = async () => {
       try {
-        const response = await fetch('/gelitup-content/about-us-news.json')
+        const response = await fetch('/gelitup-content/about-us-exhibitions.json')
         if (!response.ok) {
           return
         }
@@ -410,28 +472,30 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           return
         }
 
-        const items = Array.isArray(payload?.items)
-          ? payload.items
+        const events = Array.isArray(payload?.events)
+          ? payload.events
             .map((item) => ({
-              title: String(item?.title || '').trim(),
+              id: String(item?.id || '').trim(),
+              name: String(item?.name || '').trim(),
+              location: String(item?.location || '').trim(),
+              startDate: String(item?.startDate || '').trim(),
+              endDate: String(item?.endDate || '').trim(),
+              stand: String(item?.stand || '').trim(),
+              notes: String(item?.notes || '').trim(),
               imageUrl: String(item?.imageUrl || '').trim(),
-              mediaType: String(item?.mediaType || '').trim().toLowerCase(),
               link: String(item?.link || '').trim(),
-              backgroundVideoUrl: String(item?.backgroundVideoUrl || '').trim(),
             }))
-            .filter((item) => item.imageUrl)
+            .filter((item) => item.name)
           : []
 
-        if (!items.length) {
+        if (!events.length) {
           return
         }
 
-        setAboutUsNews({
-          introText: String(payload?.introText || ABOUT_US_NEWS_DEFAULT.introText).trim() || ABOUT_US_NEWS_DEFAULT.introText,
-          title: String(payload?.title || ABOUT_US_NEWS_DEFAULT.title).trim() || ABOUT_US_NEWS_DEFAULT.title,
-          portalLabel: String(payload?.portalLabel || ABOUT_US_NEWS_DEFAULT.portalLabel).trim() || ABOUT_US_NEWS_DEFAULT.portalLabel,
-          portalLink: String(payload?.portalLink || ABOUT_US_NEWS_DEFAULT.portalLink).trim() || ABOUT_US_NEWS_DEFAULT.portalLink,
-          items,
+        setAboutUsExhibitions({
+          title: String(payload?.title || ABOUT_US_EXHIBITIONS_DEFAULT.title).trim() || ABOUT_US_EXHIBITIONS_DEFAULT.title,
+          introText: String(payload?.introText || ABOUT_US_EXHIBITIONS_DEFAULT.introText).trim() || ABOUT_US_EXHIBITIONS_DEFAULT.introText,
+          events: sortEventsByDate(events),
         })
       }
       catch {
@@ -439,75 +503,12 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
       }
     }
 
-    void loadAboutUsNews()
+    void loadAboutUsExhibitions()
 
     return () => {
       isMounted = false
     }
   }, [isAboutUsManifesto])
-
-  const activeNewsItem = aboutUsNews.items[activeNewsSlide] || null
-  const isActiveNewsSlidePdf = resolveNewsMediaType(activeNewsItem || {}) === 'pdf'
-
-  useEffect(() => {
-    if (!isAboutUsManifesto || !isNewsAutoplayEnabled || isActiveNewsSlidePdf || aboutUsNews.items.length <= 1) {
-      return undefined
-    }
-
-    const intervalId = window.setInterval(() => {
-      const container = newsCarouselRef.current
-      if (!container) {
-        return
-      }
-
-      const step = getNewsSlideStep(container)
-      if (!step) return
-      const maxScrollLeft = container.scrollWidth - container.clientWidth
-      const currentIndex = Math.max(0, Math.min(aboutUsNews.items.length - 1, Math.round(container.scrollLeft / step)))
-      const nextIndex = (currentIndex + 1) % aboutUsNews.items.length
-      const nextLeft = nextIndex * step
-
-      if (nextLeft >= maxScrollLeft - 2 || nextIndex === 0) {
-        container.scrollTo({ left: 0, behavior: 'smooth' })
-        setActiveNewsSlide(0)
-        return
-      }
-
-      container.scrollTo({ left: nextLeft, behavior: 'smooth' })
-      setActiveNewsSlide(nextIndex)
-    }, 3500)
-
-    return () => {
-      window.clearInterval(intervalId)
-    }
-  }, [aboutUsNews.items.length, isAboutUsManifesto, isNewsAutoplayEnabled, isActiveNewsSlidePdf])
-
-  useEffect(() => {
-    if (!isAboutUsManifesto || aboutUsNews.items.length <= 1) {
-      setActiveNewsSlide(0)
-      return undefined
-    }
-
-    const container = newsCarouselRef.current
-    if (!container) {
-      return undefined
-    }
-
-    const updateActiveSlide = () => {
-      const step = getNewsSlideStep(container)
-      if (!step) return
-      const rawIndex = step > 0 ? Math.round(container.scrollLeft / step) : 0
-      const nextIndex = Math.max(0, Math.min(aboutUsNews.items.length - 1, rawIndex))
-      setActiveNewsSlide(nextIndex)
-    }
-
-    updateActiveSlide()
-    container.addEventListener('scroll', updateActiveSlide, { passive: true })
-
-    return () => {
-      container.removeEventListener('scroll', updateActiveSlide)
-    }
-  }, [aboutUsNews.items.length, isAboutUsManifesto])
 
   const previewMedia = useMemo(() => {
     if (!activePage?.mediaRefs?.length) return []
@@ -646,10 +647,10 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
       manifestoVisual
       && (manifestoVisual.displayUrl.toLowerCase().includes('.mp4') || manifestoVisual.displayUrl.toLowerCase().includes('.webm')),
     )
-    const newsBackdropVideoUrl =
-      aboutUsNews.items.find((item) => /\.(mp4|webm|mov|m4v)(\?|$)/i.test(String(item?.backgroundVideoUrl || '').trim()))?.backgroundVideoUrl
-      || (visualIsVideo ? manifestoVisual?.displayUrl : '')
+    const exhibitionsBackdropVideoUrl =
+      (visualIsVideo ? manifestoVisual?.displayUrl : '')
       || (/\.(mp4|webm|mov|m4v)(\?|$)/i.test(String(fallbackVideo || '').trim()) ? fallbackVideo : '')
+    const sortedExhibitionEvents = sortEventsByDate(aboutUsExhibitions.events || [])
 
     return (
       <section className="space-y-6 bg-white">
@@ -692,9 +693,9 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
         </div>
 
         <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#1A1A1A] px-4 py-10 sm:px-8 sm:py-12">
-          {newsBackdropVideoUrl && (
+          {exhibitionsBackdropVideoUrl && (
             <video
-              src={newsBackdropVideoUrl}
+              src={exhibitionsBackdropVideoUrl}
               className="absolute inset-0 h-full w-full object-cover"
               muted
               playsInline
@@ -706,99 +707,52 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           <div className="absolute inset-0 bg-[#1A1A1A]/75" />
 
           <div className="relative mx-auto max-w-6xl">
-            <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,460px)] lg:gap-8">
+            <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8">
               <div className="rounded-2xl border border-white/15 bg-black/30 p-5 sm:p-6">
-                <p className="text-3xl font-black uppercase tracking-[0.18em] text-[#D43790] sm:text-4xl">News</p>
-                <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.12em] text-white sm:text-3xl">{aboutUsNews.title}</h2>
-                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base">{aboutUsNews.introText}</p>
-                <NavLink
-                  to={aboutUsNews.portalLink}
-                  className="mt-5 inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-[#BF3182]"
-                >
-                  {aboutUsNews.portalLabel}
-                </NavLink>
+                <p className="text-3xl font-black uppercase tracking-[0.18em] text-[#D43790] sm:text-4xl">Exhibitions</p>
+                <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.12em] text-white sm:text-3xl">{aboutUsExhibitions.title}</h2>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base">{aboutUsExhibitions.introText}</p>
               </div>
 
-              <div>
-                <div
-                  ref={newsCarouselRef}
-                  className="mx-auto flex w-full max-w-[90vw] snap-x overflow-x-auto pb-1 [scrollbar-width:thin] sm:max-w-[420px] lg:mx-0 lg:max-w-[460px]"
-                >
-                  {aboutUsNews.items.map((item, index) => {
-                    const mediaType = resolveNewsMediaType(item)
-                    const mediaHref = item.link || item.imageUrl
-                    const pdfHref = /\.pdf(\?|$)/i.test(mediaHref) ? mediaHref : item.imageUrl
-
-                    return (
-                      <article key={`${item.imageUrl}-${index}`} data-news-slide="true" className="w-full shrink-0 snap-start overflow-hidden rounded-2xl border border-white/15 bg-black/20">
-                      <div className="w-full" style={mediaType === 'pdf' ? undefined : { aspectRatio: '1088 / 1440' }}>
-                        {mediaType === 'video'
-                          ? (
-                            <a href={mediaHref} target="_blank" rel="noreferrer" className="block h-full w-full">
-                              <video
-                                src={item.imageUrl}
-                                className="h-full w-full object-cover"
-                                autoPlay
-                                muted
-                                loop
-                                playsInline
-                                controls
-                                preload="metadata"
-                              />
-                            </a>
-                            )
-                          : mediaType === 'pdf'
-                            ? (
-                              <PdfPreviewSlide
-                                pdfUrl={pdfHref}
-                                fallbackImageUrl={item.imageUrl}
-                                altText="Spring/Summer lookbook PDF preview"
-                                backgroundVideoUrl={item.backgroundVideoUrl}
-                              />
-                              )
-                            : (
-                              <a href={mediaHref} target="_blank" rel="noreferrer" className="block h-full w-full">
-                                <img
-                                  src={item.imageUrl}
-                                  alt="Spring/Summer lookbook"
-                                  className="h-full w-full bg-black object-contain"
-                                  loading="lazy"
-                                  onError={(event) => {
-                                    event.currentTarget.src = '/logo.png'
-                                  }}
-                                />
-                              </a>
-                              )}
+              <div className="space-y-3">
+                {sortedExhibitionEvents.map((event, index) => (
+                  <article key={event.id || `${event.name}-${index}`} className="overflow-hidden rounded-2xl border border-white/15 bg-black/30 p-4 sm:p-5">
+                    <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#D43790]">Exhibition {index + 1}</p>
+                        <h3 className="mt-1 text-xl font-extrabold uppercase tracking-[0.08em] text-white">{event.name}</h3>
+                        <p className="mt-2 text-sm font-semibold uppercase tracking-[0.08em] text-white/90">{formatEventDateRange(event.startDate, event.endDate)}</p>
+                        {event.location && <p className="mt-1 text-sm text-white/80">{event.location}</p>}
+                        {event.stand && <p className="mt-2 text-sm font-bold uppercase tracking-[0.06em] text-white">{event.stand}</p>}
+                        {event.notes && <p className="mt-1 text-sm text-white/80">{event.notes}</p>}
+                        {event.link && (
+                          <a
+                            href={event.link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-3 inline-flex rounded-lg bg-[#D43790] px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]"
+                          >
+                            Event Details
+                          </a>
+                        )}
                       </div>
-                    </article>
-                    )
-                  })}
-                </div>
-                {aboutUsNews.items.length > 1 && (
-                  <div className="mx-auto mt-3 flex w-full max-w-[90vw] items-center justify-center gap-2 sm:max-w-[420px] lg:mx-0 lg:max-w-[460px]">
-                    {aboutUsNews.items.map((item, index) => (
-                      <button
-                        key={`${item.imageUrl}-dot`}
-                        type="button"
-                        aria-label={`Go to slide ${index + 1}`}
-                        onClick={() => {
-                          const container = newsCarouselRef.current
-                          if (!container) {
-                            return
-                          }
 
-                          const step = getNewsSlideStep(container)
-                          if (!step) return
-
-                          const targetLeft = index * step
-                          container.scrollTo({ left: targetLeft, behavior: 'smooth' })
-                          setActiveNewsSlide(index)
-                        }}
-                        className={`h-2.5 w-2.5 rounded-full transition ${activeNewsSlide === index ? 'bg-[#D43790]' : 'bg-white/35 hover:bg-white/55'}`}
-                      />
-                    ))}
-                  </div>
-                )}
+                      {event.imageUrl && (
+                        <div className="overflow-hidden rounded-xl border border-white/20 bg-black/40">
+                          <img
+                            src={event.imageUrl}
+                            alt={event.name}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                            onError={(eventTarget) => {
+                              eventTarget.currentTarget.src = '/logo.png'
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </article>
+                ))}
               </div>
             </div>
           </div>

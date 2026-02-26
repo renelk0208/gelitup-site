@@ -361,9 +361,34 @@ function buildHomeCarouselItems(mediaFiles = []) {
     .filter((file) => String(file?.relativePath || '').startsWith(homeCarouselFolderPrefix))
     .filter((file) => getMediaTypeFromExt(file?.ext) === 'image')
 
-  const ordered = sortHomeCarouselFiles(carouselFiles)
+  const globalPrimaryCandidate = mediaFiles
+    .filter((file) => getMediaTypeFromExt(file?.ext) === 'image')
+    .find((file) => {
+      const relativePath = String(file?.relativePath || '').trim()
+      const baseName = path.basename(relativePath, path.extname(relativePath)).trim().toLowerCase()
+      return baseName === homeCarouselPrimaryBaseName.toLowerCase() || baseName.includes(homeCarouselPrimaryBaseName.toLowerCase())
+    })
 
-  return ordered.map((file, index) => {
+  if (globalPrimaryCandidate) {
+    const alreadyIncluded = carouselFiles.some((file) => String(file?.relativePath || '').trim() === String(globalPrimaryCandidate?.relativePath || '').trim())
+    if (!alreadyIncluded) {
+      carouselFiles.unshift(globalPrimaryCandidate)
+    }
+  }
+
+  const ordered = sortHomeCarouselFiles(carouselFiles)
+  const deduped = []
+  const seenBaseNames = new Set()
+
+  for (const file of ordered) {
+    const relativePath = String(file?.relativePath || '').trim()
+    const baseName = path.basename(relativePath, path.extname(relativePath)).trim().toLowerCase()
+    if (!relativePath || !baseName || seenBaseNames.has(baseName)) continue
+    seenBaseNames.add(baseName)
+    deduped.push(file)
+  }
+
+  return deduped.map((file, index) => {
     const relativePath = String(file?.relativePath || '').trim()
     const imageUrl = toPublicNewsPath(relativePath)
     const baseName = path.basename(relativePath, path.extname(relativePath)).trim()
