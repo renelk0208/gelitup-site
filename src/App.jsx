@@ -71,6 +71,7 @@ const CLIENT_PROFILE_STORAGE_KEY = 'gelitup.portal.client_profile.v1'
 const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
+const HOME_NEWS_CLOUD_VIDEO_URL = '/gelitup-media/videos/floatingclouds.mp4'
 const LEEUKOPF_DISTRIBUTORS_SOURCE_URL = 'https://leeukopf.com/our-brands'
 const DISTRIBUTOR_DIRECTORY = [
   {
@@ -3892,8 +3893,21 @@ function HomePage() {
         </p>
       </div>
 
-      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-10 sm:px-8 sm:py-12">
-        <div className="mx-auto max-w-6xl text-center">
+      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#1A1A1A] px-4 py-10 sm:px-8 sm:py-12">
+        <video
+          src={HOME_NEWS_CLOUD_VIDEO_URL}
+          className="absolute inset-0 h-full w-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          controls={false}
+          preload="metadata"
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 bg-[#1A1A1A]/70" />
+
+        <div className="relative mx-auto max-w-6xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Spring / Summer News</p>
           <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-3xl">Collection Carousel</h2>
 
@@ -9613,12 +9627,12 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={LEGACY_MIRROR_ENABLED ? <LegacyMirrorPage pagePath="/about-us" /> : <Navigate to="/pages/about-us" replace />}
+            element={LEGACY_MIRROR_ENABLED ? <LegacyMirrorPage pagePath="/about-us" /> : <HomePage />}
           />
-          <Route path="/home" element={<Navigate to="/about-us" replace />} />
+          <Route path="/home" element={<HomePage />} />
           <Route
             path="/about-us"
-            element={LEGACY_MIRROR_ENABLED ? <LegacyMirrorPage pagePath="/" /> : <HomePage />}
+            element={LEGACY_MIRROR_ENABLED ? <LegacyMirrorPage pagePath="/" /> : <Navigate to="/pages/about-us" replace />}
           />
           <Route path="/our-products" element={<Navigate to="/distributor-packages" replace />} />
           <Route
