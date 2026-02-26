@@ -248,6 +248,64 @@ function collectGroupedImages(imageFiles = []) {
   return groups
 }
 
+function sortGroupStackFiles(files = []) {
+  const list = Array.isArray(files) ? files : []
+
+  return [...list].sort((left, right) => {
+    const leftName = String(left?.fileName || '').toLowerCase()
+    const rightName = String(right?.fileName || '').toLowerCase()
+    const leftType = getMediaTypeFromExt(left?.ext)
+    const rightType = getMediaTypeFromExt(right?.ext)
+    const leftIsAnimation = /animated|animation/.test(leftName)
+    const rightIsAnimation = /animated|animation/.test(rightName)
+
+    if (leftIsAnimation && !rightIsAnimation) return -1
+    if (!leftIsAnimation && rightIsAnimation) return 1
+
+    if (leftType === 'video' && rightType !== 'video') return -1
+    if (leftType !== 'video' && rightType === 'video') return 1
+
+    const leftCardOrderMatch = leftName.match(/-(\d+)(?:\.|\s|$)/)
+    const rightCardOrderMatch = rightName.match(/-(\d+)(?:\.|\s|$)/)
+    const leftCardOrder = leftCardOrderMatch ? Number.parseInt(leftCardOrderMatch[1], 10) : Number.POSITIVE_INFINITY
+    const rightCardOrder = rightCardOrderMatch ? Number.parseInt(rightCardOrderMatch[1], 10) : Number.POSITIVE_INFINITY
+
+    if (leftCardOrder !== rightCardOrder) {
+      return leftCardOrder - rightCardOrder
+    }
+
+    return leftName.localeCompare(rightName, undefined, { numeric: true, sensitivity: 'base' })
+  })
+}
+
+function pickStackItems(files = []) {
+  const sorted = sortGroupStackFiles(files)
+  if (!sorted.length) return []
+
+  const animation = sorted.find((file) => {
+    const fileName = String(file?.fileName || '').toLowerCase()
+    const mediaType = getMediaTypeFromExt(file?.ext)
+    return mediaType === 'video' || /animated|animation/.test(fileName)
+  })
+
+  const images = sorted.filter((file) => getMediaTypeFromExt(file?.ext) === 'image')
+  const topTwoImages = images.slice(0, 2)
+
+  const picked = []
+  if (animation) picked.push(animation)
+  picked.push(...topTwoImages)
+
+  if (picked.length < 3) {
+    for (const file of sorted) {
+      if (picked.includes(file)) continue
+      picked.push(file)
+      if (picked.length >= 3) break
+    }
+  }
+
+  return picked.slice(0, 3)
+}
+
 function deriveLookbookGroups(mediaFiles = [], itemLink = '/portal/login') {
   const groupedImages = collectGroupedImages(mediaFiles)
   const groupKeys = sortWithNumbers(Array.from(groupedImages.keys()))
@@ -262,7 +320,8 @@ function deriveLookbookGroups(mediaFiles = [], itemLink = '/portal/login') {
 
   const lookbookGroups = leafGroupKeys.map((groupKey) => {
     const files = groupedImages.get(groupKey) || []
-    const pages = buildMediaItems(files, itemLink)
+    const stackFiles = pickStackItems(files)
+    const pages = buildMediaItems(stackFiles, itemLink)
     const firstImagePage = pages.find((page) => page.mediaType === 'image')
     const fallbackHero = firstImagePage?.imageUrl || pages[0]?.imageUrl || '/logo.png'
     const heroImage = fallbackHero

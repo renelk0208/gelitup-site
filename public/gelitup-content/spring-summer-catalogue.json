@@ -230,7 +230,7 @@
     {
       "id": "Spring Summer/2609",
       "title": "2609",
-      "heroImage": "/gelitup-media/images/news/Spring Summer/2609/2609.jpg",
+      "heroImage": "/gelitup-media/images/news/Spring Summer/2609/2609-1.jpg",
       "pages": [
         {
           "title": "2609 Animated",
@@ -239,26 +239,14 @@
           "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
         },
         {
-          "title": "2609",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/2609/2609.jpg",
+          "title": "2609 1",
+          "imageUrl": "/gelitup-media/images/news/Spring Summer/2609/2609-1.jpg",
           "mediaType": "image",
           "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
         },
         {
-          "title": "2609",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/2609/2609.png",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "Gelitup Cloudancer 2609 Card Hand",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/2609/gelitup_cloudancer_2609_card_hand.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "Gelitup Cloudancer Green Hand",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/2609/gelitup_cloudancer_green_hand.jpg",
+          "title": "2609 2",
+          "imageUrl": "/gelitup-media/images/news/Spring Summer/2609/2609-2.jpg",
           "mediaType": "image",
           "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
         }
@@ -267,7 +255,7 @@
     {
       "id": "Spring Summer/2610",
       "title": "2610",
-      "heroImage": "/gelitup-media/images/news/Spring Summer/2610/2610.jpg",
+      "heroImage": "/gelitup-media/images/news/Spring Summer/2610/2610-1.jpg",
       "pages": [
         {
           "title": "2610 Animated",
@@ -276,171 +264,14 @@
           "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
         },
         {
-          "title": "2610",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/2610/2610.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2610",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/2610/2610.png",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "Gelitup Cloudancer 2610 Card Hand",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/2610/gelitup_cloudancer_2610_card_hand.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "Gelitup Cloudancer Purple",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/2610/gelitup_cloudancer_purple.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        }
-      ]
-    },
-    {
-      "id": "Spring Summer/NEWS Carousel",
-      "title": "NEWS Carousel",
-      "heroImage": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2600-1.jpg",
-      "pages": [
-        {
-          "title": "2600 1",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2600-1.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2600 2",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2600-2.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2601 1",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2601-1.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2601 2",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2601-2.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2602 1",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2602-1.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2602 2",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2602-2.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2603 1",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2603-1.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2603 2",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2603-2.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2604 1",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2604-1.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2604 2",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2604-2.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2605 1 (1)",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2605-1 (1).jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2605 2",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2605-2.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2606 1 (1)",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2606-1 (1).jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2606 2",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2606-2.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2607 1",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2607-1.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2607 2",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2607-2.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2608 1",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2608-1.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2608 2",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2608-2.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2609 1",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2609-1.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "2609 2",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2609-2.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
           "title": "2610 1",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2610-1.jpg",
+          "imageUrl": "/gelitup-media/images/news/Spring Summer/2610/2610-1.jpg",
           "mediaType": "image",
           "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
         },
         {
           "title": "2610 2",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/2610-2.jpg",
-          "mediaType": "image",
-          "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-        },
-        {
-          "title": "Primary Image Starting On Carousel",
-          "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel/Primary Image - Starting on Carousel.jpg",
+          "imageUrl": "/gelitup-media/images/news/Spring Summer/2610/2610-2.jpg",
           "mediaType": "image",
           "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
         }
