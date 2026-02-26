@@ -5,6 +5,12 @@
   "portalLink": "/portal/login",
   "items": [
     {
+      "title": "Primary Image Starting On Carousel",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/Primary Image - Starting on Carousel.jpg",
+      "mediaType": "image",
+      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
+    },
+    {
       "title": "2600 2",
       "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2600-2.jpg",
       "mediaType": "image",

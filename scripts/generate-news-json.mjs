@@ -12,6 +12,7 @@ const supportedVideoExtensions = new Set(['.mp4', '.webm', '.mov', '.m4v'])
 const homeCarouselFolderPrefix = 'Spring Summer/NEWS Carousel/'
 const homeCarouselPrimaryBaseName = 'Primary Image - Starting on Carousel'
 const aboutPortraitFolderPrefix = 'Spring Summer/1088x1440/'
+const aboutPortraitPrimaryBaseName = 'Primary Image - Starting on Carousel'
 
 const ABOUT_DEFAULTS = {
   introText: 'The new professional neutral. 2026 begins with softness, refinement, and intention. Cloud Dancer Series introduces illuminated tones that enhance the nail without overpowering it. Modern shades designed to feel effortless, elevated, and timeless. Minimalism becomes the new expression of confidence.',
@@ -377,15 +378,48 @@ function buildHomeCarouselItems(mediaFiles = []) {
   })
 }
 
+function sortAboutPortraitFiles(files = []) {
+  const prepared = files
+    .map((file) => {
+      const relativePath = String(file?.relativePath || '').trim()
+      if (!relativePath) return null
+
+      const baseName = path.basename(relativePath, path.extname(relativePath)).trim()
+      const lowerBaseName = baseName.toLowerCase()
+      const primaryLower = aboutPortraitPrimaryBaseName.toLowerCase()
+      const isPrimary = lowerBaseName === primaryLower || lowerBaseName.includes(primaryLower)
+      const numberToken = extractFirstNumber(baseName)
+
+      return {
+        file,
+        baseName,
+        isPrimary,
+        numberToken,
+      }
+    })
+    .filter(Boolean)
+
+  prepared.sort((left, right) => {
+    if (left.isPrimary && !right.isPrimary) return -1
+    if (!left.isPrimary && right.isPrimary) return 1
+
+    if (left.numberToken !== right.numberToken) {
+      return left.numberToken - right.numberToken
+    }
+
+    return left.baseName.localeCompare(right.baseName, undefined, { numeric: true, sensitivity: 'base' })
+  })
+
+  return prepared.map((entry) => entry.file)
+}
+
 function buildAboutPortraitItems(mediaFiles = [], itemLink = '/portal/login') {
   const portraitFiles = mediaFiles
     .filter((file) => String(file?.relativePath || '').startsWith(aboutPortraitFolderPrefix))
     .filter((file) => getMediaTypeFromExt(file?.ext) === 'image')
 
-  const ordered = sortWithNumbers(portraitFiles.map((file) => String(file?.relativePath || '').trim()))
+  const ordered = sortAboutPortraitFiles(portraitFiles)
   return ordered
-    .map((relativePath) => portraitFiles.find((file) => file.relativePath === relativePath))
-    .filter(Boolean)
     .map((file, index) => {
       const relativePath = String(file?.relativePath || '').trim()
       return {
