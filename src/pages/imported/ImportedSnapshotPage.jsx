@@ -4,6 +4,7 @@ import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/gelitup_official/'
+const CLOUDS_BACKDROP_VIDEO_URL = '/gelitup-media/videos/floatingclouds.mp4'
 const ABOUT_US_NEWS_DEFAULT = {
   introText: 'Inspired by bold summer tones, luminous finishes, and editorial nail artistry for the 2026 season.',
   title: 'Spring/Summer 2026',
@@ -647,9 +648,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
       manifestoVisual
       && (manifestoVisual.displayUrl.toLowerCase().includes('.mp4') || manifestoVisual.displayUrl.toLowerCase().includes('.webm')),
     )
-    const exhibitionsBackdropVideoUrl =
-      (visualIsVideo ? manifestoVisual?.displayUrl : '')
-      || (/\.(mp4|webm|mov|m4v)(\?|$)/i.test(String(fallbackVideo || '').trim()) ? fallbackVideo : '')
+    const exhibitionsBackdropVideoUrl = CLOUDS_BACKDROP_VIDEO_URL
     const sortedExhibitionEvents = sortEventsByDate(aboutUsExhibitions.events || [])
 
     return (
@@ -704,14 +703,14 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
               controls={false}
             />
           )}
-          <div className="absolute inset-0 bg-[#1A1A1A]/75" />
+          <div className="absolute inset-0 bg-[#1A1A1A]/62" />
 
           <div className="relative mx-auto max-w-6xl">
             <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8">
               <div className="rounded-2xl border border-white/15 bg-black/30 p-5 sm:p-6">
-                <p className="text-3xl font-black uppercase tracking-[0.18em] text-[#D43790] sm:text-4xl">Exhibitions</p>
-                <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.12em] text-white sm:text-3xl">{aboutUsExhibitions.title}</h2>
-                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base">{aboutUsExhibitions.introText}</p>
+                <p className="text-3xl font-black uppercase tracking-[0.18em] text-[#D43790] drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-4xl">Exhibitions</p>
+                <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.12em] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.65)] sm:text-3xl">{aboutUsExhibitions.title}</h2>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/90 drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)] sm:text-base">{aboutUsExhibitions.introText}</p>
               </div>
 
               <div className="space-y-3">
