@@ -2689,8 +2689,8 @@ function FullCataloguePage() {
 
                   return (
                     <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 hover:scale-[1.05] hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`}>
-                      <div className="flex h-56 w-full items-center justify-center bg-white p-2 sm:h-60">
-                        <img src={item.imageUrl} alt={item.name} loading="lazy" className="max-h-full w-full object-contain" />
+                      <div className="flex h-56 w-full items-center justify-center overflow-hidden bg-white p-2 sm:h-60">
+                        <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full scale-[1.025] object-cover" />
                       </div>
                       <div className="border-t border-black/10 px-2.5 py-2">
                         <p className="truncate text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
