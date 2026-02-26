@@ -65,11 +65,31 @@ function resolveNewsMediaType(item = {}) {
 
 function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl }) {
   const canvasRef = useRef(null)
+  const backgroundVideoRef = useRef(null)
   const pdfDocumentRef = useRef(null)
   const [aspectRatio, setAspectRatio] = useState(210 / 297)
   const [hasRenderError, setHasRenderError] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+
+  useEffect(() => {
+    const videoElement = backgroundVideoRef.current
+    if (!videoElement || !backgroundVideoUrl) return
+
+    const tryPlay = () => {
+      const playPromise = videoElement.play()
+      if (playPromise?.catch) {
+        playPromise.catch(() => {})
+      }
+    }
+
+    tryPlay()
+    videoElement.addEventListener('loadeddata', tryPlay)
+
+    return () => {
+      videoElement.removeEventListener('loadeddata', tryPlay)
+    }
+  }, [backgroundVideoUrl])
 
   useEffect(() => {
     let isCancelled = false
@@ -191,31 +211,35 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl
     <div className="relative h-full w-full overflow-hidden bg-black" style={{ aspectRatio }}>
       {backgroundVideoUrl && (
         <video
+          ref={backgroundVideoRef}
           src={backgroundVideoUrl}
           className="absolute inset-0 z-0 h-full w-full object-cover opacity-60"
           autoPlay
           muted
           loop
           playsInline
+          webkit-playsinline="true"
           controls={false}
           preload="metadata"
           aria-hidden="true"
         />
       )}
 
-      {hasRenderError
-        ? (
-          <img
-            src={fallbackImageUrl}
-            alt={altText}
-            className="relative z-[1] h-full w-full object-contain"
-            loading="lazy"
-            onError={(event) => {
-              event.currentTarget.src = '/logo.png'
-            }}
-          />
-          )
-        : <canvas ref={canvasRef} className="relative z-[1] block h-full w-full" aria-label={altText} />}
+      <div className="relative z-[1] h-full w-full p-2 sm:p-3">
+        {hasRenderError
+          ? (
+            <img
+              src={fallbackImageUrl}
+              alt={altText}
+              className="h-full w-full rounded-md bg-black object-contain"
+              loading="lazy"
+              onError={(event) => {
+                event.currentTarget.src = '/logo.png'
+              }}
+            />
+            )
+          : <canvas ref={canvasRef} className="block h-full w-full rounded-md bg-white" aria-label={altText} />}
+      </div>
 
       {!hasRenderError && totalPages > 1 && (
         <div className="absolute right-2 top-1/2 z-10 flex -translate-y-1/2 flex-col items-center gap-1 rounded-lg bg-black/70 p-1.5 text-[11px] font-semibold text-white">
