@@ -63,7 +63,7 @@ function resolveNewsMediaType(item = {}) {
   return 'image'
 }
 
-function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText }) {
+function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl }) {
   const canvasRef = useRef(null)
   const pdfDocumentRef = useRef(null)
   const [aspectRatio, setAspectRatio] = useState(210 / 297)
@@ -188,23 +188,37 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText }) {
   const canGoToNextPage = currentPage < totalPages
 
   return (
-    <div className="relative h-full w-full bg-black" style={{ aspectRatio }}>
+    <div className="relative h-full w-full overflow-hidden bg-black" style={{ aspectRatio }}>
+      {backgroundVideoUrl && (
+        <video
+          src={backgroundVideoUrl}
+          className="absolute inset-0 z-0 h-full w-full object-cover opacity-60"
+          autoPlay
+          muted
+          loop
+          playsInline
+          controls={false}
+          preload="metadata"
+          aria-hidden="true"
+        />
+      )}
+
       {hasRenderError
         ? (
           <img
             src={fallbackImageUrl}
             alt={altText}
-            className="h-full w-full object-contain"
+            className="relative z-[1] h-full w-full object-contain"
             loading="lazy"
             onError={(event) => {
               event.currentTarget.src = '/logo.png'
             }}
           />
           )
-        : <canvas ref={canvasRef} className="block h-full w-full" aria-label={altText} />}
+        : <canvas ref={canvasRef} className="relative z-[1] block h-full w-full" aria-label={altText} />}
 
       {!hasRenderError && totalPages > 1 && (
-        <div className="absolute bottom-3 right-3 flex flex-col items-center gap-1 rounded-lg bg-black/60 p-1.5 text-[11px] font-semibold text-white">
+        <div className="absolute right-2 top-1/2 z-10 flex -translate-y-1/2 flex-col items-center gap-1 rounded-lg bg-black/70 p-1.5 text-[11px] font-semibold text-white">
           <button
             type="button"
             aria-label="Previous PDF page"
@@ -372,6 +386,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
               imageUrl: String(item?.imageUrl || '').trim(),
               mediaType: String(item?.mediaType || '').trim().toLowerCase(),
               link: String(item?.link || '').trim(),
+              backgroundVideoUrl: String(item?.backgroundVideoUrl || '').trim(),
             }))
             .filter((item) => item.imageUrl)
           : []
@@ -686,6 +701,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                             pdfUrl={pdfHref}
                             fallbackImageUrl={item.imageUrl}
                             altText="Spring/Summer lookbook PDF preview"
+                            backgroundVideoUrl={item.backgroundVideoUrl}
                           />
                           )
                         : (
