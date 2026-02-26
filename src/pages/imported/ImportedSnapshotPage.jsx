@@ -224,7 +224,7 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl
         />
       )}
 
-      <div className="relative z-[1] h-full w-full p-2 sm:p-3">
+      <div className="relative z-[1] h-full w-full p-4 sm:p-5 lg:p-6">
         {hasRenderError
           ? (
             <img
