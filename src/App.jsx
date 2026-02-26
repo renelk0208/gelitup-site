@@ -2272,34 +2272,26 @@ function FullCataloguePage() {
     }]
   }, [springSummerLookbook])
 
-  const buildRowsWithLastFour = useCallback((items = []) => {
+  const buildRowsOfFour = useCallback((items = []) => {
     const list = Array.isArray(items) ? items : []
-    if (list.length <= 4) return [list]
+    if (!list.length) return []
 
     const rows = []
-    const fullTriples = Math.floor(list.length / 3)
-    const remainder = list.length % 3
-
-    if (remainder === 1 && fullTriples >= 2) {
-      const tripleRowsCount = fullTriples - 1
-      for (let rowIndex = 0; rowIndex < tripleRowsCount; rowIndex += 1) {
-        const start = rowIndex * 3
-        rows.push(list.slice(start, start + 3))
-      }
-      rows.push(list.slice(tripleRowsCount * 3))
-      return rows
-    }
-
-    for (let index = 0; index < list.length; index += 3) {
-      rows.push(list.slice(index, index + 3))
+    for (let index = 0; index < list.length; index += 4) {
+      rows.push(list.slice(index, index + 4))
     }
 
     return rows
   }, [])
 
+  const displayedLookbookGroups = useMemo(
+    () => lookbookGroups.slice(0, 10),
+    [lookbookGroups],
+  )
+
   const lookbookGroupRows = useMemo(
-    () => buildRowsWithLastFour(lookbookGroups),
-    [buildRowsWithLastFour, lookbookGroups],
+    () => buildRowsOfFour(displayedLookbookGroups),
+    [buildRowsOfFour, displayedLookbookGroups],
   )
 
   const filteredItems = useMemo(() => {
@@ -2385,15 +2377,15 @@ function FullCataloguePage() {
   }, [])
 
   useEffect(() => {
-    if (!lookbookGroups.length) {
+    if (!displayedLookbookGroups.length) {
       setExpandedLookbookGroup(0)
       return
     }
 
-    if (expandedLookbookGroup > lookbookGroups.length - 1) {
-      setExpandedLookbookGroup(lookbookGroups.length - 1)
+    if (expandedLookbookGroup > displayedLookbookGroups.length - 1) {
+      setExpandedLookbookGroup(displayedLookbookGroups.length - 1)
     }
-  }, [expandedLookbookGroup, lookbookGroups.length])
+  }, [displayedLookbookGroups.length, expandedLookbookGroup])
 
   const virtualRowHeight = bulkMode ? 74 : 372
   const totalRows = Math.max(1, Math.ceil(filteredItems.length / gridColumns))
@@ -2750,13 +2742,13 @@ function FullCataloguePage() {
                 return (
                   <div key={`lookbook-group-row-${rowIndex}`} className={`grid gap-3 ${rowColumnClass}`}>
                     {row.map((group) => {
-                      const groupIndex = lookbookGroups.findIndex((candidate) => candidate.id === group.id)
+                      const groupIndex = displayedLookbookGroups.findIndex((candidate) => candidate.id === group.id)
                       const isExpanded = groupIndex === expandedLookbookGroup
                       const pages = Array.isArray(group?.pages) ? group.pages : []
                       const keyPage = pages[0] || null
                       const keyPageType = String(keyPage?.mediaType || '').toLowerCase()
                       const pageCount = pages.length
-                      const pageRows = buildRowsWithLastFour(pages)
+                      const pageRows = buildRowsOfFour(pages)
 
                       return (
                         <article
@@ -2790,9 +2782,6 @@ function FullCataloguePage() {
                                         alt={group.title}
                                         className="h-full w-full rounded-md object-cover"
                                         loading="lazy"
-                                        onError={(event) => {
-                                          event.currentTarget.src = '/logo.png'
-                                        }}
                                       />
                                       )}
                                 </div>
@@ -2860,9 +2849,6 @@ function FullCataloguePage() {
                                                       alt="Spring/Summer lookbook page"
                                                       className="h-full w-full rounded-md object-cover transition duration-300 group-hover:scale-[1.01]"
                                                       loading="lazy"
-                                                      onError={(event) => {
-                                                        event.currentTarget.src = '/logo.png'
-                                                      }}
                                                     />
                                                     )}
                                             </div>
