@@ -69,6 +69,7 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl
   const canvasRef = useRef(null)
   const backgroundVideoRef = useRef(null)
   const pdfDocumentRef = useRef(null)
+  const [aspectRatio, setAspectRatio] = useState(PDF_PREVIEW_ASPECT_RATIO)
   const [hasRenderError, setHasRenderError] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -114,6 +115,13 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl
         pdfDocumentRef.current = pdfDocument
 
         const detectedPages = Math.max(1, Number(pdfDocument.numPages) || 1)
+        const firstPage = await pdfDocument.getPage(1)
+        const firstPageViewport = firstPage.getViewport({ scale: 1 })
+        const firstPageRatio = firstPageViewport.height > 0
+          ? firstPageViewport.width / firstPageViewport.height
+          : PDF_PREVIEW_ASPECT_RATIO
+
+        setAspectRatio(firstPageRatio)
         setTotalPages(detectedPages)
         setCurrentPage(1)
         setHasRenderError(false)
@@ -207,7 +215,7 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl
   const canGoToNextPage = currentPage < totalPages
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-black" style={{ aspectRatio: PDF_PREVIEW_ASPECT_RATIO }}>
+    <div className="relative h-full w-full overflow-hidden bg-black" style={{ aspectRatio }}>
       {backgroundVideoUrl && (
         <video
           ref={backgroundVideoRef}
@@ -237,7 +245,7 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl
               }}
             />
             )
-            : <canvas ref={canvasRef} className="block w-full h-auto rounded-md bg-white" aria-label={altText} />}
+              : <canvas ref={canvasRef} className="block h-full w-full rounded-md bg-white" aria-label={altText} />}
       </div>
 
       {!hasRenderError && totalPages > 1 && (
