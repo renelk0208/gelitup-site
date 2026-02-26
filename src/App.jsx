@@ -9618,7 +9618,7 @@ function App() {
           <Route path="/home" element={<Navigate to="/about-us" replace />} />
           <Route
             path="/about-us"
-            element={LEGACY_MIRROR_ENABLED ? <LegacyMirrorPage pagePath="/" /> : <HomePage />}
+            element={LEGACY_MIRROR_ENABLED ? <LegacyMirrorPage pagePath="/" /> : <Navigate to="/pages/about-us" replace />}
           />
           <Route path="/our-products" element={<Navigate to="/distributor-packages" replace />} />
           <Route
