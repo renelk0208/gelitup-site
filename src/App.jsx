@@ -72,6 +72,7 @@ const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
 const HOME_HERO_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
+const HOME_HERO_POSTER_URL = '/gelitup-media/images/news/Spring%20Summer/NEWS%20Carousel/2600-1.jpg'
 const HOME_NEWS_CLOUD_VIDEO_URL = '/gelitup-media/videos/floatingclouds.mp4'
 const HOME_CLOUD_DANCER_DEFAULT = {
   title: 'Cloud Dancer - The Story',
@@ -3720,6 +3721,7 @@ function HomePage() {
   const [homeNewsCarousel, setHomeNewsCarousel] = useState([])
   const [activeHomeNewsSlide, setActiveHomeNewsSlide] = useState(0)
   const [homeCloudStory, setHomeCloudStory] = useState(HOME_CLOUD_DANCER_DEFAULT)
+  const [enableHomeHeroVideo, setEnableHomeHeroVideo] = useState(false)
 
   useEffect(() => {
     let isMounted = true
@@ -3787,6 +3789,25 @@ function HomePage() {
   }, [])
 
   useEffect(() => {
+    const connection = navigator?.connection || navigator?.mozConnection || navigator?.webkitConnection
+    const connectionType = String(connection?.effectiveType || '').toLowerCase()
+    const hasConstrainedConnection = Boolean(connection?.saveData) || connectionType.includes('2g')
+
+    if (hasConstrainedConnection) {
+      setEnableHomeHeroVideo(false)
+      return undefined
+    }
+
+    const timerId = window.setTimeout(() => {
+      setEnableHomeHeroVideo(true)
+    }, 150)
+
+    return () => {
+      window.clearTimeout(timerId)
+    }
+  }, [])
+
+  useEffect(() => {
     let mounted = true
 
     const loadHomeCloudStory = async () => {
@@ -3837,29 +3858,38 @@ function HomePage() {
     ? Math.min(activeHomeNewsSlide, homeNewsCarousel.length - 1)
     : 0
   const activeHomeNewsItem = homeNewsCarousel[safeHomeNewsIndex] || null
+  const homeHeroVideoSource = enableHomeHeroVideo
+    ? (HOME_HERO_VIDEO_URL || HERO_CINEMATIC_VIDEO_URL || media.heroVideo)
+    : ''
 
   return (
     <section className="space-y-6">
       <div className="mx-auto w-full max-w-6xl overflow-hidden rounded-2xl bg-black">
         <div className="relative h-[70vh] min-h-[460px] w-full sm:h-[78vh]">
-          {(HOME_HERO_VIDEO_URL || HERO_CINEMATIC_VIDEO_URL || media.heroVideo)
+          {homeHeroVideoSource
             ? (
               <video
                 className="h-full w-full object-cover object-[50%_35%]"
-                src={HOME_HERO_VIDEO_URL || HERO_CINEMATIC_VIDEO_URL || media.heroVideo}
+                src={homeHeroVideoSource}
+                poster={HOME_HERO_POSTER_URL || media.heroImage}
                 muted
                 autoPlay
                 loop
                 playsInline
                 controls={false}
+                preload="metadata"
+                disablePictureInPicture
               />
               )
             : (
               <img
-                src={media.heroImage}
+                src={HOME_HERO_POSTER_URL || media.heroImage}
                 alt="GEL.IT.UP cinematic hero"
                 className="h-full w-full object-cover"
                 loading="lazy"
+                onError={(event) => {
+                  event.currentTarget.src = media.heroImage || '/logo.png'
+                }}
               />
               )}
 
