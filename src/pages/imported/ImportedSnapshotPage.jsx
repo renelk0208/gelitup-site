@@ -463,14 +463,18 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
       const step = getNewsSlideStep(container)
       if (!step) return
       const maxScrollLeft = container.scrollWidth - container.clientWidth
-      const nextLeft = container.scrollLeft + step
+      const currentIndex = Math.max(0, Math.min(aboutUsNews.items.length - 1, Math.round(container.scrollLeft / step)))
+      const nextIndex = (currentIndex + 1) % aboutUsNews.items.length
+      const nextLeft = nextIndex * step
 
-      if (nextLeft >= maxScrollLeft - 2) {
+      if (nextLeft >= maxScrollLeft - 2 || nextIndex === 0) {
         container.scrollTo({ left: 0, behavior: 'smooth' })
+        setActiveNewsSlide(0)
         return
       }
 
       container.scrollTo({ left: nextLeft, behavior: 'smooth' })
+      setActiveNewsSlide(nextIndex)
     }, 3500)
 
     return () => {
@@ -754,7 +758,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
               })}
             </div>
             {aboutUsNews.items.length > 1 && (
-              <div className="mt-3 flex items-center gap-2">
+              <div className="mx-auto mt-3 flex w-full max-w-[90vw] items-center justify-center gap-2 sm:max-w-[420px] lg:max-w-[460px]">
                 {aboutUsNews.items.map((item, index) => (
                   <button
                     key={`${item.imageUrl}-dot`}
