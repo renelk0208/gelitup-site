@@ -2086,6 +2086,7 @@ function FullCataloguePage() {
   const [showFiveInOneDetails, setShowFiveInOneDetails] = useState(false)
   const [springSummerLookbook, setSpringSummerLookbook] = useState(SPRING_SUMMER_LOOKBOOK_DEFAULT)
   const [expandedLookbookGroup, setExpandedLookbookGroup] = useState(0)
+  const [selectedLookbookPageByGroup, setSelectedLookbookPageByGroup] = useState({})
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
   const virtualContainerRef = useRef(null)
 
@@ -2386,6 +2387,25 @@ function FullCataloguePage() {
       setExpandedLookbookGroup(displayedLookbookGroups.length - 1)
     }
   }, [displayedLookbookGroups.length, expandedLookbookGroup])
+
+  useEffect(() => {
+    const availableGroupIds = new Set(displayedLookbookGroups.map((group) => group.id))
+    setSelectedLookbookPageByGroup((current) => {
+      const next = {}
+      let changed = false
+
+      for (const [groupId, value] of Object.entries(current)) {
+        if (availableGroupIds.has(groupId)) {
+          next[groupId] = value
+        }
+        else {
+          changed = true
+        }
+      }
+
+      return changed ? next : current
+    })
+  }, [displayedLookbookGroups])
 
   const virtualRowHeight = bulkMode ? 74 : 372
   const totalRows = Math.max(1, Math.ceil(filteredItems.length / gridColumns))
@@ -2739,7 +2759,8 @@ function FullCataloguePage() {
                       const groupIndex = displayedLookbookGroups.findIndex((candidate) => candidate.id === group.id)
                       const isExpanded = groupIndex === expandedLookbookGroup
                       const pages = Array.isArray(group?.pages) ? group.pages : []
-                      const keyPage = pages[0] || null
+                      const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), Math.max(0, pages.length - 1)))
+                      const keyPage = pages[selectedPageIndex] || pages[0] || null
                       const keyPageType = String(keyPage?.mediaType || '').toLowerCase()
                       const pageRows = buildRowsOfFour(pages)
 
@@ -2802,14 +2823,20 @@ function FullCataloguePage() {
                                       {pageRow.map((page, pageIndex) => {
                                         const mediaType = String(page?.mediaType || '').toLowerCase()
                                         const aspectClass = mediaType === 'pdf' ? 'aspect-[210/297]' : 'aspect-[9/16]'
+                                        const absolutePageIndex = pageRowIndex * 4 + pageIndex
+                                        const isSelected = absolutePageIndex === selectedPageIndex
 
                                         return (
-                                          <a
+                                          <button
+                                            type="button"
                                             key={`lookbook-page-${group.id}-${page.imageUrl}-${pageIndex}`}
-                                            href={page.link || page.imageUrl}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="group overflow-hidden rounded-lg border border-[#4A4A4A]/20 bg-white transition hover:border-[#D43790]/60"
+                                            onClick={() => {
+                                              setSelectedLookbookPageByGroup((current) => ({
+                                                ...current,
+                                                [group.id]: absolutePageIndex,
+                                              }))
+                                            }}
+                                            className={`group overflow-hidden rounded-lg border bg-white transition ${isSelected ? 'border-[#D43790] shadow-[0_0_0_1px_rgba(212,55,144,0.18)]' : 'border-[#4A4A4A]/20 hover:border-[#D43790]/60'}`}
                                           >
                                             <div className={`${aspectClass} w-full bg-[#F8F8F8] p-1.5`}>
                                               {mediaType === 'video'
@@ -2842,7 +2869,7 @@ function FullCataloguePage() {
                                                     />
                                                     )}
                                             </div>
-                                          </a>
+                                          </button>
                                         )
                                       })}
                                     </div>
