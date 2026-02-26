@@ -1,7 +1,27 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/gelitup_official/'
+const ABOUT_US_NEWS_DEFAULT = {
+  introText: 'Inspired by bold summer tones, luminous finishes, and editorial nail artistry for the 2026 season.',
+  title: 'Spring/Summer 2026',
+  portalLabel: 'Enter Portal',
+  portalLink: '/portal/login',
+  items: [
+    {
+      title: 'Spring/Summer 2026 · 01',
+      imageUrl: '/gelitup-media/images/news/spring-summer-2026-01.webp',
+    },
+    {
+      title: 'Spring/Summer 2026 · 02',
+      imageUrl: '/gelitup-media/images/news/spring-summer-2026-02.webp',
+    },
+    {
+      title: 'Spring/Summer 2026 · 03',
+      imageUrl: '/gelitup-media/images/news/spring-summer-2026-03.webp',
+    },
+  ],
+}
 
 function SnapshotCard({ title, children }) {
   return (
@@ -28,6 +48,10 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
   const [sourceMode, setSourceMode] = useState('snapshot')
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+  const [aboutUsNews, setAboutUsNews] = useState(ABOUT_US_NEWS_DEFAULT)
+  const [isNewsAutoplayEnabled, setIsNewsAutoplayEnabled] = useState(true)
+  const [activeNewsSlide, setActiveNewsSlide] = useState(0)
+  const newsCarouselRef = useRef(null)
 
   useEffect(() => {
     let isMounted = true
@@ -98,6 +122,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
 
   const customPage = customPagesBySlug[slug]
   const hasCustomContent = Boolean(customPage)
+  const isAboutUsManifesto = slug === 'about-us'
 
   const activePage = useMemo(() => {
     if (sourceMode === 'custom' && customPage) {
@@ -122,6 +147,127 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
       setSourceMode('snapshot')
     }
   }, [hasCustomContent, sourceMode])
+
+  useEffect(() => {
+    if (!isAboutUsManifesto) {
+      return undefined
+    }
+
+    let isMounted = true
+
+    const loadAboutUsNews = async () => {
+      try {
+        const response = await fetch('/gelitup-content/about-us-news.json')
+        if (!response.ok) {
+          return
+        }
+
+        const payload = await response.json()
+        if (!isMounted) {
+          return
+        }
+
+        const items = Array.isArray(payload?.items)
+          ? payload.items
+            .map((item) => ({
+              title: String(item?.title || '').trim(),
+              imageUrl: String(item?.imageUrl || '').trim(),
+              link: String(item?.link || '').trim(),
+            }))
+            .filter((item) => item.title && item.imageUrl)
+          : []
+
+        if (!items.length) {
+          return
+        }
+
+        setAboutUsNews({
+          introText: String(payload?.introText || ABOUT_US_NEWS_DEFAULT.introText).trim() || ABOUT_US_NEWS_DEFAULT.introText,
+          title: String(payload?.title || ABOUT_US_NEWS_DEFAULT.title).trim() || ABOUT_US_NEWS_DEFAULT.title,
+          portalLabel: String(payload?.portalLabel || ABOUT_US_NEWS_DEFAULT.portalLabel).trim() || ABOUT_US_NEWS_DEFAULT.portalLabel,
+          portalLink: String(payload?.portalLink || ABOUT_US_NEWS_DEFAULT.portalLink).trim() || ABOUT_US_NEWS_DEFAULT.portalLink,
+          items,
+        })
+      }
+      catch {
+        if (!isMounted) return
+      }
+    }
+
+    void loadAboutUsNews()
+
+    return () => {
+      isMounted = false
+    }
+  }, [isAboutUsManifesto])
+
+  useEffect(() => {
+    if (!isAboutUsManifesto || !isNewsAutoplayEnabled || aboutUsNews.items.length <= 1) {
+      return undefined
+    }
+
+    const intervalId = window.setInterval(() => {
+      const container = newsCarouselRef.current
+      if (!container) {
+        return
+      }
+
+      const firstSlide = container.querySelector('[data-news-slide="true"]')
+      if (!firstSlide) {
+        return
+      }
+
+      const slideWidth = firstSlide.getBoundingClientRect().width
+      const slideGap = 12
+      const step = slideWidth + slideGap
+      const maxScrollLeft = container.scrollWidth - container.clientWidth
+      const nextLeft = container.scrollLeft + step
+
+      if (nextLeft >= maxScrollLeft - 2) {
+        container.scrollTo({ left: 0, behavior: 'smooth' })
+        return
+      }
+
+      container.scrollTo({ left: nextLeft, behavior: 'smooth' })
+    }, 3500)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [aboutUsNews.items.length, isAboutUsManifesto, isNewsAutoplayEnabled])
+
+  useEffect(() => {
+    if (!isAboutUsManifesto || aboutUsNews.items.length <= 1) {
+      setActiveNewsSlide(0)
+      return undefined
+    }
+
+    const container = newsCarouselRef.current
+    if (!container) {
+      return undefined
+    }
+
+    const updateActiveSlide = () => {
+      const firstSlide = container.querySelector('[data-news-slide="true"]')
+      if (!firstSlide) {
+        return
+      }
+
+      const slideWidth = firstSlide.getBoundingClientRect().width
+      const slideGap = 12
+      const step = slideWidth + slideGap
+      const rawIndex = step > 0 ? Math.round(container.scrollLeft / step) : 0
+      const nextIndex = Math.max(0, Math.min(aboutUsNews.items.length - 1, rawIndex))
+      setActiveNewsSlide(nextIndex)
+    }
+
+    updateActiveSlide()
+    container.addEventListener('scroll', updateActiveSlide, { passive: true })
+
+    return () => {
+      container.removeEventListener('scroll', updateActiveSlide)
+    }
+  }, [aboutUsNews.items.length, isAboutUsManifesto])
 
   const previewMedia = useMemo(() => {
     if (!activePage?.mediaRefs?.length) return []
@@ -234,38 +380,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
   const heroMedia = previewMedia[0] || null
   const galleryMedia = previewMedia.slice(1, 7)
   const quickLinks = (activePage?.links || []).slice(0, 8)
-  const isAboutUsManifesto = slug === 'about-us'
   const manifestoVisual = heroMedia || galleryMedia[0] || null
-  const countdownTarget = useMemo(() => {
-    const now = new Date()
-    const target = new Date(now)
-    const dayOfWeek = now.getDay()
-    const daysUntilMonday = dayOfWeek === 1 ? 7 : (8 - dayOfWeek) % 7
-    target.setDate(now.getDate() + daysUntilMonday)
-    target.setHours(9, 0, 0, 0)
-    return target.getTime()
-  }, [])
-  const [countdownNow, setCountdownNow] = useState(() => Date.now())
-
-  useEffect(() => {
-    if (!isAboutUsManifesto) {
-      return undefined
-    }
-
-    const intervalId = window.setInterval(() => {
-      setCountdownNow(Date.now())
-    }, 1000)
-
-    return () => {
-      window.clearInterval(intervalId)
-    }
-  }, [isAboutUsManifesto])
-
-  const countdownRemaining = Math.max(0, countdownTarget - countdownNow)
-  const countdownDays = Math.floor(countdownRemaining / (1000 * 60 * 60 * 24))
-  const countdownHours = Math.floor((countdownRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-  const countdownMinutes = Math.floor((countdownRemaining % (1000 * 60 * 60)) / (1000 * 60))
-  const countdownSeconds = Math.floor((countdownRemaining % (1000 * 60)) / 1000)
 
   if (isLoading) {
     return <p className="text-sm text-slate-600">Loading page baseline...</p>
@@ -333,13 +448,83 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
         </div>
 
         <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-10 sm:px-8 sm:py-12">
-          <div className="mx-auto max-w-6xl text-center">
-            <p className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#D43790] sm:text-5xl">
-              {String(countdownDays).padStart(2, '0')} : {String(countdownHours).padStart(2, '0')} : {String(countdownMinutes).padStart(2, '0')} : {String(countdownSeconds).padStart(2, '0')}
-            </p>
-            <p className="mt-4 text-sm font-extrabold uppercase tracking-[0.1em] text-white sm:text-lg">
-              NEW COLOUR REVEAL COMING SOON. WATCH THIS SPACE.
-            </p>
+          <div className="mx-auto max-w-6xl">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-sm text-white/80 sm:text-base">{aboutUsNews.introText}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#D43790]">News</p>
+                <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.12em] text-white sm:text-3xl">{aboutUsNews.title}</h2>
+              </div>
+              <NavLink
+                to={aboutUsNews.portalLink}
+                className="inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-[#BF3182]"
+              >
+                {aboutUsNews.portalLabel}
+              </NavLink>
+            </div>
+
+            <div
+              ref={newsCarouselRef}
+              className="mt-5 flex snap-x gap-3 overflow-x-auto pb-1 [scrollbar-width:thin]"
+              onClick={() => {
+                setIsNewsAutoplayEnabled(false)
+              }}
+            >
+              {aboutUsNews.items.map((item) => (
+                <article key={item.imageUrl} data-news-slide="true" className="w-[210px] shrink-0 snap-start overflow-hidden rounded-2xl border border-white/15 bg-black/20 sm:w-[240px] lg:w-[260px]">
+                  <div className="w-full" style={{ aspectRatio: '9 / 16' }}>
+                    <a href={item.link || item.imageUrl} target="_blank" rel="noreferrer" className="block h-full w-full">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.title}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    </a>
+                  </div>
+                  <p className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/90">{item.title}</p>
+                </article>
+              ))}
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <p className="text-xs text-white/70">
+                {isNewsAutoplayEnabled ? 'Auto sliding enabled. Click the carousel to pause.' : 'Auto sliding paused.'}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsNewsAutoplayEnabled((current) => !current)
+                }}
+                className="inline-flex rounded-md bg-[#D43790] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white transition duration-200 hover:bg-[#BF3182]"
+              >
+                {isNewsAutoplayEnabled ? 'Pause' : 'Play'}
+              </button>
+            </div>
+            {aboutUsNews.items.length > 1 && (
+              <div className="mt-3 flex items-center gap-2">
+                {aboutUsNews.items.map((item, index) => (
+                  <button
+                    key={`${item.imageUrl}-dot`}
+                    type="button"
+                    aria-label={`Go to slide ${index + 1}`}
+                    onClick={() => {
+                      const container = newsCarouselRef.current
+                      const firstSlide = container?.querySelector('[data-news-slide="true"]')
+                      if (!container || !firstSlide) {
+                        return
+                      }
+
+                      const slideWidth = firstSlide.getBoundingClientRect().width
+                      const slideGap = 12
+                      const targetLeft = index * (slideWidth + slideGap)
+                      container.scrollTo({ left: targetLeft, behavior: 'smooth' })
+                      setActiveNewsSlide(index)
+                    }}
+                    className={`h-2.5 w-2.5 rounded-full transition ${activeNewsSlide === index ? 'bg-[#D43790]' : 'bg-white/35 hover:bg-white/55'}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

@@ -7,7 +7,7 @@ import L from 'leaflet'
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
-import appLogo from '/logo.png'
+import appLogo from '/gelitup_logo.png'
 import PWABadge from './PWABadge.jsx'
 import ImportedAnyPage from './pages/imported/ImportedAnyPage.jsx'
 import { hasSupabaseConfig, supabase } from './lib/supabaseClient'
@@ -1732,6 +1732,28 @@ function isColorsCategoryName(categoryName = '') {
   return normalizeCatalogueToken(categoryName).includes('COLOR')
 }
 
+function toTitleCaseLabel(value = '') {
+  const text = String(value || '').trim()
+  if (!text) return ''
+
+  const minorWords = new Set(['and', 'or', 'to', 'of', 'the', 'a', 'an', 'in', 'on', 'for', 'by', 'with'])
+
+  return text
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word, index) => {
+      const parts = word.split('-')
+      return parts
+        .map((part) => {
+          if (!part) return part
+          if (minorWords.has(part) && index !== 0) return part
+          return part.charAt(0).toUpperCase() + part.slice(1)
+        })
+        .join('-')
+    })
+    .join(' ')
+}
+
 function formatSubcategoryDisplayName(subcategoryName = '') {
   // Transform specific subcategory names for display
   const normalized = normalizeCatalogueToken(subcategoryName)
@@ -1790,7 +1812,7 @@ function formatSubcategoryDisplayName(subcategoryName = '') {
   if (normalized === 'PROFESSIONAL') return 'Professional'
   if (normalized === 'AUTHORITY') return 'Authority'
   
-  return subcategoryName
+  return toTitleCaseLabel(subcategoryName)
 }
 
 function buildCategoryHeroImageCandidates(categoryName = '', fallbackImageUrl = '') {
@@ -1997,6 +2019,52 @@ function getSubcategoryProductInformation(categoryName = '', subcategoryName = '
   return PRODUCT_INFORMATION_BY_SUBCATEGORY[`${categoryToken}::${subcategoryToken}`] || null
 }
 
+const SPRING_SUMMER_LOOKBOOK_DEFAULT = {
+  title: 'Spring/Summer Collection 2026 Lookbook',
+  subtitle: 'Flip through the seasonal edit before exploring the full catalogue.',
+  groups: [
+    {
+      id: 'default',
+      title: 'Spring/Summer 2026',
+      heroImage: '/gelitup-media/images/news/spring-summer-2026-01.webp',
+      pages: [
+        {
+          title: 'Spring/Summer 2026 · 01',
+          imageUrl: '/gelitup-media/images/news/spring-summer-2026-01.webp',
+          link: '/portal/login',
+        },
+        {
+          title: 'Spring/Summer 2026 · 02',
+          imageUrl: '/gelitup-media/images/news/spring-summer-2026-02.webp',
+          link: '/portal/login',
+        },
+        {
+          title: 'Spring/Summer 2026 · 03',
+          imageUrl: '/gelitup-media/images/news/spring-summer-2026-03.webp',
+          link: '/portal/login',
+        },
+      ],
+    },
+  ],
+  pages: [
+    {
+      title: 'Spring/Summer 2026 · 01',
+      imageUrl: '/gelitup-media/images/news/spring-summer-2026-01.webp',
+      link: '/portal/login',
+    },
+    {
+      title: 'Spring/Summer 2026 · 02',
+      imageUrl: '/gelitup-media/images/news/spring-summer-2026-02.webp',
+      link: '/portal/login',
+    },
+    {
+      title: 'Spring/Summer 2026 · 03',
+      imageUrl: '/gelitup-media/images/news/spring-summer-2026-03.webp',
+      link: '/portal/login',
+    },
+  ],
+}
+
 function FullCataloguePage() {
   const [sections, setSections] = useState([])
   const [activeCategory, setActiveCategory] = useState('')
@@ -2016,6 +2084,9 @@ function FullCataloguePage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [showSuperbondDetails, setShowSuperbondDetails] = useState(false)
   const [showFiveInOneDetails, setShowFiveInOneDetails] = useState(false)
+  const [springSummerLookbook, setSpringSummerLookbook] = useState(SPRING_SUMMER_LOOKBOOK_DEFAULT)
+  const [activeLookbookGroup, setActiveLookbookGroup] = useState(0)
+  const [activeLookbookPage, setActiveLookbookPage] = useState(0)
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
   const virtualContainerRef = useRef(null)
 
@@ -2068,6 +2139,95 @@ function FullCataloguePage() {
     }
   }, [])
 
+  useEffect(() => {
+    let mounted = true
+
+    const loadLookbook = async () => {
+      try {
+        const response = await fetch('/gelitup-content/spring-summer-catalogue.json')
+        if (!response.ok) {
+          if (mounted) setSpringSummerLookbook(SPRING_SUMMER_LOOKBOOK_DEFAULT)
+          return
+        }
+
+        const payload = await response.json()
+        if (!mounted) return
+
+        const normalizedPages = Array.isArray(payload?.pages)
+          ? payload.pages
+            .filter((item) => item && typeof item === 'object')
+            .map((item, index) => {
+              const imageUrl = String(item?.imageUrl || '').trim()
+              if (!imageUrl) return null
+              return {
+                title: String(item?.title || `Page ${index + 1}`).trim() || `Page ${index + 1}`,
+                imageUrl,
+                link: String(item?.link || '').trim(),
+              }
+            })
+            .filter(Boolean)
+          : []
+
+        const normalizedGroups = Array.isArray(payload?.groups)
+          ? payload.groups
+            .filter((group) => group && typeof group === 'object')
+            .map((group, groupIndex) => {
+              const groupPages = Array.isArray(group?.pages)
+                ? group.pages
+                  .filter((item) => item && typeof item === 'object')
+                  .map((item, index) => {
+                    const imageUrl = String(item?.imageUrl || '').trim()
+                    if (!imageUrl) return null
+                    return {
+                      title: String(item?.title || `Page ${index + 1}`).trim() || `Page ${index + 1}`,
+                      imageUrl,
+                      link: String(item?.link || '').trim(),
+                    }
+                  })
+                  .filter(Boolean)
+                : []
+
+              if (!groupPages.length) return null
+
+              return {
+                id: String(group?.id || `group-${groupIndex + 1}`).trim() || `group-${groupIndex + 1}`,
+                title: String(group?.title || `Collection ${groupIndex + 1}`).trim() || `Collection ${groupIndex + 1}`,
+                heroImage: String(group?.heroImage || groupPages[0]?.imageUrl || '/logo.png').trim() || '/logo.png',
+                pages: groupPages,
+              }
+            })
+            .filter(Boolean)
+          : []
+
+        const fallbackPages = normalizedPages.length ? normalizedPages : SPRING_SUMMER_LOOKBOOK_DEFAULT.pages
+        const fallbackGroups = normalizedGroups.length
+          ? normalizedGroups
+          : [{
+            id: 'default',
+            title: 'Spring/Summer 2026',
+            heroImage: fallbackPages[0]?.imageUrl || '/logo.png',
+            pages: fallbackPages,
+          }]
+
+        setSpringSummerLookbook({
+          title: String(payload?.title || SPRING_SUMMER_LOOKBOOK_DEFAULT.title).trim() || SPRING_SUMMER_LOOKBOOK_DEFAULT.title,
+          subtitle: String(payload?.subtitle || SPRING_SUMMER_LOOKBOOK_DEFAULT.subtitle).trim() || SPRING_SUMMER_LOOKBOOK_DEFAULT.subtitle,
+          groups: fallbackGroups,
+          pages: fallbackPages,
+        })
+      }
+      catch {
+        if (mounted) setSpringSummerLookbook(SPRING_SUMMER_LOOKBOOK_DEFAULT)
+      }
+    }
+
+    void loadLookbook()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
+
   const activeSection = sections.find((section) => section.category === activeCategory) || null
   const subcategoryOptions = useMemo(() => {
     if (!activeSection) return []
@@ -2096,6 +2256,30 @@ function FullCataloguePage() {
   }, [activeSection, activeSubcategory])
 
   const isColorsCategory = isColorsCategoryName(activeSection?.category)
+  const lookbookGroups = useMemo(() => {
+    const groups = Array.isArray(springSummerLookbook?.groups) ? springSummerLookbook.groups : []
+    if (groups.length) return groups
+
+    const pages = Array.isArray(springSummerLookbook?.pages) ? springSummerLookbook.pages : []
+    if (!pages.length) return []
+
+    return [{
+      id: 'default',
+      title: 'Spring/Summer 2026',
+      heroImage: pages[0]?.imageUrl || '/logo.png',
+      pages,
+    }]
+  }, [springSummerLookbook])
+
+  const safeLookbookGroup = lookbookGroups.length
+    ? Math.min(activeLookbookGroup, lookbookGroups.length - 1)
+    : 0
+  const activeLookbookGroupItem = lookbookGroups[safeLookbookGroup] || null
+  const lookbookPages = Array.isArray(activeLookbookGroupItem?.pages) ? activeLookbookGroupItem.pages : []
+  const safeLookbookPage = lookbookPages.length
+    ? Math.min(activeLookbookPage, lookbookPages.length - 1)
+    : 0
+  const activeLookbookItem = lookbookPages[safeLookbookPage] || null
 
   const filteredItems = useMemo(() => {
     const colorFiltered = (!isColorsCategory || activeColorFamily === 'ALL')
@@ -2178,6 +2362,46 @@ function FullCataloguePage() {
       window.clearInterval(intervalId)
     }
   }, [])
+
+  useEffect(() => {
+    if (!lookbookGroups.length) {
+      setActiveLookbookGroup(0)
+      return
+    }
+
+    if (activeLookbookGroup > lookbookGroups.length - 1) {
+      setActiveLookbookGroup(lookbookGroups.length - 1)
+    }
+  }, [activeLookbookGroup, lookbookGroups.length])
+
+  useEffect(() => {
+    setActiveLookbookPage(0)
+  }, [safeLookbookGroup])
+
+  useEffect(() => {
+    if (!lookbookPages.length) {
+      setActiveLookbookPage(0)
+      return
+    }
+
+    if (activeLookbookPage > lookbookPages.length - 1) {
+      setActiveLookbookPage(lookbookPages.length - 1)
+    }
+  }, [activeLookbookPage, lookbookPages.length])
+
+  const handleLookbookPrevious = useCallback(() => {
+    setActiveLookbookPage((current) => {
+      if (!lookbookPages.length) return 0
+      return current === 0 ? lookbookPages.length - 1 : current - 1
+    })
+  }, [lookbookPages.length])
+
+  const handleLookbookNext = useCallback(() => {
+    setActiveLookbookPage((current) => {
+      if (!lookbookPages.length) return 0
+      return current === lookbookPages.length - 1 ? 0 : current + 1
+    })
+  }, [lookbookPages.length])
 
   const virtualRowHeight = bulkMode ? 74 : 372
   const totalRows = Math.max(1, Math.ceil(filteredItems.length / gridColumns))
@@ -2518,6 +2742,108 @@ function FullCataloguePage() {
 
       {!isLoading && !errorMessage && sections.length > 0 && (
         <>
+          <div className="mx-auto max-w-6xl rounded-2xl border border-[#4A4A4A]/25 bg-white p-4 sm:p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">Spring / Summer Collection</p>
+            <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.08em] text-[#1A1A1A] sm:text-3xl">{springSummerLookbook.title}</h2>
+            <p className="mt-2 max-w-2xl text-sm text-[#1A1A1A]/75 sm:text-base">{springSummerLookbook.subtitle}</p>
+
+            {lookbookGroups.length > 1 && (
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {lookbookGroups.map((group, index) => {
+                  const isActiveGroup = index === safeLookbookGroup
+                  const pageCount = Array.isArray(group?.pages) ? group.pages.length : 0
+
+                  return (
+                    <button
+                      key={`lookbook-group-${group.id}-${index}`}
+                      type="button"
+                      onClick={() => setActiveLookbookGroup(index)}
+                      className={`group overflow-hidden rounded-xl border bg-white text-left transition ${isActiveGroup ? 'border-[#D43790] shadow-[0_0_0_1px_rgba(212,55,144,0.25)]' : 'border-[#4A4A4A]/25 hover:border-[#D43790]/60'}`}
+                    >
+                      <div className="relative h-36 bg-[#F8F8F8] p-2">
+                        <img
+                          src={group.heroImage || '/logo.png'}
+                          alt={group.title}
+                          className="h-full w-full rounded-lg object-cover"
+                          loading="lazy"
+                          onError={(event) => {
+                            event.currentTarget.src = '/logo.png'
+                          }}
+                        />
+                        <div className="absolute right-3 top-3 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white">
+                          {pageCount} pages
+                        </div>
+                      </div>
+                      <div className="border-t border-[#4A4A4A]/15 px-3 py-2">
+                        <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#1A1A1A]">{group.title}</p>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
+            {activeLookbookGroupItem && (
+              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.1em] text-[#1A1A1A]/70">{activeLookbookGroupItem.title}</p>
+            )}
+
+            {activeLookbookItem && (
+              <div className="mt-5 grid gap-4 sm:grid-cols-[auto,1fr,auto] sm:items-center">
+                <button
+                  type="button"
+                  onClick={handleLookbookPrevious}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#4A4A4A]/30 text-lg font-bold text-[#1A1A1A] transition hover:border-[#D43790] hover:text-[#D43790]"
+                  aria-label="Previous lookbook page"
+                >
+                  ‹
+                </button>
+
+                <a
+                  href={activeLookbookItem.link || '/portal/login'}
+                  className="group mx-auto block w-full max-w-xs"
+                >
+                  <div className="overflow-hidden rounded-xl border border-[#4A4A4A]/20 bg-[#F8F8F8]">
+                    <div className="aspect-[9/16] w-full bg-white p-2">
+                      <img
+                        src={activeLookbookItem.imageUrl}
+                        alt={activeLookbookItem.title}
+                        className="h-full w-full rounded-lg object-cover transition duration-500 group-hover:scale-[1.015]"
+                        loading="lazy"
+                        onError={(event) => {
+                          event.currentTarget.src = '/logo.png'
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <p className="mt-2 text-center text-xs font-semibold uppercase tracking-[0.08em] text-[#1A1A1A]/75">{activeLookbookItem.title}</p>
+                </a>
+
+                <button
+                  type="button"
+                  onClick={handleLookbookNext}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#4A4A4A]/30 text-lg font-bold text-[#1A1A1A] transition hover:border-[#D43790] hover:text-[#D43790]"
+                  aria-label="Next lookbook page"
+                >
+                  ›
+                </button>
+              </div>
+            )}
+
+            {lookbookPages.length > 1 && (
+              <div className="mt-4 flex items-center justify-center gap-2">
+                {lookbookPages.map((page, index) => (
+                  <button
+                    key={`lookbook-dot-${page.imageUrl}-${index}`}
+                    type="button"
+                    onClick={() => setActiveLookbookPage(index)}
+                    aria-label={`Go to ${page.title}`}
+                    className={`h-2.5 rounded-full transition ${index === safeLookbookPage ? 'w-7 bg-[#D43790]' : 'w-2.5 bg-[#1A1A1A]/30 hover:bg-[#1A1A1A]/45'}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* FEATURED HERO: SUPERBOND PRIMER */}
           <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
             <div className="mx-auto max-w-6xl">
@@ -3809,7 +4135,7 @@ function PortalLogin({ onLogin, onResendConfirmation, onCheckApproval, onCreateP
     <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
       <div className="bg-slate-900 p-8 text-white">
         <p className="text-xs uppercase tracking-[0.2em] text-slate-300">GEL.IT.UP Trade</p>
-        <h2 className="mt-3 text-3xl font-bold">Professional Access</h2>
+        <h2 className="heading-on-dark mt-3 text-3xl font-bold">Professional Access</h2>
         <p className="mt-4 text-sm text-slate-300">
           Professional Access. Enter your archives and locked pro-pricing.
         </p>
@@ -4053,12 +4379,6 @@ function PortalLogin({ onLogin, onResendConfirmation, onCheckApproval, onCreateP
                 Apply now
               </NavLink>
             </p>
-            <p>
-              Admin reviewer?{' '}
-              <NavLink to="/portal/admin-login" className="font-semibold text-slate-900 hover:underline">
-                Admin Login
-              </NavLink>
-            </p>
           </div>
         </div>
       </div>
@@ -4090,7 +4410,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
     <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
       <div className="bg-slate-900 p-8 text-white">
         <p className="text-xs uppercase tracking-[0.2em] text-slate-300">GEL.IT.UP Trade</p>
-        <h2 className="mt-3 text-3xl font-bold">{isCreatePasswordMode ? 'Admin Setup' : 'Admin Login'}</h2>
+        <h2 className="heading-on-dark mt-3 text-3xl font-bold">{isCreatePasswordMode ? 'Admin Setup' : 'Admin Login'}</h2>
         <p className="mt-4 text-sm text-slate-300">
           {isCreatePasswordMode
             ? 'Create your admin password, confirm it, and verify your email before first sign-in.'
@@ -4281,7 +4601,7 @@ function PortalRegister({ onRegister }) {
     <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
       <div className="bg-slate-900 p-8 text-white">
         <p className="text-xs uppercase tracking-[0.2em] text-slate-300">GEL.IT.UP Trade</p>
-        <h2 className="mt-3 text-3xl font-bold">Choose Application Type</h2>
+        <h2 className="heading-on-dark mt-3 text-3xl font-bold">Choose Application Type</h2>
         <p className="mt-4 text-sm text-slate-300">
           Choose Distribution Application or B2B (Client) Request. Submissions are uploaded automatically and reviewed by the B2B team.
         </p>
@@ -9179,7 +9499,9 @@ function App() {
       <header className="sticky top-0 z-40 border-b border-white/15 bg-black/80 backdrop-blur-[10px]">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-3 py-2.5 md:px-6 md:py-3">
           <div className="flex items-center gap-3">
-            <img src={appLogo} alt="Gelitup logo" className="h-9 w-9 rounded-lg object-cover md:h-10 md:w-10" />
+            <div className="flex h-10 w-16 items-center justify-center rounded-lg border border-white/25 bg-white/95 px-2 md:h-11 md:w-[72px]">
+              <img src={appLogo} alt="Gelitup logo" className="max-h-6 w-auto object-contain md:max-h-7" />
+            </div>
             <div>
               <p className="text-xs font-black uppercase leading-none tracking-[0.07em] text-white md:text-sm md:tracking-[0.08em]">GEL.IT.UP</p>
               <p className="text-[11px] text-white/65 md:text-xs">Distributor Website</p>
@@ -9346,19 +9668,6 @@ function App() {
                 </a>
               ))}
             </div>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-white/20 bg-white/5 p-3 sm:p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Admin Portal</p>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <NavLink
-              to="/portal/admin-login"
-              className="inline-flex rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
-            >
-              Admin Login
-            </NavLink>
-            <span className="text-[11px] text-white/60">Reviewer access for approvals and order actions</span>
           </div>
         </div>
 
