@@ -65,18 +65,18 @@ function resolveNewsMediaType(item = {}) {
 
 function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText }) {
   const canvasRef = useRef(null)
+  const pdfDocumentRef = useRef(null)
   const [aspectRatio, setAspectRatio] = useState(210 / 297)
   const [hasRenderError, setHasRenderError] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
 
   useEffect(() => {
     let isCancelled = false
-    let renderTask
     let loadingTask
-    let frameId
 
-    const renderPdf = async () => {
-      const canvas = canvasRef.current
-      if (!canvas || !pdfUrl) {
+    const loadPdfDocument = async () => {
+      if (!pdfUrl) {
         setHasRenderError(true)
         return
       }
@@ -89,11 +89,48 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText }) {
           return
         }
 
-        const page = await pdfDocument.getPage(1)
-        if (isCancelled) {
-          pdfDocument.destroy()
-          return
-        }
+        pdfDocumentRef.current?.destroy()
+        pdfDocumentRef.current = pdfDocument
+
+        const detectedPages = Math.max(1, Number(pdfDocument.numPages) || 1)
+        setTotalPages(detectedPages)
+        setCurrentPage(1)
+        setHasRenderError(false)
+      }
+      catch {
+        if (isCancelled) return
+        setHasRenderError(true)
+      }
+    }
+
+    void loadPdfDocument()
+
+    return () => {
+      isCancelled = true
+      loadingTask?.destroy()
+      pdfDocumentRef.current?.destroy()
+      pdfDocumentRef.current = null
+    }
+  }, [pdfUrl])
+
+  useEffect(() => {
+    let isCancelled = false
+    let renderTask
+    let frameId
+
+    const renderPdf = async () => {
+      const canvas = canvasRef.current
+      const pdfDocument = pdfDocumentRef.current
+
+      if (!canvas || !pdfDocument) {
+        setHasRenderError(true)
+        return
+      }
+
+      try {
+        const safePage = Math.max(1, Math.min(currentPage, totalPages))
+        const page = await pdfDocument.getPage(safePage)
+        if (isCancelled) return
 
         const baseViewport = page.getViewport({ scale: 1 })
         const nextRatio = baseViewport.height > 0 ? baseViewport.width / baseViewport.height : 210 / 297
@@ -106,7 +143,6 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText }) {
 
         if (!context) {
           setHasRenderError(true)
-          pdfDocument.destroy()
           return
         }
 
@@ -122,8 +158,6 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText }) {
         if (!isCancelled) {
           setHasRenderError(false)
         }
-
-        pdfDocument.destroy()
       }
       catch (error) {
         if (isCancelled) return
@@ -147,12 +181,14 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText }) {
       window.removeEventListener('resize', scheduleRender)
       window.cancelAnimationFrame(frameId)
       renderTask?.cancel()
-      loadingTask?.destroy()
     }
-  }, [pdfUrl])
+  }, [currentPage, totalPages])
+
+  const canGoToPreviousPage = currentPage > 1
+  const canGoToNextPage = currentPage < totalPages
 
   return (
-    <div className="h-full w-full bg-black" style={{ aspectRatio }}>
+    <div className="relative h-full w-full bg-black" style={{ aspectRatio }}>
       {hasRenderError
         ? (
           <img
@@ -166,6 +202,38 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText }) {
           />
           )
         : <canvas ref={canvasRef} className="block h-full w-full" aria-label={altText} />}
+
+      {!hasRenderError && totalPages > 1 && (
+        <div className="absolute bottom-3 right-3 flex flex-col items-center gap-1 rounded-lg bg-black/60 p-1.5 text-[11px] font-semibold text-white">
+          <button
+            type="button"
+            aria-label="Previous PDF page"
+            onClick={() => {
+              if (!canGoToPreviousPage) return
+              setCurrentPage((page) => Math.max(1, page - 1))
+            }}
+            disabled={!canGoToPreviousPage}
+            className={`rounded px-2 py-1 transition ${canGoToPreviousPage ? 'bg-[#D43790] hover:bg-[#BF3182]' : 'cursor-not-allowed bg-white/20 text-white/60'}`}
+          >
+            Up
+          </button>
+          <span className="rounded bg-black/30 px-2 py-1 tabular-nums">
+            {currentPage} / {totalPages}
+          </span>
+          <button
+            type="button"
+            aria-label="Next PDF page"
+            onClick={() => {
+              if (!canGoToNextPage) return
+              setCurrentPage((page) => Math.min(totalPages, page + 1))
+            }}
+            disabled={!canGoToNextPage}
+            className={`rounded px-2 py-1 transition ${canGoToNextPage ? 'bg-[#D43790] hover:bg-[#BF3182]' : 'cursor-not-allowed bg-white/20 text-white/60'}`}
+          >
+            Down
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -332,8 +400,11 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
     }
   }, [isAboutUsManifesto])
 
+  const activeNewsItem = aboutUsNews.items[activeNewsSlide] || null
+  const isActiveNewsSlidePdf = resolveNewsMediaType(activeNewsItem || {}) === 'pdf'
+
   useEffect(() => {
-    if (!isAboutUsManifesto || !isNewsAutoplayEnabled || aboutUsNews.items.length <= 1) {
+    if (!isAboutUsManifesto || !isNewsAutoplayEnabled || isActiveNewsSlidePdf || aboutUsNews.items.length <= 1) {
       return undefined
     }
 
@@ -359,7 +430,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
     return () => {
       window.clearInterval(intervalId)
     }
-  }, [aboutUsNews.items.length, isAboutUsManifesto, isNewsAutoplayEnabled])
+  }, [aboutUsNews.items.length, isAboutUsManifesto, isNewsAutoplayEnabled, isActiveNewsSlidePdf])
 
   useEffect(() => {
     if (!isAboutUsManifesto || aboutUsNews.items.length <= 1) {
@@ -637,16 +708,22 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <p className="text-xs text-white/70">
-                {isNewsAutoplayEnabled ? 'Auto sliding enabled.' : 'Auto sliding paused.'}
+                {isActiveNewsSlidePdf
+                  ? 'Auto sliding paused on PDF slide.'
+                  : isNewsAutoplayEnabled
+                    ? 'Auto sliding enabled.'
+                    : 'Auto sliding paused.'}
               </p>
               <button
                 type="button"
+                disabled={isActiveNewsSlidePdf}
                 onClick={() => {
+                  if (isActiveNewsSlidePdf) return
                   setIsNewsAutoplayEnabled((current) => !current)
                 }}
-                className="inline-flex rounded-md bg-[#D43790] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white transition duration-200 hover:bg-[#BF3182]"
+                className={`inline-flex rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white transition duration-200 ${isActiveNewsSlidePdf ? 'cursor-not-allowed bg-white/30 text-white/60' : 'bg-[#D43790] hover:bg-[#BF3182]'}`}
               >
-                {isNewsAutoplayEnabled ? 'Pause' : 'Play'}
+                {isActiveNewsSlidePdf ? 'Paused for PDF' : isNewsAutoplayEnabled ? 'Pause' : 'Play'}
               </button>
             </div>
             {aboutUsNews.items.length > 1 && (
