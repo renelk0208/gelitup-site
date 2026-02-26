@@ -2733,14 +2733,8 @@ function FullCataloguePage() {
 
             <div className="mt-5 space-y-4">
               {lookbookGroupRows.map((row, rowIndex) => {
-                const rowColumnClass = row.length >= 4
-                  ? 'grid-cols-4'
-                  : row.length === 3
-                    ? 'grid-cols-3'
-                    : 'grid-cols-2'
-
                 return (
-                  <div key={`lookbook-group-row-${rowIndex}`} className={`grid gap-3 ${rowColumnClass}`}>
+                  <div key={`lookbook-group-row-${rowIndex}`} className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                     {row.map((group) => {
                       const groupIndex = displayedLookbookGroups.findIndex((candidate) => candidate.id === group.id)
                       const isExpanded = groupIndex === expandedLookbookGroup
