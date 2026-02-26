@@ -2085,8 +2085,7 @@ function FullCataloguePage() {
   const [showSuperbondDetails, setShowSuperbondDetails] = useState(false)
   const [showFiveInOneDetails, setShowFiveInOneDetails] = useState(false)
   const [springSummerLookbook, setSpringSummerLookbook] = useState(SPRING_SUMMER_LOOKBOOK_DEFAULT)
-  const [activeLookbookGroup, setActiveLookbookGroup] = useState(0)
-  const [activeLookbookPage, setActiveLookbookPage] = useState(0)
+  const [expandedLookbookGroup, setExpandedLookbookGroup] = useState(0)
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
   const virtualContainerRef = useRef(null)
 
@@ -2271,16 +2270,6 @@ function FullCataloguePage() {
     }]
   }, [springSummerLookbook])
 
-  const safeLookbookGroup = lookbookGroups.length
-    ? Math.min(activeLookbookGroup, lookbookGroups.length - 1)
-    : 0
-  const activeLookbookGroupItem = lookbookGroups[safeLookbookGroup] || null
-  const lookbookPages = Array.isArray(activeLookbookGroupItem?.pages) ? activeLookbookGroupItem.pages : []
-  const safeLookbookPage = lookbookPages.length
-    ? Math.min(activeLookbookPage, lookbookPages.length - 1)
-    : 0
-  const activeLookbookItem = lookbookPages[safeLookbookPage] || null
-
   const filteredItems = useMemo(() => {
     const colorFiltered = (!isColorsCategory || activeColorFamily === 'ALL')
       ? baseItems
@@ -2365,43 +2354,14 @@ function FullCataloguePage() {
 
   useEffect(() => {
     if (!lookbookGroups.length) {
-      setActiveLookbookGroup(0)
+      setExpandedLookbookGroup(0)
       return
     }
 
-    if (activeLookbookGroup > lookbookGroups.length - 1) {
-      setActiveLookbookGroup(lookbookGroups.length - 1)
+    if (expandedLookbookGroup > lookbookGroups.length - 1) {
+      setExpandedLookbookGroup(lookbookGroups.length - 1)
     }
-  }, [activeLookbookGroup, lookbookGroups.length])
-
-  useEffect(() => {
-    setActiveLookbookPage(0)
-  }, [safeLookbookGroup])
-
-  useEffect(() => {
-    if (!lookbookPages.length) {
-      setActiveLookbookPage(0)
-      return
-    }
-
-    if (activeLookbookPage > lookbookPages.length - 1) {
-      setActiveLookbookPage(lookbookPages.length - 1)
-    }
-  }, [activeLookbookPage, lookbookPages.length])
-
-  const handleLookbookPrevious = useCallback(() => {
-    setActiveLookbookPage((current) => {
-      if (!lookbookPages.length) return 0
-      return current === 0 ? lookbookPages.length - 1 : current - 1
-    })
-  }, [lookbookPages.length])
-
-  const handleLookbookNext = useCallback(() => {
-    setActiveLookbookPage((current) => {
-      if (!lookbookPages.length) return 0
-      return current === lookbookPages.length - 1 ? 0 : current + 1
-    })
-  }, [lookbookPages.length])
+  }, [expandedLookbookGroup, lookbookGroups.length])
 
   const virtualRowHeight = bulkMode ? 74 : 372
   const totalRows = Math.max(1, Math.ceil(filteredItems.length / gridColumns))
@@ -2747,101 +2707,91 @@ function FullCataloguePage() {
             <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.08em] text-[#1A1A1A] sm:text-3xl">{springSummerLookbook.title}</h2>
             <p className="mt-2 max-w-2xl text-sm text-[#1A1A1A]/75 sm:text-base">{springSummerLookbook.subtitle}</p>
 
-            {lookbookGroups.length > 1 && (
-              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {lookbookGroups.map((group, index) => {
-                  const isActiveGroup = index === safeLookbookGroup
-                  const pageCount = Array.isArray(group?.pages) ? group.pages.length : 0
+            <div className="mt-5 space-y-4">
+              {lookbookGroups.map((group, index) => {
+                const isExpanded = index === expandedLookbookGroup
+                const pages = Array.isArray(group?.pages) ? group.pages : []
+                const keyPage = pages[0] || null
+                const pageCount = pages.length
 
-                  return (
+                return (
+                  <article
+                    key={`lookbook-group-${group.id}-${index}`}
+                    className={`overflow-hidden rounded-xl border bg-white transition ${isExpanded ? 'border-[#D43790] shadow-[0_0_0_1px_rgba(212,55,144,0.25)]' : 'border-[#4A4A4A]/20'}`}
+                  >
                     <button
-                      key={`lookbook-group-${group.id}-${index}`}
                       type="button"
-                      onClick={() => setActiveLookbookGroup(index)}
-                      className={`group overflow-hidden rounded-xl border bg-white text-left transition ${isActiveGroup ? 'border-[#D43790] shadow-[0_0_0_1px_rgba(212,55,144,0.25)]' : 'border-[#4A4A4A]/25 hover:border-[#D43790]/60'}`}
+                      onClick={() => setExpandedLookbookGroup(isExpanded ? -1 : index)}
+                      className="w-full"
                     >
-                      <div className="relative h-36 bg-[#F8F8F8] p-2">
-                        <img
-                          src={group.heroImage || '/logo.png'}
-                          alt={group.title}
-                          className="h-full w-full rounded-lg object-cover"
-                          loading="lazy"
-                          onError={(event) => {
-                            event.currentTarget.src = '/logo.png'
-                          }}
-                        />
-                        <div className="absolute right-3 top-3 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white">
-                          {pageCount} pages
+                      <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center">
+                        <div className="relative mx-auto w-full max-w-[180px] sm:mx-0">
+                          <div className="overflow-hidden rounded-lg border border-[#4A4A4A]/20 bg-[#F8F8F8]">
+                            <div className="aspect-[9/16] w-full bg-white p-1.5">
+                              <img
+                                src={keyPage?.imageUrl || group.heroImage || '/logo.png'}
+                                alt={group.title}
+                                className="h-full w-full rounded-md object-cover"
+                                loading="lazy"
+                                onError={(event) => {
+                                  event.currentTarget.src = '/logo.png'
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white">
+                            {pageCount} pages
+                          </div>
                         </div>
-                      </div>
-                      <div className="border-t border-[#4A4A4A]/15 px-3 py-2">
-                        <p className="text-xs font-bold uppercase tracking-[0.06em] text-[#1A1A1A]">{group.title}</p>
+
+                        <div className="flex-1 text-left">
+                          <p className="text-sm font-black uppercase tracking-[0.08em] text-[#1A1A1A]">{group.title}</p>
+                          <p className="mt-1 text-xs text-[#1A1A1A]/65">Tap to {isExpanded ? 'collapse' : 'expand'} this shade set</p>
+                        </div>
+
+                        <span
+                          aria-hidden="true"
+                          className={`mx-auto inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#4A4A4A]/25 text-[#1A1A1A] transition sm:mx-0 ${isExpanded ? 'rotate-180 border-[#D43790] text-[#D43790]' : ''}`}
+                        >
+                          ˅
+                        </span>
                       </div>
                     </button>
-                  )
-                })}
-              </div>
-            )}
 
-            {activeLookbookGroupItem && (
-              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.1em] text-[#1A1A1A]/70">{activeLookbookGroupItem.title}</p>
-            )}
-
-            {activeLookbookItem && (
-              <div className="mt-5 grid gap-4 sm:grid-cols-[auto,1fr,auto] sm:items-center">
-                <button
-                  type="button"
-                  onClick={handleLookbookPrevious}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#4A4A4A]/30 text-lg font-bold text-[#1A1A1A] transition hover:border-[#D43790] hover:text-[#D43790]"
-                  aria-label="Previous lookbook page"
-                >
-                  ‹
-                </button>
-
-                <a
-                  href={activeLookbookItem.link || '/portal/login'}
-                  className="group mx-auto block w-full max-w-xs"
-                >
-                  <div className="overflow-hidden rounded-xl border border-[#4A4A4A]/20 bg-[#F8F8F8]">
-                    <div className="aspect-[9/16] w-full bg-white p-2">
-                      <img
-                        src={activeLookbookItem.imageUrl}
-                        alt={activeLookbookItem.title}
-                        className="h-full w-full rounded-lg object-cover transition duration-500 group-hover:scale-[1.015]"
-                        loading="lazy"
-                        onError={(event) => {
-                          event.currentTarget.src = '/logo.png'
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <p className="mt-2 text-center text-xs font-semibold uppercase tracking-[0.08em] text-[#1A1A1A]/75">{activeLookbookItem.title}</p>
-                </a>
-
-                <button
-                  type="button"
-                  onClick={handleLookbookNext}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#4A4A4A]/30 text-lg font-bold text-[#1A1A1A] transition hover:border-[#D43790] hover:text-[#D43790]"
-                  aria-label="Next lookbook page"
-                >
-                  ›
-                </button>
-              </div>
-            )}
-
-            {lookbookPages.length > 1 && (
-              <div className="mt-4 flex items-center justify-center gap-2">
-                {lookbookPages.map((page, index) => (
-                  <button
-                    key={`lookbook-dot-${page.imageUrl}-${index}`}
-                    type="button"
-                    onClick={() => setActiveLookbookPage(index)}
-                    aria-label={`Go to ${page.title}`}
-                    className={`h-2.5 rounded-full transition ${index === safeLookbookPage ? 'w-7 bg-[#D43790]' : 'w-2.5 bg-[#1A1A1A]/30 hover:bg-[#1A1A1A]/45'}`}
-                  />
-                ))}
-              </div>
-            )}
+                    {isExpanded && pages.length > 0 && (
+                      <div className="border-t border-[#4A4A4A]/15 bg-[#FAFAFA] p-3 sm:p-4">
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                          {pages.map((page, pageIndex) => (
+                            <a
+                              key={`lookbook-page-${group.id}-${page.imageUrl}-${pageIndex}`}
+                              href={page.link || page.imageUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="group overflow-hidden rounded-lg border border-[#4A4A4A]/20 bg-white transition hover:border-[#D43790]/60"
+                            >
+                              <div className="aspect-[9/16] w-full bg-[#F8F8F8] p-1.5">
+                                <img
+                                  src={page.imageUrl}
+                                  alt={page.title}
+                                  className="h-full w-full rounded-md object-cover transition duration-300 group-hover:scale-[1.01]"
+                                  loading="lazy"
+                                  onError={(event) => {
+                                    event.currentTarget.src = '/logo.png'
+                                  }}
+                                />
+                              </div>
+                              <p className="truncate border-t border-[#4A4A4A]/10 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#1A1A1A]/75">
+                                {page.title}
+                              </p>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </article>
+                )
+              })}
+            </div>
           </div>
 
           {/* FEATURED HERO: SUPERBOND PRIMER */}

@@ -176,7 +176,6 @@ function collectGroupedImages(imageFiles = []) {
 
 function deriveLookbookGroups(imageFiles = [], itemLink = '/portal/login') {
   const groupedImages = collectGroupedImages(imageFiles)
-  const shallowFiles = imageFiles.filter((file) => getDirectoryDepth(file?.relativePath || '') <= 1)
   const groupKeys = sortWithNumbers(Array.from(groupedImages.keys()))
 
   const groupsWithChildren = new Set(
@@ -184,27 +183,14 @@ function deriveLookbookGroups(imageFiles = [], itemLink = '/portal/login') {
   )
 
   const leafGroupKeys = groupKeys.filter((key) => key !== '__root__' && !groupsWithChildren.has(key))
-  const heroPoolByParent = new Map()
-
-  groupsWithChildren.forEach((parentKey) => {
-    const parentImages = groupedImages.get(parentKey) || []
-    const parentHeroItems = buildImageItems(parentImages, itemLink)
-    heroPoolByParent.set(parentKey, parentHeroItems)
-  })
-
+  const shallowFiles = imageFiles.filter((file) => getDirectoryDepth(file?.relativePath || '') <= 1)
   const shallowImageItems = buildImageItems(shallowFiles, itemLink)
 
-  const lookbookGroups = leafGroupKeys.map((groupKey, index) => {
+  const lookbookGroups = leafGroupKeys.map((groupKey) => {
     const files = groupedImages.get(groupKey) || []
     const pages = buildImageItems(files, itemLink)
-    const parentKey = groupKey.includes('/') ? groupKey.slice(0, groupKey.lastIndexOf('/')) : ''
-    const parentHeroPool = heroPoolByParent.get(parentKey) || []
-    const rootHeroPool = shallowImageItems
-    const heroPool = parentHeroPool.length ? parentHeroPool : rootHeroPool
     const fallbackHero = pages[0]?.imageUrl || '/logo.png'
-    const heroImage = heroPool.length
-      ? heroPool[index % heroPool.length]?.imageUrl || fallbackHero
-      : fallbackHero
+    const heroImage = pages[0]?.imageUrl || fallbackHero
 
     return {
       id: groupKey,
