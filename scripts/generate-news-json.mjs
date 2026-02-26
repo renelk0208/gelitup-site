@@ -7,7 +7,6 @@ const aboutNewsPath = path.join(projectRoot, 'public', 'gelitup-content', 'about
 const lookbookPath = path.join(projectRoot, 'public', 'gelitup-content', 'spring-summer-catalogue.json')
 const supportedExtensions = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif'])
 const supportedPdfExtensions = new Set(['.pdf'])
-const defaultLink = '/portal/login'
 
 const ABOUT_DEFAULTS = {
   introText: 'Inspired by bold summer tones, luminous finishes, and editorial nail artistry for the 2026 season.',
@@ -53,6 +52,16 @@ function formatPageTitle(baseName, index) {
 function toPublicNewsPath(fileName) {
   const normalizedFileName = String(fileName || '').trim()
   return `/gelitup-media/images/news/${normalizedFileName}`
+}
+
+function getPreferredPamphletLink(pdfFiles = []) {
+  if (!Array.isArray(pdfFiles) || !pdfFiles.length) return '/portal/login'
+
+  const sortedPdfFiles = sortWithNumbers(pdfFiles.map((file) => String(file?.relativePath || '').trim()).filter(Boolean))
+  const preferredPdfPath = sortedPdfFiles.find((relativePath) => /pamphlet|lookbook|catalogue|catalog/i.test(relativePath))
+    || sortedPdfFiles[0]
+
+  return preferredPdfPath ? toPublicNewsPath(preferredPdfPath) : '/portal/login'
 }
 
 function toDisplayTitle(baseName = '', fallbackPrefix = 'Spring/Summer 2026 ·') {
@@ -114,7 +123,7 @@ async function getNewsAssets() {
   return { imageFiles, pdfFiles }
 }
 
-function buildImageItems(imageFiles = []) {
+function buildImageItems(imageFiles = [], itemLink = '/portal/login') {
   return imageFiles.map((file, index) => {
     const relative = String(file.relativePath || '').trim()
     const imageUrl = toPublicNewsPath(relative)
@@ -122,7 +131,7 @@ function buildImageItems(imageFiles = []) {
     return {
       title: formatPageTitle(path.basename(relative, path.extname(relative)), index),
       imageUrl,
-      link: defaultLink,
+      link: itemLink,
     }
   })
 }
@@ -165,7 +174,7 @@ function collectGroupedImages(imageFiles = []) {
   return groups
 }
 
-function deriveLookbookGroups(imageFiles = []) {
+function deriveLookbookGroups(imageFiles = [], itemLink = '/portal/login') {
   const groupedImages = collectGroupedImages(imageFiles)
   const shallowFiles = imageFiles.filter((file) => getDirectoryDepth(file?.relativePath || '') <= 1)
   const groupKeys = sortWithNumbers(Array.from(groupedImages.keys()))
@@ -179,15 +188,15 @@ function deriveLookbookGroups(imageFiles = []) {
 
   groupsWithChildren.forEach((parentKey) => {
     const parentImages = groupedImages.get(parentKey) || []
-    const parentHeroItems = buildImageItems(parentImages)
+    const parentHeroItems = buildImageItems(parentImages, itemLink)
     heroPoolByParent.set(parentKey, parentHeroItems)
   })
 
-  const shallowImageItems = buildImageItems(shallowFiles)
+  const shallowImageItems = buildImageItems(shallowFiles, itemLink)
 
   const lookbookGroups = leafGroupKeys.map((groupKey, index) => {
     const files = groupedImages.get(groupKey) || []
-    const pages = buildImageItems(files)
+    const pages = buildImageItems(files, itemLink)
     const parentKey = groupKey.includes('/') ? groupKey.slice(0, groupKey.lastIndexOf('/')) : ''
     const parentHeroPool = heroPoolByParent.get(parentKey) || []
     const rootHeroPool = shallowImageItems
@@ -234,6 +243,7 @@ async function main() {
   const assets = await getNewsAssets()
   const imageFiles = Array.isArray(assets?.imageFiles) ? assets.imageFiles : []
   const pdfFiles = Array.isArray(assets?.pdfFiles) ? assets.pdfFiles : []
+  const lookbookDocumentLink = getPreferredPamphletLink(pdfFiles)
 
   if (!imageFiles.length && !pdfFiles.length) {
     console.log('No images or PDFs found in public/gelitup-media/images/news. Add files first, then run this script again.')
@@ -243,9 +253,9 @@ async function main() {
   const existingAbout = await readJsonObject(aboutNewsPath, {})
   const existingLookbook = await readJsonObject(lookbookPath, {})
 
-  const imageItems = buildImageItems(imageFiles)
+  const imageItems = buildImageItems(imageFiles, lookbookDocumentLink)
   const pdfItems = buildPdfItems(pdfFiles)
-  const { lookbookGroups, shallowImageItems } = deriveLookbookGroups(imageFiles)
+  const { lookbookGroups, shallowImageItems } = deriveLookbookGroups(imageFiles, lookbookDocumentLink)
   const fallbackLookbookItems = imageItems.length ? imageItems : pdfItems
   const fallbackGroups = fallbackLookbookItems.length
     ? [{
@@ -258,9 +268,9 @@ async function main() {
   const nextGroups = lookbookGroups.length ? lookbookGroups : fallbackGroups
   const firstGroupPages = nextGroups[0]?.pages || []
 
-  const aboutItems = shallowImageItems.length
-    ? shallowImageItems
-    : imageItems.slice(0, 12)
+  const aboutItems = imageItems.length
+    ? imageItems
+    : shallowImageItems
 
   const nextAbout = {
     introText: String(existingAbout?.introText || ABOUT_DEFAULTS.introText).trim() || ABOUT_DEFAULTS.introText,

@@ -40,6 +40,13 @@ function chunkBySize(items = [], size = 2) {
   return chunks
 }
 
+function getNewsSlideStep(container) {
+  if (!container) return 0
+  const firstSlide = container.querySelector('[data-news-slide="true"]')
+  if (!firstSlide) return 0
+  return firstSlide.getBoundingClientRect().width
+}
+
 export default function ImportedSnapshotPage({ slug, editorFile }) {
   const [snapshotPages, setSnapshotPages] = useState([])
   const [customPagesBySlug, setCustomPagesBySlug] = useState({})
@@ -212,14 +219,8 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
         return
       }
 
-      const firstSlide = container.querySelector('[data-news-slide="true"]')
-      if (!firstSlide) {
-        return
-      }
-
-      const slideWidth = firstSlide.getBoundingClientRect().width
-      const slideGap = 12
-      const step = slideWidth + slideGap
+      const step = getNewsSlideStep(container)
+      if (!step) return
       const maxScrollLeft = container.scrollWidth - container.clientWidth
       const nextLeft = container.scrollLeft + step
 
@@ -248,14 +249,8 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
     }
 
     const updateActiveSlide = () => {
-      const firstSlide = container.querySelector('[data-news-slide="true"]')
-      if (!firstSlide) {
-        return
-      }
-
-      const slideWidth = firstSlide.getBoundingClientRect().width
-      const slideGap = 12
-      const step = slideWidth + slideGap
+      const step = getNewsSlideStep(container)
+      if (!step) return
       const rawIndex = step > 0 ? Math.round(container.scrollLeft / step) : 0
       const nextIndex = Math.max(0, Math.min(aboutUsNews.items.length - 1, rawIndex))
       setActiveNewsSlide(nextIndex)
@@ -465,14 +460,11 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
 
             <div
               ref={newsCarouselRef}
-              className="mt-5 flex snap-x gap-3 overflow-x-auto pb-1 [scrollbar-width:thin]"
-              onClick={() => {
-                setIsNewsAutoplayEnabled(false)
-              }}
+              className="mt-5 mx-auto flex w-full max-w-[280px] snap-x overflow-x-auto pb-1 [scrollbar-width:thin] sm:max-w-[320px]"
             >
               {aboutUsNews.items.map((item) => (
-                <article key={item.imageUrl} data-news-slide="true" className="w-[210px] shrink-0 snap-start overflow-hidden rounded-2xl border border-white/15 bg-black/20 sm:w-[240px] lg:w-[260px]">
-                  <div className="w-full" style={{ aspectRatio: '9 / 16' }}>
+                <article key={item.imageUrl} data-news-slide="true" className="w-full shrink-0 snap-start overflow-hidden rounded-2xl border border-white/15 bg-black/20">
+                  <div className="w-full" style={{ aspectRatio: '210 / 297' }}>
                     <a href={item.link || item.imageUrl} target="_blank" rel="noreferrer" className="block h-full w-full">
                       <img
                         src={item.imageUrl}
@@ -488,7 +480,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <p className="text-xs text-white/70">
-                {isNewsAutoplayEnabled ? 'Auto sliding enabled. Click the carousel to pause.' : 'Auto sliding paused.'}
+                {isNewsAutoplayEnabled ? 'Auto sliding enabled.' : 'Auto sliding paused.'}
               </p>
               <button
                 type="button"
@@ -509,14 +501,14 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                     aria-label={`Go to slide ${index + 1}`}
                     onClick={() => {
                       const container = newsCarouselRef.current
-                      const firstSlide = container?.querySelector('[data-news-slide="true"]')
-                      if (!container || !firstSlide) {
+                      if (!container) {
                         return
                       }
 
-                      const slideWidth = firstSlide.getBoundingClientRect().width
-                      const slideGap = 12
-                      const targetLeft = index * (slideWidth + slideGap)
+                      const step = getNewsSlideStep(container)
+                      if (!step) return
+
+                      const targetLeft = index * step
                       container.scrollTo({ left: targetLeft, behavior: 'smooth' })
                       setActiveNewsSlide(index)
                     }}
