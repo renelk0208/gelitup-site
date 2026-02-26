@@ -2781,7 +2781,7 @@ function FullCataloguePage() {
                                     ? (
                                       <video
                                         src={keyPage?.imageUrl}
-                                        className="h-full w-full rounded-md object-cover"
+                                        className="h-full w-full scale-[1.035] rounded-md object-cover"
                                         autoPlay
                                         muted
                                         loop
@@ -2794,7 +2794,7 @@ function FullCataloguePage() {
                                       <img
                                         src={keyPage?.imageUrl || group.heroImage || '/logo.png'}
                                         alt={group.title}
-                                        className="h-full w-full rounded-md object-cover"
+                                        className="h-full w-full scale-[1.035] rounded-md object-cover"
                                         loading="lazy"
                                       />
                                       )}
@@ -2843,7 +2843,7 @@ function FullCataloguePage() {
                                                 ? (
                                                   <video
                                                     src={page.imageUrl}
-                                                    className="h-full w-full rounded-md object-cover"
+                                                    className="h-full w-full scale-[1.035] rounded-md object-cover"
                                                     autoPlay
                                                     muted
                                                     loop
@@ -2864,7 +2864,7 @@ function FullCataloguePage() {
                                                     <img
                                                       src={page.imageUrl}
                                                       alt="Spring/Summer lookbook page"
-                                                      className="h-full w-full rounded-md object-cover transition duration-300 group-hover:scale-[1.01]"
+                                                      className="h-full w-full scale-[1.035] rounded-md object-cover transition duration-300 group-hover:scale-[1.045]"
                                                       loading="lazy"
                                                     />
                                                     )}
@@ -3450,13 +3450,13 @@ function Nav() {
 function MobileNav() {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/15 bg-black/90 px-2 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur md:hidden">
-      <div className="mx-auto grid max-w-xl gap-1" style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}>
+      <div className="mx-auto flex max-w-xl gap-1 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
-              `rounded-md px-2 py-2 text-center text-xs font-medium uppercase tracking-[0.03em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
+              `min-w-max shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.02em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
                 isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.5)]' : '!text-white/85 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
               }`
             }
