@@ -2272,6 +2272,36 @@ function FullCataloguePage() {
     }]
   }, [springSummerLookbook])
 
+  const buildRowsWithLastFour = useCallback((items = []) => {
+    const list = Array.isArray(items) ? items : []
+    if (list.length <= 4) return [list]
+
+    const rows = []
+    const fullTriples = Math.floor(list.length / 3)
+    const remainder = list.length % 3
+
+    if (remainder === 1 && fullTriples >= 2) {
+      const tripleRowsCount = fullTriples - 1
+      for (let rowIndex = 0; rowIndex < tripleRowsCount; rowIndex += 1) {
+        const start = rowIndex * 3
+        rows.push(list.slice(start, start + 3))
+      }
+      rows.push(list.slice(tripleRowsCount * 3))
+      return rows
+    }
+
+    for (let index = 0; index < list.length; index += 3) {
+      rows.push(list.slice(index, index + 3))
+    }
+
+    return rows
+  }, [])
+
+  const lookbookGroupRows = useMemo(
+    () => buildRowsWithLastFour(lookbookGroups),
+    [buildRowsWithLastFour, lookbookGroups],
+  )
+
   const filteredItems = useMemo(() => {
     const colorFiltered = (!isColorsCategory || activeColorFamily === 'ALL')
       ? baseItems
@@ -2710,99 +2740,145 @@ function FullCataloguePage() {
             <p className="mt-2 max-w-2xl text-sm text-[#1A1A1A]/75 sm:text-base">{springSummerLookbook.subtitle}</p>
 
             <div className="mt-5 space-y-4">
-              {lookbookGroups.map((group, index) => {
-                const isExpanded = index === expandedLookbookGroup
-                const pages = Array.isArray(group?.pages) ? group.pages : []
-                const keyPage = pages[0] || null
-                const pageCount = pages.length
+              {lookbookGroupRows.map((row, rowIndex) => {
+                const rowColumnClass = row.length >= 4
+                  ? 'grid-cols-4'
+                  : row.length === 3
+                    ? 'grid-cols-3'
+                    : 'grid-cols-2'
 
                 return (
-                  <article
-                    key={`lookbook-group-${group.id}-${index}`}
-                    className={`overflow-hidden rounded-xl border bg-white transition ${isExpanded ? 'border-[#D43790] shadow-[0_0_0_1px_rgba(212,55,144,0.25)]' : 'border-[#4A4A4A]/20'}`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setExpandedLookbookGroup(isExpanded ? -1 : index)}
-                      className="w-full"
-                    >
-                      <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center">
-                        <div className="relative mx-auto w-full max-w-[180px] sm:mx-0">
-                          <div className="overflow-hidden rounded-lg border border-[#4A4A4A]/20 bg-[#F8F8F8]">
-                            <div className="aspect-[9/16] w-full bg-white p-1.5">
-                              <img
-                                src={keyPage?.imageUrl || group.heroImage || '/logo.png'}
-                                alt={group.title}
-                                className="h-full w-full rounded-md object-cover"
-                                loading="lazy"
-                                onError={(event) => {
-                                  event.currentTarget.src = '/logo.png'
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white">
-                            {pageCount} pages
-                          </div>
-                        </div>
+                  <div key={`lookbook-group-row-${rowIndex}`} className={`grid gap-3 ${rowColumnClass}`}>
+                    {row.map((group) => {
+                      const groupIndex = lookbookGroups.findIndex((candidate) => candidate.id === group.id)
+                      const isExpanded = groupIndex === expandedLookbookGroup
+                      const pages = Array.isArray(group?.pages) ? group.pages : []
+                      const keyPage = pages[0] || null
+                      const keyPageType = String(keyPage?.mediaType || '').toLowerCase()
+                      const pageCount = pages.length
+                      const pageRows = buildRowsWithLastFour(pages)
 
-                        <div className="flex-1 text-left">
-                          <p className="text-sm font-black uppercase tracking-[0.08em] text-[#1A1A1A]">{group.title}</p>
-                          <p className="mt-1 text-xs text-[#1A1A1A]/65">Tap to {isExpanded ? 'collapse' : 'expand'} this shade set</p>
-                        </div>
-
-                        <span
-                          aria-hidden="true"
-                          className={`mx-auto inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#4A4A4A]/25 text-[#1A1A1A] transition sm:mx-0 ${isExpanded ? 'rotate-180 border-[#D43790] text-[#D43790]' : ''}`}
+                      return (
+                        <article
+                          key={`lookbook-group-${group.id}`}
+                          className={`overflow-hidden rounded-xl border bg-white transition ${isExpanded ? 'border-[#D43790] shadow-[0_0_0_1px_rgba(212,55,144,0.25)]' : 'border-[#4A4A4A]/20'}`}
                         >
-                          ˅
-                        </span>
-                      </div>
-                    </button>
-
-                    {isExpanded && pages.length > 0 && (
-                      <div className="border-t border-[#4A4A4A]/15 bg-[#FAFAFA] p-3 sm:p-4">
-                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                          {pages.map((page, pageIndex) => (
-                            <a
-                              key={`lookbook-page-${group.id}-${page.imageUrl}-${pageIndex}`}
-                              href={page.link || page.imageUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="group overflow-hidden rounded-lg border border-[#4A4A4A]/20 bg-white transition hover:border-[#D43790]/60"
-                            >
-                              <div className="aspect-[9/16] w-full bg-[#F8F8F8] p-1.5">
-                                {String(page?.mediaType || '').toLowerCase() === 'video'
-                                  ? (
-                                    <video
-                                      src={page.imageUrl}
-                                      className="h-full w-full rounded-md object-cover"
-                                      autoPlay
-                                      muted
-                                      loop
-                                      playsInline
-                                      controls
-                                      preload="metadata"
-                                    />
-                                    )
-                                  : (
-                                    <img
-                                      src={page.imageUrl}
-                                      alt="Spring/Summer lookbook page"
-                                      className="h-full w-full rounded-md object-cover transition duration-300 group-hover:scale-[1.01]"
-                                      loading="lazy"
-                                      onError={(event) => {
-                                        event.currentTarget.src = '/logo.png'
-                                      }}
-                                    />
-                                    )}
+                          <button
+                            type="button"
+                            onClick={() => setExpandedLookbookGroup(isExpanded ? -1 : groupIndex)}
+                            className="w-full text-left"
+                          >
+                            <div className="relative p-3">
+                              <div className="overflow-hidden rounded-lg border border-[#4A4A4A]/20 bg-[#F8F8F8]">
+                                <div className={`${keyPageType === 'pdf' ? 'aspect-[210/297]' : 'aspect-[9/16]'} w-full bg-white p-1.5`}>
+                                  {keyPageType === 'video'
+                                    ? (
+                                      <video
+                                        src={keyPage?.imageUrl}
+                                        className="h-full w-full rounded-md object-cover"
+                                        autoPlay
+                                        muted
+                                        loop
+                                        playsInline
+                                        controls
+                                        preload="metadata"
+                                      />
+                                      )
+                                    : (
+                                      <img
+                                        src={keyPage?.imageUrl || group.heroImage || '/logo.png'}
+                                        alt={group.title}
+                                        className="h-full w-full rounded-md object-cover"
+                                        loading="lazy"
+                                        onError={(event) => {
+                                          event.currentTarget.src = '/logo.png'
+                                        }}
+                                      />
+                                      )}
+                                </div>
                               </div>
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </article>
+                              <div className="absolute right-5 top-5 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white">
+                                {pageCount} pages
+                              </div>
+                            </div>
+
+                            <div className="px-3 pb-3">
+                              <p className="text-sm font-black uppercase tracking-[0.08em] text-[#1A1A1A]">{group.title}</p>
+                              <p className="mt-1 text-xs text-[#1A1A1A]/65">Tap to {isExpanded ? 'collapse' : 'expand'} this shade set</p>
+                            </div>
+                          </button>
+
+                          {isExpanded && pages.length > 0 && (
+                            <div className="border-t border-[#4A4A4A]/15 bg-[#FAFAFA] p-3">
+                              <div className="space-y-3">
+                                {pageRows.map((pageRow, pageRowIndex) => {
+                                  const pageRowClass = pageRow.length >= 4
+                                    ? 'grid-cols-2 lg:grid-cols-4'
+                                    : pageRow.length === 3
+                                      ? 'grid-cols-2 lg:grid-cols-3'
+                                      : 'grid-cols-2'
+
+                                  return (
+                                    <div key={`lookbook-page-row-${group.id}-${pageRowIndex}`} className={`grid gap-3 ${pageRowClass}`}>
+                                      {pageRow.map((page, pageIndex) => {
+                                        const mediaType = String(page?.mediaType || '').toLowerCase()
+                                        const aspectClass = mediaType === 'pdf' ? 'aspect-[210/297]' : 'aspect-[9/16]'
+
+                                        return (
+                                          <a
+                                            key={`lookbook-page-${group.id}-${page.imageUrl}-${pageIndex}`}
+                                            href={page.link || page.imageUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="group overflow-hidden rounded-lg border border-[#4A4A4A]/20 bg-white transition hover:border-[#D43790]/60"
+                                          >
+                                            <div className={`${aspectClass} w-full bg-[#F8F8F8] p-1.5`}>
+                                              {mediaType === 'video'
+                                                ? (
+                                                  <video
+                                                    src={page.imageUrl}
+                                                    className="h-full w-full rounded-md object-cover"
+                                                    autoPlay
+                                                    muted
+                                                    loop
+                                                    playsInline
+                                                    controls
+                                                    preload="metadata"
+                                                  />
+                                                  )
+                                                : mediaType === 'pdf'
+                                                  ? (
+                                                    <iframe
+                                                      src={`${page.link || page.imageUrl}#view=FitH`}
+                                                      title="Spring/Summer lookbook page"
+                                                      className="h-full w-full rounded-md border-0"
+                                                    />
+                                                    )
+                                                  : (
+                                                    <img
+                                                      src={page.imageUrl}
+                                                      alt="Spring/Summer lookbook page"
+                                                      className="h-full w-full rounded-md object-cover transition duration-300 group-hover:scale-[1.01]"
+                                                      loading="lazy"
+                                                      onError={(event) => {
+                                                        event.currentTarget.src = '/logo.png'
+                                                      }}
+                                                    />
+                                                    )}
+                                            </div>
+                                          </a>
+                                        )
+                                      })}
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </article>
+                      )
+                    })}
+                  </div>
                 )
               })}
             </div>
