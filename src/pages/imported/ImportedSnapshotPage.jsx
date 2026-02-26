@@ -4,7 +4,7 @@ import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/gelitup_official/'
-const EXHIBITIONS_BACKDROP_VIDEO_URL = '/gelitup-media/videos/pink%20nails%20video.mp4'
+const EXHIBITIONS_BACKDROP_VIDEO_URL = '/gelitup-media/videos/exhibition%20video.mp4'
 const ABOUT_US_NEWS_DEFAULT = {
   introText: 'Inspired by bold summer tones, luminous finishes, and editorial nail artistry for the 2026 season.',
   title: 'Spring/Summer 2026',

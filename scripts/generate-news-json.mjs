@@ -361,21 +361,6 @@ function buildHomeCarouselItems(mediaFiles = []) {
     .filter((file) => String(file?.relativePath || '').startsWith(homeCarouselFolderPrefix))
     .filter((file) => getMediaTypeFromExt(file?.ext) === 'image')
 
-  const globalPrimaryCandidate = mediaFiles
-    .filter((file) => getMediaTypeFromExt(file?.ext) === 'image')
-    .find((file) => {
-      const relativePath = String(file?.relativePath || '').trim()
-      const baseName = path.basename(relativePath, path.extname(relativePath)).trim().toLowerCase()
-      return baseName === homeCarouselPrimaryBaseName.toLowerCase() || baseName.includes(homeCarouselPrimaryBaseName.toLowerCase())
-    })
-
-  if (globalPrimaryCandidate) {
-    const alreadyIncluded = carouselFiles.some((file) => String(file?.relativePath || '').trim() === String(globalPrimaryCandidate?.relativePath || '').trim())
-    if (!alreadyIncluded) {
-      carouselFiles.unshift(globalPrimaryCandidate)
-    }
-  }
-
   const ordered = sortHomeCarouselFiles(carouselFiles)
   const deduped = []
   const seenBaseNames = new Set()
