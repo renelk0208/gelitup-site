@@ -237,7 +237,7 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl
               }}
             />
             )
-          : <canvas ref={canvasRef} className="block h-full w-full rounded-md bg-white" aria-label={altText} />}
+            : <canvas ref={canvasRef} className="block w-full h-auto rounded-md bg-white" aria-label={altText} />}
       </div>
 
       {!hasRenderError && totalPages > 1 && (
