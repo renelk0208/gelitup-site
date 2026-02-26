@@ -4,6 +4,7 @@ import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/gelitup_official/'
+const ABOUT_US_HERO_IMAGE_URL = '/gelitup-media/images/about%20us%20hero%20image.webp'
 const EXHIBITIONS_BACKDROP_VIDEO_URL = '/gelitup-media/videos/exhibition%20video.mp4'
 const ABOUT_US_NEWS_DEFAULT = {
   introText: 'Inspired by bold summer tones, luminous finishes, and editorial nail artistry for the 2026 season.',
@@ -644,10 +645,6 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
   }
 
   if (isAboutUsManifesto) {
-    const visualIsVideo = Boolean(
-      manifestoVisual
-      && (manifestoVisual.displayUrl.toLowerCase().includes('.mp4') || manifestoVisual.displayUrl.toLowerCase().includes('.webm')),
-    )
     const exhibitionsBackdropVideoUrl = EXHIBITIONS_BACKDROP_VIDEO_URL
     const sortedExhibitionEvents = sortEventsByDate(aboutUsExhibitions.events || [])
 
@@ -655,26 +652,15 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
       <section className="space-y-6 bg-white">
         <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#1A1A1A]">
           <article className="relative min-h-[320px] overflow-hidden bg-[#1A1A1A] sm:min-h-[420px]">
-            {visualIsVideo
-              ? (
-                <video
-                  src={manifestoVisual.displayUrl}
-                  className="absolute inset-0 h-full w-full object-cover"
-                  muted
-                  playsInline
-                  autoPlay
-                  loop
-                  controls={false}
-                />
-                )
-              : (
-                <img
-                  src={manifestoVisual?.displayUrl || '/logo.png'}
-                  alt="Cinematic GEL.IT.UP by GIUP® texture visual"
-                  className="absolute inset-0 h-full w-full object-cover"
-                  loading="lazy"
-                />
-                )}
+            <img
+              src={ABOUT_US_HERO_IMAGE_URL || manifestoVisual?.displayUrl || '/logo.png'}
+              alt="About Us hero visual"
+              className="absolute inset-0 h-full w-full object-cover"
+              loading="lazy"
+              onError={(event) => {
+                event.currentTarget.src = manifestoVisual?.displayUrl || '/logo.png'
+              }}
+            />
           </article>
         </div>
 
