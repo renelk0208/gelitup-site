@@ -24,6 +24,7 @@ Receives B2B portal order payloads and creates a Zoho Books Sales Order securely
    - `supabase secrets set ZOHO_SYNC_SHARED_SECRET=<random-long-string>`
    - `supabase secrets set ZOHO_BOOKS_BASE_URL=https://www.zohoapis.com/books/v3`
    - `supabase secrets set ZOHO_ACCOUNTS_BASE_URL=https://accounts.zoho.com`
+   - `supabase secrets set ZOHO_ALLOW_PARTIAL_ITEM_MAP=false`
 
 5. Deploy function:
    - `supabase functions deploy zoho-sync-order --no-verify-jwt`
@@ -42,4 +43,5 @@ Set in local `.env`:
 
 - SKU matching is based on exact normalized SKU text from payload (example: `GIUP-COL-01`, `5IN1_CLR`).
 - Any unmapped SKUs are returned in response as `unmappedSkus`.
-- If all SKUs are unmapped, function returns HTTP 422.
+- By default, if **any** SKU is unmapped, function returns HTTP 422 to prevent partial orders in Zoho.
+- Set `ZOHO_ALLOW_PARTIAL_ITEM_MAP=true` only if you intentionally want partial sync behavior.

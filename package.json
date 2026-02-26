@@ -17,7 +17,9 @@
     "import:gelitup-media": "node scripts/import-gelitup-media.mjs",
     "snapshot:gelitup-pages": "node scripts/snapshot-gelitup-pages.mjs",
     "generate:imported-pages": "node scripts/generate-imported-pages.mjs",
-    "refresh:gelitup-baseline": "npm run import:gelitup-media; npm run snapshot:gelitup-pages; npm run generate:imported-pages"
+    "generate:news-json": "node scripts/generate-news-json.mjs",
+    "refresh:gelitup-baseline": "npm run import:gelitup-media; npm run snapshot:gelitup-pages; npm run generate:imported-pages",
+    "replay:zoho-order": "node scripts/replay-order-to-zoho.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0",

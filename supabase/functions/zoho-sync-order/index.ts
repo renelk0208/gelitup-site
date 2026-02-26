@@ -118,6 +118,13 @@ function buildLineItems(items: string[], itemMap: Record<string, string>) {
   }
 }
 
+function readBooleanEnv(value: string | undefined, fallback = false) {
+  if (value == null) return fallback
+  const normalized = String(value).trim().toLowerCase()
+  if (!normalized) return fallback
+  return ['1', 'true', 'yes', 'on'].includes(normalized)
+}
+
 async function zohoRequest(path: string, accessToken: string, options: RequestInit = {}) {
   const booksBaseUrl = Deno.env.get('ZOHO_BOOKS_BASE_URL') || 'https://www.zohoapis.com/books/v3'
   const organizationId = readRequiredEnv('ZOHO_BOOKS_ORGANIZATION_ID')
@@ -220,10 +227,24 @@ serve(async (req) => {
     const rawItemMap = Deno.env.get('ZOHO_BOOKS_ITEM_MAP_JSON') || '{}'
     const itemMap = JSON.parse(rawItemMap) as Record<string, string>
 
-    const { lineItems, unmappedSkus } = buildLineItems(payload.items, itemMap)
+    const { parsed, lineItems, unmappedSkus } = buildLineItems(payload.items, itemMap)
     if (!lineItems.length) {
       return new Response(JSON.stringify({
         error: 'No mapped line items. Configure ZOHO_BOOKS_ITEM_MAP_JSON with SKU -> item_id entries.',
+        unmappedSkus,
+      }), {
+        status: 422,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const allowPartialItemMap = readBooleanEnv(Deno.env.get('ZOHO_ALLOW_PARTIAL_ITEM_MAP'), false)
+    if (unmappedSkus.length && !allowPartialItemMap) {
+      return new Response(JSON.stringify({
+        error: 'Unmapped SKUs detected. Sync aborted to prevent partial Zoho order. Update ZOHO_BOOKS_ITEM_MAP_JSON.',
+        totalParsedItems: parsed.length,
+        mappedItems: lineItems.length,
+        unmappedItems: unmappedSkus.length,
         unmappedSkus,
       }), {
         status: 422,
@@ -259,7 +280,10 @@ serve(async (req) => {
       message: 'Zoho sales order created',
       zohoTarget: payload.zohoTarget || 'books',
       salesorder_id: salesOrderResult?.salesorder?.salesorder_id || null,
+      totalParsedItems: parsed.length,
+      mappedItems: lineItems.length,
       unmappedSkus,
+      partialMappingUsed: unmappedSkus.length > 0,
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
