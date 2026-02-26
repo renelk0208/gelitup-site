@@ -495,12 +495,23 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                             preload="metadata"
                           />
                           )
+                        : mediaType === 'pdf'
+                          ? (
+                            <iframe
+                              src={`${item.link || item.imageUrl}#view=FitH`}
+                              title="Spring/Summer lookbook"
+                              className="h-full w-full border-0"
+                            />
+                            )
                         : (
                           <img
                             src={item.imageUrl}
                             alt="Spring/Summer lookbook"
                             className="h-full w-full object-cover"
                             loading="lazy"
+                            onError={(event) => {
+                              event.currentTarget.src = '/logo.png'
+                            }}
                           />
                           )}
                     </a>
