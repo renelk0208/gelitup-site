@@ -1,0 +1,18 @@
+{
+  "introText": "Inspired by bold summer tones, luminous finishes, and editorial nail artistry for the 2026 season.",
+  "title": "Spring/Summer 2026",
+  "portalLabel": "Enter Portal",
+  "portalLink": "/portal/login",
+  "items": [
+    {
+      "title": "Gelitup Cloudancer Cover Post Category Card",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/gelitup_cloudancer_cover_post-category-card.jpg",
+      "link": "/portal/login"
+    },
+    {
+      "title": "Gelitup Cloudancer Posts Planetoids Secondary Category Card",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/gelitup_cloudancer_posts_planetoids-secondary-category-card.jpg",
+      "link": "/portal/login"
+    }
+  ]
+}
