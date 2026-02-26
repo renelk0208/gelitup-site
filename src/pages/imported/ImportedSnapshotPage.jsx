@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
+import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/gelitup_official/'
 const ABOUT_US_NEWS_DEFAULT = {
@@ -22,6 +24,8 @@ const ABOUT_US_NEWS_DEFAULT = {
     },
   ],
 }
+
+GlobalWorkerOptions.workerSrc = pdfWorkerUrl
 
 function SnapshotCard({ title, children }) {
   return (
@@ -57,6 +61,113 @@ function resolveNewsMediaType(item = {}) {
   if (/\.(mp4|webm|mov|m4v)(\?|$)/i.test(imageUrl)) return 'video'
   if (/\.pdf(\?|$)/i.test(linkUrl)) return 'pdf'
   return 'image'
+}
+
+function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText }) {
+  const canvasRef = useRef(null)
+  const [aspectRatio, setAspectRatio] = useState(210 / 297)
+  const [hasRenderError, setHasRenderError] = useState(false)
+
+  useEffect(() => {
+    let isCancelled = false
+    let renderTask
+    let loadingTask
+    let frameId
+
+    const renderPdf = async () => {
+      const canvas = canvasRef.current
+      if (!canvas || !pdfUrl) {
+        setHasRenderError(true)
+        return
+      }
+
+      try {
+        loadingTask = getDocument({ url: pdfUrl })
+        const pdfDocument = await loadingTask.promise
+        if (isCancelled) {
+          pdfDocument.destroy()
+          return
+        }
+
+        const page = await pdfDocument.getPage(1)
+        if (isCancelled) {
+          pdfDocument.destroy()
+          return
+        }
+
+        const baseViewport = page.getViewport({ scale: 1 })
+        const nextRatio = baseViewport.height > 0 ? baseViewport.width / baseViewport.height : 210 / 297
+        setAspectRatio(nextRatio)
+
+        const containerWidth = Math.max(canvas.parentElement?.clientWidth || 0, 1)
+        const scale = containerWidth / baseViewport.width
+        const viewport = page.getViewport({ scale })
+        const context = canvas.getContext('2d')
+
+        if (!context) {
+          setHasRenderError(true)
+          pdfDocument.destroy()
+          return
+        }
+
+        canvas.width = Math.floor(viewport.width)
+        canvas.height = Math.floor(viewport.height)
+
+        renderTask = page.render({
+          canvasContext: context,
+          viewport,
+        })
+        await renderTask.promise
+
+        if (!isCancelled) {
+          setHasRenderError(false)
+        }
+
+        pdfDocument.destroy()
+      }
+      catch (error) {
+        if (isCancelled) return
+        if (error?.name === 'RenderingCancelledException') return
+        setHasRenderError(true)
+      }
+    }
+
+    const scheduleRender = () => {
+      window.cancelAnimationFrame(frameId)
+      frameId = window.requestAnimationFrame(() => {
+        void renderPdf()
+      })
+    }
+
+    scheduleRender()
+    window.addEventListener('resize', scheduleRender)
+
+    return () => {
+      isCancelled = true
+      window.removeEventListener('resize', scheduleRender)
+      window.cancelAnimationFrame(frameId)
+      renderTask?.cancel()
+      loadingTask?.destroy()
+    }
+  }, [pdfUrl])
+
+  return (
+    <div className="h-full w-full bg-black" style={{ aspectRatio }}>
+      {hasRenderError
+        ? (
+          <img
+            src={fallbackImageUrl}
+            alt={altText}
+            className="h-full w-full object-contain"
+            loading="lazy"
+            onError={(event) => {
+              event.currentTarget.src = '/logo.png'
+            }}
+          />
+          )
+        : <canvas ref={canvasRef} className="block h-full w-full" aria-label={altText} />}
+    </div>
+  )
 }
 
 export default function ImportedSnapshotPage({ slug, editorFile }) {
@@ -473,7 +584,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
 
             <div
               ref={newsCarouselRef}
-              className="mt-5 mx-auto flex w-full max-w-[280px] snap-x overflow-x-auto pb-1 [scrollbar-width:thin] sm:max-w-[320px]"
+              className="mt-5 mx-auto flex w-full max-w-[94vw] snap-x overflow-x-auto pb-1 [scrollbar-width:thin] sm:max-w-[620px] lg:max-w-[760px]"
             >
               {aboutUsNews.items.map((item, index) => {
                 const mediaType = resolveNewsMediaType(item)
@@ -482,7 +593,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
 
                 return (
                   <article key={`${item.imageUrl}-${index}`} data-news-slide="true" className="w-full shrink-0 snap-start overflow-hidden rounded-2xl border border-white/15 bg-black/20">
-                  <div className="w-full" style={{ aspectRatio: '210 / 297' }}>
+                  <div className="w-full" style={mediaType === 'pdf' ? undefined : { aspectRatio: '210 / 297' }}>
                     {mediaType === 'video'
                       ? (
                         <a href={mediaHref} target="_blank" rel="noreferrer" className="block h-full w-full">
@@ -500,32 +611,11 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                         )
                       : mediaType === 'pdf'
                         ? (
-                          <div className="relative h-full w-full bg-black">
-                            <object
-                              data={`${pdfHref}#view=FitH`}
-                              type="application/pdf"
-                              className="h-full w-full"
-                              aria-label="Spring/Summer lookbook PDF"
-                            >
-                              <img
-                                src={item.imageUrl}
-                                alt="Spring/Summer lookbook cover"
-                                className="h-full w-full object-cover"
-                                loading="lazy"
-                                onError={(event) => {
-                                  event.currentTarget.src = '/logo.png'
-                                }}
-                              />
-                            </object>
-                            <a
-                              href={pdfHref}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="absolute bottom-3 left-3 right-3 inline-flex justify-center rounded-lg bg-[#D43790] px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]"
-                            >
-                              Open PDF
-                            </a>
-                          </div>
+                          <PdfPreviewSlide
+                            pdfUrl={pdfHref}
+                            fallbackImageUrl={item.imageUrl}
+                            altText="Spring/Summer lookbook PDF preview"
+                          />
                           )
                         : (
                           <a href={mediaHref} target="_blank" rel="noreferrer" className="block h-full w-full">
