@@ -63,11 +63,12 @@ function resolveNewsMediaType(item = {}) {
   return 'image'
 }
 
+const PDF_PREVIEW_ASPECT_RATIO = 210 / 297
+
 function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl }) {
   const canvasRef = useRef(null)
   const backgroundVideoRef = useRef(null)
   const pdfDocumentRef = useRef(null)
-  const [aspectRatio, setAspectRatio] = useState(210 / 297)
   const [hasRenderError, setHasRenderError] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -153,8 +154,6 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl
         if (isCancelled) return
 
         const baseViewport = page.getViewport({ scale: 1 })
-        const nextRatio = baseViewport.height > 0 ? baseViewport.width / baseViewport.height : 210 / 297
-        setAspectRatio(nextRatio)
 
         const containerWidth = Math.max(canvas.parentElement?.clientWidth || 0, 1)
         const scale = containerWidth / baseViewport.width
@@ -208,7 +207,7 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl
   const canGoToNextPage = currentPage < totalPages
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-black" style={{ aspectRatio }}>
+    <div className="relative h-full w-full overflow-hidden bg-black" style={{ aspectRatio: PDF_PREVIEW_ASPECT_RATIO }}>
       {backgroundVideoUrl && (
         <video
           ref={backgroundVideoRef}
