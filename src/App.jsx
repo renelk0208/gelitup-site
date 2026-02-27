@@ -9766,11 +9766,11 @@ function App() {
             return { ok: true, applicationStatus: 'approved', debugTrace: 'login-success -> bypass-approved (no registration row)' }
           }
 
-          await supabase.auth.signOut()
+          setIsPortalAuthenticated(true)
           return {
-            ok: false,
-            message: 'No B2B registration found for this email. Use the exact email submitted in your distributor application, or apply now.',
-            applicationStatus: 'pending',
+            ok: true,
+            applicationStatus: 'approved',
+            debugTrace: 'login-success -> no-registration-row-allowed',
           }
         }
 
@@ -10061,8 +10061,13 @@ function App() {
           }
         }
 
-        await supabase.auth.signOut()
-        return { ok: false, message: 'No B2B registration found for this email. Use the same email used in your application or apply now.' }
+        setIsPortalAuthenticated(true)
+        return {
+          ok: true,
+          infoMessage: 'Password created successfully. No B2B registration profile was found yet; submit a distributor application if approval-gated access is needed.',
+          navigateToDashboard: true,
+          debugTrace: 'create-password -> no-registration-row-allowed',
+        }
       }
 
       const registrationStatus = String(latestRegistration?.status || '').trim().toLowerCase()
