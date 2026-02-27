@@ -42,7 +42,9 @@ const EMAIL_REPLY_TO = import.meta.env.VITE_EMAIL_REPLY_TO || B2B_EMAIL
 const ORDER_INBOX_EMAIL = import.meta.env.VITE_B2B_ORDER_INBOX || B2B_EMAIL
 const ORDER_BACKUP_INBOX_EMAIL = import.meta.env.VITE_B2B_ORDER_BACKUP_INBOX || 'info@gelitup.com'
 const CONTACT_INBOX_EMAIL = 'info@gelitup.com'
-const SUPPORT_WHATSAPP_URL = import.meta.env.VITE_SUPPORT_WHATSAPP_URL || ''
+const SUPPORT_WHATSAPP_NUMBER = import.meta.env.VITE_SUPPORT_WHATSAPP_NUMBER || '+306940715234'
+const SUPPORT_WHATSAPP_URL = import.meta.env.VITE_SUPPORT_WHATSAPP_URL
+  || `https://wa.me/${String(SUPPORT_WHATSAPP_NUMBER).replace(/[^\d]/g, '')}`
 const PORTAL_INTERNAL_BYPASS_EMAILS = new Set(
   [
     'distributors@gelitup.com',
@@ -8122,7 +8124,7 @@ function OrdersModule() {
             ? (
                 <a href={SUPPORT_WHATSAPP_URL} target="_blank" rel="noreferrer" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
                   <span className="font-semibold text-slate-900">WhatsApp:</span>{' '}
-                  Open chat
+                  {SUPPORT_WHATSAPP_NUMBER}
                 </a>
               )
             : (
