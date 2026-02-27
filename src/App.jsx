@@ -310,6 +310,8 @@ const COUNTRY_DIAL_CODES = {
   'New Zealand': '+64',
 }
 
+const SHOW_SERVICE_FLOW_SUBCATEGORY_MENU = false
+
 function withCountryDialCode(phoneValue = '', country = '') {
   const dialCode = COUNTRY_DIAL_CODES[country] || ''
   const current = String(phoneValue || '').trim()
@@ -2912,7 +2914,7 @@ function FullCataloguePage() {
               })}
             </div>
 
-            {serviceFlowMenu.some((flow) => flow.matchedSections.some((section) => section.category === activeCategory)) && (
+            {SHOW_SERVICE_FLOW_SUBCATEGORY_MENU && serviceFlowMenu.some((flow) => flow.matchedSections.some((section) => section.category === activeCategory)) && (
               <div className="mt-3 rounded-xl border border-[#4A4A4A]/20 bg-white p-3">
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
                   {(serviceFlowMenu.find((flow) => flow.matchedSections.some((section) => section.category === activeCategory))?.resolvedSubcategories || []).map((sub) => (
@@ -2935,6 +2937,10 @@ function FullCataloguePage() {
               </div>
             )}
           </div>
+
+          {activeCategory && <div className="mx-auto max-w-6xl">{categoryDetail}</div>}
+
+          {!activeCategory && (
 
           {/* FEATURED HERO: SUPERBOND PRIMER */}
           <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
@@ -3395,6 +3401,8 @@ function FullCataloguePage() {
               ALL SYSTEMS ARE 100% HEMA & TPO FREE | CPNP NOTIFIED
             </p>
           </div>
+
+          )}
 
         </>
       )}
