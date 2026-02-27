@@ -42,6 +42,7 @@ const EMAIL_REPLY_TO = import.meta.env.VITE_EMAIL_REPLY_TO || B2B_EMAIL
 const ORDER_INBOX_EMAIL = import.meta.env.VITE_B2B_ORDER_INBOX || B2B_EMAIL
 const ORDER_BACKUP_INBOX_EMAIL = import.meta.env.VITE_B2B_ORDER_BACKUP_INBOX || 'info@gelitup.com'
 const CONTACT_INBOX_EMAIL = 'info@gelitup.com'
+const SUPPORT_WHATSAPP_URL = import.meta.env.VITE_SUPPORT_WHATSAPP_URL || ''
 const PORTAL_INTERNAL_BYPASS_EMAILS = new Set(
   [
     'distributors@gelitup.com',
@@ -8109,6 +8110,35 @@ function OrdersModule() {
 
   return (
     <div className="space-y-4">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+        <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-lg font-semibold text-transparent">Support & Tracking</h3>
+        <p className="mt-1 text-sm text-slate-600">Track order submission/receipt status and contact support directly from this workspace.</p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          <a href={`tel:${String(PROFORMA_LEEUKOPF_PHONE || '').replace(/\s+/g, '')}`} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
+            <span className="font-semibold text-slate-900">Phone:</span>{' '}
+            {PROFORMA_LEEUKOPF_PHONE}
+          </a>
+          {SUPPORT_WHATSAPP_URL
+            ? (
+                <a href={SUPPORT_WHATSAPP_URL} target="_blank" rel="noreferrer" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                  <span className="font-semibold text-slate-900">WhatsApp:</span>{' '}
+                  Open chat
+                </a>
+              )
+            : (
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                  <span className="font-semibold text-slate-900">WhatsApp:</span>{' '}
+                  Coming soon
+                </div>
+              )}
+          <a href={`mailto:${B2B_EMAIL}`} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
+            <span className="font-semibold text-slate-900">Email:</span>{' '}
+            {B2B_EMAIL}
+          </a>
+        </div>
+        <p className="mt-2 text-xs text-slate-500">Online help/support bot will be added in a future release.</p>
+      </div>
+
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
         <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-lg font-semibold text-transparent">Submitted Orders</h3>
         <p className="mt-1 text-xs text-slate-500">
