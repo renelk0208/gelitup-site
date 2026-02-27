@@ -4579,6 +4579,31 @@ function PortalLogin({ onLogin, onResendConfirmation, onCheckApproval, onCreateP
 
       <div className="p-8">
         <h3 className="text-xl font-semibold text-slate-900">{isCreatePasswordMode ? 'Create Password' : 'Sign In'}</h3>
+        <div className="mt-2 text-xs text-slate-600">
+          {isCreatePasswordMode
+            ? (
+              <>
+                Returning client?{' '}
+                <NavLink
+                  to={prefilledEmail ? `/portal/login?email=${encodeURIComponent(prefilledEmail)}` : '/portal/login'}
+                  className="font-semibold text-slate-900 hover:underline"
+                >
+                  Sign in
+                </NavLink>
+              </>
+            )
+            : (
+              <>
+                First time here?{' '}
+                <NavLink
+                  to={email ? `/portal/login?mode=create-password&email=${encodeURIComponent(email)}` : '/portal/login?mode=create-password'}
+                  className="font-semibold text-slate-900 hover:underline"
+                >
+                  Create password
+                </NavLink>
+              </>
+            )}
+        </div>
         <form autoComplete="on" className="mt-5 space-y-4" onSubmit={async (event) => {
           event.preventDefault()
           setIsSubmitting(true)
