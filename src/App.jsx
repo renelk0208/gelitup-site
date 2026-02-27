@@ -41,6 +41,15 @@ const EMAIL_FROM = import.meta.env.VITE_EMAIL_FROM || 'gelitup.portal@gelitup.co
 const EMAIL_REPLY_TO = import.meta.env.VITE_EMAIL_REPLY_TO || B2B_EMAIL
 const ORDER_INBOX_EMAIL = import.meta.env.VITE_B2B_ORDER_INBOX || B2B_EMAIL
 const CONTACT_INBOX_EMAIL = 'info@gelitup.com'
+const PORTAL_INTERNAL_BYPASS_EMAILS = new Set(
+  [
+    'distributors@gelitup.com',
+    ...String(import.meta.env.VITE_PORTAL_INTERNAL_BYPASS_EMAILS || '')
+      .split(',')
+      .map((entry) => entry.trim().toLowerCase())
+      .filter(Boolean),
+  ],
+)
 const ZOHO_SYNC_WEBHOOK_URL = import.meta.env.VITE_ZOHO_SYNC_WEBHOOK_URL
 const ZOHO_SYNC_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_ZOHO_SYNC, false)
 const ZOHO_SYNC_TIMEOUT_MS = Number.parseInt(import.meta.env.VITE_ZOHO_SYNC_TIMEOUT_MS || '12000', 10)
@@ -9621,6 +9630,7 @@ function App() {
   const handlePortalLogin = async (email, password) => {
     if (hasSupabaseConfig && supabase) {
       const normalizedEmail = String(email || '').trim().toLowerCase()
+      const isInternalBypassEmail = PORTAL_INTERNAL_BYPASS_EMAILS.has(normalizedEmail)
       const { error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password })
 
       if (error) {
@@ -9635,6 +9645,11 @@ function App() {
         const latestRegistration = registrationResult.data || null
 
         if (!latestRegistration) {
+          if (isInternalBypassEmail) {
+            setIsPortalAuthenticated(true)
+            return { ok: true, applicationStatus: 'approved' }
+          }
+
           return {
             ok: false,
             message: 'Invalid login credentials. If this is your first sign-in, use Create password. Otherwise use Forgot password.',
@@ -9723,6 +9738,11 @@ function App() {
           : inferredDistributorFromStatus && !inferredOrderRequestFromStatus
 
         if (!latestRegistration) {
+          if (isInternalBypassEmail) {
+            setIsPortalAuthenticated(true)
+            return { ok: true, applicationStatus: 'approved' }
+          }
+
           await supabase.auth.signOut()
           return {
             ok: false,
@@ -9938,6 +9958,7 @@ function App() {
 
   const handleCreatePortalPassword = async ({ email, password, confirmPassword, rememberMe }) => {
     const normalizedEmail = String(email || '').trim().toLowerCase()
+    const isInternalBypassEmail = PORTAL_INTERNAL_BYPASS_EMAILS.has(normalizedEmail)
 
     if (!normalizedEmail) {
       return { ok: false, message: 'Business email is required.' }
@@ -10007,6 +10028,15 @@ function App() {
 
       const latestRegistration = registrationResult.data || null
       if (!latestRegistration) {
+        if (isInternalBypassEmail) {
+          setIsPortalAuthenticated(true)
+          return {
+            ok: true,
+            infoMessage: 'Password created successfully. Internal account access granted.',
+            navigateToDashboard: true,
+          }
+        }
+
         await supabase.auth.signOut()
         return { ok: false, message: 'No B2B registration found for this email. Use the same email used in your application or apply now.' }
       }
