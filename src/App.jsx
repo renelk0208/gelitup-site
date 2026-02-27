@@ -4454,7 +4454,7 @@ function PortalLanding() {
         </article>
       </div>
       <div className="flex flex-wrap gap-3">
-        <NavLink to="/portal/login" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+        <NavLink to="/portal/login?portal=login" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
           Portal Sign In
         </NavLink>
         <a
@@ -9730,22 +9730,8 @@ function App() {
         const registrationResult = await fetchLatestRegistrationByEmail(normalizedEmail, 'status, notes')
         const latestRegistration = registrationResult.data || null
 
-        if (!latestRegistration) {
-          if (isInternalBypassEmail) {
-            setIsPortalAuthenticated(true)
-            return { ok: true, applicationStatus: 'approved', debugTrace: 'login-invalid-credentials -> bypass-approved (no registration row)' }
-          }
-
-          return {
-            ok: false,
-            message: 'Invalid login credentials. If this is your first sign-in, use Create password. Otherwise use Forgot password.',
-            applicationStatus: '',
-            debugTrace: 'login-invalid-credentials -> no-registration-row -> blocked',
-          }
-        }
-
         const status = String(latestRegistration?.status || '').trim().toLowerCase()
-        const applicationType = getApplicationTypeFromRecord(latestRegistration)
+        const applicationType = latestRegistration ? getApplicationTypeFromRecord(latestRegistration) : 'b2b_order'
         const isDistributorRegistration = applicationType === 'distributor'
 
         if (isDistributorRegistration && requireApproval && status !== 'approved') {
@@ -9775,11 +9761,55 @@ function App() {
           }
         }
 
+        const signUpResult = await supabase.auth.signUp({
+          email: normalizedEmail,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/portal/login`,
+          },
+        })
+
+        const signUpMessage = signUpResult?.error?.message || ''
+        const isAlreadyRegistered = /already registered|already been registered/i.test(signUpMessage)
+        const isExistingAccount = isExistingUserSignUpResult(signUpResult)
+        let canSignInNow = hasActiveSignUpSession(signUpResult)
+
+        if (signUpResult.error && !isAlreadyRegistered) {
+          return {
+            ok: false,
+            message: signUpResult.error.message || 'Unable to initialize account access.',
+            applicationStatus: '',
+            debugTrace: 'login-invalid-credentials -> auto-provision-signup-error',
+          }
+        }
+
+        if (!canSignInNow) {
+          const { error: immediateSignInError } = await supabase.auth.signInWithPassword({
+            email: normalizedEmail,
+            password,
+          })
+
+          if (!immediateSignInError) {
+            canSignInNow = true
+          }
+        }
+
+        if (canSignInNow) {
+          setIsPortalAuthenticated(true)
+          return {
+            ok: true,
+            applicationStatus: 'approved',
+            debugTrace: 'login-invalid-credentials -> auto-provision-success',
+          }
+        }
+
         return {
           ok: false,
-          message: 'Invalid login credentials. If this is your first sign-in, use Create password. Otherwise use Forgot password.',
-          applicationStatus: status || 'approved',
-          debugTrace: `login-invalid-credentials -> registration-found status=${status || 'unknown'}`,
+          message: (isAlreadyRegistered || isExistingAccount)
+            ? 'Invalid login credentials. Use Forgot password to reset access.'
+            : 'Account setup completed. Please sign in again.',
+          applicationStatus: status || '',
+          debugTrace: 'login-invalid-credentials -> auto-provision-signin-required',
         }
       }
 
