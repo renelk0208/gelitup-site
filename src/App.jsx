@@ -9013,7 +9013,7 @@ function PortalDashboard({ onLogout }) {
   const modules = useMemo(
     () => [
       { key: 'overview', label: 'Overview' },
-      { key: 'products', label: 'Tier Packages' },
+      { key: 'products', label: 'Buy Now' },
       { key: 'orders', label: 'Orders' },
       { key: 'applications', label: 'Applications' },
       { key: 'invoices', label: 'Order Intake' },
@@ -9382,7 +9382,7 @@ function PortalDashboard({ onLogout }) {
                   My Account
                 </NavLink>
                 <NavLink to="/portal/dashboard/products" className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
-                  Place Order
+                  Buy Now
                 </NavLink>
                 <NavLink to="/portal/dashboard/orders" className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
                   Track Orders
