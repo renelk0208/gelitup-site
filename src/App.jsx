@@ -9594,7 +9594,65 @@ function App() {
       const { error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password })
 
       if (error) {
-        return { ok: false, message: error.message, applicationStatus: '' }
+        const authErrorMessage = String(error.message || '').trim()
+        const isInvalidCredentials = /invalid login credentials/i.test(authErrorMessage)
+
+        if (!isInvalidCredentials) {
+          return { ok: false, message: authErrorMessage || 'Unable to sign in.', applicationStatus: '' }
+        }
+
+        const { data: registrationRows } = await supabase
+          .from(registrationsTable)
+          .select('status, notes')
+          .eq('contact_email', normalizedEmail)
+          .order('created_at', { ascending: false })
+          .limit(1)
+
+        const latestRegistration = registrationRows?.[0] || null
+
+        if (!latestRegistration) {
+          return {
+            ok: false,
+            message: 'Invalid login credentials. If this is your first sign-in, use Create password. Otherwise use Forgot password.',
+            applicationStatus: '',
+          }
+        }
+
+        const status = String(latestRegistration?.status || '').trim().toLowerCase()
+        const explicitType = extractTaggedValue(latestRegistration?.notes, 'APPLICATION_TYPE')
+        const isDistributorRegistration = explicitType
+          ? explicitType === 'distributor'
+          : status === 'pending'
+
+        if (isDistributorRegistration && requireApproval && status !== 'approved') {
+          if (status === 'rejected') {
+            return {
+              ok: false,
+              message: 'Your B2B application was rejected. Contact distribution support for next steps.',
+              applicationStatus: 'rejected',
+            }
+          }
+
+          if (status === 'submitted') {
+            return {
+              ok: false,
+              message: 'Your order request is stored and under processing. Portal sign-in requires an approved distributor application.',
+              applicationStatus: 'submitted',
+            }
+          }
+
+          return {
+            ok: false,
+            message: 'Your B2B application is pending approval. Access is enabled after manual review.',
+            applicationStatus: 'pending',
+          }
+        }
+
+        return {
+          ok: false,
+          message: 'Invalid login credentials. If this is your first sign-in, use Create password. Otherwise use Forgot password.',
+          applicationStatus: status || 'approved',
+        }
       }
 
       if (requireApproval) {
