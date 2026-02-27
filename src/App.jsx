@@ -8058,7 +8058,7 @@ function OrdersModule() {
 
 function PendingApplicationsModule() {
   const [applications, setApplications] = useState([])
-  const [reviewedApplications, setReviewedApplications] = useState([])
+  const [statusFilter, setStatusFilter] = useState('all')
   const [actionDrafts, setActionDrafts] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const [isSavingId, setIsSavingId] = useState(null)
@@ -8069,6 +8069,25 @@ function PendingApplicationsModule() {
   const [successMessage, setSuccessMessage] = useState('')
 
   const registrationsTable = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || DEFAULT_REGISTRATIONS_TABLE
+  const statusFilterOptions = useMemo(
+    () => [
+      { key: 'all', label: 'All' },
+      { key: 'pending', label: 'Pending' },
+      { key: 'submitted', label: 'Submitted' },
+      { key: 'approved', label: 'Approved' },
+      { key: 'rejected', label: 'Rejected' },
+    ],
+    [],
+  )
+
+  const getStatusBadgeClass = useCallback((statusValue) => {
+    const normalized = String(statusValue || '').trim().toLowerCase()
+    if (normalized === 'approved') return 'bg-emerald-100 text-emerald-700'
+    if (normalized === 'rejected') return 'bg-rose-100 text-rose-700'
+    if (normalized === 'submitted') return 'bg-sky-100 text-sky-800'
+    if (normalized === 'pending') return 'bg-amber-100 text-amber-800'
+    return 'bg-slate-100 text-slate-800'
+  }, [])
 
   const loadPendingApplications = useCallback(async () => {
     if (!hasSupabaseConfig || !supabase) {
@@ -8082,36 +8101,42 @@ function PendingApplicationsModule() {
     const { data, error } = await supabase
       .from(registrationsTable)
       .select('id, created_at, customer_type, company_name, vat_number, contact_name, contact_email, phone, shipping_type, country, business_type, status, notes, application_type, order_profile, admin_comment, order_action, order_payment_status, order_shipping_status, tracking_number, tracking_url, action_updated_at, action_updated_by, invoice_address_line1, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_area, shipping_region, shipping_country, shipping_postal_code')
-      .in('status', ['pending', 'submitted'])
+      .in('status', ['pending', 'submitted', 'approved', 'rejected'])
       .order('created_at', { ascending: false })
-
-    const { data: reviewedData, error: reviewedError } = await supabase
-      .from(registrationsTable)
-      .select('id, created_at, reviewed_at, reviewed_by, customer_type, company_name, vat_number, contact_name, contact_email, phone, shipping_type, country, business_type, status, notes, application_type, order_profile, admin_comment, order_action, order_payment_status, order_shipping_status, tracking_number, tracking_url, action_updated_at, action_updated_by, invoice_address_line1, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_area, shipping_region, shipping_country, shipping_postal_code')
-      .in('status', ['approved', 'rejected'])
-      .order('reviewed_at', { ascending: false })
-      .limit(80)
 
     if (error) {
       setErrorMessage(error.message)
       setApplications([])
-      setReviewedApplications([])
-      setIsLoading(false)
-      return
-    }
-
-    if (reviewedError) {
-      setErrorMessage(reviewedError.message)
-      setApplications([])
-      setReviewedApplications([])
       setIsLoading(false)
       return
     }
 
     setApplications(data || [])
-    setReviewedApplications(reviewedData || [])
     setIsLoading(false)
   }, [registrationsTable])
+
+  const visibleApplications = useMemo(
+    () => applications.filter((application) => {
+      if (statusFilter === 'all') return true
+      return String(application?.status || '').trim().toLowerCase() === statusFilter
+    }),
+    [applications, statusFilter],
+  )
+
+  const reviewedApplications = useMemo(
+    () => applications
+      .filter((application) => {
+        const status = String(application?.status || '').trim().toLowerCase()
+        return status === 'approved' || status === 'rejected'
+      })
+      .sort((left, right) => {
+        const leftTime = new Date(left.action_updated_at || left.created_at || 0).getTime()
+        const rightTime = new Date(right.action_updated_at || right.created_at || 0).getTime()
+        return rightTime - leftTime
+      })
+      .slice(0, 80),
+    [applications],
+  )
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -8387,13 +8412,25 @@ function PendingApplicationsModule() {
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
-        {isLoading && <p className="text-sm text-slate-600">Loading active submissions...</p>}
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          {statusFilterOptions.map((option) => (
+            <button
+              key={option.key}
+              onClick={() => setStatusFilter(option.key)}
+              className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.05em] ${statusFilter === option.key ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-300 bg-white text-slate-700'}`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        {isLoading && <p className="text-sm text-slate-600">Loading submissions...</p>}
         {!isLoading && errorMessage && <p className="text-sm text-rose-600">Unable to load applications: {errorMessage}</p>}
-        {!isLoading && !errorMessage && !applications.length && (
-          <p className="text-sm text-slate-600">No active submissions.</p>
+        {!isLoading && !errorMessage && !visibleApplications.length && (
+          <p className="text-sm text-slate-600">No submissions match this status filter.</p>
         )}
 
-        {!isLoading && !errorMessage && applications.length > 0 && (
+        {!isLoading && !errorMessage && visibleApplications.length > 0 && (
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm">
               <thead>
@@ -8412,7 +8449,7 @@ function PendingApplicationsModule() {
                 </tr>
               </thead>
               <tbody>
-                {applications.map((application) => {
+                {visibleApplications.map((application) => {
                   const isDistributor = isDistributorSubmission(application)
                   const draft = getActionDraft(application)
                   return (
@@ -8425,7 +8462,7 @@ function PendingApplicationsModule() {
                       </span>
                     </td>
                     <td className="py-2 pr-4">
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${application.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-800'}`}>
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${getStatusBadgeClass(application.status)}`}>
                         {application.status || '-'}
                       </span>
                     </td>
@@ -8568,7 +8605,7 @@ function PendingApplicationsModule() {
                     </td>
                     <td className="py-2 pr-4">
                       <div className="flex flex-wrap gap-2">
-                        {isDistributor && (
+                        {isDistributor && application.status === 'pending' && (
                           <>
                             <button
                               onClick={() => reviewApplication(application, 'approved')}
@@ -8658,7 +8695,7 @@ function PendingApplicationsModule() {
                   <tr key={`reviewed-${application.id}`} className="border-b border-slate-100 text-slate-700">
                     <td className="py-2 pr-4 font-semibold">#{application.id}</td>
                     <td className="py-2 pr-4">
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${application.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${getStatusBadgeClass(application.status)}`}>
                         {application.status}
                       </span>
                     </td>
@@ -9455,9 +9492,19 @@ function App() {
         }
 
         const latestRegistration = registrationRows?.[0]
-        const status = latestRegistration?.status?.toLowerCase()
+        const status = String(latestRegistration?.status || '').trim().toLowerCase()
+        const isDistributorRegistration = isDistributorSubmission(latestRegistration || {})
 
-        if (status !== 'approved') {
+        if (!latestRegistration) {
+          await supabase.auth.signOut()
+          return {
+            ok: false,
+            message: 'No B2B registration found for this account email.',
+            applicationStatus: 'pending',
+          }
+        }
+
+        if (isDistributorRegistration && requireApproval && status !== 'approved') {
           await supabase.auth.signOut()
 
           if (status === 'rejected') {
@@ -9741,6 +9788,37 @@ function App() {
 
     localStorage.setItem('portalRememberedEmail', normalizedEmail)
     if (canSignInNow) {
+      const { data: registrationRows, error: registrationError } = await supabase
+        .from(registrationsTable)
+        .select('status, application_type, notes')
+        .eq('contact_email', normalizedEmail)
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      if (registrationError) {
+        await supabase.auth.signOut()
+        return { ok: false, message: `Registration status check failed (${registrationError.message}).` }
+      }
+
+      const latestRegistration = registrationRows?.[0] || null
+      if (!latestRegistration) {
+        await supabase.auth.signOut()
+        return { ok: false, message: 'No B2B registration found for this account email.' }
+      }
+
+      const isDistributorRegistration = isDistributorSubmission(latestRegistration)
+      const registrationStatus = String(latestRegistration?.status || '').trim().toLowerCase()
+
+      if (isDistributorRegistration && requireApproval && registrationStatus !== 'approved') {
+        await supabase.auth.signOut()
+
+        if (registrationStatus === 'rejected') {
+          return { ok: false, message: 'Your distributor application was rejected. Contact distribution support for next steps.' }
+        }
+
+        return { ok: false, message: 'Your distributor application is pending approval. Access is enabled after manual review.' }
+      }
+
       setIsPortalAuthenticated(true)
     }
 
@@ -10085,7 +10163,7 @@ function App() {
 
     const { data: registrationRows, error } = await supabase
       .from(registrationsTable)
-      .select('status')
+      .select('status, application_type, notes')
       .eq('contact_email', normalizedEmail)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -10094,7 +10172,17 @@ function App() {
       return { ok: false, message: error.message }
     }
 
-    const status = registrationRows?.[0]?.status?.toLowerCase() || 'pending'
+    const latestRegistration = registrationRows?.[0] || null
+    if (!latestRegistration) {
+      return { ok: true, applicationStatus: 'pending' }
+    }
+
+    const isDistributorRegistration = isDistributorSubmission(latestRegistration)
+    const status = String(latestRegistration?.status || '').trim().toLowerCase() || 'pending'
+
+    if (!isDistributorRegistration) {
+      return { ok: true, applicationStatus: 'approved' }
+    }
 
     return { ok: true, applicationStatus: status }
   }
