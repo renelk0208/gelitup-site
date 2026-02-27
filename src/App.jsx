@@ -311,6 +311,7 @@ const COUNTRY_DIAL_CODES = {
 }
 
 const SHOW_SERVICE_FLOW_SUBCATEGORY_MENU = false
+const CATALOGUE_RESULTS_ANCHOR_ID = 'catalogue-results-anchor'
 
 function withCountryDialCode(phoneValue = '', country = '') {
   const dialCode = COUNTRY_DIAL_CODES[country] || ''
@@ -2534,6 +2535,41 @@ function FullCataloguePage() {
     }
   }
 
+  const scrollToCatalogueResults = useCallback(() => {
+    requestAnimationFrame(() => {
+      const targetElement = document.getElementById(CATALOGUE_RESULTS_ANCHOR_ID)
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    })
+  }, [])
+
+  const openCatalogueCategory = useCallback((categoryName = '', subcategoryName = 'ALL') => {
+    if (!categoryName) return
+    setActiveCategory(categoryName)
+    setActiveSubcategory(subcategoryName || 'ALL')
+    setActiveColorFamily('ALL')
+    scrollToCatalogueResults()
+  }, [scrollToCatalogueResults])
+
+  const getCategoryCoverImage = useCallback((categoryName = '', fallbackImageUrl = '') => {
+    const candidates = buildCategoryHeroImageCandidates(categoryName, fallbackImageUrl)
+    const candidateIndex = Math.max(0, Number(heroCandidateIndexByCategory[categoryName] || 0))
+    return candidates[Math.min(candidateIndex, Math.max(0, candidates.length - 1))] || fallbackImageUrl || '/logo.png'
+  }, [heroCandidateIndexByCategory])
+
+  const handleCategoryCoverImageError = useCallback((categoryName = '', fallbackImageUrl = '') => {
+    const candidates = buildCategoryHeroImageCandidates(categoryName, fallbackImageUrl)
+    setHeroCandidateIndexByCategory((current) => {
+      const currentIndex = Math.max(0, Number(current[categoryName] || 0))
+      if (currentIndex >= candidates.length - 1) return current
+      return {
+        ...current,
+        [categoryName]: currentIndex + 1,
+      }
+    })
+  }, [])
+
   const serviceFlowMenu = useMemo(() => {
     const definitions = [
       {
@@ -2901,10 +2937,7 @@ function FullCataloguePage() {
                     onClick={() => {
                       const targetSection = flow.matchedSections[0]
                       if (!targetSection) return
-                      setActiveCategory(targetSection.category)
-                      setActiveSubcategory('ALL')
-                      setActiveColorFamily('ALL')
-                      scrollToCatalogueSection(targetSection.category)
+                      openCatalogueCategory(targetSection.category, 'ALL')
                     }}
                     className={`min-h-10 shrink-0 snap-start whitespace-nowrap rounded-lg border px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${flowIsActive ? 'border-[#D43790] bg-[#D43790] text-white' : 'border-[#4A4A4A]/35 bg-white text-[#1A1A1A] hover:border-[#D43790]'}`}
                   >
@@ -2923,10 +2956,7 @@ function FullCataloguePage() {
                       type="button"
                       onClick={() => {
                         if (!sub.category) return
-                        setActiveCategory(sub.category)
-                        setActiveSubcategory(sub.subcategory || 'ALL')
-                        setActiveColorFamily('ALL')
-                        scrollToCatalogueSection(sub.category)
+                        openCatalogueCategory(sub.category, sub.subcategory || 'ALL')
                       }}
                       className="min-h-10 rounded-lg border border-[#4A4A4A]/20 bg-white px-3 py-2 text-left text-xs font-semibold text-[#1A1A1A] transition hover:border-[#D43790]"
                     >
@@ -2937,6 +2967,8 @@ function FullCataloguePage() {
               </div>
             )}
           </div>
+
+          <div id={CATALOGUE_RESULTS_ANCHOR_ID} className="scroll-mt-28" />
 
           {activeCategory && <div className="mx-auto max-w-6xl">{categoryDetail}</div>}
 
@@ -3031,10 +3063,7 @@ function FullCataloguePage() {
                   onClick={() => {
                     const colorsSection = sections.find((s) => isColorsCategoryName(s.category))
                     if (colorsSection) {
-                      setActiveCategory(colorsSection.category)
-                      setActiveSubcategory('ALL')
-                      setActiveColorFamily('ALL')
-                      scrollToCatalogueSection(colorsSection.category)
+                      openCatalogueCategory(colorsSection.category, 'ALL')
                     }
                   }}
                   className="rounded-lg bg-fuchsia-600 px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
@@ -3140,19 +3169,24 @@ function FullCataloguePage() {
                 const section = sections.find((s) => s.category === categoryName)
                 if (!section) return null
                 const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
-                const coverImage = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
+                const coverImageFallback = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
+                const coverImage = getCategoryCoverImage(categoryName, coverImageFallback)
                 return (
                   <Fragment key={categoryName}>
                     <button
                       onClick={() => {
-                        setActiveCategory(categoryName)
-                        setActiveSubcategory('ALL')
-                        scrollToCatalogueSection(categoryName)
+                        openCatalogueCategory(categoryName, 'ALL')
                       }}
                       className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
                     >
                       <div className="relative h-52 bg-white p-2">
-                        <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" />
+                        <img
+                          src={coverImage}
+                          alt={categoryName}
+                          className="h-full w-full object-contain"
+                          loading="lazy"
+                          onError={() => handleCategoryCoverImageError(categoryName, coverImageFallback)}
+                        />
                         <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
                       </div>
                       <div className="border-t border-[#4A4A4A]/20 p-3">
@@ -3182,19 +3216,24 @@ function FullCataloguePage() {
                 const section = sections.find((s) => s.category === categoryName)
                 if (!section) return null
                 const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
-                const coverImage = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
+                const coverImageFallback = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
+                const coverImage = getCategoryCoverImage(categoryName, coverImageFallback)
                 return (
                   <Fragment key={categoryName}>
                     <button
                       onClick={() => {
-                        setActiveCategory(categoryName)
-                        setActiveSubcategory('ALL')
-                        scrollToCatalogueSection(categoryName)
+                        openCatalogueCategory(categoryName, 'ALL')
                       }}
                       className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
                     >
                       <div className="relative h-52 bg-white p-2">
-                        <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" />
+                        <img
+                          src={coverImage}
+                          alt={categoryName}
+                          className="h-full w-full object-contain"
+                          loading="lazy"
+                          onError={() => handleCategoryCoverImageError(categoryName, coverImageFallback)}
+                        />
                         <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
                       </div>
                       <div className="border-t border-[#4A4A4A]/20 p-3">
@@ -3224,19 +3263,24 @@ function FullCataloguePage() {
                 const section = sections.find((s) => s.category === categoryName)
                 if (!section) return null
                 const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
-                const coverImage = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
+                const coverImageFallback = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
+                const coverImage = getCategoryCoverImage(categoryName, coverImageFallback)
                 return (
                   <Fragment key={categoryName}>
                     <button
                       onClick={() => {
-                        setActiveCategory(categoryName)
-                        setActiveSubcategory('ALL')
-                        scrollToCatalogueSection(categoryName)
+                        openCatalogueCategory(categoryName, 'ALL')
                       }}
                       className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
                     >
                       <div className="relative h-52 bg-white p-2">
-                        <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" />
+                        <img
+                          src={coverImage}
+                          alt={categoryName}
+                          className="h-full w-full object-contain"
+                          loading="lazy"
+                          onError={() => handleCategoryCoverImageError(categoryName, coverImageFallback)}
+                        />
                         <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
                       </div>
                       <div className="border-t border-[#4A4A4A]/20 p-3">
