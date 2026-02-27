@@ -5741,6 +5741,7 @@ function ProductsModule({ moduleView = 'products' }) {
   const [localImageMap, setLocalImageMap] = useState(() => new Map())
   const [shippingMetadata, setShippingMetadata] = useState(SHIPPING_RULES)
   const [shippingMetadataStatus, setShippingMetadataStatus] = useState('Using embedded shipping metadata rules.')
+  const isDistributorRole = useMemo(() => String(b2bUserRole || '').trim().toLowerCase().includes('distributor'), [b2bUserRole])
   const productsTable = import.meta.env.VITE_B2B_PRODUCTS_TABLE || DEFAULT_PRODUCTS_TABLE
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
@@ -6412,6 +6413,12 @@ function ProductsModule({ moduleView = 'products' }) {
   }
 
   const createPackageDraft = async () => {
+    if (!isDistributorRole) {
+      setCheckoutError('Tier packages are available for approved distributor accounts only.')
+      setCheckoutMessage('')
+      return
+    }
+
     const generatedColorItems = buildTierPackageItems(packageTier, podCatalog, DEFAULT_PACKAGE_ITEM_QTY)
     const generatedTechItems = buildTierTechnicalItems(DEFAULT_PACKAGE_ITEM_QTY)
     const generatedItems = [...generatedColorItems, ...generatedTechItems]
@@ -7715,7 +7722,7 @@ function ProductsModule({ moduleView = 'products' }) {
           </div>
         )}
 
-        {!isCatalogView && (
+        {!isCatalogView && isDistributorRole && (
         <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Sales Manager</p>
           <p className="mt-1 text-sm font-semibold text-slate-900">Create Package</p>
@@ -7828,6 +7835,14 @@ function ProductsModule({ moduleView = 'products' }) {
         </div>
         )}
 
+        {!isCatalogView && !isDistributorRole && (
+          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
+            <p className="text-xs text-slate-600">
+              Tier packages are available for approved distributor accounts only. Continue ordering directly via Buy Now.
+            </p>
+          </div>
+        )}
+
         {checkoutError && <p className="mt-2 text-xs text-rose-600">{checkoutError}</p>}
         {checkoutMessage && <p className="mt-2 text-xs text-emerald-700">{checkoutMessage}</p>}
         {orderInboxEmailStatus && <p className="mt-1 text-xs text-slate-700">{orderInboxEmailStatus}</p>}
@@ -7851,13 +7866,13 @@ function ProductsModule({ moduleView = 'products' }) {
         <div className="mb-3 flex items-center justify-between gap-2">
           <div>
             <h3 className="text-lg font-semibold text-slate-900">GEL.IT.UP The Collection</h3>
-            <p className="mt-1 text-xs text-slate-500">Add extra products outside package tiers.</p>
+            <p className="mt-1 text-xs text-slate-500">Add extra products to your order.</p>
           </div>
           <button
             onClick={() => navigate('/portal/dashboard/products')}
             className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700"
           >
-            Back to Tiers
+            Back to Buy Now
           </button>
         </div>
         <p className="mt-1 text-xs text-slate-500">Professional ordering workflow for The Collection.</p>
