@@ -8124,7 +8124,7 @@ function OrdersModule() {
             ? (
                 <a href={SUPPORT_WHATSAPP_URL} target="_blank" rel="noreferrer" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
                   <span className="font-semibold text-slate-900">WhatsApp:</span>{' '}
-                  Start chat
+                  Chat with Us
                 </a>
               )
             : (
