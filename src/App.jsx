@@ -5699,13 +5699,6 @@ function ProductsModule({ moduleView = 'products' }) {
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
   const [isLoadingFeed, setIsLoadingFeed] = useState(false)
-                {' • '}
-                <NavLink
-                  to={email ? `/portal/forgot-password?admin=1&email=${encodeURIComponent(email)}` : '/portal/forgot-password?admin=1'}
-                  className="font-semibold text-slate-900 hover:underline"
-                >
-                  Forgot password
-                </NavLink>
   const [feedMessage, setFeedMessage] = useState('Live product feed not loaded yet.')
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
   const [checkoutMessage, setCheckoutMessage] = useState('')
