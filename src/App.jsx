@@ -40,6 +40,7 @@ const EMAIL_WEBHOOK_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 const EMAIL_FROM = import.meta.env.VITE_EMAIL_FROM || 'gelitup.portal@gelitup.com'
 const EMAIL_REPLY_TO = import.meta.env.VITE_EMAIL_REPLY_TO || B2B_EMAIL
 const ORDER_INBOX_EMAIL = import.meta.env.VITE_B2B_ORDER_INBOX || B2B_EMAIL
+const CONTACT_INBOX_EMAIL = 'info@gelitup.com'
 const ZOHO_SYNC_WEBHOOK_URL = import.meta.env.VITE_ZOHO_SYNC_WEBHOOK_URL
 const ZOHO_SYNC_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_ZOHO_SYNC, false)
 const ZOHO_SYNC_TIMEOUT_MS = Number.parseInt(import.meta.env.VITE_ZOHO_SYNC_TIMEOUT_MS || '12000', 10)
@@ -665,10 +666,10 @@ const navItems = [
   { to: '/', label: 'Home' },
   { to: '/about-us', label: 'About us' },
   { to: '/distributor-packages', label: 'Distribution Options' },
-  { to: '/full-catalogue', label: 'The Collection' },
+  { to: '/full-catalogue', label: 'Our Products' },
   { to: '/distributors', label: 'Distributors' },
   { to: '/application-services', label: 'Application Services' },
-  { to: '/pages/contact-us', label: 'Contact us' },
+  { to: '/contact-us', label: 'Contact us', isContactAction: true },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -3565,43 +3566,73 @@ function pickHomepageMedia(items = []) {
   }
 }
 
-function Nav() {
+function Nav({ onOpenContactModal }) {
   return (
     <nav className="hidden gap-2 md:flex">
-      {navItems.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          className={({ isActive }) =>
-            `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
-              isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
-            }`
-          }
-        >
-          {item.label}
-        </NavLink>
-      ))}
-    </nav>
-  )
-}
+      {navItems.map((item) => {
+        if (item.isContactAction) {
+          return (
+            <button
+              key={item.to}
+              type="button"
+              onClick={onOpenContactModal}
+              className="rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] !text-white/90 transition duration-300 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
+            >
+              {item.label}
+            </button>
+          )
+        }
 
-function MobileNav() {
-  return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/15 bg-black/90 px-2 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur md:hidden">
-      <div className="mx-auto flex max-w-xl gap-1 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        {navItems.map((item) => (
+        return (
           <NavLink
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
-              `min-w-max shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.02em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
-                isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.5)]' : '!text-white/85 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
+              `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
+                isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
               }`
             }
           >
             {item.label}
           </NavLink>
-        ))}
+        )
+      })}
+    </nav>
+  )
+}
+
+function MobileNav({ onOpenContactModal }) {
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/15 bg-black/90 px-2 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur md:hidden">
+      <div className="mx-auto flex max-w-xl gap-1 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        {navItems.map((item) => {
+          if (item.isContactAction) {
+            return (
+              <button
+                key={item.to}
+                type="button"
+                onClick={onOpenContactModal}
+                className="min-w-max shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.02em] !text-white/85 transition duration-300 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              >
+                {item.label}
+              </button>
+            )
+          }
+
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `min-w-max shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.02em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
+                  isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.5)]' : '!text-white/85 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
+                }`
+              }
+            >
+              {item.label}
+            </NavLink>
+          )
+        })}
       </div>
     </nav>
   )
@@ -3841,7 +3872,7 @@ function BaselinePageView() {
   )
 }
 
-function HomePage() {
+function HomePage({ onOpenContactModal }) {
   const [media, setMedia] = useState(() => ({
     heroImage: '/logo.png',
     heroVideo: null,
@@ -3991,9 +4022,13 @@ function HomePage() {
               <NavLink to="/become-distributor" className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
                 Apply as Distributor
               </NavLink>
-              <a href={`mailto:${B2B_EMAIL}`} className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
+              <button
+                type="button"
+                onClick={onOpenContactModal}
+                className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
+              >
                 Contact Distribution
-              </a>
+              </button>
             </div>
           </div>
 
@@ -4179,7 +4214,7 @@ function HomePage() {
   )
 }
 
-function PortalAccessNotice() {
+function PortalAccessNotice({ onOpenContactModal }) {
   return (
     <section className="mx-auto max-w-2xl rounded-2xl border border-slate-200 bg-white p-8">
       <h2 className="text-2xl font-semibold text-slate-900">Portal Access by Approval Only</h2>
@@ -4194,11 +4229,84 @@ function PortalAccessNotice() {
         <NavLink to="/become-distributor" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
           Distributor Registration
         </NavLink>
-        <a href={`mailto:${B2B_EMAIL}`} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">
+        <button
+          type="button"
+          onClick={onOpenContactModal}
+          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
+        >
           Contact Distribution
-        </a>
+        </button>
       </div>
     </section>
+  )
+}
+
+function ContactRequestModal({ isOpen, formState, onChange, onClose, onSubmit, isSubmitting, message, errorMessage }) {
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/55 p-3 sm:p-5">
+      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900">Contact Us</h2>
+            <p className="mt-1 text-xs text-slate-600">Send your request and our team will follow up.</p>
+          </div>
+          <button type="button" onClick={onClose} className="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700">Close</button>
+        </div>
+
+        <form
+          className="mt-4 space-y-3"
+          onSubmit={(event) => {
+            event.preventDefault()
+            void onSubmit()
+          }}
+        >
+          <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-slate-700">
+            Name
+            <input
+              type="text"
+              required
+              value={formState.name}
+              onChange={(event) => onChange('name', event.target.value)}
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              placeholder="Your full name"
+            />
+          </label>
+
+          <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-slate-700">
+            Email Address
+            <input
+              type="email"
+              required
+              value={formState.email}
+              onChange={(event) => onChange('email', event.target.value)}
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              placeholder="you@company.com"
+            />
+          </label>
+
+          <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-slate-700">
+            Contact Number
+            <input
+              type="text"
+              required
+              value={formState.phone}
+              onChange={(event) => onChange('phone', event.target.value)}
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              placeholder="+00 000 000 000"
+            />
+          </label>
+
+          <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
+            {isSubmitting ? 'Submitting...' : 'Submit'}
+          </button>
+        </form>
+
+        {errorMessage && <p className="mt-3 text-xs text-rose-600">{errorMessage}</p>}
+        {message && <p className="mt-3 text-xs text-emerald-700">{message}</p>}
+      </div>
+    </div>
   )
 }
 
@@ -9118,6 +9226,11 @@ function App() {
   const [isPortalAuthenticated, setIsPortalAuthenticated] = useState(() => localStorage.getItem('portalAuth') === 'true')
   const [authReady, setAuthReady] = useState(!hasSupabaseConfig)
   const [hasAcceptedCookies, setHasAcceptedCookies] = useState(() => localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY) === 'accepted')
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false)
+  const [contactRequestForm, setContactRequestForm] = useState({ name: '', email: '', phone: '' })
+  const [isSubmittingContactRequest, setIsSubmittingContactRequest] = useState(false)
+  const [contactRequestMessage, setContactRequestMessage] = useState('')
+  const [contactRequestError, setContactRequestError] = useState('')
   const registrationsTable = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || DEFAULT_REGISTRATIONS_TABLE
   const adminsTable = import.meta.env.VITE_B2B_ADMINS_TABLE || 'b2b_admins'
   const requireApproval = import.meta.env.VITE_REQUIRE_B2B_APPROVAL !== 'false'
@@ -9125,6 +9238,21 @@ function App() {
   const handleAcceptCookies = useCallback(() => {
     localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, 'accepted')
     setHasAcceptedCookies(true)
+  }, [])
+
+  const openContactModal = useCallback(() => {
+    setContactRequestError('')
+    setContactRequestMessage('')
+    setIsContactModalOpen(true)
+  }, [])
+
+  const closeContactModal = useCallback(() => {
+    if (isSubmittingContactRequest) return
+    setIsContactModalOpen(false)
+  }, [isSubmittingContactRequest])
+
+  const setContactField = useCallback((key, value) => {
+    setContactRequestForm((current) => ({ ...current, [key]: value }))
   }, [])
 
   useEffect(() => {
@@ -9638,6 +9766,85 @@ function App() {
     }
 
     return { ok: false, message: 'Live registration is not configured.' }
+  }
+
+  const handleSubmitContactRequest = async () => {
+    const contactName = String(contactRequestForm.name || '').trim()
+    const contactEmail = String(contactRequestForm.email || '').trim().toLowerCase()
+    const contactPhone = String(contactRequestForm.phone || '').trim()
+
+    if (!contactName || !contactEmail || !contactPhone) {
+      setContactRequestError('Name, email address, and contact number are required.')
+      return
+    }
+
+    if (!hasSupabaseConfig || !supabase) {
+      setContactRequestError('Contact form is unavailable because portal storage is not configured.')
+      return
+    }
+
+    setIsSubmittingContactRequest(true)
+    setContactRequestError('')
+    setContactRequestMessage('')
+
+    const payload = {
+      customer_type: 'company',
+      company_name: 'Contact Request',
+      vat_number: 'N/A',
+      contact_name: contactName,
+      contact_email: contactEmail,
+      phone: contactPhone,
+      shipping_type: 'road',
+      address: 'N/A',
+      city: 'N/A',
+      postal_code: 'N/A',
+      country: 'N/A',
+      business_type: 'contact_request',
+      application_type: 'contact_request',
+      status: 'submitted',
+      notes: '[CONTACT_REQUEST] Public contact modal submission.',
+      order_profile: null,
+      admin_comment: null,
+      order_action: null,
+      order_payment_status: null,
+      order_shipping_status: null,
+      tracking_number: null,
+      tracking_url: null,
+      action_updated_at: null,
+      action_updated_by: null,
+    }
+
+    const { data: createdRequest, error } = await supabase
+      .from(registrationsTable)
+      .insert([payload])
+      .select('id')
+      .single()
+
+    if (error) {
+      setIsSubmittingContactRequest(false)
+      setContactRequestError(error.message || 'Unable to save contact request.')
+      return
+    }
+
+    const notificationResult = await sendPortalEmailNotification({
+      eventType: 'contact_request_submitted',
+      to: CONTACT_INBOX_EMAIL,
+      subject: `Contact Request #${createdRequest?.id} — ${contactName}`,
+      html: `<p>New contact request submitted.</p><p><strong>Request ID:</strong> ${createdRequest?.id}</p><p><strong>Name:</strong> ${contactName}</p><p><strong>Email:</strong> ${contactEmail}</p><p><strong>Phone:</strong> ${contactPhone}</p>`,
+      applicationId: createdRequest?.id,
+      contactName,
+      status: 'submitted',
+    })
+
+    setIsSubmittingContactRequest(false)
+
+    if (!notificationResult.ok && !notificationResult.skipped) {
+      setContactRequestError(`Request saved, but notification email failed: ${notificationResult.message}`)
+      return
+    }
+
+    setContactRequestMessage(`Thanks. Your message has been submitted and sent to ${CONTACT_INBOX_EMAIL}.`)
+    setContactRequestForm({ name: '', email: '', phone: '' })
   }
 
   const handleResendConfirmation = async (email) => {
