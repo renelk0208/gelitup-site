@@ -4555,6 +4555,7 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
   const loginParams = useMemo(() => new URLSearchParams(location.search), [location.search])
   const prefilledEmail = String(loginParams.get('email') || '').trim().toLowerCase()
   const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
+  const showDebugTrace = loginParams.get('debug') === '1'
   const [email, setEmail] = useState(prefilledEmail || localStorage.getItem('portalRememberedEmail') || '')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -4564,6 +4565,7 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
   const [errorMessage, setErrorMessage] = useState('')
   const [infoMessage, setInfoMessage] = useState('')
   const [applicationStatus, setApplicationStatus] = useState('')
+  const [debugTrace, setDebugTrace] = useState('')
 
   useEffect(() => {
     if (prefilledEmail) {
@@ -4575,6 +4577,7 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
     setErrorMessage('')
     setInfoMessage('')
     setApplicationStatus('')
+    setDebugTrace('')
   }, [isCreatePasswordMode, location.search])
 
   return (
@@ -4625,6 +4628,7 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
           setErrorMessage('')
           setInfoMessage('')
           setApplicationStatus('')
+          setDebugTrace('')
 
           if (isCreatePasswordMode) {
             const result = await onCreatePassword({
@@ -4645,6 +4649,10 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
               setInfoMessage(result.infoMessage)
             }
 
+            if (result.debugTrace) {
+              setDebugTrace(result.debugTrace)
+            }
+
             if (result.navigateToDashboard) {
               navigate('/portal/dashboard/overview')
             }
@@ -4654,6 +4662,10 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
 
           const result = await onLogin(email, password)
           setIsSubmitting(false)
+
+          if (result.debugTrace) {
+            setDebugTrace(result.debugTrace)
+          }
 
           if (!result.ok) {
             setErrorMessage(result.message || 'Unable to sign in.')
@@ -4761,6 +4773,7 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
 
         {errorMessage && <p className="mt-2 text-xs text-rose-600">{errorMessage}</p>}
         {infoMessage && <p className="mt-2 text-xs text-emerald-700">{infoMessage}</p>}
+        {showDebugTrace && debugTrace && <p className="mt-2 text-xs text-amber-700">Debug trace: {debugTrace}</p>}
         {applicationStatus && (
           <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
             <p className="font-semibold text-slate-900">Application status</p>
@@ -9638,7 +9651,12 @@ function App() {
         const isInvalidCredentials = /invalid login credentials/i.test(authErrorMessage)
 
         if (!isInvalidCredentials) {
-          return { ok: false, message: authErrorMessage || 'Unable to sign in.', applicationStatus: '' }
+          return {
+            ok: false,
+            message: authErrorMessage || 'Unable to sign in.',
+            applicationStatus: '',
+            debugTrace: `login-error:${authErrorMessage || 'unknown'} bypass=${isInternalBypassEmail ? 'yes' : 'no'}`,
+          }
         }
 
         const registrationResult = await fetchLatestRegistrationByEmail(normalizedEmail, 'status, notes')
@@ -9647,13 +9665,14 @@ function App() {
         if (!latestRegistration) {
           if (isInternalBypassEmail) {
             setIsPortalAuthenticated(true)
-            return { ok: true, applicationStatus: 'approved' }
+            return { ok: true, applicationStatus: 'approved', debugTrace: 'login-invalid-credentials -> bypass-approved (no registration row)' }
           }
 
           return {
             ok: false,
             message: 'Invalid login credentials. If this is your first sign-in, use Create password. Otherwise use Forgot password.',
             applicationStatus: '',
+            debugTrace: 'login-invalid-credentials -> no-registration-row -> blocked',
           }
         }
 
@@ -9669,6 +9688,7 @@ function App() {
               ok: false,
               message: 'Your B2B application was rejected. Contact distribution support for next steps.',
               applicationStatus: 'rejected',
+              debugTrace: 'login-invalid-credentials -> distributor-rejected',
             }
           }
 
@@ -9677,6 +9697,7 @@ function App() {
               ok: false,
               message: 'Your order request is stored and under processing. Portal sign-in requires an approved distributor application.',
               applicationStatus: 'submitted',
+              debugTrace: 'login-invalid-credentials -> distributor-submitted',
             }
           }
 
@@ -9684,6 +9705,7 @@ function App() {
             ok: false,
             message: 'Your B2B application is pending approval. Access is enabled after manual review.',
             applicationStatus: 'pending',
+            debugTrace: 'login-invalid-credentials -> distributor-pending',
           }
         }
 
@@ -9691,6 +9713,7 @@ function App() {
           ok: false,
           message: 'Invalid login credentials. If this is your first sign-in, use Create password. Otherwise use Forgot password.',
           applicationStatus: status || 'approved',
+          debugTrace: `login-invalid-credentials -> registration-found status=${status || 'unknown'}`,
         }
       }
 
@@ -9740,7 +9763,7 @@ function App() {
         if (!latestRegistration) {
           if (isInternalBypassEmail) {
             setIsPortalAuthenticated(true)
-            return { ok: true, applicationStatus: 'approved' }
+            return { ok: true, applicationStatus: 'approved', debugTrace: 'login-success -> bypass-approved (no registration row)' }
           }
 
           await supabase.auth.signOut()
@@ -9823,7 +9846,7 @@ function App() {
       }
 
       setIsPortalAuthenticated(true)
-      return { ok: true, applicationStatus: 'approved' }
+      return { ok: true, applicationStatus: 'approved', debugTrace: 'login-success -> approved' }
     }
 
     if (!email || !password) {
@@ -9831,7 +9854,7 @@ function App() {
     }
 
     setIsPortalAuthenticated(true)
-    return { ok: true, applicationStatus: 'approved' }
+    return { ok: true, applicationStatus: 'approved', debugTrace: 'login-demo-mode -> approved' }
   }
 
   const handleAdminLogin = async (email, password) => {
@@ -10034,6 +10057,7 @@ function App() {
             ok: true,
             infoMessage: 'Password created successfully. Internal account access granted.',
             navigateToDashboard: true,
+            debugTrace: 'create-password -> bypass-approved (no registration row)',
           }
         }
 
@@ -10066,6 +10090,7 @@ function App() {
         ? 'Password created successfully. Email verification is not required; you are now signed in.'
         : 'Password setup completed. Please sign in.',
       navigateToDashboard: canSignInNow,
+      debugTrace: canSignInNow ? 'create-password -> signed-in' : 'create-password -> account-ready-sign-in-required',
     }
   }
 
