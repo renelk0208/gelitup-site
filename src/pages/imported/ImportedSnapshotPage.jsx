@@ -7,6 +7,7 @@ const INSTAGRAM_URL = 'https://www.instagram.com/gelitup_official/'
 const ABOUT_US_HERO_IMAGE_URL = '/gelitup-media/images/about-us-hero-image.webp'
 const ABOUT_US_HERO_IMAGE_FALLBACK_URL = '/gelitup-media/images/about%20us%20hero%20image.webp'
 const EXHIBITIONS_BACKDROP_VIDEO_URL = '/gelitup-media/videos/exhibition%20video.mp4'
+const ABOUT_US_LIVE_FALLBACK_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
 const ABOUT_US_NEWS_DEFAULT = {
   introText: 'Inspired by bold summer tones, luminous finishes, and editorial nail artistry for the 2026 season.',
   title: 'Spring/Summer 2026',
@@ -581,6 +582,8 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
     // Default fallback to the gel.it.up live demo video
     return '/gelitup-media/videos/superior_innovation_cat_eye_french-fe10f199.mp4'
   }, [mediaItems])
+  const aboutUsLiveMediaSource = String(fallbackVideo || ABOUT_US_LIVE_FALLBACK_VIDEO_URL).trim()
+  const aboutUsLiveIsVideo = /\.(mp4|webm|mov|m4v)(\?|$)/i.test(aboutUsLiveMediaSource)
 
   const structuredContent = useMemo(() => {
     if (!activePage) {
@@ -762,13 +765,13 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           <p className="mt-2 text-sm font-medium text-[#1A1A1A]">Real salon outputs that prove market demand for distributors.</p>
 
           <div className="mt-4 space-y-3">
-            {(fallbackVideo || heroMedia?.displayUrl) && (
-              <div className="overflow-hidden rounded-2xl border border-[#4A4A4A]/20 bg-[#1A1A1A]">
-                {fallbackVideo && fallbackVideo.toLowerCase().includes('.mp4') || fallbackVideo?.toLowerCase().includes('.webm') ? (
+            {(aboutUsLiveMediaSource || heroMedia?.displayUrl) && (
+              <div className="mx-auto w-full max-w-5xl overflow-hidden rounded-2xl border border-[#4A4A4A]/20 bg-[#1A1A1A]">
+                {aboutUsLiveIsVideo ? (
                   <video
-                    src={fallbackVideo}
+                    src={aboutUsLiveMediaSource}
                     poster={heroMedia?.displayUrl || undefined}
-                    className="h-72 w-full object-cover sm:h-96"
+                    className="h-56 w-full object-cover sm:h-72 lg:h-80"
                     muted
                     playsInline
                     autoPlay
@@ -778,9 +781,9 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                   />
                 ) : (
                   <img
-                    src={heroMedia?.displayUrl || fallbackVideo}
+                    src={heroMedia?.displayUrl || aboutUsLiveMediaSource}
                     alt="GEL.IT.UP live salon work"
-                    className="h-72 w-full object-cover sm:h-96"
+                    className="h-56 w-full object-cover sm:h-72 lg:h-80"
                     loading="lazy"
                   />
                 )}
