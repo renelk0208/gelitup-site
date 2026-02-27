@@ -657,6 +657,10 @@ function isExistingUserSignUpResult(signUpResult) {
   return hasNoIdentity
 }
 
+function hasActiveSignUpSession(signUpResult) {
+  return Boolean(signUpResult?.data?.session)
+}
+
 function createFallbackProducts(count = 120) {
   return Array.from({ length: count }, (_, index) => {
     const code = `GIUP-PD-${String(index + 1).padStart(4, '0')}`
@@ -9595,6 +9599,7 @@ function App() {
     const signUpMessage = signUpResult?.error?.message || ''
     const isAlreadyRegistered = /already registered|already been registered/i.test(signUpMessage)
     const isExistingAccount = isExistingUserSignUpResult(signUpResult)
+    const hasActiveSession = hasActiveSignUpSession(signUpResult)
 
     if (signUpResult.error && !isAlreadyRegistered) {
       return { ok: false, message: signUpResult.error.message }
@@ -9618,7 +9623,9 @@ function App() {
 
     return {
       ok: true,
-      message: 'Verification email sent. Confirm your email, then sign in as admin.',
+      message: hasActiveSession
+        ? 'Password created. Admin email confirmation is not required; sign in now.'
+        : 'Verification email sent. Confirm your email, then sign in as admin.',
     }
   }
 
@@ -9656,6 +9663,7 @@ function App() {
     const signUpMessage = signUpResult?.error?.message || ''
     const isAlreadyRegistered = /already registered|already been registered/i.test(signUpMessage)
     const isExistingAccount = isExistingUserSignUpResult(signUpResult)
+    const hasActiveSession = hasActiveSignUpSession(signUpResult)
 
     if (signUpResult.error && !isAlreadyRegistered) {
       return { ok: false, message: signUpResult.error.message }
@@ -9678,7 +9686,9 @@ function App() {
     localStorage.setItem('portalRememberedEmail', normalizedEmail)
     return {
       ok: true,
-      infoMessage: 'Verification email sent. Confirm your email, then sign in with your password.',
+      infoMessage: hasActiveSession
+        ? 'Password created successfully. Email verification is not required; you can sign in now.'
+        : 'Verification email sent. Confirm your email, then sign in with your password.',
     }
   }
 
