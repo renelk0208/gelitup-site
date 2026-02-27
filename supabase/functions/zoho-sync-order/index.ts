@@ -125,6 +125,24 @@ function readBooleanEnv(value: string | undefined, fallback = false) {
   return ['1', 'true', 'yes', 'on'].includes(normalized)
 }
 
+async function updateOrderInSupabase(orderId: string | number, updates: Record<string, unknown>) {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (!supabaseUrl || !serviceKey) return // non-critical — skip silently
+
+  const url = `${supabaseUrl}/rest/v1/b2b_orders?id=eq.${orderId}`
+  await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify(updates),
+  }).catch(() => undefined) // non-critical — never throw
+}
+
 async function zohoRequest(path: string, accessToken: string, options: RequestInit = {}) {
   const booksBaseUrl = Deno.env.get('ZOHO_BOOKS_BASE_URL') || 'https://www.zohoapis.com/books/v3'
   const organizationId = readRequiredEnv('ZOHO_BOOKS_ORGANIZATION_ID')
@@ -275,11 +293,24 @@ serve(async (req) => {
       }),
     })
 
+    const salesorderId = salesOrderResult?.salesorder?.salesorder_id ?? null
+    const salesorderNumber = salesOrderResult?.salesorder?.salesorder_number ?? null
+
+    // Write zoho_salesorder_id back to Supabase (non-blocking)
+    if (payload.orderId && salesorderId) {
+      await updateOrderInSupabase(payload.orderId, {
+        zoho_salesorder_id: salesorderId,
+        zoho_salesorder_number: salesorderNumber,
+        status: 'zoho_synced',
+      })
+    }
+
     return new Response(JSON.stringify({
       ok: true,
       message: 'Zoho sales order created',
       zohoTarget: payload.zohoTarget || 'books',
-      salesorder_id: salesOrderResult?.salesorder?.salesorder_id || null,
+      salesorder_id: salesorderId,
+      salesorder_number: salesorderNumber,
       totalParsedItems: parsed.length,
       mappedItems: lineItems.length,
       unmappedSkus,

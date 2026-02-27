@@ -59,6 +59,10 @@ const ZOHO_SYNC_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_ZOHO_SY
 const ZOHO_SYNC_TIMEOUT_MS = Number.parseInt(import.meta.env.VITE_ZOHO_SYNC_TIMEOUT_MS || '12000', 10)
 const ZOHO_SYNC_AUTH_TOKEN = import.meta.env.VITE_ZOHO_SYNC_AUTH_TOKEN || ''
 const ZOHO_SYNC_TARGET = import.meta.env.VITE_ZOHO_SYNC_TARGET || 'books'
+const PAYMENT_BANK_DETAILS = import.meta.env.VITE_PAYMENT_BANK_DETAILS || ''
+const PAYMENT_REVOLUT_URL = import.meta.env.VITE_PAYMENT_REVOLUT_URL || ''
+const PAYMENT_STRIPE_URL = import.meta.env.VITE_PAYMENT_STRIPE_URL || ''
+const PAYMENT_PAYPAL_URL = import.meta.env.VITE_PAYMENT_PAYPAL_URL || ''
 const UPSELL_PRICE_FUNCTION_URL = import.meta.env.VITE_UPSELL_PRICE_FUNCTION_URL || '/.netlify/functions/get-upsell-price'
 const PROFORMA_COMPANY_NAME = import.meta.env.VITE_PROFORMA_COMPANY_NAME || 'GEL.IT.UP Factory Direct'
 const PROFORMA_VAT_TAX_ID = import.meta.env.VITE_PROFORMA_VAT_TAX_ID || 'VAT/TAX ID: EL999999999'
@@ -585,11 +589,11 @@ async function sendPortalEmailNotification(payload) {
 
 async function sendZohoOrderSync(payload) {
   if (!ZOHO_SYNC_ENABLED) {
-    return { ok: false, skipped: true, message: 'Zoho sync is disabled by configuration.' }
+    return { ok: false, skipped: true, message: 'Zoho sync is disabled by configuration.', salesorder_id: null }
   }
 
   if (!ZOHO_SYNC_WEBHOOK_URL) {
-    return { ok: false, skipped: true, message: 'Zoho sync webhook is not configured.' }
+    return { ok: false, skipped: true, message: 'Zoho sync webhook is not configured.', salesorder_id: null }
   }
 
   try {
@@ -619,10 +623,11 @@ async function sendZohoOrderSync(payload) {
     window.clearTimeout(timeoutId)
 
     let responseMessage = ''
+    let responseJson = null
     const responseType = response.headers.get('content-type') || ''
 
     if (responseType.includes('application/json')) {
-      const responseJson = await response.json().catch(() => null)
+      responseJson = await response.json().catch(() => null)
       responseMessage = responseJson?.message || responseJson?.error || ''
     }
     else {
@@ -634,6 +639,7 @@ async function sendZohoOrderSync(payload) {
         ok: false,
         skipped: false,
         message: responseMessage || `Zoho sync webhook returned ${response.status}`,
+        salesorder_id: null,
       }
     }
 
@@ -641,6 +647,7 @@ async function sendZohoOrderSync(payload) {
       ok: true,
       skipped: false,
       message: responseMessage || `Zoho sync completed via ${ZOHO_SYNC_TARGET}.`,
+      salesorder_id: responseJson?.salesorder_id ?? null,
     }
   }
   catch (error) {
@@ -649,6 +656,7 @@ async function sendZohoOrderSync(payload) {
         ok: false,
         skipped: false,
         message: `Zoho sync timed out after ${Number.isFinite(ZOHO_SYNC_TIMEOUT_MS) ? ZOHO_SYNC_TIMEOUT_MS : 12000}ms`,
+        salesorder_id: null,
       }
     }
 
@@ -656,6 +664,7 @@ async function sendZohoOrderSync(payload) {
       ok: false,
       skipped: false,
       message: error instanceof Error ? error.message : 'Unknown Zoho sync error',
+      salesorder_id: null,
     }
   }
 }
@@ -8195,6 +8204,7 @@ function OrdersModule() {
   const [isLoading, setIsLoading] = useState(false)
   const [copiedOrderId, setCopiedOrderId] = useState(null)
   const [showBuilderDetails, setShowBuilderDetails] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
   const [errorMessage, setErrorMessage] = useState(
     !hasSupabaseConfig || !supabase
       ? 'Live orders are unavailable because Supabase is not configured.'
@@ -8232,7 +8242,7 @@ function OrdersModule() {
 
       let { data, error } = await supabase
         .from(ordersTable)
-        .select('id, created_at, total_units, status, items, customer_email, consignee_name, consignee_phone, shipping_address')
+        .select('id, created_at, total_units, status, payment_status, items, customer_email, consignee_name, consignee_phone, shipping_address, zoho_salesorder_id, zoho_invoice_id, zoho_invoice_number, zoho_invoice_total')
         .order('created_at', { ascending: false })
         .limit(20)
 
@@ -8270,6 +8280,39 @@ function OrdersModule() {
       mounted = false
     }
   }, [ordersTable])
+
+  // Fetch current user email for Realtime filter
+  useEffect(() => {
+    if (!hasSupabaseConfig || !supabase) return
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user?.email) setUserEmail(data.user.email)
+    })
+  }, [])
+
+  // Subscribe to order updates via Supabase Realtime
+  useEffect(() => {
+    if (!hasSupabaseConfig || !supabase || !userEmail) return
+    const channel = supabase
+      .channel(`order-updates-${userEmail}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: ordersTable,
+          filter: `customer_email=eq.${userEmail}`,
+        },
+        (payload) => {
+          setOrders((prev) =>
+            prev.map((o) => (o.id === payload.new.id ? { ...o, ...payload.new } : o)),
+          )
+        },
+      )
+      .subscribe()
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  }, [userEmail, ordersTable])
 
   return (
     <div className="space-y-4">
@@ -8309,6 +8352,65 @@ function OrdersModule() {
         </p>
       </div>
 
+      {orders.some((o) => o.payment_status === 'invoice_ready') && (
+        <div className="rounded-2xl border-2 border-fuchsia-400/50 bg-fuchsia-50 p-4 sm:p-6">
+          <h3 className="bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-lg font-semibold text-transparent">
+            Action Required — Invoice Ready
+          </h3>
+          <p className="mt-1 text-sm text-slate-600">
+            The following orders have been confirmed. Complete payment to proceed with fulfilment.
+          </p>
+          <div className="mt-4 space-y-4">
+            {orders.filter((o) => o.payment_status === 'invoice_ready').map((order) => (
+              <div key={order.id} className="rounded-xl border border-fuchsia-200 bg-white p-4">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div>
+                    <p className="font-semibold text-slate-900">Order #{order.id}</p>
+                    {order.zoho_invoice_number && (
+                      <p className="text-sm text-slate-600">Zoho Invoice: <span className="font-medium">{order.zoho_invoice_number}</span></p>
+                    )}
+                    {order.zoho_invoice_total != null && (
+                      <p className="mt-1 text-xl font-bold text-fuchsia-700">
+                        {Number(order.zoho_invoice_total).toLocaleString('en-EU', { style: 'currency', currency: order.zoho_invoice_currency || 'EUR' })}
+                      </p>
+                    )}
+                  </div>
+                  <span className="rounded-full bg-fuchsia-100 px-3 py-1 text-xs font-semibold text-fuchsia-700">Invoice Ready</span>
+                </div>
+                {PAYMENT_BANK_DETAILS && (
+                  <div className="mt-3 rounded-lg bg-slate-50 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Bank Transfer</p>
+                    <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{PAYMENT_BANK_DETAILS}</p>
+                  </div>
+                )}
+                {(PAYMENT_REVOLUT_URL || PAYMENT_STRIPE_URL || PAYMENT_PAYPAL_URL) && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {PAYMENT_REVOLUT_URL && (
+                      <a href={PAYMENT_REVOLUT_URL} target="_blank" rel="noreferrer"
+                        className="rounded-lg bg-[#1a1a2e] px-4 py-2 text-xs font-semibold text-white hover:opacity-90">
+                        Pay via Revolut
+                      </a>
+                    )}
+                    {PAYMENT_STRIPE_URL && (
+                      <a href={PAYMENT_STRIPE_URL} target="_blank" rel="noreferrer"
+                        className="rounded-lg bg-[#635bff] px-4 py-2 text-xs font-semibold text-white hover:opacity-90">
+                        Pay via Stripe
+                      </a>
+                    )}
+                    {PAYMENT_PAYPAL_URL && (
+                      <a href={PAYMENT_PAYPAL_URL} target="_blank" rel="noreferrer"
+                        className="rounded-lg bg-[#0070ba] px-4 py-2 text-xs font-semibold text-white hover:opacity-90">
+                        Pay via PayPal
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
         {isLoading && <p className="text-sm text-slate-600">Loading recent orders...</p>}
         {!isLoading && errorMessage && <p className="text-sm text-rose-600">Unable to load orders: {errorMessage}</p>}
@@ -8325,6 +8427,7 @@ function OrdersModule() {
                   <th className="py-2 pr-4">Created</th>
                   <th className="py-2 pr-4">Units</th>
                   <th className="py-2 pr-4">Status</th>
+                  <th className="py-2 pr-4">Zoho Invoice</th>
                   <th className="py-2 pr-4">Email</th>
                   <th className="py-2 pr-4">Consignee</th>
                   <th className="py-2 pr-4">Phone</th>
@@ -8338,7 +8441,12 @@ function OrdersModule() {
                     <td className="py-2 pr-4 font-semibold">#{order.id}</td>
                     <td className="py-2 pr-4">{new Date(order.created_at).toLocaleString()}</td>
                     <td className="py-2 pr-4">{order.total_units}</td>
-                    <td className="py-2 pr-4">{order.status}</td>
+                    <td className="py-2 pr-4">
+                      {order.payment_status === 'invoice_ready'
+                        ? <span className="font-semibold text-fuchsia-600">Invoice Ready</span>
+                        : order.status}
+                    </td>
+                    <td className="py-2 pr-4">{order.zoho_invoice_number || '-'}</td>
                     <td className="py-2 pr-4">{order.customer_email || '-'}</td>
                     <td className="py-2 pr-4">{order.consignee_name || '-'}</td>
                     <td className="py-2 pr-4">{order.consignee_phone || '-'}</td>
