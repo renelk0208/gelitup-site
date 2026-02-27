@@ -9588,6 +9588,36 @@ function App() {
     }
   }, [navigate, routerLocation.search])
 
+  const fetchLatestRegistrationByEmail = async (normalizedEmail, selectColumns = '*') => {
+    if (!normalizedEmail || !hasSupabaseConfig || !supabase) {
+      return { data: null, error: null }
+    }
+
+    const queryLatest = async (column) => {
+      const { data, error } = await supabase
+        .from(registrationsTable)
+        .select(selectColumns)
+        .ilike(column, normalizedEmail)
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      if (error) {
+        const missingColumn = /column .* does not exist/i.test(String(error.message || ''))
+        if (missingColumn) return { data: null, error: null }
+        return { data: null, error }
+      }
+
+      return { data: data?.[0] || null, error: null }
+    }
+
+    const primaryResult = await queryLatest('contact_email')
+    if (primaryResult.error || primaryResult.data) {
+      return primaryResult
+    }
+
+    return queryLatest('email')
+  }
+
   const handlePortalLogin = async (email, password) => {
     if (hasSupabaseConfig && supabase) {
       const normalizedEmail = String(email || '').trim().toLowerCase()
@@ -9601,14 +9631,8 @@ function App() {
           return { ok: false, message: authErrorMessage || 'Unable to sign in.', applicationStatus: '' }
         }
 
-        const { data: registrationRows } = await supabase
-          .from(registrationsTable)
-          .select('status, notes')
-          .eq('contact_email', normalizedEmail)
-          .order('created_at', { ascending: false })
-          .limit(1)
-
-        const latestRegistration = registrationRows?.[0] || null
+        const registrationResult = await fetchLatestRegistrationByEmail(normalizedEmail, 'status, notes')
+        const latestRegistration = registrationResult.data || null
 
         if (!latestRegistration) {
           return {
@@ -9676,12 +9700,8 @@ function App() {
           return { ok: true, applicationStatus: 'approved' }
         }
 
-        const { data: registrationRows, error: registrationError } = await supabase
-          .from(registrationsTable)
-          .select('*')
-          .eq('contact_email', normalizedEmail)
-          .order('created_at', { ascending: false })
-          .limit(1)
+        const registrationResult = await fetchLatestRegistrationByEmail(normalizedEmail, '*')
+        const registrationError = registrationResult.error
 
         if (registrationError) {
           await supabase.auth.signOut()
@@ -9692,7 +9712,7 @@ function App() {
           }
         }
 
-        const latestRegistration = registrationRows?.[0]
+        const latestRegistration = registrationResult.data
         const status = String(latestRegistration?.status || '').trim().toLowerCase()
         const normalizedStatus = String(status || '').trim().toLowerCase()
         const inferredDistributorFromStatus = normalizedStatus === 'pending'
@@ -9706,7 +9726,7 @@ function App() {
           await supabase.auth.signOut()
           return {
             ok: false,
-            message: 'No B2B registration found for this account email.',
+            message: 'No B2B registration found for this email. Use the exact email submitted in your distributor application, or apply now.',
             applicationStatus: 'pending',
           }
         }
@@ -9740,7 +9760,7 @@ function App() {
 
           return {
             ok: false,
-            message: 'No approved B2B application found for this account email.',
+            message: 'No approved B2B application found for this email.',
             applicationStatus: 'pending',
           }
         }
@@ -9977,22 +9997,18 @@ function App() {
 
     localStorage.setItem('portalRememberedEmail', normalizedEmail)
     if (canSignInNow) {
-      const { data: registrationRows, error: registrationError } = await supabase
-        .from(registrationsTable)
-        .select('status, notes')
-        .eq('contact_email', normalizedEmail)
-        .order('created_at', { ascending: false })
-        .limit(1)
+      const registrationResult = await fetchLatestRegistrationByEmail(normalizedEmail, 'status, notes')
+      const registrationError = registrationResult.error
 
       if (registrationError) {
         await supabase.auth.signOut()
         return { ok: false, message: `Registration status check failed (${registrationError.message}).` }
       }
 
-      const latestRegistration = registrationRows?.[0] || null
+      const latestRegistration = registrationResult.data || null
       if (!latestRegistration) {
         await supabase.auth.signOut()
-        return { ok: false, message: 'No B2B registration found for this account email.' }
+        return { ok: false, message: 'No B2B registration found for this email. Use the same email used in your application or apply now.' }
       }
 
       const registrationStatus = String(latestRegistration?.status || '').trim().toLowerCase()
@@ -10337,18 +10353,14 @@ function App() {
 
     const normalizedEmail = email.trim().toLowerCase()
 
-    const { data: registrationRows, error } = await supabase
-      .from(registrationsTable)
-      .select('status, notes')
-      .eq('contact_email', normalizedEmail)
-      .order('created_at', { ascending: false })
-      .limit(1)
+    const registrationResult = await fetchLatestRegistrationByEmail(normalizedEmail, 'status, notes')
+    const error = registrationResult.error
 
     if (error) {
       return { ok: false, message: error.message }
     }
 
-    const latestRegistration = registrationRows?.[0] || null
+    const latestRegistration = registrationResult.data || null
     if (!latestRegistration) {
       return { ok: true, applicationStatus: 'pending' }
     }
