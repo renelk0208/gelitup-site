@@ -4758,7 +4758,6 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
               checked={rememberMe}
               onChange={(event) => setRememberMe(event.target.checked)}
               className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20"
-              required={isCreatePasswordMode}
             />
             Remember me
           </label>
@@ -4867,7 +4866,7 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
 
           <div className="mt-3 space-y-1 text-slate-600">
             <p>
-              Need distributor access?{' '}
+              Distributor onboarding only:{' '}
               <NavLink to="/become-distributor" className="font-semibold text-slate-900 hover:underline">
                 Apply now
               </NavLink>
@@ -9374,10 +9373,21 @@ function PortalDashboard({ onLogout }) {
             )}
 
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h3 className="text-base font-semibold text-slate-900">Action Center</h3>
+              <h3 className="text-base font-semibold text-slate-900">One-Stop B2B Workspace</h3>
               <p className="mt-2 text-sm text-slate-600">
-                This section is ready for API integration: order creation, order intake workflows, and distributor account actions.
+                Everything runs here: account overview, order placement, and order tracking. Payment options can be added into this same flow.
               </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <NavLink to="/portal/dashboard/overview" className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                  My Account
+                </NavLink>
+                <NavLink to="/portal/dashboard/products" className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                  Place Order
+                </NavLink>
+                <NavLink to="/portal/dashboard/orders" className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                  Track Orders
+                </NavLink>
+              </div>
             </div>
           </>
         )}
