@@ -7267,6 +7267,10 @@ function ProductsModule({ moduleView = 'products' }) {
     ? 'bg-emerald-100 text-emerald-800'
     : 'bg-amber-100 text-amber-800'
   const isCatalogView = moduleView === 'catalog'
+  const actionButtonBaseClass = 'inline-flex min-h-[40px] items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold transition duration-200'
+  const actionButtonSecondaryClass = `${actionButtonBaseClass} border-slate-300 bg-white text-slate-700 hover:bg-slate-50`
+  const actionButtonPrimaryClass = `${actionButtonBaseClass} border-fuchsia-600 bg-fuchsia-600 text-white hover:bg-fuchsia-500`
+  const filterControlClass = 'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700'
 
   useEffect(() => {
     setDismissedSmartSuggestion(false)
@@ -7658,7 +7662,7 @@ function ProductsModule({ moduleView = 'products' }) {
           <button
             onClick={submitOrder}
             disabled={isSubmittingOrder}
-            className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
+            className={`${actionButtonPrimaryClass} disabled:cursor-not-allowed disabled:border-fuchsia-300 disabled:bg-fuchsia-300`}
           >
             {isSubmittingOrder ? 'Submitting...' : `Finalize Order (${totalUnits})`}
           </button>
@@ -7667,13 +7671,13 @@ function ProductsModule({ moduleView = 'products' }) {
             onClick={(event) => {
               if (!selectedCodes.length && !packageCartItems.length && !includeProfessionalBasePack) event.preventDefault()
             }}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700"
+            className={actionButtonSecondaryClass}
           >
             Send to Order Inbox
           </a>
           <button
             onClick={copyCodes}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700"
+            className={actionButtonSecondaryClass}
           >
             Copy list
           </button>
@@ -7686,7 +7690,7 @@ function ProductsModule({ moduleView = 'products' }) {
               setLastPackingList(null)
               setLastProformaInvoice(null)
             }}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700"
+            className={actionButtonSecondaryClass}
           >
             Clear list
           </button>
@@ -7896,19 +7900,19 @@ function ProductsModule({ moduleView = 'products' }) {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search SKU or product name"
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className={filterControlClass}
           />
           <select
             value={category}
             onChange={(event) => setCategory(event.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className={filterControlClass}
           >
             <option value="All">All collection categories</option>
             {PRODUCT_CATEGORIES.map((item) => (
               <option key={item} value={item}>{item}</option>
             ))}
           </select>
-          <label className="flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700">
+          <label className="flex min-h-[42px] items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
             <input
               type="checkbox"
               checked={showSelectedOnly}
@@ -7916,7 +7920,7 @@ function ProductsModule({ moduleView = 'products' }) {
             />
             Show selected only
           </label>
-          <label className="flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700">
+          <label className="flex min-h-[42px] items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
             <input
               type="checkbox"
               checked={showCleanScienceOnly}
