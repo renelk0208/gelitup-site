@@ -2973,6 +2973,7 @@ function FullCataloguePage() {
           {activeCategory && <div className="mx-auto max-w-6xl">{categoryDetail}</div>}
 
           {!activeCategory && (
+            <>
 
           {/* FEATURED HERO: SUPERBOND PRIMER */}
           <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
@@ -3446,6 +3447,7 @@ function FullCataloguePage() {
             </p>
           </div>
 
+            </>
           )}
 
         </>
