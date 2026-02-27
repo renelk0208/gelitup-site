@@ -74,6 +74,7 @@ const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03
 const HOME_HERO_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
 const HOME_HERO_POSTER_URL = '/gelitup-media/images/news/Spring%20Summer/NEWS%20Carousel/2600-1.jpg'
 const HOME_NEWS_CLOUD_VIDEO_URL = '/gelitup-media/videos/floatingclouds.mp4'
+const CONTENT_CACHE_BUSTER = '2026-02-27-1'
 const HOME_CLOUD_DANCER_DEFAULT = {
   title: 'Cloud Dancer - The Story',
   introText: 'The new professional neutral. 2026 begins with softness, refinement, and intention. Cloud Dancer Series introduces illuminated tones that enhance the nail without overpowering it. Modern shades designed to feel effortless, elevated, and timeless.',
@@ -3756,7 +3757,7 @@ function HomePage() {
 
     const loadHomeCarousel = async () => {
       try {
-        const response = await fetch('/gelitup-content/home-news-carousel.json')
+        const response = await fetch(`/gelitup-content/home-news-carousel.json?v=${CONTENT_CACHE_BUSTER}`)
         if (!response.ok) return
 
         const payload = await response.json()

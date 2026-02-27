@@ -8,6 +8,7 @@ const ABOUT_US_HERO_IMAGE_URL = '/gelitup-media/images/about-us-hero-image.webp'
 const ABOUT_US_HERO_IMAGE_FALLBACK_URL = '/gelitup-media/images/about%20us%20hero%20image.webp'
 const EXHIBITIONS_BACKDROP_VIDEO_URL = '/gelitup-media/videos/exhibition%20video.mp4'
 const ABOUT_US_LIVE_FALLBACK_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
+const ABOUT_US_CONTENT_CACHE_BUSTER = '2026-02-27-1'
 const ABOUT_US_NEWS_DEFAULT = {
   introText: 'Inspired by bold summer tones, luminous finishes, and editorial nail artistry for the 2026 season.',
   title: 'Spring/Summer 2026',
@@ -466,7 +467,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
 
     const loadAboutUsExhibitions = async () => {
       try {
-        const response = await fetch('/gelitup-content/about-us-exhibitions.json')
+        const response = await fetch(`/gelitup-content/about-us-exhibitions.json?v=${ABOUT_US_CONTENT_CACHE_BUSTER}`)
         if (!response.ok) {
           return
         }
