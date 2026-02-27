@@ -647,6 +647,16 @@ async function sendZohoOrderSync(payload) {
   }
 }
 
+function isExistingUserSignUpResult(signUpResult) {
+  const user = signUpResult?.data?.user || null
+  if (!user) return false
+
+  const identities = Array.isArray(user.identities) ? user.identities : []
+  const hasNoIdentity = identities.length === 0
+
+  return hasNoIdentity
+}
+
 function createFallbackProducts(count = 120) {
   return Array.from({ length: count }, (_, index) => {
     const code = `GIUP-PD-${String(index + 1).padStart(4, '0')}`
@@ -9584,19 +9594,24 @@ function App() {
 
     const signUpMessage = signUpResult?.error?.message || ''
     const isAlreadyRegistered = /already registered|already been registered/i.test(signUpMessage)
+    const isExistingAccount = isExistingUserSignUpResult(signUpResult)
 
     if (signUpResult.error && !isAlreadyRegistered) {
       return { ok: false, message: signUpResult.error.message }
     }
 
-    if (isAlreadyRegistered) {
-      await supabase.auth.resend({
+    if (isAlreadyRegistered || isExistingAccount) {
+      const { error: resendError } = await supabase.auth.resend({
         type: 'signup',
         email: normalizedEmail,
         options: {
           emailRedirectTo: `${window.location.origin}/portal/admin-login`,
         },
       })
+
+      if (resendError) {
+        return { ok: false, message: `Unable to send verification email: ${resendError.message}` }
+      }
     }
 
     localStorage.setItem('adminRememberedEmail', normalizedEmail)
@@ -9640,19 +9655,24 @@ function App() {
 
     const signUpMessage = signUpResult?.error?.message || ''
     const isAlreadyRegistered = /already registered|already been registered/i.test(signUpMessage)
+    const isExistingAccount = isExistingUserSignUpResult(signUpResult)
 
     if (signUpResult.error && !isAlreadyRegistered) {
       return { ok: false, message: signUpResult.error.message }
     }
 
-    if (isAlreadyRegistered) {
-      await supabase.auth.resend({
+    if (isAlreadyRegistered || isExistingAccount) {
+      const { error: resendError } = await supabase.auth.resend({
         type: 'signup',
         email: normalizedEmail,
         options: {
           emailRedirectTo: `${window.location.origin}/portal/login`,
         },
       })
+
+      if (resendError) {
+        return { ok: false, message: `Unable to send verification email: ${resendError.message}` }
+      }
     }
 
     localStorage.setItem('portalRememberedEmail', normalizedEmail)
