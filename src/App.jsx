@@ -8223,7 +8223,7 @@ function PendingApplicationsModule() {
 
     const { data, error } = await supabase
       .from(registrationsTable)
-      .select('id, created_at, customer_type, company_name, vat_number, contact_name, contact_email, phone, shipping_type, country, business_type, status, notes, application_type, order_profile, admin_comment, order_action, order_payment_status, order_shipping_status, tracking_number, tracking_url, action_updated_at, action_updated_by, invoice_address_line1, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_area, shipping_region, shipping_country, shipping_postal_code')
+      .select('id, created_at, customer_type, company_name, vat_number, contact_name, contact_email, phone, shipping_type, country, business_type, status, notes, admin_comment, order_action, order_payment_status, order_shipping_status, tracking_number, tracking_url, action_updated_at, action_updated_by, invoice_address_line1, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_area, shipping_region, shipping_country, shipping_postal_code')
       .in('status', ['pending', 'submitted', 'approved', 'rejected'])
       .order('created_at', { ascending: false })
 
