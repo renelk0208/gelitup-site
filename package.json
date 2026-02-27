@@ -19,7 +19,9 @@
     "generate:imported-pages": "node scripts/generate-imported-pages.mjs",
     "generate:news-json": "node scripts/generate-news-json.mjs",
     "refresh:gelitup-baseline": "npm run import:gelitup-media; npm run snapshot:gelitup-pages; npm run generate:imported-pages",
-    "replay:zoho-order": "node scripts/replay-order-to-zoho.mjs"
+    "replay:zoho-order": "node scripts/replay-order-to-zoho.mjs",
+    "smoke:local": "node scripts/predeploy-smoke.mjs http://localhost:5173",
+    "smoke:prod": "node scripts/predeploy-smoke.mjs https://gelitup.com"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0",
