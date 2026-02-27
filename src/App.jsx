@@ -3721,7 +3721,6 @@ function HomePage() {
   const [homeNewsCarousel, setHomeNewsCarousel] = useState([])
   const [activeHomeNewsSlide, setActiveHomeNewsSlide] = useState(0)
   const [homeCloudStory, setHomeCloudStory] = useState(HOME_CLOUD_DANCER_DEFAULT)
-  const [enableHomeHeroVideo, setEnableHomeHeroVideo] = useState(false)
 
   useEffect(() => {
     let isMounted = true
@@ -3788,59 +3787,6 @@ function HomePage() {
     }
   }, [])
 
-  useEffect(() => {
-    const connection = navigator?.connection || navigator?.mozConnection || navigator?.webkitConnection
-    const connectionType = String(connection?.effectiveType || '').toLowerCase()
-    const hasConstrainedConnection = Boolean(connection?.saveData) || connectionType.includes('2g')
-
-    if (hasConstrainedConnection) {
-      setEnableHomeHeroVideo(false)
-      return undefined
-    }
-
-    const timerId = window.setTimeout(() => {
-      setEnableHomeHeroVideo(true)
-    }, 150)
-
-    return () => {
-      window.clearTimeout(timerId)
-    }
-  }, [])
-
-  useEffect(() => {
-    let mounted = true
-
-    const loadHomeCloudStory = async () => {
-      try {
-        const response = await fetch('/gelitup-content/about-us-news.json')
-        if (!response.ok) return
-
-        const payload = await response.json()
-        if (!mounted) return
-
-        const title = String(payload?.title || '').trim()
-        const introText = String(payload?.introText || '').trim()
-        const ctaLabel = String(payload?.portalLabel || '').trim()
-        const ctaLink = String(payload?.items?.[0]?.link || payload?.portalLink || '').trim()
-
-        setHomeCloudStory({
-          title: title || HOME_CLOUD_DANCER_DEFAULT.title,
-          introText: introText || HOME_CLOUD_DANCER_DEFAULT.introText,
-          ctaLabel: ctaLabel || HOME_CLOUD_DANCER_DEFAULT.ctaLabel,
-          ctaLink: ctaLink || HOME_CLOUD_DANCER_DEFAULT.ctaLink,
-        })
-      }
-      catch {
-        if (!mounted) return
-      }
-    }
-
-    void loadHomeCloudStory()
-
-    return () => {
-      mounted = false
-    }
-  }, [])
 
   useEffect(() => {
     if (homeNewsCarousel.length <= 1) return undefined
@@ -3858,9 +3804,7 @@ function HomePage() {
     ? Math.min(activeHomeNewsSlide, homeNewsCarousel.length - 1)
     : 0
   const activeHomeNewsItem = homeNewsCarousel[safeHomeNewsIndex] || null
-  const homeHeroVideoSource = enableHomeHeroVideo
-    ? (HOME_HERO_VIDEO_URL || HERO_CINEMATIC_VIDEO_URL || media.heroVideo)
-    : ''
+  const homeHeroVideoSource = HOME_HERO_VIDEO_URL || HERO_CINEMATIC_VIDEO_URL || media.heroVideo
 
   return (
     <section className="space-y-6">
@@ -3981,7 +3925,7 @@ function HomePage() {
         <div className="absolute inset-0 bg-[#1A1A1A]/70" />
 
         <div className="relative mx-auto max-w-6xl">
-          <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,600px)] lg:gap-8">
+          <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8">
             <div className="rounded-2xl border border-white/20 bg-black/35 p-5 sm:p-7">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Spring / Summer News</p>
               <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-3xl">{homeCloudStory.title}</h2>
@@ -3998,13 +3942,13 @@ function HomePage() {
 
             <div className="w-full">
               {activeHomeNewsItem && (
-                <div className="mx-auto w-full max-w-[560px]">
+                <div className="mx-auto w-full max-w-[460px]">
                   <div className="overflow-hidden rounded-xl border border-white/20 bg-black/20 p-2">
-                    <div className="aspect-[4/5] w-full overflow-hidden rounded-lg bg-[#F8F8F8]">
+                    <div className="aspect-[9/16] w-full overflow-hidden rounded-lg bg-[#F8F8F8]">
                       <img
                         src={activeHomeNewsItem.imageUrl}
                         alt="Spring/Summer carousel visual"
-                        className="h-full w-full object-contain"
+                        className="h-full w-full object-cover"
                         loading="lazy"
                         onError={(event) => {
                           event.currentTarget.src = '/logo.png'
