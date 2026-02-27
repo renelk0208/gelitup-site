@@ -9656,6 +9656,11 @@ function App() {
   }, [])
 
   useEffect(() => {
+    const isHomeRoute = routerLocation.pathname === '/' || routerLocation.pathname === '/home'
+    if (!isHomeRoute) {
+      return
+    }
+
     const params = new URLSearchParams(routerLocation.search)
     const portalTarget = String(params.get('portal') || '').trim().toLowerCase()
 
@@ -9671,7 +9676,7 @@ function App() {
     if (portalTarget === 'admin') {
       navigate('/portal/admin-login', { replace: true })
     }
-  }, [navigate, routerLocation.search])
+  }, [navigate, routerLocation.pathname, routerLocation.search])
 
   const fetchLatestRegistrationByEmail = async (normalizedEmail, selectColumns = '*') => {
     if (!normalizedEmail || !hasSupabaseConfig || !supabase) {
