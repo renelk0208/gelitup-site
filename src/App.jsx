@@ -2511,6 +2511,27 @@ function FullCataloguePage() {
     [activeCategory, activeSubcategory],
   )
 
+  const scrollToCatalogueSection = (categoryName = '') => {
+    const normalizedCategory = normalizeCatalogueToken(categoryName)
+
+    let targetId = ''
+    if (normalizedCategory.includes('COLOR')) {
+      targetId = 'catalogue-section-colours'
+    } else if (chapter02Categories.some((name) => normalizeCatalogueToken(name) === normalizedCategory)) {
+      targetId = 'catalogue-section-builders'
+    } else if (chapter03Categories.some((name) => normalizeCatalogueToken(name) === normalizedCategory)) {
+      targetId = 'catalogue-section-tools'
+    } else if (chapter04Categories.some((name) => normalizeCatalogueToken(name) === normalizedCategory)) {
+      targetId = 'catalogue-section-consumables'
+    }
+
+    if (!targetId) return
+    const targetElement = document.getElementById(targetId)
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
   const serviceFlowMenu = useMemo(() => {
     const definitions = [
       {
@@ -2881,6 +2902,7 @@ function FullCataloguePage() {
                       setActiveCategory(targetSection.category)
                       setActiveSubcategory('ALL')
                       setActiveColorFamily('ALL')
+                      scrollToCatalogueSection(targetSection.category)
                     }}
                     className={`min-h-10 shrink-0 snap-start whitespace-nowrap rounded-lg border px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${flowIsActive ? 'border-[#D43790] bg-[#D43790] text-white' : 'border-[#4A4A4A]/35 bg-white text-[#1A1A1A] hover:border-[#D43790]'}`}
                   >
@@ -2902,6 +2924,7 @@ function FullCataloguePage() {
                         setActiveCategory(sub.category)
                         setActiveSubcategory(sub.subcategory || 'ALL')
                         setActiveColorFamily('ALL')
+                        scrollToCatalogueSection(sub.category)
                       }}
                       className="min-h-10 rounded-lg border border-[#4A4A4A]/20 bg-white px-3 py-2 text-left text-xs font-semibold text-[#1A1A1A] transition hover:border-[#D43790]"
                     >
@@ -2914,7 +2937,7 @@ function FullCataloguePage() {
           </div>
 
           {/* FEATURED HERO: SUPERBOND PRIMER */}
-          <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
+          <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
             <div className="mx-auto max-w-6xl">
               <div className="grid items-center gap-8 md:grid-cols-2">
                 {/* Product Image */}
@@ -3005,6 +3028,7 @@ function FullCataloguePage() {
                       setActiveCategory(colorsSection.category)
                       setActiveSubcategory('ALL')
                       setActiveColorFamily('ALL')
+                      scrollToCatalogueSection(colorsSection.category)
                     }
                   }}
                   className="rounded-lg bg-fuchsia-600 px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
@@ -3018,7 +3042,7 @@ function FullCataloguePage() {
           {isColorsCategoryName(activeCategory) && categoryDetail}
 
           {/* CHAPTER 02: STRUCTURAL ENGINEERING */}
-          <div className="space-y-4 py-12 px-4 sm:px-8">
+          <div id="catalogue-section-builders" className="space-y-4 scroll-mt-28 py-12 px-4 sm:px-8">
             <div className="mx-auto max-w-6xl px-4 sm:px-8">
               <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>BUILDER SYSTEMS</h2>
               <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
@@ -3117,6 +3141,7 @@ function FullCataloguePage() {
                       onClick={() => {
                         setActiveCategory(categoryName)
                         setActiveSubcategory('ALL')
+                        scrollToCatalogueSection(categoryName)
                       }}
                       className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
                     >
@@ -3138,7 +3163,7 @@ function FullCataloguePage() {
           </div>
 
           {/* CHAPTER 03: THE PROFESSIONAL TOOLSET */}
-          <div className="space-y-4 py-12 px-4 sm:px-8">
+          <div id="catalogue-section-tools" className="space-y-4 scroll-mt-28 py-12 px-4 sm:px-8">
             <div className="mx-auto max-w-6xl px-4 sm:px-8">
               <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>TOOLS & EQUIPMENT</h2>
               <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
@@ -3158,6 +3183,7 @@ function FullCataloguePage() {
                       onClick={() => {
                         setActiveCategory(categoryName)
                         setActiveSubcategory('ALL')
+                        scrollToCatalogueSection(categoryName)
                       }}
                       className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
                     >
@@ -3179,7 +3205,7 @@ function FullCataloguePage() {
           </div>
 
           {/* CHAPTER 04: ARTISTIC MASTERY & CARE */}
-          <div className="space-y-4 py-12 px-4 sm:px-8">
+          <div id="catalogue-section-consumables" className="space-y-4 scroll-mt-28 py-12 px-4 sm:px-8">
             <div className="mx-auto max-w-6xl px-4 sm:px-8">
               <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>CONSUMABLES & ART</h2>
               <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
@@ -3199,6 +3225,7 @@ function FullCataloguePage() {
                       onClick={() => {
                         setActiveCategory(categoryName)
                         setActiveSubcategory('ALL')
+                        scrollToCatalogueSection(categoryName)
                       }}
                       className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
                     >
