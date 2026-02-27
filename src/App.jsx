@@ -6321,21 +6321,17 @@ function ProductsModule({ moduleView = 'products' }) {
               : payload.items || payload.products || payload.data || []
           })()
           : await (async () => {
-            if (!hasSupabaseConfig || !supabase) {
-              return []
-            }
-
-            const { data, error } = await supabase
-              .from(productsTable)
-              .select('sku, name, description, category, hex_color, image_url, is_active')
-              .eq('is_active', true)
-              .order('name', { ascending: true })
-
-            if (error) {
-              throw new Error(error.message)
-            }
-
-            return data || []
+            // Load directly from the local catalogue (package-pods.json)
+            const response = await fetch('/gelitup-content/package-pods.json')
+            if (!response.ok) throw new Error('Could not load local catalogue')
+            const payload = await response.json()
+            const allPods = [
+              ...(Array.isArray(payload.pod_1) ? payload.pod_1 : []),
+              ...(Array.isArray(payload.pod_2) ? payload.pod_2 : []),
+              ...(Array.isArray(payload.pod_3) ? payload.pod_3 : []),
+              ...(Array.isArray(payload.pod_4) ? payload.pod_4 : []),
+            ]
+            return allPods
           })()
 
         const normalized = sourceItems
@@ -9362,7 +9358,9 @@ function PortalDashboard({ onLogout }) {
               to={`/portal/dashboard/${module.key}`}
               className={({ isActive }) =>
                 `block rounded-lg px-3 py-2 text-sm font-medium ${
-                  isActive ? 'bg-[#1A1A1A] text-white' : 'text-[#4A4A4A] hover:bg-[#E8E8E8]'
+                  isActive
+                    ? 'bg-fuchsia-600 text-white'
+                    : 'text-slate-700 hover:bg-slate-100'
                 }`
               }
             >
