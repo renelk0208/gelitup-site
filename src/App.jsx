@@ -4775,24 +4775,6 @@ function PortalLogin({ onLogin, onResendConfirmation, onCheckApproval, onCreateP
             <NavLink to="/portal/forgot-password" className="font-medium text-slate-700 hover:text-slate-900">
               Forgot password?
             </NavLink>
-            <button
-              type="button"
-              onClick={async () => {
-                setErrorMessage('')
-                setInfoMessage('')
-                const result = await onResendConfirmation(email)
-
-                if (!result.ok) {
-                  setErrorMessage(result.message || 'Unable to resend confirmation email.')
-                  return
-                }
-
-                setInfoMessage('Confirmation email sent. Check your inbox and spam folder.')
-              }}
-              className="font-medium text-slate-700 underline hover:text-slate-900"
-            >
-              Resend confirmation email
-            </button>
           </div>
 
           <p className="mt-3 leading-relaxed text-slate-600">
@@ -4949,7 +4931,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
           <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
             {isSubmitting
               ? (isCreatePasswordMode ? 'Creating password...' : 'Signing in...')
-              : (isCreatePasswordMode ? 'Create Password & Send Verification' : 'Access Applications')}
+              : (isCreatePasswordMode ? 'Create Password & Continue' : 'Access Applications')}
           </button>
         </form>
 
@@ -9671,19 +9653,10 @@ function App() {
       }
     }
 
-    if (isAlreadyRegistered || isExistingAccount) {
-      if (!canSignInNow) {
-        const { error: resendError } = await supabase.auth.resend({
-          type: 'signup',
-          email: normalizedEmail,
-          options: {
-            emailRedirectTo: `${window.location.origin}/portal/admin-login`,
-          },
-        })
-
-        if (resendError) {
-          return { ok: false, message: `Unable to send verification email: ${resendError.message}` }
-        }
+    if ((isAlreadyRegistered || isExistingAccount) && !canSignInNow) {
+      return {
+        ok: false,
+        message: 'This admin account already exists. Use your existing password or reset it via Forgot password.',
       }
     }
 
@@ -9713,7 +9686,7 @@ function App() {
       ok: true,
       message: canSignInNow
         ? 'Password created. Email confirmation is not required; you are now signed in as admin.'
-        : 'Password setup submitted. If email confirmation is enabled in Supabase, confirm your email before admin sign-in.',
+        : 'Password setup completed. Please sign in as admin.',
       navigateToDashboard: canSignInNow,
     }
   }
@@ -9770,19 +9743,10 @@ function App() {
       }
     }
 
-    if (isAlreadyRegistered || isExistingAccount) {
-      if (!canSignInNow) {
-        const { error: resendError } = await supabase.auth.resend({
-          type: 'signup',
-          email: normalizedEmail,
-          options: {
-            emailRedirectTo: `${window.location.origin}/portal/login`,
-          },
-        })
-
-        if (resendError) {
-          return { ok: false, message: `Unable to send verification email: ${resendError.message}` }
-        }
+    if ((isAlreadyRegistered || isExistingAccount) && !canSignInNow) {
+      return {
+        ok: false,
+        message: 'This account already exists. Use your existing password or reset it via Forgot password.',
       }
     }
 
@@ -9826,7 +9790,7 @@ function App() {
       ok: true,
       infoMessage: canSignInNow
         ? 'Password created successfully. Email verification is not required; you are now signed in.'
-        : 'Password setup submitted. If email confirmation is enabled in Supabase, confirm your email before sign-in.',
+        : 'Password setup completed. Please sign in.',
       navigateToDashboard: canSignInNow,
     }
   }
@@ -10128,26 +10092,10 @@ function App() {
 
   const handleResendConfirmation = async (email) => {
     if (!email) {
-      return { ok: false, message: 'Enter your email first, then click resend.' }
+      return { ok: false, message: 'Enter your email first.' }
     }
 
-    if (hasSupabaseConfig && supabase) {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/portal/login`,
-        },
-      })
-
-      if (error) {
-        return { ok: false, message: error.message }
-      }
-
-      return { ok: true }
-    }
-
-    return { ok: false, message: 'Live auth is not configured.' }
+    return { ok: false, message: 'Email confirmation is disabled. Use Forgot password if you need to reset access.' }
   }
 
   const handleCheckApproval = async (email) => {
