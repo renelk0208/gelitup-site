@@ -2576,6 +2576,7 @@ function FullCataloguePage() {
         key: 'COLOURS',
         label: 'COLOURS',
         sectionTokens: ['COLOR'],
+        preferredCategories: ['COLORS'],
         subcategories: [
           { label: 'The Solids (Nudes, Reds, Neons)', subcategoryTokens: ['SOLID', 'NUDE', 'RED', 'NEON'] },
           { label: 'Special Effects (Cat Eye, Reflective, Glitter)', subcategoryTokens: ['CAT EYE', 'REFLECT', 'GLITTER', 'SHIMMER'] },
@@ -2587,6 +2588,7 @@ function FullCataloguePage() {
         key: 'PRIMERS_PREP',
         label: 'PRIMERS & PREP',
         sectionTokens: ['LIQUID', 'BASE'],
+        preferredCategories: ['LIQUIDS', 'BASES'],
         subcategories: [
           { label: 'Adhesion (Superbond/Acid Primers)', subcategoryTokens: ['SUPERBOND', 'PRIMER'] },
           { label: 'Sanitization', subcategoryTokens: ['SANIT'] },
@@ -2597,6 +2599,7 @@ function FullCataloguePage() {
         key: 'TOPS_BASES',
         label: 'TOPS & BASES',
         sectionTokens: ['TOP', 'BASE'],
+        preferredCategories: ['TOPS', 'BASES'],
         subcategories: [
           { label: 'Rubber Bases', subcategoryTokens: ['RUBBER BASE', '5IN1'] },
           { label: 'Flexi/Fiber Bases', subcategoryTokens: ['FLEXI', 'FIBER', 'BRUSH ON BUILDER'] },
@@ -2608,6 +2611,7 @@ function FullCataloguePage() {
         key: 'BUILDERS',
         label: 'BUILDER SYSTEMS',
         sectionTokens: ['BUILDER', 'MULTIMIX', 'ACRYLIC'],
+        preferredCategories: ['BUILDER GEL SYSTEMS', 'MULTIMIX', 'ACRYLIC'],
         subcategories: [
           { label: '3-in-1 Premium Builders', subcategoryTokens: ['3INI', 'PREMIUM BUILDER'] },
           { label: 'MultiMix Synthogel (Acrygel)', subcategoryTokens: ['MULTIMIX', '30 ML', '60 ML'] },
@@ -2619,6 +2623,7 @@ function FullCataloguePage() {
         key: 'CONSUMABLES',
         label: 'CONSUMABLES',
         sectionTokens: ['CONSUMABLE'],
+        preferredCategories: ['CONSUMABLES'],
         subcategories: [
           { label: 'Files & Buffers', subcategoryTokens: ['FILE', 'BUFFER'] },
           { label: 'Wipes & Forms', subcategoryTokens: ['WIPE', 'FORM'] },
@@ -2629,6 +2634,7 @@ function FullCataloguePage() {
         key: 'TOOLS_EQUIPMENT',
         label: 'TOOLS & EQUIPMENT',
         sectionTokens: ['TOOL', 'EQUIP', 'BRUSH'],
+        preferredCategories: ['TOOLS', 'EQUIPMENT', 'BRUSHES'],
         subcategories: [
           { label: 'Professional Brushes', subcategoryTokens: ['BRUSH'] },
           { label: 'Implements (Nippers/Scissors)', subcategoryTokens: ['NIPPER', 'SCISSOR'] },
@@ -2644,8 +2650,18 @@ function FullCataloguePage() {
         return definition.sectionTokens.some((needle) => token.includes(normalizeCatalogueToken(needle)))
       })
 
+      const preferredCategoryTokens = Array.isArray(definition.preferredCategories)
+        ? definition.preferredCategories.map((item) => normalizeCatalogueToken(item))
+        : []
+      const primarySection = matchedSections.find((section) => preferredCategoryTokens.includes(normalizeCatalogueToken(section.category)))
+        || matchedSections[0]
+        || null
+      const orderedSections = primarySection
+        ? [primarySection, ...matchedSections.filter((section) => section.category !== primarySection.category)]
+        : matchedSections
+
       const resolvedSubcategories = definition.subcategories.map((sub) => {
-        for (const section of matchedSections) {
+        for (const section of orderedSections) {
           const found = section.subcategories.find((entry) => {
             const token = normalizeCatalogueToken(entry.name)
             return sub.subcategoryTokens.some((needle) => token.includes(normalizeCatalogueToken(needle)))
@@ -2660,7 +2676,7 @@ function FullCataloguePage() {
           }
         }
 
-        const fallbackSection = matchedSections[0] || null
+        const fallbackSection = primarySection || matchedSections[0] || null
         return {
           label: sub.label,
           category: fallbackSection?.category || '',
@@ -2671,6 +2687,7 @@ function FullCataloguePage() {
       return {
         ...definition,
         matchedSections,
+        primaryCategory: primarySection?.category || '',
         resolvedSubcategories,
       }
     })
@@ -2928,16 +2945,18 @@ function FullCataloguePage() {
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#4A4A4A]">Service-Flow Navigation</p>
             <div className="-mx-1 mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1">
               {serviceFlowMenu.map((flow) => {
-                const flowIsActive = flow.matchedSections.some((section) => section.category === activeCategory)
+                const flowIsActive = flow.primaryCategory
+                  ? activeCategory === flow.primaryCategory
+                  : flow.matchedSections.some((section) => section.category === activeCategory)
 
                 return (
                   <button
                     key={flow.key}
                     type="button"
                     onClick={() => {
-                      const targetSection = flow.matchedSections[0]
-                      if (!targetSection) return
-                      openCatalogueCategory(targetSection.category, 'ALL')
+                      const targetCategory = flow.primaryCategory || flow.matchedSections[0]?.category || ''
+                      if (!targetCategory) return
+                      openCatalogueCategory(targetCategory, 'ALL')
                     }}
                     className={`min-h-10 shrink-0 snap-start whitespace-nowrap rounded-lg border px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${flowIsActive ? 'border-[#D43790] bg-[#D43790] text-white' : 'border-[#4A4A4A]/35 bg-white text-[#1A1A1A] hover:border-[#D43790]'}`}
                   >
