@@ -344,7 +344,7 @@ function getApplicationTypeFromRecord(record) {
   const tagged = extractTaggedValue(record?.notes, 'APPLICATION_TYPE')
   if (tagged) return tagged
 
-  return 'distributor'
+  return 'b2b_order'
 }
 
 function getOrderProfileFromRecord(record) {
@@ -9705,10 +9705,8 @@ function App() {
         }
 
         const status = String(latestRegistration?.status || '').trim().toLowerCase()
-        const explicitType = extractTaggedValue(latestRegistration?.notes, 'APPLICATION_TYPE')
-        const isDistributorRegistration = explicitType
-          ? explicitType === 'distributor'
-          : status === 'pending'
+        const applicationType = getApplicationTypeFromRecord(latestRegistration)
+        const isDistributorRegistration = applicationType === 'distributor'
 
         if (isDistributorRegistration && requireApproval && status !== 'approved') {
           if (status === 'rejected') {
@@ -9780,13 +9778,8 @@ function App() {
 
         const latestRegistration = registrationResult.data
         const status = String(latestRegistration?.status || '').trim().toLowerCase()
-        const normalizedStatus = String(status || '').trim().toLowerCase()
-        const inferredDistributorFromStatus = normalizedStatus === 'pending'
-        const inferredOrderRequestFromStatus = normalizedStatus === 'submitted'
-        const explicitType = extractTaggedValue(latestRegistration?.notes, 'APPLICATION_TYPE')
-        const isDistributorRegistration = explicitType
-          ? explicitType === 'distributor'
-          : inferredDistributorFromStatus && !inferredOrderRequestFromStatus
+        const applicationType = getApplicationTypeFromRecord(latestRegistration)
+        const isDistributorRegistration = applicationType === 'distributor'
 
         if (!latestRegistration) {
           if (isInternalBypassEmail) {
@@ -10099,10 +10092,8 @@ function App() {
       }
 
       const registrationStatus = String(latestRegistration?.status || '').trim().toLowerCase()
-      const explicitType = extractTaggedValue(latestRegistration?.notes, 'APPLICATION_TYPE')
-      const isDistributorRegistration = explicitType
-        ? explicitType === 'distributor'
-        : registrationStatus === 'pending'
+      const applicationType = getApplicationTypeFromRecord(latestRegistration)
+      const isDistributorRegistration = applicationType === 'distributor'
 
       if (isDistributorRegistration && requireApproval && registrationStatus !== 'approved') {
         await supabase.auth.signOut()
@@ -10454,10 +10445,8 @@ function App() {
     }
 
     const status = String(latestRegistration?.status || '').trim().toLowerCase() || 'pending'
-    const explicitType = extractTaggedValue(latestRegistration?.notes, 'APPLICATION_TYPE')
-    const isDistributorRegistration = explicitType
-      ? explicitType === 'distributor'
-      : status === 'pending'
+    const applicationType = getApplicationTypeFromRecord(latestRegistration)
+    const isDistributorRegistration = applicationType === 'distributor'
 
     if (!isDistributorRegistration) {
       return { ok: true, applicationStatus: 'approved' }
