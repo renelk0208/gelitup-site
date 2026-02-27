@@ -4844,7 +4844,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
         <h2 className="heading-on-dark mt-3 text-3xl font-bold">{isCreatePasswordMode ? 'Admin Setup' : 'Admin Login'}</h2>
         <p className="mt-4 text-sm text-slate-300">
           {isCreatePasswordMode
-            ? 'Create your admin password, confirm it, and verify your email before first sign-in.'
+            ? 'Create your admin password and continue to reviewer access.'
             : 'Reviewer access for approving pending B2B applications.'}
         </p>
       </div>
@@ -4871,7 +4871,10 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
               return
             }
 
-            setInfoMessage(createResult.message || 'Verification email sent. Please verify your email before admin sign-in.')
+            setInfoMessage(createResult.message || 'Password setup completed. Please sign in as admin.')
+            if (createResult.navigateToDashboard) {
+              navigate('/portal/dashboard/applications')
+            }
             return
           }
 
@@ -5547,10 +5550,9 @@ function PortalForgotPassword() {
 function ProductsModule({ moduleView = 'products' }) {
   const location = useLocation()
   const navigate = useNavigate()
-  const fallbackProducts = useMemo(() => createFallbackProducts(), [])
-  const [products, setProducts] = useState(fallbackProducts)
+  const [products, setProducts] = useState([])
   const [isLoadingFeed, setIsLoadingFeed] = useState(false)
-  const [feedMessage, setFeedMessage] = useState('Using built-in product sample data.')
+  const [feedMessage, setFeedMessage] = useState('Live product feed not loaded yet.')
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
   const [checkoutMessage, setCheckoutMessage] = useState('')
   const [checkoutError, setCheckoutError] = useState('')
@@ -6221,8 +6223,8 @@ function ProductsModule({ moduleView = 'products' }) {
       }
       catch {
         if (isMounted) {
-          setProducts(fallbackProducts)
-          setFeedMessage('Live feed unavailable. Showing fallback product sample data.')
+          setProducts([])
+          setFeedMessage('Live product feed unavailable.')
         }
       }
       finally {
@@ -6237,7 +6239,7 @@ function ProductsModule({ moduleView = 'products' }) {
     return () => {
       isMounted = false
     }
-  }, [fallbackProducts, localImageMap, productsTable])
+  }, [localImageMap, productsTable])
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -7095,7 +7097,7 @@ function ProductsModule({ moduleView = 'products' }) {
     ? 'Connecting...'
     : feedMessage.startsWith('Loaded')
       ? 'Live'
-      : 'Fallback'
+      : 'Unavailable'
 
   const authLabel = hasSupabaseConfig ? 'Live' : 'Fallback'
   const authBadgeClass = hasSupabaseConfig
@@ -7297,7 +7299,7 @@ function ProductsModule({ moduleView = 'products' }) {
             <p className="font-semibold text-slate-900">Finalize Order Endpoint</p>
             <div className="mt-1 flex items-center gap-2">
               <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${checkoutBadgeClass}`}>
-                {checkoutIsLive ? 'Live' : 'Fallback'}
+                {checkoutIsLive ? 'Live' : 'Unavailable'}
               </span>
               <span>{checkoutIsLive ? `Supabase table: ${ordersTable}` : ORDER_INBOX_EMAIL}</span>
             </div>
@@ -7796,6 +7798,11 @@ function ProductsModule({ moduleView = 'products' }) {
             )
           })}
         </div>
+        {!isLoadingFeed && !filteredProducts.length && (
+          <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+            Live product feed is unavailable. No fallback sample products are shown.
+          </div>
+        )}
       </div>
       )}
     </div>
@@ -9600,32 +9607,67 @@ function App() {
     const isAlreadyRegistered = /already registered|already been registered/i.test(signUpMessage)
     const isExistingAccount = isExistingUserSignUpResult(signUpResult)
     const hasActiveSession = hasActiveSignUpSession(signUpResult)
+    let canSignInNow = hasActiveSession
 
     if (signUpResult.error && !isAlreadyRegistered) {
       return { ok: false, message: signUpResult.error.message }
     }
 
-    if (isAlreadyRegistered || isExistingAccount) {
-      const { error: resendError } = await supabase.auth.resend({
-        type: 'signup',
+    if (!canSignInNow) {
+      const { error: immediateSignInError } = await supabase.auth.signInWithPassword({
         email: normalizedEmail,
-        options: {
-          emailRedirectTo: `${window.location.origin}/portal/admin-login`,
-        },
+        password,
       })
 
-      if (resendError) {
-        return { ok: false, message: `Unable to send verification email: ${resendError.message}` }
+      if (!immediateSignInError) {
+        canSignInNow = true
+      }
+    }
+
+    if (isAlreadyRegistered || isExistingAccount) {
+      if (!canSignInNow) {
+        const { error: resendError } = await supabase.auth.resend({
+          type: 'signup',
+          email: normalizedEmail,
+          options: {
+            emailRedirectTo: `${window.location.origin}/portal/admin-login`,
+          },
+        })
+
+        if (resendError) {
+          return { ok: false, message: `Unable to send verification email: ${resendError.message}` }
+        }
       }
     }
 
     localStorage.setItem('adminRememberedEmail', normalizedEmail)
 
+    if (canSignInNow) {
+      const { data: adminRows, error: adminError } = await supabase
+        .from(adminsTable)
+        .select('email')
+        .ilike('email', normalizedEmail)
+        .limit(1)
+
+      if (adminError) {
+        await supabase.auth.signOut()
+        return { ok: false, message: `Admin access check failed (${adminError.message}).` }
+      }
+
+      if (!adminRows?.length) {
+        await supabase.auth.signOut()
+        return { ok: false, message: 'This account is not registered as a B2B admin reviewer.' }
+      }
+
+      setIsPortalAuthenticated(true)
+    }
+
     return {
       ok: true,
-      message: hasActiveSession
-        ? 'Password created. Admin email confirmation is not required; sign in now.'
-        : 'Verification email sent. Confirm your email, then sign in as admin.',
+      message: canSignInNow
+        ? 'Password created. Email confirmation is not required; you are now signed in as admin.'
+        : 'Password setup submitted. If email confirmation is enabled in Supabase, confirm your email before admin sign-in.',
+      navigateToDashboard: canSignInNow,
     }
   }
 
@@ -9664,31 +9706,50 @@ function App() {
     const isAlreadyRegistered = /already registered|already been registered/i.test(signUpMessage)
     const isExistingAccount = isExistingUserSignUpResult(signUpResult)
     const hasActiveSession = hasActiveSignUpSession(signUpResult)
+    let canSignInNow = hasActiveSession
 
     if (signUpResult.error && !isAlreadyRegistered) {
       return { ok: false, message: signUpResult.error.message }
     }
 
-    if (isAlreadyRegistered || isExistingAccount) {
-      const { error: resendError } = await supabase.auth.resend({
-        type: 'signup',
+    if (!canSignInNow) {
+      const { error: immediateSignInError } = await supabase.auth.signInWithPassword({
         email: normalizedEmail,
-        options: {
-          emailRedirectTo: `${window.location.origin}/portal/login`,
-        },
+        password,
       })
 
-      if (resendError) {
-        return { ok: false, message: `Unable to send verification email: ${resendError.message}` }
+      if (!immediateSignInError) {
+        canSignInNow = true
+      }
+    }
+
+    if (isAlreadyRegistered || isExistingAccount) {
+      if (!canSignInNow) {
+        const { error: resendError } = await supabase.auth.resend({
+          type: 'signup',
+          email: normalizedEmail,
+          options: {
+            emailRedirectTo: `${window.location.origin}/portal/login`,
+          },
+        })
+
+        if (resendError) {
+          return { ok: false, message: `Unable to send verification email: ${resendError.message}` }
+        }
       }
     }
 
     localStorage.setItem('portalRememberedEmail', normalizedEmail)
+    if (canSignInNow) {
+      setIsPortalAuthenticated(true)
+    }
+
     return {
       ok: true,
-      infoMessage: hasActiveSession
-        ? 'Password created successfully. Email verification is not required; you can sign in now.'
-        : 'Verification email sent. Confirm your email, then sign in with your password.',
+      infoMessage: canSignInNow
+        ? 'Password created successfully. Email verification is not required; you are now signed in.'
+        : 'Password setup submitted. If email confirmation is enabled in Supabase, confirm your email before sign-in.',
+      navigateToDashboard: canSignInNow,
     }
   }
 
@@ -9895,7 +9956,17 @@ function App() {
       }
     }
 
-    return { ok: false, message: 'Live registration is not configured.' }
+    const missingEnvVars = [
+      !import.meta.env.VITE_SUPABASE_URL ? 'VITE_SUPABASE_URL' : null,
+      !import.meta.env.VITE_SUPABASE_ANON_KEY ? 'VITE_SUPABASE_ANON_KEY' : null,
+    ].filter(Boolean)
+
+    return {
+      ok: false,
+      message: missingEnvVars.length
+        ? `Live registration is not configured. Missing env: ${missingEnvVars.join(', ')}`
+        : 'Live registration is not configured.',
+    }
   }
 
   const handleSubmitContactRequest = async () => {
