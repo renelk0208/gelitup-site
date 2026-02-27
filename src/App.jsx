@@ -4671,9 +4671,16 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
           }
 
           if (!result.ok) {
-            setErrorMessage(result.message || 'Unable to sign in.')
+            const nextErrorMessage = result.message || 'Unable to sign in.'
+            const isNoRegistrationMessage = /no\s+b2b\s+registration/i.test(nextErrorMessage)
+
+            setErrorMessage(
+              isNoRegistrationMessage
+                ? 'No account profile was found for this email. Use Create password to initialize access, then continue in Buy Now.'
+                : nextErrorMessage,
+            )
             if (result.applicationStatus) {
-              setApplicationStatus(result.applicationStatus)
+              setApplicationStatus(isNoRegistrationMessage ? '' : result.applicationStatus)
             }
             return
           }
@@ -7433,7 +7440,7 @@ function ProductsModule({ moduleView = 'products' }) {
       )}
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
-        <h3 className="text-sm font-semibold text-slate-900">Connection Status</h3>
+        <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-sm font-semibold text-transparent">Connection Status</h3>
         <div className="mt-3 grid gap-2 sm:grid-cols-3">
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
             <p className="font-semibold text-slate-900">Auth</p>
@@ -7463,7 +7470,7 @@ function ProductsModule({ moduleView = 'products' }) {
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-semibold text-slate-900">B2B Portal</p>
+          <p className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-sm font-semibold text-transparent">B2B Portal</p>
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <span>{selectedLineItems} items</span>
             <span>/</span>
@@ -7472,6 +7479,20 @@ function ProductsModule({ moduleView = 'products' }) {
         </div>
         <p className="mt-2 text-xs text-slate-500">{isLoadingFeed ? 'Loading live feed...' : feedMessage}</p>
         <p className="mt-1 text-[11px] text-slate-500">{shippingMetadataStatus}</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <button
+            onClick={() => navigate('/portal/dashboard/catalog')}
+            className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Buy Now: Open Products
+          </button>
+          <button
+            onClick={() => window.location.reload()}
+            className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Refresh Feed
+          </button>
+        </div>
         <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
           <p className="text-xs font-semibold text-slate-900">Client details (saved for next orders)</p>
           <p className="mt-1 text-[11px] text-slate-500">
@@ -7962,7 +7983,21 @@ function ProductsModule({ moduleView = 'products' }) {
         </div>
         {!isLoadingFeed && !filteredProducts.length && (
           <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-            Live product feed is unavailable. No fallback sample products are shown.
+            <p>Live product feed is unavailable right now.</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button
+                onClick={() => window.location.reload()}
+                className="rounded-md border border-amber-300 bg-white px-2 py-1 font-semibold text-amber-800"
+              >
+                Retry now
+              </button>
+              <button
+                onClick={() => navigate('/portal/dashboard/products')}
+                className="rounded-md border border-amber-300 bg-white px-2 py-1 font-semibold text-amber-800"
+              >
+                Continue in Buy Now
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -8055,7 +8090,7 @@ function OrdersModule() {
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
-        <h3 className="text-lg font-semibold text-slate-900">Submitted Orders</h3>
+        <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-lg font-semibold text-transparent">Submitted Orders</h3>
         <p className="mt-1 text-xs text-slate-500">
           Orders are stored in Supabase table: {ordersTable}. Invoicing is handled offline from {ORDER_INBOX_EMAIL}.
         </p>
@@ -9300,7 +9335,7 @@ function PortalDashboard({ onLogout }) {
         ) : (
           <>
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h2 className="text-2xl font-semibold text-slate-900">{modules.find((module) => module.key === activeModule)?.label}</h2>
+              <h2 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-2xl font-semibold text-transparent">{modules.find((module) => module.key === activeModule)?.label}</h2>
               <p className="mt-2 text-sm text-slate-600">Trade account workspace optimized for desktop and mobile management.</p>
             </div>
 
@@ -9388,7 +9423,7 @@ function PortalDashboard({ onLogout }) {
             )}
 
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h3 className="text-base font-semibold text-slate-900">One-Stop B2B Workspace</h3>
+              <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-base font-semibold text-transparent">One-Stop B2B Workspace</h3>
               <p className="mt-2 text-sm text-slate-600">
                 Everything runs here: account overview, order placement, and order tracking. Payment options can be added into this same flow.
               </p>
