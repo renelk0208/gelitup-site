@@ -74,6 +74,7 @@ const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03
 const HOME_HERO_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
 const HOME_HERO_POSTER_URL = '/gelitup-media/images/news/Spring%20Summer/NEWS%20Carousel/2600-1.jpg'
 const HOME_NEWS_CLOUD_VIDEO_URL = '/gelitup-media/videos/floatingclouds.mp4'
+const HOME_NEWS_CAROUSEL_FOLDER = '/gelitup-media/images/news/Spring Summer/NEWS Carousel/'
 const CONTENT_CACHE_BUSTER = '2026-02-27-1'
 const HOME_CLOUD_DANCER_DEFAULT = {
   title: 'Cloud Dancer - The Story',
@@ -213,6 +214,27 @@ const DISTRIBUTOR_DIRECTORY = [
   },
 ]
 const VERIFIED_DISTRIBUTOR_COUNTRIES = DISTRIBUTOR_DIRECTORY.map((item) => item.country)
+const DISTRIBUTOR_COUNTRY_COORDINATES = {
+  Belgium: [50.5039, 4.4699],
+  Bulgaria: [42.7339, 25.4858],
+  France: [46.2276, 2.2137],
+  Greece: [39.0742, 21.8243],
+  'Kingdom of Saudi Arabia': [23.8859, 45.0792],
+  Qatar: [25.3548, 51.1839],
+  'United States': [39.8283, -98.5795],
+}
+const DISTRIBUTOR_COUNTRY_POINTS = DISTRIBUTOR_DIRECTORY
+  .map((item) => {
+    const country = String(item?.country || '').trim()
+    const coordinates = DISTRIBUTOR_COUNTRY_COORDINATES[country]
+    if (!country || !Array.isArray(coordinates)) return null
+
+    return {
+      country,
+      coordinates,
+    }
+  })
+  .filter(Boolean)
 const SILVER_FREE_GUARANTEE_BADGE = 'Silver-Free Guarantee'
 const CI77820_MAIN_STATEMENT = 'All Gelitup products manufactured from December 2025 onwards are 100% CI 77820 (Silver) FREE.'
 const CI77820_TRANSPARENCY_NOTE = 'All current batches have transitioned to Aluminium and Mica-based pigments.'
@@ -3767,10 +3789,22 @@ function HomePage() {
           ? payload.items
             .map((item) => ({
               id: String(item?.id || '').trim(),
-              imageUrl: String(item?.imageUrl || '').trim(),
+              imageUrl: String(item?.imageUrl || '').replace(/\\/g, '/').trim(),
               order: Number(item?.order || 0),
             }))
-            .filter((item) => item.imageUrl)
+            .filter((item) => {
+              if (!item.imageUrl) return false
+
+              const normalized = item.imageUrl.toLowerCase()
+              const decoded = decodeURI(item.imageUrl).toLowerCase()
+              const allowedPrefix = HOME_NEWS_CAROUSEL_FOLDER.toLowerCase()
+
+              return normalized.startsWith(allowedPrefix) || decoded.startsWith(allowedPrefix)
+            })
+            .map((item) => ({
+              ...item,
+              imageUrl: encodeURI(item.imageUrl),
+            }))
           : []
 
         setHomeNewsCarousel(items)
@@ -3943,9 +3977,9 @@ function HomePage() {
 
             <div className="w-full">
               {activeHomeNewsItem && (
-                <div className="mx-auto w-full max-w-[460px]">
+                <div className="mx-auto w-full max-w-[520px]">
                   <div className="overflow-hidden rounded-xl border border-white/20 bg-black/20 p-2">
-                    <div className="aspect-[9/16] w-full overflow-hidden rounded-lg bg-[#F8F8F8]">
+                    <div className="aspect-[4/5] w-full overflow-hidden rounded-lg bg-[#F8F8F8]">
                       <img
                         src={activeHomeNewsItem.imageUrl}
                         alt="Spring/Summer carousel visual"
@@ -4100,40 +4134,15 @@ function PortalLanding() {
 }
 
 function DistributorsPage() {
-  const [selectedCountry, setSelectedCountry] = useState(DISTRIBUTOR_DIRECTORY[0]?.country ?? '')
-  const [selectedDistributorIndex, setSelectedDistributorIndex] = useState(0)
+  const [selectedCountry, setSelectedCountry] = useState(DISTRIBUTOR_COUNTRY_POINTS[0]?.country ?? '')
 
-  const selectedDirectory = useMemo(
-    () => DISTRIBUTOR_DIRECTORY.find((item) => item.country === selectedCountry),
+  const selectedPoint = useMemo(
+    () => DISTRIBUTOR_COUNTRY_POINTS.find((item) => item.country === selectedCountry) || null,
     [selectedCountry],
   )
 
-  useEffect(() => {
-    setSelectedDistributorIndex(0)
-  }, [selectedCountry])
-
-  const selectedDistributor = useMemo(() => {
-    if (!selectedDirectory || !Array.isArray(selectedDirectory.distributors) || selectedDirectory.distributors.length === 0) {
-      return null
-    }
-
-    const safeIndex = Math.min(
-      Math.max(0, selectedDistributorIndex),
-      selectedDirectory.distributors.length - 1,
-    )
-
-    return selectedDirectory.distributors[safeIndex]
-  }, [selectedDirectory, selectedDistributorIndex])
-
-  const mapEmbedUrl = useMemo(() => {
-    if (!selectedDirectory) return ''
-    if (selectedDistributor?.address) return `https://www.google.com/maps?q=${encodeURIComponent(selectedDistributor.address)}&z=13&output=embed`
-
-    const firstAddress = selectedDirectory.distributors.find((item) => item?.address)?.address
-    if (firstAddress) return `https://www.google.com/maps?q=${encodeURIComponent(firstAddress)}&z=12&output=embed`
-
-    return `https://www.google.com/maps?q=${encodeURIComponent(selectedDirectory.country)}&z=6&output=embed`
-  }, [selectedDirectory, selectedDistributor])
+  const mapCenter = selectedPoint?.coordinates || [27, 15]
+  const mapZoom = selectedPoint ? 4 : 2
 
   return (
     <section className="space-y-5">
@@ -4144,7 +4153,7 @@ function DistributorsPage() {
           LIVE COVERAGE DATA. VERIFIED NETWORK. LEGITIMATE B2B DATABASE.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          {DISTRIBUTOR_DIRECTORY.map((item) => (
+          {DISTRIBUTOR_COUNTRY_POINTS.map((item) => (
             <button
               key={item.country}
               type="button"
@@ -4159,71 +4168,10 @@ function DistributorsPage() {
         </div>
       </div>
 
-      {selectedDirectory && (
-        <div className="rounded-2xl border border-[#4A4A4A] bg-white p-4 sm:p-5">
-          <h2 className="heading-on-light text-lg font-extrabold text-[#1A1A1A] sm:text-xl">
-            {selectedDirectory.country}
-            {' '}
-            Distributor Details
-          </h2>
-          <div className="mt-3 grid gap-3 text-sm text-[#1A1A1A]">
-            {selectedDirectory.distributors.map((distributor, distributorIndex) => {
-              const isActiveDistributor = distributorIndex === selectedDistributorIndex
-
-              return (
-              <button
-                key={`${selectedDirectory.country}-${distributor.name}`}
-                type="button"
-                onClick={() => setSelectedDistributorIndex(distributorIndex)}
-                className={`rounded-xl border bg-[#E8E8E8] p-3 text-left transition ${isActiveDistributor ? 'border-fuchsia-500 ring-1 ring-fuchsia-400/60' : 'border-[#E8E8E8] hover:border-fuchsia-300'}`}
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Distributor</p>
-                <p className="mt-1 font-semibold">{distributor.name}</p>
-
-                {distributor.address && (
-                  <>
-                    <p className="mt-3 text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Address</p>
-                    <p className="mt-1 font-semibold">{distributor.address}</p>
-                  </>
-                )}
-
-                {distributor.phone && (
-                  <>
-                    <p className="mt-3 text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Telephone</p>
-                    <a href={`tel:${String(distributor.phone).replace(/[^+\d]/g, '')}`} className="mt-1 block font-semibold underline">
-                      {distributor.phone}
-                    </a>
-                  </>
-                )}
-
-                {distributor.email && (
-                  <>
-                    <p className="mt-3 text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Email</p>
-                    <a href={`mailto:${distributor.email}`} className="mt-1 block font-semibold underline">
-                      {distributor.email}
-                    </a>
-                  </>
-                )}
-
-                {distributor.website && (
-                  <>
-                    <p className="mt-3 text-xs font-semibold uppercase tracking-[0.08em] text-[#4A4A4A]">Website</p>
-                    <a href={distributor.website} target="_blank" rel="noreferrer" className="mt-1 block font-semibold underline">
-                      {distributor.website.replace(/^https?:\/\//, '')}
-                    </a>
-                  </>
-                )}
-              </button>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
       <div className="rounded-2xl border border-[#4A4A4A] bg-[#E8E8E8] p-4 sm:p-5">
         <h2 className="heading-on-light text-lg font-extrabold text-[#1A1A1A] sm:text-xl">Distributor Coverage Map</h2>
         <p className="mt-2 text-sm text-[#1A1A1A]">
-          Click a country above to load the map focus and distributor details.
+          Country-level coverage with one map pin per official market.
           {' '}
           <a href={LEEUKOPF_DISTRIBUTORS_SOURCE_URL} target="_blank" rel="noreferrer" className="font-semibold underline">
             View source
@@ -4231,13 +4179,23 @@ function DistributorsPage() {
         </p>
 
         <div className="mt-3 overflow-hidden rounded-xl border border-[#4A4A4A] bg-white">
-          <iframe
-            title="GEL.IT.UP by GIUP® distributors map"
-            src={mapEmbedUrl}
+          <MapContainer
+            key={selectedCountry || 'all-countries'}
+            center={mapCenter}
+            zoom={mapZoom}
+            scrollWheelZoom={false}
             className="h-[320px] w-full sm:h-[420px]"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {DISTRIBUTOR_COUNTRY_POINTS.map((item) => (
+              <Marker key={item.country} position={item.coordinates}>
+                <Popup>{item.country}</Popup>
+              </Marker>
+            ))}
+          </MapContainer>
         </div>
       </div>
 
