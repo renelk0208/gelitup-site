@@ -857,7 +857,7 @@ const HERO_PRODUCT_COPY = [
 ]
 
 const PACKAGE_TIER_OPTIONS = ['Silver', 'Gold', 'Platinum']
-const DEFAULT_PACKAGE_ITEM_QTY = 5
+const DEFAULT_PACKAGE_ITEM_QTY = 1
 const PACKAGE_TECH_ESSENTIALS = [
   { sku: 'SUPERBOND', code: 'SUPERBOND', name: 'Superbond Acid-Free Primer', category: 'Technical', group: 'Essentials' },
   { sku: '5IN1_CLR', code: '5IN1_CLR', name: '5-in-1 Superior Base Coat Clear', category: 'Technical', group: 'Essentials' },
@@ -866,9 +866,9 @@ const PACKAGE_TECH_ESSENTIALS = [
   { sku: 'SYN_MWH', code: 'SYN_MWH', name: 'Multimix Synthogel Milky White', category: 'Technical', group: 'Essentials' },
 ]
 const PROFESSIONAL_BASE_PACK = {
-  sku: '5IN1_CLR_6PACK',
-  description: '5-in-1 Superior Base Professional 6-pack (15% discount)',
-  qty: 6,
+  sku: '5IN1_CLR',
+  description: '5-in-1 Superior Base Add-on',
+  qty: 1,
 }
 const PROFORMA_HEADER = {
   company: PROFORMA_COMPANY_NAME,
@@ -2510,6 +2510,112 @@ function FullCataloguePage() {
     [activeCategory, activeSubcategory],
   )
 
+  const serviceFlowMenu = useMemo(() => {
+    const definitions = [
+      {
+        key: 'COLOURS',
+        label: 'COLOURS',
+        sectionTokens: ['COLOR'],
+        subcategories: [
+          { label: 'The Solids (Nudes, Reds, Neons)', subcategoryTokens: ['SOLID', 'NUDE', 'RED', 'NEON'] },
+          { label: 'Special Effects (Cat Eye, Reflective, Glitter)', subcategoryTokens: ['CAT EYE', 'REFLECT', 'GLITTER', 'SHIMMER'] },
+          { label: 'Technical Art (Stamping, Painting, Spider Gels)', subcategoryTokens: ['SPIDER', 'STAMP', 'PAINT'] },
+          { label: 'Collections', subcategoryTokens: ['COLLECTION', 'OCEAN', 'AUTUMN', 'NEW YORK', 'TUTTI'] },
+        ],
+      },
+      {
+        key: 'PRIMERS_PREP',
+        label: 'PRIMERS & PREP',
+        sectionTokens: ['LIQUID', 'BASE'],
+        subcategories: [
+          { label: 'Adhesion (Superbond/Acid Primers)', subcategoryTokens: ['SUPERBOND', 'PRIMER'] },
+          { label: 'Sanitization', subcategoryTokens: ['SANIT'] },
+          { label: 'Nail Prep/Cleansers', subcategoryTokens: ['PREP', 'CLEAN', 'REMOVER'] },
+        ],
+      },
+      {
+        key: 'TOPS_BASES',
+        label: 'TOPS & BASES',
+        sectionTokens: ['TOP', 'BASE'],
+        subcategories: [
+          { label: 'Rubber Bases', subcategoryTokens: ['RUBBER BASE', '5IN1'] },
+          { label: 'Flexi/Fiber Bases', subcategoryTokens: ['FLEXI', 'FIBER', 'BRUSH ON BUILDER'] },
+          { label: 'No-Wipe Gloss Tops', subcategoryTokens: ['NO WIPE', 'GLOSS', 'CLASSIC TOP'] },
+          { label: 'Matte/Effect Tops', subcategoryTokens: ['MATTE', 'EFFECT', 'SHIMMER TOP', 'SPOT MY TOPS'] },
+        ],
+      },
+      {
+        key: 'BUILDERS',
+        label: 'BUILDER SYSTEMS',
+        sectionTokens: ['BUILDER', 'MULTIMIX', 'ACRYLIC'],
+        subcategories: [
+          { label: '3-in-1 Premium Builders', subcategoryTokens: ['3INI', 'PREMIUM BUILDER'] },
+          { label: 'MultiMix Synthogel (Acrygel)', subcategoryTokens: ['MULTIMIX', '30 ML', '60 ML'] },
+          { label: 'Builder-in-a-bottle (BIAB)', subcategoryTokens: ['BRUSH ON BUILDER', '5IN1'] },
+          { label: 'Acrylic Systems', subcategoryTokens: ['ACRYLIC', 'COMPETE'] },
+        ],
+      },
+      {
+        key: 'CONSUMABLES',
+        label: 'CONSUMABLES',
+        sectionTokens: ['CONSUMABLE'],
+        subcategories: [
+          { label: 'Files & Buffers', subcategoryTokens: ['FILE', 'BUFFER'] },
+          { label: 'Wipes & Forms', subcategoryTokens: ['WIPE', 'FORM'] },
+          { label: 'Removal Essentials', subcategoryTokens: ['REMOV', 'CUTICLE OILS', 'CLEANSER'] },
+        ],
+      },
+      {
+        key: 'TOOLS_EQUIPMENT',
+        label: 'TOOLS & EQUIPMENT',
+        sectionTokens: ['TOOL', 'EQUIP', 'BRUSH'],
+        subcategories: [
+          { label: 'Professional Brushes', subcategoryTokens: ['BRUSH'] },
+          { label: 'Implements (Nippers/Scissors)', subcategoryTokens: ['NIPPER', 'SCISSOR'] },
+          { label: 'LED/UV Lamps', subcategoryTokens: ['LAMP', 'LED', 'UV'] },
+          { label: 'E-Files/Drills', subcategoryTokens: ['DRILL', 'E FILE'] },
+        ],
+      },
+    ]
+
+    return definitions.map((definition) => {
+      const matchedSections = sections.filter((section) => {
+        const token = normalizeCatalogueToken(section.category)
+        return definition.sectionTokens.some((needle) => token.includes(normalizeCatalogueToken(needle)))
+      })
+
+      const resolvedSubcategories = definition.subcategories.map((sub) => {
+        for (const section of matchedSections) {
+          const found = section.subcategories.find((entry) => {
+            const token = normalizeCatalogueToken(entry.name)
+            return sub.subcategoryTokens.some((needle) => token.includes(normalizeCatalogueToken(needle)))
+          })
+
+          if (found) {
+            return {
+              label: sub.label,
+              category: section.category,
+              subcategory: found.name,
+            }
+          }
+        }
+
+        const fallbackSection = matchedSections[0] || null
+        return {
+          label: sub.label,
+          category: fallbackSection?.category || '',
+          subcategory: 'ALL',
+        }
+      })
+
+      return {
+        ...definition,
+        matchedSections,
+        resolvedSubcategories,
+      }
+    })
+  }, [sections])
+
   const categoryDetail = activeCategory
     ? (
       <div className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5">
@@ -2531,28 +2637,9 @@ function FullCataloguePage() {
             <h2 className="text-lg font-black uppercase tracking-[0.05em] text-black">{activeSection?.category || 'The Collection'}</h2>
             <p className="mt-1 text-xs text-black/55">{filteredItems.length} matching items</p>
           </div>
-          <div className="flex items-center gap-3">
-            <label className="inline-flex items-center gap-2 text-xs text-black/70">
-              <span>Quick Order</span>
-              <button
-                onClick={() => setBulkMode((current) => !current)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition duration-300 ${bulkMode ? 'bg-fuchsia-600' : 'bg-black/20'}`}
-                aria-label="Toggle bulk mode"
-              >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${bulkMode ? 'translate-x-6' : 'translate-x-1'}`} />
-              </button>
-            </label>
-            <div className="rounded-[12px] border border-[#4A4A4A]/30 bg-white px-3 py-2 text-xs text-black/70">
-              Quick Basket: {quickCartUnits} units
-            </div>
+          <div className="rounded-[12px] border border-[#4A4A4A]/25 bg-[#E8E8E8] px-3 py-2 text-xs text-black/75">
+            Catalogue-only view. Purchase starts after account verification.
           </div>
-        </div>
-
-        <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
-          <div
-            className="h-full rounded-full bg-fuchsia-600 transition-all duration-300"
-            style={{ width: `${quickProgress}%` }}
-          />
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
@@ -2679,7 +2766,7 @@ function FullCataloguePage() {
             <div
               ref={virtualContainerRef}
               onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
-              className="mt-4 max-h-[62vh] overflow-auto rounded-[14px] border border-[#4A4A4A]/30 bg-white md:max-h-[72vh]"
+              className="mt-4 max-h-[68vh] overflow-auto rounded-[14px] border border-[#4A4A4A]/30 bg-white md:max-h-[72vh]"
             >
               <div style={{ height: topSpacerHeight }} />
 
@@ -2688,9 +2775,6 @@ function FullCataloguePage() {
                 style={bulkMode ? undefined : { gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))` }}
               >
                 {virtualItems.map(({ item, itemIndex }) => {
-                  const itemKey = item.imageUrl
-                  const qty = getQty(itemKey)
-                  const hasChangedQty = qty > 1
                   const itemCode = extractProductCode(item.name)
 
                   if (bulkMode) {
@@ -2713,8 +2797,8 @@ function FullCataloguePage() {
                   }
 
                   return (
-                    <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 hover:scale-[1.05] hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`}>
-                      <div className="flex h-56 w-full items-center justify-center overflow-hidden bg-white p-2 sm:h-60">
+                    <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:bg-[#E8E8E8] md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`}>
+                      <div className="flex h-44 w-full items-center justify-center overflow-hidden bg-white p-2 sm:h-52 md:h-60">
                         <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full scale-[1.025] object-cover" />
                       </div>
                       <div className="border-t border-black/10 px-2.5 py-2">
@@ -2727,11 +2811,13 @@ function FullCataloguePage() {
                           <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
                           <p className="truncate text-[11px] font-light text-black/55">{item.subcategory}</p>
                         </div>
-                        <div className="mt-2 flex items-center gap-1">
-                          <button onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>−</button>
-                          <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className={`h-7 w-10 rounded-[10px] border text-center text-xs ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/20 text-black/70'}`} />
-                          <button onClick={() => updateQty(itemKey, qty + 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>+</button>
-                          <button onClick={() => addQuickItem(itemKey)} className={`ml-auto rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition duration-300 ${pulseItemKey === itemKey ? 'lux-pulse bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`}>Add</button>
+                        <div className="mt-2 flex items-center">
+                          <NavLink
+                            to="/portal/login?mode=create-password"
+                            className="ml-auto inline-flex min-h-10 items-center rounded-[10px] bg-fuchsia-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500"
+                          >
+                            Buy Now
+                          </NavLink>
                         </div>
                       </div>
                     </article>
@@ -2743,7 +2829,7 @@ function FullCataloguePage() {
             </div>
 
             <div className="mt-2 text-xs text-black/55">
-              Virtualized view active: showing {virtualItems.length} / {filteredItems.length} items.
+              Showing {filteredItems.length} catalogue items. Use Buy Now to sign in or create an account and start purchasing.
             </div>
           </>
         )}
@@ -2778,15 +2864,371 @@ function FullCataloguePage() {
 
       {!isLoading && !errorMessage && sections.length > 0 && (
         <>
+          <div className="sticky top-2 z-30 mx-auto max-w-6xl rounded-2xl border border-[#4A4A4A]/25 bg-[#E8E8E8]/95 p-4 shadow-sm backdrop-blur sm:top-3 sm:p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#4A4A4A]">Service-Flow Navigation</p>
+            <div className="-mx-1 mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1">
+              {serviceFlowMenu.map((flow) => {
+                const flowIsActive = flow.matchedSections.some((section) => section.category === activeCategory)
+
+                return (
+                  <button
+                    key={flow.key}
+                    type="button"
+                    onClick={() => {
+                      const targetSection = flow.matchedSections[0]
+                      if (!targetSection) return
+                      setActiveCategory(targetSection.category)
+                      setActiveSubcategory('ALL')
+                      setActiveColorFamily('ALL')
+                    }}
+                    className={`min-h-10 shrink-0 snap-start whitespace-nowrap rounded-lg border px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${flowIsActive ? 'border-[#D43790] bg-[#D43790] text-white' : 'border-[#4A4A4A]/35 bg-white text-[#1A1A1A] hover:border-[#D43790]'}`}
+                  >
+                    {flow.label}
+                  </button>
+                )
+              })}
+            </div>
+
+            {serviceFlowMenu.some((flow) => flow.matchedSections.some((section) => section.category === activeCategory)) && (
+              <div className="mt-3 rounded-xl border border-[#4A4A4A]/20 bg-white p-3">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                  {(serviceFlowMenu.find((flow) => flow.matchedSections.some((section) => section.category === activeCategory))?.resolvedSubcategories || []).map((sub) => (
+                    <button
+                      key={`${sub.category}-${sub.subcategory}-${sub.label}`}
+                      type="button"
+                      onClick={() => {
+                        if (!sub.category) return
+                        setActiveCategory(sub.category)
+                        setActiveSubcategory(sub.subcategory || 'ALL')
+                        setActiveColorFamily('ALL')
+                      }}
+                      className="min-h-10 rounded-lg border border-[#4A4A4A]/20 bg-white px-3 py-2 text-left text-xs font-semibold text-[#1A1A1A] transition hover:border-[#D43790]"
+                    >
+                      {sub.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* FEATURED HERO: SUPERBOND PRIMER */}
+          <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
+            <div className="mx-auto max-w-6xl">
+              <div className="grid items-center gap-8 md:grid-cols-2">
+                {/* Product Image */}
+                <div className="flex justify-center">
+                  <div className="relative h-96 w-64 rounded-xl border border-white/20 bg-gradient-to-b from-[#2A2A2A] to-[#1A1A1A] p-8 flex items-center justify-center">
+                    <img
+                      src="/gelitup-content/product-images/BASES/SUPERBOND/superbond-primer.jpg"
+                      alt="Superbond Primer - White bottle with black matte cap"
+                      className="h-full w-full object-contain"
+                      onError={(e) => {
+                        e.currentTarget.src = '/logo.png'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Product Details */}
+                <div>
+                  <div className="inline-flex rounded-full bg-[#D43790] px-4 py-1.5 mb-4">
+                    <span className="text-xs font-extrabold uppercase tracking-[0.12em] text-white">HEMA/TPO FREE</span>
+                  </div>
+                  <h3 className="text-3xl font-extrabold uppercase tracking-[0.08em] text-white sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
+                    Superbond Primer
+                  </h3>
+                  <p className="mt-3 text-base text-white/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
+                    The Superbond Primer is a professional-grade, non-acid adhesive agent designed to create a powerful chemical bond between the natural nail and the product. It is a vital first step for ensuring long-term wear and preventing lifting.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowSuperbondDetails((current) => !current)}
+                    className="mt-5 rounded-lg border border-[#D43790]/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-white transition duration-300 hover:bg-[#D43790]/20"
+                  >
+                    {showSuperbondDetails ? 'Show Less' : 'Learn More'}
+                  </button>
+                  {showSuperbondDetails && (
+                    <>
+                      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-white/70">Key Benefits</p>
+                      <ul className="mt-2 space-y-2 text-sm text-white/75">
+                        <li className="flex items-start gap-3">
+                          <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                          <span>Superior adhesion: acts as double-sided tape, significantly increasing bond strength for gel polish and builder systems.</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                          <span>Non-acid formula: gentler on the natural nail plate than traditional acid primers while maintaining high performance.</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                          <span>Rapid ROI: one bottle supports hundreds of services, making it a high-value essential for busy studios.</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                          <span>Total safety: 100% HEMA and TPO free for a safer technician and client environment.</span>
+                        </li>
+                      </ul>
+                      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-white/70">How to Use / Application</p>
+                      <ol className="mt-2 list-decimal space-y-2 pl-5 text-sm text-white/75">
+                        <li><span className="font-semibold text-white/90">Prep:</span> Perform a dry manicure and thoroughly cleanse the nail with cleanser or alcohol to remove all surface oils.</li>
+                        <li><span className="font-semibold text-white/90">Application:</span> Wipe excess from the brush and apply a very thin, sparing layer to the natural nail plate.</li>
+                        <li><span className="font-semibold text-white/90">Drying:</span> Do not cure. Let it air-dry for about 30 seconds; slight tackiness is normal and required for adhesion.</li>
+                        <li><span className="font-semibold text-white/90">Next Step:</span> Proceed immediately with your chosen GEL.IT.UP by GIUP® Base Coat.</li>
+                      </ol>
+                    </>
+                  )}
+                  <NavLink
+                    to="/portal/login?mode=create-password"
+                    className="mt-6 inline-flex rounded-lg bg-[#D43790] px-8 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-[#C32680]"
+                  >
+                    Buy Now
+                  </NavLink>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CHAPTER 01: THE INFINITE SPECTRUM */}
+          <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
+            <div className="mx-auto max-w-6xl">
+              <h2 className="heading-on-dark text-3xl font-extrabold uppercase tracking-[0.12em] text-white sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>COLOURS</h2>
+              <p className="mt-3 max-w-2xl text-base text-white/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
+                Explore 761+ professional shades including Core Classics, Specialty Series, Effects, and our flagship GIUP® #1 Range.
+              </p>
+              <div className="mt-6">
+                <button
+                  onClick={() => {
+                    const colorsSection = sections.find((s) => isColorsCategoryName(s.category))
+                    if (colorsSection) {
+                      setActiveCategory(colorsSection.category)
+                      setActiveSubcategory('ALL')
+                      setActiveColorFamily('ALL')
+                    }
+                  }}
+                  className="rounded-lg bg-fuchsia-600 px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
+                >
+                  Explore Spectrum
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {isColorsCategoryName(activeCategory) && categoryDetail}
+
+          {/* CHAPTER 02: STRUCTURAL ENGINEERING */}
+          <div className="space-y-4 py-12 px-4 sm:px-8">
+            <div className="mx-auto max-w-6xl px-4 sm:px-8">
+              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>BUILDER SYSTEMS</h2>
+              <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
+                Advanced building and prep systems: Superbond Primer, Superior Bases, 3-in-1 Premium Builders, Crème de la Crème, and MultiMix Synthogel.
+              </p>
+            </div>
+
+             {/* FEATURED HERO: 5-IN-1 SUPERIOR BASE COAT */}
+            {!activeCategory && (
+            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-white px-4 py-12 sm:px-8 sm:py-16">
+              <div className="mx-auto max-w-6xl">
+                <div className="grid items-center gap-8 md:grid-cols-2">
+                  {/* Product Image */}
+                  <div className="flex justify-center">
+                    <div className="relative h-96 w-64 rounded-xl border border-[#4A4A4A]/30 bg-white p-8 flex items-center justify-center">
+                      <img
+                        src="/gelitup-content/product-images/BASES/5IN1 SUPERIOR BASE/5in1-superior-base.jpg"
+                        alt="5-in-1 Superior Base Coat - Clear self-leveling texture"
+                        className="h-full w-full object-contain"
+                        onError={(e) => {
+                          e.currentTarget.src = '/logo.png'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Product Details */}
+                  <div>
+                    <h3 className="text-4xl font-extrabold uppercase tracking-[0.08em] text-[#1A1A1A] sm:text-5xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
+                      The All-in-One Foundation
+                    </h3>
+                    <p className="mt-4 text-base text-[#1A1A1A]/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
+                      The 5-in-1 Superior Base Coat is a high-performance, multi-functional clear foundation designed for maximum efficiency in the professional studio. This versatile formula serves as a base coat, a strength overlay, and a short extension medium, all in one bottle.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowFiveInOneDetails((current) => !current)}
+                      className="mt-5 rounded-lg border border-[#D43790]/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-[#1A1A1A] transition duration-300 hover:bg-[#D43790]/10"
+                    >
+                      {showFiveInOneDetails ? 'Show Less' : 'Learn More'}
+                    </button>
+                    {showFiveInOneDetails && (
+                      <>
+                        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-[#1A1A1A]/70">Key Benefits</p>
+                        <ul className="mt-2 space-y-2 text-sm text-[#1A1A1A]/80">
+                          <li className="flex items-start gap-3">
+                            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                            <span>Five-in-one versatility: base coat, nail strengthener, ridge filler, repair gel, and short extension medium.</span>
+                          </li>
+                          <li className="flex items-start gap-3">
+                            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                            <span>Exceptional adhesion: resilient bond that helps prevent lifting and supports 3+ weeks of wear.</span>
+                          </li>
+                          <li className="flex items-start gap-3">
+                            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                            <span>Self-leveling mastery: high-viscosity formula corrects nail imperfections for a flawless color-ready surface.</span>
+                          </li>
+                          <li className="flex items-start gap-3">
+                            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
+                            <span>Clean science standard: 100% HEMA and TPO free.</span>
+                          </li>
+                        </ul>
+                        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-[#1A1A1A]/70">How to Use / Application</p>
+                        <ol className="mt-2 list-decimal space-y-2 pl-5 text-sm text-[#1A1A1A]/80">
+                          <li><span className="font-semibold text-[#1A1A1A]">Prep:</span> Begin with a standard dry manicure and thoroughly cleanse the nail plate to remove surface oils.</li>
+                          <li><span className="font-semibold text-[#1A1A1A]">Prime:</span> Apply a thin layer of Superbond Primer and allow it to air-dry for 30 seconds.</li>
+                          <li><span className="font-semibold text-[#1A1A1A]">Application:</span> Use the Precision Oval Brush for a thin scrub layer; for strength/ridge filling, add a second slightly thicker bead and let it self-level.</li>
+                          <li><span className="font-semibold text-[#1A1A1A]">Curing:</span> Cure for 60 seconds in LED or 120 seconds in UV.</li>
+                          <li><span className="font-semibold text-[#1A1A1A]">Next Step:</span> Proceed directly with your chosen GEL.IT.UP by GIUP® color polish.</li>
+                        </ol>
+                      </>
+                    )}
+                    <NavLink
+                      to="/portal/login?mode=create-password"
+                      className="mt-8 inline-flex rounded-lg bg-[#D43790] px-8 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-[#C32680]"
+                    >
+                      Buy Now
+                    </NavLink>
+                  </div>
+                </div>
+              </div>
+            </div>
+            )}
+
+            {/* CATEGORY GRID */}
+            <div className="mx-auto max-w-6xl">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {chapter02Categories.map((categoryName) => {
+                const section = sections.find((s) => s.category === categoryName)
+                if (!section) return null
+                const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
+                const coverImage = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
+                return (
+                  <Fragment key={categoryName}>
+                    <button
+                      onClick={() => {
+                        setActiveCategory(categoryName)
+                        setActiveSubcategory('ALL')
+                      }}
+                      className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
+                    >
+                      <div className="relative h-52 bg-white p-2">
+                        <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" />
+                        <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
+                      </div>
+                      <div className="border-t border-[#4A4A4A]/20 p-3">
+                        <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
+                        <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
+                      </div>
+                    </button>
+                    {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
+                  </Fragment>
+                )
+              })}
+            </div>
+            </div>
+          </div>
+
+          {/* CHAPTER 03: THE PROFESSIONAL TOOLSET */}
+          <div className="space-y-4 py-12 px-4 sm:px-8">
+            <div className="mx-auto max-w-6xl px-4 sm:px-8">
+              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>TOOLS & EQUIPMENT</h2>
+              <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
+                Precision finishing products, expert hardware, and maintenance tools for flawless studio finishes.
+              </p>
+            </div>
+            <div className="mx-auto max-w-6xl">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {chapter03Categories.map((categoryName) => {
+                const section = sections.find((s) => s.category === categoryName)
+                if (!section) return null
+                const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
+                const coverImage = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
+                return (
+                  <Fragment key={categoryName}>
+                    <button
+                      onClick={() => {
+                        setActiveCategory(categoryName)
+                        setActiveSubcategory('ALL')
+                      }}
+                      className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
+                    >
+                      <div className="relative h-52 bg-white p-2">
+                        <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" />
+                        <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
+                      </div>
+                      <div className="border-t border-[#4A4A4A]/20 p-3">
+                        <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
+                        <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
+                      </div>
+                    </button>
+                    {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
+                  </Fragment>
+                )
+              })}
+            </div>
+            </div>
+          </div>
+
+          {/* CHAPTER 04: ARTISTIC MASTERY & CARE */}
+          <div className="space-y-4 py-12 px-4 sm:px-8">
+            <div className="mx-auto max-w-6xl px-4 sm:px-8">
+              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>CONSUMABLES & ART</h2>
+              <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
+                Nail art ecosystem and therapeutic formulations for creative details and professional aftercare.
+              </p>
+            </div>
+            <div className="mx-auto max-w-6xl">
+            <div className="grid gap-4 sm:grid-cols-2">
+              {chapter04Categories.map((categoryName) => {
+                const section = sections.find((s) => s.category === categoryName)
+                if (!section) return null
+                const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
+                const coverImage = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
+                return (
+                  <Fragment key={categoryName}>
+                    <button
+                      onClick={() => {
+                        setActiveCategory(categoryName)
+                        setActiveSubcategory('ALL')
+                      }}
+                      className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
+                    >
+                      <div className="relative h-52 bg-white p-2">
+                        <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" />
+                        <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
+                      </div>
+                      <div className="border-t border-[#4A4A4A]/20 p-3">
+                        <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
+                        <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
+                      </div>
+                    </button>
+                    {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
+                  </Fragment>
+                )
+              })}
+            </div>
+            </div>
+
+            {chapter04Categories.includes(activeCategory) && categoryDetail}
+          </div>
+
           <div className="mx-auto max-w-6xl rounded-2xl border border-[#4A4A4A]/25 bg-white p-4 sm:p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">Spring / Summer Collection</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">NEW ADDITIONS</p>
             <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.08em] text-[#1A1A1A] sm:text-3xl">{springSummerLookbook.title}</h2>
             <p className="mt-2 max-w-2xl text-sm text-[#1A1A1A]/75 sm:text-base">{springSummerLookbook.subtitle}</p>
 
             <div className="mt-5 space-y-4">
               {lookbookGroupRows.map((row, rowIndex) => {
                 return (
-                  <div key={`lookbook-group-row-${rowIndex}`} className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                  <div key={`lookbook-group-row-${rowIndex}`} className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
                     {row.map((group) => {
                       const groupIndex = displayedLookbookGroups.findIndex((candidate) => candidate.id === group.id)
                       const isExpanded = groupIndex === expandedLookbookGroup
@@ -2917,342 +3359,6 @@ function FullCataloguePage() {
                 )
               })}
             </div>
-          </div>
-
-          {/* FEATURED HERO: SUPERBOND PRIMER */}
-          <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
-            <div className="mx-auto max-w-6xl">
-              <div className="grid items-center gap-8 sm:grid-cols-2">
-                {/* Product Image */}
-                <div className="flex justify-center">
-                  <div className="relative h-96 w-64 rounded-xl border border-white/20 bg-gradient-to-b from-[#2A2A2A] to-[#1A1A1A] p-8 flex items-center justify-center">
-                    <img
-                      src="/gelitup-content/product-images/BASES/SUPERBOND/superbond-primer.jpg"
-                      alt="Superbond Primer - White bottle with black matte cap"
-                      className="h-full w-full object-contain"
-                      onError={(e) => {
-                        e.currentTarget.src = '/logo.png'
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Product Details */}
-                <div>
-                  <div className="inline-flex rounded-full bg-[#D43790] px-4 py-1.5 mb-4">
-                    <span className="text-xs font-extrabold uppercase tracking-[0.12em] text-white">HEMA/TPO FREE</span>
-                  </div>
-                  <h3 className="text-3xl font-extrabold uppercase tracking-[0.08em] text-white sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
-                    Superbond Primer
-                  </h3>
-                  <p className="mt-3 text-base text-white/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                    The Superbond Primer is a professional-grade, non-acid adhesive agent designed to create a powerful chemical bond between the natural nail and the product. It is a vital first step for ensuring long-term wear and preventing lifting.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setShowSuperbondDetails((current) => !current)}
-                    className="mt-5 rounded-lg border border-[#D43790]/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-white transition duration-300 hover:bg-[#D43790]/20"
-                  >
-                    {showSuperbondDetails ? 'Show Less' : 'Learn More'}
-                  </button>
-                  {showSuperbondDetails && (
-                    <>
-                      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-white/70">Key Benefits</p>
-                      <ul className="mt-2 space-y-2 text-sm text-white/75">
-                        <li className="flex items-start gap-3">
-                          <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                          <span>Superior adhesion: acts as double-sided tape, significantly increasing bond strength for gel polish and builder systems.</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                          <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                          <span>Non-acid formula: gentler on the natural nail plate than traditional acid primers while maintaining high performance.</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                          <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                          <span>Rapid ROI: one bottle supports hundreds of services, making it a high-value essential for busy studios.</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                          <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                          <span>Total safety: 100% HEMA and TPO free for a safer technician and client environment.</span>
-                        </li>
-                      </ul>
-                      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-white/70">How to Use / Application</p>
-                      <ol className="mt-2 list-decimal space-y-2 pl-5 text-sm text-white/75">
-                        <li><span className="font-semibold text-white/90">Prep:</span> Perform a dry manicure and thoroughly cleanse the nail with cleanser or alcohol to remove all surface oils.</li>
-                        <li><span className="font-semibold text-white/90">Application:</span> Wipe excess from the brush and apply a very thin, sparing layer to the natural nail plate.</li>
-                        <li><span className="font-semibold text-white/90">Drying:</span> Do not cure. Let it air-dry for about 30 seconds; slight tackiness is normal and required for adhesion.</li>
-                        <li><span className="font-semibold text-white/90">Next Step:</span> Proceed immediately with your chosen GEL.IT.UP by GIUP® Base Coat.</li>
-                      </ol>
-                    </>
-                  )}
-                  <button
-                    onClick={() => {
-                      const qty = Math.max(1, Number(itemQuantities['Superbond Primer (GIUP-MNT-SB01)'] || 1))
-                      setPulseItemKey('Superbond Primer (GIUP-MNT-SB01)')
-                      window.setTimeout(() => {
-                        setPulseItemKey('')
-                      }, 320)
-                      setQuickCart((current) => ({
-                        ...current,
-                        ['Superbond Primer (GIUP-MNT-SB01)']: Number(current['Superbond Primer (GIUP-MNT-SB01)'] || 0) + qty,
-                      }))
-                    }}
-                    className="mt-6 rounded-lg bg-[#D43790] px-8 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-[#C32680]"
-                  >
-                    Add to Studio Order
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* CHAPTER 01: THE INFINITE SPECTRUM */}
-          <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
-            <div className="mx-auto max-w-6xl">
-              <h2 className="heading-on-dark text-3xl font-extrabold uppercase tracking-[0.12em] text-white sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
-                Chapter 01: The Infinite Spectrum
-              </h2>
-              <p className="mt-3 max-w-2xl text-base text-white/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                Explore 761+ professional shades including Core Classics, Specialty Series, Effects, and our flagship GIUP® #1 Range.
-              </p>
-              <div className="mt-6">
-                <button
-                  onClick={() => {
-                    const colorsSection = sections.find((s) => isColorsCategoryName(s.category))
-                    if (colorsSection) {
-                      setActiveCategory(colorsSection.category)
-                      setActiveSubcategory('ALL')
-                      setActiveColorFamily('ALL')
-                    }
-                  }}
-                  className="rounded-lg bg-fuchsia-600 px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
-                >
-                  Explore Spectrum
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {isColorsCategoryName(activeCategory) && categoryDetail}
-
-          {/* CHAPTER 02: STRUCTURAL ENGINEERING */}
-          <div className="space-y-4 py-12 px-4 sm:px-8">
-            <div className="mx-auto max-w-6xl px-4 sm:px-8">
-              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
-                Chapter 02: Structural Engineering
-              </h2>
-              <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                Advanced building and prep systems: Superbond Primer, Superior Bases, 3-in-1 Premium Builders, Crème de la Crème, and MultiMix Synthogel.
-              </p>
-            </div>
-
-             {/* FEATURED HERO: 5-IN-1 SUPERIOR BASE COAT */}
-            {!activeCategory && (
-            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-white px-4 py-12 sm:px-8 sm:py-16">
-              <div className="mx-auto max-w-6xl">
-                <div className="grid items-center gap-8 sm:grid-cols-2">
-                  {/* Product Image */}
-                  <div className="flex justify-center">
-                    <div className="relative h-96 w-64 rounded-xl border border-[#4A4A4A]/30 bg-white p-8 flex items-center justify-center">
-                      <img
-                        src="/gelitup-content/product-images/BASES/5IN1 SUPERIOR BASE/5in1-superior-base.jpg"
-                        alt="5-in-1 Superior Base Coat - Clear self-leveling texture"
-                        className="h-full w-full object-contain"
-                        onError={(e) => {
-                          e.currentTarget.src = '/logo.png'
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Product Details */}
-                  <div>
-                    <h3 className="text-4xl font-extrabold uppercase tracking-[0.08em] text-[#1A1A1A] sm:text-5xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
-                      The All-in-One Foundation
-                    </h3>
-                    <p className="mt-4 text-base text-[#1A1A1A]/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                      The 5-in-1 Superior Base Coat is a high-performance, multi-functional clear foundation designed for maximum efficiency in the professional studio. This versatile formula serves as a base coat, a strength overlay, and a short extension medium, all in one bottle.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setShowFiveInOneDetails((current) => !current)}
-                      className="mt-5 rounded-lg border border-[#D43790]/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-[#1A1A1A] transition duration-300 hover:bg-[#D43790]/10"
-                    >
-                      {showFiveInOneDetails ? 'Show Less' : 'Learn More'}
-                    </button>
-                    {showFiveInOneDetails && (
-                      <>
-                        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-[#1A1A1A]/70">Key Benefits</p>
-                        <ul className="mt-2 space-y-2 text-sm text-[#1A1A1A]/80">
-                          <li className="flex items-start gap-3">
-                            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                            <span>Five-in-one versatility: base coat, nail strengthener, ridge filler, repair gel, and short extension medium.</span>
-                          </li>
-                          <li className="flex items-start gap-3">
-                            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                            <span>Exceptional adhesion: resilient bond that helps prevent lifting and supports 3+ weeks of wear.</span>
-                          </li>
-                          <li className="flex items-start gap-3">
-                            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                            <span>Self-leveling mastery: high-viscosity formula corrects nail imperfections for a flawless color-ready surface.</span>
-                          </li>
-                          <li className="flex items-start gap-3">
-                            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                            <span>Clean science standard: 100% HEMA and TPO free.</span>
-                          </li>
-                        </ul>
-                        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-[#1A1A1A]/70">How to Use / Application</p>
-                        <ol className="mt-2 list-decimal space-y-2 pl-5 text-sm text-[#1A1A1A]/80">
-                          <li><span className="font-semibold text-[#1A1A1A]">Prep:</span> Begin with a standard dry manicure and thoroughly cleanse the nail plate to remove surface oils.</li>
-                          <li><span className="font-semibold text-[#1A1A1A]">Prime:</span> Apply a thin layer of Superbond Primer and allow it to air-dry for 30 seconds.</li>
-                          <li><span className="font-semibold text-[#1A1A1A]">Application:</span> Use the Precision Oval Brush for a thin scrub layer; for strength/ridge filling, add a second slightly thicker bead and let it self-level.</li>
-                          <li><span className="font-semibold text-[#1A1A1A]">Curing:</span> Cure for 60 seconds in LED or 120 seconds in UV.</li>
-                          <li><span className="font-semibold text-[#1A1A1A]">Next Step:</span> Proceed directly with your chosen GEL.IT.UP by GIUP® color polish.</li>
-                        </ol>
-                      </>
-                    )}
-                    <button
-                      onClick={() => {
-                        const qty = Math.max(1, Number(itemQuantities['5-in-1 Superior Base Coat'] || 1))
-                        setPulseItemKey('5-in-1 Superior Base Coat')
-                        window.setTimeout(() => {
-                          setPulseItemKey('')
-                        }, 320)
-                        setQuickCart((current) => ({
-                          ...current,
-                          ['5-in-1 Superior Base Coat']: Number(current['5-in-1 Superior Base Coat'] || 0) + qty,
-                        }))
-                      }}
-                      className="mt-8 rounded-lg bg-[#D43790] px-8 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-[#C32680]"
-                    >
-                      Add to Technical Suite
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            )}
-
-            {/* CATEGORY GRID */}
-            <div className="mx-auto max-w-6xl">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {chapter02Categories.map((categoryName) => {
-                const section = sections.find((s) => s.category === categoryName)
-                if (!section) return null
-                const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
-                const coverImage = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
-                return (
-                  <Fragment key={categoryName}>
-                    <button
-                      onClick={() => {
-                        setActiveCategory(categoryName)
-                        setActiveSubcategory('ALL')
-                      }}
-                      className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
-                    >
-                      <div className="relative h-52 bg-white p-2">
-                        <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" />
-                        <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
-                      </div>
-                      <div className="border-t border-[#4A4A4A]/20 p-3">
-                        <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
-                        <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
-                      </div>
-                    </button>
-                    {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
-                  </Fragment>
-                )
-              })}
-            </div>
-            </div>
-          </div>
-
-          {/* CHAPTER 03: THE PROFESSIONAL TOOLSET */}
-          <div className="space-y-4 py-12 px-4 sm:px-8">
-            <div className="mx-auto max-w-6xl px-4 sm:px-8">
-              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
-                Chapter 03: The Professional Toolset
-              </h2>
-              <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                Precision finishing products, expert hardware, and maintenance tools for flawless studio finishes.
-              </p>
-            </div>
-            <div className="mx-auto max-w-6xl">
-            <div className="grid gap-4 sm:grid-cols-3">
-              {chapter03Categories.map((categoryName) => {
-                const section = sections.find((s) => s.category === categoryName)
-                if (!section) return null
-                const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
-                const coverImage = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
-                return (
-                  <Fragment key={categoryName}>
-                    <button
-                      onClick={() => {
-                        setActiveCategory(categoryName)
-                        setActiveSubcategory('ALL')
-                      }}
-                      className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
-                    >
-                      <div className="relative h-52 bg-white p-2">
-                        <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" />
-                        <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
-                      </div>
-                      <div className="border-t border-[#4A4A4A]/20 p-3">
-                        <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
-                        <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
-                      </div>
-                    </button>
-                    {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
-                  </Fragment>
-                )
-              })}
-            </div>
-            </div>
-          </div>
-
-          {/* CHAPTER 04: ARTISTIC MASTERY & CARE */}
-          <div className="space-y-4 py-12 px-4 sm:px-8">
-            <div className="mx-auto max-w-6xl px-4 sm:px-8">
-              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
-                Chapter 04: Artistic Mastery & Care
-              </h2>
-              <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                Nail art ecosystem and therapeutic formulations for creative details and professional aftercare.
-              </p>
-            </div>
-            <div className="mx-auto max-w-6xl">
-            <div className="grid gap-4 sm:grid-cols-2">
-              {chapter04Categories.map((categoryName) => {
-                const section = sections.find((s) => s.category === categoryName)
-                if (!section) return null
-                const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
-                const coverImage = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
-                return (
-                  <Fragment key={categoryName}>
-                    <button
-                      onClick={() => {
-                        setActiveCategory(categoryName)
-                        setActiveSubcategory('ALL')
-                      }}
-                      className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
-                    >
-                      <div className="relative h-52 bg-white p-2">
-                        <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" />
-                        <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
-                      </div>
-                      <div className="border-t border-[#4A4A4A]/20 p-3">
-                        <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
-                        <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
-                      </div>
-                    </button>
-                    {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
-                  </Fragment>
-                )
-              })}
-            </div>
-            </div>
-
-            {chapter04Categories.includes(activeCategory) && categoryDetail}
           </div>
 
           {/* PERSISTENT FOOTER */}
