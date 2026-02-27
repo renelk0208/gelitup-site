@@ -40,6 +40,7 @@ const EMAIL_WEBHOOK_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 const EMAIL_FROM = import.meta.env.VITE_EMAIL_FROM || 'gelitup.portal@gelitup.com'
 const EMAIL_REPLY_TO = import.meta.env.VITE_EMAIL_REPLY_TO || B2B_EMAIL
 const ORDER_INBOX_EMAIL = import.meta.env.VITE_B2B_ORDER_INBOX || B2B_EMAIL
+const ORDER_BACKUP_INBOX_EMAIL = import.meta.env.VITE_B2B_ORDER_BACKUP_INBOX || 'info@gelitup.com'
 const CONTACT_INBOX_EMAIL = 'info@gelitup.com'
 const PORTAL_INTERNAL_BYPASS_EMAILS = new Set(
   [
@@ -7143,6 +7144,22 @@ function ProductsModule({ moduleView = 'products' }) {
       totalValueEurBase: proformaInvoice.grandTotalEur,
     })
 
+    const backupNotificationResult = ORDER_BACKUP_INBOX_EMAIL && ORDER_BACKUP_INBOX_EMAIL !== ORDER_INBOX_EMAIL
+      ? await sendPortalEmailNotification({
+          eventType: 'b2b_order_backup_copy',
+          to: ORDER_BACKUP_INBOX_EMAIL,
+          subject: `B2B Portal Backup Copy [#${insertedOrder?.id ?? '-'}]`,
+          html: `<p>Backup copy for a new B2B portal order.</p><p><strong>Order ID:</strong> ${insertedOrder?.id ?? '-'}</p><p><strong>Customer Email:</strong> ${userData?.user?.email ?? '-'}</p><p><strong>Total Units:</strong> ${totalUnits}</p>${invoiceBlockHtml}${shippingBlockHtml}<p><strong>Items:</strong> ${checkoutItems.join(', ')}</p>`,
+          orderId: insertedOrder?.id,
+          customerEmail: userData?.user?.email ?? null,
+          totalUnits,
+          items: checkoutItems,
+          invoice,
+          shipping,
+          totalValueEurBase: proformaInvoice.grandTotalEur,
+        })
+      : { ok: true, skipped: true, message: ORDER_BACKUP_INBOX_EMAIL ? 'Backup inbox same as primary inbox.' : 'Backup inbox not configured.' }
+
     const customerEmailTarget = String(invoice.contactEmail || userData?.user?.email || '').trim().toLowerCase()
 
     const customerNotificationResult = customerEmailTarget
@@ -7173,7 +7190,13 @@ function ProductsModule({ moduleView = 'products' }) {
         ? `Customer order copy skipped: ${customerNotificationResult.message}`
         : `Customer order copy failed: ${customerNotificationResult.message}`
 
-    setOrderInboxEmailStatus(`${inboxEmailStatusText} ${customerEmailStatusText}`)
+    const backupEmailStatusText = backupNotificationResult.ok
+      ? `Backup copy sent to ${ORDER_BACKUP_INBOX_EMAIL}.`
+      : backupNotificationResult.skipped
+        ? `Backup copy skipped: ${backupNotificationResult.message}`
+        : `Backup copy failed: ${backupNotificationResult.message}`
+
+    setOrderInboxEmailStatus(`${inboxEmailStatusText} ${customerEmailStatusText} ${backupEmailStatusText}`)
 
     const zohoStatusNote = zohoSyncResult.ok
       ? ` Zoho sync queued successfully (${ZOHO_SYNC_TARGET}).`
@@ -9062,10 +9085,8 @@ function PortalDashboard({ onLogout }) {
       { key: 'overview', label: 'Overview' },
       { key: 'products', label: 'Buy Now' },
       { key: 'orders', label: 'Orders' },
-      { key: 'applications', label: 'Applications' },
-      { key: 'invoices', label: 'Order Intake' },
       { key: 'catalog', label: 'Additional Products' },
-      { key: 'support', label: 'Support' },
+      { key: 'support', label: 'Support & Tracking' },
     ],
     [],
   )
@@ -9325,10 +9346,8 @@ function PortalDashboard({ onLogout }) {
       <div className="space-y-4">
         {activeModule === 'products' || activeModule === 'catalog' ? (
           <ProductsModule moduleView={activeModule} />
-        ) : activeModule === 'orders' ? (
+        ) : activeModule === 'orders' || activeModule === 'support' ? (
           <OrdersModule />
-        ) : activeModule === 'applications' ? (
-          <PendingApplicationsModule />
         ) : (
           <>
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
