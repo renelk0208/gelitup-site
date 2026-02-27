@@ -4540,7 +4540,7 @@ function DistributorsPage() {
   )
 }
 
-function PortalLogin({ onLogin, onResendConfirmation, onCheckApproval, onCreatePassword }) {
+function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
   const navigate = useNavigate()
   const location = useLocation()
   const loginParams = useMemo(() => new URLSearchParams(location.search), [location.search])
@@ -4799,6 +4799,9 @@ function PortalLogin({ onLogin, onResendConfirmation, onCheckApproval, onCreateP
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <NavLink to="/portal/forgot-password" className="font-medium text-slate-700 hover:text-slate-900">
               Forgot password?
+            </NavLink>
+            <NavLink to="/?portal=admin" className="font-medium text-slate-700 hover:text-slate-900">
+              Admin login
             </NavLink>
           </div>
 
@@ -9388,6 +9391,8 @@ function FooterSocialIcon({ platform }) {
 }
 
 function App() {
+  const routerLocation = useLocation()
+  const navigate = useNavigate()
   const [isPortalAuthenticated, setIsPortalAuthenticated] = useState(() => localStorage.getItem('portalAuth') === 'true')
   const [authReady, setAuthReady] = useState(!hasSupabaseConfig)
   const [hasAcceptedCookies, setHasAcceptedCookies] = useState(() => localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY) === 'accepted')
@@ -9451,6 +9456,24 @@ function App() {
       listener.subscription.unsubscribe()
     }
   }, [])
+
+  useEffect(() => {
+    const params = new URLSearchParams(routerLocation.search)
+    const portalTarget = String(params.get('portal') || '').trim().toLowerCase()
+
+    if (!portalTarget) {
+      return
+    }
+
+    if (portalTarget === 'login') {
+      navigate('/portal/login', { replace: true })
+      return
+    }
+
+    if (portalTarget === 'admin') {
+      navigate('/portal/admin-login', { replace: true })
+    }
+  }, [navigate, routerLocation.search])
 
   const handlePortalLogin = async (email, password) => {
     if (hasSupabaseConfig && supabase) {
@@ -10159,11 +10182,11 @@ function App() {
       return { ok: true, applicationStatus: 'pending' }
     }
 
+    const status = String(latestRegistration?.status || '').trim().toLowerCase() || 'pending'
     const explicitType = extractTaggedValue(latestRegistration?.notes, 'APPLICATION_TYPE')
     const isDistributorRegistration = explicitType
       ? explicitType === 'distributor'
       : status === 'pending'
-    const status = String(latestRegistration?.status || '').trim().toLowerCase() || 'pending'
 
     if (!isDistributorRegistration) {
       return { ok: true, applicationStatus: 'approved' }
@@ -10249,7 +10272,6 @@ function App() {
                   element={(
                     <PortalLogin
                       onLogin={handlePortalLogin}
-                      onResendConfirmation={handleResendConfirmation}
                       onCheckApproval={handleCheckApproval}
                       onCreatePassword={handleCreatePortalPassword}
                     />
@@ -10264,6 +10286,8 @@ function App() {
                   element={<PortalAdminLogin onAdminLogin={handleAdminLogin} onAdminCreatePassword={handleCreateAdminPassword} />}
                 />
                 <Route path="/admin-login" element={<Navigate to="/portal/admin-login" replace />} />
+                <Route path="/portal-client-login" element={<Navigate to="/portal/login" replace />} />
+                <Route path="/portal-admin-login" element={<Navigate to="/portal/admin-login" replace />} />
                 <Route path="/portal/register" element={<PortalRegister onRegister={handlePortalRegister} />} />
                 <Route path="/portal/forgot-password" element={<PortalForgotPassword />} />
                 <Route
