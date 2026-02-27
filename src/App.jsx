@@ -4549,7 +4549,7 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
   const [email, setEmail] = useState(prefilledEmail || localStorage.getItem('portalRememberedEmail') || '')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(false)
+  const [rememberMe, setRememberMe] = useState(() => localStorage.getItem('portalRememberMe') === 'true' || Boolean(localStorage.getItem('portalRememberedEmail')))
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isCheckingApproval, setIsCheckingApproval] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -4561,6 +4561,12 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
       setEmail(prefilledEmail)
     }
   }, [prefilledEmail])
+
+  useEffect(() => {
+    setErrorMessage('')
+    setInfoMessage('')
+    setApplicationStatus('')
+  }, [isCreatePasswordMode, location.search])
 
   return (
     <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
@@ -4652,6 +4658,15 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
             setApplicationStatus(result.applicationStatus)
           }
 
+          if (rememberMe) {
+            localStorage.setItem('portalRememberedEmail', String(email || '').trim().toLowerCase())
+            localStorage.setItem('portalRememberMe', 'true')
+          }
+          else {
+            localStorage.removeItem('portalRememberedEmail')
+            localStorage.removeItem('portalRememberMe')
+          }
+
           navigate('/portal/dashboard/overview')
         }}>
           <label className="block text-sm font-medium text-slate-700">
@@ -4663,7 +4678,11 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
               autoComplete="email"
               required
               value={email}
-              onChange={(event) => setEmail(event.target.value.trim().toLowerCase())}
+              onChange={(event) => {
+                setEmail(event.target.value.trim().toLowerCase())
+                setErrorMessage('')
+                setInfoMessage('')
+              }}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
               placeholder="you@company.com"
               readOnly={Boolean(prefilledEmail)}
@@ -4678,7 +4697,11 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
               autoComplete={isCreatePasswordMode ? 'new-password' : 'current-password'}
               required
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={(event) => {
+                setPassword(event.target.value)
+                setErrorMessage('')
+                setInfoMessage('')
+              }}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
               placeholder="••••••••"
             />
@@ -4694,7 +4717,11 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
                 autoComplete="new-password"
                 required
                 value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
+                onChange={(event) => {
+                  setConfirmPassword(event.target.value)
+                  setErrorMessage('')
+                  setInfoMessage('')
+                }}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
                 placeholder="••••••••"
               />
@@ -4836,7 +4863,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
   const [email, setEmail] = useState(prefilledEmail || localStorage.getItem('adminRememberedEmail') || '')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(false)
+  const [rememberMe, setRememberMe] = useState(() => localStorage.getItem('adminRememberMe') === 'true' || Boolean(localStorage.getItem('adminRememberedEmail')))
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [infoMessage, setInfoMessage] = useState('')
@@ -4846,6 +4873,11 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
       setEmail(prefilledEmail)
     }
   }, [prefilledEmail])
+
+  useEffect(() => {
+    setErrorMessage('')
+    setInfoMessage('')
+  }, [isCreatePasswordMode, location.search])
 
   return (
     <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
@@ -4896,6 +4928,15 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
             return
           }
 
+          if (rememberMe) {
+            localStorage.setItem('adminRememberedEmail', String(email || '').trim().toLowerCase())
+            localStorage.setItem('adminRememberMe', 'true')
+          }
+          else {
+            localStorage.removeItem('adminRememberedEmail')
+            localStorage.removeItem('adminRememberMe')
+          }
+
           navigate('/portal/dashboard/applications')
         }}>
           <label className="block text-sm font-medium text-slate-700">
@@ -4907,7 +4948,11 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
               autoComplete="email"
               required
               value={email}
-              onChange={(event) => setEmail(event.target.value.trim().toLowerCase())}
+              onChange={(event) => {
+                setEmail(event.target.value.trim().toLowerCase())
+                setErrorMessage('')
+                setInfoMessage('')
+              }}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
               placeholder="admin@company.com"
               readOnly={Boolean(prefilledEmail)}
@@ -4922,7 +4967,11 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
               autoComplete={isCreatePasswordMode ? 'new-password' : 'current-password'}
               required
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={(event) => {
+                setPassword(event.target.value)
+                setErrorMessage('')
+                setInfoMessage('')
+              }}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
               placeholder="••••••••"
             />
@@ -4938,7 +4987,11 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
                 autoComplete="new-password"
                 required
                 value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
+                onChange={(event) => {
+                  setConfirmPassword(event.target.value)
+                  setErrorMessage('')
+                  setInfoMessage('')
+                }}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
                 placeholder="••••••••"
               />
@@ -5520,9 +5573,57 @@ function PortalRegister({ onRegister }) {
 }
 
 function PortalForgotPassword() {
+  const location = useLocation()
+  const params = useMemo(() => new URLSearchParams(location.search), [location.search])
+  const isAdminReset = params.get('admin') === '1'
+  const prefilledEmail = String(params.get('email') || '').trim().toLowerCase()
+  const [email, setEmail] = useState(prefilledEmail || '')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
+
+  useEffect(() => {
+    if (prefilledEmail) {
+      setEmail(prefilledEmail)
+    }
+  }, [prefilledEmail])
+
+  const handleResetPassword = async (event) => {
+    event.preventDefault()
+    setErrorMessage('')
+    setSuccessMessage('')
+
+    const normalizedEmail = String(email || '').trim().toLowerCase()
+    if (!normalizedEmail) {
+      setErrorMessage('Business email is required.')
+      return
+    }
+
+    if (!hasSupabaseConfig || !supabase) {
+      setErrorMessage('Live auth is not configured.')
+      return
+    }
+
+    setIsSubmitting(true)
+
+    const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+      redirectTo: `${window.location.origin}${isAdminReset ? '/portal/admin-login' : '/portal/login'}`,
+    })
+
+    setIsSubmitting(false)
+
+    if (error) {
+      setErrorMessage(error.message || 'Unable to send reset link.')
+      setSuccessMessage('If this email exists in the portal, a reset link has been issued. Check inbox and spam.')
+      return
+    }
+
+    setSuccessMessage('If this email exists in the portal, a reset link has been issued. Check inbox and spam.')
+  }
+
   return (
     <section className="mx-auto max-w-lg rounded-2xl border border-slate-200 bg-white p-8">
-      <h2 className="text-2xl font-semibold text-slate-900">Reset Password</h2>
+      <h2 className="text-2xl font-semibold text-slate-900">{isAdminReset ? 'Reset Admin Password' : 'Reset Password'}</h2>
       <p className="mt-2 text-sm text-slate-600">
         Enter your business email and we’ll send a password reset link. Manual support:
         {' '}
@@ -5530,28 +5631,33 @@ function PortalForgotPassword() {
           {B2B_EMAIL}
         </a>
       </p>
-      <form className="mt-5 space-y-4" onSubmit={(event) => event.preventDefault()}>
+      <form className="mt-5 space-y-4" onSubmit={handleResetPassword}>
         <label className="block text-sm font-medium text-slate-700">
           Business Email
           <input
             type="email"
             required
+            value={email}
+            onChange={(event) => setEmail(event.target.value.trim().toLowerCase())}
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
             placeholder="you@company.com"
+            readOnly={Boolean(prefilledEmail)}
           />
         </label>
-        <button type="submit" className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
-          Send Reset Link
+        <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
+          {isSubmitting ? 'Sending reset link...' : 'Send Reset Link'}
         </button>
       </form>
+      {errorMessage && <p className="mt-2 text-xs text-rose-600">{errorMessage}</p>}
+      {successMessage && <p className="mt-2 text-xs text-emerald-700">{successMessage}</p>}
       <p className="mt-3 text-xs text-slate-600">
         Need distributor access?{' '}
         <NavLink to="/become-distributor" className="font-semibold text-slate-900 hover:underline">
           Apply now
         </NavLink>
       </p>
-      <NavLink to="/portal/login" className="mt-4 inline-block text-sm font-medium text-slate-600 hover:text-slate-900">
-        Back to Sign In
+      <NavLink to={isAdminReset ? '/portal/admin-login' : '/portal/login'} className="mt-4 inline-block text-sm font-medium text-slate-600 hover:text-slate-900">
+        Back to {isAdminReset ? 'Admin Sign In' : 'Sign In'}
       </NavLink>
     </section>
   )
@@ -5562,6 +5668,13 @@ function ProductsModule({ moduleView = 'products' }) {
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
   const [isLoadingFeed, setIsLoadingFeed] = useState(false)
+                {' • '}
+                <NavLink
+                  to={email ? `/portal/forgot-password?admin=1&email=${encodeURIComponent(email)}` : '/portal/forgot-password?admin=1'}
+                  className="font-semibold text-slate-900 hover:underline"
+                >
+                  Forgot password
+                </NavLink>
   const [feedMessage, setFeedMessage] = useState('Live product feed not loaded yet.')
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
   const [checkoutMessage, setCheckoutMessage] = useState('')
