@@ -9475,7 +9475,13 @@ function App() {
 
         const latestRegistration = registrationRows?.[0]
         const status = String(latestRegistration?.status || '').trim().toLowerCase()
-        const isDistributorRegistration = isDistributorSubmission(latestRegistration || {})
+        const normalizedStatus = String(status || '').trim().toLowerCase()
+        const inferredDistributorFromStatus = normalizedStatus === 'pending'
+        const inferredOrderRequestFromStatus = normalizedStatus === 'submitted'
+        const explicitType = extractTaggedValue(latestRegistration?.notes, 'APPLICATION_TYPE')
+        const isDistributorRegistration = explicitType
+          ? explicitType === 'distributor'
+          : inferredDistributorFromStatus && !inferredOrderRequestFromStatus
 
         if (!latestRegistration) {
           await supabase.auth.signOut()
@@ -9754,7 +9760,7 @@ function App() {
     if (canSignInNow) {
       const { data: registrationRows, error: registrationError } = await supabase
         .from(registrationsTable)
-        .select('status, application_type, notes')
+        .select('status, notes')
         .eq('contact_email', normalizedEmail)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -9770,8 +9776,11 @@ function App() {
         return { ok: false, message: 'No B2B registration found for this account email.' }
       }
 
-      const isDistributorRegistration = isDistributorSubmission(latestRegistration)
       const registrationStatus = String(latestRegistration?.status || '').trim().toLowerCase()
+      const explicitType = extractTaggedValue(latestRegistration?.notes, 'APPLICATION_TYPE')
+      const isDistributorRegistration = explicitType
+        ? explicitType === 'distributor'
+        : registrationStatus === 'pending'
 
       if (isDistributorRegistration && requireApproval && registrationStatus !== 'approved') {
         await supabase.auth.signOut()
@@ -10111,7 +10120,7 @@ function App() {
 
     const { data: registrationRows, error } = await supabase
       .from(registrationsTable)
-      .select('status, application_type, notes')
+      .select('status, notes')
       .eq('contact_email', normalizedEmail)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -10125,7 +10134,10 @@ function App() {
       return { ok: true, applicationStatus: 'pending' }
     }
 
-    const isDistributorRegistration = isDistributorSubmission(latestRegistration)
+    const explicitType = extractTaggedValue(latestRegistration?.notes, 'APPLICATION_TYPE')
+    const isDistributorRegistration = explicitType
+      ? explicitType === 'distributor'
+      : status === 'pending'
     const status = String(latestRegistration?.status || '').trim().toLowerCase() || 'pending'
 
     if (!isDistributorRegistration) {
