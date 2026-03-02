@@ -3274,77 +3274,101 @@ function FullCataloguePage() {
             {chapter04Categories.includes(activeCategory) && categoryDetail}
           </div>
 
-          <div className="mx-auto max-w-6xl rounded-2xl border border-[#4A4A4A]/25 bg-white p-4 sm:p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">NEW ADDITIONS</p>
-            <h2 className="mt-1 text-xl font-extrabold uppercase tracking-[0.08em] text-[#1A1A1A]">{springSummerLookbook.title}</h2>
-            <p className="mt-1 text-sm text-[#1A1A1A]/60">{springSummerLookbook.subtitle}</p>
-
-            {displayedLookbookGroups.map((group) => {
-              const pages = Array.isArray(group?.pages) ? group.pages : []
-              if (!pages.length) return null
-              const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
-              const page = pages[selectedPageIndex]
-              const pageType = String(page?.mediaType || '').toLowerCase()
-              return (
-                <div key={group.id} className="mt-3">
-                  {/* Main stage — compact fixed height */}
-                  <div className="relative overflow-hidden rounded-xl bg-[#1A1A1A]" style={{ height: '300px' }}>
-                    <div className="flex h-full w-full items-center justify-center">
-                      {pageType === 'video'
-                        ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-auto max-w-full object-contain" autoPlay muted playsInline preload="metadata" />
-                        : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-auto max-w-full object-contain" loading="lazy" />}
-                    </div>
-
-                    {/* Prev */}
-                    <button
-                      type="button"
-                      onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-xl text-white transition hover:bg-black/75"
-                    >‹</button>
-                    {/* Next */}
-                    <button
-                      type="button"
-                      onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-xl text-white transition hover:bg-black/75"
-                    >›</button>
-
-                    {/* Dot indicators */}
-                    <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
-                      {pages.map((_, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))}
-                          className={`h-1.5 rounded-full transition-all duration-300 ${idx === selectedPageIndex ? 'w-5 bg-[#D43790]' : 'w-1.5 bg-white/50'}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Thumbnail filmstrip */}
-                  <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    {pages.map((p, idx) => {
-                      const mt = String(p?.mediaType || '').toLowerCase()
-                      const isActive = idx === selectedPageIndex
-                      return (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))}
-                          className={`shrink-0 overflow-hidden rounded-md border transition ${isActive ? 'border-[#D43790]' : 'border-[#4A4A4A]/20 hover:border-[#D43790]/50'}`}
-                        >
-                          <div className="h-14 w-9 bg-[#F0F0F0]">
-                            {mt === 'video'
-                              ? <video src={p.imageUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" />
-                              : <img src={p.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}
-                          </div>
-                        </button>
-                      )
-                    })}
-                  </div>
+          <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl border border-[#4A4A4A]/25">
+            <div className="grid lg:grid-cols-2">
+              {/* LEFT: Cloud Dancer story */}
+              <div className="flex flex-col justify-center bg-[#1A1A1A] px-8 py-12 sm:px-12">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Additions · 2026</p>
+                <h2 className="mt-3 text-3xl font-extrabold uppercase leading-tight tracking-[0.06em] text-white sm:text-4xl">
+                  Cloud Dancer<br /><span className="text-[#D43790]">The Series</span>
+                </h2>
+                <div className="mt-3 h-px w-10 bg-[#D43790]/60" />
+                <p className="mt-5 text-sm leading-relaxed text-white/65">
+                  {HOME_CLOUD_DANCER_DEFAULT.introText}
+                </p>
+                <p className="mt-4 text-sm leading-relaxed text-white/40">
+                  22 illuminated shades — each one chosen to complement every skin tone and every season. The complete Cloud Dancer collection is available exclusively through our professional portal.
+                </p>
+                <div className="mt-8">
+                  <NavLink
+                    to="/portal/login?mode=create-password"
+                    className="inline-block rounded-lg bg-[#D43790] px-7 py-3 text-sm font-bold uppercase tracking-[0.12em] text-white transition duration-300 hover:bg-[#b02d78]"
+                  >
+                    Add to Your Collection
+                  </NavLink>
                 </div>
-              )
-            })}
+              </div>
+
+              {/* RIGHT: 9:16 portrait carousel */}
+              <div className="flex flex-col items-center justify-center bg-[#0F0F0F] p-6 sm:p-8">
+                {displayedLookbookGroups.map((group) => {
+                  const pages = Array.isArray(group?.pages) ? group.pages : []
+                  if (!pages.length) return null
+                  const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
+                  const page = pages[selectedPageIndex]
+                  const pageType = String(page?.mediaType || '').toLowerCase()
+                  return (
+                    <div key={group.id} className="w-full max-w-[240px] sm:max-w-[260px]">
+                      {/* Portrait stage — 9:16 */}
+                      <div className="relative overflow-hidden rounded-2xl bg-[#1A1A1A]" style={{ aspectRatio: '9/16' }}>
+                        <div className="flex h-full w-full items-center justify-center">
+                          {pageType === 'video'
+                            ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-full object-cover" autoPlay muted playsInline preload="metadata" />
+                            : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-cover" loading="lazy" />}
+                        </div>
+
+                        {/* Prev */}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-xl text-white transition hover:bg-black/75"
+                        >‹</button>
+                        {/* Next */}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-xl text-white transition hover:bg-black/75"
+                        >›</button>
+
+                        {/* Dot indicators */}
+                        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
+                          {pages.map((_, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))}
+                              className={`h-1.5 rounded-full transition-all duration-300 ${idx === selectedPageIndex ? 'w-5 bg-[#D43790]' : 'w-1.5 bg-white/40'}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Thumbnail filmstrip */}
+                      <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                        {pages.map((p, idx) => {
+                          const mt = String(p?.mediaType || '').toLowerCase()
+                          const isActive = idx === selectedPageIndex
+                          return (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))}
+                              className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}
+                            >
+                              <div className="h-14 w-9 bg-[#222]">
+                                {mt === 'video'
+                                  ? <video src={p.imageUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" />
+                                  : <img src={p.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}
+                              </div>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           </div>
 
           {/* PERSISTENT FOOTER */}
