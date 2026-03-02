@@ -2161,8 +2161,15 @@ function FullCataloguePage() {
   const [springSummerLookbook, setSpringSummerLookbook] = useState(SPRING_SUMMER_LOOKBOOK_DEFAULT)
   const [expandedLookbookGroup, setExpandedLookbookGroup] = useState(0)
   const [selectedLookbookPageByGroup, setSelectedLookbookPageByGroup] = useState({})
+  const [showBackToTop, setShowBackToTop] = useState(false)
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
   const virtualContainerRef = useRef(null)
+
+  useEffect(() => {
+    const onWindowScroll = () => setShowBackToTop(window.scrollY > 400)
+    window.addEventListener('scroll', onWindowScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onWindowScroll)
+  }, [])
 
   useEffect(() => {
     let mounted = true
@@ -10906,6 +10913,34 @@ function App() {
 
         <p className="border-t border-white/15 pt-3 text-white/55">© 2026 GEL.IT.UP by GIUP®</p>
       </footer>
+
+      {/* Floating social + back-to-top */}
+      <div className="fixed bottom-20 right-3 z-50 flex flex-col items-center gap-2 md:bottom-6 md:right-4">
+        {FOOTER_SOCIAL_LINKS.filter(s => ['tiktok','instagram','facebook'].includes(s.key)).map((social) => (
+          <a
+            key={social.key}
+            href={social.href}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={social.label}
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-black/75 text-white/80 shadow-lg backdrop-blur-[8px] transition duration-300 hover:border-fuchsia-400/60 hover:bg-fuchsia-950/70 hover:text-fuchsia-300"
+          >
+            <FooterSocialIcon platform={social.key} />
+          </a>
+        ))}
+        <button
+          type="button"
+          aria-label="Back to top"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className={`flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-black/75 text-white/70 shadow-lg backdrop-blur-[8px] transition duration-500 hover:border-fuchsia-400/60 hover:bg-fuchsia-950/70 hover:text-fuchsia-300 ${
+            showBackToTop ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
+          }`}
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
+            <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      </div>
 
       <MobileNav />
       <PWABadge />
