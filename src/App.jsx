@@ -2649,6 +2649,15 @@ function FullCataloguePage() {
     })
   }, [])
 
+  const scrollToCategoryDetail = useCallback(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const el = document.getElementById('catalogue-category-detail')
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    })
+  }, [])
+
   const openCatalogueCategory = useCallback((categoryName = '', subcategoryName = 'ALL') => {
     if (!categoryName) return
     setActiveCategory(categoryName)
@@ -2805,7 +2814,7 @@ function FullCataloguePage() {
 
   const categoryDetail = activeCategory
     ? (
-      <div className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5">
+      <div id="catalogue-category-detail" className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5 scroll-mt-28">
         <div className="mb-3">
           <button
             onClick={() => {
@@ -2835,7 +2844,7 @@ function FullCataloguePage() {
             return (
               <button
                 key={`subcategory-${subcategory}`}
-                onClick={() => setActiveSubcategory(subcategory)}
+                onClick={() => { setActiveSubcategory(subcategory); scrollToCategoryDetail() }}
                 className={`rounded-[12px] border px-3 py-1.5 text-xs font-semibold transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-[#4A4A4A]/35 bg-white text-black/75 hover:border-fuchsia-500'}`}
               >
                 {formatSubcategoryDisplayName(subcategory)}
@@ -2938,7 +2947,7 @@ function FullCataloguePage() {
                     return (
                       <button
                         key={family.key}
-                        onClick={() => setActiveColorFamily(family.key)}
+                        onClick={() => { setActiveColorFamily(family.key); scrollToCategoryDetail() }}
                         className={`inline-flex items-center gap-2 rounded-[12px] border px-2.5 py-1.5 text-xs transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-[#4A4A4A]/35 bg-white text-black/70 hover:border-fuchsia-500'}`}
                       >
                         <span className={`h-3 w-3 rounded-full ${family.swatchClass}`} />
