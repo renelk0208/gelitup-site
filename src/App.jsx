@@ -707,7 +707,7 @@ const navItems = [
   { to: '/distributor-packages', label: 'Distribution Options' },
   { to: '/full-catalogue', label: 'Our Products' },
   { to: '/distributors', label: 'Distributors' },
-  { to: '/application-services', label: 'Application Services' },
+  { to: '/become-distributor', label: 'B2B / Distribution Registration' },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -3294,7 +3294,7 @@ function FullCataloguePage() {
                 </p>
                 <div className="mt-8">
                   <NavLink
-                    to="/portal/login?mode=create-password"
+                    to="/become-distributor"
                     className="inline-block rounded-lg bg-[#D43790] px-7 py-3 text-sm font-bold uppercase tracking-[0.12em] text-white transition duration-300 hover:bg-[#b02d78]"
                   >
                     Add to Your Collection
