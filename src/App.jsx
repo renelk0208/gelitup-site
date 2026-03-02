@@ -1819,7 +1819,6 @@ function sampleImageColorFamily(imageUrl) {
 
   return new Promise((resolve) => {
     const img = new Image()
-    img.crossOrigin = 'anonymous'
     img.onload = () => {
       try {
         const SIZE = 24
@@ -2420,10 +2419,11 @@ function FullCataloguePage() {
   }, [activeSection, activeSubcategory])
 
   const isColorsCategory = isColorsCategoryName(activeSection?.category)
+  const isSolidGelPolish = isColorsCategory && normalizeCatalogueToken(activeSubcategory) === 'SOLID GEL POLISH'
 
   // ── Pixel-sample every product image when browsing colours ─────────────────
   useEffect(() => {
-    if (!isColorsCategory || !baseItems.length) return
+    if (!isSolidGelPolish || !baseItems.length) return
     let cancelled = false
     const BATCH = 20
     const toSample = [...new Set(baseItems.map((item) => item.imageUrl).filter(Boolean))]
@@ -2459,7 +2459,7 @@ function FullCataloguePage() {
     }
     processBatches()
     return () => { cancelled = true }
-  }, [isColorsCategory, baseItems])
+  }, [isSolidGelPolish, baseItems])
   // ───────────────────────────────────────────────────────────────────────────
   const lookbookGroups = useMemo(() => {
     const groups = Array.isArray(springSummerLookbook?.groups) ? springSummerLookbook.groups : []
@@ -2504,7 +2504,7 @@ function FullCataloguePage() {
       // (nudes, whites, greys whose colour is better described by name than by hue)
       pixelFamilies[item.imageUrl] || item.colorFamilyKey
 
-    const colorFiltered = (!isColorsCategory || activeColorFamily === 'ALL')
+    const colorFiltered = (!isSolidGelPolish || activeColorFamily === 'ALL')
       ? baseItems
       : baseItems.filter((item) => resolveFamily(item) === activeColorFamily)
 
@@ -2519,7 +2519,7 @@ function FullCataloguePage() {
         || subcategoryToken.includes(normalizedSearch)
         || pathToken.includes(normalizedSearch)
     })
-  }, [activeColorFamily, baseItems, isColorsCategory, pixelFamilies, searchQuery])
+  }, [activeColorFamily, baseItems, isSolidGelPolish, pixelFamilies, searchQuery])
 
   useEffect(() => {
     setScrollTop(0)
@@ -2991,7 +2991,7 @@ function FullCataloguePage() {
               />
             </div>
 
-            {isColorsCategory && (
+            {isSolidGelPolish && (
               <div className="mt-3 rounded-[12px] border border-[#4A4A4A]/30 bg-black/[0.02] p-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/55">Quick Filter</p>
                 <div className="mt-2 flex flex-wrap gap-2">
