@@ -14,7 +14,7 @@
 
 import { readFileSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
-import * as XLSX from 'xlsx'
+import XLSX from 'xlsx'
 
 const [,, inputPath] = process.argv
 
