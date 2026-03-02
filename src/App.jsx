@@ -1728,8 +1728,11 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
         // e.g., CREME DE LA CREME/item.jpg → "CREME DE LA CREME"
         subcategory = sourceCategory
       }
+    } else if (category === 'COLORS' && segments.length > 3) {
+      // Deep path: COLORS/SOLID GEL POLISH/Red/img.jpg → subcategory='SOLID GEL POLISH', family stored on item
+      subcategory = segments[1]
     } else if (category === 'COLORS' && segments.length > 2) {
-      // For COLORS, use only the last folder name to avoid "CAT EYE / CAT EYE"
+      // Standard: COLORS/CAT EYE/img.jpg → subcategory='CAT EYE'
       subcategory = segments[segments.length - 2] || 'General'
     } else if (segments.length > 2) {
       // For other categories with deep nesting, join middle segments
@@ -1745,6 +1748,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     subcategoryItems.push({
       imageUrl: imagePath,
       name: formatCatalogueItemName(afterRoot),
+      colorFamily: (category === 'COLORS' && segments.length > 3) ? segments[2] : undefined,
     })
 
     categoryBucket.set(subcategory, subcategoryItems)
@@ -1768,14 +1772,14 @@ const COLOR_FAMILY_FILTERS = [
   { key: 'ALL', label: 'All', swatchClass: 'bg-slate-300' },
   { key: 'RED', label: 'Red', swatchClass: 'bg-red-500' },
   { key: 'PINK', label: 'Pink', swatchClass: 'bg-pink-400' },
-  { key: 'NUDE', label: 'Nude', swatchClass: 'bg-amber-200' },
-  { key: 'ORANGE', label: 'Orange', swatchClass: 'bg-orange-400' },
+  { key: 'CORAL ORANGE', label: 'Coral Orange', swatchClass: 'bg-orange-400' },
   { key: 'YELLOW', label: 'Yellow', swatchClass: 'bg-yellow-300' },
   { key: 'GREEN', label: 'Green', swatchClass: 'bg-emerald-500' },
   { key: 'BLUE', label: 'Blue', swatchClass: 'bg-blue-500' },
   { key: 'PURPLE', label: 'Purple', swatchClass: 'bg-violet-500' },
   { key: 'BROWN', label: 'Brown', swatchClass: 'bg-amber-700' },
   { key: 'GREY', label: 'Grey', swatchClass: 'bg-slate-500' },
+  { key: 'NEON', label: 'Neon', swatchClass: 'bg-lime-400' },
   { key: 'BLACK', label: 'Black', swatchClass: 'bg-black' },
   { key: 'WHITE', label: 'White', swatchClass: 'bg-white border border-slate-300' },
 ]
@@ -2407,11 +2411,12 @@ function FullCataloguePage() {
 
   const filteredItems = useMemo(() => {
     const resolveFamily = (item) => {
-      // JSON lookup (from manually-curated CSV) is the primary source for Solid Gel Polish.
-      // Extract the SKU from the image filename (e.g. "/...GIUP-042.jpg" → "GIUP-042").
+      // Primary: path-derived colour family from physical sub-folder
+      if (item.colorFamily) return normalizeCatalogueToken(item.colorFamily)
+      // Secondary: manually-curated JSON lookup
       const urlParts = (item.imageUrl || '').split('/')
       const filename = urlParts[urlParts.length - 1] || ''
-      const sku = filename.replace(/\.[^.]+$/, '') // strip extension
+      const sku = filename.replace(/\.[^.]+$/, '')
       const jsonFamily = solidGelColourFamilies[sku]
       if (jsonFamily) return jsonFamily
       // Fallback: name keyword matching
@@ -2910,7 +2915,7 @@ function FullCataloguePage() {
               />
             </div>
 
-            {isSolidGelPolish && Object.keys(solidGelColourFamilies).length > 0 && (
+            {isSolidGelPolish && (
               <div className="mt-3 rounded-[12px] border border-[#4A4A4A]/30 bg-black/[0.02] p-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/55">Quick Filter</p>
                 <div className="mt-2 flex flex-wrap gap-2">
