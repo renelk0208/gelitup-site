@@ -8612,16 +8612,17 @@ function ProductsModule({ moduleView = 'products' }) {
                 <div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                   {catProducts.map((product) => {
                     const selected = selectedCodes.includes(product.code)
+                    const qty = itemQtys[product.code] || 1
                     return (
                       <div
                         key={product.code}
-                        className={`rounded-xl border p-2 transition ${
-                          selected ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-slate-200 bg-white text-slate-800 hover:border-fuchsia-300'
+                        className={`flex flex-col rounded-xl border transition ${
+                          selected ? 'border-fuchsia-500 bg-white shadow-md shadow-fuchsia-100' : 'border-slate-200 bg-white hover:border-fuchsia-300 hover:shadow-sm'
                         }`}
                       >
-                        {/* Image — click to zoom */}
+                        {/* Image — click to zoom, selected ring */}
                         <div
-                          className="relative h-20 w-full cursor-zoom-in overflow-hidden rounded-md border border-slate-100"
+                          className={`relative h-24 w-full cursor-zoom-in overflow-hidden rounded-t-xl ${selected ? 'ring-2 ring-fuchsia-500 ring-offset-0' : ''}`}
                           title="Click to enlarge"
                           onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}
                         >
@@ -8629,34 +8630,53 @@ function ProductsModule({ moduleView = 'products' }) {
                           {product.imageUrl && (
                             <img src={product.imageUrl} alt={product.name} loading="lazy" className="relative z-10 h-full w-full object-cover" />
                           )}
-                        </div>
-                        {/* Name + price — click to select */}
-                        <button className="mt-1.5 w-full text-left" onClick={() => toggleSelection(product.code)}>
-                          <p className="text-[11px] font-semibold leading-tight">{product.name}</p>
-                          {product.price != null && (
-                            <p className={`text-[11px] font-bold ${selected ? 'text-fuchsia-200' : 'text-fuchsia-700'}`}>
-                              €{Number(product.price).toFixed(2)}
-                            </p>
+                          {selected && (
+                            <span className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-fuchsia-600 text-[10px] font-bold text-white shadow">
+                              {qty}
+                            </span>
                           )}
-                        </button>
-                        {/* Qty controls when selected */}
-                        {selected && (
-                          <div className="mt-1.5 flex items-center justify-between">
+                        </div>
+
+                        {/* Name + price */}
+                        <div className="flex flex-1 flex-col gap-0.5 px-2 pt-1.5 pb-1">
+                          <p className="text-[11px] font-semibold leading-tight text-slate-900 line-clamp-2">{product.name}</p>
+                          {product.price != null && (
+                            <p className="text-[11px] font-bold text-fuchsia-700">€{Number(product.price).toFixed(2)}</p>
+                          )}
+                        </div>
+
+                        {/* Action row */}
+                        {selected ? (
+                          /* Qty stepper + remove */
+                          <div className="flex items-center justify-between gap-1 border-t border-fuchsia-100 px-2 py-1.5">
                             <div className="flex items-center gap-0.5">
                               <button
-                                onClick={(e) => { e.stopPropagation(); const q = (itemQtys[product.code] || 1) - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(prev => ({...prev, [product.code]: q})) }}
-                                className="flex h-5 w-5 items-center justify-center rounded bg-white/20 text-sm font-bold leading-none hover:bg-white/30"
+                                onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(prev => ({...prev, [product.code]: q})) }}
+                                className="flex h-6 w-6 items-center justify-center rounded-full border border-fuchsia-200 bg-fuchsia-50 text-sm font-bold text-fuchsia-700 hover:bg-fuchsia-100"
                               >−</button>
-                              <span className="w-6 text-center text-xs font-bold">{itemQtys[product.code] || 1}</span>
+                              <span className="w-6 text-center text-xs font-bold text-slate-800">{qty}</span>
                               <button
-                                onClick={(e) => { e.stopPropagation(); setItemQtys(prev => ({...prev, [product.code]: (prev[product.code] || 1) + 1})) }}
-                                className="flex h-5 w-5 items-center justify-center rounded bg-white/20 text-sm font-bold leading-none hover:bg-white/30"
+                                onClick={() => setItemQtys(prev => ({...prev, [product.code]: qty + 1}))}
+                                className="flex h-6 w-6 items-center justify-center rounded-full border border-fuchsia-200 bg-fuchsia-50 text-sm font-bold text-fuchsia-700 hover:bg-fuchsia-100"
                               >+</button>
                             </div>
-                            {product.price != null && (itemQtys[product.code] || 1) > 1 && (
-                              <span className="text-[10px] font-bold text-fuchsia-100">€{(Number(product.price) * (itemQtys[product.code] || 1)).toFixed(2)}</span>
+                            {product.price != null && qty > 1 && (
+                              <span className="text-[10px] font-semibold text-fuchsia-600">€{(Number(product.price) * qty).toFixed(2)}</span>
                             )}
+                            <button
+                              onClick={() => toggleSelection(product.code)}
+                              className="ml-auto flex h-5 w-5 items-center justify-center rounded-full text-slate-300 hover:bg-rose-50 hover:text-rose-500"
+                              title="Remove"
+                            >×</button>
                           </div>
+                        ) : (
+                          /* Add to cart button */
+                          <button
+                            onClick={() => toggleSelection(product.code)}
+                            className="mt-auto w-full rounded-b-xl border-t border-slate-100 bg-slate-50 py-1.5 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-600 hover:text-white transition"
+                          >
+                            + Add to cart
+                          </button>
                         )}
                       </div>
                     )
