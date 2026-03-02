@@ -10783,7 +10783,7 @@ function App() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-3 py-2.5 md:px-6 md:py-3">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-16 items-center justify-center rounded-lg border border-white/25 bg-white/95 px-2 md:h-11 md:w-[72px]">
-              <img src={appLogo} alt="Gelitup logo" className="max-h-6 w-auto object-contain md:max-h-7" />
+              <img src={appLogo} alt="GEL.IT.UP by GIUP® logo" className="max-h-6 w-auto object-contain md:max-h-7" />
             </div>
             <div>
               <p className="text-xs font-black uppercase leading-none tracking-[0.07em] text-white md:text-sm md:tracking-[0.08em]">GEL.IT.UP</p>
