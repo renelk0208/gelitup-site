@@ -5758,6 +5758,8 @@ function ProductsModule({ moduleView = 'products' }) {
   const [packageCartItems, setPackageCartItems] = useState([])
   const [podCatalog, setPodCatalog] = useState({ pod_1: [], pod_2: [], pod_3: [], pod_4: [] })
   const [localImageMap, setLocalImageMap] = useState(() => new Map())
+  // priceMap: normalised-key → { name, price }  (loaded from b2b-price-list.json)
+  const [priceMap, setPriceMap] = useState(() => new Map())
   const [shippingMetadata, setShippingMetadata] = useState(SHIPPING_RULES)
   const [shippingMetadataStatus, setShippingMetadataStatus] = useState('Using embedded shipping metadata rules.')
   const isDistributorRole = useMemo(() => String(b2bUserRole || '').trim().toLowerCase().includes('distributor'), [b2bUserRole])
@@ -6225,6 +6227,32 @@ function ProductsModule({ moduleView = 'products' }) {
     }
   }, [])
 
+  // Load B2B price list (public/gelitup-content/b2b-price-list.json)
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      try {
+        const res = await fetch('/gelitup-content/b2b-price-list.json')
+        if (!res.ok) return
+        const payload = await res.json()
+        const items = Array.isArray(payload?.items) ? payload.items : []
+        const map = new Map()
+        for (const { name, sku, price } of items) {
+          const entry = { name: String(name || '').trim(), price }
+          // Index by normalised SKU and also by normalised name so we can
+          // match against image-map keys which may not have a clean SKU.
+          const skuKey = normalizeSkuCode(sku)
+          const nameKey = normalizeProductName(name)
+          if (skuKey && !map.has(skuKey)) map.set(skuKey, entry)
+          if (nameKey && !map.has(nameKey)) map.set(nameKey, entry)
+        }
+        if (mounted) setPriceMap(map)
+      } catch { /* price list is optional */ }
+    }
+    load()
+    return () => { mounted = false }
+  }, [])
+
   useEffect(() => {
     let mounted = true
 
@@ -6336,17 +6364,26 @@ function ProductsModule({ moduleView = 'products' }) {
               : payload.items || payload.products || payload.data || []
           })()
           : await (async () => {
-            // Load directly from the local catalogue (package-pods.json)
-            const response = await fetch('/gelitup-content/package-pods.json')
-            if (!response.ok) throw new Error('Could not load local catalogue')
-            const payload = await response.json()
-            const allPods = [
-              ...(Array.isArray(payload.pod_1) ? payload.pod_1 : []),
-              ...(Array.isArray(payload.pod_2) ? payload.pod_2 : []),
-              ...(Array.isArray(payload.pod_3) ? payload.pod_3 : []),
-              ...(Array.isArray(payload.pod_4) ? payload.pod_4 : []),
-            ]
-            return allPods
+            // Mirror the public catalogue exactly — load from product-image-map.json
+            // so every product has the same category, name and image as shown on the site.
+            const response = await fetch('/gelitup-content/product-image-map.json')
+            if (!response.ok) throw new Error('Could not load product image map')
+            const mapPayload = await response.json()
+            const sections = buildCatalogueSectionsFromImageMap(mapPayload)
+            return sections.flatMap((section) =>
+              section.subcategories.flatMap((sub) =>
+                sub.items.map((item) => ({
+                  // For COLORS use the subcategory (SOLID GEL POLISH, CAT EYE, etc.)
+                  // For all other top-level categories use the section name (BRUSHES, TOOLS, etc.)
+                  category: section.category === 'COLORS' ? sub.name : section.category,
+                  code: item.name,
+                  sku: item.name,
+                  name: item.name,
+                  imageUrl: item.imageUrl,
+                  preview: null,
+                }))
+              )
+            )
           })()
 
         const normalized = sourceItems
@@ -6355,13 +6392,21 @@ function ProductsModule({ moduleView = 'products' }) {
             const sku = item.sku || code
             const categoryName = item.category || item.family || item.group || item.type || PRODUCT_CATEGORIES[index % PRODUCT_CATEGORIES.length]
             const preview = item.preview || item.hex || item.hex_color || item.color || `hsl(${(index * 17) % 360} 82% 56%)`
-            const name = item.name || item.title || code
+            const rawName = item.name || item.title || code
             const description = item.description || item.short_description || ''
             const mapImageUrl = localImageMap.get(normalizeSkuCode(sku))
               || localImageMap.get(normalizeSkuCode(code))
-              || localImageMap.get(normalizeProductName(name))
+              || localImageMap.get(normalizeProductName(rawName))
               || null
             const imageUrl = mapImageUrl || item.image_url || item.imageUrl || item?.images?.[0]?.src || null
+
+            // Merge price-list data (name override + price)
+            const priceEntry = priceMap.get(normalizeSkuCode(sku))
+              || priceMap.get(normalizeSkuCode(code))
+              || priceMap.get(normalizeProductName(rawName))
+              || null
+            const name = priceEntry?.name || rawName
+            const price = priceEntry?.price ?? null
 
             return {
               code,
@@ -6371,6 +6416,7 @@ function ProductsModule({ moduleView = 'products' }) {
               category: categoryName,
               preview,
               imageUrl,
+              price,
             }
           })
           .filter((item) => Boolean(item.code))
@@ -6402,7 +6448,7 @@ function ProductsModule({ moduleView = 'products' }) {
     return () => {
       isMounted = false
     }
-  }, [localImageMap, productsTable])
+  }, [localImageMap, priceMap, productsTable])
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -8171,6 +8217,11 @@ function ProductsModule({ moduleView = 'products' }) {
                   {product.description || 'No description'}
                 </p>
                 <p className={`text-[11px] ${selected ? 'text-slate-300' : 'text-slate-500'}`}>{product.category}</p>
+                {product.price != null && (
+                  <p className={`mt-1 text-[11px] font-bold ${selected ? 'text-fuchsia-200' : 'text-fuchsia-700'}`}>
+                    €{Number(product.price).toFixed(2)}
+                  </p>
+                )}
                 {silverFreeGuarantee && (
                   <p className={`mt-1 text-[10px] font-semibold uppercase tracking-[0.06em] ${selected ? 'text-fuchsia-200' : 'text-fuchsia-600'}`}>
                     HEMA-FREE | TPO-FREE | CI 77820-FREE
