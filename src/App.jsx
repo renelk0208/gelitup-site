@@ -1837,14 +1837,20 @@ function formatSubcategoryDisplayName(subcategoryName = '') {
   // Color subcategories
   if (normalized === 'RONE') return 'GIUP1'
   if (normalized === 'CAT EYE') return 'Cat Eye'
+  if (normalized === 'FRENCH') return 'French'
+  if (normalized === 'GLITTERS') return 'Glitters'
   if (normalized === 'JELLY') return 'Jelly'
   if (normalized === 'METALLIC COLLECTION') return 'Metallic Collection'
   if (normalized === 'NEW YORK') return 'New York'
+  if (normalized === 'NUDE') return 'Nude'
   if (normalized === 'PMA') return 'PMA'
   if (normalized === 'SHIMMER COLORS') return 'Shimmer Colors'
+  if (normalized === 'SNOWFLAKE') return 'Snowflake'
   if (normalized === 'SOLID GEL POLISH') return 'Solid Gel Polish'
   if (normalized === 'SPIX & SPEX' || normalized === 'SPIX  SPEX') return 'Spix & Spex'
+  if (normalized === 'THERMO') return 'Thermo'
   if (normalized === 'TUTTI FRUTTI GLASS') return 'Tutti Frutti Glass'
+  if (normalized === 'GLASS EFFECT') return 'Glass Effect'
   
   // Builder Gel Systems subcategories
   if (normalized === '3INI BUILDER') return '3-in-1 Builder Gel'
@@ -1886,7 +1892,11 @@ function formatSubcategoryDisplayName(subcategoryName = '') {
   if (normalized === 'PROFESSIONAL') return 'Professional'
   if (normalized === 'AUTHORITY') return 'Authority'
   
-  return toTitleCaseLabel(subcategoryName)
+  // Strip image file extensions and convert underscores → spaces before title-casing
+  const cleanName = subcategoryName
+    .replace(/\.(jpe?g|png|webp|gif|svg|avif|bmp|tiff?)$/i, '')
+    .replace(/_/g, ' ')
+  return toTitleCaseLabel(cleanName)
 }
 
 function buildCategoryHeroImageCandidates(categoryName = '', fallbackImageUrl = '') {
@@ -2625,7 +2635,12 @@ function FullCataloguePage() {
     setActiveCategory(categoryName)
     setActiveSubcategory(subcategoryName || 'ALL')
     setActiveColorFamily('ALL')
-    scrollToCatalogueResults()
+    // Scroll to the chapter section containing this category so results start at the top
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        scrollToCatalogueSection(categoryName)
+      })
+    })
   }, [scrollToCatalogueResults])
 
   const getCategoryCoverImage = useCallback((categoryName = '', fallbackImageUrl = '') => {
@@ -2790,8 +2805,8 @@ function FullCataloguePage() {
             <h2 className="text-lg font-black uppercase tracking-[0.05em] text-black">{activeSection?.category || 'Our Products'}</h2>
             <p className="mt-1 text-xs text-black/55">{filteredItems.length} matching items</p>
           </div>
-          <div className="rounded-[12px] border border-[#4A4A4A]/25 bg-[#E8E8E8] px-3 py-2 text-xs text-black/75">
-            Catalogue-only view. Purchase starts after account verification.
+          <div className="rounded-[12px] border border-fuchsia-200/60 bg-fuchsia-50/70 px-3 py-2 text-xs text-fuchsia-900/80">
+            All products are <strong>HEMA-free, TPO-free &amp; Silver (CI 77820)-free</strong>, formulated to strict EU cosmetic regulations. Catalogue view only.
           </div>
         </div>
 
@@ -2937,9 +2952,6 @@ function FullCataloguePage() {
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                           <p className="truncate text-[11px] font-light text-black/55">{itemCode}</p>
-                          {silverFreeGuarantee && (
-                            <p className="truncate text-[10px] font-semibold uppercase tracking-[0.06em] text-fuchsia-600">HEMA-FREE | TPO-FREE | CI 77820-FREE</p>
-                          )}
                         </div>
                         <button onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>−</button>
                         <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className={`h-7 w-10 rounded-[10px] border text-center text-xs ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/20 text-black/70'}`} />
@@ -2957,12 +2969,9 @@ function FullCataloguePage() {
                       <div className="border-t border-black/10 px-2.5 py-2">
                         <p className="truncate text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                         <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                        {silverFreeGuarantee && (
-                          <p className="mt-1 truncate text-[10px] font-semibold uppercase tracking-[0.06em] text-fuchsia-600">HEMA-FREE | TPO-FREE | CI 77820-FREE</p>
-                        )}
                         <div className="mt-2 flex items-center gap-1">
                           <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
-                          <p className="truncate text-[11px] font-light text-black/55">{item.subcategory}</p>
+                          <p className="truncate text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
                         </div>
                         <div className="mt-2 flex items-center">
                           <NavLink
@@ -2998,7 +3007,7 @@ function FullCataloguePage() {
             Our Products
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-white/90 sm:text-lg" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-            Everything you need delivered as one complete system. HEMA & TPO-Free formulations, Cruelty-Free certified, and engineered for professional excellence. Explore every shade, tool, and accessory in our global collection.
+            Everything you need delivered as one complete system. HEMA & TPO-Free formulations, <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-300 hover:underline">Cruelty-Free certified</a>, and engineered for professional excellence. Explore every shade, tool, and accessory in our global collection.
           </p>
         </div>
       </div>
@@ -3019,7 +3028,7 @@ function FullCataloguePage() {
         <>
           <div id={CATALOGUE_RESULTS_ANCHOR_ID} className="scroll-mt-28" />
 
-          {/* CHAPTER 01: THE INFINITE SPECTRUM */}}
+          {/* CHAPTER 01: THE INFINITE SPECTRUM */}
           <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 overflow-hidden bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(212,55,144,0.14)_0%,transparent_55%)]" />
             <div className="relative mx-auto max-w-6xl">
@@ -3251,146 +3260,104 @@ function FullCataloguePage() {
             <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.08em] text-[#1A1A1A] sm:text-3xl">{springSummerLookbook.title}</h2>
             <p className="mt-2 max-w-2xl text-sm text-[#1A1A1A]/75 sm:text-base">{springSummerLookbook.subtitle}</p>
 
-            <div className="mt-5 space-y-4">
-              {lookbookGroupRows.map((row, rowIndex) => {
+            {/* Horizontal snap carousel of group cards */}
+            <div className="mt-5 flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {displayedLookbookGroups.map((group, groupIndex) => {
+                const isExpanded = groupIndex === expandedLookbookGroup
+                const pages = Array.isArray(group?.pages) ? group.pages : []
+                const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), Math.max(0, pages.length - 1)))
+                const keyPage = pages[selectedPageIndex] || pages[0] || null
+                const keyPageType = String(keyPage?.mediaType || '').toLowerCase()
                 return (
-                  <div key={`lookbook-group-row-${rowIndex}`} className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-                    {row.map((group) => {
-                      const groupIndex = displayedLookbookGroups.findIndex((candidate) => candidate.id === group.id)
-                      const isExpanded = groupIndex === expandedLookbookGroup
-                      const pages = Array.isArray(group?.pages) ? group.pages : []
-                      const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), Math.max(0, pages.length - 1)))
-                      const keyPage = pages[selectedPageIndex] || pages[0] || null
-                      const keyPageType = String(keyPage?.mediaType || '').toLowerCase()
-                      const pageRows = buildRowsOfFour(pages)
-
-                      return (
-                        <article
-                          key={`lookbook-group-${group.id}`}
-                          className={`overflow-hidden rounded-xl border bg-white transition ${isExpanded ? 'border-[#D43790] shadow-[0_0_0_1px_rgba(212,55,144,0.25)]' : 'border-[#4A4A4A]/20'}`}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => setExpandedLookbookGroup(isExpanded ? -1 : groupIndex)}
-                            className="w-full text-left"
-                          >
-                            <div className="relative p-3">
-                              <div className="overflow-hidden rounded-lg border border-[#4A4A4A]/20 bg-[#F8F8F8]">
-                                <div className={`${keyPageType === 'pdf' ? 'aspect-[210/297]' : 'aspect-[9/16]'} w-full bg-white p-1.5`}>
-                                  {keyPageType === 'video'
-                                    ? (
-                                      <video
-                                        src={keyPage?.imageUrl}
-                                        className="h-full w-full scale-[1.035] rounded-md object-cover"
-                                        autoPlay
-                                        muted
-                                        loop
-                                        playsInline
-                                        controls
-                                        preload="metadata"
-                                      />
-                                      )
-                                    : (
-                                      <img
-                                        src={keyPage?.imageUrl || group.heroImage || '/logo.png'}
-                                        alt={group.title}
-                                        className="h-full w-full scale-[1.035] rounded-md object-cover"
-                                        loading="lazy"
-                                      />
-                                      )}
-                                </div>
-                              </div>
+                  <div key={group.id} className="snap-start shrink-0 w-[calc(50%-6px)] sm:w-[calc(33.33%-8px)] lg:w-[calc(25%-9px)]">
+                    <article className={`overflow-hidden rounded-xl border bg-white transition h-full ${isExpanded ? 'border-[#D43790] shadow-[0_0_0_2px_rgba(212,55,144,0.25)]' : 'border-[#4A4A4A]/20 hover:border-[#D43790]/50'}`}>
+                      <button
+                        type="button"
+                        onClick={() => setExpandedLookbookGroup(isExpanded ? -1 : groupIndex)}
+                        className="w-full text-left"
+                      >
+                        <div className="relative p-2.5">
+                          <div className="overflow-hidden rounded-lg border border-[#4A4A4A]/20 bg-[#F8F8F8]">
+                            <div className={`${keyPageType === 'pdf' ? 'aspect-[210/297]' : 'aspect-[9/16]'} w-full bg-white p-1.5`}>
+                              {keyPageType === 'video'
+                                ? <video src={keyPage?.imageUrl} className="h-full w-full rounded-md object-cover" autoPlay muted loop playsInline preload="metadata" />
+                                : <img src={keyPage?.imageUrl || group.heroImage || '/logo.png'} alt={group.title} className="h-full w-full rounded-md object-cover" loading="lazy" />}
                             </div>
-
-                            <div className="px-3 pb-3">
-                              <p className="text-sm font-black uppercase tracking-[0.08em] text-[#1A1A1A]">{group.title}</p>
-                              <p className="mt-1 text-xs text-[#1A1A1A]/65">Tap to {isExpanded ? 'collapse' : 'expand'} this shade set</p>
-                            </div>
-                          </button>
-
-                          {isExpanded && pages.length > 0 && (
-                            <div className="border-t border-[#4A4A4A]/15 bg-[#FAFAFA] p-3">
-                              <div className="space-y-3">
-                                {pageRows.map((pageRow, pageRowIndex) => {
-                                  const pageRowClass = pageRow.length >= 4
-                                    ? 'grid-cols-2 lg:grid-cols-4'
-                                    : pageRow.length === 3
-                                      ? 'grid-cols-2 lg:grid-cols-3'
-                                      : 'grid-cols-2'
-
-                                  return (
-                                    <div key={`lookbook-page-row-${group.id}-${pageRowIndex}`} className={`grid gap-3 ${pageRowClass}`}>
-                                      {pageRow.map((page, pageIndex) => {
-                                        const mediaType = String(page?.mediaType || '').toLowerCase()
-                                        const aspectClass = mediaType === 'pdf' ? 'aspect-[210/297]' : 'aspect-[9/16]'
-                                        const absolutePageIndex = pageRowIndex * 4 + pageIndex
-                                        const isSelected = absolutePageIndex === selectedPageIndex
-
-                                        return (
-                                          <button
-                                            type="button"
-                                            key={`lookbook-page-${group.id}-${page.imageUrl}-${pageIndex}`}
-                                            onClick={() => {
-                                              setSelectedLookbookPageByGroup((current) => ({
-                                                ...current,
-                                                [group.id]: absolutePageIndex,
-                                              }))
-                                            }}
-                                            className={`group overflow-hidden rounded-lg border bg-white transition ${isSelected ? 'border-[#D43790] shadow-[0_0_0_1px_rgba(212,55,144,0.18)]' : 'border-[#4A4A4A]/20 hover:border-[#D43790]/60'}`}
-                                          >
-                                            <div className={`${aspectClass} w-full bg-[#F8F8F8] p-1.5`}>
-                                              {mediaType === 'video'
-                                                ? (
-                                                  <video
-                                                    src={page.imageUrl}
-                                                    className="h-full w-full scale-[1.035] rounded-md object-cover"
-                                                    autoPlay
-                                                    muted
-                                                    loop
-                                                    playsInline
-                                                    controls
-                                                    preload="metadata"
-                                                  />
-                                                  )
-                                                : mediaType === 'pdf'
-                                                  ? (
-                                                    <iframe
-                                                      src={`${page.link || page.imageUrl}#view=FitH`}
-                                                      title="Spring/Summer lookbook page"
-                                                      className="h-full w-full rounded-md border-0"
-                                                    />
-                                                    )
-                                                  : (
-                                                    <img
-                                                      src={page.imageUrl}
-                                                      alt="Spring/Summer lookbook page"
-                                                      className="h-full w-full scale-[1.035] rounded-md object-cover transition duration-300 group-hover:scale-[1.045]"
-                                                      loading="lazy"
-                                                    />
-                                                    )}
-                                            </div>
-                                          </button>
-                                        )
-                                      })}
-                                    </div>
-                                  )
-                                })}
-                              </div>
-                            </div>
-                          )}
-                        </article>
-                      )
-                    })}
+                          </div>
+                          {isExpanded && <div className="absolute right-4 top-4 h-2.5 w-2.5 rounded-full bg-[#D43790]" />}
+                        </div>
+                        <div className="px-2.5 pb-2.5">
+                          <p className="text-xs font-black uppercase tracking-[0.08em] text-[#1A1A1A]">{group.title}</p>
+                          <p className="mt-0.5 text-[10px] text-[#1A1A1A]/55">{pages.length} pages</p>
+                        </div>
+                      </button>
+                    </article>
                   </div>
                 )
               })}
             </div>
+
+            {/* Expanded panel: big stage LEFT, thumbnail picker RIGHT */}
+            {expandedLookbookGroup >= 0 && (() => {
+              const group = displayedLookbookGroups[expandedLookbookGroup]
+              if (!group) return null
+              const pages = Array.isArray(group?.pages) ? group.pages : []
+              if (!pages.length) return null
+              const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), Math.max(0, pages.length - 1)))
+              const keyPage = pages[selectedPageIndex] || pages[0]
+              const keyPageType = String(keyPage?.mediaType || '').toLowerCase()
+              return (
+                <div className="mt-4 rounded-xl border border-[#D43790]/35 bg-[#FAFAFA] p-3 sm:p-4">
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">{group.title}</p>
+                  <div className="grid gap-4 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
+
+                    {/* Stage — large selected image */}
+                    <div className="overflow-hidden rounded-xl border border-[#4A4A4A]/20 bg-white p-1.5">
+                      <div className={`${keyPageType === 'pdf' ? 'aspect-[210/297]' : 'aspect-[9/16]'} w-full`}>
+                        {keyPageType === 'video'
+                          ? <video src={keyPage?.imageUrl} className="h-full w-full rounded-lg object-cover" autoPlay muted loop playsInline controls preload="metadata" />
+                          : keyPageType === 'pdf'
+                            ? <iframe src={`${keyPage?.link || keyPage?.imageUrl}#view=FitH`} title="Lookbook page" className="h-full w-full rounded-lg border-0" />
+                            : <img src={keyPage?.imageUrl || group.heroImage || '/logo.png'} alt={group.title} className="h-full w-full rounded-lg object-cover" loading="lazy" />}
+                      </div>
+                    </div>
+
+                    {/* Thumbnail picker grid */}
+                    <div className="grid auto-rows-min grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 content-start">
+                      {pages.map((page, idx) => {
+                        const mediaType = String(page?.mediaType || '').toLowerCase()
+                        const isSelected = idx === selectedPageIndex
+                        return (
+                          <button
+                            type="button"
+                            key={`thumb-${group.id}-${idx}`}
+                            onClick={() => setSelectedLookbookPageByGroup((current) => ({ ...current, [group.id]: idx }))}
+                            className={`overflow-hidden rounded-lg border bg-white transition ${isSelected ? 'border-[#D43790] shadow-[0_0_0_1px_rgba(212,55,144,0.2)]' : 'border-[#4A4A4A]/20 hover:border-[#D43790]/50'}`}
+                          >
+                            <div className={`${mediaType === 'pdf' ? 'aspect-[210/297]' : 'aspect-[9/16]'} w-full bg-[#F8F8F8] p-1`}>
+                              {mediaType === 'video'
+                                ? <video src={page.imageUrl} className="h-full w-full rounded object-cover" autoPlay muted loop playsInline preload="metadata" />
+                                : mediaType === 'pdf'
+                                  ? <iframe src={`${page.link || page.imageUrl}#view=FitH`} title="page" className="h-full w-full rounded border-0 pointer-events-none" />
+                                  : <img src={page.imageUrl} alt="Lookbook page" className="h-full w-full rounded object-cover" loading="lazy" />}
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
           </div>
 
           {/* PERSISTENT FOOTER */}
           <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen border-t border-[#4A4A4A]/30 bg-[#1A1A1A] px-4 py-8 text-center sm:px-8">
             <p className="text-sm font-semibold uppercase tracking-[0.12em] text-white/90">
-              ALL SYSTEMS ARE 100% HEMA & TPO FREE | CPNP NOTIFIED
+              All GEL.IT.UP products are 100% HEMA-Free · TPO-Free · Silver (CI 77820)-Free
+            </p>
+            <p className="mt-2 text-xs tracking-[0.06em] text-white/55">
+              Formulated in strict compliance with EU Cosmetics Regulation (EC) No 1223/2009 · CPNP Notified
             </p>
           </div>
 
@@ -4047,7 +4014,7 @@ function HomePage({ onOpenContactModal }) {
               <NavLink to="/become-distributor" className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
                 Apply as Distributor
               </NavLink>
-              <NavLink to="/portal/login?mode=create-password" className="rounded-lg bg-white/15 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/40 transition duration-300 hover:bg-white/25">
+              <NavLink to="/portal/login?mode=create-password" className="rounded-lg border border-white/80 bg-transparent px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-white hover:text-fuchsia-700">
                 Buy Now
               </NavLink>
             </div>
@@ -4097,8 +4064,8 @@ function HomePage({ onOpenContactModal }) {
                 <circle cx="12" cy="14" r="5" />
               </svg>
             </div>
-            <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790]">CRUELTY-FREE</p>
-            <p className="mt-2 text-sm leading-relaxed text-white">Ethics without compromise. We are 100% Leaping Bunny Approved—the global gold standard for cruelty-free cosmetics.</p>
+            <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790] hover:underline">CRUELTY-FREE</a>
+            <p className="mt-2 text-sm leading-relaxed text-white">Ethics without compromise. We are 100% <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="font-semibold text-[#D43790] hover:underline">Leaping Bunny Approved</a>—the global gold standard for cruelty-free cosmetics.</p>
           </article>
         </div>
 
@@ -4119,7 +4086,7 @@ function HomePage({ onOpenContactModal }) {
           preload="metadata"
           aria-hidden="true"
         />
-        <div className="absolute inset-0 bg-[#1A1A1A]/40" />
+        <div className="absolute inset-0 bg-[#1A1A1A]/15" />
 
         <div className="relative mx-auto max-w-6xl">
           <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8">
@@ -4200,7 +4167,7 @@ function HomePage({ onOpenContactModal }) {
 
       <InfoCard id="certifications" title="Certifications & Compliance">
         <ul className="mt-3 space-y-2 text-sm text-slate-600">
-          <li>• Leaping Bunny certified cruelty-free standards for in-house cosmetic and personal care products.</li>
+          <li>• <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="text-fuchsia-700 hover:underline">Leaping Bunny certified cruelty-free</a> standards for in-house cosmetic and personal care products.</li>
           <li>• EU regulation alignment and GMP (Good Manufacturing Practices) commitment.</li>
           <li>• Professionals-only commercial policy to protect quality and industry standards.</li>
         </ul>
@@ -4331,7 +4298,8 @@ function PortalLanding() {
   return (
     <section className="space-y-4">
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
-        <h2 className="text-2xl font-semibold text-slate-900">B2B Portal</h2>
+        <h2 className="text-2xl font-bold text-slate-900">B2B Coming Soon</h2>
+        <p className="mt-1 text-base font-medium text-[#D43790]">to better assist our GEL.IT.UP Family</p>
         <p className="mt-2 text-sm text-slate-600">
           Wholesale workspace inspired by your existing systems, rebuilt in English for distributors,
           salons, and professional buyers.
@@ -10937,7 +10905,7 @@ function App() {
             target="_blank"
             rel="noreferrer"
             aria-label={social.label}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-black/75 text-white/80 shadow-lg backdrop-blur-[8px] transition duration-300 hover:border-fuchsia-400/60 hover:bg-fuchsia-950/70 hover:text-fuchsia-300"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-xl transition duration-300 hover:border-fuchsia-500 hover:bg-fuchsia-600 hover:text-white"
           >
             <FooterSocialIcon platform={social.key} />
           </a>
@@ -10946,7 +10914,7 @@ function App() {
           type="button"
           aria-label="Back to top"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className={`flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-black/75 text-white/70 shadow-lg backdrop-blur-[8px] transition duration-500 hover:border-fuchsia-400/60 hover:bg-fuchsia-950/70 hover:text-fuchsia-300 ${
+          className={`flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-xl transition duration-300 hover:border-fuchsia-500 hover:bg-fuchsia-600 hover:text-white ${
             showBackToTop ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
           }`}
         >
