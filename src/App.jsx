@@ -1800,94 +1800,6 @@ function resolveColorFamilyKey(name = '') {
   return 'OTHER'
 }
 
-// ─── Canvas pixel-sampling for automatic colour family detection ──────────────
-// Module-level so the cache survives component re-mounts within the same session.
-const pixelFamilyCache = new Map() // imageUrl → familyKey
-
-function pixelHueToFamilyKey(h) {
-  if (h < 20 || h >= 320) return 'RED'
-  if (h < 45) return 'ORANGE'
-  if (h < 75) return 'YELLOW'
-  if (h < 165) return 'GREEN'
-  if (h < 250) return 'BLUE'
-  if (h < 290) return 'PURPLE'
-  return 'PINK'
-}
-
-function sampleImageColorFamily(imageUrl) {
-  if (pixelFamilyCache.has(imageUrl)) return Promise.resolve(pixelFamilyCache.get(imageUrl))
-
-  return new Promise((resolve) => {
-    const img = new Image()
-    img.onload = () => {
-      try {
-        const SIZE = 24
-        const canvas = document.createElement('canvas')
-        canvas.width = SIZE
-        canvas.height = SIZE
-        const ctx = canvas.getContext('2d')
-        ctx.drawImage(img, 0, 0, SIZE, SIZE)
-        const { data } = ctx.getImageData(0, 0, SIZE, SIZE)
-
-        // Tally hue votes weighted by saturation
-        let sinSum = 0
-        let cosSum = 0
-        let totalWeight = 0
-        const familyCounts = {}
-
-        for (let i = 0; i < data.length; i += 4) {
-          const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3]
-          if (a < 128) continue
-          // Skip near-white background and near-black
-          if (r > 235 && g > 235 && b > 235) continue
-          if (r < 20 && g < 20 && b < 20) continue
-
-          const rn = r / 255, gn = g / 255, bn = b / 255
-          const max = Math.max(rn, gn, bn)
-          const min = Math.min(rn, gn, bn)
-          const delta = max - min
-          if (delta < 0.08) continue // achromatic — skip
-
-          const l = (max + min) / 2
-          const s = delta / (1 - Math.abs(2 * l - 1))
-          if (s < 0.15) continue // too washed out
-
-          let h
-          if (max === rn) h = 60 * (((gn - bn) / delta) % 6)
-          else if (max === gn) h = 60 * ((bn - rn) / delta + 2)
-          else h = 60 * ((rn - gn) / delta + 4)
-          if (h < 0) h += 360
-
-          const weight = s
-          sinSum += Math.sin((h * Math.PI) / 180) * weight
-          cosSum += Math.cos((h * Math.PI) / 180) * weight
-          totalWeight += weight
-
-          const fk = pixelHueToFamilyKey(h)
-          familyCounts[fk] = (familyCounts[fk] || 0) + weight
-        }
-
-        let key = 'OTHER'
-        if (totalWeight > 0) {
-          // Use the family with the highest total weight
-          key = Object.entries(familyCounts).sort((a, b) => b[1] - a[1])[0][0]
-        }
-
-        pixelFamilyCache.set(imageUrl, key)
-        resolve(key)
-      }
-      catch {
-        pixelFamilyCache.set(imageUrl, 'OTHER')
-        resolve('OTHER')
-      }
-    }
-    img.onerror = () => {
-      pixelFamilyCache.set(imageUrl, 'OTHER')
-      resolve('OTHER')
-    }
-    img.src = imageUrl
-  })
-}
 // ─────────────────────────────────────────────────────────────────────────────
 
 function isColorsCategoryName(categoryName = '') {
@@ -2244,7 +2156,8 @@ function FullCataloguePage() {
   const [colorTileFrame, setColorTileFrame] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
-  const [pixelFamilies, setPixelFamilies] = useState({})
+  // solidGelColourFamilies: sku → colorFamily, loaded from JSON built via CSV
+  const [solidGelColourFamilies, setSolidGelColourFamilies] = useState({})
   const [springSummerLookbook, setSpringSummerLookbook] = useState(SPRING_SUMMER_LOOKBOOK_DEFAULT)
   const [expandedLookbookGroup, setExpandedLookbookGroup] = useState(0)
   const [selectedLookbookPageByGroup, setSelectedLookbookPageByGroup] = useState({})
@@ -2259,9 +2172,10 @@ function FullCataloguePage() {
       setErrorMessage('')
 
       try {
-        const [mapResponse, orderResponse] = await Promise.all([
+        const [mapResponse, orderResponse, colourFamiliesResponse] = await Promise.all([
           fetch('/gelitup-content/product-image-map.json'),
           fetch('/gelitup-content/catalog-order.json'),
+          fetch('/gelitup-content/solid-gel-colour-families.json'),
         ])
 
         if (!mapResponse.ok) {
@@ -2270,11 +2184,13 @@ function FullCataloguePage() {
 
         const payload = await mapResponse.json()
         const manualOrderPayload = orderResponse.ok ? await orderResponse.json() : { rules: [] }
+        const colourFamiliesPayload = colourFamiliesResponse.ok ? await colourFamiliesResponse.json() : {}
         const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
         if (!mounted) return
 
         const nextSections = buildCatalogueSectionsFromImageMap(payload, manualRuleIndex)
         setSections(nextSections)
+        setSolidGelColourFamilies(colourFamiliesPayload)
         setHeroCandidateIndexByCategory({})
         setActiveCategory('')
         setActiveSubcategory('')
@@ -2421,46 +2337,6 @@ function FullCataloguePage() {
   const isColorsCategory = isColorsCategoryName(activeSection?.category)
   const isSolidGelPolish = isColorsCategory && normalizeCatalogueToken(activeSubcategory) === 'SOLID GEL POLISH'
 
-  // ── Pixel-sample every product image when browsing colours ─────────────────
-  useEffect(() => {
-    if (!isSolidGelPolish || !baseItems.length) return
-    let cancelled = false
-    const BATCH = 20
-    const toSample = [...new Set(baseItems.map((item) => item.imageUrl).filter(Boolean))]
-      .filter((url) => !pixelFamilyCache.has(url))
-
-    // If everything is already cached, sync state immediately
-    if (!toSample.length) {
-      setPixelFamilies((prev) => {
-        const next = { ...prev }
-        let changed = false
-        for (const item of baseItems) {
-          if (item.imageUrl && pixelFamilyCache.has(item.imageUrl)) {
-            const k = pixelFamilyCache.get(item.imageUrl)
-            if (next[item.imageUrl] !== k) { next[item.imageUrl] = k; changed = true }
-          }
-        }
-        return changed ? next : prev
-      })
-      return
-    }
-
-    async function processBatches() {
-      for (let start = 0; start < toSample.length; start += BATCH) {
-        if (cancelled) break
-        await Promise.all(toSample.slice(start, start + BATCH).map(sampleImageColorFamily))
-        if (cancelled) break
-        setPixelFamilies((prev) => {
-          const next = { ...prev }
-          for (const [url, key] of pixelFamilyCache) next[url] = key
-          return next
-        })
-      }
-    }
-    processBatches()
-    return () => { cancelled = true }
-  }, [isSolidGelPolish, baseItems])
-  // ───────────────────────────────────────────────────────────────────────────
   const lookbookGroups = useMemo(() => {
     const groups = Array.isArray(springSummerLookbook?.groups) ? springSummerLookbook.groups : []
     if (groups.length) return groups
@@ -2500,12 +2376,15 @@ function FullCataloguePage() {
 
   const filteredItems = useMemo(() => {
     const resolveFamily = (item) => {
-      // Name keyword wins when it gives a confident result (not OTHER) —
-      // names like "CHERRY RED", "BURGUNDY", "LAVENDER" are reliable.
-      // Pixel sampling fills in only for abstract names ("SOLID 042", "GIUP-1 085").
-      const nameFamily = item.colorFamilyKey
-      if (nameFamily && nameFamily !== 'OTHER') return nameFamily
-      return pixelFamilies[item.imageUrl] || nameFamily
+      // JSON lookup (from manually-curated CSV) is the primary source for Solid Gel Polish.
+      // Extract the SKU from the image filename (e.g. "/...GIUP-042.jpg" → "GIUP-042").
+      const urlParts = (item.imageUrl || '').split('/')
+      const filename = urlParts[urlParts.length - 1] || ''
+      const sku = filename.replace(/\.[^.]+$/, '') // strip extension
+      const jsonFamily = solidGelColourFamilies[sku]
+      if (jsonFamily) return jsonFamily
+      // Fallback: name keyword matching
+      return item.colorFamilyKey
     }
 
     const colorFiltered = (!isSolidGelPolish || activeColorFamily === 'ALL')
@@ -2523,7 +2402,7 @@ function FullCataloguePage() {
         || subcategoryToken.includes(normalizedSearch)
         || pathToken.includes(normalizedSearch)
     })
-  }, [activeColorFamily, baseItems, isSolidGelPolish, pixelFamilies, searchQuery])
+  }, [activeColorFamily, baseItems, isSolidGelPolish, solidGelColourFamilies, searchQuery])
 
   useEffect(() => {
     setScrollTop(0)
