@@ -1365,7 +1365,7 @@ function DistributorPackagesPage() {
           EU REGULATED. HEMA & TPO-FREE. PROFESSIONAL EXCELLENCE.
         </p>
         <NavLink to="/full-catalogue" className="mt-4 inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
-          Quick View: The Collection
+          Quick View: Our Products
         </NavLink>
       </div>
 
@@ -2184,7 +2184,9 @@ function FullCataloguePage() {
 
         const payload = await mapResponse.json()
         const manualOrderPayload = orderResponse.ok ? await orderResponse.json() : { rules: [] }
-        const colourFamiliesPayload = colourFamiliesResponse.ok ? await colourFamiliesResponse.json() : {}
+        const colourFamiliesPayload = (colourFamiliesResponse.ok && (colourFamiliesResponse.headers.get('content-type') || '').includes('application/json'))
+          ? await colourFamiliesResponse.json()
+          : {}
         const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
         if (!mounted) return
 
@@ -2766,7 +2768,7 @@ function FullCataloguePage() {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-black uppercase tracking-[0.05em] text-black">{activeSection?.category || 'The Collection'}</h2>
+            <h2 className="text-lg font-black uppercase tracking-[0.05em] text-black">{activeSection?.category || 'Our Products'}</h2>
             <p className="mt-1 text-xs text-black/55">{filteredItems.length} matching items</p>
           </div>
           <div className="rounded-[12px] border border-[#4A4A4A]/25 bg-[#E8E8E8] px-3 py-2 text-xs text-black/75">
@@ -2974,7 +2976,7 @@ function FullCataloguePage() {
       <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
         <div className="mx-auto max-w-6xl">
           <h1 className="heading-on-dark text-4xl font-extrabold uppercase tracking-[0.15em] text-white sm:text-5xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
-            The Collection
+            Our Products
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-white/90 sm:text-lg" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
             Everything you need delivered as one complete system. HEMA & TPO-Free formulations, Cruelty-Free certified, and engineered for professional excellence. Explore every shade, tool, and accessory in our global collection.
@@ -4154,14 +4156,14 @@ function HomePage({ onOpenContactModal }) {
         </div>
       </div>
 
-      <InfoCard id="products" title="The Collection">
+      <InfoCard id="products" title="Our Products">
         <p>
           The GEL.IT.UP lineup includes Soak-off Gel Polish, Base and Top Coats, Builder System,
           Nail Polishes, Nail Art, Consumables, and Skin & Nail Care.
           We also maintain a broad color portfolio (800+ shades) for professional channels.
         </p>
         <NavLink to="/full-catalogue" className="mt-3 inline-flex rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
-          Open The Collection
+          Open Our Products
         </NavLink>
         {media.gallery.length > 0 && (
           <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -7862,7 +7864,7 @@ function ProductsModule({ moduleView = 'products' }) {
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
         <div className="mb-3 flex items-center justify-between gap-2">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">GEL.IT.UP The Collection</h3>
+            <h3 className="text-lg font-semibold text-slate-900">GEL.IT.UP Our Products</h3>
             <p className="mt-1 text-xs text-slate-500">Add extra products to your order.</p>
           </div>
           <button
@@ -7872,7 +7874,7 @@ function ProductsModule({ moduleView = 'products' }) {
             Back to Buy Now
           </button>
         </div>
-        <p className="mt-1 text-xs text-slate-500">Professional ordering workflow for The Collection.</p>
+        <p className="mt-1 text-xs text-slate-500">Professional ordering workflow for Our Products.</p>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           <input
