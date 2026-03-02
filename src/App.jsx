@@ -6462,6 +6462,23 @@ function ProductsModule({ moduleView = 'products' }) {
     })
   }, [category, products, query, selectedCodes, showSelectedOnly, showCleanScienceOnly])
 
+  // Group filtered products by category for sectioned display
+  const groupedFilteredProducts = useMemo(() => {
+    const groups = new Map()
+    for (const product of filteredProducts) {
+      const cat = product.category || 'Other'
+      if (!groups.has(cat)) groups.set(cat, [])
+      groups.get(cat).push(product)
+    }
+    return Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b))
+  }, [filteredProducts])
+
+  // All unique categories from loaded products (for the tab bar)
+  const allCategories = useMemo(() => {
+    const cats = new Set(products.map(p => p.category || 'Other'))
+    return ['All', ...Array.from(cats).sort()]
+  }, [products])
+
   const selectedProducts = useMemo(() => {
     return selectedCodes.map((code) => {
       const found = products.find((p) => p.code === code)
@@ -8183,54 +8200,46 @@ function ProductsModule({ moduleView = 'products' }) {
               </div>
             )}
         </div>
-<div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-          {filteredProducts.map((product) => {
-            const selected = selectedCodes.includes(product.code)
-
-            return (
-              <button
-                key={product.code}
-                onClick={() => toggleSelection(product.code)}
-                className={`rounded-xl border p-3 text-left transition ${
-                  selected ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-800'
-                }`}
-              >
-                <div className="relative h-16 w-full overflow-hidden rounded-md border border-slate-100">
-                  <div className="absolute inset-0" style={{ backgroundColor: product.preview }} />
-                  {product.imageUrl && (
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      loading="lazy"
-                      className="relative z-10 h-full w-full object-cover"
-                    />
-                  )}
-                  {!product.imageUrl && (
-                    <span className="absolute right-1 top-1 rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-amber-700">
-                      Missing image
-                    </span>
-                  )}
-                </div>
-                <p className="mt-2 text-xs font-semibold">{product.code}</p>
-                <p className={`truncate text-[11px] ${selected ? 'text-slate-300' : 'text-slate-500'}`}>{product.name}</p>
-                <p className={`line-clamp-2 text-[11px] ${selected ? 'text-slate-300' : 'text-slate-500'}`}>
-                  {product.description || 'No description'}
-                </p>
-                <p className={`text-[11px] ${selected ? 'text-slate-300' : 'text-slate-500'}`}>{product.category}</p>
-                {product.price != null && (
-                  <p className={`mt-1 text-[11px] font-bold ${selected ? 'text-fuchsia-200' : 'text-fuchsia-700'}`}>
-                    €{Number(product.price).toFixed(2)}
-                  </p>
-                )}
-                {silverFreeGuarantee && (
-                  <p className={`mt-1 text-[10px] font-semibold uppercase tracking-[0.06em] ${selected ? 'text-fuchsia-200' : 'text-fuchsia-600'}`}>
-                    HEMA-FREE | TPO-FREE | CI 77820-FREE
-                  </p>
-                )}
-              </button>
-            )
-          })}
-        </div>
+{groupedFilteredProducts.length === 0
+          ? (
+            <p className="mt-6 text-sm text-slate-400 italic">No products match your search.</p>
+          )
+          : groupedFilteredProducts.map(([cat, catProducts]) => (
+            <div key={cat} className="mt-6">
+              <div className="mb-3 flex items-center gap-3">
+                <h4 className="text-sm font-black uppercase tracking-[0.08em] text-slate-900">{cat}</h4>
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">{catProducts.length}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                {catProducts.map((product) => {
+                  const selected = selectedCodes.includes(product.code)
+                  return (
+                    <button
+                      key={product.code}
+                      onClick={() => toggleSelection(product.code)}
+                      className={`rounded-xl border p-2 text-left transition ${
+                        selected ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-slate-200 bg-white text-slate-800 hover:border-fuchsia-300'
+                      }`}
+                    >
+                      <div className="relative h-20 w-full overflow-hidden rounded-md border border-slate-100">
+                        <div className="absolute inset-0" style={{ backgroundColor: product.preview }} />
+                        {product.imageUrl && (
+                          <img src={product.imageUrl} alt={product.name} loading="lazy" className="relative z-10 h-full w-full object-cover" />
+                        )}
+                      </div>
+                      <p className="mt-1.5 text-[11px] font-semibold leading-tight">{product.name}</p>
+                      {product.price != null && (
+                        <p className={`text-[11px] font-bold ${selected ? 'text-fuchsia-200' : 'text-fuchsia-700'}`}>
+                          €{Number(product.price).toFixed(2)}
+                        </p>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ))
+        }
         {!isLoadingFeed && !filteredProducts.length && (
           <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
             <p>Live product feed is unavailable right now.</p>
