@@ -5728,6 +5728,9 @@ function ProductsModule({ moduleView = 'products' }) {
   const [selectedCodes, setSelectedCodes] = useState([])
   const [showSelectedOnly, setShowSelectedOnly] = useState(false)
   const [showCleanScienceOnly, setShowCleanScienceOnly] = useState(false)
+  const [expandedCategories, setExpandedCategories] = useState(new Set())
+  const [itemQtys, setItemQtys] = useState({})
+  const [lightboxUrl, setLightboxUrl] = useState(null)
   const [packageTier, setPackageTier] = useState('Silver')
   const [draftInvoice, setDraftInvoice] = useState('')
   const [dismissedTechnicalUpsell, setDismissedTechnicalUpsell] = useState(false)
@@ -6017,7 +6020,8 @@ function ProductsModule({ moduleView = 'products' }) {
     && selectionProfile.technicalCount === 0
     && !includeProfessionalBasePack
   const packageUnits = packageCartItems.reduce((sum, item) => sum + item.qty, 0)
-  const totalUnits = selectedCodes.length + packageUnits + (includeProfessionalBasePack ? PROFESSIONAL_BASE_PACK.qty : 0)
+  const selectedQtyTotal = selectedCodes.reduce((s, c) => s + (itemQtys[c] || 1), 0)
+  const totalUnits = selectedQtyTotal + packageUnits + (includeProfessionalBasePack ? PROFESSIONAL_BASE_PACK.qty : 0)
   const { activeTier, recommendedProduct } = useB2BIntelligence({
     cartTotalItems: totalUnits,
     userRole: b2bUserRole,
@@ -6441,8 +6445,8 @@ function ProductsModule({ moduleView = 'products' }) {
               SS: 'Spring Summer',
               // Special collections
               BTO: 'By The Ocean',
-              CDC: 'Crème de la Crème',
-              CDCL: 'Crème de la Crème',
+              CDC: 'Creme de la Creme',
+              CDCL: 'Creme de la Creme',
               NYP: 'New York Party',
               PMA: 'PMA',
               // Top coats
@@ -6598,6 +6602,34 @@ function ProductsModule({ moduleView = 'products' }) {
     })
   }, [selectedCodes, products])
 
+  // Colour family breakdown for selected products
+  const colourFamilyBreakdown = useMemo(() => {
+    const counts = {}
+    for (const p of selectedProducts) {
+      const family = resolveColorFamilyKey(p.name)
+      if (family && family !== 'OTHER') counts[family] = (counts[family] || 0) + 1
+    }
+    return COLOR_FAMILY_FILTERS
+      .filter(f => f.key !== 'ALL' && counts[f.key])
+      .map(f => ({ ...f, count: counts[f.key] }))
+      .sort((a, b) => b.count - a.count)
+  }, [selectedProducts])
+
+  const orderTotal = useMemo(() => {
+    const itemsTotal = selectedProducts.reduce((s, p) => s + (p.price != null ? Number(p.price) * (itemQtys[p.code] || 1) : 0), 0)
+    const pkgTotal = packageCartItems.reduce((s, item) => s + (item.price != null ? Number(item.price) * item.qty : 0), 0)
+    return itemsTotal + pkgTotal
+  }, [selectedProducts, packageCartItems, itemQtys])
+
+  const toggleCategory = (cat) => {
+    setExpandedCategories(prev => {
+      const next = new Set(prev)
+      if (next.has(cat)) next.delete(cat)
+      else next.add(cat)
+      return next
+    })
+  }
+
   const toggleSelection = (code) => {
     setSelectedCodes((current) =>
       current.includes(code) ? current.filter((item) => item !== code) : [...current, code],
@@ -6606,7 +6638,9 @@ function ProductsModule({ moduleView = 'products' }) {
 
   const copyCodes = async () => {
     if (!selectedCodes.length) return
-    await navigator.clipboard.writeText(selectedCodes.join(', '))
+    await navigator.clipboard.writeText(
+      selectedCodes.map(c => (itemQtys[c] || 1) > 1 ? `${c} x${itemQtys[c]}` : c).join(', '),
+    )
   }
 
   const createPackageDraft = async () => {
@@ -7147,11 +7181,12 @@ function ProductsModule({ moduleView = 'products' }) {
     }
 
     const packageItemsPayload = packageCartItems.map((item) => `${item.sku} x${item.qty}`)
+    const selectedCodesWithQty = selectedCodes.map(code => (itemQtys[code] || 1) > 1 ? `${code} x${itemQtys[code]}` : code)
     const checkoutItems = includeProfessionalBasePack
-      ? [...selectedCodes, ...packageItemsPayload, `${PROFESSIONAL_BASE_PACK.sku} x${PROFESSIONAL_BASE_PACK.qty}`]
-      : [...selectedCodes, ...packageItemsPayload]
+      ? [...selectedCodesWithQty, ...packageItemsPayload, `${PROFESSIONAL_BASE_PACK.sku} x${PROFESSIONAL_BASE_PACK.qty}`]
+      : [...selectedCodesWithQty, ...packageItemsPayload]
 
-    const verifiedUnits = selectedCodes.length
+    const verifiedUnits = selectedCodes.reduce((s, c) => s + (itemQtys[c] || 1), 0)
       + packageCartItems.reduce((sum, item) => sum + item.qty, 0)
       + (includeProfessionalBasePack ? PROFESSIONAL_BASE_PACK.qty : 0)
 
@@ -7414,6 +7449,7 @@ function ProductsModule({ moduleView = 'products' }) {
 
     setCheckoutMessage(`Order received (#${insertedOrder?.id ?? '-'} | ${totalUnits} units). A copy was sent to your email and to ${ORDER_INBOX_EMAIL}, and the order is stored in the portal backup.${zohoStatusNote}`)
     setSelectedCodes([])
+    setItemQtys({})
     setPackageCartItems([])
     setGeneratedPackageTier('')
     setIncludeProfessionalBasePack(false)
@@ -7423,9 +7459,10 @@ function ProductsModule({ moduleView = 'products' }) {
   const checkoutHref = useMemo(() => {
     const subject = encodeURIComponent(`GEL.IT.UP B2B Order Intake (${totalUnits} units)`)
     const packageItemsPayload = packageCartItems.map((item) => `${item.sku} x${item.qty}`)
+    const mailCodesWithQty = selectedCodes.map(code => (itemQtys[code] || 1) > 1 ? `${code} x${itemQtys[code]}` : code)
     const mailItems = includeProfessionalBasePack
-      ? [...selectedCodes, ...packageItemsPayload, `${PROFESSIONAL_BASE_PACK.sku} x${PROFESSIONAL_BASE_PACK.qty}`]
-      : [...selectedCodes, ...packageItemsPayload]
+      ? [...mailCodesWithQty, ...packageItemsPayload, `${PROFESSIONAL_BASE_PACK.sku} x${PROFESSIONAL_BASE_PACK.qty}`]
+      : [...mailCodesWithQty, ...packageItemsPayload]
     const body = encodeURIComponent([
       'Hello GEL.IT.UP Order Intake Team,',
       '',
@@ -7555,8 +7592,137 @@ function ProductsModule({ moduleView = 'products' }) {
     }
   }, [b2bUserRole, recommendedProduct, totalUnits])
 
+  // ── My Information view ────────────────────────────────────────────────────
+  if (moduleView === 'profile') {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-600">Step 3 of 3</p>
+              <h3 className="mt-0.5 bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-lg font-semibold text-transparent">My Information</h3>
+              <p className="mt-1 text-xs text-slate-500">Saved for future orders — fill in once, reuse every time.</p>
+            </div>
+            <button onClick={() => navigate('/portal/dashboard/products')} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+              ← Back to My Order
+            </button>
+          </div>
+          <p className="text-[11px] text-slate-500">Required fields are marked with <span className="font-semibold text-rose-600">*</span></p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <label className="text-xs text-slate-700">Type <span className="text-rose-600">*</span>
+              <select value={clientProfile.customerType} onChange={(e) => setClientField('customerType', e.target.value)} className={getClientInputClass('customerType')}>
+                <option value="company">Company</option><option value="client">Client</option>
+              </select>
+            </label>
+            <label className="text-xs text-slate-700">Shipping Type <span className="text-rose-600">*</span>
+              <select value={clientProfile.shippingType} onChange={(e) => setClientField('shippingType', e.target.value)} className={getClientInputClass('shippingType')}>
+                <option value="road">Road</option><option value="air">Air</option><option value="self_arranged">Self-arranged</option>
+              </select>
+            </label>
+            <label className="text-xs text-slate-700">{clientProfile.customerType === 'company' ? 'Company Name' : 'Client Name'} <span className="text-rose-600">*</span>
+              <input type="text" value={clientProfile.customerName} onChange={(e) => setClientField('customerName', e.target.value)} className={getClientInputClass('customerName')} placeholder={clientProfile.customerType === 'company' ? 'Company name' : 'Client name'} />
+            </label>
+            <label className="text-xs text-slate-700">VAT Number <span className="text-rose-600">*</span>
+              <input type="text" value={clientProfile.vatNumber} onChange={(e) => setClientField('vatNumber', e.target.value)} className={getClientInputClass('vatNumber')} placeholder="VAT / Tax ID" />
+            </label>
+            <label className="text-xs text-slate-700">Contact Number (with country code) <span className="text-rose-600">*</span>
+              <input type="text" value={clientProfile.contactPhone} onChange={(e) => setClientField('contactPhone', e.target.value)} className={getClientInputClass('contactPhone')} placeholder="+359..." />
+            </label>
+            <label className="text-xs text-slate-700">Contact Email <span className="text-rose-600">*</span>
+              <input type="email" value={clientProfile.contactEmail} onChange={(e) => setClientField('contactEmail', e.target.value)} className={getClientInputClass('contactEmail')} placeholder="name@company.com" />
+            </label>
+          </div>
+          <p className="mt-3 text-xs font-semibold text-slate-900">Invoice Address</p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <label className="text-xs text-slate-700">Address line 1 <span className="text-rose-600">*</span>
+              <input type="text" value={clientProfile.invoiceAddressLine1} onChange={(e) => setClientField('invoiceAddressLine1', e.target.value)} placeholder="Address line 1" className={getClientInputClass('invoiceAddressLine1')} />
+            </label>
+            <label className="text-xs text-slate-700">Address line 2 <span className="text-slate-500">(optional)</span>
+              <input type="text" value={clientProfile.invoiceAddressLine2} onChange={(e) => setClientField('invoiceAddressLine2', e.target.value)} placeholder="Address line 2" className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700" />
+            </label>
+            <label className="text-xs text-slate-700">Area / City <span className="text-rose-600">*</span>
+              <input type="text" value={clientProfile.invoiceArea} onChange={(e) => setClientField('invoiceArea', e.target.value)} placeholder="Area / City" className={getClientInputClass('invoiceArea')} />
+            </label>
+            <label className="text-xs text-slate-700">Region / State <span className="text-rose-600">*</span>
+              <input type="text" value={clientProfile.invoiceRegion} onChange={(e) => setClientField('invoiceRegion', e.target.value)} placeholder="Region / State" className={getClientInputClass('invoiceRegion')} />
+            </label>
+            <label className="text-xs text-slate-700">Country <span className="text-rose-600">*</span>
+              <select value={clientProfile.invoiceCountry} onChange={(e) => setClientField('invoiceCountry', e.target.value)} className={getClientInputClass('invoiceCountry')}>
+                <option value="">Select country</option>
+                {COUNTRY_OPTIONS.map((country) => (<option key={`inv-${country}`} value={country}>{country}</option>))}
+              </select>
+            </label>
+            <label className="text-xs text-slate-700">Postal code <span className="text-rose-600">*</span>
+              <input type="text" value={clientProfile.invoicePostalCode} onChange={(e) => setClientField('invoicePostalCode', e.target.value)} placeholder="Postal code" className={getClientInputClass('invoicePostalCode')} />
+            </label>
+          </div>
+          <label className="mt-3 flex items-center gap-2 text-xs text-slate-700">
+            <input type="checkbox" checked={clientProfile.shippingSameAsInvoice} onChange={(e) => setClientField('shippingSameAsInvoice', e.target.checked)} />
+            Shipping address is same as invoice address
+          </label>
+          {!clientProfile.shippingSameAsInvoice && (
+            <>
+              <p className="mt-3 text-xs font-semibold text-slate-900">Shipping Address</p>
+              <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                <label className="text-xs text-slate-700">Shipping contact name <span className="text-rose-600">*</span>
+                  <input type="text" value={clientProfile.shippingName} onChange={(e) => setClientField('shippingName', e.target.value)} placeholder="Shipping contact name" className={getClientInputClass('shippingName')} />
+                </label>
+                <label className="text-xs text-slate-700">Shipping contact number <span className="text-rose-600">*</span>
+                  <input type="text" value={clientProfile.shippingPhone} onChange={(e) => setClientField('shippingPhone', e.target.value)} placeholder="Shipping contact number" className={getClientInputClass('shippingPhone')} />
+                </label>
+                <label className="text-xs text-slate-700">Address line 1 <span className="text-rose-600">*</span>
+                  <input type="text" value={clientProfile.shippingAddressLine1} onChange={(e) => setClientField('shippingAddressLine1', e.target.value)} placeholder="Address line 1" className={getClientInputClass('shippingAddressLine1')} />
+                </label>
+                <label className="text-xs text-slate-700">Address line 2 <span className="text-slate-500">(optional)</span>
+                  <input type="text" value={clientProfile.shippingAddressLine2} onChange={(e) => setClientField('shippingAddressLine2', e.target.value)} placeholder="Address line 2" className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700" />
+                </label>
+                <label className="text-xs text-slate-700">Area / City <span className="text-rose-600">*</span>
+                  <input type="text" value={clientProfile.shippingArea} onChange={(e) => setClientField('shippingArea', e.target.value)} placeholder="Area / City" className={getClientInputClass('shippingArea')} />
+                </label>
+                <label className="text-xs text-slate-700">Region / State <span className="text-rose-600">*</span>
+                  <input type="text" value={clientProfile.shippingRegion} onChange={(e) => setClientField('shippingRegion', e.target.value)} placeholder="Region / State" className={getClientInputClass('shippingRegion')} />
+                </label>
+                <label className="text-xs text-slate-700">Country <span className="text-rose-600">*</span>
+                  <select value={clientProfile.shippingCountry} onChange={(e) => setClientField('shippingCountry', e.target.value)} className={getClientInputClass('shippingCountry')}>
+                    <option value="">Select country</option>
+                    {COUNTRY_OPTIONS.map((country) => (<option key={`sh-${country}`} value={country}>{country}</option>))}
+                  </select>
+                </label>
+                <label className="text-xs text-slate-700">Postal code <span className="text-rose-600">*</span>
+                  <input type="text" value={clientProfile.shippingPostalCode} onChange={(e) => setClientField('shippingPostalCode', e.target.value)} placeholder="Postal code" className={getClientInputClass('shippingPostalCode')} />
+                </label>
+              </div>
+            </>
+          )}
+          {showClientValidation && clientValidation.hasMissing && (
+            <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">Please complete all required fields marked with *.</p>
+          )}
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <button onClick={submitOrder} disabled={isSubmittingOrder} className={`${actionButtonPrimaryClass} disabled:cursor-not-allowed disabled:border-fuchsia-300 disabled:bg-fuchsia-300`}>
+              {isSubmittingOrder ? 'Submitting...' : `Place Order (${totalUnits} units)`}
+            </button>
+            <button onClick={() => navigate('/portal/dashboard/products')} className={actionButtonSecondaryClass}>
+              ← Back to Review
+            </button>
+          </div>
+          {checkoutMessage && <p className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">{checkoutMessage}</p>}
+          {checkoutError && <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{checkoutError}</p>}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
+      {/* Lightbox modal */}
+      {lightboxUrl && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 p-4" onClick={() => setLightboxUrl(null)}>
+          <div className="relative" onClick={(e) => e.stopPropagation()}>
+            <img src={lightboxUrl} alt="" className="max-h-[85vh] max-w-[85vw] rounded-xl object-contain shadow-2xl" />
+            <button onClick={() => setLightboxUrl(null)} className="absolute -right-3 -top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white text-lg font-bold text-slate-800 shadow-lg">×</button>
+          </div>
+        </div>
+      )}
       {showOrderConfetti && (
         <div className="fixed inset-0 z-50 flex items-start justify-center bg-white/50 pt-20">
           <div className="rounded-xl border border-slate-200 bg-white px-6 py-4 text-center shadow">
@@ -7655,6 +7821,27 @@ function ProductsModule({ moduleView = 'products' }) {
         </div>
       )}
 
+      {/* ── ORDER FLOW STEPS ── */}
+      <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 sm:px-6">
+        <div className="flex flex-wrap items-center gap-2">
+          <button onClick={() => navigate('/portal/dashboard/catalog')} className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${moduleView === 'catalog' ? 'bg-fuchsia-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+            <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ${moduleView === 'catalog' ? 'bg-white/30 text-white' : 'bg-slate-400 text-white'}`}>1</span>
+            Shop
+          </button>
+          <svg className="h-3 w-3 flex-none text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          <button onClick={() => navigate('/portal/dashboard/products')} className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${moduleView === 'products' ? 'bg-fuchsia-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+            <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ${moduleView === 'products' ? 'bg-white/30 text-white' : 'bg-slate-400 text-white'}`}>2</span>
+            Review Order
+          </button>
+          <svg className="h-3 w-3 flex-none text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          <button onClick={() => navigate('/portal/dashboard/profile')} className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${moduleView === 'profile' ? 'bg-fuchsia-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+            <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ${moduleView === 'profile' ? 'bg-white/30 text-white' : 'bg-slate-400 text-white'}`}>3</span>
+            My Details
+          </button>
+          {orderTotal > 0 && <span className="ml-auto text-xs font-bold text-fuchsia-700">€{orderTotal.toFixed(2)}</span>}
+        </div>
+      </div>
+
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
         <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-sm font-semibold text-transparent">Connection Status</h3>
         <div className="mt-3 grid gap-2 sm:grid-cols-3">
@@ -7721,7 +7908,7 @@ function ProductsModule({ moduleView = 'products' }) {
             </p>
             {(selectedCodes.length > 0 || packageCartItems.length > 0) && (
               <button
-                onClick={() => { setSelectedCodes([]); setPackageCartItems([]); setGeneratedPackageTier('') }}
+                onClick={() => { setSelectedCodes([]); setItemQtys({}); setPackageCartItems([]); setGeneratedPackageTier('') }}
                 className="text-[11px] font-semibold text-rose-500 hover:underline"
               >
                 Clear all
@@ -7729,7 +7916,7 @@ function ProductsModule({ moduleView = 'products' }) {
             )}
           </div>
           {(selectedCodes.length === 0 && packageCartItems.length === 0)
-            ? <p className="mt-2 text-[11px] italic text-slate-400">No products selected yet — go to Buy Now to start adding items.</p>
+            ? <p className="mt-2 text-[11px] italic text-slate-400">No products selected yet — go to Shop to start adding items.</p>
             : (
               <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
                 {selectedProducts.map((product) => (
@@ -7785,9 +7972,77 @@ function ProductsModule({ moduleView = 'products' }) {
             )}
         </div>
 
-        <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
-          <p className="text-xs font-semibold text-slate-900">Client details (saved for next orders)</p>
-          <p className="mt-1 text-[11px] text-slate-500">
+        {/* ── ORDER SUMMARY TABLE ── */}
+        {selectedProducts.length > 0 && (
+          <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-slate-900">Order Summary</p>
+              <button onClick={() => navigate('/portal/dashboard/catalog')} className="text-[11px] font-semibold text-fuchsia-600 hover:underline">+ Add more products</button>
+            </div>
+            <div className="mt-2 divide-y divide-slate-100">
+              {selectedProducts.map(product => {
+                const qty = itemQtys[product.code] || 1
+                const lineTotal = product.price != null ? Number(product.price) * qty : null
+                return (
+                  <div key={product.code} className="flex items-center gap-2 py-2">
+                    <div
+                      className="h-9 w-9 flex-none cursor-zoom-in overflow-hidden rounded-md border border-slate-100"
+                      style={{ backgroundColor: product.preview || '#e2e8f0' }}
+                      onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}
+                    >
+                      {product.imageUrl && <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[11px] font-semibold text-slate-900">{product.name}</p>
+                      <p className="text-[10px] text-slate-400">{product.code}</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(prev => ({...prev, [product.code]: q})) }} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">−</button>
+                      <span className="w-6 text-center text-xs font-semibold text-slate-900">{qty}</span>
+                      <button onClick={() => setItemQtys(prev => ({...prev, [product.code]: qty + 1}))} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">+</button>
+                    </div>
+                    <div className="w-16 text-right">
+                      {lineTotal != null ? <p className="text-xs font-semibold text-fuchsia-700">€{lineTotal.toFixed(2)}</p> : <p className="text-xs text-slate-400">—</p>}
+                    </div>
+                    <button onClick={() => toggleSelection(product.code)} className="flex h-6 w-6 items-center justify-center rounded-full text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Remove">×</button>
+                  </div>
+                )
+              })}
+            </div>
+            {orderTotal > 0 && (
+              <div className="mt-2 border-t border-slate-200 pt-2">
+                <div className="flex justify-between text-sm">
+                  <span className="font-semibold text-slate-700">Estimated Total</span>
+                  <span className="font-bold text-fuchsia-700">€{orderTotal.toFixed(2)}</span>
+                </div>
+                <p className="mt-0.5 text-[10px] text-slate-400">Excl. shipping. Final invoice issued by GEL.IT.UP.</p>
+              </div>
+            )}
+          </div>
+        )}
+        {/* ── YOUR DETAILS STATUS ── */}
+        <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="text-xs font-semibold text-slate-900">Your Details</p>
+              <p className="mt-0.5 text-[11px] text-slate-500">Required for order submission.</p>
+            </div>
+            {clientValidation.hasMissing
+              ? <button onClick={() => navigate('/portal/dashboard/profile')} className="rounded-lg border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100">Complete details →</button>
+              : <button onClick={() => navigate('/portal/dashboard/profile')} className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-200">✓ Ready — edit</button>
+            }
+          </div>
+          {clientValidation.hasMissing && <p className="mt-2 text-[11px] text-rose-600">Billing &amp; shipping details incomplete — needed to process your order.</p>}
+          {!clientValidation.hasMissing && (
+            <div className="mt-2 space-y-0.5 text-[11px] text-slate-500">
+              <p>{clientProfile.customerName}{clientProfile.contactEmail ? ` · ${clientProfile.contactEmail}` : ''}</p>
+              <p>{invoiceAddressComposed}</p>
+            </div>
+          )}
+        </div>
+        <div className="mt-3 hidden">
+          <p className="text-xs font-semibold text-slate-900 hidden">Client details (saved for next orders)</p>
+          <p className="mt-1 text-[11px] text-slate-500 hidden">
             Required fields are marked with <span className="font-semibold text-rose-600">*</span>
           </p>
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
@@ -7955,11 +8210,11 @@ function ProductsModule({ moduleView = 'products' }) {
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <button
-            onClick={submitOrder}
+            onClick={() => clientValidation.hasMissing ? navigate('/portal/dashboard/profile') : submitOrder()}
             disabled={isSubmittingOrder}
             className={`${actionButtonPrimaryClass} disabled:cursor-not-allowed disabled:border-fuchsia-300 disabled:bg-fuchsia-300`}
           >
-            {isSubmittingOrder ? 'Submitting...' : `Finalize Order (${totalUnits})`}
+            {isSubmittingOrder ? 'Submitting...' : clientValidation.hasMissing ? 'Complete Details →' : `Place Order (${totalUnits} units)`}
           </button>
           <a
             href={checkoutHref}
@@ -7979,6 +8234,7 @@ function ProductsModule({ moduleView = 'products' }) {
           <button
             onClick={() => {
               setSelectedCodes([])
+              setItemQtys({})
               setPackageCartItems([])
               setGeneratedPackageTier('')
               setIncludeProfessionalBasePack(false)
@@ -8176,46 +8432,56 @@ function ProductsModule({ moduleView = 'products' }) {
 
       {isCatalogView && (
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
-        <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">GEL.IT.UP Our Products</h3>
-            <p className="mt-1 text-xs text-slate-500">Add extra products to your order.</p>
+            <h3 className="text-lg font-semibold text-slate-900">GEL.IT.UP Products</h3>
+            <p className="mt-1 text-xs text-slate-500">Browse and tap a product to add it to your order.</p>
           </div>
           <button
             onClick={() => navigate('/portal/dashboard/products')}
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700"
+            className="rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white hover:bg-fuchsia-500"
           >
-            Back to My Order
+            Review Order ({totalUnits}{orderTotal > 0 ? ` · €${orderTotal.toFixed(2)}` : ''}) →
           </button>
         </div>
-        <p className="mt-1 text-xs text-slate-500">Professional ordering workflow for Our Products.</p>
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        {/* Full-width search bar */}
+        <div className="relative">
+          <svg className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 pointer-events-none text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+          </svg>
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search SKU or product name"
-            className={filterControlClass}
+            placeholder="Search by name, shade or code..."
+            className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-10 pr-10 text-sm text-slate-800 placeholder-slate-400 shadow-sm focus:border-fuchsia-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-100"
           />
+          {query && (
+            <button onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          )}
+        </div>
+        {/* Filter row */}
+        <div className="mt-2 flex flex-wrap gap-2">
           <select
             value={category}
             onChange={(event) => setCategory(event.target.value)}
-            className={filterControlClass}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 focus:border-fuchsia-400 focus:outline-none"
           >
-            <option value="All">All collection categories</option>
+            <option value="All">All categories</option>
             {PRODUCT_CATEGORIES.map((item) => (
               <option key={item} value={item}>{item}</option>
             ))}
           </select>
-          <label className="flex min-h-[42px] items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
+          <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
             <input
               type="checkbox"
               checked={showSelectedOnly}
               onChange={(event) => setShowSelectedOnly(event.target.checked)}
             />
-            Show selected only
+            Selected only
           </label>
-          <label className="flex min-h-[42px] items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
+          <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
             <input
               type="checkbox"
               checked={showCleanScienceOnly}
@@ -8243,7 +8509,7 @@ function ProductsModule({ moduleView = 'products' }) {
             <div className="flex items-center gap-3">
               {(selectedCodes.length > 0 || packageCartItems.length > 0) && (
                 <button
-                  onClick={() => { setSelectedCodes([]); setPackageCartItems([]); setGeneratedPackageTier('') }}
+                  onClick={() => { setSelectedCodes([]); setItemQtys({}); setPackageCartItems([]); setGeneratedPackageTier('') }}
                   className="text-[11px] font-semibold text-rose-500 hover:underline"
                 >
                   Clear all
@@ -8253,7 +8519,7 @@ function ProductsModule({ moduleView = 'products' }) {
                 onClick={() => navigate('/portal/dashboard/products')}
                 className="rounded-lg bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-fuchsia-500"
               >
-                Checkout ({totalUnits})
+                Review Order ({totalUnits}{orderTotal > 0 ? ` · €${orderTotal.toFixed(2)}` : ''}) →
               </button>
             </div>
           </div>
@@ -8316,41 +8582,90 @@ function ProductsModule({ moduleView = 'products' }) {
           ? (
             <p className="mt-6 text-sm text-slate-400 italic">No products match your search.</p>
           )
-          : groupedFilteredProducts.map(([cat, catProducts]) => (
-            <div key={cat} className="mt-6">
-              <div className="mb-3 flex items-center gap-3">
-                <h4 className="text-sm font-black uppercase tracking-[0.08em] text-slate-900">{cat}</h4>
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">{catProducts.length}</span>
-              </div>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-                {catProducts.map((product) => {
-                  const selected = selectedCodes.includes(product.code)
-                  return (
-                    <button
-                      key={product.code}
-                      onClick={() => toggleSelection(product.code)}
-                      className={`rounded-xl border p-2 text-left transition ${
-                        selected ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-slate-200 bg-white text-slate-800 hover:border-fuchsia-300'
-                      }`}
-                    >
-                      <div className="relative h-20 w-full overflow-hidden rounded-md border border-slate-100">
-                        <div className="absolute inset-0" style={{ backgroundColor: product.preview }} />
-                        {product.imageUrl && (
-                          <img src={product.imageUrl} alt={product.name} loading="lazy" className="relative z-10 h-full w-full object-cover" />
+          : groupedFilteredProducts.map(([cat, catProducts]) => {
+            const isExpanded = query ? true : expandedCategories.has(cat)
+            const selectedInCat = catProducts.filter(p => selectedCodes.includes(p.code)).length
+            return (
+            <div key={cat} className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              {/* Category header — click to expand/collapse */}
+              <button
+                onClick={() => toggleCategory(cat)}
+                className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-slate-50"
+              >
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-black uppercase tracking-[0.08em] text-slate-900">{cat}</h4>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">{catProducts.length}</span>
+                  {selectedInCat > 0 && (
+                    <span className="rounded-full bg-fuchsia-600 px-2 py-0.5 text-[11px] font-bold text-white">{selectedInCat} selected</span>
+                  )}
+                </div>
+                <svg
+                  className={`h-4 w-4 flex-none text-slate-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Products grid — only rendered when expanded */}
+              {isExpanded && (
+                <div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                  {catProducts.map((product) => {
+                    const selected = selectedCodes.includes(product.code)
+                    return (
+                      <div
+                        key={product.code}
+                        className={`rounded-xl border p-2 transition ${
+                          selected ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-slate-200 bg-white text-slate-800 hover:border-fuchsia-300'
+                        }`}
+                      >
+                        {/* Image — click to zoom */}
+                        <div
+                          className="relative h-20 w-full cursor-zoom-in overflow-hidden rounded-md border border-slate-100"
+                          title="Click to enlarge"
+                          onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}
+                        >
+                          <div className="absolute inset-0" style={{ backgroundColor: product.preview }} />
+                          {product.imageUrl && (
+                            <img src={product.imageUrl} alt={product.name} loading="lazy" className="relative z-10 h-full w-full object-cover" />
+                          )}
+                        </div>
+                        {/* Name + price — click to select */}
+                        <button className="mt-1.5 w-full text-left" onClick={() => toggleSelection(product.code)}>
+                          <p className="text-[11px] font-semibold leading-tight">{product.name}</p>
+                          {product.price != null && (
+                            <p className={`text-[11px] font-bold ${selected ? 'text-fuchsia-200' : 'text-fuchsia-700'}`}>
+                              €{Number(product.price).toFixed(2)}
+                            </p>
+                          )}
+                        </button>
+                        {/* Qty controls when selected */}
+                        {selected && (
+                          <div className="mt-1.5 flex items-center justify-between">
+                            <div className="flex items-center gap-0.5">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); const q = (itemQtys[product.code] || 1) - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(prev => ({...prev, [product.code]: q})) }}
+                                className="flex h-5 w-5 items-center justify-center rounded bg-white/20 text-sm font-bold leading-none hover:bg-white/30"
+                              >−</button>
+                              <span className="w-6 text-center text-xs font-bold">{itemQtys[product.code] || 1}</span>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setItemQtys(prev => ({...prev, [product.code]: (prev[product.code] || 1) + 1})) }}
+                                className="flex h-5 w-5 items-center justify-center rounded bg-white/20 text-sm font-bold leading-none hover:bg-white/30"
+                              >+</button>
+                            </div>
+                            {product.price != null && (itemQtys[product.code] || 1) > 1 && (
+                              <span className="text-[10px] font-bold text-fuchsia-100">€{(Number(product.price) * (itemQtys[product.code] || 1)).toFixed(2)}</span>
+                            )}
+                          </div>
                         )}
                       </div>
-                      <p className="mt-1.5 text-[11px] font-semibold leading-tight">{product.name}</p>
-                      {product.price != null && (
-                        <p className={`text-[11px] font-bold ${selected ? 'text-fuchsia-200' : 'text-fuchsia-700'}`}>
-                          €{Number(product.price).toFixed(2)}
-                        </p>
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
-          ))
+            )
+          })
         }
         {!isLoadingFeed && !filteredProducts.length && (
           <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
@@ -9563,8 +9878,9 @@ function PortalDashboard({ onLogout }) {
     () => [
       { key: 'overview', label: 'Overview' },
       { key: 'products', label: 'My Order' },
+      { key: 'profile', label: 'My Information' },
       { key: 'orders', label: 'Orders' },
-      { key: 'catalog', label: 'Buy Now' },
+      { key: 'catalog', label: 'Shop' },
       { key: 'support', label: 'Support & Tracking' },
     ],
     [],
@@ -9825,7 +10141,7 @@ function PortalDashboard({ onLogout }) {
       </aside>
 
       <div className="space-y-4">
-        {activeModule === 'products' || activeModule === 'catalog' ? (
+        {activeModule === 'products' || activeModule === 'catalog' || activeModule === 'profile' ? (
           <ProductsModule moduleView={activeModule} />
         ) : activeModule === 'orders' || activeModule === 'support' ? (
           <OrdersModule />
