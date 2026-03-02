@@ -708,7 +708,6 @@ const navItems = [
   { to: '/full-catalogue', label: 'Our Products' },
   { to: '/distributors', label: 'Distributors' },
   { to: '/application-services', label: 'Application Services' },
-  { to: '/contact-us', label: 'Contact us', isContactAction: true },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -4019,7 +4018,7 @@ function HomePage({ onOpenContactModal }) {
               <NavLink to="/become-distributor" className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
                 Apply as Distributor
               </NavLink>
-              <NavLink to="/portal/login?mode=create-password" className="rounded-lg border border-white/80 bg-transparent px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-white hover:text-fuchsia-700">
+              <NavLink to="/portal/login?mode=create-password" className="rounded-lg border-2 border-white bg-white px-4 py-2 text-sm font-semibold text-fuchsia-700 transition duration-300 hover:bg-white/90">
                 Buy Now
               </NavLink>
             </div>
@@ -10741,10 +10740,7 @@ function App() {
             path="/distributors"
             element={<DistributorsPage />}
           />
-          <Route
-            path="/contact-us"
-            element={<Navigate to="/become-distributor" replace />}
-          />
+
           <Route path="/products" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
@@ -10758,7 +10754,7 @@ function App() {
           <Route path="/contact" element={<Navigate to="/become-distributor" replace />} />
           <Route path="/baseline" element={<Navigate to="/" replace />} />
           <Route path="/baseline/:slug" element={<Navigate to="/" replace />} />
-          <Route path="/pages/contact-us" element={<Navigate to="/become-distributor" replace />} />
+
           <Route path="/application-services" element={<Navigate to="/become-distributor" replace />} />
           <Route path="/application-services/*" element={<Navigate to="/become-distributor" replace />} />
           <Route path="/pages/:slug" element={<ImportedAnyPage />} />
