@@ -2874,7 +2874,7 @@ function FullCataloguePage() {
               />
             </div>
 
-            {isSolidGelPolish && (
+            {isSolidGelPolish && Object.keys(solidGelColourFamilies).length > 0 && (
               <div className="mt-3 rounded-[12px] border border-[#4A4A4A]/30 bg-black/[0.02] p-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/55">Quick Filter</p>
                 <div className="mt-2 flex flex-wrap gap-2">
