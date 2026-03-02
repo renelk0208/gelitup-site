@@ -2514,6 +2514,21 @@ function FullCataloguePage() {
     }
   }, [displayedLookbookGroups.length, expandedLookbookGroup])
 
+  // Autoplay: advance through pages of the first lookbook group every 3.5 s
+  useEffect(() => {
+    const group = displayedLookbookGroups[0]
+    if (!group) return
+    const pages = Array.isArray(group.pages) ? group.pages : []
+    if (pages.length <= 1) return
+    const timer = setInterval(() => {
+      setSelectedLookbookPageByGroup((prev) => {
+        const cur = Number(prev[group.id] ?? 0)
+        return { ...prev, [group.id]: (cur + 1) % pages.length }
+      })
+    }, 3500)
+    return () => clearInterval(timer)
+  }, [displayedLookbookGroups])
+
   useEffect(() => {
     const availableGroupIds = new Set(displayedLookbookGroups.map((group) => group.id))
     setSelectedLookbookPageByGroup((current) => {
@@ -3261,98 +3276,75 @@ function FullCataloguePage() {
 
           <div className="mx-auto max-w-6xl rounded-2xl border border-[#4A4A4A]/25 bg-white p-4 sm:p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#D43790]">NEW ADDITIONS</p>
-            <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.08em] text-[#1A1A1A] sm:text-3xl">{springSummerLookbook.title}</h2>
-            <p className="mt-2 max-w-2xl text-sm text-[#1A1A1A]/75 sm:text-base">{springSummerLookbook.subtitle}</p>
+            <h2 className="mt-1 text-xl font-extrabold uppercase tracking-[0.08em] text-[#1A1A1A]">{springSummerLookbook.title}</h2>
+            <p className="mt-1 text-sm text-[#1A1A1A]/60">{springSummerLookbook.subtitle}</p>
 
-            {/* Horizontal snap carousel of group cards */}
-            <div className="mt-5 flex gap-2.5 overflow-x-auto pb-2 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {displayedLookbookGroups.map((group, groupIndex) => {
-                const isExpanded = groupIndex === expandedLookbookGroup
-                const pages = Array.isArray(group?.pages) ? group.pages : []
-                const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), Math.max(0, pages.length - 1)))
-                const keyPage = pages[selectedPageIndex] || pages[0] || null
-                const keyPageType = String(keyPage?.mediaType || '').toLowerCase()
-                return (
-                  <div key={group.id} className="snap-start shrink-0 w-36 sm:w-44 md:w-48">
-                    <article className={`overflow-hidden rounded-xl border bg-white transition h-full ${isExpanded ? 'border-[#D43790] shadow-[0_0_0_2px_rgba(212,55,144,0.25)]' : 'border-[#4A4A4A]/20 hover:border-[#D43790]/50'}`}>
-                      <button
-                        type="button"
-                        onClick={() => setExpandedLookbookGroup(isExpanded ? -1 : groupIndex)}
-                        className="w-full text-left"
-                      >
-                        <div className="relative p-2">
-                          <div className="overflow-hidden rounded-lg border border-[#4A4A4A]/20 bg-[#F8F8F8]">
-                            <div className="aspect-[4/5] w-full bg-white p-1">
-                              {keyPageType === 'video'
-                                ? <video src={keyPage?.imageUrl} className="h-full w-full rounded-md object-cover" autoPlay muted loop playsInline preload="metadata" />
-                                : <img src={keyPage?.imageUrl || group.heroImage || '/logo.png'} alt={group.title} className="h-full w-full rounded-md object-cover" loading="lazy" />}
-                            </div>
-                          </div>
-                          {isExpanded && <div className="absolute right-3 top-3 h-2 w-2 rounded-full bg-[#D43790]" />}
-                        </div>
-                        <div className="px-2 pb-2">
-                          <p className="text-xs font-black uppercase tracking-[0.08em] text-[#1A1A1A] leading-tight">{group.title}</p>
-                          <p className="mt-0.5 text-[10px] text-[#1A1A1A]/55">{pages.length} pages</p>
-                        </div>
-                      </button>
-                    </article>
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Expanded panel: big stage LEFT, thumbnail picker RIGHT */}
-            {expandedLookbookGroup >= 0 && (() => {
-              const group = displayedLookbookGroups[expandedLookbookGroup]
-              if (!group) return null
+            {displayedLookbookGroups.map((group) => {
               const pages = Array.isArray(group?.pages) ? group.pages : []
               if (!pages.length) return null
-              const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), Math.max(0, pages.length - 1)))
-              const keyPage = pages[selectedPageIndex] || pages[0]
-              const keyPageType = String(keyPage?.mediaType || '').toLowerCase()
+              const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
+              const page = pages[selectedPageIndex]
+              const pageType = String(page?.mediaType || '').toLowerCase()
               return (
-                <div className="mt-4 rounded-xl border border-[#D43790]/35 bg-[#FAFAFA] p-3 sm:p-4">
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">{group.title}</p>
-                  <div className="grid gap-4 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
-
-                    {/* Stage — large selected image */}
-                    <div className="overflow-hidden rounded-xl border border-[#4A4A4A]/20 bg-white p-1.5">
-                      <div className={`${keyPageType === 'pdf' ? 'aspect-[210/297]' : 'aspect-[9/16]'} w-full`}>
-                        {keyPageType === 'video'
-                          ? <video src={keyPage?.imageUrl} className="h-full w-full rounded-lg object-cover" autoPlay muted loop playsInline controls preload="metadata" />
-                          : keyPageType === 'pdf'
-                            ? <iframe src={`${keyPage?.link || keyPage?.imageUrl}#view=FitH`} title="Lookbook page" className="h-full w-full rounded-lg border-0" />
-                            : <img src={keyPage?.imageUrl || group.heroImage || '/logo.png'} alt={group.title} className="h-full w-full rounded-lg object-cover" loading="lazy" />}
-                      </div>
+                <div key={group.id} className="mt-3">
+                  {/* Main stage — compact fixed height */}
+                  <div className="relative overflow-hidden rounded-xl bg-[#1A1A1A]" style={{ height: '300px' }}>
+                    <div className="flex h-full w-full items-center justify-center">
+                      {pageType === 'video'
+                        ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-auto max-w-full object-contain" autoPlay muted playsInline preload="metadata" />
+                        : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-auto max-w-full object-contain" loading="lazy" />}
                     </div>
 
-                    {/* Thumbnail picker grid */}
-                    <div className="grid auto-rows-min grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 content-start">
-                      {pages.map((page, idx) => {
-                        const mediaType = String(page?.mediaType || '').toLowerCase()
-                        const isSelected = idx === selectedPageIndex
-                        return (
-                          <button
-                            type="button"
-                            key={`thumb-${group.id}-${idx}`}
-                            onClick={() => setSelectedLookbookPageByGroup((current) => ({ ...current, [group.id]: idx }))}
-                            className={`overflow-hidden rounded-lg border bg-white transition ${isSelected ? 'border-[#D43790] shadow-[0_0_0_1px_rgba(212,55,144,0.2)]' : 'border-[#4A4A4A]/20 hover:border-[#D43790]/50'}`}
-                          >
-                            <div className={`${mediaType === 'pdf' ? 'aspect-[210/297]' : 'aspect-[9/16]'} w-full bg-[#F8F8F8] p-1`}>
-                              {mediaType === 'video'
-                                ? <video src={page.imageUrl} className="h-full w-full rounded object-cover" autoPlay muted loop playsInline preload="metadata" />
-                                : mediaType === 'pdf'
-                                  ? <iframe src={`${page.link || page.imageUrl}#view=FitH`} title="page" className="h-full w-full rounded border-0 pointer-events-none" />
-                                  : <img src={page.imageUrl} alt="Lookbook page" className="h-full w-full rounded object-cover" loading="lazy" />}
-                            </div>
-                          </button>
-                        )
-                      })}
+                    {/* Prev */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-xl text-white transition hover:bg-black/75"
+                    >‹</button>
+                    {/* Next */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-xl text-white transition hover:bg-black/75"
+                    >›</button>
+
+                    {/* Dot indicators */}
+                    <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
+                      {pages.map((_, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))}
+                          className={`h-1.5 rounded-full transition-all duration-300 ${idx === selectedPageIndex ? 'w-5 bg-[#D43790]' : 'w-1.5 bg-white/50'}`}
+                        />
+                      ))}
                     </div>
+                  </div>
+
+                  {/* Thumbnail filmstrip */}
+                  <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    {pages.map((p, idx) => {
+                      const mt = String(p?.mediaType || '').toLowerCase()
+                      const isActive = idx === selectedPageIndex
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))}
+                          className={`shrink-0 overflow-hidden rounded-md border transition ${isActive ? 'border-[#D43790]' : 'border-[#4A4A4A]/20 hover:border-[#D43790]/50'}`}
+                        >
+                          <div className="h-14 w-9 bg-[#F0F0F0]">
+                            {mt === 'video'
+                              ? <video src={p.imageUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" />
+                              : <img src={p.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}
+                          </div>
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
               )
-            })()}
+            })}
           </div>
 
           {/* PERSISTENT FOOTER */}
