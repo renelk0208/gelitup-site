@@ -3261,7 +3261,7 @@ function FullCataloguePage() {
             <p className="mt-2 max-w-2xl text-sm text-[#1A1A1A]/75 sm:text-base">{springSummerLookbook.subtitle}</p>
 
             {/* Horizontal snap carousel of group cards */}
-            <div className="mt-5 flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="mt-5 flex gap-2.5 overflow-x-auto pb-2 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {displayedLookbookGroups.map((group, groupIndex) => {
                 const isExpanded = groupIndex === expandedLookbookGroup
                 const pages = Array.isArray(group?.pages) ? group.pages : []
@@ -3269,25 +3269,25 @@ function FullCataloguePage() {
                 const keyPage = pages[selectedPageIndex] || pages[0] || null
                 const keyPageType = String(keyPage?.mediaType || '').toLowerCase()
                 return (
-                  <div key={group.id} className="snap-start shrink-0 w-[calc(50%-6px)] sm:w-[calc(33.33%-8px)] lg:w-[calc(25%-9px)]">
+                  <div key={group.id} className="snap-start shrink-0 w-36 sm:w-44 md:w-48">
                     <article className={`overflow-hidden rounded-xl border bg-white transition h-full ${isExpanded ? 'border-[#D43790] shadow-[0_0_0_2px_rgba(212,55,144,0.25)]' : 'border-[#4A4A4A]/20 hover:border-[#D43790]/50'}`}>
                       <button
                         type="button"
                         onClick={() => setExpandedLookbookGroup(isExpanded ? -1 : groupIndex)}
                         className="w-full text-left"
                       >
-                        <div className="relative p-2.5">
+                        <div className="relative p-2">
                           <div className="overflow-hidden rounded-lg border border-[#4A4A4A]/20 bg-[#F8F8F8]">
-                            <div className={`${keyPageType === 'pdf' ? 'aspect-[210/297]' : 'aspect-[9/16]'} w-full bg-white p-1.5`}>
+                            <div className="aspect-[4/5] w-full bg-white p-1">
                               {keyPageType === 'video'
                                 ? <video src={keyPage?.imageUrl} className="h-full w-full rounded-md object-cover" autoPlay muted loop playsInline preload="metadata" />
                                 : <img src={keyPage?.imageUrl || group.heroImage || '/logo.png'} alt={group.title} className="h-full w-full rounded-md object-cover" loading="lazy" />}
                             </div>
                           </div>
-                          {isExpanded && <div className="absolute right-4 top-4 h-2.5 w-2.5 rounded-full bg-[#D43790]" />}
+                          {isExpanded && <div className="absolute right-3 top-3 h-2 w-2 rounded-full bg-[#D43790]" />}
                         </div>
-                        <div className="px-2.5 pb-2.5">
-                          <p className="text-xs font-black uppercase tracking-[0.08em] text-[#1A1A1A]">{group.title}</p>
+                        <div className="px-2 pb-2">
+                          <p className="text-xs font-black uppercase tracking-[0.08em] text-[#1A1A1A] leading-tight">{group.title}</p>
                           <p className="mt-0.5 text-[10px] text-[#1A1A1A]/55">{pages.length} pages</p>
                         </div>
                       </button>
