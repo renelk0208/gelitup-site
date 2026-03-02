@@ -75,12 +75,12 @@ const PROFORMA_LEEUKOPF_ADDRESS = import.meta.env.VITE_PROFORMA_LEEUKOPF_ADDRESS
 const PROFORMA_LEEUKOPF_PHONE = import.meta.env.VITE_PROFORMA_LEEUKOPF_PHONE || '(+359) 73 891 041'
 const PROFORMA_LEEUKOPF_EMAIL = import.meta.env.VITE_PROFORMA_LEEUKOPF_EMAIL || 'gelitup.portal@gelitup.com'
 const TIKTOK_URL = import.meta.env.VITE_TIKTOK_URL || 'https://www.tiktok.com/@gelitupgreece'
-const INSTAGRAM_URL = import.meta.env.VITE_INSTAGRAM_URL || 'https://www.instagram.com/gelitup'
+const INSTAGRAM_URL = import.meta.env.VITE_INSTAGRAM_URL || 'https://www.instagram.com/gelitupgreece'
 const LINKEDIN_URL = import.meta.env.VITE_LINKEDIN_URL || 'https://gr.linkedin.com/company/gel-it-up-by-giup'
 const FACEBOOK_URL = import.meta.env.VITE_FACEBOOK_URL || 'https://www.facebook.com/GEL.IT.UP.Greece/'
 const YOUTUBE_URL = import.meta.env.VITE_YOUTUBE_URL || 'https://www.youtube.com/@GELITUP'
 const TIKTOK_HANDLE = import.meta.env.VITE_TIKTOK_HANDLE || 'GELITUPGREECE'
-const INSTAGRAM_HANDLE = import.meta.env.VITE_INSTAGRAM_HANDLE || 'gelitup'
+const INSTAGRAM_HANDLE = import.meta.env.VITE_INSTAGRAM_HANDLE || 'gelitupgreece'
 const LINKEDIN_HANDLE = import.meta.env.VITE_LINKEDIN_HANDLE || 'GEL.IT.UP'
 const FACEBOOK_HANDLE = import.meta.env.VITE_FACEBOOK_HANDLE || '@gelitup'
 const YOUTUBE_HANDLE = import.meta.env.VITE_YOUTUBE_HANDLE || '@GELITUP'
@@ -1733,7 +1733,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
       // Standard: COLORS/CAT EYE/img.jpg → subcategory='CAT EYE'
       // NUDE, FRENCH, PASTEL, RONE (GIUP1) belong under Solid Gel Polish
       const folderToken = (segments[segments.length - 2] || 'General').toUpperCase()
-      subcategory = ['NUDE', 'FRENCH', 'PASTEL', 'RONE', 'GLASS EFFECT', 'GLITTERS', 'PEARL', 'SNOWFLAKE'].includes(folderToken)
+      subcategory = ['NUDE', 'FRENCH', 'PASTEL', 'RONE', 'PEARL'].includes(folderToken)
         ? 'SOLID GEL POLISH'
         : (segments[segments.length - 2] || 'General')
     } else if (segments.length > 2) {
@@ -1748,7 +1748,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     const subcategoryItems = categoryBucket.get(subcategory) || []
 
     const rawFolder = (segments[segments.length - 2] || '').toUpperCase()
-    const solidGelFlatFolders = { NUDE: 'Nude', FRENCH: 'French', PASTEL: 'Pastel', RONE: 'GIUP1', 'GLASS EFFECT': 'Glass Effect', GLITTERS: 'Glitters', PEARL: 'Pearl', SNOWFLAKE: 'Snowflake' }
+    const solidGelFlatFolders = { NUDE: 'Nude', FRENCH: 'French', PASTEL: 'Pastel', RONE: 'GIUP1', PEARL: 'Pearl' }
     subcategoryItems.push({
       imageUrl: imagePath,
       name: formatCatalogueItemName(afterRoot),
@@ -1784,8 +1784,6 @@ const COLOR_FAMILY_FILTERS = [
   { key: 'CORAL ORANGE', label: 'Coral Orange', swatchClass: 'bg-orange-400' },
   { key: 'FRENCH', label: 'French', swatchClass: 'bg-pink-100 border border-pink-200' },
   { key: 'GIUP1', label: 'GIUP1', swatchClass: 'bg-fuchsia-200 border border-fuchsia-300' },
-  { key: 'GLASS EFFECT', label: 'Glass Effect', swatchClass: 'bg-cyan-100 border border-cyan-300' },
-  { key: 'GLITTERS', label: 'Glitters', swatchClass: 'bg-amber-300' },
   { key: 'GREEN', label: 'Green', swatchClass: 'bg-emerald-500' },
   { key: 'GREY', label: 'Grey', swatchClass: 'bg-slate-500' },
   { key: 'NEON', label: 'Neon', swatchClass: 'bg-lime-400' },
@@ -1795,7 +1793,6 @@ const COLOR_FAMILY_FILTERS = [
   { key: 'PINK', label: 'Pink', swatchClass: 'bg-pink-400' },
   { key: 'PURPLE', label: 'Purple', swatchClass: 'bg-violet-500' },
   { key: 'RED', label: 'Red', swatchClass: 'bg-red-500' },
-  { key: 'SNOWFLAKE', label: 'Snowflake', swatchClass: 'bg-blue-100 border border-blue-200' },
   { key: 'WHITE', label: 'White', swatchClass: 'bg-white border border-slate-300' },
   { key: 'YELLOW', label: 'Yellow', swatchClass: 'bg-yellow-300' },
 ]
@@ -3936,6 +3933,110 @@ function BaselinePageView() {
   )
 }
 
+function InstagramFeedStrip() {
+  const [posts, setPosts] = useState([])
+  const [status, setStatus] = useState('loading') // 'loading' | 'ok' | 'error'
+
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      try {
+        const res = await fetch('/.netlify/functions/instagram-feed')
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data = await res.json()
+        if (mounted) {
+          setPosts(data.posts || [])
+          setStatus((data.posts || []).length > 0 ? 'ok' : 'error')
+        }
+      } catch {
+        if (mounted) setStatus('error')
+      }
+    }
+    load()
+    return () => { mounted = false }
+  }, [])
+
+  if (status === 'error' || (status !== 'loading' && posts.length === 0)) return null
+
+  return (
+    <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#0F0F0F] py-8">
+      <div className="mx-auto max-w-6xl px-4 sm:px-8">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {/* Instagram gradient icon */}
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#f09433" />
+                  <stop offset="25%" stopColor="#e6683c" />
+                  <stop offset="50%" stopColor="#dc2743" />
+                  <stop offset="75%" stopColor="#cc2366" />
+                  <stop offset="100%" stopColor="#bc1888" />
+                </linearGradient>
+              </defs>
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="url(#ig-grad)" strokeWidth="2" fill="none" />
+              <circle cx="12" cy="12" r="4" stroke="url(#ig-grad)" strokeWidth="2" fill="none" />
+              <circle cx="17.5" cy="6.5" r="1" fill="url(#ig-grad)" />
+            </svg>
+            <span className="text-sm font-bold uppercase tracking-[0.12em] text-white">
+              @{INSTAGRAM_HANDLE}
+            </span>
+          </div>
+          <a
+            href={INSTAGRAM_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-semibold uppercase tracking-widest text-[#D43790] transition hover:text-fuchsia-300"
+          >
+            Follow Us →
+          </a>
+        </div>
+
+        {status === 'loading' ? (
+          <div className="flex gap-3 overflow-hidden">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-48 w-48 flex-shrink-0 animate-pulse rounded-xl bg-white/10" />
+            ))}
+          </div>
+        ) : (
+          <div className="scrollbar-hide -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:-mx-8 sm:px-8">
+            {posts.map((post) => {
+              const thumb = post.media_type === 'VIDEO' ? (post.thumbnail_url || post.media_url) : post.media_url
+              const isVideo = post.media_type === 'VIDEO'
+              return (
+                <a
+                  key={post.id}
+                  href={post.permalink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group relative h-48 w-48 flex-shrink-0 snap-start overflow-hidden rounded-xl"
+                >
+                  <img
+                    src={thumb}
+                    alt={post.caption ? post.caption.slice(0, 80) : 'Instagram post'}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  {isVideo && (
+                    <div className="absolute right-2 top-2 rounded-full bg-black/60 p-1">
+                      <svg className="h-3 w-3 fill-white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 transition duration-300 group-hover:opacity-100">
+                    {post.caption && (
+                      <p className="line-clamp-3 p-3 text-[10px] leading-relaxed text-white">{post.caption}</p>
+                    )}
+                  </div>
+                </a>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function HomePage({ onOpenContactModal }) {
   const [media, setMedia] = useState(() => ({
     heroImage: '/logo.png',
@@ -4254,6 +4355,8 @@ function HomePage({ onOpenContactModal }) {
           View Distribution Options
         </NavLink>
       </InfoCard>
+
+      <InstagramFeedStrip />
 
     </section>
   )
