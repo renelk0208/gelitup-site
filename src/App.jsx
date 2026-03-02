@@ -97,8 +97,8 @@ const CONTENT_CACHE_BUSTER = '2026-02-27-1'
 const HOME_CLOUD_DANCER_DEFAULT = {
   title: 'Cloud Dancer - The Story',
   introText: 'The new professional neutral. 2026 begins with softness, refinement, and intention. Cloud Dancer Series introduces illuminated tones that enhance the nail without overpowering it. Modern shades designed to feel effortless, elevated, and timeless.',
-  ctaLabel: 'View Story PDF',
-  ctaLink: '/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf',
+  ctaLabel: 'See Our Products',
+  ctaLink: '/full-catalogue',
 }
 const LEEUKOPF_DISTRIBUTORS_SOURCE_URL = 'https://leeukopf.com/our-brands'
 const DISTRIBUTOR_DIRECTORY = [
@@ -4257,9 +4257,9 @@ function HomePage({ onOpenContactModal }) {
           controls={false}
           preload="metadata"
           aria-hidden="true"
-          onLoadedData={(e) => { e.target.playbackRate = 0.4 }}
+          onLoadedData={(e) => { e.target.playbackRate = 0.25 }}
         />
-        <div className="absolute inset-0 bg-[#1A1A1A]/15" />
+        <div className="absolute inset-0 bg-[#1A1A1A]/5" />
 
         <div className="relative mx-auto max-w-6xl">
           <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8">
@@ -4267,14 +4267,12 @@ function HomePage({ onOpenContactModal }) {
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Spring / Summer News</p>
               <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-3xl">{homeCloudStory.title}</h2>
               <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/90 sm:text-base">{homeCloudStory.introText}</p>
-              <a
-                href={homeCloudStory.ctaLink}
-                target="_blank"
-                rel="noreferrer"
+              <NavLink
+                to={homeCloudStory.ctaLink}
                 className="mt-5 inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]"
               >
                 {homeCloudStory.ctaLabel}
-              </a>
+              </NavLink>
             </div>
 
             <div className="w-full">
