@@ -2154,7 +2154,6 @@ function FullCataloguePage() {
   const [colorTileFrame, setColorTileFrame] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
-  const [showSuperbondDetails, setShowSuperbondDetails] = useState(false)
   const [showFiveInOneDetails, setShowFiveInOneDetails] = useState(false)
   const [springSummerLookbook, setSpringSummerLookbook] = useState(SPRING_SUMMER_LOOKBOOK_DEFAULT)
   const [expandedLookbookGroup, setExpandedLookbookGroup] = useState(0)
@@ -3030,85 +3029,8 @@ function FullCataloguePage() {
           {!activeCategory && (
             <>
 
-          {/* FEATURED HERO: SUPERBOND PRIMER */}
-          <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
-            <div className="mx-auto max-w-6xl">
-              <div className="grid items-center gap-8 md:grid-cols-2">
-                {/* Product Image */}
-                <div className="flex justify-center">
-                  <div className="relative h-96 w-64 rounded-xl border border-white/20 bg-gradient-to-b from-[#2A2A2A] to-[#1A1A1A] p-8 flex items-center justify-center">
-                    <img
-                      src="/gelitup-content/product-images/BASES/SUPERBOND/superbond-primer.jpg"
-                      alt="Superbond Primer - White bottle with black matte cap"
-                      className="h-full w-full object-contain"
-                      onError={(e) => {
-                        e.currentTarget.src = '/logo.png'
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Product Details */}
-                <div>
-                  <div className="inline-flex rounded-full bg-[#D43790] px-4 py-1.5 mb-4">
-                    <span className="text-xs font-extrabold uppercase tracking-[0.12em] text-white">HEMA/TPO FREE</span>
-                  </div>
-                  <h3 className="text-3xl font-extrabold uppercase tracking-[0.08em] text-white sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
-                    Superbond Primer
-                  </h3>
-                  <p className="mt-3 text-base text-white/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                    The Superbond Primer is a professional-grade, non-acid adhesive agent designed to create a powerful chemical bond between the natural nail and the product. It is a vital first step for ensuring long-term wear and preventing lifting.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setShowSuperbondDetails((current) => !current)}
-                    className="mt-5 rounded-lg border border-[#D43790]/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-white transition duration-300 hover:bg-[#D43790]/20"
-                  >
-                    {showSuperbondDetails ? 'Show Less' : 'Learn More'}
-                  </button>
-                  {showSuperbondDetails && (
-                    <>
-                      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-white/70">Key Benefits</p>
-                      <ul className="mt-2 space-y-2 text-sm text-white/75">
-                        <li className="flex items-start gap-3">
-                          <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                          <span>Superior adhesion: acts as double-sided tape, significantly increasing bond strength for gel polish and builder systems.</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                          <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                          <span>Non-acid formula: gentler on the natural nail plate than traditional acid primers while maintaining high performance.</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                          <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                          <span>Rapid ROI: one bottle supports hundreds of services, making it a high-value essential for busy studios.</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                          <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                          <span>Total safety: 100% HEMA and TPO free for a safer technician and client environment.</span>
-                        </li>
-                      </ul>
-                      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-white/70">How to Use / Application</p>
-                      <ol className="mt-2 list-decimal space-y-2 pl-5 text-sm text-white/75">
-                        <li><span className="font-semibold text-white/90">Prep:</span> Perform a dry manicure and thoroughly cleanse the nail with cleanser or alcohol to remove all surface oils.</li>
-                        <li><span className="font-semibold text-white/90">Application:</span> Wipe excess from the brush and apply a very thin, sparing layer to the natural nail plate.</li>
-                        <li><span className="font-semibold text-white/90">Drying:</span> Do not cure. Let it air-dry for about 30 seconds; slight tackiness is normal and required for adhesion.</li>
-                        <li><span className="font-semibold text-white/90">Next Step:</span> Proceed immediately with your chosen GEL.IT.UP by GIUP® Base Coat.</li>
-                      </ol>
-                    </>
-                  )}
-                  <NavLink
-                    to="/portal/login?mode=create-password"
-                    className="mt-6 inline-flex rounded-lg bg-[#D43790] px-8 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-[#C32680]"
-                  >
-                    Buy Now
-                  </NavLink>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* CHAPTER 01: THE INFINITE SPECTRUM */}
-          <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
+          <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
             <div className="mx-auto max-w-6xl">
               <h2 className="heading-on-dark text-3xl font-extrabold uppercase tracking-[0.12em] text-white sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>COLOURS</h2>
               <p className="mt-3 max-w-2xl text-base text-white/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
