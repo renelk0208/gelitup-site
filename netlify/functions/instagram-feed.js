@@ -1,21 +1,60 @@
 /**
  * Netlify serverless function: instagram-feed
- * Proxies Instagram Graph API so the access token stays server-side.
- * Returns the latest posts for the connected Business account.
+ * Uses the Instagram Graph API (Business/Creator) via graph.facebook.com.
+ * NOTE: graph.instagram.com (Basic Display API) was shut down Sept 2024 — use graph.facebook.com.
  *
- * Required env var (set in Netlify dashboard):
- *   INSTAGRAM_ACCESS_TOKEN  — long-lived access token for the Business/Creator account
+ * Required env vars (set in Netlify dashboard):
+ *   INSTAGRAM_ACCESS_TOKEN  — long-lived User or Page access token with instagram_basic +
+ *                             pages_show_list + pages_read_engagement permissions
  *
- * Optional env var:
+ * Optional env vars:
+ *   INSTAGRAM_USER_ID       — numeric Instagram Business/Creator Account ID (skips auto-discovery)
  *   INSTAGRAM_POST_LIMIT    — number of posts to return (default 12)
+ *
+ * To find INSTAGRAM_USER_ID without this function:
+ *   GET https://graph.facebook.com/v21.0/me/accounts?access_token=TOKEN
+ *   Then: GET https://graph.facebook.com/v21.0/{page-id}?fields=instagram_business_account&access_token=TOKEN
+ *   The id inside instagram_business_account is your INSTAGRAM_USER_ID.
  */
 
-const GRAPH_API_BASE = 'https://graph.instagram.com/v21.0'
+const GRAPH_BASE = 'https://graph.facebook.com/v21.0'
 const FIELDS = 'id,caption,media_type,media_url,permalink,thumbnail_url,timestamp'
+
+/** Auto-discover Instagram Business Account ID from the token's linked Facebook Pages. */
+async function discoverIgUserId(token) {
+  // 1. List all Pages this token has access to
+  const pagesRes = await fetch(`${GRAPH_BASE}/me/accounts?access_token=${token}`)
+  const pagesData = await pagesRes.json()
+  if (pagesData.error) {
+    console.error('[instagram-feed] /me/accounts error:', JSON.stringify(pagesData.error))
+    return null
+  }
+  const pages = pagesData.data || []
+  if (pages.length === 0) {
+    console.error('[instagram-feed] No Facebook Pages found for this token.')
+    return null
+  }
+
+  // 2. For each Page, look for a linked Instagram Business Account
+  for (const page of pages) {
+    const pageRes = await fetch(
+      `${GRAPH_BASE}/${page.id}?fields=instagram_business_account&access_token=${token}`
+    )
+    const pageData = await pageRes.json()
+    if (pageData.instagram_business_account?.id) {
+      console.log(`[instagram-feed] Found IG Business Account ${pageData.instagram_business_account.id} via Page ${page.id} (${page.name})`)
+      return pageData.instagram_business_account.id
+    }
+  }
+
+  console.error('[instagram-feed] No Instagram Business Account linked to any accessible Page.')
+  return null
+}
 
 export const handler = async () => {
   const token = process.env.INSTAGRAM_ACCESS_TOKEN
   const limit = parseInt(process.env.INSTAGRAM_POST_LIMIT || '12', 10)
+  let igUserId = process.env.INSTAGRAM_USER_ID || null
 
   if (!token) {
     return {
@@ -26,7 +65,22 @@ export const handler = async () => {
   }
 
   try {
-    const url = `${GRAPH_API_BASE}/me/media?fields=${FIELDS}&limit=${limit}&access_token=${token}`
+    // Discover IG User ID if not explicitly configured
+    if (!igUserId) {
+      igUserId = await discoverIgUserId(token)
+    }
+
+    if (!igUserId) {
+      return {
+        statusCode: 503,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          error: 'Instagram Business Account not found. Ensure the Instagram account is a Business/Creator account linked to a Facebook Page, and that INSTAGRAM_ACCESS_TOKEN has pages_show_list + instagram_basic permissions. You can also set INSTAGRAM_USER_ID directly.',
+        }),
+      }
+    }
+
+    const url = `${GRAPH_BASE}/${igUserId}/media?fields=${FIELDS}&limit=${limit}&access_token=${token}`
     const response = await fetch(url)
 
     if (!response.ok) {
@@ -41,7 +95,6 @@ export const handler = async () => {
 
     const data = await response.json()
 
-    // Filter to only IMAGE and VIDEO posts (exclude CAROUSEL_ALBUM children that lack media_url)
     const posts = (data.data || []).filter(
       (post) => post.media_type === 'IMAGE' || post.media_type === 'VIDEO' || post.media_type === 'CAROUSEL_ALBUM'
     )
@@ -50,7 +103,6 @@ export const handler = async () => {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        // Cache for 15 minutes on CDN
         'Cache-Control': 'public, s-maxage=900, stale-while-revalidate=300',
       },
       body: JSON.stringify({ posts }),
