@@ -3049,7 +3049,10 @@ function FullCataloguePage() {
 
           {/* CHAPTER 01: THE INFINITE SPECTRUM */}
           <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 overflow-hidden bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(212,55,144,0.14)_0%,transparent_55%)]" />
+            {/* Ombré layers — fuchsia bloom bottom-left, diagonal sweep, deep violet top-right */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_70%_at_0%_100%,rgba(212,55,144,0.42)_0%,transparent_65%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(180,30,120,0.18)_0%,transparent_50%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_100%_0%,rgba(109,40,217,0.18)_0%,transparent_60%)]" />
             <div className="relative mx-auto max-w-6xl">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-400">The Core Pigment Library</p>
               <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">1,000+ Colours</h2>
