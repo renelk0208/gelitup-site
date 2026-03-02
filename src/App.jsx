@@ -1734,7 +1734,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
       // Standard: COLORS/CAT EYE/img.jpg → subcategory='CAT EYE'
       // NUDE, FRENCH, PASTEL, RONE (GIUP1) belong under Solid Gel Polish
       const folderToken = (segments[segments.length - 2] || 'General').toUpperCase()
-      subcategory = ['NUDE', 'FRENCH', 'PASTEL', 'RONE'].includes(folderToken)
+      subcategory = ['NUDE', 'FRENCH', 'PASTEL', 'RONE', 'GLASS EFFECT', 'GLITTERS', 'PEARL', 'SNOWFLAKE'].includes(folderToken)
         ? 'SOLID GEL POLISH'
         : (segments[segments.length - 2] || 'General')
     } else if (segments.length > 2) {
@@ -1749,7 +1749,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     const subcategoryItems = categoryBucket.get(subcategory) || []
 
     const rawFolder = (segments[segments.length - 2] || '').toUpperCase()
-    const solidGelFlatFolders = { NUDE: 'Nude', FRENCH: 'French', PASTEL: 'Pastel', RONE: 'GIUP1' }
+    const solidGelFlatFolders = { NUDE: 'Nude', FRENCH: 'French', PASTEL: 'Pastel', RONE: 'GIUP1', 'GLASS EFFECT': 'Glass Effect', GLITTERS: 'Glitters', PEARL: 'Pearl', SNOWFLAKE: 'Snowflake' }
     subcategoryItems.push({
       imageUrl: imagePath,
       name: formatCatalogueItemName(afterRoot),
@@ -1785,14 +1785,18 @@ const COLOR_FAMILY_FILTERS = [
   { key: 'CORAL ORANGE', label: 'Coral Orange', swatchClass: 'bg-orange-400' },
   { key: 'FRENCH', label: 'French', swatchClass: 'bg-pink-100 border border-pink-200' },
   { key: 'GIUP1', label: 'GIUP1', swatchClass: 'bg-fuchsia-200 border border-fuchsia-300' },
+  { key: 'GLASS EFFECT', label: 'Glass Effect', swatchClass: 'bg-cyan-100 border border-cyan-300' },
+  { key: 'GLITTERS', label: 'Glitters', swatchClass: 'bg-amber-300' },
   { key: 'GREEN', label: 'Green', swatchClass: 'bg-emerald-500' },
   { key: 'GREY', label: 'Grey', swatchClass: 'bg-slate-500' },
   { key: 'NEON', label: 'Neon', swatchClass: 'bg-lime-400' },
   { key: 'NUDE', label: 'Nude', swatchClass: 'bg-amber-100 border border-amber-200' },
   { key: 'PASTEL', label: 'Pastel', swatchClass: 'bg-sky-200 border border-sky-300' },
+  { key: 'PEARL', label: 'Pearl', swatchClass: 'bg-slate-100 border border-slate-300' },
   { key: 'PINK', label: 'Pink', swatchClass: 'bg-pink-400' },
   { key: 'PURPLE', label: 'Purple', swatchClass: 'bg-violet-500' },
   { key: 'RED', label: 'Red', swatchClass: 'bg-red-500' },
+  { key: 'SNOWFLAKE', label: 'Snowflake', swatchClass: 'bg-blue-100 border border-blue-200' },
   { key: 'WHITE', label: 'White', swatchClass: 'bg-white border border-slate-300' },
   { key: 'YELLOW', label: 'Yellow', swatchClass: 'bg-yellow-300' },
 ]
