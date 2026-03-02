@@ -4101,7 +4101,7 @@ function HomePage({ onOpenContactModal }) {
           preload="metadata"
           aria-hidden="true"
         />
-        <div className="absolute inset-0 bg-[#1A1A1A]/70" />
+        <div className="absolute inset-0 bg-[#1A1A1A]/40" />
 
         <div className="relative mx-auto max-w-6xl">
           <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8">
@@ -10857,8 +10857,8 @@ function App() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Contact</p>
             <p className="mt-2">Phone: {PROFORMA_LEEUKOPF_PHONE}</p>
-            <p className="mt-1">Email: {B2B_EMAIL}</p>
-            <p className="mt-1">Orders: {ORDER_INBOX_EMAIL}</p>
+            <p className="mt-1">Email: {CONTACT_INBOX_EMAIL}</p>
+            <p className="mt-1">Orders: {B2B_EMAIL}</p>
           </div>
 
           <div>
