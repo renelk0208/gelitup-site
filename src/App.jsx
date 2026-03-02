@@ -1805,12 +1805,12 @@ function resolveColorFamilyKey(name = '') {
 const pixelFamilyCache = new Map() // imageUrl → familyKey
 
 function pixelHueToFamilyKey(h) {
-  if (h < 15 || h >= 345) return 'RED'
-  if (h < 40) return 'ORANGE'
+  if (h < 20 || h >= 320) return 'RED'
+  if (h < 45) return 'ORANGE'
   if (h < 75) return 'YELLOW'
   if (h < 165) return 'GREEN'
   if (h < 250) return 'BLUE'
-  if (h < 295) return 'PURPLE'
+  if (h < 290) return 'PURPLE'
   return 'PINK'
 }
 
@@ -2499,10 +2499,14 @@ function FullCataloguePage() {
   )
 
   const filteredItems = useMemo(() => {
-    const resolveFamily = (item) =>
-      // Pixel-sampled result wins; name-based keyword is the fallback for neutrals
-      // (nudes, whites, greys whose colour is better described by name than by hue)
-      pixelFamilies[item.imageUrl] || item.colorFamilyKey
+    const resolveFamily = (item) => {
+      // Name keyword wins when it gives a confident result (not OTHER) —
+      // names like "CHERRY RED", "BURGUNDY", "LAVENDER" are reliable.
+      // Pixel sampling fills in only for abstract names ("SOLID 042", "GIUP-1 085").
+      const nameFamily = item.colorFamilyKey
+      if (nameFamily && nameFamily !== 'OTHER') return nameFamily
+      return pixelFamilies[item.imageUrl] || nameFamily
+    }
 
     const colorFiltered = (!isSolidGelPolish || activeColorFamily === 'ALL')
       ? baseItems
