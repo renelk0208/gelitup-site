@@ -3047,7 +3047,7 @@ function FullCataloguePage() {
                   }}
                   className="rounded-lg bg-fuchsia-600 px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
                 >
-                  Explore Full Spectrum
+                  SEE THE FULL COLOUR RANGE
                 </button>
               </div>
             </div>
@@ -4177,15 +4177,6 @@ function HomePage({ onOpenContactModal }) {
         <p>
           TRUSTED B2B INVENTORY SYSTEMS. VERIFIED DATABASE. STRUCTURED SCALE-UP.
         </p>
-      </InfoCard>
-
-      <InfoCard id="contact" title="OFFICIAL INFORMATION" tone="dark">
-        <div className="mt-2 space-y-1 text-sm text-white/90">
-          <p>Distribution Email: <a href={`mailto:${B2B_EMAIL}`} className="font-medium text-white underline">{B2B_EMAIL}</a></p>
-          <p>General Email: <a href={`mailto:${B2B_EMAIL}`} className="font-medium text-white underline">{B2B_EMAIL}</a></p>
-          <p>Phone: <a href="tel:+35973891041" className="font-medium text-white underline">(+359) 73 891 041</a></p>
-          <p>Address: 8 Racho Dimchev, Sofia, Bulgaria</p>
-        </div>
       </InfoCard>
 
       <InfoCard title="Client Registration" tone="dark">
