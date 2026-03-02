@@ -2139,6 +2139,25 @@ const SPRING_SUMMER_LOOKBOOK_DEFAULT = {
   ],
 }
 
+const CATEGORY_LAB_SPECS = {
+  'COLORS': { pigmentDots: 3, cure: '60s LED · 120s UV', llab: true },
+  'BUILDER GEL SYSTEMS': { pigmentDots: null, cure: '60s LED · 120s UV', llab: true },
+  'BASES': { pigmentDots: null, cure: '60s LED · 120s UV', llab: true },
+  'CREME DE LA CREME': { pigmentDots: 3, cure: '60s LED · 120s UV', llab: true },
+  'MULTIMIX': { pigmentDots: null, cure: '60s LED · 120s UV', llab: true },
+  'TOPS': { pigmentDots: null, cure: '60s LED · 120s UV', llab: true },
+  'LINE-IT-UP': { pigmentDots: 2, cure: '60s LED · 120s UV', llab: true },
+  'TOOLS': { pigmentDots: null, cure: null, llab: true },
+  'EQUIPMENT': { pigmentDots: null, cure: null, llab: true },
+  'BRUSHES': { pigmentDots: null, cure: null, llab: true },
+  'NAIL ART': { pigmentDots: 2, cure: '60s LED · 120s UV', llab: true },
+  'CONSUMABLES': { pigmentDots: null, cure: null, llab: true },
+  'LIQUIDS': { pigmentDots: null, cure: null, llab: true },
+  'BY THE OCEAN': { pigmentDots: 3, cure: '60s LED · 120s UV', llab: true },
+  'ODE TO AUTUMN': { pigmentDots: 3, cure: '60s LED · 120s UV', llab: true },
+}
+const DEFAULT_LAB_SPECS = { pigmentDots: null, cure: '60s LED · 120s UV', llab: true }
+
 function FullCataloguePage() {
   const [sections, setSections] = useState([])
   const [activeCategory, setActiveCategory] = useState('')
@@ -3052,13 +3071,15 @@ function FullCataloguePage() {
             <>
 
           {/* CHAPTER 01: THE INFINITE SPECTRUM */}
-          <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
-            <div className="mx-auto max-w-6xl">
-              <h2 className="heading-on-dark text-3xl font-extrabold uppercase tracking-[0.12em] text-white sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>COLOURS</h2>
-              <p className="mt-3 max-w-2xl text-base text-white/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                Explore 761+ professional shades including Core Classics, Specialty Series, Effects, and our flagship GIUP® #1 Range.
+          <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 overflow-hidden bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(212,55,144,0.14)_0%,transparent_55%)]" />
+            <div className="relative mx-auto max-w-6xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-400">The Core Pigment Library</p>
+              <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">1,000+ Colours</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70 sm:text-base">
+                The Gelitup Archive. Over 1,000 laboratory-grade shades categorised by undertone and finish. From the deepest onyx to the clearest glass-top, find your signature shade in our comprehensive colour vault.
               </p>
-              <div className="mt-6">
+              <div className="mt-6 flex flex-wrap items-center gap-4">
                 <button
                   onClick={() => {
                     const colorsSection = sections.find((s) => isColorsCategoryName(s.category))
@@ -3068,8 +3089,9 @@ function FullCataloguePage() {
                   }}
                   className="rounded-lg bg-fuchsia-600 px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
                 >
-                  Explore Spectrum
+                  Explore Full Spectrum
                 </button>
+                <span className="text-xs text-white/35">Vast · Authoritative · Organised</span>
               </div>
             </div>
           </div>
@@ -3079,10 +3101,12 @@ function FullCataloguePage() {
           {/* CHAPTER 02: STRUCTURAL ENGINEERING */}
           <div id="catalogue-section-builders" className="space-y-4 scroll-mt-28 py-12 px-4 sm:px-8">
             <div className="mx-auto max-w-6xl px-4 sm:px-8">
-              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>BUILDER SYSTEMS</h2>
-              <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                Advanced building and prep systems: Superbond Primer, Superior Bases, 3-in-1 Premium Builders, Crème de la Crème, and MultiMix Synthogel.
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#D43790]">Laboratory Essentials</p>
+              <h2 className="mt-1 text-3xl font-extrabold uppercase tracking-[0.1em] text-[#1A1A1A] sm:text-4xl">Base &amp; Builder Systems</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#1A1A1A]/70 sm:text-base">
+                The foundation of every trend. Our Leeukopf-certified base and builder systems provide the architectural support for your colour — engineered for 21-day wear and diamond-grade shine.
               </p>
+              <p className="mt-1.5 text-xs text-[#4A4A4A]/55">Clinical · Essential · Premium</p>
             </div>
 
             {/* CATEGORY GRID */}
@@ -3094,6 +3118,7 @@ function FullCataloguePage() {
                 const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
                 const coverImageFallback = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
                 const coverImage = getCategoryCoverImage(categoryName, coverImageFallback)
+                const specs = CATEGORY_LAB_SPECS[categoryName] ?? DEFAULT_LAB_SPECS
                 return (
                   <Fragment key={categoryName}>
                     <button
@@ -3115,6 +3140,23 @@ function FullCataloguePage() {
                       <div className="border-t border-[#4A4A4A]/20 p-3">
                         <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
                         <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {specs.pigmentDots !== null && (
+                            <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">
+                              {specs.pigmentDots >= 1 ? '●' : '○'}{specs.pigmentDots >= 2 ? '●' : '○'}{specs.pigmentDots >= 3 ? '●' : '○'} Pigment
+                            </span>
+                          )}
+                          {specs.cure && (
+                            <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">
+                              {specs.cure}
+                            </span>
+                          )}
+                          {specs.llab && (
+                            <span className="inline-flex items-center rounded-md border border-fuchsia-200 bg-fuchsia-50 px-1.5 py-0.5 text-[10px] font-bold text-fuchsia-700">
+                              L-Lab ✓
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </button>
                     {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
@@ -3141,6 +3183,7 @@ function FullCataloguePage() {
                 const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
                 const coverImageFallback = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
                 const coverImage = getCategoryCoverImage(categoryName, coverImageFallback)
+                const specs = CATEGORY_LAB_SPECS[categoryName] ?? DEFAULT_LAB_SPECS
                 return (
                   <Fragment key={categoryName}>
                     <button
@@ -3162,6 +3205,23 @@ function FullCataloguePage() {
                       <div className="border-t border-[#4A4A4A]/20 p-3">
                         <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
                         <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {specs.pigmentDots !== null && (
+                            <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">
+                              {specs.pigmentDots >= 1 ? '●' : '○'}{specs.pigmentDots >= 2 ? '●' : '○'}{specs.pigmentDots >= 3 ? '●' : '○'} Pigment
+                            </span>
+                          )}
+                          {specs.cure && (
+                            <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">
+                              {specs.cure}
+                            </span>
+                          )}
+                          {specs.llab && (
+                            <span className="inline-flex items-center rounded-md border border-fuchsia-200 bg-fuchsia-50 px-1.5 py-0.5 text-[10px] font-bold text-fuchsia-700">
+                              L-Lab ✓
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </button>
                     {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
@@ -3188,6 +3248,7 @@ function FullCataloguePage() {
                 const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
                 const coverImageFallback = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
                 const coverImage = getCategoryCoverImage(categoryName, coverImageFallback)
+                const specs = CATEGORY_LAB_SPECS[categoryName] ?? DEFAULT_LAB_SPECS
                 return (
                   <Fragment key={categoryName}>
                     <button
@@ -3209,6 +3270,23 @@ function FullCataloguePage() {
                       <div className="border-t border-[#4A4A4A]/20 p-3">
                         <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
                         <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {specs.pigmentDots !== null && (
+                            <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">
+                              {specs.pigmentDots >= 1 ? '●' : '○'}{specs.pigmentDots >= 2 ? '●' : '○'}{specs.pigmentDots >= 3 ? '●' : '○'} Pigment
+                            </span>
+                          )}
+                          {specs.cure && (
+                            <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">
+                              {specs.cure}
+                            </span>
+                          )}
+                          {specs.llab && (
+                            <span className="inline-flex items-center rounded-md border border-fuchsia-200 bg-fuchsia-50 px-1.5 py-0.5 text-[10px] font-bold text-fuchsia-700">
+                              L-Lab ✓
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </button>
                     {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
