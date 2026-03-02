@@ -4011,7 +4011,7 @@ function HomePage({ onOpenContactModal }) {
                 Apply as Distributor
               </NavLink>
               <NavLink to="/portal/login?mode=create-password" className="rounded-lg border-2 border-white bg-white px-4 py-2 text-sm font-semibold text-fuchsia-700 transition duration-300 hover:bg-white/90">
-                Buy Now
+                B2B Salon Purchases
               </NavLink>
             </div>
           </div>
@@ -4144,7 +4144,7 @@ function HomePage({ onOpenContactModal }) {
           We also maintain a broad color portfolio (800+ shades) for professional channels.
         </p>
         <NavLink to="/full-catalogue" className="mt-3 inline-flex rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
-          Open Our Products
+          View our Products
         </NavLink>
         {media.gallery.length > 0 && (
           <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
