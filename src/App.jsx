@@ -4121,16 +4121,16 @@ function HomePage({ onOpenContactModal }) {
           {homeHeroVideoSource
             ? (
               <video
-                className="h-full w-full object-cover object-[50%_35%]"
+                className="h-full w-full object-cover object-[50%_35%] opacity-0 transition-opacity duration-700"
                 src={homeHeroVideoSource}
-                poster={HOME_HERO_POSTER_URL || media.heroImage}
                 muted
                 autoPlay
                 loop
                 playsInline
                 controls={false}
-                preload="metadata"
+                preload="auto"
                 disablePictureInPicture
+                onCanPlay={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')}
               />
               )
             : (
