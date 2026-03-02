@@ -1732,7 +1732,11 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
       subcategory = segments[1]
     } else if (category === 'COLORS' && segments.length > 2) {
       // Standard: COLORS/CAT EYE/img.jpg → subcategory='CAT EYE'
-      subcategory = segments[segments.length - 2] || 'General'
+      // NUDE, FRENCH, PASTEL, RONE (GIUP1) belong under Solid Gel Polish
+      const folderToken = (segments[segments.length - 2] || 'General').toUpperCase()
+      subcategory = ['NUDE', 'FRENCH', 'PASTEL', 'RONE'].includes(folderToken)
+        ? 'SOLID GEL POLISH'
+        : (segments[segments.length - 2] || 'General')
     } else if (segments.length > 2) {
       // For other categories with deep nesting, join middle segments
       subcategory = segments.slice(1, -1).join(' / ')
@@ -1744,10 +1748,16 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     const categoryBucket = grouped.get(category) || new Map()
     const subcategoryItems = categoryBucket.get(subcategory) || []
 
+    const rawFolder = (segments[segments.length - 2] || '').toUpperCase()
+    const solidGelFlatFolders = { NUDE: 'Nude', FRENCH: 'French', PASTEL: 'Pastel', RONE: 'GIUP1' }
     subcategoryItems.push({
       imageUrl: imagePath,
       name: formatCatalogueItemName(afterRoot),
-      colorFamily: (category === 'COLORS' && segments.length > 3) ? segments[2] : undefined,
+      colorFamily: category === 'COLORS'
+        ? segments.length > 3
+          ? segments[2]
+          : solidGelFlatFolders[rawFolder] || undefined
+        : undefined,
     })
 
     categoryBucket.set(subcategory, subcategoryItems)
@@ -1773,9 +1783,13 @@ const COLOR_FAMILY_FILTERS = [
   { key: 'BLUE', label: 'Blue', swatchClass: 'bg-blue-500' },
   { key: 'BROWN', label: 'Brown', swatchClass: 'bg-amber-700' },
   { key: 'CORAL ORANGE', label: 'Coral Orange', swatchClass: 'bg-orange-400' },
+  { key: 'FRENCH', label: 'French', swatchClass: 'bg-pink-100 border border-pink-200' },
+  { key: 'GIUP1', label: 'GIUP1', swatchClass: 'bg-fuchsia-200 border border-fuchsia-300' },
   { key: 'GREEN', label: 'Green', swatchClass: 'bg-emerald-500' },
   { key: 'GREY', label: 'Grey', swatchClass: 'bg-slate-500' },
   { key: 'NEON', label: 'Neon', swatchClass: 'bg-lime-400' },
+  { key: 'NUDE', label: 'Nude', swatchClass: 'bg-amber-100 border border-amber-200' },
+  { key: 'PASTEL', label: 'Pastel', swatchClass: 'bg-sky-200 border border-sky-300' },
   { key: 'PINK', label: 'Pink', swatchClass: 'bg-pink-400' },
   { key: 'PURPLE', label: 'Purple', swatchClass: 'bg-violet-500' },
   { key: 'RED', label: 'Red', swatchClass: 'bg-red-500' },
@@ -2344,10 +2358,12 @@ function FullCataloguePage() {
   const activeSection = sections.find((section) => section.category === activeCategory) || null
   const subcategoryOptions = useMemo(() => {
     if (!activeSection) return []
-    const sorted = activeSection.subcategories
-      .map((subcategory) => subcategory.name)
-      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true }))
-    return ['ALL', ...sorted]
+    const names = activeSection.subcategories.map((subcategory) => subcategory.name)
+    const sorted = names.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true }))
+    // Pin Solid Gel Polish immediately after ALL
+    const SGP = sorted.find((n) => normalizeCatalogueToken(n) === 'SOLID GEL POLISH')
+    const rest = sorted.filter((n) => normalizeCatalogueToken(n) !== 'SOLID GEL POLISH')
+    return SGP ? ['ALL', SGP, ...rest] : ['ALL', ...sorted]
   }, [activeSection])
 
   const baseItems = useMemo(() => {
@@ -2841,12 +2857,22 @@ function FullCataloguePage() {
         <div className="mt-3 flex flex-wrap gap-2">
           {subcategoryOptions.map((subcategory) => {
             const isActive = activeSubcategory === subcategory
+            const isSGP = normalizeCatalogueToken(subcategory) === 'SOLID GEL POLISH'
             return (
               <button
                 key={`subcategory-${subcategory}`}
                 onClick={() => { setActiveSubcategory(subcategory); scrollToCategoryDetail() }}
-                className={`rounded-[12px] border px-3 py-1.5 text-xs font-semibold transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-[#4A4A4A]/35 bg-white text-black/75 hover:border-fuchsia-500'}`}
+                className={`relative rounded-[12px] border px-3 py-1.5 text-xs font-semibold transition duration-300 ${
+                  isActive
+                    ? 'border-fuchsia-600 bg-fuchsia-600 text-white shadow-[0_0_0_2px_rgba(212,55,144,0.25)]'
+                    : isSGP
+                      ? 'border-fuchsia-400 bg-fuchsia-50 text-fuchsia-700 hover:border-fuchsia-500 hover:bg-fuchsia-100'
+                      : 'border-[#4A4A4A]/35 bg-white text-black/75 hover:border-fuchsia-500'
+                }`}
               >
+                {isSGP && !isActive && (
+                  <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[#D43790] ring-2 ring-white" />
+                )}
                 {formatSubcategoryDisplayName(subcategory)}
               </button>
             )
@@ -3073,7 +3099,7 @@ function FullCataloguePage() {
                   onClick={() => {
                     const colorsSection = sections.find((s) => isColorsCategoryName(s.category))
                     if (colorsSection) {
-                      openCatalogueCategory(colorsSection.category, 'ALL')
+                      openCatalogueCategory(colorsSection.category, 'SOLID GEL POLISH')
                     }
                   }}
                   className="rounded-lg bg-fuchsia-600 px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
