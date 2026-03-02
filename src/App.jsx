@@ -2161,15 +2161,8 @@ function FullCataloguePage() {
   const [springSummerLookbook, setSpringSummerLookbook] = useState(SPRING_SUMMER_LOOKBOOK_DEFAULT)
   const [expandedLookbookGroup, setExpandedLookbookGroup] = useState(0)
   const [selectedLookbookPageByGroup, setSelectedLookbookPageByGroup] = useState({})
-  const [showBackToTop, setShowBackToTop] = useState(false)
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
   const virtualContainerRef = useRef(null)
-
-  useEffect(() => {
-    const onWindowScroll = () => setShowBackToTop(window.scrollY > 400)
-    window.addEventListener('scroll', onWindowScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onWindowScroll)
-  }, [])
 
   useEffect(() => {
     let mounted = true
@@ -4032,13 +4025,9 @@ function HomePage({ onOpenContactModal }) {
               <NavLink to="/become-distributor" className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
                 Apply as Distributor
               </NavLink>
-              <button
-                type="button"
-                onClick={onOpenContactModal}
-                className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
-              >
-                Contact Distribution
-              </button>
+              <NavLink to="/portal/login?mode=create-password" className="rounded-lg bg-white/15 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/40 transition duration-300 hover:bg-white/25">
+                Buy Now
+              </NavLink>
             </div>
           </div>
 
@@ -4239,13 +4228,9 @@ function PortalAccessNotice({ onOpenContactModal }) {
         <NavLink to="/become-distributor" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
           Distributor Registration
         </NavLink>
-        <button
-          type="button"
-          onClick={onOpenContactModal}
-          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
-        >
-          Contact Distribution
-        </button>
+        <NavLink to="/portal/login?mode=create-password" className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition duration-300 hover:bg-slate-100">
+          Buy Now
+        </NavLink>
       </div>
     </section>
   )
@@ -9795,10 +9780,17 @@ function App() {
   const registrationsTable = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || DEFAULT_REGISTRATIONS_TABLE
   const adminsTable = import.meta.env.VITE_B2B_ADMINS_TABLE || 'b2b_admins'
   const requireApproval = import.meta.env.VITE_REQUIRE_B2B_APPROVAL !== 'false'
+  const [showBackToTop, setShowBackToTop] = useState(false)
 
   const handleAcceptCookies = useCallback(() => {
     localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, 'accepted')
     setHasAcceptedCookies(true)
+  }, [])
+
+  useEffect(() => {
+    const onWindowScroll = () => setShowBackToTop(window.scrollY > 400)
+    window.addEventListener('scroll', onWindowScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onWindowScroll)
   }, [])
 
   const openContactModal = useCallback(() => {
