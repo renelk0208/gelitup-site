@@ -7525,7 +7525,7 @@ function ProductsModule({ moduleView = 'products' }) {
             onClick={() => navigate('/portal/dashboard/catalog')}
             className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
           >
-            Buy Now: Open Products
+            Browse & Buy Products
           </button>
           <button
             onClick={() => window.location.reload()}
@@ -7554,7 +7554,7 @@ function ProductsModule({ moduleView = 'products' }) {
             )}
           </div>
           {(selectedCodes.length === 0 && packageCartItems.length === 0)
-            ? <p className="mt-2 text-[11px] italic text-slate-400">No products selected yet — go to Additional Products to start adding items.</p>
+            ? <p className="mt-2 text-[11px] italic text-slate-400">No products selected yet — go to Buy Now to start adding items.</p>
             : (
               <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
                 {selectedProducts.map((product) => (
@@ -7869,7 +7869,7 @@ function ProductsModule({ moduleView = 'products' }) {
               onClick={() => navigate('/portal/dashboard/catalog')}
               className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700"
             >
-              Add additional products
+              Browse products
             </button>
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -7976,7 +7976,7 @@ function ProductsModule({ moduleView = 'products' }) {
         {!isCatalogView && !isDistributorRole && (
           <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
             <p className="text-xs text-slate-600">
-              Tier packages are available for approved distributor accounts only. Continue ordering directly via Buy Now.
+              Tier packages are available for approved distributor accounts only. Continue ordering directly via My Order.
             </p>
           </div>
         )}
@@ -8010,7 +8010,7 @@ function ProductsModule({ moduleView = 'products' }) {
             onClick={() => navigate('/portal/dashboard/products')}
             className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700"
           >
-            Back to Buy Now
+            Back to My Order
           </button>
         </div>
         <p className="mt-1 text-xs text-slate-500">Professional ordering workflow for Our Products.</p>
@@ -8194,7 +8194,7 @@ function ProductsModule({ moduleView = 'products' }) {
                 onClick={() => navigate('/portal/dashboard/products')}
                 className="rounded-md border border-amber-300 bg-white px-2 py-1 font-semibold text-amber-800"
               >
-                Continue in Buy Now
+                Go to My Order
               </button>
             </div>
           </div>
@@ -9390,9 +9390,9 @@ function PortalDashboard({ onLogout }) {
   const modules = useMemo(
     () => [
       { key: 'overview', label: 'Overview' },
-      { key: 'products', label: 'Buy Now' },
+      { key: 'products', label: 'My Order' },
       { key: 'orders', label: 'Orders' },
-      { key: 'catalog', label: 'Additional Products' },
+      { key: 'catalog', label: 'Buy Now' },
       { key: 'support', label: 'Support & Tracking' },
     ],
     [],
@@ -9756,7 +9756,7 @@ function PortalDashboard({ onLogout }) {
                 <NavLink to="/portal/dashboard/overview" className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
                   My Account
                 </NavLink>
-                <NavLink to="/portal/dashboard/products" className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                <NavLink to="/portal/dashboard/catalog" className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
                   Buy Now
                 </NavLink>
                 <NavLink to="/portal/dashboard/orders" className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
