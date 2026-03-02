@@ -2892,8 +2892,8 @@ function FullCataloguePage() {
 
                   if (bulkMode) {
                     return (
-                      <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 rounded-[12px] border border-[#4A4A4A]/30 bg-[#E8E8E8] px-3 py-2 transition duration-300 hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_1px_rgba(212,55,144,0.26)]">
-                        <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-black/10 bg-white object-contain" loading="lazy" />
+                      <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 rounded-[12px] border border-[#4A4A4A]/30 bg-[#E8E8E8] px-3 py-2 transition duration-300 hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_1px_rgba(212,55,144,0.26)]" data-catalogue-item>
+                        <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-black/10 bg-white object-contain opacity-0 transition-opacity duration-300" loading="lazy" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                           <p className="truncate text-[11px] font-light text-black/55">{itemCode}</p>
@@ -2910,9 +2910,9 @@ function FullCataloguePage() {
                   }
 
                   return (
-                    <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:bg-[#E8E8E8] md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`}>
+                    <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:bg-[#E8E8E8] md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`} data-catalogue-item>
                       <div className="flex h-44 w-full items-center justify-center overflow-hidden bg-white p-2 sm:h-52 md:h-60">
-                        <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full scale-[1.025] object-cover" />
+                        <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full scale-[1.025] object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
                       </div>
                       <div className="border-t border-black/10 px-2.5 py-2">
                         <p className="truncate text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
