@@ -1672,7 +1672,6 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
   const categoryRemapping = new Map([
     // Colors subcategories
     ['BY THE OCEAN', 'COLORS'],
-    ['ODE TO AUTUMN', 'COLORS'],
     // Nail Art subcategories
     ['COBWEB', 'NAIL ART'],
     ['LINE-IT-UP', 'NAIL ART'],
@@ -2185,7 +2184,6 @@ const CATEGORY_LAB_SPECS = {
   'CONSUMABLES': { pigmentDots: null, cure: null, llab: true },
   'LIQUIDS': { pigmentDots: null, cure: null, llab: true },
   'BY THE OCEAN': { pigmentDots: 3, cure: '60s LED · 120s UV', llab: true },
-  'ODE TO AUTUMN': { pigmentDots: 3, cure: '60s LED · 120s UV', llab: true },
 }
 const DEFAULT_LAB_SPECS = { pigmentDots: null, cure: '60s LED · 120s UV', llab: true }
 
@@ -4159,6 +4157,7 @@ function HomePage({ onOpenContactModal }) {
           controls={false}
           preload="metadata"
           aria-hidden="true"
+          onLoadedData={(e) => { e.target.playbackRate = 0.4 }}
         />
         <div className="absolute inset-0 bg-[#1A1A1A]/15" />
 
@@ -4251,15 +4250,8 @@ function HomePage({ onOpenContactModal }) {
         <p>
           TRUSTED B2B INVENTORY SYSTEMS. VERIFIED DATABASE. STRUCTURED SCALE-UP.
         </p>
-      </InfoCard>
-
-      <InfoCard title="Client Registration" tone="dark">
-        <p>
-          Submit your distributor application form and our team will review it.
-          Portal credentials are issued only after contract confirmation and approval.
-        </p>
-        <NavLink to="/become-distributor" className="mt-4 inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
-          Open Registration Form
+        <NavLink to="/distributor-packages" className="mt-4 inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
+          View Distribution Options
         </NavLink>
       </InfoCard>
 
