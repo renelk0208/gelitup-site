@@ -1769,18 +1769,18 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
 
 const COLOR_FAMILY_FILTERS = [
   { key: 'ALL', label: 'All', swatchClass: 'bg-slate-300' },
-  { key: 'RED', label: 'Red', swatchClass: 'bg-red-500' },
-  { key: 'PINK', label: 'Pink', swatchClass: 'bg-pink-400' },
-  { key: 'CORAL ORANGE', label: 'Coral Orange', swatchClass: 'bg-orange-400' },
-  { key: 'YELLOW', label: 'Yellow', swatchClass: 'bg-yellow-300' },
-  { key: 'GREEN', label: 'Green', swatchClass: 'bg-emerald-500' },
+  { key: 'BLACK', label: 'Black', swatchClass: 'bg-black' },
   { key: 'BLUE', label: 'Blue', swatchClass: 'bg-blue-500' },
-  { key: 'PURPLE', label: 'Purple', swatchClass: 'bg-violet-500' },
   { key: 'BROWN', label: 'Brown', swatchClass: 'bg-amber-700' },
+  { key: 'CORAL ORANGE', label: 'Coral Orange', swatchClass: 'bg-orange-400' },
+  { key: 'GREEN', label: 'Green', swatchClass: 'bg-emerald-500' },
   { key: 'GREY', label: 'Grey', swatchClass: 'bg-slate-500' },
   { key: 'NEON', label: 'Neon', swatchClass: 'bg-lime-400' },
-  { key: 'BLACK', label: 'Black', swatchClass: 'bg-black' },
+  { key: 'PINK', label: 'Pink', swatchClass: 'bg-pink-400' },
+  { key: 'PURPLE', label: 'Purple', swatchClass: 'bg-violet-500' },
+  { key: 'RED', label: 'Red', swatchClass: 'bg-red-500' },
   { key: 'WHITE', label: 'White', swatchClass: 'bg-white border border-slate-300' },
+  { key: 'YELLOW', label: 'Yellow', swatchClass: 'bg-yellow-300' },
 ]
 
 function resolveColorFamilyKey(name = '') {
