@@ -3017,60 +3017,9 @@ function FullCataloguePage() {
 
       {!isLoading && !errorMessage && sections.length > 0 && (
         <>
-          <div className="sticky top-2 z-30 mx-auto max-w-6xl rounded-2xl border border-[#4A4A4A]/25 bg-[#E8E8E8]/95 p-4 shadow-sm backdrop-blur sm:top-3 sm:p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#4A4A4A]">Service-Flow Navigation</p>
-            <div className="-mx-1 mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1">
-              {serviceFlowMenu.map((flow) => {
-                const flowIsActive = flow.primaryCategory
-                  ? activeCategory === flow.primaryCategory
-                  : flow.matchedSections.some((section) => section.category === activeCategory)
-
-                return (
-                  <button
-                    key={flow.key}
-                    type="button"
-                    onClick={() => {
-                      const targetCategory = flow.primaryCategory || flow.matchedSections[0]?.category || ''
-                      if (!targetCategory) return
-                      openCatalogueCategory(targetCategory, 'ALL')
-                    }}
-                    className={`min-h-10 shrink-0 snap-start whitespace-nowrap rounded-lg border px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${flowIsActive ? 'border-[#D43790] bg-[#D43790] text-white' : 'border-[#4A4A4A]/35 bg-white text-[#1A1A1A] hover:border-[#D43790]'}`}
-                  >
-                    {flow.label}
-                  </button>
-                )
-              })}
-            </div>
-
-            {SHOW_SERVICE_FLOW_SUBCATEGORY_MENU && serviceFlowMenu.some((flow) => flow.matchedSections.some((section) => section.category === activeCategory)) && (
-              <div className="mt-3 rounded-xl border border-[#4A4A4A]/20 bg-white p-3">
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                  {(serviceFlowMenu.find((flow) => flow.matchedSections.some((section) => section.category === activeCategory))?.resolvedSubcategories || []).map((sub) => (
-                    <button
-                      key={`${sub.category}-${sub.subcategory}-${sub.label}`}
-                      type="button"
-                      onClick={() => {
-                        if (!sub.category) return
-                        openCatalogueCategory(sub.category, sub.subcategory || 'ALL')
-                      }}
-                      className="min-h-10 rounded-lg border border-[#4A4A4A]/20 bg-white px-3 py-2 text-left text-xs font-semibold text-[#1A1A1A] transition hover:border-[#D43790]"
-                    >
-                      {sub.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
           <div id={CATALOGUE_RESULTS_ANCHOR_ID} className="scroll-mt-28" />
 
-          {activeCategory && <div className="mx-auto max-w-6xl">{categoryDetail}</div>}
-
-          {!activeCategory && (
-            <>
-
-          {/* CHAPTER 01: THE INFINITE SPECTRUM */}
+          {/* CHAPTER 01: THE INFINITE SPECTRUM */}}
           <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 overflow-hidden bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(212,55,144,0.14)_0%,transparent_55%)]" />
             <div className="relative mx-auto max-w-6xl">
@@ -3091,7 +3040,6 @@ function FullCataloguePage() {
                 >
                   Explore Full Spectrum
                 </button>
-                <span className="text-xs text-white/35">Vast · Authoritative · Organised</span>
               </div>
             </div>
           </div>
@@ -3106,7 +3054,6 @@ function FullCataloguePage() {
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#1A1A1A]/70 sm:text-base">
                 The foundation of every trend. Our Leeukopf-certified base and builder systems provide the architectural support for your colour — engineered for 21-day wear and diamond-grade shine.
               </p>
-              <p className="mt-1.5 text-xs text-[#4A4A4A]/55">Clinical · Essential · Premium</p>
             </div>
 
             {/* CATEGORY GRID */}
@@ -3446,9 +3393,6 @@ function FullCataloguePage() {
               ALL SYSTEMS ARE 100% HEMA & TPO FREE | CPNP NOTIFIED
             </p>
           </div>
-
-            </>
-          )}
 
         </>
       )}
