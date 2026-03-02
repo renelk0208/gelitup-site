@@ -2154,7 +2154,6 @@ function FullCataloguePage() {
   const [colorTileFrame, setColorTileFrame] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
-  const [showFiveInOneDetails, setShowFiveInOneDetails] = useState(false)
   const [springSummerLookbook, setSpringSummerLookbook] = useState(SPRING_SUMMER_LOOKBOOK_DEFAULT)
   const [expandedLookbookGroup, setExpandedLookbookGroup] = useState(0)
   const [selectedLookbookPageByGroup, setSelectedLookbookPageByGroup] = useState({})
@@ -3062,83 +3061,6 @@ function FullCataloguePage() {
                 Advanced building and prep systems: Superbond Primer, Superior Bases, 3-in-1 Premium Builders, Crème de la Crème, and MultiMix Synthogel.
               </p>
             </div>
-
-             {/* FEATURED HERO: 5-IN-1 SUPERIOR BASE COAT */}
-            {!activeCategory && (
-            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-white px-4 py-12 sm:px-8 sm:py-16">
-              <div className="mx-auto max-w-6xl">
-                <div className="grid items-center gap-8 md:grid-cols-2">
-                  {/* Product Image */}
-                  <div className="flex justify-center">
-                    <div className="relative h-96 w-64 rounded-xl border border-[#4A4A4A]/30 bg-white p-8 flex items-center justify-center">
-                      <img
-                        src="/gelitup-content/product-images/BASES/5IN1 SUPERIOR BASE/5in1-superior-base.jpg"
-                        alt="5-in-1 Superior Base Coat - Clear self-leveling texture"
-                        className="h-full w-full object-contain"
-                        onError={(e) => {
-                          e.currentTarget.src = '/logo.png'
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Product Details */}
-                  <div>
-                    <h3 className="text-4xl font-extrabold uppercase tracking-[0.08em] text-[#1A1A1A] sm:text-5xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
-                      The All-in-One Foundation
-                    </h3>
-                    <p className="mt-4 text-base text-[#1A1A1A]/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                      The 5-in-1 Superior Base Coat is a high-performance, multi-functional clear foundation designed for maximum efficiency in the professional studio. This versatile formula serves as a base coat, a strength overlay, and a short extension medium, all in one bottle.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setShowFiveInOneDetails((current) => !current)}
-                      className="mt-5 rounded-lg border border-[#D43790]/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-[#1A1A1A] transition duration-300 hover:bg-[#D43790]/10"
-                    >
-                      {showFiveInOneDetails ? 'Show Less' : 'Learn More'}
-                    </button>
-                    {showFiveInOneDetails && (
-                      <>
-                        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-[#1A1A1A]/70">Key Benefits</p>
-                        <ul className="mt-2 space-y-2 text-sm text-[#1A1A1A]/80">
-                          <li className="flex items-start gap-3">
-                            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                            <span>Five-in-one versatility: base coat, nail strengthener, ridge filler, repair gel, and short extension medium.</span>
-                          </li>
-                          <li className="flex items-start gap-3">
-                            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                            <span>Exceptional adhesion: resilient bond that helps prevent lifting and supports 3+ weeks of wear.</span>
-                          </li>
-                          <li className="flex items-start gap-3">
-                            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                            <span>Self-leveling mastery: high-viscosity formula corrects nail imperfections for a flawless color-ready surface.</span>
-                          </li>
-                          <li className="flex items-start gap-3">
-                            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                            <span>Clean science standard: 100% HEMA and TPO free.</span>
-                          </li>
-                        </ul>
-                        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-[#1A1A1A]/70">How to Use / Application</p>
-                        <ol className="mt-2 list-decimal space-y-2 pl-5 text-sm text-[#1A1A1A]/80">
-                          <li><span className="font-semibold text-[#1A1A1A]">Prep:</span> Begin with a standard dry manicure and thoroughly cleanse the nail plate to remove surface oils.</li>
-                          <li><span className="font-semibold text-[#1A1A1A]">Prime:</span> Apply a thin layer of Superbond Primer and allow it to air-dry for 30 seconds.</li>
-                          <li><span className="font-semibold text-[#1A1A1A]">Application:</span> Use the Precision Oval Brush for a thin scrub layer; for strength/ridge filling, add a second slightly thicker bead and let it self-level.</li>
-                          <li><span className="font-semibold text-[#1A1A1A]">Curing:</span> Cure for 60 seconds in LED or 120 seconds in UV.</li>
-                          <li><span className="font-semibold text-[#1A1A1A]">Next Step:</span> Proceed directly with your chosen GEL.IT.UP by GIUP® color polish.</li>
-                        </ol>
-                      </>
-                    )}
-                    <NavLink
-                      to="/portal/login?mode=create-password"
-                      className="mt-8 inline-flex rounded-lg bg-[#D43790] px-8 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-[#C32680]"
-                    >
-                      Buy Now
-                    </NavLink>
-                  </div>
-                </div>
-              </div>
-            </div>
-            )}
 
             {/* CATEGORY GRID */}
             <div className="mx-auto max-w-6xl">
