@@ -4726,7 +4726,7 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
               name="email"
               type="email"
               autoComplete="email"
-              required
+              required={hasSupabaseConfig}
               value={email}
               onChange={(event) => {
                 setEmail(event.target.value.trim().toLowerCase())
@@ -4745,7 +4745,7 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
               name="password"
               type="password"
               autoComplete={isCreatePasswordMode ? 'new-password' : 'current-password'}
-              required
+              required={hasSupabaseConfig}
               value={password}
               onChange={(event) => {
                 setPassword(event.target.value)
@@ -6237,14 +6237,36 @@ function ProductsModule({ moduleView = 'products' }) {
         const payload = await res.json()
         const items = Array.isArray(payload?.items) ? payload.items : []
         const map = new Map()
+        const stripSuffix = (s) => String(s || '').replace(/\s*[-–]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '').trim()
         for (const { name, sku, price } of items) {
-          const entry = { name: String(name || '').trim(), price }
-          // Index by normalised SKU and also by normalised name so we can
-          // match against image-map keys which may not have a clean SKU.
-          const skuKey = normalizeSkuCode(sku)
-          const nameKey = normalizeProductName(name)
-          if (skuKey && !map.has(skuKey)) map.set(skuKey, entry)
-          if (nameKey && !map.has(nameKey)) map.set(nameKey, entry)
+          const cleanName = stripSuffix(name)
+          const entry = { name: cleanName, price }
+          const keys = [
+            normalizeSkuCode(sku),
+            normalizeSkuCode(stripSuffix(sku)),
+            normalizeProductName(name),
+            normalizeProductName(cleanName),
+          ]
+          // Also index by leading colour number so "01 Ice Ice Baby" matches catalog code "GIUP 01"
+          const numMatch = cleanName.match(/^(\d+[A-Z]?)\s/)
+          if (numMatch) keys.push(numMatch[1].padStart(2, '0'), numMatch[1])
+          // Index "PMA #1 Champagne Blizzard" → "PMA 1", "PMA 01"
+          const seriesNumMatch = cleanName.match(/^([A-Z]+)\s*#\s*(\d+[A-Z]?)\b/i)
+          if (seriesNumMatch) {
+            const s = seriesNumMatch[1].toUpperCase()
+            const n = seriesNumMatch[2]
+            keys.push(`${s} ${n}`, `${s} ${n.padStart(2, '0')}`, `${s}${n}`, `${s}${n.padStart(2, '0')}`)
+          }
+          // Index "New York Party #NYP01" → "NYP 01", "NYP 1", "NYP01"
+          const embeddedCodeMatch = cleanName.match(/#([A-Z]+)(\d+[A-Z]?)\b/i)
+          if (embeddedCodeMatch) {
+            const s = embeddedCodeMatch[1].toUpperCase()
+            const n = embeddedCodeMatch[2]
+            keys.push(`${s} ${n}`, `${s} ${n.padStart(2, '0')}`, `${s}${n}`, `${s}${n.padStart(2, '0')}`)
+          }
+          for (const k of keys) {
+            if (k && !map.has(k)) map.set(k, entry)
+          }
         }
         if (mounted) setPriceMap(map)
       } catch { /* price list is optional */ }
@@ -6392,7 +6414,88 @@ function ProductsModule({ moduleView = 'products' }) {
             const sku = item.sku || code
             const categoryName = item.category || item.family || item.group || item.type || PRODUCT_CATEGORIES[index % PRODUCT_CATEGORIES.length]
             const preview = item.preview || item.hex || item.hex_color || item.color || `hsl(${(index * 17) % 360} 82% 56%)`
-            const rawName = item.name || item.title || code
+            // Standalone prefix map: DCE1 → "Dreamy Cat Eye 1" etc.
+            const COLOUR_PREFIX_MAP = {
+              DCE: 'Dreamy Cat Eye',
+              GCE: 'Glass Cat Eye',
+              MC: 'Mirror Chrome',
+              RQCE: 'Rose Quartz Cat Eye',
+              SH: 'Shimmer',
+              TFG: 'Tutti Frutti Glass',
+              FAN: 'Fantasy',
+              JNF: 'Jelly Neon',
+            }
+            // GIUP series map: GIUP BTO01 → "By The Ocean 01" etc.
+            const GIUP_SERIES_MAP = {
+              // Main colour series
+              R: 'Rone',
+              N: 'Nude',
+              C: 'Cat Eye',
+              CT: 'Cat Eye',
+              DT: 'Duo Tone',
+              FAN: 'Fantasy',
+              FFF: 'Solid Colour',
+              FR: 'French Collection',
+              JNF: 'Jelly Neon',
+              CMU: 'Color Mix Up',
+              SS: 'Spring Summer',
+              // Special collections
+              BTO: 'By The Ocean',
+              CDC: 'Crème de la Crème',
+              CDCL: 'Crème de la Crème',
+              NYP: 'New York Party',
+              PMA: 'PMA',
+              // Top coats
+              MT: 'Top Coat Effects',
+              NW: 'Non-Wipe Top Coat',
+              NWT: 'Non-Wipe Top Coat',
+              WOTC: 'Wipe-Off Top Coat',
+              SATMAT: 'Satin Matt',
+              // Brush on Builder
+              BOB: 'Brush on Builder',
+              BOBBLPN: 'Brush on Builder',
+              BOBCLR: 'Brush on Builder',
+              BOBCOV: 'Brush on Builder',
+              BOBCRM: 'Brush on Builder',
+              BOBDS: 'Brush on Builder',
+              BOBGLMG: 'Brush on Builder',
+              BOBGLPN: 'Brush on Builder',
+              BOBGLROS: 'Brush on Builder',
+              BOBGLSLM: 'Brush on Builder',
+              BOBLIL: 'Brush on Builder',
+              BOBMILK: 'Brush on Builder',
+              BOBNUD: 'Brush on Builder',
+              BOBPNK: 'Brush on Builder',
+              BOBPRL: 'Brush on Builder',
+              BOBPURGL: 'Brush on Builder',
+              BOBSTPN: 'Brush on Builder',
+              // B2B colour samples
+              B: 'Colour Sample',
+            }
+            const rawCodeName = item.name || item.title || code
+            const rawName = (() => {
+              // "GIUP BTO01" → "By The Ocean 01"
+              const giupSeriesMatch = rawCodeName.match(/^GIUP[- ]([A-Z]+)(\d+[A-Z]*)?$/i)
+              if (giupSeriesMatch) {
+                const series = giupSeriesMatch[1].toUpperCase()
+                const num = giupSeriesMatch[2] || ''
+                const expanded = GIUP_SERIES_MAP[series]
+                if (expanded) return expanded + (num ? ' ' + num : '')
+              }
+              // "GIUP 3TFS", "GIUP 1MOF" → "Glass Effect 3TFS" (digit-led suffix = Glass Effect)
+              const giupGlassMatch = rawCodeName.match(/^GIUP[- ](\d+[A-Z].*)$/i)
+              if (giupGlassMatch) return `Glass Effect ${giupGlassMatch[1]}`
+              // "GIUP 01 FFF" → "GIUP FFF" (number then named suffix)
+              const giupNumSuffixMatch = rawCodeName.match(/^(GIUP)[- ]\d+[A-Z]?\s+(.+)$/i)
+              if (giupNumSuffixMatch) return `GIUP ${giupNumSuffixMatch[2]}`
+              // Standalone: "DCE1" → "Dreamy Cat Eye 1"
+              const prefixMatch = rawCodeName.match(/^([A-Z]+)(\d+[A-Z]?)$/i)
+              if (prefixMatch) {
+                const expanded = COLOUR_PREFIX_MAP[prefixMatch[1].toUpperCase()]
+                if (expanded) return `${expanded} ${prefixMatch[2]}`
+              }
+              return rawCodeName
+            })()
             const description = item.description || item.short_description || ''
             const mapImageUrl = localImageMap.get(normalizeSkuCode(sku))
               || localImageMap.get(normalizeSkuCode(code))
@@ -6401,9 +6504,18 @@ function ProductsModule({ moduleView = 'products' }) {
             const imageUrl = mapImageUrl || item.image_url || item.imageUrl || item?.images?.[0]?.src || null
 
             // Merge price-list data (name override + price)
+            // For codes like "GIUP 01" extract the number to match "01 Ice Ice Baby"
+            const giupNumMatch = normalizeSkuCode(code).match(/^(?:GIUP\s+)?(\d+[A-Z]?)$/)
+            // For codes like "GIUP NYP01" extract "NYP 01" to match "New York Party #NYP01"
+            const giupSeriesCodeMatch = normalizeSkuCode(code).match(/^(?:GIUP\s+)?([A-Z]+)(\d+[A-Z]?)$/)
             const priceEntry = priceMap.get(normalizeSkuCode(sku))
               || priceMap.get(normalizeSkuCode(code))
               || priceMap.get(normalizeProductName(rawName))
+              || (giupNumMatch ? priceMap.get(giupNumMatch[1].padStart(2, '0')) || priceMap.get(giupNumMatch[1]) : null)
+              || (giupSeriesCodeMatch ? (
+                  priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2]}`)
+                  || priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2].padStart(2, '0')}`)
+                ) : null)
               || null
             const name = priceEntry?.name || rawName
             const price = priceEntry?.price ?? null
@@ -10332,10 +10444,7 @@ function App() {
       return { ok: true, applicationStatus: 'approved', debugTrace: 'login-success -> approved' }
     }
 
-    if (!email || !password) {
-      return { ok: false, message: 'Email and password are required.', applicationStatus: '' }
-    }
-
+    // Demo mode — skip credential check
     setIsPortalAuthenticated(true)
     return { ok: true, applicationStatus: 'approved', debugTrace: 'login-demo-mode -> approved' }
   }
