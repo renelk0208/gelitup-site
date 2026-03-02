@@ -707,7 +707,7 @@ const navItems = [
   { to: '/distributor-packages', label: 'Distribution Options' },
   { to: '/full-catalogue', label: 'Our Products' },
   { to: '/distributors', label: 'Distributors' },
-  { to: '/become-distributor', label: 'B2B / Distribution Registration' },
+  { to: '/become-distributor', label: 'B2B / Distribution Registration', highlight: true },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -3612,9 +3612,15 @@ function Nav({ onOpenContactModal }) {
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
-              `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
-                isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
-              }`
+              item.highlight
+                ? `rounded-lg border px-4 py-2 text-sm font-bold uppercase tracking-[0.06em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
+                    isActive
+                      ? 'border-fuchsia-400 bg-fuchsia-600 !text-white shadow-[0_0_12px_rgba(212,55,144,0.55)]'
+                      : 'border-fuchsia-500 bg-fuchsia-600 !text-white shadow-[0_0_8px_rgba(212,55,144,0.35)] hover:bg-fuchsia-500 hover:shadow-[0_0_14px_rgba(212,55,144,0.6)]'
+                  }`
+                : `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
+                    isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
+                  }`
             }
           >
             {item.label}
@@ -3648,9 +3654,15 @@ function MobileNav({ onOpenContactModal }) {
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `min-w-max shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.02em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
-                  isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.5)]' : '!text-white/85 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
-                }`
+                item.highlight
+                  ? `min-w-max shrink-0 whitespace-nowrap rounded-md border px-3 py-2 text-center text-[10px] font-bold uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
+                      isActive
+                        ? 'border-fuchsia-400 bg-fuchsia-600 !text-white shadow-[0_0_10px_rgba(212,55,144,0.5)]'
+                        : 'border-fuchsia-500 bg-fuchsia-600 !text-white shadow-[0_0_6px_rgba(212,55,144,0.35)] hover:bg-fuchsia-500'
+                    }`
+                  : `min-w-max shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.02em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
+                      isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.5)]' : '!text-white/85 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
+                    }`
               }
             >
               {item.label}
