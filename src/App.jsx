@@ -10612,10 +10612,54 @@ function PendingApplicationsModule() {
   )
 }
 
+function BuyerPortal({ onLogout, userName, userEmail }) {
+  return (
+    <section className="mx-auto max-w-2xl space-y-6 py-10 px-4">
+      <div className="rounded-2xl border border-slate-200 bg-white p-8">
+        <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-600">Online Buyer Portal</p>
+        <h2 className="mt-2 text-2xl font-semibold text-slate-900">Welcome{userName ? `, ${userName}` : ''}!</h2>
+        <p className="mt-1 text-sm text-slate-500">{userEmail}</p>
+        <p className="mt-4 text-sm text-slate-600">
+          Your account is active. Browse the GEL.IT.UP catalogue and place orders online.
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <NavLink
+            to="/catalogue"
+            className="rounded-lg bg-fuchsia-600 px-5 py-2 text-sm font-semibold text-white hover:bg-fuchsia-700"
+          >
+            Browse Catalogue
+          </NavLink>
+          <NavLink
+            to="/shop"
+            className="rounded-lg border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Shop Online
+          </NavLink>
+        </div>
+      </div>
+      <div className="rounded-2xl border border-slate-200 bg-white p-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Account</p>
+        <div className="mt-3 space-y-2 text-sm text-slate-600">
+          <p><span className="font-medium text-slate-800">Name:</span> {userName || '—'}</p>
+          <p><span className="font-medium text-slate-800">Email:</span> {userEmail}</p>
+          <p><span className="font-medium text-slate-800">Account type:</span> Online Buyer</p>
+        </div>
+        <button
+          onClick={onLogout}
+          className="mt-5 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          Sign Out
+        </button>
+      </div>
+    </section>
+  )
+}
+
 function PortalDashboard({ onLogout }) {
   const location = useLocation()
   const navigate = useNavigate()
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
+  const [portalUser, setPortalUser] = useState(null)
   const [skuRules, setSkuRules] = useState({
     colorSkuSet: new Set(),
     baseSystemSkuSet: new Set(),
@@ -10627,6 +10671,13 @@ function PortalDashboard({ onLogout }) {
   const [performanceWidget, setPerformanceWidget] = useState({
     topSellingColor: '09 Coco Nude',
   })
+
+  useEffect(() => {
+    if (!hasSupabaseConfig || !supabase) return
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) setPortalUser(data.user)
+    })
+  }, [])
 
   const printComplianceCertificate = useCallback(async () => {
     const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' })
@@ -10919,6 +10970,16 @@ function PortalDashboard({ onLogout }) {
       mounted = false
     }
   }, [activeModule, ordersTable])
+
+  if (portalUser?.user_metadata?.role === 'buyer') {
+    return (
+      <BuyerPortal
+        onLogout={onLogout}
+        userName={portalUser.user_metadata?.full_name || ''}
+        userEmail={portalUser.email || ''}
+      />
+    )
+  }
 
   return (
     <section className="grid gap-4 lg:grid-cols-[240px,1fr]">
