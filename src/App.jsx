@@ -6917,8 +6917,8 @@ function ProductsModule({ moduleView = 'products' }) {
                 sub.items.map((item) => ({
                   // For COLORS use the subcategory (SOLID GEL POLISH, CAT EYE, etc.)
                   // For all other top-level categories use the section name (BRUSHES, TOOLS, etc.)
-                  // Always split by subcategory so Builder Gel Systems, Nail Art etc. show as separate groups
-                  category: (sub.name && sub.name !== 'General') ? sub.name : section.category,
+                  // Use top-level category for all except COLORS (which splits by subcategory: Solid Gel Polish, Cat Eye, etc.)
+                  category: section.category === 'COLORS' ? sub.name : section.category,
                   code: item.name,
                   sku: item.name,
                   name: item.name,
