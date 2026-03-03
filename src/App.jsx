@@ -11818,7 +11818,7 @@ function App() {
 
       if (error) {
         const missingTableError = error.message?.includes('Could not find the table')
-          || error.message?.includes('relation')
+          || error.message?.includes('does not exist')
 
         if (missingTableError) {
           return {
@@ -11827,7 +11827,7 @@ function App() {
           }
         }
 
-        return { ok: false, message: error.message }
+        return { ok: false, message: `Registration failed: ${error.message} (code: ${error.code})` }
       }
 
       const inboxNotificationResult = await sendPortalEmailNotification({
