@@ -1997,15 +1997,10 @@ function flattenSectionItems(section) {
 const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   'BASES::SUPERBOND': {
     paragraphs: [
-      'The Superbond Primer is a professional-grade, non-acid adhesive agent designed to create a powerful chemical bond between the natural nail and the product. It is a vital first step for ensuring long-term wear and preventing lifting.',
+      'GEL.IT.UP by GIUP® Superbond with Acid is an acid-based primer, designed to be safe for the natural nail, and it does not require curing.',
+      'It is applied to the free edge of the nail before the base coat, ensuring improved adhesion while providing additional dehydration for longer-lasting results.',
     ],
-    listItems: [
-      'Key Benefits: Superior adhesion, non-acid formula, rapid ROI, and 100% HEMA/TPO-free safety.',
-      'Application — Prep: Perform a dry manicure and cleanse the nail to remove surface oils.',
-      'Application — Apply: Wipe excess and apply a very thin layer to the natural nail plate.',
-      'Application — Dry: Air-dry for ~30 seconds (do not cure); slight tackiness is normal.',
-      'Application — Next: Proceed immediately with GEL.IT.UP by GIUP® Base Coat.',
-    ],
+    listItems: [],
   },
   'BASES::5IN1 SUPERIOR BASE': {
     paragraphs: [
