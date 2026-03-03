@@ -2009,15 +2009,14 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'BASES::5IN1 SUPERIOR BASE': {
     paragraphs: [
-      'The 5-in-1 Superior Base Coat is a high-performance, multi-functional clear foundation designed for maximum efficiency in the professional studio. This versatile formula serves as a base coat, a strength overlay, and a short extension medium, all in one bottle.',
+      'The 5-in-1 Superior Base Coat is a product that offers 5 different uses in a single bottle.',
     ],
     listItems: [
-      'Key Benefits: Five-in-one versatility, exceptional adhesion, self-leveling mastery, and 100% HEMA/TPO-free clean science standard.',
-      'Application — Prep: Perform dry manicure and cleanse nail plate thoroughly.',
-      'Application — Prime: Apply Superbond Primer and air-dry for 30 seconds.',
-      'Application — Apply: Add a thin scrub layer; for strength/ridge fill, add a slightly thicker self-leveling bead.',
-      'Application — Cure: 60s LED or 120s UV.',
-      'Application — Next: Proceed with GEL.IT.UP by GIUP® color polish.',
+      'A base before applying semi-permanent colors.',
+      'A reinforced base for thin and brittle nails.',
+      'A shaping gel.',
+      'An adhesive for rhinestones and other 3D nail decorations.',
+      'A gel for slight extension and strengthening of the natural nail.',
     ],
   },
   'BUILDER GEL SYSTEMS::3INI BUILDER': {
@@ -2133,6 +2132,28 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Application — Refine: Once polymerized, file to shape with professional-grade nail files.',
       'Application — Seal: Finish with GEL.IT.UP by GIUP® Non-Wipe Top Coat and cure 90–120 seconds for a TPO-free high-gloss seal.',
     ],
+  },
+  'BASES::BRUSH ON BUILDER': {
+    paragraphs: [
+      'Brush On Builder Base is a thick, gel-based base coat, durable and ideal for strengthening the natural nail and for slight extensions with a form up to 3mm.',
+      'It is mainly used in cases of nail biting and for brittle nails that break easily.',
+    ],
+    listItems: [],
+  },
+  'NAIL ART::CUSHION GEL': {
+    paragraphs: [
+      'Cushion Gels are color gels with a velvety, creamy texture, enriched with high-intensity pigments that ensure a bold and even result, even from the first application.',
+      'They are available in a 5g jar, featuring a specially designed inner stopper at the opening, allowing you to pick up the ideal amount of product each time without waste.',
+      'Ideal for creating ombre effects with a sponge, they provide incredibly smooth blending with just one pass. Application is effortless, even for beginner nail technicians, while the final result impresses with its professional finish.',
+    ],
+    listItems: [],
+  },
+  'NAIL ART::MARBLE INK': {
+    paragraphs: [
+      'Marble-It by GIUP® is a water-based color that air-dries on its own — it does not require curing.',
+      'The Marble-It range allows you to easily and quickly create marble, smoke, and water-effect nail art designs.',
+    ],
+    listItems: [],
   },
 }
 
