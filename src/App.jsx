@@ -2129,6 +2129,21 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Application — Seal: Finish with GEL.IT.UP by GIUP® Non-Wipe Top Coat and cure 90–120 seconds for a TPO-free high-gloss seal.',
     ],
   },
+  'TOPS::EFFECT TOPS': {
+    paragraphs: [
+      'The Diamond Top Coat range is the ultimate trend. It delivers the high-gloss finish of a top coat combined with the unique sparkle of flakes. You can apply it over any color of your choice.',
+      'It has no sticky layer.',
+    ],
+    listItems: [],
+  },
+  'TOPS::CLASSIC TOP COATS': {
+    paragraphs: [
+      'Non Wipe Top Coat — The well-known Non Wipe Top Coat is a top coat of exceptional durability and shine, with no sticky layer. Thanks to its superior formula, it does not yellow or alter the color, providing outstanding gloss and a long-lasting, flawless finish.',
+      'Perfect Shape Non-Wipe Topcoat — Thanks to its rubber-based formula, it provides even coverage that corrects imperfections, delivering shine, durability, and long-lasting wear. Due to its elasticity, it helps prevent scratches. Its thick consistency allows you to create additional reinforcement over gel polish and artificial nails.',
+      'Perfect Shape does not run into the cuticle area, making it especially helpful for beginner nail technicians.',
+    ],
+    listItems: [],
+  },
   'BASES::BRUSH ON BUILDER': {
     paragraphs: [
       'Brush On Builder Base is a thick, gel-based base coat, durable and ideal for strengthening the natural nail and for slight extensions with a form up to 3mm.',
