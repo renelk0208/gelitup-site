@@ -2129,6 +2129,13 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Application — Seal: Finish with GEL.IT.UP by GIUP® Non-Wipe Top Coat and cure 90–120 seconds for a TPO-free high-gloss seal.',
     ],
   },
+  'TOPS::SPOT MY TOPS': {
+    paragraphs: [
+      'Create the ultimate trend easily and quickly with the brand-new magnetic top coat — FAN12 Rainbow Dreams.',
+      'It delivers the high-gloss finish of a top coat combined with the unique sparkle of microscopic iridescent particles. You can apply it over any color of your choice.',
+    ],
+    listItems: [],
+  },
   'TOPS::EFFECT TOPS': {
     paragraphs: [
       'The Diamond Top Coat range is the ultimate trend. It delivers the high-gloss finish of a top coat combined with the unique sparkle of flakes. You can apply it over any color of your choice.',
@@ -2141,6 +2148,12 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Non Wipe Top Coat — The well-known Non Wipe Top Coat is a top coat of exceptional durability and shine, with no sticky layer. Thanks to its superior formula, it does not yellow or alter the color, providing outstanding gloss and a long-lasting, flawless finish.',
       'Perfect Shape Non-Wipe Topcoat — Thanks to its rubber-based formula, it provides even coverage that corrects imperfections, delivering shine, durability, and long-lasting wear. Due to its elasticity, it helps prevent scratches. Its thick consistency allows you to create additional reinforcement over gel polish and artificial nails.',
       'Perfect Shape does not run into the cuticle area, making it especially helpful for beginner nail technicians.',
+    ],
+    listItems: [],
+  },
+  'BASES::FLEXI BASE': {
+    paragraphs: [
+      'Flexi Base is a base coat suitable for sensitive and damaged nails that break easily. The flexibility it provides enhances the strength of the natural nail, offering greater protection against potential breakage.',
     ],
     listItems: [],
   },
