@@ -1946,6 +1946,7 @@ function formatSubcategoryDisplayName(subcategoryName = '', categoryName = '') {
   if (normalized === 'MARBLE INK') return 'Marble Ink'
   if (normalized === 'MIRROR POWDERS') return 'Mirror Powders'
   if (normalized === 'STICKERS') return 'Stickers'
+  if (normalized === 'GIUP BLOSSOM WEBP') return 'GIUP Blossom'
   
   // Packages
   if (normalized === 'STUDIO ELITE') return 'Studio Elite'
@@ -2341,6 +2342,12 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Leave the nail outside the lamp for at least 2 minutes',
       'Finish with a top coat',
     ],
+  },
+  'NAIL ART::GIUP BLOSSOM WEBP': {
+    paragraphs: [
+      'Product description coming soon.',
+    ],
+    listItems: [],
   },
 }
 
@@ -2940,7 +2947,7 @@ function FullCataloguePage() {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          const el = document.getElementById('catalogue-items-grid')
+          const el = document.getElementById('catalogue-category-detail')
           if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
         })
       })
@@ -2952,11 +2959,11 @@ function FullCataloguePage() {
     setActiveCategory(categoryName)
     setActiveSubcategory(subcategoryName || 'ALL')
     setActiveColorFamily('ALL')
-    // Scroll directly to the image grid
+    // Scroll to the category detail panel (subcategory tabs visible first)
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          const el = document.getElementById('catalogue-items-grid')
+          const el = document.getElementById('catalogue-category-detail')
           if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
         })
       })
@@ -3394,7 +3401,7 @@ function FullCataloguePage() {
                   onClick={() => {
                     const colorsSection = sections.find((s) => isColorsCategoryName(s.category))
                     if (colorsSection) {
-                      openCatalogueCategory(colorsSection.category, 'SOLID GEL POLISH')
+                      openCatalogueCategory(colorsSection.category, 'ALL')
                     }
                   }}
                   className="rounded-lg bg-fuchsia-600 px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
