@@ -2146,8 +2146,8 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   'TOPS::CLASSIC TOP COATS': {
     paragraphs: [
       'Non Wipe Top Coat — The well-known Non Wipe Top Coat is a top coat of exceptional durability and shine, with no sticky layer. Thanks to its superior formula, it does not yellow or alter the color, providing outstanding gloss and a long-lasting, flawless finish.',
-      'Perfect Shape Non-Wipe Topcoat — Thanks to its rubber-based formula, it provides even coverage that corrects imperfections, delivering shine, durability, and long-lasting wear. Due to its elasticity, it helps prevent scratches. Its thick consistency allows you to create additional reinforcement over gel polish and artificial nails.',
-      'Perfect Shape does not run into the cuticle area, making it especially helpful for beginner nail technicians.',
+      'Perfect Shape Non-Wipe Topcoat — Thanks to its rubber-based formula, it provides even coverage that corrects imperfections, delivering shine, durability, and long-lasting wear. Due to its elasticity, it helps prevent scratches. Its thick consistency allows you to create additional reinforcement over gel polish and artificial nails. It does not run into the cuticle area, making it especially helpful for beginner nail technicians.',
+      'Milky Non-Wipe Topcoat — Delivers a rich, deep milky tone over your gel polish, enhancing both light and dark shades. It provides the perfect milky finish for ombré and baby boomer designs. Your ideal ally for every nail art and technique.',
     ],
     listItems: [],
   },
