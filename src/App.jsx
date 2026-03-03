@@ -2181,13 +2181,10 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'NAIL HAND FOOT CARE::CREAMS AND SCRUBS': {
     paragraphs: [
-      'Our Hand & Body Cream range — With Organic Aloe and a unique cocktail of active ingredients, it fragrances and hydrates the skin. It absorbs quickly and leaves no oily residue.',
+      'Hand & Body Cream — With Organic Aloe and a unique cocktail of active ingredients, it fragrances and hydrates the skin. It absorbs quickly and leaves no oily residue. Key ingredients: Organic Aloe Vera, Hyaluronic Acid, Panthenol.',
+      'Silky Bliss Foot Cream — It absorbs quickly and leaves no oily residue. Key ingredients: Organic Aloe Vera, Avocado Oil, Panthenol.',
     ],
-    listItems: [
-      'Organic Aloe Vera',
-      'Hyaluronic Acid',
-      'Panthenol',
-    ],
+    listItems: [],
   },
   'NAIL HAND FOOT CARE::CUTICLE OILS REMOVERS': {
     paragraphs: [
