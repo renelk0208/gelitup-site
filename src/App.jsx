@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+﻿import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -5760,6 +5760,10 @@ function ProductsModule({ moduleView = 'products' }) {
   const [draftInvoice, setDraftInvoice] = useState('')
   const [dismissedTechnicalUpsell, setDismissedTechnicalUpsell] = useState(false)
   const [dismissedMagnetUpsell, setDismissedMagnetUpsell] = useState(false)
+  const [dismissedSuperbondUpsell, setDismissedSuperbondUpsell] = useState(false)
+  const [dismissedCleanserUpsell, setDismissedCleanserUpsell] = useState(false)
+  const [dismissedSynthoUpsell, setDismissedSynthoUpsell] = useState(false)
+  const [dismissedTipsBaseUpsell, setDismissedTipsBaseUpsell] = useState(false)
   const [includeProfessionalBasePack, setIncludeProfessionalBasePack] = useState(false)
   const [showAddOnRemovedToast, setShowAddOnRemovedToast] = useState(false)
   const [showOrderConfetti, setShowOrderConfetti] = useState(false)
@@ -6155,6 +6159,104 @@ function ProductsModule({ moduleView = 'products' }) {
       || products.find((product) => hasMagnetSignal(product?.code, product?.sku, product?.name) && !normalizeCatalogueToken(product?.category || '').includes('COLOR'))
       || null
   }, [hasMagnetSignal, isActualMagnetTool, products])
+
+  // ── Superbond upsell — any base purchased, Superbond not yet in cart ──────
+  const hasNonSuperbondBase = useCallback((product, code = '') => {
+    const cat = normalizeCatalogueToken(product?.category || '')
+    const sub = normalizeCatalogueToken(product?.subcategory || '')
+    const img = normalizeCatalogueToken(product?.imageUrl || code)
+    const isBase = cat.includes('BASE') || img.includes('BASES')
+    const isSuperbond = sub.includes('SUPERBOND') || img.includes('SUPERBOND')
+      || normalizeSkuCode(product?.code || product?.sku || code).startsWith('GIUPSB')
+    return isBase && !isSuperbond
+  }, [])
+
+  const hasSuperbondSignal = useCallback((product, code = '') => {
+    const sub = normalizeCatalogueToken(product?.subcategory || '')
+    const img = normalizeCatalogueToken(product?.imageUrl || code)
+    const sku = normalizeSkuCode(product?.code || product?.sku || code)
+    return sub.includes('SUPERBOND') || img.includes('SUPERBOND') || sku.startsWith('GIUPSB') || sku === 'SBAC'
+  }, [])
+
+  const hasBaseInCart = useMemo(() => {
+    if (selectedCodes.some((code) => hasNonSuperbondBase(catalogBySku.get(normalizeSkuCode(code)), code))) return true
+    return packageCartItems.some((item) => hasNonSuperbondBase(item, item?.code || ''))
+  }, [catalogBySku, hasNonSuperbondBase, packageCartItems, selectedCodes])
+
+  const hasSuperbondInCart = useMemo(() => {
+    if (selectedCodes.some((code) => hasSuperbondSignal(catalogBySku.get(normalizeSkuCode(code)), code))) return true
+    return packageCartItems.some((item) => hasSuperbondSignal(item, item?.code || ''))
+  }, [catalogBySku, hasSuperbondSignal, packageCartItems, selectedCodes])
+
+  const shouldShowSuperbondUpsell = hasBaseInCart && !hasSuperbondInCart
+
+  // ── Cleanser upsell — Wipe-Off Top Coat purchased, Cleanser not in cart ──
+  const hasWotcInCart = useMemo(() => {
+    if (selectedCodes.some((code) => normalizeSkuCode(code).includes('WOTC'))) return true
+    return packageCartItems.some((item) => normalizeSkuCode(item?.code || item?.sku || '').includes('WOTC'))
+  }, [packageCartItems, selectedCodes])
+
+  const hasCleanserInCart = useMemo(() => {
+    if (selectedCodes.some((code) => {
+      const t = normalizeCatalogueToken(code)
+      return t.includes('CLEANSER') || normalizeCatalogueToken(catalogBySku.get(normalizeSkuCode(code))?.name || '').includes('CLEANSER')
+    })) return true
+    return packageCartItems.some((item) => normalizeCatalogueToken(item?.name || item?.code || '').includes('CLEANSER'))
+  }, [catalogBySku, packageCartItems, selectedCodes])
+
+  const shouldShowCleanserUpsell = hasWotcInCart && !hasCleanserInCart
+
+  // ── Syntho accessories upsell — MultiMix bought, accessories not in cart ──
+  const hasMultiMixInCart = useMemo(() => {
+    if (selectedCodes.some((code) => {
+      const product = catalogBySku.get(normalizeSkuCode(code))
+      const cat = normalizeCatalogueToken(product?.category || '')
+      const img = normalizeCatalogueToken(product?.imageUrl || code)
+      return cat.includes('MULTIMIX') || img.includes('MULTIMIX') || normalizeCatalogueToken(code).includes('MULTIMIX')
+    })) return true
+    return packageCartItems.some((item) => normalizeCatalogueToken(item?.category || item?.name || '').includes('MULTIMIX'))
+  }, [catalogBySku, packageCartItems, selectedCodes])
+
+  const DUAL_FORM_SHAPES = ['DUAL MIX', 'G.T.LONG', 'G.T.SHORT', 'G.T.MEDIUM', 'DUAL FORM']
+
+  const hasSynthoAccessoriesInCart = useMemo(() => {
+    if (selectedCodes.some((code) => {
+      const t = normalizeCatalogueToken(code)
+      return t.includes('POLYGEL') || t.includes('SYNTHOGEL') || t.includes('MULTI LIQUID') || t.includes('SYNTHOLIQUID')
+        || DUAL_FORM_SHAPES.some((s) => t.includes(s))
+    })) return true
+    return packageCartItems.some((item) => {
+      const t = normalizeCatalogueToken(item?.name || item?.subcategory || '')
+      return t.includes('POLYGEL') || t.includes('SYNTHOGEL') || t.includes('MULTI LIQUID')
+        || DUAL_FORM_SHAPES.some((s) => t.includes(s))
+    })
+  }, [packageCartItems, selectedCodes])
+
+  const shouldShowSynthoUpsell = hasMultiMixInCart && !hasSynthoAccessoriesInCart
+
+  // ── 5-in-1 Clear Base upsell — Nail Tips purchased ───────────────────────
+  const hasNailTipsInCart = useMemo(() => {
+    const tipShapes = ['ALMOND', 'COFFIN', 'BALLERINA', 'SQUOVAL', 'SQUARE', 'STANDARD', 'RUSSIAN', 'DUAL MIX', 'NAIL TIP', 'NAIL FORM']
+    if (selectedCodes.some((code) => {
+      const product = catalogBySku.get(normalizeSkuCode(code))
+      const sub = normalizeCatalogueToken(product?.subcategory || '')
+      const img = normalizeCatalogueToken(product?.imageUrl || code)
+      const token = normalizeCatalogueToken(code)
+      return sub.includes('NAIL TIP') || img.includes('NAIL TIP') || tipShapes.some((s) => token.includes(s) || img.includes(s))
+    })) return true
+    return packageCartItems.some((item) => {
+      const t = normalizeCatalogueToken(item?.subcategory || item?.name || '')
+      return t.includes('NAIL TIP') || tipShapes.some((s) => t.includes(s))
+    })
+  }, [catalogBySku, packageCartItems, selectedCodes])
+
+  const has5in1ClearInCart = useMemo(() => {
+    if (selectedCodes.some((code) => normalizeSkuCode(code).includes('SBCCLR'))) return true
+    return packageCartItems.some((item) => normalizeSkuCode(item?.code || item?.sku || '').includes('SBCCLR'))
+  }, [packageCartItems, selectedCodes])
+
+  const shouldShowTipsBaseUpsell = hasNailTipsInCart && !has5in1ClearInCart
+
   const resolveCatalogImageUrl = useCallback((item) => {
     const localMapKeys = [
       normalizeSkuCode(item?.sku),
@@ -6213,6 +6315,22 @@ function ProductsModule({ moduleView = 'products' }) {
       setDismissedMagnetUpsell(false)
     }
   }, [shouldShowMagnetUpsellToast])
+
+  useEffect(() => {
+    if (!shouldShowSuperbondUpsell) setDismissedSuperbondUpsell(false)
+  }, [shouldShowSuperbondUpsell])
+
+  useEffect(() => {
+    if (!shouldShowCleanserUpsell) setDismissedCleanserUpsell(false)
+  }, [shouldShowCleanserUpsell])
+
+  useEffect(() => {
+    if (!shouldShowSynthoUpsell) setDismissedSynthoUpsell(false)
+  }, [shouldShowSynthoUpsell])
+
+  useEffect(() => {
+    if (!shouldShowTipsBaseUpsell) setDismissedTipsBaseUpsell(false)
+  }, [shouldShowTipsBaseUpsell])
 
   useEffect(() => {
     let mounted = true
@@ -7784,59 +7902,78 @@ function ProductsModule({ moduleView = 'products' }) {
         </div>
       )}
 
-      {shouldShowTechnicalUpsellToast && !dismissedTechnicalUpsell && (
-        <div className="fixed bottom-4 right-4 z-50 w-[min(92vw,440px)] rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Professional Tip</p>
-          <p className="mt-1 text-sm text-amber-900">
-            Professional Tip: Your chosen shades perform best with the 5-in-1 Superior Base. Would you like to add a professional 6-pack to your order for a 15% discount?
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              onClick={() => {
-                setIncludeProfessionalBasePack(true)
-                setDismissedTechnicalUpsell(true)
-              }}
-              className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white"
-            >
-              Add 6-pack
-            </button>
-            <button
-              onClick={() => setDismissedTechnicalUpsell(true)}
-              className="rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-800"
-            >
-              Dismiss
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Stacked upsell toasts (bottom-right column) */}
+      <div className="fixed bottom-4 right-4 z-50 flex w-[min(92vw,440px)] flex-col gap-3">
 
-      {shouldShowMagnetUpsellToast && !dismissedMagnetUpsell && (
-        <div className={`fixed right-4 z-50 w-[min(92vw,440px)] rounded-xl border border-fuchsia-200 bg-fuchsia-50 p-4 shadow-sm ${shouldShowTechnicalUpsellToast && !dismissedTechnicalUpsell ? 'bottom-40' : 'bottom-4'}`}>
-          <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-700">Cat Eye Upsell</p>
-          <p className="mt-1 text-sm text-fuchsia-900">
-            Don’t forget your magnet—Cat Eye shades need it to create the signature effect.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {magnetUpsellProduct && magnetUpsellProduct.code ? (
-              <button
-                onClick={() => {
-                  setSelectedCodes((current) => (current.includes(magnetUpsellProduct.code) ? current : [...current, magnetUpsellProduct.code]))
-                  setDismissedMagnetUpsell(true)
-                }}
-                className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white"
-              >
-                Add Magnet
-              </button>
-            ) : null}
-            <button
-              onClick={() => setDismissedMagnetUpsell(true)}
-              className="rounded-lg border border-fuchsia-300 px-3 py-1.5 text-xs font-semibold text-fuchsia-800"
-            >
-              Dismiss
-            </button>
+        {shouldShowTechnicalUpsellToast && !dismissedTechnicalUpsell && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Professional Tip</p>
+            <p className="mt-1 text-sm text-amber-900">Your chosen shades perform best with the 5-in-1 Superior Base. Add a professional 6-pack at 15% discount?</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button onClick={() => { setIncludeProfessionalBasePack(true); setDismissedTechnicalUpsell(true) }} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">Add 6-pack</button>
+              <button onClick={() => setDismissedTechnicalUpsell(true)} className="rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-800">Dismiss</button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {shouldShowMagnetUpsellToast && !dismissedMagnetUpsell && (
+          <div className="rounded-xl border border-fuchsia-200 bg-fuchsia-50 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-700">Cat Eye Essential</p>
+            <p className="mt-1 text-sm text-fuchsia-900">Don't forget your magnet - Cat Eye shades need it to create the signature effect.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {magnetUpsellProduct?.code && (
+                <button onClick={() => { setSelectedCodes((c) => c.includes(magnetUpsellProduct.code) ? c : [...c, magnetUpsellProduct.code]); setDismissedMagnetUpsell(true) }} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">Add Magnet</button>
+              )}
+              <button onClick={() => setDismissedMagnetUpsell(true)} className="rounded-lg border border-fuchsia-300 px-3 py-1.5 text-xs font-semibold text-fuchsia-800">Dismiss</button>
+            </div>
+          </div>
+        )}
+
+        {shouldShowSuperbondUpsell && !dismissedSuperbondUpsell && (
+          <div className="rounded-xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">Adhesion Tip</p>
+            <p className="mt-1 text-sm text-sky-900">Superbond Primer maximises adhesion for any base coat - avoid lifting from day one.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button onClick={() => setDismissedSuperbondUpsell(true)} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Superbond</button>
+              <button onClick={() => setDismissedSuperbondUpsell(true)} className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-semibold text-sky-800">Dismiss</button>
+            </div>
+          </div>
+        )}
+
+        {shouldShowCleanserUpsell && !dismissedCleanserUpsell && (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Complete the Finish</p>
+            <p className="mt-1 text-sm text-emerald-900">Wipe-Off Top Coat requires a cleanser to remove the inhibition layer - add the Cleanser Liquid.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button onClick={() => setDismissedCleanserUpsell(true)} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Cleanser</button>
+              <button onClick={() => setDismissedCleanserUpsell(true)} className="rounded-lg border border-emerald-300 px-3 py-1.5 text-xs font-semibold text-emerald-800">Dismiss</button>
+            </div>
+          </div>
+        )}
+
+        {shouldShowSynthoUpsell && !dismissedSynthoUpsell && (
+          <div className="rounded-xl border border-violet-200 bg-violet-50 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">MultiMix System</p>
+            <p className="mt-1 text-sm text-violet-900">MultiMix Synthogel works best with Syntholiquid, the Synthogel brush, Polygel spatulas, and Dual Form tips.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button onClick={() => setDismissedSynthoUpsell(true)} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Accessories</button>
+              <button onClick={() => setDismissedSynthoUpsell(true)} className="rounded-lg border border-violet-300 px-3 py-1.5 text-xs font-semibold text-violet-800">Dismiss</button>
+            </div>
+          </div>
+        )}
+
+        {shouldShowTipsBaseUpsell && !dismissedTipsBaseUpsell && (
+          <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">Tip Application</p>
+            <p className="mt-1 text-sm text-rose-900">Soak-Off Gel Tips bond best with the 5-in-1 Superior Base Clear (15ml) - add it to complete the system.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button onClick={() => setDismissedTipsBaseUpsell(true)} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View 5-in-1 Clear</button>
+              <button onClick={() => setDismissedTipsBaseUpsell(true)} className="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-800">Dismiss</button>
+            </div>
+          </div>
+        )}
+
+      </div>
 
       {!isCatalogView && activeTier && liveUpsellRecommendation && !dismissedSmartSuggestion && (
         <div className="fixed bottom-4 left-1/2 z-50 w-[min(92vw,420px)] -translate-x-1/2 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm backdrop-blur sm:hidden">
