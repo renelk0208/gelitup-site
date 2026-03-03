@@ -1412,7 +1412,7 @@ function DistributorPackagesPage() {
         {/* Rows */}
         <div className="divide-y divide-slate-100">
           <div className="flex items-start gap-4 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Market Focus</p>
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Market Focus</p>
             <p className="text-sm font-semibold text-slate-800">Localized Distribution</p>
           </div>
           <div className="flex items-start gap-4 bg-gradient-to-r from-fuchsia-50/60 to-white px-6 py-4">
@@ -1455,7 +1455,7 @@ function DistributorPackagesPage() {
         </div>
         <div className="divide-y divide-slate-100">
           <div className="flex items-start gap-4 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Market Focus</p>
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Market Focus</p>
             <p className="text-sm font-semibold text-slate-800">Localized Distribution</p>
           </div>
           <div className="flex items-start gap-4 bg-gradient-to-r from-amber-50/60 to-white px-6 py-4">
@@ -1500,7 +1500,7 @@ function DistributorPackagesPage() {
         </div>
         <div className="divide-y divide-slate-100">
           <div className="flex items-start gap-4 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Market Focus</p>
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Market Focus</p>
             <p className="text-sm font-semibold text-slate-800">Full Territory Dominance</p>
           </div>
           <div className="flex items-start gap-4 bg-gradient-to-r from-fuchsia-50/40 to-white px-6 py-4">
