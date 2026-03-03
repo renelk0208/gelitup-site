@@ -10630,7 +10630,7 @@ function BuyerPortal({ onLogout, userName, userEmail }) {
             Browse Catalogue
           </NavLink>
           <NavLink
-            to="/shop"
+            to="/full-catalogue"
             className="rounded-lg border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
           >
             Shop Online
