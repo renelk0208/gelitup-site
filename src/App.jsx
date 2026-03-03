@@ -2073,6 +2073,13 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Dual Forms Application — Press form from cuticle toward free edge, flash cure to lock position, then full-cure and gently remove the form before refinement.',
     ],
   },
+  'BUILDER GEL SYSTEMS::CREME DE LA CREME': {
+    paragraphs: [
+      'Creme de La Creme is a thixotropic nail gel — a high-viscosity, "smart" builder gel that changes consistency when stirred or applied (shear thinning), becoming more fluid for easy spreading, yet instantly reverting to a thick, non-runny state when stationary.',
+      'Ideal for controlling application, preventing cuticle flooding, and allowing for non-filing techniques, ensuring perfect, structural, and self-leveling nail extensions.',
+    ],
+    listItems: [],
+  },
   'BUILDER GEL SYSTEMS::MULTIMIX': {
     paragraphs: [
       'Its high-quality formula combines the advantages of acrylic and gel, making it extremely durable. It offers the strength of acrylic with the ease of use of builder gels.',
@@ -2428,7 +2435,6 @@ const CATEGORY_LAB_SPECS = {
   'COLORS': { pigmentDots: 3, cure: '60s LED · 120s UV', llab: true },
   'BUILDER GEL SYSTEMS': { pigmentDots: null, cure: '60s LED · 120s UV', llab: true },
   'BASES': { pigmentDots: null, cure: '60s LED · 120s UV', llab: true },
-  'CREME DE LA CREME': { pigmentDots: 3, cure: '60s LED · 120s UV', llab: true },
   'MULTIMIX': { pigmentDots: null, cure: '60s LED · 120s UV', llab: true },
   'TOPS': { pigmentDots: null, cure: '60s LED · 120s UV', llab: true },
   'LINE-IT-UP': { pigmentDots: 2, cure: '60s LED · 120s UV', llab: true },
@@ -2465,6 +2471,13 @@ function FullCataloguePage() {
   const [springSummerLookbook, setSpringSummerLookbook] = useState(SPRING_SUMMER_LOOKBOOK_DEFAULT)
   const [expandedLookbookGroup, setExpandedLookbookGroup] = useState(0)
   const [selectedLookbookPageByGroup, setSelectedLookbookPageByGroup] = useState({})
+  const [lightboxUrl, setLightboxUrl] = useState(null)
+  useEffect(() => {
+    if (!lightboxUrl) return
+    const handler = (e) => { if (e.key === 'Escape') setLightboxUrl(null) }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [lightboxUrl])
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
   const virtualContainerRef = useRef(null)
 
@@ -2885,7 +2898,7 @@ function FullCataloguePage() {
     return ''
   }, [])
 
-  const chapter02Categories = ['BUILDER GEL SYSTEMS', 'BASES', 'CREME DE LA CREME', 'MULTIMIX']
+  const chapter02Categories = ['BUILDER GEL SYSTEMS', 'BASES', 'MULTIMIX']
   const chapter03Categories = ['TOPS', 'TOOLS', 'EQUIPMENT', 'BRUSHES']
   const chapter04Categories = ['NAIL ART', 'CONSUMABLES', 'NAIL HAND & FOOT CARE', 'LIQUIDS', 'BY THE OCEAN']
   const activeProductInformation = useMemo(
@@ -2926,8 +2939,10 @@ function FullCataloguePage() {
   const scrollToCategoryDetail = useCallback(() => {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        const el = document.getElementById('catalogue-category-detail')
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        requestAnimationFrame(() => {
+          const el = document.getElementById('catalogue-items-grid')
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        })
       })
     })
   }, [])
@@ -2937,10 +2952,13 @@ function FullCataloguePage() {
     setActiveCategory(categoryName)
     setActiveSubcategory(subcategoryName || 'ALL')
     setActiveColorFamily('ALL')
-    // Scroll to the chapter section containing this category so results start at the top
+    // Scroll directly to the image grid
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        scrollToCatalogueSection(categoryName)
+        requestAnimationFrame(() => {
+          const el = document.getElementById('catalogue-items-grid')
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        })
       })
     })
   }, [scrollToCatalogueResults])
@@ -3255,9 +3273,10 @@ function FullCataloguePage() {
             )}
 
             <div
+              id="catalogue-items-grid"
               ref={virtualContainerRef}
               onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
-              className="mt-4 max-h-[68vh] overflow-auto rounded-[14px] border border-[#4A4A4A]/30 bg-white md:max-h-[72vh]"
+              className="mt-4 max-h-[68vh] overflow-auto rounded-[14px] border border-[#4A4A4A]/30 bg-white md:max-h-[72vh] scroll-mt-24"
             >
               <div style={{ height: topSpacerHeight }} />
 
@@ -3286,13 +3305,13 @@ function FullCataloguePage() {
 
                   return (
                     <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:bg-[#E8E8E8] md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`} data-catalogue-item>
-                      <div className="flex h-44 w-full items-center justify-center overflow-hidden bg-white p-2 sm:h-52 md:h-60">
+                      <div className="flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52 md:h-60" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
                         <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full scale-[1.025] object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
                       </div>
                       {item.galleryImages?.length > 0 && (
                         <div className="flex gap-1 border-t border-black/10 bg-white px-2 py-1.5">
                           {item.galleryImages.map((url, gi) => (
-                            <img key={gi} src={url} alt={`${item.name} view ${gi + 2}`} loading="lazy" className="h-10 w-10 rounded-[6px] border border-black/10 object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} />
+                            <img key={gi} src={url} alt={`${item.name} view ${gi + 2}`} loading="lazy" className="h-10 w-10 cursor-zoom-in rounded-[6px] border border-black/10 object-cover opacity-0 transition-opacity duration-300 hover:border-fuchsia-400" title="Click to enlarge" onClick={() => setLightboxUrl(url)} onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} />
                           ))}
                         </div>
                       )}
@@ -3696,6 +3715,23 @@ function FullCataloguePage() {
           </div>
 
         </>
+      )}
+
+      {/* LIGHTBOX OVERLAY */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-[500] flex items-center justify-center bg-black/85 p-4"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <div className="relative max-h-[90vh] max-w-[90vw]" onClick={(e) => e.stopPropagation()}>
+            <img src={lightboxUrl} alt="" className="max-h-[85vh] max-w-[85vw] rounded-xl object-contain shadow-2xl" />
+            <button
+              onClick={() => setLightboxUrl(null)}
+              className="absolute -right-3 -top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white text-lg font-bold text-slate-800 shadow-lg hover:bg-slate-100"
+              aria-label="Close"
+            >×</button>
+          </div>
+        </div>
       )}
     </section>
   )
@@ -9155,13 +9191,12 @@ function ProductsModule({ moduleView = 'products' }) {
                       >
                         {/* Image — click to zoom, selected ring */}
                         <div
-                          className={`relative h-24 w-full cursor-zoom-in overflow-hidden rounded-t-xl ${selected ? 'ring-2 ring-fuchsia-500 ring-offset-0' : ''}`}
+                          className={`relative h-24 w-full cursor-zoom-in overflow-hidden rounded-t-xl bg-white ${selected ? 'ring-2 ring-fuchsia-500 ring-offset-0' : ''}`}
                           title="Click to enlarge"
                           onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}
                         >
-                          <div className="absolute inset-0" style={{ backgroundColor: product.preview }} />
                           {product.imageUrl && (
-                            <img src={product.imageUrl} alt={product.name} loading="lazy" className="relative z-10 h-full w-full object-cover" />
+                            <img src={product.imageUrl} alt={product.name} loading="lazy" className="relative z-10 h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} />
                           )}
                           {selected && (
                             <span className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-fuchsia-600 text-[10px] font-bold text-white shadow">
