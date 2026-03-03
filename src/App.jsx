@@ -5600,7 +5600,7 @@ function PortalRegister({ onRegister }) {
                     password: buyerForm.password,
                     options: {
                       data: { full_name: buyerForm.fullName.trim(), role: 'buyer' },
-                      emailRedirectTo: window.location.origin,
+                      emailRedirectTo: `${window.location.origin}/portal/login`,
                     },
                   })
                   setBuyerSubmitting(false)
