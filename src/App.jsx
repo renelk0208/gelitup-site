@@ -11877,8 +11877,8 @@ function App() {
       return {
         ok: true,
         message: isDistributorApplication
-          ? `Distributor application submitted, sent to ${ORDER_INBOX_EMAIL}, and queued for admin approval.`
-          : `B2B order request submitted, sent to ${ORDER_INBOX_EMAIL}, and stored in admin submissions.`,
+          ? `Your distributor application has been received. Our team will review it and contact you by email once approved — usually within 1–2 business days.`
+          : `Your B2B order request has been received. Our team will review it and contact you by email once approved — usually within 1–2 business days.`,
       }
     }
 
