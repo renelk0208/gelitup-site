@@ -2129,10 +2129,48 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Application — Seal: Finish with GEL.IT.UP by GIUP® Non-Wipe Top Coat and cure 90–120 seconds for a TPO-free high-gloss seal.',
     ],
   },
+  'COLORS::ALL': {
+    paragraphs: [
+      'The GEL.IT.UP by GIUP® gel polish range has stood out in the market thanks to its excellent quality and high durability. It delivers intense shine, removes very easily, and does not wrinkle during curing.',
+      'The rich GEL.IT.UP by GIUP® color palette includes more than 500 gel polish shades, with new must-have colors added every season.',
+      'All our products are cruelty-free and have been approved by the global organization Leaping Bunny International.',
+    ],
+    listItems: [],
+  },
+  'BRUSHES::ACRYLIC BRUSHES': {
+    paragraphs: [
+      'A brush specially designed for acrylic application. It features a metal body with decorative details. Made with high-quality, durable synthetic bristles, in line with our cruelty-free product policy. Ideal for both beginners and more experienced nail technicians.',
+    ],
+    listItems: [],
+  },
+  'BRUSHES::GEL BRUSHES': {
+    paragraphs: [
+      'A brush specially designed for builder gel application. It features a metal body with decorative details. Made with high-quality, durable synthetic bristles, in line with our cruelty-free product policy. Ideal for both beginners and more experienced nail technicians.',
+    ],
+    listItems: [],
+  },
+  'BRUSHES::SYNTHOGEL & POLYGEL': {
+    paragraphs: [
+      'A brush specially designed for acrygel application. It features a metal body and is dual-ended, with a brush on one side and a specially designed metal spatula on the other. Made with high-quality, durable synthetic bristles, in line with our cruelty-free product policy. Ideal for both beginners and more experienced nail technicians.',
+      'Use the spatula side to pick up only the amount of product you need, avoiding unnecessary excess.',
+    ],
+    listItems: [],
+  },
+  'BRUSHES::NAIL ART BRUSHES': {
+    paragraphs: [
+      'Precision nail art brushes with a metal Rose Gold body and decorative details. Made with high-quality, durable synthetic bristles, in line with our cruelty-free product policy.',
+    ],
+    listItems: [
+      'Aquarela Brush — Specially designed for the watercolor technique.',
+      'French Nail Brush — Angled blade ideal for the French manicure technique.',
+      'Ombré Brush — Wide flat brush for smooth gradient and ombré blends.',
+      'Skinny Liner — Ultra-fine liner brush for detailed nail art lines and accents.',
+    ],
+  },
   'TOPS::SPOT MY TOPS': {
     paragraphs: [
-      'Create the ultimate trend easily and quickly with the brand-new magnetic top coat — FAN12 Rainbow Dreams.',
-      'It delivers the high-gloss finish of a top coat combined with the unique sparkle of microscopic iridescent particles. You can apply it over any color of your choice.',
+      'Create the ultimate trend easily and quickly with FAN12 Rainbow Dreams — an effects top coat featuring the high-gloss finish of a top coat combined with the unique sparkle of microscopic iridescent particles.',
+      'You can apply it over any color of your choice.',
     ],
     listItems: [],
   },
@@ -2184,9 +2222,14 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
 function getSubcategoryProductInformation(categoryName = '', subcategoryName = '') {
   const categoryToken = normalizeCatalogueToken(categoryName)
   const subcategoryToken = normalizeCatalogueToken(subcategoryName)
-  if (!categoryToken || !subcategoryToken || subcategoryToken === 'ALL') return null
+  if (!categoryToken || !subcategoryToken) return null
 
-  return PRODUCT_INFORMATION_BY_SUBCATEGORY[`${categoryToken}::${subcategoryToken}`] || null
+  // Exact subcategory match first, then category-level fallback (subcategory === 'ALL')
+  return (
+    PRODUCT_INFORMATION_BY_SUBCATEGORY[`${categoryToken}::${subcategoryToken}`] ||
+    PRODUCT_INFORMATION_BY_SUBCATEGORY[`${categoryToken}::ALL`] ||
+    null
+  )
 }
 
 const SPRING_SUMMER_LOOKBOOK_DEFAULT = {
