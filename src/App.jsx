@@ -6094,6 +6094,7 @@ function ProductsModule({ moduleView = 'products' }) {
   const [showSelectedOnly, setShowSelectedOnly] = useState(false)
   const [showCleanScienceOnly, setShowCleanScienceOnly] = useState(false)
   const [expandedCategories, setExpandedCategories] = useState(new Set())
+  const [expandedShowAll, setExpandedShowAll] = useState(new Set())
   const [itemQtys, setItemQtys] = useState({})
   const [lightboxUrl, setLightboxUrl] = useState(null)
   const [packageTier, setPackageTier] = useState('Silver')
@@ -6916,7 +6917,8 @@ function ProductsModule({ moduleView = 'products' }) {
                 sub.items.map((item) => ({
                   // For COLORS use the subcategory (SOLID GEL POLISH, CAT EYE, etc.)
                   // For all other top-level categories use the section name (BRUSHES, TOOLS, etc.)
-                  category: section.category === 'COLORS' ? sub.name : section.category,
+                  // Always split by subcategory so Builder Gel Systems, Nail Art etc. show as separate groups
+                  category: (sub.name && sub.name !== 'General') ? sub.name : section.category,
                   code: item.name,
                   sku: item.name,
                   name: item.name,
@@ -9138,7 +9140,12 @@ function ProductsModule({ moduleView = 'products' }) {
             <p className="mt-6 text-sm text-slate-400 italic">No products match your search.</p>
           )
           : groupedFilteredProducts.map(([cat, catProducts]) => {
-            const isExpanded = query ? true : expandedCategories.has(cat)
+            const isExpanded = expandedCategories.has(cat)
+            const showAll = expandedShowAll.has(cat)
+            const CAT_PAGE_SIZE = 48
+            const visibleProducts = isExpanded && !showAll && catProducts.length > CAT_PAGE_SIZE
+              ? catProducts.slice(0, CAT_PAGE_SIZE)
+              : catProducts
             const selectedInCat = catProducts.filter(p => selectedCodes.includes(p.code)).length
             return (
             <div key={cat} className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -9179,7 +9186,7 @@ function ProductsModule({ moduleView = 'products' }) {
                     )
                   })()}
                   <div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-                  {catProducts.map((product) => {
+                  {visibleProducts.map((product) => {
                     const selected = selectedCodes.includes(product.code)
                     const qty = itemQtys[product.code] || 1
                     return (
@@ -9250,6 +9257,16 @@ function ProductsModule({ moduleView = 'products' }) {
                     )
                   })}
                 </div>
+                  {!showAll && catProducts.length > CAT_PAGE_SIZE && (
+                    <div className="border-t border-slate-100 px-4 py-2.5 text-center">
+                      <button
+                        onClick={() => setExpandedShowAll(prev => { const n = new Set(prev); n.add(cat); return n })}
+                        className="text-xs font-semibold text-fuchsia-600 hover:underline"
+                      >
+                        Show all {catProducts.length} items
+                      </button>
+                    </div>
+                  )}
                 </>
               )}
             </div>
