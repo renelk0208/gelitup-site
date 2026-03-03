@@ -2181,7 +2181,7 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'NAIL HAND FOOT CARE::CREAMS AND SCRUBS': {
     paragraphs: [
-      'Sassy Sassy Hand & Body Cream — With Organic Aloe and a unique cocktail of active ingredients, it fragrances and hydrates the skin. It absorbs quickly and leaves no oily residue.',
+      'Our Hand & Body Cream range — With Organic Aloe and a unique cocktail of active ingredients, it fragrances and hydrates the skin. It absorbs quickly and leaves no oily residue.',
     ],
     listItems: [
       'Organic Aloe Vera',
