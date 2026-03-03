@@ -6933,7 +6933,70 @@ function ProductsModule({ moduleView = 'products' }) {
           .map((item, index) => {
             const code = item.code || item.sku || item.id || `GIUP-PD-${String(index + 1).padStart(4, '0')}`
             const sku = item.sku || code
-            const categoryName = item.category || item.family || item.group || item.type || PRODUCT_CATEGORIES[index % PRODUCT_CATEGORIES.length]
+            const rawCategoryName = item.category || item.family || item.group || item.type || PRODUCT_CATEGORIES[index % PRODUCT_CATEGORIES.length]
+            // Remap WooCommerce/feed category names to the same top-level categories as the public catalogue
+            const B2B_CAT_REMAP = {
+              // COLORS
+              'SOLID GEL POLISH': 'COLORS', 'SOLID COLOURS': 'COLORS', 'GEL POLISH': 'COLORS',
+              'CAT EYE': 'COLORS', 'DREAMY CAT EYE': 'COLORS', 'GLASS CAT EYE': 'COLORS',
+              'ROSE QUARTZ CAT EYE': 'COLORS', 'SHIMMER COLORS': 'COLORS', 'SHIMMER COLOURS': 'COLORS',
+              'NUDE': 'COLORS', 'FRENCH': 'COLORS', 'PASTEL': 'COLORS',
+              'SNOWFLAKE': 'COLORS', 'FANTASY': 'COLORS', 'JELLY NEON': 'COLORS',
+              'GLASS EFFECT': 'COLORS', 'COLOUR SAMPLE': 'COLORS', 'COLOR SAMPLE': 'COLORS',
+              'COLOR MIX UP': 'COLORS', 'COLOUR MIX UP': 'COLORS',
+              'SPRING SUMMER': 'COLORS', 'NEW YORK PARTY': 'COLORS',
+              'BY THE OCEAN': 'COLORS', 'RONE': 'COLORS', 'GIUP1': 'COLORS',
+              'DUO TONE': 'COLORS', 'TUTTI FRUTTI GLASS': 'COLORS',
+              'ODE TO AUTUMN': 'COLORS',
+              'PMA': 'COLORS', 'SPIX & SPEX': 'COLORS', 'SPIX AND SPEX': 'COLORS',
+              'MIRROR CHROME': 'COLORS',
+              // BUILDER GEL SYSTEMS
+              'BUILDER GEL': 'BUILDER GEL SYSTEMS', 'BUILDER GELS': 'BUILDER GEL SYSTEMS',
+              '3INI BUILDER': 'BUILDER GEL SYSTEMS', '3IN1 BUILDER': 'BUILDER GEL SYSTEMS',
+              'PREMIUM BUILDER': 'BUILDER GEL SYSTEMS', 'LIQUID POLYGEL': 'BUILDER GEL SYSTEMS',
+              'CREME DE LA CREME': 'BUILDER GEL SYSTEMS', 'MULTIMIX': 'BUILDER GEL SYSTEMS',
+              'ACRYLIC': 'BUILDER GEL SYSTEMS',
+              // BASES
+              'BASES': 'BASES', 'BASE': 'BASES', 'FLEXI BASE': 'BASES',
+              'BRUSH ON BUILDER': 'BASES', 'BRUSH-ON BUILDER': 'BASES',
+              // TOPS
+              'TOPS': 'TOPS', 'TOP COAT': 'TOPS', 'TOP COATS': 'TOPS',
+              'CLASSIC TOP COATS': 'TOPS', 'EFFECT TOPS': 'TOPS',
+              'SHIMMER TOP': 'TOPS', 'SPOT MY TOPS': 'TOPS',
+              'NON-WIPE TOP COAT': 'TOPS', 'NON WIPE TOP COAT': 'TOPS',
+              'TOP COAT EFFECTS': 'TOPS', 'SATIN MATT': 'TOPS',
+              // TOOLS
+              'TOOLS': 'TOOLS',
+              // EQUIPMENT
+              'EQUIPMENT': 'EQUIPMENT', 'LAMPS & CURING': 'EQUIPMENT',
+              'LAMPS AND CURING': 'EQUIPMENT', 'DUST & AIR': 'EQUIPMENT', 'DUST AND AIR': 'EQUIPMENT',
+              // BRUSHES
+              'BRUSHES': 'BRUSHES', 'BRUSH': 'BRUSHES',
+              // NAIL ART
+              'NAIL ART': 'NAIL ART', 'COBWEB': 'NAIL ART',
+              'LINE-IT-UP': 'NAIL ART', 'LINE IT UP': 'NAIL ART',
+              'MIRROR POWDERS': 'NAIL ART', 'MARBLE INK': 'NAIL ART',
+              'CUSHION GEL': 'NAIL ART', 'GLITTER EFFECTS POWDER': 'NAIL ART',
+              'STICKERS': 'NAIL ART',
+              // CONSUMABLES
+              'CONSUMABLES': 'CONSUMABLES', 'DUAL FORMS': 'CONSUMABLES',
+              'SOAK OFF GEL TIPS': 'CONSUMABLES', 'NAIL FORMS': 'CONSUMABLES',
+              'NAIL FILES': 'CONSUMABLES', 'NAIL TIPS': 'CONSUMABLES',
+              // NAIL HAND & FOOT CARE
+              'NAIL HAND & FOOT CARE': 'NAIL HAND & FOOT CARE',
+              'NAIL HAND AND FOOT CARE': 'NAIL HAND & FOOT CARE',
+              'CREAMS AND SCRUBS': 'NAIL HAND & FOOT CARE',
+              'CUTICLE OILS REMOVERS': 'NAIL HAND & FOOT CARE',
+              'CUTICLE OILS & REMOVERS': 'NAIL HAND & FOOT CARE',
+              'PODOCARE & ACCESSORIES': 'NAIL HAND & FOOT CARE',
+              'PODOCARE AND ACCESSORIES': 'NAIL HAND & FOOT CARE',
+              // LIQUIDS
+              'LIQUIDS': 'LIQUIDS', 'LIQUID': 'LIQUIDS', 'SANITIZER': 'LIQUIDS',
+            }
+            const rawCatToken = normalizeCatalogueToken(rawCategoryName)
+            // Strip file extensions from category tokens that leaked in as filenames (e.g. "SANITIZER WEBP" after normalization)
+            const cleanCatToken = rawCatToken.replace(/\s+(WEBP|JPG|JPEG|PNG|GIF|SVG)$/, '').trim()
+            const categoryName = B2B_CAT_REMAP[cleanCatToken] || B2B_CAT_REMAP[rawCategoryName?.toUpperCase()?.trim()] || rawCategoryName
             const preview = item.preview || item.hex || item.hex_color || item.color || `hsl(${(index * 17) % 360} 82% 56%)`
             // Standalone prefix map: DCE1 → "Dreamy Cat Eye 1" etc.
             const COLOUR_PREFIX_MAP = {
@@ -7097,13 +7160,21 @@ function ProductsModule({ moduleView = 'products' }) {
 
   // Group filtered products by category for sectioned display
   const groupedFilteredProducts = useMemo(() => {
+    const CATALOGUE_ORDER = ['COLORS', 'BUILDER GEL SYSTEMS', 'BASES', 'MULTIMIX', 'TOPS', 'TOOLS', 'EQUIPMENT', 'BRUSHES', 'NAIL ART', 'CONSUMABLES', 'NAIL HAND & FOOT CARE', 'LIQUIDS']
     const groups = new Map()
     for (const product of filteredProducts) {
       const cat = product.category || 'Other'
       if (!groups.has(cat)) groups.set(cat, [])
       groups.get(cat).push(product)
     }
-    return Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b))
+    return Array.from(groups.entries()).sort(([a], [b]) => {
+      const ai = CATALOGUE_ORDER.indexOf(a)
+      const bi = CATALOGUE_ORDER.indexOf(b)
+      if (ai !== -1 && bi !== -1) return ai - bi
+      if (ai !== -1) return -1
+      if (bi !== -1) return 1
+      return a.localeCompare(b)
+    })
   }, [filteredProducts])
 
   // All unique categories from loaded products (for the tab bar)
