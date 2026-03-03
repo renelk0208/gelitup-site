@@ -2898,8 +2898,8 @@ function FullCataloguePage() {
     return ''
   }, [])
 
-  const chapter02Categories = ['BUILDER GEL SYSTEMS', 'BASES', 'MULTIMIX']
-  const chapter03Categories = ['TOPS', 'TOOLS', 'EQUIPMENT', 'BRUSHES']
+  const chapter02Categories = ['BUILDER GEL SYSTEMS', 'BASES', 'MULTIMIX', 'TOPS']
+  const chapter03Categories = ['TOOLS', 'EQUIPMENT', 'BRUSHES']
   const chapter04Categories = ['NAIL ART', 'CONSUMABLES', 'NAIL HAND & FOOT CARE', 'LIQUIDS', 'BY THE OCEAN']
   const activeProductInformation = useMemo(
     () => getSubcategoryProductInformation(activeCategory, activeSubcategory),
@@ -3411,9 +3411,9 @@ function FullCataloguePage() {
           <div id="catalogue-section-builders" className="space-y-4 scroll-mt-28 py-12 px-4 sm:px-8">
             <div className="mx-auto max-w-6xl px-4 sm:px-8">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#D43790]">Laboratory Essentials</p>
-              <h2 className="mt-1 text-3xl font-extrabold uppercase tracking-[0.1em] text-[#1A1A1A] sm:text-4xl">Base &amp; Builder Systems</h2>
+              <h2 className="mt-1 text-3xl font-extrabold uppercase tracking-[0.1em] text-[#1A1A1A] sm:text-4xl">Tops, Bases &amp; Builder Systems</h2>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#1A1A1A]/70 sm:text-base">
-                The foundation of every trend. Our Leeukopf-certified base and builder systems provide the architectural support for your colour — engineered for 21-day wear and diamond-grade shine.
+                The foundation of every nail service. Our Leeukopf-certified base coats, top coats, and builder systems provide the architectural support for your colour — engineered for 21-day wear and diamond-grade shine.
               </p>
             </div>
 
