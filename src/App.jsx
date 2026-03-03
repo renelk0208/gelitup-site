@@ -5499,8 +5499,14 @@ function PortalRegister({ onRegister }) {
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
+  const [buyerForm, setBuyerForm] = useState({ email: '', password: '', confirmPassword: '', fullName: '' })
+  const [buyerSubmitting, setBuyerSubmitting] = useState(false)
+  const [buyerError, setBuyerError] = useState('')
+  const [buyerSuccess, setBuyerSuccess] = useState('')
+
   const isDistributorFlow = application.applicationType === 'distributor'
   const isB2BOrderFlow = application.applicationType === 'b2b_order'
+  const isOnlineBuyerFlow = application.applicationType === 'online_buyer'
   const isBusinessOrderProfile = application.orderProfile === 'business'
 
   const setField = (fieldName, value) => {
@@ -5513,10 +5519,16 @@ function PortalRegister({ onRegister }) {
   return (
     <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
       <div className="bg-slate-900 p-8 text-white">
-        <p className="text-xs uppercase tracking-[0.2em] text-slate-300">GEL.IT.UP Trade</p>
-        <h2 className="heading-on-dark mt-3 text-3xl font-bold">Choose Application Type</h2>
+        <p className="text-xs uppercase tracking-[0.2em] text-slate-300">GEL.IT.UP</p>
+        <h2 className="heading-on-dark mt-3 text-3xl font-bold">
+          {isOnlineBuyerFlow ? 'Create an Account' : 'Trade Registration'}
+        </h2>
         <p className="mt-4 text-sm text-slate-300">
-          Choose Distribution Application or B2B (Client) Request. Submissions are uploaded automatically and reviewed by the B2B team.
+          {isOnlineBuyerFlow
+            ? 'Register as an online buyer to browse our catalogue and place orders. You will receive a confirmation email to verify your address.'
+            : isDistributorFlow
+              ? 'Apply to become a GEL.IT.UP distributor. Your application will be reviewed by our team and you will be notified by email once approved.'
+              : 'Submit a B2B order or client request. Our team will review and contact you within 1–2 business days.'}
         </p>
       </div>
 
@@ -5552,9 +5564,113 @@ function PortalRegister({ onRegister }) {
           >
             B2B (Client)
           </button>
+          <button
+            type="button"
+            onClick={() => setApplication((current) => ({ ...current, applicationType: 'online_buyer' }))}
+            className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${isOnlineBuyerFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
+          >
+            Online Buyer
+          </button>
         </div>
 
-        <form className="mt-5 space-y-4" onSubmit={async (event) => {
+        {isOnlineBuyerFlow && (
+          <div className="mt-5">
+            {buyerSuccess ? (
+              <div className="rounded-lg bg-green-50 border border-green-200 p-4 text-sm text-green-800">
+                <p className="font-semibold">Check your inbox!</p>
+                <p className="mt-1">A confirmation link has been sent to <strong>{buyerForm.email}</strong>. Click it to activate your account and log in.</p>
+              </div>
+            ) : (
+              <form
+                className="space-y-4"
+                onSubmit={async (event) => {
+                  event.preventDefault()
+                  setBuyerError('')
+                  if (buyerForm.password !== buyerForm.confirmPassword) {
+                    setBuyerError('Passwords do not match.')
+                    return
+                  }
+                  if (buyerForm.password.length < 8) {
+                    setBuyerError('Password must be at least 8 characters.')
+                    return
+                  }
+                  setBuyerSubmitting(true)
+                  const { error } = await supabase.auth.signUp({
+                    email: buyerForm.email.trim().toLowerCase(),
+                    password: buyerForm.password,
+                    options: {
+                      data: { full_name: buyerForm.fullName.trim(), role: 'buyer' },
+                      emailRedirectTo: window.location.origin,
+                    },
+                  })
+                  setBuyerSubmitting(false)
+                  if (error) {
+                    setBuyerError(error.message)
+                  } else {
+                    setBuyerSuccess(true)
+                  }
+                }}
+              >
+                <label className="block text-sm font-medium text-slate-700">
+                  Full Name
+                  <input
+                    type="text"
+                    required
+                    value={buyerForm.fullName}
+                    onChange={(e) => setBuyerForm((f) => ({ ...f, fullName: e.target.value }))}
+                    placeholder="Jane Smith"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                  />
+                </label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Email Address
+                  <input
+                    type="email"
+                    required
+                    value={buyerForm.email}
+                    onChange={(e) => setBuyerForm((f) => ({ ...f, email: e.target.value }))}
+                    placeholder="you@example.com"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                  />
+                </label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Password
+                  <input
+                    type="password"
+                    required
+                    value={buyerForm.password}
+                    onChange={(e) => setBuyerForm((f) => ({ ...f, password: e.target.value }))}
+                    placeholder="Minimum 8 characters"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                  />
+                </label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Confirm Password
+                  <input
+                    type="password"
+                    required
+                    value={buyerForm.confirmPassword}
+                    onChange={(e) => setBuyerForm((f) => ({ ...f, confirmPassword: e.target.value }))}
+                    placeholder="Repeat your password"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                  />
+                </label>
+                {buyerError && (
+                  <p className="text-sm text-red-600">{buyerError}</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={buyerSubmitting}
+                  className="w-full rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50"
+                >
+                  {buyerSubmitting ? 'Creating account…' : 'Create Account'}
+                </button>
+              </form>
+            )}
+          </div>
+        )}
+
+        <form className={`mt-5 space-y-4 ${isOnlineBuyerFlow ? 'hidden' : ''}`} onSubmit={async (event) => {
           event.preventDefault()
           setIsSubmitting(true)
           setErrorMessage('')
