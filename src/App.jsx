@@ -1507,7 +1507,7 @@ function DistributorPackagesPage() {
           <div className="flex items-start gap-4 bg-gradient-to-r from-fuchsia-50/40 to-white px-6 py-4">
             <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-fuchsia-500">Product Spectrum</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-500" />Complete GEL.IT.UP Portfolio — Every Product, Every Shade</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-500" />Access to Complete GEL.IT.UP Portfolio</li>
             </ul>
           </div>
           <div className="flex items-start gap-4 bg-gradient-to-r from-slate-900/[0.03] to-white px-6 py-4">
@@ -5572,16 +5572,9 @@ function PortalRegister({ onRegister }) {
           >
             B2B (Client)
           </button>
-          <button
-            type="button"
-            onClick={() => setApplication((current) => ({ ...current, applicationType: 'online_buyer' }))}
-            className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${isOnlineBuyerFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
-          >
-            Online Buyer
-          </button>
         </div>
 
-        {isOnlineBuyerFlow && (
+        {false && (
           <div className="mt-5">
             {buyerSuccess ? (
               <div className="rounded-lg bg-green-50 border border-green-200 p-4 text-sm text-green-800">
@@ -5678,7 +5671,7 @@ function PortalRegister({ onRegister }) {
           </div>
         )}
 
-        <form className={`mt-5 space-y-4 ${isOnlineBuyerFlow ? 'hidden' : ''}`} onSubmit={async (event) => {
+        <form className="mt-5 space-y-4" onSubmit={async (event) => {
           event.preventDefault()
           setIsSubmitting(true)
           setErrorMessage('')

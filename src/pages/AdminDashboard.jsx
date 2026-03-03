@@ -275,6 +275,10 @@ function OrdersPanel() {
   const [filter, setFilter] = useState('all')
   const [expanded, setExpanded] = useState(null)
   const [saving, setSaving] = useState(null)
+  // per-order tracking draft state
+  const [trackingDraft, setTrackingDraft] = useState({}) // { [id]: { number, url } }
+  // per-order payment confirmation state (required before → processing)
+  const [paymentConfirmed, setPaymentConfirmed] = useState({}) // { [id]: bool }
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -293,15 +297,28 @@ function OrdersPanel() {
 
   useEffect(() => { load() }, [load])
 
-  const updateStatus = async (id, status) => {
+  const updateStatus = async (id, status, extra = {}) => {
     setSaving(id)
     const { error: err } = await supabase
       .from(ORDERS_TABLE)
-      .update({ status })
+      .update({ status, ...extra })
       .eq('id', id)
     setSaving(null)
     if (err) { alert(err.message); return }
-    setRows(prev => prev.map(r => r.id === id ? { ...r, status } : r))
+    setRows(prev => prev.map(r => r.id === id ? { ...r, status, ...extra } : r))
+  }
+
+  const markShipped = async (id) => {
+    const draft = trackingDraft[id] || {}
+    const trackingNumber = (draft.number || '').trim()
+    const trackingUrl = (draft.url || '').trim()
+    if (!trackingNumber) { alert('Please enter a tracking number before marking as shipped.'); return }
+    await updateStatus(id, 'shipped', { tracking_number: trackingNumber, tracking_url: trackingUrl || null })
+  }
+
+  const markProcessing = async (id) => {
+    if (!paymentConfirmed[id]) { alert('Please confirm payment has been received before marking as Processing.'); return }
+    await updateStatus(id, 'processing', { payment_confirmed: true })
   }
 
   const FILTERS = ['all', 'submitted', 'processing', 'shipped', 'completed', 'cancelled']
@@ -342,6 +359,11 @@ function OrdersPanel() {
       <ul className="space-y-2">
         {rows.map(row => {
           const items = Array.isArray(row.items) ? row.items : []
+          const draft = trackingDraft[row.id] || {}
+          const isShipped = row.status === 'shipped'
+          const isSubmitted = row.status === 'submitted'
+          const isProcessing = row.status === 'processing'
+
           return (
             <li key={row.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
               <button
@@ -360,14 +382,30 @@ function OrdersPanel() {
 
               {expanded === row.id && (
                 <div className="space-y-4 border-t border-slate-100 px-4 py-4">
+                  {/* Order details */}
                   <div className="grid gap-3 text-xs text-slate-700 sm:grid-cols-2">
                     <div><span className="font-semibold text-slate-400">Customer</span><br />{row.customer_email || '—'}</div>
                     <div><span className="font-semibold text-slate-400">Consignee</span><br />{row.consignee_name || '—'}</div>
                     <div><span className="font-semibold text-slate-400">Phone</span><br />{row.consignee_phone || '—'}</div>
-                    <div><span className="font-semibold text-slate-400">Source / Module</span><br />{row.source || '—'} / {row.module || '—'}</div>
+                    <div><span className="font-semibold text-slate-400">Payment confirmed</span><br />
+                      <span className={row.payment_confirmed ? 'font-semibold text-emerald-600' : 'text-slate-400'}>
+                        {row.payment_confirmed ? '✓ Yes' : 'Not yet'}
+                      </span>
+                    </div>
                     <div className="sm:col-span-2"><span className="font-semibold text-slate-400">Shipping Address</span><br />{row.shipping_address || '—'}</div>
+                    {isShipped && (
+                      <>
+                        <div><span className="font-semibold text-slate-400">Tracking #</span><br />{row.tracking_number || '—'}</div>
+                        <div><span className="font-semibold text-slate-400">Tracking URL</span><br />
+                          {row.tracking_url
+                            ? <a href={row.tracking_url} target="_blank" rel="noreferrer" className="text-fuchsia-600 hover:underline break-all">{row.tracking_url}</a>
+                            : '—'}
+                        </div>
+                      </>
+                    )}
                   </div>
 
+                  {/* Items */}
                   {items.length > 0 && (
                     <div>
                       <p className="mb-2 text-xs font-semibold text-slate-400">Items ({items.length})</p>
@@ -382,20 +420,96 @@ function OrdersPanel() {
                     </div>
                   )}
 
-                  {/* Status update buttons */}
+                  {/* ── Mark as Processing (requires payment confirmation) ── */}
+                  {isSubmitted && (
+                    <div className="rounded-xl border border-blue-200 bg-blue-50 p-3 space-y-2">
+                      <p className="text-xs font-semibold text-blue-700">Mark as Processing</p>
+                      <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={paymentConfirmed[row.id] || false}
+                          onChange={e => setPaymentConfirmed(prev => ({ ...prev, [row.id]: e.target.checked }))}
+                          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        Payment received (full or part payment confirmed)
+                      </label>
+                      <button
+                        onClick={() => markProcessing(row.id)}
+                        disabled={saving === row.id || !paymentConfirmed[row.id]}
+                        className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-40"
+                      >
+                        {saving === row.id ? 'Saving…' : '→ Mark as Processing'}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* ── Mark as Shipped (requires tracking number) ── */}
+                  {isProcessing && (
+                    <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3 space-y-2">
+                      <p className="text-xs font-semibold text-indigo-700">Mark as Shipped</p>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-1 block text-xs font-medium text-slate-600">Tracking Number <span className="text-rose-500">*</span></label>
+                          <input
+                            type="text"
+                            value={draft.number || ''}
+                            onChange={e => setTrackingDraft(prev => ({ ...prev, [row.id]: { ...prev[row.id], number: e.target.value } }))}
+                            placeholder="e.g. DHL1234567890"
+                            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-medium text-slate-600">Tracking URL (optional)</label>
+                          <input
+                            type="url"
+                            value={draft.url || ''}
+                            onChange={e => setTrackingDraft(prev => ({ ...prev, [row.id]: { ...prev[row.id], url: e.target.value } }))}
+                            placeholder="https://track.dhl.com/..."
+                            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                          />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => markShipped(row.id)}
+                        disabled={saving === row.id}
+                        className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                      >
+                        {saving === row.id ? 'Saving…' : '→ Mark as Shipped'}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Other status transitions */}
                   <div>
-                    <p className="mb-2 text-xs font-semibold text-slate-400">Update Status</p>
+                    <p className="mb-2 text-xs font-semibold text-slate-400">Other Actions</p>
                     <div className="flex flex-wrap gap-2">
-                      {ORDER_STATUSES.filter(s => s !== row.status).map(s => (
+                      {isShipped && (
                         <button
-                          key={s}
-                          onClick={() => updateStatus(row.id, s)}
+                          onClick={() => updateStatus(row.id, 'completed')}
+                          disabled={saving === row.id}
+                          className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                        >
+                          ✓ Mark Completed
+                        </button>
+                      )}
+                      {row.status !== 'cancelled' && row.status !== 'completed' && (
+                        <button
+                          onClick={() => updateStatus(row.id, 'cancelled')}
+                          disabled={saving === row.id}
+                          className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                        >
+                          ✕ Cancel Order
+                        </button>
+                      )}
+                      {(row.status === 'cancelled' || row.status === 'completed') && (
+                        <button
+                          onClick={() => updateStatus(row.id, 'submitted')}
                           disabled={saving === row.id}
                           className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
                         >
-                          → {s}
+                          ↩ Reset to Submitted
                         </button>
-                      ))}
+                      )}
                     </div>
                   </div>
                 </div>
