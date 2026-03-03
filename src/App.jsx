@@ -10,6 +10,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import appLogo from '/gelitup_logo.png'
 import PWABadge from './PWABadge.jsx'
 import ImportedAnyPage from './pages/imported/ImportedAnyPage.jsx'
+import AdminDashboard from './pages/AdminDashboard.jsx'
 import { hasSupabaseConfig, supabase } from './lib/supabaseClient'
 import useB2BIntelligence from './lib/useB2BIntelligence'
 
@@ -11117,7 +11118,7 @@ function PortalDashboard({ onLogout }) {
   )
 }
 
-function ProtectedPortal({ isAuthenticated, onLogout, authReady }) {
+function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
   if (!authReady) {
     return (
       <section className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-600">
@@ -11128,6 +11129,10 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady }) {
 
   if (!isAuthenticated) {
     return <Navigate to="/portal/login" replace />
+  }
+
+  if (isAdmin) {
+    return <AdminDashboard onLogout={onLogout} />
   }
 
   return <PortalDashboard onLogout={onLogout} />
@@ -11263,6 +11268,7 @@ function App() {
   const routerLocation = useLocation()
   const navigate = useNavigate()
   const [isPortalAuthenticated, setIsPortalAuthenticated] = useState(() => localStorage.getItem('portalAuth') === 'true')
+  const [isAdminSession, setIsAdminSession] = useState(() => localStorage.getItem('gelitup.admin.session') === 'true')
   const [authReady, setAuthReady] = useState(!hasSupabaseConfig)
   const [hasAcceptedCookies, setHasAcceptedCookies] = useState(() => localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY) === 'accepted')
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
@@ -11652,6 +11658,8 @@ function App() {
     }
 
     setIsPortalAuthenticated(true)
+    setIsAdminSession(true)
+    localStorage.setItem('gelitup.admin.session', 'true')
     return { ok: true }
   }
 
@@ -11734,6 +11742,8 @@ function App() {
       }
 
       setIsPortalAuthenticated(true)
+      setIsAdminSession(true)
+      localStorage.setItem('gelitup.admin.session', 'true')
     }
 
     return {
@@ -12205,7 +12215,9 @@ function App() {
     }
 
     setIsPortalAuthenticated(false)
+    setIsAdminSession(false)
     localStorage.removeItem('portalAuth')
+    localStorage.removeItem('gelitup.admin.session')
   }
 
   const isPortalRoute = location.pathname.startsWith('/portal') || location.pathname === '/admin-login'
@@ -12293,7 +12305,7 @@ function App() {
                 <Route path="/portal/forgot-password" element={<PortalForgotPassword />} />
                 <Route
                   path="/portal/dashboard/:module"
-                  element={<ProtectedPortal authReady={authReady} isAuthenticated={isPortalAuthenticated} onLogout={handlePortalLogout} />}
+                  element={<ProtectedPortal authReady={authReady} isAuthenticated={isPortalAuthenticated} isAdmin={isAdminSession} onLogout={handlePortalLogout} />}
                 />
                 <Route path="/portal/products" element={<Navigate to="/portal/dashboard/products" replace />} />
                 <Route path="/portal/solid-colours" element={<Navigate to="/portal/dashboard/products" replace />} />
