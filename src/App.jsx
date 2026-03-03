@@ -5495,6 +5495,7 @@ function PortalRegister({ onRegister }) {
     notes: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [consentGiven, setConsentGiven] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -5968,7 +5969,20 @@ function PortalRegister({ onRegister }) {
             </label>
           </div>
 
-          <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
+          <label className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <input
+              type="checkbox"
+              required
+              checked={consentGiven}
+              onChange={(e) => setConsentGiven(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-slate-900"
+            />
+            <span className="text-xs leading-relaxed text-slate-600">
+              I agree that the information I provide in this form will be stored and processed by GEL.IT.UP by GIUP® for the purpose of evaluating my application and managing the business relationship. This data will not be shared with third parties without consent.
+            </span>
+          </label>
+
+          <button type="submit" disabled={isSubmitting || !consentGiven} className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
             {isSubmitting ? 'Submitting...' : 'Submit Application'}
           </button>
         </form>
