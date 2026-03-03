@@ -11771,7 +11771,7 @@ function App() {
       const payload = {
         customer_type: application.customerType.trim(),
         company_name: application.companyName.trim(),
-        vat_number: application.vatNumber.trim() || null,
+        vat_number: application.vatNumber?.trim() || 'N/A',
         contact_name: application.contactName.trim(),
         contact_email: application.contactEmail.trim().toLowerCase(),
         phone: application.phone.trim(),
