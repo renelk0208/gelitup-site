@@ -1869,11 +1869,14 @@ function toTitleCaseLabel(value = '') {
     .join(' ')
 }
 
-function formatSubcategoryDisplayName(subcategoryName = '') {
+function formatSubcategoryDisplayName(subcategoryName = '', categoryName = '') {
   // Transform specific subcategory names for display
   const normalized = normalizeCatalogueToken(subcategoryName)
 
-  if (normalized === 'ALL') return 'All Colors'
+  if (normalized === 'ALL') {
+    const catToken = normalizeCatalogueToken(categoryName)
+    return catToken.includes('COLOR') ? 'All Colors' : 'All Items'
+  }
   
   // Color subcategories
   if (normalized === 'RONE') return 'GIUP1'
@@ -2022,7 +2025,9 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'BUILDER GEL SYSTEMS::3INI BUILDER': {
     paragraphs: [
-      'The 3-in-1 Premium Builder Gel is a single-phase structural system engineered for extreme durability and professional control. Infused with fiberglass fibers, this gel provides structural integrity for long extensions and hard-wearing overlays without separate base or top coats.',
+      'The 3-in-1 Builder Gel is a single-phase, thick, and completely stable builder gel that does not yellow.',
+      'It is suitable for natural nail reinforcement as well as for extensions. It can be used by both beginners and more experienced nail technicians.',
+      'The use of a base coat or any other gel is not necessary for its application. It has a sticky layer.',
     ],
     listItems: [
       'Key Benefits: Fiber-reinforced strength, single-phase efficiency, cool-cure comfort, and 100% HEMA/TPO-free performance.',
@@ -2039,7 +2044,9 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'BUILDER GEL SYSTEMS::PREMIUM BUILDER': {
     paragraphs: [
-      'The 3-in-1 Premium Builder Gel is a single-phase structural system engineered for extreme durability and professional control. Infused with fiberglass fibers, this gel provides structural integrity for long extensions and hard-wearing overlays without separate base or top coats.',
+      'Premium 3-in-1 Builder Gel is a single-phase builder gel enriched with fiberglass fibers, making it extremely strong and durable.',
+      'It is suitable for natural nail reinforcement as well as for extensions. It is very easy to apply and provides excellent adhesion and maximum durability. It does not run and does not yellow.',
+      'No base coat is required before application.',
     ],
     listItems: [
       'Key Benefits: Fiber-reinforced strength, single-phase efficiency, cool-cure comfort, and 100% HEMA/TPO-free performance.',
@@ -2056,8 +2063,9 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'BUILDER GEL SYSTEMS::MULTIMIX': {
     paragraphs: [
-      'MultiMix Synthogel is the ultimate hybrid system, combining the legendary strength of acrylic with the flexible, odorless benefits of gel. This putty-like consistency provides unlimited playtime and cures only when placed in the lamp.',
-      'It is ideal for technicians who need hard-system durability without the time pressure of traditional acrylic monomer.',
+      'Its high-quality formula combines the advantages of acrylic and gel, making it extremely durable. It offers the strength of acrylic with the ease of use of builder gels.',
+      'It can be used for natural nail reinforcement as well as for extensions. It does not run during application, is odorless, and does not cause a burning sensation during curing.',
+      'Application can be done using Dual Form Nail Tips, Nail Forms, or with a freehand technique.',
     ],
     listItems: [
       'Key Benefits: Hybrid strength, zero-gravity feel, odorless environment, and 100% HEMA/TPO-free clean science standard.',
@@ -2072,8 +2080,9 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'BUILDER GEL SYSTEMS::30 ML': {
     paragraphs: [
-      'MultiMix Synthogel is the ultimate hybrid system, combining the legendary strength of acrylic with the flexible, odorless benefits of gel. This putty-like consistency provides unlimited playtime and cures only when placed in the lamp.',
-      'It is ideal for technicians who need hard-system durability without the time pressure of traditional acrylic monomer.',
+      'Its high-quality formula combines the advantages of acrylic and gel, making it extremely durable. It offers the strength of acrylic with the ease of use of builder gels.',
+      'It can be used for natural nail reinforcement as well as for extensions. It does not run during application, is odorless, and does not cause a burning sensation during curing.',
+      'Application can be done using Dual Form Nail Tips, Nail Forms, or with a freehand technique.',
     ],
     listItems: [
       'Key Benefits: Hybrid strength, zero-gravity feel, odorless environment, and 100% HEMA/TPO-free clean science standard.',
@@ -2088,8 +2097,9 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'BUILDER GEL SYSTEMS::60 ML': {
     paragraphs: [
-      'MultiMix Synthogel is the ultimate hybrid system, combining the legendary strength of acrylic with the flexible, odorless benefits of gel. This putty-like consistency provides unlimited playtime and cures only when placed in the lamp.',
-      'It is ideal for technicians who need hard-system durability without the time pressure of traditional acrylic monomer.',
+      'Its high-quality formula combines the advantages of acrylic and gel, making it extremely durable. It offers the strength of acrylic with the ease of use of builder gels.',
+      'It can be used for natural nail reinforcement as well as for extensions. It does not run during application, is odorless, and does not cause a burning sensation during curing.',
+      'Application can be done using Dual Form Nail Tips, Nail Forms, or with a freehand technique.',
     ],
     listItems: [
       'Key Benefits: Hybrid strength, zero-gravity feel, odorless environment, and 100% HEMA/TPO-free clean science standard.',
@@ -2223,6 +2233,38 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
     ],
     listItems: [],
   },
+  'EQUIPMENT::DUST & AIR': {
+    paragraphs: [
+      'Dust Collector — 55 Watts. Professional-grade nail dust extraction for a clean, safe workstation.',
+    ],
+    listItems: [
+      '2 Powerful Motors',
+      'High Performance',
+      'Low Noise',
+      'Easy to place on any workstation',
+      'Removable filter for easy cleaning',
+    ],
+  },
+  'EQUIPMENT::LAMPS & CURING': {
+    paragraphs: [
+      'Portable Rechargeable LED Stamp Lamp — High-quality rechargeable lamp ideal for curing decorative elements and bonding Soft Gel Tips. Adjustable height, flexible neck for optimal ergonomics, and USB-C charging cable included.',
+      'LED Heli Light — Professional-grade illumination for nail artists and beauty environments. Three rectangular LED panels deliver uniform, shadow-free brightness in crisp 6500K cool white light. Easy to install with a 40,000-hour lifespan.',
+    ],
+    listItems: [
+      'Portable Stamp Lamp: Timer 30s · Power 3W · Runtime 2hr · Charge time 1.5hr · Weight 150g',
+      'Heli Light: Power 45W · Light temp 6500K · Voltage 170–265V · Frequency 50–60Hz',
+    ],
+  },
+  'BUILDER GEL::LIQUID POLYGEL': {
+    paragraphs: [
+      'GEL.IT.UP brings ultimate innovation to building systems — Liquid-form Polygel in a 15ml bottle! The strength, durability, and all the advantages of Polygel in a bottle that makes application even easier and faster.',
+      'Medium viscosity and self-leveling, with an excellent texture. Applied directly from the bottle using the built-in brush, it provides ultimate natural nail reinforcement, extremely fast maintenance, and medium-length extensions.',
+      'Also suitable for the no-filing technique, reducing service time to a minimum. Files very easily, cures perfectly, and offers exceptional durability. Cures in UV/LED lamps for 90 seconds.',
+    ],
+    listItems: [
+      'Application — For optimal adhesion, apply a layer of 5-in-1 Superior Base Clear before application',
+    ],
+  },
   'BASES::FLEXI BASE': {
     paragraphs: [
       'Flexi Base is a base coat suitable for sensitive and damaged nails that break easily. The flexibility it provides enhances the strength of the natural nail, offering greater protection against potential breakage.',
@@ -2251,6 +2293,13 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
     ],
     listItems: [],
   },
+  'NAIL ART::MIRROR POWDERS': {
+    paragraphs: [
+      'Add shine to your fingertips with Mirror Powders, available in 7 unique shades! From dazzling silver to bold rose gold, our powders are ideal for professionals and nail art lovers alike.',
+      'Create mirror and multidimensional effects that stand out.',
+    ],
+    listItems: [],
+  },
 }
 
 function getSubcategoryProductInformation(categoryName = '', subcategoryName = '') {
@@ -2264,6 +2313,34 @@ function getSubcategoryProductInformation(categoryName = '', subcategoryName = '
     PRODUCT_INFORMATION_BY_SUBCATEGORY[`${categoryToken}::ALL`] ||
     null
   )
+}
+
+// Flexible lookup for the B2B catalog view where category names come from WooCommerce/Supabase
+// and may not exactly match the image-folder-based keys.
+function getB2BCategoryDescription(categoryName = '') {
+  if (!categoryName) return null
+  const token = normalizeCatalogueToken(categoryName)
+  if (!token) return null
+
+  // 1. Direct ::ALL match (e.g., category stored as 'MULTIMIX' → 'MULTIMIX::ALL')
+  const direct = PRODUCT_INFORMATION_BY_SUBCATEGORY[`${token}::ALL`]
+  if (direct) return direct
+
+  // 2. Match as subcategory part of any key (e.g., 'MULTIMIX' → 'BUILDER GEL SYSTEMS::MULTIMIX')
+  const subKey = Object.keys(PRODUCT_INFORMATION_BY_SUBCATEGORY).find((key) => {
+    const parts = key.split('::')
+    if (parts.length < 2) return false
+    const subToken = normalizeCatalogueToken(parts[1])
+    return subToken === token || (token.length >= 5 && (subToken.includes(token) || token.includes(subToken)))
+  })
+  if (subKey) return PRODUCT_INFORMATION_BY_SUBCATEGORY[subKey]
+
+  // 3. First match where category part matches (e.g., 'NAIL ART' → 'NAIL ART::CUSHION GEL')
+  const catKey = Object.keys(PRODUCT_INFORMATION_BY_SUBCATEGORY).find((key) => {
+    const catPart = normalizeCatalogueToken((key.split('::')[0]) || '')
+    return catPart === token
+  })
+  return catKey ? PRODUCT_INFORMATION_BY_SUBCATEGORY[catKey] : null
 }
 
 const SPRING_SUMMER_LOOKBOOK_DEFAULT = {
@@ -2774,7 +2851,7 @@ function FullCataloguePage() {
   }, [])
 
   const chapter02Categories = ['BUILDER GEL SYSTEMS', 'BASES', 'CREME DE LA CREME', 'MULTIMIX']
-  const chapter03Categories = ['TOPS', 'TOOLS', 'EQUIPMENT']
+  const chapter03Categories = ['TOPS', 'TOOLS', 'EQUIPMENT', 'BRUSHES']
   const chapter04Categories = ['NAIL ART', 'CONSUMABLES', 'NAIL HAND & FOOT CARE', 'LIQUIDS', 'BY THE OCEAN']
   const activeProductInformation = useMemo(
     () => getSubcategoryProductInformation(activeCategory, activeSubcategory),
@@ -3030,7 +3107,7 @@ function FullCataloguePage() {
                 {isSGP && !isActive && (
                   <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[#D43790] ring-2 ring-white" />
                 )}
-                {formatSubcategoryDisplayName(subcategory)}
+                {formatSubcategoryDisplayName(subcategory, activeCategory)}
               </button>
             )
           })}
@@ -3815,45 +3892,96 @@ function Nav({ onOpenContactModal }) {
 }
 
 function MobileNav({ onOpenContactModal }) {
+  const [open, setOpen] = useState(false)
+  const location = useLocation()
+
+  useEffect(() => { setOpen(false) }, [location.pathname])
+
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/15 bg-black/90 px-2 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur md:hidden">
-      <div className="mx-auto flex max-w-xl gap-1 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        {navItems.map((item) => {
-          if (item.isContactAction) {
+    <>
+      {/* Hamburger button — fixed in header zone on mobile */}
+      <button
+        type="button"
+        aria-label={open ? 'Close menu' : 'Open navigation menu'}
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="fixed right-3 top-[11px] z-[60] flex h-9 w-9 flex-col items-center justify-center gap-[5px] rounded-lg border border-white/20 bg-black/85 backdrop-blur md:hidden"
+      >
+        <span className={`block h-px w-[18px] origin-center bg-white transition-all duration-200 ${open ? 'translate-y-[6px] rotate-45' : ''}`} />
+        <span className={`block h-px w-[18px] bg-white transition-all duration-200 ${open ? 'opacity-0 scale-x-0' : ''}`} />
+        <span className={`block h-px w-[18px] origin-center bg-white transition-all duration-200 ${open ? '-translate-y-[6px] -rotate-45' : ''}`} />
+      </button>
+
+      {/* Backdrop */}
+      <div
+        className={`fixed inset-0 z-[55] bg-black/55 backdrop-blur-sm transition-opacity duration-300 md:hidden ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* Slide-in drawer from right */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation menu"
+        className={`fixed inset-y-0 right-0 z-[58] flex w-72 flex-col border-l border-white/10 bg-[#111111] transition-transform duration-300 ease-in-out md:hidden ${open ? 'translate-x-0' : 'translate-x-full'}`}
+      >
+        {/* Drawer header */}
+        <div className="flex h-[52px] shrink-0 items-center justify-between border-b border-white/10 px-4">
+          <span className="text-[11px] font-black uppercase tracking-[0.1em] text-white/50">Navigation</span>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="flex h-7 w-7 items-center justify-center rounded-md text-white/50 transition hover:bg-white/10 hover:text-white"
+            aria-label="Close menu"
+          >
+            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
+              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Nav links */}
+        <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+          {navItems.map((item) => {
+            if (item.isContactAction) {
+              return (
+                <button
+                  key={item.to}
+                  type="button"
+                  onClick={() => { setOpen(false); onOpenContactModal?.() }}
+                  className="block w-full rounded-lg px-4 py-3 text-left text-sm font-semibold uppercase tracking-[0.04em] text-white/75 transition duration-200 hover:bg-white/10 hover:text-white"
+                >
+                  {item.label}
+                </button>
+              )
+            }
             return (
-              <button
+              <NavLink
                 key={item.to}
-                type="button"
-                onClick={onOpenContactModal}
-                className="min-w-max shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.02em] !text-white/85 transition duration-300 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                to={item.to}
+                onClick={() => setOpen(false)}
+                className={({ isActive }) =>
+                  item.highlight
+                    ? `block rounded-lg border px-4 py-3 text-sm font-bold uppercase tracking-[0.05em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 ${
+                        isActive
+                          ? 'border-fuchsia-400 bg-fuchsia-600 !text-white shadow-[0_0_12px_rgba(212,55,144,0.4)]'
+                          : 'border-fuchsia-500 bg-fuchsia-600 !text-white shadow-[0_0_6px_rgba(212,55,144,0.3)] hover:bg-fuchsia-500'
+                      }`
+                    : `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+                        isActive
+                          ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.4)]'
+                          : '!text-white/75 hover:bg-white/10 hover:!text-white'
+                      }`
+                }
               >
                 {item.label}
-              </button>
+              </NavLink>
             )
-          }
-
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                item.highlight
-                  ? `min-w-max shrink-0 whitespace-nowrap rounded-md border px-3 py-2 text-center text-[10px] font-bold uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
-                      isActive
-                        ? 'border-fuchsia-400 bg-fuchsia-600 !text-white shadow-[0_0_10px_rgba(212,55,144,0.5)]'
-                        : 'border-fuchsia-500 bg-fuchsia-600 !text-white shadow-[0_0_6px_rgba(212,55,144,0.35)] hover:bg-fuchsia-500'
-                    }`
-                  : `min-w-max shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.02em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
-                      isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.5)]' : '!text-white/85 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
-                    }`
-              }
-            >
-              {item.label}
-            </NavLink>
-          )
-        })}
+          })}
+        </nav>
       </div>
-    </nav>
+    </>
   )
 }
 
@@ -5898,6 +6026,7 @@ function ProductsModule({ moduleView = 'products' }) {
   const [dismissedCleanserUpsell, setDismissedCleanserUpsell] = useState(false)
   const [dismissedSynthoUpsell, setDismissedSynthoUpsell] = useState(false)
   const [dismissedTipsBaseUpsell, setDismissedTipsBaseUpsell] = useState(false)
+  const [dismissedLiquidPolygel5in1Upsell, setDismissedLiquidPolygel5in1Upsell] = useState(false)
   const [includeProfessionalBasePack, setIncludeProfessionalBasePack] = useState(false)
   const [showAddOnRemovedToast, setShowAddOnRemovedToast] = useState(false)
   const [showOrderConfetti, setShowOrderConfetti] = useState(false)
@@ -6388,6 +6517,19 @@ function ProductsModule({ moduleView = 'products' }) {
 
   const shouldShowTipsBaseUpsell = hasNailTipsInCart && !has5in1ClearInCart
 
+  // ── Liquid Polygel upsell — Liquid Polygel in cart, 5-in-1 Superior Base Clear not yet added ──
+  const hasLiquidPolygelInCart = useMemo(() => {
+    const isLiquidPolygel = (product, code = '') => {
+      const sub = normalizeCatalogueToken(product?.subcategory || '')
+      const img = normalizeCatalogueToken(product?.imageUrl || code)
+      return sub.includes('LIQUID POLYGEL') || img.includes('LIQUID POLYGEL')
+    }
+    if (selectedCodes.some((code) => isLiquidPolygel(catalogBySku.get(normalizeSkuCode(code)), code))) return true
+    return packageCartItems.some((item) => isLiquidPolygel(item, item?.code || ''))
+  }, [catalogBySku, packageCartItems, selectedCodes])
+
+  const shouldShowLiquidPolygel5in1Upsell = hasLiquidPolygelInCart && !has5in1ClearInCart
+
   const resolveCatalogImageUrl = useCallback((item) => {
     const localMapKeys = [
       normalizeSkuCode(item?.sku),
@@ -6462,6 +6604,10 @@ function ProductsModule({ moduleView = 'products' }) {
   useEffect(() => {
     if (!shouldShowTipsBaseUpsell) setDismissedTipsBaseUpsell(false)
   }, [shouldShowTipsBaseUpsell])
+
+  useEffect(() => {
+    if (!shouldShowLiquidPolygel5in1Upsell) setDismissedLiquidPolygel5in1Upsell(false)
+  }, [shouldShowLiquidPolygel5in1Upsell])
 
   useEffect(() => {
     let mounted = true
@@ -8104,6 +8250,17 @@ function ProductsModule({ moduleView = 'products' }) {
           </div>
         )}
 
+        {shouldShowLiquidPolygel5in1Upsell && !dismissedLiquidPolygel5in1Upsell && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Liquid Polygel System</p>
+            <p className="mt-1 text-sm text-amber-900">For optimal adhesion with Liquid Polygel, add a layer of 5-in-1 Superior Base Clear before application.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button onClick={() => setDismissedLiquidPolygel5in1Upsell(true)} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View 5-in-1 Clear</button>
+              <button onClick={() => setDismissedLiquidPolygel5in1Upsell(true)} className="rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-800">Dismiss</button>
+            </div>
+          </div>
+        )}
+
       </div>
 
       {!isCatalogView && activeTier && liveUpsellRecommendation && !dismissedSmartSuggestion && (
@@ -8929,7 +9086,21 @@ function ProductsModule({ moduleView = 'products' }) {
 
               {/* Products grid — only rendered when expanded */}
               {isExpanded && (
-                <div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                <>
+                  {(() => {
+                    const catDesc = getB2BCategoryDescription(cat)
+                    if (!catDesc || (!catDesc.paragraphs?.length && !catDesc.listItems?.length)) return null
+                    return (
+                      <div className="border-b border-fuchsia-100 bg-fuchsia-50/40 px-4 py-3">
+                        <div className="space-y-1">
+                          {catDesc.paragraphs.slice(0, 2).map((p, i) => (
+                            <p key={i} className="text-xs leading-relaxed text-fuchsia-900/80">{p}</p>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })()}
+                  <div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                   {catProducts.map((product) => {
                     const selected = selectedCodes.includes(product.code)
                     const qty = itemQtys[product.code] || 1
@@ -9002,6 +9173,7 @@ function ProductsModule({ moduleView = 'products' }) {
                     )
                   })}
                 </div>
+                </>
               )}
             </div>
             )
@@ -11678,7 +11850,7 @@ function App() {
   const isPortalRoute = location.pathname.startsWith('/portal') || location.pathname === '/admin-login'
 
   return (
-    <div className="lux-theme min-h-screen pb-24 md:pb-8">
+    <div className="lux-theme min-h-screen pb-8">
       <ScrollToTopOnRouteChange />
       <header className="sticky top-0 z-40 border-b border-white/15 bg-black/80 backdrop-blur-[10px]">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-3 py-2.5 md:px-6 md:py-3">
@@ -11780,7 +11952,7 @@ function App() {
       </main>
 
       {!hasAcceptedCookies && (
-        <div className="fixed bottom-20 left-0 right-0 z-40 px-3 md:bottom-4 md:px-6">
+        <div className="fixed bottom-4 left-0 right-0 z-40 px-3 md:px-6">
           <div className="mx-auto flex max-w-6xl flex-col gap-3 rounded-xl border border-white/20 bg-black/90 p-3 text-white shadow-sm backdrop-blur-[10px] sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-white/80">
               We use cookies to improve your experience. By continuing, you agree to our cookie use.
@@ -11860,7 +12032,7 @@ function App() {
       </footer>
 
       {/* Floating social + back-to-top */}
-      <div className="fixed bottom-20 right-3 z-50 flex flex-col items-center gap-2 md:bottom-6 md:right-4">
+      <div className="fixed bottom-6 right-3 z-50 flex flex-col items-center gap-2 md:right-4">
         {FOOTER_SOCIAL_LINKS.filter(s => ['tiktok','instagram','facebook'].includes(s.key)).map((social) => (
           <a
             key={social.key}
