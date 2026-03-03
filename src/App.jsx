@@ -2193,8 +2193,13 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
     paragraphs: [
       'Hand & Body Cream — With Organic Aloe and a unique cocktail of active ingredients, it fragrances and hydrates the skin. It absorbs quickly and leaves no oily residue. Key ingredients: Organic Aloe Vera, Hyaluronic Acid, Panthenol.',
       'Silky Bliss Foot Cream — It absorbs quickly and leaves no oily residue. Key ingredients: Organic Aloe Vera, Avocado Oil, Panthenol.',
+      'Scrubs — Fine particles that gently cleanse and remove dead skin cells from the surface of the skin. High content of organic aloe and vitamins that soothe any irritation and help maintain the skin\'s natural hydrolipidic film.',
     ],
-    listItems: [],
+    listItems: [
+      'Organic Aloe Vera',
+      'Niacinamide',
+      'Panthenol',
+    ],
   },
   'NAIL HAND FOOT CARE::CUTICLE OILS REMOVERS': {
     paragraphs: [
@@ -2202,6 +2207,8 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Directions for use: Apply one to two drops to the cuticle area of each nail. Massage the oil around the cuticles and then over the entire surface of the nail. It is important to apply the oil to both the skin and the nails to achieve the full nourishment you desire.',
       'Warnings: For external use only. Keep out of reach of children. Store the product at a temperature below 25°C. Keep away from direct sunlight.',
       'Photo Perfect Cuticle Oil — Your ultimate ally for the perfect photoshoot! A dry cuticle oil that leaves no greasy residue, offering hydrating and nourishing benefits while helping with skin regeneration and healing.',
+      'Cuticle Remover — Skin-friendly and highly effective in removing cuticles without causing injury. It contains essential oils and micro-particles from almond shells, softening the cuticle membrane and hardened skin areas, combining the properties of a scrub. It has a light, gel-like texture with an addictive fragrance, turning manicure and pedicure preparation into an easy and pleasant process for every nail technician.',
+      'Note: Proper dehydration is required before the application of liquid products (primer, base).',
     ],
     listItems: [
       'Leaves no greasy residue',
@@ -2299,6 +2306,22 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Create mirror and multidimensional effects that stand out.',
     ],
     listItems: [],
+  },
+  'NAIL ART::COBWEB': {
+    paragraphs: [
+      'Cobweb Gel is a special decorative gel in a bottle that creates a unique, organic pattern with a natural spreading effect on the surface. It is applied over cured color and onto a thin, uncured layer of base coat, where it spreads on its own and forms its characteristic abstract design.',
+      'Ideal for striking nail art with either a minimal or bold character, without the need for a brush or advanced technique. Available in black and white for maximum contrast and endless combinations.',
+    ],
+    listItems: [
+      'Prepare the nail and apply base coat — cure according to instructions',
+      'Apply your chosen color and cure as usual',
+      'Apply a very thin layer of base coat without curing',
+      'Gently apply the Cobweb Gel using the brush',
+      'Allow a few seconds for the product to spread naturally',
+      'Cure in the lamp',
+      'Leave the nail outside the lamp for at least 2 minutes',
+      'Finish with a top coat',
+    ],
   },
 }
 
