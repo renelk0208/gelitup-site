@@ -2191,8 +2191,15 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'With our Cuticle Oils you will feel your fingers soothed, nourished, and hydrated, while also protecting them from irritation and prolonged sun exposure.',
       'Directions for use: Apply one to two drops to the cuticle area of each nail. Massage the oil around the cuticles and then over the entire surface of the nail. It is important to apply the oil to both the skin and the nails to achieve the full nourishment you desire.',
       'Warnings: For external use only. Keep out of reach of children. Store the product at a temperature below 25°C. Keep away from direct sunlight.',
+      'Photo Perfect Cuticle Oil — Your ultimate ally for the perfect photoshoot! A dry cuticle oil that leaves no greasy residue, offering hydrating and nourishing benefits while helping with skin regeneration and healing.',
     ],
-    listItems: [],
+    listItems: [
+      'Leaves no greasy residue',
+      'Fast absorption',
+      'Natural ingredients',
+      'Convenient brush applicator',
+      'Ideal for photoshoots — eliminates imperfections without the need for Photoshop',
+    ],
   },
   'TOPS::SPOT MY TOPS': {
     paragraphs: [
