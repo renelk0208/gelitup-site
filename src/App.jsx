@@ -1357,171 +1357,196 @@ function isTechnicalSku(code) {
 
 function DistributorPackagesPage() {
   return (
-    <section className="space-y-5">
-      <div className="rounded-2xl bg-gradient-to-br from-[#1A1A1A] to-[#4A4A4A] p-5 text-white sm:p-8">
-        <h1 className="heading-on-dark mt-2 text-2xl font-extrabold sm:text-4xl">Distributor Packages</h1>
-        <p className="mt-3 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] text-white/95 sm:text-base">
-          EU REGULATED. HEMA & TPO-FREE. PROFESSIONAL EXCELLENCE.
+    <section className="space-y-6">
+
+      {/* HERO */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0f0f0f] via-[#1c0a2e] to-[#3b0764] p-7 text-white sm:p-10">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(192,38,211,0.18),transparent_60%)]" />
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-300">GEL.IT.UP by GIUP® — Verified Distribution Network</p>
+        <h1 className="mt-3 text-3xl font-black leading-tight tracking-tight text-white sm:text-5xl">
+          Distribution<br className="hidden sm:block" /> Partnership Tiers
+        </h1>
+        <p className="mt-3 max-w-2xl text-sm text-white/70 sm:text-base">
+          Built for serious operators. Every tier ships with full EU regulatory documentation and a social media brand engine — because your success is our brand in motion.
         </p>
-        <NavLink to="/full-catalogue" className="mt-4 inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
-          Quick View: Our Products
-        </NavLink>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <NavLink to="/full-catalogue" className="inline-flex rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white transition duration-300 hover:bg-fuchsia-500">
+            View Product Catalogue
+          </NavLink>
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-bold text-white backdrop-blur-sm transition duration-300 hover:bg-white/20">
+            Apply for Partnership
+          </NavLink>
+        </div>
       </div>
 
-      {/* BOUTIQUE PACKAGE */}
-      <article className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-5 sm:p-6">
-        <h2 className="text-xl font-black uppercase tracking-[0.04em] text-black sm:text-2xl">BOUTIQUE: THE FOUNDATION.</h2>
-        <p className="mt-2 text-sm text-black/70">
-          Perfect for localized salon supply. This tier focuses on high-frequency maintenance essentials and the top-selling 30 shades to ensure rapid ROI.
-        </p>
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">MARKET FOCUS</p>
-            <p className="mt-1 text-sm font-bold text-black">Localized Studio Supply</p>
+      {/* KEY DIFFERENTIATORS BANNER */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="flex items-start gap-3 rounded-2xl border border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 to-purple-50 p-4">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-fuchsia-500 to-purple-600 text-white">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
           </div>
-          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">PRODUCT SPECTRUM</p>
-            <p className="mt-1 text-sm font-bold text-black">Top 30 Core Shades</p>
-          </div>
-          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">SUPPORT PACKAGE</p>
-            <p className="mt-1 text-sm font-bold text-black">Digital Brand Assets</p>
-          </div>
-          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">STANDARDS</p>
-            <p className="mt-1 text-sm font-bold text-fuchsia-600">✓ HEMA-Free & TPO-Free Certified</p>
+          <div>
+            <p className="text-sm font-black uppercase tracking-wide text-fuchsia-800">EU Regulatory Ready</p>
+            <p className="mt-0.5 text-xs text-fuchsia-700/80">Full compliance documentation, HEMA-Free & TPO-Free certificates, and EC 1223/2009 declaration support — handled for you, not by you.</p>
           </div>
         </div>
-
-        <NavLink to="/become-distributor" className="mt-4 inline-flex rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
-          REQUEST TIER PRICING
-        </NavLink>
-      </article>
-
-      {/* PROFESSIONAL PACKAGE */}
-      <article className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-5 sm:p-6">
-        <h2 className="text-xl font-black uppercase tracking-[0.04em] text-black sm:text-2xl">PROFESSIONAL: THE EXPANDED SPECTRUM.</h2>
-        <p className="mt-2 text-sm text-black/70">
-          Designed for distributors ready to scale. Includes a curated selection of our most popular seasonal collections and specialized builder systems.
-        </p>
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">MARKET FOCUS</p>
-            <p className="mt-1 text-sm font-bold text-black">Regional Salon Networks</p>
+        <div className="flex items-start gap-3 rounded-2xl border border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 p-4">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 text-white">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
           </div>
-          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">PRODUCT SPECTRUM</p>
-            <p className="mt-1 text-sm font-bold text-black">150+ Curated Trends</p>
-          </div>
-          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">SUPPORT PACKAGE</p>
-            <p className="mt-1 text-sm font-bold text-black">Branded Salon Displays</p>
-          </div>
-          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">STANDARDS</p>
-            <p className="mt-1 text-sm font-bold text-fuchsia-600">✓ HEMA-Free & TPO-Free Certified</p>
+          <div>
+            <p className="text-sm font-black uppercase tracking-wide text-purple-800">Social Media Brand Engine</p>
+            <p className="mt-0.5 text-xs text-purple-700/80">Viral-ready content, branded assets, and territory advertising support that turns your distribution into a visible, growing movement.</p>
           </div>
         </div>
+      </div>
 
-        <NavLink to="/become-distributor" className="mt-4 inline-flex rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
-          REQUEST TIER PRICING
-        </NavLink>
-      </article>
-
-      {/* AUTHORITY PACKAGE */}
-      <article className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-5 sm:p-6">
-        <h2 className="text-xl font-black uppercase tracking-[0.04em] text-black sm:text-2xl">AUTHORITY: THE FULL MASTER COLLECTION.</h2>
-        <p className="mt-2 text-sm text-black/70">
-          For the market leader. Access the complete 761+ shade spectrum, all HEMA/TPO-free formulations, and exclusive regional marketing support.
-        </p>
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">MARKET FOCUS</p>
-            <p className="mt-1 text-sm font-bold text-black">Total Territory Dominance</p>
+      {/* BOUTIQUE TIER */}
+      <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        {/* Tier header bar */}
+        <div className="bg-gradient-to-r from-fuchsia-500 via-fuchsia-600 to-pink-600 px-6 py-4">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-100">Entry Tier</p>
+          <h2 className="mt-0.5 text-xl font-black text-white sm:text-2xl">BOUTIQUE — The Foundation</h2>
+          <p className="mt-1 text-sm text-white/80">Launch with confidence. The smartest entry point for localized distribution with everything you need to move product and build a client base instantly.</p>
+        </div>
+        {/* Rows */}
+        <div className="divide-y divide-slate-100">
+          <div className="flex items-start gap-4 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Market Focus</p>
+            <p className="text-sm font-semibold text-slate-800">Localized Distribution</p>
           </div>
-          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">PRODUCT SPECTRUM</p>
-            <p className="mt-1 text-sm font-bold text-black">Full 800+ Shade Portfolio</p>
+          <div className="flex items-start gap-4 bg-gradient-to-r from-fuchsia-50/60 to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-fuchsia-500">Product Spectrum</p>
+            <ul className="space-y-1.5">
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-500" />Top 120 Core Shades</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-500" />200 SKUs — Builder Systems, Brushes &amp; Essentials</li>
+            </ul>
           </div>
-          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">SUPPORT PACKAGE</p>
-            <p className="mt-1 text-sm font-bold text-black">Exclusive Event Support</p>
-          </div>
-          <div className="rounded-lg border border-[#4A4A4A]/20 bg-black/[0.02] p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-black/60">STANDARDS</p>
-            <p className="mt-1 text-sm font-bold text-fuchsia-600">✓ HEMA-Free & TPO-Free Certified</p>
+          <div className="flex items-start gap-4 bg-gradient-to-r from-purple-50/60 to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-purple-500">Support Package</p>
+            <ul className="space-y-1.5">
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-purple-400" />Digital Brand Assets</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-500" />
+                Viral Social Media Content
+                <span className="rounded-full bg-fuchsia-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">Brand Power</span>
+              </li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-green-500" />
+                EU Regulatory Support
+                <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-700">Compliance Included</span>
+              </li>
+            </ul>
           </div>
         </div>
-
-        <NavLink to="/become-distributor" className="mt-4 inline-flex rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
-          REQUEST TIER PRICING
-        </NavLink>
-      </article>
-
-      {/* TIER COMPARISON TABLE */}
-      <article className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-5 sm:p-6">
-        <h2 className="text-xl font-black uppercase tracking-[0.04em] text-black sm:text-2xl">TIER COMPARISON</h2>
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-[#4A4A4A]/20">
-                <th className="pb-3 pr-4 font-semibold text-black"></th>
-                <th className="pb-3 pr-4 font-semibold text-black">STUDIO ELITE</th>
-                <th className="pb-3 pr-4 font-semibold text-black">BOUTIQUE</th>
-                <th className="pb-3 pr-4 font-semibold text-black">PROFESSIONAL</th>
-                <th className="pb-3 font-semibold text-black">AUTHORITY</th>
-              </tr>
-            </thead>
-            <tbody className="text-black/75">
-              <tr className="border-b border-[#4A4A4A]/10">
-                <td className="py-3 pr-4 font-medium">Market Focus</td>
-                <td className="py-3 pr-4">High-Traffic Studios</td>
-                <td className="py-3 pr-4">Localized Studio Supply</td>
-                <td className="py-3 pr-4">Regional Salon Networks</td>
-                <td className="py-3">Total Territory Dominance</td>
-              </tr>
-              <tr className="border-b border-[#4A4A4A]/10">
-                <td className="py-3 pr-4 font-medium">Product Spectrum</td>
-                <td className="py-3 pr-4">360° Complete System</td>
-                <td className="py-3 pr-4">Top 30 Core Shades</td>
-                <td className="py-3 pr-4">150+ Curated Trends</td>
-                <td className="py-3">Full 800+ Shade Portfolio</td>
-              </tr>
-              <tr className="border-b border-[#4A4A4A]/10">
-                <td className="py-3 pr-4 font-medium">Support Package</td>
-                <td className="py-3 pr-4">Workflow Tools</td>
-                <td className="py-3 pr-4">Digital Brand Assets</td>
-                <td className="py-3 pr-4">Branded Salon Displays</td>
-                <td className="py-3">Exclusive Event Support</td>
-              </tr>
-              <tr className="border-b border-[#4A4A4A]/10">
-                <td className="py-3 pr-4 font-medium">Standard: HEMA-Free</td>
-                <td className="py-3 pr-4 text-fuchsia-600">✓ Certified</td>
-                <td className="py-3 pr-4 text-fuchsia-600">✓ Certified</td>
-                <td className="py-3 pr-4 text-fuchsia-600">✓ Certified</td>
-                <td className="py-3 text-fuchsia-600">✓ Certified</td>
-              </tr>
-              <tr className="border-b border-[#4A4A4A]/10">
-                <td className="py-3 pr-4 font-medium">Standard: TPO-Free</td>
-                <td className="py-3 pr-4 text-fuchsia-600">✓ Certified</td>
-                <td className="py-3 pr-4 text-fuchsia-600">✓ Certified</td>
-                <td className="py-3 pr-4 text-fuchsia-600">✓ Certified</td>
-                <td className="py-3 text-fuchsia-600">✓ Certified</td>
-              </tr>
-            </tbody>
-          </table>
+        <div className="px-6 py-4">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-gradient-to-r from-fuchsia-600 to-pink-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:from-fuchsia-500 hover:to-pink-500">
+            Request Boutique Tier Pricing →
+          </NavLink>
         </div>
-
-        <NavLink to="/become-distributor" className="mt-5 inline-flex rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
-          INQUIRE ABOUT REGIONAL PARTNERSHIPS
-        </NavLink>
       </article>
+
+      {/* PROFESSIONAL TIER */}
+      <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 px-6 py-4">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-purple-200">Growth Tier</p>
+          <h2 className="mt-0.5 text-xl font-black text-white sm:text-2xl">PROFESSIONAL — The Expanded Spectrum</h2>
+          <p className="mt-1 text-sm text-white/80">Scale intelligently. A broader product range, physical brand presence, and deeper marketing tools designed for distributors ready to dominate their region.</p>
+        </div>
+        <div className="divide-y divide-slate-100">
+          <div className="flex items-start gap-4 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Market Focus</p>
+            <p className="text-sm font-semibold text-slate-800">Localized Distribution</p>
+          </div>
+          <div className="flex items-start gap-4 bg-gradient-to-r from-violet-50/60 to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-violet-500">Product Spectrum</p>
+            <ul className="space-y-1.5">
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-violet-500" />150 Core Shades</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-violet-500" />280 SKU Recommendation Package</li>
+            </ul>
+          </div>
+          <div className="flex items-start gap-4 bg-gradient-to-r from-indigo-50/60 to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-indigo-500">Support Package</p>
+            <ul className="space-y-1.5">
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-indigo-400" />Digital Brand Assets</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-indigo-400" />Marketing Material</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-indigo-400" />Branded Salon Visibility</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-500" />
+                Viral Social Media Content
+                <span className="rounded-full bg-fuchsia-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">Brand Power</span>
+              </li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-green-500" />
+                EU Regulatory Support
+                <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-700">Compliance Included</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div className="px-6 py-4">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:from-purple-500 hover:to-indigo-500">
+            Request Professional Tier Pricing →
+          </NavLink>
+        </div>
+      </article>
+
+      {/* AUTHORITY TIER */}
+      <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="bg-gradient-to-r from-[#0f0f0f] via-[#1c0a2e] to-[#4a044e] px-6 py-4">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-300">Elite Tier</p>
+          <h2 className="mt-0.5 text-xl font-black text-white sm:text-2xl">AUTHORITY — The Full Master Collection</h2>
+          <p className="mt-1 text-sm text-white/70">Total market ownership. Every product, every shade, every support tool — with your territory backed by GEL.IT.UP advertising, live training, and white-glove regulatory handling.</p>
+        </div>
+        <div className="divide-y divide-slate-100">
+          <div className="flex items-start gap-4 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Market Focus</p>
+            <p className="text-sm font-semibold text-slate-800">Full Territory Dominance</p>
+          </div>
+          <div className="flex items-start gap-4 bg-gradient-to-r from-fuchsia-50/40 to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-fuchsia-500">Product Spectrum</p>
+            <ul className="space-y-1.5">
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-500" />Complete GEL.IT.UP Portfolio — Every Product, Every Shade</li>
+            </ul>
+          </div>
+          <div className="flex items-start gap-4 bg-gradient-to-r from-slate-900/[0.03] to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Support Package</p>
+            <ul className="space-y-1.5">
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400" />Digital Brand Assets</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400" />Marketing Material</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400" />Branded Salon Visibility</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400" />Seminar Training Events</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400" />Online Seminars</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400" />Promotional Package Availability</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-500" />
+                Viral Social Media Content
+                <span className="rounded-full bg-fuchsia-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">Brand Power</span>
+              </li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-600" />
+                Supported Territory Social Media Advertising
+                <span className="rounded-full bg-fuchsia-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">Brand Power</span>
+              </li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-green-500" />
+                EU Regulatory Support
+                <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-700">Compliance Included</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div className="px-6 py-4">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-gradient-to-r from-[#1c0a2e] to-fuchsia-800 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:from-[#2d1050] hover:to-fuchsia-700">
+            Request Authority Tier Pricing →
+          </NavLink>
+        </div>
+      </article>
+
     </section>
   )
 }
+
 
 function formatCatalogueItemName(rawPath = '') {
   const fileName = rawPath.split('/').pop() || ''
@@ -10265,23 +10290,7 @@ function PortalDashboard({ onLogout }) {
               </div>
             )}
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-base font-semibold text-transparent">One-Stop B2B Workspace</h3>
-              <p className="mt-2 text-sm text-slate-600">
-                Everything runs here: account overview, order placement, and order tracking. Payment options can be added into this same flow.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <NavLink to="/portal/dashboard/overview" className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
-                  My Account
-                </NavLink>
-                <NavLink to="/portal/dashboard/catalog" className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
-                  Buy Now
-                </NavLink>
-                <NavLink to="/portal/dashboard/orders" className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
-                  Track Orders
-                </NavLink>
-              </div>
-            </div>
+
           </>
         )}
       </div>
