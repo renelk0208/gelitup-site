@@ -6114,6 +6114,20 @@ function ProductsModule({ moduleView = 'products' }) {
       return normalizedToken.includes('MAGNET') || normalizedSku.includes('MAGNET')
     })
   }, [])
+
+  // Returns true only for actual physical magnet tools (EQUIPMENT category), not Cat Eye colour names
+  const isActualMagnetTool = useCallback((product) => {
+    if (!product) return false
+    const cat = normalizeCatalogueToken(product.category || '')
+    const sub = normalizeCatalogueToken(product.subcategory || '')
+    const name = normalizeCatalogueToken(product.name || '')
+    const sku = normalizeSkuCode(product.sku || product.code || '')
+    // Must NOT be a colour category
+    if (cat.includes('COLOR')) return false
+    // Must have MAGNET in subcategory, category, name, or sku
+    return sub.includes('MAGNET') || cat.includes('EQUIPMENT') && (name.includes('MAGNET') || sku.includes('MAGNET'))
+  }, [])
+
   const hasCatEyeInCart = useMemo(() => {
     const selectedHasCatEye = selectedCodes.some((code) => {
       const product = catalogBySku.get(normalizeSkuCode(code))
@@ -6127,17 +6141,20 @@ function ProductsModule({ moduleView = 'products' }) {
   const hasMagnetInCart = useMemo(() => {
     const selectedHasMagnet = selectedCodes.some((code) => {
       const product = catalogBySku.get(normalizeSkuCode(code))
-      return hasMagnetSignal(code, product?.name, product?.subcategory, product?.category)
+      return isActualMagnetTool(product)
     })
 
     if (selectedHasMagnet) return true
 
-    return packageCartItems.some((item) => hasMagnetSignal(item?.sku, item?.code, item?.name, item?.subcategory, item?.category))
-  }, [catalogBySku, hasMagnetSignal, packageCartItems, selectedCodes])
+    return packageCartItems.some((item) => isActualMagnetTool(item))
+  }, [catalogBySku, isActualMagnetTool, packageCartItems, selectedCodes])
   const shouldShowMagnetUpsellToast = hasCatEyeInCart && !hasMagnetInCart
   const magnetUpsellProduct = useMemo(() => {
-    return products.find((product) => hasMagnetSignal(product?.code, product?.sku, product?.name, product?.subcategory, product?.category)) || null
-  }, [hasMagnetSignal, products])
+    // First priority: actual magnet tool (EQUIPMENT > MAGNETS) — not a Cat Eye colour named "Magnetic xxx"
+    return products.find((product) => isActualMagnetTool(product))
+      || products.find((product) => hasMagnetSignal(product?.code, product?.sku, product?.name) && !normalizeCatalogueToken(product?.category || '').includes('COLOR'))
+      || null
+  }, [hasMagnetSignal, isActualMagnetTool, products])
   const resolveCatalogImageUrl = useCallback((item) => {
     const localMapKeys = [
       normalizeSkuCode(item?.sku),
