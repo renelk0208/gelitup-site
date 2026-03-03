@@ -10854,11 +10854,11 @@ function PortalDashboard({ onLogout }) {
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <article className="rounded-xl border border-slate-200 bg-white p-4">
                 <p className="text-xs text-slate-500">Open Orders</p>
-                <p className="mt-1 text-2xl font-bold text-slate-900">12</p>
+                <p className="mt-1 text-2xl font-bold text-slate-900">0</p>
               </article>
               <article className="rounded-xl border border-slate-200 bg-white p-4">
                 <p className="text-xs text-slate-500">Intake Queue</p>
-                <p className="mt-1 text-2xl font-bold text-slate-900">4</p>
+                <p className="mt-1 text-2xl font-bold text-slate-900">0</p>
               </article>
               <article className="rounded-xl border border-slate-200 bg-white p-4">
                 <p className="text-xs text-slate-500">Credit Limit Left</p>
@@ -10866,7 +10866,7 @@ function PortalDashboard({ onLogout }) {
               </article>
               <article className="rounded-xl border border-slate-200 bg-white p-4">
                 <p className="text-xs text-slate-500">Support Tickets</p>
-                <p className="mt-1 text-2xl font-bold text-slate-900">2</p>
+                <p className="mt-1 text-2xl font-bold text-slate-900">0</p>
               </article>
             </div>
 
