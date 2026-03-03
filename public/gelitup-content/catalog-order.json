@@ -1,6 +1,18 @@
 {
   "rules": [
     {
+      "category": "CONSUMABLES",
+      "subcategory": "DUAL FORMS",
+      "groups": [
+        {
+          "hero": "dual mix",
+          "swatches": ["dual forms mix 2", "dual forms mix 3"],
+          "mergeAsGallery": true
+        }
+      ],
+      "order": []
+    },
+    {
       "category": "BUILDER GEL",
       "subcategory": "3INI BUILDER",
       "groups": [

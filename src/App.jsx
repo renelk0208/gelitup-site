@@ -1665,16 +1665,28 @@ function applyManualCatalogueOrder(items = [], rule = null) {
     const heroItem = findCatalogueItemByMatch(items, group?.hero || '', used)
     if (heroItem) {
       used.add(heroItem.imageUrl)
-      ordered.push(heroItem)
-    }
 
-    const swatches = Array.isArray(group?.swatches) ? group.swatches : []
-    swatches.forEach((swatchName) => {
-      const swatchItem = findCatalogueItemByMatch(items, swatchName, used)
-      if (!swatchItem) return
-      used.add(swatchItem.imageUrl)
-      ordered.push(swatchItem)
-    })
+      const swatches = Array.isArray(group?.swatches) ? group.swatches : []
+      if (group?.mergeAsGallery) {
+        // Merge swatch images into hero as galleryImages — suppress them as separate tiles
+        const galleryImages = []
+        swatches.forEach((swatchName) => {
+          const swatchItem = findCatalogueItemByMatch(items, swatchName, used)
+          if (!swatchItem) return
+          used.add(swatchItem.imageUrl)
+          galleryImages.push(swatchItem.imageUrl)
+        })
+        ordered.push({ ...heroItem, galleryImages })
+      } else {
+        ordered.push(heroItem)
+        swatches.forEach((swatchName) => {
+          const swatchItem = findCatalogueItemByMatch(items, swatchName, used)
+          if (!swatchItem) return
+          used.add(swatchItem.imageUrl)
+          ordered.push(swatchItem)
+        })
+      }
+    }
   })
 
   flatOrder.forEach((rawName) => {
@@ -3277,6 +3289,13 @@ function FullCataloguePage() {
                       <div className="flex h-44 w-full items-center justify-center overflow-hidden bg-white p-2 sm:h-52 md:h-60">
                         <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full scale-[1.025] object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
                       </div>
+                      {item.galleryImages?.length > 0 && (
+                        <div className="flex gap-1 border-t border-black/10 bg-white px-2 py-1.5">
+                          {item.galleryImages.map((url, gi) => (
+                            <img key={gi} src={url} alt={`${item.name} view ${gi + 2}`} loading="lazy" className="h-10 w-10 rounded-[6px] border border-black/10 object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} />
+                          ))}
+                        </div>
+                      )}
                       <div className="border-t border-black/10 px-2.5 py-2">
                         <p className="truncate text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                         <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
