@@ -6217,36 +6217,33 @@ function ProductsModule({ moduleView = 'products' }) {
     return packageCartItems.some((item) => normalizeCatalogueToken(item?.category || item?.name || '').includes('MULTIMIX'))
   }, [catalogBySku, packageCartItems, selectedCodes])
 
-  const DUAL_FORM_SHAPES = ['DUAL MIX', 'G.T.LONG', 'G.T.SHORT', 'G.T.MEDIUM', 'DUAL FORM']
-
+  // Matches accessories for MultiMix: liquid, brushes, or Dual Form tips (filename prefix "Dual Form/Dual Forms")
   const hasSynthoAccessoriesInCart = useMemo(() => {
+    const isDualForm = (token) => token.includes('DUAL FORM') || token.includes('DUAL FORMS')
     if (selectedCodes.some((code) => {
-      const t = normalizeCatalogueToken(code)
-      return t.includes('POLYGEL') || t.includes('SYNTHOGEL') || t.includes('MULTI LIQUID') || t.includes('SYNTHOLIQUID')
-        || DUAL_FORM_SHAPES.some((s) => t.includes(s))
+      const product = catalogBySku.get(normalizeSkuCode(code))
+      const t = normalizeCatalogueToken(product?.name || product?.imageUrl || code)
+      return t.includes('POLYGEL') || t.includes('SYNTHOGEL') || t.includes('MULTI LIQUID') || t.includes('SYNTHOLIQUID') || isDualForm(t)
     })) return true
     return packageCartItems.some((item) => {
-      const t = normalizeCatalogueToken(item?.name || item?.subcategory || '')
-      return t.includes('POLYGEL') || t.includes('SYNTHOGEL') || t.includes('MULTI LIQUID')
-        || DUAL_FORM_SHAPES.some((s) => t.includes(s))
+      const t = normalizeCatalogueToken(item?.name || item?.imageUrl || item?.subcategory || '')
+      return t.includes('POLYGEL') || t.includes('SYNTHOGEL') || t.includes('MULTI LIQUID') || isDualForm(t)
     })
-  }, [packageCartItems, selectedCodes])
+  }, [catalogBySku, packageCartItems, selectedCodes])
 
   const shouldShowSynthoUpsell = hasMultiMixInCart && !hasSynthoAccessoriesInCart
 
-  // ── 5-in-1 Clear Base upsell — Nail Tips purchased ───────────────────────
+  // ── 5-in-1 Clear Base upsell — Soak-off Gel Tips specifically (filename prefix "Soak off Gel tips")
   const hasNailTipsInCart = useMemo(() => {
-    const tipShapes = ['ALMOND', 'COFFIN', 'BALLERINA', 'SQUOVAL', 'SQUARE', 'STANDARD', 'RUSSIAN', 'DUAL MIX', 'NAIL TIP', 'NAIL FORM']
+    const isSoakOffTip = (token) => token.includes('SOAK OFF')
     if (selectedCodes.some((code) => {
       const product = catalogBySku.get(normalizeSkuCode(code))
-      const sub = normalizeCatalogueToken(product?.subcategory || '')
-      const img = normalizeCatalogueToken(product?.imageUrl || code)
-      const token = normalizeCatalogueToken(code)
-      return sub.includes('NAIL TIP') || img.includes('NAIL TIP') || tipShapes.some((s) => token.includes(s) || img.includes(s))
+      const t = normalizeCatalogueToken(product?.name || product?.imageUrl || code)
+      return isSoakOffTip(t)
     })) return true
     return packageCartItems.some((item) => {
-      const t = normalizeCatalogueToken(item?.subcategory || item?.name || '')
-      return t.includes('NAIL TIP') || tipShapes.some((s) => t.includes(s))
+      const t = normalizeCatalogueToken(item?.name || item?.imageUrl || item?.subcategory || '')
+      return isSoakOffTip(t)
     })
   }, [catalogBySku, packageCartItems, selectedCodes])
 
