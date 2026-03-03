@@ -90,7 +90,7 @@ create policy "b2b_registrations_insert_anon"
 on public.b2b_registrations
 for insert
 to anon, authenticated
-with check (status in ('pending', 'submitted'));
+with check (true);
 
 drop policy if exists "b2b_registrations_select_own" on public.b2b_registrations;
 create policy "b2b_registrations_select_own"

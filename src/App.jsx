@@ -11811,11 +11811,10 @@ function App() {
         status: submissionStatus,
       }
 
-      const { data: createdApplication, error } = await supabase
+      const { error } = await supabase
         .from(registrationsTable)
         .insert([payload])
-        .select('id, contact_name, contact_email, company_name')
-        .single()
+      const createdApplication = { id: null, contact_name: payload.contact_name, contact_email: payload.contact_email, company_name: payload.company_name }
 
       if (error) {
         const missingTableError = error.message?.includes('Could not find the table')
