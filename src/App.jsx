@@ -1361,12 +1361,12 @@ function DistributorPackagesPage() {
 
       {/* HERO */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0f0f0f] via-[#1c0a2e] to-[#3b0764] p-7 text-white sm:p-10">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(192,38,211,0.18),transparent_60%)]" />
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-300">GEL.IT.UP by GIUP® — Verified Distribution Network</p>
-        <h1 className="mt-3 text-3xl font-black leading-tight tracking-tight text-white sm:text-5xl">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(192,38,211,0.12),transparent_60%)]" />
+        <p className="relative text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-300">GEL.IT.UP by GIUP® — Verified Distribution Network</p>
+        <h1 className="heading-on-dark relative mt-3 text-3xl font-black leading-tight tracking-tight drop-shadow-lg sm:text-5xl">
           Distribution<br className="hidden sm:block" /> Partnership Tiers
         </h1>
-        <p className="mt-3 max-w-2xl text-sm text-white/70 sm:text-base">
+        <p className="relative mt-3 max-w-2xl text-sm text-white/90 sm:text-base">
           Built for serious operators. Every tier ships with full EU regulatory documentation and a social media brand engine — because your success is our brand in motion.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
