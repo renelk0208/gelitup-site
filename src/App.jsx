@@ -1404,10 +1404,10 @@ function DistributorPackagesPage() {
       {/* BOUTIQUE TIER */}
       <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         {/* Tier header bar */}
-        <div className="bg-gradient-to-r from-fuchsia-500 via-fuchsia-600 to-pink-600 px-6 py-4">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-100">Entry Tier</p>
+        <div className="bg-gradient-to-r from-[#6b7280] via-[#9ca3af] to-[#6b7280] px-6 py-4">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/70">Entry Tier — Silver</p>
           <h2 className="mt-0.5 text-xl font-black text-white sm:text-2xl">BOUTIQUE — The Foundation</h2>
-          <p className="mt-1 text-sm text-white/80">Launch with confidence. The smartest entry point for localized distribution with everything you need to move product and build a client base instantly.</p>
+          <p className="mt-1 text-sm text-white/90">Launch with confidence. The smartest entry point for localized distribution with everything you need to move product and build a client base instantly.</p>
         </div>
         {/* Rows */}
         <div className="divide-y divide-slate-100">
@@ -1440,7 +1440,7 @@ function DistributorPackagesPage() {
           </div>
         </div>
         <div className="px-6 py-4">
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-gradient-to-r from-fuchsia-600 to-pink-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:from-fuchsia-500 hover:to-pink-500">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-gradient-to-r from-[#4b5563] to-[#6b7280] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:from-[#374151] hover:to-[#4b5563]">
             Request Boutique Tier Pricing →
           </NavLink>
         </div>
@@ -1448,29 +1448,29 @@ function DistributorPackagesPage() {
 
       {/* PROFESSIONAL TIER */}
       <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 px-6 py-4">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-purple-200">Growth Tier</p>
+        <div className="bg-gradient-to-r from-[#78350f] via-[#b45309] to-[#78350f] px-6 py-4">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-200">Growth Tier — Gold</p>
           <h2 className="mt-0.5 text-xl font-black text-white sm:text-2xl">PROFESSIONAL — The Expanded Spectrum</h2>
-          <p className="mt-1 text-sm text-white/80">Scale intelligently. A broader product range, physical brand presence, and deeper marketing tools designed for distributors ready to dominate their region.</p>
+          <p className="mt-1 text-sm text-amber-50/90">Scale intelligently. A broader product range, physical brand presence, and deeper marketing tools designed for distributors ready to dominate their region.</p>
         </div>
         <div className="divide-y divide-slate-100">
           <div className="flex items-start gap-4 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
             <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Market Focus</p>
             <p className="text-sm font-semibold text-slate-800">Localized Distribution</p>
           </div>
-          <div className="flex items-start gap-4 bg-gradient-to-r from-violet-50/60 to-white px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-violet-500">Product Spectrum</p>
+          <div className="flex items-start gap-4 bg-gradient-to-r from-amber-50/60 to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-amber-600">Product Spectrum</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-violet-500" />150 Core Shades</li>
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-violet-500" />280 SKU Recommendation Package</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />150 Core Shades</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />280 SKU Recommendation Package</li>
             </ul>
           </div>
-          <div className="flex items-start gap-4 bg-gradient-to-r from-indigo-50/60 to-white px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-indigo-500">Support Package</p>
+          <div className="flex items-start gap-4 bg-gradient-to-r from-amber-50/40 to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-amber-700">Support Package</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-indigo-400" />Digital Brand Assets</li>
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-indigo-400" />Marketing Material</li>
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-indigo-400" />Branded Salon Visibility</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />Digital Brand Assets</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />Marketing Material</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />Branded Salon Visibility</li>
               <li className="flex items-center gap-2 text-sm font-semibold text-slate-800">
                 <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-500" />
                 Viral Social Media Content
@@ -1485,7 +1485,7 @@ function DistributorPackagesPage() {
           </div>
         </div>
         <div className="px-6 py-4">
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:from-purple-500 hover:to-indigo-500">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-gradient-to-r from-[#78350f] to-[#b45309] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:from-[#92400e] hover:to-[#ca8a04]">
             Request Professional Tier Pricing →
           </NavLink>
         </div>
@@ -1493,10 +1493,10 @@ function DistributorPackagesPage() {
 
       {/* AUTHORITY TIER */}
       <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="bg-gradient-to-r from-[#0f0f0f] via-[#1c0a2e] to-[#4a044e] px-6 py-4">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-300">Elite Tier</p>
+        <div className="bg-gradient-to-r from-[#1e293b] via-[#334155] to-[#1e293b] px-6 py-4">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-300">Elite Tier — Platinum</p>
           <h2 className="mt-0.5 text-xl font-black text-white sm:text-2xl">AUTHORITY — The Full Master Collection</h2>
-          <p className="mt-1 text-sm text-white/70">Total market ownership. Every product, every shade, every support tool — with your territory backed by GEL.IT.UP advertising, live training, and white-glove regulatory handling.</p>
+          <p className="mt-1 text-sm text-slate-200">Total market ownership. Every product, every shade, every support tool — with your territory backed by GEL.IT.UP advertising, live training, and white-glove regulatory handling.</p>
         </div>
         <div className="divide-y divide-slate-100">
           <div className="flex items-start gap-4 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
@@ -1537,7 +1537,7 @@ function DistributorPackagesPage() {
           </div>
         </div>
         <div className="px-6 py-4">
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-gradient-to-r from-[#1c0a2e] to-fuchsia-800 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:from-[#2d1050] hover:to-fuchsia-700">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-gradient-to-r from-[#1e293b] to-[#334155] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:from-[#0f172a] hover:to-[#1e293b]">
             Request Authority Tier Pricing →
           </NavLink>
         </div>
