@@ -1919,6 +1919,11 @@ function formatSubcategoryDisplayName(subcategoryName = '') {
   if (normalized === 'CUTICLE OILS -REMOVERS' || normalized === 'CUTICLE OILS REMOVERS') return 'Cuticle Oils & Removers'
   if (normalized === 'NAIL FILES') return 'Nail Files'
   if (normalized === 'NAIL TIPS') return 'Nail Tips'
+  if (normalized === 'DUAL FORMS') return 'Dual Forms'
+  if (normalized === 'SOAK OFF GEL TIPS') return 'Soak Off Gel Tips'
+  if (normalized === 'NAIL FORMS') return 'Nail Forms'
+  // Nail Hand & Foot Care subcategories
+  if (normalized === 'NAIL HAND FOOT CARE') return 'Nail, Hand & Foot Care'
   
   // Nail Art subcategories
   if (normalized === 'CUSHION GEL') return 'Cushion Gel'
@@ -2174,6 +2179,14 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Skinny Liner — Ultra-fine liner brush for detailed nail art lines and accents.',
     ],
   },
+  'NAIL HAND FOOT CARE::CUTICLE OILS REMOVERS': {
+    paragraphs: [
+      'With our Cuticle Oils you will feel your fingers soothed, nourished, and hydrated, while also protecting them from irritation and prolonged sun exposure.',
+      'Directions for use: Apply one to two drops to the cuticle area of each nail. Massage the oil around the cuticles and then over the entire surface of the nail. It is important to apply the oil to both the skin and the nails to achieve the full nourishment you desire.',
+      'Warnings: For external use only. Keep out of reach of children. Store the product at a temperature below 25°C. Keep away from direct sunlight.',
+    ],
+    listItems: [],
+  },
   'TOPS::SPOT MY TOPS': {
     paragraphs: [
       'Create the ultimate trend easily and quickly with FAN12 Rainbow Dreams — an effects top coat featuring the high-gloss finish of a top coat combined with the unique sparkle of microscopic iridescent particles.',
@@ -2298,6 +2311,7 @@ const CATEGORY_LAB_SPECS = {
   'BRUSHES': { pigmentDots: null, cure: null, llab: true },
   'NAIL ART': { pigmentDots: 2, cure: '60s LED · 120s UV', llab: true },
   'CONSUMABLES': { pigmentDots: null, cure: null, llab: true },
+  'NAIL HAND & FOOT CARE': { pigmentDots: null, cure: null, llab: true },
   'LIQUIDS': { pigmentDots: null, cure: null, llab: true },
   'BY THE OCEAN': { pigmentDots: 3, cure: '60s LED · 120s UV', llab: true },
 }
@@ -2747,7 +2761,7 @@ function FullCataloguePage() {
 
   const chapter02Categories = ['BUILDER GEL SYSTEMS', 'BASES', 'CREME DE LA CREME', 'MULTIMIX']
   const chapter03Categories = ['TOPS', 'TOOLS', 'EQUIPMENT']
-  const chapter04Categories = ['NAIL ART', 'CONSUMABLES', 'LIQUIDS', 'BY THE OCEAN']
+  const chapter04Categories = ['NAIL ART', 'CONSUMABLES', 'NAIL HAND & FOOT CARE', 'LIQUIDS', 'BY THE OCEAN']
   const activeProductInformation = useMemo(
     () => getSubcategoryProductInformation(activeCategory, activeSubcategory),
     [activeCategory, activeSubcategory],
@@ -2879,8 +2893,19 @@ function FullCataloguePage() {
         preferredCategories: ['CONSUMABLES'],
         subcategories: [
           { label: 'Files & Buffers', subcategoryTokens: ['FILE', 'BUFFER'] },
-          { label: 'Wipes & Forms', subcategoryTokens: ['WIPE', 'FORM'] },
-          { label: 'Removal Essentials', subcategoryTokens: ['REMOV', 'CUTICLE OILS', 'CLEANSER'] },
+          { label: 'Nail Forms & Dual Forms', subcategoryTokens: ['NAIL FORM', 'DUAL FORM'] },
+          { label: 'Soak Off Gel Tips', subcategoryTokens: ['SOAK OFF'] },
+          { label: 'Wipes & Sticks', subcategoryTokens: ['WIPE', 'STICK'] },
+        ],
+      },
+      {
+        key: 'NAIL_HAND_FOOT_CARE',
+        label: 'NAIL, HAND & FOOT CARE',
+        sectionTokens: ['NAIL HAND', 'FOOT CARE'],
+        preferredCategories: ['NAIL HAND & FOOT CARE'],
+        subcategories: [
+          { label: 'Cuticle Oils & Removers', subcategoryTokens: ['CUTICLE OIL', 'REMOVER'] },
+          { label: 'Creams & Scrubs', subcategoryTokens: ['CREAM', 'SCRUB'] },
         ],
       },
       {
