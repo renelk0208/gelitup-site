@@ -6158,7 +6158,6 @@ function PortalForgotPassword() {
     setIsSubmitting(false)
 
     if (error) {
-      setErrorMessage(error.message || 'Unable to send reset link.')
       setSuccessMessage('If this email exists in the portal, a reset link has been issued. Check inbox and spam.')
       return
     }
