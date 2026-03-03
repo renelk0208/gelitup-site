@@ -2179,6 +2179,16 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Skinny Liner — Ultra-fine liner brush for detailed nail art lines and accents.',
     ],
   },
+  'NAIL HAND FOOT CARE::CREAMS AND SCRUBS': {
+    paragraphs: [
+      'Sassy Sassy Hand & Body Cream — With Organic Aloe and a unique cocktail of active ingredients, it fragrances and hydrates the skin. It absorbs quickly and leaves no oily residue.',
+    ],
+    listItems: [
+      'Organic Aloe Vera',
+      'Hyaluronic Acid',
+      'Panthenol',
+    ],
+  },
   'NAIL HAND FOOT CARE::CUTICLE OILS REMOVERS': {
     paragraphs: [
       'With our Cuticle Oils you will feel your fingers soothed, nourished, and hydrated, while also protecting them from irritation and prolonged sun exposure.',
