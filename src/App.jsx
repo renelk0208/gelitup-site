@@ -1997,8 +1997,9 @@ function flattenSectionItems(section) {
 const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   'BASES::SUPERBOND': {
     paragraphs: [
-      'GEL.IT.UP by GIUP® Superbond with Acid is an acid-based primer, designed to be safe for the natural nail, and it does not require curing.',
+      'GEL.IT.UP by GIUP® Superbond is an acid-free primer, safe for the natural nail, and it does not require curing.',
       'It is applied to the free edge of the nail before the base coat, ensuring improved adhesion while providing additional dehydration for longer-lasting results.',
+      'It also creates a thin protective film on the nail, helping to protect it from damage.',
     ],
     listItems: [],
   },
