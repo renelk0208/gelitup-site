@@ -2129,6 +2129,13 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Application — Seal: Finish with GEL.IT.UP by GIUP® Non-Wipe Top Coat and cure 90–120 seconds for a TPO-free high-gloss seal.',
     ],
   },
+  'LINE-IT-UP::ALL': {
+    paragraphs: [
+      'By choosing the LINE.IT.UP by GIUP® range, you can create linear designs easily and quickly, thanks to the specially designed brush.',
+      'It allows you to create everything from fine to thicker lines, depending on the design you wish to draw.',
+    ],
+    listItems: [],
+  },
   'COLORS::ALL': {
     paragraphs: [
       'The GEL.IT.UP by GIUP® gel polish range has stood out in the market thanks to its excellent quality and high durability. It delivers intense shine, removes very easily, and does not wrinkle during curing.',
