@@ -7447,7 +7447,11 @@ function ProductsModule({ moduleView = 'products' }) {
       orderId: insertedOrder?.id ?? '-',
     })
 
-    setCheckoutMessage(`Order received (#${insertedOrder?.id ?? '-'} | ${totalUnits} units). A copy was sent to your email and to ${ORDER_INBOX_EMAIL}, and the order is stored in the portal backup.${zohoStatusNote}`)
+    const emailSentOk = customerNotificationResult.ok && inboxNotificationResult.ok
+    const emailNote = emailSentOk
+      ? ` Confirmation emails sent.`
+      : ` ⚠️ Email notifications could not be sent — see details below.`
+    setCheckoutMessage(`Order received (#${insertedOrder?.id ?? '-'} | ${totalUnits} units). Order stored successfully.${emailNote}${zohoStatusNote}`)
     setSelectedCodes([])
     setItemQtys({})
     setPackageCartItems([])
@@ -8412,9 +8416,15 @@ function ProductsModule({ moduleView = 'products' }) {
           </div>
         )}
 
-        {checkoutError && <p className="mt-2 text-xs text-rose-600">{checkoutError}</p>}
-        {checkoutMessage && <p className="mt-2 text-xs text-emerald-700">{checkoutMessage}</p>}
-        {orderInboxEmailStatus && <p className="mt-1 text-xs text-slate-700">{orderInboxEmailStatus}</p>}
+        {checkoutError && <p className="mt-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{checkoutError}</p>}
+        {checkoutMessage && <p className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">{checkoutMessage}</p>}
+        {orderInboxEmailStatus && (
+          <p className={`mt-1 rounded-lg border px-3 py-2 text-xs ${
+            orderInboxEmailStatus.includes('failed') || orderInboxEmailStatus.includes('skipped')
+              ? 'border-amber-200 bg-amber-50 text-amber-800'
+              : 'border-slate-200 bg-slate-50 text-slate-600'
+          }`}>{orderInboxEmailStatus}</p>
+        )}
         {checkoutMessage && lastProformaInvoice && (
           <div className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 p-2">
             <p className="text-xs text-emerald-900">
