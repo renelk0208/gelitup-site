@@ -3300,8 +3300,8 @@ function FullCataloguePage() {
                       <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 rounded-[12px] border border-[#4A4A4A]/30 bg-[#E8E8E8] px-3 py-2 transition duration-300 hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_1px_rgba(212,55,144,0.26)]" data-catalogue-item>
                         <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-black/10 bg-white object-contain opacity-0 transition-opacity duration-300" loading="lazy" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                          <p className="truncate text-[11px] font-light text-black/55">{itemCode}</p>
+                          <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
+                          <p className="break-words text-[11px] font-light text-black/55">{itemCode}</p>
                         </div>
                         <button onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>−</button>
                         <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className={`h-7 w-10 rounded-[10px] border text-center text-xs ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/20 text-black/70'}`} />
@@ -3324,11 +3324,11 @@ function FullCataloguePage() {
                         </div>
                       )}
                       <div className="border-t border-black/10 px-2.5 py-2">
-                        <p className="truncate text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
-                        <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
+                        <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
+                        <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                         <div className="mt-2 flex items-center gap-1">
                           <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
-                          <p className="truncate text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
+                          <p className="break-words text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
                         </div>
                         <div className="mt-2 flex items-center">
                           <NavLink
@@ -8690,9 +8690,9 @@ function ProductsModule({ moduleView = 'products' }) {
                       >×</button>
                     </div>
                     <div className="p-1.5">
-                      <p className="truncate text-[10px] font-semibold leading-tight text-slate-900">{product.code}</p>
-                      <p className="truncate text-[9px] leading-tight text-slate-500">{product.name}</p>
-                      <p className="truncate text-[9px] leading-tight text-slate-400">{product.category}</p>
+                      <p className="break-words text-[10px] font-semibold leading-tight text-slate-900">{product.code}</p>
+                      <p className="break-words text-[9px] leading-tight text-slate-500">{product.name}</p>
+                      <p className="break-words text-[9px] leading-tight text-slate-400">{product.category}</p>
                     </div>
                   </div>
                 ))}
@@ -8714,8 +8714,8 @@ function ProductsModule({ moduleView = 'products' }) {
                         <span className="absolute left-0.5 top-0.5 rounded-full bg-fuchsia-600 px-1 py-0.5 text-[9px] font-bold leading-none text-white">{item.qty}×</span>
                       </div>
                       <div className="p-1.5">
-                        <p className="truncate text-[10px] font-semibold leading-tight text-slate-900">{item.code}</p>
-                        <p className="truncate text-[9px] leading-tight text-fuchsia-700">{item.name}</p>
+                        <p className="break-words text-[10px] font-semibold leading-tight text-slate-900">{item.code}</p>
+                        <p className="break-words text-[9px] leading-tight text-fuchsia-700">{item.name}</p>
                       </div>
                     </div>
                   )
@@ -8745,7 +8745,7 @@ function ProductsModule({ moduleView = 'products' }) {
                       {product.imageUrl && <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" />}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[11px] font-semibold text-slate-900">{product.name}</p>
+                      <p className="break-words text-[11px] font-semibold text-slate-900">{product.name}</p>
                       <p className="text-[10px] text-slate-400">{product.code}</p>
                     </div>
                     <div className="flex items-center gap-1">
@@ -9304,8 +9304,8 @@ function ProductsModule({ moduleView = 'products' }) {
                       >&times;</button>
                     </div>
                     <div className="p-1">
-                      <p className="truncate text-[10px] font-semibold leading-tight text-slate-900">{product.code}</p>
-                      <p className="truncate text-[9px] leading-tight text-slate-500">{product.name}</p>
+                      <p className="break-words text-[10px] font-semibold leading-tight text-slate-900">{product.code}</p>
+                      <p className="break-words text-[9px] leading-tight text-slate-500">{product.name}</p>
                     </div>
                   </div>
                 ))}
@@ -9327,8 +9327,8 @@ function ProductsModule({ moduleView = 'products' }) {
                         <span className="absolute left-0.5 top-0.5 rounded-full bg-fuchsia-600 px-1 py-0.5 text-[9px] font-bold leading-none text-white">{item.qty}&times;</span>
                       </div>
                       <div className="p-1">
-                        <p className="truncate text-[10px] font-semibold leading-tight text-slate-900">{item.code}</p>
-                        <p className="truncate text-[9px] leading-tight text-fuchsia-700">{item.name}</p>
+                        <p className="break-words text-[10px] font-semibold leading-tight text-slate-900">{item.code}</p>
+                        <p className="break-words text-[9px] leading-tight text-fuchsia-700">{item.name}</p>
                       </div>
                     </div>
                   )
@@ -10188,11 +10188,63 @@ function PendingApplicationsModule() {
     const createPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(application.contact_email || '')}`
 
     const subject = status === 'approved'
-      ? `Welcome to GEL.IT.UP Portal, ${application.contact_name}`
+      ? `🎉 You're Approved — Welcome to GEL.IT.UP, ${application.contact_name}!`
       : `GEL.IT.UP Portal application update`
 
     const html = status === 'approved'
-      ? `<p>Hello ${application.contact_name},</p><p>Welcome to <strong>GEL.IT.UP by GIUP®</strong>.</p><p>Your distributor account for <strong>${application.company_name}</strong> has been approved.</p><p>Please open your login page below. Your email is prefilled; create your password, confirm it, and tick the Remember me checkbox.</p><p><a href="${createPasswordLink}">Create password and continue to login</a></p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`
+      ? `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background-color:#f8f7ff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#f8f7ff;padding:32px 16px;">
+  <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(168,85,247,0.10);">
+      <!-- HEADER -->
+      <tr><td style="background:linear-gradient(135deg,#a855f7 0%,#7c3aed 50%,#4f46e5 100%);padding:40px 48px 32px;text-align:center;">
+        <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;">GEL.IT.UP by GIUP®</p>
+        <h1 style="margin:0;font-size:28px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">You're Approved! 🎉</h1>
+        <p style="margin:10px 0 0;font-size:15px;color:rgba(255,255,255,0.85);">Welcome to the GEL.IT.UP Distributor Family</p>
+      </td></tr>
+      <!-- BODY -->
+      <tr><td style="padding:40px 48px;">
+        <p style="margin:0 0 8px;font-size:17px;font-weight:600;color:#1e1b4b;">Dear ${application.contact_name},</p>
+        <p style="margin:0 0 20px;font-size:15px;line-height:1.65;color:#374151;">We are thrilled to let you know that your application for <strong style="color:#7c3aed;">${application.company_name}</strong> has been <strong>approved</strong>. Welcome aboard — we are so excited to have you as part of the GEL.IT.UP distribution network!</p>
+        <p style="margin:0 0 28px;font-size:15px;line-height:1.65;color:#374151;">Your exclusive distributor portal is ready and waiting. To get started, simply create your password using the button below — your email address is already prefilled for you.</p>
+        <!-- CTA BUTTON -->
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:32px;">
+          <tr><td align="center">
+            <a href="${createPasswordLink}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#a855f7,#7c3aed);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:50px;letter-spacing:0.3px;box-shadow:0 4px 14px rgba(124,58,237,0.35);">Create Password &amp; Enter Portal →</a>
+          </td></tr>
+        </table>
+        <!-- STEPS -->
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#faf5ff;border-radius:12px;padding:0;margin-bottom:28px;">
+          <tr><td style="padding:24px 28px;">
+            <p style="margin:0 0 14px;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7c3aed;">Getting Started — 3 Easy Steps</p>
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+              <tr>
+                <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#7c3aed;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">1</span></td>
+                <td style="padding-left:10px;padding-bottom:12px;font-size:14px;color:#374151;"><strong>Click the button above</strong> — your email is prefilled automatically.</td>
+              </tr>
+              <tr>
+                <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#7c3aed;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">2</span></td>
+                <td style="padding-left:10px;padding-bottom:12px;font-size:14px;color:#374151;"><strong>Create your password</strong>, confirm it, and tick <em>Remember me</em>.</td>
+              </tr>
+              <tr>
+                <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#7c3aed;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">3</span></td>
+                <td style="padding-left:10px;font-size:14px;color:#374151;"><strong>Log in</strong> to browse our full product catalogue and place wholesale orders.</td>
+              </tr>
+            </table>
+          </td></tr>
+        </table>
+        <p style="margin:0 0 28px;font-size:15px;line-height:1.65;color:#374151;">We look forward to growing together and supporting your business with our premium gel polish collections. If you ever have questions, our team is always here for you.</p>
+        <p style="margin:0;font-size:15px;line-height:1.65;color:#374151;">With warmth &amp; excitement,<br/><strong style="color:#1e1b4b;">The GEL.IT.UP Distribution Team</strong></p>
+      </td></tr>
+      <!-- FOOTER -->
+      <tr><td style="background:#f3f0ff;padding:24px 48px;text-align:center;border-top:1px solid #ede9fe;">
+        <p style="margin:0 0 6px;font-size:12px;color:#6b7280;">Questions? Contact us at <a href="mailto:${B2B_EMAIL}" style="color:#7c3aed;text-decoration:none;font-weight:600;">${B2B_EMAIL}</a></p>
+        <p style="margin:0;font-size:11px;color:#9ca3af;">GEL.IT.UP by GIUP® — Premium Gel Polish Distribution</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`
       : `<p>Hello ${application.contact_name},</p><p>Your GEL.IT.UP B2B Portal application for <strong>${application.company_name}</strong> has been reviewed and marked as rejected.</p><p>If you need support or want to re-apply, contact us at ${B2B_EMAIL}.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`
 
     const notificationResult = await sendPortalEmailNotification({

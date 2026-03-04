@@ -176,7 +176,75 @@ async function main() {
   const items = await fetchAllItems(accessToken, orgId)
   console.log(`Total items fetched: ${items.length}`)
 
-  // Build SKU → item_id map (only items that have a SKU)
+  // ── helpers ──────────────────────────────────────────────────────────────────
+  // Normalise a raw SKU/name the same way the portal and zoho-sync-order do.
+  // NOTE: # is intentionally preserved — Zoho stores product SKUs with # and
+  // those keys must remain intact in the map for correct order sync.
+  function normSku(s) {
+    return String(s || '').trim().toUpperCase().replace(/\s+/g, ' ')
+  }
+  // Strip trailing variant tags so "01 Ice Ice Baby -HTF" → "01 ICE ICE BABY"
+  function stripVariant(s) {
+    return normSku(s).replace(/\s*[-–]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '').trim()
+  }
+  // Extract the leading colour number so "01 Ice Ice Baby" → "01"
+  function leadingCode(s) {
+    const m = String(s || '').match(/^(\d+[A-Z]?)\s/i)
+    return m ? m[1].toUpperCase() : null
+  }
+  // Pad/unpad number variants: "1" / "01" / "001"
+  function numVariants(n, sfx = '') {
+    const i = parseInt(n, 10)
+    return [String(i), String(i).padStart(2,'0'), String(i).padStart(3,'0')].map(p => `${p}${sfx}`)
+  }
+  // All keys we want to map to the same item_id.
+  // Mirrors the alias logic in App.jsx priceMap builder so the portal's short
+  // catalog codes always resolve — # is kept for Zoho but short codes are also
+  // added so order items match regardless of how the catalog codes are stored.
+  function aliases(rawSku) {
+    const full     = normSku(rawSku)     // "01 ICE ICE BABY -HTF"  (# preserved)
+    const stripped = stripVariant(rawSku) // "01 ICE ICE BABY"        (# preserved)
+
+    const set = new Set([full, stripped].filter(Boolean))
+
+    // ── Leading numeric code: "01 Ice Ice Baby" → "01", "1", "001" ──────────
+    const shortCode = leadingCode(stripped)
+    if (shortCode) {
+      set.add(shortCode)
+      const num = shortCode.match(/^(\d+)([A-Z]?)$/)
+      if (num) numVariants(num[1], num[2] || '').forEach(k => set.add(k))
+    }
+
+    // ── Series+# prefix: "PMA #1 Champagne Blizzard" → "PMA 1", "PMA 01", "PMA1", "PMA01" ──
+    const seriesMatch = stripped.match(/^([A-Z]+)\s*#\s*(\d+[A-Z]?)\b/i)
+    if (seriesMatch) {
+      const s = seriesMatch[1].toUpperCase()
+      const n = seriesMatch[2]
+      const numM = n.match(/^(\d+)([A-Z]?)$/)
+      const nums = numM ? numVariants(numM[1], numM[2] || '') : [n]
+      nums.forEach(p => { set.add(`${s} ${p}`); set.add(`${s}${p}`) })
+      // also keep the # form itself: "PMA #1"
+      set.add(`${s} #${n}`)
+    }
+
+    // ── Embedded #CODE: "New York Party #NYP01" → "NYP 01", "NYP01" ─────────
+    const embeddedMatch = stripped.match(/#([A-Z]+)(\d+[A-Z]?)\b/i)
+    if (embeddedMatch) {
+      const s = embeddedMatch[1].toUpperCase()
+      const n = embeddedMatch[2]
+      const numM = n.match(/^(\d+)([A-Z]?)$/)
+      const nums = numM ? numVariants(numM[1], numM[2] || '') : [n]
+      nums.forEach(p => { set.add(`${s} ${p}`); set.add(`${s}${p}`) })
+      set.add(`${s}#${n}`)  // also keep "NYP#01" form
+    }
+
+    return Array.from(set)
+  }
+
+  // Build SKU → item_id map (only items that have a SKU).
+  // Each item is indexed under ALL its aliases so the portal's short catalog
+  // codes (e.g. "01") resolve to the same item_id as the full Zoho SKU
+  // (e.g. "01 Ice Ice Baby -HTF") — the full name never surfaces to clients.
   const itemMap = {}
   const noSku = []
 
@@ -186,7 +254,11 @@ async function main() {
       noSku.push(item.name || item.item_id)
       continue
     }
-    itemMap[sku] = item.item_id
+    for (const key of aliases(sku)) {
+      if (key && !(key in itemMap)) {
+        itemMap[key] = item.item_id
+      }
+    }
   }
 
   if (verbose && noSku.length) {

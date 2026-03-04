@@ -33,6 +33,20 @@ function normalizeSkuCode(value: string) {
   return String(value || '').trim().toUpperCase().replace(/\s+/g, ' ')
 }
 
+// Strip trailing variant tags (-HTF, -HTE, HEMA FREE, NEW) so that a short
+// catalog code like "01" will also match "01 Ice Ice Baby -HTF" entries in the
+// item map (which is pre-indexed under both forms by fetch-zoho-item-map.mjs).
+// NOTE: # is preserved intentionally — Zoho SKUs containing # must stay intact.
+function stripVariantSuffix(value: string) {
+  return normalizeSkuCode(value).replace(/\s*[-–]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '').trim()
+}
+
+// Pad/unpad numeric part: "1" → ["1", "01", "001"]
+function numVariants(n: string, sfx = ''): string[] {
+  const i = parseInt(n, 10)
+  return [String(i), String(i).padStart(2,'0'), String(i).padStart(3,'0')].map(p => `${p}${sfx}`)
+}
+
 function parseCartLineItem(rawItem: string): ParsedOrderItem {
   const normalized = String(rawItem || '').trim()
   if (!normalized) return { sku: '', qty: 0 }
@@ -95,9 +109,63 @@ function buildLineItems(items: string[], itemMap: Record<string, string>) {
     .map(parseCartLineItem)
     .filter((item) => item.sku && Number.isFinite(item.qty) && item.qty > 0)
 
+  // Resolve an item.sku against the map trying multiple key forms so that
+  // short catalog codes match full Zoho SKUs (e.g. "01" → "01 ICE ICE BABY -HTF",
+  // "PMA 1" → "PMA #1 CHAMPAGNE BLIZZARD -HTF", "NYP01" → "NEW YORK PARTY #NYP01").
+  // # is preserved in all keys — never stripped — because Zoho stores it.
+  function resolveItemId(sku: string): string | undefined {
+    if (itemMap[sku]) return itemMap[sku]
+
+    const stripped = stripVariantSuffix(sku)
+    if (stripped !== sku && itemMap[stripped]) return itemMap[stripped]
+
+    // 1. Leading numeric code: "01 Ice Ice Baby" → try "01", "1", "001"
+    const leadMatch = stripped.match(/^(\d+[A-Z]?)\s/)
+    if (leadMatch) {
+      const short = leadMatch[1]
+      if (itemMap[short]) return itemMap[short]
+      const num = short.match(/^(\d+)([A-Z]?)$/)
+      if (num) {
+        for (const k of numVariants(num[1], num[2] || '')) {
+          if (itemMap[k]) return itemMap[k]
+        }
+      }
+    }
+
+    // 2. Series+hash prefix: "PMA #1" / "PMA 1" / "PMA01" — try all forms
+    const seriesMatch = stripped.match(/^([A-Z]+)\s*#?\s*(\d+[A-Z]?)\b/i)
+    if (seriesMatch) {
+      const s = seriesMatch[1].toUpperCase()
+      const n = seriesMatch[2]
+      const numM = n.match(/^(\d+)([A-Z]?)$/)
+      const nums = numM ? numVariants(numM[1], numM[2] || '') : [n]
+      for (const p of nums) {
+        for (const k of [`${s} ${p}`, `${s}${p}`, `${s} #${p}`, `${s}#${p}`]) {
+          if (itemMap[k]) return itemMap[k]
+        }
+      }
+    }
+
+    // 3. Embedded #CODE: "NYP01" / "NYP 01" — try both with and without space
+    const embeddedMatch = stripped.match(/#([A-Z]+)(\d+[A-Z]?)\b/i)
+    if (embeddedMatch) {
+      const s = embeddedMatch[1].toUpperCase()
+      const n = embeddedMatch[2]
+      const numM = n.match(/^(\d+)([A-Z]?)$/)
+      const nums = numM ? numVariants(numM[1], numM[2] || '') : [n]
+      for (const p of nums) {
+        for (const k of [`${s} ${p}`, `${s}${p}`, `${s}#${p}`]) {
+          if (itemMap[k]) return itemMap[k]
+        }
+      }
+    }
+
+    return undefined
+  }
+
   const lineItems = parsed
     .map((item) => {
-      const mappedItemId = itemMap[item.sku]
+      const mappedItemId = resolveItemId(item.sku)
       if (!mappedItemId) return null
 
       return {
@@ -108,7 +176,7 @@ function buildLineItems(items: string[], itemMap: Record<string, string>) {
     .filter(Boolean)
 
   const unmappedSkus = parsed
-    .filter((item) => !itemMap[item.sku])
+    .filter((item) => !resolveItemId(item.sku))
     .map((item) => item.sku)
 
   return {
