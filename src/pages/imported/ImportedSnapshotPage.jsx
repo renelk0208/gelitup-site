@@ -4,6 +4,7 @@ import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/gelitup_official/'
+const INSTAGRAM_HANDLE = 'gelitup_official'
 const ABOUT_US_HERO_IMAGE_URL = '/gelitup-media/images/about-us-hero-image.webp'
 const ABOUT_US_HERO_IMAGE_FALLBACK_URL = '/gelitup-media/images/about%20us%20hero%20image.webp'
 const EXHIBITIONS_BACKDROP_VIDEO_URL = '/gelitup-media/videos/exhibition%20video.mp4'
@@ -362,6 +363,8 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [aboutUsExhibitions, setAboutUsExhibitions] = useState(ABOUT_US_EXHIBITIONS_DEFAULT)
+  const [igPosts, setIgPosts] = useState([])
+  const [igStatus, setIgStatus] = useState('loading')
 
   useEffect(() => {
     let isMounted = true
@@ -513,6 +516,26 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
     return () => {
       isMounted = false
     }
+  }, [isAboutUsManifesto])
+
+  useEffect(() => {
+    if (!isAboutUsManifesto) return undefined
+    let isMounted = true
+    const loadIg = async () => {
+      try {
+        const res = await fetch('/.netlify/functions/instagram-feed')
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data = await res.json()
+        if (isMounted) {
+          setIgPosts(data.posts || [])
+          setIgStatus((data.posts || []).length > 0 ? 'ok' : 'empty')
+        }
+      } catch {
+        if (isMounted) setIgStatus('error')
+      }
+    }
+    void loadIg()
+    return () => { isMounted = false }
   }, [isAboutUsManifesto])
 
   const previewMedia = useMemo(() => {
@@ -687,6 +710,64 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           </p>
         </div>
 
+        {/* ── Instagram Feed ───────────────────────────────────────────── */}
+        {igStatus !== 'error' && igStatus !== 'empty' && (
+          <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#0F0F0F] py-8">
+            <div className="mx-auto max-w-6xl px-4 sm:px-8">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="ig-grad-au" x1="0%" y1="100%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#f09433" />
+                        <stop offset="25%" stopColor="#e6683c" />
+                        <stop offset="50%" stopColor="#dc2743" />
+                        <stop offset="75%" stopColor="#cc2366" />
+                        <stop offset="100%" stopColor="#bc1888" />
+                      </linearGradient>
+                    </defs>
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="url(#ig-grad-au)" strokeWidth="2" fill="none" />
+                    <circle cx="12" cy="12" r="4" stroke="url(#ig-grad-au)" strokeWidth="2" fill="none" />
+                    <circle cx="17.5" cy="6.5" r="1" fill="url(#ig-grad-au)" />
+                  </svg>
+                  <span className="text-sm font-bold uppercase tracking-[0.12em] text-white">@{INSTAGRAM_HANDLE}</span>
+                </div>
+                <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="rounded-lg bg-[#D43790] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]">
+                  Follow Us Now →
+                </a>
+              </div>
+              {igStatus === 'loading' ? (
+                <div className="flex gap-3 overflow-hidden">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="h-48 w-48 flex-shrink-0 animate-pulse rounded-xl bg-white/10" />
+                  ))}
+                </div>
+              ) : (
+                <div className="scrollbar-hide -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:-mx-8 sm:px-8">
+                  {igPosts.map((post) => {
+                    const thumb = post.media_type === 'VIDEO' ? (post.thumbnail_url || post.media_url) : post.media_url
+                    const isVideo = post.media_type === 'VIDEO'
+                    return (
+                      <a key={post.id} href={post.permalink} target="_blank" rel="noreferrer" className="group relative h-48 w-48 flex-shrink-0 snap-start overflow-hidden rounded-xl">
+                        <img src={thumb} alt={post.caption ? post.caption.slice(0, 80) : 'Instagram post'} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+                        {isVideo && (
+                          <div className="absolute right-2 top-2 rounded-full bg-black/60 p-1">
+                            <svg className="h-3 w-3 fill-white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 transition duration-300 group-hover:opacity-100">
+                          {post.caption && <p className="line-clamp-3 p-3 text-[10px] leading-relaxed text-white">{post.caption}</p>}
+                        </div>
+                      </a>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── Exhibitions ─────────────────────────────────────────────── */}
         <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#1A1A1A] px-4 py-10 sm:px-8 sm:py-12">
           {exhibitionsBackdropVideoUrl && (
             <video
@@ -790,16 +871,6 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                 )}
               </div>
             )}
-            <div className="text-center">
-              <a
-                href={INSTAGRAM_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]"
-              >
-                Follow Us on Instagram
-              </a>
-            </div>
           </div>
         </div>
 

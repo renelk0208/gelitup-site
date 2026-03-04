@@ -4726,8 +4726,6 @@ function HomePage({ onOpenContactModal }) {
         </NavLink>
       </InfoCard>
 
-      <InstagramFeedStrip />
-
     </section>
   )
 }
