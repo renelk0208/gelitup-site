@@ -7050,8 +7050,8 @@ function ProductsModule({ moduleView = 'products' }) {
             const n = seriesNumMatch[2]
             keys.push(`${s} ${n}`, `${s} ${n.padStart(2, '0')}`, `${s}${n}`, `${s}${n.padStart(2, '0')}`)
           }
-          // Index "New York Party #NYP01" → "NYP 01", "NYP 1", "NYP01"
-          const embeddedCodeMatch = cleanName.match(/#([A-Z]+)(\d+[A-Z]?)\b/i)
+          // Index "New York Party #NYP01" or "Shimmer Top Fairy #STF 01" → "NYP 01" / "STF 01"
+          const embeddedCodeMatch = cleanName.match(/#([A-Z]+)\s*(\d+[A-Z]?)\b/i)
           if (embeddedCodeMatch) {
             const s = embeddedCodeMatch[1].toUpperCase()
             const n = embeddedCodeMatch[2]
@@ -7069,6 +7069,19 @@ function ProductsModule({ moduleView = 'products' }) {
           }
           // Build word-set entry for fuzzy fallback
           wordIndex.push({ words: new Set(normalizeSkuCode(name).split(/\s+/)), entry })
+        }
+        // Hard-wire acronym codes that can't be auto-derived from price-list names
+        const pnLookup = t => map.get(normalizeProductName(t))
+        const aliasGroups = [
+          { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-FBCLR'], target: 'Flexi Base Clear -HTF' },
+          { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
+          { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
+          { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
+          { codes: ['GIUP-SB-WITH-ACID', 'GIUP SB WITH ACID', 'SB WITH ACID'], target: 'Superbond Nail Dehydrator 11ml - with Acid -HTF' },
+        ]
+        for (const { codes, target } of aliasGroups) {
+          const entry = pnLookup(target)
+          if (entry) { for (const c of codes) { if (!map.has(c)) map.set(c, entry) } }
         }
         if (mounted) {
           setPriceMap(map)
@@ -7380,7 +7393,9 @@ function ProductsModule({ moduleView = 'products' }) {
             // For codes like "GIUP 01" extract the number to match "01 Ice Ice Baby"
             const giupNumMatch = normalizeSkuCode(code).match(/^(?:GIUP\s+)?(\d+[A-Z]?)$/)
             // For codes like "GIUP NYP01" extract "NYP 01" to match "New York Party #NYP01"
-            const giupSeriesCodeMatch = normalizeSkuCode(code).match(/^(?:GIUP\s+)?([A-Z]+)(\d+[A-Z]?)$/)
+            const giupSeriesCodeMatch = normalizeSkuCode(code).match(/^(?:GIUP[-\s]+)?([A-Z]+)(\d+[A-Z]?)$/)
+            // For codes like "GIUP SS01Kaleidascope" where colour name is appended after the series+num
+            const giupLooseSeriesMatch = !giupSeriesCodeMatch && normalizeSkuCode(code).match(/^(?:GIUP[-\s]+)?([A-Z]{2,5})(\d{1,3}[A-Z]?)(?=[A-Z])/)
             const priceEntry = priceMap.get(normalizeSkuCode(sku))
               || priceMap.get(normalizeSkuCode(code))
               || priceMap.get(normalizeProductName(rawName))
@@ -7388,6 +7403,10 @@ function ProductsModule({ moduleView = 'products' }) {
               || (giupSeriesCodeMatch ? (
                   priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2]}`)
                   || priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2].padStart(2, '0')}`)
+                ) : null)
+              || (giupLooseSeriesMatch ? (
+                  priceMap.get(`${giupLooseSeriesMatch[1]} ${giupLooseSeriesMatch[2]}`)
+                  || priceMap.get(`${giupLooseSeriesMatch[1]} ${giupLooseSeriesMatch[2].padStart(2, '0')}`)
                 ) : null)
               || fuzzyPriceLookup(code, rawName, priceWordIndex)
             const name = priceEntry?.name || rawName
