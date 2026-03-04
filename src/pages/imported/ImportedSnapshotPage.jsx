@@ -679,11 +679,11 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
     return (
       <section className="space-y-6 bg-white">
         <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#1A1A1A]">
-          <article className="relative min-h-[320px] overflow-hidden bg-[#1A1A1A] sm:min-h-[420px]">
+          <article className="overflow-hidden bg-[#1A1A1A]">
             <img
               src={ABOUT_US_HERO_IMAGE_URL || manifestoVisual?.displayUrl || '/logo.png'}
               alt="About Us hero visual"
-              className="absolute inset-0 h-full w-full object-cover"
+              className="block h-auto w-full"
               loading="lazy"
               onError={(event) => {
                 const currentSrc = event.currentTarget.getAttribute('src') || ''
