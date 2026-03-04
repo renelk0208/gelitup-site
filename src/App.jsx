@@ -3735,14 +3735,14 @@ function FullCataloguePage() {
               {/* LEFT: Cloud Dancer story */}
               <div className="flex flex-col justify-center bg-[#1A1A1A] px-8 py-12 sm:px-12">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Additions · 2026</p>
-                <h2 className="mt-3 text-3xl font-extrabold uppercase leading-tight tracking-[0.06em] text-white sm:text-4xl">
+                <h2 className="heading-on-dark mt-3 text-3xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-4xl">
                   Cloud Dancer<br /><span className="text-[#D43790]">The Series</span>
                 </h2>
                 <div className="mt-3 h-px w-10 bg-[#D43790]/60" />
-                <p className="mt-5 text-sm leading-relaxed text-white/65">
+                <p className="mt-5 text-sm leading-relaxed !text-white/65">
                   {HOME_CLOUD_DANCER_DEFAULT.introText}
                 </p>
-                <p className="mt-4 text-sm leading-relaxed text-white/40">
+                <p className="mt-4 text-sm leading-relaxed !text-white/40">
                   22 illuminated shades — each one chosen to complement every skin tone and every season. The complete Cloud Dancer collection is available exclusively through our professional portal.
                 </p>
                 <div className="mt-8">
