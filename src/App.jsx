@@ -6308,8 +6308,9 @@ function ProductsModule({ moduleView = 'products' }) {
   const [selectedCodes, setSelectedCodes] = useState([])
   const [showSelectedOnly, setShowSelectedOnly] = useState(false)
   const [showCleanScienceOnly, setShowCleanScienceOnly] = useState(false)
-  const [expandedCategories, setExpandedCategories] = useState(new Set())
+  const [expandedCategories, setExpandedCategories] = useState(new Set(['COLORS']))
   const [expandedShowAll, setExpandedShowAll] = useState(new Set())
+  const [b2bColorFamilyFilter, setB2bColorFamilyFilter] = useState('ALL')
   const [itemQtys, setItemQtys] = useState({})
   const [lightboxUrl, setLightboxUrl] = useState(null)
   const [packageTier, setPackageTier] = useState('Silver')
@@ -9301,7 +9302,7 @@ function ProductsModule({ moduleView = 'products' }) {
           </div>
           <button
             onClick={() => navigate('/portal/dashboard/products')}
-            className="rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white hover:bg-fuchsia-500"
+            className="btn-cta-rose rounded-lg px-3 py-2 text-xs font-semibold"
           >
             Review Order ({totalUnits}{orderTotal > 0 ? ` · €${orderTotal.toFixed(2)}` : ''}) →
           </button>
@@ -9315,7 +9316,8 @@ function ProductsModule({ moduleView = 'products' }) {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search by name, shade or code..."
-            className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-10 pr-10 text-sm text-slate-800 placeholder-slate-400 shadow-sm focus:border-fuchsia-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-100"
+            className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-10 pr-10 text-sm text-slate-800 placeholder-slate-400 shadow-sm focus:outline-none"
+            style={{ '--tw-ring-color': '#f0c4d0' }}
           />
           {query && (
             <button onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700">
@@ -9327,11 +9329,12 @@ function ProductsModule({ moduleView = 'products' }) {
         <div className="mt-2 flex flex-wrap gap-2">
           <select
             value={category}
-            onChange={(event) => setCategory(event.target.value)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 focus:border-fuchsia-400 focus:outline-none"
+            onChange={(event) => { setCategory(event.target.value); if (event.target.value !== 'All') setB2bColorFamilyFilter('ALL') }}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 focus:outline-none"
+            style={{ focusBorderColor: '#c8386e' }}
           >
             <option value="All">All categories</option>
-            {PRODUCT_CATEGORIES.map((item) => (
+            {allCategories.filter(c => c !== 'All').map((item) => (
               <option key={item} value={item}>{item}</option>
             ))}
           </select>
@@ -9379,7 +9382,7 @@ function ProductsModule({ moduleView = 'products' }) {
               )}
               <button
                 onClick={() => navigate('/portal/dashboard/products')}
-                className="rounded-lg bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-fuchsia-500"
+                className="btn-cta-rose rounded-lg px-3 py-1.5 text-[11px] font-semibold"
               >
                 Review Order ({totalUnits}{orderTotal > 0 ? ` · €${orderTotal.toFixed(2)}` : ''}) →
               </button>
@@ -9419,7 +9422,7 @@ function ProductsModule({ moduleView = 'products' }) {
                   return (
                     <div
                       key={`pkg-${item.sku}-${item.code}`}
-                      className="relative flex w-[64px] flex-none flex-col overflow-hidden rounded-lg border border-fuchsia-300 bg-white shadow-sm"
+                      className="relative flex w-[64px] flex-none flex-col overflow-hidden rounded-lg border bg-white shadow-sm" style={{ borderColor: '#f0c4d0' }}
                     >
                       <div
                         className="relative h-[64px] w-full flex-none"
@@ -9428,11 +9431,11 @@ function ProductsModule({ moduleView = 'products' }) {
                         {resolvedImg
                           ? <img src={resolvedImg} alt={item.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
                           : null}
-                        <span className="absolute left-0.5 top-0.5 rounded-full bg-fuchsia-600 px-1 py-0.5 text-[9px] font-bold leading-none text-white">{item.qty}&times;</span>
+                        <span className="absolute left-0.5 top-0.5 rounded-full px-1 py-0.5 text-[9px] font-bold leading-none text-white" style={{ backgroundColor: '#c8386e' }}>{item.qty}&times;</span>
                       </div>
                       <div className="p-1">
                         <p className="break-words text-[10px] font-semibold leading-tight text-slate-900">{item.code}</p>
-                        <p className="break-words text-[9px] leading-tight text-fuchsia-700">{item.name}</p>
+                        <p className="break-words text-[9px] leading-tight" style={{ color: '#c8386e' }}>{item.name}</p>
                       </div>
                     </div>
                   )
@@ -9448,30 +9451,40 @@ function ProductsModule({ moduleView = 'products' }) {
             const isExpanded = expandedCategories.has(cat)
             const showAll = expandedShowAll.has(cat)
             const CAT_PAGE_SIZE = 48
-            const visibleProducts = isExpanded && !showAll && catProducts.length > CAT_PAGE_SIZE
-              ? catProducts.slice(0, CAT_PAGE_SIZE)
+            const isColorsCategory = cat.toUpperCase().includes('COLOR') || cat.toUpperCase().includes('COLOUR')
+            const familyFilteredProducts = isColorsCategory && b2bColorFamilyFilter !== 'ALL'
+              ? catProducts.filter(p => resolveColorFamilyKey(p.name) === b2bColorFamilyFilter)
               : catProducts
+            const visibleProducts = isExpanded && !showAll && familyFilteredProducts.length > CAT_PAGE_SIZE
+              ? familyFilteredProducts.slice(0, CAT_PAGE_SIZE)
+              : familyFilteredProducts
             const selectedInCat = catProducts.filter(p => selectedCodes.includes(p.code)).length
             return (
             <div key={cat} className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
               {/* Category header — click to expand/collapse */}
               <button
                 onClick={() => toggleCategory(cat)}
-                className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-slate-50"
+                className="flex w-full items-center gap-0 text-left"
+                style={{ borderBottom: isExpanded ? '1px solid #f0e0e8' : 'none' }}
               >
-                <div className="flex items-center gap-2">
-                  <h4 className="text-sm font-black uppercase tracking-[0.08em] text-slate-900">{cat}</h4>
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">{catProducts.length}</span>
-                  {selectedInCat > 0 && (
-                    <span className="rounded-full bg-fuchsia-600 px-2 py-0.5 text-[11px] font-bold text-white">{selectedInCat} selected</span>
-                  )}
+                {/* Rose accent strip */}
+                <span className="flex-none self-stretch w-1 rounded-tl-xl" style={{ backgroundColor: '#c8386e', minHeight: '44px' }} />
+                <div className="flex flex-1 items-center justify-between gap-3 px-4 py-3 hover:bg-pink-50/40 transition">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-sm font-black uppercase tracking-[0.1em]" style={{ color: '#1a1a1a' }}>{cat}</h4>
+                    <span className="rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ backgroundColor: '#fdf0f4', color: '#b07080' }}>{catProducts.length}</span>
+                    {selectedInCat > 0 && (
+                      <span className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{selectedInCat} selected</span>
+                    )}
+                  </div>
+                  <svg
+                    className={`h-4 w-4 flex-none transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                    style={{ color: '#c8386e' }}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
                 </div>
-                <svg
-                  className={`h-4 w-4 flex-none text-slate-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
               </button>
 
               {/* Products grid — only rendered when expanded */}
@@ -9481,15 +9494,47 @@ function ProductsModule({ moduleView = 'products' }) {
                     const catDesc = getB2BCategoryDescription(cat)
                     if (!catDesc || (!catDesc.paragraphs?.length && !catDesc.listItems?.length)) return null
                     return (
-                      <div className="border-b border-fuchsia-100 bg-fuchsia-50/40 px-4 py-3">
+                      <div className="px-4 py-3" style={{ borderBottom: '1px solid #fde8f0', backgroundColor: '#fdf5f7' }}>
                         <div className="space-y-1">
                           {catDesc.paragraphs.slice(0, 2).map((p, i) => (
-                            <p key={i} className="text-xs leading-relaxed text-fuchsia-900/80">{p}</p>
+                            <p key={i} className="text-xs leading-relaxed" style={{ color: '#7a3050' }}>{p}</p>
                           ))}
                         </div>
                       </div>
                     )
                   })()}
+
+                  {/* Colour family filter pills — COLORS category only */}
+                  {isColorsCategory && (
+                    <div className="px-4 py-3" style={{ borderBottom: '1px solid #fde8f0', backgroundColor: '#fff9fb' }}>
+                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#b07080' }}>Filter by colour family</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {COLOR_FAMILY_FILTERS.map((family) => {
+                          const familyCount = family.key === 'ALL'
+                            ? catProducts.length
+                            : catProducts.filter(p => resolveColorFamilyKey(p.name) === family.key).length
+                          if (family.key !== 'ALL' && familyCount === 0) return null
+                          const isActive = b2bColorFamilyFilter === family.key
+                          return (
+                            <button
+                              key={family.key}
+                              onClick={() => setB2bColorFamilyFilter(family.key)}
+                              className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold transition"
+                              style={isActive
+                                ? { backgroundColor: '#c8386e', color: '#ffffff' }
+                                : { backgroundColor: '#fdf0f4', color: '#7a3050' }
+                              }
+                            >
+                              <span className={`h-2.5 w-2.5 flex-none rounded-full ${family.swatchClass}`} />
+                              {family.label}
+                              <span className="opacity-70">{familyCount}</span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                   {visibleProducts.map((product) => {
                     const selected = selectedCodes.includes(product.code)
@@ -9497,13 +9542,16 @@ function ProductsModule({ moduleView = 'products' }) {
                     return (
                       <div
                         key={product.code}
-                        className={`flex flex-col rounded-xl border transition ${
-                          selected ? 'border-fuchsia-500 bg-white shadow-md shadow-fuchsia-100' : 'border-slate-200 bg-white hover:border-fuchsia-300 hover:shadow-sm'
-                        }`}
+                        className="flex flex-col rounded-xl border transition"
+                        style={selected
+                          ? { borderColor: '#c8386e', backgroundColor: '#ffffff', boxShadow: '0 4px 12px rgba(200,56,110,0.12)' }
+                          : { borderColor: '#e2e8f0', backgroundColor: '#ffffff' }
+                        }
                       >
                         {/* Image — click to zoom, selected ring */}
                         <div
-                          className={`relative h-24 w-full cursor-zoom-in overflow-hidden rounded-t-xl bg-white ${selected ? 'ring-2 ring-fuchsia-500 ring-offset-0' : ''}`}
+                          className="relative h-24 w-full cursor-zoom-in overflow-hidden rounded-t-xl bg-white"
+                          style={selected ? { outline: '2px solid #c8386e', outlineOffset: '0px' } : {}}
                           title="Click to enlarge"
                           onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}
                         >
@@ -9521,27 +9569,29 @@ function ProductsModule({ moduleView = 'products' }) {
                         <div className="flex flex-1 flex-col gap-0.5 px-2 pt-1.5 pb-1">
                           <p className="text-[11px] font-semibold leading-tight text-slate-900 line-clamp-2">{product.name}</p>
                           {product.price != null && (
-                            <p className="text-[11px] font-bold text-fuchsia-700">€{Number(product.price).toFixed(2)}</p>
+                            <p className="text-[11px] font-bold" style={{ color: '#c8386e' }}>€{Number(product.price).toFixed(2)}</p>
                           )}
                         </div>
 
                         {/* Action row */}
                         {selected ? (
                           /* Qty stepper + remove */
-                          <div className="flex items-center justify-between gap-1 border-t border-fuchsia-100 px-2 py-1.5">
+                          <div className="flex items-center justify-between gap-1 border-t px-2 py-1.5" style={{ borderColor: '#fde8f0' }}>
                             <div className="flex items-center gap-0.5">
                               <button
                                 onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(prev => ({...prev, [product.code]: q})) }}
-                                className="flex h-6 w-6 items-center justify-center rounded-full border border-fuchsia-200 bg-fuchsia-50 text-sm font-bold text-fuchsia-700 hover:bg-fuchsia-100"
+                                className="flex h-6 w-6 items-center justify-center rounded-full border text-sm font-bold transition hover:bg-pink-100"
+                                style={{ borderColor: '#f0c4d0', backgroundColor: '#fdf5f7', color: '#c8386e' }}
                               >−</button>
                               <span className="w-6 text-center text-xs font-bold text-slate-800">{qty}</span>
                               <button
                                 onClick={() => setItemQtys(prev => ({...prev, [product.code]: qty + 1}))}
-                                className="flex h-6 w-6 items-center justify-center rounded-full border border-fuchsia-200 bg-fuchsia-50 text-sm font-bold text-fuchsia-700 hover:bg-fuchsia-100"
+                                className="flex h-6 w-6 items-center justify-center rounded-full border text-sm font-bold transition hover:bg-pink-100"
+                                style={{ borderColor: '#f0c4d0', backgroundColor: '#fdf5f7', color: '#c8386e' }}
                               >+</button>
                             </div>
                             {product.price != null && qty > 1 && (
-                              <span className="text-[10px] font-semibold text-fuchsia-600">€{(Number(product.price) * qty).toFixed(2)}</span>
+                              <span className="text-[10px] font-semibold" style={{ color: '#c8386e' }}>€{(Number(product.price) * qty).toFixed(2)}</span>
                             )}
                             <button
                               onClick={() => toggleSelection(product.code)}
@@ -9553,7 +9603,10 @@ function ProductsModule({ moduleView = 'products' }) {
                           /* Add to cart button */
                           <button
                             onClick={() => toggleSelection(product.code)}
-                            className="mt-auto w-full rounded-b-xl border-t border-slate-100 bg-slate-50 py-1.5 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-600 hover:text-white transition"
+                            className="mt-auto w-full rounded-b-xl border-t py-1.5 text-[11px] font-semibold transition hover:text-white"
+                            style={{ borderColor: '#f0e8f0', backgroundColor: '#fdf5f7', color: '#c8386e' }}
+                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#c8386e'; e.currentTarget.style.color = '#ffffff' }}
+                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fdf5f7'; e.currentTarget.style.color = '#c8386e' }}
                           >
                             + Add to cart
                           </button>
@@ -9562,13 +9615,14 @@ function ProductsModule({ moduleView = 'products' }) {
                     )
                   })}
                 </div>
-                  {!showAll && catProducts.length > CAT_PAGE_SIZE && (
-                    <div className="border-t border-slate-100 px-4 py-2.5 text-center">
+                  {!showAll && familyFilteredProducts.length > CAT_PAGE_SIZE && (
+                    <div className="border-t px-4 py-2.5 text-center" style={{ borderColor: '#fde8f0' }}>
                       <button
                         onClick={() => setExpandedShowAll(prev => { const n = new Set(prev); n.add(cat); return n })}
-                        className="text-xs font-semibold text-fuchsia-600 hover:underline"
+                        className="text-xs font-semibold hover:underline"
+                        style={{ color: '#c8386e' }}
                       >
-                        Show all {catProducts.length} items
+                        Show all {familyFilteredProducts.length} items
                       </button>
                     </div>
                   )}
