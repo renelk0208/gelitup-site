@@ -1391,11 +1391,11 @@ function DistributorPackagesPage() {
       </div>
 
       {/* BOUTIQUE TIER */}
-      <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #e2e8f0', backgroundColor: '#ffffff' }}>
-        <div className="px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: '#f8fafc' }}>
+      <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #f0c4d0', backgroundColor: '#ffffff' }}>
+        <div className="px-6 py-4" style={{ borderBottom: '1px solid #f5d4de', backgroundColor: '#fdf0f4' }}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#c8386e' }}>Entry Tier</p>
           <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#1a1a1a' }}>BOUTIQUE — The Foundation</h2>
-          <p className="mt-1 text-sm" style={{ color: '#6b7280' }}>Launch with confidence. The smartest entry point for localized distribution with everything you need to move product and build a client base instantly.</p>
+          <p className="mt-1 text-sm" style={{ color: '#7d4a57' }}>Launch with confidence. The smartest entry point for localized distribution with everything you need to move product and build a client base instantly.</p>
         </div>
         <div style={{ borderTop: '1px solid #f1f5f9' }}>
           <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
