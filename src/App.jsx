@@ -477,6 +477,26 @@ function normalizeProductName(value) {
     .trim()
 }
 
+// Fuzzy word-overlap price lookup for image-map products whose filename keys
+// don't match price-list names exactly (e.g. "cobweb black" vs "Cobweb Gel Black -HTF").
+// All significant query words (≥4 chars, not in skip list) must appear in the price entry.
+const FUZZY_PRICE_SKIP = new Set(['COLOR','COLOUR','COAT','CARE','FORM','SIZE'])
+function fuzzyPriceLookup(code, rawName, wordIndex) {
+  if (!wordIndex || !wordIndex.length) return null
+  for (const cand of [code, rawName].filter(Boolean)) {
+    const qWords = normalizeSkuCode(cand)
+      .split(/\s+/)
+      .filter(w => w.length >= 4 && !FUZZY_PRICE_SKIP.has(w))
+      .map(w => w.length >= 6 ? w.replace(/S$/, '') : w) // rough depluralize
+    if (qWords.length < 2) continue
+    const match = wordIndex.find(({ words }) =>
+      qWords.every(w => words.has(w) || words.has(w + 'S'))
+    )
+    if (match) return match.entry
+  }
+  return null
+}
+
 function normalizeImageMap(payload) {
   if (!payload || typeof payload !== 'object') {
     return new Map()
@@ -6379,6 +6399,8 @@ function ProductsModule({ moduleView = 'products' }) {
   const [localImageMap, setLocalImageMap] = useState(() => new Map())
   // priceMap: normalised-key → { name, price }  (loaded from b2b-price-list.json)
   const [priceMap, setPriceMap] = useState(() => new Map())
+  // priceWordIndex: [{words: Set<string>, entry}] for fuzzy word-overlap fallback
+  const [priceWordIndex, setPriceWordIndex] = useState([])
   const [shippingMetadata, setShippingMetadata] = useState(SHIPPING_RULES)
   const [shippingMetadataStatus, setShippingMetadataStatus] = useState('Using embedded shipping metadata rules.')
   const isDistributorRole = useMemo(() => String(b2bUserRole || '').trim().toLowerCase().includes('distributor'), [b2bUserRole])
@@ -7002,6 +7024,7 @@ function ProductsModule({ moduleView = 'products' }) {
         const payload = await res.json()
         const items = Array.isArray(payload?.items) ? payload.items : []
         const map = new Map()
+        const wordIndex = []
         const stripSuffix = (s) => String(s || '').replace(/\s*[-–]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '').trim()
         for (const { name, sku, price } of items) {
           const cleanName = stripSuffix(name)
@@ -7044,8 +7067,13 @@ function ProductsModule({ moduleView = 'products' }) {
           for (const k of keys) {
             if (k && !map.has(k)) map.set(k, entry)
           }
+          // Build word-set entry for fuzzy fallback
+          wordIndex.push({ words: new Set(normalizeSkuCode(name).split(/\s+/)), entry })
         }
-        if (mounted) setPriceMap(map)
+        if (mounted) {
+          setPriceMap(map)
+          setPriceWordIndex(wordIndex)
+        }
       } catch { /* price list is optional */ }
     }
     load()
@@ -7361,7 +7389,7 @@ function ProductsModule({ moduleView = 'products' }) {
                   priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2]}`)
                   || priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2].padStart(2, '0')}`)
                 ) : null)
-              || null
+              || fuzzyPriceLookup(code, rawName, priceWordIndex)
             const name = priceEntry?.name || rawName
             const price = priceEntry?.price ?? null
 
@@ -7407,7 +7435,7 @@ function ProductsModule({ moduleView = 'products' }) {
     return () => {
       isMounted = false
     }
-  }, [localImageMap, priceMap, productsTable])
+  }, [localImageMap, priceMap, priceWordIndex, productsTable])
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
