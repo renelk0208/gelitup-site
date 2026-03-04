@@ -7005,7 +7005,7 @@ function ProductsModule({ moduleView = 'products' }) {
         const stripSuffix = (s) => String(s || '').replace(/\s*[-–]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '').trim()
         for (const { name, sku, price } of items) {
           const cleanName = stripSuffix(name)
-          const entry = { name: cleanName, price }
+          const entry = { name, price }
           const keys = [
             normalizeSkuCode(sku),
             normalizeSkuCode(stripSuffix(sku)),
@@ -8634,7 +8634,7 @@ function ProductsModule({ moduleView = 'products' }) {
             <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">Adhesion Tip</p>
             <p className="mt-1 text-sm text-sky-900">Superbond Primer maximises adhesion for any base coat - avoid lifting from day one.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => setDismissedSuperbondUpsell(true)} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Superbond</button>
+              <button onClick={() => { setDismissedSuperbondUpsell(true); toggleCategory('NAIL PREPARATIONS'); navigate('/portal/dashboard/catalog') }} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Superbond</button>
               <button onClick={() => setDismissedSuperbondUpsell(true)} className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-semibold text-sky-800">Dismiss</button>
             </div>
           </div>
@@ -8645,7 +8645,7 @@ function ProductsModule({ moduleView = 'products' }) {
             <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Complete the Finish</p>
             <p className="mt-1 text-sm text-emerald-900">Wipe-Off Top Coat requires a cleanser to remove the inhibition layer - add the Cleanser Liquid.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => setDismissedCleanserUpsell(true)} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Cleanser</button>
+              <button onClick={() => { setDismissedCleanserUpsell(true); toggleCategory('LIQUIDS'); navigate('/portal/dashboard/catalog') }} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Cleanser</button>
               <button onClick={() => setDismissedCleanserUpsell(true)} className="rounded-lg border border-emerald-300 px-3 py-1.5 text-xs font-semibold text-emerald-800">Dismiss</button>
             </div>
           </div>
@@ -8656,7 +8656,7 @@ function ProductsModule({ moduleView = 'products' }) {
             <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">MultiMix System</p>
             <p className="mt-1 text-sm text-violet-900">MultiMix Synthogel works best with Syntholiquid, the Synthogel brush, Polygel spatulas, and Dual Form tips.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => setDismissedSynthoUpsell(true)} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Accessories</button>
+              <button onClick={() => { setDismissedSynthoUpsell(true); toggleCategory('CONSUMABLES'); navigate('/portal/dashboard/catalog') }} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Accessories</button>
               <button onClick={() => setDismissedSynthoUpsell(true)} className="rounded-lg border border-violet-300 px-3 py-1.5 text-xs font-semibold text-violet-800">Dismiss</button>
             </div>
           </div>
@@ -8667,7 +8667,7 @@ function ProductsModule({ moduleView = 'products' }) {
             <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">Tip Application</p>
             <p className="mt-1 text-sm text-rose-900">Soak-Off Gel Tips bond best with the 5-in-1 Superior Base Clear (15ml) - add it to complete the system.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => setDismissedTipsBaseUpsell(true)} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View 5-in-1 Clear</button>
+              <button onClick={() => { setDismissedTipsBaseUpsell(true); toggleCategory('BASES'); navigate('/portal/dashboard/catalog') }} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View 5-in-1 Clear</button>
               <button onClick={() => setDismissedTipsBaseUpsell(true)} className="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-800">Dismiss</button>
             </div>
           </div>
@@ -8678,7 +8678,7 @@ function ProductsModule({ moduleView = 'products' }) {
             <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Liquid Polygel System</p>
             <p className="mt-1 text-sm text-amber-900">For optimal adhesion with Liquid Polygel, add a layer of 5-in-1 Superior Base Clear before application.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => setDismissedLiquidPolygel5in1Upsell(true)} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View 5-in-1 Clear</button>
+              <button onClick={() => { setDismissedLiquidPolygel5in1Upsell(true); toggleCategory('BASES'); navigate('/portal/dashboard/catalog') }} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View 5-in-1 Clear</button>
               <button onClick={() => setDismissedLiquidPolygel5in1Upsell(true)} className="rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-800">Dismiss</button>
             </div>
           </div>
@@ -9420,7 +9420,7 @@ function ProductsModule({ moduleView = 'products' }) {
             </div>
 
             {/* MAIN CONTENT PANEL */}
-            <div className="flex-1 overflow-y-auto" style={{ maxHeight: 'min(72vh, 860px)' }}>
+            <div className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto" style={{ maxHeight: 'min(72vh, 860px)' }}>
 
               {groupedFilteredProducts.length === 0 && (
                 <p className="px-3 py-8 text-center text-xs text-slate-400 italic">No products match your search.</p>
@@ -9454,12 +9454,12 @@ function ProductsModule({ moduleView = 'products' }) {
                   })()}
 
                   {/* product grid */}
-                  <div className="grid grid-cols-3 gap-px bg-slate-100 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                  <div className="grid w-full grid-cols-3 gap-px bg-slate-100 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                     {visibleProducts.map(product => {
                       const selected = selectedCodes.includes(product.code)
                       const qty = itemQtys[product.code] || 1
                       return (
-                        <div key={product.code} className="flex flex-col bg-white" style={selected ? { outline: '2px solid #c8386e', outlineOffset: '-2px' } : {}}>
+                        <div key={product.code} className="flex min-w-0 flex-col overflow-hidden bg-white" style={selected ? { outline: '2px solid #c8386e', outlineOffset: '-2px' } : {}}>
                           {/* image */}
                           <div className="relative aspect-square w-full cursor-pointer bg-slate-50" onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}>
                             {product.imageUrl && <img src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />}
