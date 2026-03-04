@@ -1370,10 +1370,10 @@ function DistributorPackagesPage() {
           Built for serious operators. Every tier ships with full EU regulatory documentation and a social media brand engine — because your success is our brand in motion.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
-          <NavLink to="/full-catalogue" className="inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300" style={{ backgroundColor: '#c8386e', color: '#ffffff' }}>
+          <NavLink to="/full-catalogue" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
             View Product Catalogue
           </NavLink>
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300" style={{ border: '1px solid rgba(255,255,255,0.25)', color: '#ffffff' }}>
+          <NavLink to="/become-distributor" className="btn-cta-ghost-white inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
             Apply for Partnership
           </NavLink>
         </div>
@@ -1430,7 +1430,7 @@ function DistributorPackagesPage() {
           </div>
         </div>
         <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300" style={{ backgroundColor: '#1a1a1a', color: '#ffffff' }}>
+          <NavLink to="/become-distributor" className="btn-cta-dark inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
             Request Boutique Tier Pricing →
           </NavLink>
         </div>
@@ -1467,7 +1467,7 @@ function DistributorPackagesPage() {
           </div>
         </div>
         <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300" style={{ backgroundColor: '#c8386e', color: '#ffffff' }}>
+          <NavLink to="/become-distributor" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
             Request Professional Tier Pricing →
           </NavLink>
         </div>
@@ -1507,7 +1507,7 @@ function DistributorPackagesPage() {
           </div>
         </div>
         <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300" style={{ backgroundColor: '#c8386e', color: '#ffffff' }}>
+          <NavLink to="/become-distributor" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
             Request Authority Tier Pricing →
           </NavLink>
         </div>

@@ -104,6 +104,23 @@ h2 {
   color: #1A1A1A !important;
 }
 
+/* CTA button colour overrides — applied with !important so lux-theme cannot interfere */
+.btn-cta-dark {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+.btn-cta-rose {
+  background-color: #c8386e !important;
+  color: #ffffff !important;
+}
+
+.btn-cta-ghost-white {
+  background-color: transparent !important;
+  border: 1px solid rgba(255,255,255,0.25) !important;
+  color: #ffffff !important;
+}
+
 .hero-copy-shadow {
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
 }
