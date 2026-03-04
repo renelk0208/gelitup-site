@@ -7149,6 +7149,7 @@ function ProductsModule({ moduleView = 'products' }) {
                   category: section.category === 'COLORS' ? sub.name : section.category,
                   parentSection: section.category,  // track which top-level section this belongs to
                   _skipRemap: true,                 // categories are already correct — skip B2B_CAT_REMAP
+                  colorFamily: item.colorFamily || null, // actual folder name e.g. 'Red', 'Blue', 'Coral Orange'
                   code: item.name,
                   sku: item.name,
                   name: item.name,
@@ -7342,6 +7343,7 @@ function ProductsModule({ moduleView = 'products' }) {
               description,
               category: categoryName,
               parentSection: item.parentSection || null,
+              colorFamily: item.colorFamily || null,
               preview,
               imageUrl,
               price,
@@ -9462,8 +9464,9 @@ function ProductsModule({ moduleView = 'products' }) {
             const CAT_PAGE_SIZE = 48
             const isColorsCategory = catProducts[0]?.parentSection === 'COLORS'
               || cat.toUpperCase().includes('COLOR') || cat.toUpperCase().includes('COLOUR')
+            // Use the actual folder-based colorFamily field; fall back to name-parsing only for external feed products
             const familyFilteredProducts = isColorsCategory && b2bColorFamilyFilter !== 'ALL'
-              ? catProducts.filter(p => resolveColorFamilyKey(p.name) === b2bColorFamilyFilter)
+              ? catProducts.filter(p => (p.colorFamily || resolveColorFamilyKey(p.name)) === b2bColorFamilyFilter)
               : catProducts
             const visibleProducts = isExpanded && !showAll && familyFilteredProducts.length > CAT_PAGE_SIZE
               ? familyFilteredProducts.slice(0, CAT_PAGE_SIZE)
@@ -9514,36 +9517,64 @@ function ProductsModule({ moduleView = 'products' }) {
                     )
                   })()}
 
-                  {/* Colour family filter pills — COLORS category only */}
-                  {isColorsCategory && (
-                    <div className="px-4 py-3" style={{ borderBottom: '1px solid #fde8f0', backgroundColor: '#fff9fb' }}>
-                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#b07080' }}>Filter by colour family</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {COLOR_FAMILY_FILTERS.map((family) => {
-                          const familyCount = family.key === 'ALL'
-                            ? catProducts.length
-                            : catProducts.filter(p => resolveColorFamilyKey(p.name) === family.key).length
-                          if (family.key !== 'ALL' && familyCount === 0) return null
-                          const isActive = b2bColorFamilyFilter === family.key
-                          return (
-                            <button
-                              key={family.key}
-                              onClick={() => setB2bColorFamilyFilter(family.key)}
-                              className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold transition"
-                              style={isActive
-                                ? { backgroundColor: '#c8386e', color: '#ffffff' }
-                                : { backgroundColor: '#fdf0f4', color: '#7a3050' }
-                              }
-                            >
-                              <span className={`h-2.5 w-2.5 flex-none rounded-full ${family.swatchClass}`} />
-                              {family.label}
-                              <span className="opacity-70">{familyCount}</span>
-                            </button>
-                          )
-                        })}
+                  {/* Colour family filter pills — built from actual folder names, not name-parsing */}
+                  {isColorsCategory && (() => {
+                    // Collect unique colorFamily values from the actual product folder structure
+                    const folderFamilies = [...new Set(
+                      catProducts.map(p => p.colorFamily).filter(Boolean)
+                    )].sort()
+                    if (!folderFamilies.length) return null
+                    // Map folder names to Tailwind swatch classes
+                    const FOLDER_SWATCH = {
+                      'Black': 'bg-black',
+                      'Blue': 'bg-blue-500',
+                      'Brown': 'bg-amber-700',
+                      'Coral Orange': 'bg-orange-400',
+                      'Green': 'bg-emerald-500',
+                      'Grey': 'bg-slate-400',
+                      'Neon': 'bg-lime-400',
+                      'Pink': 'bg-pink-400',
+                      'Purple': 'bg-violet-500',
+                      'Red': 'bg-red-500',
+                      'White': 'bg-white border border-slate-300',
+                      'Yellow': 'bg-yellow-300',
+                    }
+                    return (
+                      <div className="px-4 py-3" style={{ borderBottom: '1px solid #fde8f0', backgroundColor: '#fff9fb' }}>
+                        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#b07080' }}>Filter by colour family</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {/* All pill */}
+                          <button
+                            onClick={() => setB2bColorFamilyFilter('ALL')}
+                            className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold transition"
+                            style={b2bColorFamilyFilter === 'ALL'
+                              ? { backgroundColor: '#c8386e', color: '#ffffff' }
+                              : { backgroundColor: '#fdf0f4', color: '#7a3050' }}
+                          >
+                            All <span className="opacity-70">{catProducts.length}</span>
+                          </button>
+                          {folderFamilies.map((folderName) => {
+                            const count = catProducts.filter(p => p.colorFamily === folderName).length
+                            const isActive = b2bColorFamilyFilter === folderName
+                            const swatchClass = FOLDER_SWATCH[folderName] || 'bg-slate-300'
+                            return (
+                              <button
+                                key={folderName}
+                                onClick={() => setB2bColorFamilyFilter(folderName)}
+                                className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold transition"
+                                style={isActive
+                                  ? { backgroundColor: '#c8386e', color: '#ffffff' }
+                                  : { backgroundColor: '#fdf0f4', color: '#7a3050' }}
+                              >
+                                <span className={`h-2.5 w-2.5 flex-none rounded-full ${swatchClass}`} />
+                                {folderName} <span className="opacity-70">{count}</span>
+                              </button>
+                            )
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )
+                  })()}
 
                   <div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                   {visibleProducts.map((product) => {
