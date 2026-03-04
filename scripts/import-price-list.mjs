@@ -62,7 +62,7 @@ function findCol(patterns) {
 }
 
 const colItemName = findCol([/item.?name/i, /product.?name/i, /^name$/i])
-const colSku      = findCol([/^sku$/i, /item.?code/i, /item.?sku/i])
+const colSku      = findCol([/^sku$/i, /item.?code/i, /item.?sku/i, /^barcode$/i])
 // Prefer selling/sales price; fall back to cost/purchase price
 const colPrice    = findCol([
   /^sales.?rate$/i, /^rate$/i, /selling.?price/i, /sales.?price/i,

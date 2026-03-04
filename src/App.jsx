@@ -7281,10 +7281,12 @@ function ProductsModule({ moduleView = 'products' }) {
       const matchesCategory = category === 'All' || product.category === category
       const matchesSelected = !showSelectedOnly || selectedCodes.includes(product.code)
       const matchesCleanScience = !showCleanScienceOnly || hasReachedComplianceDate(new Date())
+      // Hide products with no price when the price list has loaded — they are not available for B2B
+      const hasPriceOrNoList = priceMap.size === 0 || product.price !== null
 
-      return matchesSearch && matchesCategory && matchesSelected && matchesCleanScience
+      return matchesSearch && matchesCategory && matchesSelected && matchesCleanScience && hasPriceOrNoList
     })
-  }, [category, products, query, selectedCodes, showSelectedOnly, showCleanScienceOnly])
+  }, [category, products, query, selectedCodes, showSelectedOnly, showCleanScienceOnly, priceMap])
 
   // Group filtered products by category for sectioned display
   const groupedFilteredProducts = useMemo(() => {
