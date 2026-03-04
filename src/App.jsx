@@ -2969,6 +2969,23 @@ function FullCataloguePage() {
     setActiveCategory(categoryName)
     setActiveSubcategory(subcategoryName || 'ALL')
     setActiveColorFamily('ALL')
+    // Expand the correct section so categoryDetail renders
+    const normalized = normalizeCatalogueToken(categoryName)
+    let sectionKey = ''
+    if (normalized.includes('COLOR')) {
+      sectionKey = 'colours'
+    } else if (['BASES', 'TOPS', 'LIQUIDS'].some((c) => normalizeCatalogueToken(c) === normalized)) {
+      sectionKey = 'essentials'
+    } else if (['BUILDER GEL SYSTEMS', 'MULTIMIX'].some((c) => normalizeCatalogueToken(c) === normalized)) {
+      sectionKey = 'builders'
+    } else if (['TOOLS', 'EQUIPMENT', 'BRUSHES'].some((c) => normalizeCatalogueToken(c) === normalized)) {
+      sectionKey = 'tools'
+    } else {
+      sectionKey = 'consumables'
+    }
+    if (sectionKey) {
+      setExpandedSections((prev) => ({ ...prev, [sectionKey]: true }))
+    }
     // Scroll to the category detail panel (subcategory tabs visible first)
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -3450,7 +3467,7 @@ function FullCataloguePage() {
 
           {expandedSections.colours && (
             <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {sections.filter(s => isColorsCategoryName(s.category)).map(section => {
                   const categoryName = section.category
                   const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
@@ -3484,7 +3501,7 @@ function FullCataloguePage() {
             <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#4a2230] lg:min-h-[360px]">
               <img
                 aria-hidden="true"
-                src="/gelitup-content/catalog-heroes/bases-catalog-hero-image.webp"
+                src="/gelitup-content/catalog-heroes/top-bases-catalog-hero-image.webp"
                 alt=""
                 className="absolute right-0 top-0 hidden h-full w-[52%] object-cover object-center lg:block"
                 style={{
@@ -3516,7 +3533,7 @@ function FullCataloguePage() {
                   <div className="relative mx-auto max-w-[260px]">
                     <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(200,115,145,0.25)_0%,transparent_70%)] blur-2xl" />
                     <img
-                      src="/gelitup-content/catalog-heroes/bases-catalog-hero-image.webp"
+                      src="/gelitup-content/catalog-heroes/top-bases-catalog-hero-image.webp"
                       alt="GEL.IT.UP Bases & Tops"
                       className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(200,115,145,0.35)]"
                       style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, black 16%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 16%)' }}
@@ -3737,7 +3754,7 @@ function FullCataloguePage() {
               </div>
             </div>
             {expandedSections.consumables && <div className="mx-auto max-w-6xl">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {chapter04Categories.map((categoryName) => {
                 const section = sections.find((s) => s.category === categoryName)
                 if (!section) return null
