@@ -8796,7 +8796,7 @@ function ProductsModule({ moduleView = 'products' }) {
 
 
         {/* ── LIVE COLOUR CHART (order review) ── */}
-        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
+        <div className="mt-4 min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-3">
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs font-semibold text-slate-900">
               Colour Chart
