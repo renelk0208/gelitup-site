@@ -6308,7 +6308,7 @@ function ProductsModule({ moduleView = 'products' }) {
   const [selectedCodes, setSelectedCodes] = useState([])
   const [showSelectedOnly, setShowSelectedOnly] = useState(false)
   const [showCleanScienceOnly, setShowCleanScienceOnly] = useState(false)
-  const [expandedCategories, setExpandedCategories] = useState(new Set(['COLORS']))
+  const [expandedCategories, setExpandedCategories] = useState(new Set(['SOLID GEL POLISH']))
   const [expandedShowAll, setExpandedShowAll] = useState(new Set())
   const [b2bColorFamilyFilter, setB2bColorFamilyFilter] = useState('ALL')
   const [itemQtys, setItemQtys] = useState({})
@@ -7143,10 +7143,12 @@ function ProductsModule({ moduleView = 'products' }) {
             return sections.flatMap((section) =>
               section.subcategories.flatMap((sub) =>
                 sub.items.map((item) => ({
-                  // For COLORS use the subcategory (SOLID GEL POLISH, CAT EYE, etc.)
-                  // For all other top-level categories use the section name (BRUSHES, TOOLS, etc.)
-                  // Use top-level category for all except COLORS (which splits by subcategory: Solid Gel Polish, Cat Eye, etc.)
+                  // Preserve the exact subcategory as category — B2B mirrors the public catalogue.
+                  // For COLORS use the subcategory name (SOLID GEL POLISH, CAT EYE, GLITTERS, etc.)
+                  // For all other sections use the section name (BUILDER GEL SYSTEMS, BRUSHES, etc.)
                   category: section.category === 'COLORS' ? sub.name : section.category,
+                  parentSection: section.category,  // track which top-level section this belongs to
+                  _skipRemap: true,                 // categories are already correct — skip B2B_CAT_REMAP
                   code: item.name,
                   sku: item.name,
                   name: item.name,
@@ -7162,70 +7164,70 @@ function ProductsModule({ moduleView = 'products' }) {
             const code = item.code || item.sku || item.id || `GIUP-PD-${String(index + 1).padStart(4, '0')}`
             const sku = item.sku || code
             const rawCategoryName = item.category || item.family || item.group || item.type || PRODUCT_CATEGORIES[index % PRODUCT_CATEGORIES.length]
-            // Remap WooCommerce/feed category names to the same top-level categories as the public catalogue
+            // Remap external feed / WooCommerce category names to match the image-map subcategory names.
+            // Items loaded from product-image-map.json are already correctly categorised (_skipRemap=true)
+            // and bypass this table entirely.
             const B2B_CAT_REMAP = {
-              // COLORS
-              'SOLID GEL POLISH': 'COLORS', 'SOLID COLOURS': 'COLORS', 'GEL POLISH': 'COLORS',
-              'CAT EYE': 'COLORS', 'DREAMY CAT EYE': 'COLORS', 'GLASS CAT EYE': 'COLORS',
-              'ROSE QUARTZ CAT EYE': 'COLORS', 'SHIMMER COLORS': 'COLORS', 'SHIMMER COLOURS': 'COLORS',
-              'NUDE': 'COLORS', 'FRENCH': 'COLORS', 'PASTEL': 'COLORS',
-              'SNOWFLAKE': 'COLORS', 'FANTASY': 'COLORS', 'JELLY NEON': 'COLORS',
-              'GLASS EFFECT': 'COLORS', 'COLOUR SAMPLE': 'COLORS', 'COLOR SAMPLE': 'COLORS',
-              'COLOR MIX UP': 'COLORS', 'COLOUR MIX UP': 'COLORS',
-              'SPRING SUMMER': 'COLORS', 'NEW YORK PARTY': 'COLORS',
-              'BY THE OCEAN': 'COLORS', 'RONE': 'COLORS', 'GIUP1': 'COLORS',
-              'DUO TONE': 'COLORS', 'TUTTI FRUTTI GLASS': 'COLORS',
-              'ODE TO AUTUMN': 'COLORS',
-              'PMA': 'COLORS', 'SPIX & SPEX': 'COLORS', 'SPIX AND SPEX': 'COLORS',
-              'MIRROR CHROME': 'COLORS',
-              // BUILDER GEL SYSTEMS
+              // External feed aliases → correct subcategory names (matching image-map structure)
+              'SOLID COLOURS': 'SOLID GEL POLISH', 'GEL POLISH': 'SOLID GEL POLISH',
+              'DREAMY CAT EYE': 'CAT EYE', 'GLASS CAT EYE': 'CAT EYE',
+              'ROSE QUARTZ CAT EYE': 'CAT EYE',
+              'SHIMMER COLOURS': 'SHIMMER COLORS',
+              'GLITTER': 'GLITTERS', 'GLITTERS': 'GLITTERS',
+              'JELLY NEON': 'JELLY', 'JELLY GEL': 'JELLY',
+              'NEW YORK PARTY': 'NEW YORK',
+              'COLOUR SAMPLE': 'SOLID GEL POLISH', 'COLOR SAMPLE': 'SOLID GEL POLISH',
+              'COLOUR MIX UP': 'SOLID GEL POLISH', 'COLOR MIX UP': 'SOLID GEL POLISH',
+              'SPRING SUMMER': 'SOLID GEL POLISH', 'ODE TO AUTUMN': 'SOLID GEL POLISH',
+              'RONE': 'SOLID GEL POLISH', 'GIUP1': 'SOLID GEL POLISH',
+              'DUO TONE': 'SOLID GEL POLISH', 'MIRROR CHROME': 'SOLID GEL POLISH',
+              'SPIX AND SPEX': 'SPIX & SPEX',
+              // Builder Gel Systems
               'BUILDER GEL': 'BUILDER GEL SYSTEMS', 'BUILDER GELS': 'BUILDER GEL SYSTEMS',
               '3INI BUILDER': 'BUILDER GEL SYSTEMS', '3IN1 BUILDER': 'BUILDER GEL SYSTEMS',
               'PREMIUM BUILDER': 'BUILDER GEL SYSTEMS', 'LIQUID POLYGEL': 'BUILDER GEL SYSTEMS',
               'CREME DE LA CREME': 'BUILDER GEL SYSTEMS', 'MULTIMIX': 'BUILDER GEL SYSTEMS',
               'ACRYLIC': 'BUILDER GEL SYSTEMS',
-              // BASES
-              'BASES': 'BASES', 'BASE': 'BASES', 'FLEXI BASE': 'BASES',
+              // Bases
+              'BASE': 'BASES', 'FLEXI BASE': 'BASES',
               'BRUSH ON BUILDER': 'BASES', 'BRUSH-ON BUILDER': 'BASES',
-              // TOPS
-              'TOPS': 'TOPS', 'TOP COAT': 'TOPS', 'TOP COATS': 'TOPS',
+              // Tops
+              'TOP COAT': 'TOPS', 'TOP COATS': 'TOPS',
               'CLASSIC TOP COATS': 'TOPS', 'EFFECT TOPS': 'TOPS',
               'SHIMMER TOP': 'TOPS', 'SPOT MY TOPS': 'TOPS',
               'NON-WIPE TOP COAT': 'TOPS', 'NON WIPE TOP COAT': 'TOPS',
               'TOP COAT EFFECTS': 'TOPS', 'SATIN MATT': 'TOPS',
-              // TOOLS
-              'TOOLS': 'TOOLS',
-              // EQUIPMENT
-              'EQUIPMENT': 'EQUIPMENT', 'LAMPS & CURING': 'EQUIPMENT',
-              'LAMPS AND CURING': 'EQUIPMENT', 'DUST & AIR': 'EQUIPMENT', 'DUST AND AIR': 'EQUIPMENT',
-              // BRUSHES
-              'BRUSHES': 'BRUSHES', 'BRUSH': 'BRUSHES',
-              // NAIL ART
-              'NAIL ART': 'NAIL ART', 'COBWEB': 'NAIL ART',
-              'LINE-IT-UP': 'NAIL ART', 'LINE IT UP': 'NAIL ART',
+              // Equipment
+              'LAMPS & CURING': 'EQUIPMENT', 'LAMPS AND CURING': 'EQUIPMENT',
+              'DUST & AIR': 'EQUIPMENT', 'DUST AND AIR': 'EQUIPMENT',
+              // Brushes
+              'BRUSH': 'BRUSHES',
+              // Nail Art
+              'COBWEB': 'NAIL ART', 'LINE-IT-UP': 'NAIL ART', 'LINE IT UP': 'NAIL ART',
               'MIRROR POWDERS': 'NAIL ART', 'MARBLE INK': 'NAIL ART',
-              'CUSHION GEL': 'NAIL ART', 'GLITTER EFFECTS POWDER': 'NAIL ART',
-              'STICKERS': 'NAIL ART',
-              // CONSUMABLES
-              'CONSUMABLES': 'CONSUMABLES', 'DUAL FORMS': 'CONSUMABLES',
-              'SOAK OFF GEL TIPS': 'CONSUMABLES', 'NAIL FORMS': 'CONSUMABLES',
-              'NAIL FILES': 'CONSUMABLES', 'NAIL TIPS': 'CONSUMABLES',
-              'SUPER FLEXIBLE TIPS': 'CONSUMABLES',
-              // NAIL HAND & FOOT CARE
-              'NAIL HAND & FOOT CARE': 'NAIL HAND & FOOT CARE',
+              'CUSHION GEL': 'NAIL ART', 'GLITTER EFFECTS POWDER': 'NAIL ART', 'STICKERS': 'NAIL ART',
+              // Consumables
+              'DUAL FORMS': 'CONSUMABLES', 'SOAK OFF GEL TIPS': 'CONSUMABLES',
+              'NAIL FORMS': 'CONSUMABLES', 'NAIL FILES': 'CONSUMABLES',
+              'NAIL TIPS': 'CONSUMABLES', 'SUPER FLEXIBLE TIPS': 'CONSUMABLES',
+              // Nail Hand & Foot Care
               'NAIL HAND AND FOOT CARE': 'NAIL HAND & FOOT CARE',
               'CREAMS AND SCRUBS': 'NAIL HAND & FOOT CARE',
               'CUTICLE OILS REMOVERS': 'NAIL HAND & FOOT CARE',
               'CUTICLE OILS & REMOVERS': 'NAIL HAND & FOOT CARE',
               'PODOCARE & ACCESSORIES': 'NAIL HAND & FOOT CARE',
               'PODOCARE AND ACCESSORIES': 'NAIL HAND & FOOT CARE',
-              // LIQUIDS
-              'LIQUIDS': 'LIQUIDS', 'LIQUID': 'LIQUIDS', 'SANITIZER': 'LIQUIDS',
+              // Liquids / Nail Preparations
+              'LIQUID': 'LIQUIDS', 'SANITIZER': 'LIQUIDS',
+              'NAIL PREPARATIONS': 'NAIL PREPARATIONS',
             }
             const rawCatToken = normalizeCatalogueToken(rawCategoryName)
-            // Strip file extensions from category tokens that leaked in as filenames (e.g. "SANITIZER WEBP" after normalization)
+            // Strip file extensions from category tokens that leaked in as filenames
             const cleanCatToken = rawCatToken.replace(/\s+(WEBP|JPG|JPEG|PNG|GIF|SVG)$/, '').trim()
-            const categoryName = B2B_CAT_REMAP[cleanCatToken] || B2B_CAT_REMAP[rawCategoryName?.toUpperCase()?.trim()] || rawCategoryName
+            // Items from product-image-map.json already have correct subcategory names — skip remap
+            const categoryName = item._skipRemap
+              ? rawCategoryName
+              : (B2B_CAT_REMAP[cleanCatToken] || B2B_CAT_REMAP[rawCategoryName?.toUpperCase()?.trim()] || rawCategoryName)
             const preview = item.preview || item.hex || item.hex_color || item.color || `hsl(${(index * 17) % 360} 82% 56%)`
             // Standalone prefix map: DCE1 → "Dreamy Cat Eye 1" etc.
             const COLOUR_PREFIX_MAP = {
@@ -7339,6 +7341,7 @@ function ProductsModule({ moduleView = 'products' }) {
               name,
               description,
               category: categoryName,
+              parentSection: item.parentSection || null,
               preview,
               imageUrl,
               price,
@@ -7382,18 +7385,24 @@ function ProductsModule({ moduleView = 'products' }) {
       const matchesCategory = category === 'All' || product.category === category
       const matchesSelected = !showSelectedOnly || selectedCodes.includes(product.code)
       const matchesCleanScience = !showCleanScienceOnly || hasReachedComplianceDate(new Date())
-      // On the B2B portal, hide products that have no price on the price list.
-      // On the public "Our Products" page, show everything regardless.
-      const isB2BPortal = location.pathname.startsWith('/portal')
-      const hasPriceOrNoList = !isB2BPortal || priceMap.size === 0 || product.price !== null
-
-      return matchesSearch && matchesCategory && matchesSelected && matchesCleanScience && hasPriceOrNoList
+      return matchesSearch && matchesCategory && matchesSelected && matchesCleanScience
     })
-  }, [category, products, query, selectedCodes, showSelectedOnly, showCleanScienceOnly, priceMap, location.pathname])
+  }, [category, products, query, selectedCodes, showSelectedOnly, showCleanScienceOnly, priceMap])
 
   // Group filtered products by category for sectioned display
   const groupedFilteredProducts = useMemo(() => {
-    const CATALOGUE_ORDER = ['COLORS', 'BUILDER GEL SYSTEMS', 'BASES', 'MULTIMIX', 'TOPS', 'TOOLS', 'EQUIPMENT', 'BRUSHES', 'NAIL ART', 'CONSUMABLES', 'NAIL HAND & FOOT CARE', 'LIQUIDS']
+    // Order matches the public catalogue: COLORS subcategories first, then the rest
+    const CATALOGUE_ORDER = [
+      // COLORS subcategories (image-map sub.name values)
+      'SOLID GEL POLISH', 'CAT EYE', 'GLITTERS', 'GLASS EFFECT',
+      'SHIMMER COLORS', 'METALLIC COLLECTION', 'PEARL', 'JELLY',
+      'SNOWFLAKE', 'PMA', 'NEW YORK', 'BY THE OCEAN',
+      'SPIX & SPEX', 'TUTTI FRUTTI GLASS',
+      // Non-color sections
+      'BUILDER GEL SYSTEMS', 'BASES', 'TOPS', 'TOOLS',
+      'EQUIPMENT', 'BRUSHES', 'NAIL ART', 'CONSUMABLES',
+      'NAIL HAND & FOOT CARE', 'NAIL PREPARATIONS', 'LIQUIDS',
+    ]
     const groups = new Map()
     for (const product of filteredProducts) {
       const cat = product.category || 'Other'
@@ -9451,7 +9460,8 @@ function ProductsModule({ moduleView = 'products' }) {
             const isExpanded = expandedCategories.has(cat)
             const showAll = expandedShowAll.has(cat)
             const CAT_PAGE_SIZE = 48
-            const isColorsCategory = cat.toUpperCase().includes('COLOR') || cat.toUpperCase().includes('COLOUR')
+            const isColorsCategory = catProducts[0]?.parentSection === 'COLORS'
+              || cat.toUpperCase().includes('COLOR') || cat.toUpperCase().includes('COLOUR')
             const familyFilteredProducts = isColorsCategory && b2bColorFamilyFilter !== 'ALL'
               ? catProducts.filter(p => resolveColorFamilyKey(p.name) === b2bColorFamilyFilter)
               : catProducts
