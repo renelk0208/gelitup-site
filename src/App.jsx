@@ -2908,14 +2908,17 @@ function FullCataloguePage() {
     return ''
   }, [])
 
-  // Chapter 02a: Bases, Tops & Nail Preparations (LIQUIDS = Superbond, cuticle scrubs, prep)
-  const chapterEssentialsCategories = ['BASES', 'TOPS', 'LIQUIDS']
+  // Chapter 02a: Bases, Tops & Nail Preparations
+  const chapterEssentialsCategories = ['BASES', 'TOPS', 'NAIL PREPARATIONS']
   // Chapter 02b: Builder Systems
   const chapterBuildersCategories = ['BUILDER GEL SYSTEMS', 'MULTIMIX']
   // Keep combined alias for scroll-target logic
   const chapter02Categories = [...chapterEssentialsCategories, ...chapterBuildersCategories]
   const chapter03Categories = ['TOOLS', 'EQUIPMENT', 'BRUSHES']
-  const chapter04Categories = ['NAIL ART', 'CONSUMABLES', 'NAIL HAND & FOOT CARE', 'BY THE OCEAN']
+  const chapter04Categories = ['NAIL ART', 'CONSUMABLES', 'NAIL HAND & FOOT CARE']
+  const chapterNailArtCategories = ['NAIL ART']
+  const chapterConsumablesCategories = ['CONSUMABLES']
+  const chapterNailHandFootCategories = ['NAIL HAND & FOOT CARE']
   const activeProductInformation = useMemo(
     () => getSubcategoryProductInformation(activeCategory, activeSubcategory),
     [activeCategory, activeSubcategory],
@@ -2933,8 +2936,12 @@ function FullCataloguePage() {
       targetId = 'catalogue-section-builders'
     } else if (chapter03Categories.some((name) => normalizeCatalogueToken(name) === normalizedCategory)) {
       targetId = 'catalogue-section-tools'
-    } else if (chapter04Categories.some((name) => normalizeCatalogueToken(name) === normalizedCategory)) {
+    } else if (normalizeCatalogueToken('NAIL ART') === normalizedCategory) {
+      targetId = 'catalogue-section-nail-art'
+    } else if (normalizeCatalogueToken('CONSUMABLES') === normalizedCategory) {
       targetId = 'catalogue-section-consumables'
+    } else if (normalizeCatalogueToken('NAIL HAND & FOOT CARE') === normalizedCategory) {
+      targetId = 'catalogue-section-nail-hand-foot'
     }
 
     if (!targetId) return
@@ -2970,11 +2977,12 @@ function FullCataloguePage() {
     setActiveSubcategory(subcategoryName || 'ALL')
     setActiveColorFamily('ALL')
     // Expand the correct section so categoryDetail renders
+    // Colours skips the grid — categoryDetail is rendered standalone below the banner
     const normalized = normalizeCatalogueToken(categoryName)
     let sectionKey = ''
     if (normalized.includes('COLOR')) {
-      sectionKey = 'colours'
-    } else if (['BASES', 'TOPS', 'LIQUIDS'].some((c) => normalizeCatalogueToken(c) === normalized)) {
+      sectionKey = '' // no grid expansion needed for colours
+    } else if (['BASES', 'TOPS', 'NAIL PREPARATIONS'].some((c) => normalizeCatalogueToken(c) === normalized)) {
       sectionKey = 'essentials'
     } else if (['BUILDER GEL SYSTEMS', 'MULTIMIX'].some((c) => normalizeCatalogueToken(c) === normalized)) {
       sectionKey = 'builders'
@@ -3465,35 +3473,8 @@ function FullCataloguePage() {
             </div>
           </div>
 
-          {expandedSections.colours && (
-            <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {sections.filter(s => isColorsCategoryName(s.category)).map(section => {
-                  const categoryName = section.category
-                  const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
-                  const coverImageFallback = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
-                  const coverImage = getCategoryCoverImage(categoryName, coverImageFallback)
-                  return (
-                    <Fragment key={categoryName}>
-                      <button
-                        onClick={() => openCatalogueCategory(categoryName, 'ALL')}
-                        className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-400/60 hover:shadow-lg"
-                      >
-                        <div className="relative h-52 bg-white">
-                          <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" onError={() => handleCategoryCoverImageError(categoryName, coverImageFallback)} />
-                          <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-fuchsia-500" />
-                        </div>
-                        <div className="border-t border-[#4A4A4A]/20 p-3">
-                          <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
-                          <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
-                        </div>
-                      </button>
-                      {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
-                    </Fragment>
-                  )
-                })}
-              </div>
-            </div>
+          {activeCategory && isColorsCategoryName(activeCategory) && (
+            <div className="mx-auto max-w-6xl px-4 py-4 sm:px-8">{categoryDetail}</div>
           )}
 
           {/* CHAPTER 02a: BASES, TOPS & NAIL PREPARATIONS */}
@@ -3513,19 +3494,25 @@ function FullCataloguePage() {
               <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
                 <div className="flex-1 lg:max-w-[500px]">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-300">The Essentials</p>
-                  <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Bases &amp; Tops</h2>
+                  <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Bases, Tops &amp; Nail Preparations</h2>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
                     The non-negotiables of every nail service. Our base coats lock in colour and protect the natural nail, while our top coats deliver the perfect finish — from high-gloss brilliance to matte sophistication.
                   </p>
                   <div className="mt-6">
                     <button
-                      onClick={() => openCatalogueCategory('BASES', 'ALL')}
+                      onClick={() => {
+                        setExpandedSections(prev => ({ ...prev, essentials: true }))
+                        requestAnimationFrame(() => {
+                          const el = document.getElementById('catalogue-section-essentials')
+                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                        })
+                      }}
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
                       style={{ background: 'rgba(185,100,130,0.85)' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'rgba(205,120,150,0.95)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'rgba(185,100,130,0.85)'}
                     >
-                      BROWSE BASES &amp; TOPS
+                      BROWSE BASES, TOPS &amp; NAIL PREPARATIONS
                     </button>
                   </div>
                 </div>
@@ -3564,7 +3551,7 @@ function FullCataloguePage() {
                           <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-rose-400" />
                         </div>
                         <div className="border-t border-[#4A4A4A]/20 p-3">
-                          <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName === 'LIQUIDS' ? 'NAIL PREPARATIONS' : categoryName}</p>
+                          <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
                           <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
                           <div className="mt-2 flex flex-wrap gap-1">
                             {specs.cure && <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">{specs.cure}</span>}
@@ -3627,41 +3614,19 @@ function FullCataloguePage() {
               </div>
             </div>
 
-            {/* Builder category grid */}
-            {expandedSections.builders && <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
-              <div className="grid gap-4 sm:grid-cols-2">
-                {chapterBuildersCategories.map((categoryName) => {
-                  const section = sections.find((s) => s.category === categoryName)
-                  if (!section) return null
-                  const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
-                  const coverImageFallback = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
-                  const coverImage = getCategoryCoverImage(categoryName, coverImageFallback)
-                  const specs = CATEGORY_LAB_SPECS[categoryName] ?? DEFAULT_LAB_SPECS
-                  return (
-                    <Fragment key={categoryName}>
-                      <button
-                        onClick={() => openCatalogueCategory(categoryName, 'ALL')}
-                        className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-blue-400/60 hover:shadow-lg"
-                      >
-                        <div className="relative h-52 bg-white">
-                          <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" onError={() => handleCategoryCoverImageError(categoryName, coverImageFallback)} />
-                          <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-blue-500" />
-                        </div>
-                        <div className="border-t border-[#4A4A4A]/20 p-3">
-                          <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
-                          <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {specs.cure && <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">{specs.cure}</span>}
-                            {specs.llab && <span className="inline-flex items-center rounded-md border border-orange-200 bg-orange-50 px-1.5 py-0.5 text-[10px] font-bold text-orange-700">L-Lab ✓</span>}
-                          </div>
-                        </div>
-                      </button>
-                      {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
-                    </Fragment>
-                  )
-                })}
+            {chapterBuildersCategories.includes(activeCategory) && (
+              <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
+                <div className="mb-3 flex flex-wrap gap-2">
+                  {chapterBuildersCategories.map(cat => (
+                    <button key={cat} onClick={() => openCatalogueCategory(cat, 'ALL')}
+                      className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                        activeCategory === cat ? 'bg-[#1A1A1A] text-white' : 'border border-[#4A4A4A]/30 bg-white text-[#1A1A1A] hover:border-[#1A1A1A]'
+                      }`}>{cat}</button>
+                  ))}
+                </div>
+                {categoryDetail}
               </div>
-            </div>}
+            )}
           </div>
 
           {/* CHAPTER 03: THE PROFESSIONAL TOOLSET */}
@@ -3680,136 +3645,89 @@ function FullCataloguePage() {
                 </button>
               </div>
             </div>
-            {expandedSections.tools && <div className="mx-auto max-w-6xl">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {chapter03Categories.map((categoryName) => {
-                const section = sections.find((s) => s.category === categoryName)
-                if (!section) return null
-                const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
-                const coverImageFallback = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
-                const coverImage = getCategoryCoverImage(categoryName, coverImageFallback)
-                const specs = CATEGORY_LAB_SPECS[categoryName] ?? DEFAULT_LAB_SPECS
-                return (
-                  <Fragment key={categoryName}>
-                    <button
-                      onClick={() => {
-                        openCatalogueCategory(categoryName, 'ALL')
-                      }}
-                      className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
-                    >
-                      <div className="relative h-52 bg-white">
-                        <img
-                          src={coverImage}
-                          alt={categoryName}
-                          className="h-full w-full object-contain"
-                          loading="lazy"
-                          onError={() => handleCategoryCoverImageError(categoryName, coverImageFallback)}
-                        />
-                        <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
-                      </div>
-                      <div className="border-t border-[#4A4A4A]/20 p-3">
-                        <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
-                        <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {specs.pigmentDots !== null && (
-                            <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">
-                              {specs.pigmentDots >= 1 ? '●' : '○'}{specs.pigmentDots >= 2 ? '●' : '○'}{specs.pigmentDots >= 3 ? '●' : '○'} Pigment
-                            </span>
-                          )}
-                          {specs.cure && (
-                            <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">
-                              {specs.cure}
-                            </span>
-                          )}
-                          {specs.llab && (
-                            <span className="inline-flex items-center rounded-md border border-fuchsia-200 bg-fuchsia-50 px-1.5 py-0.5 text-[10px] font-bold text-fuchsia-700">
-                              L-Lab ✓
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                    {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
-                  </Fragment>
-                )
-              })}
-            </div>
-            </div>}
+            {chapter03Categories.includes(activeCategory) && (
+              <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
+                <div className="mb-3 flex flex-wrap gap-2">
+                  {chapter03Categories.map(cat => (
+                    <button key={cat} onClick={() => openCatalogueCategory(cat, 'ALL')}
+                      className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                        activeCategory === cat ? 'bg-[#1A1A1A] text-white' : 'border border-[#4A4A4A]/30 bg-white text-[#1A1A1A] hover:border-[#1A1A1A]'
+                      }`}>{cat}</button>
+                  ))}
+                </div>
+                {categoryDetail}
+              </div>
+            )}
           </div>
 
           {/* CHAPTER 04: ARTISTIC MASTERY & CARE */}
-          <div id="catalogue-section-consumables" className="space-y-4 scroll-mt-28 py-12 px-4 sm:px-8">
+          {/* Chapter 04a: Nail Art */}
+          <div id="catalogue-section-nail-art" className="space-y-4 scroll-mt-28 py-12 px-4 sm:px-8">
             <div className="mx-auto max-w-6xl px-4 sm:px-8">
-              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>CONSUMABLES &amp; ART</h2>
+              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>NAIL ART</h2>
               <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                Nail art ecosystem and therapeutic formulations for creative details and professional aftercare.
+                Creative nail art supplies for professional nail technicians.
               </p>
               <div className="mt-5">
                 <button
                   onClick={() => openCatalogueCategory('NAIL ART', 'ALL')}
                   className="rounded-lg bg-[#1A1A1A] px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-[#333]"
                 >
-                  BROWSE CONSUMABLES &amp; ART
+                  BROWSE NAIL ART
                 </button>
               </div>
             </div>
-            {expandedSections.consumables && <div className="mx-auto max-w-6xl">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {chapter04Categories.map((categoryName) => {
-                const section = sections.find((s) => s.category === categoryName)
-                if (!section) return null
-                const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
-                const coverImageFallback = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
-                const coverImage = getCategoryCoverImage(categoryName, coverImageFallback)
-                const specs = CATEGORY_LAB_SPECS[categoryName] ?? DEFAULT_LAB_SPECS
-                return (
-                  <Fragment key={categoryName}>
-                    <button
-                      onClick={() => {
-                        openCatalogueCategory(categoryName, 'ALL')
-                      }}
-                      className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
-                    >
-                      <div className="relative h-52 bg-white">
-                        <img
-                          src={coverImage}
-                          alt={categoryName}
-                          className="h-full w-full object-contain"
-                          loading="lazy"
-                          onError={() => handleCategoryCoverImageError(categoryName, coverImageFallback)}
-                        />
-                        <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
-                      </div>
-                      <div className="border-t border-[#4A4A4A]/20 p-3">
-                        <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
-                        <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {specs.pigmentDots !== null && (
-                            <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">
-                              {specs.pigmentDots >= 1 ? '●' : '○'}{specs.pigmentDots >= 2 ? '●' : '○'}{specs.pigmentDots >= 3 ? '●' : '○'} Pigment
-                            </span>
-                          )}
-                          {specs.cure && (
-                            <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">
-                              {specs.cure}
-                            </span>
-                          )}
-                          {specs.llab && (
-                            <span className="inline-flex items-center rounded-md border border-fuchsia-200 bg-fuchsia-50 px-1.5 py-0.5 text-[10px] font-bold text-fuchsia-700">
-                              L-Lab ✓
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                    {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
-                  </Fragment>
-                )
-              })}
-            </div>
-            </div>}
+            {chapterNailArtCategories.includes(activeCategory) && (
+              <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
+                {categoryDetail}
+              </div>
+            )}
+          </div>
 
-            {chapter04Categories.includes(activeCategory) && categoryDetail}
+          {/* Chapter 04b: Consumables */}
+          <div id="catalogue-section-consumables" className="space-y-4 scroll-mt-28 py-12 px-4 sm:px-8">
+            <div className="mx-auto max-w-6xl px-4 sm:px-8">
+              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>CONSUMABLES</h2>
+              <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
+                Professional-grade consumable supplies for everyday salon use.
+              </p>
+              <div className="mt-5">
+                <button
+                  onClick={() => openCatalogueCategory('CONSUMABLES', 'ALL')}
+                  className="rounded-lg bg-[#1A1A1A] px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-[#333]"
+                >
+                  BROWSE CONSUMABLES
+                </button>
+              </div>
+            </div>
+            {chapterConsumablesCategories.includes(activeCategory) && (
+              <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
+                {categoryDetail}
+              </div>
+            )}
+          </div>
+
+          {/* Chapter 04c: Nail, Hand & Foot Care */}
+          <div id="catalogue-section-nail-hand-foot" className="space-y-4 scroll-mt-28 py-12 px-4 sm:px-8">
+            <div className="mx-auto max-w-6xl px-4 sm:px-8">
+              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>NAIL, HAND &amp; FOOT CARE</h2>
+              <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
+                Therapeutic formulations for professional nail, hand and foot aftercare.
+              </p>
+              <div className="mt-5">
+                <button
+                  onClick={() => openCatalogueCategory('NAIL HAND & FOOT CARE', 'ALL')}
+                  className="rounded-lg bg-[#1A1A1A] px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-[#333]"
+                >
+                  BROWSE NAIL, HAND &amp; FOOT CARE
+                </button>
+              </div>
+            </div>
+            {chapterNailHandFootCategories.includes(activeCategory) && (
+              <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
+                {categoryDetail}
+              </div>
+            )}
           </div>
 
           <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl border border-[#4A4A4A]/25">
