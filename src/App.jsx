@@ -1361,19 +1361,19 @@ function DistributorPackagesPage() {
     <section className="space-y-6">
 
       {/* HERO */}
-      <div className="relative overflow-hidden rounded-2xl bg-[#1a1a1a] p-7 text-white sm:p-10">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c8386e]">GEL.IT.UP by GIUP® — Verified Distribution Network</p>
+      <div className="relative overflow-hidden rounded-2xl bg-[#1a1a1a] p-7 sm:p-10" style={{ color: '#ffffff' }}>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#c8386e' }}>GEL.IT.UP by GIUP® — Verified Distribution Network</p>
         <h1 className="heading-on-dark mt-3 text-3xl font-black leading-tight tracking-tight sm:text-5xl">
           Distribution<br className="hidden sm:block" /> Partnership Tiers
         </h1>
-        <p className="mt-3 max-w-2xl text-sm text-white/70 sm:text-base">
+        <p className="mt-3 max-w-2xl text-sm sm:text-base" style={{ color: 'rgba(255,255,255,0.70)' }}>
           Built for serious operators. Every tier ships with full EU regulatory documentation and a social media brand engine — because your success is our brand in motion.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
-          <NavLink to="/full-catalogue" className="inline-flex rounded-lg bg-[#c8386e] px-5 py-2.5 text-sm font-bold text-white transition duration-300 hover:bg-[#a82d5a]">
+          <NavLink to="/full-catalogue" className="inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300" style={{ backgroundColor: '#c8386e', color: '#ffffff' }}>
             View Product Catalogue
           </NavLink>
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg border border-white/25 px-5 py-2.5 text-sm font-bold text-white transition duration-300 hover:border-white/50 hover:bg-white/10">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300" style={{ border: '1px solid rgba(255,255,255,0.25)', color: '#ffffff' }}>
             Apply for Partnership
           </NavLink>
         </div>
@@ -1381,133 +1381,133 @@ function DistributorPackagesPage() {
 
       {/* KEY DIFFERENTIATORS BANNER */}
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-[#1a1a1a] text-white">
+        <div className="flex items-start gap-3 rounded-2xl p-4" style={{ border: '1px solid #e2e8f0', backgroundColor: '#ffffff' }}>
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: '#1a1a1a', color: '#ffffff' }}>
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
           </div>
           <div>
-            <p className="text-sm font-bold text-slate-900">EU Regulatory Ready</p>
-            <p className="mt-0.5 text-xs text-slate-500">Full compliance documentation, HEMA-Free &amp; TPO-Free certificates, and EC 1223/2009 declaration support — handled for you, not by you.</p>
+            <p className="text-sm font-bold" style={{ color: '#1a1a1a' }}>EU Regulatory Ready</p>
+            <p className="mt-0.5 text-xs" style={{ color: '#6b7280' }}>Full compliance documentation, HEMA-Free &amp; TPO-Free certificates, and EC 1223/2009 declaration support — handled for you, not by you.</p>
           </div>
         </div>
-        <div className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-[#1a1a1a] text-white">
+        <div className="flex items-start gap-3 rounded-2xl p-4" style={{ border: '1px solid #e2e8f0', backgroundColor: '#ffffff' }}>
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: '#1a1a1a', color: '#ffffff' }}>
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
           </div>
           <div>
-            <p className="text-sm font-bold text-slate-900">Social Media Brand Engine</p>
-            <p className="mt-0.5 text-xs text-slate-500">Viral-ready content, branded assets, and territory advertising support that turns your distribution into a visible, growing movement.</p>
+            <p className="text-sm font-bold" style={{ color: '#1a1a1a' }}>Social Media Brand Engine</p>
+            <p className="mt-0.5 text-xs" style={{ color: '#6b7280' }}>Viral-ready content, branded assets, and territory advertising support that turns your distribution into a visible, growing movement.</p>
           </div>
         </div>
       </div>
 
       {/* BOUTIQUE TIER */}
-      <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-100 bg-slate-50 px-6 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#c8386e]">Entry Tier</p>
-          <h2 className="mt-0.5 text-xl font-black text-slate-900 sm:text-2xl">BOUTIQUE — The Foundation</h2>
-          <p className="mt-1 text-sm text-slate-500">Launch with confidence. The smartest entry point for localized distribution with everything you need to move product and build a client base instantly.</p>
+      <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #e2e8f0', backgroundColor: '#ffffff' }}>
+        <div className="px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: '#f8fafc' }}>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#c8386e' }}>Entry Tier</p>
+          <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#1a1a1a' }}>BOUTIQUE — The Foundation</h2>
+          <p className="mt-1 text-sm" style={{ color: '#6b7280' }}>Launch with confidence. The smartest entry point for localized distribution with everything you need to move product and build a client base instantly.</p>
         </div>
-        <div className="divide-y divide-slate-100">
-          <div className="flex items-start gap-4 px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Market Focus</p>
-            <p className="text-sm font-semibold text-slate-800">Localized Distribution</p>
+        <div style={{ borderTop: '1px solid #f1f5f9' }}>
+          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9ca3af' }}>Market Focus</p>
+            <p className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>Localized Distribution</p>
           </div>
-          <div className="flex items-start gap-4 px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Product Spectrum</p>
+          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9ca3af' }}>Product Spectrum</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#c8386e]" />Top 120 Core Shades</li>
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#c8386e]" />200 SKUs — Builder Systems, Brushes &amp; Essentials</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#c8386e' }} />Top 120 Core Shades</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#c8386e' }} />200 SKUs — Builder Systems, Brushes &amp; Essentials</li>
             </ul>
           </div>
           <div className="flex items-start gap-4 px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Support Package</p>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9ca3af' }}>Support Package</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />Digital Brand Assets</li>
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />Viral Social Media Content</li>
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />EU Regulatory Support</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Digital Brand Assets</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Viral Social Media Content</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />EU Regulatory Support</li>
             </ul>
           </div>
         </div>
-        <div className="border-t border-slate-100 px-6 py-4">
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#1a1a1a] px-5 py-2.5 text-sm font-bold text-white transition duration-300 hover:bg-[#333]">
+        <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300" style={{ backgroundColor: '#1a1a1a', color: '#ffffff' }}>
             Request Boutique Tier Pricing →
           </NavLink>
         </div>
       </article>
 
       {/* PROFESSIONAL TIER */}
-      <article className="overflow-hidden rounded-2xl border border-[#1a1a1a] bg-white shadow-sm">
-        <div className="bg-[#1a1a1a] px-6 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#c8386e]">Growth Tier</p>
-          <h2 className="mt-0.5 text-xl font-black text-white sm:text-2xl">PROFESSIONAL — The Expanded Spectrum</h2>
-          <p className="mt-1 text-sm text-white/60">Scale intelligently. A broader product range, physical brand presence, and deeper marketing tools designed for distributors ready to dominate their region.</p>
+      <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #1a1a1a', backgroundColor: '#ffffff' }}>
+        <div className="px-6 py-4" style={{ backgroundColor: '#1a1a1a' }}>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#c8386e' }}>Growth Tier</p>
+          <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#ffffff' }}>PROFESSIONAL — The Expanded Spectrum</h2>
+          <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.60)' }}>Scale intelligently. A broader product range, physical brand presence, and deeper marketing tools designed for distributors ready to dominate their region.</p>
         </div>
-        <div className="divide-y divide-slate-100">
-          <div className="flex items-start gap-4 px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Market Focus</p>
-            <p className="text-sm font-semibold text-slate-800">Regional Distribution</p>
+        <div>
+          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9ca3af' }}>Market Focus</p>
+            <p className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>Regional Distribution</p>
           </div>
-          <div className="flex items-start gap-4 px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Product Spectrum</p>
+          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9ca3af' }}>Product Spectrum</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#c8386e]" />150 Core Shades</li>
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#c8386e]" />280 SKU Recommendation Package</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#c8386e' }} />150 Core Shades</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#c8386e' }} />280 SKU Recommendation Package</li>
             </ul>
           </div>
           <div className="flex items-start gap-4 px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Support Package</p>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9ca3af' }}>Support Package</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />Digital Brand Assets</li>
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />Marketing Material</li>
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />Branded Salon Visibility</li>
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />Viral Social Media Content</li>
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />EU Regulatory Support</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Digital Brand Assets</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Marketing Material</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Branded Salon Visibility</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Viral Social Media Content</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />EU Regulatory Support</li>
             </ul>
           </div>
         </div>
-        <div className="border-t border-slate-100 px-6 py-4">
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#c8386e] px-5 py-2.5 text-sm font-bold text-white transition duration-300 hover:bg-[#a82d5a]">
+        <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300" style={{ backgroundColor: '#c8386e', color: '#ffffff' }}>
             Request Professional Tier Pricing →
           </NavLink>
         </div>
       </article>
 
       {/* AUTHORITY TIER */}
-      <article className="overflow-hidden rounded-2xl border border-[#c8386e] bg-white shadow-sm">
-        <div className="bg-[#c8386e] px-6 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">Elite Tier</p>
-          <h2 className="mt-0.5 text-xl font-black text-white sm:text-2xl">AUTHORITY — The Full Master Collection</h2>
-          <p className="mt-1 text-sm text-white/80">Total market ownership. Every product, every shade, every support tool — with your territory backed by GEL.IT.UP advertising, live training, and white-glove regulatory handling.</p>
+      <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #c8386e', backgroundColor: '#ffffff' }}>
+        <div className="px-6 py-4" style={{ backgroundColor: '#c8386e' }}>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.75)' }}>Elite Tier</p>
+          <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#ffffff' }}>AUTHORITY — The Full Master Collection</h2>
+          <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.82)' }}>Total market ownership. Every product, every shade, every support tool — with your territory backed by GEL.IT.UP advertising, live training, and white-glove regulatory handling.</p>
         </div>
-        <div className="divide-y divide-slate-100">
-          <div className="flex items-start gap-4 px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Market Focus</p>
-            <p className="text-sm font-semibold text-slate-800">Full Territory Dominance</p>
+        <div>
+          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9ca3af' }}>Market Focus</p>
+            <p className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>Full Territory Dominance</p>
           </div>
-          <div className="flex items-start gap-4 px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Product Spectrum</p>
+          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9ca3af' }}>Product Spectrum</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#c8386e]" />Access to Complete GEL.IT.UP Portfolio</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#c8386e' }} />Access to Complete GEL.IT.UP Portfolio</li>
             </ul>
           </div>
           <div className="flex items-start gap-4 px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Support Package</p>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9ca3af' }}>Support Package</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />Digital Brand Assets</li>
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />Marketing Material</li>
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />Branded Salon Visibility</li>
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />Seminar Training Events</li>
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />Online Seminars</li>
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />Promotional Package Availability</li>
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />Viral Social Media Content</li>
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />Supported Territory Social Media Advertising</li>
-              <li className="flex items-center gap-2 text-sm text-slate-700"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-300" />EU Regulatory Support</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Digital Brand Assets</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Marketing Material</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Branded Salon Visibility</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Seminar Training Events</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Online Seminars</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Promotional Package Availability</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Viral Social Media Content</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Supported Territory Social Media Advertising</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />EU Regulatory Support</li>
             </ul>
           </div>
         </div>
-        <div className="border-t border-slate-100 px-6 py-4">
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#c8386e] px-5 py-2.5 text-sm font-bold text-white transition duration-300 hover:bg-[#a82d5a]">
+        <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300" style={{ backgroundColor: '#c8386e', color: '#ffffff' }}>
             Request Authority Tier Pricing →
           </NavLink>
         </div>
