@@ -842,38 +842,6 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[#E8E8E8] bg-white p-5 sm:p-7">
-          <h2 className="text-2xl font-extrabold uppercase tracking-[0.15em] text-[#1A1A1A] sm:text-3xl">GEL.IT.UP by GIUP® LIVE.</h2>
-          <p className="mt-2 text-sm font-medium text-[#1A1A1A]">Real salon outputs that prove market demand for distributors.</p>
-
-          <div className="mt-4 space-y-3">
-            {(aboutUsLiveMediaSource || heroMedia?.displayUrl) && (
-              <div className="mx-auto w-full max-w-5xl overflow-hidden rounded-2xl border border-[#4A4A4A]/20 bg-[#1A1A1A]">
-                {aboutUsLiveIsVideo ? (
-                  <video
-                    src={aboutUsLiveMediaSource}
-                    poster={heroMedia?.displayUrl || undefined}
-                    className="h-56 w-full object-cover sm:h-72 lg:h-80"
-                    muted
-                    playsInline
-                    autoPlay
-                    loop
-                    controls={false}
-                    preload="metadata"
-                  />
-                ) : (
-                  <img
-                    src={heroMedia?.displayUrl || aboutUsLiveMediaSource}
-                    alt="GEL.IT.UP live salon work"
-                    className="h-56 w-full object-cover sm:h-72 lg:h-80"
-                    loading="lazy"
-                  />
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
         <div className="pb-2 text-center">
           <NavLink
             to="/become-distributor"
