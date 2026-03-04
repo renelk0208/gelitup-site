@@ -5056,9 +5056,6 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
 
       <div className="p-8">
         <h3 className="text-xl font-semibold text-slate-900">{isCreatePasswordMode ? 'Create Password' : 'Sign In'}</h3>
-        <p className="mt-2 text-xs text-slate-600">
-          Non-distributor clients can create access immediately. Distributor accounts require approved website application.
-        </p>
         <div className="mt-2 text-xs text-slate-600">
           {isCreatePasswordMode
             ? (
