@@ -1418,7 +1418,7 @@ function DistributorPackagesPage() {
             </ul>
           </div>
         </div>
-        <div className="px-6 py-4" style={{ borderTop: '1px solid #f0c4d0' }}>
+        <div className="px-6 py-4" style={{ borderTop: '1px solid #f0c4d0', backgroundColor: '#fdf0f4' }}>
           <NavLink to="/become-distributor" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
             Request Boutique Tier Pricing →
           </NavLink>
