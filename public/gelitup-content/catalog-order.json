@@ -6,7 +6,10 @@
       "groups": [
         {
           "hero": "dual mix",
-          "swatches": ["dual forms mix 2", "dual forms mix 3"],
+          "swatches": [
+            "dual forms mix 2",
+            "dual forms mix 3"
+          ],
           "mergeAsGallery": true
         }
       ],
@@ -31,6 +34,21 @@
         {
           "hero": "3in1pink",
           "swatches": []
+        }
+      ],
+      "order": []
+    },
+    {
+      "category": "CONSUMABLES",
+      "subcategory": "SUPER FLEXIBLE TIPS",
+      "groups": [
+        {
+          "hero": "flexi short square",
+          "swatches": [
+            "flexi long almond",
+            "flexi short almond"
+          ],
+          "mergeAsGallery": true
         }
       ],
       "order": []

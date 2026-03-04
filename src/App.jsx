@@ -1937,6 +1937,7 @@ function formatSubcategoryDisplayName(subcategoryName = '', categoryName = '') {
   if (normalized === 'NAIL TIPS') return 'Nail Tips'
   if (normalized === 'DUAL FORMS') return 'Dual Forms'
   if (normalized === 'SOAK OFF GEL TIPS') return 'Soak Off Gel Tips'
+  if (normalized === 'SUPER FLEXIBLE TIPS') return 'Super Flexible Tips'
   if (normalized === 'NAIL FORMS') return 'Nail Forms'
   // Nail Hand & Foot Care subcategories
   if (normalized === 'NAIL HAND FOOT CARE') return 'Nail, Hand & Foot Care'
@@ -2460,6 +2461,7 @@ const DEFAULT_LAB_SPECS = { pigmentDots: null, cure: '60s LED · 120s UV', llab:
 function FullCataloguePage() {
   const [sections, setSections] = useState([])
   const [activeCategory, setActiveCategory] = useState('')
+  const [expandedSections, setExpandedSections] = useState({})
   const [activeSubcategory, setActiveSubcategory] = useState('')
   const [activeColorFamily, setActiveColorFamily] = useState('ALL')
   const [searchQuery, setSearchQuery] = useState('')
@@ -2906,9 +2908,14 @@ function FullCataloguePage() {
     return ''
   }, [])
 
-  const chapter02Categories = ['BUILDER GEL SYSTEMS', 'BASES', 'MULTIMIX', 'TOPS']
+  // Chapter 02a: Bases, Tops & Nail Preparations (LIQUIDS = Superbond, cuticle scrubs, prep)
+  const chapterEssentialsCategories = ['BASES', 'TOPS', 'LIQUIDS']
+  // Chapter 02b: Builder Systems
+  const chapterBuildersCategories = ['BUILDER GEL SYSTEMS', 'MULTIMIX']
+  // Keep combined alias for scroll-target logic
+  const chapter02Categories = [...chapterEssentialsCategories, ...chapterBuildersCategories]
   const chapter03Categories = ['TOOLS', 'EQUIPMENT', 'BRUSHES']
-  const chapter04Categories = ['NAIL ART', 'CONSUMABLES', 'NAIL HAND & FOOT CARE', 'LIQUIDS', 'BY THE OCEAN']
+  const chapter04Categories = ['NAIL ART', 'CONSUMABLES', 'NAIL HAND & FOOT CARE', 'BY THE OCEAN']
   const activeProductInformation = useMemo(
     () => getSubcategoryProductInformation(activeCategory, activeSubcategory),
     [activeCategory, activeSubcategory],
@@ -2920,7 +2927,9 @@ function FullCataloguePage() {
     let targetId = ''
     if (normalizedCategory.includes('COLOR')) {
       targetId = 'catalogue-section-colours'
-    } else if (chapter02Categories.some((name) => normalizeCatalogueToken(name) === normalizedCategory)) {
+    } else if (chapterEssentialsCategories.some((name) => normalizeCatalogueToken(name) === normalizedCategory)) {
+      targetId = 'catalogue-section-essentials'
+    } else if (chapterBuildersCategories.some((name) => normalizeCatalogueToken(name) === normalizedCategory)) {
       targetId = 'catalogue-section-builders'
     } else if (chapter03Categories.some((name) => normalizeCatalogueToken(name) === normalizedCategory)) {
       targetId = 'catalogue-section-tools'
@@ -3047,6 +3056,7 @@ function FullCataloguePage() {
           { label: 'Files & Buffers', subcategoryTokens: ['FILE', 'BUFFER'] },
           { label: 'Nail Forms & Dual Forms', subcategoryTokens: ['NAIL FORM', 'DUAL FORM'] },
           { label: 'Soak Off Gel Tips', subcategoryTokens: ['SOAK OFF'] },
+          { label: 'Super Flexible Tips', subcategoryTokens: ['SUPER FLEX', 'SUPER FLEXIBLE'] },
           { label: 'Wipes & Sticks', subcategoryTokens: ['WIPE', 'STICK'] },
         ],
       },
@@ -3386,112 +3396,274 @@ function FullCataloguePage() {
           <div id={CATALOGUE_RESULTS_ANCHOR_ID} className="scroll-mt-28" />
 
           {/* CHAPTER 01: THE INFINITE SPECTRUM */}
-          <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 overflow-hidden bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
-            {/* Ombré layers — fuchsia bloom bottom-left, diagonal sweep, deep violet top-right */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_70%_at_0%_100%,rgba(212,55,144,0.42)_0%,transparent_65%)]" />
-            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(180,30,120,0.18)_0%,transparent_50%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_100%_0%,rgba(109,40,217,0.18)_0%,transparent_60%)]" />
-            <div className="relative mx-auto max-w-6xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-400">The Core Pigment Library</p>
-              <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">1,000+ Colours</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70 sm:text-base">
-                The Gelitup Archive. Over 1,000 laboratory-grade shades categorised by undertone and finish. From the deepest onyx to the clearest glass-top, find your signature shade in our comprehensive colour vault.
-              </p>
-              <div className="mt-6 flex flex-wrap items-center gap-4">
-                <button
-                  onClick={() => {
-                    const colorsSection = sections.find((s) => isColorsCategoryName(s.category))
-                    if (colorsSection) {
-                      openCatalogueCategory(colorsSection.category, 'ALL')
-                    }
-                  }}
-                  className="rounded-lg bg-fuchsia-600 px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
-                >
-                  SEE THE FULL COLOUR RANGE
-                </button>
+          <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 overflow-hidden bg-[#6b0d38] lg:min-h-[400px]">
+            <img
+              aria-hidden="true"
+              src="/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg"
+              alt=""
+              className="absolute right-0 top-0 hidden h-full w-[52%] object-cover object-center lg:block"
+              style={{
+                maskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
+                WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
+              }}
+            />
+
+            {/* Content */}
+            <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12 sm:px-8 sm:py-16 lg:flex-row lg:items-center lg:gap-0">
+              {/* Text column */}
+              <div className="flex-1 lg:max-w-[520px]">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-400">The Core Pigment Library</p>
+                <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">1,000+ Colours</h2>
+                <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
+                  The Gelitup Archive. Over 1,000 laboratory-grade shades categorised by undertone and finish. From the deepest onyx to the clearest glass-top, find your signature shade in our comprehensive colour vault.
+                </p>
+                <div className="mt-6 flex flex-wrap items-center gap-4">
+                  <button
+                    onClick={() => {
+                      const colorsSection = sections.find((s) => isColorsCategoryName(s.category))
+                      if (colorsSection) openCatalogueCategory(colorsSection.category, 'ALL')
+                    }}
+                    className="rounded-lg bg-fuchsia-600 px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
+                  >
+                    BROWSE COLOURS
+                  </button>
+                </div>
+              </div>
+
+              {/* Mobile image — shown below text, softly faded top */}
+              <div className="lg:hidden">
+                <div className="relative mx-auto max-w-[280px]">
+                  <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(212,55,144,0.3)_0%,transparent_70%)] blur-2xl" />
+                  <img
+                    src="/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg"
+                    alt="GEL.IT.UP Colour Collection"
+                    className="relative w-full object-contain drop-shadow-[0_6px_32px_rgba(212,55,144,0.45)]"
+                    style={{
+                      maskImage: 'linear-gradient(to bottom, transparent 0%, black 18%)',
+                      WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 18%)',
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
 
-          {isColorsCategoryName(activeCategory) && categoryDetail}
-
-          {/* CHAPTER 02: STRUCTURAL ENGINEERING */}
-          <div id="catalogue-section-builders" className="space-y-4 scroll-mt-28 py-12 px-4 sm:px-8">
-            <div className="mx-auto max-w-6xl px-4 sm:px-8">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#D43790]">Laboratory Essentials</p>
-              <h2 className="mt-1 text-3xl font-extrabold uppercase tracking-[0.1em] text-[#1A1A1A] sm:text-4xl">Tops, Bases &amp; Builder Systems</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#1A1A1A]/70 sm:text-base">
-                The foundation of every nail service. Our Leeukopf-certified base coats, top coats, and builder systems provide the architectural support for your colour — engineered for 21-day wear and diamond-grade shine.
-              </p>
-            </div>
-
-            {/* CATEGORY GRID */}
-            <div className="mx-auto max-w-6xl">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {chapter02Categories.map((categoryName) => {
-                const section = sections.find((s) => s.category === categoryName)
-                if (!section) return null
-                const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
-                const coverImageFallback = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
-                const coverImage = getCategoryCoverImage(categoryName, coverImageFallback)
-                const specs = CATEGORY_LAB_SPECS[categoryName] ?? DEFAULT_LAB_SPECS
-                return (
-                  <Fragment key={categoryName}>
-                    <button
-                      onClick={() => {
-                        openCatalogueCategory(categoryName, 'ALL')
-                      }}
-                      className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
-                    >
-                      <div className="relative h-52 bg-white p-2">
-                        <img
-                          src={coverImage}
-                          alt={categoryName}
-                          className="h-full w-full object-contain"
-                          loading="lazy"
-                          onError={() => handleCategoryCoverImageError(categoryName, coverImageFallback)}
-                        />
-                        <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#D43790]" />
-                      </div>
-                      <div className="border-t border-[#4A4A4A]/20 p-3">
-                        <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
-                        <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {specs.pigmentDots !== null && (
-                            <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">
-                              {specs.pigmentDots >= 1 ? '●' : '○'}{specs.pigmentDots >= 2 ? '●' : '○'}{specs.pigmentDots >= 3 ? '●' : '○'} Pigment
-                            </span>
-                          )}
-                          {specs.cure && (
-                            <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">
-                              {specs.cure}
-                            </span>
-                          )}
-                          {specs.llab && (
-                            <span className="inline-flex items-center rounded-md border border-fuchsia-200 bg-fuchsia-50 px-1.5 py-0.5 text-[10px] font-bold text-fuchsia-700">
-                              L-Lab ✓
-                            </span>
-                          )}
+          {expandedSections.colours && (
+            <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {sections.filter(s => isColorsCategoryName(s.category)).map(section => {
+                  const categoryName = section.category
+                  const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
+                  const coverImageFallback = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
+                  const coverImage = getCategoryCoverImage(categoryName, coverImageFallback)
+                  return (
+                    <Fragment key={categoryName}>
+                      <button
+                        onClick={() => openCatalogueCategory(categoryName, 'ALL')}
+                        className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-400/60 hover:shadow-lg"
+                      >
+                        <div className="relative h-52 bg-white">
+                          <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" onError={() => handleCategoryCoverImageError(categoryName, coverImageFallback)} />
+                          <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-fuchsia-500" />
                         </div>
-                      </div>
+                        <div className="border-t border-[#4A4A4A]/20 p-3">
+                          <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
+                          <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
+                        </div>
+                      </button>
+                      {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
+                    </Fragment>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* CHAPTER 02a: BASES, TOPS & NAIL PREPARATIONS */}
+          <div id="catalogue-section-essentials" className="scroll-mt-28">
+            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#4a2230] lg:min-h-[360px]">
+              <img
+                aria-hidden="true"
+                src="/gelitup-content/catalog-heroes/bases-catalog-hero-image.webp"
+                alt=""
+                className="absolute right-0 top-0 hidden h-full w-[52%] object-cover object-center lg:block"
+                style={{
+                  maskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
+                }}
+              />
+
+              <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
+                <div className="flex-1 lg:max-w-[500px]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-300">The Essentials</p>
+                  <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Bases &amp; Tops</h2>
+                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
+                    The non-negotiables of every nail service. Our base coats lock in colour and protect the natural nail, while our top coats deliver the perfect finish — from high-gloss brilliance to matte sophistication.
+                  </p>
+                  <div className="mt-6">
+                    <button
+                      onClick={() => openCatalogueCategory('BASES', 'ALL')}
+                      className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
+                      style={{ background: 'rgba(185,100,130,0.85)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(205,120,150,0.95)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(185,100,130,0.85)'}
+                    >
+                      BROWSE BASES &amp; TOPS
                     </button>
-                    {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
-                  </Fragment>
-                )
-              })}
+                  </div>
+                </div>
+                <div className="lg:hidden">
+                  <div className="relative mx-auto max-w-[260px]">
+                    <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(200,115,145,0.25)_0%,transparent_70%)] blur-2xl" />
+                    <img
+                      src="/gelitup-content/catalog-heroes/bases-catalog-hero-image.webp"
+                      alt="GEL.IT.UP Bases & Tops"
+                      className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(200,115,145,0.35)]"
+                      style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, black 16%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 16%)' }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Essentials category grid */}
+            {expandedSections.essentials && <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {chapterEssentialsCategories.map((categoryName) => {
+                  const section = sections.find((s) => s.category === categoryName)
+                  if (!section) return null
+                  const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
+                  const coverImageFallback = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
+                  const coverImage = getCategoryCoverImage(categoryName, coverImageFallback)
+                  const specs = CATEGORY_LAB_SPECS[categoryName] ?? DEFAULT_LAB_SPECS
+                  return (
+                    <Fragment key={categoryName}>
+                      <button
+                        onClick={() => openCatalogueCategory(categoryName, 'ALL')}
+                        className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-rose-400/60 hover:shadow-lg"
+                      >
+                        <div className="relative h-52 bg-white">
+                          <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" onError={() => handleCategoryCoverImageError(categoryName, coverImageFallback)} />
+                          <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-rose-400" />
+                        </div>
+                        <div className="border-t border-[#4A4A4A]/20 p-3">
+                          <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName === 'LIQUIDS' ? 'NAIL PREPARATIONS' : categoryName}</p>
+                          <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {specs.cure && <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">{specs.cure}</span>}
+                            {specs.llab && <span className="inline-flex items-center rounded-md border border-rose-200 bg-rose-50 px-1.5 py-0.5 text-[10px] font-bold text-rose-700">L-Lab ✓</span>}
+                          </div>
+                        </div>
+                      </button>
+                      {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
+                    </Fragment>
+                  )
+                })}
+              </div>
+            </div>}
+          </div>
+
+          {/* CHAPTER 02b: BUILDER SYSTEMS */}
+          <div id="catalogue-section-builders" className="scroll-mt-28">
+            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#3d1e0e] lg:min-h-[360px]">
+              <img
+                aria-hidden="true"
+                src="/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp"
+                alt=""
+                className="absolute right-0 top-0 hidden h-full w-[52%] object-cover object-center lg:block"
+                style={{
+                  maskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
+                }}
+              />
+
+              <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
+                <div className="flex-1 lg:max-w-[500px]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-200">Structural Innovation</p>
+                  <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Builder Systems</h2>
+                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
+                    From Liquid Polygel to 3-in-1 Builder and Multimix — our complete range of building systems delivers strength, flexibility and flawless structure. Engineered for extensions, reinforcement, and zero-file technique.
+                  </p>
+                  <div className="mt-6">
+                    <button
+                      onClick={() => openCatalogueCategory('BUILDER GEL SYSTEMS', 'ALL')}
+                      className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
+                      style={{ background: 'rgba(185,100,50,0.85)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(210,120,65,0.95)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(185,100,50,0.85)'}
+                    >
+                      BROWSE BUILDER SYSTEMS
+                    </button>
+                  </div>
+                </div>
+                <div className="lg:hidden">
+                  <div className="relative mx-auto max-w-[260px]">
+                    <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(185,100,50,0.25)_0%,transparent_70%)] blur-2xl" />
+                    <img
+                      src="/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp"
+                      alt="GEL.IT.UP Builder Systems"
+                      className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(185,100,50,0.35)]"
+                      style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, black 16%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 16%)' }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Builder category grid */}
+            {expandedSections.builders && <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {chapterBuildersCategories.map((categoryName) => {
+                  const section = sections.find((s) => s.category === categoryName)
+                  if (!section) return null
+                  const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
+                  const coverImageFallback = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
+                  const coverImage = getCategoryCoverImage(categoryName, coverImageFallback)
+                  const specs = CATEGORY_LAB_SPECS[categoryName] ?? DEFAULT_LAB_SPECS
+                  return (
+                    <Fragment key={categoryName}>
+                      <button
+                        onClick={() => openCatalogueCategory(categoryName, 'ALL')}
+                        className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-blue-400/60 hover:shadow-lg"
+                      >
+                        <div className="relative h-52 bg-white">
+                          <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" onError={() => handleCategoryCoverImageError(categoryName, coverImageFallback)} />
+                          <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-blue-500" />
+                        </div>
+                        <div className="border-t border-[#4A4A4A]/20 p-3">
+                          <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
+                          <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {specs.cure && <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">{specs.cure}</span>}
+                            {specs.llab && <span className="inline-flex items-center rounded-md border border-orange-200 bg-orange-50 px-1.5 py-0.5 text-[10px] font-bold text-orange-700">L-Lab ✓</span>}
+                          </div>
+                        </div>
+                      </button>
+                      {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
+                    </Fragment>
+                  )
+                })}
+              </div>
+            </div>}
           </div>
 
           {/* CHAPTER 03: THE PROFESSIONAL TOOLSET */}
           <div id="catalogue-section-tools" className="space-y-4 scroll-mt-28 py-12 px-4 sm:px-8">
             <div className="mx-auto max-w-6xl px-4 sm:px-8">
-              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>TOOLS & EQUIPMENT</h2>
+              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>TOOLS &amp; EQUIPMENT</h2>
               <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
                 Precision finishing products, expert hardware, and maintenance tools for flawless studio finishes.
               </p>
+              <div className="mt-5">
+                <button
+                  onClick={() => openCatalogueCategory('TOOLS', 'ALL')}
+                  className="rounded-lg bg-[#1A1A1A] px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-[#333]"
+                >
+                  BROWSE TOOLS &amp; EQUIPMENT
+                </button>
+              </div>
             </div>
-            <div className="mx-auto max-w-6xl">
+            {expandedSections.tools && <div className="mx-auto max-w-6xl">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {chapter03Categories.map((categoryName) => {
                 const section = sections.find((s) => s.category === categoryName)
@@ -3508,7 +3680,7 @@ function FullCataloguePage() {
                       }}
                       className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
                     >
-                      <div className="relative h-52 bg-white p-2">
+                      <div className="relative h-52 bg-white">
                         <img
                           src={coverImage}
                           alt={categoryName}
@@ -3545,18 +3717,26 @@ function FullCataloguePage() {
                 )
               })}
             </div>
-            </div>
+            </div>}
           </div>
 
           {/* CHAPTER 04: ARTISTIC MASTERY & CARE */}
           <div id="catalogue-section-consumables" className="space-y-4 scroll-mt-28 py-12 px-4 sm:px-8">
             <div className="mx-auto max-w-6xl px-4 sm:px-8">
-              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>CONSUMABLES & ART</h2>
+              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>CONSUMABLES &amp; ART</h2>
               <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
                 Nail art ecosystem and therapeutic formulations for creative details and professional aftercare.
               </p>
+              <div className="mt-5">
+                <button
+                  onClick={() => openCatalogueCategory('NAIL ART', 'ALL')}
+                  className="rounded-lg bg-[#1A1A1A] px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-[#333]"
+                >
+                  BROWSE CONSUMABLES &amp; ART
+                </button>
+              </div>
             </div>
-            <div className="mx-auto max-w-6xl">
+            {expandedSections.consumables && <div className="mx-auto max-w-6xl">
             <div className="grid gap-4 sm:grid-cols-2">
               {chapter04Categories.map((categoryName) => {
                 const section = sections.find((s) => s.category === categoryName)
@@ -3573,7 +3753,7 @@ function FullCataloguePage() {
                       }}
                       className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-fuchsia-500/50 hover:shadow-lg"
                     >
-                      <div className="relative h-52 bg-white p-2">
+                      <div className="relative h-52 bg-white">
                         <img
                           src={coverImage}
                           alt={categoryName}
@@ -3610,7 +3790,7 @@ function FullCataloguePage() {
                 )
               })}
             </div>
-            </div>
+            </div>}
 
             {chapter04Categories.includes(activeCategory) && categoryDetail}
           </div>
@@ -7122,6 +7302,7 @@ function ProductsModule({ moduleView = 'products' }) {
               'CONSUMABLES': 'CONSUMABLES', 'DUAL FORMS': 'CONSUMABLES',
               'SOAK OFF GEL TIPS': 'CONSUMABLES', 'NAIL FORMS': 'CONSUMABLES',
               'NAIL FILES': 'CONSUMABLES', 'NAIL TIPS': 'CONSUMABLES',
+              'SUPER FLEXIBLE TIPS': 'CONSUMABLES',
               // NAIL HAND & FOOT CARE
               'NAIL HAND & FOOT CARE': 'NAIL HAND & FOOT CARE',
               'NAIL HAND AND FOOT CARE': 'NAIL HAND & FOOT CARE',

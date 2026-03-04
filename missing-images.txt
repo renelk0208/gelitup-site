@@ -1,0 +1,53 @@
+02B  ->  02B Sweetheart -HTF
+02C  ->  02C Ballet Shoes -HTF
+02D  ->  02D Le Culotté -HTF
+02E  ->  02E Co Co Co Carde -HTF
+02F  ->  02F Oh Marie Oh Marie -HTF
+02G  ->  02G Riviera Rose -HTF
+02H  ->  02H Rose Bonbon -HTF
+02I  ->  02I Ok Baby -HTF
+FR07  ->  FR07 Glitter Petal
+N024  ->  N024 New Porn Pink -HTF
+N026  ->  N026 Whispering Blush -HTF
+07B  ->  07B Liberte -HTF
+07C  ->  07C Allons Danton -HTF
+07D  ->  07D Tulle Taupe -HTF
+08A  ->  08A Tusker -HTF
+08D  ->  08D Snowy Tree Tops -HTF
+08E  ->  08E Ivory Sparkle -HTF
+08F  ->  08F Soft Devotion -HTF
+09A  ->  09A Au Pli Louis -HTF
+09B  ->  09B Knock Off -HTF
+2527  ->  2527 The Doll's Dress -HTF
+2529  ->  2529 Thunderstorm -HTF
+2113S  ->  2113S Vivi Vail -HTF
+BTB01  ->  BTB01 Rosso Corso -HTF
+BTB02  ->  BTB02 Nautilus -HTF
+BTB03  ->  BTB03 Brimstone -HTF
+SS01  ->  SS01 SPIX and SPEX Kaleidascope -HTF
+SS02  ->  SS02 SPIX and SPEX Delphinium -HTF
+SS03  ->  SS03 SPIX and SPEX Giddy Grape -HTF
+SS04  ->  SS04 SPIX and SPEX Popping Candy -HTF
+SS05  ->  SS05 SPIX and SPEX Lemon Sorbet -HTF
+SS06  ->  SS06 SPIX and SPEX Tusk Tusk -HTF
+DT01  ->  DT01 Dandelion Diamond Top 11ml -HTF
+DT02  ->  DT02 Diamond Dust Diamond Top 11ml -HTF
+DT03  ->  DT03 Sugar Socks Diamond Top 11ml -HTF
+DT04  ->  DT04 Chipper Diamond Top 11ml -HTF
+NW01  ->  NW01 Spot my top -HTF
+NW02  ->  NW02 Sopt my top -HTF
+NW03  ->  NW03 Spot my top -HTF
+MT01  ->  MT01 Spot my top -HTF
+MT02  ->  MT02 Spot my top -HTF
+MT03  ->  MT03 Spot my top -HTF
+MT04  ->  MT04 Spot my top -HTF
+MT05  ->  MT05 Spot my top -HTF
+MT06  ->  MT06 Spot my top -HTF
+SP8001  ->  SP8001 Mirror Clear Powder
+TR01  ->  TR01 Mirror X1 Powder
+TR02  ->  TR02 Mirror X2 Powder
+TR03  ->  TR03 Mirror X3 Powder
+TR04  ->  TR04 Mirror X4 Powder
+TR05  ->  TR05 Mirror X5 Powder
+TR06  ->  TR06 Mirror X6 Powder
+CM12  ->  CM12 Mirror X7 Powder
