@@ -6896,8 +6896,13 @@ function ProductsModule({ moduleView = 'products' }) {
             normalizeProductName(cleanName),
           ]
           // Also index by leading colour number so "01 Ice Ice Baby" matches catalog code "GIUP 01"
+          // Also push zero-stripped variant so "02B" matches "GIUP 2B"
           const numMatch = cleanName.match(/^(\d+[A-Z]?)\s/)
-          if (numMatch) keys.push(numMatch[1].padStart(2, '0'), numMatch[1])
+          if (numMatch) {
+            const padded = numMatch[1].replace(/^(\d+)/, n => n.padStart(2, '0'))
+            const stripped = numMatch[1].replace(/^0+(\d)/, '$1')
+            keys.push(padded, stripped, numMatch[1])
+          }
           // Index "PMA #1 Champagne Blizzard" → "PMA 1", "PMA 01"
           const seriesNumMatch = cleanName.match(/^([A-Z]+)\s*#\s*(\d+[A-Z]?)\b/i)
           if (seriesNumMatch) {
@@ -6910,6 +6915,13 @@ function ProductsModule({ moduleView = 'products' }) {
           if (embeddedCodeMatch) {
             const s = embeddedCodeMatch[1].toUpperCase()
             const n = embeddedCodeMatch[2]
+            keys.push(`${s} ${n}`, `${s} ${n.padStart(2, '0')}`, `${s}${n}`, `${s}${n.padStart(2, '0')}`)
+          }
+          // Index any embedded series+number token (e.g. "BTO01" in "By The Ocean BTO01", "R01" in "GEL.IT.UP 1 R01 11ml")
+          const tokenMatches = [...cleanName.matchAll(/\b([A-Z]{1,5})(\d{1,3}[A-Z]?)\b/gi)]
+          for (const tm of tokenMatches) {
+            const s = tm[1].toUpperCase()
+            const n = tm[2]
             keys.push(`${s} ${n}`, `${s} ${n.padStart(2, '0')}`, `${s}${n}`, `${s}${n.padStart(2, '0')}`)
           }
           for (const k of keys) {
