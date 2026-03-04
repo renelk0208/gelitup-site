@@ -9308,10 +9308,10 @@ function ProductsModule({ moduleView = 'products' }) {
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
 
         {/* ── STICKY ORDER BAR ─────────────────────────────────────────────── */}
-        <div className="sticky top-0 z-30 border-b bg-white px-4 py-3 sm:px-6" style={{ borderColor: '#f0c4d0' }}>
-          <div className="flex items-center justify-between gap-3">
+        <div className="sticky top-0 z-30 border-b bg-white px-3 py-2" style={{ borderColor: '#f0c4d0' }}>
+          <div className="flex items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
-              <span className="text-sm font-bold" style={{ color: '#1a1a1a' }}>
+              <span className="text-xs font-bold" style={{ color: '#1a1a1a' }}>
                 {(selectedCodes.length + packageCartItems.length) > 0
                   ? `🛒 ${selectedCodes.length + packageCartItems.length} item${selectedCodes.length + packageCartItems.length !== 1 ? 's' : ''} · ${totalUnits} units${orderTotal > 0 ? ` · €${orderTotal.toFixed(2)}` : ''}`
                   : '🛒 Tap any product to add it to your order'}
@@ -9322,18 +9322,18 @@ function ProductsModule({ moduleView = 'products' }) {
                 </button>
               )}
             </div>
-            <button onClick={() => navigate('/portal/dashboard/products')} className="btn-cta-rose flex-none rounded-lg px-4 py-2 text-xs font-semibold">
+            <button onClick={() => navigate('/portal/dashboard/products')} className="btn-cta-rose flex-none rounded-md px-3 py-1.5 text-xs font-semibold">
               Review Order →
             </button>
           </div>
           {/* Mini thumbnail strip of selected items */}
           {(selectedCodes.length > 0 || packageCartItems.length > 0) && (
-            <div className="mt-2 flex gap-1.5 overflow-x-auto pb-0.5">
+            <div className="mt-1 flex gap-1 overflow-x-auto pb-0.5">
               {selectedCodes.slice(0, 20).map((code) => {
                 const product = products.find(p => p.code === code)
                 if (!product) return null
                 return (
-                  <div key={code} onClick={() => toggleSelection(code)} className="group relative h-9 w-9 flex-none cursor-pointer overflow-hidden rounded-lg border border-slate-200">
+                  <div key={code} onClick={() => toggleSelection(code)} className="group relative h-7 w-7 flex-none cursor-pointer overflow-hidden rounded border border-slate-200">
                     {product.imageUrl
                       ? <img src={product.imageUrl} alt={code} className="h-full w-full object-cover" />
                       : <div className="h-full w-full" style={{ backgroundColor: product.preview || '#e2e8f0' }} />}
@@ -9344,14 +9344,14 @@ function ProductsModule({ moduleView = 'products' }) {
               {packageCartItems.slice(0, 8).map((item) => {
                 const img = resolveCatalogImageUrl(item)
                 return (
-                  <div key={`pkg-${item.sku}`} className="relative h-9 w-9 flex-none overflow-hidden rounded-lg border" style={{ borderColor: '#f0c4d0' }}>
+                  <div key={`pkg-${item.sku}`} className="relative h-7 w-7 flex-none overflow-hidden rounded border" style={{ borderColor: '#f0c4d0' }}>
                     {img ? <img src={img} alt={item.code} className="h-full w-full object-cover" /> : <div className="h-full w-full" style={{ backgroundColor: item.hex_color || '#e2e8f0' }} />}
                     <span className="absolute left-0 top-0 rounded-br-md px-1 text-[8px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{item.qty}×</span>
                   </div>
                 )
               })}
               {(selectedCodes.length + packageCartItems.length) > 28 && (
-                <div className="flex h-9 w-9 flex-none items-center justify-center rounded-lg border border-slate-200 text-[10px] font-semibold text-slate-500">
+                <div className="flex h-7 w-7 flex-none items-center justify-center rounded border border-slate-200 text-[9px] font-semibold text-slate-500">
                   +{selectedCodes.length + packageCartItems.length - 28}
                 </div>
               )}
@@ -9359,18 +9359,18 @@ function ProductsModule({ moduleView = 'products' }) {
           )}
         </div>
 
-        <div className="p-4 sm:p-6">
+        <div className="p-3">
 
           {/* ── SEARCH ───────────────────────────────────────────────────── */}
           <div className="relative">
-            <svg className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 pointer-events-none text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 pointer-events-none text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
             </svg>
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name, shade or code..."
-              className="w-full rounded-xl border py-3 pl-10 pr-10 text-sm text-slate-800 placeholder-slate-400 shadow-sm focus:outline-none"
+              className="w-full rounded-lg border py-1.5 pl-8 pr-8 text-xs text-slate-800 placeholder-slate-400 focus:outline-none"
               style={{ borderColor: query ? '#c8386e' : '#e2e8f0' }}
             />
             {query && (
@@ -9381,12 +9381,12 @@ function ProductsModule({ moduleView = 'products' }) {
           </div>
 
           {/* ── QUICK FILTER CHIPS ───────────────────────────────────────── */}
-          <div className="mt-2 flex flex-wrap gap-2">
-            <label className="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition" style={showSelectedOnly ? { borderColor: '#c8386e', backgroundColor: '#fdf0f4', color: '#c8386e' } : { borderColor: '#e2e8f0', color: '#64748b' }}>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            <label className="flex cursor-pointer items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition" style={showSelectedOnly ? { borderColor: '#c8386e', backgroundColor: '#fdf0f4', color: '#c8386e' } : { borderColor: '#e2e8f0', color: '#64748b' }}>
               <input type="checkbox" checked={showSelectedOnly} onChange={e => setShowSelectedOnly(e.target.checked)} className="sr-only" />
               ✓ Selected only{showSelectedOnly && selectedCodes.length > 0 ? ` (${selectedCodes.length})` : ''}
             </label>
-            <label className="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition" style={showCleanScienceOnly ? { borderColor: '#c8386e', backgroundColor: '#fdf0f4', color: '#c8386e' } : { borderColor: '#e2e8f0', color: '#64748b' }}>
+            <label className="flex cursor-pointer items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition" style={showCleanScienceOnly ? { borderColor: '#c8386e', backgroundColor: '#fdf0f4', color: '#c8386e' } : { borderColor: '#e2e8f0', color: '#64748b' }}>
               <input type="checkbox" checked={showCleanScienceOnly} onChange={e => setShowCleanScienceOnly(e.target.checked)} className="sr-only" />
               🧪 HEMA-free only
             </label>
@@ -9394,10 +9394,9 @@ function ProductsModule({ moduleView = 'products' }) {
 
           {/* ── CATEGORY TAB NAV ─────────────────────────────────────────── */}
           {!query && (
-            <div className="mt-5">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest" style={{ color: '#b07080' }}>Jump to category</p>
-              <div className="-mx-1 overflow-x-auto pb-2">
-                <div className="flex gap-1.5 px-1">
+            <div className="mt-2">
+              <div className="overflow-x-auto pb-1">
+                <div className="flex gap-1 ">
                   {groupedFilteredProducts.map(([cat, catProds]) => {
                     const isActive = expandedCategories.has(cat)
                     const selCount = catProds.filter(p => selectedCodes.includes(p.code)).length
@@ -9411,7 +9410,7 @@ function ProductsModule({ moduleView = 'products' }) {
                             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
                           }, 80)
                         }}
-                        className="flex-none whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+                        className="flex-none whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-semibold transition"
                         style={isActive
                           ? { backgroundColor: '#c8386e', borderColor: '#c8386e', color: '#ffffff' }
                           : { backgroundColor: '#ffffff', borderColor: '#f0c4d0', color: '#7a3050' }}
@@ -9428,7 +9427,7 @@ function ProductsModule({ moduleView = 'products' }) {
           )}
 
           {/* ── PRODUCT SECTIONS ─────────────────────────────────────────── */}
-          <div className="mt-4 space-y-3">
+          <div className="mt-2 space-y-1.5">
             {groupedFilteredProducts.length === 0
               ? <p className="py-10 text-center text-sm italic text-slate-400">No products match your search.</p>
               : groupedFilteredProducts.map(([cat, catProducts]) => {
@@ -9452,13 +9451,13 @@ function ProductsModule({ moduleView = 'products' }) {
                       className="flex w-full items-center text-left"
                       style={{ borderBottom: isExpanded ? '1px solid #f0e0e8' : 'none' }}
                     >
-                      <span className="flex-none self-stretch w-1 rounded-tl-xl" style={{ backgroundColor: '#c8386e', minHeight: '48px' }} />
-                      <div className="flex flex-1 items-center justify-between gap-3 px-4 py-3 transition hover:bg-pink-50/40">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h4 className="text-sm font-black uppercase tracking-[0.1em]" style={{ color: '#1a1a1a' }}>{cat}</h4>
-                          <span className="rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ backgroundColor: '#fdf0f4', color: '#b07080' }}>{catProducts.length} items</span>
+                      <span className="flex-none self-stretch w-1 rounded-tl-xl" style={{ backgroundColor: '#c8386e', minHeight: '34px' }} />
+                      <div className="flex flex-1 items-center justify-between gap-2 px-3 py-2 transition hover:bg-pink-50/40">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <h4 className="text-xs font-black uppercase tracking-wide" style={{ color: '#1a1a1a' }}>{cat}</h4>
+                          <span className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold" style={{ backgroundColor: '#fdf0f4', color: '#b07080' }}>{catProducts.length}</span>
                           {selectedInCat > 0 && (
-                            <span className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>✓ {selectedInCat} in order</span>
+                            <span className="rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>✓ {selectedInCat}</span>
                           )}
                         </div>
                         <svg className={`h-4 w-4 flex-none transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} style={{ color: '#c8386e' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -9474,9 +9473,9 @@ function ProductsModule({ moduleView = 'products' }) {
                           const catDesc = getB2BCategoryDescription(cat)
                           if (!catDesc || (!catDesc.paragraphs?.length && !catDesc.listItems?.length)) return null
                           return (
-                            <div className="px-4 py-3" style={{ borderBottom: '1px solid #fde8f0', backgroundColor: '#fdf5f7' }}>
-                              {catDesc.paragraphs.slice(0, 2).map((p, i) => (
-                                <p key={i} className="text-xs leading-relaxed" style={{ color: '#7a3050' }}>{p}</p>
+                            <div className="px-3 py-2" style={{ borderBottom: '1px solid #fde8f0', backgroundColor: '#fdf5f7' }}>
+                              {catDesc.paragraphs.slice(0, 1).map((p, i) => (
+                                <p key={i} className="text-[11px] leading-relaxed" style={{ color: '#7a3050' }}>{p}</p>
                               ))}
                             </div>
                           )
@@ -9493,17 +9492,16 @@ function ProductsModule({ moduleView = 'products' }) {
                             'Red': 'bg-red-500', 'White': 'bg-white border border-slate-300', 'Yellow': 'bg-yellow-300',
                           }
                           return (
-                            <div className="px-4 py-3" style={{ borderBottom: '1px solid #fde8f0', backgroundColor: '#fff9fb' }}>
-                              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#b07080' }}>Filter by colour family</p>
-                              <div className="flex flex-wrap gap-1.5">
-                                <button onClick={() => setB2bColorFamilyFilter('ALL')} className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold" style={b2bColorFamilyFilter === 'ALL' ? { backgroundColor: '#c8386e', color: '#fff' } : { backgroundColor: '#fdf0f4', color: '#7a3050' }}>
+                            <div className="px-3 py-2" style={{ borderBottom: '1px solid #fde8f0', backgroundColor: '#fff9fb' }}>
+                              <div className="flex flex-wrap gap-1">
+                                <button onClick={() => setB2bColorFamilyFilter('ALL')} className="flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold" style={b2bColorFamilyFilter === 'ALL' ? { backgroundColor: '#c8386e', color: '#fff' } : { backgroundColor: '#fdf0f4', color: '#7a3050' }}>
                                   All <span className="opacity-70">{catProducts.length}</span>
                                 </button>
                                 {folderFamilies.map(folderName => {
                                   const count = catProducts.filter(p => p.colorFamily === folderName).length
                                   return (
-                                    <button key={folderName} onClick={() => setB2bColorFamilyFilter(folderName)} className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold" style={b2bColorFamilyFilter === folderName ? { backgroundColor: '#c8386e', color: '#fff' } : { backgroundColor: '#fdf0f4', color: '#7a3050' }}>
-                                      <span className={`h-2.5 w-2.5 flex-none rounded-full ${FOLDER_SWATCH[folderName] || 'bg-slate-300'}`} />
+                                    <button key={folderName} onClick={() => setB2bColorFamilyFilter(folderName)} className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold" style={b2bColorFamilyFilter === folderName ? { backgroundColor: '#c8386e', color: '#fff' } : { backgroundColor: '#fdf0f4', color: '#7a3050' }}>
+                                      <span className={`h-2 w-2 flex-none rounded-full ${FOLDER_SWATCH[folderName] || 'bg-slate-300'}`} />
                                       {folderName} <span className="opacity-70">{count}</span>
                                     </button>
                                   )
@@ -9514,36 +9512,36 @@ function ProductsModule({ moduleView = 'products' }) {
                         })()}
 
                         {/* Product grid */}
-                        <div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                        <div className="grid grid-cols-3 gap-2 p-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7">
                           {visibleProducts.map((product) => {
                             const selected = selectedCodes.includes(product.code)
                             const qty = itemQtys[product.code] || 1
                             return (
-                              <div key={product.code} className="flex flex-col rounded-xl border transition" style={selected ? { borderColor: '#c8386e', backgroundColor: '#ffffff', boxShadow: '0 4px 12px rgba(200,56,110,0.12)' } : { borderColor: '#e2e8f0', backgroundColor: '#ffffff' }}>
-                                <div className="relative h-24 w-full cursor-zoom-in overflow-hidden rounded-t-xl bg-white" style={selected ? { outline: '2px solid #c8386e' } : {}} title="Click to enlarge" onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}>
+                              <div key={product.code} className="flex flex-col rounded-lg border transition" style={selected ? { borderColor: '#c8386e', backgroundColor: '#ffffff', boxShadow: '0 2px 8px rgba(200,56,110,0.12)' } : { borderColor: '#e2e8f0', backgroundColor: '#ffffff' }}>
+                                <div className="relative h-16 w-full cursor-zoom-in overflow-hidden rounded-t-lg bg-white" style={selected ? { outline: '2px solid #c8386e' } : {}} title="Click to enlarge" onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}>
                                   {product.imageUrl && <img src={product.imageUrl} alt={product.name} loading="lazy" className="relative z-10 h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={e => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} />}
                                   {selected && <span className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
                                 </div>
-                                <div className="flex flex-1 flex-col gap-0.5 px-2 pt-1.5 pb-1">
-                                  <p className="line-clamp-2 text-[11px] font-semibold leading-tight text-slate-900">{product.name}</p>
-                                  {product.price != null && <p className="text-[11px] font-bold" style={{ color: '#c8386e' }}>€{Number(product.price).toFixed(2)}</p>}
+                                <div className="flex flex-1 flex-col gap-0 px-1.5 pt-1 pb-0.5">
+                                  <p className="line-clamp-2 text-[10px] font-semibold leading-tight text-slate-900">{product.name}</p>
+                                  {product.price != null && <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{Number(product.price).toFixed(2)}</p>}
                                 </div>
                                 {selected ? (
-                                  <div className="flex items-center justify-between gap-1 border-t px-2 py-1.5" style={{ borderColor: '#fde8f0' }}>
+                                  <div className="flex items-center justify-between gap-1 border-t px-1.5 py-1" style={{ borderColor: '#fde8f0' }}>
                                     <div className="flex items-center gap-0.5">
-                                      <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(prev => ({...prev, [product.code]: q})) }} className="flex h-6 w-6 items-center justify-center rounded-full border text-sm font-bold" style={{ borderColor: '#f0c4d0', backgroundColor: '#fdf5f7', color: '#c8386e' }}>−</button>
-                                      <span className="w-6 text-center text-xs font-bold text-slate-800">{qty}</span>
-                                      <button onClick={() => setItemQtys(prev => ({...prev, [product.code]: qty + 1}))} className="flex h-6 w-6 items-center justify-center rounded-full border text-sm font-bold" style={{ borderColor: '#f0c4d0', backgroundColor: '#fdf5f7', color: '#c8386e' }}>+</button>
+                                      <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(prev => ({...prev, [product.code]: q})) }} className="flex h-5 w-5 items-center justify-center rounded-full border text-xs font-bold" style={{ borderColor: '#f0c4d0', backgroundColor: '#fdf5f7', color: '#c8386e' }}>−</button>
+                                      <span className="w-5 text-center text-[10px] font-bold text-slate-800">{qty}</span>
+                                      <button onClick={() => setItemQtys(prev => ({...prev, [product.code]: qty + 1}))} className="flex h-5 w-5 items-center justify-center rounded-full border text-xs font-bold" style={{ borderColor: '#f0c4d0', backgroundColor: '#fdf5f7', color: '#c8386e' }}>+</button>
                                     </div>
                                     {product.price != null && qty > 1 && <span className="text-[10px] font-semibold" style={{ color: '#c8386e' }}>€{(Number(product.price) * qty).toFixed(2)}</span>}
                                     <button onClick={() => toggleSelection(product.code)} className="ml-auto flex h-5 w-5 items-center justify-center rounded-full text-slate-300 hover:bg-rose-50 hover:text-rose-500" title="Remove">×</button>
                                   </div>
                                 ) : (
-                                  <button onClick={() => toggleSelection(product.code)} className="mt-auto w-full rounded-b-xl border-t py-1.5 text-[11px] font-semibold transition"
+                                  <button onClick={() => toggleSelection(product.code)} className="mt-auto w-full rounded-b-lg border-t py-1 text-[10px] font-semibold transition"
                                     style={{ borderColor: '#f0e8f0', backgroundColor: '#fdf5f7', color: '#c8386e' }}
                                     onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#c8386e'; e.currentTarget.style.color = '#ffffff' }}
                                     onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fdf5f7'; e.currentTarget.style.color = '#c8386e' }}>
-                                    + Add to order
+                                    + Add
                                   </button>
                                 )}
                               </div>
@@ -9551,7 +9549,7 @@ function ProductsModule({ moduleView = 'products' }) {
                           })}
                         </div>
                         {!showAll && familyFilteredProducts.length > CAT_PAGE_SIZE && (
-                          <div className="border-t px-4 py-3 text-center" style={{ borderColor: '#fde8f0' }}>
+                          <div className="border-t px-3 py-2 text-center" style={{ borderColor: '#fde8f0' }}>
                             <button onClick={() => setExpandedShowAll(prev => { const n = new Set(prev); n.add(cat); return n })} className="text-xs font-semibold hover:underline" style={{ color: '#c8386e' }}>
                               Show all {familyFilteredProducts.length} items in {cat}
                             </button>
