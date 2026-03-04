@@ -6293,6 +6293,35 @@ function PortalForgotPassword() {
   )
 }
 
+// B2B shop sidebar groupings — mirrors the public FullCataloguePage chapter structure
+const B2B_SIDEBAR_GROUPS = [
+  {
+    label: 'Colours',
+    cats: [
+      'SOLID GEL POLISH', 'CAT EYE', 'GLITTERS', 'GLASS EFFECT',
+      'SHIMMER COLORS', 'METALLIC COLLECTION', 'PEARL', 'JELLY',
+      'SNOWFLAKE', 'PMA', 'NEW YORK', 'BY THE OCEAN',
+      'SPIX & SPEX', 'TUTTI FRUTTI GLASS',
+    ],
+  },
+  {
+    label: 'Essentials',
+    cats: ['BASES', 'TOPS', 'NAIL PREPARATIONS', 'LIQUIDS'],
+  },
+  {
+    label: 'Builder Systems',
+    cats: ['BUILDER GEL SYSTEMS', 'MULTIMIX'],
+  },
+  {
+    label: 'Tools & Equipment',
+    cats: ['TOOLS', 'EQUIPMENT', 'BRUSHES'],
+  },
+  {
+    label: 'Professional Range',
+    cats: ['NAIL ART', 'CONSUMABLES', 'NAIL HAND & FOOT CARE'],
+  },
+]
+
 function ProductsModule({ moduleView = 'products' }) {
   const location = useLocation()
   const navigate = useNavigate()
@@ -7453,13 +7482,10 @@ function ProductsModule({ moduleView = 'products' }) {
     return itemsTotal + pkgTotal
   }, [selectedProducts, packageCartItems, itemQtys])
 
+  // Single-select: one category visible at a time in sidebar layout
   const toggleCategory = (cat) => {
-    setExpandedCategories(prev => {
-      const next = new Set(prev)
-      if (next.has(cat)) next.delete(cat)
-      else next.add(cat)
-      return next
-    })
+    setExpandedCategories(new Set([cat]))
+    setB2bColorFamilyFilter('ALL')
   }
 
   const toggleSelection = (code) => {
@@ -8710,34 +8736,6 @@ function ProductsModule({ moduleView = 'products' }) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
-        <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-sm font-semibold text-transparent">Connection Status</h3>
-        <div className="mt-3 grid gap-2 sm:grid-cols-3">
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
-            <p className="font-semibold text-slate-900">Auth</p>
-            <div className="mt-1 flex items-center gap-2">
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${authBadgeClass}`}>{authLabel}</span>
-              <span>{hasSupabaseConfig ? 'Supabase' : 'Demo mode'}</span>
-            </div>
-          </div>
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
-            <p className="font-semibold text-slate-900">Product Feed</p>
-            <div className="mt-1 flex items-center gap-2">
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${feedBadgeClass}`}>{feedStatus}</span>
-              <span>{isLoadingFeed ? 'Fetching products' : 'Collection source'}</span>
-            </div>
-          </div>
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
-            <p className="font-semibold text-slate-900">Finalize Order Endpoint</p>
-            <div className="mt-1 flex items-center gap-2">
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${checkoutBadgeClass}`}>
-                {checkoutIsLive ? 'Live' : 'Unavailable'}
-              </span>
-              <span>{checkoutIsLive ? `Supabase table: ${ordersTable}` : ORDER_INBOX_EMAIL}</span>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -8748,22 +8746,7 @@ function ProductsModule({ moduleView = 'products' }) {
             <span>{totalUnits} total units</span>
           </div>
         </div>
-        <p className="mt-2 text-xs text-slate-500">{isLoadingFeed ? 'Loading live feed...' : feedMessage}</p>
-        <p className="mt-1 text-[11px] text-slate-500">{shippingMetadataStatus}</p>
-        <div className="mt-2 flex flex-wrap gap-2">
-          <button
-            onClick={() => navigate('/portal/dashboard/catalog')}
-            className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            Browse & Buy Products
-          </button>
-          <button
-            onClick={() => window.location.reload()}
-            className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            Refresh Feed
-          </button>
-        </div>
+
 
         {/* ── LIVE COLOUR CHART (order review) ── */}
         <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
@@ -9304,11 +9287,64 @@ function ProductsModule({ moduleView = 'products' }) {
         )}
       </div>
 
-      {isCatalogView && (
-      <div className="rounded-xl border border-slate-200 bg-white text-sm">
+      {isCatalogView && (() => {
+        // Derive active category from expandedCategories (single-select)
+        const activeCat = expandedCategories.size > 0
+          ? [...expandedCategories][0]
+          : (groupedFilteredProducts[0]?.[0] ?? '')
+        const activeCatProducts = groupedFilteredProducts.find(([c]) => c === activeCat)?.[1] || []
+        const showAll = expandedShowAll.has(activeCat)
+        const CAT_PAGE_SIZE = 48
+        const isColorsCategory = activeCatProducts[0]?.parentSection === 'COLORS'
+          || activeCat.toUpperCase().includes('COLOR') || activeCat.toUpperCase().includes('COLOUR')
+        const familyFilteredProducts = isColorsCategory && b2bColorFamilyFilter !== 'ALL'
+          ? activeCatProducts.filter(p => (p.colorFamily || resolveColorFamilyKey(p.name)) === b2bColorFamilyFilter)
+          : activeCatProducts
+        const visibleProducts = !showAll && familyFilteredProducts.length > CAT_PAGE_SIZE
+          ? familyFilteredProducts.slice(0, CAT_PAGE_SIZE)
+          : familyFilteredProducts
+        const selectedInActiveCat = activeCatProducts.filter(p => selectedCodes.includes(p.code)).length
+        const availableCatNames = new Set(groupedFilteredProducts.map(([c]) => c))
+        const groupedCatNamesSet = new Set(B2B_SIDEBAR_GROUPS.flatMap(g => g.cats))
+        const ungroupedCats = groupedFilteredProducts.filter(([cat]) => !groupedCatNamesSet.has(cat))
+        const SWATCH = { Black: 'bg-black', Blue: 'bg-blue-500', Brown: 'bg-amber-700', 'Coral Orange': 'bg-orange-400', Green: 'bg-emerald-500', Grey: 'bg-slate-400', Neon: 'bg-lime-400', Pink: 'bg-pink-400', Purple: 'bg-violet-500', Red: 'bg-red-500', White: 'bg-white border border-slate-300', Yellow: 'bg-yellow-300' }
 
-        {/* order bar */}
-        <div className="flex items-center justify-between gap-2 border-b px-3 py-2" style={{ borderColor: '#f0c4d0' }}>
+        const renderSidebarGroup = (group) => {
+          const available = group.cats.filter(c => availableCatNames.has(c))
+          if (!available.length) return null
+          return (
+            <div key={group.label}>
+              <p className="px-3 pt-3 pb-1 text-[9px] font-black uppercase tracking-widest" style={{ color: '#b4abc0' }}>{group.label}</p>
+              {available.map(cat => {
+                const catTotal = groupedFilteredProducts.find(([c]) => c === cat)?.[1]?.length ?? 0
+                const selInCat = (groupedFilteredProducts.find(([c]) => c === cat)?.[1] ?? []).filter(p => selectedCodes.includes(p.code)).length
+                const isActive = cat === activeCat
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => toggleCategory(cat)}
+                    className={`flex w-full items-center justify-between py-1.5 text-left text-[11px] transition-colors ${isActive ? 'font-semibold' : 'font-normal text-slate-600 hover:bg-rose-50/60'}`}
+                    style={isActive
+                      ? { backgroundColor: '#fdf0f5', color: '#c8386e', paddingLeft: '10px', paddingRight: '8px', borderLeft: '2px solid #c8386e' }
+                      : { paddingLeft: '12px', paddingRight: '8px', borderLeft: '2px solid transparent' }}
+                  >
+                    <span className="truncate pr-1 leading-tight">{cat}</span>
+                    <span className="flex shrink-0 items-center gap-1">
+                      <span className="text-[9px] text-slate-400">{catTotal}</span>
+                      {selInCat > 0 && <span className="rounded-full px-1 text-[8px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>✓{selInCat}</span>}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )
+        }
+
+        return (
+        <div className="rounded-xl border border-slate-200 bg-white text-sm overflow-hidden">
+
+          {/* order bar */}
+          <div className="flex items-center justify-between gap-2 border-b px-3 py-2" style={{ borderColor: '#f0c4d0' }}>
           <span className="truncate text-xs font-semibold text-slate-700">
             {(selectedCodes.length + packageCartItems.length) > 0
               ? `${selectedCodes.length + packageCartItems.length} items · ${totalUnits} units${orderTotal > 0 ? ` · €${orderTotal.toFixed(2)}` : ''}`
@@ -9324,136 +9360,156 @@ function ProductsModule({ moduleView = 'products' }) {
           </div>
         </div>
 
-        {/* search + filters */}
-        <div className="border-b px-3 py-2" style={{ borderColor: '#f0e8f0' }}>
-          <input
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            placeholder="Search products…"
-            className="w-full rounded border px-2 py-1.5 text-xs focus:outline-none"
-            style={{ borderColor: '#e2e8f0' }}
-          />
-          <div className="mt-1.5 flex gap-2">
-            <label className="flex cursor-pointer items-center gap-1 text-xs" style={showSelectedOnly ? { color: '#c8386e', fontWeight: 600 } : { color: '#64748b' }}>
-              <input type="checkbox" checked={showSelectedOnly} onChange={e => setShowSelectedOnly(e.target.checked)} className="accent-rose-500" />
-              Selected only
-            </label>
-            <label className="flex cursor-pointer items-center gap-1 text-xs" style={showCleanScienceOnly ? { color: '#c8386e', fontWeight: 600 } : { color: '#64748b' }}>
-              <input type="checkbox" checked={showCleanScienceOnly} onChange={e => setShowCleanScienceOnly(e.target.checked)} className="accent-rose-500" />
-              HEMA-free
-            </label>
+          {/* search + filters */}
+          <div className="border-b px-3 py-2" style={{ borderColor: '#f0e8f0' }}>
+            <input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Search products…"
+              className="w-full rounded border px-2 py-1.5 text-xs focus:outline-none"
+              style={{ borderColor: '#e2e8f0' }}
+            />
+            <div className="mt-1.5 flex gap-2">
+              <label className="flex cursor-pointer items-center gap-1 text-xs" style={showSelectedOnly ? { color: '#c8386e', fontWeight: 600 } : { color: '#64748b' }}>
+                <input type="checkbox" checked={showSelectedOnly} onChange={e => setShowSelectedOnly(e.target.checked)} className="accent-rose-500" />
+                Selected only
+              </label>
+              <label className="flex cursor-pointer items-center gap-1 text-xs" style={showCleanScienceOnly ? { color: '#c8386e', fontWeight: 600 } : { color: '#64748b' }}>
+                <input type="checkbox" checked={showCleanScienceOnly} onChange={e => setShowCleanScienceOnly(e.target.checked)} className="accent-rose-500" />
+                HEMA-free
+              </label>
+            </div>
           </div>
-        </div>
 
-        {/* category sections */}
-        <div>
-          {groupedFilteredProducts.length === 0 && (
-            <p className="px-3 py-6 text-center text-xs text-slate-400 italic">No products match your search.</p>
-          )}
-          {groupedFilteredProducts.map(([cat, catProducts]) => {
-            const isExpanded = expandedCategories.has(cat)
-            const showAll = expandedShowAll.has(cat)
-            const CAT_PAGE_SIZE = 48
-            const isColorsCategory = catProducts[0]?.parentSection === 'COLORS'
-              || cat.toUpperCase().includes('COLOR') || cat.toUpperCase().includes('COLOUR')
-            const familyFilteredProducts = isColorsCategory && b2bColorFamilyFilter !== 'ALL'
-              ? catProducts.filter(p => (p.colorFamily || resolveColorFamilyKey(p.name)) === b2bColorFamilyFilter)
-              : catProducts
-            const visibleProducts = isExpanded && !showAll && familyFilteredProducts.length > CAT_PAGE_SIZE
-              ? familyFilteredProducts.slice(0, CAT_PAGE_SIZE)
-              : familyFilteredProducts
-            const selectedInCat = catProducts.filter(p => selectedCodes.includes(p.code)).length
-            return (
-              <div key={cat} id={`b2b-cat-${cat}`} className="border-b last:border-b-0" style={{ borderColor: '#f0e8f0' }}>
-                {/* header */}
-                <button onClick={() => toggleCategory(cat)} className="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-slate-50">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold uppercase tracking-wide text-slate-800">{cat}</span>
-                    <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{catProducts.length}</span>
-                    {selectedInCat > 0 && (
-                      <span className="rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>✓{selectedInCat}</span>
+          {/* mobile category picker — grouped <select>, hidden on sm+ */}
+          <div className="sm:hidden border-b px-3 py-2" style={{ borderColor: '#f0e8f0', backgroundColor: '#fdfbfc' }}>
+            <select
+              value={activeCat}
+              onChange={e => toggleCategory(e.target.value)}
+              className="w-full rounded border px-2 py-1.5 text-xs font-medium text-slate-700"
+              style={{ borderColor: '#e2e8f0' }}
+            >
+              {B2B_SIDEBAR_GROUPS.map(group => {
+                const available = group.cats.filter(c => availableCatNames.has(c))
+                if (!available.length) return null
+                return (
+                  <optgroup key={group.label} label={group.label}>
+                    {available.map(c => <option key={c} value={c}>{c}</option>)}
+                  </optgroup>
+                )
+              })}
+              {ungroupedCats.length > 0 && (
+                <optgroup label="Other">
+                  {ungroupedCats.map(([c]) => <option key={c} value={c}>{c}</option>)}
+                </optgroup>
+              )}
+            </select>
+          </div>
+
+          {/* body: sidebar (desktop) + product panel */}
+          <div className="flex" style={{ minHeight: '320px' }}>
+
+            {/* LEFT SIDEBAR — desktop only */}
+            <div
+              className="hidden sm:flex sm:flex-col w-44 shrink-0 border-r overflow-y-auto"
+              style={{ borderColor: '#f0e8f0', maxHeight: 'min(72vh, 860px)' }}
+            >
+              {B2B_SIDEBAR_GROUPS.map(renderSidebarGroup)}
+              {ungroupedCats.length > 0 && renderSidebarGroup({ label: 'Other', cats: ungroupedCats.map(([c]) => c) })}
+              <div className="h-4 shrink-0" />
+            </div>
+
+            {/* MAIN CONTENT PANEL */}
+            <div className="flex-1 overflow-y-auto" style={{ maxHeight: 'min(72vh, 860px)' }}>
+
+              {groupedFilteredProducts.length === 0 && (
+                <p className="px-3 py-8 text-center text-xs text-slate-400 italic">No products match your search.</p>
+              )}
+
+              {activeCat && activeCatProducts.length > 0 && (
+                <>
+                  {/* category name + count header */}
+                  <div className="sticky top-0 z-10 flex items-center gap-2 border-b bg-white px-3 py-2" style={{ borderColor: '#f0e8f0' }}>
+                    <span className="text-xs font-bold uppercase tracking-wide text-slate-800">{activeCat}</span>
+                    <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{activeCatProducts.length}</span>
+                    {selectedInActiveCat > 0 && (
+                      <span className="rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>✓{selectedInActiveCat} selected</span>
                     )}
                   </div>
-                  <svg className={`h-3.5 w-3.5 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
 
-                {isExpanded && (
-                  <>
-                    {/* colour family pills */}
-                    {isColorsCategory && (() => {
-                      const families = [...new Set(catProducts.map(p => p.colorFamily).filter(Boolean))].sort()
-                      if (!families.length) return null
-                      const SWATCH = { Black: 'bg-black', Blue: 'bg-blue-500', Brown: 'bg-amber-700', 'Coral Orange': 'bg-orange-400', Green: 'bg-emerald-500', Grey: 'bg-slate-400', Neon: 'bg-lime-400', Pink: 'bg-pink-400', Purple: 'bg-violet-500', Red: 'bg-red-500', White: 'bg-white border border-slate-300', Yellow: 'bg-yellow-300' }
+                  {/* colour family pills for colour categories */}
+                  {isColorsCategory && (() => {
+                    const families = [...new Set(activeCatProducts.map(p => p.colorFamily).filter(Boolean))].sort()
+                    if (!families.length) return null
+                    return (
+                      <div className="flex flex-wrap gap-1 border-b px-3 py-2" style={{ borderColor: '#f0e8f0', backgroundColor: '#fdfbfc' }}>
+                        <button onClick={() => setB2bColorFamilyFilter('ALL')} className="rounded border px-2 py-0.5 text-[11px] font-medium" style={b2bColorFamilyFilter === 'ALL' ? { background: '#c8386e', borderColor: '#c8386e', color: '#fff' } : { borderColor: '#e2e8f0', color: '#555' }}>All</button>
+                        {families.map(f => (
+                          <button key={f} onClick={() => setB2bColorFamilyFilter(f)} className="flex items-center gap-1 rounded border px-2 py-0.5 text-[11px] font-medium" style={b2bColorFamilyFilter === f ? { background: '#c8386e', borderColor: '#c8386e', color: '#fff' } : { borderColor: '#e2e8f0', color: '#555' }}>
+                            <span className={`h-2 w-2 rounded-full ${SWATCH[f] || 'bg-slate-300'}`} />{f}
+                          </button>
+                        ))}
+                      </div>
+                    )
+                  })()}
+
+                  {/* product grid */}
+                  <div className="grid grid-cols-3 gap-px bg-slate-100 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                    {visibleProducts.map(product => {
+                      const selected = selectedCodes.includes(product.code)
+                      const qty = itemQtys[product.code] || 1
                       return (
-                        <div className="flex flex-wrap gap-1 border-b px-3 py-2" style={{ borderColor: '#f0e8f0', backgroundColor: '#fdfbfc' }}>
-                          <button onClick={() => setB2bColorFamilyFilter('ALL')} className="rounded border px-2 py-0.5 text-[11px] font-medium" style={b2bColorFamilyFilter === 'ALL' ? { background: '#c8386e', borderColor: '#c8386e', color: '#fff' } : { borderColor: '#e2e8f0', color: '#555' }}>All</button>
-                          {families.map(f => (
-                            <button key={f} onClick={() => setB2bColorFamilyFilter(f)} className="flex items-center gap-1 rounded border px-2 py-0.5 text-[11px] font-medium" style={b2bColorFamilyFilter === f ? { background: '#c8386e', borderColor: '#c8386e', color: '#fff' } : { borderColor: '#e2e8f0', color: '#555' }}>
-                              <span className={`h-2 w-2 rounded-full ${SWATCH[f] || 'bg-slate-300'}`} />{f}
+                        <div key={product.code} className="flex flex-col bg-white" style={selected ? { outline: '2px solid #c8386e', outlineOffset: '-2px' } : {}}>
+                          {/* image */}
+                          <div className="relative aspect-square w-full cursor-pointer bg-slate-50" onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}>
+                            {product.imageUrl && <img src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />}
+                            {selected && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
+                          </div>
+                          {/* info */}
+                          <div className="px-1.5 pt-1 pb-0.5">
+                            <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{product.name}</p>
+                            {product.price != null && <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{Number(product.price).toFixed(2)}</p>}
+                          </div>
+                          {/* action */}
+                          {selected ? (
+                            <div className="mt-auto flex items-center justify-center gap-1 border-t px-1 py-1" style={{ borderColor: '#fde8f0' }}>
+                              <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(p => ({...p, [product.code]: q})) }} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>−</button>
+                              <span className="w-4 text-center text-[10px] font-bold">{qty}</span>
+                              <button onClick={() => setItemQtys(p => ({...p, [product.code]: qty + 1}))} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>+</button>
+                            </div>
+                          ) : (
+                            <button onClick={() => toggleSelection(product.code)} className="mt-auto border-t py-1 text-center text-[10px] font-semibold" style={{ borderColor: '#f0e8f0', color: '#c8386e' }}>
+                              + Add
                             </button>
-                          ))}
+                          )}
                         </div>
                       )
-                    })()}
+                    })}
+                  </div>
 
-                    {/* product grid */}
-                    <div className="grid grid-cols-3 gap-px bg-slate-100 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
-                      {visibleProducts.map(product => {
-                        const selected = selectedCodes.includes(product.code)
-                        const qty = itemQtys[product.code] || 1
-                        return (
-                          <div key={product.code} className="flex flex-col bg-white" style={selected ? { outline: '2px solid #c8386e', outlineOffset: '-2px' } : {}}>
-                            {/* image */}
-                            <div className="relative aspect-square w-full cursor-pointer bg-slate-50" onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}>
-                              {product.imageUrl && <img src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />}
-                              {selected && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
-                            </div>
-                            {/* info */}
-                            <div className="px-1.5 pt-1 pb-0.5">
-                              <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{product.name}</p>
-                              {product.price != null && <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{Number(product.price).toFixed(2)}</p>}
-                            </div>
-                            {/* action */}
-                            {selected ? (
-                              <div className="mt-auto flex items-center justify-center gap-1 border-t px-1 py-1" style={{ borderColor: '#fde8f0' }}>
-                                <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(p => ({...p, [product.code]: q})) }} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>−</button>
-                                <span className="w-4 text-center text-[10px] font-bold">{qty}</span>
-                                <button onClick={() => setItemQtys(p => ({...p, [product.code]: qty + 1}))} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>+</button>
-                              </div>
-                            ) : (
-                              <button onClick={() => toggleSelection(product.code)} className="mt-auto border-t py-1 text-center text-[10px] font-semibold" style={{ borderColor: '#f0e8f0', color: '#c8386e' }}>
-                                + Add
-                              </button>
-                            )}
-                          </div>
-                        )
-                      })}
+                  {/* show all pagination */}
+                  {!showAll && familyFilteredProducts.length > CAT_PAGE_SIZE && (
+                    <div className="border-t px-3 py-2 text-center" style={{ borderColor: '#f0e8f0' }}>
+                      <button onClick={() => setExpandedShowAll(prev => { const n = new Set(prev); n.add(activeCat); return n })} className="text-xs font-semibold" style={{ color: '#c8386e' }}>
+                        Show all {familyFilteredProducts.length} items ↓
+                      </button>
                     </div>
+                  )}
+                </>
+              )}
 
-                    {!showAll && familyFilteredProducts.length > CAT_PAGE_SIZE && (
-                      <div className="border-t px-3 py-2 text-center" style={{ borderColor: '#f0e8f0' }}>
-                        <button onClick={() => setExpandedShowAll(prev => { const n = new Set(prev); n.add(cat); return n })} className="text-xs font-semibold" style={{ color: '#c8386e' }}>
-                          Show all {familyFilteredProducts.length} items ↓
-                        </button>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            )
-          })}
-        </div>
-
-        {!isLoadingFeed && !filteredProducts.length && (
-          <div className="m-3 rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-            <p>Product feed unavailable.</p>
-            <button onClick={() => window.location.reload()} className="mt-1 font-semibold underline">Retry</button>
+            </div>
           </div>
-        )}
-      </div>
-      )}
+
+          {!isLoadingFeed && !filteredProducts.length && (
+            <div className="m-3 rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+              <p>Product feed unavailable.</p>
+              <button onClick={() => window.location.reload()} className="mt-1 font-semibold underline">Retry</button>
+            </div>
+          )}
+        </div>
+        )
+      })()}
 
     </div>
   )
