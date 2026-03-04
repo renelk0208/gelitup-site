@@ -9,6 +9,17 @@ const manifest = JSON.parse(
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-leaflet': ['leaflet', 'react-leaflet'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+        },
+      },
+    },
+  },
   plugins: [react(), VitePWA({
     manifestFilename: 'manifest.json',
     registerType: 'autoUpdate',

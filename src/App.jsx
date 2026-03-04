@@ -1,24 +1,13 @@
-﻿import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+﻿import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { jsPDF } from 'jspdf'
-import autoTable from 'jspdf-autotable'
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
-import L from 'leaflet'
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
-import markerIcon from 'leaflet/dist/images/marker-icon.png'
-import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import appLogo from '/gelitup_logo.png'
 import PWABadge from './PWABadge.jsx'
 import ImportedAnyPage from './pages/imported/ImportedAnyPage.jsx'
-import AdminDashboard from './pages/AdminDashboard.jsx'
 import { hasSupabaseConfig, supabase } from './lib/supabaseClient'
 import useB2BIntelligence from './lib/useB2BIntelligence'
 
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-})
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
+const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
 
 const B2B_EMAIL = 'gelitup.portal@gelitup.com'
 const PRODUCT_CATEGORIES = ['Solid Colours', 'Builder Gels', 'Base & Top', 'Nail Care', 'Accessories']
@@ -4990,23 +4979,14 @@ function DistributorsPage() {
         </p>
 
         <div className="mt-3 overflow-hidden rounded-xl border border-rose-200 bg-white">
-          <MapContainer
-            key={selectedCountry || 'all-countries'}
-            center={mapCenter}
-            zoom={mapZoom}
-            scrollWheelZoom={false}
-            className="h-[320px] w-full sm:h-[420px]"
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          <Suspense fallback={<div className="h-[320px] w-full animate-pulse bg-rose-50 sm:h-[420px]" />}>
+            <DistributorMap
+              center={mapCenter}
+              zoom={mapZoom}
+              selectedCountry={selectedCountry}
+              points={DISTRIBUTOR_COUNTRY_POINTS}
             />
-            {DISTRIBUTOR_COUNTRY_POINTS.map((item) => (
-              <Marker key={item.country} position={item.coordinates}>
-                <Popup>{item.country}</Popup>
-              </Marker>
-            ))}
-          </MapContainer>
+          </Suspense>
         </div>
       </div>
 
@@ -7540,6 +7520,8 @@ function ProductsModule({ moduleView = 'products' }) {
 
   const exportProformaPdf = async () => {
     if (!lastProformaInvoice) return
+    const { jsPDF } = await import('jspdf')
+    const { default: autoTable } = await import('jspdf-autotable')
 
     const getImageFormat = (dataUrl) => dataUrl.includes('image/jpeg') ? 'JPEG' : 'PNG'
 
@@ -10832,6 +10814,7 @@ function PortalDashboard({ onLogout }) {
   }, [])
 
   const printComplianceCertificate = useCallback(async () => {
+    const { jsPDF } = await import('jspdf')
     const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' })
     const margin = 44
     const titleY = 72
@@ -11276,7 +11259,11 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
   }
 
   if (isAdmin) {
-    return <AdminDashboard onLogout={onLogout} />
+    return (
+      <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#c8386e] border-t-transparent" /></div>}>
+        <AdminDashboard onLogout={onLogout} />
+      </Suspense>
+    )
   }
 
   return <PortalDashboard onLogout={onLogout} />
