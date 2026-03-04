@@ -4946,11 +4946,13 @@ function DistributorsPage() {
 
   return (
     <section className="space-y-5">
-      <div className="rounded-2xl bg-gradient-to-br from-[#1a0810] via-[#3d1525] to-[#5c1b36] p-5 text-white sm:p-8">
-        <p className="text-xs uppercase tracking-[0.16em] text-rose-200/90">Verified Distribution Network</p>
+
+      {/* HERO — matches DistributorPackagesPage hero */}
+      <div className="relative overflow-hidden rounded-2xl p-5 sm:p-8" style={{ backgroundColor: '#1a1a1a', color: '#ffffff' }}>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: '#c8386e' }}>Verified Distribution Network</p>
         <h1 className="heading-on-dark mt-2 text-2xl font-extrabold sm:text-4xl">Official GEL.IT.UP by GIUP® Distributors</h1>
-        <p className="mt-3 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] text-white/95 sm:text-base">
-          LIVE COVERAGE DATA. VERIFIED NETWORK. LEGITIMATE B2B DATABASE.
+        <p className="mt-3 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] sm:text-base" style={{ color: 'rgba(255,255,255,0.75)' }}>
+          Live Coverage Data. Verified Network. Legitimate B2B Database.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           {DISTRIBUTOR_COUNTRY_POINTS.map((item) => (
@@ -4958,9 +4960,10 @@ function DistributorsPage() {
               key={item.country}
               type="button"
               onClick={() => setSelectedCountry(item.country)}
-              className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] transition ${selectedCountry === item.country
-                ? 'border-rose-200 bg-white/20 text-white ring-1 ring-white/30'
-                : 'border-white/30 bg-white/10 text-white hover:bg-white/20'}`}
+              className="rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] transition"
+              style={selectedCountry === item.country
+                ? { backgroundColor: '#c8386e', color: '#ffffff', border: '1px solid #c8386e' }
+                : { backgroundColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.20)' }}
             >
               {item.country}
             </button>
@@ -4968,18 +4971,18 @@ function DistributorsPage() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-rose-200 bg-[#fdf6f2] p-4 sm:p-5">
-        <h2 className="heading-on-light text-lg font-extrabold text-[#2c0a16] sm:text-xl">Distributor Coverage Map</h2>
-        <p className="mt-2 text-sm text-[#2c0a16]">
+      {/* MAP SECTION — matches boutique card tint */}
+      <div className="rounded-2xl p-4 sm:p-5" style={{ border: '1px solid #f0c4d0', backgroundColor: '#fdf5f7' }}>
+        <h2 className="heading-on-light text-lg font-extrabold sm:text-xl" style={{ color: '#1a1a1a' }}>Distributor Coverage Map</h2>
+        <p className="mt-2 text-sm" style={{ color: '#7d4a57' }}>
           Country-level coverage with one map pin per official market.
           {' '}
-          <a href={LEEUKOPF_DISTRIBUTORS_SOURCE_URL} target="_blank" rel="noreferrer" className="font-semibold underline">
+          <a href={LEEUKOPF_DISTRIBUTORS_SOURCE_URL} target="_blank" rel="noreferrer" className="font-semibold underline" style={{ color: '#c8386e' }}>
             View source
           </a>
         </p>
-
-        <div className="mt-3 overflow-hidden rounded-xl border border-rose-200 bg-white">
-          <Suspense fallback={<div className="h-[320px] w-full animate-pulse bg-rose-50 sm:h-[420px]" />}>
+        <div className="mt-3 overflow-hidden rounded-xl bg-white" style={{ border: '1px solid #f0c4d0' }}>
+          <Suspense fallback={<div className="h-[320px] w-full animate-pulse sm:h-[420px]" style={{ backgroundColor: '#fdf0f4' }} />}>
             <DistributorMap
               center={mapCenter}
               zoom={mapZoom}
@@ -4990,15 +4993,17 @@ function DistributorsPage() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-rose-900/20 bg-gradient-to-br from-[#2c0a16] to-[#5c1b36] p-4 text-white sm:p-5">
+      {/* CTA — matches professional tier dark header */}
+      <div className="rounded-2xl p-4 sm:p-5" style={{ backgroundColor: '#1a1a1a' }}>
         <h2 className="heading-on-dark text-lg font-extrabold sm:text-xl">Register Now for Distribution</h2>
-        <p className="mt-2 text-sm text-rose-100/90">Client onboarding for verified trade partners is handled through the official B2B registration workflow.</p>
+        <p className="mt-2 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>Client onboarding for verified trade partners is handled through the official B2B registration workflow.</p>
         <div className="mt-4">
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-rose-400">
+          <NavLink to="/become-distributor" className="btn-cta-rose inline-flex rounded-lg px-4 py-2 text-sm font-semibold transition duration-300">
             Open Client Registration
           </NavLink>
         </div>
       </div>
+
     </section>
   )
 }
