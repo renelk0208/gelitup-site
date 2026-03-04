@@ -1361,9 +1361,9 @@ function DistributorPackagesPage() {
     <section className="space-y-6">
 
       {/* HERO */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0f0f0f] via-[#1c0a2e] to-[#3b0764] p-7 text-white sm:p-10">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(192,38,211,0.12),transparent_60%)]" />
-        <p className="relative text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-300">GEL.IT.UP by GIUP® — Verified Distribution Network</p>
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1a0810] via-[#3d1525] to-[#5c1b36] p-7 text-white sm:p-10">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(180,80,100,0.18),transparent_60%)]" />
+        <p className="relative text-xs font-semibold uppercase tracking-[0.2em] text-rose-300">GEL.IT.UP by GIUP® — Verified Distribution Network</p>
         <h1 className="heading-on-dark relative mt-3 text-3xl font-black leading-tight tracking-tight drop-shadow-lg sm:text-5xl">
           Distribution<br className="hidden sm:block" /> Partnership Tiers
         </h1>
@@ -1371,7 +1371,7 @@ function DistributorPackagesPage() {
           Built for serious operators. Every tier ships with full EU regulatory documentation and a social media brand engine — because your success is our brand in motion.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
-          <NavLink to="/full-catalogue" className="inline-flex rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white transition duration-300 hover:bg-fuchsia-500">
+          <NavLink to="/full-catalogue" className="inline-flex rounded-lg bg-rose-600 px-5 py-2.5 text-sm font-bold text-white transition duration-300 hover:bg-rose-500">
             View Product Catalogue
           </NavLink>
           <NavLink to="/become-distributor" className="inline-flex rounded-lg border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-bold text-white backdrop-blur-sm transition duration-300 hover:bg-white/20">
@@ -1382,22 +1382,22 @@ function DistributorPackagesPage() {
 
       {/* KEY DIFFERENTIATORS BANNER */}
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="flex items-start gap-3 rounded-2xl border border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 to-purple-50 p-4">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-fuchsia-500 to-purple-600 text-white">
+        <div className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-gradient-to-r from-rose-50 to-pink-50 p-4">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-rose-500 to-rose-700 text-white">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
           </div>
           <div>
-            <p className="text-sm font-black uppercase tracking-wide text-fuchsia-800">EU Regulatory Ready</p>
-            <p className="mt-0.5 text-xs text-fuchsia-700/80">Full compliance documentation, HEMA-Free & TPO-Free certificates, and EC 1223/2009 declaration support — handled for you, not by you.</p>
+            <p className="text-sm font-black uppercase tracking-wide text-rose-800">EU Regulatory Ready</p>
+            <p className="mt-0.5 text-xs text-rose-700/80">Full compliance documentation, HEMA-Free & TPO-Free certificates, and EC 1223/2009 declaration support — handled for you, not by you.</p>
           </div>
         </div>
-        <div className="flex items-start gap-3 rounded-2xl border border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 p-4">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 text-white">
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-rose-50 p-4">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#c4956c] to-[#8b5840] text-white">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
           </div>
           <div>
-            <p className="text-sm font-black uppercase tracking-wide text-purple-800">Social Media Brand Engine</p>
-            <p className="mt-0.5 text-xs text-purple-700/80">Viral-ready content, branded assets, and territory advertising support that turns your distribution into a visible, growing movement.</p>
+            <p className="text-sm font-black uppercase tracking-wide text-amber-900">Social Media Brand Engine</p>
+            <p className="mt-0.5 text-xs text-amber-800/80">Viral-ready content, branded assets, and territory advertising support that turns your distribution into a visible, growing movement.</p>
           </div>
         </div>
       </div>
@@ -1405,10 +1405,10 @@ function DistributorPackagesPage() {
       {/* BOUTIQUE TIER */}
       <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         {/* Tier header bar */}
-        <div className="bg-gradient-to-r from-[#6b7280] via-[#9ca3af] to-[#6b7280] px-6 py-4">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/70">Entry Tier — Silver</p>
+        <div className="bg-gradient-to-r from-[#7a6060] via-[#b09090] to-[#7a6060] px-6 py-4">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-rose-100/80">Entry Tier — Pearl</p>
           <h2 className="mt-0.5 text-xl font-black text-white sm:text-2xl">BOUTIQUE — The Foundation</h2>
-          <p className="mt-1 text-sm text-white/90">Launch with confidence. The smartest entry point for localized distribution with everything you need to move product and build a client base instantly.</p>
+          <p className="mt-1 text-sm text-rose-50/90">Launch with confidence. The smartest entry point for localized distribution with everything you need to move product and build a client base instantly.</p>
         </div>
         {/* Rows */}
         <div className="divide-y divide-slate-100">
@@ -1416,32 +1416,32 @@ function DistributorPackagesPage() {
             <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Market Focus</p>
             <p className="text-sm font-semibold text-slate-800">Localized Distribution</p>
           </div>
-          <div className="flex items-start gap-4 bg-gradient-to-r from-fuchsia-50/60 to-white px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-fuchsia-500">Product Spectrum</p>
+          <div className="flex items-start gap-4 bg-gradient-to-r from-rose-50/60 to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-rose-500">Product Spectrum</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-500" />Top 120 Core Shades</li>
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-500" />200 SKUs — Builder Systems, Brushes &amp; Essentials</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-400" />Top 120 Core Shades</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-400" />200 SKUs — Builder Systems, Brushes &amp; Essentials</li>
             </ul>
           </div>
-          <div className="flex items-start gap-4 bg-gradient-to-r from-purple-50/60 to-white px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-purple-500">Support Package</p>
+          <div className="flex items-start gap-4 bg-gradient-to-r from-pink-50/60 to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-pink-500">Support Package</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-purple-400" />Digital Brand Assets</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-pink-400" />Digital Brand Assets</li>
               <li className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-500" />
+                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-500" />
                 Viral Social Media Content
-                <span className="rounded-full bg-fuchsia-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">Brand Power</span>
+                <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-700">Brand Power</span>
               </li>
               <li className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-green-500" />
+                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-500" />
                 EU Regulatory Support
-                <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-700">Compliance Included</span>
+                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700">Compliance Included</span>
               </li>
             </ul>
           </div>
         </div>
         <div className="px-6 py-4">
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-gradient-to-r from-[#4b5563] to-[#6b7280] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:from-[#374151] hover:to-[#4b5563]">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-gradient-to-r from-[#7a6060] to-[#b09090] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:from-[#5c4545] hover:to-[#8a7070]">
             Request Boutique Tier Pricing →
           </NavLink>
         </div>
@@ -1449,44 +1449,44 @@ function DistributorPackagesPage() {
 
       {/* PROFESSIONAL TIER */}
       <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="bg-gradient-to-r from-[#78350f] via-[#b45309] to-[#78350f] px-6 py-4">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-200">Growth Tier — Gold</p>
+        <div className="bg-gradient-to-r from-[#6b4535] via-[#a0684a] to-[#6b4535] px-6 py-4">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-rose-200">Growth Tier — Rose Gold</p>
           <h2 className="mt-0.5 text-xl font-black text-white sm:text-2xl">PROFESSIONAL — The Expanded Spectrum</h2>
-          <p className="mt-1 text-sm text-amber-50/90">Scale intelligently. A broader product range, physical brand presence, and deeper marketing tools designed for distributors ready to dominate their region.</p>
+          <p className="mt-1 text-sm text-rose-50/90">Scale intelligently. A broader product range, physical brand presence, and deeper marketing tools designed for distributors ready to dominate their region.</p>
         </div>
         <div className="divide-y divide-slate-100">
           <div className="flex items-start gap-4 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
             <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Market Focus</p>
             <p className="text-sm font-semibold text-slate-800">Localized Distribution</p>
           </div>
-          <div className="flex items-start gap-4 bg-gradient-to-r from-amber-50/60 to-white px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-amber-600">Product Spectrum</p>
+          <div className="flex items-start gap-4 bg-gradient-to-r from-orange-50/60 to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-[#a0684a]">Product Spectrum</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />150 Core Shades</li>
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />280 SKU Recommendation Package</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#c4956c]" />150 Core Shades</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#c4956c]" />280 SKU Recommendation Package</li>
             </ul>
           </div>
-          <div className="flex items-start gap-4 bg-gradient-to-r from-amber-50/40 to-white px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-amber-700">Support Package</p>
+          <div className="flex items-start gap-4 bg-gradient-to-r from-orange-50/40 to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-[#8b5840]">Support Package</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />Digital Brand Assets</li>
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />Marketing Material</li>
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />Branded Salon Visibility</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#c4956c]" />Digital Brand Assets</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#c4956c]" />Marketing Material</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#c4956c]" />Branded Salon Visibility</li>
               <li className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-500" />
+                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-500" />
                 Viral Social Media Content
-                <span className="rounded-full bg-fuchsia-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">Brand Power</span>
+                <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-700">Brand Power</span>
               </li>
               <li className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-green-500" />
+                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-500" />
                 EU Regulatory Support
-                <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-700">Compliance Included</span>
+                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700">Compliance Included</span>
               </li>
             </ul>
           </div>
         </div>
         <div className="px-6 py-4">
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-gradient-to-r from-[#78350f] to-[#b45309] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:from-[#92400e] hover:to-[#ca8a04]">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-gradient-to-r from-[#6b4535] to-[#a0684a] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:from-[#5c3a2a] hover:to-[#8b5840]">
             Request Professional Tier Pricing →
           </NavLink>
         </div>
@@ -1494,51 +1494,51 @@ function DistributorPackagesPage() {
 
       {/* AUTHORITY TIER */}
       <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="bg-gradient-to-r from-[#1e293b] via-[#334155] to-[#1e293b] px-6 py-4">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-300">Elite Tier — Platinum</p>
+        <div className="bg-gradient-to-r from-[#2c0a16] via-[#5c1b36] to-[#2c0a16] px-6 py-4">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-rose-200">Elite Tier — Bordeaux</p>
           <h2 className="mt-0.5 text-xl font-black text-white sm:text-2xl">AUTHORITY — The Full Master Collection</h2>
-          <p className="mt-1 text-sm text-slate-200">Total market ownership. Every product, every shade, every support tool — with your territory backed by GEL.IT.UP advertising, live training, and white-glove regulatory handling.</p>
+          <p className="mt-1 text-sm text-rose-100/90">Total market ownership. Every product, every shade, every support tool — with your territory backed by GEL.IT.UP advertising, live training, and white-glove regulatory handling.</p>
         </div>
         <div className="divide-y divide-slate-100">
           <div className="flex items-start gap-4 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
             <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Market Focus</p>
             <p className="text-sm font-semibold text-slate-800">Full Territory Dominance</p>
           </div>
-          <div className="flex items-start gap-4 bg-gradient-to-r from-fuchsia-50/40 to-white px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-fuchsia-500">Product Spectrum</p>
+          <div className="flex items-start gap-4 bg-gradient-to-r from-rose-50/40 to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-rose-600">Product Spectrum</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-500" />Access to Complete GEL.IT.UP Portfolio</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-500" />Access to Complete GEL.IT.UP Portfolio</li>
             </ul>
           </div>
-          <div className="flex items-start gap-4 bg-gradient-to-r from-slate-900/[0.03] to-white px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Support Package</p>
+          <div className="flex items-start gap-4 bg-gradient-to-r from-rose-900/[0.03] to-white px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-rose-800">Support Package</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400" />Digital Brand Assets</li>
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400" />Marketing Material</li>
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400" />Branded Salon Visibility</li>
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400" />Seminar Training Events</li>
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400" />Online Seminars</li>
-              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400" />Promotional Package Availability</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-300" />Digital Brand Assets</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-300" />Marketing Material</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-300" />Branded Salon Visibility</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-300" />Seminar Training Events</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-300" />Online Seminars</li>
+              <li className="flex items-center gap-2 text-sm font-semibold text-slate-800"><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-300" />Promotional Package Availability</li>
               <li className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-500" />
+                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-500" />
                 Viral Social Media Content
-                <span className="rounded-full bg-fuchsia-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">Brand Power</span>
+                <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-700">Brand Power</span>
               </li>
               <li className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-fuchsia-600" />
+                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-600" />
                 Supported Territory Social Media Advertising
-                <span className="rounded-full bg-fuchsia-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">Brand Power</span>
+                <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-700">Brand Power</span>
               </li>
               <li className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-green-500" />
+                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-500" />
                 EU Regulatory Support
-                <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-700">Compliance Included</span>
+                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700">Compliance Included</span>
               </li>
             </ul>
           </div>
         </div>
         <div className="px-6 py-4">
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-gradient-to-r from-[#1e293b] to-[#334155] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:from-[#0f172a] hover:to-[#1e293b]">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-gradient-to-r from-[#2c0a16] to-[#5c1b36] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition duration-300 hover:from-[#1a0810] hover:to-[#3d1525]">
             Request Authority Tier Pricing →
           </NavLink>
         </div>
@@ -4988,8 +4988,8 @@ function DistributorsPage() {
 
   return (
     <section className="space-y-5">
-      <div className="rounded-2xl bg-[#1A1A1A] p-5 text-white sm:p-8">
-        <p className="text-xs uppercase tracking-[0.16em] text-white/80">Verified Distribution Network</p>
+      <div className="rounded-2xl bg-gradient-to-br from-[#1a0810] via-[#3d1525] to-[#5c1b36] p-5 text-white sm:p-8">
+        <p className="text-xs uppercase tracking-[0.16em] text-rose-200/90">Verified Distribution Network</p>
         <h1 className="heading-on-dark mt-2 text-2xl font-extrabold sm:text-4xl">Official GEL.IT.UP by GIUP® Distributors</h1>
         <p className="mt-3 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] text-white/95 sm:text-base">
           LIVE COVERAGE DATA. VERIFIED NETWORK. LEGITIMATE B2B DATABASE.
@@ -5001,7 +5001,7 @@ function DistributorsPage() {
               type="button"
               onClick={() => setSelectedCountry(item.country)}
               className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] transition ${selectedCountry === item.country
-                ? 'border-white bg-white text-[#1A1A1A]'
+                ? 'border-rose-200 bg-white/20 text-white ring-1 ring-white/30'
                 : 'border-white/30 bg-white/10 text-white hover:bg-white/20'}`}
             >
               {item.country}
@@ -5010,9 +5010,9 @@ function DistributorsPage() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#4A4A4A] bg-[#E8E8E8] p-4 sm:p-5">
-        <h2 className="heading-on-light text-lg font-extrabold text-[#1A1A1A] sm:text-xl">Distributor Coverage Map</h2>
-        <p className="mt-2 text-sm text-[#1A1A1A]">
+      <div className="rounded-2xl border border-rose-200 bg-[#fdf6f2] p-4 sm:p-5">
+        <h2 className="heading-on-light text-lg font-extrabold text-[#2c0a16] sm:text-xl">Distributor Coverage Map</h2>
+        <p className="mt-2 text-sm text-[#2c0a16]">
           Country-level coverage with one map pin per official market.
           {' '}
           <a href={LEEUKOPF_DISTRIBUTORS_SOURCE_URL} target="_blank" rel="noreferrer" className="font-semibold underline">
@@ -5020,7 +5020,7 @@ function DistributorsPage() {
           </a>
         </p>
 
-        <div className="mt-3 overflow-hidden rounded-xl border border-[#4A4A4A] bg-white">
+        <div className="mt-3 overflow-hidden rounded-xl border border-rose-200 bg-white">
           <MapContainer
             key={selectedCountry || 'all-countries'}
             center={mapCenter}
@@ -5041,11 +5041,11 @@ function DistributorsPage() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-4 text-white sm:p-5">
+      <div className="rounded-2xl border border-rose-900/20 bg-gradient-to-br from-[#2c0a16] to-[#5c1b36] p-4 text-white sm:p-5">
         <h2 className="heading-on-dark text-lg font-extrabold sm:text-xl">Register Now for Distribution</h2>
-        <p className="mt-2 text-sm text-white/90">Client onboarding for verified trade partners is handled through the official B2B registration workflow.</p>
+        <p className="mt-2 text-sm text-rose-100/90">Client onboarding for verified trade partners is handled through the official B2B registration workflow.</p>
         <div className="mt-4">
-          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-rose-400">
             Open Client Registration
           </NavLink>
         </div>
