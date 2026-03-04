@@ -4012,6 +4012,18 @@ function pickHomepageMedia(items = []) {
 function Nav({ onOpenContactModal }) {
   return (
     <nav className="hidden gap-2 md:flex">
+      <NavLink
+        to="/portal/login"
+        className={({ isActive }) =>
+          `rounded-lg border px-4 py-2 text-sm font-bold uppercase tracking-[0.06em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c8386e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
+            isActive
+              ? 'border-[#c8386e] bg-[#c8386e] !text-white'
+              : 'border-[#c8386e] bg-[#c8386e] !text-white hover:bg-[#a82d5a] hover:border-[#a82d5a]'
+          }`
+        }
+      >
+        Login to Ordering Portal
+      </NavLink>
       {navItems.map((item) => {
         if (item.isContactAction) {
           return (
@@ -4102,6 +4114,15 @@ function MobileNav({ onOpenContactModal }) {
 
         {/* Nav links */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+          <NavLink
+            to="/portal/login"
+            onClick={() => setOpen(false)}
+            className={() =>
+              'block rounded-lg border border-[#c8386e] bg-[#c8386e] px-4 py-3 text-sm font-bold uppercase tracking-[0.05em] !text-white transition duration-200 hover:bg-[#a82d5a]'
+            }
+          >
+            Login to Ordering Portal
+          </NavLink>
           {navItems.map((item) => {
             if (item.isContactAction) {
               return (
