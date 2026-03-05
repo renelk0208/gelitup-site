@@ -1697,6 +1697,8 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     ['ACRYLIC', 'BUILDER GEL SYSTEMS'],
     ['MULTIMIX', 'BUILDER GEL SYSTEMS'],
     ['CREME DE LA CREME', 'BUILDER GEL SYSTEMS'],
+    ['BRUSH ON BUILDER', 'BUILDER GEL SYSTEMS'],
+    ['SYNTHOGEL & POLYGEL', 'BUILDER GEL SYSTEMS'],
   ])
   
   const isBlockedImagePath = (imagePath = '') => {
@@ -6330,7 +6332,7 @@ const B2B_SIDEBAR_GROUPS = [
   },
   {
     label: 'Builder Systems',
-    cats: ['BUILDER GEL SYSTEMS', 'MULTIMIX'],
+    cats: ['3-in-1 Builder Gel', '3-in-1 Premium Builder Gel', 'Creme De La Creme', 'Multimix Polygel', 'Brush On Builder', 'Liquid Polygel'],
   },
   {
     label: 'Tools & Equipment',
@@ -7129,6 +7131,189 @@ function ProductsModule({ moduleView = 'products' }) {
           { codes: ['Βuffing_block', 'Βuffing block', 'buffing block', 'BUFFING BLOCK'], target: 'Nail Files 100/100' },
           // Nail Forms
           { codes: ['nail_forms_5', 'nail forms 5', 'NAIL FORMS 5', 'NAIL FORMS'], target: 'GEL.IT.UP by GIUP® Nail Forms' },
+          // Mirror Powders
+          { codes: ['MIRROR CLEAR', 'SP 8001', 'SP8001'], target: 'SP8001 Mirror Clear Powder' },
+          { codes: ['MIRROR X1', 'TR 1', 'TR1'], target: 'TR01 Mirror X1 Powder' },
+          { codes: ['MIRROR X2', 'TR 2', 'TR2'], target: 'TR02 Mirror X2 Powder' },
+          { codes: ['MIRROR X3', 'TR 3', 'TR3'], target: 'TR03 Mirror X3 Powder' },
+          { codes: ['MIRROR X4', 'TR 4', 'TR4'], target: 'TR04 Mirror X4 Powder' },
+          { codes: ['MIRROR X5', 'TR 5', 'TR5'], target: 'TR05 Mirror X5 Powder' },
+          { codes: ['MIRROR X6', 'TR 6', 'TR6'], target: 'TR06 Mirror X6 Powder' },
+          // 3-in-1 Builder Gel
+          { codes: ['3 IN 1 CLEAR', '3IN1CLEAR'], target: '3-in-1 Builder Gel Clear 40g -HTF' },
+          { codes: ['3IN1COVER'], target: '3-in-1 Builder Gel Cover 40g -HTF' },
+          { codes: ['3IN1PINK'], target: '3-in-1 Builder Gel Pink 40g -HTF' },
+          { codes: ['3 IN 1 SHIMMER COVER'], target: '3-in-1 Shimmery Builder Gel 40g Cover -HTF' },
+          { codes: ['3 IN 1 SHIMMER IRIDESCENT CLEAR'], target: '3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF' },
+          { codes: ['3 IN 1 SHIMMER LIGHT LILAC'], target: '3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF' },
+          { codes: ['3 IN 1 MARMALADE SHIMMER PINK'], target: '3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF' },
+          // Premium Builder Gel
+          { codes: ['3 IN 1 PREMIUM CLEAR', '3IN 1 PREMIUM CLEAR'], target: 'Premium Builder Gel Clear 40gr -HTF' },
+          { codes: ['3IN 1 PREMIUM BUILDER GEL COVER', '3 IN 1 PREMIUM BUILDER GEL COVER'], target: 'Premium Builder Gel Cover 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL BLUSH'], target: 'Premium Builder Gel Blush 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL MILKY'], target: 'Premium Builder Gel Milky 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL NUDE'], target: 'Premium Builder Gel Nude 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL PEARLY NUDE'], target: 'Premium Builder Gel Pearly Nude 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL PEARLY PINK'], target: 'Premium Builder Gel Pearly Pink 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GELS PINK'], target: 'Premium Builder Gel Pink 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GELS WHITE'], target: 'Premium Builder Gel White 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM PLUS', '3 IN 1.PREMIUM.PLUS'], target: 'Premium Plus Fiber Glass Builder Gel 40gr -HTF' },
+          // Brush on Builder (BOB)
+          { codes: ['GIUP BOBCLR', 'GIUP-BOBCLR'], target: 'Brush on Builder Gel Clear 15ml -HTF' },
+          { codes: ['GIUP BOBCOV', 'GIUP-BOBCOV'], target: 'Brush on Builder Gel Cover 15ml -HTF' },
+          { codes: ['GIUP BOBPNK', 'GIUP-BOBPNK'], target: 'Brush on Builder Gel Pink 15ml -HTF' },
+          { codes: ['GIUP BOBCRM', 'GIUP-BOBCRM'], target: 'Brush on Builder Gel Creamy 15ml -HTF' },
+          { codes: ['GIUP BOBNUD', 'GIUP-BOBNUD'], target: 'Brush on Builder Gel Nude 15ml -HTF' },
+          { codes: ['GIUP BOBPRL', 'GIUP-BOBPRL'], target: 'Brush on Builder Gel Purple 15ml -HTF' },
+          { codes: ['GIUP BOBDS', 'GIUP-BOBDS'], target: 'Brush on Builder Gel Dusty Shimmer 15ml -HTF' },
+          { codes: ['GIUP BOBMILK', 'GIUP-BOBMILK'], target: 'Brush on Builder Gel Milky 15ml -HTF' },
+          { codes: ['GIUP BOBLIL', 'GIUP-BOBLIL'], target: 'Brush on Builder Gel Lilac 15ml -HTF' },
+          { codes: ['GIUP BOBBLPN', 'GIUP-BOBBLPN'], target: 'Brush on Builder Gel Blush Pink 15ml -HTF' },
+          { codes: ['GIUP BOBSTPN', 'GIUP-BOBSTPN'], target: 'Brush on Builder Gel Soft Pink 15ml -HTF' },
+          { codes: ['GIUP BOBGLPN', 'GIUP-BOBGLPN'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
+          { codes: ['GIUP BOBGLMG', 'GIUP-BOBGLMG'], target: 'Brush on Builder Gel Magenta Glitter 15ml -HTF' },
+          { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL'], target: 'Brush on Builder Gel Milky Glitter 15ml -HTF' },
+          { codes: ['GIUP BOBGLROS', 'GIUP-BOBGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
+          { codes: ['GIUP BOBGLSLM', 'GIUP-BOBGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
+          // MultiMix Synthogel 30g
+          { codes: ['MULTIMIX BABY BLUE COLOR'], target: 'MultiMix Synthogel 30gr Baby Blue -HTF' },
+          { codes: ['MULTIMIX BABY PINK GLITTER COLOR'], target: 'MultiMix Synthogel 30gr Baby Pink Glitter -HTF' },
+          { codes: ['MULTIMIX BLUE GLITTER COLOR'], target: 'MultiMix Synthogel 30g Blue Glitter -HTF' },
+          { codes: ['MULTIMIX BUBBLE GUM GLITTER COLOR'], target: 'MultiMix Synthogel 30gr Bubble Gum Glitter -HTF' },
+          { codes: ['MULTIMIX GLITSY GREEN COLOR'], target: 'MultiMix Synthogel 30gr Glitsy Green -HTF' },
+          { codes: ['MULTIMIX LIGHT NUDE COLOR'], target: 'Multimix Synthogel 30g Light Nude -HTF' },
+          { codes: ['MULTIMIX MINT GREEN COLOR'], target: 'MultiMix Synthogel 30gr Minty Green -HTF' },
+          { codes: ['MULTIMIX PINKIII COLOR'], target: 'MultiMix Synthogel 30gr Pink III -HTF' },
+          { codes: ['MULTIMIX SUPER SOFT PINK COLOR'], target: 'MultiMix Synthogel 30gr Super Soft Pink -HTF' },
+          // MultiMix Synthogel 60g
+          { codes: ['MULTIMIX BLACK COLOR'], target: 'MultiMix Synthogel 60gr Black -HTF' },
+          { codes: ['MULTIMIX CLEAR COLOR'], target: 'MultiMix Synthogel 60gr Clear -HTF' },
+          { codes: ['MULTIMIX COVER COLOR'], target: 'MultiMix Synthogel 60gr Cover -HTF' },
+          { codes: ['MULTIMIX COVER II COLOR'], target: 'MultiMix Synthogel 60gr Cover II -HTF' },
+          { codes: ['MULTIMIX CRYSTAL CLEAR COLOR'], target: 'MultiMix Synthogel 60gr Crystal Clear -HTF' },
+          { codes: ['MULTIMIX GLITTERPINK COLOR'], target: 'MultiMix Synthogel 60gr Glitter Pink -HTF' },
+          { codes: ['MULTIMIX GLITTERS CLEAR'], target: 'MultiMix Synthogel 60gr Clear Glitter -HTF' },
+          { codes: ['MULTIMIX GLITTERS GOLD'], target: 'MultiMix Synthogel 60gr Glitter Gold -HTF' },
+          { codes: ['MULTIMIX GLITTERS NUDE'], target: 'MultiMix Synthogel 60gr Glitter Nude -HTF' },
+          { codes: ['MULTIMIX GLITTERS PINK'], target: 'MultiMix Synthogel 60gr Glitter Pink -HTF' },
+          { codes: ['MULTIMIX GLITTERS WHITE'], target: 'MultiMix Synthogel 60gr Glitter White -HTF' },
+          { codes: ['MULTIMIX LIGHT PINK COLOR'], target: 'MultiMix Synthogel 60gr Light Pink -HTF' },
+          { codes: ['MULTIMIX LILAC COLOR'], target: 'MultiMix Synthogel 60gr Light Lilac -HTF' },
+          { codes: ['MULTIMIX MILKY WHITE COLOR'], target: 'MultiMix Synthogel 60gr Milky White -HTF' },
+          { codes: ['MULTIMIX NUDE COLOR'], target: 'MultiMix Synthogel 60gr Nude -HTF' },
+          { codes: ['MULTIMIX PINK COLOR'], target: 'MultiMix Synthogel 60gr Pink -HTF' },
+          { codes: ['MULTIMIX PINK II COLOR'], target: 'MultiMix Synthogel 60gr Pink II -HTF' },
+          { codes: ['MULTIMIX SUPER MILKY COLOR'], target: 'MultiMix Synthogel 60gr Super Milky -HTF' },
+          { codes: ['MULTIMIX WHITE COLOR'], target: 'MultiMix Synthogel 60gr White -HTF' },
+          // Cleanser & Sanitizer
+          { codes: ['CLEANSER'], target: 'Cleanser 200 ml -HTF' },
+          { codes: ['SANITIZER'], target: 'Sanitizer 200ml -HTF' },
+          // Cuticle Oils
+          { codes: ['CUTICLE OIL PEACH', 'WHITE SATIN CUTICLE OIL PEACH'], target: 'Perky Peach Cuticle Oil 100ml -HTF' },
+          { codes: ['CUTICLE OIL MELON', 'WHITE SATIN CUTICLE OIL MELON'], target: 'Chilled Melon Cuticle Oil 100ml -HTF' },
+          { codes: ['CUTICLE OIL COCONUT', 'WHITE SATIN CUTICLE OIL COCONUT OIL'], target: 'Cooling Coconut Cuticle Oil 100ml -HTF' },
+          { codes: ['PHOTO PERFECT CUTICLE OIL'], target: 'PhotoPerfect Cuticle Oil New' },
+          // Creams & Scrubs
+          { codes: ['FOOT CREAM 100 CALMFROST'], target: 'GEL IT UP FOOT CREAM 100ml CALM FROST NEW' },
+          { codes: ['FOOT CREAM 100 SASSYSASSY'], target: 'GEL IT UP FOOT CREAM 100ml SASSY SASSY NEW' },
+          { codes: ['FOOT CREAM 100 SILKYBLISS'], target: 'GEL IT UP FOOT CREAM 100ml SILKY BLISS NEW' },
+          { codes: ['FOOT CREAM 1000 CALMFROST'], target: 'GEL IT UP FOOT CREAM 1000ml CALM FROST NEW' },
+          { codes: ['FOOT CREAM 1000 SASSYSASSY'], target: 'GEL IT UP FOOT CREAM 1000ml SASSY SASSY NEW' },
+          { codes: ['FOOT CREAM 1000 SILKYBLISS'], target: 'GEL IT UP FOOT CREAM 1000ml SILKY BLISS NEW' },
+          { codes: ['HANDANDBODY CREAM 100 CALMFROST'], target: 'GEL IT UP HAND AND BODY CREAM 100ml CALM FROST NEW' },
+          { codes: ['HANDANDBODY CREAM 100 SASSYSASSY'], target: 'GEL IT UP HAND AND BODY CREAM 100ml SASSY SASSY NEW' },
+          { codes: ['HANDANDBODY CREAM 100 SILKYBLISS'], target: 'GEL IT UP HAND AND BODY CREAM 100ml SILKY BLISS NEW' },
+          { codes: ['HANDANDBODY CREAM 1000 CALMFROST'], target: 'GEL IT UP HAND AND BODY CREAM 1000ml CALM FROST NEW' },
+          { codes: ['HANDANDBODY CREAM 1000 SASSYSASSY'], target: 'GEL IT UP HAND AND BODY CREAM 1000ml SASSY SASSY NEW' },
+          { codes: ['HANDANDBODY CREAM 1000 SILKYBLISS'], target: 'GEL IT UP HAND AND BODY CREAM 1000ml SILKY BLISS NEW' },
+          { codes: ['SCRUB 200 CALMFROST'], target: 'GEL IT UP SCRUB 200ml CALM FROST NEW' },
+          { codes: ['SCRUB 200 SASSYSASSY'], target: 'GEL IT UP SCRUB 200ml SASSY SASSY NEW' },
+          { codes: ['SCRUB 200 SILKYBLISS'], target: 'GEL IT UP SCRUB 200ml SILKY BLISS NEW' },
+          { codes: ['SCRUB 750 CALMFROST'], target: 'GEL IT UP SCRUB 750ml CALM FROST NEW' },
+          { codes: ['SCRUB 750 SASSYSASSY'], target: 'GEL IT UP SCRUB 750ml SASSY SASSY NEW' },
+          { codes: ['SCRUB 750 SILKYBLISS'], target: 'GEL IT UP SCRUB 750ml SILKY BLISS NEW' },
+          // Line It Up
+          { codes: ['LINE IT UP 0001 YELLOW', 'LINE IT UP  0001 YELLOW'], target: 'LINE IT UP YELLOW -HTF' },
+          { codes: ['LINE IT UP 0002 WHITE', 'LINE IT UP  0002 WHITE'], target: 'LINE IT UP WHITE -HTF' },
+          { codes: ['LINE IT UP 0003 SKY', 'LINE IT UP  0003 SKY'], target: 'LINE IT UP SKY -HTF' },
+          { codes: ['LINE IT UP 0004 SILVER', 'LINE IT UP  0004 SILVER'], target: 'LINE IT UP SILVER -HTF' },
+          { codes: ['LINE IT UP 0005 ROSE', 'LINE IT UP  0005 ROSE'], target: 'LINE IT UP ROSE -HTF' },
+          { codes: ['LINE IT UP 0006 RED', 'LINE IT UP  0006 RED'], target: 'LINE IT UP RED -HTF' },
+          { codes: ['LINE IT UP 0007 PYRITE', 'LINE IT UP  0007 PYRITE'], target: 'LINE IT UP PYRITE -HTF' },
+          { codes: ['LINE IT UP 0008 PISTACHIO', 'LINE IT UP  0008 PISTACHIO'], target: 'LINE IT UP PISTACHIO -HTF' },
+          { codes: ['LINE IT UP 0009 PINK', 'LINE IT UP  0009 PINK'], target: 'LINE IT UP PINK -HTF' },
+          { codes: ['LINE IT UP 0010 ORANGE', 'LINE IT UP  0010 ORANGE'], target: 'LINE IT UP ORANGE -HTF' },
+          { codes: ['LINE IT UP 0011 MINT', 'LINE IT UP  0011 MINT'], target: 'LINE IT UP MINT -HTF' },
+          { codes: ['LINE IT UP 0012 MAGENTA', 'LINE IT UP  0012 MAGENTA'], target: 'LINE IT UP MAGENTA -HTF' },
+          { codes: ['LINE IT UP 0013 LILAC', 'LINE IT UP  0013 LILAC'], target: 'LINE IT UP LILAC -HTF' },
+          { codes: ['LINE IT UP 0014 LAVENDER', 'LINE IT UP  0014 LAVENDER'], target: 'LINE IT UP LAVENDER -HTF' },
+          { codes: ['LINE IT UP 0015 GREEN', 'LINE IT UP  0015 GREEN'], target: 'LINE IT UP GREEN -HTF' },
+          { codes: ['LINE IT UP 0016 GOLD', 'LINE IT UP  0016 GOLD'], target: 'LINE IT UP GOLD -HTF' },
+          { codes: ['LINE IT UP 0017 BLACK', 'LINE IT UP  0017 BLACK'], target: 'LINE IT UP BLACK -HTF' },
+          { codes: ['LINE IT UP 0018 APRICOT', 'LINE IT UP  0018 APRICOT'], target: 'LINE IT UP APRICOT -HTF' },
+          // Marble Inks
+          { codes: ['MARBLE 1'], target: 'Marble-It by GIUP #01' },
+          { codes: ['MARBLE 2'], target: 'Marble-It by GIUP #02' },
+          { codes: ['MARBLE 3'], target: 'Marble-It by GIUP #03' },
+          { codes: ['MARBLE 4'], target: 'Marble-It by GIUP #04' },
+          { codes: ['MARBLE 5'], target: 'Marble-It by GIUP #05' },
+          { codes: ['MARBLE 6'], target: 'Marble-It by GIUP #06' },
+          { codes: ['MARBLE 7'], target: 'Marble-It by GIUP #07' },
+          { codes: ['MARBLE 8'], target: 'Marble-It by GIUP #08' },
+          { codes: ['MARBLE 9'], target: 'Marble-It by GIUP #09' },
+          { codes: ['MARBLE 10'], target: 'Marble-It by GIUP #10' },
+          { codes: ['MARBLE 11'], target: 'Marble-It by GIUP #11' },
+          { codes: ['MARBLE 12'], target: 'Marble-It by GIUP #12' },
+          { codes: ['MARBLE 13'], target: 'Marble-It by GIUP #13' },
+          { codes: ['MARBLE 14'], target: 'Marble-It by GIUP #14' },
+          { codes: ['MARBLE 15'], target: 'Marble-It by GIUP #15' },
+          { codes: ['MARBLE 16'], target: 'Marble-It by GIUP #16' },
+          { codes: ['MARBLE 17'], target: 'Marble-It by GIUP #17' },
+          { codes: ['MARBLE 18'], target: 'Marble-It by GIUP #18' },
+          // Sugary Glitter
+          { codes: ['SUGARY GLITTER 01'], target: 'Sugary Glitter pigment 3gr 01 -HTF' },
+          { codes: ['SUGARY GLITTER 02'], target: 'Sugary Glitter pigment 3gr 02 -HTF' },
+          { codes: ['SUGARY GLITTER 03'], target: 'Sugary Glitter pigment 3gr 03 -HTF' },
+          { codes: ['SUGARY GLITTER 04'], target: 'Sugary Glitter pigment 3gr 04 -HTF' },
+          { codes: ['SUGARY GLITTER 05'], target: 'Sugary Glitter pigment 3gr 05 -HTF' },
+          { codes: ['SUGARY GLITTER 06'], target: 'Sugary Glitter pigment 3gr 06 -HTF' },
+          { codes: ['SUGARY GLITTER 07'], target: 'Sugary Glitter pigment 3gr 07 -HTF' },
+          // Velvet Cat Eye — CT codes in image map, VCE codes in price list
+          { codes: ['GIUP CT 01', 'GIUP-CT-01'], target: 'Velvet Cat Eye #VCE01 -HTF' },
+          { codes: ['GIUP CT 02', 'GIUP-CT-02'], target: 'Velvet Cat Eye #VCE02 -HTF' },
+          { codes: ['GIUP CT 03', 'GIUP-CT-03'], target: 'Velvet Cat Eye #VCE03 -HTF' },
+          { codes: ['GIUP CT 04', 'GIUP-CT-04'], target: 'Velvet Cat Eye #VCE04 -HTF' },
+          { codes: ['GIUP CT 05', 'GIUP-CT-05'], target: 'Velvet Cat Eye #VCE05 -HTF' },
+          { codes: ['GIUP CT 06', 'GIUP-CT-06'], target: 'Velvet Cat Eye #VCE06 -HTF' },
+          { codes: ['GIUP CT 07', 'GIUP-CT-07'], target: 'Velvet Cat Eye #VCE07 -HTF' },
+          { codes: ['GIUP CT 08', 'GIUP-CT-08'], target: 'Velvet Cat Eye #VCE08 -HTF' },
+          { codes: ['GIUP CT 09', 'GIUP-CT-09'], target: 'Velvet Cat Eye #VCE09 -HTF' },
+          { codes: ['GIUP CT 10', 'GIUP-CT-10'], target: 'Velvet Cat Eye #VCE10 -HTF' },
+          // Nail Art — Blossom
+          { codes: ['GIUP-.BLOSSOM', 'GIUP.Blossom', 'GIUP .BLOSSOM', 'BLOSSOM'], target: 'Blossom Flower Power 15ml -HTF' },
+          // Nail Art — Water Colors (aquarelle palette)
+          { codes: ['water colors', 'water_colors', 'WATER COLORS', 'WATER_COLORS'], target: 'Watercolors Aquarelle Pallete' },
+          // Nail Art Brushes
+          { codes: ['aquarelle brush', 'aquarelle_brush', 'AQUARELLE BRUSH', 'AQUARELLE_BRUSH'], target: 'Aquarela Brush Rose Gold' },
+          { codes: ['french curved brush', 'french_curved_brush', 'FRENCH CURVED BRUSH', 'FRENCH_CURVED_BRUSH'], target: 'French Nail Brush Rose Gold' },
+          // Synthogel & Polygel accessories (brush tools)
+          { codes: ['polygel', 'POLYGEL'], target: 'Polygel Brush and Spatula Rose Gold' },
+          { codes: ['polygel 2', 'POLYGEL 2'], target: 'Polygel 2 Brush and Spatula Rose Gold' },
+          { codes: ['synthogel brush', 'synthogel_brush', 'SYNTHOGEL BRUSH', 'SYNTHOGEL_BRUSH'], target: 'Polygel Brush and Spatula Rose Gold' },
+          // Podocare & Accessories
+          { codes: ['PODODISC', 'PODODISC Β', 'PODODISC_Β'], target: 'Pododisc + 5 Replacement Stickers M-20 mm New' },
+          { codes: ['PROBES'], target: 'Probes Stainless Steel Rounded 1222 New' },
+          { codes: ['TWEEZER', 'TWEEZER B', 'TWEEZER_B'], target: 'Splinter tweezer – 13 cm 1386 New' },
+          // Tools — Head Cutters & Nippers
+          { codes: ['01. HEAD CUTTER, PLAIN HANDLE, HALF BLADE', '01. HEAD CUTTER, PLAIN HANDLE, HALF BLADE B', '01. HEAD CUTTER, PLAIN HANDLE, HALF BLADE_B'], target: 'Professional Head Cutter Nipper Half Blade L 11.5cm 1006 New' },
+          { codes: ['02. CORNER NIPPER, EXTRA SLIM (Flame Shaped)'], target: 'Corner Nippers Flame Shaped L 10cm 1115 New' },
+          { codes: ['03. CORNER NIPPER, DESIGN HANDLE'], target: 'Corner Nippers Straight Cutter Design Handle  L 11cm 1119 New' },
+          // Nail Preparations — Cuticle Removers
+          { codes: ['cuticle remover 5ml', 'CUTICLE REMOVER 5ML'], target: 'Almond Cuticle Scrub Remover 5ml -HTF' },
+          { codes: ['white satin cuticle scrub remover', 'WHITE SATIN CUTICLE SCRUB REMOVER'], target: 'Almond Cuticle Scrub Remover 100ml -HTF' },
+          // Stickers
+          { codes: ['5D NAIL STICKERS BLACK'], target: 'SD-1934 Nail Decals French - Black' },
+          { codes: ['5D NAIL STICKERS WHITE'], target: 'SD-1933 Nail Decals French - White' },
         ]
         for (const { codes, target } of aliasGroups) {
           const entry = pnLookup(target)
@@ -7267,7 +7452,19 @@ function ProductsModule({ moduleView = 'products' }) {
                   // Preserve the exact subcategory as category — B2B mirrors the public catalogue.
                   // For COLORS use the subcategory name (SOLID GEL POLISH, CAT EYE, GLITTERS, etc.)
                   // For all other sections use the section name (BUILDER GEL SYSTEMS, BRUSHES, etc.)
-                  category: section.category === 'COLORS' ? sub.name : section.category,
+                  category: (() => {
+                    if (section.category === 'COLORS') return sub.name
+                    if (section.category === 'BUILDER GEL SYSTEMS') {
+                      const n = (sub.name || '').toUpperCase()
+                      if (n === '3INI BUILDER') return '3-in-1 Builder Gel'
+                      if (n === 'PREMIUM BUILDER') return '3-in-1 Premium Builder Gel'
+                      if (n === 'CREME DE LA CREME') return 'Creme De La Creme'
+                      if (n === '30 ML' || n === '60 ML' || n === 'MULTIMIX') return 'Multimix Polygel'
+                      if (n === 'BRUSH ON BUILDER') return 'Brush On Builder'
+                      if (n === 'LIQUID POLYGEL') return 'Liquid Polygel'
+                    }
+                    return section.category
+                  })(),
                   parentSection: section.category,  // track which top-level section this belongs to
                   _skipRemap: true,                 // categories are already correct — skip B2B_CAT_REMAP
                   colorFamily: item.colorFamily || null, // actual folder name e.g. 'Red', 'Blue', 'Coral Orange'
@@ -7455,6 +7652,8 @@ function ProductsModule({ moduleView = 'products' }) {
               || (giupSeriesCodeMatch ? (
                   priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2]}`)
                   || priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2].padStart(2, '0')}`)
+                  // strip leading zeros: R010 → R10 (matches GEL.IT.UP 1 R10 11ml in price list)
+                  || priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2].replace(/^0+(\d)/, '$1')}`)
                 ) : null)
               || (giupLooseSeriesMatch ? (
                   priceMap.get(`${giupLooseSeriesMatch[1]} ${giupLooseSeriesMatch[2]}`)
