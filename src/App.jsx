@@ -306,6 +306,91 @@ const COUNTRY_VAT_PREFIX = {
   'New Zealand': 'GST',
 }
 
+// VAT treatment per buyer country (from the seller's perspective: Bulgaria/Greece = EU seller)
+// 'reverse_charge'  — EU B2B: 0% VAT, buyer accounts via reverse charge (Art. 44 Directive 2006/112/EC)
+// 'export_exempt'   — non-EU export: 0% VAT, zero-rated supply
+// 'domestic_bg'     — Domestic Bulgaria: 20% VAT
+// 'domestic_gr'     — Domestic Greece: 24% VAT
+const COUNTRY_VAT_TREATMENT = {
+  // EU Member States → reverse charge
+  Austria: 'reverse_charge',
+  Belgium: 'reverse_charge',
+  Bulgaria: 'domestic_bg',
+  Croatia: 'reverse_charge',
+  Cyprus: 'reverse_charge',
+  'Czech Republic': 'reverse_charge',
+  Denmark: 'reverse_charge',
+  Estonia: 'reverse_charge',
+  Finland: 'reverse_charge',
+  France: 'reverse_charge',
+  Germany: 'reverse_charge',
+  Greece: 'domestic_gr',
+  Hungary: 'reverse_charge',
+  Ireland: 'reverse_charge',
+  Italy: 'reverse_charge',
+  Latvia: 'reverse_charge',
+  Lithuania: 'reverse_charge',
+  Luxembourg: 'reverse_charge',
+  Malta: 'reverse_charge',
+  Netherlands: 'reverse_charge',
+  Poland: 'reverse_charge',
+  Portugal: 'reverse_charge',
+  Romania: 'reverse_charge',
+  Slovakia: 'reverse_charge',
+  Slovenia: 'reverse_charge',
+  Spain: 'reverse_charge',
+  Sweden: 'reverse_charge',
+  // Non-EU → export exempt
+  'United Kingdom': 'export_exempt',
+  Norway: 'export_exempt',
+  Switzerland: 'export_exempt',
+  Turkey: 'export_exempt',
+  Ukraine: 'export_exempt',
+  'United Arab Emirates': 'export_exempt',
+  'South Africa': 'export_exempt',
+  Australia: 'export_exempt',
+  'New Zealand': 'export_exempt',
+  'United States': 'export_exempt',
+  Canada: 'export_exempt',
+  Japan: 'export_exempt',
+  Singapore: 'export_exempt',
+  'Hong Kong': 'export_exempt',
+  China: 'export_exempt',
+  India: 'export_exempt',
+  Brazil: 'export_exempt',
+  Mexico: 'export_exempt',
+  Russia: 'export_exempt',
+  'Saudi Arabia': 'export_exempt',
+  Kuwait: 'export_exempt',
+  Qatar: 'export_exempt',
+  Bahrain: 'export_exempt',
+  Oman: 'export_exempt',
+  Egypt: 'export_exempt',
+  Israel: 'export_exempt',
+  Morocco: 'export_exempt',
+  Tunisia: 'export_exempt',
+  Lebanon: 'export_exempt',
+  Jordan: 'export_exempt',
+}
+
+function resolveVatTreatment(country) {
+  return COUNTRY_VAT_TREATMENT[country] || 'export_exempt'
+}
+
+function getVatTreatmentLabel(treatment, country) {
+  switch (treatment) {
+    case 'reverse_charge':
+      return { pct: 0, label: '0% — VAT Reverse Charge (EU B2B, Art. 44 Directive 2006/112/EC)', note: 'The customer is liable to account for VAT in their country of establishment.' }
+    case 'domestic_bg':
+      return { pct: 20, label: '20% — Bulgarian VAT (BG domestic supply)', note: 'Bulgarian VAT applies. Seller to remit to NRA Bulgaria.' }
+    case 'domestic_gr':
+      return { pct: 24, label: '24% — Greek VAT (EL domestic supply)', note: 'Greek VAT applies. Seller to remit to AADE Greece.' }
+    case 'export_exempt':
+    default:
+      return { pct: 0, label: '0% — Zero-rated Export (outside EU)', note: `Goods exported outside the EU. VAT exempt under export provisions. Buyer may be subject to local import duties in ${country || 'their country'}.` }
+  }
+}
+
 // Returns null if valid, or an error string if the VAT prefix is wrong for the country
 function validateVatPrefix(vatNumber, country) {
   const prefix = COUNTRY_VAT_PREFIX[country]
@@ -1080,7 +1165,12 @@ function buildProformaFromCart({
     : []
 
   const lines = [...selectedLines, ...packageLines, ...addOnLines]
-  const grandTotalEur = Number(lines.reduce((sum, line) => sum + line.subtotalEur, 0).toFixed(2))
+  const subtotalEur = Number(lines.reduce((sum, line) => sum + line.subtotalEur, 0).toFixed(2))
+  const country = userProfile?.country || '-'
+  const vatTreatment = resolveVatTreatment(country)
+  const vatInfo = getVatTreatmentLabel(vatTreatment, country)
+  const vatAmountEur = Number((subtotalEur * vatInfo.pct / 100).toFixed(2))
+  const grandTotalEur = Number((subtotalEur + vatAmountEur).toFixed(2))
 
   return {
     orderId,
@@ -1088,10 +1178,16 @@ function buildProformaFromCart({
     customer: {
       companyName: userProfile?.companyName || '-',
       vatNumber: userProfile?.vatNumber || '-',
-      country: userProfile?.country || '-',
+      country,
       region: userProfile?.region || '-',
     },
     lines,
+    subtotalEur,
+    vatTreatment,
+    vatPct: vatInfo.pct,
+    vatLabel: vatInfo.label,
+    vatNote: vatInfo.note,
+    vatAmountEur,
     grandTotalEur,
     currency: EUR_CURRENCY_CODE,
   }
@@ -8468,16 +8564,35 @@ function ProductsModule({ moduleView = 'products' }) {
     })
 
     const tableEndY = doc.lastAutoTable?.finalY || cursorY + 8
-    const footerY = Math.min(tableEndY + 22, pageHeight - 64)
+    const footerY = Math.min(tableEndY + 22, pageHeight - 100)
     const silverFreeBadge = getSilverFreeGuaranteeText(lastProformaInvoice?.createdAtIso)
 
+    // Subtotal, VAT, Grand Total block
+    doc.setFontSize(10)
+    doc.text(`Subtotal (EUR): ${currencyFormatter(lastProformaInvoice.subtotalEur)}`, pageWidth - margin, footerY, { align: 'right' })
+    doc.setFontSize(9)
+    if (lastProformaInvoice.vatPct > 0) {
+      doc.text(`VAT ${lastProformaInvoice.vatPct}%: ${currencyFormatter(lastProformaInvoice.vatAmountEur)}`, pageWidth - margin, footerY + 13, { align: 'right' })
+    } else {
+      doc.setTextColor(80, 100, 80)
+      doc.text(`VAT: ${lastProformaInvoice.vatLabel}`, pageWidth - margin, footerY + 13, { align: 'right' })
+      doc.setTextColor(...textColor)
+    }
     doc.setFontSize(12)
-    doc.text(`Grand Total (EUR): ${currencyFormatter(lastProformaInvoice.grandTotalEur)}`, pageWidth - margin, footerY, { align: 'right' })
+    doc.setFont(hasPdfCustomFont ? 'PFFuturaNeu' : 'helvetica', 'bold')
+    doc.text(`Grand Total (EUR): ${currencyFormatter(lastProformaInvoice.grandTotalEur)}`, pageWidth - margin, footerY + 28, { align: 'right' })
+    doc.setFont(hasPdfCustomFont ? 'PFFuturaNeu' : 'helvetica', 'normal')
+
+    // VAT treatment note
+    doc.setFontSize(8)
+    doc.setTextColor(80, 100, 80)
+    doc.text(lastProformaInvoice.vatNote, margin, footerY + 14, { maxWidth: pageWidth - margin * 2 - 180 })
+    doc.setTextColor(...textColor)
 
     if (silverFreeBadge) {
       doc.setFontSize(9)
       doc.setTextColor(217, 70, 239)
-      doc.text(silverFreeBadge, margin, footerY)
+      doc.text(silverFreeBadge, margin, footerY + 28)
       doc.setTextColor(...textColor)
     }
 
@@ -10242,7 +10357,6 @@ function OrdersModule() {
   const [orders, setOrders] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [copiedOrderId, setCopiedOrderId] = useState(null)
-  const [showBuilderDetails, setShowBuilderDetails] = useState(false)
   const [userEmail, setUserEmail] = useState('')
   const [errorMessage, setErrorMessage] = useState(
     !hasSupabaseConfig || !supabase
@@ -10505,107 +10619,6 @@ function OrdersModule() {
                   </tr>
                 ))}
 
-                {/* STRUCTURAL EXCELLENCE: 3-IN-1 PREMIUM BUILDER GEL */}
-                <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
-                  <div className="mx-auto max-w-6xl">
-                    <div className="grid items-center gap-8 sm:grid-cols-2">
-                      {/* Product Details */}
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 600 }}>
-                          Structural Excellence
-                        </p>
-                        <h3 className="mt-3 text-4xl font-extrabold uppercase tracking-[0.08em] text-white sm:text-5xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
-                          The Architect of Strength
-                        </h3>
-                        <p className="mt-4 text-base text-white/80" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                          3-in-1 Premium Builder Gel delivers resilient structure with professional clarity and precision. Available in Clear, Pink, and Cover to match every studio system.
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => setShowBuilderDetails((current) => !current)}
-                          className="mt-5 rounded-lg border border-[#D43790]/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-white transition duration-300 hover:bg-[#D43790]/20"
-                        >
-                          {showBuilderDetails ? 'Show Less' : 'Learn More'}
-                        </button>
-                        {showBuilderDetails && (
-                          <>
-                            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-white/70">Key Benefits</p>
-                            <ul className="mt-2 space-y-2 text-sm text-white/75">
-                              <li className="flex items-start gap-3">
-                                <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                                <span>Fiber-reinforced strength: fiberglass particles create a cross-linked mesh for resistance against cracking and snapping.</span>
-                              </li>
-                              <li className="flex items-start gap-3">
-                                <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                                <span>Single-phase efficiency: functions as base, builder, and high-shine top coat in one service flow.</span>
-                              </li>
-                              <li className="flex items-start gap-3">
-                                <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                                <span>Cool cure technology: formulated to minimize heat spikes during curing for improved client comfort.</span>
-                              </li>
-                              <li className="flex items-start gap-3">
-                                <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#D43790]" />
-                                <span>Toxin-free performance: 100% HEMA and TPO free.</span>
-                              </li>
-                            </ul>
-                            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-white/70">How to Use / Application</p>
-                            <ol className="mt-2 list-decimal space-y-2 pl-5 text-sm text-white/75">
-                              <li><span className="font-semibold text-white/90">Preparation:</span> Perform a thorough dry manicure and cleanse the nail plate.</li>
-                              <li><span className="font-semibold text-white/90">Adhesion:</span> Apply Superbond Primer and allow to air-dry for 30 seconds.</li>
-                              <li><span className="font-semibold text-white/90">Foundation Layer:</span> Apply a thin slip layer over the nail (and form if extending). Do not cure.</li>
-                              <li><span className="font-semibold text-white/90">Building:</span> Place a larger bead in the center and guide to edges, allowing self-leveling apex formation.</li>
-                              <li><span className="font-semibold text-white/90">Curing:</span> Cure for 60-90 seconds in LED or 120 seconds in UV.</li>
-                              <li><span className="font-semibold text-white/90">Refinement:</span> Wipe inhibition layer with cleanser and file to shape.</li>
-                              <li><span className="font-semibold text-white/90">Finishing:</span> Apply a final thin layer of the same gel for gloss, or proceed with GEL.IT.UP by GIUP® color.</li>
-                            </ol>
-                          </>
-                        )}
-                        <button
-                          onClick={() => {
-                            const builderSection = sections.find((s) => s.category === 'BUILDER GEL SYSTEMS')
-                            if (builderSection) {
-                              setActiveCategory(builderSection.category)
-                              setActiveSubcategory('ALL')
-                            }
-                          }}
-                          className="mt-8 rounded-lg bg-[#D43790] px-8 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-[#C32680]"
-                        >
-                          Shop the Builder System
-                        </button>
-                      </div>
-
-                      {/* Product Visuals */}
-                      <div className="flex flex-col items-center gap-5">
-                        <div className="relative h-80 w-64 rounded-xl border border-white/20 bg-gradient-to-b from-[#2A2A2A] to-[#1A1A1A] p-6 flex items-center justify-center">
-                          <img
-                            src="/gelitup-content/product-images/BUILDER GEL/3INI BUILDER/3-in-1-builder-gel.hero.image.jpg"
-                            alt="3-in-1 Premium Builder Gel bottle"
-                            className="h-full w-full object-contain"
-                            onError={(e) => {
-                              e.currentTarget.src = '/logo.png'
-                            }}
-                          />
-                        </div>
-                        <div className="grid w-full grid-cols-3 gap-3">
-                          {[
-                            { label: 'Clear', src: '/gelitup-content/product-images/BUILDER GEL/3INI BUILDER/3-in-1_clear.jpg' },
-                            { label: 'Pink', src: '/gelitup-content/product-images/BUILDER GEL/3INI BUILDER/3in1pink.jpg' },
-                            { label: 'Cover', src: '/gelitup-content/product-images/BUILDER GEL/3INI BUILDER/3in1cover.jpg' },
-                          ].map((shade) => (
-                            <div key={shade.label} className="rounded-lg border border-white/15 bg-[#111111] p-2 text-center">
-                              <div className="h-20 w-full overflow-hidden rounded-md bg-black/20">
-                                <img src={shade.src} alt={`${shade.label} Builder Gel shade`} className="h-full w-full object-cover" loading="lazy" />
-                              </div>
-                              <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-white/70" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 600 }}>
-                                {shade.label}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </tbody>
             </table>
           </div>
