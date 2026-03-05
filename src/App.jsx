@@ -7078,6 +7078,21 @@ function ProductsModule({ moduleView = 'products' }) {
           { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
           { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
           { codes: ['GIUP-SB-WITH-ACID', 'GIUP SB WITH ACID', 'SB WITH ACID'], target: 'Superbond Nail Dehydrator 11ml - with Acid -HTF' },
+          // Dual form / nail tip shapes (image map uses bare shape names)
+          { codes: ['ALMOND', 'DUAL FORMS ALMOND'], target: 'DUAL FORMS ALMOND' },
+          { codes: ['BALLERINA', 'DUAL FORMS BALLERINA'], target: 'DUAL FORMS BALLERINA' },
+          { codes: ['LONG ALMOND', 'DUAL FORMS LONG ALMOND'], target: 'DUAL FORMS LONG ALMOND' },
+          { codes: ['MODERNS SQUARE', 'MODERN SQUARE', 'DUAL FORMS MODERN SQUARE'], target: 'DUAL FORMS MODERN SQUARE' },
+          { codes: ['RUSSIAN ALMOND', 'DUAL FORMS RUSSIAN ALMOND'], target: 'DUAL FORMS RUSSIAN ALMOND' },
+          { codes: ['SQUARE', 'DUAL FORMS SQUARE'], target: 'DUAL FORMS SQUARE' },
+          { codes: ['SQUOVAL', 'DUAL FORMS SQUOVAL'], target: 'DUAL FORMS SQUOVAL' },
+          { codes: ['STANDARD', 'DUAL FORMS STANDARD'], target: 'Standard Dual Reverse Tips 120 s' },
+          { codes: ['DUAL MIX', 'DUAL MIX 2', 'DUAL MIX 3', 'dual mix', 'dual mix 2', 'dual mix 3'], target: 'DUAL FORMS MIX COLOR AND SHAPE' },
+          { codes: ['SQUARE XL', 'DUAL FORM SQUARE XL'], target: 'DUAL FORMS SQUARE' },
+          { codes: ['SOAK OFF GEL TIPS LONG ALMOND', 'G.T.LONG ALMOND', 'GT LONG ALMOND'], target: 'SOAK OFF GEL TIPS LONG ALMOND' },
+          { codes: ['SOAK OFF GEL TIPS LONG COFFIN', 'G.T.LONG COFFIN', 'GT LONG COFFIN'], target: 'SOAK OFF GEL TIPS LONG COFFIN' },
+          { codes: ['SOAK OFF GEL TIPS MEDIUM SQUARE', 'G.T.MEDIUM SQUARE', 'GT MEDIUM SQUARE'], target: 'SOAK OFF GEL TIPS MEDIUM SQUARE' },
+          { codes: ['SOAK OFF GEL TIPS SHORT ALMOND', 'G.T.SHORT ALMOND', 'GT SHORT ALMOND', 'SHORT ALMOND'], target: 'SOAK OFF GEL TIPS SHORT ALMOND' },
         ]
         for (const { codes, target } of aliasGroups) {
           const entry = pnLookup(target)
