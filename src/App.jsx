@@ -3401,15 +3401,15 @@ function FullCataloguePage() {
           <div id={CATALOGUE_RESULTS_ANCHOR_ID} className="scroll-mt-28" />
 
           {/* CHAPTER 01: THE INFINITE SPECTRUM */}
-          <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 overflow-hidden bg-[#6b0d38] lg:min-h-[400px]">
+          <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 overflow-hidden bg-[#7a1040] lg:min-h-[400px]">
             <img
               aria-hidden="true"
               src="/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg"
               alt=""
-              className="absolute right-0 top-0 hidden h-full w-[52%] object-contain object-center lg:block"
+              className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-center lg:block"
               style={{
-                maskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
-                WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
+                maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
+                WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
               }}
             />
 
@@ -3455,15 +3455,15 @@ function FullCataloguePage() {
 
           {/* CHAPTER 02a: BASES, TOPS & NAIL PREPARATIONS */}
           <div id="catalogue-section-essentials" className="scroll-mt-28">
-            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#4a2230] lg:min-h-[360px]">
+            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#5c2a3a] lg:min-h-[360px]">
               <img
                 aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/top-bases-catalog-hero-image.webp"
                 alt=""
-                className="absolute right-0 top-0 hidden h-full w-[52%] object-contain object-center lg:block"
+                className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-center lg:block"
                 style={{
-                  maskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
-                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
+                  maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
                 }}
               />
 
@@ -3544,15 +3544,15 @@ function FullCataloguePage() {
 
           {/* CHAPTER 02b: BUILDER SYSTEMS */}
           <div id="catalogue-section-builders" className="scroll-mt-28">
-            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#3d1e0e] lg:min-h-[360px]">
+            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#4d2412] lg:min-h-[360px]">
               <img
                 aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp"
                 alt=""
-                className="absolute right-0 top-0 hidden h-full w-[52%] object-contain object-center lg:block"
+                className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-center lg:block"
                 style={{
-                  maskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
-                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
+                  maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
                 }}
               />
 
