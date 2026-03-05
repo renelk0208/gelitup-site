@@ -7093,6 +7093,20 @@ function ProductsModule({ moduleView = 'products' }) {
           { codes: ['SOAK OFF GEL TIPS LONG COFFIN', 'G.T.LONG COFFIN', 'GT LONG COFFIN'], target: 'SOAK OFF GEL TIPS LONG COFFIN' },
           { codes: ['SOAK OFF GEL TIPS MEDIUM SQUARE', 'G.T.MEDIUM SQUARE', 'GT MEDIUM SQUARE'], target: 'SOAK OFF GEL TIPS MEDIUM SQUARE' },
           { codes: ['SOAK OFF GEL TIPS SHORT ALMOND', 'G.T.SHORT ALMOND', 'GT SHORT ALMOND', 'SHORT ALMOND'], target: 'SOAK OFF GEL TIPS SHORT ALMOND' },
+          // Super Flexible Tips
+          { codes: ['FLEXI LONG ALMOND', 'FLEXI-LONG-ALMOND', 'Flexi Long Almond', 'flexi long almond', 'Super Flexi Long Almond', 'SUPER FLEXI LONG ALMOND', 'GIUP FLEXI LONG ALMOND'], target: 'FLEXI Soak Off Nail Tips Long Almond -2025' },
+          { codes: ['FLEXI SHORT ALMOND', 'FLEXI-SHORT-ALMOND', 'Flexi Short Almond', 'flexi short almond', 'Super Flexi Short Almond', 'SUPER FLEXI SHORT ALMOND', 'GIUP FLEXI SHORT ALMOND'], target: 'FLEXI Soak Off Nail Tips Short Almond -2025' },
+          { codes: ['FLEXI SHORT SQUARE', 'FLEXI-SHORT-SQUARE', 'Flexi Short Square', 'flexi short square', 'Super Flexi Short Square', 'SUPER FLEXI SHORT SQUARE', 'GIUP FLEXI SHORT SQUARE'], target: 'FLEXI Soak Off Nail Tips Medium Square -2025' },
+          // Nail Files
+          { codes: ['1280x1280_nail_bufer_100', '1280x1280 nail bufer 100'], target: 'Nail Files With Back Glue 100 Packet of 10' },
+          { codes: ['1280x1280_nail_bufer_120', '1280x1280 nail bufer 120'], target: 'Nail Files With Back Glue 120 Packet of 10' },
+          { codes: ['1280x1280_nail_bufer_180', '1280x1280 nail bufer 180'], target: 'Nail Files With Back Glue 180 Packet of 10' },
+          { codes: ['1280x1280_nail_bufer_metallic', '1280x1280 nail bufer metallic'], target: 'GIUP Boat Shape metallic Nail File' },
+          { codes: ['1280x1280_buffer_100_120', '1280x1280 buffer 100 120', '100_120_file2', '100 120 file2'], target: 'GIUP Boat Shape Nail File 100/120 Purple Sponge' },
+          { codes: ['1280x1280_buffer_180_180', '1280x1280 buffer 180 180', '180_180_file2', '180 180 file2'], target: 'Nail Files 180/180 Pink Sponge' },
+          { codes: ['Βuffing_block', 'Βuffing block', 'buffing block', 'BUFFING BLOCK'], target: 'Nail Files 100/100' },
+          // Nail Forms
+          { codes: ['nail_forms_5', 'nail forms 5', 'NAIL FORMS 5', 'NAIL FORMS'], target: 'GEL.IT.UP by GIUP® Nail Forms' },
         ]
         for (const { codes, target } of aliasGroups) {
           const entry = pnLookup(target)
