@@ -52,6 +52,21 @@
         }
       ],
       "order": []
+    },
+    {
+      "category": "EQUIPMENT",
+      "subcategory": "DUST & AIR",
+      "groups": [
+        {
+          "hero": "DUST COLLECTOR",
+          "swatches": [
+            "DUST COLLECTOR 2",
+            "nailduster"
+          ],
+          "mergeAsGallery": true
+        }
+      ],
+      "order": []
     }
   ]
 }
