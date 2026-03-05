@@ -7312,7 +7312,8 @@ function ProductsModule({ moduleView = 'products' }) {
               'ACRYLIC': 'BUILDER GEL SYSTEMS',
               // Bases
               'BASE': 'BASES', 'FLEXI BASE': 'BASES',
-              'BRUSH ON BUILDER': 'BASES', 'BRUSH-ON BUILDER': 'BASES',
+              // Brush on Builder belongs under Builder Systems
+              'BRUSH ON BUILDER': 'BUILDER GEL SYSTEMS', 'BRUSH-ON BUILDER': 'BUILDER GEL SYSTEMS',
               // Tops
               'TOP COAT': 'TOPS', 'TOP COATS': 'TOPS',
               'CLASSIC TOP COATS': 'TOPS', 'EFFECT TOPS': 'TOPS',
