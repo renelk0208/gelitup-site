@@ -1896,7 +1896,7 @@ function formatSubcategoryDisplayName(subcategoryName = '', categoryName = '') {
   if (normalized === 'COMPETE') return 'Compete Acrylic'
   if (normalized === 'MULTIMIX' || normalized === '30 ML') return 'Multimix 30g'
   if (normalized === '60 ML') return 'Multimix 60g'
-  if (normalized === 'CDC' || normalized === 'CREME DE LA CREME') return 'Creme de La Creme'
+  if (normalized === 'CDC' || normalized === 'CREME DE LA CREME') return 'Crème De La Crème'
   
   // Bases subcategories
   if (normalized === '5IN1 SUPERIOR BASE') return '5-in-1 Superior Base'
@@ -2058,7 +2058,7 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'BUILDER GEL SYSTEMS::CREME DE LA CREME': {
     paragraphs: [
-      'Creme de La Creme is a thixotropic nail gel � a high-viscosity, "smart" builder gel that changes consistency when stirred or applied (shear thinning), becoming more fluid for easy spreading, yet instantly reverting to a thick, non-runny state when stationary.',
+      'Crème De La Crème is a thixotropic nail gel � a high-viscosity, "smart" builder gel that changes consistency when stirred or applied (shear thinning), becoming more fluid for easy spreading, yet instantly reverting to a thick, non-runny state when stationary.',
       'Ideal for controlling application, preventing cuticle flooding, and allowing for non-filing techniques, ensuring perfect, structural, and self-leveling nail extensions.',
     ],
     listItems: [],
@@ -2620,7 +2620,11 @@ function FullCataloguePage() {
   const subcategoryOptions = useMemo(() => {
     if (!activeSection) return []
     const names = activeSection.subcategories.map((subcategory) => subcategory.name)
-    const sorted = names.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true }))
+    // Sort by display name so tabs appear alphabetically as shown to the user
+    const sorted = [...names].sort((a, b) =>
+      formatSubcategoryDisplayName(a, activeSection.category)
+        .localeCompare(formatSubcategoryDisplayName(b, activeSection.category), undefined, { sensitivity: 'base', numeric: true })
+    )
     // Pin Solid Gel Polish immediately after ALL
     const SGP = sorted.find((n) => normalizeCatalogueToken(n) === 'SOLID GEL POLISH')
     const rest = sorted.filter((n) => normalizeCatalogueToken(n) !== 'SOLID GEL POLISH')
@@ -3245,7 +3249,7 @@ function FullCataloguePage() {
                       </ul>
                     </>
                   )}
-                  {dualFormsItems.length > 0 && (
+                  {dualFormsItems.length > 0 && /multimix/i.test(String(activeSubcategory || '')) && (
                     <details className="mt-3 rounded-[10px] border border-fuchsia-300/50 bg-white/70 p-3">
                       <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.1em] text-fuchsia-900/80">Learn More: Dual Forms Application</summary>
                       <ul className="mt-2 space-y-1.5">
@@ -6326,7 +6330,7 @@ const B2B_SIDEBAR_GROUPS = [
   },
   {
     label: 'Builder Systems',
-    cats: ['3-in-1 Builder Gel', '3-in-1 Premium Builder Gel', 'Creme De La Creme', 'Multimix Polygel', 'Brush On Builder', 'Liquid Polygel'],
+    cats: ['3-in-1 Builder Gel', '3-in-1 Premium Builder Gel', 'Crème De La Crème', 'Multimix Polygel', 'Brush On Builder', 'Liquid Polygel'],
   },
   {
     label: 'Tools & Equipment',
@@ -7454,7 +7458,7 @@ function ProductsModule({ moduleView = 'products' }) {
                       const n = (sub.name || '').toUpperCase()
                       if (n === '3INI BUILDER') return '3-in-1 Builder Gel'
                       if (n === 'PREMIUM BUILDER') return '3-in-1 Premium Builder Gel'
-                      if (n === 'CREME DE LA CREME') return 'Creme De La Creme'
+                      if (n === 'CREME DE LA CREME') return 'Crème De La Crème'
                       if (n === '30 ML' || n === '60 ML' || n === 'MULTIMIX') return 'Multimix Polygel'
                       if (n === 'BRUSH ON BUILDER') return 'Brush On Builder'
                       if (n === 'LIQUID POLYGEL') return 'Liquid Polygel'
@@ -7572,8 +7576,8 @@ function ProductsModule({ moduleView = 'products' }) {
               SS: 'Spring Summer',
               // Special collections
               BTO: 'By The Ocean',
-              CDC: 'Creme de la Creme',
-              CDCL: 'Creme de la Creme',
+              CDC: 'Crème De La Crème',
+              CDCL: 'Crème De La Crème',
               NYP: 'New York Party',
               PMA: 'PMA',
               // Top coats
@@ -7733,6 +7737,10 @@ function ProductsModule({ moduleView = 'products' }) {
       const cat = product.category || 'Other'
       if (!groups.has(cat)) groups.set(cat, [])
       groups.get(cat).push(product)
+    }
+    // Sort products within each category alphabetically by name
+    for (const [, items] of groups) {
+      items.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' }))
     }
     return Array.from(groups.entries()).sort(([a], [b]) => {
       const ai = CATALOGUE_ORDER.indexOf(a)
@@ -9604,7 +9612,7 @@ function ProductsModule({ moduleView = 'products' }) {
         const SWATCH = { Black: 'bg-black', Blue: 'bg-blue-500', Brown: 'bg-amber-700', 'Coral Orange': 'bg-orange-400', Green: 'bg-emerald-500', Grey: 'bg-slate-400', Neon: 'bg-lime-400', Pink: 'bg-pink-400', Purple: 'bg-violet-500', Red: 'bg-red-500', White: 'bg-white border border-slate-300', Yellow: 'bg-yellow-300' }
 
         const renderSidebarGroup = (group) => {
-          const available = group.cats.filter(c => availableCatNames.has(c))
+          const available = group.cats.filter(c => availableCatNames.has(c)).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
           if (!available.length) return null
           return (
             <div key={group.label}>
@@ -9684,7 +9692,7 @@ function ProductsModule({ moduleView = 'products' }) {
               style={{ borderColor: '#e2e8f0' }}
             >
               {B2B_SIDEBAR_GROUPS.map(group => {
-                const available = group.cats.filter(c => availableCatNames.has(c))
+                const available = group.cats.filter(c => availableCatNames.has(c)).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
                 if (!available.length) return null
                 return (
                   <optgroup key={group.label} label={group.label}>
