@@ -3503,7 +3503,7 @@ function FullCataloguePage() {
               aria-hidden="true"
               src="/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg"
               alt=""
-              className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-center lg:block"
+              className="absolute right-0 top-0 hidden h-full w-[60%] object-contain object-right lg:block"
               style={{
                 maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
                 WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
@@ -3557,7 +3557,7 @@ function FullCataloguePage() {
                 aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/top-bases-catalog-hero-image.webp"
                 alt=""
-                className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-center lg:block"
+                className="absolute right-0 top-0 hidden h-full w-[60%] object-contain object-right lg:block"
                 style={{
                   maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
@@ -3645,7 +3645,7 @@ function FullCataloguePage() {
                 aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp"
                 alt=""
-                className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-center lg:block"
+                className="absolute right-0 top-0 hidden h-full w-[60%] object-contain object-right lg:block"
                 style={{
                   maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
