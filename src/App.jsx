@@ -3406,7 +3406,7 @@ function FullCataloguePage() {
               aria-hidden="true"
               src="/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg"
               alt=""
-              className="absolute right-0 top-0 hidden h-full w-[52%] object-cover object-top lg:block"
+              className="absolute right-0 top-0 hidden h-full w-[52%] object-contain object-center lg:block"
               style={{
                 maskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
                 WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
@@ -3443,10 +3443,6 @@ function FullCataloguePage() {
                     src="/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg"
                     alt="GEL.IT.UP Colour Collection"
                     className="relative w-full object-contain drop-shadow-[0_6px_32px_rgba(212,55,144,0.45)]"
-                    style={{
-                      maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, black 20%)',
-                      WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, black 20%)',
-                    }}
                   />
                 </div>
               </div>
@@ -3464,7 +3460,7 @@ function FullCataloguePage() {
                 aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/top-bases-catalog-hero-image.webp"
                 alt=""
-                className="absolute right-0 top-0 hidden h-full w-[52%] object-cover object-top lg:block"
+                className="absolute right-0 top-0 hidden h-full w-[52%] object-contain object-center lg:block"
                 style={{
                   maskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
@@ -3503,7 +3499,6 @@ function FullCataloguePage() {
                       src="/gelitup-content/catalog-heroes/top-bases-catalog-hero-image.webp"
                       alt="GEL.IT.UP Bases & Tops"
                       className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(200,115,145,0.35)]"
-                      style={{ maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, black 20%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, black 20%)' }}
                     />
                   </div>
                 </div>
@@ -3554,7 +3549,7 @@ function FullCataloguePage() {
                 aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp"
                 alt=""
-                className="absolute right-0 top-0 hidden h-full w-[52%] object-cover object-top lg:block"
+                className="absolute right-0 top-0 hidden h-full w-[52%] object-contain object-center lg:block"
                 style={{
                   maskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
@@ -3587,7 +3582,6 @@ function FullCataloguePage() {
                       src="/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp"
                       alt="GEL.IT.UP Builder Systems"
                       className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(185,100,50,0.35)]"
-                      style={{ maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, black 20%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, black 20%)' }}
                     />
                   </div>
                 </div>
