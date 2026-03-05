@@ -2728,6 +2728,31 @@ function FullCataloguePage() {
     setScrollTop(0)
   }, [searchQuery])
 
+  const globalSearchResults = useMemo(() => {
+    const normalizedSearch = normalizeCatalogueToken(searchQuery)
+    if (!normalizedSearch) return []
+    const hits = []
+    for (const section of sections) {
+      for (const sub of section.subcategories) {
+        for (const item of sub.items) {
+          const nameToken = normalizeCatalogueToken(item.name)
+          const subcategoryToken = normalizeCatalogueToken(sub.name)
+          const pathToken = normalizeCatalogueToken(item.imageUrl)
+          const categoryToken = normalizeCatalogueToken(section.category)
+          if (
+            nameToken.includes(normalizedSearch) ||
+            subcategoryToken.includes(normalizedSearch) ||
+            pathToken.includes(normalizedSearch) ||
+            categoryToken.includes(normalizedSearch)
+          ) {
+            hits.push({ ...item, subcategory: sub.name, category: section.category })
+          }
+        }
+      }
+    }
+    return hits
+  }, [sections, searchQuery])
+
   useEffect(() => {
     if (activeCategory && !activeSubcategory) {
       setActiveSubcategory('ALL')
@@ -2960,6 +2985,7 @@ function FullCataloguePage() {
     setActiveCategory(categoryName)
     setActiveSubcategory(subcategoryName || 'ALL')
     setActiveColorFamily('ALL')
+    setSearchQuery('')
     // Expand the correct section so categoryDetail renders
     // Colours skips the grid � categoryDetail is rendered standalone below the banner
     const normalized = normalizeCatalogueToken(categoryName)
@@ -3406,6 +3432,69 @@ function FullCataloguePage() {
         <>
           <div id={CATALOGUE_RESULTS_ANCHOR_ID} className="scroll-mt-28" />
 
+          {/* GLOBAL SEARCH BAR */}
+          <div className="mx-auto max-w-6xl px-4 sm:px-8 py-4">
+            <div className="relative flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="pointer-events-none absolute left-3 h-4 w-4 text-black/40">
+                <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clipRule="evenodd" />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search all products by name, code or category..."
+                className="w-full rounded-[14px] border border-[#4A4A4A]/35 bg-white py-2.5 pl-9 pr-10 text-sm text-black outline-none ring-fuchsia-500/25 transition focus:border-fuchsia-400 focus:ring"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 flex h-5 w-5 items-center justify-center rounded-full bg-black/15 text-black/60 transition hover:bg-black/25"
+                  aria-label="Clear search"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3 w-3"><path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" /></svg>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* GLOBAL SEARCH RESULTS */}
+          {searchQuery && !activeCategory && (
+            <div className="mx-auto max-w-6xl px-4 sm:px-8 pb-12">
+              <p className="mb-4 text-xs uppercase tracking-[0.1em] text-black/50">
+                {globalSearchResults.length === 0 ? 'No results' : `${globalSearchResults.length} result${globalSearchResults.length === 1 ? '' : 's'}`} for <span className="font-semibold text-black/70">&ldquo;{searchQuery}&rdquo;</span>
+              </p>
+              {globalSearchResults.length === 0 ? (
+                <div className="rounded-2xl border border-[#4A4A4A]/20 bg-white p-8 text-center">
+                  <p className="text-sm text-black/55">No products matched your search. Try a different name, code, or category.</p>
+                </div>
+              ) : (
+                <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}>
+                  {globalSearchResults.slice(0, 240).map((item, idx) => {
+                    const itemCode = extractProductCode(item.name)
+                    return (
+                      <article
+                        key={idx}
+                        className="cursor-pointer overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 hover:border-fuchsia-500/70 hover:shadow-md"
+                        onClick={() => openCatalogueCategory(item.category, item.subcategory)}
+                        title={`View in ${item.category}`}
+                      >
+                        <div className="flex h-36 w-full items-center justify-center overflow-hidden bg-white p-1.5">
+                          <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => e.currentTarget.closest('article')?.classList.add('!hidden')} />
+                        </div>
+                        <div className="border-t border-black/10 px-2 py-1.5">
+                          <p className="truncate text-[10px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
+                          <p className="line-clamp-2 text-[11px] font-semibold uppercase leading-tight tracking-[0.02em] text-black">{item.name}</p>
+                          <p className="mt-1 truncate text-[10px] text-fuchsia-600">{formatSubcategoryDisplayName(item.subcategory, item.category)}</p>
+                        </div>
+                      </article>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {!searchQuery && <>
           {/* CHAPTER 01: THE INFINITE SPECTRUM */}
           <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 overflow-hidden bg-[#7a1040] lg:min-h-[400px]">
             <img
@@ -3805,6 +3894,8 @@ function FullCataloguePage() {
               </div>
             </div>
           </div>
+
+          </>}
 
           {/* PERSISTENT FOOTER */}
           <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen border-t border-[#4A4A4A]/30 bg-[#1A1A1A] px-4 py-8 text-center sm:px-8">
