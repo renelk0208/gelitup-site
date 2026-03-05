@@ -266,6 +266,58 @@ const COUNTRY_OPTIONS = [
   'India', 'China', 'Japan', 'South Korea', 'Singapore', 'Australia', 'New Zealand',
 ]
 
+// VAT number prefix required per country (EU VIES prefixes + common non-EU formats)
+const COUNTRY_VAT_PREFIX = {
+  Austria: 'AT',
+  Belgium: 'BE',
+  Bulgaria: 'BG',
+  Croatia: 'HR',
+  Cyprus: 'CY',
+  'Czech Republic': 'CZ',
+  Denmark: 'DK',
+  Estonia: 'EE',
+  Finland: 'FI',
+  France: 'FR',
+  Germany: 'DE',
+  Greece: 'EL',
+  Hungary: 'HU',
+  Ireland: 'IE',
+  Italy: 'IT',
+  Latvia: 'LV',
+  Lithuania: 'LT',
+  Luxembourg: 'LU',
+  Malta: 'MT',
+  Netherlands: 'NL',
+  Poland: 'PL',
+  Portugal: 'PT',
+  Romania: 'RO',
+  Slovakia: 'SK',
+  Slovenia: 'SI',
+  Spain: 'ES',
+  Sweden: 'SE',
+  'United Kingdom': 'GB',
+  Norway: 'NO',
+  Switzerland: 'CHE',
+  Turkey: 'TR',
+  Ukraine: 'UA',
+  'United Arab Emirates': 'TRN',
+  'South Africa': 'ZA',
+  Australia: 'ABN',
+  'New Zealand': 'GST',
+}
+
+// Returns null if valid, or an error string if the VAT prefix is wrong for the country
+function validateVatPrefix(vatNumber, country) {
+  const prefix = COUNTRY_VAT_PREFIX[country]
+  if (!prefix) return null // no known prefix rule for this country
+  const vat = String(vatNumber || '').trim().toUpperCase().replace(/[\s\-\.]/g, '')
+  if (!vat) return null // empty handled by required check
+  if (!vat.startsWith(prefix.toUpperCase())) {
+    return `VAT number for ${country} must start with ${prefix} (e.g. ${prefix}123456789)`
+  }
+  return null
+}
+
 const COUNTRY_DIAL_CODES = {
   Austria: '+43',
   Belgium: '+32',
@@ -1754,7 +1806,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
       // Standard: COLORS/CAT EYE/img.jpg ? subcategory='CAT EYE'
       // NUDE, FRENCH, PASTEL, RONE (GIUP1) belong under Solid Gel Polish
       const folderToken = (segments[segments.length - 2] || 'General').toUpperCase()
-      subcategory = ['NUDE', 'FRENCH', 'PASTEL', 'RONE'].includes(folderToken)
+      subcategory = ['NUDE', 'PASTEL', 'RONE'].includes(folderToken)
         ? 'SOLID GEL POLISH'
         : (segments[segments.length - 2] || 'General')
     } else if (segments.length > 2) {
@@ -6827,11 +6879,12 @@ function ProductsModule({ moduleView = 'products' }) {
     : clientProfile.shippingPhone
 
   const clientValidation = useMemo(() => {
+    const vatPrefixError = validateVatPrefix(clientProfile.vatNumber, clientProfile.invoiceCountry)
     const missing = {
       customerType: !String(clientProfile.customerType || '').trim(),
       shippingType: !String(clientProfile.shippingType || '').trim(),
       customerName: !String(clientProfile.customerName || '').trim(),
-      vatNumber: !String(clientProfile.vatNumber || '').trim(),
+      vatNumber: !String(clientProfile.vatNumber || '').trim() || Boolean(vatPrefixError),
       contactPhone: !String(clientProfile.contactPhone || '').trim(),
       contactEmail: !String(clientProfile.contactEmail || '').trim(),
       invoiceAddressLine1: !String(clientProfile.invoiceAddressLine1 || '').trim(),
@@ -6871,7 +6924,7 @@ function ProductsModule({ moduleView = 'products' }) {
 
     const missingLabels = Object.entries(missing)
       .filter(([, isMissing]) => isMissing)
-      .map(([field]) => labelByField[field])
+      .map(([field]) => field === 'vatNumber' && vatPrefixError ? vatPrefixError : labelByField[field])
 
     if (!invoiceAddressComposed.trim()) missingLabels.push('invoice address')
     if (!shippingAddressComposed.trim()) missingLabels.push('shipping address')
@@ -6879,6 +6932,7 @@ function ProductsModule({ moduleView = 'products' }) {
     return {
       missing,
       missingLabels,
+      vatPrefixError,
       hasMissing: missingLabels.length > 0,
     }
   }, [
@@ -7802,8 +7856,7 @@ function ProductsModule({ moduleView = 'products' }) {
               'COLOUR MIX UP': 'SOLID GEL POLISH', 'COLOR MIX UP': 'SOLID GEL POLISH',
               'SPRING SUMMER': 'SOLID GEL POLISH', 'ODE TO AUTUMN': 'SOLID GEL POLISH',
               'RONE': 'SOLID GEL POLISH', 'GIUP1': 'SOLID GEL POLISH',
-              'DUO TONE': 'SOLID GEL POLISH', 'MIRROR CHROME': 'SOLID GEL POLISH',
-              'SPIX AND SPEX': 'SPIX & SPEX',
+              'DUO TONE': 'SOLID GEL POLISH', 'MIRROR CHROME': 'SOLID GEL POLISH',              'SPIX AND SPEX': 'SPIX & SPEX',
               // Builder Gel Systems
               'BUILDER GEL': 'BUILDER GEL SYSTEMS', 'BUILDER GELS': 'BUILDER GEL SYSTEMS',
               '3INI BUILDER': 'BUILDER GEL SYSTEMS', '3IN1 BUILDER': 'BUILDER GEL SYSTEMS',
@@ -8810,21 +8863,77 @@ function ProductsModule({ moduleView = 'products' }) {
     })
 
     const shippingBlockHtml = `
-      <p><strong>Shipping Type:</strong> ${escapeHtml(shipping.type || '-')}</p>
-      <p><strong>Consignee Name:</strong> ${escapeHtml(shipping.name || '-')}</p>
-      <p><strong>Consignee Phone:</strong> ${escapeHtml(shipping.phone || '-')}</p>
-      <p><strong>Shipping Address:</strong> ${escapeHtml(shipping.address || '-')}</p>
-      <p><strong>Shipping Country:</strong> ${escapeHtml(shipping.country || '-')}</p>
+      <p style="margin:2px 0"><strong>Shipping Type:</strong> ${escapeHtml(shipping.type || '-')}</p>
+      <p style="margin:2px 0"><strong>Consignee Name:</strong> ${escapeHtml(shipping.name || '-')}</p>
+      <p style="margin:2px 0"><strong>Consignee Phone:</strong> ${escapeHtml(shipping.phone || '-')}</p>
+      <p style="margin:2px 0"><strong>Shipping Address:</strong> ${escapeHtml(shipping.address || '-')}</p>
+      <p style="margin:2px 0"><strong>Shipping Country:</strong> ${escapeHtml(shipping.country || '-')}</p>
     `
     const invoiceBlockHtml = `
-      <p><strong>Invoice Type:</strong> ${escapeHtml(invoice.customerType === 'company' ? 'Company' : 'Client')}</p>
-      <p><strong>Invoice Name:</strong> ${escapeHtml(invoice.name || '-')}</p>
-      <p><strong>VAT Number:</strong> ${escapeHtml(invoice.vatNumber || '-')}</p>
-      <p><strong>Invoice Address:</strong> ${escapeHtml(invoice.address || '-')}</p>
-      <p><strong>Invoice Country:</strong> ${escapeHtml(invoice.country || '-')}</p>
-      <p><strong>Contact Email:</strong> ${escapeHtml(invoice.contactEmail || '-')}</p>
-      <p><strong>Contact Phone:</strong> ${escapeHtml(invoice.contactPhone || '-')}</p>
-      <p><strong>Shipping same as invoice:</strong> ${clientProfile.shippingSameAsInvoice ? 'Yes' : 'No'}</p>
+      <p style="margin:2px 0"><strong>Invoice Type:</strong> ${escapeHtml(invoice.customerType === 'company' ? 'Company' : 'Client')}</p>
+      <p style="margin:2px 0"><strong>Invoice Name:</strong> ${escapeHtml(invoice.name || '-')}</p>
+      <p style="margin:2px 0"><strong>VAT Number:</strong> ${escapeHtml(invoice.vatNumber || '-')}</p>
+      <p style="margin:2px 0"><strong>Invoice Address:</strong> ${escapeHtml(invoice.address || '-')}</p>
+      <p style="margin:2px 0"><strong>Invoice Country:</strong> ${escapeHtml(invoice.country || '-')}</p>
+      <p style="margin:2px 0"><strong>Contact Email:</strong> ${escapeHtml(invoice.contactEmail || '-')}</p>
+      <p style="margin:2px 0"><strong>Contact Phone:</strong> ${escapeHtml(invoice.contactPhone || '-')}</p>
+      <p style="margin:2px 0"><strong>Shipping same as invoice:</strong> ${clientProfile.shippingSameAsInvoice ? 'Yes' : 'No'}</p>
+    `
+
+    // Spreadsheet-style order table for Zoho import
+    const thStyle = 'border:1px solid #ccc;padding:6px 10px;background:#f3f4f6;font-weight:bold;text-align:left;white-space:nowrap'
+    const tdStyle = 'border:1px solid #ddd;padding:5px 10px'
+    const tdRStyle = 'border:1px solid #ddd;padding:5px 10px;text-align:right'
+    const orderTableRows = proformaInvoice.lines.map(line => `
+      <tr>
+        <td style="${tdStyle}">${escapeHtml(line.sku)}</td>
+        <td style="${tdStyle}">${escapeHtml(line.description)}</td>
+        <td style="${tdRStyle}">${line.qty}</td>
+        <td style="${tdRStyle}">${line.unitPriceEur.toFixed(2)}</td>
+        <td style="${tdRStyle}">${line.subtotalEur.toFixed(2)}</td>
+      </tr>`).join('')
+    const orderTableHtml = `
+      <table style="border-collapse:collapse;width:100%;font-size:13px;font-family:Arial,sans-serif">
+        <thead>
+          <tr>
+            <th style="${thStyle}">SKU / Item Code</th>
+            <th style="${thStyle}">Description</th>
+            <th style="${thStyle}">Qty</th>
+            <th style="${thStyle}">Unit Price (EUR)</th>
+            <th style="${thStyle}">Line Total (EUR)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${orderTableRows}
+          <tr>
+            <td colspan="4" style="${tdStyle};text-align:right;font-weight:bold">TOTAL (EUR)</td>
+            <td style="${tdRStyle};font-weight:bold">${proformaInvoice.grandTotalEur.toFixed(2)}</td>
+          </tr>
+        </tbody>
+      </table>
+    `
+
+    // CSV attachment content (for Zoho import)
+    const csvHeader = 'SKU/Item Code,Description,Qty,Unit Price (EUR),Line Total (EUR)'
+    const csvRows = proformaInvoice.lines.map(line =>
+      [line.sku, line.description, line.qty, line.unitPriceEur.toFixed(2), line.subtotalEur.toFixed(2)]
+        .map(v => `"${String(v).replace(/"/g, '""')}"`)
+        .join(',')
+    )
+    csvRows.push(`"","","","TOTAL",${proformaInvoice.grandTotalEur.toFixed(2)}`)
+    const csvContent = [csvHeader, ...csvRows].join('\n')
+
+    const inboxOrderHtml = `
+      <h2 style="font-family:Arial,sans-serif;font-size:16px;margin-bottom:4px">B2B Order #${escapeHtml(String(insertedOrder?.id ?? '-'))} — ${escapeHtml(invoice.name || userData?.user?.email || '-')}</h2>
+      <p style="font-family:Arial,sans-serif;font-size:13px;color:#555;margin:0 0 12px">Order received ${new Date().toISOString().slice(0,10)} &bull; Customer: ${escapeHtml(userData?.user?.email ?? '-')} &bull; Total units: ${totalUnits}</p>
+      <h3 style="font-family:Arial,sans-serif;font-size:13px;margin:12px 0 4px">Invoice Details</h3>
+      <div style="font-family:Arial,sans-serif;font-size:13px">${invoiceBlockHtml}</div>
+      <h3 style="font-family:Arial,sans-serif;font-size:13px;margin:12px 0 4px">Shipping Details</h3>
+      <div style="font-family:Arial,sans-serif;font-size:13px">${shippingBlockHtml}</div>
+      <h3 style="font-family:Arial,sans-serif;font-size:13px;margin:16px 0 6px">Order Lines (ready for Zoho import)</h3>
+      ${orderTableHtml}
+      <p style="font-family:Arial,sans-serif;font-size:11px;color:#888;margin-top:10px">Copy the table above or use the CSV data below to import into Zoho.</p>
+      <pre style="font-family:monospace;font-size:11px;background:#f9f9f9;padding:10px;border:1px solid #e0e0e0;white-space:pre-wrap;word-break:break-all">${escapeHtml(csvContent)}</pre>
     `
 
     // Resend allows max 2 req/sec — stagger the 3 email sends with a 600 ms gap each
@@ -8833,8 +8942,8 @@ function ProductsModule({ moduleView = 'products' }) {
     const inboxNotificationResult = await sendPortalEmailNotification({
       eventType: 'b2b_order_received',
       to: ORDER_INBOX_EMAIL,
-      subject: `B2B Portal Order Received [#${insertedOrder?.id ?? '-'}]`,
-      html: `<p>A new B2B portal order has been received and is ready for offline invoicing.</p><p><strong>Order ID:</strong> ${insertedOrder?.id ?? '-'}</p><p><strong>Customer Email:</strong> ${userData?.user?.email ?? '-'}</p><p><strong>Total Units:</strong> ${totalUnits}</p>${invoiceBlockHtml}${shippingBlockHtml}<p><strong>Items:</strong> ${checkoutItems.join(', ')}</p>`,
+      subject: `B2B Order #${insertedOrder?.id ?? '-'} — ${invoice.name || userData?.user?.email || '-'} — ${totalUnits} units`,
+      html: inboxOrderHtml,
       orderId: insertedOrder?.id,
       customerEmail: userData?.user?.email ?? null,
       totalUnits,
@@ -8849,8 +8958,8 @@ function ProductsModule({ moduleView = 'products' }) {
       ? await sendPortalEmailNotification({
           eventType: 'b2b_order_backup_copy',
           to: ORDER_BACKUP_INBOX_EMAIL,
-          subject: `B2B Portal Backup Copy [#${insertedOrder?.id ?? '-'}]`,
-          html: `<p>Backup copy for a new B2B portal order.</p><p><strong>Order ID:</strong> ${insertedOrder?.id ?? '-'}</p><p><strong>Customer Email:</strong> ${userData?.user?.email ?? '-'}</p><p><strong>Total Units:</strong> ${totalUnits}</p>${invoiceBlockHtml}${shippingBlockHtml}<p><strong>Items:</strong> ${checkoutItems.join(', ')}</p>`,
+          subject: `B2B Order #${insertedOrder?.id ?? '-'} — ${invoice.name || userData?.user?.email || '-'} — ${totalUnits} units [backup]`,
+          html: inboxOrderHtml,
           orderId: insertedOrder?.id,
           customerEmail: userData?.user?.email ?? null,
           totalUnits,
@@ -9102,7 +9211,11 @@ function ProductsModule({ moduleView = 'products' }) {
               <input type="text" value={clientProfile.customerName} onChange={(e) => setClientField('customerName', e.target.value)} className={getClientInputClass('customerName')} placeholder={clientProfile.customerType === 'company' ? 'Company name' : 'Client name'} />
             </label>
             <label className="text-xs text-slate-700">VAT Number <span className="text-rose-600">*</span>
-              <input type="text" value={clientProfile.vatNumber} onChange={(e) => setClientField('vatNumber', e.target.value)} className={getClientInputClass('vatNumber')} placeholder="VAT / Tax ID" />
+              <input type="text" value={clientProfile.vatNumber} onChange={(e) => setClientField('vatNumber', e.target.value.toUpperCase())} className={getClientInputClass('vatNumber')} placeholder={COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry] ? `${COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry]}123456789` : 'VAT / Tax ID'} />
+              {COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry] && (
+                <span className="mt-0.5 block text-[10px] text-slate-400">Must start with <strong>{COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry]}</strong> for {clientProfile.invoiceCountry}</span>
+              )}
+              {clientValidation.vatPrefixError && <span className="mt-0.5 block text-[10px] text-rose-600">{clientValidation.vatPrefixError}</span>}
             </label>
             <label className="text-xs text-slate-700">Contact Number (with country code) <span className="text-rose-600">*</span>
               <input type="text" value={clientProfile.contactPhone} onChange={(e) => setClientField('contactPhone', e.target.value)} className={getClientInputClass('contactPhone')} placeholder="+359..." />
@@ -9316,7 +9429,7 @@ function ProductsModule({ moduleView = 'products' }) {
                 As a {activeTier.name}, you qualify for {liveUpsellRecommendation.name} at a {liveUpsellRecommendation.discountPercent}% discount with this order.
               </p>
               <p className="mt-1 text-xs font-semibold text-slate-900">
-                Tier-Only: —{Number(liveUpsellRecommendation.tierOnlyPrice || 0).toFixed(2)}
+                Tier-Only: €{Number(liveUpsellRecommendation.tierOnlyPrice || 0).toFixed(2)}
               </p>
             </div>
           </div>
@@ -9348,7 +9461,7 @@ function ProductsModule({ moduleView = 'products' }) {
             <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ${moduleView === 'profile' ? 'bg-white/30 text-white' : 'bg-slate-400 text-white'}`}>3</span>
             My Details
           </button>
-          {orderTotal > 0 && <span className="ml-auto text-xs font-bold text-fuchsia-700">—{orderTotal.toFixed(2)}</span>}
+          {orderTotal > 0 && <span className="ml-auto text-xs font-bold text-fuchsia-700">€{orderTotal.toFixed(2)}</span>}
         </div>
       </div>
 
@@ -9394,7 +9507,7 @@ function ProductsModule({ moduleView = 'products' }) {
                       <button onClick={() => setItemQtys(prev => ({...prev, [product.code]: qty + 1}))} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">+</button>
                     </div>
                     <div className="w-16 text-right">
-                      {lineTotal != null ? <p className="text-xs font-semibold text-fuchsia-700">—{lineTotal.toFixed(2)}</p> : <p className="text-xs text-slate-400">—</p>}
+                      {lineTotal != null ? <p className="text-xs font-semibold text-fuchsia-700">€{lineTotal.toFixed(2)}</p> : <p className="text-xs text-slate-400">—</p>}
                     </div>
                     <button onClick={() => toggleSelection(product.code)} className="flex h-6 w-6 items-center justify-center rounded-full text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Remove">—</button>
                   </div>
@@ -9405,7 +9518,7 @@ function ProductsModule({ moduleView = 'products' }) {
               <div className="mt-2 border-t border-slate-200 pt-2">
                 <div className="flex justify-between text-sm">
                   <span className="font-semibold text-slate-700">Estimated Total</span>
-                  <span className="font-bold text-fuchsia-700">—{orderTotal.toFixed(2)}</span>
+                  <span className="font-bold text-fuchsia-700">€{orderTotal.toFixed(2)}</span>
                 </div>
                 <p className="mt-0.5 text-[10px] text-slate-400">Excl. shipping. Final invoice issued by GEL.IT.UP.</p>
               </div>
@@ -9421,7 +9534,7 @@ function ProductsModule({ moduleView = 'products' }) {
             </div>
             {clientValidation.hasMissing
               ? <button onClick={() => navigate('/portal/dashboard/profile')} className="rounded-lg border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100">Complete details ?</button>
-              : <button onClick={() => navigate('/portal/dashboard/profile')} className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-200">? Ready — edit</button>
+              : <button onClick={() => navigate('/portal/dashboard/profile')} className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-200">Ready — edit</button>
             }
           </div>
           {clientValidation.hasMissing && <p className="mt-2 text-[11px] text-rose-600">Billing &amp; shipping details incomplete — needed to process your order.</p>}
@@ -9890,7 +10003,7 @@ function ProductsModule({ moduleView = 'products' }) {
           <div className="flex items-center justify-between gap-2 border-b px-3 py-2" style={{ borderColor: '#f0c4d0' }}>
           <span className="truncate text-xs font-semibold text-slate-700">
             {(selectedCodes.length + packageCartItems.length) > 0
-              ? `${selectedCodes.length + packageCartItems.length} items — ${totalUnits} units${orderTotal > 0 ? ` — —${orderTotal.toFixed(2)}` : ''}`
+              ? `${selectedCodes.length + packageCartItems.length} items — ${totalUnits} units${orderTotal > 0 ? ` — €${orderTotal.toFixed(2)}` : ''}`
               : 'Tap a product to add it'}
           </span>
           <div className="flex shrink-0 items-center gap-2">
@@ -9898,7 +10011,7 @@ function ProductsModule({ moduleView = 'products' }) {
               <button onClick={() => { setSelectedCodes([]); setItemQtys({}); setPackageCartItems([]); setGeneratedPackageTier('') }} className="text-xs text-slate-400 hover:text-rose-500">Clear</button>
             )}
             <button onClick={() => navigate('/portal/dashboard/products')} className="btn-cta-rose rounded px-3 py-1 text-xs font-semibold">
-              Review ?
+              Review
             </button>
           </div>
         </div>
@@ -10018,7 +10131,7 @@ function ProductsModule({ moduleView = 'products' }) {
                           {/* info */}
                           <div className="px-1.5 pt-1 pb-0.5">
                             <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{product.name}</p>
-                            {product.price != null && <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>—{Number(product.price).toFixed(2)}</p>}
+                            {product.price != null && <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{Number(product.price).toFixed(2)}</p>}
                           </div>
                           {/* action */}
                           {selected ? (
@@ -12569,6 +12682,14 @@ function App() {
       const missingField = requiredFields.find(([, value]) => !String(value || '').trim())
       if (missingField) {
         return { ok: false, message: `Please complete ${missingField[0]}.` }
+      }
+
+      // VAT prefix validation for known countries
+      if (isDistributorApplication || isBusinessOrder) {
+        const vatPrefixErr = validateVatPrefix(application.vatNumber, invoiceCountry)
+        if (vatPrefixErr) {
+          return { ok: false, message: vatPrefixErr }
+        }
       }
 
       const submissionStatus = isDistributorApplication ? 'pending' : 'submitted'
