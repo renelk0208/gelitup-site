@@ -8973,12 +8973,50 @@ function ProductsModule({ moduleView = 'products' }) {
     await _emailDelay()
     const customerEmailTarget = String(invoice.contactEmail || userData?.user?.email || '').trim().toLowerCase()
 
+    const customerOrderHtml = `
+      <div style="font-family:Arial,sans-serif;max-width:680px;margin:0 auto;color:#1a1a1a">
+        <div style="background:#1a1a1a;padding:24px 28px 20px;border-radius:4px 4px 0 0">
+          <p style="margin:0;font-size:11px;font-weight:600;letter-spacing:0.18em;color:#d946af;text-transform:uppercase">GEL.IT.UP by GIUP®</p>
+          <h1 style="margin:6px 0 0;font-size:20px;font-weight:800;color:#ffffff;letter-spacing:0.05em;text-transform:uppercase">Order Confirmation</h1>
+          <p style="margin:6px 0 0;font-size:12px;color:#aaaaaa">Order #${escapeHtml(String(insertedOrder?.id ?? '-'))} &bull; ${new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' })}</p>
+        </div>
+
+        <div style="background:#fafafa;padding:20px 28px;border-left:1px solid #e5e5e5;border-right:1px solid #e5e5e5">
+          <p style="margin:0 0 4px;font-size:14px">Hello <strong>${escapeHtml(invoice.name || 'Valued Customer')}</strong>,</p>
+          <p style="margin:0;font-size:13px;color:#444">Thank you for your GEL.IT.UP B2B order. A summary is below — please keep this email as your order record.</p>
+        </div>
+
+        <div style="background:#ffffff;padding:20px 28px;border:1px solid #e5e5e5;border-top:none;display:flex;gap:24px">
+          <div style="flex:1;min-width:0">
+            <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#888">Invoice Details</p>
+            ${invoiceBlockHtml}
+          </div>
+          <div style="flex:1;min-width:0">
+            <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#888">Shipping Details</p>
+            ${shippingBlockHtml}
+          </div>
+        </div>
+
+        <div style="background:#ffffff;padding:0 28px 20px;border:1px solid #e5e5e5;border-top:none">
+          <p style="margin:0 0 10px;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#888">Order Lines</p>
+          ${orderTableHtml}
+          <p style="margin:14px 0 0;font-size:12px;color:#555">Total units ordered: <strong>${totalUnits}</strong></p>
+        </div>
+
+        <div style="background:#f3f3f3;padding:16px 28px;border:1px solid #e5e5e5;border-top:none;border-radius:0 0 4px 4px">
+          <p style="margin:0 0 6px;font-size:12px;color:#444">You can download your pro-forma invoice PDF directly from the B2B portal.</p>
+          <p style="margin:0;font-size:12px;color:#888">If you have any questions about your order, please reply to this email.</p>
+          <p style="margin:14px 0 0;font-size:12px;color:#1a1a1a">Best regards,<br/><strong>GEL.IT.UP Distribution Team</strong></p>
+        </div>
+      </div>
+    `
+
     const customerNotificationResult = customerEmailTarget
       ? await sendPortalEmailNotification({
           eventType: 'b2b_order_customer_copy',
           to: customerEmailTarget,
-          subject: `Your GEL.IT.UP B2B Order Copy [#${insertedOrder?.id ?? '-'}]`,
-          html: `<p>Hello,</p><p>Thank you for your GEL.IT.UP by GIUP® order submission.</p><p><strong>Order ID:</strong> ${insertedOrder?.id ?? '-'}</p><p><strong>Total Units:</strong> ${totalUnits}</p>${invoiceBlockHtml}${shippingBlockHtml}<p><strong>Items:</strong> ${checkoutItems.join(', ')}</p><p>You can keep this email as your order record. You can also download your pro-forma PDF directly from the portal.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
+          subject: `Your GEL.IT.UP Order Confirmation [#${insertedOrder?.id ?? '-'}] — ${totalUnits} units`,
+          html: customerOrderHtml,
           orderId: insertedOrder?.id,
           customerEmail: customerEmailTarget,
           totalUnits,
