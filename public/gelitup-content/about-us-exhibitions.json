@@ -1,6 +1,6 @@
 {
   "title": "Upcoming Exhibitions",
-  "introText": "Meet GEL.IT.UP by GIUP® at the next professional beauty events and discover our seasonal launches live.",
+  "introText": "Meet GEL.IT.UP by GIUP\u00ae at the next professional beauty events and discover our seasonal launches live.",
   "events": [
     {
       "id": "exhibition-1-athens-2026",
@@ -11,7 +11,7 @@
       "stand": "Hall C Stand 300",
       "notes": "Exhibition #1",
       "imageUrl": "/gelitup-media/images/exhibitions/beauty%20festival.png",
-      "link": ""
+      "link": "https://www.beautyfestival.gr"
     },
     {
       "id": "beauty-greece-spring-2026",
@@ -20,9 +20,9 @@
       "startDate": "2026-04-25",
       "endDate": "2026-04-27",
       "stand": "STAND 119-123",
-      "notes": "Exhibition #2 · GEL.IT.UP Greece",
+      "notes": "Exhibition #2 \u00b7 GEL.IT.UP Greece",
       "imageUrl": "/gelitup-media/images/exhibitions/beauty%20greece.png",
-      "link": ""
+      "link": "https://www.beautygreece.gr/"
     }
   ]
 }
