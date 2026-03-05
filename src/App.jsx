@@ -5315,7 +5315,7 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
             <input
               id="portal-login-password"
               name="password"
-              type="password"
+              type={password ? 'password' : 'text'}
               autoComplete={isCreatePasswordMode ? 'new-password' : 'current-password'}
               required={hasSupabaseConfig}
               value={password}
@@ -5325,7 +5325,7 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
                 setInfoMessage('')
               }}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-              placeholder="��������"
+              placeholder="Enter your password"
             />
           </label>
 
@@ -5335,7 +5335,7 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
               <input
                 id="portal-login-confirm-password"
                 name="confirmPassword"
-                type="password"
+                type={confirmPassword ? 'password' : 'text'}
                 autoComplete="new-password"
                 required
                 value={confirmPassword}
@@ -5345,7 +5345,7 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
                   setInfoMessage('')
                 }}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                placeholder="��������"
+                placeholder="Confirm your password"
               />
             </label>
           )}
@@ -5585,7 +5585,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
             <input
               id="portal-admin-login-password"
               name="password"
-              type="password"
+              type={password ? 'password' : 'text'}
               autoComplete={isCreatePasswordMode ? 'new-password' : 'current-password'}
               required
               value={password}
@@ -5595,7 +5595,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
                 setInfoMessage('')
               }}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-              placeholder="��������"
+              placeholder="Enter your password"
             />
           </label>
 
@@ -5605,7 +5605,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
               <input
                 id="portal-admin-login-confirm-password"
                 name="confirmPassword"
-                type="password"
+                type={confirmPassword ? 'password' : 'text'}
                 autoComplete="new-password"
                 required
                 value={confirmPassword}
@@ -5615,7 +5615,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
                   setInfoMessage('')
                 }}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                placeholder="��������"
+                placeholder="Confirm your password"
               />
             </label>
           )}
