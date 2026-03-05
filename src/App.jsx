@@ -3269,21 +3269,24 @@ function FullCataloguePage() {
                 .map((item) => String(item).replace(/^Application\s*[—-]\s*/i, '').trim())
               const nonApplicationItems = listItems.filter((item) => !/^Application\s*[—-]\s*/i.test(String(item || '')) && !/^Dual Forms Application\s*[—-]\s*/i.test(String(item || '')))
 
+              const infoAccent = getCategoryAccent(activeCategory)
+              const infoRgb = infoAccent.shadowRgb
+
               return (
-                <div className="mt-4 rounded-[12px] border border-fuchsia-400/40 bg-gradient-to-br from-fuchsia-50/60 to-purple-50/40 p-4 sm:p-5">
-                  <h3 className="text-base font-bold uppercase tracking-[0.06em] text-fuchsia-900 sm:text-lg">Product Information</h3>
+                <div className="mt-4 rounded-[12px] p-4 sm:p-5" style={{ border: `1px solid rgba(${infoRgb},0.35)`, background: `rgba(${infoRgb},0.09)` }}>
+                  <h3 className="text-base font-bold uppercase tracking-[0.06em] sm:text-lg" style={{ color: infoAccent.bg }}>Product Information</h3>
                   {metadata.paragraphs?.length > 0 && (
                     <div className="mt-3 space-y-2">
                       {metadata.paragraphs.map((para, idx) => (
-                        <p key={idx} className="text-sm leading-relaxed text-fuchsia-900/80">{para}</p>
+                        <p key={idx} className="text-sm leading-relaxed text-gray-700">{para}</p>
                       ))}
                     </div>
                   )}
                   {nonApplicationItems.length > 0 && (
                     <ul className="mt-3 space-y-1.5">
                       {nonApplicationItems.map((item, idx) => (
-                        <li key={idx} className="flex gap-2 text-sm text-fuchsia-900/90">
-                          <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-fuchsia-600" />
+                        <li key={idx} className="flex gap-2 text-sm text-gray-700">
+                          <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full" style={{ backgroundColor: infoAccent.bg }} />
                           <span>{item}</span>
                         </li>
                       ))}
@@ -3291,11 +3294,11 @@ function FullCataloguePage() {
                   )}
                   {applicationItems.length > 0 && (
                     <>
-                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.1em] text-fuchsia-900/70">Application</p>
+                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.1em]" style={{ color: infoAccent.bg }}>Application</p>
                       <ul className="mt-2 space-y-1.5">
                         {applicationItems.map((item, idx) => (
-                          <li key={`application-${idx}`} className="flex gap-2 text-sm text-fuchsia-900/90">
-                            <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-fuchsia-600" />
+                          <li key={`application-${idx}`} className="flex gap-2 text-sm text-gray-700">
+                            <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full" style={{ backgroundColor: infoAccent.bg }} />
                             <span>{item}</span>
                           </li>
                         ))}
@@ -3303,12 +3306,12 @@ function FullCataloguePage() {
                     </>
                   )}
                   {dualFormsItems.length > 0 && /multimix/i.test(String(activeSubcategory || '')) && (
-                    <details className="mt-3 rounded-[10px] border border-fuchsia-300/50 bg-white/70 p-3">
-                      <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.1em] text-fuchsia-900/80">Learn More: Dual Forms Application</summary>
+                    <details className="mt-3 rounded-[10px] bg-white/70 p-3" style={{ border: `1px solid rgba(${infoRgb},0.4)` }}>
+                      <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.1em]" style={{ color: infoAccent.bg }}>Learn More: Dual Forms Application</summary>
                       <ul className="mt-2 space-y-1.5">
                         {dualFormsItems.map((item, idx) => (
-                          <li key={`dual-forms-${idx}`} className="flex gap-2 text-sm text-fuchsia-900/90">
-                            <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-fuchsia-600" />
+                          <li key={`dual-forms-${idx}`} className="flex gap-2 text-sm text-gray-700">
+                            <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full" style={{ backgroundColor: infoAccent.bg }} />
                             <span>{item}</span>
                           </li>
                         ))}
@@ -3643,7 +3646,6 @@ function FullCataloguePage() {
                       >
                         <div className="relative h-52 bg-white">
                           <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" onError={() => handleCategoryCoverImageError(categoryName, coverImageFallback)} />
-                          <div className="absolute right-3 top-3 h-3 w-3 rounded-full bg-rose-400" />
                         </div>
                         <div className="border-t border-[#4A4A4A]/20 p-3">
                           <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
