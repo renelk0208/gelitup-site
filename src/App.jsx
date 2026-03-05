@@ -7311,6 +7311,8 @@ function ProductsModule({ moduleView = 'products' }) {
           // Nail Preparations — Cuticle Removers
           { codes: ['cuticle remover 5ml', 'CUTICLE REMOVER 5ML'], target: 'Almond Cuticle Scrub Remover 5ml -HTF' },
           { codes: ['white satin cuticle scrub remover', 'WHITE SATIN CUTICLE SCRUB REMOVER'], target: 'Almond Cuticle Scrub Remover 100ml -HTF' },
+          // FFF (01 FFF — second white, named "White Years Ahead")
+          { codes: ['GIUP FFF', 'GIUP-FFF', 'GIUP 01 FFF', 'GIUP-01-FFF'], target: 'FFF White Years Ahead -HTF' },
           // Stickers
           { codes: ['5D NAIL STICKERS BLACK'], target: 'SD-1934 Nail Decals French - Black' },
           { codes: ['5D NAIL STICKERS WHITE'], target: 'SD-1933 Nail Decals French - White' },
