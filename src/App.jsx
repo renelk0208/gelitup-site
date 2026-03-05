@@ -3503,7 +3503,7 @@ function FullCataloguePage() {
               aria-hidden="true"
               src="/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg"
               alt=""
-              className="absolute right-0 top-0 hidden h-full w-[60%] object-contain object-right lg:block"
+              className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
               style={{
                 maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
                 WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
@@ -3557,7 +3557,7 @@ function FullCataloguePage() {
                 aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/top-bases-catalog-hero-image.webp"
                 alt=""
-                className="absolute right-0 top-0 hidden h-full w-[60%] object-contain object-right lg:block"
+                className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
                 style={{
                   maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
@@ -3645,7 +3645,7 @@ function FullCataloguePage() {
                 aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp"
                 alt=""
-                className="absolute right-0 top-0 hidden h-full w-[60%] object-contain object-right lg:block"
+                className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
                 style={{
                   maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
@@ -3732,19 +3732,47 @@ function FullCataloguePage() {
 
           {/* CHAPTER 04: ARTISTIC MASTERY & CARE */}
           {/* Chapter 04a: Nail Art */}
-          <div id="catalogue-section-nail-art" className="space-y-4 scroll-mt-28 py-12 px-4 sm:px-8">
-            <div className="mx-auto max-w-6xl px-4 sm:px-8">
-              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>NAIL ART</h2>
-              <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                Creative nail art supplies for professional nail technicians.
-              </p>
-              <div className="mt-5">
-                <button
-                  onClick={() => openCatalogueCategory('NAIL ART', 'ALL')}
-                  className="rounded-lg bg-[#1A1A1A] px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-[#333]"
-                >
-                  BROWSE NAIL ART
-                </button>
+          <div id="catalogue-section-nail-art" className="scroll-mt-28">
+            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#8c4060] lg:min-h-[360px]">
+              <img
+                aria-hidden="true"
+                src="/gelitup-content/catalog-heroes/nail-art-catalog-hero-image.jpg"
+                alt=""
+                className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
+                style={{
+                  maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
+                }}
+              />
+              <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
+                <div className="flex-1 lg:max-w-[500px]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-200">Artistic Mastery</p>
+                  <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Nail Art</h2>
+                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
+                    Creative nail art supplies for professional nail technicians.
+                  </p>
+                  <div className="mt-6">
+                    <button
+                      onClick={() => openCatalogueCategory('NAIL ART', 'ALL')}
+                      className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
+                      style={{ background: 'rgba(160,70,100,0.85)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(185,90,120,0.95)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(160,70,100,0.85)'}
+                    >
+                      BROWSE NAIL ART
+                    </button>
+                  </div>
+                </div>
+                <div className="lg:hidden">
+                  <div className="relative mx-auto max-w-[260px]">
+                    <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(160,70,100,0.3)_0%,transparent_70%)] blur-2xl" />
+                    <img
+                      src="/gelitup-content/catalog-heroes/nail-art-catalog-hero-image.jpg"
+                      alt="GEL.IT.UP Nail Art"
+                      className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(160,70,100,0.4)]"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
             {chapterNailArtCategories.includes(activeCategory) && (
@@ -3778,19 +3806,47 @@ function FullCataloguePage() {
           </div>
 
           {/* Chapter 04c: Nail, Hand & Foot Care */}
-          <div id="catalogue-section-nail-hand-foot" className="space-y-4 scroll-mt-28 py-12 px-4 sm:px-8">
-            <div className="mx-auto max-w-6xl px-4 sm:px-8">
-              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>NAIL, HAND &amp; FOOT CARE</h2>
-              <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                Therapeutic formulations for professional nail, hand and foot aftercare.
-              </p>
-              <div className="mt-5">
-                <button
-                  onClick={() => openCatalogueCategory('NAIL HAND & FOOT CARE', 'ALL')}
-                  className="rounded-lg bg-[#1A1A1A] px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-[#333]"
-                >
-                  BROWSE NAIL, HAND &amp; FOOT CARE
-                </button>
+          <div id="catalogue-section-nail-hand-foot" className="scroll-mt-28">
+            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#3b5a52] lg:min-h-[360px]">
+              <img
+                aria-hidden="true"
+                src="/gelitup-content/catalog-heroes/Hand-nail-and-foot-care-catalog-hero-image.webp"
+                alt=""
+                className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
+                style={{
+                  maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
+                }}
+              />
+              <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
+                <div className="flex-1 lg:max-w-[500px]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200">Professional Aftercare</p>
+                  <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Nail, Hand &amp; Foot Care</h2>
+                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
+                    Therapeutic formulations for professional nail, hand and foot aftercare.
+                  </p>
+                  <div className="mt-6">
+                    <button
+                      onClick={() => openCatalogueCategory('NAIL HAND & FOOT CARE', 'ALL')}
+                      className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
+                      style={{ background: 'rgba(59,100,90,0.85)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(75,120,108,0.95)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(59,100,90,0.85)'}
+                    >
+                      BROWSE NAIL, HAND &amp; FOOT CARE
+                    </button>
+                  </div>
+                </div>
+                <div className="lg:hidden">
+                  <div className="relative mx-auto max-w-[260px]">
+                    <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(59,100,90,0.3)_0%,transparent_70%)] blur-2xl" />
+                    <img
+                      src="/gelitup-content/catalog-heroes/Hand-nail-and-foot-care-catalog-hero-image.webp"
+                      alt="GEL.IT.UP Nail, Hand & Foot Care"
+                      className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(59,100,90,0.4)]"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
             {chapterNailHandFootCategories.includes(activeCategory) && (
