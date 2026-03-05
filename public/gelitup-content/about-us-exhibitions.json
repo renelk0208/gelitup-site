@@ -23,6 +23,17 @@
       "notes": "Exhibition #2 \u00b7 GEL.IT.UP Greece",
       "imageUrl": "/gelitup-media/images/exhibitions/beauty%20greece.png",
       "link": "https://www.beautygreece.gr/"
+    },
+    {
+      "id": "beauty-world-riyadh-2026",
+      "name": "Beauty World Riyadh",
+      "location": "Riyadh International Convention \u0026 Exhibition Center (RICEC)",
+      "startDate": "2026-05-18",
+      "endDate": "2026-05-20",
+      "stand": "",
+      "notes": "12PM \u2013 8PM \u00b7 Trade professionals only \u00b7 18+ years",
+      "imageUrl": "",
+      "link": "https://beautyworld-riyadh.ksa.messefrankfurt.com/ksa/en.html"
     }
   ]
 }
