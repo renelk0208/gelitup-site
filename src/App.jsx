@@ -81,7 +81,9 @@ const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
 const HOME_HERO_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
 const HOME_HERO_POSTER_URL = '/gelitup-media/images/news/Spring%20Summer/NEWS%20Carousel/2600-1.jpg'
-const HOME_NEWS_CLOUD_VIDEO_URL = '/gelitup-media/videos/floating-clouds.mp4'
+const HOME_NEWS_CLOUD_VIDEO_URL = Math.floor(Date.now() / 86400000) % 2 === 0
+  ? '/gelitup-media/videos/floating-clouds.mp4'
+  : '/gelitup-media/videos/floating- clouds2.mp4'
 const HOME_NEWS_CAROUSEL_FOLDER = '/gelitup-media/images/news/Spring Summer/NEWS Carousel/'
 const CONTENT_CACHE_BUSTER = '2026-02-27-1'
 const HOME_CLOUD_DANCER_DEFAULT = {
