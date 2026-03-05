@@ -8485,8 +8485,20 @@ function ProductsModule({ moduleView = 'products' }) {
     doc.text(
       'This is a Pro-Forma invoice for bank transfer purposes. Production begins upon payment confirmation.',
       margin,
-      Math.min(footerY + 18, pageHeight - 42),
+      Math.min(footerY + 18, pageHeight - 52),
     )
+    doc.setTextColor(180, 83, 9)
+    doc.text(
+      'IMPORTANT: Shipping costs are NOT included in this total. Final shipping charges will be calculated and invoiced',
+      margin,
+      Math.min(footerY + 30, pageHeight - 40),
+    )
+    doc.text(
+      'separately once your order is packed. You will be notified of the final shipping amount before dispatch.',
+      margin,
+      Math.min(footerY + 41, pageHeight - 29),
+    )
+    doc.setTextColor(...textColor)
 
     doc.save(`proforma-order-${lastProformaInvoice.orderId}.pdf`)
   }
@@ -9976,13 +9988,16 @@ function ProductsModule({ moduleView = 'products' }) {
         {checkoutMessage && lastProformaInvoice && (
           <div className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 p-2">
             <p className="text-xs text-emerald-900">
-              Pro-Forma ready — Base accounting total ({EUR_CURRENCY_CODE}): {currencyFormatter(lastProformaInvoice.grandTotalEur)}
+              Pro-Forma ready — Base product total ({EUR_CURRENCY_CODE}): {currencyFormatter(lastProformaInvoice.grandTotalEur)}
+            </p>
+            <p className="mt-1.5 rounded-md border border-amber-300 bg-amber-50 px-2 py-1.5 text-[11px] text-amber-800 leading-snug">
+              <strong>Note:</strong> Shipping costs are <strong>not included</strong> in this total. Final shipping charges will be calculated separately once your order is packed and you will be notified before dispatch.
             </p>
             <button
               onClick={exportProformaPdf}
               className="mt-2 rounded-md border border-emerald-300 bg-white px-2 py-1 text-xs font-semibold text-emerald-800"
             >
-              Download Pro-Forma Invoice
+              Download Pro-Forma Invoice PDF
             </button>
           </div>
         )}
