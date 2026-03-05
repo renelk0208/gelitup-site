@@ -76,6 +76,7 @@ const FACEBOOK_HANDLE = import.meta.env.VITE_FACEBOOK_HANDLE || '@gelitup'
 const YOUTUBE_HANDLE = import.meta.env.VITE_YOUTUBE_HANDLE || '@GELITUP'
 const PORTAL_FONT_TTF_URL = import.meta.env.VITE_PORTAL_FONT_TTF_URL || '/fonts/PF-Futura-Neu.ttf'
 const CLIENT_PROFILE_STORAGE_KEY = 'gelitup.portal.client_profile.v1'
+const B2B_CART_STORAGE_KEY_PREFIX = 'gelitup.portal.b2b_cart.v1'
 const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
@@ -6721,6 +6722,60 @@ function ProductsModule({ moduleView = 'products' }) {
     }
   }, [])
 
+  // Cart persistence — restore cart from localStorage on mount, keyed by user ID
+  const cartUserIdRef = useRef(null)
+
+  useEffect(() => {
+    if (!hasSupabaseConfig || !supabase) return
+    supabase.auth.getUser().then(({ data }) => {
+      const uid = data?.user?.id
+      if (!uid) return
+      cartUserIdRef.current = uid
+      const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${uid}`
+      try {
+        const saved = JSON.parse(localStorage.getItem(key) || 'null')
+        if (!saved) return
+        if (Array.isArray(saved.selectedCodes) && saved.selectedCodes.length) setSelectedCodes(saved.selectedCodes)
+        if (saved.itemQtys && typeof saved.itemQtys === 'object') setItemQtys(saved.itemQtys)
+        if (Array.isArray(saved.packageCartItems) && saved.packageCartItems.length) setPackageCartItems(saved.packageCartItems)
+        // Trigger abandoned cart email if cart is older than 24 hours
+        if (saved.savedAt && Date.now() - saved.savedAt > 24 * 60 * 60 * 1000) {
+          const itemCount = (saved.selectedCodes?.length || 0) + (saved.packageCartItems?.length || 0)
+          const userEmail = String(data?.user?.email || '').trim()
+          if (itemCount > 0 && userEmail) {
+            sendPortalEmailNotification({
+              eventType: 'b2b_abandoned_cart',
+              to: userEmail,
+              subject: 'You have items waiting in your GEL.IT.UP B2B cart',
+              html: `<p>Hello,</p><p>You have <strong>${itemCount} product${itemCount === 1 ? '' : 's'}</strong> saved in your GEL.IT.UP B2B portal cart that have not yet been ordered.</p><p>Log in to the portal to continue or cancel your current selection.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
+            }).catch(() => {})
+            // Reset the savedAt timer so the reminder doesn't fire every login
+            localStorage.setItem(key, JSON.stringify({ ...saved, savedAt: Date.now() }))
+          }
+        }
+      }
+      catch { /* ignore corrupt storage */ }
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Persist cart to localStorage whenever it changes
+  useEffect(() => {
+    const uid = cartUserIdRef.current
+    if (!uid) return
+    const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${uid}`
+    if (!selectedCodes.length && !Object.keys(itemQtys).length && !packageCartItems.length) {
+      localStorage.removeItem(key)
+      return
+    }
+    const existing = (() => { try { return JSON.parse(localStorage.getItem(key) || 'null') } catch { return null } })()
+    localStorage.setItem(key, JSON.stringify({
+      selectedCodes,
+      itemQtys,
+      packageCartItems,
+      savedAt: existing?.savedAt ?? Date.now(),
+    }))
+  }, [selectedCodes, itemQtys, packageCartItems])
+
   const setClientField = useCallback((key, value) => {
     setClientProfile((current) => ({ ...current, [key]: value }))
   }, [])
@@ -8873,6 +8928,10 @@ function ProductsModule({ moduleView = 'products' }) {
     setPackageCartItems([])
     setGeneratedPackageTier('')
     setIncludeProfessionalBasePack(false)
+    // Clear persisted cart from localStorage on successful submit
+    if (cartUserIdRef.current) {
+      localStorage.removeItem(`${B2B_CART_STORAGE_KEY_PREFIX}_${cartUserIdRef.current}`)
+    }
     setIsSubmittingOrder(false)
   }
 
@@ -9580,6 +9639,7 @@ function ProductsModule({ moduleView = 'products' }) {
           </button>
         </div>
 
+        {/* Packing list hidden until product dimensions are complete
         {lastPackingList && (
           <div className="mt-3 rounded-lg border border-sky-200 bg-sky-50 p-3 text-xs text-slate-800">
             <p className="font-semibold text-slate-900">Packing List (Draft) — Order #{lastPackingList.orderId}</p>
@@ -9611,6 +9671,7 @@ function ProductsModule({ moduleView = 'products' }) {
             </div>
           </div>
         )}
+        */}
 
         {includeProfessionalBasePack && (
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
@@ -10049,18 +10110,20 @@ function OrdersModule() {
         .from(ordersTable)
         .select('id, created_at, total_units, status, payment_status, items, customer_email, consignee_name, consignee_phone, shipping_address, zoho_salesorder_id, zoho_invoice_id, zoho_invoice_number, zoho_invoice_total')
         .order('created_at', { ascending: false })
-        .limit(20)
+        .limit(100)
 
-      const missingShippingColumnsError = error?.message?.includes('consignee_name')
+      const missingColumnsError = error?.message?.includes('consignee_name')
         || error?.message?.includes('consignee_phone')
         || error?.message?.includes('shipping_address')
+        || error?.message?.includes('payment_status')
+        || error?.message?.includes('zoho_')
 
-      if (missingShippingColumnsError) {
+      if (missingColumnsError) {
         const retry = await supabase
           .from(ordersTable)
           .select('id, created_at, total_units, status, items, customer_email')
           .order('created_at', { ascending: false })
-          .limit(20)
+          .limit(100)
 
         data = retry.data
         error = retry.error
