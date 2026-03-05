@@ -3154,7 +3154,9 @@ function FullCataloguePage() {
             }}
             className="inline-flex items-center gap-1.5 rounded-lg border border-[#4A4A4A]/30 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-black/70 transition hover:border-fuchsia-500/50 hover:text-fuchsia-600"
           >
-            <span>?</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5 flex-shrink-0">
+              <path fillRule="evenodd" d="M14 8a.75.75 0 0 1-.75.75H4.56l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 1.06L4.56 7.25H13.25A.75.75 0 0 1 14 8Z" clipRule="evenodd" />
+            </svg>
             <span>Back to Categories</span>
           </button>
         </div>
