@@ -1,4 +1,4 @@
-﻿import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import appLogo from '/gelitup_logo.png'
 import PWABadge from './PWABadge.jsx'
@@ -1110,7 +1110,7 @@ function formatDraftInvoiceText(invoice) {
   const silverFreeLine = getSilverFreeGuaranteeText(invoice?.createdAt)
 
   const lines = [
-    'GEL.IT.UP by GIUPu00AE - B2B DRAFT INVOICE',
+    'GEL.IT.UP by GIUP® - B2B DRAFT INVOICE',
     `Invoice #: ${invoice.invoiceNumber}`,
     `Created: ${new Date(invoice.createdAt).toLocaleString()}`,
     `Tier: ${invoice.tier}`,
@@ -1133,7 +1133,7 @@ function buildPlatinumSuccessEmail({ distributorName, orderId }) {
   const subject = `Welcome to the Family! ?? Your GEL.IT.UP Platinum Distributor Order [#${orderId}]`
   const html = `
     <p>Hello ${distributorName},</p>
-    <p>It is a pleasure to officially welcome you to the GEL.IT.UP by GIUPu00AE global network!</p>
+    <p>It is a pleasure to officially welcome you to the GEL.IT.UP by GIUP® global network!</p>
     <p>You haven—t just placed an order; you—ve invested in a partnership. By choosing the Platinum Elite Package, you are now equipped with our top 120 high-velocity colors and the technical systems that professional nail technicians trust daily.</p>
     <p><strong>?? What Happens Next?</strong></p>
     <p><strong>Order Processing:</strong> Our warehouse team is currently hand-picking your 120-color "Master Collection" and technical essentials.</p>
@@ -1373,7 +1373,7 @@ function DistributorPackagesPage() {
 
       {/* HERO */}
       <div className="relative overflow-hidden rounded-2xl bg-[#1a1a1a] p-7 sm:p-10" style={{ color: '#ffffff' }}>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#c8386e' }}>GEL.IT.UP by GIUPu00AE — Verified Distribution Network</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#c8386e' }}>GEL.IT.UP by GIUP® — Verified Distribution Network</p>
         <h1 className="heading-on-dark mt-3 text-3xl font-black leading-tight tracking-tight sm:text-5xl">
           Distribution<br className="hidden sm:block" /> Partnership Tiers
         </h1>
@@ -2002,7 +2002,7 @@ function flattenSectionItems(section) {
 const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   'BASES::SUPERBOND': {
     paragraphs: [
-      'GEL.IT.UP by GIUPu00AE Superbond is an acid-free primer, safe for the natural nail, and it does not require curing.',
+      'GEL.IT.UP by GIUP® Superbond is an acid-free primer, safe for the natural nail, and it does not require curing.',
       'It is applied to the free edge of the nail before the base coat, ensuring improved adhesion while providing additional dehydration for longer-lasting results.',
       'It also creates a thin protective film on the nail, helping to protect it from damage.',
     ],
@@ -2033,7 +2033,7 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Application — Foundation: Apply a thin slip layer over nail/form (do not cure).',
       'Application — Building: Place a larger bead centrally and guide to edges/apex as it self-levels.',
       'Application — Cure: 60–90s LED (120s UV).',
-      'Application — Refinement & Finish: Wipe inhibition layer, file shape, then final gloss layer or proceed with GEL.IT.UP by GIUPu00AE color.',
+      'Application — Refinement & Finish: Wipe inhibition layer, file shape, then final gloss layer or proceed with GEL.IT.UP by GIUP® color.',
       'Dual Forms Application — Prep and prime as standard, then apply a thin slip layer of 3-in-1 Premium Builder Gel.',
       'Dual Forms Application — Select the correct dual form size, place a controlled bead in the form, and spread evenly to avoid trapped air.',
       'Dual Forms Application — Press form from cuticle toward free edge, flash cure to lock position, then full-cure and gently remove the form before refinement.',
@@ -2052,7 +2052,7 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Application — Foundation: Apply a thin slip layer over nail/form (do not cure).',
       'Application — Building: Place a larger bead centrally and guide to edges/apex as it self-levels.',
       'Application — Cure: 60–90s LED (120s UV).',
-      'Application — Refinement & Finish: Wipe inhibition layer, file shape, then final gloss layer or proceed with GEL.IT.UP by GIUPu00AE color.',
+      'Application — Refinement & Finish: Wipe inhibition layer, file shape, then final gloss layer or proceed with GEL.IT.UP by GIUP® color.',
       'Dual Forms Application — Prep and prime as standard, then apply a thin slip layer of 3-in-1 Premium Builder Gel.',
       'Dual Forms Application — Select the correct dual form size, place a controlled bead in the form, and spread evenly to avoid trapped air.',
       'Dual Forms Application — Press form from cuticle toward free edge, flash cure to lock position, then full-cure and gently remove the form before refinement.',
@@ -2079,7 +2079,7 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Application — Placement: Dispense MultiMix Synthogel and position with a spatula.',
       'Application — Sculpting: Use a brush with Cleanser/Slip Solution (lightly) to pat and smooth; product remains workable until cured.',
       'Application — Curing: Cure for 60-90 seconds in LED.',
-      'Application — Refine: Wipe inhibition layer, file to shape, and finish with GEL.IT.UP by GIUPu00AE color or top coat.',
+      'Application — Refine: Wipe inhibition layer, file to shape, and finish with GEL.IT.UP by GIUP® color or top coat.',
     ],
   },
   'BUILDER GEL SYSTEMS::30 ML': {
@@ -2096,7 +2096,7 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Application — Placement: Dispense MultiMix Synthogel and position with a spatula.',
       'Application — Sculpting: Use a brush with Cleanser/Slip Solution (lightly) to pat and smooth; product remains workable until cured.',
       'Application — Curing: Cure for 60-90 seconds in LED.',
-      'Application — Refine: Wipe inhibition layer, file to shape, and finish with GEL.IT.UP by GIUPu00AE color or top coat.',
+      'Application — Refine: Wipe inhibition layer, file to shape, and finish with GEL.IT.UP by GIUP® color or top coat.',
     ],
   },
   'BUILDER GEL SYSTEMS::60 ML': {
@@ -2113,12 +2113,12 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Application — Placement: Dispense MultiMix Synthogel and position with a spatula.',
       'Application — Sculpting: Use a brush with Cleanser/Slip Solution (lightly) to pat and smooth; product remains workable until cured.',
       'Application — Curing: Cure for 60-90 seconds in LED.',
-      'Application — Refine: Wipe inhibition layer, file to shape, and finish with GEL.IT.UP by GIUPu00AE color or top coat.',
+      'Application — Refine: Wipe inhibition layer, file to shape, and finish with GEL.IT.UP by GIUP® color or top coat.',
     ],
   },
   'BUILDER GEL SYSTEMS::COMPETE': {
     paragraphs: [
-      'The GEL.IT.UP by GIUPu00AE Acrylic System is a high-performance sculpting range designed for technicians who demand ultimate strength and traditional structural control.',
+      'The GEL.IT.UP by GIUP® Acrylic System is a high-performance sculpting range designed for technicians who demand ultimate strength and traditional structural control.',
       'Engineered to work with specialized powders, the system includes two monomer options for different workflows: Professional Fast Liquid for rapid set/high-speed service, and Beginner Slow Liquid for extended playtime and precision architecture.',
     ],
     listItems: [
@@ -2129,12 +2129,12 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Application — Pick-up: Dip brush tip into acrylic powder to create a creamy bead.',
       'Application — Sculpt: Place and guide bead; use Slow for more playtime or Fast for quicker setting.',
       'Application — Refine: Once polymerized, file to shape with professional-grade nail files.',
-      'Application — Seal: Finish with GEL.IT.UP by GIUPu00AE Non-Wipe Top Coat and cure 90–120 seconds for a TPO-free high-gloss seal.',
+      'Application — Seal: Finish with GEL.IT.UP by GIUP® Non-Wipe Top Coat and cure 90–120 seconds for a TPO-free high-gloss seal.',
     ],
   },
   'BUILDER GEL SYSTEMS::ACRYLIC': {
     paragraphs: [
-      'The GEL.IT.UP by GIUPu00AE Acrylic System is a high-performance sculpting range designed for technicians who demand ultimate strength and traditional structural control.',
+      'The GEL.IT.UP by GIUP® Acrylic System is a high-performance sculpting range designed for technicians who demand ultimate strength and traditional structural control.',
       'Engineered to work with specialized powders, the system includes two monomer options for different workflows: Professional Fast Liquid for rapid set/high-speed service, and Beginner Slow Liquid for extended playtime and precision architecture.',
     ],
     listItems: [
@@ -2145,20 +2145,20 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Application — Pick-up: Dip brush tip into acrylic powder to create a creamy bead.',
       'Application — Sculpt: Place and guide bead; use Slow for more playtime or Fast for quicker setting.',
       'Application — Refine: Once polymerized, file to shape with professional-grade nail files.',
-      'Application — Seal: Finish with GEL.IT.UP by GIUPu00AE Non-Wipe Top Coat and cure 90–120 seconds for a TPO-free high-gloss seal.',
+      'Application — Seal: Finish with GEL.IT.UP by GIUP® Non-Wipe Top Coat and cure 90–120 seconds for a TPO-free high-gloss seal.',
     ],
   },
   'LINE-IT-UP::ALL': {
     paragraphs: [
-      'By choosing the LINE.IT.UP by GIUPu00AE range, you can create linear designs easily and quickly, thanks to the specially designed brush.',
+      'By choosing the LINE.IT.UP by GIUP® range, you can create linear designs easily and quickly, thanks to the specially designed brush.',
       'It allows you to create everything from fine to thicker lines, depending on the design you wish to draw.',
     ],
     listItems: [],
   },
   'COLORS::ALL': {
     paragraphs: [
-      'The GEL.IT.UP by GIUPu00AE gel polish range has stood out in the market thanks to its excellent quality and high durability. It delivers intense shine, removes very easily, and does not wrinkle during curing.',
-      'The rich GEL.IT.UP by GIUPu00AE color palette includes more than 500 gel polish shades, with new must-have colors added every season.',
+      'The GEL.IT.UP by GIUP® gel polish range has stood out in the market thanks to its excellent quality and high durability. It delivers intense shine, removes very easily, and does not wrinkle during curing.',
+      'The rich GEL.IT.UP by GIUP® color palette includes more than 500 gel polish shades, with new must-have colors added every season.',
       'All our products are cruelty-free and have been approved by the global organization Leaping Bunny International.',
     ],
     listItems: [],
@@ -2299,7 +2299,7 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'NAIL ART::MARBLE INK': {
     paragraphs: [
-      'Marble-It by GIUPu00AE is a water-based color that air-dries on its own — it does not require curing.',
+      'Marble-It by GIUP® is a water-based color that air-dries on its own — it does not require curing.',
       'The Marble-It range allows you to easily and quickly create marble, smoke, and water-effect nail art designs.',
     ],
     listItems: [],
@@ -4758,7 +4758,7 @@ function HomePage({ onOpenContactModal }) {
 
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
             <h1 className="hero-copy-shadow heading-on-dark max-w-5xl text-3xl font-black uppercase leading-[1.2] tracking-[0.19em] text-white sm:text-4xl lg:text-6xl">
-              GEL.IT.UP by GIUPu00AE: THE ARCHITECTS OF PROFESSIONAL COLOR.
+              GEL.IT.UP by GIUP®: THE ARCHITECTS OF PROFESSIONAL COLOR.
             </h1>
             <p className="hero-copy-shadow mt-5 max-w-3xl text-sm font-semibold uppercase leading-[1.7] tracking-[0.12em] text-white/95 sm:text-base">
               A DECADE OF PROFESSIONAL MASTERY. EU REGULATED. HEMA & TPO-FREE.
@@ -4785,7 +4785,7 @@ function HomePage({ onOpenContactModal }) {
               </svg>
             </div>
             <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790]">CPNP NOTIFIED</p>
-            <p className="mt-2 text-sm leading-relaxed text-white">Every formula in The Spectrum is CPNP Notified. This is your legal guarantee that GEL.IT.UP by GIUPu00AE is fully authorized for sale across every EU member state.</p>
+            <p className="mt-2 text-sm leading-relaxed text-white">Every formula in The Spectrum is CPNP Notified. This is your legal guarantee that GEL.IT.UP by GIUP® is fully authorized for sale across every EU member state.</p>
           </article>
 
           <article className="rounded-xl border border-white/15 bg-black/20 p-4">
@@ -4823,7 +4823,7 @@ function HomePage({ onOpenContactModal }) {
         </div>
 
         <p className="mt-5 border-t border-white/20 pt-4 text-center text-sm font-extrabold uppercase tracking-[0.08em] text-white sm:text-base">
-          WHEN YOU CHOOSE GEL.IT.UP by GIUPu00AE, YOU ARE BUYING TOTAL REGULATORY PEACE OF MIND.
+          WHEN YOU CHOOSE GEL.IT.UP by GIUP®, YOU ARE BUYING TOTAL REGULATORY PEACE OF MIND.
         </p>
       </div>
 
@@ -5085,7 +5085,7 @@ function DistributorsPage() {
       {/* HERO — matches DistributorPackagesPage hero */}
       <div className="relative overflow-hidden rounded-2xl p-5 sm:p-8" style={{ backgroundColor: '#1a1a1a', color: '#ffffff' }}>
         <p className="text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: '#c8386e' }}>Verified Distribution Network</p>
-        <h1 className="heading-on-dark mt-2 text-2xl font-extrabold sm:text-4xl">Official GEL.IT.UP by GIUPu00AE Distributors</h1>
+        <h1 className="heading-on-dark mt-2 text-2xl font-extrabold sm:text-4xl">Official GEL.IT.UP by GIUP® Distributors</h1>
         <p className="mt-3 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] sm:text-base" style={{ color: 'rgba(255,255,255,0.75)' }}>
           Live Coverage Data. Verified Network. Legitimate B2B Database.
         </p>
@@ -6302,7 +6302,7 @@ function PortalRegister({ onRegister }) {
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-slate-900"
             />
             <span className="text-xs leading-relaxed text-slate-600">
-              I agree that the information I provide in this form will be stored and processed by GEL.IT.UP by GIUPu00AE for the purpose of evaluating my application and managing the business relationship. This data will not be shared with third parties without consent.
+              I agree that the information I provide in this form will be stored and processed by GEL.IT.UP by GIUP® for the purpose of evaluating my application and managing the business relationship. This data will not be shared with third parties without consent.
             </span>
           </label>
 
@@ -7230,7 +7230,7 @@ function ProductsModule({ moduleView = 'products' }) {
           { codes: ['1280x1280_buffer_180_180', '1280x1280 buffer 180 180', '180_180_file2', '180 180 file2'], target: 'Nail Files 180/180 Pink Sponge' },
           { codes: ['?uffing_block', '?uffing block', 'buffing block', 'BUFFING BLOCK'], target: 'Nail Files 100/100' },
           // Nail Forms
-          { codes: ['nail_forms_5', 'nail forms 5', 'NAIL FORMS 5', 'NAIL FORMS'], target: 'GEL.IT.UP by GIUPu00AE Nail Forms' },
+          { codes: ['nail_forms_5', 'nail forms 5', 'NAIL FORMS 5', 'NAIL FORMS'], target: 'GEL.IT.UP by GIUP® Nail Forms' },
           // Mirror Powders
           { codes: ['MIRROR CLEAR', 'SP 8001', 'SP8001'], target: 'SP8001 Mirror Clear Powder' },
           { codes: ['MIRROR X1', 'TR 1', 'TR1'], target: 'TR01 Mirror X1 Powder' },
@@ -8662,7 +8662,7 @@ function ProductsModule({ moduleView = 'products' }) {
           eventType: 'b2b_order_customer_copy',
           to: customerEmailTarget,
           subject: `Your GEL.IT.UP B2B Order Copy [#${insertedOrder?.id ?? '-'}]`,
-          html: `<p>Hello,</p><p>Thank you for your GEL.IT.UP by GIUPu00AE order submission.</p><p><strong>Order ID:</strong> ${insertedOrder?.id ?? '-'}</p><p><strong>Total Units:</strong> ${totalUnits}</p>${invoiceBlockHtml}${shippingBlockHtml}<p><strong>Items:</strong> ${checkoutItems.join(', ')}</p><p>You can keep this email as your order record. You can also download your pro-forma PDF directly from the portal.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
+          html: `<p>Hello,</p><p>Thank you for your GEL.IT.UP by GIUP® order submission.</p><p><strong>Order ID:</strong> ${insertedOrder?.id ?? '-'}</p><p><strong>Total Units:</strong> ${totalUnits}</p>${invoiceBlockHtml}${shippingBlockHtml}<p><strong>Items:</strong> ${checkoutItems.join(', ')}</p><p>You can keep this email as your order record. You can also download your pro-forma PDF directly from the portal.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
           orderId: insertedOrder?.id,
           customerEmail: customerEmailTarget,
           totalUnits,
@@ -10235,7 +10235,7 @@ function OrdersModule() {
                               <li><span className="font-semibold text-white/90">Building:</span> Place a larger bead in the center and guide to edges, allowing self-leveling apex formation.</li>
                               <li><span className="font-semibold text-white/90">Curing:</span> Cure for 60-90 seconds in LED or 120 seconds in UV.</li>
                               <li><span className="font-semibold text-white/90">Refinement:</span> Wipe inhibition layer with cleanser and file to shape.</li>
-                              <li><span className="font-semibold text-white/90">Finishing:</span> Apply a final thin layer of the same gel for gloss, or proceed with GEL.IT.UP by GIUPu00AE color.</li>
+                              <li><span className="font-semibold text-white/90">Finishing:</span> Apply a final thin layer of the same gel for gloss, or proceed with GEL.IT.UP by GIUP® color.</li>
                             </ol>
                           </>
                         )}
@@ -10618,7 +10618,7 @@ function PendingApplicationsModule() {
     <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(168,85,247,0.10);">
       <!-- HEADER -->
       <tr><td style="background:linear-gradient(135deg,#a855f7 0%,#7c3aed 50%,#4f46e5 100%);padding:40px 48px 32px;text-align:center;">
-        <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;">GEL.IT.UP by GIUPu00AE</p>
+        <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;">GEL.IT.UP by GIUP®</p>
         <h1 style="margin:0;font-size:28px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">You're Approved! ??</h1>
         <p style="margin:10px 0 0;font-size:15px;color:rgba(255,255,255,0.85);">Welcome to the GEL.IT.UP Distributor Family</p>
       </td></tr>
@@ -10659,7 +10659,7 @@ function PendingApplicationsModule() {
       <!-- FOOTER -->
       <tr><td style="background:#f3f0ff;padding:24px 48px;text-align:center;border-top:1px solid #ede9fe;">
         <p style="margin:0 0 6px;font-size:12px;color:#6b7280;">Questions? Contact us at <a href="mailto:${B2B_EMAIL}" style="color:#7c3aed;text-decoration:none;font-weight:600;">${B2B_EMAIL}</a></p>
-        <p style="margin:0;font-size:11px;color:#9ca3af;">GEL.IT.UP by GIUPu00AE — Premium Gel Polish Distribution</p>
+        <p style="margin:0;font-size:11px;color:#9ca3af;">GEL.IT.UP by GIUP® — Premium Gel Polish Distribution</p>
       </td></tr>
     </table>
   </td></tr>
@@ -12522,7 +12522,7 @@ function App() {
         to: payload.contact_email,
         subject: `${isDistributorApplication ? 'Distributor application received' : 'B2B order request received'}: ${payload.company_name}`,
         html: isDistributorApplication
-          ? `<p>Hello ${payload.contact_name},</p><p>Welcome to <strong>GEL.IT.UP by GIUPu00AE</strong>.</p><p>Thank you for submitting your distributor information for <strong>${payload.company_name}</strong>.</p><p>Your submission has been sent to ${ORDER_INBOX_EMAIL}. You will soon receive an approval email confirming that you can log in to the portal.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`
+          ? `<p>Hello ${payload.contact_name},</p><p>Welcome to <strong>GEL.IT.UP by GIUP®</strong>.</p><p>Thank you for submitting your distributor information for <strong>${payload.company_name}</strong>.</p><p>Your submission has been sent to ${ORDER_INBOX_EMAIL}. You will soon receive an approval email confirming that you can log in to the portal.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`
           : `<p>Hello ${payload.contact_name},</p><p>Thank you for your B2B order request for <strong>${payload.company_name}</strong>.</p><p>Your request has been sent to ${ORDER_INBOX_EMAIL} and stored in our admin portal for processing.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
         applicationId: createdApplication?.id,
         companyName: payload.company_name,
@@ -12712,7 +12712,7 @@ function App() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-3 py-2.5 md:px-6 md:py-3">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-16 items-center justify-center rounded-lg border border-white/25 bg-white/95 px-2 md:h-11 md:w-[72px]">
-              <img src={appLogo} alt="GEL.IT.UP by GIUPu00AE logo" className="max-h-6 w-auto object-contain md:max-h-7" />
+              <img src={appLogo} alt="GEL.IT.UP by GIUP® logo" className="max-h-6 w-auto object-contain md:max-h-7" />
             </div>
             <div>
               <p className="text-xs font-black uppercase leading-none tracking-[0.07em] text-white md:text-sm md:tracking-[0.08em]">GEL.IT.UP</p>
@@ -12830,7 +12830,7 @@ function App() {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Company</p>
-            <p className="mt-2 text-sm font-semibold text-white">GEL.IT.UP by GIUPu00AE Professional</p>
+            <p className="mt-2 text-sm font-semibold text-white">GEL.IT.UP by GIUP® Professional</p>
             <p className="mt-1">Global Professional Distribution Network</p>
           </div>
 
@@ -12884,7 +12884,7 @@ function App() {
           </div>
         </div>
 
-        <p className="border-t border-white/15 pt-3 text-white/55">— 2026 GEL.IT.UP by GIUPu00AE</p>
+        <p className="border-t border-white/15 pt-3 text-white/55">— 2026 GEL.IT.UP by GIUP®</p>
       </footer>
 
       {/* Floating social + back-to-top */}
