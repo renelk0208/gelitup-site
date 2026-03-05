@@ -4082,15 +4082,20 @@ function MissingImagesReport() {
       setErrorMessage('')
 
       try {
-        const response = await fetch('/gelitup-content/product-image-map.json')
+        const [response, orderResponse] = await Promise.all([
+          fetch('/gelitup-content/product-image-map.json'),
+          fetch('/gelitup-content/catalog-order.json'),
+        ])
         if (!response.ok) {
           throw new Error(`Catalogue map unavailable (${response.status})`)
         }
 
         const payload = await response.json()
+        const manualOrderPayload = orderResponse.ok ? await orderResponse.json() : { rules: [] }
+        const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
         if (!mounted) return
 
-        const nextSections = buildCatalogueSectionsFromImageMap(payload, new Map())
+        const nextSections = buildCatalogueSectionsFromImageMap(payload, manualRuleIndex)
         setSections(nextSections)
       }
       catch (error) {
@@ -7679,10 +7684,15 @@ function ProductsModule({ moduleView = 'products' }) {
           : await (async () => {
             // Mirror the public catalogue exactly — load from product-image-map.json
             // so every product has the same category, name and image as shown on the site.
-            const response = await fetch('/gelitup-content/product-image-map.json')
+            const [response, orderResponse] = await Promise.all([
+              fetch('/gelitup-content/product-image-map.json'),
+              fetch('/gelitup-content/catalog-order.json'),
+            ])
             if (!response.ok) throw new Error('Could not load product image map')
             const mapPayload = await response.json()
-            const sections = buildCatalogueSectionsFromImageMap(mapPayload)
+            const manualOrderPayload = orderResponse.ok ? await orderResponse.json() : { rules: [] }
+            const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
+            const sections = buildCatalogueSectionsFromImageMap(mapPayload, manualRuleIndex)
             return sections.flatMap((section) =>
               section.subcategories.flatMap((sub) =>
                 sub.items.map((item) => ({
@@ -7709,6 +7719,7 @@ function ProductsModule({ moduleView = 'products' }) {
                   sku: item.name,
                   name: item.name,
                   imageUrl: item.imageUrl,
+                  galleryImages: item.galleryImages || [],
                   preview: null,
                 }))
               )
@@ -7910,6 +7921,7 @@ function ProductsModule({ moduleView = 'products' }) {
               colorFamily: item.colorFamily || null,
               preview,
               imageUrl,
+              galleryImages: item.galleryImages || [],
               price,
             }
           })
@@ -9930,6 +9942,13 @@ function ProductsModule({ moduleView = 'products' }) {
                             {product.imageUrl && <img src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />}
                             {selected && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
                           </div>
+                          {product.galleryImages?.length > 0 && (
+                            <div className="flex gap-0.5 border-t border-slate-100 bg-white px-1 py-1">
+                              {product.galleryImages.map((url, gi) => (
+                                <img key={gi} src={url} alt={`${product.name} view ${gi + 2}`} loading="lazy" className="h-8 w-8 cursor-zoom-in rounded border border-slate-100 object-cover hover:border-fuchsia-400" onClick={(e) => { e.stopPropagation(); setLightboxUrl(url) }} />
+                              ))}
+                            </div>
+                          )}
                           {/* info */}
                           <div className="px-1.5 pt-1 pb-0.5">
                             <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{product.name}</p>
