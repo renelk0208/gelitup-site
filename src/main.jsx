@@ -5,6 +5,11 @@ import 'leaflet/dist/leaflet.css'
 import './index.css'
 import App from './App.jsx'
 
+// Block right-click saving on all images globally
+document.addEventListener('contextmenu', (e) => {
+  if (e.target.tagName === 'IMG') e.preventDefault()
+}, true)
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>

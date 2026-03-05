@@ -816,23 +816,19 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                       </div>
 
                       {event.imageUrl && (
-                        <a
-                          href={event.imageUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="block overflow-hidden rounded-xl border border-white/20 bg-black/40"
-                          aria-label={`Open full exhibition image for ${event.name}`}
-                        >
+                        <div className="block overflow-hidden rounded-xl border border-white/20 bg-black/40">
                           <img
                             src={event.imageUrl}
                             alt={event.name}
                             className="h-44 w-full object-contain sm:h-52"
                             loading="lazy"
+                            draggable="false"
+                            onContextMenu={e => e.preventDefault()}
                             onError={(eventTarget) => {
                               eventTarget.currentTarget.src = '/logo.png'
                             }}
                           />
-                        </a>
+                        </div>
                       )}
                     </div>
                   </article>
