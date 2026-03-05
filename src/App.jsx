@@ -1415,9 +1415,9 @@ function DistributorPackagesPage() {
       {/* BOUTIQUE TIER */}
       <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #f0c4d0', backgroundColor: '#fdf5f7' }}>
         <div className="px-6 py-4" style={{ borderBottom: '1px solid #f0c4d0', backgroundColor: '#fdf0f4' }}>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#c8386e' }}>Entry Tier</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#d4185a' }}>Entry Tier</p>
           <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#1a1a1a' }}>BOUTIQUE — The Foundation</h2>
-          <p className="mt-1 text-sm" style={{ color: '#7d4a57' }}>Launch with confidence. The smartest entry point for localized distribution with everything you need to move product and build a client base instantly.</p>
+          <p className="mt-1 text-sm" style={{ color: '#a01850' }}>Launch with confidence. The smartest entry point for localized distribution with everything you need to move product and build a client base instantly.</p>
         </div>
         <div>
           <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #f0c4d0' }}>
@@ -1427,8 +1427,8 @@ function DistributorPackagesPage() {
           <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #f0c4d0' }}>
             <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#b07080' }}>Product Spectrum</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#c8386e' }} />Top 120 Core Shades</li>
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#c8386e' }} />200 SKUs — Builder Systems, Brushes &amp; Essentials</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d4185a' }} />Top 120 Core Shades</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d4185a' }} />200 SKUs — Builder Systems, Brushes &amp; Essentials</li>
             </ul>
           </div>
           <div className="flex items-start gap-4 px-6 py-4">
