@@ -11490,7 +11490,7 @@ function PortalDashboard({ onLogout }) {
     const { jsPDF } = await import('jspdf')
     const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' })
     const margin = 44
-    const titleY = 72
+    const pageWidth = doc.internal.pageSize.getWidth()
     const now = new Date()
     const dateLabel = now.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
     let distributorLabel = 'Approved GEL.IT.UP Distributor'
@@ -11503,40 +11503,131 @@ function PortalDashboard({ onLogout }) {
       if (companyName) distributorLabel = companyName
     }
 
+    // Load logos as base64
+    const loadImageAsDataUrl = (src) => new Promise((resolve) => {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        canvas.width = img.naturalWidth
+        canvas.height = img.naturalHeight
+        canvas.getContext('2d').drawImage(img, 0, 0)
+        resolve(canvas.toDataURL('image/png'))
+      }
+      img.onerror = () => resolve(null)
+      img.src = src
+    })
+
+    const [gelitupLogoData, thermiLogoData] = await Promise.all([
+      loadImageAsDataUrl('/gelitup_logo.png'),
+      loadImageAsDataUrl('/leeukopf_black_logo.png'),
+    ])
+
+    // Header bar
+    doc.setFillColor(26, 26, 26)
+    doc.rect(0, 0, pageWidth, 70, 'F')
+
+    // GEL.IT.UP logo — left side of header
+    if (gelitupLogoData) {
+      doc.addImage(gelitupLogoData, 'PNG', margin, 10, 110, 50)
+    }
+    // Thermitek logo — right side of header
+    if (thermiLogoData) {
+      doc.addImage(thermiLogoData, 'PNG', pageWidth - margin - 110, 10, 110, 50)
+    }
+
+    // Title
+    const titleY = 110
     doc.setTextColor(0, 0, 0)
     doc.setFont('helvetica', 'bold')
-    doc.setFontSize(18)
-    doc.text('GEL.IT.UP COMPLIANCE CERTIFICATE', margin, titleY)
+    doc.setFontSize(20)
+    doc.text('COMPLIANCE CERTIFICATE', margin, titleY)
 
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(10)
-    doc.text(`Issued: ${dateLabel}`, margin, titleY + 24)
-    doc.text(`Certificate Holder: ${distributorLabel}`, margin, titleY + 40)
+    doc.setTextColor(80, 80, 80)
+    doc.text('GEL.IT.UP by GIUP® — Product Safety & Regulatory Declarations', margin, titleY + 18)
 
     doc.setDrawColor(217, 70, 239)
-    doc.line(margin, titleY + 52, 550, titleY + 52)
+    doc.setLineWidth(1.5)
+    doc.line(margin, titleY + 30, pageWidth - margin, titleY + 30)
+
+    // Issuer & recipient block
+    const blockY = titleY + 50
+    doc.setTextColor(0, 0, 0)
+    doc.setFontSize(9)
+    doc.setFont('helvetica', 'bold')
+    doc.text('ISSUED BY', margin, blockY)
+    doc.text('ISSUED TO', pageWidth / 2 + 10, blockY)
+
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(60, 60, 60)
+    const issuerLines = [
+      'Thermitek Ltd',
+      '8 Racho Dimchev, Sofia, Bulgaria, 1000',
+      'info@leeukopf.com',
+    ]
+    issuerLines.forEach((line, i) => doc.text(line, margin, blockY + 14 + i * 13))
+
+    const recipientLines = [
+      distributorLabel,
+      `Date of Issue: ${dateLabel}`,
+    ]
+    recipientLines.forEach((line, i) => doc.text(line, pageWidth / 2 + 10, blockY + 14 + i * 13))
+
+    // Divider
+    doc.setDrawColor(220, 220, 220)
+    doc.setLineWidth(0.5)
+    doc.line(margin, blockY + 58, pageWidth - margin, blockY + 58)
+
+    // Declarations
+    const declY = blockY + 78
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(11)
+    doc.setTextColor(0, 0, 0)
+    doc.text('PRODUCT SAFETY DECLARATIONS', margin, declY)
 
     const statements = [
-      'Declaration 1: HEMA-FREE formulation standard is active across current production lines.',
-      'Declaration 2: TPO-FREE photoinitiator policy is active across current production lines.',
-      `Declaration 3: CI 77820 (Silver) FREE transition has been active since ${new Date(`${COMPLIANCE_DATE}T00:00:00.000Z`).toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}.`,
-      'Regulatory Note: Legacy stock (pre-Dec 2025) may contain trace levels (<0.2%) in line with EC 1223/2009 requirements at time of manufacture.',
-      'Current Pigment Strategy: Aluminium and mica-based alternatives, including CI 77000, CI 77891, Synthetic Fluorphlogopite, and Calcium Aluminium Borosilicate.',
+      { label: 'Declaration 1 — HEMA-FREE', body: 'The HEMA-FREE formulation standard is active across all current production lines. No 2-Hydroxyethyl Methacrylate is present in any current GEL.IT.UP by GIUP® product.' },
+      { label: 'Declaration 2 — TPO-FREE', body: 'The TPO-FREE photoinitiator policy is active across all current production lines. Diphenyl(2,4,6-trimethylbenzoyl)phosphine oxide is not used in any current formulation.' },
+      { label: 'Declaration 3 — CI 77820 (Silver) FREE', body: `The CI 77820 (Silver pigment) FREE transition has been active since ${new Date(`${COMPLIANCE_DATE}T00:00:00.000Z`).toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}. All current production is free of CI 77820.` },
+      { label: 'Regulatory Note — Legacy Stock', body: 'Pre-December 2025 stock may contain trace levels (<0.2%) of CI 77820 in line with EC Regulation 1223/2009 requirements at the time of manufacture.' },
+      { label: 'Current Pigment Strategy', body: 'Aluminium and mica-based alternatives are in use, including CI 77000, CI 77891, Synthetic Fluorphlogopite, and Calcium Aluminium Borosilicate.' },
     ]
 
-    doc.setFontSize(11)
-    let cursorY = titleY + 84
-    statements.forEach((line) => {
-      const wrapped = doc.splitTextToSize(line, 510)
+    let cursorY = declY + 20
+    statements.forEach((stmt) => {
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(9.5)
+      doc.setTextColor(217, 70, 239)
+      doc.text(stmt.label, margin, cursorY)
+      cursorY += 14
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(9.5)
+      doc.setTextColor(40, 40, 40)
+      const wrapped = doc.splitTextToSize(stmt.body, pageWidth - margin * 2)
       doc.text(wrapped, margin, cursorY)
-      cursorY += (wrapped.length * 15) + 6
+      cursorY += (wrapped.length * 13) + 10
     })
 
+    // Footer
+    const footerY = doc.internal.pageSize.getHeight() - 50
+    doc.setDrawColor(217, 70, 239)
+    doc.setLineWidth(1)
+    doc.line(margin, footerY, pageWidth - margin, footerY)
     doc.setFont('helvetica', 'bold')
+    doc.setFontSize(9)
     doc.setTextColor(217, 70, 239)
-    doc.text('Professional Choice. Professional Results.', margin, Math.min(cursorY + 16, 760))
+    doc.text('Professional Choice. Professional Results.', margin, footerY + 15)
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(120, 120, 120)
+    doc.text('GEL.IT.UP by GIUP® is a registered product line of Thermitek Ltd. This document is valid on the date of issue.', margin, footerY + 28)
+    doc.text('Thermitek Ltd — 8 Racho Dimchev, Sofia, Bulgaria, 1000 — info@leeukopf.com', margin, footerY + 40)
 
-    doc.save(`gelitup-compliance-certificate-${now.toISOString().slice(0, 10)}.pdf`)
+    // Open in browser tab for preview/print (not auto-download)
+    const blobUrl = doc.output('bloburl')
+    window.open(blobUrl, '_blank')
   }, [])
 
   const modules = useMemo(
@@ -11897,7 +11988,7 @@ function PortalDashboard({ onLogout }) {
             {activeModule === 'overview' && (
               <div className="rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-4 sm:p-5">
                 <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-700">B2B Regulatory Docs</p>
-                <p className="mt-2 text-sm text-fuchsia-900">Generate the inspector-ready certificate including HEMA-Free, TPO-Free, and CI 77820-Free declarations.</p>
+                <p className="mt-2 text-sm text-fuchsia-900">Generate the inspector-ready certificate including HEMA-Free, TPO-Free, and CI 77820-Free declarations. The document will open in a new tab — review it before printing or saving.</p>
                 <button
                   type="button"
                   onClick={() => {
@@ -11905,7 +11996,7 @@ function PortalDashboard({ onLogout }) {
                   }}
                   className="mt-3 inline-flex rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
                 >
-                  Print Compliance Certificate
+                  View Compliance Certificate
                 </button>
               </div>
             )}
