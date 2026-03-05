@@ -6983,11 +6983,11 @@ function ProductsModule({ moduleView = 'products' }) {
       const product = catalogBySku.get(normalizeSkuCode(code))
       return hasCatEyeSignal(code, product?.name, product?.subcategory, product?.category)
     })
-
     if (selectedHasCatEye) return true
-
-    return packageCartItems.some((item) => hasCatEyeSignal(item?.sku, item?.code, item?.name, item?.subcategory, item?.category))
-  }, [catalogBySku, hasCatEyeSignal, packageCartItems, selectedCodes])
+    if (packageCartItems.some((item) => hasCatEyeSignal(item?.sku, item?.code, item?.name, item?.subcategory, item?.category))) return true
+    // Also fire when actively browsing a cat eye subcategory or category
+    return hasCatEyeSignal(activeSubcategory, activeCategory)
+  }, [catalogBySku, hasCatEyeSignal, packageCartItems, selectedCodes, activeSubcategory, activeCategory])
   const hasMagnetInCart = useMemo(() => {
     const selectedHasMagnet = selectedCodes.some((code) => {
       const product = catalogBySku.get(normalizeSkuCode(code))
@@ -9193,9 +9193,10 @@ function ProductsModule({ moduleView = 'products' }) {
         {shouldShowSynthoUpsell && !dismissedSynthoUpsell && (
           <div className="rounded-xl border border-violet-200 bg-violet-50 p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">MultiMix System</p>
-            <p className="mt-1 text-sm text-violet-900">MultiMix Synthogel works best with Syntholiquid, the Synthogel brush, Polygel spatulas, and Dual Form tips.</p>
+            <p className="mt-1 text-sm text-violet-900">MultiMix works best with <strong>Polygel Brush &amp; Spatula</strong> and <strong>MultiMix Liquid (Syntholiquid)</strong> — add them to complete the system.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => { setDismissedSynthoUpsell(true); toggleCategory('CONSUMABLES'); navigate('/portal/dashboard/catalog') }} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Accessories</button>
+              <button onClick={() => { setDismissedSynthoUpsell(true); toggleCategory('BRUSHES'); navigate('/portal/dashboard/catalog') }} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">Add Polygel Brush</button>
+              <button onClick={() => { setDismissedSynthoUpsell(true); toggleCategory('MULTIMIX'); navigate('/portal/dashboard/catalog') }} className="rounded-lg bg-violet-700 px-3 py-1.5 text-xs font-semibold text-white">Add MultiMix Liquid</button>
               <button onClick={() => setDismissedSynthoUpsell(true)} className="rounded-lg border border-violet-300 px-3 py-1.5 text-xs font-semibold text-violet-800">Dismiss</button>
             </div>
           </div>
@@ -9286,81 +9287,6 @@ function ProductsModule({ moduleView = 'products' }) {
           </div>
         </div>
 
-
-        {/* -- LIVE COLOUR CHART (order review) -- */}
-        <div className="mt-4 min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-3">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-xs font-semibold text-slate-900">
-              Colour Chart
-              {(selectedCodes.length + packageCartItems.length) > 0
-                ? ` — ${selectedCodes.length + packageCartItems.length} lines selected`
-                : ''}
-            </p>
-            {(selectedCodes.length > 0 || packageCartItems.length > 0) && (
-              <button
-                onClick={() => { setSelectedCodes([]); setItemQtys({}); setPackageCartItems([]); setGeneratedPackageTier('') }}
-                className="text-[11px] font-semibold text-rose-500 hover:underline"
-              >
-                Clear all
-              </button>
-            )}
-          </div>
-          {(selectedCodes.length === 0 && packageCartItems.length === 0)
-            ? <p className="mt-2 text-[11px] italic text-slate-400">No products selected yet — go to Shop to start adding items.</p>
-            : (
-              <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
-                {selectedProducts.map((product) => (
-                  <div
-                    key={product.code}
-                    className="group relative flex w-[68px] flex-none flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
-                  >
-                    <div
-                      className="relative h-[68px] w-full flex-none"
-                      style={{ backgroundColor: product.preview || '#e2e8f0' }}
-                    >
-                      {product.imageUrl
-                        ? <img src={product.imageUrl} alt={product.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-                        : null}
-                      <button
-                        onClick={() => toggleSelection(product.code)}
-                        className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-white/90 text-[11px] font-bold text-slate-700 shadow opacity-0 transition group-hover:opacity-100"
-                        aria-label={`Remove ${product.code}`}
-                      >—</button>
-                    </div>
-                    <div className="p-1.5">
-                      <p className="break-words text-[10px] font-semibold leading-tight text-slate-900">{product.code}</p>
-                      <p className="break-words text-[9px] leading-tight text-slate-500">{product.name}</p>
-                      <p className="break-words text-[9px] leading-tight text-slate-400">{product.category}</p>
-                    </div>
-                  </div>
-                ))}
-                {packageCartItems.map((item) => {
-                  const resolvedImg = resolveCatalogImageUrl(item)
-                  const itemPreview = item.preview || item.hex_color || '#e2e8f0'
-                  return (
-                    <div
-                      key={`pkg-${item.sku}-${item.code}`}
-                      className="relative flex w-[68px] flex-none flex-col overflow-hidden rounded-lg border border-fuchsia-300 bg-white shadow-sm"
-                    >
-                      <div
-                        className="relative h-[68px] w-full flex-none"
-                        style={{ backgroundColor: itemPreview }}
-                      >
-                        {resolvedImg
-                          ? <img src={resolvedImg} alt={item.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-                          : null}
-                        <span className="absolute left-0.5 top-0.5 rounded-full bg-fuchsia-600 px-1 py-0.5 text-[9px] font-bold leading-none text-white">{item.qty}—</span>
-                      </div>
-                      <div className="p-1.5">
-                        <p className="break-words text-[10px] font-semibold leading-tight text-slate-900">{item.code}</p>
-                        <p className="break-words text-[9px] leading-tight text-fuchsia-700">{item.name}</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-        </div>
 
         {/* -- ORDER SUMMARY TABLE -- */}
         {selectedProducts.length > 0 && (
