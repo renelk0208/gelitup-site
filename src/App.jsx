@@ -1,4 +1,4 @@
-﻿import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import appLogo from '/gelitup_logo.png'
 import PWABadge from './PWABadge.jsx'
@@ -131,7 +131,7 @@ const DISTRIBUTOR_DIRECTORY = [
     distributors: [
       {
         name: 'GEL.IT.UP Corinth',
-        address: 'Sikyōnos 1, Kiato, 20200, Greece',
+        address: 'Sikyonos 1, Kiato, 20200, Greece',
         phone: '+30 2742 402617',
         email: 'info@nailtalesacademy.gr',
         website: 'https://nailtalesacademy.gr/',
@@ -462,7 +462,7 @@ function hasReachedComplianceDate(referenceDate = new Date()) {
 }
 
 function getSilverFreeGuaranteeText(referenceDate = new Date()) {
-  return hasReachedComplianceDate(referenceDate) ? `${SILVER_FREE_GUARANTEE_BADGE} • CI 77820-FREE` : ''
+  return hasReachedComplianceDate(referenceDate) ? `${SILVER_FREE_GUARANTEE_BADGE} � CI 77820-FREE` : ''
 }
 
 function normalizeSkuCode(value) {
@@ -479,7 +479,7 @@ function normalizeProductName(value) {
 
 // Fuzzy word-overlap price lookup for image-map products whose filename keys
 // don't match price-list names exactly (e.g. "cobweb black" vs "Cobweb Gel Black -HTF").
-// All significant query words (≥4 chars, not in skip list) must appear in the price entry.
+// All significant query words (=4 chars, not in skip list) must appear in the price entry.
 const FUZZY_PRICE_SKIP = new Set(['COLOR','COLOUR','COAT','CARE','FORM','SIZE'])
 function fuzzyPriceLookup(code, rawName, wordIndex) {
   if (!wordIndex || !wordIndex.length) return null
@@ -721,158 +721,158 @@ const navItems = [
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
-  'GIUP-MNT-SB01 — Superbond Primer',
-  'GIUP-MNT-5C01 — 5-in-1 Clear Builder',
-  'GIUP-MNT-NW01 — Non-Wipe Top Coat',
+  'GIUP-MNT-SB01 � Superbond Primer',
+  'GIUP-MNT-5C01 � 5-in-1 Clear Builder',
+  'GIUP-MNT-NW01 � Non-Wipe Top Coat',
 ]
 
 const SILVER_CORE_30_COLORS = [
-  'GIUP-COL-01 — Ice Ice Baby',
-  'GIUP-COL-102 — Marsh Mallow',
-  'GIUP-COL-05 — Snow Queen',
-  'GIUP-COL-04 — Milkyway',
-  'GIUP-COL-09 — Coco Nude',
-  'GIUP-COL-08 — Ivory',
-  'GIUP-COL-010 — Bridal Bliss',
-  'GIUP-COL-07B — Liberte',
-  'GIUP-COL-2511 — Skin Shock',
-  'GIUP-COL-100A — She Bangs',
-  'GIUP-COL-02 — Cotton Candy',
-  'GIUP-COL-06 — Ballerina',
-  'GIUP-COL-11 — Pinky Promise',
-  'GIUP-COL-1801 — Sweet Pea',
-  'GIUP-COL-051A — Raspberry Ripple',
-  'GIUP-COL-1803 — Don’t Pout',
-  'GIUP-COL-023 — Classic Red',
-  'GIUP-COL-025 — Cherry Bomb',
-  'GIUP-COL-015 — Total Eclipse',
-  'GIUP-COL-1802 — Grey Matter',
-  'GIUP-COL-019 — Slate',
-  'GIUP-COL-152 — Frisco',
-  'GIUP-COL-120 — Wisteria Lane',
-  'GIUP-COL-07 — Lavender Dreams',
-  'GIUP-COL-2020 — Soft n Sweet',
-  'GIUP-COL-2037 — Salty Caramel',
-  'GIUP-COL-2026 — Whaat? Pistachio?',
-  'GIUP-COL-2113J — Blue Flashing Star',
-  'GIUP-COL-GCE01 — Glass Cat Eye Clear',
-  'GIUP-COL-F01 — Foil Gel Adhesive',
+  'GIUP-COL-01 � Ice Ice Baby',
+  'GIUP-COL-102 � Marsh Mallow',
+  'GIUP-COL-05 � Snow Queen',
+  'GIUP-COL-04 � Milkyway',
+  'GIUP-COL-09 � Coco Nude',
+  'GIUP-COL-08 � Ivory',
+  'GIUP-COL-010 � Bridal Bliss',
+  'GIUP-COL-07B � Liberte',
+  'GIUP-COL-2511 � Skin Shock',
+  'GIUP-COL-100A � She Bangs',
+  'GIUP-COL-02 � Cotton Candy',
+  'GIUP-COL-06 � Ballerina',
+  'GIUP-COL-11 � Pinky Promise',
+  'GIUP-COL-1801 � Sweet Pea',
+  'GIUP-COL-051A � Raspberry Ripple',
+  'GIUP-COL-1803 � Don�t Pout',
+  'GIUP-COL-023 � Classic Red',
+  'GIUP-COL-025 � Cherry Bomb',
+  'GIUP-COL-015 � Total Eclipse',
+  'GIUP-COL-1802 � Grey Matter',
+  'GIUP-COL-019 � Slate',
+  'GIUP-COL-152 � Frisco',
+  'GIUP-COL-120 � Wisteria Lane',
+  'GIUP-COL-07 � Lavender Dreams',
+  'GIUP-COL-2020 � Soft n Sweet',
+  'GIUP-COL-2037 � Salty Caramel',
+  'GIUP-COL-2026 � Whaat? Pistachio?',
+  'GIUP-COL-2113J � Blue Flashing Star',
+  'GIUP-COL-GCE01 � Glass Cat Eye Clear',
+  'GIUP-COL-F01 � Foil Gel Adhesive',
 ]
 
 const GOLD_BUILDER_SKUS = [
-  'GIUP-BLD-3IN1-PK01 — 3-in-1 Builder Gel Pink Soft',
-  'GIUP-BLD-3IN1-PK02 — 3-in-1 Builder Gel Pink Medium',
-  'GIUP-BLD-3IN1-PK03 — 3-in-1 Builder Gel Pink Hard',
-  'GIUP-BLD-3IN1-CV01 — 3-in-1 Builder Gel Cover Light',
-  'GIUP-BLD-3IN1-CV02 — 3-in-1 Builder Gel Cover Medium',
-  'GIUP-BLD-3IN1-CV03 — 3-in-1 Builder Gel Cover Deep',
+  'GIUP-BLD-3IN1-PK01 � 3-in-1 Builder Gel Pink Soft',
+  'GIUP-BLD-3IN1-PK02 � 3-in-1 Builder Gel Pink Medium',
+  'GIUP-BLD-3IN1-PK03 � 3-in-1 Builder Gel Pink Hard',
+  'GIUP-BLD-3IN1-CV01 � 3-in-1 Builder Gel Cover Light',
+  'GIUP-BLD-3IN1-CV02 � 3-in-1 Builder Gel Cover Medium',
+  'GIUP-BLD-3IN1-CV03 � 3-in-1 Builder Gel Cover Deep',
 ]
 
 const GOLD_MODERN_30_COLORS = [
-  'GIUP-COL-2032 — Salt Water Toffee',
-  'GIUP-COL-2035 — Scuubie',
-  'GIUP-COL-2039 — Coral Reef',
-  'GIUP-COL-2038 — Hibiscus',
-  'GIUP-COL-030 — Sunset',
-  'GIUP-COL-2029 — Show Me The Moneee',
-  'GIUP-COL-2516 — Berry Obsession',
-  'GIUP-COL-2519 — Merlot Veil',
-  'GIUP-COL-2512 — Ember Rose',
-  'GIUP-COL-2521 — Chopco Veil',
-  'GIUP-COL-1927 — Forestation',
-  'GIUP-COL-2027 — Emerald Coast',
-  'GIUP-COL-1926 — Eco-Savvy',
-  'GIUP-COL-2526 — Double Leopardy',
-  'GIUP-COL-2034 — Smurf\'s Baby',
-  'GIUP-COL-2033 — Baby Shark',
-  'GIUP-COL-2113R — Midnight Hera',
-  'GIUP-COL-2113G — Golden Hour',
-  'GIUP-COL-GCE02 — Glass Cat Eye Rose',
-  'GIUP-COL-GCE05 — Glass Cat Eye Ocean',
-  'GIUP-COL-112 — Vintage Rose',
-  'GIUP-COL-2518 — Vintage Whisper',
-  'GIUP-COL-061 — Deep Sangria',
-  'GIUP-COL-088 — Midnight Sky',
-  'GIUP-COL-141 — Peachy Keen',
-  'GIUP-COL-ST01 — Spider Gel Black',
-  'GIUP-COL-ST02 — Spider Gel White',
-  'GIUP-COL-2022 — Lemon Squeeze',
-  'GIUP-COL-2023 — Minty Fresh',
-  'GIUP-COL-2025 — Lilac Love',
+  'GIUP-COL-2032 � Salt Water Toffee',
+  'GIUP-COL-2035 � Scuubie',
+  'GIUP-COL-2039 � Coral Reef',
+  'GIUP-COL-2038 � Hibiscus',
+  'GIUP-COL-030 � Sunset',
+  'GIUP-COL-2029 � Show Me The Moneee',
+  'GIUP-COL-2516 � Berry Obsession',
+  'GIUP-COL-2519 � Merlot Veil',
+  'GIUP-COL-2512 � Ember Rose',
+  'GIUP-COL-2521 � Chopco Veil',
+  'GIUP-COL-1927 � Forestation',
+  'GIUP-COL-2027 � Emerald Coast',
+  'GIUP-COL-1926 � Eco-Savvy',
+  'GIUP-COL-2526 � Double Leopardy',
+  'GIUP-COL-2034 � Smurf\'s Baby',
+  'GIUP-COL-2033 � Baby Shark',
+  'GIUP-COL-2113R � Midnight Hera',
+  'GIUP-COL-2113G � Golden Hour',
+  'GIUP-COL-GCE02 � Glass Cat Eye Rose',
+  'GIUP-COL-GCE05 � Glass Cat Eye Ocean',
+  'GIUP-COL-112 � Vintage Rose',
+  'GIUP-COL-2518 � Vintage Whisper',
+  'GIUP-COL-061 � Deep Sangria',
+  'GIUP-COL-088 � Midnight Sky',
+  'GIUP-COL-141 � Peachy Keen',
+  'GIUP-COL-ST01 � Spider Gel Black',
+  'GIUP-COL-ST02 � Spider Gel White',
+  'GIUP-COL-2022 � Lemon Squeeze',
+  'GIUP-COL-2023 � Minty Fresh',
+  'GIUP-COL-2025 � Lilac Love',
 ]
 
 const PLATINUM_SYNTHOGEL_SKUS = [
-  'GIUP-SYN-BS01 — Synthogel Base',
-  'GIUP-SYN-CL01 — Synthogel Clear',
-  'GIUP-SYN-PK01 — Synthogel Pink',
-  'GIUP-SYN-CV01 — Synthogel Cover',
-  'GIUP-SYN-WH01 — Synthogel White',
-  'GIUP-SYN-MX01 — Synthogel Multimix',
-  'GIUP-SYN-TG01 — Synthogel Top Gloss',
-  'GIUP-SYN-LQ01 — Synthogel Brush Liquid',
+  'GIUP-SYN-BS01 � Synthogel Base',
+  'GIUP-SYN-CL01 � Synthogel Clear',
+  'GIUP-SYN-PK01 � Synthogel Pink',
+  'GIUP-SYN-CV01 � Synthogel Cover',
+  'GIUP-SYN-WH01 � Synthogel White',
+  'GIUP-SYN-MX01 � Synthogel Multimix',
+  'GIUP-SYN-TG01 � Synthogel Top Gloss',
+  'GIUP-SYN-LQ01 � Synthogel Brush Liquid',
 ]
 
 const PLATINUM_SPECIAL_EFFECTS_60 = [
-  'GIUP-COL-2113B — Pink Flashing Star',
-  'GIUP-COL-2113S — Silver Flashing Star',
-  'GIUP-COL-GCE08 — Glass Cat Eye Emerald',
-  'GIUP-COL-GCE10 — Glass Cat Eye Amethyst',
-  'GIUP-COL-N01 — Neon Yellow',
-  'GIUP-COL-N05 — Electric Orange',
-  'GIUP-COL-N08 — Shocking Pink',
-  'GIUP-COL-1301 — Mermaid Tail',
-  'GIUP-COL-1305 — Golden Dust',
-  'GIUP-COL-1310 — Starry Night',
-  'GIUP-COL-1502 — Holographic Silver',
-  'GIUP-COL-2041 — Ibiza Blue',
-  'GIUP-COL-2045 — Sunset Strip',
-  'GIUP-COL-118 — Tiffany Blue',
-  'GIUP-COL-145 — Apricot Sorbet',
-  'GIUP-COL-160 — Matcha Latte',
-  'GIUP-COL-054 — Crimson Tide',
-  'GIUP-COL-058 — Bordeaux Wine',
-  'GIUP-COL-062 — Plum Pudding',
-  'GIUP-COL-068 — Vampire Red',
-  'GIUP-COL-2530 — Velvet Sand',
-  'GIUP-COL-2535 — Desert Rose',
-  'GIUP-COL-1930 — Earth Mother',
-  'GIUP-COL-1935 — Clay Canyon',
-  'GIUP-COL-2050 — Electric Lime',
-  'GIUP-COL-2055 — Ultraviolet',
-  'GIUP-COL-STF03 — Shimmer Top Silver',
-  'GIUP-COL-STF04 — Shimmer Top Gold',
-  'GIUP-COL-M01 — Metallic Silver Paint',
-  'GIUP-COL-M02 — Metallic Gold Paint',
-  'GIUP-COL-2540 — Midnight Chrome',
-  'GIUP-COL-2545 — Bronze Age',
-  'GIUP-COL-2550 — Antique Copper',
-  'GIUP-COL-110 — Smoked Mauve',
-  'GIUP-COL-115 — Dusty Cedar',
-  'GIUP-COL-125 — Misty Lilac',
-  'GIUP-COL-135 — Sage Wisdom',
-  'GIUP-COL-170 — Oyster Shell',
-  'GIUP-COL-175 — Pearly White',
-  'GIUP-COL-075 — Royal Purple',
-  'GIUP-COL-082 — Cobalt Crush',
-  'GIUP-COL-095 — Forest Fern',
-  'GIUP-COL-105 — Concrete Jungle',
-  'GIUP-COL-111 — Black Cherry',
-  'GIUP-COL-122 — Mulberry',
-  'GIUP-COL-185 — Spiced Chai',
-  'GIUP-COL-195 — Pumpkin Spice',
-  'GIUP-COL-205 — Deep Teal',
-  'GIUP-COL-215 — Midnight Navy',
-  'GIUP-COL-225 — Charcoal Spark',
-  'GIUP-COL-235 — Rose Gold Foil',
-  'GIUP-COL-245 — Copper Flare',
-  'GIUP-COL-GCE12 — Glass Cat Eye Galaxy',
-  'GIUP-COL-2113W — White Flashing Star',
-  'GIUP-COL-2113P — Purple Flashing Star',
-  'GIUP-COL-ST03 — Spider Gel Gold',
-  'GIUP-COL-ST04 — Spider Gel Silver',
-  'GIUP-COL-B01 — Blooming Gel',
-  'GIUP-COL-401 — Mattest Matte',
-  'GIUP-COL-501 — Super Glossy Wipe',
+  'GIUP-COL-2113B � Pink Flashing Star',
+  'GIUP-COL-2113S � Silver Flashing Star',
+  'GIUP-COL-GCE08 � Glass Cat Eye Emerald',
+  'GIUP-COL-GCE10 � Glass Cat Eye Amethyst',
+  'GIUP-COL-N01 � Neon Yellow',
+  'GIUP-COL-N05 � Electric Orange',
+  'GIUP-COL-N08 � Shocking Pink',
+  'GIUP-COL-1301 � Mermaid Tail',
+  'GIUP-COL-1305 � Golden Dust',
+  'GIUP-COL-1310 � Starry Night',
+  'GIUP-COL-1502 � Holographic Silver',
+  'GIUP-COL-2041 � Ibiza Blue',
+  'GIUP-COL-2045 � Sunset Strip',
+  'GIUP-COL-118 � Tiffany Blue',
+  'GIUP-COL-145 � Apricot Sorbet',
+  'GIUP-COL-160 � Matcha Latte',
+  'GIUP-COL-054 � Crimson Tide',
+  'GIUP-COL-058 � Bordeaux Wine',
+  'GIUP-COL-062 � Plum Pudding',
+  'GIUP-COL-068 � Vampire Red',
+  'GIUP-COL-2530 � Velvet Sand',
+  'GIUP-COL-2535 � Desert Rose',
+  'GIUP-COL-1930 � Earth Mother',
+  'GIUP-COL-1935 � Clay Canyon',
+  'GIUP-COL-2050 � Electric Lime',
+  'GIUP-COL-2055 � Ultraviolet',
+  'GIUP-COL-STF03 � Shimmer Top Silver',
+  'GIUP-COL-STF04 � Shimmer Top Gold',
+  'GIUP-COL-M01 � Metallic Silver Paint',
+  'GIUP-COL-M02 � Metallic Gold Paint',
+  'GIUP-COL-2540 � Midnight Chrome',
+  'GIUP-COL-2545 � Bronze Age',
+  'GIUP-COL-2550 � Antique Copper',
+  'GIUP-COL-110 � Smoked Mauve',
+  'GIUP-COL-115 � Dusty Cedar',
+  'GIUP-COL-125 � Misty Lilac',
+  'GIUP-COL-135 � Sage Wisdom',
+  'GIUP-COL-170 � Oyster Shell',
+  'GIUP-COL-175 � Pearly White',
+  'GIUP-COL-075 � Royal Purple',
+  'GIUP-COL-082 � Cobalt Crush',
+  'GIUP-COL-095 � Forest Fern',
+  'GIUP-COL-105 � Concrete Jungle',
+  'GIUP-COL-111 � Black Cherry',
+  'GIUP-COL-122 � Mulberry',
+  'GIUP-COL-185 � Spiced Chai',
+  'GIUP-COL-195 � Pumpkin Spice',
+  'GIUP-COL-205 � Deep Teal',
+  'GIUP-COL-215 � Midnight Navy',
+  'GIUP-COL-225 � Charcoal Spark',
+  'GIUP-COL-235 � Rose Gold Foil',
+  'GIUP-COL-245 � Copper Flare',
+  'GIUP-COL-GCE12 � Glass Cat Eye Galaxy',
+  'GIUP-COL-2113W � White Flashing Star',
+  'GIUP-COL-2113P � Purple Flashing Star',
+  'GIUP-COL-ST03 � Spider Gel Gold',
+  'GIUP-COL-ST04 � Spider Gel Silver',
+  'GIUP-COL-B01 � Blooming Gel',
+  'GIUP-COL-401 � Mattest Matte',
+  'GIUP-COL-501 � Super Glossy Wipe',
 ]
 
 const HERO_PRODUCT_COPY = [
@@ -1108,7 +1108,7 @@ function formatDraftInvoiceText(invoice) {
   const silverFreeLine = getSilverFreeGuaranteeText(invoice?.createdAt)
 
   const lines = [
-    'GEL.IT.UP by GIUP® - B2B DRAFT INVOICE',
+    'GEL.IT.UP by GIUP� - B2B DRAFT INVOICE',
     `Invoice #: ${invoice.invoiceNumber}`,
     `Created: ${new Date(invoice.createdAt).toLocaleString()}`,
     `Tier: ${invoice.tier}`,
@@ -1128,17 +1128,17 @@ function formatDraftInvoiceText(invoice) {
 }
 
 function buildPlatinumSuccessEmail({ distributorName, orderId }) {
-  const subject = `Welcome to the Family! 💎 Your GEL.IT.UP Platinum Distributor Order [#${orderId}]`
+  const subject = `Welcome to the Family! ?? Your GEL.IT.UP Platinum Distributor Order [#${orderId}]`
   const html = `
     <p>Hello ${distributorName},</p>
-    <p>It is a pleasure to officially welcome you to the GEL.IT.UP by GIUP® global network!</p>
-    <p>You haven’t just placed an order; you’ve invested in a partnership. By choosing the Platinum Elite Package, you are now equipped with our top 120 high-velocity colors and the technical systems that professional nail technicians trust daily.</p>
-    <p><strong>📦 What Happens Next?</strong></p>
+    <p>It is a pleasure to officially welcome you to the GEL.IT.UP by GIUP� global network!</p>
+    <p>You haven�t just placed an order; you�ve invested in a partnership. By choosing the Platinum Elite Package, you are now equipped with our top 120 high-velocity colors and the technical systems that professional nail technicians trust daily.</p>
+    <p><strong>?? What Happens Next?</strong></p>
     <p><strong>Order Processing:</strong> Our warehouse team is currently hand-picking your 120-color "Master Collection" and technical essentials.</p>
     <p><strong>Digital Assets:</strong> Keep an eye on your inbox. Within 24 hours, you will receive a link to our Distributor Media Kit, containing high-res imagery, social media templates, and technical data sheets (SDS) to help you start selling immediately.</p>
     <p><strong>Logistics:</strong> As soon as your shipment leaves our facility, your tracking number will update automatically on your V2 Dashboard.</p>
-    <p><strong>💡 A Pro-Tip for Your Launch:</strong><br/>Your package includes the 5-in-1 Superior Base 6-pack. We recommend highlighting this as your "Hero Product" alongside the Coco Nude (09) and Ice Ice Baby (01) shades—this combination is currently our #1 requested salon starter set for 2026.</p>
-    <p>We are thrilled to have you representing the brand. Let’s make the world more colorful, one manicure at a time.</p>
+    <p><strong>?? A Pro-Tip for Your Launch:</strong><br/>Your package includes the 5-in-1 Superior Base 6-pack. We recommend highlighting this as your "Hero Product" alongside the Coco Nude (09) and Ice Ice Baby (01) shades�this combination is currently our #1 requested salon starter set for 2026.</p>
+    <p>We are thrilled to have you representing the brand. Let�s make the world more colorful, one manicure at a time.</p>
     <p>Best Regards,<br/>The GEL.IT.UP Team<br/>Professional Choice. Professional Results.</p>
   `
 
@@ -1371,12 +1371,12 @@ function DistributorPackagesPage() {
 
       {/* HERO */}
       <div className="relative overflow-hidden rounded-2xl bg-[#1a1a1a] p-7 sm:p-10" style={{ color: '#ffffff' }}>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#c8386e' }}>GEL.IT.UP by GIUP® — Verified Distribution Network</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#c8386e' }}>GEL.IT.UP by GIUP� � Verified Distribution Network</p>
         <h1 className="heading-on-dark mt-3 text-3xl font-black leading-tight tracking-tight sm:text-5xl">
           Distribution<br className="hidden sm:block" /> Partnership Tiers
         </h1>
         <p className="mt-3 max-w-2xl text-sm sm:text-base" style={{ color: 'rgba(255,255,255,0.70)' }}>
-          Built for serious operators. Every tier ships with full EU regulatory documentation and a social media brand engine — because your success is our brand in motion.
+          Built for serious operators. Every tier ships with full EU regulatory documentation and a social media brand engine � because your success is our brand in motion.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <NavLink to="/full-catalogue" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
@@ -1396,7 +1396,7 @@ function DistributorPackagesPage() {
           </div>
           <div>
             <p className="text-sm font-bold" style={{ color: '#1a1a1a' }}>EU Regulatory Ready</p>
-            <p className="mt-0.5 text-xs" style={{ color: '#6b7280' }}>Full compliance documentation, HEMA-Free &amp; TPO-Free certificates, and EC 1223/2009 declaration support — handled for you, not by you.</p>
+            <p className="mt-0.5 text-xs" style={{ color: '#6b7280' }}>Full compliance documentation, HEMA-Free &amp; TPO-Free certificates, and EC 1223/2009 declaration support � handled for you, not by you.</p>
           </div>
         </div>
         <div className="flex items-start gap-3 rounded-2xl p-4" style={{ border: '1px solid #e2e8f0', backgroundColor: '#ffffff' }}>
@@ -1414,7 +1414,7 @@ function DistributorPackagesPage() {
       <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #f0c4d0', backgroundColor: '#fdf5f7' }}>
         <div className="px-6 py-4" style={{ borderBottom: '1px solid #f0c4d0', backgroundColor: '#fdf0f4' }}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#c8386e' }}>Entry Tier</p>
-          <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#1a1a1a' }}>BOUTIQUE — The Foundation</h2>
+          <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#1a1a1a' }}>BOUTIQUE � The Foundation</h2>
           <p className="mt-1 text-sm" style={{ color: '#7d4a57' }}>Launch with confidence. The smartest entry point for localized distribution with everything you need to move product and build a client base instantly.</p>
         </div>
         <div>
@@ -1426,7 +1426,7 @@ function DistributorPackagesPage() {
             <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#b07080' }}>Product Spectrum</p>
             <ul className="space-y-1.5">
               <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#c8386e' }} />Top 120 Core Shades</li>
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#c8386e' }} />200 SKUs — Builder Systems, Brushes &amp; Essentials</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#c8386e' }} />200 SKUs � Builder Systems, Brushes &amp; Essentials</li>
             </ul>
           </div>
           <div className="flex items-start gap-4 px-6 py-4">
@@ -1440,7 +1440,7 @@ function DistributorPackagesPage() {
         </div>
         <div className="px-6 py-4" style={{ borderTop: '1px solid #f0c4d0', backgroundColor: '#fdf0f4' }}>
           <NavLink to="/become-distributor" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Request Boutique Tier Pricing →
+            Request Boutique Tier Pricing ?
           </NavLink>
         </div>
       </article>
@@ -1449,7 +1449,7 @@ function DistributorPackagesPage() {
       <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #1a1a1a', backgroundColor: '#ffffff' }}>
         <div className="px-6 py-4" style={{ backgroundColor: '#1a1a1a' }}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#c8386e' }}>Growth Tier</p>
-          <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#ffffff' }}>PROFESSIONAL — The Expanded Spectrum</h2>
+          <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#ffffff' }}>PROFESSIONAL � The Expanded Spectrum</h2>
           <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.60)' }}>Scale intelligently. A broader product range, physical brand presence, and deeper marketing tools designed for distributors ready to dominate their region.</p>
         </div>
         <div>
@@ -1477,7 +1477,7 @@ function DistributorPackagesPage() {
         </div>
         <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
           <NavLink to="/become-distributor" className="btn-cta-dark inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Request Professional Tier Pricing →
+            Request Professional Tier Pricing ?
           </NavLink>
         </div>
       </article>
@@ -1486,8 +1486,8 @@ function DistributorPackagesPage() {
       <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #c8386e', backgroundColor: '#ffffff' }}>
         <div className="px-6 py-4" style={{ backgroundColor: '#c8386e' }}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.75)' }}>Elite Tier</p>
-          <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#ffffff' }}>AUTHORITY — The Full Master Collection</h2>
-          <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.82)' }}>Total market ownership. Every product, every shade, every support tool — with your territory backed by GEL.IT.UP advertising, live training, and white-glove regulatory handling.</p>
+          <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#ffffff' }}>AUTHORITY � The Full Master Collection</h2>
+          <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.82)' }}>Total market ownership. Every product, every shade, every support tool � with your territory backed by GEL.IT.UP advertising, live training, and white-glove regulatory handling.</p>
         </div>
         <div>
           <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
@@ -1517,7 +1517,7 @@ function DistributorPackagesPage() {
         </div>
         <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
           <NavLink to="/become-distributor" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Request Authority Tier Pricing →
+            Request Authority Tier Pricing ?
           </NavLink>
         </div>
       </article>
@@ -1647,7 +1647,7 @@ function applyManualCatalogueOrder(items = [], rule = null) {
 
       const swatches = Array.isArray(group?.swatches) ? group.swatches : []
       if (group?.mergeAsGallery) {
-        // Merge swatch images into hero as galleryImages — suppress them as separate tiles
+        // Merge swatch images into hero as galleryImages � suppress them as separate tiles
         const galleryImages = []
         swatches.forEach((swatchName) => {
           const swatchItem = findCatalogueItemByMatch(items, swatchName, used)
@@ -1725,7 +1725,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     const sourceCategory = segments[0] || 'Other'
     let category = sourceCategory
     
-    // Apply category remapping (e.g., BY THE OCEAN → COLORS)
+    // Apply category remapping (e.g., BY THE OCEAN ? COLORS)
     const remappedCategory = categoryRemapping.get(category)
     const isRemapped = !!remappedCategory
     if (remappedCategory) {
@@ -1737,18 +1737,18 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     if (isRemapped) {
       if (segments.length > 2) {
         // For remapped categories with real subfolders, use the path between root and filename
-        // e.g., BUILDER GEL/3INI BUILDER/item.jpg → "3INI BUILDER"
+        // e.g., BUILDER GEL/3INI BUILDER/item.jpg ? "3INI BUILDER"
         subcategory = segments.slice(1, -1).join(' / ') || sourceCategory
       } else {
         // For remapped categories with files directly under root, keep root as subcategory
-        // e.g., CREME DE LA CREME/item.jpg → "CREME DE LA CREME"
+        // e.g., CREME DE LA CREME/item.jpg ? "CREME DE LA CREME"
         subcategory = sourceCategory
       }
     } else if (category === 'COLORS' && segments.length > 3) {
-      // Deep path: COLORS/SOLID GEL POLISH/Red/img.jpg → subcategory='SOLID GEL POLISH', family stored on item
+      // Deep path: COLORS/SOLID GEL POLISH/Red/img.jpg ? subcategory='SOLID GEL POLISH', family stored on item
       subcategory = segments[1]
     } else if (category === 'COLORS' && segments.length > 2) {
-      // Standard: COLORS/CAT EYE/img.jpg → subcategory='CAT EYE'
+      // Standard: COLORS/CAT EYE/img.jpg ? subcategory='CAT EYE'
       // NUDE, FRENCH, PASTEL, RONE (GIUP1) belong under Solid Gel Polish
       const folderToken = (segments[segments.length - 2] || 'General').toUpperCase()
       subcategory = ['NUDE', 'FRENCH', 'PASTEL', 'RONE'].includes(folderToken)
@@ -1834,7 +1834,7 @@ function resolveColorFamilyKey(name = '') {
   return 'OTHER'
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 function isColorsCategoryName(categoryName = '') {
   return normalizeCatalogueToken(categoryName).includes('COLOR')
@@ -1936,7 +1936,7 @@ function formatSubcategoryDisplayName(subcategoryName = '', categoryName = '') {
   if (normalized === 'PROFESSIONAL') return 'Professional'
   if (normalized === 'AUTHORITY') return 'Authority'
   
-  // Strip image file extensions and convert underscores → spaces before title-casing
+  // Strip image file extensions and convert underscores ? spaces before title-casing
   const cleanName = subcategoryName
     .replace(/\.(jpe?g|png|webp|gif|svg|avif|bmp|tiff?)$/i, '')
     .replace(/_/g, ' ')
@@ -2000,7 +2000,7 @@ function flattenSectionItems(section) {
 const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   'BASES::SUPERBOND': {
     paragraphs: [
-      'GEL.IT.UP by GIUP® Superbond is an acid-free primer, safe for the natural nail, and it does not require curing.',
+      'GEL.IT.UP by GIUP� Superbond is an acid-free primer, safe for the natural nail, and it does not require curing.',
       'It is applied to the free edge of the nail before the base coat, ensuring improved adhesion while providing additional dehydration for longer-lasting results.',
       'It also creates a thin protective film on the nail, helping to protect it from damage.',
     ],
@@ -2026,15 +2026,15 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
     ],
     listItems: [
       'Key Benefits: Fiber-reinforced strength, single-phase efficiency, cool-cure comfort, and 100% HEMA/TPO-free performance.',
-      'Application — Preparation: Perform a thorough dry manicure and cleanse the nail plate.',
-      'Application — Adhesion: Apply Superbond Primer and air-dry for 30 seconds.',
-      'Application — Foundation: Apply a thin slip layer over nail/form (do not cure).',
-      'Application — Building: Place a larger bead centrally and guide to edges/apex as it self-levels.',
-      'Application — Cure: 60–90s LED (120s UV).',
-      'Application — Refinement & Finish: Wipe inhibition layer, file shape, then final gloss layer or proceed with GEL.IT.UP by GIUP® color.',
-      'Dual Forms Application — Prep and prime as standard, then apply a thin slip layer of 3-in-1 Premium Builder Gel.',
-      'Dual Forms Application — Select the correct dual form size, place a controlled bead in the form, and spread evenly to avoid trapped air.',
-      'Dual Forms Application — Press form from cuticle toward free edge, flash cure to lock position, then full-cure and gently remove the form before refinement.',
+      'Application � Preparation: Perform a thorough dry manicure and cleanse the nail plate.',
+      'Application � Adhesion: Apply Superbond Primer and air-dry for 30 seconds.',
+      'Application � Foundation: Apply a thin slip layer over nail/form (do not cure).',
+      'Application � Building: Place a larger bead centrally and guide to edges/apex as it self-levels.',
+      'Application � Cure: 60�90s LED (120s UV).',
+      'Application � Refinement & Finish: Wipe inhibition layer, file shape, then final gloss layer or proceed with GEL.IT.UP by GIUP� color.',
+      'Dual Forms Application � Prep and prime as standard, then apply a thin slip layer of 3-in-1 Premium Builder Gel.',
+      'Dual Forms Application � Select the correct dual form size, place a controlled bead in the form, and spread evenly to avoid trapped air.',
+      'Dual Forms Application � Press form from cuticle toward free edge, flash cure to lock position, then full-cure and gently remove the form before refinement.',
     ],
   },
   'BUILDER GEL SYSTEMS::PREMIUM BUILDER': {
@@ -2045,20 +2045,20 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
     ],
     listItems: [
       'Key Benefits: Fiber-reinforced strength, single-phase efficiency, cool-cure comfort, and 100% HEMA/TPO-free performance.',
-      'Application — Preparation: Perform a thorough dry manicure and cleanse the nail plate.',
-      'Application — Adhesion: Apply Superbond Primer and air-dry for 30 seconds.',
-      'Application — Foundation: Apply a thin slip layer over nail/form (do not cure).',
-      'Application — Building: Place a larger bead centrally and guide to edges/apex as it self-levels.',
-      'Application — Cure: 60–90s LED (120s UV).',
-      'Application — Refinement & Finish: Wipe inhibition layer, file shape, then final gloss layer or proceed with GEL.IT.UP by GIUP® color.',
-      'Dual Forms Application — Prep and prime as standard, then apply a thin slip layer of 3-in-1 Premium Builder Gel.',
-      'Dual Forms Application — Select the correct dual form size, place a controlled bead in the form, and spread evenly to avoid trapped air.',
-      'Dual Forms Application — Press form from cuticle toward free edge, flash cure to lock position, then full-cure and gently remove the form before refinement.',
+      'Application � Preparation: Perform a thorough dry manicure and cleanse the nail plate.',
+      'Application � Adhesion: Apply Superbond Primer and air-dry for 30 seconds.',
+      'Application � Foundation: Apply a thin slip layer over nail/form (do not cure).',
+      'Application � Building: Place a larger bead centrally and guide to edges/apex as it self-levels.',
+      'Application � Cure: 60�90s LED (120s UV).',
+      'Application � Refinement & Finish: Wipe inhibition layer, file shape, then final gloss layer or proceed with GEL.IT.UP by GIUP� color.',
+      'Dual Forms Application � Prep and prime as standard, then apply a thin slip layer of 3-in-1 Premium Builder Gel.',
+      'Dual Forms Application � Select the correct dual form size, place a controlled bead in the form, and spread evenly to avoid trapped air.',
+      'Dual Forms Application � Press form from cuticle toward free edge, flash cure to lock position, then full-cure and gently remove the form before refinement.',
     ],
   },
   'BUILDER GEL SYSTEMS::CREME DE LA CREME': {
     paragraphs: [
-      'Creme de La Creme is a thixotropic nail gel — a high-viscosity, "smart" builder gel that changes consistency when stirred or applied (shear thinning), becoming more fluid for easy spreading, yet instantly reverting to a thick, non-runny state when stationary.',
+      'Creme de La Creme is a thixotropic nail gel � a high-viscosity, "smart" builder gel that changes consistency when stirred or applied (shear thinning), becoming more fluid for easy spreading, yet instantly reverting to a thick, non-runny state when stationary.',
       'Ideal for controlling application, preventing cuticle flooding, and allowing for non-filing techniques, ensuring perfect, structural, and self-leveling nail extensions.',
     ],
     listItems: [],
@@ -2071,13 +2071,13 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
     ],
     listItems: [
       'Key Benefits: Hybrid strength, zero-gravity feel, odorless environment, and 100% HEMA/TPO-free clean science standard.',
-      'Application — Prep: Perform a standard dry manicure and cleanse the nail plate.',
-      'Application — Prime: Apply Superbond Primer and air-dry for 30 seconds.',
-      'Application — Foundation: Apply a thin layer of 5-in-1 Superior Base and cure (60s LED).',
-      'Application — Placement: Dispense MultiMix Synthogel and position with a spatula.',
-      'Application — Sculpting: Use a brush with Cleanser/Slip Solution (lightly) to pat and smooth; product remains workable until cured.',
-      'Application — Curing: Cure for 60-90 seconds in LED.',
-      'Application — Refine: Wipe inhibition layer, file to shape, and finish with GEL.IT.UP by GIUP® color or top coat.',
+      'Application � Prep: Perform a standard dry manicure and cleanse the nail plate.',
+      'Application � Prime: Apply Superbond Primer and air-dry for 30 seconds.',
+      'Application � Foundation: Apply a thin layer of 5-in-1 Superior Base and cure (60s LED).',
+      'Application � Placement: Dispense MultiMix Synthogel and position with a spatula.',
+      'Application � Sculpting: Use a brush with Cleanser/Slip Solution (lightly) to pat and smooth; product remains workable until cured.',
+      'Application � Curing: Cure for 60-90 seconds in LED.',
+      'Application � Refine: Wipe inhibition layer, file to shape, and finish with GEL.IT.UP by GIUP� color or top coat.',
     ],
   },
   'BUILDER GEL SYSTEMS::30 ML': {
@@ -2088,13 +2088,13 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
     ],
     listItems: [
       'Key Benefits: Hybrid strength, zero-gravity feel, odorless environment, and 100% HEMA/TPO-free clean science standard.',
-      'Application — Prep: Perform a standard dry manicure and cleanse the nail plate.',
-      'Application — Prime: Apply Superbond Primer and air-dry for 30 seconds.',
-      'Application — Foundation: Apply a thin layer of 5-in-1 Superior Base and cure (60s LED).',
-      'Application — Placement: Dispense MultiMix Synthogel and position with a spatula.',
-      'Application — Sculpting: Use a brush with Cleanser/Slip Solution (lightly) to pat and smooth; product remains workable until cured.',
-      'Application — Curing: Cure for 60-90 seconds in LED.',
-      'Application — Refine: Wipe inhibition layer, file to shape, and finish with GEL.IT.UP by GIUP® color or top coat.',
+      'Application � Prep: Perform a standard dry manicure and cleanse the nail plate.',
+      'Application � Prime: Apply Superbond Primer and air-dry for 30 seconds.',
+      'Application � Foundation: Apply a thin layer of 5-in-1 Superior Base and cure (60s LED).',
+      'Application � Placement: Dispense MultiMix Synthogel and position with a spatula.',
+      'Application � Sculpting: Use a brush with Cleanser/Slip Solution (lightly) to pat and smooth; product remains workable until cured.',
+      'Application � Curing: Cure for 60-90 seconds in LED.',
+      'Application � Refine: Wipe inhibition layer, file to shape, and finish with GEL.IT.UP by GIUP� color or top coat.',
     ],
   },
   'BUILDER GEL SYSTEMS::60 ML': {
@@ -2105,58 +2105,58 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
     ],
     listItems: [
       'Key Benefits: Hybrid strength, zero-gravity feel, odorless environment, and 100% HEMA/TPO-free clean science standard.',
-      'Application — Prep: Perform a standard dry manicure and cleanse the nail plate.',
-      'Application — Prime: Apply Superbond Primer and air-dry for 30 seconds.',
-      'Application — Foundation: Apply a thin layer of 5-in-1 Superior Base and cure (60s LED).',
-      'Application — Placement: Dispense MultiMix Synthogel and position with a spatula.',
-      'Application — Sculpting: Use a brush with Cleanser/Slip Solution (lightly) to pat and smooth; product remains workable until cured.',
-      'Application — Curing: Cure for 60-90 seconds in LED.',
-      'Application — Refine: Wipe inhibition layer, file to shape, and finish with GEL.IT.UP by GIUP® color or top coat.',
+      'Application � Prep: Perform a standard dry manicure and cleanse the nail plate.',
+      'Application � Prime: Apply Superbond Primer and air-dry for 30 seconds.',
+      'Application � Foundation: Apply a thin layer of 5-in-1 Superior Base and cure (60s LED).',
+      'Application � Placement: Dispense MultiMix Synthogel and position with a spatula.',
+      'Application � Sculpting: Use a brush with Cleanser/Slip Solution (lightly) to pat and smooth; product remains workable until cured.',
+      'Application � Curing: Cure for 60-90 seconds in LED.',
+      'Application � Refine: Wipe inhibition layer, file to shape, and finish with GEL.IT.UP by GIUP� color or top coat.',
     ],
   },
   'BUILDER GEL SYSTEMS::COMPETE': {
     paragraphs: [
-      'The GEL.IT.UP by GIUP® Acrylic System is a high-performance sculpting range designed for technicians who demand ultimate strength and traditional structural control.',
+      'The GEL.IT.UP by GIUP� Acrylic System is a high-performance sculpting range designed for technicians who demand ultimate strength and traditional structural control.',
       'Engineered to work with specialized powders, the system includes two monomer options for different workflows: Professional Fast Liquid for rapid set/high-speed service, and Beginner Slow Liquid for extended playtime and precision architecture.',
     ],
     listItems: [
       'Key Benefits: Superior bond, non-yellowing UV-stable formula, exceptional clarity and strength, and ethical CPNP-notified compliance.',
-      'Application — Prep: Conduct a thorough dry manicure and cleanse the nail plate.',
-      'Application — Adhesion: Apply Superbond Primer and allow to air-dry for 30 seconds.',
-      'Application — Dip: Submerge acrylic brush in chosen liquid (Fast or Slow) and wipe excess on dappen dish side.',
-      'Application — Pick-up: Dip brush tip into acrylic powder to create a creamy bead.',
-      'Application — Sculpt: Place and guide bead; use Slow for more playtime or Fast for quicker setting.',
-      'Application — Refine: Once polymerized, file to shape with professional-grade nail files.',
-      'Application — Seal: Finish with GEL.IT.UP by GIUP® Non-Wipe Top Coat and cure 90–120 seconds for a TPO-free high-gloss seal.',
+      'Application � Prep: Conduct a thorough dry manicure and cleanse the nail plate.',
+      'Application � Adhesion: Apply Superbond Primer and allow to air-dry for 30 seconds.',
+      'Application � Dip: Submerge acrylic brush in chosen liquid (Fast or Slow) and wipe excess on dappen dish side.',
+      'Application � Pick-up: Dip brush tip into acrylic powder to create a creamy bead.',
+      'Application � Sculpt: Place and guide bead; use Slow for more playtime or Fast for quicker setting.',
+      'Application � Refine: Once polymerized, file to shape with professional-grade nail files.',
+      'Application � Seal: Finish with GEL.IT.UP by GIUP� Non-Wipe Top Coat and cure 90�120 seconds for a TPO-free high-gloss seal.',
     ],
   },
   'BUILDER GEL SYSTEMS::ACRYLIC': {
     paragraphs: [
-      'The GEL.IT.UP by GIUP® Acrylic System is a high-performance sculpting range designed for technicians who demand ultimate strength and traditional structural control.',
+      'The GEL.IT.UP by GIUP� Acrylic System is a high-performance sculpting range designed for technicians who demand ultimate strength and traditional structural control.',
       'Engineered to work with specialized powders, the system includes two monomer options for different workflows: Professional Fast Liquid for rapid set/high-speed service, and Beginner Slow Liquid for extended playtime and precision architecture.',
     ],
     listItems: [
       'Key Benefits: Superior bond, non-yellowing UV-stable formula, exceptional clarity and strength, and ethical CPNP-notified compliance.',
-      'Application — Prep: Conduct a thorough dry manicure and cleanse the nail plate.',
-      'Application — Adhesion: Apply Superbond Primer and allow to air-dry for 30 seconds.',
-      'Application — Dip: Submerge acrylic brush in chosen liquid (Fast or Slow) and wipe excess on dappen dish side.',
-      'Application — Pick-up: Dip brush tip into acrylic powder to create a creamy bead.',
-      'Application — Sculpt: Place and guide bead; use Slow for more playtime or Fast for quicker setting.',
-      'Application — Refine: Once polymerized, file to shape with professional-grade nail files.',
-      'Application — Seal: Finish with GEL.IT.UP by GIUP® Non-Wipe Top Coat and cure 90–120 seconds for a TPO-free high-gloss seal.',
+      'Application � Prep: Conduct a thorough dry manicure and cleanse the nail plate.',
+      'Application � Adhesion: Apply Superbond Primer and allow to air-dry for 30 seconds.',
+      'Application � Dip: Submerge acrylic brush in chosen liquid (Fast or Slow) and wipe excess on dappen dish side.',
+      'Application � Pick-up: Dip brush tip into acrylic powder to create a creamy bead.',
+      'Application � Sculpt: Place and guide bead; use Slow for more playtime or Fast for quicker setting.',
+      'Application � Refine: Once polymerized, file to shape with professional-grade nail files.',
+      'Application � Seal: Finish with GEL.IT.UP by GIUP� Non-Wipe Top Coat and cure 90�120 seconds for a TPO-free high-gloss seal.',
     ],
   },
   'LINE-IT-UP::ALL': {
     paragraphs: [
-      'By choosing the LINE.IT.UP by GIUP® range, you can create linear designs easily and quickly, thanks to the specially designed brush.',
+      'By choosing the LINE.IT.UP by GIUP� range, you can create linear designs easily and quickly, thanks to the specially designed brush.',
       'It allows you to create everything from fine to thicker lines, depending on the design you wish to draw.',
     ],
     listItems: [],
   },
   'COLORS::ALL': {
     paragraphs: [
-      'The GEL.IT.UP by GIUP® gel polish range has stood out in the market thanks to its excellent quality and high durability. It delivers intense shine, removes very easily, and does not wrinkle during curing.',
-      'The rich GEL.IT.UP by GIUP® color palette includes more than 500 gel polish shades, with new must-have colors added every season.',
+      'The GEL.IT.UP by GIUP� gel polish range has stood out in the market thanks to its excellent quality and high durability. It delivers intense shine, removes very easily, and does not wrinkle during curing.',
+      'The rich GEL.IT.UP by GIUP� color palette includes more than 500 gel polish shades, with new must-have colors added every season.',
       'All our products are cruelty-free and have been approved by the global organization Leaping Bunny International.',
     ],
     listItems: [],
@@ -2185,17 +2185,17 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Precision nail art brushes with a metal Rose Gold body and decorative details. Made with high-quality, durable synthetic bristles, in line with our cruelty-free product policy.',
     ],
     listItems: [
-      'Aquarela Brush — Specially designed for the watercolor technique.',
-      'French Nail Brush — Angled blade ideal for the French manicure technique.',
-      'Ombré Brush — Wide flat brush for smooth gradient and ombré blends.',
-      'Skinny Liner — Ultra-fine liner brush for detailed nail art lines and accents.',
+      'Aquarela Brush � Specially designed for the watercolor technique.',
+      'French Nail Brush � Angled blade ideal for the French manicure technique.',
+      'Ombr� Brush � Wide flat brush for smooth gradient and ombr� blends.',
+      'Skinny Liner � Ultra-fine liner brush for detailed nail art lines and accents.',
     ],
   },
   'NAIL HAND FOOT CARE::CREAMS AND SCRUBS': {
     paragraphs: [
-      'Hand & Body Cream — With Organic Aloe and a unique cocktail of active ingredients, it fragrances and hydrates the skin. It absorbs quickly and leaves no oily residue. Key ingredients: Organic Aloe Vera, Hyaluronic Acid, Panthenol.',
-      'Silky Bliss Foot Cream — It absorbs quickly and leaves no oily residue. Key ingredients: Organic Aloe Vera, Avocado Oil, Panthenol.',
-      'Scrubs — Fine particles that gently cleanse and remove dead skin cells from the surface of the skin. High content of organic aloe and vitamins that soothe any irritation and help maintain the skin\'s natural hydrolipidic film.',
+      'Hand & Body Cream � With Organic Aloe and a unique cocktail of active ingredients, it fragrances and hydrates the skin. It absorbs quickly and leaves no oily residue. Key ingredients: Organic Aloe Vera, Hyaluronic Acid, Panthenol.',
+      'Silky Bliss Foot Cream � It absorbs quickly and leaves no oily residue. Key ingredients: Organic Aloe Vera, Avocado Oil, Panthenol.',
+      'Scrubs � Fine particles that gently cleanse and remove dead skin cells from the surface of the skin. High content of organic aloe and vitamins that soothe any irritation and help maintain the skin\'s natural hydrolipidic film.',
     ],
     listItems: [
       'Organic Aloe Vera',
@@ -2207,9 +2207,9 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
     paragraphs: [
       'With our Cuticle Oils you will feel your fingers soothed, nourished, and hydrated, while also protecting them from irritation and prolonged sun exposure.',
       'Directions for use: Apply one to two drops to the cuticle area of each nail. Massage the oil around the cuticles and then over the entire surface of the nail. It is important to apply the oil to both the skin and the nails to achieve the full nourishment you desire.',
-      'Warnings: For external use only. Keep out of reach of children. Store the product at a temperature below 25°C. Keep away from direct sunlight.',
-      'Photo Perfect Cuticle Oil — Your ultimate ally for the perfect photoshoot! A dry cuticle oil that leaves no greasy residue, offering hydrating and nourishing benefits while helping with skin regeneration and healing.',
-      'Cuticle Remover — Skin-friendly and highly effective in removing cuticles without causing injury. It contains essential oils and micro-particles from almond shells, softening the cuticle membrane and hardened skin areas, combining the properties of a scrub. It has a light, gel-like texture with an addictive fragrance, turning manicure and pedicure preparation into an easy and pleasant process for every nail technician.',
+      'Warnings: For external use only. Keep out of reach of children. Store the product at a temperature below 25�C. Keep away from direct sunlight.',
+      'Photo Perfect Cuticle Oil � Your ultimate ally for the perfect photoshoot! A dry cuticle oil that leaves no greasy residue, offering hydrating and nourishing benefits while helping with skin regeneration and healing.',
+      'Cuticle Remover � Skin-friendly and highly effective in removing cuticles without causing injury. It contains essential oils and micro-particles from almond shells, softening the cuticle membrane and hardened skin areas, combining the properties of a scrub. It has a light, gel-like texture with an addictive fragrance, turning manicure and pedicure preparation into an easy and pleasant process for every nail technician.',
       'Note: Proper dehydration is required before the application of liquid products (primer, base).',
     ],
     listItems: [
@@ -2217,12 +2217,12 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Fast absorption',
       'Natural ingredients',
       'Convenient brush applicator',
-      'Ideal for photoshoots — eliminates imperfections without the need for Photoshop',
+      'Ideal for photoshoots � eliminates imperfections without the need for Photoshop',
     ],
   },
   'TOPS::SPOT MY TOPS': {
     paragraphs: [
-      'Create the ultimate trend easily and quickly with FAN12 Rainbow Dreams — an effects top coat featuring the high-gloss finish of a top coat combined with the unique sparkle of microscopic iridescent particles.',
+      'Create the ultimate trend easily and quickly with FAN12 Rainbow Dreams � an effects top coat featuring the high-gloss finish of a top coat combined with the unique sparkle of microscopic iridescent particles.',
       'You can apply it over any color of your choice.',
     ],
     listItems: [],
@@ -2236,15 +2236,15 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'TOPS::CLASSIC TOP COATS': {
     paragraphs: [
-      'Non Wipe Top Coat — The well-known Non Wipe Top Coat is a top coat of exceptional durability and shine, with no sticky layer. Thanks to its superior formula, it does not yellow or alter the color, providing outstanding gloss and a long-lasting, flawless finish.',
-      'Perfect Shape Non-Wipe Topcoat — Thanks to its rubber-based formula, it provides even coverage that corrects imperfections, delivering shine, durability, and long-lasting wear. Due to its elasticity, it helps prevent scratches. Its thick consistency allows you to create additional reinforcement over gel polish and artificial nails. It does not run into the cuticle area, making it especially helpful for beginner nail technicians.',
-      'Milky Non-Wipe Topcoat — Delivers a rich, deep milky tone over your gel polish, enhancing both light and dark shades. It provides the perfect milky finish for ombré and baby boomer designs. Your ideal ally for every nail art and technique.',
+      'Non Wipe Top Coat � The well-known Non Wipe Top Coat is a top coat of exceptional durability and shine, with no sticky layer. Thanks to its superior formula, it does not yellow or alter the color, providing outstanding gloss and a long-lasting, flawless finish.',
+      'Perfect Shape Non-Wipe Topcoat � Thanks to its rubber-based formula, it provides even coverage that corrects imperfections, delivering shine, durability, and long-lasting wear. Due to its elasticity, it helps prevent scratches. Its thick consistency allows you to create additional reinforcement over gel polish and artificial nails. It does not run into the cuticle area, making it especially helpful for beginner nail technicians.',
+      'Milky Non-Wipe Topcoat � Delivers a rich, deep milky tone over your gel polish, enhancing both light and dark shades. It provides the perfect milky finish for ombr� and baby boomer designs. Your ideal ally for every nail art and technique.',
     ],
     listItems: [],
   },
   'EQUIPMENT::DUST & AIR': {
     paragraphs: [
-      'Dust Collector — 55 Watts. Professional-grade nail dust extraction for a clean, safe workstation.',
+      'Dust Collector � 55 Watts. Professional-grade nail dust extraction for a clean, safe workstation.',
     ],
     listItems: [
       '2 Powerful Motors',
@@ -2256,22 +2256,22 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'EQUIPMENT::LAMPS & CURING': {
     paragraphs: [
-      'Portable Rechargeable LED Stamp Lamp — High-quality rechargeable lamp ideal for curing decorative elements and bonding Soft Gel Tips. Adjustable height, flexible neck for optimal ergonomics, and USB-C charging cable included.',
-      'LED Heli Light — Professional-grade illumination for nail artists and beauty environments. Three rectangular LED panels deliver uniform, shadow-free brightness in crisp 6500K cool white light. Easy to install with a 40,000-hour lifespan.',
+      'Portable Rechargeable LED Stamp Lamp � High-quality rechargeable lamp ideal for curing decorative elements and bonding Soft Gel Tips. Adjustable height, flexible neck for optimal ergonomics, and USB-C charging cable included.',
+      'LED Heli Light � Professional-grade illumination for nail artists and beauty environments. Three rectangular LED panels deliver uniform, shadow-free brightness in crisp 6500K cool white light. Easy to install with a 40,000-hour lifespan.',
     ],
     listItems: [
-      'Portable Stamp Lamp: Timer 30s · Power 3W · Runtime 2hr · Charge time 1.5hr · Weight 150g',
-      'Heli Light: Power 45W · Light temp 6500K · Voltage 170–265V · Frequency 50–60Hz',
+      'Portable Stamp Lamp: Timer 30s � Power 3W � Runtime 2hr � Charge time 1.5hr � Weight 150g',
+      'Heli Light: Power 45W � Light temp 6500K � Voltage 170�265V � Frequency 50�60Hz',
     ],
   },
   'BUILDER GEL::LIQUID POLYGEL': {
     paragraphs: [
-      'GEL.IT.UP brings ultimate innovation to building systems — Liquid-form Polygel in a 15ml bottle! The strength, durability, and all the advantages of Polygel in a bottle that makes application even easier and faster.',
+      'GEL.IT.UP brings ultimate innovation to building systems � Liquid-form Polygel in a 15ml bottle! The strength, durability, and all the advantages of Polygel in a bottle that makes application even easier and faster.',
       'Medium viscosity and self-leveling, with an excellent texture. Applied directly from the bottle using the built-in brush, it provides ultimate natural nail reinforcement, extremely fast maintenance, and medium-length extensions.',
       'Also suitable for the no-filing technique, reducing service time to a minimum. Files very easily, cures perfectly, and offers exceptional durability. Cures in UV/LED lamps for 90 seconds.',
     ],
     listItems: [
-      'Application — For optimal adhesion, apply a layer of 5-in-1 Superior Base Clear before application',
+      'Application � For optimal adhesion, apply a layer of 5-in-1 Superior Base Clear before application',
     ],
   },
   'BASES::FLEXI BASE': {
@@ -2297,7 +2297,7 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'NAIL ART::MARBLE INK': {
     paragraphs: [
-      'Marble-It by GIUP® is a water-based color that air-dries on its own — it does not require curing.',
+      'Marble-It by GIUP� is a water-based color that air-dries on its own � it does not require curing.',
       'The Marble-It range allows you to easily and quickly create marble, smoke, and water-effect nail art designs.',
     ],
     listItems: [],
@@ -2315,7 +2315,7 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Ideal for striking nail art with either a minimal or bold character, without the need for a brush or advanced technique. Available in black and white for maximum contrast and endless combinations.',
     ],
     listItems: [
-      'Prepare the nail and apply base coat — cure according to instructions',
+      'Prepare the nail and apply base coat � cure according to instructions',
       'Apply your chosen color and cure as usual',
       'Apply a very thin layer of base coat without curing',
       'Gently apply the Cobweb Gel using the brush',
@@ -2353,11 +2353,11 @@ function getB2BCategoryDescription(categoryName = '') {
   const token = normalizeCatalogueToken(categoryName)
   if (!token) return null
 
-  // 1. Direct ::ALL match (e.g., category stored as 'MULTIMIX' → 'MULTIMIX::ALL')
+  // 1. Direct ::ALL match (e.g., category stored as 'MULTIMIX' ? 'MULTIMIX::ALL')
   const direct = PRODUCT_INFORMATION_BY_SUBCATEGORY[`${token}::ALL`]
   if (direct) return direct
 
-  // 2. Match as subcategory part of any key (e.g., 'MULTIMIX' → 'BUILDER GEL SYSTEMS::MULTIMIX')
+  // 2. Match as subcategory part of any key (e.g., 'MULTIMIX' ? 'BUILDER GEL SYSTEMS::MULTIMIX')
   const subKey = Object.keys(PRODUCT_INFORMATION_BY_SUBCATEGORY).find((key) => {
     const parts = key.split('::')
     if (parts.length < 2) return false
@@ -2366,7 +2366,7 @@ function getB2BCategoryDescription(categoryName = '') {
   })
   if (subKey) return PRODUCT_INFORMATION_BY_SUBCATEGORY[subKey]
 
-  // 3. First match where category part matches (e.g., 'NAIL ART' → 'NAIL ART::CUSHION GEL')
+  // 3. First match where category part matches (e.g., 'NAIL ART' ? 'NAIL ART::CUSHION GEL')
   const catKey = Object.keys(PRODUCT_INFORMATION_BY_SUBCATEGORY).find((key) => {
     const catPart = normalizeCatalogueToken((key.split('::')[0]) || '')
     return catPart === token
@@ -2384,17 +2384,17 @@ const SPRING_SUMMER_LOOKBOOK_DEFAULT = {
       heroImage: '/gelitup-media/images/news/spring-summer-2026-01.webp',
       pages: [
         {
-          title: 'Spring/Summer 2026 · 01',
+          title: 'Spring/Summer 2026 � 01',
           imageUrl: '/gelitup-media/images/news/spring-summer-2026-01.webp',
           link: '/portal/login',
         },
         {
-          title: 'Spring/Summer 2026 · 02',
+          title: 'Spring/Summer 2026 � 02',
           imageUrl: '/gelitup-media/images/news/spring-summer-2026-02.webp',
           link: '/portal/login',
         },
         {
-          title: 'Spring/Summer 2026 · 03',
+          title: 'Spring/Summer 2026 � 03',
           imageUrl: '/gelitup-media/images/news/spring-summer-2026-03.webp',
           link: '/portal/login',
         },
@@ -2403,17 +2403,17 @@ const SPRING_SUMMER_LOOKBOOK_DEFAULT = {
   ],
   pages: [
     {
-      title: 'Spring/Summer 2026 · 01',
+      title: 'Spring/Summer 2026 � 01',
       imageUrl: '/gelitup-media/images/news/spring-summer-2026-01.webp',
       link: '/portal/login',
     },
     {
-      title: 'Spring/Summer 2026 · 02',
+      title: 'Spring/Summer 2026 � 02',
       imageUrl: '/gelitup-media/images/news/spring-summer-2026-02.webp',
       link: '/portal/login',
     },
     {
-      title: 'Spring/Summer 2026 · 03',
+      title: 'Spring/Summer 2026 � 03',
       imageUrl: '/gelitup-media/images/news/spring-summer-2026-03.webp',
       link: '/portal/login',
     },
@@ -2421,22 +2421,22 @@ const SPRING_SUMMER_LOOKBOOK_DEFAULT = {
 }
 
 const CATEGORY_LAB_SPECS = {
-  'COLORS': { pigmentDots: 3, cure: '60s LED · 120s UV', llab: true },
-  'BUILDER GEL SYSTEMS': { pigmentDots: null, cure: '60s LED · 120s UV', llab: true },
-  'BASES': { pigmentDots: null, cure: '60s LED · 120s UV', llab: true },
-  'MULTIMIX': { pigmentDots: null, cure: '60s LED · 120s UV', llab: true },
-  'TOPS': { pigmentDots: null, cure: '60s LED · 120s UV', llab: true },
-  'LINE-IT-UP': { pigmentDots: 2, cure: '60s LED · 120s UV', llab: true },
+  'COLORS': { pigmentDots: 3, cure: '60s LED � 120s UV', llab: true },
+  'BUILDER GEL SYSTEMS': { pigmentDots: null, cure: '60s LED � 120s UV', llab: true },
+  'BASES': { pigmentDots: null, cure: '60s LED � 120s UV', llab: true },
+  'MULTIMIX': { pigmentDots: null, cure: '60s LED � 120s UV', llab: true },
+  'TOPS': { pigmentDots: null, cure: '60s LED � 120s UV', llab: true },
+  'LINE-IT-UP': { pigmentDots: 2, cure: '60s LED � 120s UV', llab: true },
   'TOOLS': { pigmentDots: null, cure: null, llab: true },
   'EQUIPMENT': { pigmentDots: null, cure: null, llab: true },
   'BRUSHES': { pigmentDots: null, cure: null, llab: true },
-  'NAIL ART': { pigmentDots: 2, cure: '60s LED · 120s UV', llab: true },
+  'NAIL ART': { pigmentDots: 2, cure: '60s LED � 120s UV', llab: true },
   'CONSUMABLES': { pigmentDots: null, cure: null, llab: true },
   'NAIL HAND & FOOT CARE': { pigmentDots: null, cure: null, llab: true },
   'LIQUIDS': { pigmentDots: null, cure: null, llab: true },
-  'BY THE OCEAN': { pigmentDots: 3, cure: '60s LED · 120s UV', llab: true },
+  'BY THE OCEAN': { pigmentDots: 3, cure: '60s LED � 120s UV', llab: true },
 }
-const DEFAULT_LAB_SPECS = { pigmentDots: null, cure: '60s LED · 120s UV', llab: true }
+const DEFAULT_LAB_SPECS = { pigmentDots: null, cure: '60s LED � 120s UV', llab: true }
 
 function FullCataloguePage() {
   const [sections, setSections] = useState([])
@@ -2456,7 +2456,7 @@ function FullCataloguePage() {
   const [colorTileFrame, setColorTileFrame] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
-  // solidGelColourFamilies: sku → colorFamily, loaded from JSON built via CSV
+  // solidGelColourFamilies: sku ? colorFamily, loaded from JSON built via CSV
   const [solidGelColourFamilies, setSolidGelColourFamilies] = useState({})
   const [springSummerLookbook, setSpringSummerLookbook] = useState(SPRING_SUMMER_LOOKBOOK_DEFAULT)
   const [expandedLookbookGroup, setExpandedLookbookGroup] = useState(0)
@@ -2957,7 +2957,7 @@ function FullCataloguePage() {
     setActiveSubcategory(subcategoryName || 'ALL')
     setActiveColorFamily('ALL')
     // Expand the correct section so categoryDetail renders
-    // Colours skips the grid — categoryDetail is rendered standalone below the banner
+    // Colours skips the grid � categoryDetail is rendered standalone below the banner
     const normalized = normalizeCatalogueToken(categoryName)
     let sectionKey = ''
     if (normalized.includes('COLOR')) {
@@ -3150,7 +3150,7 @@ function FullCataloguePage() {
             }}
             className="inline-flex items-center gap-1.5 rounded-lg border border-[#4A4A4A]/30 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-black/70 transition hover:border-fuchsia-500/50 hover:text-fuchsia-600"
           >
-            <span>←</span>
+            <span>?</span>
             <span>Back to Categories</span>
           </button>
         </div>
@@ -3205,12 +3205,12 @@ function FullCataloguePage() {
 
               const listItems = Array.isArray(metadata.listItems) ? metadata.listItems : []
               const dualFormsItems = listItems
-                .filter((item) => /^Dual Forms Application\s*[—-]\s*/i.test(String(item || '')))
-                .map((item) => String(item).replace(/^Dual Forms Application\s*[—-]\s*/i, '').trim())
+                .filter((item) => /^Dual Forms Application\s*[�-]\s*/i.test(String(item || '')))
+                .map((item) => String(item).replace(/^Dual Forms Application\s*[�-]\s*/i, '').trim())
               const applicationItems = listItems
-                .filter((item) => /^Application\s*[—-]\s*/i.test(String(item || '')))
-                .map((item) => String(item).replace(/^Application\s*[—-]\s*/i, '').trim())
-              const nonApplicationItems = listItems.filter((item) => !/^Application\s*[—-]\s*/i.test(String(item || '')) && !/^Dual Forms Application\s*[—-]\s*/i.test(String(item || '')))
+                .filter((item) => /^Application\s*[�-]\s*/i.test(String(item || '')))
+                .map((item) => String(item).replace(/^Application\s*[�-]\s*/i, '').trim())
+              const nonApplicationItems = listItems.filter((item) => !/^Application\s*[�-]\s*/i.test(String(item || '')) && !/^Dual Forms Application\s*[�-]\s*/i.test(String(item || '')))
 
               return (
                 <div className="mt-4 rounded-[12px] border border-fuchsia-400/40 bg-gradient-to-br from-fuchsia-50/60 to-purple-50/40 p-4 sm:p-5">
@@ -3318,7 +3318,7 @@ function FullCataloguePage() {
                           <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                           <p className="break-words text-[11px] font-light text-black/55">{itemCode}</p>
                         </div>
-                        <button onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>−</button>
+                        <button onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>-</button>
                         <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className={`h-7 w-10 rounded-[10px] border text-center text-xs ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/20 text-black/70'}`} />
                         <button onClick={() => updateQty(itemKey, qty + 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>+</button>
                         <button onClick={() => addQuickItem(itemKey)} className={`rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition duration-300 ${pulseItemKey === itemKey ? 'lux-pulse bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`}>Add</button>
@@ -3406,7 +3406,7 @@ function FullCataloguePage() {
               aria-hidden="true"
               src="/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg"
               alt=""
-              className="absolute right-0 top-0 hidden h-full w-[52%] object-cover object-center lg:block"
+              className="absolute right-0 top-0 hidden h-full w-[52%] object-cover object-top lg:block"
               style={{
                 maskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
                 WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
@@ -3435,7 +3435,7 @@ function FullCataloguePage() {
                 </div>
               </div>
 
-              {/* Mobile image — shown below text, softly faded top */}
+              {/* Mobile image � shown below text, softly faded top */}
               <div className="lg:hidden">
                 <div className="relative mx-auto max-w-[280px]">
                   <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(212,55,144,0.3)_0%,transparent_70%)] blur-2xl" />
@@ -3444,8 +3444,8 @@ function FullCataloguePage() {
                     alt="GEL.IT.UP Colour Collection"
                     className="relative w-full object-contain drop-shadow-[0_6px_32px_rgba(212,55,144,0.45)]"
                     style={{
-                      maskImage: 'linear-gradient(to bottom, transparent 0%, black 18%)',
-                      WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 18%)',
+                      maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, black 20%)',
+                      WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, black 20%)',
                     }}
                   />
                 </div>
@@ -3464,7 +3464,7 @@ function FullCataloguePage() {
                 aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/top-bases-catalog-hero-image.webp"
                 alt=""
-                className="absolute right-0 top-0 hidden h-full w-[52%] object-cover object-center lg:block"
+                className="absolute right-0 top-0 hidden h-full w-[52%] object-cover object-top lg:block"
                 style={{
                   maskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
@@ -3476,7 +3476,7 @@ function FullCataloguePage() {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-300">The Essentials</p>
                   <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Bases, Tops &amp; Nail Preparations</h2>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
-                    The non-negotiables of every nail service. Our base coats lock in colour and protect the natural nail, while our top coats deliver the perfect finish — from high-gloss brilliance to matte sophistication.
+                    The non-negotiables of every nail service. Our base coats lock in colour and protect the natural nail, while our top coats deliver the perfect finish � from high-gloss brilliance to matte sophistication.
                   </p>
                   <div className="mt-6">
                     <button
@@ -3503,7 +3503,7 @@ function FullCataloguePage() {
                       src="/gelitup-content/catalog-heroes/top-bases-catalog-hero-image.webp"
                       alt="GEL.IT.UP Bases & Tops"
                       className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(200,115,145,0.35)]"
-                      style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, black 16%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 16%)' }}
+                      style={{ maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, black 20%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, black 20%)' }}
                     />
                   </div>
                 </div>
@@ -3535,7 +3535,7 @@ function FullCataloguePage() {
                           <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
                           <div className="mt-2 flex flex-wrap gap-1">
                             {specs.cure && <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">{specs.cure}</span>}
-                            {specs.llab && <span className="inline-flex items-center rounded-md border border-rose-200 bg-rose-50 px-1.5 py-0.5 text-[10px] font-bold text-rose-700">L-Lab ✓</span>}
+                            {specs.llab && <span className="inline-flex items-center rounded-md border border-rose-200 bg-rose-50 px-1.5 py-0.5 text-[10px] font-bold text-rose-700">L-Lab ?</span>}
                           </div>
                         </div>
                       </button>
@@ -3554,7 +3554,7 @@ function FullCataloguePage() {
                 aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp"
                 alt=""
-                className="absolute right-0 top-0 hidden h-full w-[52%] object-cover object-center lg:block"
+                className="absolute right-0 top-0 hidden h-full w-[52%] object-cover object-top lg:block"
                 style={{
                   maskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 22%)',
@@ -3566,7 +3566,7 @@ function FullCataloguePage() {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-200">Structural Innovation</p>
                   <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Builder Systems</h2>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
-                    From Liquid Polygel to 3-in-1 Builder and Multimix — our complete range of building systems delivers strength, flexibility and flawless structure. Engineered for extensions, reinforcement, and zero-file technique.
+                    From Liquid Polygel to 3-in-1 Builder and Multimix � our complete range of building systems delivers strength, flexibility and flawless structure. Engineered for extensions, reinforcement, and zero-file technique.
                   </p>
                   <div className="mt-6">
                     <button
@@ -3587,7 +3587,7 @@ function FullCataloguePage() {
                       src="/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp"
                       alt="GEL.IT.UP Builder Systems"
                       className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(185,100,50,0.35)]"
-                      style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, black 16%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 16%)' }}
+                      style={{ maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, black 20%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, black 20%)' }}
                     />
                   </div>
                 </div>
@@ -3714,7 +3714,7 @@ function FullCataloguePage() {
             <div className="grid lg:grid-cols-2">
               {/* LEFT: Cloud Dancer story */}
               <div className="flex flex-col justify-center bg-[#1A1A1A] px-8 py-12 sm:px-12">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Additions · 2026</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Additions � 2026</p>
                 <h2 className="heading-on-dark mt-3 text-3xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-4xl">
                   Cloud Dancer<br /><span className="text-[#D43790]">The Series</span>
                 </h2>
@@ -3723,7 +3723,7 @@ function FullCataloguePage() {
                   {HOME_CLOUD_DANCER_DEFAULT.introText}
                 </p>
                 <p className="mt-4 text-sm leading-relaxed !text-white/40">
-                  22 illuminated shades — each one chosen to complement every skin tone and every season. The complete Cloud Dancer collection is available exclusively through our professional portal.
+                  22 illuminated shades � each one chosen to complement every skin tone and every season. The complete Cloud Dancer collection is available exclusively through our professional portal.
                 </p>
                 <div className="mt-8">
                   <NavLink
@@ -3745,7 +3745,7 @@ function FullCataloguePage() {
                   const pageType = String(page?.mediaType || '').toLowerCase()
                   return (
                     <div key={group.id} className="w-full max-w-[240px] sm:max-w-[260px]">
-                      {/* Portrait stage — 9:16 */}
+                      {/* Portrait stage � 9:16 */}
                       <div className="relative overflow-hidden rounded-2xl bg-[#1A1A1A]" style={{ aspectRatio: '9/16' }}>
                         <div className="flex h-full w-full items-center justify-center">
                           {pageType === 'video'
@@ -3758,13 +3758,13 @@ function FullCataloguePage() {
                           type="button"
                           onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))}
                           className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-xl text-white transition hover:bg-black/75"
-                        >‹</button>
+                        >�</button>
                         {/* Next */}
                         <button
                           type="button"
                           onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))}
                           className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-xl text-white transition hover:bg-black/75"
-                        >›</button>
+                        >�</button>
 
                         {/* Dot indicators */}
                         <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
@@ -3810,10 +3810,10 @@ function FullCataloguePage() {
           {/* PERSISTENT FOOTER */}
           <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen border-t border-[#4A4A4A]/30 bg-[#1A1A1A] px-4 py-8 text-center sm:px-8">
             <p className="text-sm font-semibold uppercase tracking-[0.12em] text-white/90">
-              All GEL.IT.UP products are 100% HEMA-Free · TPO-Free · Silver (CI 77820)-Free
+              All GEL.IT.UP products are 100% HEMA-Free � TPO-Free � Silver (CI 77820)-Free
             </p>
             <p className="mt-2 text-xs tracking-[0.06em] text-white/55">
-              Formulated in strict compliance with EU Cosmetics Regulation (EC) No 1223/2009 · CPNP Notified
+              Formulated in strict compliance with EU Cosmetics Regulation (EC) No 1223/2009 � CPNP Notified
             </p>
           </div>
 
@@ -3832,7 +3832,7 @@ function FullCataloguePage() {
               onClick={() => setLightboxUrl(null)}
               className="absolute -right-3 -top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white text-lg font-bold text-slate-800 shadow-lg hover:bg-slate-100"
               aria-label="Close"
-            >×</button>
+            >�</button>
           </div>
         </div>
       )}
@@ -3926,7 +3926,7 @@ function MissingImagesReport() {
             to="/full-catalogue"
             className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/60 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-amber-900 transition hover:border-amber-600"
           >
-            <span>←</span>
+            <span>?</span>
             <span>Back to Catalogue</span>
           </NavLink>
         </div>
@@ -3946,7 +3946,7 @@ function MissingImagesReport() {
 
       {!isLoading && !errorMessage && missingImages.length === 0 && (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-700">
-          ✓ All products have images! No missing images found.
+          ? All products have images! No missing images found.
         </div>
       )}
 
@@ -4092,7 +4092,7 @@ function MobileNav({ onOpenContactModal }) {
 
   return (
     <>
-      {/* Hamburger button — fixed in header zone on mobile */}
+      {/* Hamburger button � fixed in header zone on mobile */}
       <button
         type="button"
         aria-label={open ? 'Close menu' : 'Open navigation menu'}
@@ -4370,7 +4370,7 @@ function BaselinePageView() {
       {page.headings?.h1?.length > 0 && (
         <InfoCard title="Primary Headings">
           <ul className="space-y-1">
-            {page.headings.h1.map((heading) => <li key={heading}>• {heading}</li>)}
+            {page.headings.h1.map((heading) => <li key={heading}>� {heading}</li>)}
           </ul>
         </InfoCard>
       )}
@@ -4378,7 +4378,7 @@ function BaselinePageView() {
       {page.headings?.h2?.length > 0 && (
         <InfoCard title="Section Headings">
           <ul className="space-y-1">
-            {page.headings.h2.map((heading) => <li key={heading}>• {heading}</li>)}
+            {page.headings.h2.map((heading) => <li key={heading}>� {heading}</li>)}
           </ul>
         </InfoCard>
       )}
@@ -4476,7 +4476,7 @@ function InstagramFeedStrip() {
             rel="noreferrer"
             className="text-xs font-semibold uppercase tracking-widest text-[#D43790] transition hover:text-fuchsia-300"
           >
-            Follow Us →
+            Follow Us ?
           </a>
         </div>
 
@@ -4666,7 +4666,7 @@ function HomePage({ onOpenContactModal }) {
 
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
             <h1 className="hero-copy-shadow heading-on-dark max-w-5xl text-3xl font-black uppercase leading-[1.2] tracking-[0.19em] text-white sm:text-4xl lg:text-6xl">
-              GEL.IT.UP by GIUP®: THE ARCHITECTS OF PROFESSIONAL COLOR.
+              GEL.IT.UP by GIUP�: THE ARCHITECTS OF PROFESSIONAL COLOR.
             </h1>
             <p className="hero-copy-shadow mt-5 max-w-3xl text-sm font-semibold uppercase leading-[1.7] tracking-[0.12em] text-white/95 sm:text-base">
               A DECADE OF PROFESSIONAL MASTERY. EU REGULATED. HEMA & TPO-FREE.
@@ -4693,7 +4693,7 @@ function HomePage({ onOpenContactModal }) {
               </svg>
             </div>
             <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790]">CPNP NOTIFIED</p>
-            <p className="mt-2 text-sm leading-relaxed text-white">Every formula in The Spectrum is CPNP Notified. This is your legal guarantee that GEL.IT.UP by GIUP® is fully authorized for sale across every EU member state.</p>
+            <p className="mt-2 text-sm leading-relaxed text-white">Every formula in The Spectrum is CPNP Notified. This is your legal guarantee that GEL.IT.UP by GIUP� is fully authorized for sale across every EU member state.</p>
           </article>
 
           <article className="rounded-xl border border-white/15 bg-black/20 p-4">
@@ -4703,7 +4703,7 @@ function HomePage({ onOpenContactModal }) {
               </svg>
             </div>
             <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790]">STRICTEST SAFETY</p>
-            <p className="mt-2 text-sm leading-relaxed text-white">We operate under the world’s strictest safety protocols. Our manufacturing is ISO-certified, ensuring zero hazardous contaminants and 100% batch consistency.</p>
+            <p className="mt-2 text-sm leading-relaxed text-white">We operate under the world�s strictest safety protocols. Our manufacturing is ISO-certified, ensuring zero hazardous contaminants and 100% batch consistency.</p>
           </article>
 
           <article className="rounded-xl border border-white/15 bg-black/20 p-4">
@@ -4726,12 +4726,12 @@ function HomePage({ onOpenContactModal }) {
               </svg>
             </div>
             <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790] hover:underline">CRUELTY-FREE</a>
-            <p className="mt-2 text-sm leading-relaxed text-white">Ethics without compromise. We are 100% <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="font-semibold text-[#D43790] hover:underline">Leaping Bunny Approved</a>—the global gold standard for cruelty-free cosmetics.</p>
+            <p className="mt-2 text-sm leading-relaxed text-white">Ethics without compromise. We are 100% <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="font-semibold text-[#D43790] hover:underline">Leaping Bunny Approved</a>�the global gold standard for cruelty-free cosmetics.</p>
           </article>
         </div>
 
         <p className="mt-5 border-t border-white/20 pt-4 text-center text-sm font-extrabold uppercase tracking-[0.08em] text-white sm:text-base">
-          WHEN YOU CHOOSE GEL.IT.UP by GIUP®, YOU ARE BUYING TOTAL REGULATORY PEACE OF MIND.
+          WHEN YOU CHOOSE GEL.IT.UP by GIUP�, YOU ARE BUYING TOTAL REGULATORY PEACE OF MIND.
         </p>
       </div>
 
@@ -4827,9 +4827,9 @@ function HomePage({ onOpenContactModal }) {
 
       <InfoCard id="certifications" title="Certifications & Compliance">
         <ul className="mt-3 space-y-2 text-sm text-slate-600">
-          <li>• <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="text-fuchsia-700 hover:underline">Leaping Bunny certified cruelty-free</a> standards for in-house cosmetic and personal care products.</li>
-          <li>• EU regulation alignment and GMP (Good Manufacturing Practices) commitment.</li>
-          <li>• Professionals-only commercial policy to protect quality and industry standards.</li>
+          <li>� <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="text-fuchsia-700 hover:underline">Leaping Bunny certified cruelty-free</a> standards for in-house cosmetic and personal care products.</li>
+          <li>� EU regulation alignment and GMP (Good Manufacturing Practices) commitment.</li>
+          <li>� Professionals-only commercial policy to protect quality and industry standards.</li>
         </ul>
       </InfoCard>
 
@@ -4990,10 +4990,10 @@ function DistributorsPage() {
   return (
     <section className="space-y-5">
 
-      {/* HERO — matches DistributorPackagesPage hero */}
+      {/* HERO � matches DistributorPackagesPage hero */}
       <div className="relative overflow-hidden rounded-2xl p-5 sm:p-8" style={{ backgroundColor: '#1a1a1a', color: '#ffffff' }}>
         <p className="text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: '#c8386e' }}>Verified Distribution Network</p>
-        <h1 className="heading-on-dark mt-2 text-2xl font-extrabold sm:text-4xl">Official GEL.IT.UP by GIUP® Distributors</h1>
+        <h1 className="heading-on-dark mt-2 text-2xl font-extrabold sm:text-4xl">Official GEL.IT.UP by GIUP� Distributors</h1>
         <p className="mt-3 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] sm:text-base" style={{ color: 'rgba(255,255,255,0.75)' }}>
           Live Coverage Data. Verified Network. Legitimate B2B Database.
         </p>
@@ -5014,7 +5014,7 @@ function DistributorsPage() {
         </div>
       </div>
 
-      {/* MAP SECTION — matches boutique card tint */}
+      {/* MAP SECTION � matches boutique card tint */}
       <div className="rounded-2xl p-4 sm:p-5" style={{ border: '1px solid #f0c4d0', backgroundColor: '#fdf5f7' }}>
         <h2 className="heading-on-light text-lg font-extrabold sm:text-xl" style={{ color: '#1a1a1a' }}>Distributor Coverage Map</h2>
         <p className="mt-2 text-sm" style={{ color: '#7d4a57' }}>
@@ -5036,7 +5036,7 @@ function DistributorsPage() {
         </div>
       </div>
 
-      {/* CTA — matches professional tier dark header */}
+      {/* CTA � matches professional tier dark header */}
       <div className="rounded-2xl p-4 sm:p-5" style={{ backgroundColor: '#1a1a1a' }}>
         <h2 className="heading-on-dark text-lg font-extrabold sm:text-xl">Register Now for Distribution</h2>
         <p className="mt-2 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>Client onboarding for verified trade partners is handled through the official B2B registration workflow.</p>
@@ -5091,9 +5091,9 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
           Professional Access. Enter your archives and locked pro-pricing.
         </p>
         <ul className="mt-6 space-y-2 text-sm text-slate-300">
-          <li>• Real-time account overview</li>
-          <li>• Fast reorder and order intake tracking</li>
-          <li>• Dedicated distributor support</li>
+          <li>� Real-time account overview</li>
+          <li>� Fast reorder and order intake tracking</li>
+          <li>� Dedicated distributor support</li>
         </ul>
       </div>
 
@@ -5233,7 +5233,7 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
                 setInfoMessage('')
               }}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-              placeholder="••••••••"
+              placeholder="��������"
             />
           </label>
 
@@ -5253,7 +5253,7 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
                   setInfoMessage('')
                 }}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                placeholder="••••••••"
+                placeholder="��������"
               />
             </label>
           )}
@@ -5503,7 +5503,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
                 setInfoMessage('')
               }}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-              placeholder="••••••••"
+              placeholder="��������"
             />
           </label>
 
@@ -5523,7 +5523,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
                   setInfoMessage('')
                 }}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                placeholder="••••••••"
+                placeholder="��������"
               />
             </label>
           )}
@@ -5565,7 +5565,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
                 <NavLink to="/portal/admin-login?mode=create-password" className="font-semibold text-slate-900 hover:underline">
                   Create password
                 </NavLink>
-                {' • '}
+                {' � '}
                 <NavLink to="/portal/login" className="font-semibold text-slate-900 hover:underline">
                   Back to Portal Login
                 </NavLink>
@@ -5643,7 +5643,7 @@ function PortalRegister({ onRegister }) {
             ? 'Register as an online buyer to browse our catalogue and place orders. You will receive a confirmation email to verify your address.'
             : isDistributorFlow
               ? 'Apply to become a GEL.IT.UP distributor. Your application will be reviewed by our team and you will be notified by email once approved.'
-              : 'Submit a B2B order or client request. Our team will review and contact you within 1–2 business days.'}
+              : 'Submit a B2B order or client request. Our team will review and contact you within 1�2 business days.'}
         </p>
       </div>
 
@@ -5771,7 +5771,7 @@ function PortalRegister({ onRegister }) {
                   disabled={buyerSubmitting}
                   className="w-full rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50"
                 >
-                  {buyerSubmitting ? 'Creating account…' : 'Create Account'}
+                  {buyerSubmitting ? 'Creating account�' : 'Create Account'}
                 </button>
               </form>
             )}
@@ -6202,7 +6202,7 @@ function PortalRegister({ onRegister }) {
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-slate-900"
             />
             <span className="text-xs leading-relaxed text-slate-600">
-              I agree that the information I provide in this form will be stored and processed by GEL.IT.UP by GIUP® for the purpose of evaluating my application and managing the business relationship. This data will not be shared with third parties without consent.
+              I agree that the information I provide in this form will be stored and processed by GEL.IT.UP by GIUP� for the purpose of evaluating my application and managing the business relationship. This data will not be shared with third parties without consent.
             </span>
           </label>
 
@@ -6277,7 +6277,7 @@ function PortalForgotPassword() {
     <section className="mx-auto max-w-lg rounded-2xl border border-slate-200 bg-white p-8">
       <h2 className="text-2xl font-semibold text-slate-900">{isAdminReset ? 'Reset Admin Password' : 'Reset Password'}</h2>
       <p className="mt-2 text-sm text-slate-600">
-        Enter your business email and we’ll send a password reset link. Manual support:
+        Enter your business email and we�ll send a password reset link. Manual support:
         {' '}
         <a href={`mailto:${B2B_EMAIL}`} className="font-medium text-slate-800 underline">
           {B2B_EMAIL}
@@ -6315,7 +6315,7 @@ function PortalForgotPassword() {
   )
 }
 
-// B2B shop sidebar groupings — mirrors the public FullCataloguePage chapter structure
+// B2B shop sidebar groupings � mirrors the public FullCataloguePage chapter structure
 const B2B_SIDEBAR_GROUPS = [
   {
     label: 'Colours',
@@ -6399,7 +6399,7 @@ function ProductsModule({ moduleView = 'products' }) {
   const [packageCartItems, setPackageCartItems] = useState([])
   const [podCatalog, setPodCatalog] = useState({ pod_1: [], pod_2: [], pod_3: [], pod_4: [] })
   const [localImageMap, setLocalImageMap] = useState(() => new Map())
-  // priceMap: normalised-key → { name, price }  (loaded from b2b-price-list.json)
+  // priceMap: normalised-key ? { name, price }  (loaded from b2b-price-list.json)
   const [priceMap, setPriceMap] = useState(() => new Map())
   // priceWordIndex: [{words: Set<string>, entry}] for fuzzy word-overlap fallback
   const [priceWordIndex, setPriceWordIndex] = useState([])
@@ -6765,13 +6765,13 @@ function ProductsModule({ moduleView = 'products' }) {
   }, [catalogBySku, isActualMagnetTool, packageCartItems, selectedCodes])
   const shouldShowMagnetUpsellToast = hasCatEyeInCart && !hasMagnetInCart
   const magnetUpsellProduct = useMemo(() => {
-    // First priority: actual magnet tool (EQUIPMENT > MAGNETS) — not a Cat Eye colour named "Magnetic xxx"
+    // First priority: actual magnet tool (EQUIPMENT > MAGNETS) � not a Cat Eye colour named "Magnetic xxx"
     return products.find((product) => isActualMagnetTool(product))
       || products.find((product) => hasMagnetSignal(product?.code, product?.sku, product?.name) && !normalizeCatalogueToken(product?.category || '').includes('COLOR'))
       || null
   }, [hasMagnetSignal, isActualMagnetTool, products])
 
-  // ── Superbond upsell — any base purchased, Superbond not yet in cart ──────
+  // -- Superbond upsell � any base purchased, Superbond not yet in cart ------
   const hasNonSuperbondBase = useCallback((product, code = '') => {
     const cat = normalizeCatalogueToken(product?.category || '')
     const sub = normalizeCatalogueToken(product?.subcategory || '')
@@ -6801,7 +6801,7 @@ function ProductsModule({ moduleView = 'products' }) {
 
   const shouldShowSuperbondUpsell = hasBaseInCart && !hasSuperbondInCart
 
-  // ── Cleanser upsell — Wipe-Off Top Coat purchased, Cleanser not in cart ──
+  // -- Cleanser upsell � Wipe-Off Top Coat purchased, Cleanser not in cart --
   const hasWotcInCart = useMemo(() => {
     if (selectedCodes.some((code) => normalizeSkuCode(code).includes('WOTC'))) return true
     return packageCartItems.some((item) => normalizeSkuCode(item?.code || item?.sku || '').includes('WOTC'))
@@ -6817,7 +6817,7 @@ function ProductsModule({ moduleView = 'products' }) {
 
   const shouldShowCleanserUpsell = hasWotcInCart && !hasCleanserInCart
 
-  // ── Syntho accessories upsell — MultiMix bought, accessories not in cart ──
+  // -- Syntho accessories upsell � MultiMix bought, accessories not in cart --
   const hasMultiMixInCart = useMemo(() => {
     if (selectedCodes.some((code) => {
       const product = catalogBySku.get(normalizeSkuCode(code))
@@ -6844,7 +6844,7 @@ function ProductsModule({ moduleView = 'products' }) {
 
   const shouldShowSynthoUpsell = hasMultiMixInCart && !hasSynthoAccessoriesInCart
 
-  // ── 5-in-1 Clear Base upsell — Soak-off Gel Tips specifically (filename prefix "Soak off Gel tips")
+  // -- 5-in-1 Clear Base upsell � Soak-off Gel Tips specifically (filename prefix "Soak off Gel tips")
   const hasNailTipsInCart = useMemo(() => {
     const isSoakOffTip = (token) => token.includes('SOAK OFF')
     if (selectedCodes.some((code) => {
@@ -6865,7 +6865,7 @@ function ProductsModule({ moduleView = 'products' }) {
 
   const shouldShowTipsBaseUpsell = hasNailTipsInCart && !has5in1ClearInCart
 
-  // ── Liquid Polygel upsell — Liquid Polygel in cart, 5-in-1 Superior Base Clear not yet added ──
+  // -- Liquid Polygel upsell � Liquid Polygel in cart, 5-in-1 Superior Base Clear not yet added --
   const hasLiquidPolygelInCart = useMemo(() => {
     const isLiquidPolygel = (product, code = '') => {
       const sub = normalizeCatalogueToken(product?.subcategory || '')
@@ -7027,7 +7027,7 @@ function ProductsModule({ moduleView = 'products' }) {
         const items = Array.isArray(payload?.items) ? payload.items : []
         const map = new Map()
         const wordIndex = []
-        const stripSuffix = (s) => String(s || '').replace(/\s*[-–]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '').trim()
+        const stripSuffix = (s) => String(s || '').replace(/\s*[-�]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '').trim()
         for (const { name, sku, price } of items) {
           const cleanName = stripSuffix(name)
           const entry = { name, price }
@@ -7045,14 +7045,14 @@ function ProductsModule({ moduleView = 'products' }) {
             const stripped = numMatch[1].replace(/^0+(\d)/, '$1')
             keys.push(padded, stripped, numMatch[1])
           }
-          // Index "PMA #1 Champagne Blizzard" → "PMA 1", "PMA 01"
+          // Index "PMA #1 Champagne Blizzard" ? "PMA 1", "PMA 01"
           const seriesNumMatch = cleanName.match(/^([A-Z]+)\s*#\s*(\d+[A-Z]?)\b/i)
           if (seriesNumMatch) {
             const s = seriesNumMatch[1].toUpperCase()
             const n = seriesNumMatch[2]
             keys.push(`${s} ${n}`, `${s} ${n.padStart(2, '0')}`, `${s}${n}`, `${s}${n.padStart(2, '0')}`)
           }
-          // Index "New York Party #NYP01" or "Shimmer Top Fairy #STF 01" → "NYP 01" / "STF 01"
+          // Index "New York Party #NYP01" or "Shimmer Top Fairy #STF 01" ? "NYP 01" / "STF 01"
           const embeddedCodeMatch = cleanName.match(/#([A-Z]+)\s*(\d+[A-Z]?)\b/i)
           if (embeddedCodeMatch) {
             const s = embeddedCodeMatch[1].toUpperCase()
@@ -7128,9 +7128,9 @@ function ProductsModule({ moduleView = 'products' }) {
           { codes: ['1280x1280_nail_bufer_metallic', '1280x1280 nail bufer metallic'], target: 'GIUP Boat Shape metallic Nail File' },
           { codes: ['1280x1280_buffer_100_120', '1280x1280 buffer 100 120', '100_120_file2', '100 120 file2'], target: 'GIUP Boat Shape Nail File 100/120 Purple Sponge' },
           { codes: ['1280x1280_buffer_180_180', '1280x1280 buffer 180 180', '180_180_file2', '180 180 file2'], target: 'Nail Files 180/180 Pink Sponge' },
-          { codes: ['Βuffing_block', 'Βuffing block', 'buffing block', 'BUFFING BLOCK'], target: 'Nail Files 100/100' },
+          { codes: ['?uffing_block', '?uffing block', 'buffing block', 'BUFFING BLOCK'], target: 'Nail Files 100/100' },
           // Nail Forms
-          { codes: ['nail_forms_5', 'nail forms 5', 'NAIL FORMS 5', 'NAIL FORMS'], target: 'GEL.IT.UP by GIUP® Nail Forms' },
+          { codes: ['nail_forms_5', 'nail forms 5', 'NAIL FORMS 5', 'NAIL FORMS'], target: 'GEL.IT.UP by GIUP� Nail Forms' },
           // Mirror Powders
           { codes: ['MIRROR CLEAR', 'SP 8001', 'SP8001'], target: 'SP8001 Mirror Clear Powder' },
           { codes: ['MIRROR X1', 'TR 1', 'TR1'], target: 'TR01 Mirror X1 Powder' },
@@ -7278,7 +7278,7 @@ function ProductsModule({ moduleView = 'products' }) {
           { codes: ['SUGARY GLITTER 05'], target: 'Sugary Glitter pigment 3gr 05 -HTF' },
           { codes: ['SUGARY GLITTER 06'], target: 'Sugary Glitter pigment 3gr 06 -HTF' },
           { codes: ['SUGARY GLITTER 07'], target: 'Sugary Glitter pigment 3gr 07 -HTF' },
-          // Velvet Cat Eye — CT codes in image map, VCE codes in price list
+          // Velvet Cat Eye � CT codes in image map, VCE codes in price list
           { codes: ['GIUP CT 01', 'GIUP-CT-01'], target: 'Velvet Cat Eye #VCE01 -HTF' },
           { codes: ['GIUP CT 02', 'GIUP-CT-02'], target: 'Velvet Cat Eye #VCE02 -HTF' },
           { codes: ['GIUP CT 03', 'GIUP-CT-03'], target: 'Velvet Cat Eye #VCE03 -HTF' },
@@ -7289,9 +7289,9 @@ function ProductsModule({ moduleView = 'products' }) {
           { codes: ['GIUP CT 08', 'GIUP-CT-08'], target: 'Velvet Cat Eye #VCE08 -HTF' },
           { codes: ['GIUP CT 09', 'GIUP-CT-09'], target: 'Velvet Cat Eye #VCE09 -HTF' },
           { codes: ['GIUP CT 10', 'GIUP-CT-10'], target: 'Velvet Cat Eye #VCE10 -HTF' },
-          // Nail Art — Blossom
+          // Nail Art � Blossom
           { codes: ['GIUP-.BLOSSOM', 'GIUP.Blossom', 'GIUP .BLOSSOM', 'BLOSSOM'], target: 'Blossom Flower Power 15ml -HTF' },
-          // Nail Art — Water Colors (aquarelle palette)
+          // Nail Art � Water Colors (aquarelle palette)
           { codes: ['water colors', 'water_colors', 'WATER COLORS', 'WATER_COLORS'], target: 'Watercolors Aquarelle Pallete' },
           // Nail Art Brushes
           { codes: ['aquarelle brush', 'aquarelle_brush', 'AQUARELLE BRUSH', 'AQUARELLE_BRUSH'], target: 'Aquarela Brush Rose Gold' },
@@ -7301,17 +7301,17 @@ function ProductsModule({ moduleView = 'products' }) {
           { codes: ['polygel 2', 'POLYGEL 2'], target: 'Polygel 2 Brush and Spatula Rose Gold' },
           { codes: ['synthogel brush', 'synthogel_brush', 'SYNTHOGEL BRUSH', 'SYNTHOGEL_BRUSH'], target: 'Polygel Brush and Spatula Rose Gold' },
           // Podocare & Accessories
-          { codes: ['PODODISC', 'PODODISC Β', 'PODODISC_Β'], target: 'Pododisc + 5 Replacement Stickers M-20 mm New' },
+          { codes: ['PODODISC', 'PODODISC ?', 'PODODISC_?'], target: 'Pododisc + 5 Replacement Stickers M-20 mm New' },
           { codes: ['PROBES'], target: 'Probes Stainless Steel Rounded 1222 New' },
-          { codes: ['TWEEZER', 'TWEEZER B', 'TWEEZER_B'], target: 'Splinter tweezer – 13 cm 1386 New' },
-          // Tools — Head Cutters & Nippers
+          { codes: ['TWEEZER', 'TWEEZER B', 'TWEEZER_B'], target: 'Splinter tweezer � 13 cm 1386 New' },
+          // Tools � Head Cutters & Nippers
           { codes: ['01. HEAD CUTTER, PLAIN HANDLE, HALF BLADE', '01. HEAD CUTTER, PLAIN HANDLE, HALF BLADE B', '01. HEAD CUTTER, PLAIN HANDLE, HALF BLADE_B'], target: 'Professional Head Cutter Nipper Half Blade L 11.5cm 1006 New' },
           { codes: ['02. CORNER NIPPER, EXTRA SLIM (Flame Shaped)'], target: 'Corner Nippers Flame Shaped L 10cm 1115 New' },
           { codes: ['03. CORNER NIPPER, DESIGN HANDLE'], target: 'Corner Nippers Straight Cutter Design Handle  L 11cm 1119 New' },
-          // Nail Preparations — Cuticle Removers
+          // Nail Preparations � Cuticle Removers
           { codes: ['cuticle remover 5ml', 'CUTICLE REMOVER 5ML'], target: 'Almond Cuticle Scrub Remover 5ml -HTF' },
           { codes: ['white satin cuticle scrub remover', 'WHITE SATIN CUTICLE SCRUB REMOVER'], target: 'Almond Cuticle Scrub Remover 100ml -HTF' },
-          // FFF (01 FFF — second white, named "White Years Ahead")
+          // FFF (01 FFF � second white, named "White Years Ahead")
           { codes: ['GIUP FFF', 'GIUP-FFF', 'GIUP 01 FFF', 'GIUP-01-FFF'], target: 'FFF White Years Ahead -HTF' },
           // Stickers
           { codes: ['5D NAIL STICKERS BLACK'], target: 'SD-1934 Nail Decals French - Black' },
@@ -7442,7 +7442,7 @@ function ProductsModule({ moduleView = 'products' }) {
               : payload.items || payload.products || payload.data || []
           })()
           : await (async () => {
-            // Mirror the public catalogue exactly — load from product-image-map.json
+            // Mirror the public catalogue exactly � load from product-image-map.json
             // so every product has the same category, name and image as shown on the site.
             const response = await fetch('/gelitup-content/product-image-map.json')
             if (!response.ok) throw new Error('Could not load product image map')
@@ -7451,7 +7451,7 @@ function ProductsModule({ moduleView = 'products' }) {
             return sections.flatMap((section) =>
               section.subcategories.flatMap((sub) =>
                 sub.items.map((item) => ({
-                  // Preserve the exact subcategory as category — B2B mirrors the public catalogue.
+                  // Preserve the exact subcategory as category � B2B mirrors the public catalogue.
                   // For COLORS use the subcategory name (SOLID GEL POLISH, CAT EYE, GLITTERS, etc.)
                   // For all other sections use the section name (BUILDER GEL SYSTEMS, BRUSHES, etc.)
                   category: (() => {
@@ -7468,7 +7468,7 @@ function ProductsModule({ moduleView = 'products' }) {
                     return section.category
                   })(),
                   parentSection: section.category,  // track which top-level section this belongs to
-                  _skipRemap: true,                 // categories are already correct — skip B2B_CAT_REMAP
+                  _skipRemap: true,                 // categories are already correct � skip B2B_CAT_REMAP
                   colorFamily: item.colorFamily || null, // actual folder name e.g. 'Red', 'Blue', 'Coral Orange'
                   code: item.name,
                   sku: item.name,
@@ -7489,7 +7489,7 @@ function ProductsModule({ moduleView = 'products' }) {
             // Items loaded from product-image-map.json are already correctly categorised (_skipRemap=true)
             // and bypass this table entirely.
             const B2B_CAT_REMAP = {
-              // External feed aliases → correct subcategory names (matching image-map structure)
+              // External feed aliases ? correct subcategory names (matching image-map structure)
               'SOLID COLOURS': 'SOLID GEL POLISH', 'GEL POLISH': 'SOLID GEL POLISH',
               'DREAMY CAT EYE': 'CAT EYE', 'GLASS CAT EYE': 'CAT EYE',
               'ROSE QUARTZ CAT EYE': 'CAT EYE',
@@ -7546,12 +7546,12 @@ function ProductsModule({ moduleView = 'products' }) {
             const rawCatToken = normalizeCatalogueToken(rawCategoryName)
             // Strip file extensions from category tokens that leaked in as filenames
             const cleanCatToken = rawCatToken.replace(/\s+(WEBP|JPG|JPEG|PNG|GIF|SVG)$/, '').trim()
-            // Items from product-image-map.json already have correct subcategory names — skip remap
+            // Items from product-image-map.json already have correct subcategory names � skip remap
             const categoryName = item._skipRemap
               ? rawCategoryName
               : (B2B_CAT_REMAP[cleanCatToken] || B2B_CAT_REMAP[rawCategoryName?.toUpperCase()?.trim()] || rawCategoryName)
             const preview = item.preview || item.hex || item.hex_color || item.color || `hsl(${(index * 17) % 360} 82% 56%)`
-            // Standalone prefix map: DCE1 → "Dreamy Cat Eye 1" etc.
+            // Standalone prefix map: DCE1 ? "Dreamy Cat Eye 1" etc.
             const COLOUR_PREFIX_MAP = {
               DCE: 'Dreamy Cat Eye',
               GCE: 'Glass Cat Eye',
@@ -7562,7 +7562,7 @@ function ProductsModule({ moduleView = 'products' }) {
               FAN: 'Fantasy',
               JNF: 'Jelly Neon',
             }
-            // GIUP series map: GIUP BTO01 → "By The Ocean 01" etc.
+            // GIUP series map: GIUP BTO01 ? "By The Ocean 01" etc.
             const GIUP_SERIES_MAP = {
               // Main colour series
               R: 'Rone',
@@ -7611,7 +7611,7 @@ function ProductsModule({ moduleView = 'products' }) {
             }
             const rawCodeName = item.name || item.title || code
             const rawName = (() => {
-              // "GIUP BTO01" → "By The Ocean 01"
+              // "GIUP BTO01" ? "By The Ocean 01"
               const giupSeriesMatch = rawCodeName.match(/^GIUP[- ]([A-Z]+)(\d+[A-Z]*)?$/i)
               if (giupSeriesMatch) {
                 const series = giupSeriesMatch[1].toUpperCase()
@@ -7619,13 +7619,13 @@ function ProductsModule({ moduleView = 'products' }) {
                 const expanded = GIUP_SERIES_MAP[series]
                 if (expanded) return expanded + (num ? ' ' + num : '')
               }
-              // "GIUP 3TFS", "GIUP 1MOF" → "Glass Effect 3TFS" (digit-led suffix = Glass Effect)
+              // "GIUP 3TFS", "GIUP 1MOF" ? "Glass Effect 3TFS" (digit-led suffix = Glass Effect)
               const giupGlassMatch = rawCodeName.match(/^GIUP[- ](\d+[A-Z].*)$/i)
               if (giupGlassMatch) return `Glass Effect ${giupGlassMatch[1]}`
-              // "GIUP 01 FFF" → "GIUP FFF" (number then named suffix)
+              // "GIUP 01 FFF" ? "GIUP FFF" (number then named suffix)
               const giupNumSuffixMatch = rawCodeName.match(/^(GIUP)[- ]\d+[A-Z]?\s+(.+)$/i)
               if (giupNumSuffixMatch) return `GIUP ${giupNumSuffixMatch[2]}`
-              // Standalone: "DCE1" → "Dreamy Cat Eye 1"
+              // Standalone: "DCE1" ? "Dreamy Cat Eye 1"
               const prefixMatch = rawCodeName.match(/^([A-Z]+)(\d+[A-Z]?)$/i)
               if (prefixMatch) {
                 const expanded = COLOUR_PREFIX_MAP[prefixMatch[1].toUpperCase()]
@@ -7654,7 +7654,7 @@ function ProductsModule({ moduleView = 'products' }) {
               || (giupSeriesCodeMatch ? (
                   priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2]}`)
                   || priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2].padStart(2, '0')}`)
-                  // strip leading zeros: R010 → R10 (matches GEL.IT.UP 1 R10 11ml in price list)
+                  // strip leading zeros: R010 ? R10 (matches GEL.IT.UP 1 R10 11ml in price list)
                   || priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2].replace(/^0+(\d)/, '$1')}`)
                 ) : null)
               || (giupLooseSeriesMatch ? (
@@ -8218,7 +8218,7 @@ function ProductsModule({ moduleView = 'products' }) {
         <td>${escapeHtml(line.description)}</td>
         <td>${line.qty}</td>
         <td>${line.unitWeightKg}</td>
-        <td>${line.unitLengthCm}×${line.unitWidthCm}×${line.unitHeightCm}</td>
+        <td>${line.unitLengthCm}�${line.unitWidthCm}�${line.unitHeightCm}</td>
         <td>${line.lineWeightKg}</td>
         <td>${line.lineVolumeCm3}</td>
       </tr>`)
@@ -8238,11 +8238,11 @@ function ProductsModule({ moduleView = 'products' }) {
           </style>
         </head>
         <body>
-          <h1>Packing List — Order #${lastPackingList.orderId}</h1>
+          <h1>Packing List � Order #${lastPackingList.orderId}</h1>
           <p>Total Weight: ${lastPackingList.totalWeightKg} kg</p>
-          <p>Total Volume: ${lastPackingList.totalVolumeCm3} cm³</p>
+          <p>Total Volume: ${lastPackingList.totalVolumeCm3} cm�</p>
           <p>Suggested Parcels: ${lastPackingList.suggestedParcels}</p>
-          <p>Suggested Carton: ${lastPackingList.packaging.suggestedBoxLengthCm}×${lastPackingList.packaging.suggestedBoxWidthCm}×${lastPackingList.packaging.suggestedBoxHeightCm} cm</p>
+          <p>Suggested Carton: ${lastPackingList.packaging.suggestedBoxLengthCm}�${lastPackingList.packaging.suggestedBoxWidthCm}�${lastPackingList.packaging.suggestedBoxHeightCm} cm</p>
           <p>Consignee Name: ${escapeHtml(shipping.name || '-')}</p>
           <p>Consignee Phone: ${escapeHtml(shipping.phone || '-')}</p>
           <p>Shipping Address: ${escapeHtml(shipping.address || '-')}</p>
@@ -8255,7 +8255,7 @@ function ProductsModule({ moduleView = 'products' }) {
                 <th>Unit Weight (kg)</th>
                 <th>Dimensions (cm)</th>
                 <th>Line Weight (kg)</th>
-                <th>Line Volume (cm³)</th>
+                <th>Line Volume (cm�)</th>
               </tr>
             </thead>
             <tbody>${rowsHtml}</tbody>
@@ -8558,7 +8558,7 @@ function ProductsModule({ moduleView = 'products' }) {
           eventType: 'b2b_order_customer_copy',
           to: customerEmailTarget,
           subject: `Your GEL.IT.UP B2B Order Copy [#${insertedOrder?.id ?? '-'}]`,
-          html: `<p>Hello,</p><p>Thank you for your GEL.IT.UP by GIUP® order submission.</p><p><strong>Order ID:</strong> ${insertedOrder?.id ?? '-'}</p><p><strong>Total Units:</strong> ${totalUnits}</p>${invoiceBlockHtml}${shippingBlockHtml}<p><strong>Items:</strong> ${checkoutItems.join(', ')}</p><p>You can keep this email as your order record. You can also download your pro-forma PDF directly from the portal.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
+          html: `<p>Hello,</p><p>Thank you for your GEL.IT.UP by GIUP� order submission.</p><p><strong>Order ID:</strong> ${insertedOrder?.id ?? '-'}</p><p><strong>Total Units:</strong> ${totalUnits}</p>${invoiceBlockHtml}${shippingBlockHtml}<p><strong>Items:</strong> ${checkoutItems.join(', ')}</p><p>You can keep this email as your order record. You can also download your pro-forma PDF directly from the portal.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
           orderId: insertedOrder?.id,
           customerEmail: customerEmailTarget,
           totalUnits,
@@ -8610,7 +8610,7 @@ function ProductsModule({ moduleView = 'products' }) {
     const emailSentOk = customerNotificationResult.ok && inboxNotificationResult.ok
     const emailNote = emailSentOk
       ? ` Confirmation emails sent.`
-      : ` ⚠️ Email notifications could not be sent — see details below.`
+      : ` ?? Email notifications could not be sent � see details below.`
     setCheckoutMessage(`Order received (#${insertedOrder?.id ?? '-'} | ${totalUnits} units). Order stored successfully.${emailNote}${zohoStatusNote}`)
     setSelectedCodes([])
     setItemQtys({})
@@ -8756,7 +8756,7 @@ function ProductsModule({ moduleView = 'products' }) {
     }
   }, [b2bUserRole, recommendedProduct, totalUnits])
 
-  // ── My Information view ────────────────────────────────────────────────────
+  // -- My Information view ----------------------------------------------------
   if (moduleView === 'profile') {
     return (
       <div className="space-y-4">
@@ -8765,10 +8765,10 @@ function ProductsModule({ moduleView = 'products' }) {
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-600">Step 3 of 3</p>
               <h3 className="mt-0.5 bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-lg font-semibold text-transparent">My Information</h3>
-              <p className="mt-1 text-xs text-slate-500">Saved for future orders — fill in once, reuse every time.</p>
+              <p className="mt-1 text-xs text-slate-500">Saved for future orders � fill in once, reuse every time.</p>
             </div>
             <button onClick={() => navigate('/portal/dashboard/products')} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
-              ← Back to My Order
+              ? Back to My Order
             </button>
           </div>
           <p className="text-[11px] text-slate-500">Required fields are marked with <span className="font-semibold text-rose-600">*</span></p>
@@ -8866,7 +8866,7 @@ function ProductsModule({ moduleView = 'products' }) {
               {isSubmittingOrder ? 'Submitting...' : `Place Order (${totalUnits} units)`}
             </button>
             <button onClick={() => navigate('/portal/dashboard/products')} className={actionButtonSecondaryClass}>
-              ← Back to Review
+              ? Back to Review
             </button>
           </div>
           {checkoutMessage && <p className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">{checkoutMessage}</p>}
@@ -8883,14 +8883,14 @@ function ProductsModule({ moduleView = 'products' }) {
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 p-4" onClick={() => setLightboxUrl(null)}>
           <div className="relative" onClick={(e) => e.stopPropagation()}>
             <img src={lightboxUrl} alt="" className="max-h-[85vh] max-w-[85vw] rounded-xl object-contain shadow-2xl" />
-            <button onClick={() => setLightboxUrl(null)} className="absolute -right-3 -top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white text-lg font-bold text-slate-800 shadow-lg">×</button>
+            <button onClick={() => setLightboxUrl(null)} className="absolute -right-3 -top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white text-lg font-bold text-slate-800 shadow-lg">�</button>
           </div>
         </div>
       )}
       {showOrderConfetti && (
         <div className="fixed inset-0 z-50 flex items-start justify-center bg-white/50 pt-20">
           <div className="rounded-xl border border-slate-200 bg-white px-6 py-4 text-center shadow">
-            <p className="text-2xl">🎉✨💎✨🎉</p>
+            <p className="text-2xl">????????</p>
             <p className="mt-1 text-sm font-semibold text-slate-900">Platinum order confirmed</p>
           </div>
         </div>
@@ -9000,7 +9000,7 @@ function ProductsModule({ moduleView = 'products' }) {
                 As a {activeTier.name}, you qualify for {liveUpsellRecommendation.name} at a {liveUpsellRecommendation.discountPercent}% discount with this order.
               </p>
               <p className="mt-1 text-xs font-semibold text-slate-900">
-                Tier-Only: €{Number(liveUpsellRecommendation.tierOnlyPrice || 0).toFixed(2)}
+                Tier-Only: �{Number(liveUpsellRecommendation.tierOnlyPrice || 0).toFixed(2)}
               </p>
             </div>
           </div>
@@ -9015,7 +9015,7 @@ function ProductsModule({ moduleView = 'products' }) {
         </div>
       )}
 
-      {/* ── ORDER FLOW STEPS ── */}
+      {/* -- ORDER FLOW STEPS -- */}
       <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 sm:px-6">
         <div className="flex flex-wrap items-center gap-2">
           <button onClick={() => navigate('/portal/dashboard/catalog')} className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${moduleView === 'catalog' ? 'bg-fuchsia-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
@@ -9032,7 +9032,7 @@ function ProductsModule({ moduleView = 'products' }) {
             <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ${moduleView === 'profile' ? 'bg-white/30 text-white' : 'bg-slate-400 text-white'}`}>3</span>
             My Details
           </button>
-          {orderTotal > 0 && <span className="ml-auto text-xs font-bold text-fuchsia-700">€{orderTotal.toFixed(2)}</span>}
+          {orderTotal > 0 && <span className="ml-auto text-xs font-bold text-fuchsia-700">�{orderTotal.toFixed(2)}</span>}
         </div>
       </div>
 
@@ -9048,13 +9048,13 @@ function ProductsModule({ moduleView = 'products' }) {
         </div>
 
 
-        {/* ── LIVE COLOUR CHART (order review) ── */}
+        {/* -- LIVE COLOUR CHART (order review) -- */}
         <div className="mt-4 min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-3">
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs font-semibold text-slate-900">
               Colour Chart
               {(selectedCodes.length + packageCartItems.length) > 0
-                ? ` — ${selectedCodes.length + packageCartItems.length} lines selected`
+                ? ` � ${selectedCodes.length + packageCartItems.length} lines selected`
                 : ''}
             </p>
             {(selectedCodes.length > 0 || packageCartItems.length > 0) && (
@@ -9067,7 +9067,7 @@ function ProductsModule({ moduleView = 'products' }) {
             )}
           </div>
           {(selectedCodes.length === 0 && packageCartItems.length === 0)
-            ? <p className="mt-2 text-[11px] italic text-slate-400">No products selected yet — go to Shop to start adding items.</p>
+            ? <p className="mt-2 text-[11px] italic text-slate-400">No products selected yet � go to Shop to start adding items.</p>
             : (
               <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
                 {selectedProducts.map((product) => (
@@ -9086,7 +9086,7 @@ function ProductsModule({ moduleView = 'products' }) {
                         onClick={() => toggleSelection(product.code)}
                         className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-white/90 text-[11px] font-bold text-slate-700 shadow opacity-0 transition group-hover:opacity-100"
                         aria-label={`Remove ${product.code}`}
-                      >×</button>
+                      >�</button>
                     </div>
                     <div className="p-1.5">
                       <p className="break-words text-[10px] font-semibold leading-tight text-slate-900">{product.code}</p>
@@ -9110,7 +9110,7 @@ function ProductsModule({ moduleView = 'products' }) {
                         {resolvedImg
                           ? <img src={resolvedImg} alt={item.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
                           : null}
-                        <span className="absolute left-0.5 top-0.5 rounded-full bg-fuchsia-600 px-1 py-0.5 text-[9px] font-bold leading-none text-white">{item.qty}×</span>
+                        <span className="absolute left-0.5 top-0.5 rounded-full bg-fuchsia-600 px-1 py-0.5 text-[9px] font-bold leading-none text-white">{item.qty}�</span>
                       </div>
                       <div className="p-1.5">
                         <p className="break-words text-[10px] font-semibold leading-tight text-slate-900">{item.code}</p>
@@ -9123,7 +9123,7 @@ function ProductsModule({ moduleView = 'products' }) {
             )}
         </div>
 
-        {/* ── ORDER SUMMARY TABLE ── */}
+        {/* -- ORDER SUMMARY TABLE -- */}
         {selectedProducts.length > 0 && (
           <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
             <div className="flex items-center justify-between">
@@ -9148,14 +9148,14 @@ function ProductsModule({ moduleView = 'products' }) {
                       <p className="text-[10px] text-slate-400">{product.code}</p>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(prev => ({...prev, [product.code]: q})) }} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">−</button>
+                      <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(prev => ({...prev, [product.code]: q})) }} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">-</button>
                       <span className="w-6 text-center text-xs font-semibold text-slate-900">{qty}</span>
                       <button onClick={() => setItemQtys(prev => ({...prev, [product.code]: qty + 1}))} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">+</button>
                     </div>
                     <div className="w-16 text-right">
-                      {lineTotal != null ? <p className="text-xs font-semibold text-fuchsia-700">€{lineTotal.toFixed(2)}</p> : <p className="text-xs text-slate-400">—</p>}
+                      {lineTotal != null ? <p className="text-xs font-semibold text-fuchsia-700">�{lineTotal.toFixed(2)}</p> : <p className="text-xs text-slate-400">�</p>}
                     </div>
-                    <button onClick={() => toggleSelection(product.code)} className="flex h-6 w-6 items-center justify-center rounded-full text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Remove">×</button>
+                    <button onClick={() => toggleSelection(product.code)} className="flex h-6 w-6 items-center justify-center rounded-full text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Remove">�</button>
                   </div>
                 )
               })}
@@ -9164,14 +9164,14 @@ function ProductsModule({ moduleView = 'products' }) {
               <div className="mt-2 border-t border-slate-200 pt-2">
                 <div className="flex justify-between text-sm">
                   <span className="font-semibold text-slate-700">Estimated Total</span>
-                  <span className="font-bold text-fuchsia-700">€{orderTotal.toFixed(2)}</span>
+                  <span className="font-bold text-fuchsia-700">�{orderTotal.toFixed(2)}</span>
                 </div>
                 <p className="mt-0.5 text-[10px] text-slate-400">Excl. shipping. Final invoice issued by GEL.IT.UP.</p>
               </div>
             )}
           </div>
         )}
-        {/* ── YOUR DETAILS STATUS ── */}
+        {/* -- YOUR DETAILS STATUS -- */}
         <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
@@ -9179,14 +9179,14 @@ function ProductsModule({ moduleView = 'products' }) {
               <p className="mt-0.5 text-[11px] text-slate-500">Required for order submission.</p>
             </div>
             {clientValidation.hasMissing
-              ? <button onClick={() => navigate('/portal/dashboard/profile')} className="rounded-lg border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100">Complete details →</button>
-              : <button onClick={() => navigate('/portal/dashboard/profile')} className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-200">✓ Ready — edit</button>
+              ? <button onClick={() => navigate('/portal/dashboard/profile')} className="rounded-lg border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100">Complete details ?</button>
+              : <button onClick={() => navigate('/portal/dashboard/profile')} className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-200">? Ready � edit</button>
             }
           </div>
-          {clientValidation.hasMissing && <p className="mt-2 text-[11px] text-rose-600">Billing &amp; shipping details incomplete — needed to process your order.</p>}
+          {clientValidation.hasMissing && <p className="mt-2 text-[11px] text-rose-600">Billing &amp; shipping details incomplete � needed to process your order.</p>}
           {!clientValidation.hasMissing && (
             <div className="mt-2 space-y-0.5 text-[11px] text-slate-500">
-              <p>{clientProfile.customerName}{clientProfile.contactEmail ? ` · ${clientProfile.contactEmail}` : ''}</p>
+              <p>{clientProfile.customerName}{clientProfile.contactEmail ? ` � ${clientProfile.contactEmail}` : ''}</p>
               <p>{invoiceAddressComposed}</p>
             </div>
           )}
@@ -9365,7 +9365,7 @@ function ProductsModule({ moduleView = 'products' }) {
             disabled={isSubmittingOrder}
             className={`${actionButtonPrimaryClass} disabled:cursor-not-allowed disabled:border-fuchsia-300 disabled:bg-fuchsia-300`}
           >
-            {isSubmittingOrder ? 'Submitting...' : clientValidation.hasMissing ? 'Complete Details →' : `Place Order (${totalUnits} units)`}
+            {isSubmittingOrder ? 'Submitting...' : clientValidation.hasMissing ? 'Complete Details ?' : `Place Order (${totalUnits} units)`}
           </button>
           <a
             href={checkoutHref}
@@ -9400,15 +9400,15 @@ function ProductsModule({ moduleView = 'products' }) {
 
         {lastPackingList && (
           <div className="mt-3 rounded-lg border border-sky-200 bg-sky-50 p-3 text-xs text-slate-800">
-            <p className="font-semibold text-slate-900">Packing List (Draft) — Order #{lastPackingList.orderId}</p>
+            <p className="font-semibold text-slate-900">Packing List (Draft) � Order #{lastPackingList.orderId}</p>
             <p className="mt-1">
-              Total weight: {lastPackingList.totalWeightKg} kg • Total volume: {lastPackingList.totalVolumeCm3} cm³ • Suggested parcels: {lastPackingList.suggestedParcels}
+              Total weight: {lastPackingList.totalWeightKg} kg � Total volume: {lastPackingList.totalVolumeCm3} cm� � Suggested parcels: {lastPackingList.suggestedParcels}
             </p>
             <p className="mt-1 text-slate-600">
-              Suggested carton: {lastPackingList.packaging.suggestedBoxLengthCm}×{lastPackingList.packaging.suggestedBoxWidthCm}×{lastPackingList.packaging.suggestedBoxHeightCm} cm (max {lastPackingList.packaging.maxBoxWeightKg} kg)
+              Suggested carton: {lastPackingList.packaging.suggestedBoxLengthCm}�{lastPackingList.packaging.suggestedBoxWidthCm}�{lastPackingList.packaging.suggestedBoxHeightCm} cm (max {lastPackingList.packaging.maxBoxWeightKg} kg)
             </p>
             <p className="mt-1 text-slate-600">
-              Consignee: {lastPackingList.shipping?.name || '-'} • Phone: {lastPackingList.shipping?.phone || '-'}
+              Consignee: {lastPackingList.shipping?.name || '-'} � Phone: {lastPackingList.shipping?.phone || '-'}
             </p>
             <p className="mt-1 text-slate-600">
               Ship to: {lastPackingList.shipping?.address || '-'}
@@ -9526,7 +9526,7 @@ function ProductsModule({ moduleView = 'products' }) {
                           <span>
                             <span className="font-semibold">{item.code}</span>
                             {' '}
-                            —
+                            �
                             {' '}
                             {item.name}
                           </span>
@@ -9575,7 +9575,7 @@ function ProductsModule({ moduleView = 'products' }) {
         {checkoutMessage && lastProformaInvoice && (
           <div className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 p-2">
             <p className="text-xs text-emerald-900">
-              Pro-Forma ready • Base accounting total ({EUR_CURRENCY_CODE}): {currencyFormatter(lastProformaInvoice.grandTotalEur)}
+              Pro-Forma ready � Base accounting total ({EUR_CURRENCY_CODE}): {currencyFormatter(lastProformaInvoice.grandTotalEur)}
             </p>
             <button
               onClick={exportProformaPdf}
@@ -9631,7 +9631,7 @@ function ProductsModule({ moduleView = 'products' }) {
                     <span className="truncate pr-1 leading-tight">{cat}</span>
                     <span className="flex shrink-0 items-center gap-1">
                       <span className="text-[9px] text-slate-400">{catTotal}</span>
-                      {selInCat > 0 && <span className="rounded-full px-1 text-[8px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>✓{selInCat}</span>}
+                      {selInCat > 0 && <span className="rounded-full px-1 text-[8px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>?{selInCat}</span>}
                     </span>
                   </button>
                 )
@@ -9647,7 +9647,7 @@ function ProductsModule({ moduleView = 'products' }) {
           <div className="flex items-center justify-between gap-2 border-b px-3 py-2" style={{ borderColor: '#f0c4d0' }}>
           <span className="truncate text-xs font-semibold text-slate-700">
             {(selectedCodes.length + packageCartItems.length) > 0
-              ? `${selectedCodes.length + packageCartItems.length} items · ${totalUnits} units${orderTotal > 0 ? ` · €${orderTotal.toFixed(2)}` : ''}`
+              ? `${selectedCodes.length + packageCartItems.length} items � ${totalUnits} units${orderTotal > 0 ? ` � �${orderTotal.toFixed(2)}` : ''}`
               : 'Tap a product to add it'}
           </span>
           <div className="flex shrink-0 items-center gap-2">
@@ -9655,7 +9655,7 @@ function ProductsModule({ moduleView = 'products' }) {
               <button onClick={() => { setSelectedCodes([]); setItemQtys({}); setPackageCartItems([]); setGeneratedPackageTier('') }} className="text-xs text-slate-400 hover:text-rose-500">Clear</button>
             )}
             <button onClick={() => navigate('/portal/dashboard/products')} className="btn-cta-rose rounded px-3 py-1 text-xs font-semibold">
-              Review →
+              Review ?
             </button>
           </div>
         </div>
@@ -9665,7 +9665,7 @@ function ProductsModule({ moduleView = 'products' }) {
             <input
               value={query}
               onChange={e => setQuery(e.target.value)}
-              placeholder="Search products…"
+              placeholder="Search products�"
               className="w-full rounded border px-2 py-1.5 text-xs focus:outline-none"
               style={{ borderColor: '#e2e8f0' }}
             />
@@ -9681,7 +9681,7 @@ function ProductsModule({ moduleView = 'products' }) {
             </div>
           </div>
 
-          {/* mobile category picker — grouped <select>, hidden on sm+ */}
+          {/* mobile category picker � grouped <select>, hidden on sm+ */}
           <div className="sm:hidden border-b px-3 py-2" style={{ borderColor: '#f0e8f0', backgroundColor: '#fdfbfc' }}>
             <select
               value={activeCat}
@@ -9709,7 +9709,7 @@ function ProductsModule({ moduleView = 'products' }) {
           {/* body: sidebar (desktop) + product panel */}
           <div className="flex" style={{ minHeight: '320px' }}>
 
-            {/* LEFT SIDEBAR — desktop only */}
+            {/* LEFT SIDEBAR � desktop only */}
             <div
               className="hidden sm:flex sm:flex-col w-44 shrink-0 border-r overflow-y-auto"
               style={{ borderColor: '#f0e8f0', maxHeight: 'min(72vh, 860px)' }}
@@ -9733,7 +9733,7 @@ function ProductsModule({ moduleView = 'products' }) {
                     <span className="text-xs font-bold uppercase tracking-wide text-slate-800">{activeCat}</span>
                     <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{activeCatProducts.length}</span>
                     {selectedInActiveCat > 0 && (
-                      <span className="rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>✓{selectedInActiveCat} selected</span>
+                      <span className="rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>?{selectedInActiveCat} selected</span>
                     )}
                   </div>
 
@@ -9768,12 +9768,12 @@ function ProductsModule({ moduleView = 'products' }) {
                           {/* info */}
                           <div className="px-1.5 pt-1 pb-0.5">
                             <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{product.name}</p>
-                            {product.price != null && <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{Number(product.price).toFixed(2)}</p>}
+                            {product.price != null && <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>�{Number(product.price).toFixed(2)}</p>}
                           </div>
                           {/* action */}
                           {selected ? (
                             <div className="mt-auto flex items-center justify-center gap-1 border-t px-1 py-1" style={{ borderColor: '#fde8f0' }}>
-                              <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(p => ({...p, [product.code]: q})) }} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>−</button>
+                              <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(p => ({...p, [product.code]: q})) }} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>-</button>
                               <span className="w-4 text-center text-[10px] font-bold">{qty}</span>
                               <button onClick={() => setItemQtys(p => ({...p, [product.code]: qty + 1}))} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>+</button>
                             </div>
@@ -9791,7 +9791,7 @@ function ProductsModule({ moduleView = 'products' }) {
                   {!showAll && familyFilteredProducts.length > CAT_PAGE_SIZE && (
                     <div className="border-t px-3 py-2 text-center" style={{ borderColor: '#f0e8f0' }}>
                       <button onClick={() => setExpandedShowAll(prev => { const n = new Set(prev); n.add(activeCat); return n })} className="text-xs font-semibold" style={{ color: '#c8386e' }}>
-                        Show all {familyFilteredProducts.length} items ↓
+                        Show all {familyFilteredProducts.length} items ?
                       </button>
                     </div>
                   )}
@@ -9971,7 +9971,7 @@ function OrdersModule() {
       {orders.some((o) => o.payment_status === 'invoice_ready') && (
         <div className="rounded-2xl border-2 border-fuchsia-400/50 bg-fuchsia-50 p-4 sm:p-6">
           <h3 className="bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-lg font-semibold text-transparent">
-            Action Required — Invoice Ready
+            Action Required � Invoice Ready
           </h3>
           <p className="mt-1 text-sm text-slate-600">
             The following orders have been confirmed. Complete payment to proceed with fulfilment.
@@ -10131,7 +10131,7 @@ function OrdersModule() {
                               <li><span className="font-semibold text-white/90">Building:</span> Place a larger bead in the center and guide to edges, allowing self-leveling apex formation.</li>
                               <li><span className="font-semibold text-white/90">Curing:</span> Cure for 60-90 seconds in LED or 120 seconds in UV.</li>
                               <li><span className="font-semibold text-white/90">Refinement:</span> Wipe inhibition layer with cleanser and file to shape.</li>
-                              <li><span className="font-semibold text-white/90">Finishing:</span> Apply a final thin layer of the same gel for gloss, or proceed with GEL.IT.UP by GIUP® color.</li>
+                              <li><span className="font-semibold text-white/90">Finishing:</span> Apply a final thin layer of the same gel for gloss, or proceed with GEL.IT.UP by GIUP� color.</li>
                             </ol>
                           </>
                         )}
@@ -10371,8 +10371,8 @@ function PendingApplicationsModule() {
         ].filter(Boolean).join(', ')
 
     const shippingContact = shippingSameAsInvoice
-      ? `${application.contact_name || '-'} • ${application.phone || '-'}`
-      : `${application.shipping_name || '-'} • ${application.shipping_phone || '-'}`
+      ? `${application.contact_name || '-'} � ${application.phone || '-'}`
+      : `${application.shipping_name || '-'} � ${application.shipping_phone || '-'}`
 
     const lines = [
       `Application #${application.id}`,
@@ -10383,7 +10383,7 @@ function PendingApplicationsModule() {
       `Customer Type: ${application.customer_type === 'client' ? 'Client' : 'Company'}`,
       `Business Type: ${application.business_type || '-'}`,
       `VAT: ${application.vat_number || '-'}`,
-      `Contact: ${application.contact_name || '-'} • ${application.contact_email || '-'} • ${application.phone || '-'}`,
+      `Contact: ${application.contact_name || '-'} � ${application.contact_email || '-'} � ${application.phone || '-'}`,
       `Shipping Type: ${application.shipping_type || '-'}`,
       `Invoice Address: ${invoiceAddress || '-'}`,
       `Shipping Address: ${shippingAddress || '-'}`,
@@ -10419,7 +10419,7 @@ function PendingApplicationsModule() {
       `Customer Type: ${application.customer_type === 'client' ? 'Client' : 'Company'}`,
       `VAT: ${application.vat_number || '-'}`,
       `Invoice Address: ${invoiceAddress || '-'}`,
-      `Invoice Contact: ${application.contact_name || '-'} • ${application.contact_email || '-'} • ${application.phone || '-'}`,
+      `Invoice Contact: ${application.contact_name || '-'} � ${application.contact_email || '-'} � ${application.phone || '-'}`,
     ]
 
     await navigator.clipboard.writeText(lines.join('\n'))
@@ -10450,8 +10450,8 @@ function PendingApplicationsModule() {
         ].filter(Boolean).join(', ')
 
     const shippingContact = shippingSameAsInvoice
-      ? `${application.contact_name || '-'} • ${application.phone || '-'}`
-      : `${application.shipping_name || '-'} • ${application.shipping_phone || '-'}`
+      ? `${application.contact_name || '-'} � ${application.phone || '-'}`
+      : `${application.shipping_name || '-'} � ${application.shipping_phone || '-'}`
 
     const lines = [
       `Application #${application.id}`,
@@ -10504,7 +10504,7 @@ function PendingApplicationsModule() {
     const createPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(application.contact_email || '')}`
 
     const subject = status === 'approved'
-      ? `🎉 You're Approved — Welcome to GEL.IT.UP, ${application.contact_name}!`
+      ? `?? You're Approved � Welcome to GEL.IT.UP, ${application.contact_name}!`
       : `GEL.IT.UP Portal application update`
 
     const html = status === 'approved'
@@ -10514,29 +10514,29 @@ function PendingApplicationsModule() {
     <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(168,85,247,0.10);">
       <!-- HEADER -->
       <tr><td style="background:linear-gradient(135deg,#a855f7 0%,#7c3aed 50%,#4f46e5 100%);padding:40px 48px 32px;text-align:center;">
-        <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;">GEL.IT.UP by GIUP®</p>
-        <h1 style="margin:0;font-size:28px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">You're Approved! 🎉</h1>
+        <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;">GEL.IT.UP by GIUP�</p>
+        <h1 style="margin:0;font-size:28px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">You're Approved! ??</h1>
         <p style="margin:10px 0 0;font-size:15px;color:rgba(255,255,255,0.85);">Welcome to the GEL.IT.UP Distributor Family</p>
       </td></tr>
       <!-- BODY -->
       <tr><td style="padding:40px 48px;">
         <p style="margin:0 0 8px;font-size:17px;font-weight:600;color:#1e1b4b;">Dear ${application.contact_name},</p>
-        <p style="margin:0 0 20px;font-size:15px;line-height:1.65;color:#374151;">We are thrilled to let you know that your application for <strong style="color:#7c3aed;">${application.company_name}</strong> has been <strong>approved</strong>. Welcome aboard — we are so excited to have you as part of the GEL.IT.UP distribution network!</p>
-        <p style="margin:0 0 28px;font-size:15px;line-height:1.65;color:#374151;">Your exclusive distributor portal is ready and waiting. To get started, simply create your password using the button below — your email address is already prefilled for you.</p>
+        <p style="margin:0 0 20px;font-size:15px;line-height:1.65;color:#374151;">We are thrilled to let you know that your application for <strong style="color:#7c3aed;">${application.company_name}</strong> has been <strong>approved</strong>. Welcome aboard � we are so excited to have you as part of the GEL.IT.UP distribution network!</p>
+        <p style="margin:0 0 28px;font-size:15px;line-height:1.65;color:#374151;">Your exclusive distributor portal is ready and waiting. To get started, simply create your password using the button below � your email address is already prefilled for you.</p>
         <!-- CTA BUTTON -->
         <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:32px;">
           <tr><td align="center">
-            <a href="${createPasswordLink}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#a855f7,#7c3aed);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:50px;letter-spacing:0.3px;box-shadow:0 4px 14px rgba(124,58,237,0.35);">Create Password &amp; Enter Portal →</a>
+            <a href="${createPasswordLink}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#a855f7,#7c3aed);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:50px;letter-spacing:0.3px;box-shadow:0 4px 14px rgba(124,58,237,0.35);">Create Password &amp; Enter Portal ?</a>
           </td></tr>
         </table>
         <!-- STEPS -->
         <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#faf5ff;border-radius:12px;padding:0;margin-bottom:28px;">
           <tr><td style="padding:24px 28px;">
-            <p style="margin:0 0 14px;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7c3aed;">Getting Started — 3 Easy Steps</p>
+            <p style="margin:0 0 14px;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7c3aed;">Getting Started � 3 Easy Steps</p>
             <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
               <tr>
                 <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#7c3aed;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">1</span></td>
-                <td style="padding-left:10px;padding-bottom:12px;font-size:14px;color:#374151;"><strong>Click the button above</strong> — your email is prefilled automatically.</td>
+                <td style="padding-left:10px;padding-bottom:12px;font-size:14px;color:#374151;"><strong>Click the button above</strong> � your email is prefilled automatically.</td>
               </tr>
               <tr>
                 <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#7c3aed;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">2</span></td>
@@ -10555,7 +10555,7 @@ function PendingApplicationsModule() {
       <!-- FOOTER -->
       <tr><td style="background:#f3f0ff;padding:24px 48px;text-align:center;border-top:1px solid #ede9fe;">
         <p style="margin:0 0 6px;font-size:12px;color:#6b7280;">Questions? Contact us at <a href="mailto:${B2B_EMAIL}" style="color:#7c3aed;text-decoration:none;font-weight:600;">${B2B_EMAIL}</a></p>
-        <p style="margin:0;font-size:11px;color:#9ca3af;">GEL.IT.UP by GIUP® — Premium Gel Polish Distribution</p>
+        <p style="margin:0;font-size:11px;color:#9ca3af;">GEL.IT.UP by GIUP� � Premium Gel Polish Distribution</p>
       </td></tr>
     </table>
   </td></tr>
@@ -10689,7 +10689,7 @@ function PendingApplicationsModule() {
                             </div>
                             <div className="text-xs text-slate-500">
                               {(application.shipping_name || '-')}
-                              {' · '}
+                              {' � '}
                               {(application.shipping_phone || '-')}
                             </div>
                           </>
@@ -10928,7 +10928,7 @@ function PendingApplicationsModule() {
                             </div>
                             <div className="text-xs text-slate-500">
                               {(application.shipping_name || '-')}
-                              {' · '}
+                              {' � '}
                               {(application.shipping_phone || '-')}
                             </div>
                           </>
@@ -11009,7 +11009,7 @@ function BuyerPortal({ onLogout, userName, userEmail }) {
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Account</p>
         <div className="mt-3 space-y-2 text-sm text-slate-600">
-          <p><span className="font-medium text-slate-800">Name:</span> {userName || '—'}</p>
+          <p><span className="font-medium text-slate-800">Name:</span> {userName || '�'}</p>
           <p><span className="font-medium text-slate-800">Email:</span> {userEmail}</p>
           <p><span className="font-medium text-slate-800">Account type:</span> Online Buyer</p>
         </div>
@@ -11553,7 +11553,7 @@ function CookiePolicyPage() {
           Essential cookies are required for basic site operations. Optional analytics or preference cookies may be added as needed.
         </p>
         <p>
-          By clicking “Accept Cookies”, you confirm consent to cookie use as described in this policy.
+          By clicking �Accept Cookies�, you confirm consent to cookie use as described in this policy.
         </p>
       </div>
     </LegalPageLayout>
@@ -11990,7 +11990,7 @@ function App() {
       return { ok: true, applicationStatus: 'approved', debugTrace: 'login-success -> approved' }
     }
 
-    // Demo mode — skip credential check
+    // Demo mode � skip credential check
     setIsPortalAuthenticated(true)
     return { ok: true, applicationStatus: 'approved', debugTrace: 'login-demo-mode -> approved' }
   }
@@ -12392,7 +12392,7 @@ function App() {
       const inboxNotificationResult = await sendPortalEmailNotification({
         eventType: isDistributorApplication ? 'distributor_application_submitted' : 'b2b_order_request_submitted',
         to: ORDER_INBOX_EMAIL,
-        subject: `${isDistributorApplication ? 'Distributor Application' : 'B2B Order Request'} #${createdApplication?.id} — ${payload.company_name}`,
+        subject: `${isDistributorApplication ? 'Distributor Application' : 'B2B Order Request'} #${createdApplication?.id} � ${payload.company_name}`,
         html: `<p>New ${isDistributorApplication ? 'distributor application' : 'B2B order request'} received.</p><p><strong>Application ID:</strong> ${createdApplication?.id}</p><p><strong>Company/Client:</strong> ${payload.company_name}</p><p><strong>Contact:</strong> ${payload.contact_name} (${payload.contact_email})</p><p><strong>Status:</strong> ${payload.status}</p><p><strong>Business Type:</strong> ${payload.business_type}</p><p><strong>VAT:</strong> ${payload.vat_number || '-'}</p><p><strong>Invoice Country:</strong> ${payload.invoice_country}</p>`,
         applicationId: createdApplication?.id,
         companyName: payload.company_name,
@@ -12405,7 +12405,7 @@ function App() {
         to: payload.contact_email,
         subject: `${isDistributorApplication ? 'Distributor application received' : 'B2B order request received'}: ${payload.company_name}`,
         html: isDistributorApplication
-          ? `<p>Hello ${payload.contact_name},</p><p>Welcome to <strong>GEL.IT.UP by GIUP®</strong>.</p><p>Thank you for submitting your distributor information for <strong>${payload.company_name}</strong>.</p><p>Your submission has been sent to ${ORDER_INBOX_EMAIL}. You will soon receive an approval email confirming that you can log in to the portal.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`
+          ? `<p>Hello ${payload.contact_name},</p><p>Welcome to <strong>GEL.IT.UP by GIUP�</strong>.</p><p>Thank you for submitting your distributor information for <strong>${payload.company_name}</strong>.</p><p>Your submission has been sent to ${ORDER_INBOX_EMAIL}. You will soon receive an approval email confirming that you can log in to the portal.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`
           : `<p>Hello ${payload.contact_name},</p><p>Thank you for your B2B order request for <strong>${payload.company_name}</strong>.</p><p>Your request has been sent to ${ORDER_INBOX_EMAIL} and stored in our admin portal for processing.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
         applicationId: createdApplication?.id,
         companyName: payload.company_name,
@@ -12436,8 +12436,8 @@ function App() {
       return {
         ok: true,
         message: isDistributorApplication
-          ? `Your distributor application has been received. Our team will review it and contact you by email once approved — usually within 1–2 business days.`
-          : `Your B2B order request has been received. Our team will review it and contact you by email once approved — usually within 1–2 business days.`,
+          ? `Your distributor application has been received. Our team will review it and contact you by email once approved � usually within 1�2 business days.`
+          : `Your B2B order request has been received. Our team will review it and contact you by email once approved � usually within 1�2 business days.`,
       }
     }
 
@@ -12515,7 +12515,7 @@ function App() {
     const notificationResult = await sendPortalEmailNotification({
       eventType: 'contact_request_submitted',
       to: CONTACT_INBOX_EMAIL,
-      subject: `Contact Request #${createdRequest?.id} — ${contactName}`,
+      subject: `Contact Request #${createdRequest?.id} � ${contactName}`,
       html: `<p>New contact request submitted.</p><p><strong>Request ID:</strong> ${createdRequest?.id}</p><p><strong>Name:</strong> ${contactName}</p><p><strong>Email:</strong> ${contactEmail}</p><p><strong>Phone:</strong> ${contactPhone}</p>`,
       applicationId: createdRequest?.id,
       contactName,
@@ -12595,7 +12595,7 @@ function App() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-3 py-2.5 md:px-6 md:py-3">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-16 items-center justify-center rounded-lg border border-white/25 bg-white/95 px-2 md:h-11 md:w-[72px]">
-              <img src={appLogo} alt="GEL.IT.UP by GIUP® logo" className="max-h-6 w-auto object-contain md:max-h-7" />
+              <img src={appLogo} alt="GEL.IT.UP by GIUP� logo" className="max-h-6 w-auto object-contain md:max-h-7" />
             </div>
             <div>
               <p className="text-xs font-black uppercase leading-none tracking-[0.07em] text-white md:text-sm md:tracking-[0.08em]">GEL.IT.UP</p>
@@ -12713,7 +12713,7 @@ function App() {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Company</p>
-            <p className="mt-2 text-sm font-semibold text-white">GEL.IT.UP by GIUP® Professional</p>
+            <p className="mt-2 text-sm font-semibold text-white">GEL.IT.UP by GIUP� Professional</p>
             <p className="mt-1">Global Professional Distribution Network</p>
           </div>
 
@@ -12767,7 +12767,7 @@ function App() {
           </div>
         </div>
 
-        <p className="border-t border-white/15 pt-3 text-white/55">© 2026 GEL.IT.UP by GIUP®</p>
+        <p className="border-t border-white/15 pt-3 text-white/55">� 2026 GEL.IT.UP by GIUP�</p>
       </footer>
 
       {/* Floating social + back-to-top */}
