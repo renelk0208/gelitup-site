@@ -6986,10 +6986,8 @@ function ProductsModule({ moduleView = 'products' }) {
       return hasCatEyeSignal(code, product?.name, product?.subcategory, product?.category)
     })
     if (selectedHasCatEye) return true
-    if (packageCartItems.some((item) => hasCatEyeSignal(item?.sku, item?.code, item?.name, item?.subcategory, item?.category))) return true
-    // Also fire when actively browsing a cat eye subcategory or category
-    return hasCatEyeSignal(activeSubcategory, activeCategory)
-  }, [catalogBySku, hasCatEyeSignal, packageCartItems, selectedCodes, activeSubcategory, activeCategory])
+    return packageCartItems.some((item) => hasCatEyeSignal(item?.sku, item?.code, item?.name, item?.subcategory, item?.category))
+  }, [catalogBySku, hasCatEyeSignal, packageCartItems, selectedCodes])
   const hasMagnetInCart = useMemo(() => {
     const selectedHasMagnet = selectedCodes.some((code) => {
       const product = catalogBySku.get(normalizeSkuCode(code))
