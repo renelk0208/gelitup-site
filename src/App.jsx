@@ -9399,7 +9399,7 @@ function ProductsModule({ moduleView = 'products' }) {
               <p className="mt-1 text-xs text-slate-500">Saved for future orders — fill in once, reuse every time.</p>
             </div>
             <button onClick={() => navigate('/portal/dashboard/products')} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
-              ? Back to My Order
+              ← Back to My Order
             </button>
           </div>
           <p className="text-[11px] text-slate-500">Required fields are marked with <span className="font-semibold text-rose-600">*</span></p>
@@ -9501,7 +9501,7 @@ function ProductsModule({ moduleView = 'products' }) {
               {isSubmittingOrder ? 'Submitting...' : `Place Order (${totalUnits} units)`}
             </button>
             <button onClick={() => navigate('/portal/dashboard/products')} className={actionButtonSecondaryClass}>
-              ? Back to Review
+              ← Back to Review
             </button>
           </div>
           {checkoutMessage && <p className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">{checkoutMessage}</p>}
@@ -10116,14 +10116,6 @@ function ProductsModule({ moduleView = 'products' }) {
             </>
           )}
         </div>
-        )}
-
-        {!isCatalogView && !isDistributorRole && (
-          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
-            <p className="text-xs text-slate-600">
-              Tier packages are available for approved distributor accounts only. Continue ordering directly via My Order.
-            </p>
-          </div>
         )}
 
         {checkoutError && <p className="mt-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{checkoutError}</p>}
