@@ -8772,6 +8772,9 @@ function ProductsModule({ moduleView = 'products' }) {
       <p><strong>Shipping same as invoice:</strong> ${clientProfile.shippingSameAsInvoice ? 'Yes' : 'No'}</p>
     `
 
+    // Resend allows max 2 req/sec — stagger the 3 email sends with a 600 ms gap each
+    const _emailDelay = () => new Promise(r => setTimeout(r, 600))
+
     const inboxNotificationResult = await sendPortalEmailNotification({
       eventType: 'b2b_order_received',
       to: ORDER_INBOX_EMAIL,
@@ -8786,6 +8789,7 @@ function ProductsModule({ moduleView = 'products' }) {
       totalValueEurBase: proformaInvoice.grandTotalEur,
     })
 
+    await _emailDelay()
     const backupNotificationResult = ORDER_BACKUP_INBOX_EMAIL && ORDER_BACKUP_INBOX_EMAIL !== ORDER_INBOX_EMAIL
       ? await sendPortalEmailNotification({
           eventType: 'b2b_order_backup_copy',
@@ -8802,6 +8806,7 @@ function ProductsModule({ moduleView = 'products' }) {
         })
       : { ok: true, skipped: true, message: ORDER_BACKUP_INBOX_EMAIL ? 'Backup inbox same as primary inbox.' : 'Backup inbox not configured.' }
 
+    await _emailDelay()
     const customerEmailTarget = String(invoice.contactEmail || userData?.user?.email || '').trim().toLowerCase()
 
     const customerNotificationResult = customerEmailTarget
