@@ -6764,6 +6764,7 @@ function ProductsModule({ moduleView = 'products' }) {
   const [lightboxUrl, setLightboxUrl] = useState(null)
   const [packageTier, setPackageTier] = useState('Silver')
   const [draftInvoice, setDraftInvoice] = useState('')
+  const [isReordering, setIsReordering] = useState(false)
   const [dismissedTechnicalUpsell, setDismissedTechnicalUpsell] = useState(false)
   const [dismissedMagnetUpsell, setDismissedMagnetUpsell] = useState(false)
   const [dismissedSuperbondUpsell, setDismissedSuperbondUpsell] = useState(false)
@@ -7845,6 +7846,40 @@ function ProductsModule({ moduleView = 'products' }) {
   useEffect(() => {
     setPackagePreviewVisibleCount(15)
   }, [generatedPackageTier])
+
+  // Re-order from previous order: ?reorder=SKU1%20x3,SKU2,SKU3%20x2
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const reorderParam = params.get('reorder')
+    if (!reorderParam || !products.length) return
+
+    const entries = reorderParam.split(',').map(s => s.trim()).filter(Boolean)
+    const newCodes = []
+    const newQtys = {}
+    entries.forEach(entry => {
+      const match = entry.match(/^(.+?)\s+x(\d+)$/i)
+      if (match) {
+        const sku = match[1].trim()
+        const qty = parseInt(match[2], 10)
+        newCodes.push(sku)
+        newQtys[sku] = qty
+      } else {
+        newCodes.push(entry)
+        newQtys[entry] = 1
+      }
+    })
+
+    if (newCodes.length === 0) return
+    setSelectedCodes(newCodes)
+    setItemQtys(newQtys)
+    setIsReordering(true)
+    setCheckoutMessage('')
+    setCheckoutError('')
+
+    params.delete('reorder')
+    const nextSearch = params.toString()
+    navigate({ pathname: location.pathname, search: nextSearch ? `?${nextSearch}` : '' }, { replace: true })
+  }, [location.pathname, location.search, navigate, products])
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
@@ -9505,7 +9540,7 @@ function ProductsModule({ moduleView = 'products' }) {
       {/* Stacked upsell toasts (bottom-right column) */}
       <div className="fixed bottom-4 right-4 z-50 flex w-[min(92vw,440px)] flex-col gap-3">
 
-        {shouldShowTechnicalUpsellToast && !dismissedTechnicalUpsell && (
+        {shouldShowTechnicalUpsellToast && !dismissedTechnicalUpsell && !isReordering && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Professional Tip</p>
             <p className="mt-1 text-sm text-amber-900">Your chosen shades perform best with the 5-in-1 Superior Base. Add a professional 6-pack at 15% discount?</p>
@@ -9516,7 +9551,7 @@ function ProductsModule({ moduleView = 'products' }) {
           </div>
         )}
 
-        {shouldShowMagnetUpsellToast && !dismissedMagnetUpsell && (
+        {shouldShowMagnetUpsellToast && !dismissedMagnetUpsell && !isReordering && (
           <div className="rounded-xl border border-fuchsia-200 bg-fuchsia-50 p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-700">Cat Eye Essential</p>
             <p className="mt-1 text-sm text-fuchsia-900">Don't forget your magnet - Cat Eye shades need it to create the signature effect.</p>
@@ -9529,7 +9564,7 @@ function ProductsModule({ moduleView = 'products' }) {
           </div>
         )}
 
-        {shouldShowSuperbondUpsell && !dismissedSuperbondUpsell && (
+        {shouldShowSuperbondUpsell && !dismissedSuperbondUpsell && !isReordering && (
           <div className="rounded-xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">Adhesion Tip</p>
             <p className="mt-1 text-sm text-sky-900">Superbond Primer maximises adhesion for any base coat - avoid lifting from day one.</p>
@@ -9540,7 +9575,7 @@ function ProductsModule({ moduleView = 'products' }) {
           </div>
         )}
 
-        {shouldShowCleanserUpsell && !dismissedCleanserUpsell && (
+        {shouldShowCleanserUpsell && !dismissedCleanserUpsell && !isReordering && (
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Complete the Finish</p>
             <p className="mt-1 text-sm text-emerald-900">Wipe-Off Top Coat requires a cleanser to remove the inhibition layer - add the Cleanser Liquid.</p>
@@ -9551,7 +9586,7 @@ function ProductsModule({ moduleView = 'products' }) {
           </div>
         )}
 
-        {shouldShowSynthoUpsell && !dismissedSynthoUpsell && (
+        {shouldShowSynthoUpsell && !dismissedSynthoUpsell && !isReordering && (
           <div className="rounded-xl border border-violet-200 bg-violet-50 p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">MultiMix System</p>
             <p className="mt-1 text-sm text-violet-900">MultiMix works best with <strong>Polygel Brush &amp; Spatula</strong> and <strong>MultiMix Liquid (Syntholiquid)</strong> — add them to complete the system.</p>
@@ -9563,7 +9598,7 @@ function ProductsModule({ moduleView = 'products' }) {
           </div>
         )}
 
-        {shouldShowTipsBaseUpsell && !dismissedTipsBaseUpsell && (
+        {shouldShowTipsBaseUpsell && !dismissedTipsBaseUpsell && !isReordering && (
           <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">Tip Application</p>
             <p className="mt-1 text-sm text-rose-900">Soak-Off Gel Tips bond best with the 5-in-1 Superior Base Clear (15ml) - add it to complete the system.</p>
@@ -9574,7 +9609,7 @@ function ProductsModule({ moduleView = 'products' }) {
           </div>
         )}
 
-        {shouldShowLiquidPolygel5in1Upsell && !dismissedLiquidPolygel5in1Upsell && (
+        {shouldShowLiquidPolygel5in1Upsell && !dismissedLiquidPolygel5in1Upsell && !isReordering && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Liquid Polygel System</p>
             <p className="mt-1 text-sm text-amber-900">For optimal adhesion with Liquid Polygel, add a layer of 5-in-1 Superior Base Clear before application.</p>
@@ -10354,6 +10389,7 @@ function ProductsModule({ moduleView = 'products' }) {
 }
 
 function OrdersModule() {
+  const navigate = useNavigate()
   const [orders, setOrders] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [copiedOrderId, setCopiedOrderId] = useState(null)
@@ -10588,6 +10624,7 @@ function OrdersModule() {
                   <th className="py-2 pr-4">Phone</th>
                   <th className="py-2 pr-4">Shipping Address</th>
                   <th className="py-2 pr-4">Label</th>
+                  <th className="py-2 pr-4">Re-Order</th>
                 </tr>
               </thead>
               <tbody>
@@ -10615,6 +10652,22 @@ function OrdersModule() {
                       >
                         {copiedOrderId === order.id ? 'Copied' : 'Copy Label'}
                       </button>
+                    </td>
+                    <td className="py-2 pr-4">
+                      {Array.isArray(order.items) && order.items.length > 0 && (
+                        <button
+                          onClick={() => {
+                            const encoded = order.items
+                              .filter(i => typeof i === 'string')
+                              .map(i => encodeURIComponent(i))
+                              .join(',')
+                            navigate(`/portal/dashboard/products?reorder=${encoded}`)
+                          }}
+                          className="rounded-md border border-fuchsia-300 bg-fuchsia-50 px-2 py-1 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100"
+                        >
+                          Re-Order
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -11527,13 +11580,18 @@ function PortalDashboard({ onLogout }) {
     doc.setFillColor(26, 26, 26)
     doc.rect(0, 0, pageWidth, 70, 'F')
 
-    // GEL.IT.UP logo — left side of header
+    const logoH = 44
+    const headerPadY = (70 - logoH) / 2
+
+    // GEL.IT.UP logo — left side of header (2958×2225, ratio 1.329)
     if (gelitupLogoData) {
-      doc.addImage(gelitupLogoData, 'PNG', margin, 10, 110, 50)
+      const gelW = Math.round(logoH * (2958 / 2225))
+      doc.addImage(gelitupLogoData, 'PNG', margin, headerPadY, gelW, logoH)
     }
-    // Thermitek logo — right side of header
+    // Thermitek logo — right side of header (842×595, ratio 1.415)
     if (thermiLogoData) {
-      doc.addImage(thermiLogoData, 'PNG', pageWidth - margin - 110, 10, 110, 50)
+      const thermiW = Math.round(logoH * (842 / 595))
+      doc.addImage(thermiLogoData, 'PNG', pageWidth - margin - thermiW, headerPadY, thermiW, logoH)
     }
 
     // Title
