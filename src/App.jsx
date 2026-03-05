@@ -4952,7 +4952,7 @@ function HomePage({ onOpenContactModal }) {
                 <circle cx="12" cy="14" r="5" />
               </svg>
             </div>
-            <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790] hover:underline">CRUELTY-FREE</a>
+            <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="mt-3 block text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790] hover:underline">CRUELTY-FREE</a>
             <p className="mt-2 text-sm leading-relaxed text-white">Ethics without compromise. We are 100% <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="font-semibold text-[#D43790] hover:underline">Leaping Bunny Approved</a>—the global gold standard for cruelty-free cosmetics.</p>
           </article>
         </div>
@@ -4973,9 +4973,9 @@ function HomePage({ onOpenContactModal }) {
           controls={false}
           preload="metadata"
           aria-hidden="true"
-          onLoadedData={(e) => { e.target.playbackRate = 0.25 }}
+          onLoadedData={(e) => { e.target.playbackRate = 0.5 }}
         />
-        <div className="absolute inset-0 bg-[#1A1A1A]/5" />
+        <div className="absolute inset-0 bg-[#1A1A1A]/45" />
 
         <div className="relative mx-auto max-w-6xl">
           <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8">
