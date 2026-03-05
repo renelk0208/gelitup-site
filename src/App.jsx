@@ -7477,7 +7477,7 @@ function ProductsModule({ moduleView = 'products' }) {
               price,
             }
           })
-          .filter((item) => Boolean(item.code) && item.price !== null)
+          .filter((item) => Boolean(item.code))
 
         if (!normalized.length) {
           throw new Error('Feed has no valid products')
