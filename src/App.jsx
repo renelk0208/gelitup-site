@@ -7074,6 +7074,21 @@ function ProductsModule({ moduleView = 'products' }) {
         const pnLookup = t => map.get(normalizeProductName(t))
         const aliasGroups = [
           { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-FBCLR'], target: 'Flexi Base Clear -HTF' },
+          // 5-in-1 Superior Base coloureds (SBC*)
+          { codes: ['GIUP SBCCLR', 'GIUP-SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
+          { codes: ['GIUP SBCMP', 'GIUP-SBCMP'], target: '5-in-1 Superior Base 15ml Milky Pink -HTF' },
+          { codes: ['GIUP SBCPP', 'GIUP-SBCPP'], target: '5-in-1 Superior Base 15ml Pretty Pink -HTF' },
+          { codes: ['GIUP SBCBP', 'GIUP-SBCBP'], target: '5-in-1 Superior Base 15ml Baby Pink -HTF' },
+          { codes: ['GIUP SBCCP', 'GIUP-SBCCP'], target: '5-in-1 Superior Base 15ml Candy Pink -HTF' },
+          { codes: ['GIUP SBCSP', 'GIUP-SBCSP'], target: '5-in-1 Superior Base 15ml Sweet Pink -HTF' },
+          { codes: ['GIUP SBCGLPI', 'GIUP-SBCGLPI'], target: '5-IN-1 Superior Base 15ml Glittery Pink -HTF' },
+          { codes: ['GIUP SBCGP', 'GIUP-SBCGP'], target: '5-in-1 Superior Base 15ml Glittery Peach -HTF' },
+          { codes: ['GIUP SBCIRPI', 'GIUP-SBCIRPI'], target: '5-IN-1 Superior Base 15ml Irridecent Pink -HTF' },
+          { codes: ['GIUP SBCIMF', 'GIUP-SBCIMF'], target: '5-in-1 Superior Base 15ml Iridescent Milky Flakes -HTF' },
+          { codes: ['GIUP SBCCLI', 'GIUP-SBCCLI'], target: '5-in-1 Superior Base 15ml Lilac -HTF' },
+          { codes: ['GIUP SBCMW', 'GIUP-SBCMW'], target: '5-in-1 Superior Base 15ml Milky White -HTF' },
+          { codes: ['GIUP SBCN', 'GIUP-SBCN'], target: '5-in-1 Superior Base 15ml Nude -HTF' },
+          { codes: ['GIUP SBCSN', 'GIUP-SBCSN'], target: '5-IN-1 Superior Base 15ml Soft Nude -HTF' },
           { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
           { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
           { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
