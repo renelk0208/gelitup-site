@@ -1782,9 +1782,16 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     
     // Apply category remapping (e.g., BY THE OCEAN ? COLORS)
     const remappedCategory = categoryRemapping.get(category)
-    const isRemapped = !!remappedCategory
+    let isRemapped = !!remappedCategory
     if (remappedCategory) {
       category = remappedCategory
+    }
+
+    // Path-based override: BASES/BRUSH ON BUILDER/* → BUILDER GEL SYSTEMS
+    // (images are stored under BASES/ but the product belongs in Builder Gel Systems)
+    if (!isRemapped && category === 'BASES' && (segments[1] || '').toUpperCase() === 'BRUSH ON BUILDER') {
+      category = 'BUILDER GEL SYSTEMS'
+      isRemapped = true
     }
     
     // Determine subcategory based on folder structure
