@@ -2930,6 +2930,20 @@ function FullCataloguePage() {
   const chapterNailArtCategories = ['NAIL ART']
   const chapterConsumablesCategories = ['CONSUMABLES']
   const chapterNailHandFootCategories = ['NAIL HAND & FOOT CARE']
+
+  // Returns accent colour matching each chapter banner
+  const getCategoryAccent = (cat) => {
+    if (!cat) return { bg: '#7a1040', text: '#fff', shadowRgb: '122,16,64' }
+    if (isColorsCategoryName(cat)) return { bg: '#7a1040', text: '#fff', shadowRgb: '122,16,64' }
+    if (chapterEssentialsCategories.includes(cat)) return { bg: '#5c2a3a', text: '#fff', shadowRgb: '92,42,58' }
+    if (chapterBuildersCategories.includes(cat)) return { bg: '#FFCCB6', text: '#374151', shadowRgb: '255,204,182' }
+    if (chapter03Categories.includes(cat)) return { bg: '#9b8cc4', text: '#fff', shadowRgb: '155,140,196' }
+    if (chapterNailArtCategories.includes(cat)) return { bg: '#8c4060', text: '#fff', shadowRgb: '140,64,96' }
+    if (chapterConsumablesCategories.includes(cat)) return { bg: '#FCEF91', text: '#374151', shadowRgb: '252,239,145' }
+    if (chapterNailHandFootCategories.includes(cat)) return { bg: '#2c5878', text: '#fff', shadowRgb: '44,88,120' }
+    return { bg: '#1A1A1A', text: '#fff', shadowRgb: '26,26,26' }
+  }
+
   const activeProductInformation = useMemo(
     () => getSubcategoryProductInformation(activeCategory, activeSubcategory),
     [activeCategory, activeSubcategory],
@@ -3193,34 +3207,43 @@ function FullCataloguePage() {
             <h2 className="text-lg font-black uppercase tracking-[0.05em] text-black">{activeSection?.category || 'Our Products'}</h2>
             <p className="mt-1 text-xs text-black/55">{filteredItems.length} matching items</p>
           </div>
-          <div className="rounded-[12px] border border-fuchsia-200/60 bg-fuchsia-50/70 px-3 py-2 text-xs text-fuchsia-900/80">
-            All products are <strong>HEMA-free, TPO-free &amp; Silver (CI 77820)-free</strong>, formulated to strict EU cosmetic regulations. Catalogue view only.
-          </div>
+          {(() => {
+            const accent = getCategoryAccent(activeCategory)
+            return (
+              <div className="rounded-[12px] border px-3 py-2 text-xs" style={{ borderColor: accent.bg + '88', background: accent.bg + '18', color: accent.bg === '#FCEF91' || accent.bg === '#FFCCB6' ? '#374151' : accent.bg }}>
+                All products are <strong>HEMA-free, TPO-free &amp; Silver (CI 77820)-free</strong>, formulated to strict EU cosmetic regulations. Catalogue view only.
+              </div>
+            )
+          })()}
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
-          {subcategoryOptions.map((subcategory) => {
-            const isActive = activeSubcategory === subcategory
-            const isSGP = normalizeCatalogueToken(subcategory) === 'SOLID GEL POLISH'
-            return (
-              <button
-                key={`subcategory-${subcategory}`}
-                onClick={() => { setActiveSubcategory(subcategory); scrollToCategoryDetail() }}
-                className={`relative rounded-[12px] border px-3 py-1.5 text-xs font-semibold transition duration-300 ${
-                  isActive
-                    ? 'border-fuchsia-600 bg-fuchsia-600 text-white shadow-[0_0_0_2px_rgba(212,55,144,0.25)]'
-                    : isSGP
-                      ? 'border-fuchsia-400 bg-fuchsia-50 text-fuchsia-700 hover:border-fuchsia-500 hover:bg-fuchsia-100'
-                      : 'border-[#4A4A4A]/35 bg-white text-black/75 hover:border-fuchsia-500'
-                }`}
-              >
-                {isSGP && !isActive && (
-                  <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[#D43790] ring-2 ring-white" />
-                )}
-                {formatSubcategoryDisplayName(subcategory, activeCategory)}
-              </button>
-            )
-          })}
+          {(() => {
+            const accent = getCategoryAccent(activeCategory)
+            return subcategoryOptions.map((subcategory) => {
+              const isActive = activeSubcategory === subcategory
+              const isSGP = normalizeCatalogueToken(subcategory) === 'SOLID GEL POLISH'
+              return (
+                <button
+                  key={`subcategory-${subcategory}`}
+                  onClick={() => { setActiveSubcategory(subcategory); scrollToCategoryDetail() }}
+                  className="relative rounded-[12px] border px-3 py-1.5 text-xs font-semibold transition duration-300"
+                  style={
+                    isActive
+                      ? { background: accent.bg, color: accent.text, borderColor: accent.bg, boxShadow: `0 0 0 2px rgba(${accent.shadowRgb},0.25)` }
+                      : isSGP
+                        ? { borderColor: accent.bg + 'aa', background: accent.bg + '22', color: accent.bg }
+                        : { borderColor: 'rgba(74,74,74,0.35)', background: '#fff', color: 'rgba(0,0,0,0.75)' }
+                  }
+                >
+                  {isSGP && !isActive && (
+                    <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full ring-2 ring-white" style={{ background: accent.bg }} />
+                  )}
+                  {formatSubcategoryDisplayName(subcategory, activeCategory)}
+                </button>
+              )
+            })
+          })()}
         </div>
 
         {!activeSubcategory && (
@@ -3640,32 +3663,32 @@ function FullCataloguePage() {
 
           {/* CHAPTER 02b: BUILDER SYSTEMS */}
           <div id="catalogue-section-builders" className="scroll-mt-28">
-            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#4d2412] lg:min-h-[360px]">
+            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#FFCCB6] lg:min-h-[360px]">
               <img
                 aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp"
                 alt=""
                 className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
                 style={{
-                  maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
-                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
+                  maskImage: 'linear-gradient(to right, transparent 0%, rgba(255,204,182,0.6) 25%, rgb(255,204,182) 50%)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(255,204,182,0.6) 25%, rgb(255,204,182) 50%)',
                 }}
               />
 
               <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
                 <div className="flex-1 lg:max-w-[500px]">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-200">Structural Innovation</p>
-                  <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Builder Systems</h2>
-                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-700">Structural Innovation</p>
+                  <h2 className="mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-gray-800 sm:text-4xl">Builder Systems</h2>
+                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-700 sm:text-base">
                     From Liquid Polygel to 3-in-1 Builder and Multimix — our complete range of building systems delivers strength, flexibility and flawless structure. Engineered for extensions, reinforcement, and zero-file technique.
                   </p>
                   <div className="mt-6">
                     <button
                       onClick={() => openCatalogueCategory('BUILDER GEL SYSTEMS', 'ALL')}
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
-                      style={{ background: 'rgba(185,100,50,0.85)' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(210,120,65,0.95)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(185,100,50,0.85)'}
+                      style={{ background: 'rgba(180,90,50,0.85)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(160,75,40,0.95)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(180,90,50,0.85)'}
                     >
                       BROWSE BUILDER SYSTEMS
                     </button>
@@ -3673,11 +3696,11 @@ function FullCataloguePage() {
                 </div>
                 <div className="lg:hidden">
                   <div className="relative mx-auto max-w-[260px]">
-                    <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(185,100,50,0.25)_0%,transparent_70%)] blur-2xl" />
+                    <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(255,204,182,0.5)_0%,transparent_70%)] blur-2xl" />
                     <img
                       src="/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp"
                       alt="GEL.IT.UP Builder Systems"
-                      className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(185,100,50,0.35)]"
+                      className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(180,90,50,0.3)]"
                     />
                   </div>
                 </div>
@@ -3690,7 +3713,7 @@ function FullCataloguePage() {
                   {chapterBuildersCategories.map(cat => (
                     <button key={cat} onClick={() => openCatalogueCategory(cat, 'ALL')}
                       className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
-                        activeCategory === cat ? 'bg-[#1A1A1A] text-white' : 'border border-[#4A4A4A]/30 bg-white text-[#1A1A1A] hover:border-[#1A1A1A]'
+                        activeCategory === cat ? 'bg-[#FFCCB6] text-gray-800 border border-[#e0a882]' : 'border border-[#4A4A4A]/30 bg-white text-[#1A1A1A] hover:border-[#FFCCB6]'
                       }`}>{cat}</button>
                   ))}
                 </div>
@@ -3700,19 +3723,47 @@ function FullCataloguePage() {
           </div>
 
           {/* CHAPTER 03: THE PROFESSIONAL TOOLSET */}
-          <div id="catalogue-section-tools" className="space-y-4 scroll-mt-28 py-12 px-4 sm:px-8">
-            <div className="mx-auto max-w-6xl px-4 sm:px-8">
-              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>TOOLS &amp; EQUIPMENT</h2>
-              <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                Precision finishing products, expert hardware, and maintenance tools for flawless studio finishes.
-              </p>
-              <div className="mt-5">
-                <button
-                  onClick={() => openCatalogueCategory('TOOLS', 'ALL')}
-                  className="rounded-lg bg-[#1A1A1A] px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-[#333]"
-                >
-                  BROWSE TOOLS &amp; EQUIPMENT
-                </button>
+          <div id="catalogue-section-tools" className="scroll-mt-28">
+            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#9b8cc4] lg:min-h-[360px]">
+              <img
+                aria-hidden="true"
+                src="/gelitup-content/catalog-heroes/equipment-and-tools-catalog-hero.jpg"
+                alt=""
+                className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
+                style={{
+                  maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
+                }}
+              />
+              <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
+                <div className="flex-1 lg:max-w-[500px]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-violet-200">The Professional Toolset</p>
+                  <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Tools &amp; Equipment</h2>
+                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
+                    Precision finishing products, expert hardware, and maintenance tools for flawless studio finishes.
+                  </p>
+                  <div className="mt-6">
+                    <button
+                      onClick={() => openCatalogueCategory('TOOLS', 'ALL')}
+                      className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
+                      style={{ background: 'rgba(74,53,112,0.85)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(95,70,140,0.95)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(74,53,112,0.85)'}
+                    >
+                      BROWSE TOOLS &amp; EQUIPMENT
+                    </button>
+                  </div>
+                </div>
+                <div className="lg:hidden">
+                  <div className="relative mx-auto max-w-[260px]">
+                    <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(74,53,112,0.3)_0%,transparent_70%)] blur-2xl" />
+                    <img
+                      src="/gelitup-content/catalog-heroes/equipment-and-tools-catalog-hero.jpg"
+                      alt="GEL.IT.UP Tools & Equipment"
+                      className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(74,53,112,0.4)]"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
             {chapter03Categories.includes(activeCategory) && (
@@ -3721,7 +3772,7 @@ function FullCataloguePage() {
                   {chapter03Categories.map(cat => (
                     <button key={cat} onClick={() => openCatalogueCategory(cat, 'ALL')}
                       className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
-                        activeCategory === cat ? 'bg-[#1A1A1A] text-white' : 'border border-[#4A4A4A]/30 bg-white text-[#1A1A1A] hover:border-[#1A1A1A]'
+                        activeCategory === cat ? 'bg-[#9b8cc4] text-white border border-[#7b6bad]' : 'border border-[#4A4A4A]/30 bg-white text-[#1A1A1A] hover:border-[#9b8cc4]'
                       }`}>{cat}</button>
                   ))}
                 </div>
@@ -3783,19 +3834,47 @@ function FullCataloguePage() {
           </div>
 
           {/* Chapter 04b: Consumables */}
-          <div id="catalogue-section-consumables" className="space-y-4 scroll-mt-28 py-12 px-4 sm:px-8">
-            <div className="mx-auto max-w-6xl px-4 sm:px-8">
-              <h2 className="text-3xl font-extrabold uppercase tracking-[0.12em] text-[#1A1A1A] sm:text-4xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>CONSUMABLES</h2>
-              <p className="mt-3 max-w-2xl text-base text-[#1A1A1A]/75" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-                Professional-grade consumable supplies for everyday salon use.
-              </p>
-              <div className="mt-5">
-                <button
-                  onClick={() => openCatalogueCategory('CONSUMABLES', 'ALL')}
-                  className="rounded-lg bg-[#1A1A1A] px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-[#333]"
-                >
-                  BROWSE CONSUMABLES
-                </button>
+          <div id="catalogue-section-consumables" className="scroll-mt-28">
+            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#FCEF91] lg:min-h-[360px]">
+              <img
+                aria-hidden="true"
+                src="/gelitup-content/catalog-heroes/consumables-catalog-hero.jpg"
+                alt=""
+                className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
+                style={{
+                  maskImage: 'linear-gradient(to right, transparent 0%, rgba(252,239,145,0.6) 25%, rgb(252,239,145) 50%)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(252,239,145,0.6) 25%, rgb(252,239,145) 50%)',
+                }}
+              />
+              <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
+                <div className="flex-1 lg:max-w-[500px]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-700">Studio Essentials</p>
+                  <h2 className="mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-gray-800 sm:text-4xl">Consumables</h2>
+                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-700 sm:text-base">
+                    Professional-grade consumable supplies for everyday salon use.
+                  </p>
+                  <div className="mt-6">
+                    <button
+                      onClick={() => openCatalogueCategory('CONSUMABLES', 'ALL')}
+                      className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
+                      style={{ background: 'rgba(175,140,0,0.85)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(155,120,0,0.95)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(175,140,0,0.85)'}
+                    >
+                      BROWSE CONSUMABLES
+                    </button>
+                  </div>
+                </div>
+                <div className="lg:hidden">
+                  <div className="relative mx-auto max-w-[260px]">
+                    <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(252,239,145,0.5)_0%,transparent_70%)] blur-2xl" />
+                    <img
+                      src="/gelitup-content/catalog-heroes/consumables-catalog-hero.jpg"
+                      alt="GEL.IT.UP Consumables"
+                      className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(120,90,10,0.3)]"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
             {chapterConsumablesCategories.includes(activeCategory) && (
@@ -3807,7 +3886,7 @@ function FullCataloguePage() {
 
           {/* Chapter 04c: Nail, Hand & Foot Care */}
           <div id="catalogue-section-nail-hand-foot" className="scroll-mt-28">
-            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#3b5a52] lg:min-h-[360px]">
+            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#2c5878] lg:min-h-[360px]">
               <img
                 aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/Hand-nail-and-foot-care-catalog-hero-image.webp"
@@ -3820,7 +3899,7 @@ function FullCataloguePage() {
               />
               <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
                 <div className="flex-1 lg:max-w-[500px]">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200">Professional Aftercare</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-200">Professional Aftercare</p>
                   <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Nail, Hand &amp; Foot Care</h2>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
                     Therapeutic formulations for professional nail, hand and foot aftercare.
@@ -3829,9 +3908,9 @@ function FullCataloguePage() {
                     <button
                       onClick={() => openCatalogueCategory('NAIL HAND & FOOT CARE', 'ALL')}
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
-                      style={{ background: 'rgba(59,100,90,0.85)' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(75,120,108,0.95)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(59,100,90,0.85)'}
+                      style={{ background: 'rgba(44,88,120,0.85)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(60,108,145,0.95)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(44,88,120,0.85)'}
                     >
                       BROWSE NAIL, HAND &amp; FOOT CARE
                     </button>
