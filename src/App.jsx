@@ -11541,11 +11541,11 @@ function PortalDashboard({ onLogout }) {
 
   const modules = useMemo(
     () => [
-      { key: 'overview', label: 'Overview' },
+      { key: 'catalog', label: 'Shop' },
       { key: 'products', label: 'My Order' },
       { key: 'profile', label: 'My Information' },
-      { key: 'orders', label: 'Orders' },
-      { key: 'catalog', label: 'Shop' },
+      { key: 'orders', label: 'My Orders' },
+      { key: 'overview', label: 'Overview' },
       { key: 'support', label: 'Support & Tracking' },
     ],
     [],
