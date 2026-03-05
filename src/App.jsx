@@ -3536,7 +3536,6 @@ function FullCataloguePage() {
                           <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
                           <div className="mt-2 flex flex-wrap gap-1">
                             {specs.cure && <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">{specs.cure}</span>}
-                            {specs.llab && <span className="inline-flex items-center rounded-md border border-rose-200 bg-rose-50 px-1.5 py-0.5 text-[10px] font-bold text-rose-700">L-Lab ?</span>}
                           </div>
                         </div>
                       </button>
