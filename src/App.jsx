@@ -23,6 +23,14 @@ function readBooleanEnvFlag(value, fallbackValue = false) {
 }
 
 const PORTAL_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_PORTAL, false)
+const MIN_ORDER_EUR = 100
+const SHIPPING_ZONES = [
+  { zone: 2, rateEur: 10.50, maxKg: 5, countries: ['Austria', 'Germany', 'Hungary'] },
+  { zone: 3, rateEur: 13.90, maxKg: 5, countries: ['Belgium', 'Italy', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'France', 'Croatia', 'Czech Republic'] },
+  { zone: 4, rateEur: 17.90, maxKg: 5, countries: ['Denmark', 'Spain', 'Luxembourg'] },
+  { zone: 5, rateEur: 17.90, maxKg: 5, countries: ['Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Finland', 'Sweden'], note: 'incl. Northern Ireland' },
+  { zone: 6, rateEur: 28.00, maxKg: 5, countries: ['United Kingdom'] },
+]
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL
@@ -9060,6 +9068,12 @@ function ProductsModule({ moduleView = 'products' }) {
       return
     }
 
+    if (orderTotal > 0 && orderTotal < MIN_ORDER_EUR) {
+      setCheckoutError(`Minimum order value is €${MIN_ORDER_EUR.toFixed(2)} NET. Your current order is €${orderTotal.toFixed(2)}. Please add more products before submitting.`)
+      setCheckoutMessage('')
+      return
+    }
+
     if (!hasSupabaseConfig || !supabase) {
       setCheckoutError('Order intake API is not configured. Use Send to Order Inbox.')
       setCheckoutMessage('')
@@ -9801,6 +9815,49 @@ function ProductsModule({ moduleView = 'products' }) {
           {showClientValidation && clientValidation.hasMissing && (
             <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">Please complete all required fields marked with *.</p>
           )}
+
+          {/* Order terms reminder */}
+          {(() => {
+            const _dest = (clientProfile.shippingCountry || clientProfile.invoiceCountry || '').trim()
+            const _zone = _dest ? SHIPPING_ZONES.find((z) => z.countries.includes(_dest)) : null
+            const _belowMin = orderTotal > 0 && orderTotal < MIN_ORDER_EUR
+            return (
+              <div className={`mt-4 rounded-xl border p-3 ${_belowMin ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-slate-50'}`}>
+                {_belowMin && (
+                  <div className="mb-2 flex items-center gap-2 rounded-lg border border-amber-400 bg-amber-100 px-3 py-2">
+                    <svg className="h-4 w-4 flex-none text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
+                    <p className="text-xs font-semibold text-amber-800">Minimum order is €{MIN_ORDER_EUR.toFixed(2)} NET — your order is €{orderTotal.toFixed(2)}. Please add more products to reach the minimum.</p>
+                  </div>
+                )}
+                <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
+                <ul className="mt-1.5 space-y-1 text-[11px] text-slate-600">
+                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Minimum order:</strong> €{MIN_ORDER_EUR.toFixed(2)} NET (excl. VAT &amp; shipping). Orders below this value are not accepted.</span></li>
+                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong> Calculated by destination zone. Final packing list and shipping cost will appear on your invoice.</span></li>
+                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by GEL.IT.UP.</span></li>
+                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
+                </ul>
+                <div className="mt-2.5">
+                  <p className="text-[11px] font-semibold text-slate-700">Shipping Rates by Zone (up to 5 kg)</p>
+                  <div className="mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white text-[11px]">
+                    {SHIPPING_ZONES.map((z) => (
+                      <div key={z.zone} className={`flex items-start gap-2 px-2 py-1.5 ${_zone?.zone === z.zone ? 'bg-fuchsia-50 ring-1 ring-inset ring-fuchsia-300' : 'odd:bg-white even:bg-slate-50'}`}>
+                        <span className="w-14 flex-none font-semibold text-slate-500">Zone {z.zone}</span>
+                        <span className="min-w-0 flex-1 text-slate-500">{z.countries.join(', ')}{z.note ? ` (${z.note})` : ''}</span>
+                        <span className="flex-none font-bold text-fuchsia-700">€{z.rateEur.toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {_zone
+                    ? <p className="mt-1 text-[10px] text-fuchsia-700">Your destination ({_dest}) is Zone {_zone.zone} — estimated shipping from €{_zone.rateEur.toFixed(2)} (up to 5 kg).</p>
+                    : _dest
+                      ? <p className="mt-1 text-[10px] text-slate-500">Shipping rate for {_dest} will be confirmed on your invoice.</p>
+                      : null
+                  }
+                </div>
+              </div>
+            )
+          })()}
+
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <button onClick={submitOrder} disabled={isSubmittingOrder} className={`${actionButtonPrimaryClass} disabled:cursor-not-allowed disabled:border-fuchsia-300 disabled:bg-fuchsia-300`}>
               {isSubmittingOrder ? 'Submitting...' : `Place Order (${totalUnits} units)`}
@@ -10099,6 +10156,49 @@ function ProductsModule({ moduleView = 'products' }) {
             )}
           </div>
         )}
+
+        {/* -- ORDER TERMS NOTICE -- */}
+        {(() => {
+          const _dest = (clientProfile.shippingCountry || clientProfile.invoiceCountry || '').trim()
+          const _zone = _dest ? SHIPPING_ZONES.find((z) => z.countries.includes(_dest)) : null
+          const _belowMin = orderTotal > 0 && orderTotal < MIN_ORDER_EUR
+          return (
+            <div className={`mt-3 rounded-xl border p-3 ${_belowMin ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-slate-50'}`}>
+              {_belowMin && (
+                <div className="mb-2 flex items-center gap-2 rounded-lg border border-amber-400 bg-amber-100 px-3 py-2">
+                  <svg className="h-4 w-4 flex-none text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
+                  <p className="text-xs font-semibold text-amber-800">Minimum order is €{MIN_ORDER_EUR.toFixed(2)} NET — your order is €{orderTotal.toFixed(2)}. Please add more products to reach the minimum.</p>
+                </div>
+              )}
+              <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
+              <ul className="mt-1.5 space-y-1 text-[11px] text-slate-600">
+                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Minimum order:</strong> €{MIN_ORDER_EUR.toFixed(2)} NET (excl. VAT &amp; shipping). Orders below this value are not accepted.</span></li>
+                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong> Calculated by destination zone. Final packing list and shipping cost will appear on your invoice.</span></li>
+                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by GEL.IT.UP.</span></li>
+                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
+              </ul>
+              <div className="mt-2.5">
+                <p className="text-[11px] font-semibold text-slate-700">Shipping Rates by Zone (up to 5 kg)</p>
+                <div className="mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white text-[11px]">
+                  {SHIPPING_ZONES.map((z) => (
+                    <div key={z.zone} className={`flex items-start gap-2 px-2 py-1.5 ${_zone?.zone === z.zone ? 'bg-fuchsia-50 ring-1 ring-inset ring-fuchsia-300' : 'odd:bg-white even:bg-slate-50'}`}>
+                      <span className="w-14 flex-none font-semibold text-slate-500">Zone {z.zone}</span>
+                      <span className="min-w-0 flex-1 text-slate-500">{z.countries.join(', ')}{z.note ? ` (${z.note})` : ''}</span>
+                      <span className="flex-none font-bold text-fuchsia-700">€{z.rateEur.toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+                {_zone
+                  ? <p className="mt-1 text-[10px] text-fuchsia-700">Your destination ({_dest}) is Zone {_zone.zone} — estimated shipping from €{_zone.rateEur.toFixed(2)} (up to 5 kg).</p>
+                  : _dest
+                    ? <p className="mt-1 text-[10px] text-slate-500">Shipping rate for {_dest} will be confirmed on your invoice.</p>
+                    : null
+                }
+              </div>
+            </div>
+          )
+        })()}
+
         {/* -- YOUR DETAILS STATUS -- */}
         <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
