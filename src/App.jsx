@@ -1082,13 +1082,13 @@ const PROFORMA_HEADER = {
 }
 const EUR_CURRENCY_CODE = 'EUR'
 const FACTORY_PRICE_BOOK_EUR = {
-  colorDefault: 11.4,
+  colorDefault: 9.5,
   technicalBySku: {
-    SUPERBOND: 15.0,
-    '5IN1_CLR': 16.8,
-    NW_TOP: 15.6,
-    '3IN1_CLR': 19.8,
-    SYN_MWH: 20.4,
+    SUPERBOND: 12.5,
+    '5IN1_CLR': 14,
+    NW_TOP: 13,
+    '3IN1_CLR': 16.5,
+    SYN_MWH: 17,
   },
   professionalPackDiscountPct: 15,
 }
@@ -7571,7 +7571,7 @@ function ProductsModule({ moduleView = 'products' }) {
         const stripSuffix = (s) => String(s || '').replace(/\s*[-—]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '').trim()
         for (const { name, sku, price } of items) {
           const cleanName = stripSuffix(name)
-          const entry = { name, price: price != null ? Number((Number(price) * B2B_PRICE_MULTIPLIER).toFixed(2)) : null }
+          const entry = { name, price }
           const keys = [
             normalizeSkuCode(sku),
             normalizeSkuCode(stripSuffix(sku)),
