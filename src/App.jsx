@@ -25,12 +25,13 @@ function readBooleanEnvFlag(value, fallbackValue = false) {
 const PORTAL_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_PORTAL, false)
 const MIN_ORDER_EUR = 100
 const SHIPPING_ZONES = [
-  { zone: 2, rateEur: 10.50, maxKg: 5, countries: ['Austria', 'Germany', 'Hungary'] },
-  { zone: 3, rateEur: 13.90, maxKg: 5, countries: ['Belgium', 'Italy', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'France', 'Croatia', 'Czech Republic'] },
-  { zone: 4, rateEur: 17.90, maxKg: 5, countries: ['Denmark', 'Spain', 'Luxembourg'] },
-  { zone: 5, rateEur: 17.90, maxKg: 5, countries: ['Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Finland', 'Sweden'], note: 'incl. Northern Ireland' },
+  { zone: 2, rateEur: 0, maxKg: 5, countries: ['Austria', 'Germany', 'Hungary'] },
+  { zone: 3, rateEur: 0, maxKg: 5, countries: ['Belgium', 'Italy', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'France', 'Croatia', 'Czech Republic'] },
+  { zone: 4, rateEur: 0, maxKg: 5, countries: ['Denmark', 'Spain', 'Luxembourg'] },
+  { zone: 5, rateEur: 0, maxKg: 5, countries: ['Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Finland', 'Sweden'], note: 'incl. Northern Ireland' },
   { zone: 6, rateEur: 28.00, maxKg: 5, countries: ['United Kingdom'] },
 ]
+const B2B_PRICE_MULTIPLIER = 1.2
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL
@@ -323,7 +324,7 @@ const COUNTRY_VAT_TREATMENT = {
   // EU Member States → reverse charge
   Austria: 'reverse_charge',
   Belgium: 'reverse_charge',
-  Bulgaria: 'domestic_bg',
+  Bulgaria: 'reverse_charge',
   Croatia: 'reverse_charge',
   Cyprus: 'reverse_charge',
   'Czech Republic': 'reverse_charge',
@@ -332,7 +333,7 @@ const COUNTRY_VAT_TREATMENT = {
   Finland: 'reverse_charge',
   France: 'reverse_charge',
   Germany: 'reverse_charge',
-  Greece: 'domestic_gr',
+  Greece: 'reverse_charge',
   Hungary: 'reverse_charge',
   Ireland: 'reverse_charge',
   Italy: 'reverse_charge',
@@ -390,9 +391,9 @@ function getVatTreatmentLabel(treatment, country) {
     case 'reverse_charge':
       return { pct: 0, label: '0% — VAT Reverse Charge (EU B2B, Art. 44 Directive 2006/112/EC)', note: 'The customer is liable to account for VAT in their country of establishment.' }
     case 'domestic_bg':
-      return { pct: 20, label: '20% — Bulgarian VAT (BG domestic supply)', note: 'Bulgarian VAT applies. Seller to remit to NRA Bulgaria.' }
+      return { pct: 0, label: '0% — VAT Reverse Charge (EU B2B)', note: 'B2B cross-border supply. The customer is liable to account for VAT in their country of establishment.' }
     case 'domestic_gr':
-      return { pct: 24, label: '24% — Greek VAT (EL domestic supply)', note: 'Greek VAT applies. Seller to remit to AADE Greece.' }
+      return { pct: 0, label: '0% — VAT Reverse Charge (EU B2B)', note: 'B2B cross-border supply. The customer is liable to account for VAT in their country of establishment.' }
     case 'export_exempt':
     default:
       return { pct: 0, label: '0% — Zero-rated Export (outside EU)', note: `Goods exported outside the EU. VAT exempt under export provisions. Buyer may be subject to local import duties in ${country || 'their country'}.` }
@@ -1081,13 +1082,13 @@ const PROFORMA_HEADER = {
 }
 const EUR_CURRENCY_CODE = 'EUR'
 const FACTORY_PRICE_BOOK_EUR = {
-  colorDefault: 9.5,
+  colorDefault: 11.4,
   technicalBySku: {
-    SUPERBOND: 12.5,
-    '5IN1_CLR': 14,
-    NW_TOP: 13,
-    '3IN1_CLR': 16.5,
-    SYN_MWH: 17,
+    SUPERBOND: 15.0,
+    '5IN1_CLR': 16.8,
+    NW_TOP: 15.6,
+    '3IN1_CLR': 19.8,
+    SYN_MWH: 20.4,
   },
   professionalPackDiscountPct: 15,
 }
@@ -7570,7 +7571,7 @@ function ProductsModule({ moduleView = 'products' }) {
         const stripSuffix = (s) => String(s || '').replace(/\s*[-—]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '').trim()
         for (const { name, sku, price } of items) {
           const cleanName = stripSuffix(name)
-          const entry = { name, price }
+          const entry = { name, price: price != null ? Number((Number(price) * B2B_PRICE_MULTIPLIER).toFixed(2)) : null }
           const keys = [
             normalizeSkuCode(sku),
             normalizeSkuCode(stripSuffix(sku)),
@@ -9832,23 +9833,23 @@ function ProductsModule({ moduleView = 'products' }) {
                 <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
                 <ul className="mt-1.5 space-y-1 text-[11px] text-slate-600">
                   <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Minimum order:</strong> €{MIN_ORDER_EUR.toFixed(2)} NET (excl. VAT &amp; shipping). Orders below this value are not accepted.</span></li>
-                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong> Calculated by destination zone. Final packing list and shipping cost will appear on your invoice.</span></li>
+                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong> FREE to all EU zones (Zones 2–5). Zone 6 (UK): €28.00. Final packing list will appear on your invoice.</span></li>
                   <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by GEL.IT.UP.</span></li>
                   <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
                 </ul>
                 <div className="mt-2.5">
-                  <p className="text-[11px] font-semibold text-slate-700">Shipping Rates by Zone (up to 5 kg)</p>
+                  <p className="text-[11px] font-semibold text-slate-700">Shipping by Zone — FREE for EU (up to 5 kg)</p>
                   <div className="mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white text-[11px]">
                     {SHIPPING_ZONES.map((z) => (
                       <div key={z.zone} className={`flex items-start gap-2 px-2 py-1.5 ${_zone?.zone === z.zone ? 'bg-fuchsia-50 ring-1 ring-inset ring-fuchsia-300' : 'odd:bg-white even:bg-slate-50'}`}>
                         <span className="w-14 flex-none font-semibold text-slate-500">Zone {z.zone}</span>
                         <span className="min-w-0 flex-1 text-slate-500">{z.countries.join(', ')}{z.note ? ` (${z.note})` : ''}</span>
-                        <span className="flex-none font-bold text-fuchsia-700">€{z.rateEur.toFixed(2)}</span>
+                        <span className={`flex-none font-bold ${z.rateEur === 0 ? 'text-emerald-600' : 'text-fuchsia-700'}`}>{z.rateEur === 0 ? 'FREE' : `€${z.rateEur.toFixed(2)}`}</span>
                       </div>
                     ))}
                   </div>
                   {_zone
-                    ? <p className="mt-1 text-[10px] text-fuchsia-700">Your destination ({_dest}) is Zone {_zone.zone} — estimated shipping from €{_zone.rateEur.toFixed(2)} (up to 5 kg).</p>
+                    ? <p className="mt-1 text-[10px] text-fuchsia-700">Your destination ({_dest}) is Zone {_zone.zone} — shipping: {_zone.rateEur === 0 ? 'FREE' : `from €${_zone.rateEur.toFixed(2)}`} (up to 5 kg).</p>
                     : _dest
                       ? <p className="mt-1 text-[10px] text-slate-500">Shipping rate for {_dest} will be confirmed on your invoice.</p>
                       : null
@@ -10173,23 +10174,23 @@ function ProductsModule({ moduleView = 'products' }) {
               <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
               <ul className="mt-1.5 space-y-1 text-[11px] text-slate-600">
                 <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Minimum order:</strong> €{MIN_ORDER_EUR.toFixed(2)} NET (excl. VAT &amp; shipping). Orders below this value are not accepted.</span></li>
-                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong> Calculated by destination zone. Final packing list and shipping cost will appear on your invoice.</span></li>
+                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong> FREE to all EU zones (Zones 2–5). Zone 6 (UK): €28.00. Final packing list will appear on your invoice.</span></li>
                 <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by GEL.IT.UP.</span></li>
                 <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
               </ul>
               <div className="mt-2.5">
-                <p className="text-[11px] font-semibold text-slate-700">Shipping Rates by Zone (up to 5 kg)</p>
+                <p className="text-[11px] font-semibold text-slate-700">Shipping by Zone — FREE for EU (up to 5 kg)</p>
                 <div className="mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white text-[11px]">
                   {SHIPPING_ZONES.map((z) => (
                     <div key={z.zone} className={`flex items-start gap-2 px-2 py-1.5 ${_zone?.zone === z.zone ? 'bg-fuchsia-50 ring-1 ring-inset ring-fuchsia-300' : 'odd:bg-white even:bg-slate-50'}`}>
                       <span className="w-14 flex-none font-semibold text-slate-500">Zone {z.zone}</span>
                       <span className="min-w-0 flex-1 text-slate-500">{z.countries.join(', ')}{z.note ? ` (${z.note})` : ''}</span>
-                      <span className="flex-none font-bold text-fuchsia-700">€{z.rateEur.toFixed(2)}</span>
+                      <span className={`flex-none font-bold ${z.rateEur === 0 ? 'text-emerald-600' : 'text-fuchsia-700'}`}>{z.rateEur === 0 ? 'FREE' : `€${z.rateEur.toFixed(2)}`}</span>
                     </div>
                   ))}
                 </div>
                 {_zone
-                  ? <p className="mt-1 text-[10px] text-fuchsia-700">Your destination ({_dest}) is Zone {_zone.zone} — estimated shipping from €{_zone.rateEur.toFixed(2)} (up to 5 kg).</p>
+                  ? <p className="mt-1 text-[10px] text-fuchsia-700">Your destination ({_dest}) is Zone {_zone.zone} — shipping: {_zone.rateEur === 0 ? 'FREE' : `from €${_zone.rateEur.toFixed(2)}`} (up to 5 kg).</p>
                   : _dest
                     ? <p className="mt-1 text-[10px] text-slate-500">Shipping rate for {_dest} will be confirmed on your invoice.</p>
                     : null
