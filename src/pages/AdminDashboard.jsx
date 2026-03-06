@@ -10,14 +10,16 @@ const ORDER_STATUSES = ['submitted', 'processing', 'shipped', 'completed', 'canc
 
 function statusBadge(status) {
   const map = {
-    pending:    'bg-amber-100 text-amber-700',
-    approved:   'bg-emerald-100 text-emerald-700',
-    rejected:   'bg-rose-100 text-rose-700',
-    submitted:  'bg-slate-100 text-slate-600',
-    processing: 'bg-blue-100 text-blue-700',
-    shipped:    'bg-indigo-100 text-indigo-700',
-    completed:  'bg-emerald-100 text-emerald-700',
-    cancelled:  'bg-rose-100 text-rose-700',
+    pending:                 'bg-amber-100 text-amber-700',
+    approved:                'bg-emerald-100 text-emerald-700',
+    rejected:                'bg-rose-100 text-rose-700',
+    received:                'bg-sky-100 text-sky-700',
+    submitted:               'bg-slate-100 text-slate-600',
+    processing:              'bg-blue-100 text-blue-700',
+    shipped:                 'bg-indigo-100 text-indigo-700',
+    completed:               'bg-emerald-100 text-emerald-700',
+    cancelled:               'bg-rose-100 text-rose-700',
+    cancellation_requested:  'bg-orange-100 text-orange-700',
   }
   const cls = map[String(status).toLowerCase()] || 'bg-slate-100 text-slate-600'
   return (
@@ -374,7 +376,7 @@ function OrdersPanel() {
     await updateStatus(id, 'processing', { payment_confirmed: true })
   }
 
-  const FILTERS = ['all', 'submitted', 'processing', 'shipped', 'completed', 'cancelled']
+  const FILTERS = ['all', 'received', 'submitted', 'cancellation_requested', 'processing', 'shipped', 'completed', 'cancelled']
 
   return (
     <div>
@@ -414,8 +416,9 @@ function OrdersPanel() {
           const items = Array.isArray(row.items) ? row.items : []
           const draft = trackingDraft[row.id] || {}
           const isShipped = row.status === 'shipped'
-          const isSubmitted = row.status === 'submitted'
+          const isSubmitted = row.status === 'submitted' || row.status === 'received'
           const isProcessing = row.status === 'processing'
+          const isCancellationRequested = row.status === 'cancellation_requested'
 
           return (
             <li key={row.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
@@ -463,13 +466,45 @@ function OrdersPanel() {
                     <div>
                       <p className="mb-2 text-xs font-semibold text-slate-400">Items ({items.length})</p>
                       <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 text-xs">
-                        {items.map((item, i) => (
-                          <li key={i} className="flex items-center justify-between px-3 py-2">
-                            <span className="text-slate-700">{item.name || item.displayName || item.sku || `Item ${i + 1}`}</span>
-                            <span className="font-semibold text-slate-900">×{item.qty ?? item.quantity ?? 1}</span>
-                          </li>
-                        ))}
+                        {items.map((item, i) => {
+                          const label = typeof item === 'string'
+                            ? item.replace(/ x\d+$/, '')
+                            : (item.name || item.displayName || item.sku || `Item ${i + 1}`)
+                          const qty = typeof item === 'string'
+                            ? (item.match(/ x(\d+)$/)?.[1] ?? 1)
+                            : (item.qty ?? item.quantity ?? 1)
+                          return (
+                            <li key={i} className="flex items-center justify-between px-3 py-2">
+                              <span className="text-slate-700">{label}</span>
+                              <span className="font-semibold text-slate-900">×{qty}</span>
+                            </li>
+                          )
+                        })}
                       </ul>
+                    </div>
+                  )}
+
+                  {/* ── Cancellation Request ── */}
+                  {isCancellationRequested && (
+                    <div className="rounded-xl border border-orange-200 bg-orange-50 p-3 space-y-2">
+                      <p className="text-xs font-semibold text-orange-700">⚠ Cancellation Requested by Customer</p>
+                      <p className="text-xs text-slate-600">The customer has requested to cancel this order. Confirm to cancel it, or reject to keep it active.</p>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => updateStatus(row.id, 'cancelled')}
+                          disabled={saving === row.id}
+                          className="rounded-lg bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
+                        >
+                          {saving === row.id ? 'Saving…' : '✕ Confirm Cancellation'}
+                        </button>
+                        <button
+                          onClick={() => updateStatus(row.id, 'submitted')}
+                          disabled={saving === row.id}
+                          className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                        >
+                          ↩ Reject — Keep Order Active
+                        </button>
+                      </div>
                     </div>
                   )}
 
