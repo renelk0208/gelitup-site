@@ -12,7 +12,7 @@ interface NotificationPayload {
   from?: string
   replyTo?: string
   eventType?: string
-  attachments?: Array<{ filename: string; content: string }>
+  attachments?: Array<{ filename: string; content: string; content_type?: string }>
 }
 
 serve(async (req) => {

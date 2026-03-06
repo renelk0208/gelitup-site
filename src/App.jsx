@@ -1121,6 +1121,7 @@ function buildProformaFromCart({
   orderId,
   userProfile,
   selectedCodes,
+  itemQtys,
   packageCartItems,
   includeProfessionalBasePack,
   products,
@@ -1132,7 +1133,7 @@ function buildProformaFromCart({
     const normalized = normalizeSkuCode(code)
     const product = productMap.get(normalized)
     const unitPriceEur = priceMap?.get(normalized)?.price ?? getUnitPriceEurForSku(normalized)
-    const qty = 1
+    const qty = Number(itemQtys?.[code] || itemQtys?.[normalized] || 1)
 
     return {
       sku: normalized,
@@ -9198,6 +9199,7 @@ function ProductsModule({ moduleView = 'products' }) {
       orderId: '-',
       userProfile,
       selectedCodes,
+      itemQtys,
       packageCartItems,
       includeProfessionalBasePack,
       products,
@@ -9410,8 +9412,11 @@ function ProductsModule({ moduleView = 'products' }) {
 
     const csvContent = [csvColumnHeaders, ...csvItemRows].join('\r\n')
     // Base64-encode the CSV for email attachment (UTF-8 safe)
-    const csvBase64 = btoa(unescape(encodeURIComponent(csvContent)))
-    const csvAttachment = [{ filename: `order-${orderId}.csv`, content: csvBase64 }]
+    const csvBytes = new TextEncoder().encode(csvContent)
+    let csvBinary = ''
+    csvBytes.forEach((b) => { csvBinary += String.fromCharCode(b) })
+    const csvBase64 = btoa(csvBinary)
+    const csvAttachment = [{ filename: `order-${orderId}.csv`, content: csvBase64, content_type: 'text/csv' }]
 
     const inboxOrderHtml = `
       <h2 style="font-family:Arial,sans-serif;font-size:16px;margin-bottom:4px">B2B Order #${escapeHtml(String(insertedOrder?.id ?? '-'))} — ${escapeHtml(invoice.name || userData?.user?.email || '-')}</h2>
