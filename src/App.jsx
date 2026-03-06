@@ -1833,7 +1833,7 @@ function applyManualCatalogueOrder(items = [], rule = null) {
 function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()) {
   if (!payload || typeof payload !== 'object') return []
 
-  const blockedCategoryTokens = new Set(['CRACK', 'THERMO'])
+  const blockedCategoryTokens = new Set(['CRACK', 'THERMO', 'CREME DE LA CREME'])
   
   // Map certain folders to be subcategories of parent categories
   const categoryRemapping = new Map([
@@ -6729,7 +6729,7 @@ const B2B_SIDEBAR_GROUPS = [
   },
   {
     label: 'Builder Systems',
-    cats: ['BUILDER GEL SYSTEMS', '3-in-1 Builder Gel', '3-in-1 Premium Builder Gel', 'Crème De La Crème', 'Multimix Polygel', 'Brush On Builder', 'Liquid Polygel', 'Acrylics'],
+    cats: ['BUILDER GEL SYSTEMS', '3-in-1 Builder Gel', '3-in-1 Premium Builder Gel', 'Multimix Polygel', 'Brush On Builder', 'Liquid Polygel', 'Acrylics'],
   },
   {
     label: 'Tools & Equipment',
@@ -7654,13 +7654,14 @@ function ProductsModule({ moduleView = 'products' }) {
           { codes: ['FLEXI SHORT ALMOND', 'FLEXI-SHORT-ALMOND', 'Flexi Short Almond', 'flexi short almond', 'Super Flexi Short Almond', 'SUPER FLEXI SHORT ALMOND', 'GIUP FLEXI SHORT ALMOND'], target: 'FLEXI Soak Off Nail Tips Short Almond -2025' },
           { codes: ['FLEXI SHORT SQUARE', 'FLEXI-SHORT-SQUARE', 'Flexi Short Square', 'flexi short square', 'Super Flexi Short Square', 'SUPER FLEXI SHORT SQUARE', 'GIUP FLEXI SHORT SQUARE'], target: 'FLEXI Soak Off Nail Tips Medium Square -2025' },
           // Nail Files
-          { codes: ['1280x1280_nail_bufer_100', '1280x1280 nail bufer 100'], target: 'Nail Files With Back Glue 100 Packet of 10' },
-          { codes: ['1280x1280_nail_bufer_120', '1280x1280 nail bufer 120'], target: 'Nail Files With Back Glue 120 Packet of 10' },
-          { codes: ['1280x1280_nail_bufer_180', '1280x1280 nail bufer 180'], target: 'Nail Files With Back Glue 180 Packet of 10' },
-          { codes: ['1280x1280_nail_bufer_metallic', '1280x1280 nail bufer metallic'], target: 'GIUP Boat Shape metallic Nail File' },
-          { codes: ['1280x1280_buffer_100_120', '1280x1280 buffer 100 120', '100_120_file2', '100 120 file2'], target: 'GIUP Boat Shape Nail File 100/120 Purple Sponge' },
-          { codes: ['1280x1280_buffer_180_180', '1280x1280 buffer 180 180', '180_180_file2', '180 180 file2'], target: 'Nail Files 180/180 Pink Sponge' },
-          { codes: ['?uffing_block', '?uffing block', 'buffing block', 'BUFFING BLOCK'], target: 'Nail Files 100/100' },
+          { codes: ['1280x1280_nail_bufer_100', '1280x1280 nail bufer 100', 'Nail Files With Back Glue 100 Packet of 10'], target: 'Nail Files With Back Glue 100 Packet of 10' },
+          { codes: ['1280x1280_nail_bufer_120', '1280x1280 nail bufer 120', 'Nail Files With Back Glue 120 Packet of 10'], target: 'Nail Files With Back Glue 120 Packet of 10' },
+          { codes: ['1280x1280_nail_bufer_180', '1280x1280 nail bufer 180', 'Nail Files With Back Glue 180 Packet of 10'], target: 'Nail Files With Back Glue 180 Packet of 10' },
+          { codes: ['1280x1280_nail_bufer_metallic', '1280x1280 nail bufer metallic', 'Boat Shape metallic Nail Base', 'Boat-Shape-metallic-Nail-Base'], target: 'GIUP Boat Shape metallic Nail File' },
+          { codes: ['1280x1280_buffer_100_120', '1280x1280 buffer 100 120', '100_120_file2', '100 120 file2', 'Nail Files Buffer 100 180 Purple Sponge', 'Nail Files Buffer 100-180 Purple Sponge'], target: 'GIUP Boat Shape Nail File 100/120 Purple Sponge' },
+          { codes: ['1280x1280_buffer_180_180', '1280x1280 buffer 180 180', '180_180_file2', '180 180 file2', 'Nail Files Buffer 180 180 Pink Sponge', 'Nail Files Buffer 180-180 Pink Sponge'], target: 'Nail Files 180/180 Pink Sponge' },
+          { codes: ['?uffing_block', '?uffing block', 'buffing block', 'BUFFING BLOCK', '\u0392uffing block', '\u0392uffing_block'], target: 'Nail Files 100/100' },
+          { codes: ['nail file 100 1001', 'nail-file 100-1001'], target: 'Nail Files 100/100' },
           // Nail Forms
           { codes: ['nail_forms_5', 'nail forms 5', 'NAIL FORMS 5', 'NAIL FORMS'], target: 'GEL.IT.UP by GIUP® Nail Forms' },
           // Mirror Powders
