@@ -7571,7 +7571,7 @@ function ProductsModule({ moduleView = 'products' }) {
         const stripSuffix = (s) => String(s || '').replace(/\s*[-—]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '').trim()
         for (const { name, sku, price } of items) {
           const cleanName = stripSuffix(name)
-          const entry = { name, price }
+          const entry = { name, price: price != null ? Math.ceil(Number(price) * B2B_PRICE_MULTIPLIER * 10) / 10 : null }
           const keys = [
             normalizeSkuCode(sku),
             normalizeSkuCode(stripSuffix(sku)),
