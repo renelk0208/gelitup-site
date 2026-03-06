@@ -1845,7 +1845,6 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     ['LINE IT UP', 'NAIL ART'],
     // Builder Gel Systems subcategories
     ['BUILDER GEL', 'BUILDER GEL SYSTEMS'],
-    ['ACRYLIC', 'BUILDER GEL SYSTEMS'],
     ['MULTIMIX', 'BUILDER GEL SYSTEMS'],
     ['CREME DE LA CREME', 'BUILDER GEL SYSTEMS'],
     ['BRUSH ON BUILDER', 'BUILDER GEL SYSTEMS'],
@@ -6730,7 +6729,7 @@ const B2B_SIDEBAR_GROUPS = [
   },
   {
     label: 'Builder Systems',
-    cats: ['BUILDER GEL SYSTEMS', '3-in-1 Builder Gel', '3-in-1 Premium Builder Gel', 'Crème De La Crème', 'Multimix Polygel', 'Brush On Builder', 'Liquid Polygel'],
+    cats: ['BUILDER GEL SYSTEMS', '3-in-1 Builder Gel', '3-in-1 Premium Builder Gel', 'Crème De La Crème', 'Multimix Polygel', 'Brush On Builder', 'Liquid Polygel', 'Acrylics'],
   },
   {
     label: 'Tools & Equipment',
@@ -6772,6 +6771,9 @@ function ProductsModule({ moduleView = 'products' }) {
   const [dismissedSynthoUpsell, setDismissedSynthoUpsell] = useState(false)
   const [dismissedTipsBaseUpsell, setDismissedTipsBaseUpsell] = useState(false)
   const [dismissedLiquidPolygel5in1Upsell, setDismissedLiquidPolygel5in1Upsell] = useState(false)
+  const [dismissedDualFormsUpsell, setDismissedDualFormsUpsell] = useState(false)
+  const [dismissedBuilderGelSuperbondUpsell, setDismissedBuilderGelSuperbondUpsell] = useState(false)
+  const [upsellModal, setUpsellModal] = useState(null)
   const [includeProfessionalBasePack, setIncludeProfessionalBasePack] = useState(false)
   const [showAddOnRemovedToast, setShowAddOnRemovedToast] = useState(false)
   const [showOrderConfetti, setShowOrderConfetti] = useState(false)
@@ -7217,12 +7219,16 @@ function ProductsModule({ moduleView = 'products' }) {
     return packageCartItems.some((item) => isActualMagnetTool(item))
   }, [catalogBySku, isActualMagnetTool, packageCartItems, selectedCodes])
   const shouldShowMagnetUpsellToast = hasCatEyeInCart && !hasMagnetInCart
-  const magnetUpsellProduct = useMemo(() => {
-    // First priority: actual magnet tool (EQUIPMENT > MAGNETS) — not a Cat Eye colour named "Magnetic xxx"
-    return products.find((product) => isActualMagnetTool(product))
-      || products.find((product) => hasMagnetSignal(product?.code, product?.sku, product?.name) && !normalizeCatalogueToken(product?.category || '').includes('COLOR'))
-      || null
-  }, [hasMagnetSignal, isActualMagnetTool, products])
+  const magnetPinkProduct = useMemo(() =>
+    products.find((p) => isActualMagnetTool(p) && normalizeCatalogueToken(p.name || p.imageUrl || '').includes('PINK'))
+    || products.find((p) => hasMagnetSignal(p?.code, p?.sku, p?.name) && !normalizeCatalogueToken(p?.category || '').includes('COLOR') && normalizeCatalogueToken(p.name || p.imageUrl || '').includes('PINK'))
+    || null
+  , [hasMagnetSignal, isActualMagnetTool, products])
+  const magnetBlackProduct = useMemo(() =>
+    products.find((p) => isActualMagnetTool(p) && normalizeCatalogueToken(p.name || p.imageUrl || '').includes('BLACK'))
+    || products.find((p) => hasMagnetSignal(p?.code, p?.sku, p?.name) && !normalizeCatalogueToken(p?.category || '').includes('COLOR') && normalizeCatalogueToken(p.name || p.imageUrl || '').includes('BLACK'))
+    || null
+  , [hasMagnetSignal, isActualMagnetTool, products])
 
   // -- Superbond upsell — any base purchased, Superbond not yet in cart ------
   const hasNonSuperbondBase = useCallback((product, code = '') => {
@@ -7253,6 +7259,28 @@ function ProductsModule({ moduleView = 'products' }) {
   }, [catalogBySku, hasSuperbondSignal, packageCartItems, selectedCodes])
 
   const shouldShowSuperbondUpsell = hasBaseInCart && !hasSuperbondInCart
+
+  // -- Builder Gel upsell — any builder gel in cart, acid-free Superbond not yet in cart --------
+  const hasBuilderGelInCart = useMemo(() => {
+    const isBuilderGel = (product) => {
+      const cat = normalizeCatalogueToken(product?.category || '')
+      const sub = normalizeCatalogueToken(product?.subcategory || '')
+      const img = normalizeCatalogueToken(product?.imageUrl || '')
+      return cat.includes('BUILDER GEL') || sub.includes('BUILDER GEL') || img.includes('BUILDER GEL') || img.includes('BRUSH ON BUILDER') || img.includes('MULTIMIX') || img.includes('SYNTHOGEL') || img.includes('POLYGEL')
+    }
+    if (selectedCodes.some((code) => isBuilderGel(catalogBySku.get(normalizeSkuCode(code))))) return true
+    return packageCartItems.some((item) => isBuilderGel(item))
+  }, [catalogBySku, packageCartItems, selectedCodes])
+
+  const superbondAcidFreeProduct = useMemo(() =>
+    products.find((p) => {
+      const t = normalizeCatalogueToken(p.name || p.imageUrl || '')
+      const sku = normalizeSkuCode(p.code || p.sku || '')
+      return (t.includes('ACID FREE') || sku === 'SB-AC' || sku === 'SBAC') && hasSuperbondSignal(p, p.code || '')
+    }) || null
+  , [hasSuperbondSignal, products])
+
+  const shouldShowBuilderGelSuperbondUpsell = hasBuilderGelInCart && !hasSuperbondInCart
 
   // -- Cleanser upsell — Wipe-Off Top Coat purchased, Cleanser not in cart --
   const hasWotcInCart = useMemo(() => {
@@ -7297,17 +7325,17 @@ function ProductsModule({ moduleView = 'products' }) {
 
   const shouldShowSynthoUpsell = hasMultiMixInCart && !hasSynthoAccessoriesInCart
 
-  // -- 5-in-1 Clear Base upsell — Soak-off Gel Tips specifically (filename prefix "Soak off Gel tips")
+  // -- 5-in-1 Clear Base upsell — Soak-off Gel Tips and Super Flexi Gel Tips
   const hasNailTipsInCart = useMemo(() => {
-    const isSoakOffTip = (token) => token.includes('SOAK OFF')
+    const isGelTips = (token) => token.includes('SOAK OFF') || token.includes('SUPER FLEXIBLE') || token.includes('SUPER FLEXI')
     if (selectedCodes.some((code) => {
       const product = catalogBySku.get(normalizeSkuCode(code))
       const t = normalizeCatalogueToken(product?.name || product?.imageUrl || code)
-      return isSoakOffTip(t)
+      return isGelTips(t)
     })) return true
     return packageCartItems.some((item) => {
       const t = normalizeCatalogueToken(item?.name || item?.imageUrl || item?.subcategory || '')
-      return isSoakOffTip(t)
+      return isGelTips(t)
     })
   }, [catalogBySku, packageCartItems, selectedCodes])
 
@@ -7330,6 +7358,49 @@ function ProductsModule({ moduleView = 'products' }) {
   }, [catalogBySku, packageCartItems, selectedCodes])
 
   const shouldShowLiquidPolygel5in1Upsell = hasLiquidPolygelInCart && !has5in1ClearInCart
+
+  // -- Dual Forms / Nail Tips upsell — dual forms or nail tips in cart, upsell 5-in-1 Base + Superbond --
+  const hasDualFormsInCart = useMemo(() => {
+    const isDualForm = (token) => token.includes('DUAL FORM') || token.includes('NAIL TIP') || token.includes('NAIL FORM')
+    if (selectedCodes.some((code) => {
+      const product = catalogBySku.get(normalizeSkuCode(code))
+      const t = normalizeCatalogueToken(product?.name || product?.imageUrl || code)
+      return isDualForm(t)
+    })) return true
+    return packageCartItems.some((item) => {
+      const t = normalizeCatalogueToken(item?.name || item?.imageUrl || item?.subcategory || '')
+      return isDualForm(t)
+    })
+  }, [catalogBySku, packageCartItems, selectedCodes])
+
+  const shouldShowDualFormsUpsell = hasDualFormsInCart && (!has5in1ClearInCart || !hasSuperbondInCart)
+
+  // Resolve actual catalog products for upsell modals
+  const superbondUpsellProduct = useMemo(() =>
+    products.find(p => hasSuperbondSignal(p, p.code || '')),
+  [products, hasSuperbondSignal])
+
+  const cleanserUpsellProduct = useMemo(() =>
+    products.find(p => normalizeCatalogueToken(p.name || '').includes('CLEANSER') && p.category === 'LIQUIDS'),
+  [products])
+
+  const fiveIn1ClearProduct = useMemo(() =>
+    products.find(p => normalizeSkuCode(p.code || p.sku || '').includes('SBCCLR')),
+  [products])
+
+  const synthoLiquidProduct = useMemo(() =>
+    products.find(p => {
+      const t = normalizeCatalogueToken(p.name || p.imageUrl || '')
+      return t.includes('SYNTHOLIQUID') || t.includes('MULTI LIQUID') || t.includes('SYNTHOGEL LIQUID')
+    }),
+  [products])
+
+  const polygelbBrushProduct = useMemo(() =>
+    products.find(p => {
+      const t = normalizeCatalogueToken(p.name || p.imageUrl || '')
+      return (t.includes('POLYGEL') || t.includes('SYNTHOGEL')) && p.category === 'BRUSHES'
+    }),
+  [products])
 
   const resolveCatalogImageUrl = useCallback((item) => {
     const localMapKeys = [
@@ -7395,6 +7466,10 @@ function ProductsModule({ moduleView = 'products' }) {
   }, [shouldShowSuperbondUpsell])
 
   useEffect(() => {
+    if (!shouldShowBuilderGelSuperbondUpsell) setDismissedBuilderGelSuperbondUpsell(false)
+  }, [shouldShowBuilderGelSuperbondUpsell])
+
+  useEffect(() => {
     if (!shouldShowCleanserUpsell) setDismissedCleanserUpsell(false)
   }, [shouldShowCleanserUpsell])
 
@@ -7409,6 +7484,10 @@ function ProductsModule({ moduleView = 'products' }) {
   useEffect(() => {
     if (!shouldShowLiquidPolygel5in1Upsell) setDismissedLiquidPolygel5in1Upsell(false)
   }, [shouldShowLiquidPolygel5in1Upsell])
+
+  useEffect(() => {
+    if (!shouldShowDualFormsUpsell) setDismissedDualFormsUpsell(false)
+  }, [shouldShowDualFormsUpsell])
 
   useEffect(() => {
     let mounted = true
@@ -8126,6 +8205,7 @@ function ProductsModule({ moduleView = 'products' }) {
                       if (n === 'BRUSH ON BUILDER') return 'Brush On Builder'
                       if (n === 'LIQUID POLYGEL') return 'Liquid Polygel'
                     }
+                    if (section.category === 'ACRYLIC') return 'Acrylics'
                     return section.category
                   })(),
                   parentSection: section.category,  // track which top-level section this belongs to
@@ -8169,7 +8249,7 @@ function ProductsModule({ moduleView = 'products' }) {
               '3INI BUILDER': 'BUILDER GEL SYSTEMS', '3IN1 BUILDER': 'BUILDER GEL SYSTEMS',
               'PREMIUM BUILDER': 'BUILDER GEL SYSTEMS', 'LIQUID POLYGEL': 'BUILDER GEL SYSTEMS',
               'CREME DE LA CREME': 'BUILDER GEL SYSTEMS', 'MULTIMIX': 'BUILDER GEL SYSTEMS',
-              'ACRYLIC': 'BUILDER GEL SYSTEMS',
+              'ACRYLIC': 'Acrylics', 'ACRYLICS': 'Acrylics',
               // Bases
               'BASE': 'BASES', 'FLEXI BASE': 'BASES',
               // Brush on Builder belongs under Builder Systems
@@ -8391,7 +8471,7 @@ function ProductsModule({ moduleView = 'products' }) {
       'SNOWFLAKE', 'PMA', 'NEW YORK', 'BY THE OCEAN',
       'SPIX & SPEX', 'TUTTI FRUTTI GLASS', 'FRENCH',
       // Non-color sections
-      'BUILDER GEL SYSTEMS', 'BASES', 'TOPS', 'TOOLS',
+      'BUILDER GEL SYSTEMS', 'ACRYLICS', 'BASES', 'TOPS', 'TOOLS',
       'EQUIPMENT', 'BRUSHES', 'NAIL ART', 'CONSUMABLES',
       'NAIL HAND & FOOT CARE', 'NAIL PREPARATIONS', 'LIQUIDS',
     ]
@@ -9722,10 +9802,13 @@ function ProductsModule({ moduleView = 'products' }) {
         {shouldShowMagnetUpsellToast && !dismissedMagnetUpsell && !isReordering && (
           <div className="rounded-xl border border-fuchsia-200 bg-fuchsia-50 p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-700">Cat Eye Essential</p>
-            <p className="mt-1 text-sm text-fuchsia-900">Don't forget your magnet - Cat Eye shades need it to create the signature effect.</p>
+            <p className="mt-1 text-sm text-fuchsia-900">Don't forget your magnet — Cat Eye shades need it to create the signature effect.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              {magnetUpsellProduct?.code && (
-                <button onClick={() => { setSelectedCodes((c) => c.includes(magnetUpsellProduct.code) ? c : [...c, magnetUpsellProduct.code]); setDismissedMagnetUpsell(true) }} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">Add Magnet</button>
+              {magnetPinkProduct && (
+                <button onClick={() => setUpsellModal({ product: magnetPinkProduct, dismissFn: () => setDismissedMagnetUpsell(true) })} className="rounded-lg bg-pink-600 px-3 py-1.5 text-xs font-semibold text-white">Pink Magnet</button>
+              )}
+              {magnetBlackProduct && (
+                <button onClick={() => setUpsellModal({ product: magnetBlackProduct, dismissFn: () => setDismissedMagnetUpsell(true) })} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">Black Magnet</button>
               )}
               <button onClick={() => setDismissedMagnetUpsell(true)} className="rounded-lg border border-fuchsia-300 px-3 py-1.5 text-xs font-semibold text-fuchsia-800">Dismiss</button>
             </div>
@@ -9737,8 +9820,19 @@ function ProductsModule({ moduleView = 'products' }) {
             <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">Adhesion Tip</p>
             <p className="mt-1 text-sm text-sky-900">Superbond Primer maximises adhesion for any base coat - avoid lifting from day one.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => { setDismissedSuperbondUpsell(true); toggleCategory('NAIL PREPARATIONS'); navigate('/portal/dashboard/catalog') }} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Superbond</button>
+              <button onClick={() => superbondUpsellProduct ? setUpsellModal({ product: superbondUpsellProduct, dismissFn: () => setDismissedSuperbondUpsell(true) }) : (setDismissedSuperbondUpsell(true), toggleCategory('NAIL PREPARATIONS'), navigate('/portal/dashboard/catalog'))} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Superbond</button>
               <button onClick={() => setDismissedSuperbondUpsell(true)} className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-semibold text-sky-800">Dismiss</button>
+            </div>
+          </div>
+        )}
+
+        {shouldShowBuilderGelSuperbondUpsell && !dismissedBuilderGelSuperbondUpsell && !isReordering && (
+          <div className="rounded-xl border border-violet-200 bg-violet-50 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">Builder Gel Prep</p>
+            <p className="mt-1 text-sm text-violet-900">Pair your builder gel with <strong>Superbond Acid-Free</strong> primer for maximum adhesion and no lifting.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button onClick={() => superbondAcidFreeProduct ? setUpsellModal({ product: superbondAcidFreeProduct, dismissFn: () => setDismissedBuilderGelSuperbondUpsell(true) }) : (setDismissedBuilderGelSuperbondUpsell(true), toggleCategory('NAIL PREPARATIONS'), navigate('/portal/dashboard/catalog'))} className="rounded-lg bg-violet-700 px-3 py-1.5 text-xs font-semibold text-white">View Acid-Free Superbond</button>
+              <button onClick={() => setDismissedBuilderGelSuperbondUpsell(true)} className="rounded-lg border border-violet-300 px-3 py-1.5 text-xs font-semibold text-violet-800">Dismiss</button>
             </div>
           </div>
         )}
@@ -9748,7 +9842,7 @@ function ProductsModule({ moduleView = 'products' }) {
             <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Complete the Finish</p>
             <p className="mt-1 text-sm text-emerald-900">Wipe-Off Top Coat requires a cleanser to remove the inhibition layer - add the Cleanser Liquid.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => { setDismissedCleanserUpsell(true); toggleCategory('LIQUIDS'); navigate('/portal/dashboard/catalog') }} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Cleanser</button>
+              <button onClick={() => cleanserUpsellProduct ? setUpsellModal({ product: cleanserUpsellProduct, dismissFn: () => setDismissedCleanserUpsell(true) }) : (setDismissedCleanserUpsell(true), toggleCategory('LIQUIDS'), navigate('/portal/dashboard/catalog'))} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Cleanser</button>
               <button onClick={() => setDismissedCleanserUpsell(true)} className="rounded-lg border border-emerald-300 px-3 py-1.5 text-xs font-semibold text-emerald-800">Dismiss</button>
             </div>
           </div>
@@ -9759,8 +9853,8 @@ function ProductsModule({ moduleView = 'products' }) {
             <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">MultiMix System</p>
             <p className="mt-1 text-sm text-violet-900">MultiMix works best with <strong>Polygel Brush &amp; Spatula</strong> and <strong>MultiMix Liquid (Syntholiquid)</strong> — add them to complete the system.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => { setDismissedSynthoUpsell(true); toggleCategory('BRUSHES'); navigate('/portal/dashboard/catalog') }} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">Add Polygel Brush</button>
-              <button onClick={() => { setDismissedSynthoUpsell(true); toggleCategory('MULTIMIX'); navigate('/portal/dashboard/catalog') }} className="rounded-lg bg-violet-700 px-3 py-1.5 text-xs font-semibold text-white">Add MultiMix Liquid</button>
+              <button onClick={() => polygelbBrushProduct ? setUpsellModal({ product: polygelbBrushProduct, dismissFn: () => setDismissedSynthoUpsell(true) }) : (setDismissedSynthoUpsell(true), toggleCategory('BRUSHES'), navigate('/portal/dashboard/catalog'))} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Polygel Brush</button>
+              <button onClick={() => synthoLiquidProduct ? setUpsellModal({ product: synthoLiquidProduct, dismissFn: () => setDismissedSynthoUpsell(true) }) : (setDismissedSynthoUpsell(true), toggleCategory('MULTIMIX'), navigate('/portal/dashboard/catalog'))} className="rounded-lg bg-violet-700 px-3 py-1.5 text-xs font-semibold text-white">View MultiMix Liquid</button>
               <button onClick={() => setDismissedSynthoUpsell(true)} className="rounded-lg border border-violet-300 px-3 py-1.5 text-xs font-semibold text-violet-800">Dismiss</button>
             </div>
           </div>
@@ -9769,9 +9863,9 @@ function ProductsModule({ moduleView = 'products' }) {
         {shouldShowTipsBaseUpsell && !dismissedTipsBaseUpsell && !isReordering && (
           <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">Tip Application</p>
-            <p className="mt-1 text-sm text-rose-900">Soak-Off Gel Tips bond best with the 5-in-1 Superior Base Clear (15ml) - add it to complete the system.</p>
+            <p className="mt-1 text-sm text-rose-900">Soak-Off Gel Tips and Super Flexi Tips bond best with the <strong>5-in-1 Superior Base Clear</strong> — add it to complete the system.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => { setDismissedTipsBaseUpsell(true); toggleCategory('BASES'); navigate('/portal/dashboard/catalog') }} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View 5-in-1 Clear</button>
+              <button onClick={() => fiveIn1ClearProduct ? setUpsellModal({ product: fiveIn1ClearProduct, dismissFn: () => setDismissedTipsBaseUpsell(true) }) : (setDismissedTipsBaseUpsell(true), toggleCategory('BASES'), navigate('/portal/dashboard/catalog'))} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View 5-in-1 Clear</button>
               <button onClick={() => setDismissedTipsBaseUpsell(true)} className="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-800">Dismiss</button>
             </div>
           </div>
@@ -9782,13 +9876,61 @@ function ProductsModule({ moduleView = 'products' }) {
             <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Liquid Polygel System</p>
             <p className="mt-1 text-sm text-amber-900">For optimal adhesion with Liquid Polygel, add a layer of 5-in-1 Superior Base Clear before application.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => { setDismissedLiquidPolygel5in1Upsell(true); toggleCategory('BASES'); navigate('/portal/dashboard/catalog') }} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View 5-in-1 Clear</button>
+              <button onClick={() => fiveIn1ClearProduct ? setUpsellModal({ product: fiveIn1ClearProduct, dismissFn: () => setDismissedLiquidPolygel5in1Upsell(true) }) : (setDismissedLiquidPolygel5in1Upsell(true), toggleCategory('BASES'), navigate('/portal/dashboard/catalog'))} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View 5-in-1 Clear</button>
               <button onClick={() => setDismissedLiquidPolygel5in1Upsell(true)} className="rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-800">Dismiss</button>
             </div>
           </div>
         )}
 
+        {shouldShowDualFormsUpsell && !dismissedDualFormsUpsell && !isReordering && (
+          <div className="rounded-xl border border-teal-200 bg-teal-50 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">Complete Your Extension System</p>
+            <p className="mt-1 text-sm text-teal-900">Dual Forms / Nail Tips work best with <strong>5-in-1 Superior Base Clear</strong> and <strong>Superbond Primer</strong> for maximum adhesion.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {!has5in1ClearInCart && (
+                <button onClick={() => fiveIn1ClearProduct ? setUpsellModal({ product: fiveIn1ClearProduct, dismissFn: () => setDismissedDualFormsUpsell(true) }) : (setDismissedDualFormsUpsell(true), toggleCategory('BASES'), navigate('/portal/dashboard/catalog'))} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View 5-in-1 Base</button>
+              )}
+              {!hasSuperbondInCart && (
+                <button onClick={() => superbondUpsellProduct ? setUpsellModal({ product: superbondUpsellProduct, dismissFn: () => setDismissedDualFormsUpsell(true) }) : (setDismissedDualFormsUpsell(true), toggleCategory('NAIL PREPARATIONS'), navigate('/portal/dashboard/catalog'))} className="rounded-lg bg-teal-700 px-3 py-1.5 text-xs font-semibold text-white">View Superbond</button>
+              )}
+              <button onClick={() => setDismissedDualFormsUpsell(true)} className="rounded-lg border border-teal-300 px-3 py-1.5 text-xs font-semibold text-teal-800">Dismiss</button>
+            </div>
+          </div>
+        )}
+
       </div>
+
+      {/* Upsell product popup modal */}
+      {upsellModal && (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 p-4 sm:items-center" onClick={() => setUpsellModal(null)}>
+          <div className="w-full max-w-xs rounded-2xl bg-white shadow-2xl" onClick={e => e.stopPropagation()}>
+            {upsellModal.product?.imageUrl && (
+              <img src={upsellModal.product.imageUrl} alt={upsellModal.product.name} className="h-52 w-full rounded-t-2xl object-cover" />
+            )}
+            <div className="p-5">
+              <p className="text-sm font-semibold text-slate-900 leading-snug">{upsellModal.product?.name}</p>
+              {upsellModal.product?.price != null && (
+                <p className="mt-1 text-sm font-bold text-fuchsia-700">€{Number(upsellModal.product.price).toFixed(2)}</p>
+              )}
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={() => {
+                    const code = upsellModal.product?.code
+                    if (code) setSelectedCodes(c => c.includes(code) ? c : [...c, code])
+                    upsellModal.dismissFn()
+                    setUpsellModal(null)
+                  }}
+                  className="flex-1 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white"
+                >Add to Order</button>
+                <button
+                  onClick={() => { upsellModal.dismissFn(); setUpsellModal(null) }}
+                  className="flex-1 rounded-lg border border-slate-300 py-2.5 text-sm font-semibold text-slate-700"
+                >No Thanks</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {!isCatalogView && activeTier && liveUpsellRecommendation && !dismissedSmartSuggestion && (
         <div className="fixed bottom-4 left-1/2 z-50 w-[min(92vw,420px)] -translate-x-1/2 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm backdrop-blur sm:hidden">
