@@ -12,6 +12,7 @@ interface NotificationPayload {
   from?: string
   replyTo?: string
   eventType?: string
+  attachments?: Array<{ filename: string; content: string }>
 }
 
 serve(async (req) => {
@@ -61,6 +62,7 @@ serve(async (req) => {
         subject: payload.subject,
         html: payload.html,
         reply_to: payload.replyTo || 'distribution@gelitup.com',
+        ...(payload.attachments?.length ? { attachments: payload.attachments } : {}),
       }),
     })
 

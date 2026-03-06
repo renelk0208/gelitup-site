@@ -9331,15 +9331,70 @@ function ProductsModule({ moduleView = 'products' }) {
       </table>
     `
 
-    // CSV attachment content (for Zoho import)
-    const csvHeader = 'SKU/Item Code,Description,Qty,Unit Price (EUR),Line Total (EUR)'
-    const csvRows = proformaInvoice.lines.map(line =>
-      [line.sku, line.description, line.qty, line.unitPriceEur.toFixed(2), line.subtotalEur.toFixed(2)]
-        .map(v => `"${String(v).replace(/"/g, '""')}"`)
-        .join(',')
+    // CSV attachment — flat format with order context + line items, suitable for Zoho Books import
+    const orderId = insertedOrder?.id ?? 'draft'
+    const orderDate = insertedOrder?.created_at
+      ? new Date(insertedOrder.created_at).toISOString().slice(0, 10)
+      : new Date().toISOString().slice(0, 10)
+    const customerName = invoice.name || userData?.user?.email || '-'
+    const customerEmail = userData?.user?.email || '-'
+    const vatNumber = invoice.vatNumber || '-'
+    const invoiceCountry = invoice.country || '-'
+    const shippingName = shipping.name || '-'
+    const shippingAddress = shipping.address || '-'
+    const shippingCountry = shipping.country || invoiceCountry
+
+    const csvEsc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`
+
+    const csvColumnHeaders = [
+      'Order #',
+      'Order Date',
+      'Customer Name',
+      'Customer Email',
+      'VAT Number',
+      'Invoice Country',
+      'Shipping Name',
+      'Shipping Address',
+      'Shipping Country',
+      'SKU',
+      'Item Description',
+      'Qty',
+      'Unit Price (EUR)',
+      'Line Total (EUR)',
+      'Subtotal (EUR)',
+      'VAT %',
+      'VAT Amount (EUR)',
+      'Grand Total (EUR)',
+    ].join(',')
+
+    const csvItemRows = proformaInvoice.lines.map((line, i) =>
+      [
+        csvEsc(orderId),
+        csvEsc(orderDate),
+        csvEsc(customerName),
+        csvEsc(customerEmail),
+        csvEsc(vatNumber),
+        csvEsc(invoiceCountry),
+        csvEsc(shippingName),
+        csvEsc(shippingAddress),
+        csvEsc(shippingCountry),
+        csvEsc(line.sku),
+        csvEsc(line.description),
+        csvEsc(line.qty),
+        csvEsc(line.unitPriceEur.toFixed(2)),
+        csvEsc(line.subtotalEur.toFixed(2)),
+        // Totals only on the last item row
+        i === proformaInvoice.lines.length - 1 ? csvEsc(proformaInvoice.subtotalEur.toFixed(2)) : '""',
+        i === proformaInvoice.lines.length - 1 ? csvEsc(proformaInvoice.vatPct) : '""',
+        i === proformaInvoice.lines.length - 1 ? csvEsc(proformaInvoice.vatAmountEur.toFixed(2)) : '""',
+        i === proformaInvoice.lines.length - 1 ? csvEsc(proformaInvoice.grandTotalEur.toFixed(2)) : '""',
+      ].join(',')
     )
-    csvRows.push(`"","","","TOTAL",${proformaInvoice.grandTotalEur.toFixed(2)}`)
-    const csvContent = [csvHeader, ...csvRows].join('\n')
+
+    const csvContent = [csvColumnHeaders, ...csvItemRows].join('\r\n')
+    // Base64-encode the CSV for email attachment (UTF-8 safe)
+    const csvBase64 = btoa(unescape(encodeURIComponent(csvContent)))
+    const csvAttachment = [{ filename: `order-${orderId}.csv`, content: csvBase64 }]
 
     const inboxOrderHtml = `
       <h2 style="font-family:Arial,sans-serif;font-size:16px;margin-bottom:4px">B2B Order #${escapeHtml(String(insertedOrder?.id ?? '-'))} — ${escapeHtml(invoice.name || userData?.user?.email || '-')}</h2>
@@ -9348,10 +9403,9 @@ function ProductsModule({ moduleView = 'products' }) {
       <div style="font-family:Arial,sans-serif;font-size:13px">${invoiceBlockHtml}</div>
       <h3 style="font-family:Arial,sans-serif;font-size:13px;margin:12px 0 4px">Shipping Details</h3>
       <div style="font-family:Arial,sans-serif;font-size:13px">${shippingBlockHtml}</div>
-      <h3 style="font-family:Arial,sans-serif;font-size:13px;margin:16px 0 6px">Order Lines (ready for Zoho import)</h3>
+      <h3 style="font-family:Arial,sans-serif;font-size:13px;margin:16px 0 6px">Order Lines</h3>
       ${orderTableHtml}
-      <p style="font-family:Arial,sans-serif;font-size:11px;color:#888;margin-top:10px">Copy the table above or use the CSV data below to import into Zoho.</p>
-      <pre style="font-family:monospace;font-size:11px;background:#f9f9f9;padding:10px;border:1px solid #e0e0e0;white-space:pre-wrap;word-break:break-all">${escapeHtml(csvContent)}</pre>
+      <p style="font-family:Arial,sans-serif;font-size:11px;color:#888;margin-top:10px">The order CSV is attached to this email for easy import.</p>
     `
 
     // Resend allows max 2 req/sec — stagger the 3 email sends with a 600 ms gap each
@@ -9362,6 +9416,7 @@ function ProductsModule({ moduleView = 'products' }) {
       to: ORDER_INBOX_EMAIL,
       subject: `B2B Order #${insertedOrder?.id ?? '-'} — ${invoice.name || userData?.user?.email || '-'} — ${totalUnits} units`,
       html: inboxOrderHtml,
+      attachments: csvAttachment,
       orderId: insertedOrder?.id,
       customerEmail: userData?.user?.email ?? null,
       totalUnits,
@@ -9378,6 +9433,7 @@ function ProductsModule({ moduleView = 'products' }) {
           to: ORDER_BACKUP_INBOX_EMAIL,
           subject: `B2B Order #${insertedOrder?.id ?? '-'} — ${invoice.name || userData?.user?.email || '-'} — ${totalUnits} units [backup]`,
           html: inboxOrderHtml,
+          attachments: csvAttachment,
           orderId: insertedOrder?.id,
           customerEmail: userData?.user?.email ?? null,
           totalUnits,
@@ -10693,6 +10749,10 @@ function OrdersModule() {
   const [orders, setOrders] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [copiedOrderId, setCopiedOrderId] = useState(null)
+  const [expandedOrderId, setExpandedOrderId] = useState(null)
+  const [cancelConfirmId, setCancelConfirmId] = useState(null)
+  const [cancellingId, setCancellingId] = useState(null)
+  const [cancelRequestedIds, setCancelRequestedIds] = useState(() => new Set())
   const [userEmail, setUserEmail] = useState('')
   const [errorMessage, setErrorMessage] = useState(
     !hasSupabaseConfig || !supabase
@@ -10700,6 +10760,44 @@ function OrdersModule() {
       : '',
   )
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
+
+  const isCancellable = (order) => {
+    const s = String(order?.status || 'received').toLowerCase()
+    return s !== 'shipped' && s !== 'completed' && s !== 'cancelled' && s !== 'cancellation_requested'
+  }
+
+  const requestCancellation = async (order) => {
+    setCancelConfirmId(null)
+    setCancellingId(order.id)
+    try {
+      const itemList = Array.isArray(order.items)
+        ? order.items.filter(i => typeof i === 'string').map((i, n) => `<li>${n + 1}. ${i}</li>`).join('')
+        : '<li>No item detail available</li>'
+
+      await sendPortalEmailNotification({
+        to: ORDER_INBOX_EMAIL,
+        subject: `Cancellation Request — Order #${order.id} from ${userEmail}`,
+        html: `
+          <p><strong>A client has requested to cancel their order.</strong></p>
+          <table style="border-collapse:collapse;font-size:14px">
+            <tr><td style="padding:4px 12px 4px 0;font-weight:600">Order #</td><td>${order.id}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0;font-weight:600">Client Email</td><td>${userEmail}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0;font-weight:600">Placed</td><td>${new Date(order.created_at).toLocaleString()}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0;font-weight:600">Status</td><td>${order.status || 'received'}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0;font-weight:600">Units</td><td>${order.total_units}</td></tr>
+          </table>
+          <p style="margin-top:12px"><strong>Items ordered:</strong></p>
+          <ol style="font-size:13px">${itemList}</ol>
+          <p style="margin-top:12px;color:#dc2626">Please review and action this cancellation request in the admin dashboard.</p>
+        `,
+      })
+      setCancelRequestedIds((prev) => new Set([...prev, order.id]))
+    } catch {
+      // silent — button will remain available to retry
+    } finally {
+      setCancellingId(null)
+    }
+  }
 
   const copyShippingLabel = async (order) => {
     const lines = [
@@ -10718,20 +10816,20 @@ function OrdersModule() {
     }, 1800)
   }
 
+  // Fetch user email first, then load their orders filtered by email
   useEffect(() => {
-    if (!hasSupabaseConfig || !supabase) {
-      return
-    }
+    if (!hasSupabaseConfig || !supabase) return
 
     let mounted = true
 
-    const loadOrders = async () => {
+    const loadOrders = async (email) => {
       setIsLoading(true)
       setErrorMessage('')
 
       let { data, error } = await supabase
         .from(ordersTable)
         .select('id, created_at, total_units, status, payment_status, items, customer_email, consignee_name, consignee_phone, shipping_address, zoho_salesorder_id, zoho_invoice_id, zoho_invoice_number, zoho_invoice_total')
+        .eq('customer_email', email)
         .order('created_at', { ascending: false })
         .limit(100)
 
@@ -10745,6 +10843,7 @@ function OrdersModule() {
         const retry = await supabase
           .from(ordersTable)
           .select('id, created_at, total_units, status, items, customer_email')
+          .eq('customer_email', email)
           .order('created_at', { ascending: false })
           .limit(100)
 
@@ -10765,20 +10864,17 @@ function OrdersModule() {
       setIsLoading(false)
     }
 
-    loadOrders()
+    supabase.auth.getUser().then(({ data }) => {
+      const email = data?.user?.email
+      if (!email || !mounted) return
+      setUserEmail(email)
+      void loadOrders(email)
+    })
 
     return () => {
       mounted = false
     }
   }, [ordersTable])
-
-  // Fetch current user email for Realtime filter
-  useEffect(() => {
-    if (!hasSupabaseConfig || !supabase) return
-    supabase.auth.getUser().then(({ data }) => {
-      if (data?.user?.email) setUserEmail(data.user.email)
-    })
-  }, [])
 
   // Subscribe to order updates via Supabase Realtime
   useEffect(() => {
@@ -10910,57 +11006,45 @@ function OrdersModule() {
         )}
 
         {!isLoading && !errorMessage && orders.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
-                  <th className="py-2 pr-4">Order #</th>
-                  <th className="py-2 pr-4">Created</th>
-                  <th className="py-2 pr-4">Units</th>
-                  <th className="py-2 pr-4">Status</th>
-                  <th className="py-2 pr-4">Zoho Invoice</th>
-                  <th className="py-2 pr-4">Email</th>
-                  <th className="py-2 pr-4">Consignee</th>
-                  <th className="py-2 pr-4">Phone</th>
-                  <th className="py-2 pr-4">Shipping Address</th>
-                  <th className="py-2 pr-4">Label</th>
-                  <th className="py-2 pr-4">Re-Order</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((order) => (
-                  <tr key={order.id} className="border-b border-slate-100 text-slate-700">
-                    <td className="py-2 pr-4 font-semibold">#{order.id}</td>
-                    <td className="py-2 pr-4">{new Date(order.created_at).toLocaleString()}</td>
-                    <td className="py-2 pr-4">{order.total_units}</td>
-                    <td className="py-2 pr-4">
-                      {order.payment_status === 'invoice_ready'
-                        ? <span className="font-semibold text-fuchsia-600">Invoice Ready</span>
-                        : order.status}
-                    </td>
-                    <td className="py-2 pr-4">{order.zoho_invoice_number || '-'}</td>
-                    <td className="py-2 pr-4">{order.customer_email || '-'}</td>
-                    <td className="py-2 pr-4">{order.consignee_name || '-'}</td>
-                    <td className="py-2 pr-4">{order.consignee_phone || '-'}</td>
-                    <td className="py-2 pr-4">{order.shipping_address || '-'}</td>
-                    <td className="py-2 pr-4">
-                      <button
-                        onClick={() => {
-                          void copyShippingLabel(order)
-                        }}
-                        className="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700"
-                      >
-                        {copiedOrderId === order.id ? 'Copied' : 'Copy Label'}
-                      </button>
-                    </td>
-                    <td className="py-2 pr-4">
-                      {Array.isArray(order.items) && order.items.length > 0 && (
+          <div className="space-y-3">
+            {orders.map((order) => {
+              const isExpanded = expandedOrderId === order.id
+              const itemLines = Array.isArray(order.items) ? order.items.filter(i => typeof i === 'string') : []
+              const cancelRequested = cancelRequestedIds.has(order.id) || String(order.status || '').toLowerCase() === 'cancellation_requested'
+              const isCancelling = cancellingId === order.id
+              const isConfirming = cancelConfirmId === order.id
+              return (
+                <div key={order.id} className="rounded-xl border border-slate-200 bg-slate-50">
+                  {/* Order summary row */}
+                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                      <span className="font-bold text-slate-900">#{order.id}</span>
+                      <span className="text-slate-500">{new Date(order.created_at).toLocaleString()}</span>
+                      <span className="text-slate-700">{order.total_units} units</span>
+                      {cancelRequested
+                        ? <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">Cancellation Requested</span>
+                        : String(order.status || '').toLowerCase() === 'cancelled'
+                          ? <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-700">Cancelled</span>
+                          : order.payment_status === 'invoice_ready'
+                            ? <span className="rounded-full bg-fuchsia-100 px-2 py-0.5 text-xs font-semibold text-fuchsia-700">Invoice Ready</span>
+                            : <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600 capitalize">{order.status || 'received'}</span>}
+                      {order.zoho_invoice_number && (
+                        <span className="text-xs text-slate-500">Invoice: {order.zoho_invoice_number}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {itemLines.length > 0 && (
+                        <button
+                          onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
+                          className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                        >
+                          {isExpanded ? 'Hide Items' : `View Items (${itemLines.length})`}
+                        </button>
+                      )}
+                      {itemLines.length > 0 && (
                         <button
                           onClick={() => {
-                            const encoded = order.items
-                              .filter(i => typeof i === 'string')
-                              .map(i => encodeURIComponent(i))
-                              .join(',')
+                            const encoded = itemLines.map(i => encodeURIComponent(i)).join(',')
                             navigate(`/portal/dashboard/products?reorder=${encoded}`)
                           }}
                           className="rounded-md border border-fuchsia-300 bg-fuchsia-50 px-2 py-1 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100"
@@ -10968,12 +11052,68 @@ function OrdersModule() {
                           Re-Order
                         </button>
                       )}
-                    </td>
-                  </tr>
-                ))}
+                      <button
+                        onClick={() => { void copyShippingLabel(order) }}
+                        className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                      >
+                        {copiedOrderId === order.id ? 'Copied ✓' : 'Copy Label'}
+                      </button>
+                      {!cancelRequested && isCancellable(order) && !isConfirming && (
+                        <button
+                          disabled={isCancelling}
+                          onClick={() => setCancelConfirmId(order.id)}
+                          className="rounded-md border border-rose-200 bg-white px-2 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                        >
+                          {isCancelling ? 'Sending…' : 'Cancel Order'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
 
-              </tbody>
-            </table>
+                  {/* Inline cancel confirmation */}
+                  {isConfirming && !cancelRequested && (
+                    <div className="border-t border-rose-200 bg-rose-50 px-4 py-3">
+                      <p className="text-sm font-medium text-rose-800">
+                        Request cancellation for Order #{order.id}? A notification will be sent to our team for review.
+                      </p>
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          onClick={() => { void requestCancellation(order) }}
+                          className="rounded-md bg-rose-600 px-3 py-1 text-xs font-semibold text-white hover:bg-rose-700"
+                        >
+                          Yes, request cancellation
+                        </button>
+                        <button
+                          onClick={() => setCancelConfirmId(null)}
+                          className="rounded-md border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                        >
+                          Keep order
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Expandable items detail */}
+                  {isExpanded && itemLines.length > 0 && (
+                    <div className="border-t border-slate-200 px-4 pb-4 pt-3">
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Order Contents</p>
+                      <ul className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+                        {itemLines.map((item, idx) => (
+                          <li key={idx} className="rounded-md bg-white px-3 py-1.5 text-xs text-slate-700 border border-slate-200">
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                      {order.shipping_address && (
+                        <p className="mt-3 text-xs text-slate-500">
+                          <span className="font-semibold text-slate-600">Ship to:</span> {[order.consignee_name, order.shipping_address].filter(Boolean).join(' — ')}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
