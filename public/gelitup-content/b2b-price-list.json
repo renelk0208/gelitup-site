@@ -5184,6 +5184,11 @@
       "name": "AirBrush Machine New",
       "sku": "AirBrush Machine New",
       "price": 58.24
+    },
+    {
+      "name": "Stamp Lamp",
+      "sku": "Stamp Lamp",
+      "price": 6.00
     }
   ]
 }
