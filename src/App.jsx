@@ -1124,13 +1124,14 @@ function buildProformaFromCart({
   packageCartItems,
   includeProfessionalBasePack,
   products,
+  priceMap,
 }) {
   const productMap = new Map(products.map((product) => [normalizeSkuCode(product.code), product]))
 
   const selectedLines = selectedCodes.map((code) => {
     const normalized = normalizeSkuCode(code)
     const product = productMap.get(normalized)
-    const unitPriceEur = getUnitPriceEurForSku(normalized)
+    const unitPriceEur = priceMap?.get(normalized)?.price ?? getUnitPriceEurForSku(normalized)
     const qty = 1
 
     return {
@@ -1144,7 +1145,7 @@ function buildProformaFromCart({
   })
 
   const packageLines = packageCartItems.map((item) => {
-    const unitPriceEur = getUnitPriceEurForSku(item.sku)
+    const unitPriceEur = priceMap?.get(normalizeSkuCode(item.sku))?.price ?? getUnitPriceEurForSku(item.sku)
     const qty = Number(item.qty || 0)
     return {
       sku: item.sku,
@@ -9200,6 +9201,7 @@ function ProductsModule({ moduleView = 'products' }) {
       packageCartItems,
       includeProfessionalBasePack,
       products,
+      priceMap,
     })
 
     let { data: insertedOrder, error } = await supabase
@@ -9850,9 +9852,7 @@ function ProductsModule({ moduleView = 'products' }) {
                   </div>
                   {_zone
                     ? <p className="mt-1 text-[10px] text-fuchsia-700">Your destination ({_dest}) is Zone {_zone.zone} — shipping: {_zone.rateEur === 0 ? 'FREE' : `from €${_zone.rateEur.toFixed(2)}`} (up to 5 kg).</p>
-                    : _dest
-                      ? <p className="mt-1 text-[10px] text-slate-500">Shipping rate for {_dest} will be confirmed on your invoice.</p>
-                      : null
+                    : null
                   }
                 </div>
               </div>
@@ -10191,9 +10191,7 @@ function ProductsModule({ moduleView = 'products' }) {
                 </div>
                 {_zone
                   ? <p className="mt-1 text-[10px] text-fuchsia-700">Your destination ({_dest}) is Zone {_zone.zone} — shipping: {_zone.rateEur === 0 ? 'FREE' : `from €${_zone.rateEur.toFixed(2)}`} (up to 5 kg).</p>
-                  : _dest
-                    ? <p className="mt-1 text-[10px] text-slate-500">Shipping rate for {_dest} will be confirmed on your invoice.</p>
-                    : null
+                  : null
                 }
               </div>
             </div>
