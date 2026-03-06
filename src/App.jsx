@@ -10895,6 +10895,11 @@ function OrdersModule() {
           <p style="margin-top:12px;color:#dc2626">Please review and action this cancellation request in the admin dashboard.</p>
         `,
       })
+      // Persist the cancellation request in Supabase so it survives page reloads
+      await supabase
+        .from(ordersTable)
+        .update({ status: 'cancellation_requested' })
+        .eq('id', order.id)
       setCancelRequestedIds((prev) => new Set([...prev, order.id]))
     } catch {
       // silent — button will remain available to retry
