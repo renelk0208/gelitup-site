@@ -710,9 +710,12 @@ async function sendPortalEmailNotification(payload) {
       method: 'POST',
       headers,
       body: JSON.stringify({
-        from: EMAIL_FROM,
-        replyTo: EMAIL_REPLY_TO,
-        ...payload,
+        from: payload.from || EMAIL_FROM,
+        replyTo: payload.replyTo || EMAIL_REPLY_TO,
+        to: payload.to,
+        subject: payload.subject,
+        html: payload.html,
+        ...(payload.attachments?.length ? { attachments: payload.attachments } : {}),
       }),
     })
 
