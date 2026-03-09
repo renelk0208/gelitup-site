@@ -1583,19 +1583,19 @@ function DistributorPackagesPage() {
           <p className="mt-1 text-sm" style={{ color: '#a01850' }}>Launch with confidence. The smartest entry point for localized distribution with everything you need to move product and build a client base instantly.</p>
         </div>
         <div>
-          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #f0c4d0' }}>
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#b07080' }}>Market Focus</p>
+          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #e8a8b8' }}>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>Market Focus</p>
             <p className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>Localized Distribution</p>
           </div>
-          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #f0c4d0' }}>
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#b07080' }}>Product Spectrum</p>
+          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #e8a8b8' }}>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>Product Spectrum</p>
             <ul className="space-y-1.5">
               <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d4185a' }} />Top 120 Core Shades</li>
               <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d4185a' }} />200 SKUs — Builder Systems, Brushes &amp; Essentials</li>
             </ul>
           </div>
           <div className="flex items-start gap-4 px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#b07080' }}>Support Package</p>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>Support Package</p>
             <ul className="space-y-1.5">
               <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />Digital Brand Assets</li>
               <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />Viral Social Media Content</li>
@@ -1618,19 +1618,19 @@ function DistributorPackagesPage() {
           <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.60)' }}>Scale intelligently. A broader product range, physical brand presence, and deeper marketing tools designed for distributors ready to dominate their region.</p>
         </div>
         <div>
-          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9ca3af' }}>Market Focus</p>
+          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #e2e8f0' }}>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#64748b', borderRight: '2px solid #e2e8f0', paddingRight: '1rem' }}>Market Focus</p>
             <p className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>Regional Distribution</p>
           </div>
-          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9ca3af' }}>Product Spectrum</p>
+          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #e2e8f0' }}>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#64748b', borderRight: '2px solid #e2e8f0', paddingRight: '1rem' }}>Product Spectrum</p>
             <ul className="space-y-1.5">
               <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#c8386e' }} />180 Core Shades</li>
               <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#c8386e' }} />250 SKU's Total</li>
             </ul>
           </div>
           <div className="flex items-start gap-4 px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9ca3af' }}>Support Package</p>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#64748b', borderRight: '2px solid #e2e8f0', paddingRight: '1rem' }}>Support Package</p>
             <ul className="space-y-1.5">
               <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Digital Brand Assets</li>
               <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Marketing Material</li>
@@ -1655,18 +1655,18 @@ function DistributorPackagesPage() {
           <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.82)' }}>Total market ownership. Every product, every shade, every support tool — with your territory backed by GEL.IT.UP advertising, live training, and white-glove regulatory handling.</p>
         </div>
         <div>
-          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9ca3af' }}>Market Focus</p>
+          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #e2e8f0' }}>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#64748b', borderRight: '2px solid #e2e8f0', paddingRight: '1rem' }}>Market Focus</p>
             <p className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>Full Territory Dominance</p>
           </div>
-          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9ca3af' }}>Product Spectrum</p>
+          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #e2e8f0' }}>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#64748b', borderRight: '2px solid #e2e8f0', paddingRight: '1rem' }}>Product Spectrum</p>
             <ul className="space-y-1.5">
               <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#c8386e' }} />Access to Complete GEL.IT.UP Portfolio</li>
             </ul>
           </div>
           <div className="flex items-start gap-4 px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9ca3af' }}>Support Package</p>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#64748b', borderRight: '2px solid #e2e8f0', paddingRight: '1rem' }}>Support Package</p>
             <ul className="space-y-1.5">
               <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Digital Brand Assets</li>
               <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Marketing Material</li>
