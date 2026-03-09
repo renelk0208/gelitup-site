@@ -9416,7 +9416,31 @@ function ProductsModule({ moduleView = 'products' }) {
     let csvBinary = ''
     csvBytes.forEach((b) => { csvBinary += String.fromCharCode(b) })
     const csvBase64 = btoa(csvBinary)
-    const csvAttachment = [{ filename: `order-${orderId}.csv`, content: csvBase64, content_type: 'text/csv' }]
+
+    // Zoho Books / Inventory Sales Order import CSV (matches Zoho import column format)
+    const zohoCsvHeaders = ['SalesOrder#', 'Date', 'CustomerName', 'Item Name', 'SKU', 'Quantity', 'Rate', 'Item Total'].join(',')
+    const zohoCsvRows = proformaInvoice.lines.map((line, i) =>
+      [
+        csvEsc(i === 0 ? `PORTAL-${orderId}` : ''),
+        csvEsc(i === 0 ? orderDate : ''),
+        csvEsc(i === 0 ? customerName : ''),
+        csvEsc(line.description),
+        csvEsc(line.sku),
+        csvEsc(line.qty),
+        csvEsc(line.unitPriceEur.toFixed(2)),
+        csvEsc(line.subtotalEur.toFixed(2)),
+      ].join(',')
+    )
+    const zohoCsvContent = [zohoCsvHeaders, ...zohoCsvRows].join('\r\n')
+    const zohoCsvBytes = new TextEncoder().encode(zohoCsvContent)
+    let zohoCsvBinary = ''
+    zohoCsvBytes.forEach((b) => { zohoCsvBinary += String.fromCharCode(b) })
+    const zohoCsvBase64 = btoa(zohoCsvBinary)
+
+    const emailAttachments = [
+      { filename: `order-${orderId}.csv`, content: csvBase64, content_type: 'text/csv' },
+      { filename: `zoho-import-order-${orderId}.csv`, content: zohoCsvBase64, content_type: 'text/csv' },
+    ]
 
     const inboxOrderHtml = `
       <h2 style="font-family:Arial,sans-serif;font-size:16px;margin-bottom:4px">B2B Order #${escapeHtml(String(insertedOrder?.id ?? '-'))} — ${escapeHtml(invoice.name || userData?.user?.email || '-')}</h2>
@@ -9427,7 +9451,7 @@ function ProductsModule({ moduleView = 'products' }) {
       <div style="font-family:Arial,sans-serif;font-size:13px">${shippingBlockHtml}</div>
       <h3 style="font-family:Arial,sans-serif;font-size:13px;margin:16px 0 6px">Order Lines</h3>
       ${orderTableHtml}
-      <p style="font-family:Arial,sans-serif;font-size:11px;color:#888;margin-top:10px">The order CSV is attached to this email for easy import.</p>
+      <p style="font-family:Arial,sans-serif;font-size:11px;color:#888;margin-top:10px">Two CSVs are attached: the full order detail CSV and a Zoho Books/Inventory import CSV (<code>zoho-import-order-${escapeHtml(String(orderId))}.csv</code>).</p>
     `
 
     // Resend allows max 2 req/sec — stagger the 3 email sends with a 600 ms gap each
@@ -9438,7 +9462,7 @@ function ProductsModule({ moduleView = 'products' }) {
       to: ORDER_INBOX_EMAIL,
       subject: `B2B Order #${insertedOrder?.id ?? '-'} — ${invoice.name || userData?.user?.email || '-'} — ${totalUnits} units`,
       html: inboxOrderHtml,
-      attachments: csvAttachment,
+      attachments: emailAttachments,
       orderId: insertedOrder?.id,
       customerEmail: userData?.user?.email ?? null,
       totalUnits,
@@ -9455,7 +9479,7 @@ function ProductsModule({ moduleView = 'products' }) {
           to: ORDER_BACKUP_INBOX_EMAIL,
           subject: `B2B Order #${insertedOrder?.id ?? '-'} — ${invoice.name || userData?.user?.email || '-'} — ${totalUnits} units [backup]`,
           html: inboxOrderHtml,
-          attachments: csvAttachment,
+          attachments: emailAttachments,
           orderId: insertedOrder?.id,
           customerEmail: userData?.user?.email ?? null,
           totalUnits,
@@ -9572,8 +9596,9 @@ function ProductsModule({ moduleView = 'products' }) {
     setGeneratedPackageTier('')
     setIncludeProfessionalBasePack(false)
     // Clear persisted cart from localStorage on successful submit
-    if (cartUserIdRef.current) {
-      localStorage.removeItem(`${B2B_CART_STORAGE_KEY_PREFIX}_${cartUserIdRef.current}`)
+    const cartUid = cartUserIdRef.current || userData?.user?.id
+    if (cartUid) {
+      localStorage.removeItem(`${B2B_CART_STORAGE_KEY_PREFIX}_${cartUid}`)
     }
     setIsSubmittingOrder(false)
   }
@@ -10402,7 +10427,19 @@ function ProductsModule({ moduleView = 'products' }) {
           <a
             href={checkoutHref}
             onClick={(event) => {
-              if (!selectedCodes.length && !packageCartItems.length && !includeProfessionalBasePack) event.preventDefault()
+              if (!selectedCodes.length && !packageCartItems.length && !includeProfessionalBasePack) {
+                event.preventDefault()
+                return
+              }
+              // Clear cart after mailto order is sent
+              setSelectedCodes([])
+              setItemQtys({})
+              setPackageCartItems([])
+              setGeneratedPackageTier('')
+              setIncludeProfessionalBasePack(false)
+              if (cartUserIdRef.current) {
+                localStorage.removeItem(`${B2B_CART_STORAGE_KEY_PREFIX}_${cartUserIdRef.current}`)
+              }
             }}
             className={actionButtonSecondaryClass}
           >
