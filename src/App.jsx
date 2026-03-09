@@ -9379,7 +9379,7 @@ function ProductsModule({ moduleView = 'products' }) {
       'Shipping Address',
       'Shipping Country',
       'SKU',
-      'Item Description',
+      'Item Name',
       'Qty',
       'Unit Price (EUR)',
       'Line Total (EUR)',
