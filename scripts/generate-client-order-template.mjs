@@ -9,7 +9,7 @@
  *   node scripts/generate-client-order-template.mjs --out orders/my-client-template.csv
  *
  * Output columns (what the client sees):
- *   SKU | Item Name | Unit Price (excl. VAT) | Qty
+ *   [Client Info block] then SKU | Item Name | Unit Price (excl. VAT) | Qty
  */
 
 import { readFileSync, mkdirSync, writeFileSync } from 'fs'
@@ -54,6 +54,26 @@ function csvCell(value) {
   return str
 }
 
+// ── Client info block (clients fill in column B) ─────────────────────────────
+// The parser in convert-order-to-zoho-csv.mjs reads these key:value rows and
+// treats the row whose first cell is "SKU" as the product table header.
+const CLIENT_INFO_FIELDS = [
+  'Client Name',
+  'Contact Number',
+  'Email',
+  'VAT Number',
+  'Shipping Address',
+  'Invoice / Billing Address',
+]
+
+const infoRows = [
+  // Section heading row — leave the fill-in cell blank so it's obvious
+  ['CLIENT INFORMATION — please fill in column B', '', '', ''],
+  ...CLIENT_INFO_FIELDS.map(label => [csvCell(label + ':'), '', '', '']),
+  // Blank separator before the product table
+  ['', '', '', ''],
+]
+
 const header = ['SKU', 'Item Name', 'Unit Price (excl. VAT)', 'Qty']
 const rows = items.map(item => [
   csvCell(item.sku),
@@ -62,7 +82,11 @@ const rows = items.map(item => [
   '', // blank — client fills this in
 ])
 
-const csv = [header.join(','), ...rows.map(r => r.join(','))].join('\r\n')
+const csv = [
+  ...infoRows.map(r => r.join(',')),
+  header.join(','),
+  ...rows.map(r => r.join(',')),
+].join('\r\n')
 
 // ── Write output ──────────────────────────────────────────────────────────────
 try {
@@ -77,5 +101,7 @@ try {
 console.log(`✓ Client order template written to: ${outputPath}`)
 console.log(`  ${items.length} products | columns: ${header.join(', ')}`)
 console.log()
-console.log('Send this file to the client. They fill in the Qty column and email it back.')
-console.log('Then run: node scripts/convert-order-to-zoho-csv.mjs <filled-in-file.csv> --customer "Client Name"')
+console.log('Send this file to the client.')
+console.log('They fill in their details in the CLIENT INFORMATION block and the Qty column, then email it back.')
+console.log('Then run: node scripts/convert-order-to-zoho-csv.mjs <filled-in-file.csv>')
+console.log('  (--customer is optional when client info is embedded in the CSV)')
