@@ -8836,7 +8836,7 @@ function ProductsModule({ moduleView = 'products' }) {
         fillColor: [241, 245, 249],
         textColor,
       },
-      head: [['#', 'SKU', 'Description', 'Qty', 'Unit Price (EUR)', 'Discount', 'Subtotal (EUR)']],
+      head: [['#', 'SKU', 'Item Name', 'Qty', 'Unit Price (EUR)', 'Discount', 'Subtotal (EUR)']],
       body: lastProformaInvoice.lines.map((line, index) => ([
         index + 1,
         line.sku,
@@ -8932,7 +8932,7 @@ function ProductsModule({ moduleView = 'products' }) {
     const header = [
       'Order ID',
       'SKU',
-      'Description',
+      'Item Name',
       'Qty',
       'Unit Weight (kg)',
       'Unit L (cm)',
@@ -9041,7 +9041,7 @@ function ProductsModule({ moduleView = 'products' }) {
             <thead>
               <tr>
                 <th>SKU</th>
-                <th>Description</th>
+                <th>Item Name</th>
                 <th>Qty</th>
                 <th>Unit Weight (kg)</th>
                 <th>Dimensions (cm)</th>
@@ -9337,7 +9337,7 @@ function ProductsModule({ moduleView = 'products' }) {
         <thead>
           <tr>
             <th style="${thStyle}">SKU / Item Code</th>
-            <th style="${thStyle}">Description</th>
+            <th style="${thStyle}">Item Name</th>
             <th style="${thStyle}">Qty</th>
             <th style="${thStyle}">Unit Price (EUR)</th>
             <th style="${thStyle}">Line Total (EUR)</th>
