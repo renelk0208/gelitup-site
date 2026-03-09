@@ -9420,29 +9420,8 @@ function ProductsModule({ moduleView = 'products' }) {
     csvBytes.forEach((b) => { csvBinary += String.fromCharCode(b) })
     const csvBase64 = btoa(csvBinary)
 
-    // Zoho Books / Inventory Sales Order import CSV (matches Zoho import column format)
-    const zohoCsvHeaders = ['SalesOrder#', 'Date', 'CustomerName', 'Item Name', 'SKU', 'Quantity', 'Rate', 'Item Total'].join(',')
-    const zohoCsvRows = proformaInvoice.lines.map((line, i) =>
-      [
-        csvEsc(i === 0 ? `PORTAL-${orderId}` : ''),
-        csvEsc(i === 0 ? orderDate : ''),
-        csvEsc(i === 0 ? customerName : ''),
-        csvEsc(line.description),
-        csvEsc(line.sku),
-        csvEsc(line.qty),
-        csvEsc(line.unitPriceEur.toFixed(2)),
-        csvEsc(line.subtotalEur.toFixed(2)),
-      ].join(',')
-    )
-    const zohoCsvContent = [zohoCsvHeaders, ...zohoCsvRows].join('\r\n')
-    const zohoCsvBytes = new TextEncoder().encode(zohoCsvContent)
-    let zohoCsvBinary = ''
-    zohoCsvBytes.forEach((b) => { zohoCsvBinary += String.fromCharCode(b) })
-    const zohoCsvBase64 = btoa(zohoCsvBinary)
-
     const emailAttachments = [
       { filename: `order-${orderId}.csv`, content: csvBase64, content_type: 'text/csv' },
-      { filename: `zoho-import-order-${orderId}.csv`, content: zohoCsvBase64, content_type: 'text/csv' },
     ]
 
     const inboxOrderHtml = `
@@ -9454,7 +9433,7 @@ function ProductsModule({ moduleView = 'products' }) {
       <div style="font-family:Arial,sans-serif;font-size:13px">${shippingBlockHtml}</div>
       <h3 style="font-family:Arial,sans-serif;font-size:13px;margin:16px 0 6px">Order Lines</h3>
       ${orderTableHtml}
-      <p style="font-family:Arial,sans-serif;font-size:11px;color:#888;margin-top:10px">Two CSVs are attached: the full order detail CSV and a Zoho Books/Inventory import CSV (<code>zoho-import-order-${escapeHtml(String(orderId))}.csv</code>).</p>
+      <p style="font-family:Arial,sans-serif;font-size:11px;color:#888;margin-top:10px">The order detail CSV (<code>order-${escapeHtml(String(orderId))}.csv</code>) is attached.</p>
     `
 
     // Resend allows max 2 req/sec — stagger the 3 email sends with a 600 ms gap each
