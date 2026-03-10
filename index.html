@@ -2,16 +2,49 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>GEL.IT.UP by GIUP® | B2B Portal</title>
-    <link rel="icon" type="image/png" href="/logo.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/pwa-64x64.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-192x192.png" />
+
+    <!-- PWA manifest & theme -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#000000" />
-    <link rel="apple-touch-icon" href="/logo.png" />
+
+    <!-- iOS PWA -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="GEL.IT.UP" />
+
+    <!-- iOS splash screens (generated from 512x512 icon, centred on standard device sizes) -->
+    <!-- iPhone SE (1st gen) 320x568 -->
+    <link rel="apple-touch-startup-image" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" href="/pwa-512x512.png" />
+    <!-- iPhone 8 / SE (2nd+3rd gen) 375x667 -->
+    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="/pwa-512x512.png" />
+    <!-- iPhone 8 Plus 414x736 -->
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" href="/pwa-512x512.png" />
+    <!-- iPhone X/XS/11 Pro 375x812 -->
+    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="/pwa-512x512.png" />
+    <!-- iPhone XS Max/XR/11 414x896 -->
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" href="/pwa-512x512.png" />
+    <!-- iPhone 12/13/14 390x844 -->
+    <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="/pwa-512x512.png" />
+    <!-- iPhone 12/13/14 Pro Max 428x926 -->
+    <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" href="/pwa-512x512.png" />
+    <!-- iPhone 14 Pro / 15 / 15 Pro 393x852 -->
+    <link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" href="/pwa-512x512.png" />
+    <!-- iPhone 14 Pro Max / 15 Plus / 15 Pro Max 430x932 -->
+    <link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" href="/pwa-512x512.png" />
+    <!-- iPad Mini / Air 768x1024 -->
+    <link rel="apple-touch-startup-image" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" href="/pwa-512x512.png" />
+    <!-- iPad Pro 11" 834x1194 -->
+    <link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)" href="/pwa-512x512.png" />
+    <!-- iPad Pro 12.9" 1024x1366 -->
+    <link rel="apple-touch-startup-image" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" href="/pwa-512x512.png" />
   </head>
   <body>
     <div id="root"></div>

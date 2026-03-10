@@ -79,7 +79,8 @@ function RegistrationsPanel() {
       .select('*')
       .order('created_at', { ascending: false })
       .limit(200)
-    if (filter !== 'all') query = query.eq('status', filter)
+    if (filter === 'pending') query = query.in('status', ['pending', 'submitted'])
+    else if (filter !== 'all') query = query.eq('status', filter)
     const { data, error: err } = await query
     setLoading(false)
     if (err) { setError(err.message); return }
@@ -181,7 +182,9 @@ function RegistrationsPanel() {
 
   const FILTERS = ['pending', 'approved', 'rejected', 'all']
   const counts = FILTERS.reduce((acc, f) => {
-    acc[f] = f === 'all' ? rows.length : rows.filter(r => r.status === f).length
+    if (f === 'all') acc[f] = rows.length
+    else if (f === 'pending') acc[f] = rows.filter(r => r.status === 'pending' || r.status === 'submitted').length
+    else acc[f] = rows.filter(r => r.status === f).length
     return acc
   }, {})
 
