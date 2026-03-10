@@ -23,7 +23,7 @@ export default defineConfig({
   plugins: [react(), VitePWA({
     manifestFilename: 'manifest.json',
     registerType: 'autoUpdate',
-    injectRegister: false,
+    injectRegister: 'auto',
 
     pwaAssets: {
       disabled: false,
