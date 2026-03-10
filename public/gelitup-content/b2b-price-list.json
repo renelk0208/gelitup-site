@@ -4811,6 +4811,12 @@
       "price": 1.096
     },
     {
+      "name": "Buffing Block",
+      "sku": "Buffing Block",
+      "price": 8.10,
+      "description": "10 buffing blocks per pack"
+    },
+    {
       "name": "GIUP Buffing Block 180/180 Packet of 10",
       "sku": "GIUP Buffing Block 180/180 Packet of 10",
       "price": 8.10,
