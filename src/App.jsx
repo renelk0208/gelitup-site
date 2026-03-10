@@ -1575,7 +1575,7 @@ function DistributorPackagesPage() {
         </div>
       </div>
 
-      {/* PROFESSIONAL TIER */
+      {/* PROFESSIONAL TIER */}
       <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #1a1a1a', backgroundColor: '#ffffff' }}>
         <div className="px-6 py-4" style={{ backgroundColor: '#1a1a1a' }}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#c8386e' }}>Regional Growth Tier</p>
