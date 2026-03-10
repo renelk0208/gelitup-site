@@ -1561,6 +1561,11 @@
       "price": 7.41
     },
     {
+      "name": "2037 -HTF",
+      "sku": "2037 -HTF",
+      "price": 7.41
+    },
+    {
       "name": "2038 Hibiscus -HTF",
       "sku": "2038 Hibiscus -HTF",
       "price": 7.41
@@ -4751,6 +4756,11 @@
       "price": 0.72
     },
     {
+      "name": "Nail Files Buffer 100-180 Purple Sponge",
+      "sku": "Nail Files Buffer 100-180 Purple Sponge",
+      "price": 1.096
+    },
+    {
       "name": "Nail Files 180/180 Pink Sponge",
       "sku": "Nail Files 180/180 Pink Sponge",
       "price": 1.096
@@ -4798,7 +4808,8 @@
     {
       "name": "GIUP Buffing Block 180/180 Packet of 10",
       "sku": "GIUP Buffing Block 180/180 Packet of 10",
-      "price": 8.6
+      "price": 8.10,
+      "description": "10 buffing blocks per pack"
     },
     {
       "name": "GEL.IT.UP by GIUP® Nail Forms",

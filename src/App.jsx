@@ -8394,7 +8394,6 @@ function ProductsModule({ moduleView = 'products' }) {
               }
               return rawCodeName
             })()
-            const description = item.description || item.short_description || ''
             const mapImageUrl = localImageMap.get(normalizeSkuCode(sku))
               || localImageMap.get(normalizeSkuCode(code))
               || localImageMap.get(normalizeProductName(rawName))
@@ -8425,6 +8424,7 @@ function ProductsModule({ moduleView = 'products' }) {
               || fuzzyPriceLookup(code, rawName, priceWordIndex)
             const name = priceEntry?.name || rawName
             const price = priceEntry?.price ?? null
+            const description = priceEntry?.description || item.description || item.short_description || ''
 
             return {
               code,
@@ -10816,6 +10816,7 @@ function ProductsModule({ moduleView = 'products' }) {
                           {/* info */}
                           <div className="px-1.5 pt-1 pb-0.5">
                             <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{product.name}</p>
+                            {product.description && <p className="text-[9px] leading-tight text-slate-500">{product.description}</p>}
                             {product.price != null && <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{Number(product.price).toFixed(2)}</p>}
                           </div>
                           {/* action */}
