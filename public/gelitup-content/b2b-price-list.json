@@ -2,7 +2,7 @@
   "_meta": {
     "source": "gelitup-b2b-pricelist-names-zoho-order-form.xlsx",
     "generated": "2026-03-04T17:57:46.431Z",
-    "count": 1036
+    "count": 1039
   },
   "items": [
     {
@@ -3541,36 +3541,6 @@
       "price": 7.41
     },
     {
-      "name": "SS01 SPIX and SPEX Kaleidascope -HTF",
-      "sku": "SS01 SPIX and SPEX Kaleidascope -HTF",
-      "price": 8.32
-    },
-    {
-      "name": "SS02 SPIX and SPEX Delphinium -HTF",
-      "sku": "SS02 SPIX and SPEX Delphinium -HTF",
-      "price": 8.32
-    },
-    {
-      "name": "SS03 SPIX and SPEX Giddy Grape -HTF",
-      "sku": "SS03 SPIX and SPEX Giddy Grape -HTF",
-      "price": 8.32
-    },
-    {
-      "name": "SS04 SPIX and SPEX Popping Candy -HTF",
-      "sku": "SS04 SPIX and SPEX Popping Candy -HTF",
-      "price": 8.32
-    },
-    {
-      "name": "SS05 SPIX and SPEX Lemon Sorbet -HTF",
-      "sku": "SS05 SPIX and SPEX Lemon Sorbet -HTF",
-      "price": 8.32
-    },
-    {
-      "name": "SS06 SPIX and SPEX Tusk Tusk -HTF",
-      "sku": "SS06 SPIX and SPEX Tusk Tusk -HTF",
-      "price": 8.32
-    },
-    {
       "name": "LINE IT UP APRICOT -HTF",
       "sku": "LINE IT UP APRICOT -HTF",
       "price": 5.48
@@ -4813,7 +4783,7 @@
     {
       "name": "GIUP Boat Shape Nail File 100/120 Pink Sponge",
       "sku": "GIUP Boat Shape Nail File 100/120 Pink Sponge",
-      "price": 1.10
+      "price": 1.1
     },
     {
       "name": "GIUP Boat Shape Nail File 100/120 Purple Sponge",
@@ -4828,19 +4798,19 @@
     {
       "name": "Buffing Block",
       "sku": "Buffing Block",
-      "price": 8.10,
+      "price": 8.1,
       "description": "10 buffing blocks per pack"
     },
     {
       "name": "Βuffing block",
       "sku": "Βuffing block",
-      "price": 8.10,
+      "price": 8.1,
       "description": "10 buffing blocks per pack"
     },
     {
       "name": "GIUP Buffing Block 180/180 Packet of 10",
       "sku": "GIUP Buffing Block 180/180 Packet of 10",
-      "price": 8.10,
+      "price": 8.1,
       "description": "10 buffing blocks per pack"
     },
     {
@@ -5121,7 +5091,7 @@
     {
       "name": "Professional Cuticle Scissors, Curved 1466 New",
       "sku": "Professional Cuticle Scissors, Curved 1466 New",
-      "price": 19.70
+      "price": 19.7
     },
     {
       "name": "Professional Spring Scissors, Curved 1468 New",
@@ -5231,7 +5201,7 @@
     {
       "name": "Stamp Lamp",
       "sku": "Stamp Lamp",
-      "price": 6.00
+      "price": 6.0
     }
   ]
 }

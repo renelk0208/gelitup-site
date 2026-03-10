@@ -7661,13 +7661,6 @@ function ProductsModule({ moduleView = 'products' }) {
           { codes: ['SOAK OFF GEL TIPS LONG COFFIN', 'G.T.LONG COFFIN', 'GT LONG COFFIN'], target: 'SOAK OFF GEL TIPS LONG COFFIN' },
           { codes: ['SOAK OFF GEL TIPS MEDIUM SQUARE', 'G.T.MEDIUM SQUARE', 'GT MEDIUM SQUARE'], target: 'SOAK OFF GEL TIPS MEDIUM SQUARE' },
           { codes: ['SOAK OFF GEL TIPS SHORT ALMOND', 'G.T.SHORT ALMOND', 'GT SHORT ALMOND', 'SHORT ALMOND'], target: 'SOAK OFF GEL TIPS SHORT ALMOND' },
-          // Spix & Spex
-          { codes: ['GIUP SS01Kaleidascope','GIUP-SS01Kaleidascope','GIUP-SS01KALEIDASCOPE','SS01'], target: 'SS01 SPIX and SPEX Kaleidascope -HTF' },
-          { codes: ['GIUP SS02Delphinium','GIUP-SS02Delphinium','GIUP-SS02DELPHINIUM','SS02'], target: 'SS02 SPIX and SPEX Delphinium -HTF' },
-          { codes: ['GIUP SS03Giddy Grape','GIUP-SS03Giddy Grape','GIUP-SS03GIDDY-GRAPE','SS03'], target: 'SS03 SPIX and SPEX Giddy Grape -HTF' },
-          { codes: ['GIUP SS04Popping Candy','GIUP-SS04Popping Candy','GIUP-SS04POPPING-CANDY','SS04'], target: 'SS04 SPIX and SPEX Popping Candy -HTF' },
-          { codes: ['GIUP SS05Lemon Sorbet','GIUP-SS05Lemon Sorbet','GIUP-SS05LEMON-SORBET','SS05'], target: 'SS05 SPIX and SPEX Lemon Sorbet -HTF' },
-          { codes: ['GIUP SS06Tusk Tusk','GIUP-SS06Tusk Tusk','GIUP-SS06TUSK-TUSK','SS06'], target: 'SS06 SPIX and SPEX Tusk Tusk -HTF' },
           // Super Flexible Tips
           { codes: ['FLEXI LONG ALMOND', 'FLEXI-LONG-ALMOND', 'Flexi Long Almond', 'flexi long almond', 'Super Flexi Long Almond', 'SUPER FLEXI LONG ALMOND', 'GIUP FLEXI LONG ALMOND'], target: 'FLEXI Soak Off Nail Tips Long Almond -2025' },
           { codes: ['FLEXI SHORT ALMOND', 'FLEXI-SHORT-ALMOND', 'Flexi Short Almond', 'flexi short almond', 'Super Flexi Short Almond', 'SUPER FLEXI SHORT ALMOND', 'GIUP FLEXI SHORT ALMOND'], target: 'FLEXI Soak Off Nail Tips Short Almond -2025' },
