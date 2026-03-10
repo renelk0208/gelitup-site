@@ -4486,6 +4486,11 @@
       "price": 21.29
     },
     {
+      "name": "multi liquid",
+      "sku": "multi liquid",
+      "price": 5.1
+    },
+    {
       "name": "MultiMix Syntholiquid 100ml -HTF",
       "sku": "MultiMix Syntholiquid 100ml -HTF",
       "price": 5.1
@@ -4761,8 +4766,18 @@
       "price": 1.096
     },
     {
+      "name": "Nail Files Buffer 100 180 Purple Sponge",
+      "sku": "Nail Files Buffer 100 180 Purple Sponge",
+      "price": 1.096
+    },
+    {
       "name": "Nail Files 180/180 Pink Sponge",
       "sku": "Nail Files 180/180 Pink Sponge",
+      "price": 1.096
+    },
+    {
+      "name": "Nail Files Buffer 180 180 Pink Sponge",
+      "sku": "Nail Files Buffer 180 180 Pink Sponge",
       "price": 1.096
     },
     {
@@ -4813,6 +4828,12 @@
     {
       "name": "Buffing Block",
       "sku": "Buffing Block",
+      "price": 8.10,
+      "description": "10 buffing blocks per pack"
+    },
+    {
+      "name": "Βuffing block",
+      "sku": "Βuffing block",
       "price": 8.10,
       "description": "10 buffing blocks per pack"
     },
