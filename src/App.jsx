@@ -9295,12 +9295,19 @@ function ProductsModule({ moduleView = 'products' }) {
       })
     }
 
+    // Build a SKU → unit price map from the proforma so Zoho uses portal prices,
+    // not Zoho's own stored list prices, which are almost always different.
+    const itemRates = Object.fromEntries(
+      proformaInvoice.lines.map(line => [normalizeSkuCode(line.sku), line.unitPriceEur]),
+    )
+
     const zohoSyncResult = await sendZohoOrderSync({
       orderId: insertedOrder?.id,
       customerEmail: userData?.user?.email ?? null,
       accountType: userData?.user?.user_metadata?.account_type || null,
       generatedPackageTier: generatedPackageTier || null,
       items: checkoutItems,
+      itemRates,
       totalUnits,
       status: 'received',
       source: 'b2b_portal',

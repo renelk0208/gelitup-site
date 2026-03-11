@@ -11,6 +11,7 @@ interface ZohoOrderPayload {
   customerEmail?: string | null
   generatedPackageTier?: string | null
   items?: string[]
+  itemRates?: Record<string, number>
   totalUnits?: number
   status?: string
   source?: string
@@ -104,7 +105,11 @@ async function resolveZohoAccessToken() {
   return responseJson.access_token as string
 }
 
-function buildLineItems(items: string[], itemMap: Record<string, string>) {
+function buildLineItems(
+  items: string[],
+  itemMap: Record<string, string>,
+  itemRates?: Record<string, number>,
+) {
   const parsed = items
     .map(parseCartLineItem)
     .filter((item) => item.sku && Number.isFinite(item.qty) && item.qty > 0)
@@ -186,10 +191,19 @@ function buildLineItems(items: string[], itemMap: Record<string, string>) {
       const mappedItemId = resolveItemId(item.sku)
       if (!mappedItemId) return null
 
-      return {
+      const lineItem: { item_id: string; quantity: number; rate?: number } = {
         item_id: mappedItemId,
         quantity: item.qty,
       }
+
+      if (itemRates) {
+        const rate = itemRates[item.sku]
+        if (rate != null && Number.isFinite(rate) && rate > 0) {
+          lineItem.rate = rate
+        }
+      }
+
+      return lineItem
     })
     .filter(Boolean)
 
@@ -361,7 +375,7 @@ serve(async (req) => {
     console.log(`[zoho-sync] itemMapRows.length=${allRows.length}`)
     const itemMap = Object.fromEntries(allRows.map(r => [r.sku, r.item_id]))
 
-    const { parsed, lineItems, unmappedSkus } = buildLineItems(payload.items, itemMap)
+    const { parsed, lineItems, unmappedSkus } = buildLineItems(payload.items, itemMap, payload.itemRates)
     console.log(`[zoho-sync] parsed=${parsed.length} mapped=${lineItems.length} unmapped=${unmappedSkus.length} skus=${JSON.stringify(parsed.map(p=>p.sku))}`)
     if (!lineItems.length) {
       return new Response(JSON.stringify({
