@@ -1135,7 +1135,7 @@ function buildProformaFromCart({
   const selectedLines = selectedCodes.map((code) => {
     const normalized = normalizeSkuCode(code)
     const product = productMap.get(normalized)
-    const unitPriceEur = priceMap?.get(normalized)?.price ?? getUnitPriceEurForSku(normalized)
+    const unitPriceEur = product?.price ?? priceMap?.get(normalized)?.price ?? getUnitPriceEurForSku(normalized)
     const qty = Number(itemQtys?.[code] || itemQtys?.[normalized] || 1)
 
     return {
@@ -1149,7 +1149,7 @@ function buildProformaFromCart({
   })
 
   const packageLines = packageCartItems.map((item) => {
-    const unitPriceEur = priceMap?.get(normalizeSkuCode(item.sku))?.price ?? getUnitPriceEurForSku(item.sku)
+    const unitPriceEur = item.price ?? priceMap?.get(normalizeSkuCode(item.sku))?.price ?? getUnitPriceEurForSku(item.sku)
     const qty = Number(item.qty || 0)
     return {
       sku: item.sku,
