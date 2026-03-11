@@ -616,6 +616,18 @@ async function main() {
     { codes: ['SUGARY GLITTER 05'], target: 'Sugary Glitter pigment 3gr 05 -HTF' },
     { codes: ['SUGARY GLITTER 06'], target: 'Sugary Glitter pigment 3gr 06 -HTF' },
     { codes: ['SUGARY GLITTER 07'], target: 'Sugary Glitter pigment 3gr 07 -HTF' },
+    // Brushes
+    { codes: ['SKINNY LINER 5 7', 'SKINNY LINER 5-7', 'SKINNY LINER NO5', 'SKINNY LINER NO 5'], target: 'Skinny Liner Brush 5-7' },
+    { codes: ['SKINNY LINER 9 11', 'SKINNY LINER 9-11', 'SKINNY LINER NO9', 'SKINNY LINER NO 9'], target: 'Skinny Liner Brush 9-11' },
+    // Nail Wipes
+    { codes: ['NAIL WIPES', 'NAIL WIPES 1000', 'NAIL WIPES 1000S'], target: 'Nail Wipes 1000s' },
+    // Cobweb Gel
+    { codes: ['COBWEB BLACK', 'COBWEB GEL BLACK'], target: 'Cobweb Gel Black -HTF' },
+    { codes: ['COBWEB WHITE', 'COBWEB GEL WHITE'], target: 'Cobweb Gel White -HTF' },
+    // FLEXI Tips (2025 line — Zoho stores with 'LL' prefix and singular 'TIP')
+    { codes: ['FLEXI SOAK OFF NAIL TIPS LONG ALMOND -2025', 'FLEXI SOAK OFF NAIL TIP LONG ALMOND -2025', 'FLEXI LONG ALMOND -2025'], target: 'LLFlexi Soak Off Nail Tip Long Almond -2025' },
+    // Natural nail sticks
+    { codes: ['NATURAL NAIL STICKS', 'NATURAL NAIL STICKS WITH RING', 'NAIL STICKS NATURAL'], target: 'Nail Sticks Natural with Ring' },
   ]
   let extendedHits = 0
   for (const { codes, target } of PORTAL_EXTENDED_ALIASES) {

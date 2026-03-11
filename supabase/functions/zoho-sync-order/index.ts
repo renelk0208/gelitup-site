@@ -116,6 +116,12 @@ function buildLineItems(items: string[], itemMap: Record<string, string>) {
   function resolveItemId(sku: string): string | undefined {
     if (itemMap[sku]) return itemMap[sku]
 
+    // Handle GIUP-{code} (hyphen separator) — normalise to "GIUP {code}" and re-resolve.
+    // e.g. "GIUP-01" → "GIUP 01", "GIUP-2021" → "GIUP 2021"
+    if (sku.startsWith('GIUP-')) {
+      return resolveItemId('GIUP ' + sku.slice(5))
+    }
+
     // Portal prefixes every product-image-map key with "GIUP " — strip it and
     // re-resolve. Also try compact "GIUP{bare}" (no space) for Zoho SKUs that
     // are stored that way (e.g. "GIUP SB" → Zoho SKU "GIUPSB"),
