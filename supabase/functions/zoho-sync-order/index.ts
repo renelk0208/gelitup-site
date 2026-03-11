@@ -310,24 +310,38 @@ serve(async (req) => {
       })
     }
 
-    // Load item map from DB — fetch all rows once (indexed table, fast query)
+    // Load item map from DB with pagination — PostgREST max_rows is 1000 by default
+    // so we page through all rows in parallel (table has ~13 000+ rows).
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     console.log(`[zoho-sync] supabaseUrl=${supabaseUrl} serviceKeySet=${!!supabaseServiceKey}`)
-    const itemMapResp = await fetch(
-      `${supabaseUrl}/rest/v1/zoho_item_map?select=sku,item_id&limit=20000`,
-      { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}`, 'Accept-Profile': 'public', Prefer: 'count=none' } },
+
+    const PAGE_SIZE = 1000
+    // First, get the exact row count so we can fan out all pages at once
+    const countResp = await fetch(
+      `${supabaseUrl}/rest/v1/zoho_item_map?select=sku&limit=1`,
+      { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}`, Prefer: 'count=exact' } },
     )
-    console.log(`[zoho-sync] itemMap fetch status=${itemMapResp.status}`)
-    if (!itemMapResp.ok) {
-      const errBody = await itemMapResp.text().catch(() => '')
-      throw new Error(`Failed to load item map from database: HTTP ${itemMapResp.status} ${errBody}`)
-    }
-    const itemMapRows = await itemMapResp.json() as Array<{ sku: string; item_id: string }>
-    console.log(`[zoho-sync] itemMapRows.length=${Array.isArray(itemMapRows) ? itemMapRows.length : typeof itemMapRows}`)
-    const itemMap = Object.fromEntries(
-      (Array.isArray(itemMapRows) ? itemMapRows : []).map(r => [r.sku, r.item_id])
-    )
+    const totalCount = parseInt(countResp.headers.get('content-range')?.split('/')[1] ?? '0', 10) || 0
+    const pageCount = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
+    console.log(`[zoho-sync] itemMap totalCount=${totalCount} pages=${pageCount}`)
+
+    const pageOffsets = Array.from({ length: pageCount }, (_, i) => i * PAGE_SIZE)
+    const allRowArrays = await Promise.all(pageOffsets.map(async (offset) => {
+      const url = `${supabaseUrl}/rest/v1/zoho_item_map?select=sku,item_id&limit=${PAGE_SIZE}&offset=${offset}`
+      const resp = await fetch(url, {
+        headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` },
+      })
+      if (!resp.ok) {
+        const errBody = await resp.text().catch(() => '')
+        throw new Error(`Failed to load item map page (offset=${offset}): HTTP ${resp.status} ${errBody}`)
+      }
+      return resp.json() as Promise<Array<{ sku: string; item_id: string }>>
+    }))
+
+    const allRows = allRowArrays.flat()
+    console.log(`[zoho-sync] itemMapRows.length=${allRows.length}`)
+    const itemMap = Object.fromEntries(allRows.map(r => [r.sku, r.item_id]))
 
     const { parsed, lineItems, unmappedSkus } = buildLineItems(payload.items, itemMap)
     console.log(`[zoho-sync] parsed=${parsed.length} mapped=${lineItems.length} unmapped=${unmappedSkus.length} skus=${JSON.stringify(parsed.map(p=>p.sku))}`)
