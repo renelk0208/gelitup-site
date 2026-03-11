@@ -247,6 +247,30 @@ async function main() {
       set.add(`${s}#${n}`)  // also keep "NYP#01" form
     }
 
+    // ── Letter+digit prefix (no #): "MT01 SPOT MY TOP", "NW01 SPOT MY TOP",
+    // "FAN01 -HTF" → "MT01", "MT1", "MT 01" etc.
+    // Portal uses "GIUP MT1", "GIUP NW2" etc.; these get added via the
+    // second-pass "GIUP {key}" step after the full map is built.
+    const alphaNumMatch = stripped.match(/^([A-Z]{2,5})(\d{1,3}[A-Z]?)(?:\s|$)/i)
+    if (alphaNumMatch) {
+      const s = alphaNumMatch[1].toUpperCase()
+      const n = alphaNumMatch[2].toUpperCase()
+      const numM = n.match(/^(\d+)([A-Z]?)$/)
+      const nums = numM ? numVariants(numM[1], numM[2] || '') : [n]
+      nums.forEach(p => { set.add(`${s}${p}`); set.add(`${s} ${p}`) })
+    }
+
+    // ── GEL.IT.UP R-series: "GEL.IT.UP 1 R01 11ML -HTF" → "R01", "R1", "R 01"
+    // Portal uses "GIUP R01" etc.; GIUP aliases added via second pass.
+    const gelitupMatch = stripped.match(/^GEL\.IT\.UP\s+\d+\s+([A-Z]+)(\d+[A-Z]?)\s/i)
+    if (gelitupMatch) {
+      const s = gelitupMatch[1].toUpperCase()
+      const n = gelitupMatch[2].toUpperCase()
+      const numM = n.match(/^(\d+)([A-Z]?)$/)
+      const nums = numM ? numVariants(numM[1], numM[2] || '') : [n]
+      nums.forEach(p => { set.add(`${s}${p}`); set.add(`${s} ${p}`) })
+    }
+
     return Array.from(set)
   }
 
@@ -282,6 +306,43 @@ async function main() {
   } else if (noSku.length) {
     console.log(`Items without SKU: ${noSku.length} (run --verbose to list them)`)
   }
+
+  // ── GIUP-prefix second pass ────────────────────────────────────────────────
+  // The B2B portal prefixes all product image-map codes with "GIUP ".
+  // For every short-code key already in the map (no spaces, no existing GIUP
+  // prefix), also register "GIUP {key}" so that portal SKUs like "GIUP N004",
+  // "GIUP FAN01", "GIUP MT1" resolve automatically. First-writer wins, so any
+  // real Zoho SKU that already starts with "GIUP" is never overwritten.
+  const snapshotKeys = Object.keys(itemMap)
+  for (const k of snapshotKeys) {
+    if (k.startsWith('GIUP')) continue   // skip keys already prefixed
+    if (k.includes(' ')) continue        // skip full descriptive names
+    const prefixed = `GIUP ${k}`
+    if (!(prefixed in itemMap)) itemMap[prefixed] = itemMap[k]
+  }
+
+  // ── Static portal-code aliases ─────────────────────────────────────────────
+  // Portal codes in product-image-map.json whose short-hand doesn't follow any
+  // systematic naming convention. Map them explicitly to their Zoho item key.
+  const PORTAL_STATIC_ALIASES = {
+    'SATMAT': 'SATIN MATT RS TOP 15 ML',   // Satin Matt RS top coat
+    'WOTC':   'WIPE OFF TOP',               // Wipe-Off Top Coat (11ml)
+    'NWT':    'NON WIPE TOP COAT 11ML',     // Non-Wipe Top Coat 11ml
+    'FFF':    'FFF WHITE YEARS AHEAD',      // Gel polish FFF White Years Ahead
+    'SB':     'GIUPSB',                     // Superbond — Zoho SKU is "GIUPSB"
+  }
+  let staticHits = 0
+  for (const [code, target] of Object.entries(PORTAL_STATIC_ALIASES)) {
+    const itemId = itemMap[normSku(target)] ?? itemMap[target]
+    if (!itemId) {
+      console.warn(`  ! Static alias "${code}" → "${target}": target key not found in map — skipping`)
+      continue
+    }
+    for (const alias of [code, `GIUP ${code}`]) {
+      if (!(alias in itemMap)) { itemMap[alias] = itemId; staticHits++ }
+    }
+  }
+  if (staticHits) console.log(`Static portal aliases added: ${staticHits}`)
 
   checkCoverage(itemMap)
 

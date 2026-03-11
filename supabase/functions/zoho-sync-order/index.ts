@@ -116,6 +116,18 @@ function buildLineItems(items: string[], itemMap: Record<string, string>) {
   function resolveItemId(sku: string): string | undefined {
     if (itemMap[sku]) return itemMap[sku]
 
+    // Portal prefixes every product-image-map key with "GIUP " — strip it and
+    // re-resolve. Also try compact "GIUP{bare}" (no space) for Zoho SKUs that
+    // are stored that way (e.g. "GIUP SB" → Zoho SKU "GIUPSB"),
+    // and hyphen form "GIUP-{bare}" for B2B-exclusive items like "GIUP-B2BRED0001".
+    if (sku.startsWith('GIUP ')) {
+      const bare = sku.slice(5)
+      if (itemMap[bare]) return itemMap[bare]
+      if (itemMap[`GIUP${bare}`]) return itemMap[`GIUP${bare}`]
+      if (itemMap[`GIUP-${bare}`]) return itemMap[`GIUP-${bare}`]
+      return resolveItemId(bare)
+    }
+
     const stripped = stripVariantSuffix(sku)
     if (stripped !== sku && itemMap[stripped]) return itemMap[stripped]
 
