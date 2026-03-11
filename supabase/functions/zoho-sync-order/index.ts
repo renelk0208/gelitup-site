@@ -313,20 +313,28 @@ serve(async (req) => {
     // Load item map from DB — fetch all rows once (indexed table, fast query)
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    console.log(`[zoho-sync] supabaseUrl=${supabaseUrl} serviceKeySet=${!!supabaseServiceKey}`)
     const itemMapResp = await fetch(
       `${supabaseUrl}/rest/v1/zoho_item_map?select=sku,item_id&limit=20000`,
-      { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}`, 'Accept-Profile': 'public' } },
+      { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}`, 'Accept-Profile': 'public', Prefer: 'count=none' } },
     )
+    console.log(`[zoho-sync] itemMap fetch status=${itemMapResp.status}`)
     if (!itemMapResp.ok) {
-      throw new Error(`Failed to load item map from database: HTTP ${itemMapResp.status}`)
+      const errBody = await itemMapResp.text().catch(() => '')
+      throw new Error(`Failed to load item map from database: HTTP ${itemMapResp.status} ${errBody}`)
     }
     const itemMapRows = await itemMapResp.json() as Array<{ sku: string; item_id: string }>
-    const itemMap = Object.fromEntries(itemMapRows.map(r => [r.sku, r.item_id]))
+    console.log(`[zoho-sync] itemMapRows.length=${Array.isArray(itemMapRows) ? itemMapRows.length : typeof itemMapRows}`)
+    const itemMap = Object.fromEntries(
+      (Array.isArray(itemMapRows) ? itemMapRows : []).map(r => [r.sku, r.item_id])
+    )
 
     const { parsed, lineItems, unmappedSkus } = buildLineItems(payload.items, itemMap)
+    console.log(`[zoho-sync] parsed=${parsed.length} mapped=${lineItems.length} unmapped=${unmappedSkus.length} skus=${JSON.stringify(parsed.map(p=>p.sku))}`)
     if (!lineItems.length) {
       return new Response(JSON.stringify({
-        error: 'No mapped line items. Ensure zoho_item_map table is populated (run supabase/sql/create_zoho_item_map.sql).',
+        error: `No mapped line items (itemMapSize=${Object.keys(itemMap).length}). Ensure zoho_item_map table is populated.`,
+        itemMapSize: Object.keys(itemMap).length,
         unmappedSkus,
       }), {
         status: 422,
