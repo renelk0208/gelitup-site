@@ -310,13 +310,23 @@ serve(async (req) => {
       })
     }
 
-    const rawItemMap = Deno.env.get('ZOHO_BOOKS_ITEM_MAP_JSON') || '{}'
-    const itemMap = JSON.parse(rawItemMap) as Record<string, string>
+    // Load item map from DB table (too large for a Supabase secret)
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const itemMapResp = await fetch(
+      `${supabaseUrl}/rest/v1/zoho_item_map?select=sku,item_id&limit=20000`,
+      { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } },
+    )
+    if (!itemMapResp.ok) {
+      throw new Error(`Failed to load item map from database: HTTP ${itemMapResp.status}`)
+    }
+    const itemMapRows = await itemMapResp.json() as Array<{ sku: string; item_id: string }>
+    const itemMap = Object.fromEntries(itemMapRows.map(r => [r.sku, r.item_id]))
 
     const { parsed, lineItems, unmappedSkus } = buildLineItems(payload.items, itemMap)
     if (!lineItems.length) {
       return new Response(JSON.stringify({
-        error: 'No mapped line items. Configure ZOHO_BOOKS_ITEM_MAP_JSON with SKU -> item_id entries.',
+        error: 'No mapped line items. Ensure zoho_item_map table is populated (run supabase/sql/create_zoho_item_map.sql).',
         unmappedSkus,
       }), {
         status: 422,
@@ -327,7 +337,7 @@ serve(async (req) => {
     const allowPartialItemMap = readBooleanEnv(Deno.env.get('ZOHO_ALLOW_PARTIAL_ITEM_MAP'), false)
     if (unmappedSkus.length && !allowPartialItemMap) {
       return new Response(JSON.stringify({
-        error: 'Unmapped SKUs detected. Sync aborted to prevent partial Zoho order. Update ZOHO_BOOKS_ITEM_MAP_JSON.',
+        error: 'Unmapped SKUs detected. Sync aborted to prevent partial Zoho order. Re-run create_zoho_item_map.sql to refresh.',
         totalParsedItems: parsed.length,
         mappedItems: lineItems.length,
         unmappedItems: unmappedSkus.length,

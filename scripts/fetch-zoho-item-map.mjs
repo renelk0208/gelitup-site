@@ -87,7 +87,7 @@ async function fetchAllItems(accessToken, orgId) {
   let page = 1
 
   while (true) {
-    const url = new URL('/items', booksBase)
+    const url = new URL(booksBase.replace(/\/?$/, '') + '/items')
     url.searchParams.set('organization_id', orgId)
     url.searchParams.set('page', String(page))
     url.searchParams.set('per_page', '200')
