@@ -628,6 +628,10 @@ async function main() {
     { codes: ['FLEXI SOAK OFF NAIL TIPS LONG ALMOND -2025', 'FLEXI SOAK OFF NAIL TIP LONG ALMOND -2025', 'FLEXI LONG ALMOND -2025'], target: 'LLFlexi Soak Off Nail Tip Long Almond -2025' },
     // Natural nail sticks
     { codes: ['NATURAL NAIL STICKS', 'NATURAL NAIL STICKS WITH RING', 'NAIL STICKS NATURAL'], target: 'Nail Sticks Natural with Ring' },
+    // Nail Clips single
+    { codes: ['NAIL CLIPS DUAL FORM SINGLE', 'NAIL CLIPS DUAL FORMS SINGLE', 'NAIL CLIPS DUAL FORMS PACK OF SINGLE'], target: 'Nail Clips Dual Forms Clear' },
+    // Salt of the 7 Seas 370g (Zoho only has 370g OLD)
+    { codes: ['SALT OF THE 7 SEAS FOOT SCRUB 370G NEW', 'SALT OF THE 7 SEAS FOOT SCRUB 370G'], target: 'Salt of the 7 Seas Foot Scrub 370g OLD' },
   ]
   let extendedHits = 0
   for (const { codes, target } of PORTAL_EXTENDED_ALIASES) {
