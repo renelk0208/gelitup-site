@@ -310,12 +310,12 @@ serve(async (req) => {
       })
     }
 
-    // Load item map from DB table (too large for a Supabase secret)
+    // Load item map from DB — fetch all rows once (indexed table, fast query)
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const itemMapResp = await fetch(
-      `${supabaseUrl}/rest/v1/zoho_item_map?select=sku,item_id&limit=20000`,
-      { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } },
+      `${supabaseUrl}/rest/v1/zoho_item_map?select=sku,item_id&limit=10000`,
+      { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}`, 'Accept-Profile': 'public' } },
     )
     if (!itemMapResp.ok) {
       throw new Error(`Failed to load item map from database: HTTP ${itemMapResp.status}`)

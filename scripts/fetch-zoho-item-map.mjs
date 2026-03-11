@@ -250,11 +250,17 @@ async function main() {
 
   for (const item of items) {
     const sku = (item.sku || '').trim()
-    if (!sku) {
-      noSku.push(item.name || item.item_id)
+    // For items with no SKU, fall back to the item name so that HTF products
+    // (whose SKU field is blank in Zoho) are still indexed by their name.
+    const keySource = sku || (item.name || '').trim()
+    if (!keySource) {
+      noSku.push(item.item_id)
       continue
     }
-    for (const key of aliases(sku)) {
+    if (!sku) {
+      noSku.push(item.name || item.item_id)
+    }
+    for (const key of aliases(keySource)) {
       if (key && !(key in itemMap)) {
         itemMap[key] = item.item_id
       }
