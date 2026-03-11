@@ -212,7 +212,16 @@ async function main() {
     if (shortCode) {
       set.add(shortCode)
       const num = shortCode.match(/^(\d+)([A-Z]?)$/)
-      if (num) numVariants(num[1], num[2] || '').forEach(k => set.add(k))
+      if (num) {
+        numVariants(num[1], num[2] || '').forEach(k => set.add(k))
+        // ── GIUP alias: portal image-map keys use "GIUP {N}" for solid gel colours
+        // e.g. "11 Nimbus -HTF" must also resolve as "GIUP 11" / "GIUP11" / "GIUP 011"
+        // Safe: first-writer wins, so real GIUP #N items (with SKU) take precedence.
+        numVariants(num[1], num[2] || '').forEach(p => {
+          set.add(`GIUP ${p}`)
+          set.add(`GIUP${p}`)
+        })
+      }
     }
 
     // ── Series+# prefix: "PMA #1 Champagne Blizzard" → "PMA 1", "PMA 01", "PMA1", "PMA01" ──
