@@ -314,7 +314,7 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const itemMapResp = await fetch(
-      `${supabaseUrl}/rest/v1/zoho_item_map?select=sku,item_id&limit=10000`,
+      `${supabaseUrl}/rest/v1/zoho_item_map?select=sku,item_id&limit=20000`,
       { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}`, 'Accept-Profile': 'public' } },
     )
     if (!itemMapResp.ok) {
