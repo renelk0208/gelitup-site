@@ -5768,11 +5768,15 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
           </div>
         )}
 
-        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs sm:p-4">
+        <NavLink
+          to={email ? `/portal/forgot-password?email=${encodeURIComponent(email)}` : '/portal/forgot-password'}
+          className="mt-4 block w-full rounded-lg border-2 border-rose-500 px-4 py-2.5 text-center text-sm font-semibold text-rose-600 transition hover:bg-rose-50"
+        >
+          Forgot password? Reset it here
+        </NavLink>
+
+        <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs sm:p-4">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <NavLink to="/portal/forgot-password" className="font-medium text-slate-700 hover:text-slate-900">
-              Forgot password?
-            </NavLink>
             <NavLink to="/?portal=admin" className="font-medium text-slate-700 hover:text-slate-900">
               Admin login
             </NavLink>
@@ -13358,9 +13362,14 @@ function App() {
     }
 
     if ((isAlreadyRegistered || isExistingAccount) && !canSignInNow) {
+      // Account exists but the new password didn't match — silently send a reset email
+      // so the user can recover without seeing a confusing error.
+      await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+        redirectTo: `${window.location.origin}/portal/login`,
+      })
       return {
         ok: false,
-        message: 'This account already exists. Use your existing password or reset it via Forgot password.',
+        message: 'An account already exists for this email. We\'ve sent a password reset link to your inbox — check your email (and spam) to set a new password.',
       }
     }
 
