@@ -41,6 +41,8 @@ const DELIVERY_DAYS = {
   'Switzerland': '6', 'Sweden': '6',
 }
 const COUNTRY_MAX_KG = { 'Slovakia': 31.5, 'United Kingdom': 30 }
+// Duplicate DB rows that should never show as separate products — the canonical entry is shown instead
+const SUPPRESSED_PRODUCT_CODES = new Set(['cushion sponge 2', 'CUSHION SPONGE 2'])
 const B2B_PRICE_MULTIPLIER = 1.2
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
@@ -6614,16 +6616,6 @@ function PortalRegister({ onRegister }) {
               </>
             )}
 
-            <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-              Notes
-              <textarea
-                rows={3}
-                value={application.notes}
-                onChange={(event) => setField('notes', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                placeholder="Tell us about your expected monthly volume, brands, or regions."
-              />
-            </label>
           </div>
 
           <label className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
@@ -8057,7 +8049,14 @@ function ProductsModule({ moduleView = 'products' }) {
         ]
         for (const { codes, target } of aliasGroups) {
           const entry = pnLookup(target)
-          if (entry) { for (const c of codes) { if (!map.has(c)) map.set(c, entry) } }
+          if (entry) {
+            for (const c of codes) {
+              const nk = normalizeSkuCode(c)
+              const npk = normalizeProductName(c)
+              if (nk && !map.has(nk)) map.set(nk, entry)
+              if (npk && !map.has(npk)) map.set(npk, entry)
+            }
+          }
         }
         if (mounted) {
           setPriceMap(map)
@@ -8490,6 +8489,7 @@ function ProductsModule({ moduleView = 'products' }) {
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
+      if (SUPPRESSED_PRODUCT_CODES.has(product.code) || SUPPRESSED_PRODUCT_CODES.has((product.name || ''))) return false
       const matchesSearch = product.code.toLowerCase().includes(query.toLowerCase())
         || (product.name || '').toLowerCase().includes(query.toLowerCase())
       const matchesCategory = category === 'All' || product.category === category
