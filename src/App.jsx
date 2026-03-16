@@ -81,6 +81,14 @@ const CATALOGUE_DESCRIPTIONS = new Map([
     'liquid polygel',
     'An innovative liquid polygel in a 15 ml bottle combining the strength of polygel with faster, easier application. Medium viscosity self-leveling formula applied directly from the bottle. Ideal for natural nail reinforcement, quick maintenance and medium-length extensions. Suitable for the no-filing technique. Apply a layer of 5-in-1 Superior Base Clear before use for optimal adhesion. Cures in UV/LED lamps for 90 seconds. Available in 8 shades. HEMA & TPO free.',
   ],
+  [
+    'superbond',
+    'A primer safe for the natural nail. No curing required. Applied to the free edge before the base coat to improve adhesion and provide additional dehydration. Helps ensure longer-lasting results and creates a thin protective film to help protect the nail. Blue Cap: with Acid. Red Cap: Acid-free.',
+  ],
+  [
+    'classic base coat',
+    'Ensures strong adhesion of colour to the nail surface. Provides a flawless result with long-lasting wear.',
+  ],
 ])
 const B2B_PRICE_MULTIPLIER = 1.2
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
