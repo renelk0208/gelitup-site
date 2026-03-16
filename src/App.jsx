@@ -71,6 +71,17 @@ const DISCONTINUED_PRODUCT_CODES = new Set([
 const OUT_OF_STOCK_CODES = new Set([
   // e.g. 'GIUP 01', 'SUPERBOND'
 ])
+// Keys are lowercase substrings matched against the product name (case-insensitive)
+const CATALOGUE_DESCRIPTIONS = new Map([
+  [
+    'brush on builder base',
+    'A thick gel base designed for durability, suitable for reinforcing the natural nail and for slight extensions with a form up to 3 mm. Mainly used for nail biting cases and fragile nails that break easily. Available in various colours and effects.',
+  ],
+  [
+    'liquid polygel',
+    'An innovative liquid polygel in a 15 ml bottle combining the strength of polygel with faster, easier application. Medium viscosity self-leveling formula applied directly from the bottle. Ideal for natural nail reinforcement, quick maintenance and medium-length extensions. Suitable for the no-filing technique. Apply a layer of 5-in-1 Superior Base Clear before use for optimal adhesion. Cures in UV/LED lamps for 90 seconds. Available in 8 shades. HEMA & TPO free.',
+  ],
+])
 const B2B_PRICE_MULTIPLIER = 1.2
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
@@ -3636,6 +3647,11 @@ function FullCataloguePage() {
                       <div className="border-t border-black/10 px-2.5 py-2">
                         <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                         <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
+                        {(() => {
+                          const nameLower = (item.name || '').toLowerCase()
+                          const desc = Array.from(CATALOGUE_DESCRIPTIONS.entries()).find(([key]) => nameLower.includes(key))?.[1]
+                          return desc ? <p className="mt-1.5 break-words text-[11px] leading-relaxed text-black/60">{desc}</p> : null
+                        })()}
                         <div className="mt-2 flex items-center gap-1">
                           <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
                           <p className="break-words text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
