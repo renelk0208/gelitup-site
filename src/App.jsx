@@ -28,9 +28,19 @@ const SHIPPING_ZONES = [
   { zone: 2, rateEur: 0, maxKg: 5, countries: ['Austria', 'Germany', 'Hungary'] },
   { zone: 3, rateEur: 0, maxKg: 5, countries: ['Belgium', 'Italy', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'France', 'Croatia', 'Czech Republic'] },
   { zone: 4, rateEur: 0, maxKg: 5, countries: ['Denmark', 'Spain', 'Luxembourg'] },
-  { zone: 5, rateEur: 0, maxKg: 5, countries: ['Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Finland', 'Sweden'], note: 'incl. Northern Ireland' },
-  { zone: 6, rateEur: 28.00, maxKg: 5, countries: ['United Kingdom'] },
+  { zone: 5, rateEur: 0, maxKg: 5, countries: ['Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Northern Ireland', 'Finland', 'Sweden'] },
+  { zone: 6, rateEur: 28.00, maxKg: 5, countries: ['United Kingdom', 'Norway', 'Switzerland'], note: 'Non-EU — no VAT charged; +BGN 20.00 / €10.22 import admin fee' },
 ]
+const DELIVERY_DAYS = {
+  'Austria': '3–4', 'Belgium': '4–5', 'United Kingdom': '5–6', 'Germany': '4',
+  'Denmark': '5', 'Estonia': '5–6', 'Ireland': '6', 'Spain': '6',
+  'Italy': '4–5', 'Latvia': '5–6', 'Lithuania': '5–6', 'Luxembourg': '4',
+  'Netherlands': '5', 'Norway': '7–8', 'Poland': '4', 'Portugal': '6–7',
+  'Northern Ireland': '6–7', 'Slovakia': '3–4', 'Slovenia': '3–4', 'Hungary': '3',
+  'Finland': '7', 'France': '5', 'Croatia': '4', 'Czech Republic': '4',
+  'Switzerland': '6', 'Sweden': '6',
+}
+const COUNTRY_MAX_KG = { 'Slovakia': 31.5, 'United Kingdom': 30 }
 const B2B_PRICE_MULTIPLIER = 1.2
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
@@ -872,7 +882,7 @@ const navItems = [
   { to: '/distributor-packages', label: 'Distribution Options' },
   { to: '/full-catalogue', label: 'Our Products' },
   { to: '/distributors', label: 'Distributors' },
-  { to: '/become-distributor', label: 'B2B / Distribution Registration', highlight: true },
+  { to: '/become-distributor', label: 'B2B (Salon) / Distributor Registration', highlight: true },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -6100,7 +6110,7 @@ function PortalRegister({ onRegister }) {
             }}
             className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${isB2BOrderFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
           >
-            B2B (Client)
+            B2B / Salon
           </button>
         </div>
 
@@ -9866,26 +9876,19 @@ function ProductsModule({ moduleView = 'products' }) {
                 <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
                 <ul className="mt-1.5 space-y-1 text-[11px] text-slate-600">
                   <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Minimum order:</strong> €{MIN_ORDER_EUR.toFixed(2)} NET (excl. VAT &amp; shipping). Orders below this value are not accepted.</span></li>
-                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong> FREE to all EU zones (Zones 2–5). Zone 6 (UK): €28.00. Final packing list will appear on your invoice.</span></li>
-                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by GEL.IT.UP.</span></li>
+                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong> FREE to all EU zones (Zones 2–5). Zone 6 (UK, Norway, Switzerland): €28.00 — VAT not charged (export); +BGN 20.00 / €10.22 import admin fee applies. Final packing list will appear on your invoice.</span></li>
+                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by Thermitek Ltd.</span></li>
                   <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
                 </ul>
-                <div className="mt-2.5">
-                  <p className="text-[11px] font-semibold text-slate-700">Shipping by Zone — FREE for EU (up to 5 kg)</p>
-                  <div className="mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white text-[11px]">
-                    {SHIPPING_ZONES.map((z) => (
-                      <div key={z.zone} className={`flex items-start gap-2 px-2 py-1.5 ${_zone?.zone === z.zone ? 'bg-fuchsia-50 ring-1 ring-inset ring-fuchsia-300' : 'odd:bg-white even:bg-slate-50'}`}>
-                        <span className="w-14 flex-none font-semibold text-slate-500">Zone {z.zone}</span>
-                        <span className="min-w-0 flex-1 text-slate-500">{z.countries.join(', ')}{z.note ? ` (${z.note})` : ''}</span>
-                        <span className={`flex-none font-bold ${z.rateEur === 0 ? 'text-emerald-600' : 'text-fuchsia-700'}`}>{z.rateEur === 0 ? 'FREE' : `€${z.rateEur.toFixed(2)}`}</span>
-                      </div>
-                    ))}
+                {_zone && (
+                  <div className="mt-2.5 rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-2 text-[11px]">
+                    <p className="font-semibold text-slate-700">Shipping to <span className="text-fuchsia-700">{_dest}</span></p>
+                    <p className="mt-0.5 text-slate-600">Zone {_zone.zone} — <span className={`font-bold ${_zone.rateEur === 0 ? 'text-emerald-600' : 'text-fuchsia-700'}`}>{_zone.rateEur === 0 ? 'FREE' : `€${_zone.rateEur.toFixed(2)}`}</span></p>
+                    {DELIVERY_DAYS[_dest] && <p className="mt-0.5 text-slate-500">Est. delivery: <strong>{DELIVERY_DAYS[_dest]} working days</strong></p>}
+                    {COUNTRY_MAX_KG[_dest] && <p className="mt-0.5 text-slate-500">Max gross weight: <strong>{COUNTRY_MAX_KG[_dest]} kg</strong></p>}
+                    {_zone.note && <p className="mt-1 text-[10px] text-slate-500">{_zone.note}</p>}
                   </div>
-                  {_zone
-                    ? <p className="mt-1 text-[10px] text-fuchsia-700">Your destination ({_dest}) is Zone {_zone.zone} — shipping: {_zone.rateEur === 0 ? 'FREE' : `from €${_zone.rateEur.toFixed(2)}`} (up to 5 kg).</p>
-                    : null
-                  }
-                </div>
+                )}
               </div>
             )
           })()}
@@ -10205,26 +10208,19 @@ function ProductsModule({ moduleView = 'products' }) {
               <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
               <ul className="mt-1.5 space-y-1 text-[11px] text-slate-600">
                 <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Minimum order:</strong> €{MIN_ORDER_EUR.toFixed(2)} NET (excl. VAT &amp; shipping). Orders below this value are not accepted.</span></li>
-                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong> FREE to all EU zones (Zones 2–5). Zone 6 (UK): €28.00. Final packing list will appear on your invoice.</span></li>
-                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by GEL.IT.UP.</span></li>
+                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong> FREE to all EU zones (Zones 2–5). Zone 6 (UK, Norway, Switzerland): €28.00 — VAT not charged (export); +BGN 20.00 / €10.22 import admin fee applies. Final packing list will appear on your invoice.</span></li>
+                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by Thermitek Ltd.</span></li>
                 <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
               </ul>
-              <div className="mt-2.5">
-                <p className="text-[11px] font-semibold text-slate-700">Shipping by Zone — FREE for EU (up to 5 kg)</p>
-                <div className="mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white text-[11px]">
-                  {SHIPPING_ZONES.map((z) => (
-                    <div key={z.zone} className={`flex items-start gap-2 px-2 py-1.5 ${_zone?.zone === z.zone ? 'bg-fuchsia-50 ring-1 ring-inset ring-fuchsia-300' : 'odd:bg-white even:bg-slate-50'}`}>
-                      <span className="w-14 flex-none font-semibold text-slate-500">Zone {z.zone}</span>
-                      <span className="min-w-0 flex-1 text-slate-500">{z.countries.join(', ')}{z.note ? ` (${z.note})` : ''}</span>
-                      <span className={`flex-none font-bold ${z.rateEur === 0 ? 'text-emerald-600' : 'text-fuchsia-700'}`}>{z.rateEur === 0 ? 'FREE' : `€${z.rateEur.toFixed(2)}`}</span>
-                    </div>
-                  ))}
+              {_zone && (
+                <div className="mt-2.5 rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-2 text-[11px]">
+                  <p className="font-semibold text-slate-700">Shipping to <span className="text-fuchsia-700">{_dest}</span></p>
+                  <p className="mt-0.5 text-slate-600">Zone {_zone.zone} — <span className={`font-bold ${_zone.rateEur === 0 ? 'text-emerald-600' : 'text-fuchsia-700'}`}>{_zone.rateEur === 0 ? 'FREE' : `€${_zone.rateEur.toFixed(2)}`}</span></p>
+                  {DELIVERY_DAYS[_dest] && <p className="mt-0.5 text-slate-500">Est. delivery: <strong>{DELIVERY_DAYS[_dest]} working days</strong></p>}
+                  {COUNTRY_MAX_KG[_dest] && <p className="mt-0.5 text-slate-500">Max gross weight: <strong>{COUNTRY_MAX_KG[_dest]} kg</strong></p>}
+                  {_zone.note && <p className="mt-1 text-[10px] text-slate-500">{_zone.note}</p>}
                 </div>
-                {_zone
-                  ? <p className="mt-1 text-[10px] text-fuchsia-700">Your destination ({_dest}) is Zone {_zone.zone} — shipping: {_zone.rateEur === 0 ? 'FREE' : `from €${_zone.rateEur.toFixed(2)}`} (up to 5 kg).</p>
-                  : null
-                }
-              </div>
+              )}
             </div>
           )
         })()}
@@ -12093,11 +12089,146 @@ function BuyerPortal({ onLogout, userName, userEmail }) {
   )
 }
 
+function DistributorModule() {
+  const navigate = useNavigate()
+  const { distributor } = B2B_TIER_ENGINE
+
+  const MOQ_TABLE = [
+    { category: 'Solid Gel Polish (Colours)', moq: '500 pcs combined', note: 'Mix & match colours' },
+    { category: 'Builder Gels / BIAB', moq: '500 pcs combined', note: 'Counts toward total order' },
+    { category: 'Base & Top Coats', moq: '500 pcs combined', note: 'Technical items included' },
+    { category: 'Package: Silver Tier', moq: 'Pod_1 colours + tech essentials', note: 'Pre-built starter pack' },
+    { category: 'Package: Gold Tier', moq: 'Pod_1 + Pod_2 + tech essentials', note: 'Extended range' },
+    { category: 'Package: Platinum Tier', moq: 'All pods (1–4) + tech essentials', note: 'Full catalogue' },
+  ]
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="rounded-2xl border border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 to-purple-50 p-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-600">Account Tier</p>
+        <h2 className="mt-1 text-2xl font-semibold text-slate-900">Distributor Tools</h2>
+        <p className="mt-2 text-sm text-slate-600">
+          Your account is approved at <strong>Distributor tier</strong>. Minimum combined order:{' '}
+          <strong>{distributor.trigger.minUnits} units</strong>.
+        </p>
+        <button
+          type="button"
+          onClick={() => navigate('/portal/dashboard/products')}
+          className="mt-4 inline-flex rounded-lg bg-fuchsia-600 px-5 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-700"
+        >
+          Start / Continue Order →
+        </button>
+      </div>
+
+      {/* MOQ Reference Table */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">MOQ Reference</p>
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-100">
+                <th className="pb-2 text-left font-semibold text-slate-700">Category</th>
+                <th className="pb-2 text-left font-semibold text-slate-700">Min. Order</th>
+                <th className="hidden pb-2 text-left font-semibold text-slate-700 sm:table-cell">Notes</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {MOQ_TABLE.map((row) => (
+                <tr key={row.category}>
+                  <td className="py-2 text-slate-800">{row.category}</td>
+                  <td className="py-2 text-slate-600">{row.moq}</td>
+                  <td className="hidden py-2 text-slate-500 sm:table-cell">{row.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Package Tier Shortcuts */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Pre-Built Package Tiers</p>
+        <p className="mt-2 text-sm text-slate-600">
+          Use the <strong>Sales Manager</strong> panel inside "My Order" to generate Silver, Gold or Platinum packages.
+          Each package is auto-built from the pod catalog with tech essentials included.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          {PACKAGE_TIER_OPTIONS.map((tier) => (
+            <button
+              key={tier}
+              type="button"
+              onClick={() => navigate('/portal/dashboard/products')}
+              className="rounded-xl border border-slate-200 p-4 text-left transition-colors hover:border-fuchsia-300 hover:bg-fuchsia-50"
+            >
+              <p className="text-sm font-semibold text-slate-900">{tier} Tier</p>
+              <p className="mt-1 text-xs text-slate-500">
+                {tier === 'Silver'
+                  ? 'Pod_1 colours + tech essentials'
+                  : tier === 'Gold'
+                    ? 'Pod_1 + Pod_2 + tech essentials'
+                    : 'All pods (Pod_1–4) + tech essentials'}
+              </p>
+              <p className="mt-2 text-xs font-semibold text-fuchsia-600">Generate in My Order →</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Exclusive Add-ons */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Exclusive Distributor Add-ons</p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          {distributor.upsells.map((upsell) => {
+            const discounted = (upsell.basePrice * (1 - upsell.discountPercent / 100)).toFixed(2)
+            return (
+              <div key={upsell.name} className="rounded-xl border border-fuchsia-100 bg-fuchsia-50 p-4">
+                <p className="text-sm font-semibold text-slate-900">{upsell.name}</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  List: €{upsell.basePrice.toFixed(2)}
+                  {' '}|{' '}
+                  <span className="font-semibold text-fuchsia-700">Your price: €{discounted}</span>
+                  <span className="ml-2 rounded bg-fuchsia-200 px-1.5 py-0.5 text-xs font-bold text-fuchsia-800">
+                    -{upsell.discountPercent}%
+                  </span>
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate('/portal/dashboard/products')}
+                  className="mt-3 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white transition duration-300 hover:bg-slate-700"
+                >
+                  Add to Order
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Quick Restock */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Quick Restock</p>
+        <p className="mt-2 text-sm text-slate-600">
+          Trigger a Pod_1 restock in one click — loads all Pod_1 colours into your order.
+        </p>
+        <button
+          type="button"
+          onClick={() => navigate('/portal/dashboard/products?quickRestock=pod_1')}
+          className="mt-3 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-slate-700"
+        >
+          Trigger Pod_1 Restock
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function PortalDashboard({ onLogout }) {
   const location = useLocation()
   const navigate = useNavigate()
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
   const [portalUser, setPortalUser] = useState(null)
+  const [dashboardRole, setDashboardRole] = useState('')
   const [skuRules, setSkuRules] = useState({
     colorSkuSet: new Set(),
     baseSystemSkuSet: new Set(),
@@ -12116,6 +12247,17 @@ function PortalDashboard({ onLogout }) {
       if (data?.user) setPortalUser(data.user)
     })
   }, [])
+
+  useEffect(() => {
+    if (!hasSupabaseConfig || !supabase) return
+    supabase.auth.getUser().then(({ data }) => {
+      const meta = data?.user?.user_metadata || {}
+      const role = String(meta.role || meta.account_type || meta.customer_type || '').trim().toLowerCase()
+      setDashboardRole(role)
+    })
+  }, [])
+
+  const isDistributor = dashboardRole.includes('distributor')
 
   const printComplianceCertificate = useCallback(async () => {
     const { jsPDF } = await import('jspdf')
@@ -12270,12 +12412,13 @@ function PortalDashboard({ onLogout }) {
     () => [
       { key: 'catalog', label: 'Shop' },
       { key: 'products', label: 'My Order' },
+      ...(isDistributor ? [{ key: 'distributor', label: 'Distributor Tools' }] : []),
       { key: 'profile', label: 'My Information' },
       { key: 'orders', label: 'My Orders' },
       { key: 'overview', label: 'Overview' },
       { key: 'support', label: 'Support & Tracking' },
     ],
-    [],
+    [isDistributor],
   )
 
   const activeModuleRaw = modules.find((module) => location.pathname.endsWith(module.key))?.key
@@ -12547,6 +12690,8 @@ function PortalDashboard({ onLogout }) {
           <ProductsModule moduleView={activeModule} />
         ) : activeModule === 'orders' || activeModule === 'support' ? (
           <OrdersModule />
+        ) : activeModule === 'distributor' ? (
+          <DistributorModule />
         ) : (
           <>
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
