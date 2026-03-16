@@ -41,17 +41,12 @@
     {
       "category": "CONSUMABLES",
       "subcategory": "SUPER FLEXIBLE TIPS",
-      "groups": [
-        {
-          "hero": "flexi short square",
-          "swatches": [
-            "flexi long almond",
-            "flexi short almond"
-          ],
-          "mergeAsGallery": true
-        }
-      ],
-      "order": []
+      "groups": [],
+      "order": [
+        "flexi short square",
+        "flexi long almond",
+        "flexi short almond"
+      ]
     },
     {
       "category": "EQUIPMENT",

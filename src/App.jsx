@@ -71,45 +71,6 @@ const DISCONTINUED_PRODUCT_CODES = new Set([
 const OUT_OF_STOCK_CODES = new Set([
   // e.g. 'GIUP 01', 'SUPERBOND'
 ])
-// Keys are lowercase substrings matched against the product name (case-insensitive)
-const CATALOGUE_DESCRIPTIONS = new Map([
-  [
-    'brush on builder base',
-    'A thick gel base designed for durability, suitable for reinforcing the natural nail and for slight extensions with a form up to 3 mm. Mainly used for nail biting cases and fragile nails that break easily. Available in various colours and effects.',
-  ],
-  [
-    'liquid polygel',
-    'An innovative liquid polygel in a 15 ml bottle combining the strength of polygel with faster, easier application. Medium viscosity self-leveling formula applied directly from the bottle. Ideal for natural nail reinforcement, quick maintenance and medium-length extensions. Suitable for the no-filing technique. Apply a layer of 5-in-1 Superior Base Clear before use for optimal adhesion. Cures in UV/LED lamps for 90 seconds. Available in 8 shades. HEMA & TPO free.',
-  ],
-  [
-    'superbond',
-    'A primer safe for the natural nail. No curing required. Applied to the free edge before the base coat to improve adhesion and provide additional dehydration. Helps ensure longer-lasting results and creates a thin protective film to help protect the nail. Blue Cap: with Acid. Red Cap: Acid-free.',
-  ],
-  [
-    'classic base coat',
-    'Ensures strong adhesion of colour to the nail surface. Provides a flawless result with long-lasting wear.',
-  ],
-  [
-    'flexi',
-    'Natural look with a thin cuticle area for a seamless fit. Flexible and durable — bend to absorb stress rather than snapping. Long-lasting wear up to 3–4 weeks. Pre-shaped (almond, coffin, stiletto) for faster application. Lightweight and comfortable. Applied with gel adhesive and soaked off with acetone for less damage. Ideal for thin or sensitive nails.\n\nApplication: Prepare nail, apply dehydrator/primer, select tip size, apply base or extension gel and cure, place tip and flash cure 5–10 sec, full cure 60 sec under UV/LED, lightly file then apply colour and top coat.\n\nTips: Keep adhesive off the skin, avoid over-filing, use high-quality gel adhesive for best adhesion.',
-  ],
-  [
-    'dual form',
-    'Reusable dual forms for nail extensions using MultiMix Synthogel (Polygel). Set contains 120 pieces in various sizes, designed for an optimal fit according to nail size and shape.',
-  ],
-  [
-    'soft gel tip',
-    'An innovative product for easy and fast nail extensions.',
-  ],
-  [
-    'photo perfect cuticle oil',
-    'A dry cuticle oil that leaves no greasy residue. Hydrates and nourishes the skin around the nails and helps support skin regeneration and healing. Non-greasy finish with fast absorption. Made with natural ingredients and a convenient brush applicator. Ideal for nail photography — smooths imperfections for a flawless finish.',
-  ],
-  [
-    'blossom',
-    'Use Flower Power Blossom to easily and quickly create marble effects, flowers, and other nail art designs.',
-  ],
-])
 const B2B_PRICE_MULTIPLIER = 1.2
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
@@ -2278,9 +2239,18 @@ function flattenSectionItems(section) {
 const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   'BASES::SUPERBOND': {
     paragraphs: [
-      'GEL.IT.UP by GIUP® Superbond is an acid-free primer, safe for the natural nail, and it does not require curing.',
+      'GEL.IT.UP by GIUP® Superbond is a primer that is safe for the natural nail and does not require curing.',
       'It is applied to the free edge of the nail before the base coat, ensuring improved adhesion while providing additional dehydration for longer-lasting results.',
       'It also creates a thin protective film on the nail, helping to protect it from damage.',
+    ],
+    listItems: [
+      'Blue Cap — with Acid',
+      'Red Cap — Acid-free',
+    ],
+  },
+  'BASES::CLASSIC BASE COAT': {
+    paragraphs: [
+      'Ensures strong adhesion of colour to the nail surface. Provides a flawless result with long-lasting wear.',
     ],
     listItems: [],
   },
@@ -2603,11 +2573,71 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Finish with a top coat',
     ],
   },
-  'NAIL ART::GIUP BLOSSOM WEBP': {
+  'NAIL ART::BLOSSOM': {
     paragraphs: [
-      'Product description coming soon.',
+      'Use Flower Power Blossom to easily and quickly create marble effects, flowers, and other nail art designs.',
     ],
     listItems: [],
+  },
+  'NAIL ART::AQUARELLE PALETTE': {
+    paragraphs: [
+      '60-colour palette designed for nail art and aquarelle designs. Includes 48 solid matte and 12 shimmer shades.',
+      'Highly pigmented, velvet-textured colours ideal for detailed artwork. Carefully selected shades to help every nail artist achieve perfect results.',
+      'Practical, well-sealed kit that keeps colours secure during transport.',
+    ],
+    listItems: [
+      'Recommended brush: Aquarelle & Nail Art Brush for best results and easier painting',
+    ],
+  },
+  'BUILDER GEL SYSTEMS::LIQUID POLYGEL': {
+    paragraphs: [
+      'An innovative liquid polygel in a 15 ml bottle combining the strength and durability of polygel with faster, easier application.',
+      'Medium viscosity, self-leveling formula applied directly from the bottle with the built-in brush. Ideal for natural nail reinforcement, quick maintenance, and medium-length extensions.',
+      'Suitable for the no-filing technique, reducing service time. Recommended to apply a layer of 5-in-1 Superior Base Clear before use for optimal adhesion.',
+    ],
+    listItems: [
+      'Cures in UV/LED lamps for 90 seconds',
+      'Available in 8 shades',
+      'HEMA & TPO free',
+    ],
+  },
+  'CONSUMABLES::SUPER FLEXIBLE TIPS': {
+    paragraphs: [
+      'Super Flexible Nail Tips offer a natural look with a thin cuticle area for a seamless fit. Flexible and durable — they bend to absorb stress rather than snapping.',
+      'Long-lasting wear up to 3–4 weeks with proper application. Pre-shaped styles available for faster service. Lightweight, comfortable, and ideal for thin or sensitive nails.',
+      'Applied with gel adhesive and soaked off with acetone for minimal damage to the natural nail.',
+    ],
+    listItems: [
+      'Application: Prepare nail, apply dehydrator/primer, select correct tip size',
+      'Apply base or extension gel and cure, place tip and flash cure 5–10 seconds',
+      'Full cure under UV/LED lamp for 60 seconds',
+      'Lightly file if needed, then apply colour and top coat',
+      'Tip: Keep adhesive off the skin and use high-quality gel adhesive for best adhesion',
+    ],
+  },
+  'CONSUMABLES::DUAL FORMS': {
+    paragraphs: [
+      'Reusable dual forms for nail extensions using MultiMix Synthogel (Polygel).',
+      'Set contains 120 pieces in various sizes, designed for an optimal fit according to nail size and shape.',
+    ],
+    listItems: [],
+  },
+  'CONSUMABLES::SOAK OFF GEL TIPS': {
+    paragraphs: [
+      'An innovative product for easy and fast nail extensions.',
+    ],
+    listItems: [],
+  },
+  'NAIL HAND & FOOT CARE::PHOTO PERFECT CUTICLE OIL': {
+    paragraphs: [
+      'A dry cuticle oil in a 15 ml bottle that leaves no greasy residue. Hydrates and nourishes the skin around the nails and helps support skin regeneration and healing.',
+      'Ideal for nail photography — smooths imperfections for a flawless finish without the need for editing.',
+    ],
+    listItems: [
+      'Non-greasy finish with fast absorption',
+      'Made with natural ingredients',
+      'Convenient brush applicator',
+    ],
   },
 }
 
@@ -3677,11 +3707,6 @@ function FullCataloguePage() {
                       <div className="border-t border-black/10 px-2.5 py-2">
                         <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                         <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                        {(() => {
-                          const nameLower = (item.name || '').toLowerCase()
-                          const desc = Array.from(CATALOGUE_DESCRIPTIONS.entries()).find(([key]) => nameLower.includes(key))?.[1]
-                          return desc ? <p className="mt-1.5 break-words text-[11px] leading-relaxed text-black/60">{desc}</p> : null
-                        })()}
                         <div className="mt-2 flex items-center gap-1">
                           <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
                           <p className="break-words text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
