@@ -89,6 +89,26 @@ const CATALOGUE_DESCRIPTIONS = new Map([
     'classic base coat',
     'Ensures strong adhesion of colour to the nail surface. Provides a flawless result with long-lasting wear.',
   ],
+  [
+    'flexi',
+    'Natural look with a thin cuticle area for a seamless fit. Flexible and durable — bend to absorb stress rather than snapping. Long-lasting wear up to 3–4 weeks. Pre-shaped (almond, coffin, stiletto) for faster application. Lightweight and comfortable. Applied with gel adhesive and soaked off with acetone for less damage. Ideal for thin or sensitive nails.\n\nApplication: Prepare nail, apply dehydrator/primer, select tip size, apply base or extension gel and cure, place tip and flash cure 5–10 sec, full cure 60 sec under UV/LED, lightly file then apply colour and top coat.\n\nTips: Keep adhesive off the skin, avoid over-filing, use high-quality gel adhesive for best adhesion.',
+  ],
+  [
+    'dual form',
+    'Reusable dual forms for nail extensions using MultiMix Synthogel (Polygel). Set contains 120 pieces in various sizes, designed for an optimal fit according to nail size and shape.',
+  ],
+  [
+    'soft gel tip',
+    'An innovative product for easy and fast nail extensions.',
+  ],
+  [
+    'photo perfect cuticle oil',
+    'A dry cuticle oil that leaves no greasy residue. Hydrates and nourishes the skin around the nails and helps support skin regeneration and healing. Non-greasy finish with fast absorption. Made with natural ingredients and a convenient brush applicator. Ideal for nail photography — smooths imperfections for a flawless finish.',
+  ],
+  [
+    'blossom',
+    'Use Flower Power Blossom to easily and quickly create marble effects, flowers, and other nail art designs.',
+  ],
 ])
 const B2B_PRICE_MULTIPLIER = 1.2
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
@@ -1926,6 +1946,8 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     '/2113.', '-2113.', '_2113.', ' 2113 ', ' 2113.',
     // Flexi Base Cover / Pink by code
     'GIUP FBCOV', 'GIUP-FBCOV', 'GIUP FBP', 'GIUP-FBP',
+    // Duplicate cushion sponge image — suppressed in favour of the main cushion sponge card
+    'cushion sponge 2',
   ]
   const isDiscontinuedImagePath = (imagePath = '') => {
     const upper = imagePath.toUpperCase()
