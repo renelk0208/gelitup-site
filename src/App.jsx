@@ -41,8 +41,31 @@ const DELIVERY_DAYS = {
   'Switzerland': '6', 'Sweden': '6',
 }
 const COUNTRY_MAX_KG = { 'Slovakia': 31.5, 'United Kingdom': 30 }
-// Duplicate DB rows that should never show as separate products — the canonical entry is shown instead
-const SUPPRESSED_PRODUCT_CODES = new Set(['cushion sponge 2', 'CUSHION SPONGE 2'])
+// Duplicate DB rows whose image should be merged into the canonical product's gallery, then hidden.
+// key = suppressed product code (normalised), value = canonical product name to merge into
+const GALLERY_MERGE_MAP = new Map([
+  ['CUSHION SPONGE 2', 'Ombre Brush and Pinching Tool'],
+])
+// Discontinued / removed products — hidden from the portal entirely
+const DISCONTINUED_PRODUCT_CODES = new Set([
+  'GIUP FBCOV', 'GIUP-FBCOV', 'FBCOV',             // Flexi Base Cover (discontinued)
+  'GIUP FBP', 'GIUP-FBP', 'FBP',                    // Flexi Base Pink (discontinued)
+  // Spot My Tops — entire range removed
+  'GIUP MT1', 'GIUP-MT1', 'MT1', 'MT01',
+  'GIUP MT2', 'GIUP-MT2', 'MT2', 'MT02',
+  'GIUP MT6', 'GIUP-MT6', 'MT6', 'MT06',
+  'GIUP NW1', 'GIUP-NW1', 'NW1', 'NW01',
+  'GIUP NW2', 'GIUP-NW2', 'NW2', 'NW02',
+  'GIUP NW3', 'GIUP-NW3', 'NW3', 'NW03',
+  // Spix & Spex — only SS01, SS02, SS03, SS06 remain; SS04 & SS05 discontinued
+  'GIUP SS04POPPING CANDY', 'GIUP-SS04POPPING-CANDY', 'SS04',
+  'GIUP SS05LEMON SORBET', 'GIUP-SS05LEMON-SORBET', 'SS05',
+  // Discontinued gel polish colours
+  'GIUP 250', 'GIUP-250', '250', 'GIUP250',
+  'GIUP 2113', 'GIUP-2113', '2113', 'GIUP2113',
+  'GIUP 2113O', 'GIUP-2113O', '2113O', 'GIUP2113O',
+  'SFT 2113', 'SFT-2113', 'SFT2113',
+])
 const B2B_PRICE_MULTIPLIER = 1.2
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
@@ -1863,6 +1886,27 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
   if (!payload || typeof payload !== 'object') return []
 
   const blockedCategoryTokens = new Set(['CRACK', 'THERMO', 'CREME DE LA CREME'])
+
+  // Image path tokens for discontinued products — matched against the normalised image path
+  // Format: include enough of the path/filename to uniquely identify the product
+  const discontinuedImageTokens = [
+    // Flexi Base variants (only Clear remains)
+    'FLEXI BASE COVER', 'FLEXI BASE PINK', 'FBCOV', 'FBP',
+    // Spot My Tops — entire range
+    'SPOT MY TOP', 'SPOT MY TOPS',
+    // Spix & Spex SS04 / SS05
+    'SS04', 'SS05', 'POPPING CANDY', 'LEMON SORBET',
+    // Discontinued gel polish colours
+    '/250/', '/250.', '-250.', '_250.', ' 250 ', ' 250.', '\\250.',
+    '/2113O', '/2113 O', '-2113O', '_2113O', ' 2113O',
+    '/2113.', '-2113.', '_2113.', ' 2113 ', ' 2113.',
+    // Flexi Base Cover / Pink by code
+    'GIUP FBCOV', 'GIUP-FBCOV', 'GIUP FBP', 'GIUP-FBP',
+  ]
+  const isDiscontinuedImagePath = (imagePath = '') => {
+    const upper = imagePath.toUpperCase()
+    return discontinuedImageTokens.some(t => upper.includes(t.toUpperCase()))
+  }
   
   // Map certain folders to be subcategories of parent categories
   const categoryRemapping = new Map([
@@ -7652,7 +7696,7 @@ function ProductsModule({ moduleView = 'products' }) {
           { codes: ['GIUP SBCN', 'GIUP-SBCN'], target: '5-in-1 Superior Base 15ml Nude -HTF' },
           { codes: ['GIUP SBCSN', 'GIUP-SBCSN'], target: '5-IN-1 Superior Base 15ml Soft Nude -HTF' },
           { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
-          { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
+          { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1', 'Non Wipe Top Coat Perfect Shape 15ml', 'NON WIPE TOP COAT PERFECT SHAPE'], target: 'Aurora Flakes Non Wipe Top Coat 15ml -HTF' },
           { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
           { codes: ['GIUP-SB-WITH-ACID', 'GIUP SB WITH ACID', 'SB WITH ACID'], target: 'Superbond Nail Dehydrator 11ml - with Acid -HTF' },
           // Dual form / nail tip shapes (image map uses bare shape names)
@@ -8045,7 +8089,7 @@ function ProductsModule({ moduleView = 'products' }) {
           { codes: ['Dual Forms LONG COFFIN', 'DUAL FORMS LONG COFFIN'], target: 'SOAK OFF GEL TIPS LONG COFFIN' },
           { codes: ['Dual Forms MEDIUM SQUARE', 'DUAL FORMS MEDIUM SQUARE'], target: 'SOAK OFF GEL TIPS MEDIUM SQUARE' },
           // Nail Art — cushion sponge (ombre blending tool)
-          { codes: ['cushion sponge', 'cushion sponge 2', 'CUSHION SPONGE'], target: 'Ombre sponge' },
+          { codes: ['cushion sponge', 'cushion sponge 2', 'CUSHION SPONGE', 'ombre sponge', 'OMBRE SPONGE'], target: 'Ombre Brush and Pinching Tool' },
         ]
         for (const { codes, target } of aliasGroups) {
           const entry = pnLookup(target)
@@ -8458,13 +8502,43 @@ function ProductsModule({ moduleView = 'products' }) {
           })
           .filter((item) => Boolean(item.code))
 
+        // Merge gallery images from duplicate rows into canonical products, then drop duplicates
+        const mergedProducts = []
+        const canonicalByName = new Map()
+        for (const product of normalized) {
+          const upperCode = (product.code || '').toUpperCase().trim()
+          const canonicalName = GALLERY_MERGE_MAP.get(upperCode)
+          if (canonicalName) {
+            // queue image to be merged once canonical is found
+            const existing = canonicalByName.get(normalizeSkuCode(canonicalName))
+            if (existing && product.imageUrl) {
+              existing.galleryImages = [...(existing.galleryImages || []), product.imageUrl]
+            } else {
+              // canonical not yet seen — store for deferred merge
+              canonicalByName.set('__PENDING__' + upperCode, { imageUrl: product.imageUrl, target: normalizeSkuCode(canonicalName) })
+            }
+            // do not push this row
+            continue
+          }
+          canonicalByName.set(normalizeSkuCode(product.name || product.code), product)
+          mergedProducts.push(product)
+        }
+        // Apply any pending merges (canonical appeared before duplicate in list)
+        for (const [k, pending] of canonicalByName) {
+          if (!k.startsWith('__PENDING__')) continue
+          const canon = canonicalByName.get(pending.target)
+          if (canon && pending.imageUrl) {
+            canon.galleryImages = [...(canon.galleryImages || []), pending.imageUrl]
+          }
+        }
+
         if (!normalized.length) {
           throw new Error('Feed has no valid products')
         }
 
         if (isMounted) {
-          setProducts(normalized)
-          setFeedMessage(`Loaded ${normalized.length} live products from ${feedUrl ? 'feed' : 'Supabase catalog'}.`)
+          setProducts(mergedProducts)
+          setFeedMessage(`Loaded ${mergedProducts.length} live products from ${feedUrl ? 'feed' : 'Supabase catalog'}.`)
         }
       }
       catch {
@@ -8489,7 +8563,16 @@ function ProductsModule({ moduleView = 'products' }) {
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      if (SUPPRESSED_PRODUCT_CODES.has(product.code) || SUPPRESSED_PRODUCT_CODES.has((product.name || ''))) return false
+      const upperCode = (product.code || '').toUpperCase().trim()
+      const upperSku = (product.sku || '').toUpperCase().trim()
+      const upperName = (product.name || '').toUpperCase().trim()
+      if (DISCONTINUED_PRODUCT_CODES.has(upperCode) || DISCONTINUED_PRODUCT_CODES.has(upperSku)) return false
+      // Catch Spot My Tops by category name or product name
+      if (upperName.includes('SPOT MY TOP') || upperCode.includes('SPOT MY TOP')) return false
+      // Catch any Spix & Spex SS04/SS05 by name
+      if (/\bSS0[45]\b/.test(upperCode) || /\bSS0[45]\b/.test(upperSku) || /\bSS0[45]\b/.test(upperName)) return false
+      // Catch discontinued colours by number token
+      if (/\b(250|2113O?)\b/.test(upperCode) || /\b(250|2113O?)\b/.test(upperSku) || /\b(250|2113O?)\b/.test(upperName)) return false
       const matchesSearch = product.code.toLowerCase().includes(query.toLowerCase())
         || (product.name || '').toLowerCase().includes(query.toLowerCase())
       const matchesCategory = category === 'All' || product.category === category
@@ -9876,7 +9959,14 @@ function ProductsModule({ moduleView = 'products' }) {
                 <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
                 <ul className="mt-1.5 space-y-1 text-[11px] text-slate-600">
                   <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Minimum order:</strong> €{MIN_ORDER_EUR.toFixed(2)} NET (excl. VAT &amp; shipping). Orders below this value are not accepted.</span></li>
-                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong> FREE to all EU zones (Zones 2–5). Zone 6 (UK, Norway, Switzerland): €28.00 — VAT not charged (export); +BGN 20.00 / €10.22 import admin fee applies. Final packing list will appear on your invoice.</span></li>
+                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong><ul className="mt-1 space-y-0.5 pl-1">
+                      <li>Zone 2 (AT, DE, HU): <strong className="text-emerald-600">FREE</strong></li>
+                      <li>Zone 3 (BE, IT, NL, PL, SK, SI, FR, HR, CZ): <strong className="text-emerald-600">FREE</strong></li>
+                      <li>Zone 4 (DK, ES, LU): <strong className="text-emerald-600">FREE</strong></li>
+                      <li>Zone 5 (EE, IE, LV, LT, PT, Northern Ireland, FI, SE): <strong className="text-emerald-600">FREE</strong></li>
+                      <li>Zone 6 (UK, Norway, Switzerland): <strong className="text-fuchsia-700">€28.00</strong> — VAT not charged (export); +BGN 20.00 / €10.22 import admin fee applies.</li>
+                    </ul>
+                    <span className="block mt-0.5">Final packing list will appear on your invoice.</span></span></li>
                   <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by Thermitek Ltd.</span></li>
                   <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
                 </ul>
@@ -10208,7 +10298,14 @@ function ProductsModule({ moduleView = 'products' }) {
               <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
               <ul className="mt-1.5 space-y-1 text-[11px] text-slate-600">
                 <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Minimum order:</strong> €{MIN_ORDER_EUR.toFixed(2)} NET (excl. VAT &amp; shipping). Orders below this value are not accepted.</span></li>
-                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong> FREE to all EU zones (Zones 2–5). Zone 6 (UK, Norway, Switzerland): €28.00 — VAT not charged (export); +BGN 20.00 / €10.22 import admin fee applies. Final packing list will appear on your invoice.</span></li>
+                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong><ul className="mt-1 space-y-0.5 pl-1">
+                    <li>Zone 2 (AT, DE, HU): <strong className="text-emerald-600">FREE</strong></li>
+                    <li>Zone 3 (BE, IT, NL, PL, SK, SI, FR, HR, CZ): <strong className="text-emerald-600">FREE</strong></li>
+                    <li>Zone 4 (DK, ES, LU): <strong className="text-emerald-600">FREE</strong></li>
+                    <li>Zone 5 (EE, IE, LV, LT, PT, Northern Ireland, FI, SE): <strong className="text-emerald-600">FREE</strong></li>
+                    <li>Zone 6 (UK, Norway, Switzerland): <strong className="text-fuchsia-700">€28.00</strong> — VAT not charged (export); +BGN 20.00 / €10.22 import admin fee applies.</li>
+                  </ul>
+                  <span className="block mt-0.5">Final packing list will appear on your invoice.</span></span></li>
                 <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by Thermitek Ltd.</span></li>
                 <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
               </ul>
