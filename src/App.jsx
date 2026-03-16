@@ -1618,41 +1618,6 @@ function DistributorPackagesPage() {
         </div>
       </div>
 
-      {/* BOUTIQUE TIER */}
-      <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #f0c4d0', backgroundColor: '#fdf5f7' }}>
-        <div className="px-6 py-4" style={{ borderBottom: '1px solid #f0c4d0', backgroundColor: '#fdf0f4' }}>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#d4185a' }}>Entry Tier</p>
-          <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#1a1a1a' }}>BOUTIQUE — The Foundation</h2>
-          <p className="mt-1 text-sm" style={{ color: '#a01850' }}>Launch with confidence. The smartest entry point for localized distribution with everything you need to move product and build a client base instantly.</p>
-        </div>
-        <div>
-          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #e8a8b8' }}>
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>Market Focus</p>
-            <p className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>Localized Distribution</p>
-          </div>
-          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #e8a8b8' }}>
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>Product Spectrum</p>
-            <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d4185a' }} />Top 120 Core Shades</li>
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d4185a' }} />200 SKUs — Builder Systems, Brushes &amp; Essentials</li>
-            </ul>
-          </div>
-          <div className="flex items-start gap-4 px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>Support Package</p>
-            <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />Digital Brand Assets</li>
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />Viral Social Media Content</li>
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />EU Regulatory Support</li>
-            </ul>
-          </div>
-        </div>
-        <div className="px-6 py-4" style={{ borderTop: '1px solid #f0c4d0', backgroundColor: '#fdf0f4' }}>
-          <NavLink to="/become-distributor" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Request Boutique Tier Pricing ?
-          </NavLink>
-        </div>
-      </article>
-
       {/* PROFESSIONAL TIER */}
       <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #1a1a1a', backgroundColor: '#ffffff' }}>
         <div className="px-6 py-4" style={{ backgroundColor: '#1a1a1a' }}>
