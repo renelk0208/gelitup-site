@@ -66,6 +66,11 @@ const DISCONTINUED_PRODUCT_CODES = new Set([
   'GIUP 2113O', 'GIUP-2113O', '2113O', 'GIUP2113O',
   'SFT 2113', 'SFT-2113', 'SFT2113',
 ])
+// Temporarily out of stock — shown greyed-out with badge, cannot be added to cart
+// To mark a product OOS: add its code (uppercase) here. Remove to reinstate.
+const OUT_OF_STOCK_CODES = new Set([
+  // e.g. 'GIUP 01', 'SUPERBOND'
+])
 const B2B_PRICE_MULTIPLIER = 1.2
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
@@ -1994,6 +1999,8 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
 
     const categoryBucket = grouped.get(category) || new Map()
     const subcategoryItems = categoryBucket.get(subcategory) || []
+
+    if (isDiscontinuedImagePath(imagePath)) return
 
     const rawFolder = (segments[segments.length - 2] || '').toUpperCase()
     const solidGelFlatFolders = { NUDE: 'Nude', FRENCH: 'French', PASTEL: 'Pastel', RONE: 'GIUP1' }
@@ -6822,6 +6829,9 @@ function ProductsModule({ moduleView = 'products' }) {
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
   const [checkoutMessage, setCheckoutMessage] = useState('')
   const [checkoutError, setCheckoutError] = useState('')
+  // Product status from spreadsheet (product-status.csv)
+  const [oosFromSheet, setOosFromSheet] = useState(new Set())
+  const [discontinuedFromSheet, setDiscontinuedFromSheet] = useState(new Set())
   const [orderInboxEmailStatus, setOrderInboxEmailStatus] = useState('')
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('All')
@@ -7618,6 +7628,31 @@ function ProductsModule({ moduleView = 'products' }) {
     return () => {
       mounted = false
     }
+  }, [])
+
+  // Load product-status.csv — edit this file in Excel/Google Sheets to manage availability
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      try {
+        const res = await fetch('/gelitup-content/product-status.csv')
+        if (!res.ok) return
+        const text = await res.text()
+        const oos = new Set()
+        const disc = new Set()
+        text.split('\n').slice(1).forEach(line => {
+          const cols = line.split(',')
+          const code = (cols[0] || '').trim().toUpperCase()
+          const status = (cols[2] || '').trim().toLowerCase()
+          if (!code || code === 'CODE') return
+          if (status === 'out_of_stock') oos.add(code)
+          else if (status === 'discontinued') disc.add(code)
+        })
+        if (mounted) { setOosFromSheet(oos); setDiscontinuedFromSheet(disc) }
+      } catch { /* optional file */ }
+    }
+    void load()
+    return () => { mounted = false }
   }, [])
 
   // Load B2B price list (public/gelitup-content/b2b-price-list.json)
@@ -8566,7 +8601,9 @@ function ProductsModule({ moduleView = 'products' }) {
       const upperCode = (product.code || '').toUpperCase().trim()
       const upperSku = (product.sku || '').toUpperCase().trim()
       const upperName = (product.name || '').toUpperCase().trim()
+      // Discontinued check (code + sheet)
       if (DISCONTINUED_PRODUCT_CODES.has(upperCode) || DISCONTINUED_PRODUCT_CODES.has(upperSku)) return false
+      if (discontinuedFromSheet.has(upperCode) || discontinuedFromSheet.has(upperSku)) return false
       // Catch Spot My Tops by category name or product name
       if (upperName.includes('SPOT MY TOP') || upperCode.includes('SPOT MY TOP')) return false
       // Catch any Spix & Spex SS04/SS05 by name
@@ -8579,7 +8616,7 @@ function ProductsModule({ moduleView = 'products' }) {
       const matchesSelected = !showSelectedOnly || selectedCodes.includes(product.code)
       return matchesSearch && matchesCategory && matchesSelected
     })
-  }, [category, products, query, selectedCodes, showSelectedOnly, priceMap])
+  }, [category, products, query, selectedCodes, showSelectedOnly, priceMap, oosFromSheet, discontinuedFromSheet])
 
   // Group filtered products by category for sectioned display
   const groupedFilteredProducts = useMemo(() => {
@@ -10906,12 +10943,17 @@ function ProductsModule({ moduleView = 'products' }) {
                     {visibleProducts.map(product => {
                       const selected = selectedCodes.includes(product.code)
                       const qty = itemQtys[product.code] || 1
+                      const upperCode = (product.code || '').toUpperCase().trim()
+                      const upperSku = (product.sku || '').toUpperCase().trim()
+                      const isOos = OUT_OF_STOCK_CODES.has(upperCode) || OUT_OF_STOCK_CODES.has(upperSku)
+                        || oosFromSheet.has(upperCode) || oosFromSheet.has(upperSku)
                       return (
-                        <div key={product.code} className="flex min-w-0 flex-col overflow-hidden bg-white" style={selected ? { outline: '2px solid #c8386e', outlineOffset: '-2px' } : {}}>
+                        <div key={product.code} className={`flex min-w-0 flex-col overflow-hidden bg-white${isOos ? ' opacity-50' : ''}`} style={selected && !isOos ? { outline: '2px solid #c8386e', outlineOffset: '-2px' } : {}}>
                           {/* image */}
-                          <div className="relative aspect-square w-full cursor-pointer bg-slate-50" onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}>
+                          <div className="relative aspect-square w-full cursor-pointer bg-slate-50" onClick={() => !isOos && product.imageUrl && setLightboxUrl(product.imageUrl)}>
                             {product.imageUrl && <img src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />}
-                            {selected && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
+                            {isOos && <span className="absolute inset-x-0 bottom-0 bg-slate-700/70 py-0.5 text-center text-[9px] font-bold uppercase tracking-wide text-white">Out of Stock</span>}
+                            {selected && !isOos && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
                           </div>
                           {product.galleryImages?.length > 0 && (
                             <div className="flex gap-0.5 border-t border-slate-100 bg-white px-1 py-1">
@@ -10926,7 +10968,9 @@ function ProductsModule({ moduleView = 'products' }) {
                             {product.price != null && <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{Number(product.price).toFixed(2)}</p>}
                           </div>
                           {/* action */}
-                          {selected ? (
+                          {isOos ? (
+                            <div className="mt-auto border-t py-1 text-center text-[10px] font-semibold text-slate-400" style={{ borderColor: '#f0e8f0' }}>Out of Stock</div>
+                          ) : selected ? (
                             <div className="mt-auto flex items-center justify-center gap-1 border-t px-1 py-1" style={{ borderColor: '#fde8f0' }}>
                               <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(p => ({...p, [product.code]: q})) }} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>-</button>
                               <span className="w-4 text-center text-[10px] font-bold">{qty}</span>
