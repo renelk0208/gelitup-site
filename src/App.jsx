@@ -6319,6 +6319,10 @@ function PortalRegister({ onRegister }) {
           if (result.loginEmail) setLoginEmail(result.loginEmail)
           setIsDistributorModal(!result.loginEmail)
           setShowWelcomeModal(true)
+
+          // Fire GTM generate_lead event on successful registration
+          window.dataLayer = window.dataLayer || []
+          window.dataLayer.push({ event: 'generate_lead' })
         }}>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block text-sm font-medium text-slate-700 md:col-span-2">
