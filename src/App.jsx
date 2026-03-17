@@ -6134,6 +6134,7 @@ function PortalRegister({ onRegister }) {
   const [marketingConsent, setMarketingConsent] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false)
 
   const [buyerForm, setBuyerForm] = useState({ email: '', password: '', confirmPassword: '', fullName: '' })
   const [buyerSubmitting, setBuyerSubmitting] = useState(false)
@@ -6314,8 +6315,8 @@ function PortalRegister({ onRegister }) {
             return
           }
 
-          setSuccessMessage(result.message || 'Application submitted and marked as pending approval. You will be notified by email after review.')
           if (result.loginEmail) setLoginEmail(result.loginEmail)
+          setShowWelcomeModal(true)
         }}>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block text-sm font-medium text-slate-700 md:col-span-2">
@@ -6740,14 +6741,40 @@ function PortalRegister({ onRegister }) {
         </form>
 
         {errorMessage && <p className="mt-2 text-xs text-rose-600">{errorMessage}</p>}
-        {successMessage && <p className="mt-2 text-xs text-emerald-700">{successMessage}</p>}
-        {loginEmail && (
-          <NavLink
-            to={`/portal/login?mode=create-password&email=${encodeURIComponent(loginEmail)}`}
-            className="mt-3 block w-full rounded-lg bg-slate-900 px-4 py-2 text-center text-sm font-semibold text-white"
-          >
-            Create your login password →
-          </NavLink>
+
+        {showWelcomeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+            <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl text-center">
+              <div className="mb-4 text-5xl">🎉</div>
+              <h2 className="text-xl font-bold text-slate-900">Welcome to the GEL.IT.UP B2B Portal!</h2>
+              <p className="mt-3 text-sm text-slate-600 leading-relaxed">
+                Thank you for registering with us.<br />
+                Your B2B profile is all set — you can log in immediately.
+              </p>
+              {loginEmail ? (
+                <NavLink
+                  to={`/portal/login?mode=create-password&email=${encodeURIComponent(loginEmail)}`}
+                  className="mt-6 block w-full rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+                >
+                  Create your login password &amp; access portal →
+                </NavLink>
+              ) : (
+                <NavLink
+                  to="/portal/login"
+                  className="mt-6 block w-full rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+                >
+                  Go to Login →
+                </NavLink>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowWelcomeModal(false)}
+                className="mt-3 text-xs text-slate-400 hover:text-slate-600 underline"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         )}
 
         <div className="mt-4 text-xs text-slate-600">
