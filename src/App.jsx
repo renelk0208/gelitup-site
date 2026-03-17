@@ -915,13 +915,13 @@ const navItems = [
   { to: '/become-distributor', label: 'B2B (Salon) / Distributor Registration', highlight: true },
 ]
 
-const SILVER_MAINTENANCE_SKUS = [
+const PROFESSIONAL_MAINTENANCE_SKUS = [
   'GIUP-MNT-SB01 — Superbond Primer',
   'GIUP-MNT-5C01 — 5-in-1 Clear Builder',
   'GIUP-MNT-NW01 — Non-Wipe Top Coat',
 ]
 
-const SILVER_CORE_30_COLORS = [
+const PROFESSIONAL_CORE_COLORS = [
   'GIUP-COL-01 — Ice Ice Baby',
   'GIUP-COL-102 — Marsh Mallow',
   'GIUP-COL-05 — Snow Queen',
@@ -954,7 +954,7 @@ const SILVER_CORE_30_COLORS = [
   'GIUP-COL-F01 — Foil Gel Adhesive',
 ]
 
-const GOLD_BUILDER_SKUS = [
+const AUTHORITY_BUILDER_SKUS = [
   'GIUP-BLD-3IN1-PK01 — 3-in-1 Builder Gel Pink Soft',
   'GIUP-BLD-3IN1-PK02 — 3-in-1 Builder Gel Pink Medium',
   'GIUP-BLD-3IN1-PK03 — 3-in-1 Builder Gel Pink Hard',
@@ -963,7 +963,7 @@ const GOLD_BUILDER_SKUS = [
   'GIUP-BLD-3IN1-CV03 — 3-in-1 Builder Gel Cover Deep',
 ]
 
-const GOLD_MODERN_30_COLORS = [
+const AUTHORITY_MODERN_COLORS = [
   'GIUP-COL-2032 — Salt Water Toffee',
   'GIUP-COL-2035 — Scuubie',
   'GIUP-COL-2039 — Coral Reef',
@@ -996,7 +996,7 @@ const GOLD_MODERN_30_COLORS = [
   'GIUP-COL-2025 — Lilac Love',
 ]
 
-const PLATINUM_SYNTHOGEL_SKUS = [
+const AUTHORITY_SYNTHOGEL_SKUS = [
   'GIUP-SYN-BS01 — Synthogel Base',
   'GIUP-SYN-CL01 — Synthogel Clear',
   'GIUP-SYN-PK01 — Synthogel Pink',
@@ -1007,7 +1007,7 @@ const PLATINUM_SYNTHOGEL_SKUS = [
   'GIUP-SYN-LQ01 — Synthogel Brush Liquid',
 ]
 
-const PLATINUM_SPECIAL_EFFECTS_60 = [
+const AUTHORITY_SPECIAL_EFFECTS = [
   'GIUP-COL-2113B — Pink Flashing Star',
   'GIUP-COL-2113S — Silver Flashing Star',
   'GIUP-COL-GCE08 — Glass Cat Eye Emerald',
@@ -1100,7 +1100,7 @@ const HERO_PRODUCT_COPY = [
   },
 ]
 
-const PACKAGE_TIER_OPTIONS = ['Silver', 'Gold', 'Platinum']
+const PACKAGE_TIER_OPTIONS = ['Professional', 'Authority']
 const DEFAULT_PACKAGE_ITEM_QTY = 1
 const PACKAGE_TECH_ESSENTIALS = [
   { sku: 'SUPERBOND', code: 'SUPERBOND', name: 'Superbond Acid-Free Primer', category: 'Technical', group: 'Essentials' },
@@ -1256,11 +1256,9 @@ function buildTierPackageItems(tier, podCatalog, defaultQty = DEFAULT_PACKAGE_IT
   const pod3 = Array.isArray(podCatalog?.pod_3) ? podCatalog.pod_3 : []
   const pod4 = Array.isArray(podCatalog?.pod_4) ? podCatalog.pod_4 : []
 
-  const source = tier === 'Silver'
+  const source = tier === 'Professional'
     ? pod1
-    : tier === 'Gold'
-      ? [...pod1, ...pod2]
-      : [...pod1, ...pod2, ...pod3, ...pod4]
+    : [...pod1, ...pod2, ...pod3, ...pod4]
 
   return source.map((item) => ({
     sku: item.sku,
@@ -1335,18 +1333,18 @@ function formatDraftInvoiceText(invoice) {
   return lines.join('\n')
 }
 
-function buildPlatinumSuccessEmail({ distributorName, orderId }) {
-  const subject = `Welcome to the Family! ?? Your GEL.IT.UP Platinum Distributor Order [#${orderId}]`
+function buildAuthoritySuccessEmail({ distributorName, orderId }) {
+  const subject = `Welcome to the Family! 🎉 Your GEL.IT.UP Authority Distributor Order [#${orderId}]`
   const html = `
     <p>Hello ${distributorName},</p>
     <p>It is a pleasure to officially welcome you to the GEL.IT.UP by GIUP® global network!</p>
-    <p>You haven—t just placed an order; you—ve invested in a partnership. By choosing the Platinum Elite Package, you are now equipped with our top 120 high-velocity colors and the technical systems that professional nail technicians trust daily.</p>
-    <p><strong>?? What Happens Next?</strong></p>
-    <p><strong>Order Processing:</strong> Our warehouse team is currently hand-picking your 120-color "Master Collection" and technical essentials.</p>
+    <p>You haven't just placed an order; you've invested in a partnership. By choosing the Authority Package, you are now equipped with our complete range of high-velocity colors and the technical systems that professional nail technicians trust daily.</p>
+    <p><strong>🚀 What Happens Next?</strong></p>
+    <p><strong>Order Processing:</strong> Our warehouse team is currently hand-picking your full "Master Collection" and technical essentials.</p>
     <p><strong>Digital Assets:</strong> Keep an eye on your inbox. Within 24 hours, you will receive a link to our Distributor Media Kit, containing high-res imagery, social media templates, and technical data sheets (SDS) to help you start selling immediately.</p>
-    <p><strong>Logistics:</strong> As soon as your shipment leaves our facility, your tracking number will update automatically on your V2 Dashboard.</p>
-    <p><strong>?? A Pro-Tip for Your Launch:</strong><br/>Your package includes the 5-in-1 Superior Base 6-pack. We recommend highlighting this as your "Hero Product" alongside the Coco Nude (09) and Ice Ice Baby (01) shades—this combination is currently our #1 requested salon starter set for 2026.</p>
-    <p>We are thrilled to have you representing the brand. Let—s make the world more colorful, one manicure at a time.</p>
+    <p><strong>Logistics:</strong> As soon as your shipment leaves our facility, your tracking number will update automatically on your Dashboard.</p>
+    <p><strong>💡 A Pro-Tip for Your Launch:</strong><br/>Your package includes the 5-in-1 Superior Base 6-pack. We recommend highlighting this as your "Hero Product" alongside the Coco Nude (09) and Ice Ice Baby (01) shades—this combination is currently our #1 requested salon starter set for 2026.</p>
+    <p>We are thrilled to have you representing the brand. Let's make the world more colorful, one manicure at a time.</p>
     <p>Best Regards,<br/>The GEL.IT.UP Team<br/>Professional Choice. Professional Results.</p>
   `
 
@@ -6905,7 +6903,7 @@ function ProductsModule({ moduleView = 'products' }) {
   const [b2bColorFamilyFilter, setB2bColorFamilyFilter] = useState('ALL')
   const [itemQtys, setItemQtys] = useState({})
   const [lightboxUrl, setLightboxUrl] = useState(null)
-  const [packageTier, setPackageTier] = useState('Silver')
+  const [packageTier, setPackageTier] = useState('Professional')
   const [draftInvoice, setDraftInvoice] = useState('')
   const [isReordering, setIsReordering] = useState(false)
   const [dismissedTechnicalUpsell, setDismissedTechnicalUpsell] = useState(false)
@@ -7268,13 +7266,11 @@ function ProductsModule({ moduleView = 'products' }) {
     userRole: b2bUserRole,
   })
   const selectedLineItems = selectedCodes.length + packageCartItems.length + (includeProfessionalBasePack ? 1 : 0)
-  const expectedColorCountByTier = generatedPackageTier === 'Silver'
+  const expectedColorCountByTier = generatedPackageTier === 'Professional'
     ? podCatalog.pod_1.length
-    : generatedPackageTier === 'Gold'
-      ? podCatalog.pod_1.length + podCatalog.pod_2.length
-      : generatedPackageTier === 'Platinum'
-        ? podCatalog.pod_1.length + podCatalog.pod_2.length + podCatalog.pod_3.length + podCatalog.pod_4.length
-        : 0
+    : generatedPackageTier === 'Authority'
+      ? podCatalog.pod_1.length + podCatalog.pod_2.length + podCatalog.pod_3.length + podCatalog.pod_4.length
+      : 0
   const expectedTechCount = generatedPackageTier ? PACKAGE_TECH_ESSENTIALS.length : 0
   const expectedPackageItems = expectedColorCountByTier + expectedTechCount
   const expectedPackageUnits = expectedPackageItems * DEFAULT_PACKAGE_ITEM_QTY
@@ -8806,8 +8802,8 @@ function ProductsModule({ moduleView = 'products' }) {
       includeProfessionalBasePack ? [PROFESSIONAL_BASE_PACK] : [],
     )
 
-    const tierMessage = packageTier === 'Platinum'
-      ? `Platinum package generated with ${generatedColorItems.length} colors (Pod_1 + Pod_2 + Pod_3 + Pod_4) + ${generatedTechItems.length} tech essentials.`
+    const tierMessage = packageTier === 'Authority'
+      ? `Authority package generated with ${generatedColorItems.length} colors (all pods) + ${generatedTechItems.length} tech essentials.`
       : `${packageTier} package generated with ${generatedColorItems.length} colors + ${generatedTechItems.length} tech essentials (qty ${DEFAULT_PACKAGE_ITEM_QTY}).`
 
     setCheckoutMessage(tierMessage)
@@ -9458,7 +9454,7 @@ function ProductsModule({ moduleView = 'products' }) {
       return
     }
 
-    const isPlatinumOrder = generatedPackageTier === 'Platinum'
+    const isPlatinumOrder = generatedPackageTier === 'Authority'
       && packageCartItems.some((item) => item.group === 'Pod_4')
 
     if (isPlatinumOrder) {
@@ -9473,17 +9469,17 @@ function ProductsModule({ moduleView = 'products' }) {
       await supabase.auth.updateUser({
         data: {
           ...userMeta,
-          account_type: 'Platinum_Distributor',
+          account_type: 'Authority_Distributor',
         },
       })
 
-      const emailPayload = buildPlatinumSuccessEmail({
+      const emailPayload = buildAuthoritySuccessEmail({
         distributorName,
         orderId: insertedOrder?.id ?? '-',
       })
 
       await sendPortalEmailNotification({
-        eventType: 'platinum_order_success',
+        eventType: 'authority_order_success',
         to: userData?.user?.email,
         subject: emailPayload.subject,
         html: emailPayload.html,
@@ -12300,9 +12296,8 @@ function DistributorModule() {
     { category: 'Solid Gel Polish (Colours)', moq: '500 pcs combined', note: 'Mix & match colours' },
     { category: 'Builder Gels / BIAB', moq: '500 pcs combined', note: 'Counts toward total order' },
     { category: 'Base & Top Coats', moq: '500 pcs combined', note: 'Technical items included' },
-    { category: 'Package: Silver Tier', moq: 'Pod_1 colours + tech essentials', note: 'Pre-built starter pack' },
-    { category: 'Package: Gold Tier', moq: 'Pod_1 + Pod_2 + tech essentials', note: 'Extended range' },
-    { category: 'Package: Platinum Tier', moq: 'All pods (1–4) + tech essentials', note: 'Full catalogue' },
+    { category: 'Package: Professional Tier', moq: 'Pod_1 colours + tech essentials', note: 'Pre-built starter pack' },
+    { category: 'Package: Authority Tier', moq: 'All pods (1–4) + tech essentials', note: 'Full catalogue' },
   ]
 
   return (
@@ -12353,7 +12348,7 @@ function DistributorModule() {
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Pre-Built Package Tiers</p>
         <p className="mt-2 text-sm text-slate-600">
-          Use the <strong>Sales Manager</strong> panel inside "My Order" to generate Silver, Gold or Platinum packages.
+          Use the <strong>Sales Manager</strong> panel inside "My Order" to generate Professional or Authority packages.
           Each package is auto-built from the pod catalog with tech essentials included.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -12366,11 +12361,9 @@ function DistributorModule() {
             >
               <p className="text-sm font-semibold text-slate-900">{tier} Tier</p>
               <p className="mt-1 text-xs text-slate-500">
-                {tier === 'Silver'
+                {tier === 'Professional'
                   ? 'Pod_1 colours + tech essentials'
-                  : tier === 'Gold'
-                    ? 'Pod_1 + Pod_2 + tech essentials'
-                    : 'All pods (Pod_1–4) + tech essentials'}
+                  : 'All pods (Pod_1–4) + tech essentials'}
               </p>
               <p className="mt-2 text-xs font-semibold text-fuchsia-600">Generate in My Order →</p>
             </button>
