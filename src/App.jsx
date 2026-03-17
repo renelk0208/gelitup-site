@@ -6747,7 +6747,8 @@ function PortalRegister({ onRegister }) {
         {showWelcomeModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
             <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl text-center">
-              <div className="mb-4 text-5xl">{isDistributorModal ? '📋' : '🎉'}</div>
+              <img src="/gelitup_logo.png" alt="GEL.IT.UP" className="mx-auto mb-5 h-12 w-auto object-contain" />
+              <div className="mb-3 text-4xl">{isDistributorModal ? '📋' : '🎉'}</div>
               <h2 className="text-xl font-bold text-slate-900">
                 {isDistributorModal
                   ? 'Application Received!'
@@ -6770,14 +6771,14 @@ function PortalRegister({ onRegister }) {
               {!isDistributorModal && loginEmail ? (
                 <NavLink
                   to={`/portal/login?mode=create-password&email=${encodeURIComponent(loginEmail)}`}
-                  className="mt-6 block w-full rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+                  className="mt-6 block w-full rounded-lg bg-fuchsia-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-700"
                 >
                   Create your login password &amp; access portal →
                 </NavLink>
               ) : !isDistributorModal ? (
                 <NavLink
                   to="/portal/login"
-                  className="mt-6 block w-full rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+                  className="mt-6 block w-full rounded-lg bg-fuchsia-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-700"
                 >
                   Go to Login →
                 </NavLink>
