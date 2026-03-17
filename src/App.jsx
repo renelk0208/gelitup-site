@@ -6718,8 +6718,8 @@ function PortalRegister({ onRegister }) {
             />
             <span className="text-xs leading-relaxed text-slate-600">
               I agree to the{' '}
-              <a href="/terms" target="_blank" rel="noreferrer" className="font-semibold text-slate-900 underline">Terms &amp; Conditions</a>{' '}and{' '}
-              <a href="/privacy" target="_blank" rel="noreferrer" className="font-semibold text-slate-900 underline">Privacy Policy</a>.
+              <a href="/terms-and-conditions" target="_blank" rel="noreferrer" className="font-semibold text-slate-900 underline">Terms &amp; Conditions</a>{' '}and{' '}
+              <a href="/privacy-policy" target="_blank" rel="noreferrer" className="font-semibold text-slate-900 underline">Privacy Policy</a>.
               I consent to my information being stored and processed by GEL.IT.UP by GIUP® for the purpose of evaluating my application and managing the business relationship. This data will not be shared with third parties without consent.
             </span>
           </label>
@@ -13034,21 +13034,89 @@ function LegalPageLayout({ title, children }) {
 function PrivacyPolicyPage() {
   return (
     <LegalPageLayout title="Privacy Policy">
-      <div className="space-y-3">
-        <p>
-          GEL.IT.UP processes personal data to provide services, respond to requests, manage distributor applications,
-          and maintain account security.
-        </p>
-        <p>
-          We collect only the data needed for business operations, including contact information, billing and shipping details,
-          and account activity.
-        </p>
-        <p>
-          Data may be shared with trusted service providers for hosting, authentication, transactional messaging, and operational support.
-        </p>
-        <p>
-          You may request access, correction, or deletion of your personal data by contacting us at {PROFORMA_LEEUKOPF_EMAIL}.
-        </p>
+      <div className="space-y-6 text-sm leading-relaxed text-slate-700">
+        <p className="text-xs text-slate-500">Last updated: March 2026</p>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">1. Who We Are</h2>
+          <p>GEL.IT.UP by GIUP® is a professional gel polish brand operated by Leeukopf Laboratories. This Privacy Policy explains how we collect, use, and protect your personal data when you use our website at <strong>gelitup.com</strong> or register for our B2B portal.</p>
+          <p className="mt-2">Contact: <a href={`mailto:${PROFORMA_LEEUKOPF_EMAIL}`} className="text-slate-900 underline">{PROFORMA_LEEUKOPF_EMAIL}</a></p>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">2. Data We Collect</h2>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>Identity & contact data: name, company name, email address, phone number</li>
+            <li>Business data: VAT/EORI number, billing and shipping address, business type</li>
+            <li>Account data: login credentials (hashed), session activity</li>
+            <li>Order data: product selections, quantities, order history</li>
+            <li>Communications: messages submitted via contact or registration forms</li>
+            <li>Technical data: IP address, browser type, and usage data via cookies</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">3. How We Use Your Data</h2>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>To process and manage B2B registrations and orders</li>
+            <li>To provide access to the distributor/salon portal</li>
+            <li>To send transactional emails (order confirmations, shipping updates)</li>
+            <li>To send promotional material and trade offers — only if you have opted in</li>
+            <li>To comply with legal and regulatory obligations (e.g. VAT records)</li>
+            <li>To improve our website and services</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">4. Legal Basis for Processing</h2>
+          <p>We process your data under the following legal bases:</p>
+          <ul className="list-disc space-y-1 pl-5 mt-2">
+            <li><strong>Contract:</strong> processing necessary to fulfil your order or application</li>
+            <li><strong>Legitimate interest:</strong> managing our business relationship and preventing fraud</li>
+            <li><strong>Consent:</strong> marketing communications (you may withdraw consent at any time)</li>
+            <li><strong>Legal obligation:</strong> tax, regulatory, and compliance requirements</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">5. Data Sharing</h2>
+          <p>We do not sell your personal data. We may share it with:</p>
+          <ul className="list-disc space-y-1 pl-5 mt-2">
+            <li>Hosting and authentication providers (Netlify, Supabase) — for platform operation</li>
+            <li>Email service providers (Resend, Zoho) — for transactional and operational emails</li>
+            <li>Logistics partners — solely for order fulfilment</li>
+            <li>Regulatory authorities — where legally required</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">6. Data Retention</h2>
+          <p>We retain your data for as long as needed to fulfil the purposes described above, or as required by law. Account data is retained for the duration of your business relationship with us plus 7 years for tax and audit purposes.</p>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">7. Your Rights</h2>
+          <p>Under GDPR and applicable data protection laws, you have the right to:</p>
+          <ul className="list-disc space-y-1 pl-5 mt-2">
+            <li>Access the personal data we hold about you</li>
+            <li>Request correction of inaccurate data</li>
+            <li>Request deletion of your data (subject to legal retention requirements)</li>
+            <li>Object to or restrict processing</li>
+            <li>Withdraw marketing consent at any time</li>
+            <li>Lodge a complaint with your local data protection authority</li>
+          </ul>
+          <p className="mt-2">To exercise any of these rights, contact us at <a href={`mailto:${PROFORMA_LEEUKOPF_EMAIL}`} className="text-slate-900 underline">{PROFORMA_LEEUKOPF_EMAIL}</a>.</p>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">8. Cookies</h2>
+          <p>We use essential cookies required for site operation and optional analytics cookies. See our <a href="/cookie-policy" className="text-slate-900 underline">Cookie Policy</a> for details.</p>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">9. Changes to This Policy</h2>
+          <p>We may update this Privacy Policy from time to time. Material changes will be communicated via the website or by email. Continued use of our services constitutes acceptance of the updated policy.</p>
+        </section>
       </div>
     </LegalPageLayout>
   )
@@ -13076,20 +13144,76 @@ function CookiePolicyPage() {
 function TermsAndConditionsPage() {
   return (
     <LegalPageLayout title="Terms and Conditions">
-      <div className="space-y-3">
-        <p>
-          By using this website, you agree to these terms. Product information, pricing, and availability are provided for
-          commercial reference and may be updated without prior notice.
-        </p>
-        <p>
-          Orders, account approvals, and distribution relationships are subject to eligibility checks and separate commercial agreements.
-        </p>
-        <p>
-          Unauthorized copying, scraping, or misuse of content is prohibited.
-        </p>
-        <p>
-          For account and legal questions, contact us at {PROFORMA_LEEUKOPF_EMAIL}.
-        </p>
+      <div className="space-y-6 text-sm leading-relaxed text-slate-700">
+        <p className="text-xs text-slate-500">Last updated: March 2026</p>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">1. Introduction</h2>
+          <p>These Terms and Conditions govern your use of the GEL.IT.UP by GIUP® website at <strong>gelitup.com</strong> and the B2B portal. By accessing or registering on this site, you agree to be bound by these terms. If you do not agree, please do not use this site.</p>
+          <p className="mt-2">GEL.IT.UP by GIUP® is operated by Leeukopf Laboratories. For questions, contact <a href={`mailto:${PROFORMA_LEEUKOPF_EMAIL}`} className="text-slate-900 underline">{PROFORMA_LEEUKOPF_EMAIL}</a>.</p>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">2. B2B Portal Access</h2>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>Portal access is available to verified salons, trade buyers, and approved distributors.</li>
+            <li>Salon and trade clients may register and access the portal immediately upon creating a password.</li>
+            <li>Distributor applications are subject to review and must be approved before portal access is granted.</li>
+            <li>You are responsible for maintaining the confidentiality of your login credentials.</li>
+            <li>We reserve the right to suspend or terminate access if terms are violated.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">3. Orders and Pricing</h2>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>All prices shown in the portal are trade prices and exclusive of VAT unless stated otherwise.</li>
+            <li>Prices and product availability may change without prior notice.</li>
+            <li>Orders submitted through the portal are subject to acceptance and stock availability.</li>
+            <li>Minimum order quantities may apply depending on your account tier.</li>
+            <li>GEL.IT.UP reserves the right to cancel or refuse any order at its discretion.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">4. Products</h2>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>All GEL.IT.UP products are EU-regulated, HEMA-free, and TPO-free professional formulations.</li>
+            <li>Product images and descriptions are for reference and may vary slightly from actual products.</li>
+            <li>Products are intended for professional use by qualified nail technicians.</li>
+            <li>You are responsible for compliance with local import, labelling, and distribution regulations in your territory.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">5. Intellectual Property</h2>
+          <p>All content on this website — including product images, branding, text, and catalogue data — is the exclusive property of GEL.IT.UP by GIUP® / Leeukopf Laboratories. Unauthorised copying, scraping, reproduction, or redistribution is strictly prohibited.</p>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">6. Distributor Obligations</h2>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>Approved distributors must comply with their individual distribution agreements.</li>
+            <li>Resale below agreed minimum pricing is not permitted.</li>
+            <li>Distributors may not sub-distribute without written approval.</li>
+            <li>Territory restrictions apply as agreed in the distribution contract.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">7. Limitation of Liability</h2>
+          <p>To the fullest extent permitted by law, GEL.IT.UP by GIUP® / Leeukopf Laboratories shall not be liable for indirect, incidental, or consequential damages arising from use of this site or our products. Our total liability in any matter shall not exceed the value of the relevant order.</p>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">8. Governing Law</h2>
+          <p>These terms are governed by the laws of South Africa. Any disputes shall be subject to the exclusive jurisdiction of the South African courts, unless otherwise required by applicable EU or local consumer protection laws.</p>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-base font-bold text-slate-900">9. Changes to These Terms</h2>
+          <p>We may update these Terms and Conditions at any time. Continued use of the site or portal after changes constitutes acceptance of the revised terms. Material changes will be communicated via the website.</p>
+        </section>
       </div>
     </LegalPageLayout>
   )
