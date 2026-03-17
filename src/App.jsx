@@ -6140,6 +6140,7 @@ function PortalRegister({ onRegister }) {
   const [buyerSubmitting, setBuyerSubmitting] = useState(false)
   const [buyerError, setBuyerError] = useState('')
   const [buyerSuccess, setBuyerSuccess] = useState('')
+  const [loginEmail, setLoginEmail] = useState('')
 
   const isDistributorFlow = application.applicationType === 'distributor'
   const isB2BOrderFlow = application.applicationType === 'b2b_order'
@@ -6315,6 +6316,7 @@ function PortalRegister({ onRegister }) {
           }
 
           setSuccessMessage(result.message || 'Application submitted and marked as pending approval. You will be notified by email after review.')
+          if (result.loginEmail) setLoginEmail(result.loginEmail)
         }}>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block text-sm font-medium text-slate-700 md:col-span-2">
@@ -6725,9 +6727,17 @@ function PortalRegister({ onRegister }) {
 
         {errorMessage && <p className="mt-2 text-xs text-rose-600">{errorMessage}</p>}
         {successMessage && <p className="mt-2 text-xs text-emerald-700">{successMessage}</p>}
+        {loginEmail && (
+          <NavLink
+            to={`/portal/login?mode=create-password&email=${encodeURIComponent(loginEmail)}`}
+            className="mt-3 block w-full rounded-lg bg-slate-900 px-4 py-2 text-center text-sm font-semibold text-white"
+          >
+            Create your login password →
+          </NavLink>
+        )}
 
         <div className="mt-4 text-xs text-slate-600">
-          Already approved?{' '}
+          Already have a password?{' '}
           <NavLink to="/portal/login" className="font-semibold text-slate-900 hover:underline">
             Sign in
           </NavLink>
@@ -13720,7 +13730,7 @@ function App() {
         setIsPortalAuthenticated(true)
         return {
           ok: true,
-          infoMessage: 'Password created successfully. No B2B registration profile was found yet; submit a distributor application if approval-gated access is needed.',
+          infoMessage: 'Password created successfully. Welcome to the GEL.IT.UP portal.',
           navigateToDashboard: true,
           debugTrace: 'create-password -> no-registration-row-allowed',
         }
@@ -13959,7 +13969,8 @@ function App() {
         ok: true,
         message: isDistributorApplication
           ? `Your distributor application has been received. Our team will review it and contact you by email once approved — usually within 1–2 business days.`
-          : `Your B2B order request has been received. Our team will review it and contact you by email once approved — usually within 1–2 business days.`,
+          : `Your B2B profile is set up. You can now create your portal login password and access immediately — no approval needed.`,
+        loginEmail: isDistributorApplication ? null : payload.contact_email,
       }
     }
 
