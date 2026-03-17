@@ -6135,6 +6135,7 @@ function PortalRegister({ onRegister }) {
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [showWelcomeModal, setShowWelcomeModal] = useState(false)
+  const [isDistributorModal, setIsDistributorModal] = useState(false)
 
   const [buyerForm, setBuyerForm] = useState({ email: '', password: '', confirmPassword: '', fullName: '' })
   const [buyerSubmitting, setBuyerSubmitting] = useState(false)
@@ -6316,6 +6317,7 @@ function PortalRegister({ onRegister }) {
           }
 
           if (result.loginEmail) setLoginEmail(result.loginEmail)
+          setIsDistributorModal(!result.loginEmail)
           setShowWelcomeModal(true)
         }}>
           <div className="grid gap-4 md:grid-cols-2">
@@ -6745,27 +6747,41 @@ function PortalRegister({ onRegister }) {
         {showWelcomeModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
             <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl text-center">
-              <div className="mb-4 text-5xl">🎉</div>
-              <h2 className="text-xl font-bold text-slate-900">Welcome to the GEL.IT.UP B2B Portal!</h2>
+              <div className="mb-4 text-5xl">{isDistributorModal ? '📋' : '🎉'}</div>
+              <h2 className="text-xl font-bold text-slate-900">
+                {isDistributorModal
+                  ? 'Application Received!'
+                  : 'Welcome to the GEL.IT.UP B2B Portal!'}
+              </h2>
               <p className="mt-3 text-sm text-slate-600 leading-relaxed">
-                Thank you for registering with us.<br />
-                Your B2B profile is all set — you can log in immediately.
+                {isDistributorModal ? (
+                  <>
+                    Thank you for registering with us.<br />
+                    Your distributor application is being reviewed by our team.<br /><br />
+                    <strong>You will be notified by email once approved</strong> — usually within 1–2 business days. After approval you can log in immediately.
+                  </>
+                ) : (
+                  <>
+                    Thank you for registering with us.<br />
+                    Your B2B profile is all set — you can log in immediately.
+                  </>
+                )}
               </p>
-              {loginEmail ? (
+              {!isDistributorModal && loginEmail ? (
                 <NavLink
                   to={`/portal/login?mode=create-password&email=${encodeURIComponent(loginEmail)}`}
                   className="mt-6 block w-full rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
                 >
                   Create your login password &amp; access portal →
                 </NavLink>
-              ) : (
+              ) : !isDistributorModal ? (
                 <NavLink
                   to="/portal/login"
                   className="mt-6 block w-full rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
                 >
                   Go to Login →
                 </NavLink>
-              )}
+              ) : null}
               <button
                 type="button"
                 onClick={() => setShowWelcomeModal(false)}
