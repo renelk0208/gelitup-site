@@ -6133,6 +6133,7 @@ function PortalRegister({ onRegister }) {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [consentGiven, setConsentGiven] = useState(false)
+  const [marketingConsent, setMarketingConsent] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -6307,7 +6308,7 @@ function PortalRegister({ onRegister }) {
           setErrorMessage('')
           setSuccessMessage('')
 
-          const result = await onRegister(application)
+          const result = await onRegister({ ...application, marketingConsent })
           setIsSubmitting(false)
 
           if (!result.ok) {
@@ -6716,7 +6717,22 @@ function PortalRegister({ onRegister }) {
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-slate-900"
             />
             <span className="text-xs leading-relaxed text-slate-600">
-              I agree that the information I provide in this form will be stored and processed by GEL.IT.UP by GIUP® for the purpose of evaluating my application and managing the business relationship. This data will not be shared with third parties without consent.
+              I agree to the{' '}
+              <a href="/terms" target="_blank" rel="noreferrer" className="font-semibold text-slate-900 underline">Terms &amp; Conditions</a>{' '}and{' '}
+              <a href="/privacy" target="_blank" rel="noreferrer" className="font-semibold text-slate-900 underline">Privacy Policy</a>.
+              I consent to my information being stored and processed by GEL.IT.UP by GIUP® for the purpose of evaluating my application and managing the business relationship. This data will not be shared with third parties without consent.
+            </span>
+          </label>
+
+          <label className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <input
+              type="checkbox"
+              checked={marketingConsent}
+              onChange={(e) => setMarketingConsent(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-slate-900"
+            />
+            <span className="text-xs leading-relaxed text-slate-600">
+              I would like to receive promotional material, product updates, and trade offers from GEL.IT.UP by GIUP®. You can unsubscribe at any time.
             </span>
           </label>
 
@@ -13846,6 +13862,7 @@ function App() {
       const notesSections = [
         `[APPLICATION_TYPE:${isDistributorApplication ? 'distributor' : 'b2b_order'}]`,
         `[ORDER_PROFILE:${isBusinessOrder ? 'business' : 'personal'}]`,
+        `[MARKETING_CONSENT:${application.marketingConsent ? 'yes' : 'no'}]`,
       ]
 
       if (isDistributorApplication) {
