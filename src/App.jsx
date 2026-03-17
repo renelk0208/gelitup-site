@@ -6323,6 +6323,7 @@ function PortalRegister({ onRegister }) {
           // Fire GTM generate_lead event on successful registration
           window.dataLayer = window.dataLayer || []
           window.dataLayer.push({ event: 'generate_lead' })
+          window.dataLayer.push({ event: 'ads_conversion_submit_lead_form' })
         }}>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block text-sm font-medium text-slate-700 md:col-span-2">
