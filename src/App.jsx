@@ -28,49 +28,9 @@ const SHIPPING_ZONES = [
   { zone: 2, rateEur: 0, maxKg: 5, countries: ['Austria', 'Germany', 'Hungary'] },
   { zone: 3, rateEur: 0, maxKg: 5, countries: ['Belgium', 'Italy', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'France', 'Croatia', 'Czech Republic'] },
   { zone: 4, rateEur: 0, maxKg: 5, countries: ['Denmark', 'Spain', 'Luxembourg'] },
-  { zone: 5, rateEur: 0, maxKg: 5, countries: ['Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Northern Ireland', 'Finland', 'Sweden'] },
-  { zone: 6, rateEur: 28.00, maxKg: 5, countries: ['United Kingdom', 'Norway', 'Switzerland'], note: 'Non-EU — no VAT charged; +BGN 20.00 / €10.22 import admin fee' },
+  { zone: 5, rateEur: 0, maxKg: 5, countries: ['Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Finland', 'Sweden'], note: 'incl. Northern Ireland' },
+  { zone: 6, rateEur: 28.00, maxKg: 5, countries: ['United Kingdom'] },
 ]
-const DELIVERY_DAYS = {
-  'Austria': '3–4', 'Belgium': '4–5', 'United Kingdom': '5–6', 'Germany': '4',
-  'Denmark': '5', 'Estonia': '5–6', 'Ireland': '6', 'Spain': '6',
-  'Italy': '4–5', 'Latvia': '5–6', 'Lithuania': '5–6', 'Luxembourg': '4',
-  'Netherlands': '5', 'Norway': '7–8', 'Poland': '4', 'Portugal': '6–7',
-  'Northern Ireland': '6–7', 'Slovakia': '3–4', 'Slovenia': '3–4', 'Hungary': '3',
-  'Finland': '7', 'France': '5', 'Croatia': '4', 'Czech Republic': '4',
-  'Switzerland': '6', 'Sweden': '6',
-}
-const COUNTRY_MAX_KG = { 'Slovakia': 31.5, 'United Kingdom': 30 }
-// Duplicate DB rows whose image should be merged into the canonical product's gallery, then hidden.
-// key = suppressed product code (normalised), value = canonical product name to merge into
-const GALLERY_MERGE_MAP = new Map([
-  ['CUSHION SPONGE 2', 'Ombre Brush and Pinching Tool'],
-])
-// Discontinued / removed products — hidden from the portal entirely
-const DISCONTINUED_PRODUCT_CODES = new Set([
-  'GIUP FBCOV', 'GIUP-FBCOV', 'FBCOV',             // Flexi Base Cover (discontinued)
-  'GIUP FBP', 'GIUP-FBP', 'FBP',                    // Flexi Base Pink (discontinued)
-  // Spot My Tops — entire range removed
-  'GIUP MT1', 'GIUP-MT1', 'MT1', 'MT01',
-  'GIUP MT2', 'GIUP-MT2', 'MT2', 'MT02',
-  'GIUP MT6', 'GIUP-MT6', 'MT6', 'MT06',
-  'GIUP NW1', 'GIUP-NW1', 'NW1', 'NW01',
-  'GIUP NW2', 'GIUP-NW2', 'NW2', 'NW02',
-  'GIUP NW3', 'GIUP-NW3', 'NW3', 'NW03',
-  // Spix & Spex — only SS01, SS02, SS03, SS06 remain; SS04 & SS05 discontinued
-  'GIUP SS04POPPING CANDY', 'GIUP-SS04POPPING-CANDY', 'SS04',
-  'GIUP SS05LEMON SORBET', 'GIUP-SS05LEMON-SORBET', 'SS05',
-  // Discontinued gel polish colours
-  'GIUP 250', 'GIUP-250', '250', 'GIUP250',
-  'GIUP 2113', 'GIUP-2113', '2113', 'GIUP2113',
-  'GIUP 2113O', 'GIUP-2113O', '2113O', 'GIUP2113O',
-  'SFT 2113', 'SFT-2113', 'SFT2113',
-])
-// Temporarily out of stock — shown greyed-out with badge, cannot be added to cart
-// To mark a product OOS: add its code (uppercase) here. Remove to reinstate.
-const OUT_OF_STOCK_CODES = new Set([
-  // e.g. 'GIUP 01', 'SUPERBOND'
-])
 const B2B_PRICE_MULTIPLIER = 1.2
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
@@ -912,16 +872,16 @@ const navItems = [
   { to: '/distributor-packages', label: 'Distribution Options' },
   { to: '/full-catalogue', label: 'Our Products' },
   { to: '/distributors', label: 'Distributors' },
-  { to: '/become-distributor', label: 'B2B (Salon) / Distributor Registration', highlight: true },
+  { to: '/become-distributor', label: 'B2B / Distribution Registration', highlight: true },
 ]
 
-const PROFESSIONAL_MAINTENANCE_SKUS = [
+const SILVER_MAINTENANCE_SKUS = [
   'GIUP-MNT-SB01 — Superbond Primer',
   'GIUP-MNT-5C01 — 5-in-1 Clear Builder',
   'GIUP-MNT-NW01 — Non-Wipe Top Coat',
 ]
 
-const PROFESSIONAL_CORE_COLORS = [
+const SILVER_CORE_30_COLORS = [
   'GIUP-COL-01 — Ice Ice Baby',
   'GIUP-COL-102 — Marsh Mallow',
   'GIUP-COL-05 — Snow Queen',
@@ -954,7 +914,7 @@ const PROFESSIONAL_CORE_COLORS = [
   'GIUP-COL-F01 — Foil Gel Adhesive',
 ]
 
-const AUTHORITY_BUILDER_SKUS = [
+const GOLD_BUILDER_SKUS = [
   'GIUP-BLD-3IN1-PK01 — 3-in-1 Builder Gel Pink Soft',
   'GIUP-BLD-3IN1-PK02 — 3-in-1 Builder Gel Pink Medium',
   'GIUP-BLD-3IN1-PK03 — 3-in-1 Builder Gel Pink Hard',
@@ -963,7 +923,7 @@ const AUTHORITY_BUILDER_SKUS = [
   'GIUP-BLD-3IN1-CV03 — 3-in-1 Builder Gel Cover Deep',
 ]
 
-const AUTHORITY_MODERN_COLORS = [
+const GOLD_MODERN_30_COLORS = [
   'GIUP-COL-2032 — Salt Water Toffee',
   'GIUP-COL-2035 — Scuubie',
   'GIUP-COL-2039 — Coral Reef',
@@ -996,7 +956,7 @@ const AUTHORITY_MODERN_COLORS = [
   'GIUP-COL-2025 — Lilac Love',
 ]
 
-const AUTHORITY_SYNTHOGEL_SKUS = [
+const PLATINUM_SYNTHOGEL_SKUS = [
   'GIUP-SYN-BS01 — Synthogel Base',
   'GIUP-SYN-CL01 — Synthogel Clear',
   'GIUP-SYN-PK01 — Synthogel Pink',
@@ -1007,7 +967,7 @@ const AUTHORITY_SYNTHOGEL_SKUS = [
   'GIUP-SYN-LQ01 — Synthogel Brush Liquid',
 ]
 
-const AUTHORITY_SPECIAL_EFFECTS = [
+const PLATINUM_SPECIAL_EFFECTS_60 = [
   'GIUP-COL-2113B — Pink Flashing Star',
   'GIUP-COL-2113S — Silver Flashing Star',
   'GIUP-COL-GCE08 — Glass Cat Eye Emerald',
@@ -1100,7 +1060,7 @@ const HERO_PRODUCT_COPY = [
   },
 ]
 
-const PACKAGE_TIER_OPTIONS = ['Professional', 'Authority']
+const PACKAGE_TIER_OPTIONS = ['Silver', 'Gold', 'Platinum']
 const DEFAULT_PACKAGE_ITEM_QTY = 1
 const PACKAGE_TECH_ESSENTIALS = [
   { sku: 'SUPERBOND', code: 'SUPERBOND', name: 'Superbond Acid-Free Primer', category: 'Technical', group: 'Essentials' },
@@ -1256,9 +1216,11 @@ function buildTierPackageItems(tier, podCatalog, defaultQty = DEFAULT_PACKAGE_IT
   const pod3 = Array.isArray(podCatalog?.pod_3) ? podCatalog.pod_3 : []
   const pod4 = Array.isArray(podCatalog?.pod_4) ? podCatalog.pod_4 : []
 
-  const source = tier === 'Professional'
+  const source = tier === 'Silver'
     ? pod1
-    : [...pod1, ...pod2, ...pod3, ...pod4]
+    : tier === 'Gold'
+      ? [...pod1, ...pod2]
+      : [...pod1, ...pod2, ...pod3, ...pod4]
 
   return source.map((item) => ({
     sku: item.sku,
@@ -1333,18 +1295,18 @@ function formatDraftInvoiceText(invoice) {
   return lines.join('\n')
 }
 
-function buildAuthoritySuccessEmail({ distributorName, orderId }) {
-  const subject = `Welcome to the Family! 🎉 Your GEL.IT.UP Authority Distributor Order [#${orderId}]`
+function buildPlatinumSuccessEmail({ distributorName, orderId }) {
+  const subject = `Welcome to the Family! ?? Your GEL.IT.UP Platinum Distributor Order [#${orderId}]`
   const html = `
     <p>Hello ${distributorName},</p>
     <p>It is a pleasure to officially welcome you to the GEL.IT.UP by GIUP® global network!</p>
-    <p>You haven't just placed an order; you've invested in a partnership. By choosing the Authority Package, you are now equipped with our complete range of high-velocity colors and the technical systems that professional nail technicians trust daily.</p>
-    <p><strong>🚀 What Happens Next?</strong></p>
-    <p><strong>Order Processing:</strong> Our warehouse team is currently hand-picking your full "Master Collection" and technical essentials.</p>
+    <p>You haven—t just placed an order; you—ve invested in a partnership. By choosing the Platinum Elite Package, you are now equipped with our top 120 high-velocity colors and the technical systems that professional nail technicians trust daily.</p>
+    <p><strong>?? What Happens Next?</strong></p>
+    <p><strong>Order Processing:</strong> Our warehouse team is currently hand-picking your 120-color "Master Collection" and technical essentials.</p>
     <p><strong>Digital Assets:</strong> Keep an eye on your inbox. Within 24 hours, you will receive a link to our Distributor Media Kit, containing high-res imagery, social media templates, and technical data sheets (SDS) to help you start selling immediately.</p>
-    <p><strong>Logistics:</strong> As soon as your shipment leaves our facility, your tracking number will update automatically on your Dashboard.</p>
-    <p><strong>💡 A Pro-Tip for Your Launch:</strong><br/>Your package includes the 5-in-1 Superior Base 6-pack. We recommend highlighting this as your "Hero Product" alongside the Coco Nude (09) and Ice Ice Baby (01) shades—this combination is currently our #1 requested salon starter set for 2026.</p>
-    <p>We are thrilled to have you representing the brand. Let's make the world more colorful, one manicure at a time.</p>
+    <p><strong>Logistics:</strong> As soon as your shipment leaves our facility, your tracking number will update automatically on your V2 Dashboard.</p>
+    <p><strong>?? A Pro-Tip for Your Launch:</strong><br/>Your package includes the 5-in-1 Superior Base 6-pack. We recommend highlighting this as your "Hero Product" alongside the Coco Nude (09) and Ice Ice Baby (01) shades—this combination is currently our #1 requested salon starter set for 2026.</p>
+    <p>We are thrilled to have you representing the brand. Let—s make the world more colorful, one manicure at a time.</p>
     <p>Best Regards,<br/>The GEL.IT.UP Team<br/>Professional Choice. Professional Results.</p>
   `
 
@@ -1616,6 +1578,41 @@ function DistributorPackagesPage() {
         </div>
       </div>
 
+      {/* BOUTIQUE TIER */}
+      <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #f0c4d0', backgroundColor: '#fdf5f7' }}>
+        <div className="px-6 py-4" style={{ borderBottom: '1px solid #f0c4d0', backgroundColor: '#fdf0f4' }}>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#d4185a' }}>Entry Tier</p>
+          <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#1a1a1a' }}>BOUTIQUE — The Foundation</h2>
+          <p className="mt-1 text-sm" style={{ color: '#a01850' }}>Launch with confidence. The smartest entry point for localized distribution with everything you need to move product and build a client base instantly.</p>
+        </div>
+        <div>
+          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #e8a8b8' }}>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>Market Focus</p>
+            <p className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>Localized Distribution</p>
+          </div>
+          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #e8a8b8' }}>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>Product Spectrum</p>
+            <ul className="space-y-1.5">
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d4185a' }} />Top 120 Core Shades</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d4185a' }} />200 SKUs — Builder Systems, Brushes &amp; Essentials</li>
+            </ul>
+          </div>
+          <div className="flex items-start gap-4 px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>Support Package</p>
+            <ul className="space-y-1.5">
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />Digital Brand Assets</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />Viral Social Media Content</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />EU Regulatory Support</li>
+            </ul>
+          </div>
+        </div>
+        <div className="px-6 py-4" style={{ borderTop: '1px solid #f0c4d0', backgroundColor: '#fdf0f4' }}>
+          <NavLink to="/become-distributor" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
+            Request Boutique Tier Pricing ?
+          </NavLink>
+        </div>
+      </article>
+
       {/* PROFESSIONAL TIER */}
       <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #1a1a1a', backgroundColor: '#ffffff' }}>
         <div className="px-6 py-4" style={{ backgroundColor: '#1a1a1a' }}>
@@ -1854,29 +1851,6 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
   if (!payload || typeof payload !== 'object') return []
 
   const blockedCategoryTokens = new Set(['CRACK', 'THERMO', 'CREME DE LA CREME'])
-
-  // Image path tokens for discontinued products — matched against the normalised image path
-  // Format: include enough of the path/filename to uniquely identify the product
-  const discontinuedImageTokens = [
-    // Flexi Base variants (only Clear remains)
-    'FLEXI BASE COVER', 'FLEXI BASE PINK', 'FBCOV', 'FBP',
-    // Spot My Tops — entire range
-    'SPOT MY TOP', 'SPOT MY TOPS',
-    // Spix & Spex SS04 / SS05
-    'SS04', 'SS05', 'POPPING CANDY', 'LEMON SORBET',
-    // Discontinued gel polish colours
-    '/250/', '/250.', '-250.', '_250.', ' 250 ', ' 250.', '\\250.',
-    '/2113O', '/2113 O', '-2113O', '_2113O', ' 2113O',
-    '/2113.', '-2113.', '_2113.', ' 2113 ', ' 2113.',
-    // Flexi Base Cover / Pink by code
-    'GIUP FBCOV', 'GIUP-FBCOV', 'GIUP FBP', 'GIUP-FBP',
-    // Duplicate cushion sponge image — suppressed in favour of the main cushion sponge card
-    'cushion sponge 2',
-  ]
-  const isDiscontinuedImagePath = (imagePath = '') => {
-    const upper = imagePath.toUpperCase()
-    return discontinuedImageTokens.some(t => upper.includes(t.toUpperCase()))
-  }
   
   // Map certain folders to be subcategories of parent categories
   const categoryRemapping = new Map([
@@ -1964,8 +1938,6 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
 
     const categoryBucket = grouped.get(category) || new Map()
     const subcategoryItems = categoryBucket.get(subcategory) || []
-
-    if (isDiscontinuedImagePath(imagePath)) return
 
     const rawFolder = (segments[segments.length - 2] || '').toUpperCase()
     const solidGelFlatFolders = { NUDE: 'Nude', FRENCH: 'French', PASTEL: 'Pastel', RONE: 'GIUP1' }
@@ -2202,18 +2174,9 @@ function flattenSectionItems(section) {
 const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   'BASES::SUPERBOND': {
     paragraphs: [
-      'GEL.IT.UP by GIUP® Superbond is a primer that is safe for the natural nail and does not require curing.',
+      'GEL.IT.UP by GIUP® Superbond is an acid-free primer, safe for the natural nail, and it does not require curing.',
       'It is applied to the free edge of the nail before the base coat, ensuring improved adhesion while providing additional dehydration for longer-lasting results.',
       'It also creates a thin protective film on the nail, helping to protect it from damage.',
-    ],
-    listItems: [
-      'Blue Cap — with Acid',
-      'Red Cap — Acid-free',
-    ],
-  },
-  'BASES::CLASSIC BASE COAT': {
-    paragraphs: [
-      'Ensures strong adhesion of colour to the nail surface. Provides a flawless result with long-lasting wear.',
     ],
     listItems: [],
   },
@@ -2536,71 +2499,11 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
       'Finish with a top coat',
     ],
   },
-  'NAIL ART::BLOSSOM': {
+  'NAIL ART::GIUP BLOSSOM WEBP': {
     paragraphs: [
-      'Use Flower Power Blossom to easily and quickly create marble effects, flowers, and other nail art designs.',
+      'Product description coming soon.',
     ],
     listItems: [],
-  },
-  'NAIL ART::AQUARELLE PALETTE': {
-    paragraphs: [
-      '60-colour palette designed for nail art and aquarelle designs. Includes 48 solid matte and 12 shimmer shades.',
-      'Highly pigmented, velvet-textured colours ideal for detailed artwork. Carefully selected shades to help every nail artist achieve perfect results.',
-      'Practical, well-sealed kit that keeps colours secure during transport.',
-    ],
-    listItems: [
-      'Recommended brush: Aquarelle & Nail Art Brush for best results and easier painting',
-    ],
-  },
-  'BUILDER GEL SYSTEMS::LIQUID POLYGEL': {
-    paragraphs: [
-      'An innovative liquid polygel in a 15 ml bottle combining the strength and durability of polygel with faster, easier application.',
-      'Medium viscosity, self-leveling formula applied directly from the bottle with the built-in brush. Ideal for natural nail reinforcement, quick maintenance, and medium-length extensions.',
-      'Suitable for the no-filing technique, reducing service time. Recommended to apply a layer of 5-in-1 Superior Base Clear before use for optimal adhesion.',
-    ],
-    listItems: [
-      'Cures in UV/LED lamps for 90 seconds',
-      'Available in 8 shades',
-      'HEMA & TPO free',
-    ],
-  },
-  'CONSUMABLES::SUPER FLEXIBLE TIPS': {
-    paragraphs: [
-      'Super Flexible Nail Tips offer a natural look with a thin cuticle area for a seamless fit. Flexible and durable — they bend to absorb stress rather than snapping.',
-      'Long-lasting wear up to 3–4 weeks with proper application. Pre-shaped styles available for faster service. Lightweight, comfortable, and ideal for thin or sensitive nails.',
-      'Applied with gel adhesive and soaked off with acetone for minimal damage to the natural nail.',
-    ],
-    listItems: [
-      'Application: Prepare nail, apply dehydrator/primer, select correct tip size',
-      'Apply base or extension gel and cure, place tip and flash cure 5–10 seconds',
-      'Full cure under UV/LED lamp for 60 seconds',
-      'Lightly file if needed, then apply colour and top coat',
-      'Tip: Keep adhesive off the skin and use high-quality gel adhesive for best adhesion',
-    ],
-  },
-  'CONSUMABLES::DUAL FORMS': {
-    paragraphs: [
-      'Reusable dual forms for nail extensions using MultiMix Synthogel (Polygel).',
-      'Set contains 120 pieces in various sizes, designed for an optimal fit according to nail size and shape.',
-    ],
-    listItems: [],
-  },
-  'CONSUMABLES::SOAK OFF GEL TIPS': {
-    paragraphs: [
-      'An innovative product for easy and fast nail extensions.',
-    ],
-    listItems: [],
-  },
-  'NAIL HAND & FOOT CARE::PHOTO PERFECT CUTICLE OIL': {
-    paragraphs: [
-      'A dry cuticle oil in a 15 ml bottle that leaves no greasy residue. Hydrates and nourishes the skin around the nails and helps support skin regeneration and healing.',
-      'Ideal for nail photography — smooths imperfections for a flawless finish without the need for editing.',
-    ],
-    listItems: [
-      'Non-greasy finish with fast absorption',
-      'Made with natural ingredients',
-      'Convenient brush applicator',
-    ],
   },
 }
 
@@ -5443,37 +5346,77 @@ function ContactRequestModal({ isOpen, formState, onChange, onClose, onSubmit, i
 
 function PortalLanding() {
   return (
-    <section className="space-y-4">
-      <div className="rounded-2xl border border-slate-200 bg-white p-6">
-        <h2 className="text-2xl font-bold text-slate-900">B2B Coming Soon</h2>
-        <p className="mt-1 text-base font-medium text-[#D43790]">to better assist our GEL.IT.UP Family</p>
-        <p className="mt-2 text-sm text-slate-600">
-          Wholesale workspace inspired by your existing systems, rebuilt in English for distributors,
-          salons, and professional buyers.
+    <section className="space-y-5">
+      <div
+        className="relative overflow-hidden rounded-2xl p-8 sm:p-10"
+        style={{ background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #4f46e5 100%)' }}
+      >
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/70">GEL.IT.UP by GIUP®</p>
+        <h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
+          Distributor Portal
+        </h1>
+        <p className="mt-3 max-w-lg text-base text-white/80">
+          Your wholesale workspace — browse the full catalogue, place B2B orders, track shipments,
+          and download compliance certificates.
         </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <NavLink
+            to="/portal/login"
+            className="rounded-lg bg-white px-5 py-2.5 text-sm font-bold text-fuchsia-700 shadow transition duration-200 hover:bg-fuchsia-50"
+          >
+            Sign In to Portal
+          </NavLink>
+          <NavLink
+            to="/become-distributor"
+            className="rounded-lg border border-white/40 px-5 py-2.5 text-sm font-semibold text-white transition duration-200 hover:bg-white/10"
+          >
+            Apply as Distributor
+          </NavLink>
+        </div>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+
+      <div className="grid gap-4 sm:grid-cols-3">
         <article className="rounded-xl border border-slate-200 bg-white p-5">
-          <h3 className="text-sm font-semibold text-slate-900">Client Registration</h3>
-          <p className="mt-2 text-sm text-slate-600">Onboard new distributors and manage trade account access.</p>
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-fuchsia-100">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5 text-fuchsia-600">
+              <path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </div>
+          <h3 className="mt-3 text-sm font-semibold text-slate-900">Full Product Catalogue</h3>
+          <p className="mt-1.5 text-xs text-slate-500">Browse all Solid Colours, Builder Gels, Base &amp; Top, and Accessories with live B2B pricing.</p>
         </article>
         <article className="rounded-xl border border-slate-200 bg-white p-5">
-          <h3 className="text-sm font-semibold text-slate-900">Trade Dashboard</h3>
-          <p className="mt-2 text-sm text-slate-600">Orders, order intake status, and support in one place.</p>
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5 text-emerald-600">
+              <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.8" />
+            </svg>
+          </div>
+          <h3 className="mt-3 text-sm font-semibold text-slate-900">Order Management</h3>
+          <p className="mt-1.5 text-xs text-slate-500">Place wholesale orders, track intake status, receive shipment updates and proforma invoices.</p>
+        </article>
+        <article className="rounded-xl border border-slate-200 bg-white p-5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-100">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5 text-indigo-600">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <h3 className="mt-3 text-sm font-semibold text-slate-900">Compliance &amp; Regulatory</h3>
+          <p className="mt-1.5 text-xs text-slate-500">Download HEMA-Free, TPO-Free, and CI 77820-Free compliance certificates for your markets.</p>
         </article>
       </div>
-      <div className="flex flex-wrap gap-3">
-        <NavLink to="/portal/login?portal=login" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
-          Portal Sign In
-        </NavLink>
-        <a
-          href="https://www.gelitup.com"
-          target="_blank"
-          rel="noreferrer"
-          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Not registered yet?</p>
+        <p className="mt-2 text-sm text-slate-600">
+          Apply for a trade account to access wholesale pricing, the online ordering system, and dedicated distributor support.
+        </p>
+        <NavLink
+          to="/become-distributor"
+          className="mt-4 inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-200 hover:bg-fuchsia-700"
         >
-          Apply as Distributor
-        </a>
+          Start Your Application
+        </NavLink>
       </div>
     </section>
   )
@@ -5865,15 +5808,11 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
           </div>
         )}
 
-        <NavLink
-          to={email ? `/portal/forgot-password?email=${encodeURIComponent(email)}` : '/portal/forgot-password'}
-          className="mt-4 block w-full rounded-lg border-2 border-rose-500 px-4 py-2.5 text-center text-sm font-semibold text-rose-600 transition hover:bg-rose-50"
-        >
-          Forgot password? Reset it here
-        </NavLink>
-
-        <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs sm:p-4">
+        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs sm:p-4">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <NavLink to="/portal/forgot-password" className="font-medium text-slate-700 hover:text-slate-900">
+              Forgot password?
+            </NavLink>
             <NavLink to="/?portal=admin" className="font-medium text-slate-700 hover:text-slate-900">
               Admin login
             </NavLink>
@@ -6131,17 +6070,13 @@ function PortalRegister({ onRegister }) {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [consentGiven, setConsentGiven] = useState(false)
-  const [marketingConsent, setMarketingConsent] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false)
-  const [isDistributorModal, setIsDistributorModal] = useState(false)
 
   const [buyerForm, setBuyerForm] = useState({ email: '', password: '', confirmPassword: '', fullName: '' })
   const [buyerSubmitting, setBuyerSubmitting] = useState(false)
   const [buyerError, setBuyerError] = useState('')
   const [buyerSuccess, setBuyerSuccess] = useState('')
-  const [loginEmail, setLoginEmail] = useState('')
 
   const isDistributorFlow = application.applicationType === 'distributor'
   const isB2BOrderFlow = application.applicationType === 'b2b_order'
@@ -6201,7 +6136,7 @@ function PortalRegister({ onRegister }) {
             }}
             className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${isB2BOrderFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
           >
-            B2B / Salon
+            B2B (Client)
           </button>
         </div>
 
@@ -6308,7 +6243,7 @@ function PortalRegister({ onRegister }) {
           setErrorMessage('')
           setSuccessMessage('')
 
-          const result = await onRegister({ ...application, marketingConsent })
+          const result = await onRegister(application)
           setIsSubmitting(false)
 
           if (!result.ok) {
@@ -6316,14 +6251,7 @@ function PortalRegister({ onRegister }) {
             return
           }
 
-          if (result.loginEmail) setLoginEmail(result.loginEmail)
-          setIsDistributorModal(!result.loginEmail)
-          setShowWelcomeModal(true)
-
-          // Fire GTM generate_lead event on successful registration
-          window.dataLayer = window.dataLayer || []
-          window.dataLayer.push({ event: 'generate_lead' })
-          window.dataLayer.push({ event: 'ads_conversion_submit_lead_form' })
+          setSuccessMessage(result.message || 'Application submitted and marked as pending approval. You will be notified by email after review.')
         }}>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block text-sm font-medium text-slate-700 md:col-span-2">
@@ -6712,6 +6640,16 @@ function PortalRegister({ onRegister }) {
               </>
             )}
 
+            <label className="block text-sm font-medium text-slate-700 md:col-span-2">
+              Notes
+              <textarea
+                rows={3}
+                value={application.notes}
+                onChange={(event) => setField('notes', event.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                placeholder="Tell us about your expected monthly volume, brands, or regions."
+              />
+            </label>
           </div>
 
           <label className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
@@ -6723,22 +6661,7 @@ function PortalRegister({ onRegister }) {
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-slate-900"
             />
             <span className="text-xs leading-relaxed text-slate-600">
-              I agree to the{' '}
-              <a href="/terms-and-conditions" target="_blank" rel="noreferrer" className="font-semibold text-slate-900 underline">Terms &amp; Conditions</a>{' '}and{' '}
-              <a href="/privacy-policy" target="_blank" rel="noreferrer" className="font-semibold text-slate-900 underline">Privacy Policy</a>.
-              I consent to my information being stored and processed by GEL.IT.UP by GIUP® for the purpose of evaluating my application and managing the business relationship. This data will not be shared with third parties without consent.
-            </span>
-          </label>
-
-          <label className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <input
-              type="checkbox"
-              checked={marketingConsent}
-              onChange={(e) => setMarketingConsent(e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-slate-900"
-            />
-            <span className="text-xs leading-relaxed text-slate-600">
-              I would like to receive promotional material, product updates, and trade offers from GEL.IT.UP by GIUP®. You can unsubscribe at any time.
+              I agree that the information I provide in this form will be stored and processed by GEL.IT.UP by GIUP® for the purpose of evaluating my application and managing the business relationship. This data will not be shared with third parties without consent.
             </span>
           </label>
 
@@ -6748,59 +6671,10 @@ function PortalRegister({ onRegister }) {
         </form>
 
         {errorMessage && <p className="mt-2 text-xs text-rose-600">{errorMessage}</p>}
-
-        {showWelcomeModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-            <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl text-center">
-              <img src="/gelitup_logo.png" alt="GEL.IT.UP" className="mx-auto mb-5 h-12 w-auto object-contain" />
-              <div className="mb-3 text-4xl">{isDistributorModal ? '📋' : '🎉'}</div>
-              <h2 className="text-xl font-bold text-slate-900">
-                {isDistributorModal
-                  ? 'Application Received!'
-                  : 'Welcome to the GEL.IT.UP B2B Portal!'}
-              </h2>
-              <p className="mt-3 text-sm text-slate-600 leading-relaxed">
-                {isDistributorModal ? (
-                  <>
-                    Thank you for registering with us.<br />
-                    Your distributor application is being reviewed by our team.<br /><br />
-                    <strong>You will be notified by email once approved</strong> — usually within 1–2 business days. After approval you can log in immediately.
-                  </>
-                ) : (
-                  <>
-                    Thank you for registering with us.<br />
-                    Your B2B profile is all set — you can log in immediately.
-                  </>
-                )}
-              </p>
-              {!isDistributorModal && loginEmail ? (
-                <NavLink
-                  to={`/portal/login?mode=create-password&email=${encodeURIComponent(loginEmail)}`}
-                  className="mt-6 block w-full rounded-lg bg-fuchsia-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-700"
-                >
-                  Create your login password &amp; access portal →
-                </NavLink>
-              ) : !isDistributorModal ? (
-                <NavLink
-                  to="/portal/login"
-                  className="mt-6 block w-full rounded-lg bg-fuchsia-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-700"
-                >
-                  Go to Login →
-                </NavLink>
-              ) : null}
-              <button
-                type="button"
-                onClick={() => setShowWelcomeModal(false)}
-                className="mt-3 text-xs text-slate-400 hover:text-slate-600 underline"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        )}
+        {successMessage && <p className="mt-2 text-xs text-emerald-700">{successMessage}</p>}
 
         <div className="mt-4 text-xs text-slate-600">
-          Already have a password?{' '}
+          Already approved?{' '}
           <NavLink to="/portal/login" className="font-semibold text-slate-900 hover:underline">
             Sign in
           </NavLink>
@@ -6938,9 +6812,6 @@ function ProductsModule({ moduleView = 'products' }) {
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
   const [checkoutMessage, setCheckoutMessage] = useState('')
   const [checkoutError, setCheckoutError] = useState('')
-  // Product status from spreadsheet (product-status.csv)
-  const [oosFromSheet, setOosFromSheet] = useState(new Set())
-  const [discontinuedFromSheet, setDiscontinuedFromSheet] = useState(new Set())
   const [orderInboxEmailStatus, setOrderInboxEmailStatus] = useState('')
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('All')
@@ -6952,7 +6823,7 @@ function ProductsModule({ moduleView = 'products' }) {
   const [b2bColorFamilyFilter, setB2bColorFamilyFilter] = useState('ALL')
   const [itemQtys, setItemQtys] = useState({})
   const [lightboxUrl, setLightboxUrl] = useState(null)
-  const [packageTier, setPackageTier] = useState('Professional')
+  const [packageTier, setPackageTier] = useState('Silver')
   const [draftInvoice, setDraftInvoice] = useState('')
   const [isReordering, setIsReordering] = useState(false)
   const [dismissedTechnicalUpsell, setDismissedTechnicalUpsell] = useState(false)
@@ -7315,11 +7186,13 @@ function ProductsModule({ moduleView = 'products' }) {
     userRole: b2bUserRole,
   })
   const selectedLineItems = selectedCodes.length + packageCartItems.length + (includeProfessionalBasePack ? 1 : 0)
-  const expectedColorCountByTier = generatedPackageTier === 'Professional'
+  const expectedColorCountByTier = generatedPackageTier === 'Silver'
     ? podCatalog.pod_1.length
-    : generatedPackageTier === 'Authority'
-      ? podCatalog.pod_1.length + podCatalog.pod_2.length + podCatalog.pod_3.length + podCatalog.pod_4.length
-      : 0
+    : generatedPackageTier === 'Gold'
+      ? podCatalog.pod_1.length + podCatalog.pod_2.length
+      : generatedPackageTier === 'Platinum'
+        ? podCatalog.pod_1.length + podCatalog.pod_2.length + podCatalog.pod_3.length + podCatalog.pod_4.length
+        : 0
   const expectedTechCount = generatedPackageTier ? PACKAGE_TECH_ESSENTIALS.length : 0
   const expectedPackageItems = expectedColorCountByTier + expectedTechCount
   const expectedPackageUnits = expectedPackageItems * DEFAULT_PACKAGE_ITEM_QTY
@@ -7737,31 +7610,6 @@ function ProductsModule({ moduleView = 'products' }) {
     }
   }, [])
 
-  // Load product-status.csv — edit this file in Excel/Google Sheets to manage availability
-  useEffect(() => {
-    let mounted = true
-    const load = async () => {
-      try {
-        const res = await fetch('/gelitup-content/product-status.csv')
-        if (!res.ok) return
-        const text = await res.text()
-        const oos = new Set()
-        const disc = new Set()
-        text.split('\n').slice(1).forEach(line => {
-          const cols = line.split(',')
-          const code = (cols[0] || '').trim().toUpperCase()
-          const status = (cols[2] || '').trim().toLowerCase()
-          if (!code || code === 'CODE') return
-          if (status === 'out_of_stock') oos.add(code)
-          else if (status === 'discontinued') disc.add(code)
-        })
-        if (mounted) { setOosFromSheet(oos); setDiscontinuedFromSheet(disc) }
-      } catch { /* optional file */ }
-    }
-    void load()
-    return () => { mounted = false }
-  }, [])
-
   // Load B2B price list (public/gelitup-content/b2b-price-list.json)
   useEffect(() => {
     let mounted = true
@@ -7838,7 +7686,7 @@ function ProductsModule({ moduleView = 'products' }) {
           { codes: ['GIUP SBCN', 'GIUP-SBCN'], target: '5-in-1 Superior Base 15ml Nude -HTF' },
           { codes: ['GIUP SBCSN', 'GIUP-SBCSN'], target: '5-IN-1 Superior Base 15ml Soft Nude -HTF' },
           { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
-          { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1', 'Non Wipe Top Coat Perfect Shape 15ml', 'NON WIPE TOP COAT PERFECT SHAPE'], target: 'Aurora Flakes Non Wipe Top Coat 15ml -HTF' },
+          { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
           { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
           { codes: ['GIUP-SB-WITH-ACID', 'GIUP SB WITH ACID', 'SB WITH ACID'], target: 'Superbond Nail Dehydrator 11ml - with Acid -HTF' },
           // Dual form / nail tip shapes (image map uses bare shape names)
@@ -8231,18 +8079,11 @@ function ProductsModule({ moduleView = 'products' }) {
           { codes: ['Dual Forms LONG COFFIN', 'DUAL FORMS LONG COFFIN'], target: 'SOAK OFF GEL TIPS LONG COFFIN' },
           { codes: ['Dual Forms MEDIUM SQUARE', 'DUAL FORMS MEDIUM SQUARE'], target: 'SOAK OFF GEL TIPS MEDIUM SQUARE' },
           // Nail Art — cushion sponge (ombre blending tool)
-          { codes: ['cushion sponge', 'cushion sponge 2', 'CUSHION SPONGE', 'ombre sponge', 'OMBRE SPONGE'], target: 'Ombre Brush and Pinching Tool' },
+          { codes: ['cushion sponge', 'cushion sponge 2', 'CUSHION SPONGE'], target: 'Ombre sponge' },
         ]
         for (const { codes, target } of aliasGroups) {
           const entry = pnLookup(target)
-          if (entry) {
-            for (const c of codes) {
-              const nk = normalizeSkuCode(c)
-              const npk = normalizeProductName(c)
-              if (nk && !map.has(nk)) map.set(nk, entry)
-              if (npk && !map.has(npk)) map.set(npk, entry)
-            }
-          }
+          if (entry) { for (const c of codes) { if (!map.has(c)) map.set(c, entry) } }
         }
         if (mounted) {
           setPriceMap(map)
@@ -8644,43 +8485,13 @@ function ProductsModule({ moduleView = 'products' }) {
           })
           .filter((item) => Boolean(item.code))
 
-        // Merge gallery images from duplicate rows into canonical products, then drop duplicates
-        const mergedProducts = []
-        const canonicalByName = new Map()
-        for (const product of normalized) {
-          const upperCode = (product.code || '').toUpperCase().trim()
-          const canonicalName = GALLERY_MERGE_MAP.get(upperCode)
-          if (canonicalName) {
-            // queue image to be merged once canonical is found
-            const existing = canonicalByName.get(normalizeSkuCode(canonicalName))
-            if (existing && product.imageUrl) {
-              existing.galleryImages = [...(existing.galleryImages || []), product.imageUrl]
-            } else {
-              // canonical not yet seen — store for deferred merge
-              canonicalByName.set('__PENDING__' + upperCode, { imageUrl: product.imageUrl, target: normalizeSkuCode(canonicalName) })
-            }
-            // do not push this row
-            continue
-          }
-          canonicalByName.set(normalizeSkuCode(product.name || product.code), product)
-          mergedProducts.push(product)
-        }
-        // Apply any pending merges (canonical appeared before duplicate in list)
-        for (const [k, pending] of canonicalByName) {
-          if (!k.startsWith('__PENDING__')) continue
-          const canon = canonicalByName.get(pending.target)
-          if (canon && pending.imageUrl) {
-            canon.galleryImages = [...(canon.galleryImages || []), pending.imageUrl]
-          }
-        }
-
         if (!normalized.length) {
           throw new Error('Feed has no valid products')
         }
 
         if (isMounted) {
-          setProducts(mergedProducts)
-          setFeedMessage(`Loaded ${mergedProducts.length} live products from ${feedUrl ? 'feed' : 'Supabase catalog'}.`)
+          setProducts(normalized)
+          setFeedMessage(`Loaded ${normalized.length} live products from ${feedUrl ? 'feed' : 'Supabase catalog'}.`)
         }
       }
       catch {
@@ -8705,25 +8516,13 @@ function ProductsModule({ moduleView = 'products' }) {
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      const upperCode = (product.code || '').toUpperCase().trim()
-      const upperSku = (product.sku || '').toUpperCase().trim()
-      const upperName = (product.name || '').toUpperCase().trim()
-      // Discontinued check (code + sheet)
-      if (DISCONTINUED_PRODUCT_CODES.has(upperCode) || DISCONTINUED_PRODUCT_CODES.has(upperSku)) return false
-      if (discontinuedFromSheet.has(upperCode) || discontinuedFromSheet.has(upperSku)) return false
-      // Catch Spot My Tops by category name or product name
-      if (upperName.includes('SPOT MY TOP') || upperCode.includes('SPOT MY TOP')) return false
-      // Catch any Spix & Spex SS04/SS05 by name
-      if (/\bSS0[45]\b/.test(upperCode) || /\bSS0[45]\b/.test(upperSku) || /\bSS0[45]\b/.test(upperName)) return false
-      // Catch discontinued colours by number token
-      if (/\b(250|2113O?)\b/.test(upperCode) || /\b(250|2113O?)\b/.test(upperSku) || /\b(250|2113O?)\b/.test(upperName)) return false
       const matchesSearch = product.code.toLowerCase().includes(query.toLowerCase())
         || (product.name || '').toLowerCase().includes(query.toLowerCase())
       const matchesCategory = category === 'All' || product.category === category
       const matchesSelected = !showSelectedOnly || selectedCodes.includes(product.code)
       return matchesSearch && matchesCategory && matchesSelected
     })
-  }, [category, products, query, selectedCodes, showSelectedOnly, priceMap, oosFromSheet, discontinuedFromSheet])
+  }, [category, products, query, selectedCodes, showSelectedOnly, priceMap])
 
   // Group filtered products by category for sectioned display
   const groupedFilteredProducts = useMemo(() => {
@@ -8851,8 +8650,8 @@ function ProductsModule({ moduleView = 'products' }) {
       includeProfessionalBasePack ? [PROFESSIONAL_BASE_PACK] : [],
     )
 
-    const tierMessage = packageTier === 'Authority'
-      ? `Authority package generated with ${generatedColorItems.length} colors (all pods) + ${generatedTechItems.length} tech essentials.`
+    const tierMessage = packageTier === 'Platinum'
+      ? `Platinum package generated with ${generatedColorItems.length} colors (Pod_1 + Pod_2 + Pod_3 + Pod_4) + ${generatedTechItems.length} tech essentials.`
       : `${packageTier} package generated with ${generatedColorItems.length} colors + ${generatedTechItems.length} tech essentials (qty ${DEFAULT_PACKAGE_ITEM_QTY}).`
 
     setCheckoutMessage(tierMessage)
@@ -9503,7 +9302,7 @@ function ProductsModule({ moduleView = 'products' }) {
       return
     }
 
-    const isPlatinumOrder = generatedPackageTier === 'Authority'
+    const isPlatinumOrder = generatedPackageTier === 'Platinum'
       && packageCartItems.some((item) => item.group === 'Pod_4')
 
     if (isPlatinumOrder) {
@@ -9518,17 +9317,17 @@ function ProductsModule({ moduleView = 'products' }) {
       await supabase.auth.updateUser({
         data: {
           ...userMeta,
-          account_type: 'Authority_Distributor',
+          account_type: 'Platinum_Distributor',
         },
       })
 
-      const emailPayload = buildAuthoritySuccessEmail({
+      const emailPayload = buildPlatinumSuccessEmail({
         distributorName,
         orderId: insertedOrder?.id ?? '-',
       })
 
       await sendPortalEmailNotification({
-        eventType: 'authority_order_success',
+        eventType: 'platinum_order_success',
         to: userData?.user?.email,
         subject: emailPayload.subject,
         html: emailPayload.html,
@@ -10103,26 +9902,26 @@ function ProductsModule({ moduleView = 'products' }) {
                 <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
                 <ul className="mt-1.5 space-y-1 text-[11px] text-slate-600">
                   <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Minimum order:</strong> €{MIN_ORDER_EUR.toFixed(2)} NET (excl. VAT &amp; shipping). Orders below this value are not accepted.</span></li>
-                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong><ul className="mt-1 space-y-0.5 pl-1">
-                      <li>Zone 2 (AT, DE, HU): <strong className="text-emerald-600">FREE</strong></li>
-                      <li>Zone 3 (BE, IT, NL, PL, SK, SI, FR, HR, CZ): <strong className="text-emerald-600">FREE</strong></li>
-                      <li>Zone 4 (DK, ES, LU): <strong className="text-emerald-600">FREE</strong></li>
-                      <li>Zone 5 (EE, IE, LV, LT, PT, Northern Ireland, FI, SE): <strong className="text-emerald-600">FREE</strong></li>
-                      <li>Zone 6 (UK, Norway, Switzerland): <strong className="text-fuchsia-700">€28.00</strong> — VAT not charged (export); +BGN 20.00 / €10.22 import admin fee applies.</li>
-                    </ul>
-                    <span className="block mt-0.5">Final packing list will appear on your invoice.</span></span></li>
-                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by Thermitek Ltd.</span></li>
+                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong> FREE to all EU zones (Zones 2–5). Zone 6 (UK): €28.00. Final packing list will appear on your invoice.</span></li>
+                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by GEL.IT.UP.</span></li>
                   <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
                 </ul>
-                {_zone && (
-                  <div className="mt-2.5 rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-2 text-[11px]">
-                    <p className="font-semibold text-slate-700">Shipping to <span className="text-fuchsia-700">{_dest}</span></p>
-                    <p className="mt-0.5 text-slate-600">Zone {_zone.zone} — <span className={`font-bold ${_zone.rateEur === 0 ? 'text-emerald-600' : 'text-fuchsia-700'}`}>{_zone.rateEur === 0 ? 'FREE' : `€${_zone.rateEur.toFixed(2)}`}</span></p>
-                    {DELIVERY_DAYS[_dest] && <p className="mt-0.5 text-slate-500">Est. delivery: <strong>{DELIVERY_DAYS[_dest]} working days</strong></p>}
-                    {COUNTRY_MAX_KG[_dest] && <p className="mt-0.5 text-slate-500">Max gross weight: <strong>{COUNTRY_MAX_KG[_dest]} kg</strong></p>}
-                    {_zone.note && <p className="mt-1 text-[10px] text-slate-500">{_zone.note}</p>}
+                <div className="mt-2.5">
+                  <p className="text-[11px] font-semibold text-slate-700">Shipping by Zone — FREE for EU (up to 5 kg)</p>
+                  <div className="mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white text-[11px]">
+                    {SHIPPING_ZONES.map((z) => (
+                      <div key={z.zone} className={`flex items-start gap-2 px-2 py-1.5 ${_zone?.zone === z.zone ? 'bg-fuchsia-50 ring-1 ring-inset ring-fuchsia-300' : 'odd:bg-white even:bg-slate-50'}`}>
+                        <span className="w-14 flex-none font-semibold text-slate-500">Zone {z.zone}</span>
+                        <span className="min-w-0 flex-1 text-slate-500">{z.countries.join(', ')}{z.note ? ` (${z.note})` : ''}</span>
+                        <span className={`flex-none font-bold ${z.rateEur === 0 ? 'text-emerald-600' : 'text-fuchsia-700'}`}>{z.rateEur === 0 ? 'FREE' : `€${z.rateEur.toFixed(2)}`}</span>
+                      </div>
+                    ))}
                   </div>
-                )}
+                  {_zone
+                    ? <p className="mt-1 text-[10px] text-fuchsia-700">Your destination ({_dest}) is Zone {_zone.zone} — shipping: {_zone.rateEur === 0 ? 'FREE' : `from €${_zone.rateEur.toFixed(2)}`} (up to 5 kg).</p>
+                    : null
+                  }
+                </div>
               </div>
             )
           })()}
@@ -10442,26 +10241,26 @@ function ProductsModule({ moduleView = 'products' }) {
               <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
               <ul className="mt-1.5 space-y-1 text-[11px] text-slate-600">
                 <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Minimum order:</strong> €{MIN_ORDER_EUR.toFixed(2)} NET (excl. VAT &amp; shipping). Orders below this value are not accepted.</span></li>
-                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong><ul className="mt-1 space-y-0.5 pl-1">
-                    <li>Zone 2 (AT, DE, HU): <strong className="text-emerald-600">FREE</strong></li>
-                    <li>Zone 3 (BE, IT, NL, PL, SK, SI, FR, HR, CZ): <strong className="text-emerald-600">FREE</strong></li>
-                    <li>Zone 4 (DK, ES, LU): <strong className="text-emerald-600">FREE</strong></li>
-                    <li>Zone 5 (EE, IE, LV, LT, PT, Northern Ireland, FI, SE): <strong className="text-emerald-600">FREE</strong></li>
-                    <li>Zone 6 (UK, Norway, Switzerland): <strong className="text-fuchsia-700">€28.00</strong> — VAT not charged (export); +BGN 20.00 / €10.22 import admin fee applies.</li>
-                  </ul>
-                  <span className="block mt-0.5">Final packing list will appear on your invoice.</span></span></li>
-                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by Thermitek Ltd.</span></li>
+                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong> FREE to all EU zones (Zones 2–5). Zone 6 (UK): €28.00. Final packing list will appear on your invoice.</span></li>
+                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by GEL.IT.UP.</span></li>
                 <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
               </ul>
-              {_zone && (
-                <div className="mt-2.5 rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-2 text-[11px]">
-                  <p className="font-semibold text-slate-700">Shipping to <span className="text-fuchsia-700">{_dest}</span></p>
-                  <p className="mt-0.5 text-slate-600">Zone {_zone.zone} — <span className={`font-bold ${_zone.rateEur === 0 ? 'text-emerald-600' : 'text-fuchsia-700'}`}>{_zone.rateEur === 0 ? 'FREE' : `€${_zone.rateEur.toFixed(2)}`}</span></p>
-                  {DELIVERY_DAYS[_dest] && <p className="mt-0.5 text-slate-500">Est. delivery: <strong>{DELIVERY_DAYS[_dest]} working days</strong></p>}
-                  {COUNTRY_MAX_KG[_dest] && <p className="mt-0.5 text-slate-500">Max gross weight: <strong>{COUNTRY_MAX_KG[_dest]} kg</strong></p>}
-                  {_zone.note && <p className="mt-1 text-[10px] text-slate-500">{_zone.note}</p>}
+              <div className="mt-2.5">
+                <p className="text-[11px] font-semibold text-slate-700">Shipping by Zone — FREE for EU (up to 5 kg)</p>
+                <div className="mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white text-[11px]">
+                  {SHIPPING_ZONES.map((z) => (
+                    <div key={z.zone} className={`flex items-start gap-2 px-2 py-1.5 ${_zone?.zone === z.zone ? 'bg-fuchsia-50 ring-1 ring-inset ring-fuchsia-300' : 'odd:bg-white even:bg-slate-50'}`}>
+                      <span className="w-14 flex-none font-semibold text-slate-500">Zone {z.zone}</span>
+                      <span className="min-w-0 flex-1 text-slate-500">{z.countries.join(', ')}{z.note ? ` (${z.note})` : ''}</span>
+                      <span className={`flex-none font-bold ${z.rateEur === 0 ? 'text-emerald-600' : 'text-fuchsia-700'}`}>{z.rateEur === 0 ? 'FREE' : `€${z.rateEur.toFixed(2)}`}</span>
+                    </div>
+                  ))}
                 </div>
-              )}
+                {_zone
+                  ? <p className="mt-1 text-[10px] text-fuchsia-700">Your destination ({_dest}) is Zone {_zone.zone} — shipping: {_zone.rateEur === 0 ? 'FREE' : `from €${_zone.rateEur.toFixed(2)}`} (up to 5 kg).</p>
+                  : null
+                }
+              </div>
             </div>
           )
         })()}
@@ -11050,17 +10849,12 @@ function ProductsModule({ moduleView = 'products' }) {
                     {visibleProducts.map(product => {
                       const selected = selectedCodes.includes(product.code)
                       const qty = itemQtys[product.code] || 1
-                      const upperCode = (product.code || '').toUpperCase().trim()
-                      const upperSku = (product.sku || '').toUpperCase().trim()
-                      const isOos = OUT_OF_STOCK_CODES.has(upperCode) || OUT_OF_STOCK_CODES.has(upperSku)
-                        || oosFromSheet.has(upperCode) || oosFromSheet.has(upperSku)
                       return (
-                        <div key={product.code} className={`flex min-w-0 flex-col overflow-hidden bg-white${isOos ? ' opacity-50' : ''}`} style={selected && !isOos ? { outline: '2px solid #c8386e', outlineOffset: '-2px' } : {}}>
+                        <div key={product.code} className="flex min-w-0 flex-col overflow-hidden bg-white" style={selected ? { outline: '2px solid #c8386e', outlineOffset: '-2px' } : {}}>
                           {/* image */}
-                          <div className="relative aspect-square w-full cursor-pointer bg-slate-50" onClick={() => !isOos && product.imageUrl && setLightboxUrl(product.imageUrl)}>
+                          <div className="relative aspect-square w-full cursor-pointer bg-slate-50" onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}>
                             {product.imageUrl && <img src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />}
-                            {isOos && <span className="absolute inset-x-0 bottom-0 bg-slate-700/70 py-0.5 text-center text-[9px] font-bold uppercase tracking-wide text-white">Out of Stock</span>}
-                            {selected && !isOos && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
+                            {selected && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
                           </div>
                           {product.galleryImages?.length > 0 && (
                             <div className="flex gap-0.5 border-t border-slate-100 bg-white px-1 py-1">
@@ -11075,9 +10869,7 @@ function ProductsModule({ moduleView = 'products' }) {
                             {product.price != null && <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{Number(product.price).toFixed(2)}</p>}
                           </div>
                           {/* action */}
-                          {isOos ? (
-                            <div className="mt-auto border-t py-1 text-center text-[10px] font-semibold text-slate-400" style={{ borderColor: '#f0e8f0' }}>Out of Stock</div>
-                          ) : selected ? (
+                          {selected ? (
                             <div className="mt-auto flex items-center justify-center gap-1 border-t px-1 py-1" style={{ borderColor: '#fde8f0' }}>
                               <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(p => ({...p, [product.code]: q})) }} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>-</button>
                               <span className="w-4 text-center text-[10px] font-bold">{qty}</span>
@@ -12337,143 +12129,11 @@ function BuyerPortal({ onLogout, userName, userEmail }) {
   )
 }
 
-function DistributorModule() {
-  const navigate = useNavigate()
-  const { distributor } = B2B_TIER_ENGINE
-
-  const MOQ_TABLE = [
-    { category: 'Solid Gel Polish (Colours)', moq: '500 pcs combined', note: 'Mix & match colours' },
-    { category: 'Builder Gels / BIAB', moq: '500 pcs combined', note: 'Counts toward total order' },
-    { category: 'Base & Top Coats', moq: '500 pcs combined', note: 'Technical items included' },
-    { category: 'Package: Professional Tier', moq: 'Pod_1 colours + tech essentials', note: 'Pre-built starter pack' },
-    { category: 'Package: Authority Tier', moq: 'All pods (1–4) + tech essentials', note: 'Full catalogue' },
-  ]
-
-  return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="rounded-2xl border border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 to-purple-50 p-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-600">Account Tier</p>
-        <h2 className="mt-1 text-2xl font-semibold text-slate-900">Distributor Tools</h2>
-        <p className="mt-2 text-sm text-slate-600">
-          Your account is approved at <strong>Distributor tier</strong>. Minimum combined order:{' '}
-          <strong>{distributor.trigger.minUnits} units</strong>.
-        </p>
-        <button
-          type="button"
-          onClick={() => navigate('/portal/dashboard/products')}
-          className="mt-4 inline-flex rounded-lg bg-fuchsia-600 px-5 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-700"
-        >
-          Start / Continue Order →
-        </button>
-      </div>
-
-      {/* MOQ Reference Table */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">MOQ Reference</p>
-        <div className="mt-3 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100">
-                <th className="pb-2 text-left font-semibold text-slate-700">Category</th>
-                <th className="pb-2 text-left font-semibold text-slate-700">Min. Order</th>
-                <th className="hidden pb-2 text-left font-semibold text-slate-700 sm:table-cell">Notes</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {MOQ_TABLE.map((row) => (
-                <tr key={row.category}>
-                  <td className="py-2 text-slate-800">{row.category}</td>
-                  <td className="py-2 text-slate-600">{row.moq}</td>
-                  <td className="hidden py-2 text-slate-500 sm:table-cell">{row.note}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Package Tier Shortcuts */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Pre-Built Package Tiers</p>
-        <p className="mt-2 text-sm text-slate-600">
-          Use the <strong>Sales Manager</strong> panel inside "My Order" to generate Professional or Authority packages.
-          Each package is auto-built from the pod catalog with tech essentials included.
-        </p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          {PACKAGE_TIER_OPTIONS.map((tier) => (
-            <button
-              key={tier}
-              type="button"
-              onClick={() => navigate('/portal/dashboard/products')}
-              className="rounded-xl border border-slate-200 p-4 text-left transition-colors hover:border-fuchsia-300 hover:bg-fuchsia-50"
-            >
-              <p className="text-sm font-semibold text-slate-900">{tier} Tier</p>
-              <p className="mt-1 text-xs text-slate-500">
-                {tier === 'Professional'
-                  ? 'Pod_1 colours + tech essentials'
-                  : 'All pods (Pod_1–4) + tech essentials'}
-              </p>
-              <p className="mt-2 text-xs font-semibold text-fuchsia-600">Generate in My Order →</p>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Exclusive Add-ons */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Exclusive Distributor Add-ons</p>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          {distributor.upsells.map((upsell) => {
-            const discounted = (upsell.basePrice * (1 - upsell.discountPercent / 100)).toFixed(2)
-            return (
-              <div key={upsell.name} className="rounded-xl border border-fuchsia-100 bg-fuchsia-50 p-4">
-                <p className="text-sm font-semibold text-slate-900">{upsell.name}</p>
-                <p className="mt-1 text-xs text-slate-500">
-                  List: €{upsell.basePrice.toFixed(2)}
-                  {' '}|{' '}
-                  <span className="font-semibold text-fuchsia-700">Your price: €{discounted}</span>
-                  <span className="ml-2 rounded bg-fuchsia-200 px-1.5 py-0.5 text-xs font-bold text-fuchsia-800">
-                    -{upsell.discountPercent}%
-                  </span>
-                </p>
-                <button
-                  type="button"
-                  onClick={() => navigate('/portal/dashboard/products')}
-                  className="mt-3 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white transition duration-300 hover:bg-slate-700"
-                >
-                  Add to Order
-                </button>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Quick Restock */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Quick Restock</p>
-        <p className="mt-2 text-sm text-slate-600">
-          Trigger a Pod_1 restock in one click — loads all Pod_1 colours into your order.
-        </p>
-        <button
-          type="button"
-          onClick={() => navigate('/portal/dashboard/products?quickRestock=pod_1')}
-          className="mt-3 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-slate-700"
-        >
-          Trigger Pod_1 Restock
-        </button>
-      </div>
-    </div>
-  )
-}
-
 function PortalDashboard({ onLogout }) {
   const location = useLocation()
   const navigate = useNavigate()
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
   const [portalUser, setPortalUser] = useState(null)
-  const [dashboardRole, setDashboardRole] = useState('')
   const [skuRules, setSkuRules] = useState({
     colorSkuSet: new Set(),
     baseSystemSkuSet: new Set(),
@@ -12485,6 +12145,12 @@ function PortalDashboard({ onLogout }) {
   const [performanceWidget, setPerformanceWidget] = useState({
     topSellingColor: '09 Coco Nude',
   })
+  const [orderStats, setOrderStats] = useState({
+    openOrders: null,
+    inTransit: null,
+    totalOrders: null,
+    lastOrderDate: null,
+  })
 
   useEffect(() => {
     if (!hasSupabaseConfig || !supabase) return
@@ -12492,17 +12158,6 @@ function PortalDashboard({ onLogout }) {
       if (data?.user) setPortalUser(data.user)
     })
   }, [])
-
-  useEffect(() => {
-    if (!hasSupabaseConfig || !supabase) return
-    supabase.auth.getUser().then(({ data }) => {
-      const meta = data?.user?.user_metadata || {}
-      const role = String(meta.role || meta.account_type || meta.customer_type || '').trim().toLowerCase()
-      setDashboardRole(role)
-    })
-  }, [])
-
-  const isDistributor = dashboardRole.includes('distributor')
 
   const printComplianceCertificate = useCallback(async () => {
     const { jsPDF } = await import('jspdf')
@@ -12657,13 +12312,12 @@ function PortalDashboard({ onLogout }) {
     () => [
       { key: 'catalog', label: 'Shop' },
       { key: 'products', label: 'My Order' },
-      ...(isDistributor ? [{ key: 'distributor', label: 'Distributor Tools' }] : []),
       { key: 'profile', label: 'My Information' },
       { key: 'orders', label: 'My Orders' },
       { key: 'overview', label: 'Overview' },
       { key: 'support', label: 'Support & Tracking' },
     ],
-    [isDistributor],
+    [],
   )
 
   const activeModuleRaw = modules.find((module) => location.pathname.endsWith(module.key))?.key
@@ -12827,6 +12481,41 @@ function PortalDashboard({ onLogout }) {
   }, [activeModule, ordersTable, skuRules])
 
   useEffect(() => {
+    let isMounted = true
+
+    const loadOrderStats = async () => {
+      if (activeModule !== 'overview' || !hasSupabaseConfig || !supabase) return
+
+      const { data: userData } = await supabase.auth.getUser()
+      const userEmail = userData?.user?.email?.toLowerCase()
+      if (!userEmail) return
+
+      const { data: rows } = await supabase
+        .from(ordersTable)
+        .select('status, created_at')
+        .eq('customer_email', userEmail)
+        .order('created_at', { ascending: false })
+        .limit(200)
+
+      if (!isMounted || !Array.isArray(rows)) return
+
+      const openStatuses = new Set(['submitted', 'processing'])
+      const openOrders = rows.filter((r) => openStatuses.has(String(r.status || '').toLowerCase())).length
+      const inTransit = rows.filter((r) => String(r.status || '').toLowerCase() === 'shipped').length
+      const totalOrders = rows.length
+      const lastOrderDate = rows[0]?.created_at
+        ? new Date(rows[0].created_at).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
+        : null
+
+      setOrderStats({ openOrders, inTransit, totalOrders, lastOrderDate })
+    }
+
+    void loadOrderStats()
+
+    return () => { isMounted = false }
+  }, [activeModule, ordersTable])
+
+  useEffect(() => {
     let mounted = true
 
     const loadPerformanceWidget = async () => {
@@ -12935,8 +12624,6 @@ function PortalDashboard({ onLogout }) {
           <ProductsModule moduleView={activeModule} />
         ) : activeModule === 'orders' || activeModule === 'support' ? (
           <OrdersModule />
-        ) : activeModule === 'distributor' ? (
-          <DistributorModule />
         ) : (
           <>
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
@@ -12969,19 +12656,27 @@ function PortalDashboard({ onLogout }) {
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <article className="rounded-xl border border-slate-200 bg-white p-4">
                 <p className="text-xs text-slate-500">Open Orders</p>
-                <p className="mt-1 text-2xl font-bold text-slate-900">0</p>
+                <p className="mt-1 text-2xl font-bold text-slate-900">
+                  {orderStats.openOrders === null ? '—' : orderStats.openOrders}
+                </p>
               </article>
               <article className="rounded-xl border border-slate-200 bg-white p-4">
-                <p className="text-xs text-slate-500">Intake Queue</p>
-                <p className="mt-1 text-2xl font-bold text-slate-900">0</p>
+                <p className="text-xs text-slate-500">In Transit</p>
+                <p className="mt-1 text-2xl font-bold text-slate-900">
+                  {orderStats.inTransit === null ? '—' : orderStats.inTransit}
+                </p>
               </article>
               <article className="rounded-xl border border-slate-200 bg-white p-4">
-                <p className="text-xs text-slate-500">Credit Limit Left</p>
-                <p className="mt-1 text-2xl font-bold text-slate-900">N/A</p>
+                <p className="text-xs text-slate-500">Total Orders</p>
+                <p className="mt-1 text-2xl font-bold text-slate-900">
+                  {orderStats.totalOrders === null ? '—' : orderStats.totalOrders}
+                </p>
               </article>
               <article className="rounded-xl border border-slate-200 bg-white p-4">
-                <p className="text-xs text-slate-500">Support Tickets</p>
-                <p className="mt-1 text-2xl font-bold text-slate-900">0</p>
+                <p className="text-xs text-slate-500">Last Order</p>
+                <p className="mt-1 text-lg font-bold text-slate-900">
+                  {orderStats.lastOrderDate ?? '—'}
+                </p>
               </article>
             </div>
 
@@ -13076,89 +12771,21 @@ function LegalPageLayout({ title, children }) {
 function PrivacyPolicyPage() {
   return (
     <LegalPageLayout title="Privacy Policy">
-      <div className="space-y-6 text-sm leading-relaxed text-slate-700">
-        <p className="text-xs text-slate-500">Last updated: March 2026</p>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">1. Who We Are</h2>
-          <p>GEL.IT.UP by GIUP® is a professional gel polish brand operated by Leeukopf Laboratories. This Privacy Policy explains how we collect, use, and protect your personal data when you use our website at <strong>gelitup.com</strong> or register for our B2B portal.</p>
-          <p className="mt-2">Contact: <a href={`mailto:${PROFORMA_LEEUKOPF_EMAIL}`} className="text-slate-900 underline">{PROFORMA_LEEUKOPF_EMAIL}</a></p>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">2. Data We Collect</h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>Identity & contact data: name, company name, email address, phone number</li>
-            <li>Business data: VAT/EORI number, billing and shipping address, business type</li>
-            <li>Account data: login credentials (hashed), session activity</li>
-            <li>Order data: product selections, quantities, order history</li>
-            <li>Communications: messages submitted via contact or registration forms</li>
-            <li>Technical data: IP address, browser type, and usage data via cookies</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">3. How We Use Your Data</h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>To process and manage B2B registrations and orders</li>
-            <li>To provide access to the distributor/salon portal</li>
-            <li>To send transactional emails (order confirmations, shipping updates)</li>
-            <li>To send promotional material and trade offers — only if you have opted in</li>
-            <li>To comply with legal and regulatory obligations (e.g. VAT records)</li>
-            <li>To improve our website and services</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">4. Legal Basis for Processing</h2>
-          <p>We process your data under the following legal bases:</p>
-          <ul className="list-disc space-y-1 pl-5 mt-2">
-            <li><strong>Contract:</strong> processing necessary to fulfil your order or application</li>
-            <li><strong>Legitimate interest:</strong> managing our business relationship and preventing fraud</li>
-            <li><strong>Consent:</strong> marketing communications (you may withdraw consent at any time)</li>
-            <li><strong>Legal obligation:</strong> tax, regulatory, and compliance requirements</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">5. Data Sharing</h2>
-          <p>We do not sell your personal data. We may share it with:</p>
-          <ul className="list-disc space-y-1 pl-5 mt-2">
-            <li>Hosting and authentication providers (Netlify, Supabase) — for platform operation</li>
-            <li>Email service providers (Resend, Zoho) — for transactional and operational emails</li>
-            <li>Logistics partners — solely for order fulfilment</li>
-            <li>Regulatory authorities — where legally required</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">6. Data Retention</h2>
-          <p>We retain your data for as long as needed to fulfil the purposes described above, or as required by law. Account data is retained for the duration of your business relationship with us plus 7 years for tax and audit purposes.</p>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">7. Your Rights</h2>
-          <p>Under GDPR and applicable data protection laws, you have the right to:</p>
-          <ul className="list-disc space-y-1 pl-5 mt-2">
-            <li>Access the personal data we hold about you</li>
-            <li>Request correction of inaccurate data</li>
-            <li>Request deletion of your data (subject to legal retention requirements)</li>
-            <li>Object to or restrict processing</li>
-            <li>Withdraw marketing consent at any time</li>
-            <li>Lodge a complaint with your local data protection authority</li>
-          </ul>
-          <p className="mt-2">To exercise any of these rights, contact us at <a href={`mailto:${PROFORMA_LEEUKOPF_EMAIL}`} className="text-slate-900 underline">{PROFORMA_LEEUKOPF_EMAIL}</a>.</p>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">8. Cookies</h2>
-          <p>We use essential cookies required for site operation and optional analytics cookies. See our <a href="/cookie-policy" className="text-slate-900 underline">Cookie Policy</a> for details.</p>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">9. Changes to This Policy</h2>
-          <p>We may update this Privacy Policy from time to time. Material changes will be communicated via the website or by email. Continued use of our services constitutes acceptance of the updated policy.</p>
-        </section>
+      <div className="space-y-3">
+        <p>
+          GEL.IT.UP processes personal data to provide services, respond to requests, manage distributor applications,
+          and maintain account security.
+        </p>
+        <p>
+          We collect only the data needed for business operations, including contact information, billing and shipping details,
+          and account activity.
+        </p>
+        <p>
+          Data may be shared with trusted service providers for hosting, authentication, transactional messaging, and operational support.
+        </p>
+        <p>
+          You may request access, correction, or deletion of your personal data by contacting us at {PROFORMA_LEEUKOPF_EMAIL}.
+        </p>
       </div>
     </LegalPageLayout>
   )
@@ -13186,76 +12813,20 @@ function CookiePolicyPage() {
 function TermsAndConditionsPage() {
   return (
     <LegalPageLayout title="Terms and Conditions">
-      <div className="space-y-6 text-sm leading-relaxed text-slate-700">
-        <p className="text-xs text-slate-500">Last updated: March 2026</p>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">1. Introduction</h2>
-          <p>These Terms and Conditions govern your use of the GEL.IT.UP by GIUP® website at <strong>gelitup.com</strong> and the B2B portal. By accessing or registering on this site, you agree to be bound by these terms. If you do not agree, please do not use this site.</p>
-          <p className="mt-2">GEL.IT.UP by GIUP® is operated by Leeukopf Laboratories. For questions, contact <a href={`mailto:${PROFORMA_LEEUKOPF_EMAIL}`} className="text-slate-900 underline">{PROFORMA_LEEUKOPF_EMAIL}</a>.</p>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">2. B2B Portal Access</h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>Portal access is available to verified salons, trade buyers, and approved distributors.</li>
-            <li>Salon and trade clients may register and access the portal immediately upon creating a password.</li>
-            <li>Distributor applications are subject to review and must be approved before portal access is granted.</li>
-            <li>You are responsible for maintaining the confidentiality of your login credentials.</li>
-            <li>We reserve the right to suspend or terminate access if terms are violated.</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">3. Orders and Pricing</h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>All prices shown in the portal are trade prices and exclusive of VAT unless stated otherwise.</li>
-            <li>Prices and product availability may change without prior notice.</li>
-            <li>Orders submitted through the portal are subject to acceptance and stock availability.</li>
-            <li>Minimum order quantities may apply depending on your account tier.</li>
-            <li>GEL.IT.UP reserves the right to cancel or refuse any order at its discretion.</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">4. Products</h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>All GEL.IT.UP products are EU-regulated, HEMA-free, and TPO-free professional formulations.</li>
-            <li>Product images and descriptions are for reference and may vary slightly from actual products.</li>
-            <li>Products are intended for professional use by qualified nail technicians.</li>
-            <li>You are responsible for compliance with local import, labelling, and distribution regulations in your territory.</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">5. Intellectual Property</h2>
-          <p>All content on this website — including product images, branding, text, and catalogue data — is the exclusive property of GEL.IT.UP by GIUP® / Leeukopf Laboratories. Unauthorised copying, scraping, reproduction, or redistribution is strictly prohibited.</p>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">6. Distributor Obligations</h2>
-          <ul className="list-disc space-y-1 pl-5">
-            <li>Approved distributors must comply with their individual distribution agreements.</li>
-            <li>Resale below agreed minimum pricing is not permitted.</li>
-            <li>Distributors may not sub-distribute without written approval.</li>
-            <li>Territory restrictions apply as agreed in the distribution contract.</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">7. Limitation of Liability</h2>
-          <p>To the fullest extent permitted by law, GEL.IT.UP by GIUP® / Leeukopf Laboratories shall not be liable for indirect, incidental, or consequential damages arising from use of this site or our products. Our total liability in any matter shall not exceed the value of the relevant order.</p>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">8. Governing Law</h2>
-          <p>These terms are governed by the laws of South Africa. Any disputes shall be subject to the exclusive jurisdiction of the South African courts, unless otherwise required by applicable EU or local consumer protection laws.</p>
-        </section>
-
-        <section>
-          <h2 className="mb-2 text-base font-bold text-slate-900">9. Changes to These Terms</h2>
-          <p>We may update these Terms and Conditions at any time. Continued use of the site or portal after changes constitutes acceptance of the revised terms. Material changes will be communicated via the website.</p>
-        </section>
+      <div className="space-y-3">
+        <p>
+          By using this website, you agree to these terms. Product information, pricing, and availability are provided for
+          commercial reference and may be updated without prior notice.
+        </p>
+        <p>
+          Orders, account approvals, and distribution relationships are subject to eligibility checks and separate commercial agreements.
+        </p>
+        <p>
+          Unauthorized copying, scraping, or misuse of content is prohibited.
+        </p>
+        <p>
+          For account and legal questions, contact us at {PROFORMA_LEEUKOPF_EMAIL}.
+        </p>
       </div>
     </LegalPageLayout>
   )
@@ -13876,14 +13447,9 @@ function App() {
     }
 
     if ((isAlreadyRegistered || isExistingAccount) && !canSignInNow) {
-      // Account exists but the new password didn't match — silently send a reset email
-      // so the user can recover without seeing a confusing error.
-      await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-        redirectTo: `${window.location.origin}/portal/login`,
-      })
       return {
         ok: false,
-        message: 'An account already exists for this email. We\'ve sent a password reset link to your inbox — check your email (and spam) to set a new password.',
+        message: 'This account already exists. Use your existing password or reset it via Forgot password.',
       }
     }
 
@@ -13912,7 +13478,7 @@ function App() {
         setIsPortalAuthenticated(true)
         return {
           ok: true,
-          infoMessage: 'Password created successfully. Welcome to the GEL.IT.UP portal.',
+          infoMessage: 'Password created successfully. No B2B registration profile was found yet; submit a distributor application if approval-gated access is needed.',
           navigateToDashboard: true,
           debugTrace: 'create-password -> no-registration-row-allowed',
         }
@@ -14028,7 +13594,6 @@ function App() {
       const notesSections = [
         `[APPLICATION_TYPE:${isDistributorApplication ? 'distributor' : 'b2b_order'}]`,
         `[ORDER_PROFILE:${isBusinessOrder ? 'business' : 'personal'}]`,
-        `[MARKETING_CONSENT:${application.marketingConsent ? 'yes' : 'no'}]`,
       ]
 
       if (isDistributorApplication) {
@@ -14152,8 +13717,7 @@ function App() {
         ok: true,
         message: isDistributorApplication
           ? `Your distributor application has been received. Our team will review it and contact you by email once approved — usually within 1–2 business days.`
-          : `Your B2B profile is set up. You can now create your portal login password and access immediately — no approval needed.`,
-        loginEmail: isDistributorApplication ? null : payload.contact_email,
+          : `Your B2B order request has been received. Our team will review it and contact you by email once approved — usually within 1–2 business days.`,
       }
     }
 

@@ -5,6 +5,7 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  VITE_ENABLE_PORTAL = "true"
 
 [functions]
   node_bundler = "esbuild"
