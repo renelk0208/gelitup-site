@@ -5497,7 +5497,7 @@ function DistributorsPage() {
   )
 }
 
-function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
+function PortalLogin({ onLogin, onCreatePassword }) {
   const navigate = useNavigate()
   const location = useLocation()
   const loginParams = useMemo(() => new URLSearchParams(location.search), [location.search])
@@ -5514,10 +5514,8 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
     return true
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isCheckingApproval, setIsCheckingApproval] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [infoMessage, setInfoMessage] = useState('')
-  const [applicationStatus, setApplicationStatus] = useState('')
   const [debugTrace, setDebugTrace] = useState('')
 
   useEffect(() => {
@@ -5529,7 +5527,6 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
   useEffect(() => {
     setErrorMessage('')
     setInfoMessage('')
-    setApplicationStatus('')
     setDebugTrace('')
   }, [isCreatePasswordMode, location.search])
 
@@ -5621,22 +5618,8 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
           }
 
           if (!result.ok) {
-            const nextErrorMessage = result.message || 'Unable to sign in.'
-            const isNoRegistrationMessage = /no\s+b2b\s+registration/i.test(nextErrorMessage)
-
-            setErrorMessage(
-              isNoRegistrationMessage
-                ? 'No account profile was found for this email. Use Create password to initialize access, then continue in Buy Now.'
-                : nextErrorMessage,
-            )
-            if (result.applicationStatus) {
-              setApplicationStatus(isNoRegistrationMessage ? '' : result.applicationStatus)
-            }
+            setErrorMessage(result.message || 'Unable to sign in.')
             return
-          }
-
-          if (result.applicationStatus) {
-            setApplicationStatus(result.applicationStatus)
           }
 
           // Mark this tab as active so session persists within the browser session
@@ -5747,99 +5730,21 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
         {errorMessage && <p className="mt-2 text-xs text-rose-600">{errorMessage}</p>}
         {infoMessage && <p className="mt-2 text-xs text-emerald-700">{infoMessage}</p>}
         {showDebugTrace && debugTrace && <p className="mt-2 text-xs text-amber-700">Debug trace: {debugTrace}</p>}
-        {applicationStatus && (
-          <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
-            <p className="font-semibold text-slate-900">Application status</p>
-            <div className="mt-1 flex items-center gap-2">
-              <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                  applicationStatus === 'approved'
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : applicationStatus === 'rejected'
-                      ? 'bg-rose-100 text-rose-800'
-                      : applicationStatus === 'submitted'
-                        ? 'bg-sky-100 text-sky-800'
-                      : 'bg-amber-100 text-amber-800'
-                }`}
-              >
-                {applicationStatus}
-              </span>
-              <span>
-                {applicationStatus === 'approved'
-                  ? 'Approved for portal access.'
-                  : applicationStatus === 'rejected'
-                    ? 'Rejected. Contact distribution support.'
-                    : applicationStatus === 'submitted'
-                      ? 'Order request is stored. Portal access still requires approved distributor application.'
-                    : 'Pending review by B2B team.'}
-              </span>
-            </div>
-            {applicationStatus === 'pending' && (
-              <button
-                type="button"
-                disabled={isCheckingApproval || !email || !password}
-                onClick={async () => {
-                  setErrorMessage('')
-                  setInfoMessage('')
-                  setIsCheckingApproval(true)
-
-                  const statusResult = await onCheckApproval(email)
-
-                  if (!statusResult.ok) {
-                    setErrorMessage(statusResult.message || 'Unable to check approval status.')
-                    setIsCheckingApproval(false)
-                    return
-                  }
-
-                  setApplicationStatus(statusResult.applicationStatus || 'pending')
-
-                  if (statusResult.applicationStatus !== 'approved') {
-                    setInfoMessage('Still pending. Please try again later.')
-                    setIsCheckingApproval(false)
-                    return
-                  }
-
-                  const loginResult = await onLogin(email, password)
-                  setIsCheckingApproval(false)
-
-                  if (!loginResult.ok) {
-                    setErrorMessage(loginResult.message || 'Approval detected, but sign-in failed.')
-                    return
-                  }
-
-                  navigate('/portal/dashboard/overview')
-                }}
-                className="mt-2 rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 disabled:opacity-60"
-              >
-                {isCheckingApproval ? 'Checking approval...' : 'Check approval now'}
-              </button>
-            )}
-          </div>
-        )}
 
         <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs sm:p-4">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <NavLink to="/?portal=admin" className="font-medium text-slate-700 hover:text-slate-900">
-              Admin login
-            </NavLink>
-          </div>
-
-          <p className="mt-3 leading-relaxed text-slate-600">
+          <p className="leading-relaxed text-slate-600">
             For questions or issues with the portal, contact{' '}
             <a href={`mailto:${B2B_EMAIL}`} className="font-medium text-slate-700 hover:text-slate-900">
               {B2B_EMAIL}
             </a>
             .
           </p>
-
-          <div className="mt-3 space-y-1 text-slate-600">
-            <p>
-              Distributor onboarding only:{' '}
-              <NavLink to="/become-distributor" className="font-semibold text-slate-900 hover:underline">
-                Apply now
-              </NavLink>
-            </p>
-          </div>
+          <p className="mt-2 text-slate-600">
+            Distributor onboarding only:{' '}
+            <NavLink to="/become-distributor" className="font-semibold text-slate-900 hover:underline">
+              Apply now
+            </NavLink>
+          </p>
         </div>
       </div>
     </section>
@@ -5905,10 +5810,10 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
               return
             }
 
-            setInfoMessage(createResult.message || 'Password setup completed. Please sign in as admin.')
-            if (createResult.navigateToDashboard) {
-              navigate('/portal/dashboard/applications')
-            }
+            // Auto-clear and redirect to sign-in
+            setPassword('')
+            setConfirmPassword('')
+            navigate('/portal/admin-login')
             return
           }
 
@@ -6778,7 +6683,42 @@ function PortalRegister({ onRegister }) {
                 </NavLink>
                 <button
                   type="button"
-                  onClick={() => setSubmittedProfile(null)}
+                  onClick={() => {
+                    setSubmittedProfile(null)
+                    setApplication({
+                      applicationType: 'distributor',
+                      orderProfile: 'business',
+                      customerType: 'company',
+                      companyName: '',
+                      vatNumber: '',
+                      contactName: '',
+                      contactEmail: '',
+                      phone: '',
+                      website: '',
+                      shippingType: 'road',
+                      invoiceAddressLine1: '',
+                      invoiceAddressLine2: '',
+                      invoiceArea: '',
+                      invoiceRegion: '',
+                      invoiceCountry: '',
+                      invoicePostalCode: '',
+                      shippingSameAsInvoice: true,
+                      shippingName: '',
+                      shippingPhone: '',
+                      shippingAddressLine1: '',
+                      shippingAddressLine2: '',
+                      shippingArea: '',
+                      shippingRegion: '',
+                      shippingCountry: '',
+                      shippingPostalCode: '',
+                      businessType: '',
+                      yearsInBusiness: '',
+                      distributionCountryInterests: '',
+                      notes: '',
+                    })
+                    setConsentGiven(false)
+                    setErrorMessage('')
+                  }}
                   className="w-full rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
                 >
                   Back to Registration
@@ -14090,7 +14030,6 @@ function App() {
                   element={(
                     <PortalLogin
                       onLogin={handlePortalLogin}
-                      onCheckApproval={handleCheckApproval}
                       onCreatePassword={handleCreatePortalPassword}
                     />
                   )}
