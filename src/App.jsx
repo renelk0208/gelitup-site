@@ -6675,6 +6675,11 @@ function PortalRegister({ onRegister }) {
                   <p className="mt-4 text-xs text-slate-500">
                     Review usually takes <strong>1–2 business days</strong>. Check your inbox and spam folder.
                   </p>
+                  {successMessage && successMessage.toLowerCase().includes('email') && successMessage.toLowerCase().includes('fail') && (
+                    <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                      ⚠ {successMessage}
+                    </p>
+                  )}
                 </>
               ) : (
                 <>

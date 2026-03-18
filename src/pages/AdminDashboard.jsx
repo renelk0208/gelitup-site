@@ -71,6 +71,7 @@ function RegistrationsPanel() {
   const [expanded, setExpanded] = useState(null)
   const [commentMap, setCommentMap] = useState({})
   const [saving, setSaving] = useState(null)
+  const [emailStatus, setEmailStatus] = useState({}) // { [id]: { state: 'sending'|'sent'|'error', message: '' } }
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -162,16 +163,59 @@ function RegistrationsPanel() {
 </table>
 </body></html>`
         : `<p>Hi ${row.contact_name},</p><p>Thank you for applying to become a GEL.IT.UP distributor. Unfortunately your application has not been approved at this time.</p><p>If you have any questions please contact us at distribution@gelitup.com.</p>`
+      setEmailStatus(prev => ({ ...prev, [id]: { state: 'sending', message: '' } }))
       const emailHeaders = { 'Content-Type': 'application/json' }
       if (SUPABASE_ANON_KEY) {
         emailHeaders['apikey'] = SUPABASE_ANON_KEY
         emailHeaders['Authorization'] = `Bearer ${SUPABASE_ANON_KEY}`
       }
-      fetch(EMAIL_WEBHOOK_URL, {
+      try {
+        const res = await fetch(EMAIL_WEBHOOK_URL, {
+          method: 'POST',
+          headers: emailHeaders,
+          body: JSON.stringify({ to: row.contact_email, subject, html, from: FROM_EMAIL }),
+        })
+        const resJson = await res.json().catch(() => null)
+        if (res.ok) {
+          setEmailStatus(prev => ({ ...prev, [id]: { state: 'sent', message: `Email sent to ${row.contact_email}` } }))
+        } else {
+          const errMsg = resJson?.error || `HTTP ${res.status}`
+          setEmailStatus(prev => ({ ...prev, [id]: { state: 'error', message: errMsg } }))
+        }
+      } catch (emailErr) {
+        setEmailStatus(prev => ({ ...prev, [id]: { state: 'error', message: emailErr.message || 'Network error' } }))
+      }
+    } else if (row?.contact_email && !EMAIL_WEBHOOK_URL) {
+      setEmailStatus(prev => ({ ...prev, [id]: { state: 'error', message: 'VITE_EMAIL_WEBHOOK_URL is not configured — email not sent.' } }))
+    }
+  }
+
+  const resendApprovalEmail = async (row) => {
+    if (!row?.contact_email || !EMAIL_WEBHOOK_URL) return
+    const subject = `🎉 You're Approved — Welcome to GEL.IT.UP, ${row.contact_name}!`
+    const portalLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(row.contact_email || '')}`
+    const html = `<p>Dear ${row.contact_name},</p><p>Your GEL.IT.UP distributor application for <strong>${row.company_name}</strong> has been <strong>approved</strong>.</p><p>Click the link below to create your password and access the portal:</p><p><a href="${portalLink}" style="background:#7c3aed;color:#fff;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:700;">Create Password &amp; Enter Portal →</a></p><p>If you have any questions, contact us at distribution@gelitup.com.</p><p>The GEL.IT.UP Distribution Team</p>`
+    setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sending', message: '' } }))
+    const emailHeaders = { 'Content-Type': 'application/json' }
+    if (SUPABASE_ANON_KEY) {
+      emailHeaders['apikey'] = SUPABASE_ANON_KEY
+      emailHeaders['Authorization'] = `Bearer ${SUPABASE_ANON_KEY}`
+    }
+    try {
+      const res = await fetch(EMAIL_WEBHOOK_URL, {
         method: 'POST',
         headers: emailHeaders,
         body: JSON.stringify({ to: row.contact_email, subject, html, from: FROM_EMAIL }),
-      }).catch(() => {})
+      })
+      const resJson = await res.json().catch(() => null)
+      if (res.ok) {
+        setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sent', message: `Email resent to ${row.contact_email}` } }))
+      } else {
+        const errMsg = resJson?.error || `HTTP ${res.status}`
+        setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: errMsg } }))
+      }
+    } catch (emailErr) {
+      setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: emailErr.message || 'Network error' } }))
     }
   }
 
@@ -301,7 +345,30 @@ function RegistrationsPanel() {
                       ↩ Reset to Pending
                     </button>
                   )}
+                  {row.status === 'approved' && (
+                    <button
+                      onClick={() => resendApprovalEmail(row)}
+                      disabled={emailStatus[row.id]?.state === 'sending'}
+                      className="rounded-lg border border-fuchsia-300 bg-fuchsia-50 px-3 py-2 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-50"
+                    >
+                      {emailStatus[row.id]?.state === 'sending' ? '📨 Sending…' : '📧 Resend Approval Email'}
+                    </button>
+                  )}
                 </div>
+
+                {/* Email status feedback */}
+                {emailStatus[row.id] && (
+                  <div className={`rounded-lg px-3 py-2 text-xs font-medium ${
+                    emailStatus[row.id].state === 'sent' ? 'bg-emerald-50 text-emerald-700' :
+                    emailStatus[row.id].state === 'sending' ? 'bg-blue-50 text-blue-600' :
+                    'bg-rose-50 text-rose-700'
+                  }`}>
+                    {emailStatus[row.id].state === 'sent' && '✓ '}
+                    {emailStatus[row.id].state === 'error' && '⚠ Email failed: '}
+                    {emailStatus[row.id].state === 'sending' && '📨 Sending email…'}
+                    {emailStatus[row.id].message}
+                  </div>
+                )}
 
                 {/* Internal comment */}
                 <div>
