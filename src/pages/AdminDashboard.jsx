@@ -5,6 +5,7 @@ const REGISTRATIONS_TABLE = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || 'b2b
 const ORDERS_TABLE = import.meta.env.VITE_B2B_ORDERS_TABLE || 'b2b_orders'
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL || ''
 const FROM_EMAIL = import.meta.env.VITE_EMAIL_FROM || 'noreply@gelitup.com'
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
 const ORDER_STATUSES = ['submitted', 'processing', 'shipped', 'completed', 'cancelled']
 
@@ -161,9 +162,14 @@ function RegistrationsPanel() {
 </table>
 </body></html>`
         : `<p>Hi ${row.contact_name},</p><p>Thank you for applying to become a GEL.IT.UP distributor. Unfortunately your application has not been approved at this time.</p><p>If you have any questions please contact us at distribution@gelitup.com.</p>`
+      const emailHeaders = { 'Content-Type': 'application/json' }
+      if (SUPABASE_ANON_KEY) {
+        emailHeaders['apikey'] = SUPABASE_ANON_KEY
+        emailHeaders['Authorization'] = `Bearer ${SUPABASE_ANON_KEY}`
+      }
       fetch(EMAIL_WEBHOOK_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: emailHeaders,
         body: JSON.stringify({ to: row.contact_email, subject, html, from: FROM_EMAIL }),
       }).catch(() => {})
     }
