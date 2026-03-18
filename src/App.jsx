@@ -5757,6 +5757,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
   const loginParams = useMemo(() => new URLSearchParams(location.search), [location.search])
   const prefilledEmail = String(loginParams.get('email') || '').trim().toLowerCase()
   const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
+  const needsEmailConfirm = loginParams.get('confirm') === '1'
   const [email, setEmail] = useState(prefilledEmail || localStorage.getItem('adminRememberedEmail') || '')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -5790,6 +5791,12 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
 
       <div className="p-8">
         <h3 className="text-xl font-semibold text-slate-900">{isCreatePasswordMode ? 'Create Admin Password' : 'Sign In as Admin'}</h3>
+
+        {needsEmailConfirm && !isCreatePasswordMode && (
+          <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <strong>Almost there!</strong> Check your inbox for a confirmation email and click the link, then sign in below.
+          </div>
+        )}
         <form autoComplete="on" className="mt-5 space-y-4" onSubmit={async (event) => {
           event.preventDefault()
           setIsSubmitting(true)
@@ -5810,10 +5817,21 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
               return
             }
 
-            // Auto-clear and redirect to sign-in
+            // Clear sensitive fields
             setPassword('')
             setConfirmPassword('')
-            navigate('/portal/admin-login')
+
+            if (createResult.navigateToDashboard) {
+              // Already authenticated — go straight to the dashboard
+              sessionStorage.setItem('portalTabActive', 'true')
+              localStorage.setItem('adminRememberedEmail', String(email || '').trim().toLowerCase())
+              localStorage.setItem('adminRememberMe', 'true')
+              localStorage.removeItem('portalSessionOnly')
+              navigate('/portal/dashboard/applications')
+            } else {
+              // Email confirmation required — redirect to sign-in with a hint
+              navigate('/portal/admin-login?confirm=1')
+            }
             return
           }
 
@@ -13375,6 +13393,9 @@ function App() {
     const { error: signInError } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password })
 
     if (signInError) {
+      if (/email not confirmed/i.test(signInError.message)) {
+        return { ok: false, message: 'Your email address is not yet confirmed. Please check your inbox (and spam folder) for a confirmation link, then try again.' }
+      }
       return { ok: false, message: signInError.message }
     }
 
@@ -13386,12 +13407,15 @@ function App() {
 
     if (adminError) {
       await supabase.auth.signOut()
+      if (/does not exist/i.test(adminError.message)) {
+        return { ok: false, message: 'Admin table not found. Please run supabase/sql/create_b2b_admins.sql in the Supabase SQL Editor.' }
+      }
       return { ok: false, message: `Admin access check failed (${adminError.message}).` }
     }
 
     if (!adminRows?.length) {
       await supabase.auth.signOut()
-      return { ok: false, message: 'This account is not registered as a B2B admin reviewer.' }
+      return { ok: false, message: `"${normalizedEmail}" is not registered as a B2B admin reviewer. Add it to the b2b_admins table in Supabase.` }
     }
 
     setIsPortalAuthenticated(true)
