@@ -5577,7 +5577,6 @@ function PortalLogin({ onLogin, onCreatePassword }) {
           setIsSubmitting(true)
           setErrorMessage('')
           setInfoMessage('')
-          setApplicationStatus('')
           setDebugTrace('')
 
           if (isCreatePasswordMode) {
