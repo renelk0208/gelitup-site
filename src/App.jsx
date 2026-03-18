@@ -6072,6 +6072,7 @@ function PortalRegister({ onRegister }) {
   const [consentGiven, setConsentGiven] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const [submittedProfile, setSubmittedProfile] = useState(null)
 
   const [buyerForm, setBuyerForm] = useState({ email: '', password: '', confirmPassword: '', fullName: '' })
   const [buyerSubmitting, setBuyerSubmitting] = useState(false)
@@ -6243,6 +6244,8 @@ function PortalRegister({ onRegister }) {
           setErrorMessage('')
           setSuccessMessage('')
 
+          const capturedName = String(application.contactName || '').trim()
+          const capturedIsDistributor = application.applicationType === 'distributor'
           const result = await onRegister(application)
           setIsSubmitting(false)
 
@@ -6251,7 +6254,8 @@ function PortalRegister({ onRegister }) {
             return
           }
 
-          setSuccessMessage(result.message || 'Application submitted and marked as pending approval. You will be notified by email after review.')
+          setSubmittedProfile({ name: capturedName, isDistributor: capturedIsDistributor })
+          setSuccessMessage(result.message || 'Application submitted.')
         }}>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block text-sm font-medium text-slate-700 md:col-span-2">
@@ -6671,7 +6675,6 @@ function PortalRegister({ onRegister }) {
         </form>
 
         {errorMessage && <p className="mt-2 text-xs text-rose-600">{errorMessage}</p>}
-        {successMessage && <p className="mt-2 text-xs text-emerald-700">{successMessage}</p>}
 
         <div className="mt-4 text-xs text-slate-600">
           Already approved?{' '}
@@ -6680,6 +6683,96 @@ function PortalRegister({ onRegister }) {
           </NavLink>
         </div>
       </div>
+
+      {/* ── Application submitted modal ── */}
+      {submittedProfile && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Application submitted"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm"
+        >
+          <div className="relative w-full max-w-md overflow-hidden rounded-3xl shadow-2xl">
+            {/* gradient header */}
+            <div
+              className="px-8 pb-8 pt-10 text-center text-white"
+              style={{ background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 55%, #4f46e5 100%)' }}
+            >
+              {/* checkmark icon */}
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/20 ring-4 ring-white/30">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-8 w-8 text-white">
+                  <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/70">GEL.IT.UP by GIUP®</p>
+              <h2 className="mt-2 text-2xl font-black text-white">
+                {submittedProfile.isDistributor ? 'Application Received!' : 'Request Received!'}
+              </h2>
+              <p className="mt-1.5 text-sm text-white/85">
+                {submittedProfile.name ? `Thank you, ${submittedProfile.name.split(' ')[0]}` : 'Thank you'} — we’re excited to review your application.
+              </p>
+            </div>
+
+            {/* body */}
+            <div className="bg-white px-8 py-7">
+              {submittedProfile.isDistributor ? (
+                <>
+                  <p className="text-sm leading-relaxed text-slate-700">
+                    Your distributor application has been submitted to our team. Once reviewed and approved, you will receive an email with
+                    a direct link to set your portal password and gain full access to:
+                  </p>
+                  <ul className="mt-4 space-y-2 text-sm text-slate-700">
+                    <li className="flex items-start gap-2">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-100 text-fuchsia-600 text-xs font-bold">✓</span>
+                      The full B2B product catalogue with distributor pricing
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-100 text-fuchsia-600 text-xs font-bold">✓</span>
+                      Online wholesale ordering and proforma invoice generation
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-100 text-fuchsia-600 text-xs font-bold">✓</span>
+                      Order tracking, compliance certificates, and distributor support
+                    </li>
+                  </ul>
+                  <p className="mt-4 text-xs text-slate-500">
+                    Review usually takes <strong>1–2 business days</strong>. Check your inbox and spam folder.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm leading-relaxed text-slate-700">
+                    Your B2B order request has been received. Our team will review the details and contact you by email within
+                    <strong> 1–2 business days</strong> with next steps.
+                  </p>
+                  <p className="mt-3 text-xs text-slate-500">
+                    Questions? Reach us at <a href="mailto:{B2B_EMAIL}" className="font-semibold text-fuchsia-600 hover:underline">{B2B_EMAIL}</a>
+                  </p>
+                </>
+              )}
+
+              <div className="mt-6 flex flex-col gap-3">
+                <NavLink
+                  to="/portal/login"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-fuchsia-200 transition hover:opacity-90"
+                >
+                  Already approved? Sign in
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
+                    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </NavLink>
+                <button
+                  type="button"
+                  onClick={() => setSubmittedProfile(null)}
+                  className="w-full rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                >
+                  Back to Registration
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
