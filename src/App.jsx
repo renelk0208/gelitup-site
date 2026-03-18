@@ -13768,28 +13768,29 @@ function App() {
         return { ok: false, message: `Registration failed: ${error.message} (code: ${error.code})` }
       }
 
-      const inboxNotificationResult = await sendPortalEmailNotification({
-        eventType: isDistributorApplication ? 'distributor_application_submitted' : 'b2b_order_request_submitted',
-        to: ORDER_INBOX_EMAIL,
-        subject: `${isDistributorApplication ? 'Distributor Application' : 'B2B Order Request'} #${createdApplication?.id} — ${payload.company_name}`,
-        html: `<p>New ${isDistributorApplication ? 'distributor application' : 'B2B order request'} received.</p><p><strong>Application ID:</strong> ${createdApplication?.id}</p><p><strong>Company/Client:</strong> ${payload.company_name}</p><p><strong>Contact:</strong> ${payload.contact_name} (${payload.contact_email})</p><p><strong>Status:</strong> ${payload.status}</p><p><strong>Business Type:</strong> ${payload.business_type}</p><p><strong>VAT:</strong> ${payload.vat_number || '-'}</p><p><strong>Invoice Country:</strong> ${payload.invoice_country}</p>`,
-        applicationId: createdApplication?.id,
-        companyName: payload.company_name,
-        contactName: payload.contact_name,
-        status: payload.status,
-      })
-
-      const applicantNotificationResult = await sendPortalEmailNotification({
-        eventType: 'application_received',
-        to: payload.contact_email,
-        subject: `${isDistributorApplication ? 'Distributor application received' : 'B2B order request received'}: ${payload.company_name}`,
-        html: isDistributorApplication
-          ? `<p>Hello ${payload.contact_name},</p><p>Welcome to <strong>GEL.IT.UP by GIUP®</strong>.</p><p>Thank you for submitting your distributor information for <strong>${payload.company_name}</strong>.</p><p>Your submission has been sent to ${ORDER_INBOX_EMAIL}. You will soon receive an approval email confirming that you can log in to the portal.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`
-          : `<p>Hello ${payload.contact_name},</p><p>Thank you for your B2B order request for <strong>${payload.company_name}</strong>.</p><p>Your request has been sent to ${ORDER_INBOX_EMAIL} and stored in our admin portal for processing.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
-        applicationId: createdApplication?.id,
-        companyName: payload.company_name,
-        contactName: payload.contact_name,
-      })
+      const [inboxNotificationResult, applicantNotificationResult] = await Promise.all([
+        sendPortalEmailNotification({
+          eventType: isDistributorApplication ? 'distributor_application_submitted' : 'b2b_order_request_submitted',
+          to: ORDER_INBOX_EMAIL,
+          subject: `${isDistributorApplication ? 'Distributor Application' : 'B2B Order Request'} #${createdApplication?.id} — ${payload.company_name}`,
+          html: `<p>New ${isDistributorApplication ? 'distributor application' : 'B2B order request'} received.</p><p><strong>Application ID:</strong> ${createdApplication?.id}</p><p><strong>Company/Client:</strong> ${payload.company_name}</p><p><strong>Contact:</strong> ${payload.contact_name} (${payload.contact_email})</p><p><strong>Status:</strong> ${payload.status}</p><p><strong>Business Type:</strong> ${payload.business_type}</p><p><strong>VAT:</strong> ${payload.vat_number || '-'}</p><p><strong>Invoice Country:</strong> ${payload.invoice_country}</p>`,
+          applicationId: createdApplication?.id,
+          companyName: payload.company_name,
+          contactName: payload.contact_name,
+          status: payload.status,
+        }),
+        sendPortalEmailNotification({
+          eventType: 'application_received',
+          to: payload.contact_email,
+          subject: `${isDistributorApplication ? 'Distributor application received' : 'B2B order request received'}: ${payload.company_name}`,
+          html: isDistributorApplication
+            ? `<p>Hello ${payload.contact_name},</p><p>Welcome to <strong>GEL.IT.UP by GIUP®</strong>.</p><p>Thank you for submitting your distributor information for <strong>${payload.company_name}</strong>.</p><p>Your submission has been sent to ${ORDER_INBOX_EMAIL}. You will soon receive an approval email confirming that you can log in to the portal.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`
+            : `<p>Hello ${payload.contact_name},</p><p>Thank you for your B2B order request for <strong>${payload.company_name}</strong>.</p><p>Your request has been sent to ${ORDER_INBOX_EMAIL} and stored in our admin portal for processing.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
+          applicationId: createdApplication?.id,
+          companyName: payload.company_name,
+          contactName: payload.contact_name,
+        }),
+      ])
 
       if (!applicantNotificationResult.ok && !applicantNotificationResult.skipped) {
         return {
