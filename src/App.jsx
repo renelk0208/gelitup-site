@@ -5727,6 +5727,15 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
           <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
             {isSubmitting ? (isCreatePasswordMode ? 'Creating password...' : 'Signing in...') : (isCreatePasswordMode ? 'Create Password & Continue' : 'Enter Professional Access')}
           </button>
+
+          {!isCreatePasswordMode && (
+            <NavLink
+              to={email ? `/portal/forgot-password?email=${encodeURIComponent(email)}` : '/portal/forgot-password'}
+              className="block w-full rounded-lg border-2 border-fuchsia-200 bg-fuchsia-50 py-2.5 text-center text-sm font-bold text-fuchsia-700 transition-colors hover:border-fuchsia-400 hover:bg-fuchsia-100"
+            >
+              Forgot password? Reset it here →
+            </NavLink>
+          )}
         </form>
 
         {!hasSupabaseConfig && (
@@ -5810,9 +5819,6 @@ function PortalLogin({ onLogin, onCheckApproval, onCreatePassword }) {
 
         <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs sm:p-4">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <NavLink to="/portal/forgot-password" className="font-medium text-slate-700 hover:text-slate-900">
-              Forgot password?
-            </NavLink>
             <NavLink to="/?portal=admin" className="font-medium text-slate-700 hover:text-slate-900">
               Admin login
             </NavLink>
@@ -6003,6 +6009,15 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
               ? (isCreatePasswordMode ? 'Creating password...' : 'Signing in...')
               : (isCreatePasswordMode ? 'Create Password & Continue' : 'Access Applications')}
           </button>
+
+          {!isCreatePasswordMode && (
+            <NavLink
+              to={email ? `/portal/forgot-password?admin=1&email=${encodeURIComponent(email)}` : '/portal/forgot-password?admin=1'}
+              className="block w-full rounded-lg border-2 border-fuchsia-200 bg-fuchsia-50 py-2.5 text-center text-sm font-bold text-fuchsia-700 transition-colors hover:border-fuchsia-400 hover:bg-fuchsia-100"
+            >
+              Forgot password? Reset it here →
+            </NavLink>
+          )}
         </form>
 
         {errorMessage && <p className="mt-2 text-xs text-rose-600">{errorMessage}</p>}
@@ -6785,7 +6800,7 @@ function PortalForgotPassword() {
   const [email, setEmail] = useState(prefilledEmail || '')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
+  const [sent, setSent] = useState(false)
 
   useEffect(() => {
     if (prefilledEmail) {
@@ -6796,7 +6811,6 @@ function PortalForgotPassword() {
   const handleResetPassword = async (event) => {
     event.preventDefault()
     setErrorMessage('')
-    setSuccessMessage('')
 
     const normalizedEmail = String(email || '').trim().toLowerCase()
     if (!normalizedEmail) {
@@ -6811,58 +6825,110 @@ function PortalForgotPassword() {
 
     setIsSubmitting(true)
 
-    const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+    // Always show success to prevent email enumeration
+    await supabase.auth.resetPasswordForEmail(normalizedEmail, {
       redirectTo: `${window.location.origin}${isAdminReset ? '/portal/admin-login' : '/portal/login'}`,
     })
 
     setIsSubmitting(false)
-
-    if (error) {
-      setSuccessMessage('If this email exists in the portal, a reset link has been issued. Check inbox and spam.')
-      return
-    }
-
-    setSuccessMessage('If this email exists in the portal, a reset link has been issued. Check inbox and spam.')
+    setSent(true)
   }
 
   return (
-    <section className="mx-auto max-w-lg rounded-2xl border border-slate-200 bg-white p-8">
-      <h2 className="text-2xl font-semibold text-slate-900">{isAdminReset ? 'Reset Admin Password' : 'Reset Password'}</h2>
-      <p className="mt-2 text-sm text-slate-600">
-        Enter your business email and we—ll send a password reset link. Manual support:
-        {' '}
-        <a href={`mailto:${B2B_EMAIL}`} className="font-medium text-slate-800 underline">
-          {B2B_EMAIL}
-        </a>
-      </p>
-      <form className="mt-5 space-y-4" onSubmit={handleResetPassword}>
-        <label className="block text-sm font-medium text-slate-700">
-          Business Email
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(event) => setEmail(event.target.value.trim().toLowerCase())}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-            placeholder="you@company.com"
-            readOnly={Boolean(prefilledEmail)}
-          />
-        </label>
-        <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
-          {isSubmitting ? 'Sending reset link...' : 'Send Reset Link'}
-        </button>
-      </form>
-      {errorMessage && <p className="mt-2 text-xs text-rose-600">{errorMessage}</p>}
-      {successMessage && <p className="mt-2 text-xs text-emerald-700">{successMessage}</p>}
-      <p className="mt-3 text-xs text-slate-600">
-        Need distributor access?{' '}
-        <NavLink to="/become-distributor" className="font-semibold text-slate-900 hover:underline">
-          Apply now
-        </NavLink>
-      </p>
-      <NavLink to={isAdminReset ? '/portal/admin-login' : '/portal/login'} className="mt-4 inline-block text-sm font-medium text-slate-600 hover:text-slate-900">
-        Back to {isAdminReset ? 'Admin Sign In' : 'Sign In'}
-      </NavLink>
+    <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
+      <div className="bg-slate-900 p-8 text-white">
+        <p className="text-xs uppercase tracking-[0.2em] text-slate-300">GEL.IT.UP Trade</p>
+        <h2 className="heading-on-dark mt-3 text-3xl font-bold">Password Reset</h2>
+        <p className="mt-4 text-sm text-slate-300">
+          Enter your business email and we'll send a secure link to reset your password — straight to your inbox, no extra approval steps.
+        </p>
+        <ul className="mt-6 space-y-2 text-sm text-slate-300">
+          <li>— Reset link sent instantly</li>
+          <li>— Link expires after 24 hours</li>
+          <li>— No approval process needed</li>
+        </ul>
+      </div>
+
+      <div className="flex flex-col justify-center p-8">
+        {sent
+          ? (
+            <div className="flex flex-col items-center text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+                <svg className="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="mt-4 text-2xl font-bold text-slate-900">Check your inbox</h3>
+              <p className="mt-2 text-sm text-slate-600">
+                If <span className="font-semibold text-slate-800">{email}</span> has a portal account, a reset link is on its way. Check your spam folder too.
+              </p>
+              <p className="mt-4 text-xs text-slate-500">
+                Didn't receive it?{' '}
+                <button
+                  type="button"
+                  onClick={() => setSent(false)}
+                  className="font-semibold text-slate-700 hover:underline"
+                >
+                  Try again
+                </button>
+                {' '}or email{' '}
+                <a href={`mailto:${B2B_EMAIL}`} className="font-semibold text-slate-700 hover:underline">
+                  {B2B_EMAIL}
+                </a>
+              </p>
+              <NavLink
+                to={isAdminReset ? '/portal/admin-login' : '/portal/login'}
+                className="mt-6 inline-block rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                ← Back to Sign In
+              </NavLink>
+            </div>
+          )
+          : (
+            <>
+              <h3 className="text-xl font-semibold text-slate-900">
+                {isAdminReset ? 'Reset Admin Password' : 'Reset Your Password'}
+              </h3>
+              <p className="mt-1 text-sm text-slate-600">
+                We'll send a reset link to your inbox immediately.
+              </p>
+              <form className="mt-5 space-y-4" onSubmit={handleResetPassword}>
+                <label className="block text-sm font-medium text-slate-700">
+                  Business Email
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value.trim().toLowerCase())}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                    placeholder="you@company.com"
+                    readOnly={Boolean(prefilledEmail)}
+                  />
+                </label>
+                <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
+                  {isSubmitting ? 'Sending reset link...' : 'Send Reset Link →'}
+                </button>
+              </form>
+              {errorMessage && <p className="mt-2 text-xs text-rose-600">{errorMessage}</p>}
+              <div className="mt-5 space-y-2 text-xs text-slate-600">
+                <p>
+                  Need distributor access?{' '}
+                  <NavLink to="/become-distributor" className="font-semibold text-slate-900 hover:underline">
+                    Apply now
+                  </NavLink>
+                </p>
+                <p>
+                  <NavLink
+                    to={isAdminReset ? '/portal/admin-login' : '/portal/login'}
+                    className="font-medium text-slate-600 hover:text-slate-900"
+                  >
+                    ← Back to {isAdminReset ? 'Admin Sign In' : 'Sign In'}
+                  </NavLink>
+                </p>
+              </div>
+            </>
+          )}
+      </div>
     </section>
   )
 }
