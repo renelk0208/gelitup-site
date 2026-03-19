@@ -6944,6 +6944,8 @@ const B2B_SIDEBAR_GROUPS = [
 ]
 
 function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated = false }) {
+  // Professional: -60% from B2B (pay 40%). Authority: -78% from B2B (pay 22%).
+  const tierPriceMultiplier = tier === 'authority' ? 0.22 : tier === 'professional' ? 0.40 : 1.0
   const location = useLocation()
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
@@ -8725,10 +8727,10 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   }, [selectedProducts])
 
   const orderTotal = useMemo(() => {
-    const itemsTotal = selectedProducts.reduce((s, p) => s + (p.price != null ? Number(p.price) * (itemQtys[p.code] || 1) : 0), 0)
-    const pkgTotal = packageCartItems.reduce((s, item) => s + (item.price != null ? Number(item.price) * item.qty : 0), 0)
+    const itemsTotal = selectedProducts.reduce((s, p) => s + (p.price != null ? Number(p.price) * tierPriceMultiplier * (itemQtys[p.code] || 1) : 0), 0)
+    const pkgTotal = packageCartItems.reduce((s, item) => s + (item.price != null ? Number(item.price) * tierPriceMultiplier * item.qty : 0), 0)
     return itemsTotal + pkgTotal
-  }, [selectedProducts, packageCartItems, itemQtys])
+  }, [selectedProducts, packageCartItems, itemQtys, tierPriceMultiplier])
 
   // Single-select: one category visible at a time in sidebar layout
   const toggleCategory = (cat) => {
@@ -10232,7 +10234,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <div className="p-5">
               <p className="text-sm font-semibold text-slate-900 leading-snug">{upsellModal.product?.name}</p>
               {upsellModal.product?.price != null && pricesAllocated && (
-                <p className="mt-1 text-sm font-bold text-fuchsia-700">€{Number(upsellModal.product.price).toFixed(2)}</p>
+                <p className="mt-1 text-sm font-bold text-fuchsia-700">€{(Number(upsellModal.product.price) * tierPriceMultiplier).toFixed(2)}</p>
               )}
               <div className="mt-4 flex gap-2">
                 <button
@@ -10368,7 +10370,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <div className="mt-2 divide-y divide-slate-100">
               {selectedProducts.map(product => {
                 const qty = itemQtys[product.code] || 1
-                const lineTotal = product.price != null ? Number(product.price) * qty : null
+                const lineTotal = product.price != null ? Number(product.price) * tierPriceMultiplier * qty : null
                 return (
                   <div key={product.code} className="flex items-center gap-2 py-2">
                     <div
@@ -11050,7 +11052,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                             <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{product.name}</p>
                             {product.price != null && (
                             pricesAllocated
-                              ? <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{Number(product.price).toFixed(2)}</p>
+                              ? <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{(Number(product.price) * tierPriceMultiplier).toFixed(2)}</p>
                               : <p className="text-[10px] text-slate-400">POA</p>
                           )}
                           </div>
