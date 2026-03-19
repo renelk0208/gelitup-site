@@ -593,6 +593,7 @@ function buildUserMetadataFromRegistration(registration) {
     shipping_country: profile.shippingCountry,
     shipping_postal_code: profile.shippingPostalCode,
     distributor_tier: registration?.distributor_tier || null,
+    prices_allocated: Boolean(registration?.prices_allocated),
     registration_status: 'approved',
     registration_id: registration?.id || null,
   }

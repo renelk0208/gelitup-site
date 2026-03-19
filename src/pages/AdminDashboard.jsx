@@ -230,6 +230,18 @@ function RegistrationsPanel() {
     setRows(prev => prev.map(r => r.id === id ? { ...r, admin_comment: commentMap[id] ?? '' } : r))
   }
 
+  const togglePricesAllocated = async (row) => {
+    const next = !row.prices_allocated
+    setSaving(row.id)
+    const { error: err } = await supabase
+      .from(REGISTRATIONS_TABLE)
+      .update({ prices_allocated: next })
+      .eq('id', row.id)
+    setSaving(null)
+    if (err) { alert(err.message); return }
+    setRows(prev => prev.map(r => r.id === row.id ? { ...r, prices_allocated: next } : r))
+  }
+
   const FILTERS = ['pending', 'approved', 'rejected', 'all']
   const counts = FILTERS.reduce((acc, f) => {
     if (f === 'all') acc[f] = rows.length
@@ -355,6 +367,33 @@ function RegistrationsPanel() {
                     </button>
                   )}
                 </div>
+
+                {/* Prices visibility toggle — approved distributors only */}
+                {row.status === 'approved' && row.application_type === 'distributor' && (
+                  <div className={`flex items-center justify-between rounded-xl border px-4 py-3 ${row.prices_allocated ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}>
+                    <div>
+                      <p className={`text-xs font-semibold ${row.prices_allocated ? 'text-emerald-700' : 'text-amber-700'}`}>
+                        {row.prices_allocated ? '✓ Prices Visible to Client' : '⏳ Prices Hidden from Client'}
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-slate-500">
+                        {row.prices_allocated
+                          ? 'Distributor can see their tier pricing. Takes effect on their next login.'
+                          : 'Distributor has portal access but prices are not shown yet. Toggle when ready.'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => togglePricesAllocated(row)}
+                      disabled={saving === row.id}
+                      className={`ml-4 shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition disabled:opacity-50 ${
+                        row.prices_allocated
+                          ? 'border border-amber-300 bg-white text-amber-700 hover:bg-amber-50'
+                          : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                      }`}
+                    >
+                      {saving === row.id ? 'Saving…' : row.prices_allocated ? 'Hide Prices' : 'Show Prices'}
+                    </button>
+                  </div>
+                )}
 
                 {/* Email status feedback */}
                 {emailStatus[row.id] && (
