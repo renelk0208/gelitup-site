@@ -219,6 +219,26 @@ function RegistrationsPanel() {
     }
   }
 
+  const convertToB2B = async (row) => {
+    if (!window.confirm(`Convert "${row.company_name}" from Distributor to B2B Client?\n\nThis will:\n• Set application_type → b2b_order\n• Set status → approved\n• Set prices_allocated → true`)) return
+    setSaving(row.id)
+    const { error: err } = await supabase
+      .from(REGISTRATIONS_TABLE)
+      .update({
+        application_type: 'b2b_order',
+        status: 'approved',
+        prices_allocated: true,
+        notes: (row.notes ? row.notes + '\n' : '') + '[CONVERTED: distributor → b2b_order by admin]',
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq('id', row.id)
+    setSaving(null)
+    if (err) { alert(err.message); return }
+    setRows(prev => prev.map(r => r.id === row.id
+      ? { ...r, application_type: 'b2b_order', status: 'approved', prices_allocated: true }
+      : r))
+  }
+
   const saveComment = async (id) => {
     setSaving(id)
     const { error: err } = await supabase
@@ -364,6 +384,15 @@ function RegistrationsPanel() {
                       className="rounded-lg border border-fuchsia-300 bg-fuchsia-50 px-3 py-2 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-50"
                     >
                       {emailStatus[row.id]?.state === 'sending' ? '📨 Sending…' : '📧 Resend Approval Email'}
+                    </button>
+                  )}
+                  {row.application_type === 'distributor' && (
+                    <button
+                      onClick={() => convertToB2B(row)}
+                      disabled={saving === row.id}
+                      className="rounded-lg border border-sky-300 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 hover:bg-sky-100 disabled:opacity-50"
+                    >
+                      ⇄ Convert to B2B Client
                     </button>
                   )}
                 </div>
