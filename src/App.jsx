@@ -5505,6 +5505,10 @@ function PortalLogin({ onLogin, onCreatePassword }) {
   const loginParams = useMemo(() => new URLSearchParams(location.search), [location.search])
   const prefilledEmail = String(loginParams.get('email') || '').trim().toLowerCase()
   const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
+  // True only when the user arrived via a Supabase password-reset email link
+  // (PKCE flow sends ?code=..., implicit flow sends #type=recovery)
+  const isPasswordResetFlow = Boolean(loginParams.get('code'))
+    || /type=recovery/.test(window.location.hash)
   const showDebugTrace = loginParams.get('debug') === '1'
   const [email, setEmail] = useState(prefilledEmail || localStorage.getItem('portalRememberedEmail') || '')
   const [password, setPassword] = useState('')
@@ -5587,6 +5591,7 @@ function PortalLogin({ onLogin, onCreatePassword }) {
               password,
               confirmPassword,
               rememberMe,
+              isRecoveryFlow: isPasswordResetFlow,
             })
 
             setIsSubmitting(false)
@@ -13713,7 +13718,7 @@ function App() {
     }
   }
 
-  const handleCreatePortalPassword = async ({ email, password, confirmPassword, rememberMe }) => {
+  const handleCreatePortalPassword = async ({ email, password, confirmPassword, rememberMe, isRecoveryFlow = false }) => {
     const normalizedEmail = String(email || '').trim().toLowerCase()
     const isInternalBypassEmail = PORTAL_INTERNAL_BYPASS_EMAILS.has(normalizedEmail)
 
@@ -13737,17 +13742,14 @@ function App() {
       return { ok: false, message: 'Live auth is not configured.' }
     }
 
-    // If the user arrived via a password-reset email link, Supabase has already
-    // established a recovery session. Detect it and call updateUser directly.
-    const { data: sessionData } = await supabase.auth.getSession()
-    const activeSessionEmail = String(sessionData?.session?.user?.email || '').trim().toLowerCase()
-    const isRecoverySession = Boolean(sessionData?.session) && (
-      !activeSessionEmail || activeSessionEmail === normalizedEmail
-    )
-
-    if (isRecoverySession && sessionData?.session) {
+    // If the user arrived via a Supabase password-reset email link (isRecoveryFlow=true),
+    // the SDK has already exchanged the code for a recovery session — call updateUser directly.
+    if (isRecoveryFlow) {
       const { error: updateError } = await supabase.auth.updateUser({ password })
       if (updateError) {
+        if (/not exist|invalid|expired/i.test(updateError.message || '')) {
+          return { ok: false, message: 'Your reset link has expired. Please request a new password reset email.' }
+        }
         return { ok: false, message: updateError.message || 'Password update failed.' }
       }
       setIsPortalAuthenticated(true)
