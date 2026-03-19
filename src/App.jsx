@@ -10079,22 +10079,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                   <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by GEL.IT.UP.</span></li>
                   <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
                 </ul>
-                <div className="mt-2.5">
-                  <p className="text-[11px] font-semibold text-slate-700">Shipping by Zone — FREE for EU (up to 5 kg)</p>
-                  <div className="mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white text-[11px]">
-                    {SHIPPING_ZONES.map((z) => (
-                      <div key={z.zone} className={`flex items-start gap-2 px-2 py-1.5 ${_zone?.zone === z.zone ? 'bg-fuchsia-50 ring-1 ring-inset ring-fuchsia-300' : 'odd:bg-white even:bg-slate-50'}`}>
-                        <span className="w-14 flex-none font-semibold text-slate-500">Zone {z.zone}</span>
-                        <span className="min-w-0 flex-1 text-slate-500">{z.countries.join(', ')}{z.note ? ` (${z.note})` : ''}</span>
-                        <span className={`flex-none font-bold ${z.rateEur === 0 ? 'text-emerald-600' : 'text-fuchsia-700'}`}>{z.rateEur === 0 ? 'FREE' : `€${z.rateEur.toFixed(2)}`}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {_zone
-                    ? <p className="mt-1 text-[10px] text-fuchsia-700">Your destination ({_dest}) is Zone {_zone.zone} — shipping: {_zone.rateEur === 0 ? 'FREE' : `from €${_zone.rateEur.toFixed(2)}`} (up to 5 kg).</p>
-                    : null
-                  }
-                </div>
               </div>
             )
           })()}
@@ -10460,22 +10444,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                 <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by GEL.IT.UP.</span></li>
                 <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
               </ul>
-              <div className="mt-2.5">
-                <p className="text-[11px] font-semibold text-slate-700">Shipping by Zone — FREE for EU (up to 5 kg)</p>
-                <div className="mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white text-[11px]">
-                  {SHIPPING_ZONES.map((z) => (
-                    <div key={z.zone} className={`flex items-start gap-2 px-2 py-1.5 ${_zone?.zone === z.zone ? 'bg-fuchsia-50 ring-1 ring-inset ring-fuchsia-300' : 'odd:bg-white even:bg-slate-50'}`}>
-                      <span className="w-14 flex-none font-semibold text-slate-500">Zone {z.zone}</span>
-                      <span className="min-w-0 flex-1 text-slate-500">{z.countries.join(', ')}{z.note ? ` (${z.note})` : ''}</span>
-                      <span className={`flex-none font-bold ${z.rateEur === 0 ? 'text-emerald-600' : 'text-fuchsia-700'}`}>{z.rateEur === 0 ? 'FREE' : `€${z.rateEur.toFixed(2)}`}</span>
-                    </div>
-                  ))}
-                </div>
-                {_zone
-                  ? <p className="mt-1 text-[10px] text-fuchsia-700">Your destination ({_dest}) is Zone {_zone.zone} — shipping: {_zone.rateEur === 0 ? 'FREE' : `from €${_zone.rateEur.toFixed(2)}`} (up to 5 kg).</p>
-                  : null
-                }
-              </div>
             </div>
           )
         })()}
