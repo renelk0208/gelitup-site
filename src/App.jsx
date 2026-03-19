@@ -6075,7 +6075,7 @@ function PortalRegister({ onRegister }) {
             ? 'Register as an online buyer to browse our catalogue and place orders. You will receive a confirmation email to verify your address.'
             : isDistributorFlow
               ? 'Apply to become a GEL.IT.UP distributor. Your application will be reviewed by our team and you will be notified by email once approved.'
-              : 'Submit a B2B order or client request. Our team will review and contact you within 1–2 business days.'}
+              : 'Submit your B2B client details to register. You can set your password and log in immediately — no approval required.'}
         </p>
       </div>
 
@@ -6226,7 +6226,7 @@ function PortalRegister({ onRegister }) {
             return
           }
 
-          setSubmittedProfile({ name: capturedName, isDistributor: capturedIsDistributor })
+          setSubmittedProfile({ name: capturedName, isDistributor: capturedIsDistributor, email: String(application.contactEmail || '').trim().toLowerCase() })
           setSuccessMessage(result.message || 'Application submitted.')
         }}>
           <div className="grid gap-4 md:grid-cols-2">
@@ -6736,25 +6736,37 @@ function PortalRegister({ onRegister }) {
               ) : (
                 <>
                   <p className="text-sm leading-relaxed text-slate-700">
-                    Your B2B order request has been received. Our team will review the details and contact you by email within
-                    <strong> 1–2 business days</strong> with next steps.
+                    Your B2B account is ready. <strong>You can log in immediately</strong> — no approval or waiting required.
+                    Click below to set your password and access the portal.
                   </p>
                   <p className="mt-3 text-xs text-slate-500">
-                    Questions? Reach us at <a href="mailto:{B2B_EMAIL}" className="font-semibold text-fuchsia-600 hover:underline">{B2B_EMAIL}</a>
+                    Questions? Reach us at <a href={`mailto:${B2B_EMAIL}`} className="font-semibold text-fuchsia-600 hover:underline">{B2B_EMAIL}</a>
                   </p>
                 </>
               )}
 
               <div className="mt-6 flex flex-col gap-3">
-                <NavLink
-                  to="/portal/login"
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-fuchsia-200 transition hover:opacity-90"
-                >
-                  Already approved? Sign in
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
-                    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </NavLink>
+                {!submittedProfile.isDistributor ? (
+                  <NavLink
+                    to={submittedProfile.email ? `/portal/login?mode=create-password&email=${encodeURIComponent(submittedProfile.email)}` : '/portal/login?mode=create-password'}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-fuchsia-200 transition hover:opacity-90"
+                  >
+                    Set Password &amp; Sign In
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
+                      <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </NavLink>
+                ) : (
+                  <NavLink
+                    to="/portal/login"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-fuchsia-200 transition hover:opacity-90"
+                  >
+                    Already approved? Sign in
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
+                      <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </NavLink>
+                )}
                 <button
                   type="button"
                   onClick={() => {
@@ -13953,7 +13965,7 @@ function App() {
         }
       }
 
-      const submissionStatus = isDistributorApplication ? 'pending' : 'submitted'
+      const submissionStatus = isDistributorApplication ? 'pending' : 'approved'
       const derivedBusinessType = isDistributorApplication
         ? application.businessType.trim()
         : `B2B Order - ${isBusinessOrder ? 'Business' : 'Personal'}`
@@ -14086,7 +14098,7 @@ function App() {
         ok: true,
         message: isDistributorApplication
           ? `Your distributor application has been received. Our team will review it and contact you by email once approved — usually within 1–2 business days.`
-          : `Your B2B order request has been received. Our team will review it and contact you by email once approved — usually within 1–2 business days.`,
+          : `Your B2B account is ready. Set your password and sign in immediately.`,
       }
     }
 
