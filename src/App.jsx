@@ -5611,6 +5611,9 @@ function PortalLogin({ onLogin, onCreatePassword }) {
 
             if (result.navigateToDashboard) {
               navigate('/portal/dashboard/overview')
+            } else {
+              // Password created but auto sign-in not available — redirect to sign-in form
+              navigate(email ? `/portal/login?email=${encodeURIComponent(email)}` : '/portal/login')
             }
 
             return
