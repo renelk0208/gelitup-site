@@ -12318,7 +12318,9 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
   const location = useLocation()
   const navigate = useNavigate()
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
+  const registrationsTable = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || DEFAULT_REGISTRATIONS_TABLE
   const [portalUser, setPortalUser] = useState(null)
+  const [liveRegistration, setLiveRegistration] = useState(null)
   const [skuRules, setSkuRules] = useState({
     colorSkuSet: new Set(),
     baseSystemSkuSet: new Set(),
@@ -12339,8 +12341,22 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
 
   useEffect(() => {
     if (!hasSupabaseConfig || !supabase) return
-    supabase.auth.getUser().then(({ data }) => {
-      if (data?.user) setPortalUser(data.user)
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data?.user) return
+      setPortalUser(data.user)
+      // Fetch live registration so prices_allocated / tier are always up-to-date,
+      // even if user_metadata is stale (e.g. after a password reset flow).
+      const email = data.user.email
+      if (email) {
+        const { data: reg } = await supabase
+          .from(registrationsTable)
+          .select('prices_allocated, distributor_tier, status')
+          .ilike('email', email)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        if (reg) setLiveRegistration(reg)
+      }
     })
   }, [])
 
@@ -12768,10 +12784,16 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     }
   }, [activeModule, ordersTable])
 
-  const effectiveTier = tierOverride ?? portalUser?.user_metadata?.distributor_tier ?? null
+  // Prefer live registration data (always fresh) over stale user_metadata
+  const effectiveTier = tierOverride
+    ?? liveRegistration?.distributor_tier
+    ?? portalUser?.user_metadata?.distributor_tier
+    ?? null
   const effectivePricesAllocated = pricesAllocatedOverride !== null
     ? pricesAllocatedOverride
-    : Boolean(portalUser?.user_metadata?.prices_allocated)
+    : liveRegistration
+      ? Boolean(liveRegistration.prices_allocated)
+      : Boolean(portalUser?.user_metadata?.prices_allocated)
 
   if (portalUser?.user_metadata?.role === 'buyer') {
     return (
