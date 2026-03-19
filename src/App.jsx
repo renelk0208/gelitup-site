@@ -6053,8 +6053,11 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
 }
 
 function PortalRegister({ onRegister }) {
+  const { pathname: registerPathname } = useLocation()
+  const defaultApplicationType = registerPathname === '/portal/register' ? 'b2b_order' : 'distributor'
+
   const [application, setApplication] = useState({
-    applicationType: 'distributor',
+    applicationType: defaultApplicationType,
     distributorTier: '',
     orderProfile: 'business',
     customerType: 'company',
