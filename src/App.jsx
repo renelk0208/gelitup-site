@@ -4442,26 +4442,22 @@ function pickHomepageMedia(items = []) {
 
 function Nav({ onOpenContactModal }) {
   return (
-    <nav className="hidden gap-2 md:flex">
+    <nav className="hidden gap-2 md:flex items-center">
       <NavLink
         to="/portal/login?portal=b2b"
         className={({ isActive }) =>
-          `rounded-lg border px-4 py-2 text-sm font-bold uppercase tracking-[0.06em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c8386e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
-            isActive
-              ? 'border-[#c8386e] bg-[#c8386e] !text-white'
-              : 'border-[#c8386e] bg-[#c8386e] !text-white hover:bg-[#a82d5a] hover:border-[#a82d5a]'
+          `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
+            isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
           }`
         }
       >
-        B2B Client Login
+        B2B Login
       </NavLink>
       <NavLink
         to="/portal/login?portal=distributor"
         className={({ isActive }) =>
-          `rounded-lg border px-4 py-2 text-sm font-bold uppercase tracking-[0.06em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
-            isActive
-              ? 'border-indigo-500 bg-indigo-600 !text-white'
-              : 'border-indigo-500 bg-indigo-600 !text-white hover:bg-indigo-500 hover:border-indigo-400'
+          `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
+            isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
           }`
         }
       >
@@ -4560,17 +4556,21 @@ function MobileNav({ onOpenContactModal }) {
           <NavLink
             to="/portal/login?portal=b2b"
             onClick={() => setOpen(false)}
-            className={() =>
-              'block rounded-lg border border-[#c8386e] bg-[#c8386e] px-4 py-3 text-sm font-bold uppercase tracking-[0.05em] !text-white transition duration-200 hover:bg-[#a82d5a]'
+            className={({ isActive }) =>
+              `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+                isActive ? 'bg-fuchsia-600 !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
+              }`
             }
           >
-            B2B Client Login
+            B2B Login
           </NavLink>
           <NavLink
             to="/portal/login?portal=distributor"
             onClick={() => setOpen(false)}
-            className={() =>
-              'block rounded-lg border border-indigo-500 bg-indigo-600 px-4 py-3 text-sm font-bold uppercase tracking-[0.05em] !text-white transition duration-200 hover:bg-indigo-500'
+            className={({ isActive }) =>
+              `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+                isActive ? 'bg-fuchsia-600 !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
+              }`
             }
           >
             Distributor Login
@@ -14063,6 +14063,7 @@ function App() {
         application_type: isDistributorApplication ? 'distributor' : 'b2b_order',
         distributor_tier: isDistributorApplication ? (application.distributorTier || null) : null,
         order_profile: isBusinessOrder ? 'business' : 'personal',
+        prices_allocated: !isDistributorApplication,
         admin_comment: null,
         order_action: null,
         order_payment_status: isDistributorApplication ? null : 'unpaid',
