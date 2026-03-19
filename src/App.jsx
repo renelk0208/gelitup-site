@@ -6943,7 +6943,7 @@ const B2B_SIDEBAR_GROUPS = [
   },
 ]
 
-function ProductsModule({ moduleView = 'products' }) {
+function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated = false }) {
   const location = useLocation()
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
@@ -10231,7 +10231,7 @@ function ProductsModule({ moduleView = 'products' }) {
             )}
             <div className="p-5">
               <p className="text-sm font-semibold text-slate-900 leading-snug">{upsellModal.product?.name}</p>
-              {upsellModal.product?.price != null && (
+              {upsellModal.product?.price != null && pricesAllocated && (
                 <p className="mt-1 text-sm font-bold text-fuchsia-700">€{Number(upsellModal.product.price).toFixed(2)}</p>
               )}
               <div className="mt-4 flex gap-2">
@@ -10283,6 +10283,42 @@ function ProductsModule({ moduleView = 'products' }) {
         </div>
       )}
 
+      {/* Distributor tier identity banner */}
+      {tier === 'authority' && (
+        <div className="rounded-2xl border border-violet-300 bg-gradient-to-r from-violet-700 to-indigo-700 p-4 text-white">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Country Distribution Authority</p>
+              <p className="mt-0.5 text-base font-bold">★ Authority Partner Portal</p>
+            </div>
+            {!pricesAllocated && (
+              <span className="rounded-lg bg-white/20 px-3 py-1 text-xs font-semibold">Pricing pending allocation</span>
+            )}
+          </div>
+          <p className="mt-2 text-xs leading-relaxed opacity-80">You hold exclusive country-level distribution rights for GEL.IT.UP products. Access the full wholesale catalogue, place orders for your entire country territory, and manage your exclusive distribution agreement below.</p>
+        </div>
+      )}
+      {tier === 'professional' && (
+        <div className="rounded-2xl border border-fuchsia-300 bg-gradient-to-r from-fuchsia-600 to-pink-600 p-4 text-white">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Regional Professional Distributor</p>
+              <p className="mt-0.5 text-base font-bold">Professional Partner Portal</p>
+            </div>
+            {!pricesAllocated && (
+              <span className="rounded-lg bg-white/20 px-3 py-1 text-xs font-semibold">Pricing pending allocation</span>
+            )}
+          </div>
+          <p className="mt-2 text-xs leading-relaxed opacity-80">You are an approved regional distributor of GEL.IT.UP products. Browse the full wholesale catalogue and place orders for your approved distribution region below.</p>
+        </div>
+      )}
+      {!pricesAllocated && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3">
+          <p className="text-xs font-semibold text-amber-800">Wholesale pricing not yet allocated</p>
+          <p className="mt-0.5 text-xs text-amber-700">Your account manager will confirm your wholesale pricing agreement before prices are displayed. You can browse the catalogue and prepare your selection in the meantime.</p>
+        </div>
+      )}
+
       {/* -- ORDER FLOW STEPS -- */}
       <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 sm:px-6">
         <div className="flex flex-wrap items-center gap-2">
@@ -10300,14 +10336,20 @@ function ProductsModule({ moduleView = 'products' }) {
             <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ${moduleView === 'profile' ? 'bg-white/30 text-white' : 'bg-slate-400 text-white'}`}>3</span>
             My Details
           </button>
-          {orderTotal > 0 && <span className="ml-auto text-xs font-bold text-fuchsia-700">€{orderTotal.toFixed(2)}</span>}
+          {orderTotal > 0 && pricesAllocated && <span className="ml-auto text-xs font-bold text-fuchsia-700">€{orderTotal.toFixed(2)}</span>}
         </div>
       </div>
 
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-sm font-semibold text-transparent">B2B Portal</p>
+          <p className={`text-sm font-semibold ${
+            tier === 'authority' ? 'text-violet-700' :
+            tier === 'professional' ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent' :
+            'bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent'
+          }`}>
+            {tier === 'authority' ? '★ Authority Distributor Portal' : tier === 'professional' ? 'Professional Distributor Portal' : 'Distributor Portal'}
+          </p>
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <span>{selectedLineItems} items</span>
             <span>/</span>
@@ -10346,14 +10388,14 @@ function ProductsModule({ moduleView = 'products' }) {
                       <button onClick={() => setItemQtys(prev => ({...prev, [product.code]: qty + 1}))} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">+</button>
                     </div>
                     <div className="w-16 text-right">
-                      {lineTotal != null ? <p className="text-xs font-semibold text-fuchsia-700">€{lineTotal.toFixed(2)}</p> : <p className="text-xs text-slate-400">—</p>}
+                      {lineTotal != null && pricesAllocated ? <p className="text-xs font-semibold text-fuchsia-700">€{lineTotal.toFixed(2)}</p> : <p className="text-xs text-slate-400">—</p>}
                     </div>
                     <button onClick={() => toggleSelection(product.code)} className="flex h-6 w-6 items-center justify-center rounded-full text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Remove">—</button>
                   </div>
                 )
               })}
             </div>
-            {orderTotal > 0 && (
+            {orderTotal > 0 && pricesAllocated && (
               <div className="mt-2 border-t border-slate-200 pt-2">
                 <div className="flex justify-between text-sm">
                   <span className="font-semibold text-slate-700">Estimated Total</span>
@@ -11006,7 +11048,11 @@ function ProductsModule({ moduleView = 'products' }) {
                           {/* info */}
                           <div className="px-1.5 pt-1 pb-0.5">
                             <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{product.name}</p>
-                            {product.price != null && <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{Number(product.price).toFixed(2)}</p>}
+                            {product.price != null && (
+                            pricesAllocated
+                              ? <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{Number(product.price).toFixed(2)}</p>
+                              : <p className="text-[10px] text-slate-400">POA</p>
+                          )}
                           </div>
                           {/* action */}
                           {selected ? (
@@ -12269,7 +12315,7 @@ function BuyerPortal({ onLogout, userName, userEmail }) {
   )
 }
 
-function PortalDashboard({ onLogout, tierOverride = null }) {
+function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverride = null }) {
   const location = useLocation()
   const navigate = useNavigate()
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
@@ -12723,6 +12769,11 @@ function PortalDashboard({ onLogout, tierOverride = null }) {
     }
   }, [activeModule, ordersTable])
 
+  const effectiveTier = tierOverride ?? portalUser?.user_metadata?.distributor_tier ?? null
+  const effectivePricesAllocated = pricesAllocatedOverride !== null
+    ? pricesAllocatedOverride
+    : Boolean(portalUser?.user_metadata?.prices_allocated)
+
   if (portalUser?.user_metadata?.role === 'buyer') {
     return (
       <BuyerPortal
@@ -12761,7 +12812,7 @@ function PortalDashboard({ onLogout, tierOverride = null }) {
 
       <div className="space-y-4">
         {activeModule === 'products' || activeModule === 'catalog' || activeModule === 'profile' ? (
-          <ProductsModule moduleView={activeModule} />
+          <ProductsModule moduleView={activeModule} tier={effectiveTier} pricesAllocated={effectivePricesAllocated} />
         ) : activeModule === 'orders' || activeModule === 'support' ? (
           <OrdersModule />
         ) : (
@@ -12821,7 +12872,7 @@ function PortalDashboard({ onLogout, tierOverride = null }) {
             </div>
 
             {activeModule === 'overview' && (() => {
-              const tier = tierOverride ?? portalUser?.user_metadata?.distributor_tier ?? null
+              const tier = effectiveTier
               const isTierProfessional = tier === 'professional'
               const isTierAuthority = tier === 'authority'
               return (
@@ -12914,6 +12965,7 @@ function PortalDashboard({ onLogout, tierOverride = null }) {
 function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
   const [adminPreviewMode, setAdminPreviewMode] = useState(false)
   const [adminTierPreview, setAdminTierPreview] = useState(null)
+  const [adminPricesAllocated, setAdminPricesAllocated] = useState(false)
 
   if (!authReady) {
     return (
@@ -12958,10 +13010,20 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
                 >
                   Authority
                 </button>
+                <button
+                  onClick={() => setAdminPricesAllocated(v => !v)}
+                  className={`rounded-full border px-2 py-0.5 text-xs font-semibold transition ${
+                    adminPricesAllocated
+                      ? 'border-emerald-600 bg-emerald-600 text-white'
+                      : 'border-amber-300 bg-white text-amber-800 hover:bg-amber-100'
+                  }`}
+                >
+                  {adminPricesAllocated ? '✓ Prices On' : '✗ Prices Off'}
+                </button>
               </>
             )}
             <button
-              onClick={() => { setAdminPreviewMode(v => !v); setAdminTierPreview(null) }}
+              onClick={() => { setAdminPreviewMode(v => !v); setAdminTierPreview(null); setAdminPricesAllocated(false) }}
               className="rounded-full border border-amber-300 bg-white px-3 py-1 font-semibold text-amber-800 hover:bg-amber-100 transition"
             >
               {adminPreviewMode ? 'Back to Admin Panel' : 'Preview Distributor Portal'}
@@ -12969,7 +13031,7 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
           </div>
         </div>
         {adminPreviewMode
-          ? <PortalDashboard onLogout={onLogout} tierOverride={adminTierPreview} />
+          ? <PortalDashboard onLogout={onLogout} tierOverride={adminTierPreview} pricesAllocatedOverride={adminPricesAllocated} />
           : (
             <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#c8386e] border-t-transparent" /></div>}>
               <AdminDashboard onLogout={onLogout} />
@@ -12980,7 +13042,7 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
     )
   }
 
-  return <PortalDashboard onLogout={onLogout} />
+  return <PortalDashboard onLogout={onLogout} pricesAllocatedOverride={null} />
 }
 
 function LegalPageLayout({ title, children }) {
