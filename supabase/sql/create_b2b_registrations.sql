@@ -31,6 +31,7 @@ create table if not exists public.b2b_registrations (
   business_type text not null,
   notes text,
   application_type text not null default 'distributor',
+  distributor_tier text,
   order_profile text,
   admin_comment text,
   order_action text,
@@ -63,6 +64,7 @@ alter table public.b2b_registrations add column if not exists shipping_region te
 alter table public.b2b_registrations add column if not exists shipping_country text;
 alter table public.b2b_registrations add column if not exists shipping_postal_code text;
 alter table public.b2b_registrations add column if not exists application_type text not null default 'distributor';
+alter table public.b2b_registrations add column if not exists distributor_tier text;
 alter table public.b2b_registrations add column if not exists order_profile text;
 alter table public.b2b_registrations add column if not exists admin_comment text;
 alter table public.b2b_registrations add column if not exists order_action text;

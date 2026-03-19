@@ -592,6 +592,7 @@ function buildUserMetadataFromRegistration(registration) {
     shipping_region: profile.shippingRegion,
     shipping_country: profile.shippingCountry,
     shipping_postal_code: profile.shippingPostalCode,
+    distributor_tier: registration?.distributor_tier || null,
     registration_status: 'approved',
     registration_id: registration?.id || null,
   }
@@ -5976,6 +5977,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
 function PortalRegister({ onRegister }) {
   const [application, setApplication] = useState({
     applicationType: 'distributor',
+    distributorTier: '',
     orderProfile: 'business',
     customerType: 'company',
     companyName: '',
@@ -6214,6 +6216,23 @@ function PortalRegister({ onRegister }) {
                 <option value="b2b_order">B2B Order Form</option>
               </select>
             </label>
+
+            {isDistributorFlow && (
+              <label className="block text-sm font-medium text-slate-700 md:col-span-2">
+                Distribution Tier
+                <select
+                  required
+                  value={application.distributorTier}
+                  onChange={(event) => setField('distributorTier', event.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                >
+                  <option value="" disabled>Select your distribution tier</option>
+                  <option value="professional">Professional Distributor — Regional Distribution</option>
+                  <option value="authority">Authority Distributor — Country Distribution</option>
+                </select>
+                <p className="mt-1 text-xs text-slate-400">Professional: multi-salon or regional reach. Authority: exclusive country-level distribution rights.</p>
+              </label>
+            )}
 
             {isB2BOrderFlow && (
               <label className="block text-sm font-medium text-slate-700 md:col-span-2">
@@ -12801,6 +12820,47 @@ function PortalDashboard({ onLogout }) {
               </article>
             </div>
 
+            {activeModule === 'overview' && (() => {
+              const tier = portalUser?.user_metadata?.distributor_tier || null
+              const isTierProfessional = tier === 'professional'
+              const isTierAuthority = tier === 'authority'
+              return (
+                <div className={`rounded-2xl border p-4 sm:p-5 ${
+                  isTierAuthority ? 'border-violet-300 bg-violet-50' :
+                  isTierProfessional ? 'border-fuchsia-200 bg-fuchsia-50' :
+                  'border-slate-200 bg-white'
+                }`}>
+                  <div className="flex items-center gap-3">
+                    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
+                      isTierAuthority ? 'bg-violet-700 text-white' :
+                      isTierProfessional ? 'bg-fuchsia-600 text-white' :
+                      'bg-slate-200 text-slate-600'
+                    }`}>
+                      {isTierAuthority ? '★ Authority Distributor' : isTierProfessional ? 'Professional Distributor' : 'Distributor'}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      {isTierAuthority ? 'Country Distribution Rights' : isTierProfessional ? 'Regional Distribution' : ''}
+                    </span>
+                  </div>
+                  {isTierAuthority && (
+                    <div className="mt-3 text-sm text-violet-900">
+                      <p className="font-semibold">Your Account: Country Distribution</p>
+                      <p className="mt-1 text-xs text-violet-700">You hold exclusive country-level distribution rights. Your dedicated account manager and full regulatory pack are available below.</p>
+                    </div>
+                  )}
+                  {isTierProfessional && (
+                    <div className="mt-3 text-sm text-fuchsia-900">
+                      <p className="font-semibold">Your Account: Regional Distribution</p>
+                      <p className="mt-1 text-xs text-fuchsia-700">You are an approved regional distributor. Browse the full catalogue and place wholesale orders below.</p>
+                    </div>
+                  )}
+                  {!tier && (
+                    <p className="mt-2 text-xs text-slate-500">Distribution tier not set — contact your account manager.</p>
+                  )}
+                </div>
+              )
+            })()}
+
             {activeModule === 'overview' && (
               <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">DIST_PERFORMANCE_01</p>
@@ -13785,6 +13845,7 @@ function App() {
         shipping_postal_code: shippingPostalCode || null,
         business_type: derivedBusinessType,
         application_type: isDistributorApplication ? 'distributor' : 'b2b_order',
+        distributor_tier: isDistributorApplication ? (application.distributorTier || null) : null,
         order_profile: isBusinessOrder ? 'business' : 'personal',
         admin_comment: null,
         order_action: null,
