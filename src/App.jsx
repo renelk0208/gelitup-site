@@ -13257,7 +13257,10 @@ function App() {
   const routerLocation = useLocation()
   const navigate = useNavigate()
   const [isPortalAuthenticated, setIsPortalAuthenticated] = useState(() => localStorage.getItem('portalAuth') === 'true')
-  const [isAdminSession, setIsAdminSession] = useState(() => localStorage.getItem('gelitup.admin.session') === 'true')
+  // IMPORTANT: never bootstrap isAdminSession from localStorage.
+  // Always verify against the DB before routing. Defaulting to false means a legitimate
+  // admin sees a brief loading screen, which is far better than a B2B client seeing admin panel.
+  const [isAdminSession, setIsAdminSession] = useState(false)
   const [authReady, setAuthReady] = useState(!hasSupabaseConfig)
   const [pendingRecoverySession, setPendingRecoverySession] = useState(false)
   const [hasAcceptedCookies, setHasAcceptedCookies] = useState(() => localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY) === 'accepted')
@@ -13362,10 +13365,14 @@ function App() {
         return
       }
       if (event === 'SIGNED_IN' && session) {
-        // Re-verify whether this newly signed-in user is actually an admin.
-        // This prevents stale localStorage 'gelitup.admin.session' from a previous
-        // admin session routing a freshly-confirmed B2B client to the admin panel.
+        // Block authReady until the admin DB check resolves — this eliminates the race
+        // condition where ProtectedPortal renders with stale isAdminSession=true before
+        // the async check can correct it, routing B2B clients to the admin panel.
         const userEmail = session.user?.email
+        const sessionOnly = localStorage.getItem('portalSessionOnly') === 'true'
+        const tabActive = sessionStorage.getItem('portalTabActive') === 'true'
+        if (sessionOnly && !tabActive) return
+        setIsPortalAuthenticated(true)
         if (userEmail && supabase) {
           supabase
             .from(adminsTable)
@@ -13382,11 +13389,23 @@ function App() {
               }
             })
             .catch(() => {
-              // If the check fails, default to non-admin to be safe
               setIsAdminSession(false)
               localStorage.removeItem('gelitup.admin.session')
             })
+            .finally(() => { setAuthReady(true) })
+        } else {
+          setIsAdminSession(false)
+          localStorage.removeItem('gelitup.admin.session')
+          setAuthReady(true)
         }
+        return
+      }
+      if (event === 'SIGNED_OUT') {
+        setIsAdminSession(false)
+        localStorage.removeItem('gelitup.admin.session')
+        setIsPortalAuthenticated(false)
+        setAuthReady(true)
+        return
       }
       if (session) {
         // Don't restore a session-only login that should have been cleared on browser close
