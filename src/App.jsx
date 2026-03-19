@@ -10073,11 +10073,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                   </div>
                 )}
                 <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
-                <ul className="mt-1.5 space-y-1 text-[11px] text-slate-600">
-                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Minimum order:</strong> €{MIN_ORDER_EUR.toFixed(2)} NET (excl. VAT &amp; shipping). Orders below this value are not accepted.</span></li>
-                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong> FREE to all EU zones (Zones 2–5). Zone 6 (UK): €28.00. Final packing list will appear on your invoice.</span></li>
-                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by GEL.IT.UP.</span></li>
-                  <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
+                <ul className="mt-1.5 space-y-2 text-xs text-slate-700">
+                  <li className="flex items-start gap-2"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by Thermitek Ltd.</span></li>
+                  <li className="flex items-start gap-2"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
                 </ul>
               </div>
             )
@@ -10418,7 +10416,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                   <span className="font-semibold text-slate-700">Estimated Total</span>
                   <span className="font-bold text-fuchsia-700">€{orderTotal.toFixed(2)}</span>
                 </div>
-                <p className="mt-0.5 text-[10px] text-slate-400">Excl. shipping. Final invoice issued by GEL.IT.UP.</p>
+                <p className="mt-0.5 text-[10px] text-slate-400">Excl. shipping. Final invoice issued by Thermitek Ltd.</p>
               </div>
             )}
           </div>
@@ -10438,11 +10436,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                 </div>
               )}
               <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
-              <ul className="mt-1.5 space-y-1 text-[11px] text-slate-600">
-                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Minimum order:</strong> €{MIN_ORDER_EUR.toFixed(2)} NET (excl. VAT &amp; shipping). Orders below this value are not accepted.</span></li>
-                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Shipping:</strong> FREE to all EU zones (Zones 2–5). Zone 6 (UK): €28.00. Final packing list will appear on your invoice.</span></li>
-                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by GEL.IT.UP.</span></li>
-                <li className="flex items-start gap-1.5"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
+              <ul className="mt-1.5 space-y-2 text-xs text-slate-700">
+                <li className="flex items-start gap-2"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by Thermitek Ltd.</span></li>
+                <li className="flex items-start gap-2"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
               </ul>
             </div>
           )
