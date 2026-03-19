@@ -13361,6 +13361,33 @@ function App() {
         setAuthReady(true)
         return
       }
+      if (event === 'SIGNED_IN' && session) {
+        // Re-verify whether this newly signed-in user is actually an admin.
+        // This prevents stale localStorage 'gelitup.admin.session' from a previous
+        // admin session routing a freshly-confirmed B2B client to the admin panel.
+        const userEmail = session.user?.email
+        if (userEmail && supabase) {
+          supabase
+            .from(adminsTable)
+            .select('email')
+            .ilike('email', userEmail)
+            .limit(1)
+            .then(({ data: adminRows }) => {
+              const isAdmin = Boolean(adminRows?.length)
+              setIsAdminSession(isAdmin)
+              if (isAdmin) {
+                localStorage.setItem('gelitup.admin.session', 'true')
+              } else {
+                localStorage.removeItem('gelitup.admin.session')
+              }
+            })
+            .catch(() => {
+              // If the check fails, default to non-admin to be safe
+              setIsAdminSession(false)
+              localStorage.removeItem('gelitup.admin.session')
+            })
+        }
+      }
       if (session) {
         // Don't restore a session-only login that should have been cleared on browser close
         const sessionOnly = localStorage.getItem('portalSessionOnly') === 'true'
