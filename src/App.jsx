@@ -12852,6 +12852,8 @@ function PortalDashboard({ onLogout }) {
 }
 
 function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
+  const [adminPreviewMode, setAdminPreviewMode] = useState(false)
+
   if (!authReady) {
     return (
       <section className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-600">
@@ -12866,9 +12868,28 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
 
   if (isAdmin) {
     return (
-      <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#c8386e] border-t-transparent" /></div>}>
-        <AdminDashboard onLogout={onLogout} />
-      </Suspense>
+      <div className="relative">
+        {/* Admin mode switcher bar */}
+        <div className="sticky top-0 z-50 flex items-center justify-between gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs">
+          <span className="font-semibold text-amber-800">
+            {adminPreviewMode ? '👁 Previewing distributor portal (read-only view)' : '🔑 Admin Panel'}
+          </span>
+          <button
+            onClick={() => setAdminPreviewMode(v => !v)}
+            className="rounded-full border border-amber-300 bg-white px-3 py-1 font-semibold text-amber-800 hover:bg-amber-100 transition"
+          >
+            {adminPreviewMode ? 'Back to Admin Panel' : 'Preview Distributor Portal'}
+          </button>
+        </div>
+        {adminPreviewMode
+          ? <PortalDashboard onLogout={onLogout} />
+          : (
+            <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#c8386e] border-t-transparent" /></div>}>
+              <AdminDashboard onLogout={onLogout} />
+            </Suspense>
+          )
+        }
+      </div>
     )
   }
 
