@@ -12407,7 +12407,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
       if (email) {
         const { data: reg } = await supabase
           .from(registrationsTable)
-          .select('prices_allocated, distributor_tier, status')
+          .select('prices_allocated, distributor_tier, status, application_type')
           .ilike('email', email)
           .order('created_at', { ascending: false })
           .limit(1)
@@ -12846,11 +12846,17 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     ?? liveRegistration?.distributor_tier
     ?? portalUser?.user_metadata?.distributor_tier
     ?? null
+  // B2B order clients always have prices visible — regardless of the prices_allocated flag
+  // (handles registrations created before the flag was introduced).
+  const isB2BOrderClient = liveRegistration?.application_type === 'b2b_order'
+    || portalUser?.user_metadata?.customer_type === 'b2b_order'
   const effectivePricesAllocated = pricesAllocatedOverride !== null
     ? pricesAllocatedOverride
-    : liveRegistration
-      ? Boolean(liveRegistration.prices_allocated)
-      : Boolean(portalUser?.user_metadata?.prices_allocated)
+    : isB2BOrderClient
+      ? true
+      : liveRegistration
+        ? Boolean(liveRegistration.prices_allocated)
+        : Boolean(portalUser?.user_metadata?.prices_allocated)
 
   if (portalUser?.user_metadata?.role === 'buyer') {
     return (
