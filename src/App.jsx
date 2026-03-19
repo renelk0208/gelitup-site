@@ -13181,6 +13181,26 @@ function App() {
         }
         // Mark this tab as having an active authenticated session
         sessionStorage.setItem('portalTabActive', 'true')
+        // Re-verify admin status on session restore (handles new devices / cleared localStorage)
+        try {
+          const userEmail = data.session.user?.email
+          if (userEmail) {
+            const { data: adminRows } = await supabase
+              .from(adminsTable)
+              .select('email')
+              .ilike('email', userEmail)
+              .limit(1)
+            const isAdmin = Boolean(adminRows?.length)
+            if (mounted) {
+              setIsAdminSession(isAdmin)
+              if (isAdmin) {
+                localStorage.setItem('gelitup.admin.session', 'true')
+              } else {
+                localStorage.removeItem('gelitup.admin.session')
+              }
+            }
+          }
+        } catch { /* non-fatal — fall back to localStorage value */ }
       }
       setIsPortalAuthenticated(Boolean(data.session))
       setAuthReady(true)
