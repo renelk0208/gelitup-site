@@ -6809,7 +6809,7 @@ function PortalForgotPassword() {
 
     // Always show success to prevent email enumeration
     await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-      redirectTo: `${window.location.origin}${isAdminReset ? '/portal/admin-login' : '/portal/login'}`,
+      redirectTo: `${window.location.origin}${isAdminReset ? '/portal/admin-login?mode=create-password' : '/portal/login?mode=create-password'}`,
     })
 
     setIsSubmitting(false)
@@ -13735,6 +13735,28 @@ function App() {
 
     if (!hasSupabaseConfig || !supabase) {
       return { ok: false, message: 'Live auth is not configured.' }
+    }
+
+    // If the user arrived via a password-reset email link, Supabase has already
+    // established a recovery session. Detect it and call updateUser directly.
+    const { data: sessionData } = await supabase.auth.getSession()
+    const activeSessionEmail = String(sessionData?.session?.user?.email || '').trim().toLowerCase()
+    const isRecoverySession = Boolean(sessionData?.session) && (
+      !activeSessionEmail || activeSessionEmail === normalizedEmail
+    )
+
+    if (isRecoverySession && sessionData?.session) {
+      const { error: updateError } = await supabase.auth.updateUser({ password })
+      if (updateError) {
+        return { ok: false, message: updateError.message || 'Password update failed.' }
+      }
+      setIsPortalAuthenticated(true)
+      return {
+        ok: true,
+        infoMessage: 'Password updated successfully. You are now signed in.',
+        navigateToDashboard: true,
+        debugTrace: 'create-password -> recovery-updateUser',
+      }
     }
 
     const signUpResult = await supabase.auth.signUp({
