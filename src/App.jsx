@@ -874,7 +874,8 @@ const navItems = [
   { to: '/distributor-packages', label: 'Distribution Options' },
   { to: '/full-catalogue', label: 'Our Products' },
   { to: '/distributors', label: 'Distributors' },
-  { to: '/become-distributor', label: 'B2B / Distribution Registration', highlight: true },
+  { to: '/portal/register', label: 'Client Registration' },
+  { to: '/become-distributor', label: 'Become Distributor', highlight: true },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -4443,7 +4444,7 @@ function Nav({ onOpenContactModal }) {
   return (
     <nav className="hidden gap-2 md:flex">
       <NavLink
-        to="/portal/login"
+        to="/portal/login?portal=b2b"
         className={({ isActive }) =>
           `rounded-lg border px-4 py-2 text-sm font-bold uppercase tracking-[0.06em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c8386e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
             isActive
@@ -4452,7 +4453,19 @@ function Nav({ onOpenContactModal }) {
           }`
         }
       >
-        Login to Ordering Portal
+        B2B Client Login
+      </NavLink>
+      <NavLink
+        to="/portal/login?portal=distributor"
+        className={({ isActive }) =>
+          `rounded-lg border px-4 py-2 text-sm font-bold uppercase tracking-[0.06em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
+            isActive
+              ? 'border-indigo-500 bg-indigo-600 !text-white'
+              : 'border-indigo-500 bg-indigo-600 !text-white hover:bg-indigo-500 hover:border-indigo-400'
+          }`
+        }
+      >
+        Distributor Login
       </NavLink>
       {navItems.map((item) => {
         if (item.isContactAction) {
@@ -4545,13 +4558,22 @@ function MobileNav({ onOpenContactModal }) {
         {/* Nav links */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           <NavLink
-            to="/portal/login"
+            to="/portal/login?portal=b2b"
             onClick={() => setOpen(false)}
             className={() =>
               'block rounded-lg border border-[#c8386e] bg-[#c8386e] px-4 py-3 text-sm font-bold uppercase tracking-[0.05em] !text-white transition duration-200 hover:bg-[#a82d5a]'
             }
           >
-            Login to Ordering Portal
+            B2B Client Login
+          </NavLink>
+          <NavLink
+            to="/portal/login?portal=distributor"
+            onClick={() => setOpen(false)}
+            className={() =>
+              'block rounded-lg border border-indigo-500 bg-indigo-600 px-4 py-3 text-sm font-bold uppercase tracking-[0.05em] !text-white transition duration-200 hover:bg-indigo-500'
+            }
+          >
+            Distributor Login
           </NavLink>
           {navItems.map((item) => {
             if (item.isContactAction) {
@@ -5505,6 +5527,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
   const loginParams = useMemo(() => new URLSearchParams(location.search), [location.search])
   const prefilledEmail = String(loginParams.get('email') || '').trim().toLowerCase()
   const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
+  const portalType = loginParams.get('portal') || 'b2b' // 'b2b' | 'distributor'
   // Reliable recovery detection: the PASSWORD_RECOVERY auth event sets pendingRecoverySession
   // (URL-based ?code= detection is unreliable — the SDK consumes the code before React renders)
   const isPasswordResetFlow = pendingRecoverySession
@@ -5540,15 +5563,31 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
   return (
     <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
       <div className="bg-slate-900 p-8 text-white">
-        <p className="text-xs uppercase tracking-[0.2em] text-slate-300">GEL.IT.UP Trade</p>
-        <h2 className="heading-on-dark mt-3 text-3xl font-bold">Professional Access</h2>
+        <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
+          {portalType === 'distributor' ? 'GEL.IT.UP Distribution' : 'GEL.IT.UP Trade'}
+        </p>
+        <h2 className="heading-on-dark mt-3 text-3xl font-bold">
+          {portalType === 'distributor' ? 'Distributor Portal' : 'B2B Client Access'}
+        </h2>
         <p className="mt-4 text-sm text-slate-300">
-          Professional Access. Enter your archives and locked pro-pricing.
+          {portalType === 'distributor'
+            ? 'Access your distributor dashboard, exclusive tier pricing, and dedicated support.'
+            : 'Access your ordering portal, real-time stock, and locked pro-pricing.'}
         </p>
         <ul className="mt-6 space-y-2 text-sm text-slate-300">
-          <li>— Real-time account overview</li>
-          <li>— Fast reorder and order intake tracking</li>
-          <li>— Dedicated distributor support</li>
+          {portalType === 'distributor' ? (
+            <>
+              <li>— Territory and tier overview</li>
+              <li>— Distributor-exclusive pricing</li>
+              <li>— Dedicated distributor support</li>
+            </>
+          ) : (
+            <>
+              <li>— Real-time account overview</li>
+              <li>— Fast reorder and order intake tracking</li>
+              <li>— Allocated B2B pricing</li>
+            </>
+          )}
         </ul>
       </div>
 
@@ -5560,21 +5599,27 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
               <>
                 Returning client?{' '}
                 <NavLink
-                  to={prefilledEmail ? `/portal/login?email=${encodeURIComponent(prefilledEmail)}` : '/portal/login'}
+                  to={prefilledEmail ? `/portal/login?portal=${portalType}&email=${encodeURIComponent(prefilledEmail)}` : `/portal/login?portal=${portalType}`}
                   className="font-semibold text-slate-900 hover:underline"
                 >
                   Sign in
                 </NavLink>
               </>
             )
+            : portalType === 'distributor'
+            ? (
+              <>
+                Want to become a distributor?{' '}
+                <NavLink to="/become-distributor" className="font-semibold text-slate-900 hover:underline">
+                  Apply here
+                </NavLink>
+              </>
+            )
             : (
               <>
-                First time here?{' '}
-                <NavLink
-                  to={email ? `/portal/login?mode=create-password&email=${encodeURIComponent(email)}` : '/portal/login?mode=create-password'}
-                  className="font-semibold text-slate-900 hover:underline"
-                >
-                  Create password
+                New B2B client?{' '}
+                <NavLink to="/portal/register" className="font-semibold text-slate-900 hover:underline">
+                  Register here
                 </NavLink>
               </>
             )}
@@ -14394,7 +14439,7 @@ function App() {
               <NavLink to="/full-catalogue" className="block transition duration-300 hover:text-fuchsia-300">Catalogue</NavLink>
               <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
               <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Become Distributor</NavLink>
-              <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Client Registration</NavLink>
+              <NavLink to="/portal/register" className="block transition duration-300 hover:text-fuchsia-300">Client Registration</NavLink>
             </div>
           </div>
 
