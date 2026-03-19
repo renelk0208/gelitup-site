@@ -5611,8 +5611,10 @@ function PortalLogin({ onLogin, onCreatePassword }) {
 
             if (result.navigateToDashboard) {
               navigate('/portal/dashboard/overview')
+            } else if (result.infoMessage === 'confirm-email') {
+              // Supabase sent a confirmation email — show check-inbox screen
+              setInfoMessage('confirm-email')
             } else {
-              // Password created but auto sign-in not available — redirect to sign-in form
               navigate(email ? `/portal/login?email=${encodeURIComponent(email)}` : '/portal/login')
             }
 
@@ -5737,7 +5739,27 @@ function PortalLogin({ onLogin, onCreatePassword }) {
         )}
 
         {errorMessage && <p className="mt-2 text-xs text-rose-600">{errorMessage}</p>}
-        {infoMessage && <p className="mt-2 text-xs text-emerald-700">{infoMessage}</p>}
+        {infoMessage === 'confirm-email' && (
+          <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+              <svg className="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <p className="text-sm font-bold text-emerald-800">Check your inbox!</p>
+            <p className="mt-1 text-xs text-emerald-700">
+              A confirmation email has been sent to <strong>{email}</strong>.<br />
+              Click the link in that email to confirm your account, then come back here to sign in with your new password.
+            </p>
+            <NavLink
+              to={email ? `/portal/login?email=${encodeURIComponent(email)}` : '/portal/login'}
+              className="mt-3 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
+            >
+              Go to Sign In →
+            </NavLink>
+          </div>
+        )}
+        {infoMessage && infoMessage !== 'confirm-email' && <p className="mt-2 text-xs text-emerald-700">{infoMessage}</p>}
         {showDebugTrace && debugTrace && <p className="mt-2 text-xs text-amber-700">Debug trace: {debugTrace}</p>}
 
         <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs sm:p-4">
@@ -13851,8 +13873,8 @@ function App() {
     return {
       ok: true,
       infoMessage: canSignInNow
-        ? 'Password created successfully. Email verification is not required; you are now signed in.'
-        : 'Password setup completed. Please sign in.',
+        ? 'Password created successfully. You are now signed in.'
+        : 'confirm-email',
       navigateToDashboard: canSignInNow,
       debugTrace: canSignInNow ? 'create-password -> signed-in' : 'create-password -> account-ready-sign-in-required',
     }
