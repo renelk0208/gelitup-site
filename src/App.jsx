@@ -12269,7 +12269,7 @@ function BuyerPortal({ onLogout, userName, userEmail }) {
   )
 }
 
-function PortalDashboard({ onLogout }) {
+function PortalDashboard({ onLogout, tierOverride = null }) {
   const location = useLocation()
   const navigate = useNavigate()
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
@@ -12821,7 +12821,7 @@ function PortalDashboard({ onLogout }) {
             </div>
 
             {activeModule === 'overview' && (() => {
-              const tier = portalUser?.user_metadata?.distributor_tier || null
+              const tier = tierOverride ?? portalUser?.user_metadata?.distributor_tier ?? null
               const isTierProfessional = tier === 'professional'
               const isTierAuthority = tier === 'authority'
               return (
@@ -12913,6 +12913,7 @@ function PortalDashboard({ onLogout }) {
 
 function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
   const [adminPreviewMode, setAdminPreviewMode] = useState(false)
+  const [adminTierPreview, setAdminTierPreview] = useState(null)
 
   if (!authReady) {
     return (
@@ -12934,15 +12935,41 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
           <span className="font-semibold text-amber-800">
             {adminPreviewMode ? '👁 Previewing distributor portal (read-only view)' : '🔑 Admin Panel'}
           </span>
-          <button
-            onClick={() => setAdminPreviewMode(v => !v)}
-            className="rounded-full border border-amber-300 bg-white px-3 py-1 font-semibold text-amber-800 hover:bg-amber-100 transition"
-          >
-            {adminPreviewMode ? 'Back to Admin Panel' : 'Preview Distributor Portal'}
-          </button>
+          <div className="flex items-center gap-2">
+            {adminPreviewMode && (
+              <>
+                <button
+                  onClick={() => setAdminTierPreview('professional')}
+                  className={`rounded-full border px-2 py-0.5 text-xs font-semibold transition ${
+                    adminTierPreview === 'professional'
+                      ? 'border-fuchsia-600 bg-fuchsia-600 text-white'
+                      : 'border-amber-300 bg-white text-amber-800 hover:bg-amber-100'
+                  }`}
+                >
+                  Professional
+                </button>
+                <button
+                  onClick={() => setAdminTierPreview('authority')}
+                  className={`rounded-full border px-2 py-0.5 text-xs font-semibold transition ${
+                    adminTierPreview === 'authority'
+                      ? 'border-violet-700 bg-violet-700 text-white'
+                      : 'border-amber-300 bg-white text-amber-800 hover:bg-amber-100'
+                  }`}
+                >
+                  Authority
+                </button>
+              </>
+            )}
+            <button
+              onClick={() => { setAdminPreviewMode(v => !v); setAdminTierPreview(null) }}
+              className="rounded-full border border-amber-300 bg-white px-3 py-1 font-semibold text-amber-800 hover:bg-amber-100 transition"
+            >
+              {adminPreviewMode ? 'Back to Admin Panel' : 'Preview Distributor Portal'}
+            </button>
+          </div>
         </div>
         {adminPreviewMode
-          ? <PortalDashboard onLogout={onLogout} />
+          ? <PortalDashboard onLogout={onLogout} tierOverride={adminTierPreview} />
           : (
             <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#c8386e] border-t-transparent" /></div>}>
               <AdminDashboard onLogout={onLogout} />
