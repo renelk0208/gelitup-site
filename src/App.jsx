@@ -12846,18 +12846,15 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     ?? liveRegistration?.distributor_tier
     ?? portalUser?.user_metadata?.distributor_tier
     ?? null
-  // B2B order clients always have prices visible — regardless of the prices_allocated flag
-  // (handles registrations created before the flag was introduced).
-  // Use getApplicationTypeFromRecord so old records with type in notes are handled correctly.
-  const isB2BOrderClient = getApplicationTypeFromRecord(liveRegistration) === 'b2b_order'
-    || portalUser?.user_metadata?.customer_type === 'b2b_order'
+  // Prices are shown by default. The ONLY case where prices are hidden is when we have a
+  // confirmed distributor registration with prices_allocated explicitly set to false.
+  // B2B clients, unknown users, and any non-distributor always see prices.
+  const isUnreleasedDistributor = liveRegistration !== null
+    && getApplicationTypeFromRecord(liveRegistration) === 'distributor'
+    && !Boolean(liveRegistration.prices_allocated)
   const effectivePricesAllocated = pricesAllocatedOverride !== null
     ? pricesAllocatedOverride
-    : isB2BOrderClient
-      ? true
-      : liveRegistration
-        ? Boolean(liveRegistration.prices_allocated)
-        : Boolean(portalUser?.user_metadata?.prices_allocated)
+    : !isUnreleasedDistributor
 
   if (portalUser?.user_metadata?.role === 'buyer') {
     return (
