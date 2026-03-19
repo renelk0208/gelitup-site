@@ -5499,15 +5499,16 @@ function DistributorsPage() {
   )
 }
 
-function PortalLogin({ onLogin, onCreatePassword }) {
+function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false, onRecoverySessionConsumed }) {
   const navigate = useNavigate()
   const location = useLocation()
   const loginParams = useMemo(() => new URLSearchParams(location.search), [location.search])
   const prefilledEmail = String(loginParams.get('email') || '').trim().toLowerCase()
   const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
-  // True only when the user arrived via a Supabase password-reset email link
-  // (PKCE flow sends ?code=..., implicit flow sends #type=recovery)
-  const isPasswordResetFlow = Boolean(loginParams.get('code'))
+  // Reliable recovery detection: the PASSWORD_RECOVERY auth event sets pendingRecoverySession
+  // (URL-based ?code= detection is unreliable — the SDK consumes the code before React renders)
+  const isPasswordResetFlow = pendingRecoverySession
+    || Boolean(loginParams.get('code'))
     || /type=recovery/.test(window.location.hash)
   const showDebugTrace = loginParams.get('debug') === '1'
   const [email, setEmail] = useState(prefilledEmail || localStorage.getItem('portalRememberedEmail') || '')
@@ -5610,6 +5611,7 @@ function PortalLogin({ onLogin, onCreatePassword }) {
             }
 
             if (result.navigateToDashboard) {
+              onRecoverySessionConsumed?.()
               navigate('/portal/dashboard/overview')
             } else if (result.infoMessage === 'confirm-email') {
               // Supabase sent a confirmation email — show check-inbox screen
@@ -13174,6 +13176,7 @@ function App() {
   const [isPortalAuthenticated, setIsPortalAuthenticated] = useState(() => localStorage.getItem('portalAuth') === 'true')
   const [isAdminSession, setIsAdminSession] = useState(() => localStorage.getItem('gelitup.admin.session') === 'true')
   const [authReady, setAuthReady] = useState(!hasSupabaseConfig)
+  const [pendingRecoverySession, setPendingRecoverySession] = useState(false)
   const [hasAcceptedCookies, setHasAcceptedCookies] = useState(() => localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY) === 'accepted')
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
   const [contactRequestForm, setContactRequestForm] = useState({ name: '', email: '', phone: '' })
@@ -13265,7 +13268,16 @@ function App() {
       setAuthReady(true)
     })
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        // User arrived via a password-reset email link — flag recovery mode and send to
+        // the create-password form.  The ?code= is already consumed by the SDK so we
+        // cannot rely on URL params; this event is the only reliable signal.
+        setPendingRecoverySession(true)
+        navigate('/portal/login?mode=create-password')
+        setAuthReady(true)
+        return
+      }
       if (session) {
         // Don't restore a session-only login that should have been cleared on browser close
         const sessionOnly = localStorage.getItem('portalSessionOnly') === 'true'
@@ -14267,6 +14279,8 @@ function App() {
                     <PortalLogin
                       onLogin={handlePortalLogin}
                       onCreatePassword={handleCreatePortalPassword}
+                      pendingRecoverySession={pendingRecoverySession}
+                      onRecoverySessionConsumed={() => setPendingRecoverySession(false)}
                     />
                   )}
                 />
