@@ -4443,26 +4443,6 @@ function pickHomepageMedia(items = []) {
 function Nav({ onOpenContactModal }) {
   return (
     <nav className="hidden gap-2 md:flex items-center">
-      <NavLink
-        to="/portal/login?portal=b2b"
-        className={({ isActive }) =>
-          `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
-            isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
-          }`
-        }
-      >
-        B2B Login
-      </NavLink>
-      <NavLink
-        to="/portal/login?portal=distributor"
-        className={({ isActive }) =>
-          `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
-            isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
-          }`
-        }
-      >
-        Distributor Login
-      </NavLink>
       {navItems.map((item) => {
         if (item.isContactAction) {
           return (
@@ -4497,6 +4477,26 @@ function Nav({ onOpenContactModal }) {
           </NavLink>
         )
       })}
+      <NavLink
+        to="/portal/login?portal=b2b"
+        className={({ isActive }) =>
+          `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
+            isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
+          }`
+        }
+      >
+        B2B Login
+      </NavLink>
+      <NavLink
+        to="/portal/login?portal=distributor"
+        className={({ isActive }) =>
+          `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
+            isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
+          }`
+        }
+      >
+        Distributor Login
+      </NavLink>
     </nav>
   )
 }
@@ -4553,28 +4553,6 @@ function MobileNav({ onOpenContactModal }) {
 
         {/* Nav links */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-          <NavLink
-            to="/portal/login?portal=b2b"
-            onClick={() => setOpen(false)}
-            className={({ isActive }) =>
-              `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
-                isActive ? 'bg-fuchsia-600 !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
-              }`
-            }
-          >
-            B2B Login
-          </NavLink>
-          <NavLink
-            to="/portal/login?portal=distributor"
-            onClick={() => setOpen(false)}
-            className={({ isActive }) =>
-              `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
-                isActive ? 'bg-fuchsia-600 !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
-              }`
-            }
-          >
-            Distributor Login
-          </NavLink>
           {navItems.map((item) => {
             if (item.isContactAction) {
               return (
@@ -4611,6 +4589,28 @@ function MobileNav({ onOpenContactModal }) {
               </NavLink>
             )
           })}
+          <NavLink
+            to="/portal/login?portal=b2b"
+            onClick={() => setOpen(false)}
+            className={({ isActive }) =>
+              `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+                isActive ? 'bg-fuchsia-600 !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
+              }`
+            }
+          >
+            B2B Login
+          </NavLink>
+          <NavLink
+            to="/portal/login?portal=distributor"
+            onClick={() => setOpen(false)}
+            className={({ isActive }) =>
+              `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+                isActive ? 'bg-fuchsia-600 !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
+              }`
+            }
+          >
+            Distributor Login
+          </NavLink>
         </nav>
       </div>
     </>
