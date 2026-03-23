@@ -13048,9 +13048,21 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
 }
 
 function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
-  const [adminPreviewMode, setAdminPreviewMode] = useState(false)
+  // null = admin panel, 'distributor' = distributor preview, 'b2b' = B2B client preview
+  const [adminPreviewType, setAdminPreviewType] = useState(null)
   const [adminTierPreview, setAdminTierPreview] = useState(null)
-  const [adminPricesAllocated, setAdminPricesAllocated] = useState(false)
+  const [adminPricesAllocated, setAdminPricesAllocated] = useState(true)
+
+  const enterPreview = (type) => {
+    setAdminPreviewType(type)
+    setAdminTierPreview(null)
+    setAdminPricesAllocated(type === 'b2b') // B2B always has prices; distributor starts with prices off
+  }
+  const exitPreview = () => {
+    setAdminPreviewType(null)
+    setAdminTierPreview(null)
+    setAdminPricesAllocated(true)
+  }
 
   if (!authReady) {
     return (
@@ -13065,16 +13077,22 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
   }
 
   if (isAdmin) {
+    const previewLabel = adminPreviewType === 'distributor'
+      ? '👁 Previewing: Distributor Portal'
+      : adminPreviewType === 'b2b'
+        ? '👁 Previewing: B2B Client Portal'
+        : '🔑 Admin Panel'
+
     return (
       <div className="relative">
         {/* Admin mode switcher bar */}
-        <div className="sticky top-0 z-50 flex items-center justify-between gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs">
-          <span className="font-semibold text-amber-800">
-            {adminPreviewMode ? '👁 Previewing distributor portal (read-only view)' : '🔑 Admin Panel'}
-          </span>
-          <div className="flex items-center gap-2">
-            {adminPreviewMode && (
+        <div className="sticky top-0 z-50 flex flex-wrap items-center justify-between gap-2 border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs">
+          <span className="font-semibold text-amber-800">{previewLabel}</span>
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Distributor-specific preview controls */}
+            {adminPreviewType === 'distributor' && (
               <>
+                <span className="text-amber-600 opacity-75">Tier:</span>
                 <button
                   onClick={() => setAdminTierPreview('professional')}
                   className={`rounded-full border px-2 py-0.5 text-xs font-semibold transition ${
@@ -13095,28 +13113,71 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
                 >
                   Authority
                 </button>
+              </>
+            )}
+            {/* Price toggle — shown for both portal types */}
+            {adminPreviewType !== null && (
+              <button
+                onClick={() => setAdminPricesAllocated(v => !v)}
+                className={`rounded-full border px-2 py-0.5 text-xs font-semibold transition ${
+                  adminPricesAllocated
+                    ? 'border-emerald-600 bg-emerald-600 text-white'
+                    : 'border-amber-300 bg-white text-amber-800 hover:bg-amber-100'
+                }`}
+              >
+                {adminPricesAllocated ? '✓ Prices On' : '✗ Prices Off'}
+              </button>
+            )}
+            {/* Preview switcher buttons */}
+            {adminPreviewType === null ? (
+              <>
                 <button
-                  onClick={() => setAdminPricesAllocated(v => !v)}
-                  className={`rounded-full border px-2 py-0.5 text-xs font-semibold transition ${
-                    adminPricesAllocated
-                      ? 'border-emerald-600 bg-emerald-600 text-white'
-                      : 'border-amber-300 bg-white text-amber-800 hover:bg-amber-100'
-                  }`}
+                  onClick={() => enterPreview('distributor')}
+                  className="rounded-full border border-amber-300 bg-white px-3 py-1 font-semibold text-amber-800 hover:bg-amber-100 transition"
                 >
-                  {adminPricesAllocated ? '✓ Prices On' : '✗ Prices Off'}
+                  Preview Distributor Portal
+                </button>
+                <button
+                  onClick={() => enterPreview('b2b')}
+                  className="rounded-full border border-amber-300 bg-white px-3 py-1 font-semibold text-amber-800 hover:bg-amber-100 transition"
+                >
+                  Preview B2B Portal
+                </button>
+              </>
+            ) : (
+              <>
+                {adminPreviewType !== 'distributor' && (
+                  <button
+                    onClick={() => enterPreview('distributor')}
+                    className="rounded-full border border-amber-300 bg-white px-2 py-0.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 transition"
+                  >
+                    Switch to Distributor
+                  </button>
+                )}
+                {adminPreviewType !== 'b2b' && (
+                  <button
+                    onClick={() => enterPreview('b2b')}
+                    className="rounded-full border border-amber-300 bg-white px-2 py-0.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 transition"
+                  >
+                    Switch to B2B
+                  </button>
+                )}
+                <button
+                  onClick={exitPreview}
+                  className="rounded-full border border-amber-300 bg-white px-3 py-1 font-semibold text-amber-800 hover:bg-amber-100 transition"
+                >
+                  ← Back to Admin Panel
                 </button>
               </>
             )}
-            <button
-              onClick={() => { setAdminPreviewMode(v => !v); setAdminTierPreview(null); setAdminPricesAllocated(false) }}
-              className="rounded-full border border-amber-300 bg-white px-3 py-1 font-semibold text-amber-800 hover:bg-amber-100 transition"
-            >
-              {adminPreviewMode ? 'Back to Admin Panel' : 'Preview Distributor Portal'}
-            </button>
           </div>
         </div>
-        {adminPreviewMode
-          ? <PortalDashboard onLogout={onLogout} tierOverride={adminTierPreview} pricesAllocatedOverride={adminPricesAllocated} />
+        {adminPreviewType !== null
+          ? <PortalDashboard
+              onLogout={onLogout}
+              tierOverride={adminPreviewType === 'distributor' ? adminTierPreview : null}
+              pricesAllocatedOverride={adminPricesAllocated}
+            />
           : (
             <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#c8386e] border-t-transparent" /></div>}>
               <AdminDashboard onLogout={onLogout} />
