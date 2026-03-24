@@ -5578,7 +5578,7 @@ function PortalLanding() {
     <section className="space-y-5">
       <div
         className="relative overflow-hidden rounded-2xl p-8 sm:p-10"
-        style={{ background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #4f46e5 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #D43790 0%, #a8186e 50%, #7c1250 100%)' }}
       >
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/70">GEL.IT.UP by GIUP®</p>
         <h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
@@ -6925,7 +6925,7 @@ function PortalRegister({ onRegister }) {
             {/* gradient header */}
             <div
               className="px-8 pb-8 pt-10 text-center text-white"
-              style={{ background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 55%, #4f46e5 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #D43790 0%, #a8186e 55%, #7c1250 100%)' }}
             >
               {/* checkmark icon */}
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/20 ring-4 ring-white/30">

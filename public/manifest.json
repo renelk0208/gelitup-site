@@ -1,11 +1,11 @@
 {
   "name": "GEL.IT.UP by GIUP®",
   "short_name": "GEL.IT.UP",
-  "description": "Premium B2B & Retail Gel Polish Portal",
+  "description": "B2B wholesale gel polish, BIAB, builder gels and nail systems. 1,000+ shades, HEMA-free, EU certified.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#111111",
+  "theme_color": "#D43790",
   "lang": "en",
   "scope": "/",
   "icons": [
