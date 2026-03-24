@@ -44,6 +44,8 @@ const CONTACT_INBOX_EMAIL = 'info@gelitup.com'
 const SUPPORT_WHATSAPP_NUMBER = import.meta.env.VITE_SUPPORT_WHATSAPP_NUMBER || '+306940715234'
 const SUPPORT_WHATSAPP_URL = import.meta.env.VITE_SUPPORT_WHATSAPP_URL
   || `https://wa.me/${String(SUPPORT_WHATSAPP_NUMBER).replace(/[^\d]/g, '')}`
+const SUPPORT_VIBER_URL = import.meta.env.VITE_SUPPORT_VIBER_URL
+  || `viber://chat?number=${String(SUPPORT_WHATSAPP_NUMBER).replace(/[^\d+]/g, '')}`
 const PORTAL_INTERNAL_BYPASS_EMAILS = new Set(
   [
     'distributors@gelitup.com',
@@ -869,11 +871,9 @@ function createFallbackProducts(count = 120) {
 }
 
 const navItems = [
-  { to: '/', label: 'Home' },
   { to: '/full-catalogue', label: 'Our Products' },
   { to: '/about-us', label: 'About us' },
   { to: '/distributor-packages', label: 'Distribution' },
-  { to: '/become-distributor', label: 'Become Distributor', highlight: true },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -2076,7 +2076,7 @@ function formatSubcategoryDisplayName(subcategoryName = '', categoryName = '') {
   
   // Bases subcategories
   if (normalized === '5IN1 SUPERIOR BASE') return '5-in-1 Superior Base'
-  if (normalized === 'BRUSH ON BUILDER') return 'Brush On Builder'
+  if (normalized === 'BRUSH ON BUILDER') return 'Brush On Builder (BIAB)'
   if (normalized === 'FLEXI BASE') return 'Flexi Base'
   if (normalized === 'SUPERBOND') return 'Superbond'
   
@@ -3631,7 +3631,7 @@ function FullCataloguePage() {
 
       {/* STICKY CHAPTER JUMP NAV */}
       {!isLoading && !errorMessage && sections.length > 0 && (
-        <div className="sticky top-0 z-30 -mx-3 border-b border-white/10 bg-[#111111]/95 backdrop-blur-sm md:-mx-6">
+        <div className="sticky top-[61px] z-30 -mx-3 border-b border-white/10 bg-[#111111]/95 backdrop-blur-sm md:-mx-6 md:top-[69px]">
           <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-6">
             {[
               { label: 'Colours', anchor: 'catalogue-section-colours' },
@@ -5238,42 +5238,28 @@ function HomePage({ onOpenContactModal }) {
   return (
     <section className="space-y-6">
       <div className="mx-auto w-full max-w-6xl overflow-hidden rounded-2xl bg-black">
-        <div className="relative h-[70vh] min-h-[460px] w-full sm:h-[78vh]">
-          {homeHeroVideoSource
-            ? (
-              <video
-                className="h-full w-full object-cover object-[50%_35%] opacity-0 transition-opacity duration-700"
-                src={homeHeroVideoSource}
-                muted
-                autoPlay
-                loop
-                playsInline
-                controls={false}
-                preload="auto"
-                disablePictureInPicture
-                onCanPlay={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')}
-              />
-              )
-            : (
-              <img
-                src={HOME_HERO_POSTER_URL || media.heroImage}
-                alt="GEL.IT.UP cinematic hero"
-                className="h-full w-full object-cover"
-                loading="lazy"
-                onError={(event) => {
-                  event.currentTarget.src = media.heroImage || '/logo.png'
-                }}
-              />
-              )}
+        <div className="relative h-[58vh] min-h-[400px] w-full sm:h-[66vh]">
+          <img
+            src={HOME_HERO_POSTER_URL || media.heroImage}
+            alt="GEL.IT.UP cinematic hero"
+            className="h-full w-full object-cover object-[50%_35%]"
+            loading="eager"
+            onError={(event) => {
+              event.currentTarget.src = media.heroImage || '/logo.png'
+            }}
+          />
 
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/75" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
 
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
-            <h1 className="hero-copy-shadow heading-on-dark max-w-5xl text-3xl font-black uppercase leading-[1.2] tracking-[0.19em] text-white sm:text-4xl lg:text-6xl">
-              GEL.IT.UP by GIUP®: THE ARCHITECTS OF PROFESSIONAL COLOR.
+            <p className="hero-copy-shadow mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-300">
+              GEL.IT.UP by GIUP®
+            </p>
+            <h1 className="hero-copy-shadow heading-on-dark max-w-2xl text-3xl font-bold leading-[1.25] tracking-tight text-white sm:text-4xl lg:text-5xl">
+              The home of professional nail colour.
             </h1>
-            <p className="hero-copy-shadow mt-5 max-w-3xl text-sm font-semibold uppercase leading-[1.7] tracking-[0.12em] text-white/95 sm:text-base">
-              A DECADE OF PROFESSIONAL MASTERY. EU REGULATED. HEMA & TPO-FREE.
+            <p className="hero-copy-shadow mt-4 max-w-xl text-sm leading-relaxed text-white/80 sm:text-base">
+              A decade of mastery · EU regulated · HEMA &amp; TPO-free
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <NavLink to="/portal/register" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_16px_rgba(212,55,144,0.55)] transition duration-300 hover:bg-fuchsia-500">
@@ -7232,7 +7218,7 @@ const B2B_SIDEBAR_GROUPS = [
   },
   {
     label: 'Builder Systems',
-    cats: ['BUILDER GEL SYSTEMS', '3-in-1 Builder Gel', '3-in-1 Premium Builder Gel', 'Multimix Polygel', 'Brush On Builder', 'Liquid Polygel', 'Acrylics'],
+    cats: ['BUILDER GEL SYSTEMS', '3-in-1 Builder Gel', '3-in-1 Premium Builder Gel', 'Multimix Polygel', 'Brush On Builder (BIAB)', 'Liquid Polygel', 'Acrylics'],
   },
   {
     label: 'Tools & Equipment',
@@ -13839,6 +13825,7 @@ function App() {
   const adminsTable = import.meta.env.VITE_B2B_ADMINS_TABLE || 'b2b_admins'
   const requireApproval = import.meta.env.VITE_REQUIRE_B2B_APPROVAL !== 'false'
   const [showBackToTop, setShowBackToTop] = useState(false)
+  const [showChatPanel, setShowChatPanel] = useState(false)
 
   const handleAcceptCookies = useCallback(() => {
     localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, 'accepted')
@@ -14917,9 +14904,7 @@ function App() {
       <header className="sticky top-0 z-40 border-b border-white/15 bg-black/80 backdrop-blur-[10px]">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-3 py-2.5 md:px-6 md:py-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-16 items-center justify-center rounded-lg border border-white/25 bg-white/95 px-2 md:h-11 md:w-[72px]">
-              <img src={appLogo} alt="GEL.IT.UP by GIUP® logo" className="max-h-6 w-auto object-contain md:max-h-7" />
-            </div>
+            <img src={appLogo} alt="GEL.IT.UP by GIUP® logo" className="max-h-8 w-auto object-contain md:max-h-9" />
             <div>
               <p className="text-xs font-black uppercase leading-none tracking-[0.07em] text-white md:text-sm md:tracking-[0.08em]">GEL.IT.UP</p>
               <p className="text-[11px] text-white/65 md:text-xs">Distributor Website</p>
@@ -15106,20 +15091,70 @@ function App() {
         <p className="border-t border-white/15 pt-3 text-white/55">— 2026 GEL.IT.UP by GIUP®</p>
       </footer>
 
-      {/* Floating WhatsApp + back-to-top */}
+      {/* Floating chat widget + back-to-top */}
       <div className="fixed bottom-6 right-3 z-50 flex flex-col items-end gap-2 md:right-4">
-        <a
-          href={SUPPORT_WHATSAPP_URL}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Chat on WhatsApp"
-          className="flex items-center gap-2 rounded-2xl bg-[#25D366] px-3 py-2.5 shadow-xl transition duration-300 hover:bg-[#1ebe59] active:scale-95"
+        {/* Expandable chat panel */}
+        {showChatPanel && (
+          <div className="mb-1 w-64 rounded-2xl border border-white/10 bg-[#1a1a1a] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+              <p className="text-sm font-semibold text-white">Chat with us</p>
+              <button
+                type="button"
+                aria-label="Close chat panel"
+                onClick={() => setShowChatPanel(false)}
+                className="text-white/50 hover:text-white"
+              >
+                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div className="flex flex-col gap-2 p-3">
+              {/* WhatsApp */}
+              <a
+                href={SUPPORT_WHATSAPP_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-3 rounded-xl bg-[#25D366]/15 px-3 py-2.5 transition hover:bg-[#25D366]/25"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 shrink-0 text-[#25D366]">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+                <div>
+                  <p className="text-sm font-semibold text-white">WhatsApp</p>
+                  <p className="text-[11px] text-white/55">English support</p>
+                </div>
+              </a>
+              {/* Viber */}
+              <a
+                href={SUPPORT_VIBER_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-3 rounded-xl bg-[#7360f2]/15 px-3 py-2.5 transition hover:bg-[#7360f2]/25"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 shrink-0 text-[#7360f2]">
+                  <path d="M11.992 2C6.256 2 2 6.03 2 11.578c0 2.704 1.076 5.136 3.017 6.887V21l2.834-1.56c.747.204 1.538.314 2.353.314.122 0 .243-.003.364-.008C10.91 19.81 11.45 20 12 20c3.866 0 7-2.686 7-6s-3.134-6-7-6c-.003 0-.006 0-.01 0zM7.5 9.5c.276 0 .5.224.5.5v.01c0 .276-.224.5-.5.5S7 10.286 7 10.01V10c0-.276.224-.5.5-.5zm4 0c.276 0 .5.224.5.5v.01c0 .276-.224.5-.5.5s-.5-.224-.5-.5V10c0-.276.224-.5.5-.5zm4 0c.276 0 .5.224.5.5v.01c0 .276-.224.5-.5.5s-.5-.224-.5-.5V10c0-.276.224-.5.5-.5zm-8.938 2.964c.343 2.69 2.518 4.846 5.215 5.183l-.043.037c-.413.35-.882.537-1.359.537-.395 0-.791-.118-1.157-.35l-.337-.215-1.693.932.455-1.554-.25-.32A7.014 7.014 0 012.999 11.59c0-2.33 1.096-4.408 2.82-5.77A8.058 8.058 0 002 11.578c0 1.873.641 3.603 1.715 4.982l-.618 2.112 2.165-1.191c.535.285 1.1.43 1.672.43.87 0 1.713-.3 2.428-.858A7.023 7.023 0 018 14c0-3.866 3.134-7 7-7 .341 0 .677.025 1.006.072C14.485 4.81 11.44 2 7.562 2z"/>
+                </svg>
+                <div>
+                  <p className="text-sm font-semibold text-white">Viber</p>
+                  <p className="text-[11px] text-white/55">Multilingual · auto-translate</p>
+                </div>
+              </a>
+              <p className="px-1 pt-1 text-[10px] text-white/30">Opens in a new tab — you won't lose your place.</p>
+            </div>
+          </div>
+        )}
+        {/* Toggle button */}
+        <button
+          type="button"
+          aria-label={showChatPanel ? 'Close chat' : 'Chat with us'}
+          onClick={() => setShowChatPanel(p => !p)}
+          className="flex items-center gap-2 rounded-2xl bg-fuchsia-600 px-3 py-2.5 shadow-xl transition duration-300 hover:bg-fuchsia-500 active:scale-95"
         >
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="h-5 w-5 shrink-0 text-white">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-          </svg>
-          <span className="text-sm font-semibold text-white">WhatsApp</span>
-        </a>
+          {showChatPanel
+            ? <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-white" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            : <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-white" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          }
+          <span className="text-sm font-semibold text-white">{showChatPanel ? 'Close' : 'Chat with us'}</span>
+        </button>
         <button
           type="button"
           aria-label="Back to top"
