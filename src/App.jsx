@@ -5231,34 +5231,36 @@ function HomePage({ onOpenContactModal }) {
             }}
           />
 
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent" />
 
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
-            <p className="hero-copy-shadow mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-300">
-              GEL.IT.UP by GIUP®
-            </p>
-            <h1 className="hero-copy-shadow heading-on-dark max-w-2xl text-3xl font-bold leading-[1.25] tracking-tight text-white sm:text-4xl lg:text-5xl">
-              The home of professional nail colour.
-            </h1>
-            <p className="hero-copy-shadow mt-4 max-w-xl text-sm leading-relaxed text-white/80 sm:text-base">
-              A decade of mastery · EU regulated · HEMA &amp; TPO-free
-            </p>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              <NavLink to="/portal/register" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_16px_rgba(212,55,144,0.55)] transition duration-300 hover:bg-fuchsia-500">
-                Register Free &rarr;
-              </NavLink>
-              <NavLink to="/become-distributor" className="rounded-lg border-2 border-white/80 px-5 py-2.5 text-sm font-semibold text-white/90 transition duration-300 hover:border-white hover:text-white">
-                Become a Distributor
-              </NavLink>
-            </div>
-            {/* Trust bar */}
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5">
-              {['1,000+ shades', 'HEMA-free', 'EU certified', '30+ countries'].map((badge) => (
-                <span key={badge} className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/70">
-                  <span className="h-1 w-1 rounded-full bg-fuchsia-400" aria-hidden="true" />
-                  {badge}
-                </span>
-              ))}
+          <div className="absolute inset-0 flex flex-col justify-end px-6 pb-8 sm:px-10 sm:pb-10">
+            <div className="max-w-xl">
+              <p className="hero-copy-shadow mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-300">
+                GEL.IT.UP by GIUP®
+              </p>
+              <h1 className="hero-copy-shadow heading-on-dark text-3xl font-bold leading-[1.25] tracking-tight text-white sm:text-4xl lg:text-5xl">
+                The home of professional nail colour.
+              </h1>
+              <p className="hero-copy-shadow mt-3 text-sm leading-relaxed text-white/80 sm:text-base">
+                A decade of mastery · EU regulated · HEMA &amp; TPO-free
+              </p>
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                <NavLink to="/portal/register" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_16px_rgba(212,55,144,0.55)] transition duration-300 hover:bg-fuchsia-500">
+                  Register Free &rarr;
+                </NavLink>
+                <NavLink to="/become-distributor" className="rounded-lg border-2 border-white/80 px-5 py-2.5 text-sm font-semibold text-white/90 transition duration-300 hover:border-white hover:text-white">
+                  Become a Distributor
+                </NavLink>
+              </div>
+              {/* Trust bar */}
+              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                {['1,000+ shades', 'HEMA-free', 'EU certified', '30+ countries'].map((badge) => (
+                  <span key={badge} className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/70">
+                    <span className="h-1 w-1 rounded-full bg-fuchsia-400" aria-hidden="true" />
+                    {badge}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -5423,22 +5425,22 @@ function HomePage({ onOpenContactModal }) {
       </InfoCard>
 
       {/* B2B SALON CTA CARD */}
-      <div className="rounded-2xl border border-fuchsia-500/40 bg-gradient-to-br from-fuchsia-950/60 to-[#1A1A1A] p-5 sm:p-6">
+      <div className="rounded-2xl p-5 sm:p-6 shadow-[0_4px_32px_rgba(212,55,144,0.35)]" style={{ background: 'linear-gradient(135deg, #f03988 0%, #D43790 45%, #8e1650 100%)' }}>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fuchsia-400">B2B Salon Access</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/75">B2B Salon Access</p>
             <h2 className="mt-1 text-xl font-extrabold text-white">Are you a salon or nail tech?</h2>
-            <p className="mt-2 max-w-lg text-sm text-white/75">Register free in under 2 minutes. No approval, no waiting — instant access to 1,000+ shades at wholesale B2B pricing from day one.</p>
+            <p className="mt-2 max-w-lg text-sm text-white/90">Register free in under 2 minutes. No approval, no waiting — instant access to 1,000+ shades at wholesale B2B pricing from day one.</p>
             <ul className="mt-3 space-y-1">
               {['1,000+ professional shades', 'B2B wholesale pricing — no MOQ', 'HEMA-free · EU certified', 'WhatsApp &amp; Viber support'].map(item => (
-                <li key={item} className="flex items-center gap-2 text-sm text-white/80">
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-fuchsia-400" />
+                <li key={item} className="flex items-center gap-2 text-sm text-white/90">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white/70" />
                   <span dangerouslySetInnerHTML={{ __html: item }} />
                 </li>
               ))}
             </ul>
           </div>
-          <NavLink to="/portal/register" className="shrink-0 self-start rounded-xl bg-fuchsia-600 px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(212,55,144,0.4)] transition duration-300 hover:bg-fuchsia-500">
+          <NavLink to="/portal/register" className="shrink-0 self-start rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#D43790] shadow-[0_2px_12px_rgba(0,0,0,0.18)] transition duration-300 hover:bg-fuchsia-50">
             Register Free &rarr;
           </NavLink>
         </div>
