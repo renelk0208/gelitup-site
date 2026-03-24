@@ -1579,42 +1579,6 @@ function DistributorPackagesPage() {
         </div>
       </div>
 
-      {/* B2B CLIENT CARD */}
-      <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #f0c4d0', backgroundColor: '#fdf5f7' }}>
-        <div className="px-6 py-4" style={{ borderBottom: '1px solid #f0c4d0', backgroundColor: '#fdf0f4' }}>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#d4185a' }}>Immediate Access</p>
-          <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#1a1a1a' }}>B2B — Professionals &amp; Salons</h2>
-          <p className="mt-1 text-sm" style={{ color: '#a01850' }}>Register free and start ordering today. No approval process, no waiting — your account is active the moment you sign up.</p>
-        </div>
-        <div>
-          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #e8a8b8' }}>
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>Who It's For</p>
-            <p className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>Nail salons, beauty studios &amp; professional technicians</p>
-          </div>
-          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #e8a8b8' }}>
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>What You Get</p>
-            <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d4185a' }} />Full catalogue — 1,000+ shades &amp; 200+ SKUs</li>
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d4185a' }} />B2B wholesale pricing from day one</li>
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d4185a' }} />HEMA-free, EU-certified formulas</li>
-            </ul>
-          </div>
-          <div className="flex items-start gap-4 px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>Access</p>
-            <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />Instant — no approval required</li>
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />Online ordering &amp; order tracking</li>
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />WhatsApp support included</li>
-            </ul>
-          </div>
-        </div>
-        <div className="px-6 py-4" style={{ borderTop: '1px solid #f0c4d0', backgroundColor: '#fdf0f4' }}>
-          <NavLink to="/portal/register" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Register Free &rarr;
-          </NavLink>
-        </div>
-      </article>
-
       {/* PROFESSIONAL TIER */}
       <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #1a1a1a', backgroundColor: '#ffffff' }}>
         <div className="px-6 py-4" style={{ backgroundColor: '#1a1a1a' }}>
@@ -4494,6 +4458,24 @@ function pickHomepageMedia(items = []) {
   }
 }
 
+function NotFoundPage() {
+  return (
+    <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
+      <p className="text-6xl font-black text-fuchsia-600">404</p>
+      <h1 className="mt-3 text-2xl font-bold text-white">Page not found</h1>
+      <p className="mt-2 max-w-sm text-sm text-white/60">The page you're looking for doesn't exist or has moved.</p>
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <NavLink to="/" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-fuchsia-500">
+          Go home
+        </NavLink>
+        <NavLink to="/full-catalogue" className="rounded-lg border border-white/25 px-5 py-2.5 text-sm font-semibold text-white/80 transition hover:border-white/50 hover:text-white">
+          Browse products
+        </NavLink>
+      </div>
+    </div>
+  )
+}
+
 function Nav({ onOpenContactModal }) {
   return (
     <nav className="hidden gap-1 md:flex items-center">
@@ -5440,14 +5422,36 @@ function HomePage({ onOpenContactModal }) {
         )}
       </InfoCard>
 
-      <div className="rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-5 sm:p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Wholesale Access</p>
-        <h2 className="mt-1 text-xl font-extrabold uppercase tracking-[0.08em] text-white">B2B &amp; Distribution</h2>
-        <p className="mt-2 text-sm text-white/80">Direct B2B access for salons, plus two distributor tiers for regional and country-level distribution.</p>
+      {/* B2B SALON CTA CARD */}
+      <div className="rounded-2xl border border-fuchsia-500/40 bg-gradient-to-br from-fuchsia-950/60 to-[#1A1A1A] p-5 sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fuchsia-400">B2B Salon Access</p>
+            <h2 className="mt-1 text-xl font-extrabold text-white">Are you a salon or nail tech?</h2>
+            <p className="mt-2 max-w-lg text-sm text-white/75">Register free in under 2 minutes. No approval, no waiting — instant access to 1,000+ shades at wholesale B2B pricing from day one.</p>
+            <ul className="mt-3 space-y-1">
+              {['1,000+ professional shades', 'B2B wholesale pricing — no MOQ', 'HEMA-free · EU certified', 'WhatsApp &amp; Viber support'].map(item => (
+                <li key={item} className="flex items-center gap-2 text-sm text-white/80">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-fuchsia-400" />
+                  <span dangerouslySetInnerHTML={{ __html: item }} />
+                </li>
+              ))}
+            </ul>
+          </div>
+          <NavLink to="/portal/register" className="shrink-0 self-start rounded-xl bg-fuchsia-600 px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(212,55,144,0.4)] transition duration-300 hover:bg-fuchsia-500">
+            Register Free &rarr;
+          </NavLink>
+        </div>
+      </div>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+      {/* DISTRIBUTOR TIERS CARD */}
+      <div className="rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-5 sm:p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Distribution</p>
+        <h2 className="mt-1 text-xl font-extrabold uppercase tracking-[0.08em] text-white">Become a Distributor</h2>
+        <p className="mt-2 text-sm text-white/80">Two tiers for regional and country-level distribution — with marketing, brand support and territory protection.</p>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {[
-            { name: 'B2B', tagline: 'Immediate access — professionals & salons', skus: '200+', shades: '1,000+ shades', badge: 'No Approval' },
             { name: 'PROFESSIONAL', tagline: 'Regional distribution', skus: '250+', shades: '180 core shades', badge: 'Growth' },
             { name: 'AUTHORITY', tagline: 'Territory dominance', skus: '500+', shades: 'Full portfolio', badge: 'Elite' },
           ].map((tier) => (
@@ -5468,12 +5472,6 @@ function HomePage({ onOpenContactModal }) {
         <NavLink to="/distributor-packages" className="mt-5 inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
           View Distribution Options
         </NavLink>
-        <p className="mt-4 border-t border-white/15 pt-4 text-xs text-white/55">
-          Not a distributor?{' '}
-          <NavLink to="/portal/register" className="font-semibold text-fuchsia-400 hover:text-fuchsia-300 hover:underline">
-            B2B salon clients register free &rarr;
-          </NavLink>
-        </p>
       </div>
 
       <GoogleReviewsStrip />
@@ -14903,13 +14901,13 @@ function App() {
       <ScrollToTopOnRouteChange />
       <header className="sticky top-0 z-40 border-b border-white/15 bg-black/80 backdrop-blur-[10px]">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-3 py-2.5 md:px-6 md:py-3">
-          <div className="flex items-center gap-3">
+          <NavLink to="/" className="flex items-center gap-3 group">
             <img src={appLogo} alt="GEL.IT.UP by GIUP® logo" className="max-h-8 w-auto object-contain md:max-h-9" />
             <div>
               <p className="text-xs font-black uppercase leading-none tracking-[0.07em] text-white md:text-sm md:tracking-[0.08em]">GEL.IT.UP</p>
-              <p className="text-[11px] text-white/65 md:text-xs">Distributor Website</p>
+              <p className="text-[11px] text-white/65 md:text-xs">Professional Nail Supplies</p>
             </div>
-          </div>
+          </NavLink>
           <Nav />
         </div>
       </header>
@@ -14995,7 +14993,7 @@ function App() {
               </>
             )}
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
 
