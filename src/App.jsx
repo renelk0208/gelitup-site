@@ -92,7 +92,7 @@ const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
 const HOME_HERO_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
-const HOME_HERO_POSTER_URL = '/gelitup-media/images/news/Spring%20Summer/NEWS%20Carousel/2600-1.jpg'
+const HOME_HERO_POSTER_URL = '/gelitup-media/images/home-page-hero-image-cloud-dancer.png'
 const HOME_NEWS_CLOUD_VIDEO_URL = Math.floor(Date.now() / 86400000) % 2 === 0
   ? '/gelitup-media/videos/floating-clouds.mp4'
   : '/gelitup-media/videos/floating- clouds2.mp4'
@@ -5224,7 +5224,7 @@ function HomePage({ onOpenContactModal }) {
           <img
             src={HOME_HERO_POSTER_URL || media.heroImage}
             alt="GEL.IT.UP cinematic hero"
-            className="h-full w-full object-cover object-[50%_35%]"
+            className="h-full w-full object-cover object-[50%_35%] brightness-[0.72] saturate-[0.85]"
             loading="eager"
             onError={(event) => {
               event.currentTarget.src = media.heroImage || '/logo.png'
@@ -6218,6 +6218,8 @@ function PortalRegister({ onRegister }) {
     distributorTier: '',
     orderProfile: 'business',
     customerType: 'company',
+    firstName: '',
+    lastName: '',
     companyName: '',
     vatNumber: '',
     contactName: '',
@@ -6460,9 +6462,11 @@ function PortalRegister({ onRegister }) {
           setErrorMessage('')
           setSuccessMessage('')
 
-          const capturedName = String(application.contactName || '').trim()
+          const b2bFullName = isB2BOrderFlow ? `${application.firstName || ''} ${application.lastName || ''}`.trim() : ''
+          const capturedName = isB2BOrderFlow ? b2bFullName : String(application.contactName || '').trim()
           const capturedIsDistributor = application.applicationType === 'distributor'
-          const result = await onRegister(application)
+          const appToSubmit = isB2BOrderFlow ? { ...application, contactName: b2bFullName, companyName: b2bFullName } : application
+          const result = await onRegister(appToSubmit)
           setIsSubmitting(false)
 
           if (!result.ok) {
@@ -6474,6 +6478,37 @@ function PortalRegister({ onRegister }) {
           setSuccessMessage(result.message || 'Application submitted.')
         }}>
           <div className="grid gap-4 md:grid-cols-2">
+            {isB2BOrderFlow ? (
+              <>
+                <label className="block text-sm font-medium text-slate-700">
+                  First Name
+                  <input type="text" required value={application.firstName || ''} onChange={(e) => setField('firstName', e.target.value)} placeholder="Jane" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
+                </label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Surname
+                  <input type="text" required value={application.lastName || ''} onChange={(e) => setField('lastName', e.target.value)} placeholder="Smith" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
+                </label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Email Address
+                  <input type="email" required value={application.contactEmail} onChange={(e) => setField('contactEmail', e.target.value)} placeholder="jane@salon.com" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
+                </label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Contact Number
+                  <input type="tel" required value={application.phone} onChange={(e) => setField('phone', e.target.value)} placeholder="+30 210 0000000" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
+                </label>
+                <label className="block text-sm font-medium text-slate-700 md:col-span-2">
+                  Business Type
+                  <select required value={application.businessType} onChange={(e) => setField('businessType', e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring">
+                    <option value="">Select type</option>
+                    <option value="Salon">Nail Salon</option>
+                    <option value="Nail Technician">Nail Technician / Freelancer</option>
+                    <option value="Academy">Nail Academy / School</option>
+                    <option value="Wholesaler">Wholesaler / Reseller</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </label>
+              </>
+            ) : (<>
             {isDistributorFlow && (
               <label className="block text-sm font-medium text-slate-700 md:col-span-2">
                 Distribution Tier
@@ -6871,6 +6906,7 @@ function PortalRegister({ onRegister }) {
                 placeholder="Tell us about your expected monthly volume, brands, or regions."
               />
             </label>
+            </>)}
           </div>
 
           <label className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
