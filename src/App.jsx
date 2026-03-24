@@ -870,11 +870,9 @@ function createFallbackProducts(count = 120) {
 
 const navItems = [
   { to: '/', label: 'Home' },
-  { to: '/about-us', label: 'About us' },
-  { to: '/distributor-packages', label: 'Distribution Options' },
   { to: '/full-catalogue', label: 'Our Products' },
-  { to: '/distributors', label: 'Distributors' },
-  { to: '/portal/register', label: 'Client Registration' },
+  { to: '/about-us', label: 'About us' },
+  { to: '/distributor-packages', label: 'Distribution' },
   { to: '/become-distributor', label: 'Become Distributor', highlight: true },
 ]
 
@@ -1581,37 +1579,38 @@ function DistributorPackagesPage() {
         </div>
       </div>
 
-      {/* BOUTIQUE TIER */}
+      {/* B2B CLIENT CARD */}
       <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #f0c4d0', backgroundColor: '#fdf5f7' }}>
         <div className="px-6 py-4" style={{ borderBottom: '1px solid #f0c4d0', backgroundColor: '#fdf0f4' }}>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#d4185a' }}>Entry Tier</p>
-          <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#1a1a1a' }}>BOUTIQUE — The Foundation</h2>
-          <p className="mt-1 text-sm" style={{ color: '#a01850' }}>Launch with confidence. The smartest entry point for localized distribution with everything you need to move product and build a client base instantly.</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#d4185a' }}>Immediate Access</p>
+          <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#1a1a1a' }}>B2B — Professionals &amp; Salons</h2>
+          <p className="mt-1 text-sm" style={{ color: '#a01850' }}>Register free and start ordering today. No approval process, no waiting — your account is active the moment you sign up.</p>
         </div>
         <div>
           <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #e8a8b8' }}>
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>Market Focus</p>
-            <p className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>Localized Distribution</p>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>Who It's For</p>
+            <p className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>Nail salons, beauty studios &amp; professional technicians</p>
           </div>
           <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #e8a8b8' }}>
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>Product Spectrum</p>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>What You Get</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d4185a' }} />Top 120 Core Shades</li>
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d4185a' }} />200 SKUs — Builder Systems, Brushes &amp; Essentials</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d4185a' }} />Full catalogue — 1,000+ shades &amp; 200+ SKUs</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d4185a' }} />B2B wholesale pricing from day one</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d4185a' }} />HEMA-free, EU-certified formulas</li>
             </ul>
           </div>
           <div className="flex items-start gap-4 px-6 py-4">
-            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>Support Package</p>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#9a3a58', borderRight: '2px solid #e8a8b8', paddingRight: '1rem' }}>Access</p>
             <ul className="space-y-1.5">
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />Digital Brand Assets</li>
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />Viral Social Media Content</li>
-              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />EU Regulatory Support</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />Instant — no approval required</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />Online ordering &amp; order tracking</li>
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#e8a0b4' }} />WhatsApp support included</li>
             </ul>
           </div>
         </div>
         <div className="px-6 py-4" style={{ borderTop: '1px solid #f0c4d0', backgroundColor: '#fdf0f4' }}>
-          <NavLink to="/become-distributor" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Request Boutique Tier Pricing ?
+          <NavLink to="/portal/register" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
+            Register Free &rarr;
           </NavLink>
         </div>
       </article>
@@ -2109,7 +2108,7 @@ function formatSubcategoryDisplayName(subcategoryName = '', categoryName = '') {
   
   // Packages
   if (normalized === 'STUDIO ELITE') return 'Studio Elite'
-  if (normalized === 'BOUTIQUE') return 'Boutique'
+  if (normalized === 'BOUTIQUE') return 'B2B Salon'
   if (normalized === 'PROFESSIONAL') return 'Professional'
   if (normalized === 'AUTHORITY') return 'Authority'
   
@@ -3632,8 +3631,8 @@ function FullCataloguePage() {
 
       {/* STICKY CHAPTER JUMP NAV */}
       {!isLoading && !errorMessage && sections.length > 0 && (
-        <div className="sticky top-0 z-30 left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen border-b border-white/10 bg-[#111111]/95 backdrop-blur-sm">
-          <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-4 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-8">
+        <div className="sticky top-0 z-30 -mx-3 border-b border-white/10 bg-[#111111]/95 backdrop-blur-sm md:-mx-6">
+          <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-6">
             {[
               { label: 'Colours', anchor: 'catalogue-section-colours' },
               { label: 'Bases & Tops', anchor: 'catalogue-section-essentials' },
@@ -3676,18 +3675,16 @@ function FullCataloguePage() {
           <div id={CATALOGUE_RESULTS_ANCHOR_ID} className="scroll-mt-28" />
 
           {/* GUEST CONVERSION BANNER */}
-          <div className="mx-auto max-w-6xl px-4 sm:px-8 pt-4 pb-1">
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-fuchsia-200 bg-fuchsia-50 px-4 py-2.5">
-              <p className="text-xs text-fuchsia-800">
-                <span className="font-semibold">You&rsquo;re browsing as a guest.</span>{' '}Register free for B2B wholesale pricing and ordering.
-              </p>
-              <NavLink
-                to="/portal/register"
-                className="shrink-0 rounded-lg bg-fuchsia-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-fuchsia-500"
-              >
-                Register Free &rarr;
-              </NavLink>
-            </div>
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-fuchsia-200 bg-fuchsia-50 px-4 py-2.5">
+            <p className="text-xs text-fuchsia-800">
+              <span className="font-semibold">You&rsquo;re browsing as a guest.</span>{' '}Register free for B2B wholesale pricing and ordering.
+            </p>
+            <NavLink
+              to="/portal/register"
+              className="shrink-0 rounded-lg bg-fuchsia-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-fuchsia-500"
+            >
+              Register Free &rarr;
+            </NavLink>
           </div>
 
           {/* GLOBAL SEARCH BAR */}
@@ -4499,27 +4496,8 @@ function pickHomepageMedia(items = []) {
 
 function Nav({ onOpenContactModal }) {
   return (
-    <nav className="hidden gap-2 md:flex items-center">
-      <NavLink
-        to="/portal/login?portal=b2b"
-        className={({ isActive }) =>
-          `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
-            isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
-          }`
-        }
-      >
-        B2B Login
-      </NavLink>
-      <NavLink
-        to="/portal/login?portal=distributor"
-        className={({ isActive }) =>
-          `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
-            isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
-          }`
-        }
-      >
-        Distributor Login
-      </NavLink>
+    <nav className="hidden gap-1 md:flex items-center">
+      {/* Content links */}
       {navItems.map((item) => {
         if (item.isContactAction) {
           return (
@@ -4527,26 +4505,25 @@ function Nav({ onOpenContactModal }) {
               key={item.to}
               type="button"
               onClick={onOpenContactModal}
-              className="rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] !text-white/90 transition duration-300 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
+              className="rounded-lg px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] !text-white/75 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
             >
               {item.label}
             </button>
           )
         }
-
         return (
           <NavLink
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
               item.highlight
-                ? `rounded-lg border px-4 py-2 text-sm font-bold uppercase tracking-[0.06em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
+                ? `rounded-lg border px-3 py-2 text-sm font-bold uppercase tracking-[0.06em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 ${
                     isActive
                       ? 'border-fuchsia-400 bg-fuchsia-600 !text-white shadow-[0_0_12px_rgba(212,55,144,0.55)]'
-                      : 'border-fuchsia-500 bg-fuchsia-600 !text-white shadow-[0_0_8px_rgba(212,55,144,0.35)] hover:bg-fuchsia-500 hover:shadow-[0_0_14px_rgba(212,55,144,0.6)]'
+                      : 'border-fuchsia-500/60 !text-white/80 hover:bg-white/10 hover:!text-white'
                   }`
-                : `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
-                    isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
+                : `rounded-lg px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+                    isActive ? 'bg-white/15 !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
                   }`
             }
           >
@@ -4554,6 +4531,33 @@ function Nav({ onOpenContactModal }) {
           </NavLink>
         )
       })}
+
+      {/* Divider */}
+      <span className="mx-1.5 h-5 w-px bg-white/20" aria-hidden="true" />
+
+      {/* Primary CTA — visible, actionable */}
+      <NavLink
+        to="/portal/register"
+        className={({ isActive }) =>
+          `rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-bold uppercase tracking-[0.06em] text-white shadow-[0_0_8px_rgba(212,55,144,0.45)] transition duration-300 hover:bg-fuchsia-500 hover:shadow-[0_0_14px_rgba(212,55,144,0.65)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 ${
+            isActive ? 'shadow-[0_0_14px_rgba(212,55,144,0.7)]' : ''
+          }`
+        }
+      >
+        Register Free
+      </NavLink>
+
+      {/* Sign In — compact, for returning users */}
+      <NavLink
+        to="/portal/login"
+        className={({ isActive }) =>
+          `rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+            isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/80 hover:border-white/50 hover:bg-white/10 hover:!text-white'
+          }`
+        }
+      >
+        Sign In
+      </NavLink>
     </nav>
   )
 }
@@ -4610,28 +4614,28 @@ function MobileNav({ onOpenContactModal }) {
 
         {/* Nav links */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+          {/* Quick-action CTAs at the top */}
           <NavLink
-            to="/portal/login?portal=b2b"
+            to="/portal/register"
+            onClick={() => setOpen(false)}
+            className="block rounded-lg bg-fuchsia-600 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.06em] text-white shadow-[0_0_8px_rgba(212,55,144,0.4)] transition duration-200 hover:bg-fuchsia-500"
+          >
+            Register Free &rarr;
+          </NavLink>
+          <NavLink
+            to="/portal/login"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
-              `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
-                isActive ? 'bg-fuchsia-600 !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
+              `block rounded-lg border border-white/25 px-4 py-3 text-center text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+                isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/75 hover:border-white/40 hover:bg-white/10 hover:!text-white'
               }`
             }
           >
-            B2B Login
+            Sign In
           </NavLink>
-          <NavLink
-            to="/portal/login?portal=distributor"
-            onClick={() => setOpen(false)}
-            className={({ isActive }) =>
-              `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
-                isActive ? 'bg-fuchsia-600 !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
-              }`
-            }
-          >
-            Distributor Login
-          </NavLink>
+
+          <div className="my-2 border-t border-white/10" />
+
           {navItems.map((item) => {
             if (item.isContactAction) {
               return (
@@ -5272,12 +5276,21 @@ function HomePage({ onOpenContactModal }) {
               A DECADE OF PROFESSIONAL MASTERY. EU REGULATED. HEMA & TPO-FREE.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              <NavLink to="/become-distributor" className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
-                Apply as Distributor
-              </NavLink>
-              <NavLink to="/portal/register" className="rounded-lg border-2 border-white bg-white px-4 py-2 text-sm font-semibold text-fuchsia-700 transition duration-300 hover:bg-white/90">
+              <NavLink to="/portal/register" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_16px_rgba(212,55,144,0.55)] transition duration-300 hover:bg-fuchsia-500">
                 Register Free &rarr;
               </NavLink>
+              <NavLink to="/become-distributor" className="rounded-lg border-2 border-white/80 px-5 py-2.5 text-sm font-semibold text-white/90 transition duration-300 hover:border-white hover:text-white">
+                Become a Distributor
+              </NavLink>
+            </div>
+            {/* Trust bar */}
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5">
+              {['1,000+ shades', 'HEMA-free', 'EU certified', '30+ countries'].map((badge) => (
+                <span key={badge} className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/70">
+                  <span className="h-1 w-1 rounded-full bg-fuchsia-400" aria-hidden="true" />
+                  {badge}
+                </span>
+              ))}
             </div>
           </div>
 
@@ -5442,14 +5455,14 @@ function HomePage({ onOpenContactModal }) {
       </InfoCard>
 
       <div className="rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-5 sm:p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Wholesale Distribution</p>
-        <h2 className="mt-1 text-xl font-extrabold uppercase tracking-[0.08em] text-white">Distributor Packages</h2>
-        <p className="mt-2 text-sm text-white/80">Three structured entry tiers — choose the scale that matches your market ambition.</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Wholesale Access</p>
+        <h2 className="mt-1 text-xl font-extrabold uppercase tracking-[0.08em] text-white">B2B &amp; Distribution</h2>
+        <p className="mt-2 text-sm text-white/80">Direct B2B access for salons, plus two distributor tiers for regional and country-level distribution.</p>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
           {[
-            { name: 'BOUTIQUE', tagline: 'Localized market entry', skus: '200+', shades: '120 core shades', badge: 'Entry' },
-            { name: 'PROFESSIONAL', tagline: 'Regional growth', skus: '250+', shades: '180 core shades', badge: 'Growth' },
+            { name: 'B2B', tagline: 'Immediate access — professionals & salons', skus: '200+', shades: '1,000+ shades', badge: 'No Approval' },
+            { name: 'PROFESSIONAL', tagline: 'Regional distribution', skus: '250+', shades: '180 core shades', badge: 'Growth' },
             { name: 'AUTHORITY', tagline: 'Territory dominance', skus: '500+', shades: 'Full portfolio', badge: 'Elite' },
           ].map((tier) => (
             <div key={tier.name} className="rounded-xl border border-white/15 bg-white/5 p-4">
@@ -5467,7 +5480,7 @@ function HomePage({ onOpenContactModal }) {
         </div>
 
         <NavLink to="/distributor-packages" className="mt-5 inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
-          View Full Package Details
+          View Distribution Options
         </NavLink>
         <p className="mt-4 border-t border-white/15 pt-4 text-xs text-white/55">
           Not a distributor?{' '}
@@ -15030,9 +15043,21 @@ function App() {
 
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Contact</p>
-            <p className="mt-2">Phone: {PROFORMA_LEEUKOPF_PHONE}</p>
-            <p className="mt-1">Email: {CONTACT_INBOX_EMAIL}</p>
-            <p className="mt-1">Orders: {B2B_EMAIL}</p>
+            <a href={`tel:${String(PROFORMA_LEEUKOPF_PHONE || '').replace(/[\s()]/g, '')}`} className="mt-2 block transition hover:text-fuchsia-300">{PROFORMA_LEEUKOPF_PHONE}</a>
+            <a href={`mailto:${CONTACT_INBOX_EMAIL}`} className="mt-1 block transition hover:text-fuchsia-300">{CONTACT_INBOX_EMAIL}</a>
+            <a href={`mailto:${B2B_EMAIL}`} className="mt-1 block transition hover:text-fuchsia-300">Orders: {B2B_EMAIL}</a>
+            <a
+              href={SUPPORT_WHATSAPP_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 inline-flex items-center gap-1.5 text-green-400 transition hover:text-green-300"
+            >
+              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.570-.347z"/>
+                <path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.522 5.836L.057 23.928a.5.5 0 00.608.593l6.358-1.43A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-4.985-1.356l-.357-.213-3.704.833.886-3.576-.233-.369A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
+              </svg>
+              WhatsApp Support
+            </a>
           </div>
 
           <div>
@@ -15081,20 +15106,20 @@ function App() {
         <p className="border-t border-white/15 pt-3 text-white/55">— 2026 GEL.IT.UP by GIUP®</p>
       </footer>
 
-      {/* Floating social + back-to-top */}
-      <div className="fixed bottom-6 right-3 z-50 flex flex-col items-center gap-2 md:right-4">
-        {FOOTER_SOCIAL_LINKS.filter(s => ['tiktok','instagram','facebook'].includes(s.key)).map((social) => (
-          <a
-            key={social.key}
-            href={social.href}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={social.label}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-xl transition duration-300 hover:border-fuchsia-500 hover:bg-fuchsia-600 hover:text-white"
-          >
-            <FooterSocialIcon platform={social.key} />
-          </a>
-        ))}
+      {/* Floating WhatsApp + back-to-top */}
+      <div className="fixed bottom-6 right-3 z-50 flex flex-col items-end gap-2 md:right-4">
+        <a
+          href={SUPPORT_WHATSAPP_URL}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Chat on WhatsApp"
+          className="flex items-center gap-2 rounded-2xl bg-[#25D366] px-3 py-2.5 shadow-xl transition duration-300 hover:bg-[#1ebe59] active:scale-95"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="h-5 w-5 shrink-0 text-white">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          <span className="text-sm font-semibold text-white">WhatsApp</span>
+        </a>
         <button
           type="button"
           aria-label="Back to top"
