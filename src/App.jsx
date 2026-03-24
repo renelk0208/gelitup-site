@@ -3580,9 +3580,13 @@ function FullCataloguePage() {
                           <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
                           <p className="break-words text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
                         </div>
+                        <p className="mt-1.5 flex items-center gap-1 text-[10px] text-black/38">
+                          <svg viewBox="0 0 16 16" fill="currentColor" className="h-3 w-3 shrink-0" aria-hidden="true"><path fillRule="evenodd" d="M8 1a3.5 3.5 0 0 0-3.5 3.5V6H4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-.5V4.5A3.5 3.5 0 0 0 8 1Zm2 5V4.5a2 2 0 1 0-4 0V6h4Z" clipRule="evenodd" /></svg>
+                          Register for wholesale price
+                        </p>
                         <div className="mt-2 flex items-center">
                           <NavLink
-                            to="/portal/login?mode=create-password"
+                            to="/portal/register"
                             className="ml-auto inline-flex min-h-10 items-center rounded-[10px] bg-fuchsia-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500"
                           >
                             Buy Now
@@ -3597,8 +3601,15 @@ function FullCataloguePage() {
               <div style={{ height: bottomSpacerHeight }} />
             </div>
 
-            <div className="mt-2 text-xs text-black/55">
-              Showing {filteredItems.length} catalogue items. Use Buy Now to sign in or create an account and start purchasing.
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-3 text-xs text-black/55">
+              <span>Showing {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''}</span>
+              <NavLink
+                to="/portal/register"
+                className="inline-flex items-center gap-1 rounded-lg border border-fuchsia-500/40 bg-fuchsia-50 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 transition hover:bg-fuchsia-100"
+              >
+                <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" /></svg>
+                Register to purchase
+              </NavLink>
             </div>
           </>
         )}
@@ -3619,6 +3630,35 @@ function FullCataloguePage() {
         </div>
       </div>
 
+      {/* STICKY CHAPTER JUMP NAV */}
+      {!isLoading && !errorMessage && sections.length > 0 && (
+        <div className="sticky top-0 z-30 left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen border-b border-white/10 bg-[#111111]/95 backdrop-blur-sm">
+          <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-4 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-8">
+            {[
+              { label: 'Colours', anchor: 'catalogue-section-colours' },
+              { label: 'Bases & Tops', anchor: 'catalogue-section-essentials' },
+              { label: 'Builder Systems', anchor: 'catalogue-section-builders' },
+              { label: 'Tools', anchor: 'catalogue-section-tools' },
+              { label: 'Nail Art', anchor: 'catalogue-section-nail-art' },
+              { label: 'Consumables', anchor: 'catalogue-section-consumables' },
+              { label: 'Nail Care', anchor: 'catalogue-section-nail-hand-foot' },
+            ].map((item) => (
+              <button
+                key={item.anchor}
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById(item.anchor)
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }}
+                className="shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/60 transition hover:bg-white/10 hover:text-white"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {isLoading && (
         <div className="rounded-2xl border border-black/10 bg-white p-5 text-sm text-black/65">
           Loading catalogue...
@@ -3634,6 +3674,21 @@ function FullCataloguePage() {
       {!isLoading && !errorMessage && sections.length > 0 && (
         <>
           <div id={CATALOGUE_RESULTS_ANCHOR_ID} className="scroll-mt-28" />
+
+          {/* GUEST CONVERSION BANNER */}
+          <div className="mx-auto max-w-6xl px-4 sm:px-8 pt-4 pb-1">
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-fuchsia-200 bg-fuchsia-50 px-4 py-2.5">
+              <p className="text-xs text-fuchsia-800">
+                <span className="font-semibold">You&rsquo;re browsing as a guest.</span>{' '}Register free for B2B wholesale pricing and ordering.
+              </p>
+              <NavLink
+                to="/portal/register"
+                className="shrink-0 rounded-lg bg-fuchsia-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-fuchsia-500"
+              >
+                Register Free &rarr;
+              </NavLink>
+            </div>
+          </div>
 
           {/* GLOBAL SEARCH BAR */}
           <div className="mx-auto max-w-6xl px-4 sm:px-8 py-4">
@@ -4158,15 +4213,17 @@ function FullCataloguePage() {
                         {/* Prev */}
                         <button
                           type="button"
+                          aria-label="Previous page"
                           onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-xl text-white transition hover:bg-black/75"
-                        >—</button>
+                          className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"
+                        ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
                         {/* Next */}
                         <button
                           type="button"
+                          aria-label="Next page"
                           onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-xl text-white transition hover:bg-black/75"
-                        >—</button>
+                          className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"
+                        ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg></button>
 
                         {/* Dot indicators */}
                         <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
@@ -4234,9 +4291,9 @@ function FullCataloguePage() {
             <img src={lightboxUrl} alt="" className="max-h-[85vh] max-w-[85vw] rounded-xl object-contain shadow-2xl" />
             <button
               onClick={() => setLightboxUrl(null)}
-              className="absolute -right-3 -top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white text-lg font-bold text-slate-800 shadow-lg hover:bg-slate-100"
-              aria-label="Close"
-            >—</button>
+              className="absolute -right-3 -top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-800 shadow-lg transition hover:bg-slate-100"
+              aria-label="Close image"
+            ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
           </div>
         </div>
       )}
@@ -4443,6 +4500,26 @@ function pickHomepageMedia(items = []) {
 function Nav({ onOpenContactModal }) {
   return (
     <nav className="hidden gap-2 md:flex items-center">
+      <NavLink
+        to="/portal/login?portal=b2b"
+        className={({ isActive }) =>
+          `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
+            isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
+          }`
+        }
+      >
+        B2B Login
+      </NavLink>
+      <NavLink
+        to="/portal/login?portal=distributor"
+        className={({ isActive }) =>
+          `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
+            isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
+          }`
+        }
+      >
+        Distributor Login
+      </NavLink>
       {navItems.map((item) => {
         if (item.isContactAction) {
           return (
@@ -4477,26 +4554,6 @@ function Nav({ onOpenContactModal }) {
           </NavLink>
         )
       })}
-      <NavLink
-        to="/portal/login?portal=b2b"
-        className={({ isActive }) =>
-          `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
-            isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
-          }`
-        }
-      >
-        B2B Login
-      </NavLink>
-      <NavLink
-        to="/portal/login?portal=distributor"
-        className={({ isActive }) =>
-          `rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] ${
-            isActive ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.45)]' : '!text-white/90 hover:bg-white/10 hover:!text-white active:bg-fuchsia-600 active:!text-white'
-          }`
-        }
-      >
-        Distributor Login
-      </NavLink>
     </nav>
   )
 }
@@ -4553,6 +4610,28 @@ function MobileNav({ onOpenContactModal }) {
 
         {/* Nav links */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+          <NavLink
+            to="/portal/login?portal=b2b"
+            onClick={() => setOpen(false)}
+            className={({ isActive }) =>
+              `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+                isActive ? 'bg-fuchsia-600 !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
+              }`
+            }
+          >
+            B2B Login
+          </NavLink>
+          <NavLink
+            to="/portal/login?portal=distributor"
+            onClick={() => setOpen(false)}
+            className={({ isActive }) =>
+              `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+                isActive ? 'bg-fuchsia-600 !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
+              }`
+            }
+          >
+            Distributor Login
+          </NavLink>
           {navItems.map((item) => {
             if (item.isContactAction) {
               return (
@@ -4589,28 +4668,6 @@ function MobileNav({ onOpenContactModal }) {
               </NavLink>
             )
           })}
-          <NavLink
-            to="/portal/login?portal=b2b"
-            onClick={() => setOpen(false)}
-            className={({ isActive }) =>
-              `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
-                isActive ? 'bg-fuchsia-600 !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
-              }`
-            }
-          >
-            B2B Login
-          </NavLink>
-          <NavLink
-            to="/portal/login?portal=distributor"
-            onClick={() => setOpen(false)}
-            className={({ isActive }) =>
-              `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
-                isActive ? 'bg-fuchsia-600 !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
-              }`
-            }
-          >
-            Distributor Login
-          </NavLink>
         </nav>
       </div>
     </>
@@ -4955,6 +5012,119 @@ function InstagramFeedStrip() {
   )
 }
 
+function GoogleReviewsStrip() {
+  const [reviews, setReviews] = useState([])
+  const [summary, setSummary] = useState(null) // { rating, totalRatings, placeUrl }
+  const [status, setStatus] = useState('loading') // 'loading' | 'ok' | 'error'
+
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      try {
+        const res = await fetch('/.netlify/functions/google-reviews')
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data = await res.json()
+        if (mounted) {
+          const reviewList = data.reviews || []
+          setSummary({ rating: data.rating, totalRatings: data.totalRatings, placeUrl: data.placeUrl })
+          setReviews(reviewList)
+          setStatus(reviewList.length > 0 ? 'ok' : 'error')
+        }
+      }
+      catch {
+        if (mounted) setStatus('error')
+      }
+    }
+    load()
+    return () => { mounted = false }
+  }, [])
+
+  if (status === 'error' || (status !== 'loading' && reviews.length === 0)) return null
+
+  const StarRating = ({ value }) => {
+    const full = Math.floor(value)
+    const half = value - full >= 0.5
+    return (
+      <span className="flex items-center gap-0.5" aria-label={`${value} out of 5 stars`}>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <svg key={i} viewBox="0 0 20 20" className={`h-4 w-4 ${i < full ? 'fill-yellow-400' : (i === full && half ? 'fill-yellow-300' : 'fill-white/20')}`} xmlns="http://www.w3.org/2000/svg">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+        ))}
+      </span>
+    )
+  }
+
+  return (
+    <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#0F0F0F] py-8">
+      <div className="mx-auto max-w-6xl px-4 sm:px-8">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z" fill="#4285F4" />
+              <path d="M17.64 12.204c0-.379-.034-.743-.096-1.093H12v2.068h3.167a2.71 2.71 0 01-1.175 1.777v1.477h1.903c1.113-1.025 1.756-2.535 1.756-4.23z" fill="#4285F4" />
+              <path d="M12 18c1.59 0 2.923-.527 3.896-1.427l-1.902-1.477c-.528.354-1.203.563-1.994.563-1.535 0-2.835-1.037-3.299-2.43H6.735v1.526A5.997 5.997 0 0012 18z" fill="#34A853" />
+              <path d="M8.701 13.23A3.612 3.612 0 018.5 12c0-.425.073-.838.201-1.23V9.244H6.735A5.997 5.997 0 006 12c0 .967.232 1.88.735 2.756l1.966-1.526z" fill="#FBBC05" />
+              <path d="M12 8.14c.865 0 1.64.297 2.25.882l1.688-1.688C14.922 6.342 13.588 5.75 12 5.75A5.997 5.997 0 006.735 9.244l1.966 1.526C9.165 9.177 10.465 8.14 12 8.14z" fill="#EA4335" />
+            </svg>
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.1em] text-white">Google Reviews</p>
+              {summary && (
+                <div className="mt-0.5 flex items-center gap-2">
+                  <StarRating value={summary.rating} />
+                  <span className="text-xs text-white/60">{summary.rating?.toFixed(1)} · {summary.totalRatings?.toLocaleString()} reviews</span>
+                </div>
+              )}
+            </div>
+          </div>
+          {summary?.placeUrl && (
+            <a
+              href={summary.placeUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs font-semibold uppercase tracking-widest text-[#D43790] transition hover:text-fuchsia-300"
+            >
+              Write a Review →
+            </a>
+          )}
+        </div>
+
+        {status === 'loading'
+          ? (
+            <div className="flex gap-4 overflow-hidden">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-44 w-72 flex-shrink-0 animate-pulse rounded-xl bg-white/10" />
+              ))}
+            </div>
+            )
+          : (
+            <div className="scrollbar-hide -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:-mx-8 sm:px-8">
+              {reviews.map((review, i) => (
+                <div
+                  key={i}
+                  className="w-72 flex-shrink-0 snap-start rounded-xl border border-white/10 bg-white/5 p-4"
+                >
+                  <div className="flex items-center gap-2">
+                    {review.authorPhoto
+                      ? <img src={review.authorPhoto} alt={review.author} className="h-8 w-8 rounded-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
+                      : <div className="flex h-8 w-8 items-center justify-center rounded-full bg-fuchsia-600 text-xs font-bold text-white">{review.author?.charAt(0)}</div>
+                    }
+                    <div className="flex-1 overflow-hidden">
+                      <p className="truncate text-xs font-semibold text-white">{review.author}</p>
+                      <p className="text-[10px] text-white/40">{review.relativeTime}</p>
+                    </div>
+                  </div>
+                  <StarRating value={review.rating} />
+                  <p className="mt-2 line-clamp-5 text-xs leading-relaxed text-white/75">{review.text}</p>
+                </div>
+              ))}
+            </div>
+            )}
+      </div>
+    </div>
+  )
+}
+
 function HomePage({ onOpenContactModal }) {
   const [media, setMedia] = useState(() => ({
     heroImage: '/logo.png',
@@ -5105,8 +5275,8 @@ function HomePage({ onOpenContactModal }) {
               <NavLink to="/become-distributor" className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
                 Apply as Distributor
               </NavLink>
-              <NavLink to="/portal/login?mode=create-password" className="rounded-lg border-2 border-white bg-white px-4 py-2 text-sm font-semibold text-fuchsia-700 transition duration-300 hover:bg-white/90">
-                B2B Salon Purchases
+              <NavLink to="/portal/register" className="rounded-lg border-2 border-white bg-white px-4 py-2 text-sm font-semibold text-fuchsia-700 transition duration-300 hover:bg-white/90">
+                Register Free &rarr;
               </NavLink>
             </div>
           </div>
@@ -5214,7 +5384,15 @@ function HomePage({ onOpenContactModal }) {
               )}
 
               {homeNewsCarousel.length > 1 && (
-                <div className="mt-4 flex items-center justify-center gap-2">
+                <div className="mt-4 flex items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setActiveHomeNewsSlide((s) => (s - 1 + homeNewsCarousel.length) % homeNewsCarousel.length)}
+                    aria-label="Previous slide"
+                    className="flex h-7 w-7 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white/70 transition hover:border-white/50 hover:text-white"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+                  </button>
                   {homeNewsCarousel.map((item, index) => (
                     <button
                       key={`${item.id || item.imageUrl}-${index}`}
@@ -5224,6 +5402,14 @@ function HomePage({ onOpenContactModal }) {
                       className={`h-2.5 rounded-full transition ${index === safeHomeNewsIndex ? 'w-7 bg-[#D43790]' : 'w-2.5 bg-white/35 hover:bg-white/55'}`}
                     />
                   ))}
+                  <button
+                    type="button"
+                    onClick={() => setActiveHomeNewsSlide((s) => (s + 1) % homeNewsCarousel.length)}
+                    aria-label="Next slide"
+                    className="flex h-7 w-7 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white/70 transition hover:border-white/50 hover:text-white"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
+                  </button>
                 </div>
               )}
             </div>
@@ -5255,22 +5441,44 @@ function HomePage({ onOpenContactModal }) {
         )}
       </InfoCard>
 
-      <InfoCard id="certifications" title="Certifications & Compliance">
-        <ul className="mt-3 space-y-2 text-sm text-slate-600">
-          <li>— <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="text-fuchsia-700 hover:underline">Leaping Bunny certified cruelty-free</a> standards for in-house cosmetic and personal care products.</li>
-          <li>— EU regulation alignment and GMP (Good Manufacturing Practices) commitment.</li>
-          <li>— Professionals-only commercial policy to protect quality and industry standards.</li>
-        </ul>
-      </InfoCard>
+      <div className="rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-5 sm:p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Wholesale Distribution</p>
+        <h2 className="mt-1 text-xl font-extrabold uppercase tracking-[0.08em] text-white">Distributor Packages</h2>
+        <p className="mt-2 text-sm text-white/80">Three structured entry tiers — choose the scale that matches your market ambition.</p>
 
-      <InfoCard title="DISTRIBUTOR PACKAGES" tone="dark">
-        <p>
-          TRUSTED B2B INVENTORY SYSTEMS. VERIFIED DATABASE. STRUCTURED SCALE-UP.
-        </p>
-        <NavLink to="/distributor-packages" className="mt-4 inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
-          View Distribution Options
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          {[
+            { name: 'BOUTIQUE', tagline: 'Localized market entry', skus: '200+', shades: '120 core shades', badge: 'Entry' },
+            { name: 'PROFESSIONAL', tagline: 'Regional growth', skus: '250+', shades: '180 core shades', badge: 'Growth' },
+            { name: 'AUTHORITY', tagline: 'Territory dominance', skus: '500+', shades: 'Full portfolio', badge: 'Elite' },
+          ].map((tier) => (
+            <div key={tier.name} className="rounded-xl border border-white/15 bg-white/5 p-4">
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-sm font-extrabold uppercase tracking-[0.08em] text-white">{tier.name}</p>
+                <span className="rounded-full border border-[#D43790]/50 bg-[#D43790]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#D43790]">{tier.badge}</span>
+              </div>
+              <p className="mt-1 text-xs text-white/55">{tier.tagline}</p>
+              <div className="mt-3 space-y-1 text-xs text-white/80">
+                <p>— {tier.shades}</p>
+                <p>— {tier.skus} total SKUs</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <NavLink to="/distributor-packages" className="mt-5 inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
+          View Full Package Details
         </NavLink>
-      </InfoCard>
+        <p className="mt-4 border-t border-white/15 pt-4 text-xs text-white/55">
+          Not a distributor?{' '}
+          <NavLink to="/portal/register" className="font-semibold text-fuchsia-400 hover:text-fuchsia-300 hover:underline">
+            B2B salon clients register free &rarr;
+          </NavLink>
+        </p>
+      </div>
+
+      <GoogleReviewsStrip />
+      <InstagramFeedStrip />
 
     </section>
   )
@@ -5561,70 +5769,28 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
   }, [isCreatePasswordMode, location.search])
 
   return (
-    <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
-      <div className="bg-slate-900 p-8 text-white">
-        <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
-          {portalType === 'distributor' ? 'GEL.IT.UP Distribution' : 'GEL.IT.UP Trade'}
-        </p>
-        <h2 className="heading-on-dark mt-3 text-3xl font-bold">
-          {portalType === 'distributor' ? 'Distributor Portal' : 'B2B Client Access'}
+    <section className="mx-auto max-w-sm">
+      {/* Header */}
+      <div className="rounded-t-2xl bg-[#111111] px-8 py-7 text-center">
+        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/40">GEL.IT.UP by GIUP®</p>
+        <h2 className="mt-2 text-xl font-extrabold uppercase tracking-[0.08em] text-white">
+          {isCreatePasswordMode ? 'Create Password' : portalType === 'distributor' ? 'Distributor Portal' : 'B2B Portal'}
         </h2>
-        <p className="mt-4 text-sm text-slate-300">
-          {portalType === 'distributor'
-            ? 'Access your distributor dashboard, exclusive tier pricing, and dedicated support.'
-            : 'Access your ordering portal, real-time stock, and locked pro-pricing.'}
-        </p>
-        <ul className="mt-6 space-y-2 text-sm text-slate-300">
-          {portalType === 'distributor' ? (
-            <>
-              <li>— Territory and tier overview</li>
-              <li>— Distributor-exclusive pricing</li>
-              <li>— Dedicated distributor support</li>
-            </>
-          ) : (
-            <>
-              <li>— Real-time account overview</li>
-              <li>— Fast reorder and order intake tracking</li>
-              <li>— Allocated B2B pricing</li>
-            </>
-          )}
-        </ul>
       </div>
 
-      <div className="p-8">
-        <h3 className="text-xl font-semibold text-slate-900">{isCreatePasswordMode ? 'Create Password' : 'Sign In'}</h3>
-        <div className="mt-2 text-xs text-slate-600">
+      {/* Form card */}
+      <div className="rounded-b-2xl border border-t-0 border-slate-200 bg-white px-8 py-7">
+        {/* Mode/register sub-link */}
+        <p className="mb-5 text-center text-xs text-slate-500">
           {isCreatePasswordMode
-            ? (
-              <>
-                Returning client?{' '}
-                <NavLink
-                  to={prefilledEmail ? `/portal/login?portal=${portalType}&email=${encodeURIComponent(prefilledEmail)}` : `/portal/login?portal=${portalType}`}
-                  className="font-semibold text-slate-900 hover:underline"
-                >
-                  Sign in
-                </NavLink>
-              </>
-            )
+            ? <>Returning client?{' '}<NavLink to={prefilledEmail ? `/portal/login?portal=${portalType}&email=${encodeURIComponent(prefilledEmail)}` : `/portal/login?portal=${portalType}`} className="font-semibold text-slate-800 hover:underline">Sign in</NavLink></>
             : portalType === 'distributor'
-            ? (
-              <>
-                Want to become a distributor?{' '}
-                <NavLink to="/become-distributor" className="font-semibold text-slate-900 hover:underline">
-                  Apply here
-                </NavLink>
-              </>
-            )
-            : (
-              <>
-                New B2B client?{' '}
-                <NavLink to="/portal/register" className="font-semibold text-slate-900 hover:underline">
-                  Register here
-                </NavLink>
-              </>
-            )}
-        </div>
-        <form autoComplete="on" className="mt-5 space-y-4" onSubmit={async (event) => {
+              ? <>No account?{' '}<NavLink to="/become-distributor" className="font-semibold text-slate-800 hover:underline">Apply here</NavLink></>
+              : <>New client?{' '}<NavLink to="/portal/register" className="font-semibold text-slate-800 hover:underline">Register</NavLink></>
+          }
+        </p>
+
+        <form autoComplete="on" className="space-y-3" onSubmit={async (event) => {
           event.preventDefault()
           setIsSubmitting(true)
           setErrorMessage('')
@@ -5697,7 +5863,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           navigate('/portal/dashboard/overview')
         }}>
           <label className="block text-sm font-medium text-slate-700">
-            Business Email
+            Email
             <input
               id="portal-login-email"
               name="email"
@@ -5710,7 +5876,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
                 setErrorMessage('')
                 setInfoMessage('')
               }}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none ring-fuchsia-500/20 transition focus:border-fuchsia-400 focus:ring"
               placeholder="you@company.com"
               readOnly={Boolean(prefilledEmail)}
             />
@@ -5729,8 +5895,8 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
                 setErrorMessage('')
                 setInfoMessage('')
               }}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-              placeholder="Enter your password"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none ring-fuchsia-500/20 transition focus:border-fuchsia-400 focus:ring"
+              placeholder={isCreatePasswordMode ? 'Minimum 8 characters' : 'Your password'}
             />
           </label>
 
@@ -5749,33 +5915,25 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
                   setErrorMessage('')
                   setInfoMessage('')
                 }}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                placeholder="Confirm your password"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none ring-fuchsia-500/20 transition focus:border-fuchsia-400 focus:ring"
+                placeholder="Repeat your password"
               />
             </label>
           )}
 
-          <label className="flex items-center gap-2 text-xs text-slate-700">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(event) => setRememberMe(event.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20"
-            />
-            Remember me
-          </label>
-
-          <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
-            {isSubmitting ? (isCreatePasswordMode ? 'Creating password...' : 'Signing in...') : (isCreatePasswordMode ? 'Create Password & Continue' : 'Enter Professional Access')}
+          <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-[#111111] px-4 py-3 text-sm font-bold text-white transition hover:bg-black disabled:opacity-60">
+            {isSubmitting ? (isCreatePasswordMode ? 'Creating password...' : 'Signing in...') : (isCreatePasswordMode ? 'Create Password & Continue' : 'Sign In')}
           </button>
 
           {!isCreatePasswordMode && (
-            <NavLink
-              to={email ? `/portal/forgot-password?email=${encodeURIComponent(email)}` : '/portal/forgot-password'}
-              className="block w-full rounded-lg border-2 border-fuchsia-200 bg-fuchsia-50 py-2.5 text-center text-sm font-bold text-fuchsia-700 transition-colors hover:border-fuchsia-400 hover:bg-fuchsia-100"
-            >
-              Forgot password? Reset it here →
-            </NavLink>
+            <p className="text-center text-xs text-slate-500">
+              <NavLink
+                to={email ? `/portal/forgot-password?email=${encodeURIComponent(email)}` : '/portal/forgot-password'}
+                className="hover:text-slate-800 hover:underline"
+              >
+                Forgot password?
+              </NavLink>
+            </p>
           )}
         </form>
 
@@ -5785,7 +5943,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           </p>
         )}
 
-        {errorMessage && <p className="mt-2 text-xs text-rose-600">{errorMessage}</p>}
+        {errorMessage && <p className="mt-3 text-xs text-rose-600">{errorMessage}</p>}
         {infoMessage === 'confirm-email' && (
           <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-center">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
@@ -5796,7 +5954,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
             <p className="text-sm font-bold text-emerald-800">Check your inbox!</p>
             <p className="mt-1 text-xs text-emerald-700">
               A confirmation email has been sent to <strong>{email}</strong>.<br />
-              Click the link in that email to confirm your account, then come back here to sign in with your new password.
+              Click the link to confirm your account, then sign in.
             </p>
             <NavLink
               to={email ? `/portal/login?email=${encodeURIComponent(email)}` : '/portal/login'}
@@ -5807,22 +5965,22 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           </div>
         )}
         {infoMessage && infoMessage !== 'confirm-email' && <p className="mt-2 text-xs text-emerald-700">{infoMessage}</p>}
-        {showDebugTrace && debugTrace && <p className="mt-2 text-xs text-amber-700">Debug trace: {debugTrace}</p>}
+        {showDebugTrace && debugTrace && <p className="mt-2 text-xs text-amber-700">Debug: {debugTrace}</p>}
 
-        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs sm:p-4">
-          <p className="leading-relaxed text-slate-600">
-            For questions or issues with the portal, contact{' '}
-            <a href={`mailto:${B2B_EMAIL}`} className="font-medium text-slate-700 hover:text-slate-900">
-              {B2B_EMAIL}
-            </a>
-            .
-          </p>
-          <p className="mt-2 text-slate-600">
-            Distributor onboarding only:{' '}
-            <NavLink to="/become-distributor" className="font-semibold text-slate-900 hover:underline">
-              Apply now
-            </NavLink>
-          </p>
+        {/* WhatsApp help */}
+        <div className="mt-5 border-t border-slate-100 pt-4">
+          <a
+            href={SUPPORT_WHATSAPP_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center justify-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2.5 text-sm font-semibold text-green-700 transition hover:bg-green-100"
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-green-500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.570-.347z" />
+              <path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.522 5.836L.057 23.928a.5.5 0 00.608.593l6.358-1.43A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-4.985-1.356l-.357-.213-3.704.833.886-3.576-.233-.369A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z" />
+            </svg>
+            Need help? Chat on WhatsApp
+          </a>
         </div>
       </div>
     </section>
@@ -6113,18 +6271,57 @@ function PortalRegister({ onRegister }) {
 
   return (
     <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
-      <div className="bg-slate-900 p-8 text-white">
-        <p className="text-xs uppercase tracking-[0.2em] text-slate-300">GEL.IT.UP</p>
+      <div className="bg-[#111111] p-8 text-white">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-400">GEL.IT.UP by GIUP®</p>
         <h2 className="heading-on-dark mt-3 text-3xl font-bold">
-          {isOnlineBuyerFlow ? 'Create an Account' : 'Trade Registration'}
+          {isDistributorFlow ? 'Distribution Application' : 'Trade Registration'}
         </h2>
-        <p className="mt-4 text-sm text-slate-300">
-          {isOnlineBuyerFlow
-            ? 'Register as an online buyer to browse our catalogue and place orders. You will receive a confirmation email to verify your address.'
-            : isDistributorFlow
-              ? 'Apply to become a GEL.IT.UP distributor. Your application will be reviewed by our team and you will be notified by email once approved.'
-              : 'Submit your B2B client details to register. You can set your password and log in immediately — no approval required.'}
+        <p className="mt-3 text-sm text-slate-300">
+          {isDistributorFlow
+            ? 'Apply to become a GEL.IT.UP distributor. Your application will be reviewed and you will be notified by email once approved.'
+            : 'Register your B2B account. No approval needed — you can set your password and log in immediately.'}
         </p>
+        <ul className="mt-6 space-y-3">
+          {isDistributorFlow ? (
+            <>
+              <li className="flex items-start gap-2.5 text-sm text-slate-300">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
+                Exclusive regional or country distribution rights
+              </li>
+              <li className="flex items-start gap-2.5 text-sm text-slate-300">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
+                Full catalogue access with distributor pricing
+              </li>
+              <li className="flex items-start gap-2.5 text-sm text-slate-300">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
+                Co-marketing tools, training &amp; ongoing support
+              </li>
+              <li className="flex items-start gap-2.5 text-sm text-slate-300">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
+                Review within 1–2 business days
+              </li>
+            </>
+          ) : (
+            <>
+              <li className="flex items-start gap-2.5 text-sm text-slate-300">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
+                Instant access — no waiting for approval
+              </li>
+              <li className="flex items-start gap-2.5 text-sm text-slate-300">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
+                Wholesale pricing on 200+ HEMA-free products
+              </li>
+              <li className="flex items-start gap-2.5 text-sm text-slate-300">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
+                Place orders and track shipments from your dashboard
+              </li>
+              <li className="flex items-start gap-2.5 text-sm text-slate-300">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
+                EU-certified, dermatologist-tested formulas
+              </li>
+            </>
+          )}
+        </ul>
       </div>
 
       <div className="p-8">
@@ -6278,26 +6475,6 @@ function PortalRegister({ onRegister }) {
           setSuccessMessage(result.message || 'Application submitted.')
         }}>
           <div className="grid gap-4 md:grid-cols-2">
-            <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-              Application Service
-              <select
-                required
-                value={application.applicationType}
-                onChange={(event) => {
-                  const nextType = event.target.value
-                  setApplication((current) => ({
-                    ...current,
-                    applicationType: nextType,
-                    customerType: nextType === 'distributor' ? 'company' : current.customerType,
-                  }))
-                }}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-              >
-                <option value="distributor">Distributor Application</option>
-                <option value="b2b_order">B2B Order Form</option>
-              </select>
-            </label>
-
             {isDistributorFlow && (
               <label className="block text-sm font-medium text-slate-700 md:col-span-2">
                 Distribution Tier
@@ -6426,81 +6603,9 @@ function PortalRegister({ onRegister }) {
                 placeholder="https://company.com"
               />
             </label>
-            <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-              Shipping Type
-              <select
-                required
-                value={application.shippingType}
-                onChange={(event) => setField('shippingType', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-              >
-                <option value="road">Road</option>
-                <option value="air">Air</option>
-                <option value="self_arranged">Self-arranged</option>
-              </select>
-            </label>
-
-            <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-              Invoice Address Line 1
-              <input
-                type="text"
-                required
-                value={application.invoiceAddressLine1}
-                onChange={(event) => setField('invoiceAddressLine1', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                placeholder="Street, number"
-              />
-            </label>
-
-            <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-              Invoice Address Line 2 (optional)
-              <input
-                type="text"
-                value={application.invoiceAddressLine2}
-                onChange={(event) => setField('invoiceAddressLine2', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                placeholder="Suite, floor"
-              />
-            </label>
-
+            {/* Country — always shown */}
             <label className="block text-sm font-medium text-slate-700">
-              Invoice Area / City
-              <input
-                type="text"
-                required
-                value={application.invoiceArea}
-                onChange={(event) => setField('invoiceArea', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                placeholder="Athens"
-              />
-            </label>
-
-            <label className="block text-sm font-medium text-slate-700">
-              Invoice Region / State
-              <input
-                type="text"
-                required
-                value={application.invoiceRegion}
-                onChange={(event) => setField('invoiceRegion', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                placeholder="Attica"
-              />
-            </label>
-
-            <label className="block text-sm font-medium text-slate-700">
-              Invoice Postal Code
-              <input
-                type="text"
-                required
-                value={application.invoicePostalCode}
-                onChange={(event) => setField('invoicePostalCode', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                placeholder="10431"
-              />
-            </label>
-
-            <label className="block text-sm font-medium text-slate-700">
-              Invoice Country
+              Country
               <select
                 required
                 value={application.invoiceCountry}
@@ -6509,13 +6614,11 @@ function PortalRegister({ onRegister }) {
                   setApplication((current) => ({
                     ...current,
                     invoiceCountry: nextCountry,
+                    shippingCountry: nextCountry,
                     phone: withCountryDialCode(current.phone, nextCountry),
-                    shippingPhone: current.shippingSameAsInvoice
-                      ? withCountryDialCode(current.shippingPhone || current.phone, nextCountry)
-                      : current.shippingPhone,
                   }))
                 }}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
               >
                 <option value="">Select country</option>
                 {COUNTRY_OPTIONS.map((country) => (
@@ -6524,117 +6627,195 @@ function PortalRegister({ onRegister }) {
               </select>
             </label>
 
-            <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-              <span className="inline-flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={application.shippingSameAsInvoice}
-                  onChange={(event) => setField('shippingSameAsInvoice', event.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20"
-                />
-                Shipping details same as invoice
-              </span>
-            </label>
-
-            {!application.shippingSameAsInvoice && (
+            {/* Full address fields — distributor applications only */}
+            {isDistributorFlow && (
               <>
-                <label className="block text-sm font-medium text-slate-700">
-                  Shipping Contact Name
-                  <input
-                    type="text"
-                    required={!application.shippingSameAsInvoice}
-                    value={application.shippingName}
-                    onChange={(event) => setField('shippingName', event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                    placeholder="Warehouse receiver"
-                  />
-                </label>
-                <label className="block text-sm font-medium text-slate-700">
-                  Shipping Phone
-                  <input
-                    type="text"
-                    required={!application.shippingSameAsInvoice}
-                    value={application.shippingPhone}
-                    onChange={(event) => setField('shippingPhone', event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                    placeholder="+30 210 0000000"
-                  />
-                </label>
                 <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-                  Shipping Address Line 1
+                  Shipping Type
+                  <select
+                    required
+                    value={application.shippingType}
+                    onChange={(event) => setField('shippingType', event.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                  >
+                    <option value="road">Road</option>
+                    <option value="air">Air</option>
+                    <option value="self_arranged">Self-arranged</option>
+                  </select>
+                </label>
+
+                <label className="block text-sm font-medium text-slate-700 md:col-span-2">
+                  Invoice Address Line 1
                   <input
                     type="text"
-                    required={!application.shippingSameAsInvoice}
-                    value={application.shippingAddressLine1}
-                    onChange={(event) => setField('shippingAddressLine1', event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                    required
+                    value={application.invoiceAddressLine1}
+                    onChange={(event) => setField('invoiceAddressLine1', event.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
                     placeholder="Street, number"
                   />
                 </label>
+
                 <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-                  Shipping Address Line 2 (optional)
+                  Invoice Address Line 2 (optional)
                   <input
                     type="text"
-                    value={application.shippingAddressLine2}
-                    onChange={(event) => setField('shippingAddressLine2', event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                    value={application.invoiceAddressLine2}
+                    onChange={(event) => setField('invoiceAddressLine2', event.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
                     placeholder="Suite, floor"
                   />
                 </label>
+
                 <label className="block text-sm font-medium text-slate-700">
-                  Shipping Area / City
+                  Invoice Area / City
                   <input
                     type="text"
-                    required={!application.shippingSameAsInvoice}
-                    value={application.shippingArea}
-                    onChange={(event) => setField('shippingArea', event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                    required
+                    value={application.invoiceArea}
+                    onChange={(event) => setField('invoiceArea', event.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
                     placeholder="Athens"
                   />
                 </label>
+
                 <label className="block text-sm font-medium text-slate-700">
-                  Shipping Region / State
+                  Invoice Region / State
                   <input
                     type="text"
-                    required={!application.shippingSameAsInvoice}
-                    value={application.shippingRegion}
-                    onChange={(event) => setField('shippingRegion', event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                    required
+                    value={application.invoiceRegion}
+                    onChange={(event) => setField('invoiceRegion', event.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
                     placeholder="Attica"
                   />
                 </label>
+
                 <label className="block text-sm font-medium text-slate-700">
-                  Shipping Postal Code
+                  Invoice Postal Code
                   <input
                     type="text"
-                    required={!application.shippingSameAsInvoice}
-                    value={application.shippingPostalCode}
-                    onChange={(event) => setField('shippingPostalCode', event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                    required
+                    value={application.invoicePostalCode}
+                    onChange={(event) => setField('invoicePostalCode', event.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
                     placeholder="10431"
                   />
                 </label>
-                <label className="block text-sm font-medium text-slate-700">
-                  Shipping Country
-                  <select
-                    required={!application.shippingSameAsInvoice}
-                    value={application.shippingCountry}
-                    onChange={(event) => {
-                      const nextCountry = event.target.value
-                      setApplication((current) => ({
-                        ...current,
-                        shippingCountry: nextCountry,
-                        shippingPhone: withCountryDialCode(current.shippingPhone, nextCountry),
-                      }))
-                    }}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                  >
-                    <option value="">Select country</option>
-                    {COUNTRY_OPTIONS.map((country) => (
-                      <option key={country} value={country}>{country}</option>
-                    ))}
-                  </select>
+
+                <label className="block text-sm font-medium text-slate-700 md:col-span-2">
+                  <span className="inline-flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={application.shippingSameAsInvoice}
+                      onChange={(event) => setField('shippingSameAsInvoice', event.target.checked)}
+                      className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20"
+                    />
+                    Shipping details same as invoice
+                  </span>
                 </label>
+
+                {!application.shippingSameAsInvoice && (
+                  <>
+                    <label className="block text-sm font-medium text-slate-700">
+                      Shipping Contact Name
+                      <input
+                        type="text"
+                        required={!application.shippingSameAsInvoice}
+                        value={application.shippingName}
+                        onChange={(event) => setField('shippingName', event.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                        placeholder="Warehouse receiver"
+                      />
+                    </label>
+                    <label className="block text-sm font-medium text-slate-700">
+                      Shipping Phone
+                      <input
+                        type="text"
+                        required={!application.shippingSameAsInvoice}
+                        value={application.shippingPhone}
+                        onChange={(event) => setField('shippingPhone', event.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                        placeholder="+30 210 0000000"
+                      />
+                    </label>
+                    <label className="block text-sm font-medium text-slate-700 md:col-span-2">
+                      Shipping Address Line 1
+                      <input
+                        type="text"
+                        required={!application.shippingSameAsInvoice}
+                        value={application.shippingAddressLine1}
+                        onChange={(event) => setField('shippingAddressLine1', event.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                        placeholder="Street, number"
+                      />
+                    </label>
+                    <label className="block text-sm font-medium text-slate-700 md:col-span-2">
+                      Shipping Address Line 2 (optional)
+                      <input
+                        type="text"
+                        value={application.shippingAddressLine2}
+                        onChange={(event) => setField('shippingAddressLine2', event.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                        placeholder="Suite, floor"
+                      />
+                    </label>
+                    <label className="block text-sm font-medium text-slate-700">
+                      Shipping Area / City
+                      <input
+                        type="text"
+                        required={!application.shippingSameAsInvoice}
+                        value={application.shippingArea}
+                        onChange={(event) => setField('shippingArea', event.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                        placeholder="Athens"
+                      />
+                    </label>
+                    <label className="block text-sm font-medium text-slate-700">
+                      Shipping Region / State
+                      <input
+                        type="text"
+                        required={!application.shippingSameAsInvoice}
+                        value={application.shippingRegion}
+                        onChange={(event) => setField('shippingRegion', event.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                        placeholder="Attica"
+                      />
+                    </label>
+                    <label className="block text-sm font-medium text-slate-700">
+                      Shipping Postal Code
+                      <input
+                        type="text"
+                        required={!application.shippingSameAsInvoice}
+                        value={application.shippingPostalCode}
+                        onChange={(event) => setField('shippingPostalCode', event.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                        placeholder="10431"
+                      />
+                    </label>
+                    <label className="block text-sm font-medium text-slate-700">
+                      Shipping Country
+                      <select
+                        required={!application.shippingSameAsInvoice}
+                        value={application.shippingCountry}
+                        onChange={(event) => {
+                          const nextCountry = event.target.value
+                          setApplication((current) => ({
+                            ...current,
+                            shippingCountry: nextCountry,
+                            shippingPhone: withCountryDialCode(current.shippingPhone, nextCountry),
+                          }))
+                        }}
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                      >
+                        <option value="">Select country</option>
+                        {COUNTRY_OPTIONS.map((country) => (
+                          <option key={country} value={country}>{country}</option>
+                        ))}
+                      </select>
+                    </label>
+                  </>
+                )}
               </>
             )}
 
@@ -6713,11 +6894,25 @@ function PortalRegister({ onRegister }) {
 
         {errorMessage && <p className="mt-2 text-xs text-rose-600">{errorMessage}</p>}
 
-        <div className="mt-4 text-xs text-slate-600">
-          Already approved?{' '}
-          <NavLink to="/portal/login" className="font-semibold text-slate-900 hover:underline">
-            Sign in
-          </NavLink>
+        <div className="mt-5 border-t border-slate-100 pt-4 flex items-center justify-between gap-4 flex-wrap">
+          <span className="text-xs text-slate-500">
+            Already have an account?{' '}
+            <NavLink to="/portal/login" className="font-semibold text-slate-700 hover:underline">
+              Sign in
+            </NavLink>
+          </span>
+          <a
+            href={SUPPORT_WHATSAPP_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-700 transition hover:bg-green-100"
+          >
+            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-green-500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.570-.347z" />
+              <path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.522 5.836L.057 23.928a.5.5 0 00.608.593l6.358-1.43A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-4.985-1.356l-.357-.213-3.704.833.886-3.576-.233-.369A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z" />
+            </svg>
+            Need help?
+          </a>
         </div>
       </div>
 
@@ -7081,6 +7276,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [liveUpsellRecommendation, setLiveUpsellRecommendation] = useState(null)
   const [dismissedSmartSuggestion, setDismissedSmartSuggestion] = useState(false)
   const [showClientValidation, setShowClientValidation] = useState(false)
+  const [profileSaveStatus, setProfileSaveStatus] = useState(null) // null | 'saving' | 'saved' | 'error'
   const [packagePreviewVisibleCount, setPackagePreviewVisibleCount] = useState(15)
   const [clientProfile, setClientProfile] = useState(() => {
     try {
@@ -10147,10 +10343,54 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <button onClick={submitOrder} disabled={isSubmittingOrder} className={`${actionButtonPrimaryClass} disabled:cursor-not-allowed disabled:border-fuchsia-300 disabled:bg-fuchsia-300`}>
               {isSubmittingOrder ? 'Submitting...' : `Place Order (${totalUnits} units)`}
             </button>
+            <button
+              type="button"
+              disabled={profileSaveStatus === 'saving'}
+              onClick={async () => {
+                if (!hasSupabaseConfig || !supabase) return
+                setProfileSaveStatus('saving')
+                try {
+                  await supabase.auth.updateUser({
+                    data: {
+                      company_name: clientProfile.customerName,
+                      customer_type: clientProfile.customerType,
+                      vat_number: clientProfile.vatNumber,
+                      contact_phone: clientProfile.contactPhone,
+                      contact_email: clientProfile.contactEmail,
+                      shipping_type: clientProfile.shippingType,
+                      invoice_address_line1: clientProfile.invoiceAddressLine1,
+                      invoice_address_line2: clientProfile.invoiceAddressLine2,
+                      invoice_area: clientProfile.invoiceArea,
+                      invoice_region: clientProfile.invoiceRegion,
+                      invoice_country: clientProfile.invoiceCountry,
+                      invoice_postal_code: clientProfile.invoicePostalCode,
+                      shipping_same_as_invoice: clientProfile.shippingSameAsInvoice,
+                      shipping_name: clientProfile.shippingName,
+                      shipping_phone: clientProfile.shippingPhone,
+                      shipping_address_line1: clientProfile.shippingAddressLine1,
+                      shipping_address_line2: clientProfile.shippingAddressLine2,
+                      shipping_area: clientProfile.shippingArea,
+                      shipping_region: clientProfile.shippingRegion,
+                      shipping_country: clientProfile.shippingCountry,
+                      shipping_postal_code: clientProfile.shippingPostalCode,
+                    },
+                  })
+                  setProfileSaveStatus('saved')
+                  window.setTimeout(() => setProfileSaveStatus(null), 3000)
+                } catch {
+                  setProfileSaveStatus('error')
+                }
+              }}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            >
+              {profileSaveStatus === 'saving' ? 'Saving…' : '💾 Save to My Account'}
+            </button>
             <button onClick={() => navigate('/portal/dashboard/products')} className={actionButtonSecondaryClass}>
               ← Back to Review
             </button>
           </div>
+          {profileSaveStatus === 'saved' && <p className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">Profile saved to your account — it will pre-fill automatically next time.</p>}
+          {profileSaveStatus === 'error' && <p className="mt-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">Could not save — your details are still stored locally in this browser.</p>}
           {checkoutMessage && <p className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">{checkoutMessage}</p>}
           {checkoutError && <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{checkoutError}</p>}
         </div>
@@ -11158,6 +11398,203 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   )
 }
 
+function SupportModule() {
+  const [openFaq, setOpenFaq] = useState(null)
+  const [inquiryForm, setInquiryForm] = useState({ subject: '', message: '', orderRef: '' })
+  const [inquiryStatus, setInquiryStatus] = useState(null) // 'sending' | 'sent' | 'error'
+  const [userEmail, setUserEmail] = useState('')
+  const [recentOrders, setRecentOrders] = useState([])
+  const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
+
+  useEffect(() => {
+    if (!hasSupabaseConfig || !supabase) return
+    supabase.auth.getUser().then(async ({ data }) => {
+      const email = data?.user?.email
+      if (!email) return
+      setUserEmail(email)
+      const { data: rows } = await supabase
+        .from(ordersTable)
+        .select('id, created_at, status, total_units')
+        .eq('customer_email', email)
+        .order('created_at', { ascending: false })
+        .limit(5)
+      setRecentOrders(rows || [])
+    })
+  }, [ordersTable])
+
+  const faqs = [
+    {
+      q: 'How long does delivery take?',
+      a: 'Road freight within Europe typically takes 3–7 business days. Air freight is 2–4 business days depending on destination. Self-arranged shipments follow your carrier\'s schedule.',
+    },
+    {
+      q: 'When will I receive my invoice?',
+      a: 'Invoices are issued by Thermitek Ltd within 1–2 business days of order confirmation. You will receive it by email and it will appear as "Invoice Ready" in your My Orders tab.',
+    },
+    {
+      q: 'Can I cancel or modify my order?',
+      a: 'Orders can be cancelled from the My Orders tab before they reach "Shipped" status. To modify quantities, please contact us directly via WhatsApp or email as soon as possible after placing the order.',
+    },
+    {
+      q: 'What payment methods do you accept?',
+      a: 'We accept bank transfer (SEPA/SWIFT), Revolut business, Stripe, and PayPal. Payment details are shown on your invoice. Full payment is required before fulfilment.',
+    },
+    {
+      q: 'What if an item is out of stock?',
+      a: 'We will notify you by email immediately if any item in your order is unavailable. You can choose to wait for restock, substitute, or receive a partial shipment.',
+    },
+    {
+      q: 'How do I become an authorised distributor?',
+      a: 'Apply via the Become a Distributor page. Our team reviews all applications within 3–5 business days and will contact you to discuss territory and tier.',
+    },
+  ]
+
+  const sendInquiry = async () => {
+    if (!inquiryForm.message.trim()) return
+    setInquiryStatus('sending')
+    try {
+      await sendPortalEmailNotification({
+        to: ORDER_INBOX_EMAIL,
+        subject: `Portal Support Inquiry — ${inquiryForm.subject || 'General'} — ${userEmail}`,
+        html: `
+          <p><strong>Support inquiry from portal client:</strong> ${userEmail}</p>
+          ${inquiryForm.orderRef ? `<p><strong>Order reference:</strong> ${inquiryForm.orderRef}</p>` : ''}
+          <p><strong>Subject:</strong> ${inquiryForm.subject || 'General'}</p>
+          <p style="white-space:pre-wrap">${inquiryForm.message}</p>
+        `,
+      })
+      setInquiryStatus('sent')
+      setInquiryForm({ subject: '', message: '', orderRef: '' })
+    } catch {
+      setInquiryStatus('error')
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Contact channels */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+        <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-lg font-semibold text-transparent">Support & Contact</h3>
+        <p className="mt-1 text-sm text-slate-500">Reach us through your preferred channel. WhatsApp is the fastest for urgent matters.</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <a
+            href={`tel:${String(PROFORMA_LEEUKOPF_PHONE || '').replace(/\s+/g, '')}`}
+            className="flex flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50 p-4 hover:border-fuchsia-200 hover:bg-fuchsia-50 transition"
+          >
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Phone</span>
+            <span className="text-sm font-semibold text-slate-900">{PROFORMA_LEEUKOPF_PHONE || '—'}</span>
+            <span className="text-xs text-slate-500">Mon–Fri 9:00–17:00 EET</span>
+          </a>
+          <a
+            href={SUPPORT_WHATSAPP_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="flex flex-col gap-1 rounded-xl border border-green-200 bg-green-50 p-4 hover:bg-green-100 transition"
+          >
+            <span className="text-xs font-semibold uppercase tracking-wide text-green-600">WhatsApp</span>
+            <span className="text-sm font-semibold text-slate-900">Chat with Us</span>
+            <span className="text-xs text-slate-500">Fastest response — usually under 2 hours</span>
+          </a>
+          <a
+            href={`mailto:${B2B_EMAIL}`}
+            className="flex flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50 p-4 hover:border-fuchsia-200 hover:bg-fuchsia-50 transition"
+          >
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Email</span>
+            <span className="text-sm font-semibold text-slate-900">{B2B_EMAIL}</span>
+            <span className="text-xs text-slate-500">Response within 1 business day</span>
+          </a>
+        </div>
+      </div>
+
+      {/* Send inquiry */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+        <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-lg font-semibold text-transparent">Send a Message</h3>
+        <p className="mt-1 text-sm text-slate-500">Use this form for non-urgent queries. We respond within 1 business day.</p>
+        <div className="mt-4 space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="text-xs text-slate-700">Subject
+              <input
+                type="text"
+                value={inquiryForm.subject}
+                onChange={(e) => setInquiryForm((f) => ({ ...f, subject: e.target.value }))}
+                placeholder="e.g. Delivery question"
+                className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800"
+              />
+            </label>
+            <label className="text-xs text-slate-700">Order Reference (optional)
+              {recentOrders.length > 0
+                ? (
+                    <select
+                      value={inquiryForm.orderRef}
+                      onChange={(e) => setInquiryForm((f) => ({ ...f, orderRef: e.target.value }))}
+                      className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800"
+                    >
+                      <option value="">No specific order</option>
+                      {recentOrders.map((o) => (
+                        <option key={o.id} value={`#${o.id}`}>Order #{o.id} — {new Date(o.created_at).toLocaleDateString()} — {o.total_units} units</option>
+                      ))}
+                    </select>
+                  )
+                : (
+                    <input
+                      type="text"
+                      value={inquiryForm.orderRef}
+                      onChange={(e) => setInquiryForm((f) => ({ ...f, orderRef: e.target.value }))}
+                      placeholder="Order #..."
+                      className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800"
+                    />
+                  )}
+            </label>
+          </div>
+          <label className="block text-xs text-slate-700">Message
+            <textarea
+              value={inquiryForm.message}
+              onChange={(e) => setInquiryForm((f) => ({ ...f, message: e.target.value }))}
+              rows={4}
+              placeholder="Describe your question or issue..."
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 resize-none"
+            />
+          </label>
+          {inquiryStatus === 'sent' && (
+            <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">Message sent — we'll be in touch within 1 business day.</p>
+          )}
+          {inquiryStatus === 'error' && (
+            <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">Failed to send — please email us directly at {B2B_EMAIL}.</p>
+          )}
+          <button
+            onClick={sendInquiry}
+            disabled={!inquiryForm.message.trim() || inquiryStatus === 'sending'}
+            className="rounded-lg bg-fuchsia-600 px-4 py-2 text-xs font-semibold text-white hover:bg-fuchsia-700 disabled:opacity-50"
+          >
+            {inquiryStatus === 'sending' ? 'Sending…' : 'Send Message'}
+          </button>
+        </div>
+      </div>
+
+      {/* FAQ */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+        <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-lg font-semibold text-transparent">Frequently Asked Questions</h3>
+        <div className="mt-4 divide-y divide-slate-100">
+          {faqs.map((faq, i) => (
+            <div key={i}>
+              <button
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                className="flex w-full items-center justify-between py-3 text-left text-sm font-medium text-slate-800 hover:text-fuchsia-700"
+              >
+                <span>{faq.q}</span>
+                <span className={`ml-4 flex-none text-slate-400 transition-transform ${openFaq === i ? 'rotate-180' : ''}`}>▾</span>
+              </button>
+              {openFaq === i && (
+                <p className="pb-4 text-sm text-slate-600 leading-relaxed">{faq.a}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function OrdersModule() {
   const navigate = useNavigate()
   const [orders, setOrders] = useState([])
@@ -11247,7 +11684,7 @@ function OrdersModule() {
 
       let { data, error } = await supabase
         .from(ordersTable)
-        .select('id, created_at, total_units, status, payment_status, items, customer_email, consignee_name, consignee_phone, shipping_address, zoho_salesorder_id, zoho_invoice_id, zoho_invoice_number, zoho_invoice_total')
+        .select('id, created_at, total_units, status, payment_status, items, customer_email, consignee_name, consignee_phone, shipping_address, zoho_salesorder_id, zoho_invoice_id, zoho_invoice_number, zoho_invoice_total, tracking_number, tracking_url')
         .eq('customer_email', email)
         .order('created_at', { ascending: false })
         .limit(100)
@@ -11323,39 +11760,8 @@ function OrdersModule() {
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
-        <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-lg font-semibold text-transparent">Support & Tracking</h3>
-        <p className="mt-1 text-sm text-slate-600">Track order submission/receipt status and contact support directly from this workspace.</p>
-        <div className="mt-3 grid gap-2 sm:grid-cols-3">
-          <a href={`tel:${String(PROFORMA_LEEUKOPF_PHONE || '').replace(/\s+/g, '')}`} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
-            <span className="font-semibold text-slate-900">Phone:</span>{' '}
-            {PROFORMA_LEEUKOPF_PHONE}
-          </a>
-          {SUPPORT_WHATSAPP_URL
-            ? (
-                <a href={SUPPORT_WHATSAPP_URL} target="_blank" rel="noreferrer" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
-                  <span className="font-semibold text-slate-900">WhatsApp:</span>{' '}
-                  Chat with Us
-                </a>
-              )
-            : (
-                <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                  <span className="font-semibold text-slate-900">WhatsApp:</span>{' '}
-                  Coming soon
-                </div>
-              )}
-          <a href={`mailto:${B2B_EMAIL}`} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
-            <span className="font-semibold text-slate-900">Email:</span>{' '}
-            {B2B_EMAIL}
-          </a>
-        </div>
-        <p className="mt-2 text-xs text-slate-500">Online help/support bot will be added in a future release.</p>
-      </div>
-
-      <div className="rounded-2xl border border-slate-200 bg-white p-6">
-        <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-lg font-semibold text-transparent">Submitted Orders</h3>
-        <p className="mt-1 text-xs text-slate-500">
-          Orders are stored in Supabase table: {ordersTable}. Invoicing is handled offline from {ORDER_INBOX_EMAIL}.
-        </p>
+        <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-lg font-semibold text-transparent">My Orders</h3>
+        <p className="mt-1 text-sm text-slate-600">Your full order history. Expand any order to see line items, or request a cancellation before it ships.</p>
       </div>
 
       {orders.some((o) => o.payment_status === 'invoice_ready') && (
@@ -11449,6 +11855,13 @@ function OrdersModule() {
                             : <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600 capitalize">{order.status || 'received'}</span>}
                       {order.zoho_invoice_number && (
                         <span className="text-xs text-slate-500">Invoice: {order.zoho_invoice_number}</span>
+                      )}
+                      {order.tracking_number && (
+                        order.tracking_url
+                          ? <a href={order.tracking_url} target="_blank" rel="noreferrer" className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-200">
+                              Track: {order.tracking_number}
+                            </a>
+                          : <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-700">Track: {order.tracking_number}</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
@@ -12332,6 +12745,26 @@ function PendingApplicationsModule() {
 }
 
 function BuyerPortal({ onLogout, userName, userEmail }) {
+  const [recentOrders, setRecentOrders] = useState([])
+  const [ordersLoading, setOrdersLoading] = useState(false)
+  const [expandedOrderId, setExpandedOrderId] = useState(null)
+  const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
+
+  useEffect(() => {
+    if (!hasSupabaseConfig || !supabase || !userEmail) return
+    setOrdersLoading(true)
+    supabase
+      .from(ordersTable)
+      .select('id, created_at, total_units, status, payment_status, items')
+      .eq('customer_email', userEmail)
+      .order('created_at', { ascending: false })
+      .limit(10)
+      .then(({ data }) => {
+        setRecentOrders(data || [])
+        setOrdersLoading(false)
+      })
+  }, [userEmail, ordersTable])
+
   return (
     <section className="mx-auto max-w-2xl space-y-6 py-10 px-4">
       <div className="rounded-2xl border border-slate-200 bg-white p-8">
@@ -12343,19 +12776,68 @@ function BuyerPortal({ onLogout, userName, userEmail }) {
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <NavLink
-            to="/catalogue"
+            to="/full-catalogue"
             className="rounded-lg bg-fuchsia-600 px-5 py-2 text-sm font-semibold text-white hover:bg-fuchsia-700"
           >
             Browse Catalogue
           </NavLink>
           <NavLink
-            to="/full-catalogue"
+            to="/distributor-packages"
             className="rounded-lg border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
           >
-            Shop Online
+            View Packages
           </NavLink>
         </div>
       </div>
+
+      {/* Recent orders */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Recent Orders</p>
+        {ordersLoading && <p className="mt-3 text-sm text-slate-500">Loading orders…</p>}
+        {!ordersLoading && recentOrders.length === 0 && (
+          <p className="mt-3 text-sm text-slate-500">No orders yet. Browse the catalogue to get started.</p>
+        )}
+        {!ordersLoading && recentOrders.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {recentOrders.map((order) => {
+              const isExpanded = expandedOrderId === order.id
+              const itemLines = Array.isArray(order.items) ? order.items.filter(i => typeof i === 'string') : []
+              return (
+                <div key={order.id} className="rounded-xl border border-slate-200 bg-slate-50">
+                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3 text-sm">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                      <span className="font-bold text-slate-900">#{order.id}</span>
+                      <span className="text-slate-500">{new Date(order.created_at).toLocaleDateString()}</span>
+                      <span className="text-slate-700">{order.total_units} units</span>
+                      {order.payment_status === 'invoice_ready'
+                        ? <span className="rounded-full bg-fuchsia-100 px-2 py-0.5 text-xs font-semibold text-fuchsia-700">Invoice Ready</span>
+                        : <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs text-slate-600 capitalize">{order.status || 'received'}</span>}
+                    </div>
+                    {itemLines.length > 0 && (
+                      <button
+                        onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
+                        className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                      >
+                        {isExpanded ? 'Hide' : `View Items (${itemLines.length})`}
+                      </button>
+                    )}
+                  </div>
+                  {isExpanded && itemLines.length > 0 && (
+                    <div className="border-t border-slate-200 px-4 pb-4 pt-3">
+                      <ul className="grid gap-1 sm:grid-cols-2">
+                        {itemLines.map((item, idx) => (
+                          <li key={idx} className="rounded-md bg-white px-3 py-1.5 text-xs text-slate-700 border border-slate-200">{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Account</p>
         <div className="mt-3 space-y-2 text-sm text-slate-600">
@@ -12363,12 +12845,17 @@ function BuyerPortal({ onLogout, userName, userEmail }) {
           <p><span className="font-medium text-slate-800">Email:</span> {userEmail}</p>
           <p><span className="font-medium text-slate-800">Account type:</span> Online Buyer</p>
         </div>
-        <button
-          onClick={onLogout}
-          className="mt-5 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-        >
-          Sign Out
-        </button>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <a href={`mailto:${B2B_EMAIL}`} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+            Contact Support
+          </a>
+          <button
+            onClick={onLogout}
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Sign Out
+          </button>
+        </div>
       </div>
     </section>
   )
@@ -12898,8 +13385,10 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
       <div className="space-y-4">
         {activeModule === 'products' || activeModule === 'catalog' || activeModule === 'profile' ? (
           <ProductsModule moduleView={activeModule} tier={effectiveTier} pricesAllocated={effectivePricesAllocated} />
-        ) : activeModule === 'orders' || activeModule === 'support' ? (
+        ) : activeModule === 'orders' ? (
           <OrdersModule />
+        ) : activeModule === 'support' ? (
+          <SupportModule />
         ) : (
           <>
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
@@ -14447,7 +14936,7 @@ function App() {
           <Route path="/products" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
-          <Route path="/admin/missing-images" element={<MissingImagesReport />} />
+          <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
