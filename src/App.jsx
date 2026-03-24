@@ -3365,17 +3365,17 @@ function FullCataloguePage() {
                 <button
                   key={`subcategory-${subcategory}`}
                   onClick={() => { setActiveSubcategory(subcategory); scrollToCategoryDetail() }}
-                  className="relative rounded-[12px] border px-3 py-1.5 text-xs font-semibold transition duration-300"
+                  className="relative rounded-full border px-4 py-2 text-xs font-semibold tracking-wide transition duration-200"
                   style={
                     isActive
-                      ? { background: accent.bg, color: accent.text, borderColor: accent.bg, boxShadow: `0 0 0 2px rgba(${accent.shadowRgb},0.25)` }
+                      ? { background: accent.bg, color: accent.text, borderColor: accent.bg, boxShadow: `0 0 0 3px rgba(${accent.shadowRgb},0.22)` }
                       : isSGP
-                        ? { borderColor: accent.bg + 'aa', background: accent.bg + '22', color: accent.bg }
-                        : { borderColor: 'rgba(74,74,74,0.35)', background: '#fff', color: 'rgba(0,0,0,0.75)' }
+                        ? { borderColor: accent.bg + 'cc', background: accent.bg + '18', color: accent.bg }
+                        : { borderColor: 'rgba(74,74,74,0.30)', background: '#f5f5f5', color: 'rgba(0,0,0,0.70)' }
                   }
                 >
                   {isSGP && !isActive && (
-                    <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full ring-2 ring-white" style={{ background: accent.bg }} />
+                    <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full ring-2 ring-white" style={{ background: accent.bg }} />
                   )}
                   {formatSubcategoryDisplayName(subcategory, activeCategory)}
                 </button>
@@ -3525,7 +3525,7 @@ function FullCataloguePage() {
                   }
 
                   return (
-                    <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:bg-[#E8E8E8] md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`} data-catalogue-item>
+                    <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`flex flex-col overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:bg-[#E8E8E8] md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`} data-catalogue-item>
                       <div className="flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52 md:h-60" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
                         <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full scale-[1.025] object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
                       </div>
@@ -3536,7 +3536,7 @@ function FullCataloguePage() {
                           ))}
                         </div>
                       )}
-                      <div className="border-t border-black/10 px-2.5 py-2">
+                      <div className="flex flex-1 flex-col border-t border-black/10 px-2.5 py-2">
                         <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                         <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                         <div className="mt-2 flex items-center gap-1">
@@ -3547,7 +3547,7 @@ function FullCataloguePage() {
                           <svg viewBox="0 0 16 16" fill="currentColor" className="h-3 w-3 shrink-0" aria-hidden="true"><path fillRule="evenodd" d="M8 1a3.5 3.5 0 0 0-3.5 3.5V6H4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-.5V4.5A3.5 3.5 0 0 0 8 1Zm2 5V4.5a2 2 0 1 0-4 0V6h4Z" clipRule="evenodd" /></svg>
                           Register for wholesale price
                         </p>
-                        <div className="mt-2 flex items-center">
+                        <div className="mt-auto pt-3 flex items-center">
                           <NavLink
                             to="/portal/register"
                             className="ml-auto inline-flex min-h-10 items-center rounded-[10px] bg-fuchsia-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500"
@@ -5627,8 +5627,8 @@ function PortalLanding() {
           <p className="mt-1.5 text-xs text-slate-500">Place wholesale orders, track intake status, receive shipment updates and proforma invoices.</p>
         </article>
         <article className="rounded-xl border border-slate-200 bg-white p-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-100">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5 text-indigo-600">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-fuchsia-100">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5 text-fuchsia-600">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
             </svg>
           </div>
@@ -6991,7 +6991,7 @@ function PortalRegister({ onRegister }) {
                 {!submittedProfile.isDistributor ? (
                   <NavLink
                     to={submittedProfile.email ? `/portal/login?mode=create-password&email=${encodeURIComponent(submittedProfile.email)}` : '/portal/login?mode=create-password'}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-fuchsia-200 transition hover:opacity-90"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-fuchsia-800 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-fuchsia-200 transition hover:opacity-90"
                   >
                     Set Password &amp; Sign In
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
@@ -7001,7 +7001,7 @@ function PortalRegister({ onRegister }) {
                 ) : (
                   <NavLink
                     to="/portal/login"
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-fuchsia-200 transition hover:opacity-90"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-fuchsia-800 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-fuchsia-200 transition hover:opacity-90"
                   >
                     Already approved? Sign in
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
@@ -10214,7 +10214,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-600">Step 3 of 3</p>
-              <h3 className="mt-0.5 bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-lg font-semibold text-transparent">My Information</h3>
+              <h3 className="mt-0.5 bg-gradient-to-r from-fuchsia-500 to-fuchsia-800 bg-clip-text text-lg font-semibold text-transparent">My Information</h3>
               <p className="mt-1 text-xs text-slate-500">Saved for future orders — fill in once, reuse every time.</p>
             </div>
             <button onClick={() => navigate('/portal/dashboard/products')} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
@@ -10601,7 +10601,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
       {/* Distributor tier identity banner */}
       {tier === 'authority' && (
-        <div className="rounded-2xl border border-violet-300 bg-gradient-to-r from-violet-700 to-indigo-700 p-4 text-white">
+        <div className="rounded-2xl border border-fuchsia-400 bg-gradient-to-r from-[#1a1a1a] to-[#3d0f22] p-4 text-white">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Country Distribution Authority</p>
@@ -10660,9 +10660,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className={`text-sm font-semibold ${
-            tier === 'authority' ? 'text-violet-700' :
+            tier === 'authority' ? 'text-fuchsia-700' :
             tier === 'professional' ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent' :
-            'bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent'
+            'bg-gradient-to-r from-fuchsia-600 to-fuchsia-800 bg-clip-text text-transparent'
           }`}>
             {tier === 'authority' ? '★ Authority Distributor Portal' : tier === 'professional' ? 'Professional Distributor Portal' : 'Distributor Portal'}
           </p>
@@ -12275,48 +12275,48 @@ function PendingApplicationsModule() {
   <tr><td align="center">
     <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(168,85,247,0.10);">
       <!-- HEADER -->
-      <tr><td style="background:linear-gradient(135deg,#a855f7 0%,#7c3aed 50%,#4f46e5 100%);padding:40px 48px 32px;text-align:center;">
+      <tr><td style="background:linear-gradient(135deg,#D43790 0%,#a8186e 50%,#7c1250 100%);padding:40px 48px 32px;text-align:center;">
         <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;">GEL.IT.UP by GIUP®</p>
         <h1 style="margin:0;font-size:28px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">You're Approved! ??</h1>
         <p style="margin:10px 0 0;font-size:15px;color:rgba(255,255,255,0.85);">Welcome to the GEL.IT.UP Distributor Family</p>
       </td></tr>
       <!-- BODY -->
       <tr><td style="padding:40px 48px;">
-        <p style="margin:0 0 8px;font-size:17px;font-weight:600;color:#1e1b4b;">Dear ${application.contact_name},</p>
-        <p style="margin:0 0 20px;font-size:15px;line-height:1.65;color:#374151;">We are thrilled to let you know that your application for <strong style="color:#7c3aed;">${application.company_name}</strong> has been <strong>approved</strong>. Welcome aboard — we are so excited to have you as part of the GEL.IT.UP distribution network!</p>
+        <p style="margin:0 0 8px;font-size:17px;font-weight:600;color:#1a1a1a;">Dear ${application.contact_name},</p>
+        <p style="margin:0 0 20px;font-size:15px;line-height:1.65;color:#374151;">We are thrilled to let you know that your application for <strong style="color:#D43790;">${application.company_name}</strong> has been <strong>approved</strong>. Welcome aboard — we are so excited to have you as part of the GEL.IT.UP distribution network!</p>
         <p style="margin:0 0 28px;font-size:15px;line-height:1.65;color:#374151;">Your exclusive distributor portal is ready and waiting. To get started, simply create your password using the button below — your email address is already prefilled for you.</p>
         <!-- CTA BUTTON -->
         <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:32px;">
           <tr><td align="center">
-            <a href="${createPasswordLink}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#a855f7,#7c3aed);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:50px;letter-spacing:0.3px;box-shadow:0 4px 14px rgba(124,58,237,0.35);">Create Password &amp; Enter Portal ?</a>
+            <a href="${createPasswordLink}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#D43790,#a8186e);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:50px;letter-spacing:0.3px;box-shadow:0 4px 14px rgba(212,55,144,0.35);">Create Password &amp; Enter Portal ✨</a>
           </td></tr>
         </table>
         <!-- STEPS -->
-        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#faf5ff;border-radius:12px;padding:0;margin-bottom:28px;">
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#fdf2f8;border-radius:12px;padding:0;margin-bottom:28px;">
           <tr><td style="padding:24px 28px;">
-            <p style="margin:0 0 14px;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7c3aed;">Getting Started — 3 Easy Steps</p>
+            <p style="margin:0 0 14px;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#D43790;">Getting Started — 3 Easy Steps</p>
             <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
               <tr>
-                <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#7c3aed;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">1</span></td>
+                <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#D43790;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">1</span></td>
                 <td style="padding-left:10px;padding-bottom:12px;font-size:14px;color:#374151;"><strong>Click the button above</strong> — your email is prefilled automatically.</td>
               </tr>
               <tr>
-                <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#7c3aed;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">2</span></td>
+                <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#D43790;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">2</span></td>
                 <td style="padding-left:10px;padding-bottom:12px;font-size:14px;color:#374151;"><strong>Create your password</strong>, confirm it, and tick <em>Remember me</em>.</td>
               </tr>
               <tr>
-                <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#7c3aed;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">3</span></td>
+                <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#D43790;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">3</span></td>
                 <td style="padding-left:10px;font-size:14px;color:#374151;"><strong>Log in</strong> to browse our full product catalogue and place wholesale orders.</td>
               </tr>
             </table>
           </td></tr>
         </table>
         <p style="margin:0 0 28px;font-size:15px;line-height:1.65;color:#374151;">We look forward to growing together and supporting your business with our premium gel polish collections. If you ever have questions, our team is always here for you.</p>
-        <p style="margin:0;font-size:15px;line-height:1.65;color:#374151;">With warmth &amp; excitement,<br/><strong style="color:#1e1b4b;">The GEL.IT.UP Distribution Team</strong></p>
+        <p style="margin:0;font-size:15px;line-height:1.65;color:#374151;">With warmth &amp; excitement,<br/><strong style="color:#D43790;">The GEL.IT.UP Distribution Team</strong></p>
       </td></tr>
       <!-- FOOTER -->
-      <tr><td style="background:#f3f0ff;padding:24px 48px;text-align:center;border-top:1px solid #ede9fe;">
-        <p style="margin:0 0 6px;font-size:12px;color:#6b7280;">Questions? Contact us at <a href="mailto:${B2B_EMAIL}" style="color:#7c3aed;text-decoration:none;font-weight:600;">${B2B_EMAIL}</a></p>
+      <tr><td style="background:#fdf2f8;padding:24px 48px;text-align:center;border-top:1px solid #fce7f3;">
+        <p style="margin:0 0 6px;font-size:12px;color:#6b7280;">Questions? Contact us at <a href="mailto:${B2B_EMAIL}" style="color:#D43790;text-decoration:none;font-weight:600;">${B2B_EMAIL}</a></p>
         <p style="margin:0;font-size:11px;color:#9ca3af;">GEL.IT.UP by GIUP® — Premium Gel Polish Distribution</p>
       </td></tr>
     </table>
