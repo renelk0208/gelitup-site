@@ -1667,21 +1667,40 @@ function ForAcademiesPage() {
     <section className="space-y-6">
 
       {/* HERO */}
-      <div className="relative overflow-hidden rounded-2xl bg-[#1a1a1a] p-7 sm:p-10" style={{ color: '#ffffff' }}>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#D43790' }}>GEL.IT.UP by GIUP® — For Nail Academies &amp; Training Schools</p>
-        <h1 className="heading-on-dark mt-3 text-3xl font-black leading-tight tracking-tight sm:text-5xl">
-          The Professional Nail Brand<br className="hidden sm:block" /> Built for Academies
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm sm:text-base" style={{ color: 'rgba(255,255,255,0.70)' }}>
-          EU-certified, HEMA-free, and structured for training volume. From intake consumables to student kits — professional products your students can trust from day one.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <NavLink to="/portal/register" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Register Your Academy
-          </NavLink>
-          <NavLink to="/full-catalogue" className="btn-cta-ghost-white inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Browse Product Catalogue
-          </NavLink>
+      <div className="w-full overflow-hidden rounded-2xl bg-black">
+        <div className="relative h-[60vh] min-h-[420px] w-full sm:h-[68vh]">
+          <img
+            src="/gelitup-media/images/hero-image-academies.png"
+            alt="Professional nail academy training"
+            className="h-full w-full object-cover object-center brightness-[0.72]"
+            loading="eager"
+            fetchPriority="high"
+          />
+          {/* Gradient overlays — vertical pull from bottom + left-side bias for text legibility */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
+          {/* Text content */}
+          <div className="absolute inset-0 flex flex-col justify-end px-7 pb-9 sm:px-12 sm:pb-12">
+            <div className="max-w-2xl">
+              <p className="hero-copy-shadow mb-2 text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#D43790' }}>
+                GEL.IT.UP by GIUP® — For Nail Academies &amp; Training Schools
+              </p>
+              <h1 className="hero-copy-shadow heading-on-dark mt-1 text-3xl font-black leading-tight tracking-tight sm:text-5xl">
+                The Professional Nail Brand<br className="hidden sm:block" /> Built for Academies
+              </h1>
+              <p className="hero-copy-shadow mt-3 max-w-xl text-sm leading-relaxed sm:text-base" style={{ color: 'rgba(255,255,255,0.82)' }}>
+                EU-certified, HEMA-free, and structured for training volume. From intake consumables to student kits — professional products your students can trust from day one.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <NavLink to="/portal/register" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
+                  Register Your Academy
+                </NavLink>
+                <NavLink to="/full-catalogue" className="btn-cta-ghost-white inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
+                  Browse Product Catalogue
+                </NavLink>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -5446,7 +5465,7 @@ function HomePage({ onOpenContactModal }) {
                 <NavLink to="/portal/register" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_16px_rgba(212,55,144,0.55)] transition duration-300 hover:bg-fuchsia-500">
                   Register Free &rarr;
                 </NavLink>
-                <NavLink to="/become-distributor" className="rounded-lg border-2 border-white/80 px-5 py-2.5 text-sm font-semibold text-white/90 transition duration-300 hover:border-white hover:text-white">
+                <NavLink to="/become-distributor" className="rounded-lg border-2 border-white bg-black/25 px-5 py-2.5 text-sm font-bold text-white shadow-[0_2px_12px_rgba(0,0,0,0.35)] transition duration-300 hover:bg-black/40">
                   Become a Distributor
                 </NavLink>
               </div>
