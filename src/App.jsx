@@ -92,7 +92,7 @@ const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
 const HOME_HERO_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
-const HOME_HERO_POSTER_URL = '/gelitup-media/images/home-page-hero-image-cloud-dancer.png'
+const HOME_HERO_POSTER_URL = '/gelitup-media/images/news/Spring%20Summer/NEWS%20Carousel/2600-1.jpg'
 const HOME_NEWS_CLOUD_VIDEO_URL = Math.floor(Date.now() / 86400000) % 2 === 0
   ? '/gelitup-media/videos/floating-clouds.mp4'
   : '/gelitup-media/videos/floating- clouds2.mp4'
@@ -5224,7 +5224,7 @@ function HomePage({ onOpenContactModal }) {
           <img
             src={HOME_HERO_POSTER_URL || media.heroImage}
             alt="GEL.IT.UP cinematic hero"
-            className="h-full w-full object-cover object-[50%_35%] brightness-[0.72] saturate-[0.85]"
+            className="h-full w-full object-cover object-[50%_35%]"
             loading="eager"
             onError={(event) => {
               event.currentTarget.src = media.heroImage || '/logo.png'
