@@ -872,6 +872,7 @@ function createFallbackProducts(count = 120) {
 
 const navItems = [
   { to: '/full-catalogue', label: 'Our Products' },
+  { to: '/for-academies', label: 'Academies' },
   { to: '/about-us', label: 'About us' },
   { to: '/distributor-packages', label: 'Distribution' },
 ]
@@ -1655,6 +1656,178 @@ function DistributorPackagesPage() {
           </NavLink>
         </div>
       </article>
+
+    </section>
+  )
+}
+
+
+function ForAcademiesPage() {
+  return (
+    <section className="space-y-6">
+
+      {/* HERO */}
+      <div className="relative overflow-hidden rounded-2xl bg-[#1a1a1a] p-7 sm:p-10" style={{ color: '#ffffff' }}>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#D43790' }}>GEL.IT.UP by GIUP® — For Nail Academies &amp; Training Schools</p>
+        <h1 className="heading-on-dark mt-3 text-3xl font-black leading-tight tracking-tight sm:text-5xl">
+          The Professional Nail Brand<br className="hidden sm:block" /> Built for Academies
+        </h1>
+        <p className="mt-3 max-w-2xl text-sm sm:text-base" style={{ color: 'rgba(255,255,255,0.70)' }}>
+          EU-certified, HEMA-free, and structured for training volume. From intake consumables to student kits — professional products your students can trust from day one.
+        </p>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <NavLink to="/portal/register" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
+            Register Your Academy
+          </NavLink>
+          <NavLink to="/full-catalogue" className="btn-cta-ghost-white inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
+            Browse Product Catalogue
+          </NavLink>
+        </div>
+      </div>
+
+      {/* TRUST PILLARS */}
+      <div className="rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-4 sm:p-6">
+        <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#D43790' }}>Why academies choose GEL.IT.UP</p>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <article className="rounded-xl border border-white/15 bg-black/20 p-4">
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+            </div>
+            <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em]" style={{ color: '#D43790' }}>EU CERTIFIED</p>
+            <p className="mt-2 text-sm leading-relaxed text-white">Every formula is CPNP Notified and EC 1223/2009 compliant. Full safety documentation available — exactly what your academy’s compliance obligations require.</p>
+          </article>
+          <article className="rounded-xl border border-white/15 bg-black/20 p-4">
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v8M8 9v5a4 4 0 008 0V9" /></svg>
+            </div>
+            <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em]" style={{ color: '#D43790' }}>HEMA-FREE</p>
+            <p className="mt-2 text-sm leading-relaxed text-white">HEMA-free and TPO-free across current production lines. Formulated for responsible use in training environments where students have repeated daily exposure.</p>
+          </article>
+          <article className="rounded-xl border border-white/15 bg-black/20 p-4">
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+            </div>
+            <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em]" style={{ color: '#D43790' }}>TRAINING VOLUME</p>
+            <p className="mt-2 text-sm leading-relaxed text-white">Structured for intake-cycle ordering. Consistent stock availability, flexible B2B pricing tiers, and no minimum order requirement for registered academy accounts.</p>
+          </article>
+          <article className="rounded-xl border border-white/15 bg-black/20 p-4">
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+            </div>
+            <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em]" style={{ color: '#D43790' }}>DEDICATED SUPPORT</p>
+            <p className="mt-2 text-sm leading-relaxed text-white">WhatsApp and Viber support, sample availability before you commit, and structured onboarding designed around your academy’s procurement cycle.</p>
+          </article>
+        </div>
+      </div>
+
+      {/* USE CASES */}
+      <div>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-black/50">What academies order from us</p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#D43790' }}>Training Consumables</p>
+            <h2 className="mt-1 text-base font-bold text-[#1a1a1a]">Classroom Supplies</h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">Base coats, top coats, gel polishes and builder systems ordered per intake. Consistent formulas so students learn on the same products they’ll use professionally.</p>
+          </article>
+          <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#D43790' }}>Student Starter Kits</p>
+            <h2 className="mt-1 text-base font-bold text-[#1a1a1a]">Curated Course Kits</h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">Pre-selected colour ranges and system kits packaged with course enrolment. Ordered in bulk, delivered ready for your students — no kit-building administration on your end.</p>
+          </article>
+          <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#D43790' }}>Resale &amp; Retail</p>
+            <h2 className="mt-1 text-base font-bold text-[#1a1a1a]">Graduate Retail Stock</h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">Graduates leave knowing the brand. Stock GEL.IT.UP products for post-course retail — a natural extension of the skills your students already trained with.</p>
+          </article>
+        </div>
+      </div>
+
+      {/* COMPLIANCE */}
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        <div className="border-b border-slate-200 bg-slate-50 px-6 py-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#D43790' }}>Compliance &amp; Safety Documentation</p>
+          <h2 className="mt-1 text-lg font-bold text-[#1a1a1a]">Every certificate your academy needs — ready on request</h2>
+        </div>
+        <div className="grid sm:grid-cols-2">
+          {[
+            { label: 'CPNP Notification', detail: 'Every formula officially notified under EU Cosmetics Regulation EC 1223/2009. Valid for professional sale and use across all EU member states.' },
+            { label: 'HEMA-Free & TPO-Free', detail: 'Third-party verified formulation certificates confirming absence of HEMA and TPO sensitisers across current production lines.' },
+            { label: 'ISO-Certified Manufacturing', detail: 'Manufactured in ISO-certified facilities with rigorous batch testing, hazard control, and documented quality assurance processes.' },
+            { label: 'Safety Data Sheets (SDS)', detail: 'SDS documents available for all products — required for in-academy use and supplied as standard to registered partners.' },
+          ].map(({ label, detail }) => (
+            <div key={label} className="flex items-start gap-3 border-b border-r border-slate-100 p-5 last:border-b-0 sm:[&:nth-child(even)]:border-r-0">
+              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-100 text-xs font-bold" style={{ color: '#D43790' }}>✓</span>
+              <div>
+                <p className="text-sm font-bold text-[#1a1a1a]">{label}</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{detail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* FAQ */}
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        <div className="border-b border-slate-200 px-6 py-4">
+          <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-[#1a1a1a]">Frequently Asked Questions</h2>
+        </div>
+        <div className="divide-y divide-slate-100">
+          {[
+            {
+              q: 'Can we order a sample kit before committing to a full order?',
+              a: 'Yes. Registered academy accounts can request sample packs before placing bulk orders. Contact us via WhatsApp or through your B2B dashboard to arrange a sample selection.',
+            },
+            {
+              q: 'Are your products safe for repeated daily use in a training environment?',
+              a: 'Yes. All products in current production are HEMA-free and TPO-free — the two most common sensitisers in gel products. We supply SDS documentation for all products on request.',
+            },
+            {
+              q: 'Do your products comply with EU cosmetics regulations?',
+              a: 'Yes. Every formula is CPNP Notified under EC 1223/2009 and fully compliant for sale and professional use across all EU member states.',
+            },
+            {
+              q: 'What are the minimum order quantities for academy accounts?',
+              a: 'No minimum order quantity is required for registered B2B accounts. Volume pricing tiers apply to larger orders, which your account manager can discuss with you directly.',
+            },
+            {
+              q: 'Can we incorporate GEL.IT.UP products into our course curriculum?',
+              a: 'Absolutely. We can provide product information, application guides, and technical details to support your course materials. Get in touch after registering your academy account.',
+            },
+          ].map(({ q, a }) => (
+            <div key={q} className="px-6 py-4">
+              <p className="text-sm font-semibold text-[#1a1a1a]">{q}</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div className="rounded-2xl p-5 sm:p-6 shadow-[0_4px_32px_rgba(212,55,144,0.35)]" style={{ background: 'linear-gradient(135deg, #f03988 0%, #D43790 45%, #8e1650 100%)' }}>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/75">Academy B2B Access</p>
+            <h2 className="mt-1 text-xl font-extrabold text-white">Register your academy for B2B access</h2>
+            <p className="mt-2 max-w-lg text-sm text-white/90">Free registration in under 2 minutes. Instant access to wholesale pricing, compliance documentation, and the full GEL.IT.UP product catalogue.</p>
+            <ul className="mt-3 space-y-1">
+              {[
+                '1,000+ professional shades',
+                'HEMA-free · EU certified · CPNP notified',
+                'No MOQ · Sample packs available',
+                'SDS &amp; compliance docs on request',
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-2 text-sm text-white/90">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white/70" />
+                  <span dangerouslySetInnerHTML={{ __html: item }} />
+                </li>
+              ))}
+            </ul>
+          </div>
+          <NavLink to="/portal/register" className="shrink-0 self-start rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#D43790] shadow-[0_2px_12px_rgba(0,0,0,0.18)] transition duration-300 hover:bg-fuchsia-50">
+            Register Free &rarr;
+          </NavLink>
+        </div>
+      </div>
 
     </section>
   )
@@ -5467,6 +5640,28 @@ function HomePage({ onOpenContactModal }) {
           </div>
           <NavLink to="/portal/register" className="shrink-0 self-start rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#D43790] shadow-[0_2px_12px_rgba(0,0,0,0.18)] transition duration-300 hover:bg-fuchsia-50">
             Register Free &rarr;
+          </NavLink>
+        </div>
+      </div>
+
+      {/* ACADEMY CTA CARD */}
+      <div className="overflow-hidden rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-5 sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">For Nail Academies</p>
+            <h2 className="mt-1 text-xl font-extrabold text-white">Do you run a nail academy or training school?</h2>
+            <p className="mt-2 max-w-lg text-sm text-white/80">EU-certified, HEMA-free products built for training volume. From classroom consumables to student kits — with compliance documentation included.</p>
+            <ul className="mt-3 space-y-1">
+              {['CPNP notified · EU compliant', 'HEMA-free · SDS docs included', 'No MOQ · Sample packs available', 'Intake-cycle ordering support'].map((item) => (
+                <li key={item} className="flex items-center gap-2 text-sm text-white/80">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#D43790]/70" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <NavLink to="/for-academies" className="shrink-0 self-start rounded-xl border border-[#D43790]/60 px-5 py-3 text-sm font-bold text-[#D43790] transition duration-300 hover:bg-[#D43790]/10">
+            Academy Info &rarr;
           </NavLink>
         </div>
       </div>
@@ -14994,6 +15189,7 @@ function App() {
 
           <Route path="/products" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
+          <Route path="/for-academies" element={<ForAcademiesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
           <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
