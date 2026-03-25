@@ -2422,6 +2422,15 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'BASES::BRUSH ON BUILDER': {
     paragraphs: [
+      'A self-levelling builder gel in a bottle that strengthens, shapes and perfects natural nails with effortless control and long-lasting durability.',
+      'Brush On Builder Base is a thick, gel-based base coat, durable and ideal for strengthening the natural nail and for slight extensions with a form up to 3mm.',
+      'It is mainly used in cases of nail biting and for brittle nails that break easily.',
+    ],
+    listItems: [],
+  },
+  'BUILDER GEL SYSTEMS::BRUSH ON BUILDER': {
+    paragraphs: [
+      'A self-levelling builder gel in a bottle that strengthens, shapes and perfects natural nails with effortless control and long-lasting durability.',
       'Brush On Builder Base is a thick, gel-based base coat, durable and ideal for strengthening the natural nail and for slight extensions with a form up to 3mm.',
       'It is mainly used in cases of nail biting and for brittle nails that break easily.',
     ],
