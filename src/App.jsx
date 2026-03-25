@@ -3632,8 +3632,16 @@ function FullCataloguePage() {
       )}
 
       {isLoading && (
-        <div className="rounded-2xl border border-black/10 bg-white p-5 text-sm text-black/65">
-          Loading catalogue...
+        <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}>
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="animate-pulse overflow-hidden rounded-[14px] border border-[#4A4A4A]/10 bg-[#E8E8E8]">
+              <div className="h-36 w-full bg-slate-200" />
+              <div className="space-y-1.5 p-2">
+                <div className="h-2.5 w-3/4 rounded bg-slate-300" />
+                <div className="h-2 w-1/2 rounded bg-slate-200" />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -4369,8 +4377,16 @@ function MissingImagesReport() {
       </div>
 
       {isLoading && (
-        <div className="rounded-2xl border border-black/10 bg-white p-5 text-sm text-black/65">
-          Loading catalogue data...
+        <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}>
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="animate-pulse overflow-hidden rounded-[14px] border border-[#4A4A4A]/10 bg-[#E8E8E8]">
+              <div className="h-36 w-full bg-slate-200" />
+              <div className="space-y-1.5 p-2">
+                <div className="h-2.5 w-3/4 rounded bg-slate-300" />
+                <div className="h-2 w-1/2 rounded bg-slate-200" />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
