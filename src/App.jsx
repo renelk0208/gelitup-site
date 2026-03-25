@@ -898,7 +898,7 @@ const SILVER_CORE_30_COLORS = [
   'GIUP-COL-11 — Pinky Promise',
   'GIUP-COL-1801 — Sweet Pea',
   'GIUP-COL-051A — Raspberry Ripple',
-  'GIUP-COL-1803 — Don—t Pout',
+  'GIUP-COL-1803 — Don’t Pout',
   'GIUP-COL-023 — Classic Red',
   'GIUP-COL-025 — Cherry Bomb',
   'GIUP-COL-015 — Total Eclipse',
@@ -2327,7 +2327,7 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
     listItems: [
       'Aquarela Brush — Specially designed for the watercolor technique.',
       'French Nail Brush — Angled blade ideal for the French manicure technique.',
-      'Ombr— Brush — Wide flat brush for smooth gradient and ombr— blends.',
+      'Ombré Brush — Wide flat brush for smooth gradient and ombré blends.',
       'Skinny Liner — Ultra-fine liner brush for detailed nail art lines and accents.',
     ],
   },
@@ -2347,7 +2347,7 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
     paragraphs: [
       'With our Cuticle Oils you will feel your fingers soothed, nourished, and hydrated, while also protecting them from irritation and prolonged sun exposure.',
       'Directions for use: Apply one to two drops to the cuticle area of each nail. Massage the oil around the cuticles and then over the entire surface of the nail. It is important to apply the oil to both the skin and the nails to achieve the full nourishment you desire.',
-      'Warnings: For external use only. Keep out of reach of children. Store the product at a temperature below 25—C. Keep away from direct sunlight.',
+      'Warnings: For external use only. Keep out of reach of children. Store the product at a temperature below 25°C. Keep away from direct sunlight.',
       'Photo Perfect Cuticle Oil — Your ultimate ally for the perfect photoshoot! A dry cuticle oil that leaves no greasy residue, offering hydrating and nourishing benefits while helping with skin regeneration and healing.',
       'Cuticle Remover — Skin-friendly and highly effective in removing cuticles without causing injury. It contains essential oils and micro-particles from almond shells, softening the cuticle membrane and hardened skin areas, combining the properties of a scrub. It has a light, gel-like texture with an addictive fragrance, turning manicure and pedicure preparation into an easy and pleasant process for every nail technician.',
       'Note: Proper dehydration is required before the application of liquid products (primer, base).',
@@ -2476,7 +2476,7 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'NAIL ART::GIUP BLOSSOM WEBP': {
     paragraphs: [
-      'Product description coming soon.',
+      'Blossom Gel creates soft, organic floral effects that bloom across the nail surface. Applied over an uncured layer of base coat, the gel spreads naturally to form delicate flower-like patterns — no brush technique required.',
     ],
     listItems: [],
   },
@@ -5295,7 +5295,7 @@ function HomePage({ onOpenContactModal }) {
               </svg>
             </div>
             <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790]">STRICTEST SAFETY</p>
-            <p className="mt-2 text-sm leading-relaxed text-white">We operate under the world—s strictest safety protocols. Our manufacturing is ISO-certified, ensuring zero hazardous contaminants and 100% batch consistency.</p>
+            <p className="mt-2 text-sm leading-relaxed text-white">We operate under the world’s strictest safety protocols. Our manufacturing is ISO-certified, ensuring zero hazardous contaminants and 100% batch consistency.</p>
           </article>
 
           <article className="rounded-xl border border-white/15 bg-black/20 p-4">
@@ -5556,7 +5556,7 @@ function ContactRequestModal({ isOpen, formState, onChange, onClose, onSubmit, i
               value={formState.email}
               onChange={(event) => onChange('email', event.target.value)}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              placeholder="you@company.com"
+              placeholder="jane@mysalon.com"
             />
           </label>
 
@@ -5885,7 +5885,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
                 setInfoMessage('')
               }}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none ring-fuchsia-500/20 transition focus:border-fuchsia-400 focus:ring"
-              placeholder="you@company.com"
+              placeholder="jane@mysalon.com"
               readOnly={Boolean(prefilledEmail)}
             />
           </label>
@@ -6622,7 +6622,7 @@ function PortalRegister({ onRegister }) {
                 value={application.contactEmail}
                 onChange={(event) => setField('contactEmail', event.target.value)}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                placeholder="buyer@company.com"
+                placeholder="jane@mysalon.com"
               />
             </label>
             <label className="block text-sm font-medium text-slate-700">
@@ -7214,7 +7214,7 @@ function PortalForgotPassword() {
                     value={email}
                     onChange={(event) => setEmail(event.target.value.trim().toLowerCase())}
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-                    placeholder="you@company.com"
+                    placeholder="jane@example.com"
                     readOnly={Boolean(prefilledEmail)}
                   />
                 </label>
