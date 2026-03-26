@@ -320,7 +320,7 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl
       </div>
 
       {!hasRenderError && totalPages > 1 && (
-        <div className="absolute right-2 top-1/2 z-10 flex -translate-y-1/2 flex-col items-center gap-1 rounded-lg bg-black/70 p-1.5 text-[11px] font-semibold text-white">
+        <div className="absolute right-2 top-1/2 z-10 flex -translate-y-1/2 flex-col items-center gap-1 rounded-lg bg-black/70 p-2 text-xs font-semibold text-white">
           <button
             type="button"
             aria-label="Previous PDF page"
@@ -329,7 +329,7 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl
               setCurrentPage((page) => Math.max(1, page - 1))
             }}
             disabled={!canGoToPreviousPage}
-            className={`rounded px-2 py-1 transition ${canGoToPreviousPage ? 'bg-[#D43790] hover:bg-[#BF3182]' : 'cursor-not-allowed bg-white/20 text-white/60'}`}
+            className={`min-h-[44px] min-w-[44px] rounded px-3 py-2 transition ${canGoToPreviousPage ? 'bg-[#D43790] hover:bg-[#BF3182]' : 'cursor-not-allowed bg-white/20 text-white/60'}`}
           >
             Up
           </button>
@@ -344,7 +344,7 @@ function PdfPreviewSlide({ pdfUrl, fallbackImageUrl, altText, backgroundVideoUrl
               setCurrentPage((page) => Math.min(totalPages, page + 1))
             }}
             disabled={!canGoToNextPage}
-            className={`rounded px-2 py-1 transition ${canGoToNextPage ? 'bg-[#D43790] hover:bg-[#BF3182]' : 'cursor-not-allowed bg-white/20 text-white/60'}`}
+            className={`min-h-[44px] min-w-[44px] rounded px-3 py-2 transition ${canGoToNextPage ? 'bg-[#D43790] hover:bg-[#BF3182]' : 'cursor-not-allowed bg-white/20 text-white/60'}`}
           >
             Down
           </button>

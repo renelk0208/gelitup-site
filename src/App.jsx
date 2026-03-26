@@ -1668,9 +1668,9 @@ function ForAcademiesPage() {
 
       {/* HERO */}
       <div className="w-full overflow-hidden rounded-2xl bg-black">
-        <div className="relative h-[60vh] min-h-[420px] w-full sm:h-[68vh]">
+        <div className="relative h-[60vh] min-h-[320px] w-full sm:h-[68vh] sm:min-h-[420px]">
           <img
-            src="/gelitup-media/images/hero-image-academies.png"
+            src="/gelitup-content/catalog-heroes/consumables-catalog-hero.jpg"
             alt="Professional nail academy training"
             className="h-full w-full object-cover object-center brightness-[0.72]"
             loading="eager"
@@ -4775,7 +4775,7 @@ function MobileNav({ onOpenContactModal }) {
         aria-label={open ? 'Close menu' : 'Open navigation menu'}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="fixed right-3 top-[11px] z-[60] flex h-9 w-9 flex-col items-center justify-center gap-[5px] rounded-lg border border-white/20 bg-black/85 backdrop-blur md:hidden"
+        className="fixed right-3 top-[9px] z-[60] flex h-11 w-11 flex-col items-center justify-center gap-[5px] rounded-lg border border-white/20 bg-black/85 backdrop-blur md:hidden"
       >
         <span className={`block h-px w-[18px] origin-center bg-white transition-all duration-200 ${open ? 'translate-y-[6px] rotate-45' : ''}`} />
         <span className={`block h-px w-[18px] bg-white transition-all duration-200 ${open ? 'opacity-0 scale-x-0' : ''}`} />
@@ -4802,7 +4802,7 @@ function MobileNav({ onOpenContactModal }) {
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-white/50 transition hover:bg-white/10 hover:text-white"
+            className="flex h-10 w-10 items-center justify-center rounded-md text-white/50 transition hover:bg-white/10 hover:text-white"
             aria-label="Close menu"
           >
             <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
