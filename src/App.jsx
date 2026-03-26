@@ -6721,19 +6721,19 @@ function PortalRegister({ onRegister }) {
               <>
                 <label className="block text-sm font-medium text-slate-700">
                   First Name
-                  <input type="text" required value={application.firstName || ''} onChange={(e) => setField('firstName', e.target.value)} placeholder="Jane" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
+                  <input type="text" required autoComplete="given-name" value={application.firstName || ''} onChange={(e) => setField('firstName', e.target.value)} placeholder="Jane" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
                   Surname
-                  <input type="text" required value={application.lastName || ''} onChange={(e) => setField('lastName', e.target.value)} placeholder="Smith" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
+                  <input type="text" required autoComplete="family-name" value={application.lastName || ''} onChange={(e) => setField('lastName', e.target.value)} placeholder="Smith" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
                   Email Address
-                  <input type="email" required value={application.contactEmail} onChange={(e) => setField('contactEmail', e.target.value)} placeholder="jane@salon.com" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
+                  <input type="email" required autoComplete="email" value={application.contactEmail} onChange={(e) => setField('contactEmail', e.target.value)} placeholder="jane@salon.com" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
                   Contact Number
-                  <input type="tel" required value={application.phone} onChange={(e) => setField('phone', e.target.value)} placeholder="+30 210 0000000" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
+                  <input type="tel" required autoComplete="tel" value={application.phone} onChange={(e) => setField('phone', e.target.value)} placeholder="+30 210 0000000" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700 md:col-span-2">
                   Business Type

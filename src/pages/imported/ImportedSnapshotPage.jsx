@@ -739,7 +739,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
               {igStatus === 'loading' ? (
                 <div className="flex gap-3 overflow-hidden">
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="h-48 w-48 flex-shrink-0 animate-pulse rounded-xl bg-white/10" />
+                    <div key={i} className="h-40 w-40 flex-shrink-0 animate-pulse rounded-xl bg-white/10 sm:h-48 sm:w-48" />
                   ))}
                 </div>
               ) : (
@@ -748,7 +748,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                     const thumb = post.media_type === 'VIDEO' ? (post.thumbnail_url || post.media_url) : post.media_url
                     const isVideo = post.media_type === 'VIDEO'
                     return (
-                      <a key={post.id} href={post.permalink} target="_blank" rel="noreferrer" className="group relative h-48 w-48 flex-shrink-0 snap-start overflow-hidden rounded-xl">
+                      <a key={post.id} href={post.permalink} target="_blank" rel="noreferrer" className="group relative h-40 w-40 flex-shrink-0 snap-start overflow-hidden rounded-xl sm:h-48 sm:w-48">
                         <img src={thumb} alt={post.caption ? post.caption.slice(0, 80) : 'Instagram post'} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
                         {isVideo && (
                           <div className="absolute right-2 top-2 rounded-full bg-black/60 p-1">
@@ -785,7 +785,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           <div className="absolute inset-0 bg-[#1A1A1A]/76" />
 
           <div className="relative mx-auto max-w-6xl">
-            <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8">
+            <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8 grid-cols-1">
               <div className="rounded-2xl border border-white/15 bg-black/30 p-5 sm:p-6">
                 <p className="text-3xl font-black uppercase tracking-[0.18em] !text-[#D43790] drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-4xl">Exhibitions</p>
                 <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.12em] !text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.65)] sm:text-3xl">{aboutUsExhibitions.title}</h2>
@@ -795,7 +795,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
               <div className="space-y-3">
                 {sortedExhibitionEvents.map((event, index) => (
                   <article key={event.id || `${event.name}-${index}`} className="overflow-hidden rounded-2xl border border-white/15 bg-black/30 p-4 sm:p-5">
-                    <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_240px]">
+                    <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_240px]">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.15em] !text-[#D43790]">Exhibition {index + 1}</p>
                         <h3 className="mt-1 text-xl font-extrabold uppercase tracking-[0.08em] !text-white">{event.name}</h3>
