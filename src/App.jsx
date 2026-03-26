@@ -3669,7 +3669,7 @@ function FullCataloguePage() {
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Search product name, code, or subcategory..."
-                className="w-full rounded-[12px] border border-[#4A4A4A]/35 bg-white px-3 py-2 text-sm text-black outline-none ring-fuchsia-500/20 focus:ring"
+                className="w-full rounded-[12px] border border-[#4A4A4A]/35 bg-white px-3 py-2 text-base text-black outline-none ring-fuchsia-500/20 focus:ring"
               />
             </div>
 
@@ -3814,7 +3814,7 @@ function FullCataloguePage() {
                   const el = document.getElementById(item.anchor)
                   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
                 }}
-                className="shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/60 transition hover:bg-white/10 hover:text-white"
+                className="shrink-0 rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/60 transition hover:bg-white/10 hover:text-white"
               >
                 {item.label}
               </button>
@@ -3871,7 +3871,7 @@ function FullCataloguePage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search all products by name, code or category..."
-                className="w-full rounded-[14px] border border-[#4A4A4A]/35 bg-white py-2.5 pl-9 pr-10 text-sm text-black outline-none ring-fuchsia-500/25 transition focus:border-fuchsia-400 focus:ring"
+                className="w-full rounded-[14px] border border-[#4A4A4A]/35 bg-white py-2.5 pl-9 pr-10 text-base text-black outline-none ring-fuchsia-500/25 transition focus:border-fuchsia-400 focus:ring"
               />
               {searchQuery && (
                 <button
@@ -5173,7 +5173,7 @@ function InstagramFeedStrip() {
         {status === 'loading' ? (
           <div className="flex gap-3 overflow-hidden">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-48 w-48 flex-shrink-0 animate-pulse rounded-xl bg-white/10" />
+              <div key={i} className="h-40 w-40 flex-shrink-0 animate-pulse rounded-xl bg-white/10 sm:h-48 sm:w-48" />
             ))}
           </div>
         ) : (
@@ -5187,7 +5187,7 @@ function InstagramFeedStrip() {
                   href={post.permalink}
                   target="_blank"
                   rel="noreferrer"
-                  className="group relative h-48 w-48 flex-shrink-0 snap-start overflow-hidden rounded-xl"
+                  className="group relative h-40 w-40 flex-shrink-0 snap-start overflow-hidden rounded-xl sm:h-48 sm:w-48"
                 >
                   <img
                     src={thumb}
@@ -5305,7 +5305,7 @@ function GoogleReviewsStrip() {
               {reviews.map((review, i) => (
                 <div
                   key={i}
-                  className="w-72 flex-shrink-0 snap-start rounded-xl border border-white/10 bg-white/5 p-4"
+                  className="w-[min(72vw,288px)] flex-shrink-0 snap-start rounded-xl border border-white/10 bg-white/5 p-4 sm:w-72"
                 >
                   <div className="flex items-center gap-2">
                     {review.authorPhoto
@@ -5437,7 +5437,7 @@ function HomePage({ onOpenContactModal }) {
   return (
     <section className="space-y-6">
       <div className="mx-auto w-full max-w-6xl overflow-hidden rounded-2xl bg-black">
-        <div className="relative h-[58vh] min-h-[400px] w-full sm:h-[66vh]">
+        <div className="relative h-[58vh] min-h-[320px] w-full sm:h-[66vh] sm:min-h-[400px]">
           <img
             src={HOME_HERO_POSTER_URL || media.heroImage}
             alt="GEL.IT.UP cinematic hero"
@@ -5773,7 +5773,7 @@ function ContactRequestModal({ isOpen, formState, onChange, onClose, onSubmit, i
               required
               value={formState.name}
               onChange={(event) => onChange('name', event.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base"
               placeholder="Your full name"
             />
           </label>
@@ -5785,7 +5785,7 @@ function ContactRequestModal({ isOpen, formState, onChange, onClose, onSubmit, i
               required
               value={formState.email}
               onChange={(event) => onChange('email', event.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base"
               placeholder="jane@mysalon.com"
             />
           </label>
@@ -5797,7 +5797,7 @@ function ContactRequestModal({ isOpen, formState, onChange, onClose, onSubmit, i
               required
               value={formState.phone}
               onChange={(event) => onChange('phone', event.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base"
               placeholder="+00 000 000 000"
             />
           </label>
@@ -6114,7 +6114,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
                 setErrorMessage('')
                 setInfoMessage('')
               }}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none ring-fuchsia-500/20 transition focus:border-fuchsia-400 focus:ring"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base outline-none ring-fuchsia-500/20 transition focus:border-fuchsia-400 focus:ring"
               placeholder="jane@mysalon.com"
               readOnly={Boolean(prefilledEmail)}
             />
@@ -6133,7 +6133,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
                 setErrorMessage('')
                 setInfoMessage('')
               }}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none ring-fuchsia-500/20 transition focus:border-fuchsia-400 focus:ring"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base outline-none ring-fuchsia-500/20 transition focus:border-fuchsia-400 focus:ring"
               placeholder={isCreatePasswordMode ? 'Minimum 8 characters' : 'Your password'}
             />
           </label>
@@ -6153,7 +6153,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
                   setErrorMessage('')
                   setInfoMessage('')
                 }}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none ring-fuchsia-500/20 transition focus:border-fuchsia-400 focus:ring"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base outline-none ring-fuchsia-500/20 transition focus:border-fuchsia-400 focus:ring"
                 placeholder="Repeat your password"
               />
             </label>
@@ -6345,7 +6345,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
                 setErrorMessage('')
                 setInfoMessage('')
               }}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
               placeholder="admin@company.com"
               readOnly={Boolean(prefilledEmail)}
             />
@@ -6364,7 +6364,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
                 setErrorMessage('')
                 setInfoMessage('')
               }}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
               placeholder="Enter your password"
             />
           </label>
@@ -6384,7 +6384,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
                   setErrorMessage('')
                   setInfoMessage('')
                 }}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                 placeholder="Confirm your password"
               />
             </label>
@@ -6644,7 +6644,7 @@ function PortalRegister({ onRegister }) {
                     value={buyerForm.fullName}
                     onChange={(e) => setBuyerForm((f) => ({ ...f, fullName: e.target.value }))}
                     placeholder="Jane Smith"
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                   />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
@@ -6655,7 +6655,7 @@ function PortalRegister({ onRegister }) {
                     value={buyerForm.email}
                     onChange={(e) => setBuyerForm((f) => ({ ...f, email: e.target.value }))}
                     placeholder="you@example.com"
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                   />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
@@ -6666,7 +6666,7 @@ function PortalRegister({ onRegister }) {
                     value={buyerForm.password}
                     onChange={(e) => setBuyerForm((f) => ({ ...f, password: e.target.value }))}
                     placeholder="Minimum 8 characters"
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                   />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
@@ -6677,7 +6677,7 @@ function PortalRegister({ onRegister }) {
                     value={buyerForm.confirmPassword}
                     onChange={(e) => setBuyerForm((f) => ({ ...f, confirmPassword: e.target.value }))}
                     placeholder="Repeat your password"
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                   />
                 </label>
                 {buyerError && (
@@ -6721,23 +6721,23 @@ function PortalRegister({ onRegister }) {
               <>
                 <label className="block text-sm font-medium text-slate-700">
                   First Name
-                  <input type="text" required value={application.firstName || ''} onChange={(e) => setField('firstName', e.target.value)} placeholder="Jane" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
+                  <input type="text" required value={application.firstName || ''} onChange={(e) => setField('firstName', e.target.value)} placeholder="Jane" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
                   Surname
-                  <input type="text" required value={application.lastName || ''} onChange={(e) => setField('lastName', e.target.value)} placeholder="Smith" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
+                  <input type="text" required value={application.lastName || ''} onChange={(e) => setField('lastName', e.target.value)} placeholder="Smith" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
                   Email Address
-                  <input type="email" required value={application.contactEmail} onChange={(e) => setField('contactEmail', e.target.value)} placeholder="jane@salon.com" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
+                  <input type="email" required value={application.contactEmail} onChange={(e) => setField('contactEmail', e.target.value)} placeholder="jane@salon.com" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
                   Contact Number
-                  <input type="tel" required value={application.phone} onChange={(e) => setField('phone', e.target.value)} placeholder="+30 210 0000000" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
+                  <input type="tel" required value={application.phone} onChange={(e) => setField('phone', e.target.value)} placeholder="+30 210 0000000" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700 md:col-span-2">
                   Business Type
-                  <select required value={application.businessType} onChange={(e) => setField('businessType', e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring">
+                  <select required value={application.businessType} onChange={(e) => setField('businessType', e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring">
                     <option value="">Select type</option>
                     <option value="Salon">Nail Salon</option>
                     <option value="Nail Technician">Nail Technician / Freelancer</option>
@@ -6755,7 +6755,7 @@ function PortalRegister({ onRegister }) {
                   required
                   value={application.distributorTier}
                   onChange={(event) => setField('distributorTier', event.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                 >
                   <option value="" disabled>Select your distribution tier</option>
                   <option value="professional">Professional Distributor — Regional Distribution</option>
@@ -6779,7 +6779,7 @@ function PortalRegister({ onRegister }) {
                       customerType: nextProfile === 'personal' ? 'personal' : 'company',
                     }))
                   }}
-                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                 >
                   <option value="business">Business (VAT required)</option>
                   <option value="personal">Personal (EU purchases)</option>
@@ -6793,7 +6793,7 @@ function PortalRegister({ onRegister }) {
                 required
                 value={application.customerType}
                 onChange={(event) => setField('customerType', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
               >
                 {isDistributorFlow
                   ? (
@@ -6818,7 +6818,7 @@ function PortalRegister({ onRegister }) {
                 required
                 value={application.companyName}
                 onChange={(event) => setField('companyName', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                 placeholder={(application.customerType === 'company' || isDistributorFlow) ? 'Company Ltd' : 'Full Name'}
               />
             </label>
@@ -6829,7 +6829,7 @@ function PortalRegister({ onRegister }) {
                 required={isDistributorFlow || isBusinessOrderProfile}
                 value={application.vatNumber}
                 onChange={(event) => setField('vatNumber', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                 placeholder={(isDistributorFlow || isBusinessOrderProfile) ? 'EU123456789' : 'Optional for personal purchases'}
               />
             </label>
@@ -6840,7 +6840,7 @@ function PortalRegister({ onRegister }) {
                 required
                 value={application.contactName}
                 onChange={(event) => setField('contactName', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                 placeholder="Jane Smith"
               />
             </label>
@@ -6851,7 +6851,7 @@ function PortalRegister({ onRegister }) {
                 required
                 value={application.contactEmail}
                 onChange={(event) => setField('contactEmail', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                 placeholder="jane@mysalon.com"
               />
             </label>
@@ -6862,7 +6862,7 @@ function PortalRegister({ onRegister }) {
                 required
                 value={application.phone}
                 onChange={(event) => setField('phone', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                 placeholder="+30 210 0000000"
               />
             </label>
@@ -6872,7 +6872,7 @@ function PortalRegister({ onRegister }) {
                 type="url"
                 value={application.website}
                 onChange={(event) => setField('website', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                 placeholder="https://company.com"
               />
             </label>
@@ -6891,7 +6891,7 @@ function PortalRegister({ onRegister }) {
                     phone: withCountryDialCode(current.phone, nextCountry),
                   }))
                 }}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
               >
                 <option value="">Select country</option>
                 {COUNTRY_OPTIONS.map((country) => (
@@ -6909,7 +6909,7 @@ function PortalRegister({ onRegister }) {
                     required
                     value={application.shippingType}
                     onChange={(event) => setField('shippingType', event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
                   >
                     <option value="road">Road</option>
                     <option value="air">Air</option>
@@ -6924,7 +6924,7 @@ function PortalRegister({ onRegister }) {
                     required
                     value={application.invoiceAddressLine1}
                     onChange={(event) => setField('invoiceAddressLine1', event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
                     placeholder="Street, number"
                   />
                 </label>
@@ -6935,7 +6935,7 @@ function PortalRegister({ onRegister }) {
                     type="text"
                     value={application.invoiceAddressLine2}
                     onChange={(event) => setField('invoiceAddressLine2', event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
                     placeholder="Suite, floor"
                   />
                 </label>
@@ -6947,7 +6947,7 @@ function PortalRegister({ onRegister }) {
                     required
                     value={application.invoiceArea}
                     onChange={(event) => setField('invoiceArea', event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
                     placeholder="Athens"
                   />
                 </label>
@@ -6959,7 +6959,7 @@ function PortalRegister({ onRegister }) {
                     required
                     value={application.invoiceRegion}
                     onChange={(event) => setField('invoiceRegion', event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
                     placeholder="Attica"
                   />
                 </label>
@@ -6971,7 +6971,7 @@ function PortalRegister({ onRegister }) {
                     required
                     value={application.invoicePostalCode}
                     onChange={(event) => setField('invoicePostalCode', event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
                     placeholder="10431"
                   />
                 </label>
@@ -6997,7 +6997,7 @@ function PortalRegister({ onRegister }) {
                         required={!application.shippingSameAsInvoice}
                         value={application.shippingName}
                         onChange={(event) => setField('shippingName', event.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
                         placeholder="Warehouse receiver"
                       />
                     </label>
@@ -7008,7 +7008,7 @@ function PortalRegister({ onRegister }) {
                         required={!application.shippingSameAsInvoice}
                         value={application.shippingPhone}
                         onChange={(event) => setField('shippingPhone', event.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
                         placeholder="+30 210 0000000"
                       />
                     </label>
@@ -7019,7 +7019,7 @@ function PortalRegister({ onRegister }) {
                         required={!application.shippingSameAsInvoice}
                         value={application.shippingAddressLine1}
                         onChange={(event) => setField('shippingAddressLine1', event.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
                         placeholder="Street, number"
                       />
                     </label>
@@ -7029,7 +7029,7 @@ function PortalRegister({ onRegister }) {
                         type="text"
                         value={application.shippingAddressLine2}
                         onChange={(event) => setField('shippingAddressLine2', event.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
                         placeholder="Suite, floor"
                       />
                     </label>
@@ -7040,7 +7040,7 @@ function PortalRegister({ onRegister }) {
                         required={!application.shippingSameAsInvoice}
                         value={application.shippingArea}
                         onChange={(event) => setField('shippingArea', event.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
                         placeholder="Athens"
                       />
                     </label>
@@ -7051,7 +7051,7 @@ function PortalRegister({ onRegister }) {
                         required={!application.shippingSameAsInvoice}
                         value={application.shippingRegion}
                         onChange={(event) => setField('shippingRegion', event.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
                         placeholder="Attica"
                       />
                     </label>
@@ -7062,7 +7062,7 @@ function PortalRegister({ onRegister }) {
                         required={!application.shippingSameAsInvoice}
                         value={application.shippingPostalCode}
                         onChange={(event) => setField('shippingPostalCode', event.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
                         placeholder="10431"
                       />
                     </label>
@@ -7079,7 +7079,7 @@ function PortalRegister({ onRegister }) {
                             shippingPhone: withCountryDialCode(current.shippingPhone, nextCountry),
                           }))
                         }}
-                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
                       >
                         <option value="">Select country</option>
                         {COUNTRY_OPTIONS.map((country) => (
@@ -7098,7 +7098,7 @@ function PortalRegister({ onRegister }) {
                 required={isDistributorFlow}
                 value={application.businessType}
                 onChange={(event) => setField('businessType', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
               >
                 <option value="">Select type</option>
                 <option value="Distributor">Distributor</option>
@@ -7117,7 +7117,7 @@ function PortalRegister({ onRegister }) {
                     required
                     value={application.yearsInBusiness}
                     onChange={(event) => setField('yearsInBusiness', event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                     placeholder="e.g. 5"
                   />
                 </label>
@@ -7128,7 +7128,7 @@ function PortalRegister({ onRegister }) {
                     required
                     value={application.distributionCountryInterests}
                     onChange={(event) => setField('distributionCountryInterests', event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                     placeholder="Countries or regions you want distribution rights for"
                   />
                 </label>
@@ -7141,7 +7141,7 @@ function PortalRegister({ onRegister }) {
                 rows={3}
                 value={application.notes}
                 onChange={(event) => setField('notes', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                 placeholder="Tell us about your expected monthly volume, brands, or regions."
               />
             </label>
@@ -7443,7 +7443,7 @@ function PortalForgotPassword() {
                     required
                     value={email}
                     onChange={(event) => setEmail(event.target.value.trim().toLowerCase())}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                     placeholder="jane@example.com"
                     readOnly={Boolean(prefilledEmail)}
                   />
