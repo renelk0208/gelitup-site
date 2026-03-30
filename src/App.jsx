@@ -5747,7 +5747,7 @@ function HomePage({ onOpenContactModal }) {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/75">B2B Salon Access</p>
-            <h2 className="mt-1 text-xl font-extrabold text-white">Are you a salon or nail tech?</h2>
+            <h2 className="mt-1 text-xl font-extrabold text-white">Are you a salon?</h2>
             <p className="mt-2 max-w-lg text-sm text-white/90">Register free in under 2 minutes. No approval, no waiting — instant access to 1,000+ shades at wholesale B2B pricing from day one.</p>
             <ul className="mt-3 space-y-1">
               {['1,000+ professional shades', 'B2B wholesale pricing — no MOQ', 'HEMA-free · EU certified', 'WhatsApp &amp; Viber support'].map(item => (
@@ -15500,7 +15500,8 @@ function App() {
             <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Contact</p>
             <a href={`tel:${String(PROFORMA_LEEUKOPF_PHONE || '').replace(/[\s()]/g, '')}`} className="mt-2 block transition hover:text-fuchsia-300">{PROFORMA_LEEUKOPF_PHONE}</a>
             <a href={`mailto:${CONTACT_INBOX_EMAIL}`} className="mt-1 block transition hover:text-fuchsia-300">{CONTACT_INBOX_EMAIL}</a>
-            <a href={`mailto:${B2B_EMAIL}`} className="mt-1 block transition hover:text-fuchsia-300">Orders: {B2B_EMAIL}</a>
+            <a href="mailto:info@gelitup.com" className="mt-1 block transition hover:text-fuchsia-300">For Information: info@gelitup.com</a>
+            <a href="mailto:distribution@gelitup.com" className="mt-1 block transition hover:text-fuchsia-300">For Distribution: distribution@gelitup.com</a>
             <a
               href={SUPPORT_WHATSAPP_URL}
               target="_blank"
