@@ -1862,7 +1862,7 @@ function ForAcademiesPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/75">Academy B2B Access</p>
-            <h2 className="mt-1 text-xl font-extrabold text-white">Register your academy for B2B access</h2>
+            <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">Register your academy for B2B access</h2>
             <p className="mt-2 max-w-lg text-sm text-white/90">Free registration in under 2 minutes. Instant access to wholesale pricing, compliance documentation, and the full GEL.IT.UP product catalogue.</p>
             <ul className="mt-3 space-y-1">
               {[
@@ -5566,7 +5566,7 @@ function HomePage({ onOpenContactModal }) {
                 <NavLink to="/portal/register" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_16px_rgba(212,55,144,0.55)] transition duration-300 hover:bg-fuchsia-500">
                   Register Free &rarr;
                 </NavLink>
-                <NavLink to="/become-distributor" className="rounded-lg border-2 border-white bg-black/25 px-5 py-2.5 text-sm font-bold text-white shadow-[0_2px_12px_rgba(0,0,0,0.35)] transition duration-300 hover:bg-black/40">
+                <NavLink to="/become-distributor" className="rounded-lg border-2 border-white/80 bg-white/15 px-5 py-2.5 text-sm font-bold text-white shadow-[0_2px_12px_rgba(0,0,0,0.35)] backdrop-blur-sm transition duration-300 hover:bg-white/25">
                   Become a Distributor
                 </NavLink>
               </div>
@@ -5747,7 +5747,7 @@ function HomePage({ onOpenContactModal }) {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/75">B2B Salon Access</p>
-            <h2 className="mt-1 text-xl font-extrabold text-white">Are you a salon?</h2>
+            <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">Are you a salon?</h2>
             <p className="mt-2 max-w-lg text-sm text-white/90">Register free in under 2 minutes. No approval, no waiting — instant access to 1,000+ shades at wholesale B2B pricing from day one.</p>
             <ul className="mt-3 space-y-1">
               {['1,000+ professional shades', 'B2B wholesale pricing — no MOQ', 'HEMA-free · EU certified', 'WhatsApp &amp; Viber support'].map(item => (
@@ -5769,7 +5769,7 @@ function HomePage({ onOpenContactModal }) {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">For Nail Academies</p>
-            <h2 className="mt-1 text-xl font-extrabold text-white">Do you run a nail academy or training school?</h2>
+            <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">Do you run a nail academy or training school?</h2>
             <p className="mt-2 max-w-lg text-sm text-white/80">EU-certified, HEMA-free products built for training volume. From classroom consumables to student kits — with compliance documentation included.</p>
             <ul className="mt-3 space-y-1">
               {['CPNP notified · EU compliant', 'HEMA-free · SDS docs included', 'No MOQ · Sample packs available', 'Intake-cycle ordering support'].map((item) => (
@@ -5789,7 +5789,7 @@ function HomePage({ onOpenContactModal }) {
       {/* DISTRIBUTOR TIERS CARD */}
       <div className="rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-5 sm:p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Distribution</p>
-        <h2 className="mt-1 text-xl font-extrabold uppercase tracking-[0.08em] text-white">Become a Distributor</h2>
+        <h2 className="heading-on-dark mt-1 text-xl font-extrabold uppercase tracking-[0.08em] text-white">Become a Distributor</h2>
         <p className="mt-2 text-sm text-white/80">Two tiers for regional and country-level distribution — with marketing, brand support and territory protection.</p>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -5923,7 +5923,7 @@ function PortalLanding() {
         style={{ background: 'linear-gradient(135deg, #D43790 0%, #a8186e 50%, #7c1250 100%)' }}
       >
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/70">GEL.IT.UP by GIUP®</p>
-        <h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
+        <h1 className="heading-on-dark mt-2 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl">
           Distributor Portal
         </h1>
         <p className="mt-3 max-w-lg text-base text-white/80">
@@ -7358,7 +7358,7 @@ function PortalRegister({ onRegister }) {
                 </svg>
               </div>
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/70">GEL.IT.UP by GIUP®</p>
-              <h2 className="mt-2 text-2xl font-black text-white">
+              <h2 className="heading-on-dark mt-2 text-2xl font-black text-white">
                 {submittedProfile.isDistributor ? 'Application Received!' : 'Account Created!'}
               </h2>
               <p className="mt-1.5 text-sm text-white/85">
