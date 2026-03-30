@@ -39,6 +39,22 @@
     Cache-Control = "no-cache, no-store, must-revalidate"
     Pragma = "no-cache"
 
+# Prevent portal and admin routes from being indexed by search engines
+[[headers]]
+  for = "/portal/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/admin-login"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

@@ -366,6 +366,43 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
   const [igPosts, setIgPosts] = useState([])
   const [igStatus, setIgStatus] = useState('loading')
 
+  const PAGE_SEO_MAP = {
+    'about-us': {
+      title: 'About GEL.IT.UP by GIUP® | Professional Gel Polish Brand',
+      description: 'Learn about GEL.IT.UP by GIUP® — a professional gel polish and nail systems brand known for 1,000+ shades, HEMA-free formulas, and EU-certified products for nail technicians worldwide.',
+      canonical: 'https://gelitup.com/pages/about-us',
+    },
+    'contact-us': {
+      title: 'Contact GEL.IT.UP by GIUP® | Get in Touch',
+      description: 'Contact GEL.IT.UP by GIUP® for wholesale enquiries, distributor applications, and professional nail product support.',
+      canonical: 'https://gelitup.com/pages/contact-us',
+    },
+  }
+
+  useEffect(() => {
+    const defaults = {
+      title: 'GEL.IT.UP by GIUP® | Professional Gel Polish, Builder Gel & Nail Systems',
+      description: 'Professional gel polish with 1,000+ shades, builder gel systems, base coats and top coats. HEMA-free, TPO-free, EU certified. Available wholesale to professional nail technicians worldwide.',
+      canonical: `https://gelitup.com/pages/${slug}`,
+    }
+    const seo = PAGE_SEO_MAP[slug] || defaults
+    const prevTitle = document.title
+    const metaDesc = document.querySelector('meta[name="description"]')
+    const metaCanonical = document.querySelector('link[rel="canonical"]')
+    const prevDesc = metaDesc?.getAttribute('content') || ''
+    const prevCanonical = metaCanonical?.getAttribute('href') || ''
+
+    document.title = seo.title
+    if (metaDesc) metaDesc.setAttribute('content', seo.description)
+    if (metaCanonical) metaCanonical.setAttribute('href', seo.canonical)
+
+    return () => {
+      document.title = prevTitle
+      if (metaDesc) metaDesc.setAttribute('content', prevDesc)
+      if (metaCanonical) metaCanonical.setAttribute('href', prevCanonical)
+    }
+  }, [slug])
+
   useEffect(() => {
     let isMounted = true
 

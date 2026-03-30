@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Block private portal, admin, and auth flows from being indexed
+Disallow: /portal/
+Disallow: /admin/
+Disallow: /admin-login
+Disallow: /portal-client-login
+Disallow: /portal-admin-login
+
+Sitemap: https://gelitup.com/sitemap.xml

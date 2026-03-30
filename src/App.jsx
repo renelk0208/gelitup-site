@@ -75,13 +75,13 @@ const PROFORMA_LEEUKOPF_COMPANY = import.meta.env.VITE_PROFORMA_LEEUKOPF_COMPANY
 const PROFORMA_LEEUKOPF_ADDRESS = import.meta.env.VITE_PROFORMA_LEEUKOPF_ADDRESS || '8 Racho Dimchev, Sofia, Bulgaria'
 const PROFORMA_LEEUKOPF_PHONE = import.meta.env.VITE_PROFORMA_LEEUKOPF_PHONE || '(+359) 73 891 041'
 const PROFORMA_LEEUKOPF_EMAIL = import.meta.env.VITE_PROFORMA_LEEUKOPF_EMAIL || 'gelitup.portal@gelitup.com'
-const TIKTOK_URL = import.meta.env.VITE_TIKTOK_URL || 'https://www.tiktok.com/@gelitupgreece'
-const INSTAGRAM_URL = import.meta.env.VITE_INSTAGRAM_URL || 'https://www.instagram.com/gelitupgreece'
+const TIKTOK_URL = import.meta.env.VITE_TIKTOK_URL || 'https://www.tiktok.com/@gelitupinternational'
+const INSTAGRAM_URL = import.meta.env.VITE_INSTAGRAM_URL || 'https://www.instagram.com/gelitupinternational/'
 const LINKEDIN_URL = import.meta.env.VITE_LINKEDIN_URL || 'https://gr.linkedin.com/company/gel-it-up-by-giup'
 const FACEBOOK_URL = import.meta.env.VITE_FACEBOOK_URL || 'https://www.facebook.com/GEL.IT.UP.Greece/'
 const YOUTUBE_URL = import.meta.env.VITE_YOUTUBE_URL || 'https://www.youtube.com/@GELITUP'
-const TIKTOK_HANDLE = import.meta.env.VITE_TIKTOK_HANDLE || 'GELITUPGREECE'
-const INSTAGRAM_HANDLE = import.meta.env.VITE_INSTAGRAM_HANDLE || 'gelitupgreece'
+const TIKTOK_HANDLE = import.meta.env.VITE_TIKTOK_HANDLE || 'GELITUPINTERNATIONAL'
+const INSTAGRAM_HANDLE = import.meta.env.VITE_INSTAGRAM_HANDLE || 'gelitupinternational'
 const LINKEDIN_HANDLE = import.meta.env.VITE_LINKEDIN_HANDLE || 'GEL.IT.UP'
 const FACEBOOK_HANDLE = import.meta.env.VITE_FACEBOOK_HANDLE || '@gelitup'
 const YOUTUBE_HANDLE = import.meta.env.VITE_YOUTUBE_HANDLE || '@GELITUP'
@@ -616,6 +616,30 @@ function hasReachedComplianceDate(referenceDate = new Date()) {
 
 function getSilverFreeGuaranteeText(referenceDate = new Date()) {
   return hasReachedComplianceDate(referenceDate) ? `${SILVER_FREE_GUARANTEE_BADGE} — CI 77820-FREE` : ''
+}
+
+/**
+ * Updates document.title, the meta[name="description"], and link[rel="canonical"]
+ * for the current route. Used in page-level useEffect calls.
+ * Returns a cleanup function that restores the default home-page SEO values.
+ */
+function setPageSEO({ title, description, canonical } = {}) {
+  const SITE_NAME = 'GEL.IT.UP by GIUP®'
+  const DEFAULT_TITLE = `${SITE_NAME} | Professional Gel Polish, Builder Gel & Nail Systems`
+  const DEFAULT_DESCRIPTION = 'Professional gel polish with 1,000+ shades, builder gel systems, base coats and top coats. HEMA-free, TPO-free, EU certified. Available wholesale to professional nail technicians worldwide.'
+  const DEFAULT_CANONICAL = 'https://gelitup.com/'
+
+  if (title) document.title = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`
+  const metaDesc = document.querySelector('meta[name="description"]')
+  if (metaDesc && description) metaDesc.setAttribute('content', description)
+  const canonicalLink = document.querySelector('link[rel="canonical"]')
+  if (canonicalLink && canonical) canonicalLink.setAttribute('href', canonical)
+
+  return () => {
+    document.title = DEFAULT_TITLE
+    if (metaDesc) metaDesc.setAttribute('content', DEFAULT_DESCRIPTION)
+    if (canonicalLink) canonicalLink.setAttribute('href', DEFAULT_CANONICAL)
+  }
 }
 
 function normalizeSkuCode(value) {
@@ -1536,6 +1560,12 @@ function isTechnicalSku(code) {
 }
 
 function DistributorPackagesPage() {
+  useEffect(() => setPageSEO({
+    title: 'Distribution Partnership Tiers | GEL.IT.UP by GIUP®',
+    description: 'Explore GEL.IT.UP wholesale distribution tiers — gel polish, builder gel, base coats, top coats and a full professional nail range. EU certified, HEMA-free. Apply to become a distributor.',
+    canonical: 'https://gelitup.com/distributor-packages',
+  }), [])
+
   return (
     <section className="space-y-6">
 
@@ -1663,6 +1693,12 @@ function DistributorPackagesPage() {
 
 
 function ForAcademiesPage() {
+  useEffect(() => setPageSEO({
+    title: 'Gel Polish & Nail Systems for Academies | GEL.IT.UP by GIUP®',
+    description: 'Professional gel polish, builder gel, base coats and nail accessories for nail academies and training schools. EU certified, HEMA-free. Register your academy for wholesale pricing.',
+    canonical: 'https://gelitup.com/for-academies',
+  }), [])
+
   return (
     <section className="space-y-6">
 
@@ -2194,6 +2230,46 @@ function toTitleCaseLabel(value = '') {
     .join(' ')
 }
 
+/**
+ * Maps internal category token names to SEO-friendly display labels.
+ * Used in headings, alt text, and structured data.
+ */
+function formatCategoryDisplayName(categoryName = '') {
+  const normalized = normalizeCatalogueToken(categoryName)
+  if (normalized.includes('COLOR') || normalized.includes('COLOUR')) return 'Gel Polish'
+  if (normalized === 'BUILDER GEL SYSTEMS') return 'Builder Gel Systems'
+  if (normalized === 'BUILDER GEL') return 'Builder Gel'
+  if (normalized === 'BASES') return 'Base Coats'
+  if (normalized === 'TOPS') return 'Top Coats'
+  if (normalized === 'MULTIMIX') return 'Synthogel Multimix'
+  if (normalized === 'NAIL PREPARATIONS') return 'Nail Preparations'
+  if (normalized === 'NAIL ART') return 'Nail Art'
+  if (normalized === 'CONSUMABLES') return 'Consumables'
+  if (normalized.includes('NAIL HAND')) return 'Nail, Hand & Foot Care'
+  if (normalized === 'TOOLS') return 'Tools'
+  if (normalized === 'EQUIPMENT') return 'Equipment'
+  if (normalized === 'BRUSHES') return 'Brushes'
+  if (normalized === 'LINE-IT-UP' || normalized === 'LINE IT UP') return 'Line It Up'
+  return toTitleCaseLabel(categoryName)
+}
+
+/**
+ * Returns a keyword-rich heading label for the active subcategory context.
+ * Used in H3 headings and aria context within the category detail panel.
+ */
+function formatSubcategoryHeadingLabel(subcategoryName = '', categoryName = '') {
+  const normalizedSub = normalizeCatalogueToken(subcategoryName)
+  const normalizedCat = normalizeCatalogueToken(categoryName)
+  if (normalizedSub === 'CAT EYE' && normalizedCat.includes('COLOR')) return 'Cat Eye Gel Polish'
+  if (normalizedSub === '5IN1 SUPERIOR BASE') return '5-in-1 Base Coat'
+  if (normalizedSub === 'PREMIUM BUILDER') return 'Fiberglass Builder Gel'
+  if (normalizedSub === 'BRUSH ON BUILDER') return 'Brush On Builder (BIAB)'
+  if (normalizedSub === 'SOLID GEL POLISH') return 'Solid Gel Polish'
+  if (normalizedSub === 'CLASSIC TOP COATS') return 'Classic Top Coats'
+  if (normalizedSub === '3INI BUILDER') return '3-in-1 Builder Gel'
+  return formatSubcategoryDisplayName(subcategoryName, categoryName)
+}
+
 function formatSubcategoryDisplayName(subcategoryName = '', categoryName = '') {
   // Transform specific subcategory names for display
   const normalized = normalizeCatalogueToken(subcategoryName)
@@ -2340,21 +2416,21 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'BASES::5IN1 SUPERIOR BASE': {
     paragraphs: [
-      'The 5-in-1 Superior Base Coat is a product that offers 5 different uses in a single bottle.',
+      'The GEL.IT.UP 5-in-1 base coat is a multi-function base system that delivers five distinct applications in a single bottle — reducing kit complexity while maximising service versatility.',
     ],
     listItems: [
-      'A base before applying semi-permanent colors.',
+      'A base coat before applying semi-permanent gel polish colours.',
       'A reinforced base for thin and brittle nails.',
-      'A shaping gel.',
-      'An adhesive for rhinestones and other 3D nail decorations.',
-      'A gel for slight extension and strengthening of the natural nail.',
+      'A shaping gel for targeted nail correction.',
+      'An adhesive base for rhinestones and 3D nail decorations.',
+      'A gel for slight nail extension and natural nail strengthening.',
     ],
   },
   'BUILDER GEL SYSTEMS::3INI BUILDER': {
     paragraphs: [
-      'The 3-in-1 Builder Gel is a single-phase, thick, and completely stable builder gel that does not yellow.',
-      'It is suitable for natural nail reinforcement as well as for extensions. It can be used by both beginners and more experienced nail technicians.',
-      'The use of a base coat or any other gel is not necessary for its application. It has a sticky layer.',
+      'The GEL.IT.UP 3-in-1 Builder Gel is a single-phase, thick, and completely stable builder gel that does not yellow over time.',
+      'This builder gel is suitable for natural nail reinforcement as well as extensions. It can be used by both beginners and experienced nail technicians with equal confidence.',
+      'No base coat or additional gel is required prior to application. The product retains a light inhibition layer after curing.',
     ],
     listItems: [
       'Key Benefits: Fiber-reinforced strength, single-phase efficiency, cool-cure comfort, and 100% HEMA/TPO-free performance.',
@@ -2371,12 +2447,12 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'BUILDER GEL SYSTEMS::PREMIUM BUILDER': {
     paragraphs: [
-      'Premium 3-in-1 Builder Gel is a single-phase builder gel enriched with fiberglass fibers, making it extremely strong and durable.',
-      'It is suitable for natural nail reinforcement as well as for extensions. It is very easy to apply and provides excellent adhesion and maximum durability. It does not run and does not yellow.',
-      'No base coat is required before application.',
+      'The GEL.IT.UP 3-in-1 Premium is a fiberglass builder gel — a single-phase builder gel enriched with fiberglass fibres for exceptional structural strength and long-lasting durability.',
+      'This fiberglass builder gel is suitable for natural nail reinforcement as well as extensions. It applies cleanly, does not run, and does not yellow. No separate base coat is required before application.',
+      'Ideal for technicians who need predictable structure, maximum adhesion control, and professional-grade durability across all service types.',
     ],
     listItems: [
-      'Key Benefits: Fiber-reinforced strength, single-phase efficiency, cool-cure comfort, and 100% HEMA/TPO-free performance.',
+      'Key Benefits: Fiberglass-reinforced strength, single-phase efficiency, cool-cure comfort, and 100% HEMA/TPO-free performance.',
       'Application — Preparation: Perform a thorough dry manicure and cleanse the nail plate.',
       'Application — Adhesion: Apply Superbond Primer and air-dry for 30 seconds.',
       'Application — Foundation: Apply a thin slip layer over nail/form (do not cure).',
@@ -2487,11 +2563,24 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'COLORS::ALL': {
     paragraphs: [
-      'The GEL.IT.UP by GIUP® gel polish range has stood out in the market thanks to its excellent quality and high durability. It delivers intense shine, removes very easily, and does not wrinkle during curing.',
-      'The rich GEL.IT.UP by GIUP® color palette includes more than 500 gel polish shades, with new must-have colors added every season.',
-      'All our products are cruelty-free and have been approved by the global organization Leaping Bunny International.',
+      'The GEL.IT.UP by GIUP® gel polish range has established itself in the professional market through exceptional colour intensity, long-lasting wear, and reliable performance across service types. Each gel polish delivers intense shine, removes cleanly without damage, and cures without wrinkling.',
+      'The Gel It Up gel polish palette spans more than 1,000 shades, including Solid Gel Polish, Cat Eye gel polish, Glitter, Thermo, Jelly, and Glass Effect finishes — with new collections added each season.',
+      'All gel polishes are cruelty-free and approved by Cruelty Free International under the global Leaping Bunny programme.',
     ],
     listItems: [],
+  },
+  'COLORS::CAT EYE': {
+    paragraphs: [
+      'Cat eye gel polish creates a distinctive magnetic effect that shifts with light — producing a linear shimmer band reminiscent of a cat\'s eye. The GEL.IT.UP cat eye gel polish collection includes classic, velvet, and glass cat eye finishes in multiple wavelength-reactive pigments.',
+      'Applied like standard gel polish and activated with a magnet tool before curing, cat eye gel polish requires no specialist training. Results are consistent, dramatic, and long-lasting.',
+    ],
+    listItems: [
+      'Step 1 — Apply base coat and cure.',
+      'Step 2 — Apply one thin flood coat of cat eye gel polish (do not cure).',
+      'Step 3 — Hold the magnet over the nail surface for 5–10 seconds to activate the magnetic cat eye effect.',
+      'Step 4 — Cure immediately once the desired effect is achieved.',
+      'Step 5 — Apply top coat and cure to seal.',
+    ],
   },
   'BRUSHES::ACRYLIC BRUSHES': {
     paragraphs: [
@@ -2568,9 +2657,10 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'TOPS::CLASSIC TOP COATS': {
     paragraphs: [
-      'Non Wipe Top Coat — The well-known Non Wipe Top Coat is a top coat of exceptional durability and shine, with no sticky layer. Thanks to its superior formula, it does not yellow or alter the color, providing outstanding gloss and a long-lasting, flawless finish.',
-      'Perfect Shape Non-Wipe Topcoat — Thanks to its rubber-based formula, it provides even coverage that corrects imperfections, delivering shine, durability, and long-lasting wear. Due to its elasticity, it helps prevent scratches. Its thick consistency allows you to create additional reinforcement over gel polish and artificial nails. It does not run into the cuticle area, making it especially helpful for beginner nail technicians.',
-      'Milky Non-Wipe Topcoat — Delivers a rich, deep milky tone over your gel polish, enhancing both light and dark shades. It provides the perfect milky finish for ombr— and baby boomer designs. Your ideal ally for every nail art and technique.',
+      'The GEL.IT.UP professional top coat range delivers flawless finish options for every service type — from high-gloss sealing to rubber-based correction and specialty effects. Each top coat is designed to protect gel polish colour, prevent lifting, and extend wear.',
+      'Non Wipe Top Coat — A top coat of exceptional durability and shine, with no inhibition layer. Thanks to its superior formula, it does not yellow or alter the colour, providing outstanding gloss and a long-lasting, flawless finish.',
+      'Perfect Shape Non-Wipe Top Coat — Its rubber-based formula provides even coverage that corrects imperfections, delivering shine, durability, and long-lasting wear. Due to its elasticity, it helps prevent scratches. Ideal for beginners as its thick consistency does not run into the cuticle area.',
+      'Milky Non-Wipe Top Coat — Delivers a rich milky tone over gel polish, enhancing both light and dark shades. The perfect top coat finish for ombré and baby boomer designs.',
     ],
     listItems: [],
   },
@@ -2614,17 +2704,15 @@ const PRODUCT_INFORMATION_BY_SUBCATEGORY = {
   },
   'BASES::BRUSH ON BUILDER': {
     paragraphs: [
-      'A self-levelling builder gel in a bottle that strengthens, shapes and perfects natural nails with effortless control and long-lasting durability.',
-      'Brush On Builder Base is a thick, gel-based base coat, durable and ideal for strengthening the natural nail and for slight extensions with a form up to 3mm.',
-      'It is mainly used in cases of nail biting and for brittle nails that break easily.',
+      'Brush On Builder is a builder in a bottle (BIAB) — a self-levelling builder gel that applies directly from the bottle to strengthen, shape, and perfect natural nails with effortless control.',
+      'Brush On Builder Base is a thick, gel-based base coat ideal for strengthening the natural nail and for slight extensions with a form up to 3mm. It is particularly effective for nail biters and for brittle nails prone to breakage.',
     ],
     listItems: [],
   },
   'BUILDER GEL SYSTEMS::BRUSH ON BUILDER': {
     paragraphs: [
-      'A self-levelling builder gel in a bottle that strengthens, shapes and perfects natural nails with effortless control and long-lasting durability.',
-      'Brush On Builder Base is a thick, gel-based base coat, durable and ideal for strengthening the natural nail and for slight extensions with a form up to 3mm.',
-      'It is mainly used in cases of nail biting and for brittle nails that break easily.',
+      'Brush On Builder is a builder in a bottle (BIAB) — a self-levelling builder gel that applies directly from the bottle to strengthen, shape, and perfect natural nails with effortless control.',
+      'Brush On Builder Base is a thick, gel-based base coat ideal for strengthening the natural nail and for slight extensions with a form up to 3mm. It is particularly effective for nail biters and for brittle nails prone to breakage.',
     ],
     listItems: [],
   },
@@ -2809,6 +2897,13 @@ function FullCataloguePage() {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [lightboxUrl])
+
+  useEffect(() => setPageSEO({
+    title: 'Gel Polish, Builder Gel & Professional Nail Systems | GEL.IT.UP by GIUP®',
+    description: 'Browse 1,000+ gel polish colours, professional builder gel systems, base coats, top coats, and nail accessories. HEMA-free, TPO-free, EU certified. Wholesale pricing available.',
+    canonical: 'https://gelitup.com/full-catalogue',
+  }), [])
+
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
   const virtualContainerRef = useRef(null)
 
@@ -3543,7 +3638,7 @@ function FullCataloguePage() {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-black uppercase tracking-[0.05em] text-black">{activeSection?.category || 'Our Products'}</h2>
+            <h2 className="text-lg font-black uppercase tracking-[0.05em] text-black">{formatCategoryDisplayName(activeSection?.category || 'Our Products')}</h2>
             <p className="mt-1 text-xs text-black/55">{filteredItems.length} matching items</p>
           </div>
           {(() => {
@@ -3613,7 +3708,7 @@ function FullCataloguePage() {
 
               return (
                 <div className="mt-4 rounded-[12px] p-4 sm:p-5" style={{ border: `1px solid rgba(${infoRgb},0.35)`, background: `rgba(${infoRgb},0.09)` }}>
-                  <h3 className="text-base font-bold uppercase tracking-[0.06em] sm:text-lg" style={{ color: infoAccent.bg }}>Product Information</h3>
+                  <h3 className="text-base font-bold uppercase tracking-[0.06em] sm:text-lg" style={{ color: infoAccent.bg }}>{formatSubcategoryHeadingLabel(activeSubcategory, activeCategory)}</h3>
                   {metadata.paragraphs?.length > 0 && (
                     <div className="mt-3 space-y-2">
                       {metadata.paragraphs.map((para, idx) => (
@@ -3786,10 +3881,10 @@ function FullCataloguePage() {
       <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
         <div className="mx-auto max-w-6xl">
           <h1 className="heading-on-dark text-4xl font-extrabold uppercase tracking-[0.15em] text-white sm:text-5xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
-            Our Products
+            Gel Polish &amp; Professional Nail Systems
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-white/90 sm:text-lg" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-            Everything you need delivered as one complete system. HEMA & TPO-Free formulations, <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-300 hover:underline">Cruelty-Free certified</a>, and engineered for professional excellence. Explore every shade, tool, and accessory in our global collection.
+            The complete professional nail range — gel polish, builder gel, base coats, top coats, and accessories. HEMA &amp; TPO-Free formulations, <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-300 hover:underline">Cruelty-Free certified</a>, and engineered for professional excellence. Browse every shade, system, and tool in the Gel It Up collection.
           </p>
         </div>
       </div>
@@ -3941,9 +4036,9 @@ function FullCataloguePage() {
               {/* Text column */}
               <div className="flex-1 lg:max-w-[520px]">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-400">The Core Pigment Library</p>
-                <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">1,000+ Colours</h2>
+                <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">1,000+ Gel Polish Colours</h2>
                 <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
-                  The Gelitup Archive. Over 1,000 laboratory-grade shades categorised by undertone and finish. From the deepest onyx to the clearest glass-top, find your signature shade in our comprehensive colour vault.
+                  The Gel It Up gel polish archive. Over 1,000 laboratory-grade gel polish shades categorised by undertone and finish — from the deepest onyx to glass-top effects. Includes Solid Gel Polish, Cat Eye gel polish, Glitters, Thermos, and seasonal collections. Find your signature shade.
                 </p>
                 <div className="mt-6 flex flex-wrap items-center gap-4">
                   <button
@@ -3964,7 +4059,7 @@ function FullCataloguePage() {
                   <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(212,55,144,0.3)_0%,transparent_70%)] blur-2xl" />
                   <img
                     src="/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg"
-                    alt="GEL.IT.UP Colour Collection"
+                    alt="Gel It Up gel polish colour collection — over 1,000 professional shades"
                     className="relative w-full object-contain drop-shadow-[0_6px_32px_rgba(212,55,144,0.45)]"
                   />
                 </div>
@@ -3993,9 +4088,9 @@ function FullCataloguePage() {
               <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
                 <div className="flex-1 lg:max-w-[500px]">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-300">The Essentials</p>
-                  <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Bases, Tops &amp; Nail Preparations</h2>
+                  <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Base Coat &amp; Top Coat Systems</h2>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
-                    The non-negotiables of every nail service. Our base coats lock in colour and protect the natural nail, while our top coats deliver the perfect finish — from high-gloss brilliance to matte sophistication.
+                    The non-negotiables of every nail service. Our professional base coat range protects the natural nail and maximises colour adhesion, while our top coat systems deliver the perfect finish — from high-gloss brilliance to matte sophistication. Includes the 5-in-1 base coat, Flexi Base, Brush On Builder (BIAB), and our full top coat collection.
                   </p>
                   <div className="mt-6">
                     <button
@@ -4020,7 +4115,7 @@ function FullCataloguePage() {
                     <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(200,115,145,0.25)_0%,transparent_70%)] blur-2xl" />
                     <img
                       src="/gelitup-content/catalog-heroes/top-bases-catalog-hero-image.webp"
-                      alt="GEL.IT.UP Bases & Tops"
+                      alt="Gel It Up professional base coat and top coat systems"
                       className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(200,115,145,0.35)]"
                     />
                   </div>
@@ -4045,7 +4140,7 @@ function FullCataloguePage() {
                         className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-rose-400/60 hover:shadow-lg"
                       >
                         <div className="relative h-52 bg-white">
-                          <img src={coverImage} alt={categoryName} className="h-full w-full object-contain" loading="lazy" onError={() => handleCategoryCoverImageError(categoryName, coverImageFallback)} />
+                          <img src={coverImage} alt={`${formatCategoryDisplayName(categoryName)} — GEL.IT.UP by GIUP®`} className="h-full w-full object-contain" loading="lazy" onError={() => handleCategoryCoverImageError(categoryName, coverImageFallback)} />
                         </div>
                         <div className="border-t border-[#4A4A4A]/20 p-3">
                           <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
@@ -4080,9 +4175,9 @@ function FullCataloguePage() {
               <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
                 <div className="flex-1 lg:max-w-[500px]">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-700">Structural Innovation</p>
-                  <h2 className="mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-gray-800 sm:text-4xl">Builder Systems</h2>
+                  <h2 className="mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-gray-800 sm:text-4xl">Professional Builder Gel Systems</h2>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-700 sm:text-base">
-                    From Liquid Polygel to 3-in-1 Builder and Multimix — our complete range of building systems delivers strength, flexibility and flawless structure. Engineered for extensions, reinforcement, and zero-file technique.
+                    From Liquid Polygel to the fiberglass builder gel (3-in-1 Premium) and Multimix Synthogel — our complete builder gel range delivers strength, flexibility, and flawless structure. Engineered for nail extensions, natural nail reinforcement, and zero-file technique. BIAB and brush-on builder options also available.
                   </p>
                   <div className="mt-6">
                     <button
@@ -4101,7 +4196,7 @@ function FullCataloguePage() {
                     <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(255,204,182,0.5)_0%,transparent_70%)] blur-2xl" />
                     <img
                       src="/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp"
-                      alt="GEL.IT.UP Builder Systems"
+                      alt="Gel It Up professional builder gel systems for nail extensions and reinforcement"
                       className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(180,90,50,0.3)]"
                     />
                   </div>
@@ -5338,6 +5433,12 @@ function HomePage({ onOpenContactModal }) {
   const [activeHomeNewsSlide, setActiveHomeNewsSlide] = useState(0)
   const [homeCloudStory, setHomeCloudStory] = useState(HOME_CLOUD_DANCER_DEFAULT)
 
+  useEffect(() => setPageSEO({
+    title: 'GEL.IT.UP by GIUP® | Professional Gel Polish, Builder Gel & Nail Systems',
+    description: 'Professional gel polish with 1,000+ shades, builder gel systems, base coats and top coats. HEMA-free, TPO-free, EU certified. Available wholesale to professional nail technicians worldwide.',
+    canonical: 'https://gelitup.com/',
+  }), [])
+
   useEffect(() => {
     let isMounted = true
 
@@ -5894,6 +5995,12 @@ function PortalLanding() {
 
 function DistributorsPage() {
   const [selectedCountry, setSelectedCountry] = useState(DISTRIBUTOR_COUNTRY_POINTS[0]?.country ?? '')
+
+  useEffect(() => setPageSEO({
+    title: 'Official GEL.IT.UP Distributors Worldwide | GEL.IT.UP by GIUP®',
+    description: 'Find official GEL.IT.UP gel polish and nail system distributors in your country. Verified network covering 30+ countries across Europe and beyond.',
+    canonical: 'https://gelitup.com/distributors',
+  }), [])
 
   const selectedPoint = useMemo(
     () => DISTRIBUTOR_COUNTRY_POINTS.find((item) => item.country === selectedCountry) || null,
