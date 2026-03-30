@@ -7319,10 +7319,12 @@ function PortalRegister({ onRegister }) {
               </div>
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/70">GEL.IT.UP by GIUP®</p>
               <h2 className="mt-2 text-2xl font-black text-white">
-                {submittedProfile.isDistributor ? 'Application Received!' : 'Request Received!'}
+                {submittedProfile.isDistributor ? 'Application Received!' : 'Account Created!'}
               </h2>
               <p className="mt-1.5 text-sm text-white/85">
-                {submittedProfile.name ? `Thank you, ${submittedProfile.name.split(' ')[0]}` : 'Thank you'} — we’re excited to review your application.
+                {submittedProfile.isDistributor
+                  ? `${submittedProfile.name ? `Thank you, ${submittedProfile.name.split(' ')[0]}` : 'Thank you'} — we’re excited to review your application.`
+                  : `${submittedProfile.name ? `Welcome, ${submittedProfile.name.split(' ')[0]}` : 'Welcome'} — a confirmation email is on its way.`}
               </p>
             </div>
 
@@ -7359,23 +7361,29 @@ function PortalRegister({ onRegister }) {
                 </>
               ) : (
                 <>
-                  <p className="text-sm leading-relaxed text-slate-700">
-                    Your B2B account is ready. <strong>You can log in immediately</strong> — no approval or waiting required.
-                    Click below to set your password and access the portal.
-                  </p>
-                  <p className="mt-3 text-xs text-slate-500">
-                    Questions? Reach us at <a href={`mailto:${B2B_EMAIL}`} className="font-semibold text-fuchsia-600 hover:underline">{B2B_EMAIL}</a>
-                  </p>
+                  <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                    <svg className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <div>
+                      <p className="text-sm font-semibold text-emerald-800">Check your inbox</p>
+                      <p className="mt-0.5 text-xs text-emerald-700">
+                        We've sent a confirmation link to <strong>{submittedProfile.email}</strong>.
+                        Click it to set your password — the whole process takes under 2 minutes.
+                      </p>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-xs text-slate-500">Can't find it? Check your spam folder. Questions? <a href={`mailto:${B2B_EMAIL}`} className="font-semibold text-fuchsia-600 hover:underline">{B2B_EMAIL}</a></p>
                 </>
               )}
 
               <div className="mt-6 flex flex-col gap-3">
                 {!submittedProfile.isDistributor ? (
                   <NavLink
-                    to={submittedProfile.email ? `/portal/login?mode=create-password&email=${encodeURIComponent(submittedProfile.email)}` : '/portal/login?mode=create-password'}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-fuchsia-800 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-fuchsia-200 transition hover:opacity-90"
+                    to={submittedProfile.email ? `/portal/login?email=${encodeURIComponent(submittedProfile.email)}` : '/portal/login'}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
                   >
-                    Set Password &amp; Sign In
+                    Already confirmed? Sign in
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
                       <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -14826,6 +14834,24 @@ function App() {
       }
     }
 
+    // Check if user already has an active session — this happens when they clicked
+    // the B2B invite / email-confirmation link, which establishes a session via SIGNED_IN.
+    const { data: { session: activeSession } } = await supabase.auth.getSession()
+    if (activeSession) {
+      const { error: updateError } = await supabase.auth.updateUser({ password })
+      if (updateError) {
+        return { ok: false, message: updateError.message || 'Unable to set your password. Please try again or use Forgot password.' }
+      }
+      localStorage.setItem('portalRememberedEmail', normalizedEmail)
+      setIsPortalAuthenticated(true)
+      return {
+        ok: true,
+        infoMessage: 'Password set. Welcome to the GEL.IT.UP B2B Portal!',
+        navigateToDashboard: true,
+        debugTrace: 'create-password -> email-confirmation-session -> updateUser',
+      }
+    }
+
     const signUpResult = await supabase.auth.signUp({
       email: normalizedEmail,
       password,
@@ -14950,15 +14976,20 @@ function App() {
         ['contact name', application.contactName],
         ['contact email', application.contactEmail],
         ['phone', application.phone],
-        ['shipping type', application.shippingType],
-        ['invoice address line 1', invoiceAddressLine1],
-        ['invoice area/city', invoiceArea],
-        ['invoice region/state', invoiceRegion],
-        ['invoice country', invoiceCountry],
-        ['invoice postal code', invoicePostalCode],
       ]
 
-      if (isDistributorApplication || isBusinessOrder) {
+      if (isDistributorApplication) {
+        requiredFields.push(
+          ['shipping type', application.shippingType],
+          ['invoice address line 1', invoiceAddressLine1],
+          ['invoice area/city', invoiceArea],
+          ['invoice region/state', invoiceRegion],
+          ['invoice country', invoiceCountry],
+          ['invoice postal code', invoicePostalCode],
+        )
+      }
+
+      if (isDistributorApplication) {
         requiredFields.push(['VAT number', application.vatNumber])
       }
 
@@ -14988,7 +15019,7 @@ function App() {
       }
 
       // VAT prefix validation for known countries
-      if (isDistributorApplication || isBusinessOrder) {
+      if (isDistributorApplication) {
         const vatPrefixErr = validateVatPrefix(application.vatNumber, invoiceCountry)
         if (vatPrefixErr) {
           return { ok: false, message: vatPrefixErr }
@@ -15125,11 +15156,27 @@ function App() {
         }
       }
 
+      // For B2B orders: create the Supabase auth account immediately so that Supabase
+      // sends the email-confirmation link. The link redirects to create-password.
+      if (!isDistributorApplication) {
+        const contactEmail = payload.contact_email
+        const encodedEmail = encodeURIComponent(contactEmail)
+        const tempPass = `${crypto.randomUUID()}-Gu!${Date.now()}`
+        await supabase.auth.signUp({
+          email: contactEmail,
+          password: tempPass,
+          options: {
+            emailRedirectTo: `${window.location.origin}/portal/login?mode=create-password&email=${encodedEmail}`,
+          },
+        })
+        // Ignore signUp errors — user may already have an account; this is best-effort
+      }
+
       return {
         ok: true,
         message: isDistributorApplication
           ? `Your distributor application has been received. Our team will review it and contact you by email once approved — usually within 1–2 business days.`
-          : `Your B2B account is ready. Set your password and sign in immediately.`,
+          : `check-inbox:${payload.contact_email}`,
       }
     }
 
