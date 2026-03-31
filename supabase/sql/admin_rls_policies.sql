@@ -2,6 +2,7 @@
 -- Run once in Supabase SQL Editor after create_b2b_admins.sql.
 -- These allow any authenticated user whose email is in b2b_admins
 -- to read and update all rows in both tables.
+-- Safety: always re-applies the anon insert policy so the registration form keeps working.
 
 -- ── b2b_registrations ────────────────────────────────────────────────────────
 
@@ -54,3 +55,19 @@ create policy "Admins can update orders"
       where lower(email) = lower(auth.email())
     )
   );
+
+-- ── Safety footer — always re-apply anon insert so this script can never lock out registrations ──
+drop policy if exists "b2b_registrations_insert_anon" on public.b2b_registrations;
+create policy "b2b_registrations_insert_anon"
+  on public.b2b_registrations
+  for insert
+  to anon, authenticated
+  with check (true);
+
+-- Safety: always re-apply the anon insert policy so the registration form keeps working.
+drop policy if exists "b2b_registrations_insert_anon" on public.b2b_registrations;
+create policy "b2b_registrations_insert_anon"
+  on public.b2b_registrations
+  for insert
+  to anon, authenticated
+  with check (true);
