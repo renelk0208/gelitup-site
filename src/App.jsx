@@ -6641,8 +6641,7 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
 }
 
 function PortalRegister({ onRegister }) {
-  const { pathname: registerPathname } = useLocation()
-  const defaultApplicationType = registerPathname === '/portal/register' ? 'b2b_order' : 'distributor'
+  const defaultApplicationType = 'distributor'
 
   const [application, setApplication] = useState({
     applicationType: defaultApplicationType,
