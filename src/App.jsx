@@ -6691,6 +6691,7 @@ function PortalRegister({ onRegister }) {
   const isDistributorFlow = application.applicationType === 'distributor'
   const isB2BOrderFlow = application.applicationType === 'b2b_order'
   const isOnlineBuyerFlow = application.applicationType === 'online_buyer'
+  const isSalesRepFlow = isDistributorFlow && application.distributorTier === 'sales'
   const isBusinessOrderProfile = application.orderProfile === 'business'
 
   const setField = (fieldName, value) => {
@@ -6757,7 +6758,7 @@ function PortalRegister({ onRegister }) {
 
       <div className="p-8">
         <h3 className="text-xl font-semibold text-slate-900">
-          {isDistributorFlow ? 'Distributor Application' : 'B2B Order Request'}
+          {isSalesRepFlow ? 'Sales Representative Application' : isDistributorFlow ? 'Distributor Application' : 'B2B Order Request'}
         </h3>
 
         <div className="mt-4 flex flex-wrap gap-2">
@@ -6770,9 +6771,23 @@ function PortalRegister({ onRegister }) {
                 customerType: 'company',
               }))
             }}
-            className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${isDistributorFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
+            className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${isDistributorFlow && !isSalesRepFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
           >
             Distribution Application
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setApplication((current) => ({
+                ...current,
+                applicationType: 'distributor',
+                distributorTier: 'sales',
+                customerType: 'company',
+              }))
+            }}
+            className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${isSalesRepFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
+          >
+            Sales Representative
           </button>
           <button
             type="button"
@@ -6951,9 +6966,54 @@ function PortalRegister({ onRegister }) {
                   <option value="" disabled>Select your distribution tier</option>
                   <option value="professional">Professional Distributor — Regional Distribution</option>
                   <option value="authority">Authority Distributor — Country Distribution</option>
+                  <option value="sales">Sales Representative — Direct Sales / Local Market</option>
                 </select>
-                <p className="mt-1 text-xs text-slate-400">Professional: multi-salon or regional reach. Authority: exclusive country-level distribution rights.</p>
+                <p className="mt-1 text-xs text-slate-400">Professional: multi-salon or regional reach. Authority: exclusive country-level distribution rights. Sales Representative: direct sales and local market development.</p>
               </label>
+            )}
+
+            {/* Pricing structure card — shown when a tier is selected */}
+            {isDistributorFlow && application.distributorTier && (
+              <div className="md:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
+                <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500 mb-3">Pricing Structure</p>
+                <div className="space-y-2.5">
+                  {[{
+                    tier: 'professional',
+                    label: 'Professional Distributor',
+                    sub: 'Regional Distribution',
+                    detail: '-63% on all B2B prices',
+                    color: 'text-fuchsia-700',
+                  }, {
+                    tier: 'authority',
+                    label: 'Authority Distributor',
+                    sub: 'Country Distribution',
+                    detail: '-78% on all B2B prices',
+                    color: 'text-fuchsia-900',
+                  }, {
+                    tier: 'sales',
+                    label: 'Sales Representative',
+                    sub: 'Direct Sales / Local Market — The Foundation',
+                    detail: 'Standard B2B price + 0.4% — all product categories',
+                    color: 'text-slate-700',
+                  }].map(row => (
+                    <div key={row.tier} className={`flex items-start gap-3 rounded-lg px-3 py-2.5 transition ${
+                      application.distributorTier === row.tier ? 'bg-white border border-slate-300 shadow-sm' : 'opacity-50'
+                    }`}>
+                      <div className={`mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full ${application.distributorTier === row.tier ? 'bg-fuchsia-600' : 'bg-slate-300'}`} />
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-semibold ${row.color}`}>{row.label}</p>
+                        <p className="text-xs text-slate-500">{row.sub}</p>
+                      </div>
+                      <p className={`shrink-0 text-xs font-bold ${application.distributorTier === row.tier ? 'text-fuchsia-700' : 'text-slate-400'}`}>{row.detail}</p>
+                    </div>
+                  ))}
+                </div>
+                {application.distributorTier === 'sales' && (
+                  <p className="mt-3 text-xs text-slate-500 leading-relaxed">
+                    Build your presence. A focused product range and essential tools designed for professionals entering the market and developing their client network. Full product knowledge support included.
+                  </p>
+                )}
+              </div>
             )}
 
             {isB2BOrderFlow && (
@@ -7513,6 +7573,7 @@ function PortalRegister({ onRegister }) {
                       shippingRegion: '',
                       shippingCountry: '',
                       shippingPostalCode: '',
+                      distributorTier: '',
                       businessType: '',
                       yearsInBusiness: '',
                       distributionCountryInterests: '',
@@ -7707,7 +7768,8 @@ const B2B_SIDEBAR_GROUPS = [
 function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated = false }) {
   // Tier 1 / Professional (local-regional): -63% from B2B price (pay 37%).
   // Tier 2 / Authority (national): -78% from B2B price (pay 22%).
-  const tierPriceMultiplier = tier === 'authority' ? 0.22 : tier === 'professional' ? 0.37 : 1.0
+  // Sales Representative: standard B2B price + 0.4% (pay 100.4%).
+  const tierPriceMultiplier = tier === 'authority' ? 0.22 : tier === 'professional' ? 0.37 : tier === 'sales' ? 1.004 : 1.0
   const location = useLocation()
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
@@ -11139,7 +11201,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             tier === 'professional' ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent' :
             'bg-gradient-to-r from-fuchsia-600 to-fuchsia-800 bg-clip-text text-transparent'
           }`}>
-            {tier === 'authority' ? '★ Authority Distributor Portal' : tier === 'professional' ? 'Professional Distributor Portal' : 'Distributor Portal'}
+            {tier === 'authority' ? '★ Authority Distributor Portal' : tier === 'professional' ? 'Professional Distributor Portal' : tier === 'sales' ? 'Sales Representative Portal' : 'Distributor Portal'}
           </p>
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <span>{selectedLineItems} items</span>
@@ -15214,6 +15276,7 @@ function App() {
               <p style="margin:0 0 8px;"><strong>Company:</strong> ${payload.company_name}</p>
               <p style="margin:0 0 8px;"><strong>Contact:</strong> ${payload.contact_name} (<a href="mailto:${payload.contact_email}">${payload.contact_email}</a>)</p>
               <p style="margin:0 0 8px;"><strong>Status:</strong> ${payload.status}</p>
+              <p style="margin:0 0 8px;"><strong>Distribution Tier:</strong> ${payload.distributor_tier || 'N/A'}</p>
               <p style="margin:0 0 8px;"><strong>Business Type:</strong> ${payload.business_type}</p>
               <p style="margin:0 0 8px;"><strong>VAT:</strong> ${payload.vat_number || 'N/A'}</p>
               <p style="margin:0;"><strong>Invoice Country:</strong> ${payload.invoice_country}</p>
