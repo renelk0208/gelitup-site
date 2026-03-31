@@ -7004,8 +7004,8 @@ function PortalRegister({ onRegister }) {
               </label>
             )}
 
-            {/* Pricing structure card — shown when a tier is selected */}
-            {isDistributorFlow && application.distributorTier && (
+            {/* Pricing structure card — shown when a distributor tier is selected (not sales) */}
+            {isDistributorFlow && application.distributorTier && !isSalesRepFlow && (
               <div className="md:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
                 <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500 mb-3">Pricing Structure</p>
                 <div className="space-y-2.5">
@@ -7024,7 +7024,7 @@ function PortalRegister({ onRegister }) {
                   }, {
                     tier: 'sales',
                     label: 'Sales Representative',
-                    sub: 'Direct Sales / Local Market',
+                    sub: 'Local Market',
                     detail: 'Standard B2B + 0.4%',
                     color: 'text-slate-700',
                   }].map(row => (
