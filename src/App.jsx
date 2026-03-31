@@ -6181,6 +6181,19 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
             return
           }
 
+          // Set session flags BEFORE calling onLogin so the SIGNED_IN event (which fires
+          // inside signInWithPassword) sees the correct portalSessionOnly state.
+          sessionStorage.setItem('portalTabActive', 'true')
+          if (rememberMe) {
+            localStorage.setItem('portalRememberedEmail', String(email || '').trim().toLowerCase())
+            localStorage.setItem('portalRememberMe', 'true')
+            localStorage.removeItem('portalSessionOnly')
+          } else {
+            localStorage.setItem('portalSessionOnly', 'true')
+            localStorage.removeItem('portalRememberedEmail')
+            localStorage.removeItem('portalRememberMe')
+          }
+
           const result = await onLogin(email, password)
           setIsSubmitting(false)
 
@@ -6189,22 +6202,11 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           }
 
           if (!result.ok) {
+            // Revert session flags on login failure
+            sessionStorage.removeItem('portalTabActive')
+            localStorage.removeItem('portalSessionOnly')
             setErrorMessage(result.message || 'Unable to sign in.')
             return
-          }
-
-          // Mark this tab as active so session persists within the browser session
-          sessionStorage.setItem('portalTabActive', 'true')
-          if (rememberMe) {
-            localStorage.setItem('portalRememberedEmail', String(email || '').trim().toLowerCase())
-            localStorage.setItem('portalRememberMe', 'true')
-            localStorage.removeItem('portalSessionOnly')
-          }
-          else {
-            // Session-only: sign out automatically when browser is fully closed
-            localStorage.setItem('portalSessionOnly', 'true')
-            localStorage.removeItem('portalRememberedEmail')
-            localStorage.removeItem('portalRememberMe')
           }
 
           navigate('/portal/dashboard/overview')
@@ -6382,7 +6384,11 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
   const [email, setEmail] = useState(prefilledEmail || localStorage.getItem('adminRememberedEmail') || '')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(() => localStorage.getItem('adminRememberMe') === 'true' || Boolean(localStorage.getItem('adminRememberedEmail')))
+  const [rememberMe, setRememberMe] = useState(() => {
+    const stored = localStorage.getItem('adminRememberMe')
+    if (stored === 'false') return false
+    return true
+  })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [infoMessage, setInfoMessage] = useState('')
@@ -6456,24 +6462,27 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
             return
           }
 
-          const result = await onAdminLogin(email, password)
-          setIsSubmitting(false)
-
-          if (!result.ok) {
-            setErrorMessage(result.message || 'Unable to sign in as admin.')
-            return
-          }
-
+          // Set session flags BEFORE calling onAdminLogin so the SIGNED_IN event sees them
           sessionStorage.setItem('portalTabActive', 'true')
           if (rememberMe) {
             localStorage.setItem('adminRememberedEmail', String(email || '').trim().toLowerCase())
             localStorage.setItem('adminRememberMe', 'true')
             localStorage.removeItem('portalSessionOnly')
-          }
-          else {
+          } else {
             localStorage.setItem('portalSessionOnly', 'true')
             localStorage.removeItem('adminRememberedEmail')
             localStorage.removeItem('adminRememberMe')
+          }
+
+          const result = await onAdminLogin(email, password)
+          setIsSubmitting(false)
+
+          if (!result.ok) {
+            // Revert session flags on login failure
+            sessionStorage.removeItem('portalTabActive')
+            localStorage.removeItem('portalSessionOnly')
+            setErrorMessage(result.message || 'Unable to sign in as admin.')
+            return
           }
 
           navigate('/portal/dashboard/applications')
@@ -14398,6 +14407,9 @@ function App() {
           // getSession handler will perform the sign-out; skip setting authenticated here
           return
         }
+        // Mark this tab active so future TOKEN_REFRESHED / INITIAL_SESSION events pass
+        // the tabActive check even if sessionStorage was empty on page load.
+        sessionStorage.setItem('portalTabActive', 'true')
       }
       setIsPortalAuthenticated(Boolean(session))
       setAuthReady(true)
