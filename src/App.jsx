@@ -1610,6 +1610,38 @@ function DistributorPackagesPage() {
         </div>
       </div>
 
+      {/* SALES TIER */}
+      <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #374151', backgroundColor: '#ffffff' }}>
+        <div className="px-6 py-4" style={{ backgroundColor: '#374151' }}>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.60)' }}>Entry Tier</p>
+          <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#ffffff' }}>SALES — The Foundation</h2>
+          <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.60)' }}>Build your presence. A focused product range and essential tools designed for professionals entering the market and developing their client network.</p>
+        </div>
+        <div>
+          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #e2e8f0' }}>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#64748b', borderRight: '2px solid #e2e8f0', paddingRight: '1rem' }}>Market Focus</p>
+            <p className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>Direct Sales / Local Market</p>
+          </div>
+          <div className="flex items-start gap-4 px-6 py-4" style={{ borderBottom: '1px solid #e2e8f0' }}>
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#64748b', borderRight: '2px solid #e2e8f0', paddingRight: '1rem' }}>Product Spectrum</p>
+            <ul className="space-y-1.5">
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#c8386e' }} />Complete Product Spectrum</li>
+            </ul>
+          </div>
+          <div className="flex items-start gap-4 px-6 py-4">
+            <p className="w-36 flex-shrink-0 text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#64748b', borderRight: '2px solid #e2e8f0', paddingRight: '1rem' }}>Support Package</p>
+            <ul className="space-y-1.5">
+              <li className="flex items-center gap-2 text-sm" style={{ color: '#374151' }}><span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: '#d1d5db' }} />Product Knowledge Support</li>
+            </ul>
+          </div>
+        </div>
+        <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
+          <NavLink to="/become-distributor" className="btn-cta-dark inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
+            Request Sales Tier Pricing ?
+          </NavLink>
+        </div>
+      </article>
+
       {/* PROFESSIONAL TIER */}
       <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #1a1a1a', backgroundColor: '#ffffff' }}>
         <div className="px-6 py-4" style={{ backgroundColor: '#1a1a1a' }}>
