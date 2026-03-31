@@ -7024,8 +7024,8 @@ function PortalRegister({ onRegister }) {
                   }, {
                     tier: 'sales',
                     label: 'Sales Representative',
-                    sub: 'Direct Sales / Local Market — The Foundation',
-                    detail: 'Standard B2B price + 0.4% — all product categories',
+                    sub: 'Direct Sales / Local Market',
+                    detail: 'Standard B2B + 0.4%',
                     color: 'text-slate-700',
                   }].map(row => (
                     <div key={row.tier} className={`flex items-start gap-3 rounded-lg px-3 py-2.5 transition ${
