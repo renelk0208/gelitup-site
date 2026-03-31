@@ -6,3 +6,11 @@
 
 alter table public.b2b_registrations
   add column if not exists prices_allocated boolean not null default false;
+
+-- Safety: always re-apply the anon insert policy so the registration form keeps working.
+drop policy if exists "b2b_registrations_insert_anon" on public.b2b_registrations;
+create policy "b2b_registrations_insert_anon"
+  on public.b2b_registrations
+  for insert
+  to anon, authenticated
+  with check (true);
