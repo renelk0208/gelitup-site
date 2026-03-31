@@ -67,7 +67,7 @@ function RegistrationsPanel() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [filter, setFilter] = useState('pending')
+  const [filter, setFilter] = useState('all')
   const [expanded, setExpanded] = useState(null)
   const [commentMap, setCommentMap] = useState({})
   const [saving, setSaving] = useState(null)

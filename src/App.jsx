@@ -15132,10 +15132,11 @@ function App() {
         status: submissionStatus,
       }
 
-      const { error } = await supabase
+      const { data: insertedRows, error } = await supabase
         .from(registrationsTable)
         .insert([payload])
-      const createdApplication = { id: null, contact_name: payload.contact_name, contact_email: payload.contact_email, company_name: payload.company_name }
+        .select('id')
+      const createdApplication = { id: insertedRows?.[0]?.id ?? null, contact_name: payload.contact_name, contact_email: payload.contact_email, company_name: payload.company_name }
 
       if (error) {
         const missingTableError = error.message?.includes('Could not find the table')
@@ -15151,12 +15152,45 @@ function App() {
         return { ok: false, message: `Registration failed: ${error.message} (code: ${error.code})` }
       }
 
+      const inboxTo = isDistributorApplication ? ORDER_INBOX_EMAIL : CONTACT_INBOX_EMAIL
+      const inboxSubject = isDistributorApplication
+        ? `[DISTRIBUTOR APPLICATION] #${createdApplication?.id} — ${payload.company_name}`
+        : `[NEW ORDER REQUEST] #${createdApplication?.id} — ${payload.company_name}`
+      const inboxHtml = isDistributorApplication
+        ? `<div style="font-family:sans-serif;max-width:600px;">
+            <div style="background:#4f46e5;color:#fff;padding:16px 24px;border-radius:8px 8px 0 0;">
+              <strong style="font-size:13px;letter-spacing:2px;text-transform:uppercase;">Distributor Application</strong>
+            </div>
+            <div style="border:1px solid #e5e7eb;border-top:none;padding:20px 24px;border-radius:0 0 8px 8px;">
+              <p style="margin:0 0 12px;"><strong>Application ID:</strong> ${createdApplication?.id}</p>
+              <p style="margin:0 0 8px;"><strong>Company:</strong> ${payload.company_name}</p>
+              <p style="margin:0 0 8px;"><strong>Contact:</strong> ${payload.contact_name} (<a href="mailto:${payload.contact_email}">${payload.contact_email}</a>)</p>
+              <p style="margin:0 0 8px;"><strong>Status:</strong> ${payload.status}</p>
+              <p style="margin:0 0 8px;"><strong>Business Type:</strong> ${payload.business_type}</p>
+              <p style="margin:0 0 8px;"><strong>VAT:</strong> ${payload.vat_number || 'N/A'}</p>
+              <p style="margin:0;"><strong>Invoice Country:</strong> ${payload.invoice_country}</p>
+            </div>
+          </div>`
+        : `<div style="font-family:sans-serif;max-width:600px;">
+            <div style="background:#16a34a;color:#fff;padding:16px 24px;border-radius:8px 8px 0 0;">
+              <strong style="font-size:13px;letter-spacing:2px;text-transform:uppercase;">&#128722; New B2B Order Request</strong>
+            </div>
+            <div style="border:1px solid #e5e7eb;border-top:none;padding:20px 24px;border-radius:0 0 8px 8px;">
+              <p style="margin:0 0 12px;"><strong>Order Request ID:</strong> ${createdApplication?.id}</p>
+              <p style="margin:0 0 8px;"><strong>Company/Client:</strong> ${payload.company_name}</p>
+              <p style="margin:0 0 8px;"><strong>Contact:</strong> ${payload.contact_name} (<a href="mailto:${payload.contact_email}">${payload.contact_email}</a>)</p>
+              <p style="margin:0 0 8px;"><strong>Business Type:</strong> ${payload.business_type}</p>
+              <p style="margin:0 0 8px;"><strong>VAT:</strong> ${payload.vat_number || 'N/A'}</p>
+              <p style="margin:0;"><strong>Invoice Country:</strong> ${payload.invoice_country}</p>
+            </div>
+          </div>`
+
       const [inboxNotificationResult, applicantNotificationResult] = await Promise.all([
         sendPortalEmailNotification({
           eventType: isDistributorApplication ? 'distributor_application_submitted' : 'b2b_order_request_submitted',
-          to: ORDER_INBOX_EMAIL,
-          subject: `${isDistributorApplication ? 'Distributor Application' : 'B2B Order Request'} #${createdApplication?.id} — ${payload.company_name}`,
-          html: `<p>New ${isDistributorApplication ? 'distributor application' : 'B2B order request'} received.</p><p><strong>Application ID:</strong> ${createdApplication?.id}</p><p><strong>Company/Client:</strong> ${payload.company_name}</p><p><strong>Contact:</strong> ${payload.contact_name} (${payload.contact_email})</p><p><strong>Status:</strong> ${payload.status}</p><p><strong>Business Type:</strong> ${payload.business_type}</p><p><strong>VAT:</strong> ${payload.vat_number || '-'}</p><p><strong>Invoice Country:</strong> ${payload.invoice_country}</p>`,
+          to: inboxTo,
+          subject: inboxSubject,
+          html: inboxHtml,
           applicationId: createdApplication?.id,
           companyName: payload.company_name,
           contactName: payload.contact_name,
