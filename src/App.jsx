@@ -1738,7 +1738,7 @@ function ForAcademiesPage() {
       <div className="w-full overflow-hidden rounded-2xl bg-black">
         <div className="relative h-[60vh] min-h-[320px] w-full sm:h-[68vh] sm:min-h-[420px]">
           <img
-            src="/gelitup-content/catalog-heroes/consumables-catalog-hero.jpg"
+            src="/gelitup-content/catalog-heroes/academy-hero-image.webp"
             alt="Professional nail academy training"
             className="h-full w-full object-cover object-center brightness-[0.72]"
             loading="eager"
