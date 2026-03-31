@@ -2898,6 +2898,32 @@ function FullCataloguePage() {
     return () => window.removeEventListener('keydown', handler)
   }, [lightboxUrl])
 
+  const [activeNavAnchor, setActiveNavAnchor] = useState('')
+  useEffect(() => {
+    const anchors = [
+      'catalogue-section-colours',
+      'catalogue-section-essentials',
+      'catalogue-section-builders',
+      'catalogue-section-tools',
+      'catalogue-section-nail-art',
+      'catalogue-section-consumables',
+      'catalogue-section-nail-hand-foot',
+    ]
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Pick the topmost section that is currently intersecting
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+        if (visible.length > 0) setActiveNavAnchor(visible[0].target.id)
+      },
+      { rootMargin: '-10% 0px -60% 0px', threshold: 0 },
+    )
+    const els = anchors.map(id => document.getElementById(id)).filter(Boolean)
+    els.forEach(el => observer.observe(el))
+    return () => els.forEach(el => observer.unobserve(el))
+  }, [isLoading])
+
   useEffect(() => setPageSEO({
     title: 'Gel Polish, Builder Gel & Professional Nail Systems | GEL.IT.UP by GIUP®',
     description: 'Browse 1,000+ gel polish colours, professional builder gel systems, base coats, top coats, and nail accessories. HEMA-free, TPO-free, EU certified. Wholesale pricing available.',
@@ -3894,26 +3920,36 @@ function FullCataloguePage() {
         <div className="sticky top-[61px] z-30 -mx-3 border-b border-white/10 bg-[#111111]/95 backdrop-blur-sm md:-mx-6 md:top-[69px]">
           <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-6">
             {[
-              { label: 'Colours', anchor: 'catalogue-section-colours' },
-              { label: 'Bases & Tops', anchor: 'catalogue-section-essentials' },
-              { label: 'Builder Systems', anchor: 'catalogue-section-builders' },
-              { label: 'Tools', anchor: 'catalogue-section-tools' },
-              { label: 'Nail Art', anchor: 'catalogue-section-nail-art' },
-              { label: 'Consumables', anchor: 'catalogue-section-consumables' },
-              { label: 'Nail Care', anchor: 'catalogue-section-nail-hand-foot' },
-            ].map((item) => (
-              <button
-                key={item.anchor}
-                type="button"
-                onClick={() => {
-                  const el = document.getElementById(item.anchor)
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                }}
-                className="shrink-0 rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/60 transition hover:bg-white/10 hover:text-white"
-              >
-                {item.label}
-              </button>
-            ))}
+              { label: 'Colours',        anchor: 'catalogue-section-colours',       color: '#c084fc' },
+              { label: 'Bases & Tops',   anchor: 'catalogue-section-essentials',    color: '#67e8f9' },
+              { label: 'Builder Systems',anchor: 'catalogue-section-builders',      color: '#86efac' },
+              { label: 'Tools',          anchor: 'catalogue-section-tools',         color: '#fcd34d' },
+              { label: 'Nail Art',       anchor: 'catalogue-section-nail-art',      color: '#f9a8d4' },
+              { label: 'Consumables',    anchor: 'catalogue-section-consumables',   color: '#fb923c' },
+              { label: 'Nail Care',      anchor: 'catalogue-section-nail-hand-foot',color: '#6ee7b7' },
+            ].map((item) => {
+              const isActive = activeNavAnchor === item.anchor
+              return (
+                <button
+                  key={item.anchor}
+                  type="button"
+                  onClick={() => {
+                    setActiveNavAnchor(item.anchor)
+                    const el = document.getElementById(item.anchor)
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }}
+                  className="shrink-0 rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition"
+                  style={isActive
+                    ? { color: item.color, borderBottom: `2px solid ${item.color}`, borderRadius: 0, paddingBottom: '6px' }
+                    : { color: 'rgba(255,255,255,0.50)' }
+                  }
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = item.color }}
+                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = 'rgba(255,255,255,0.50)' }}
+                >
+                  {item.label}
+                </button>
+              )
+            })}
           </div>
         </div>
       )}
@@ -4405,9 +4441,9 @@ function FullCataloguePage() {
                     <button
                       onClick={() => openCatalogueCategory('NAIL HAND & FOOT CARE', 'ALL')}
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
-                      style={{ background: 'rgba(44,88,120,0.85)' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(60,108,145,0.95)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(44,88,120,0.85)'}
+                      style={{ background: 'rgba(20,140,120,0.90)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(20,165,140,1)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(20,140,120,0.90)'}
                     >
                       BROWSE NAIL, HAND &amp; FOOT CARE
                     </button>
