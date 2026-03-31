@@ -7706,8 +7706,9 @@ const B2B_SIDEBAR_GROUPS = [
 ]
 
 function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated = false }) {
-  // Professional: -60% from B2B (pay 40%). Authority: -78% from B2B (pay 22%).
-  const tierPriceMultiplier = tier === 'authority' ? 0.22 : tier === 'professional' ? 0.40 : 1.0
+  // Tier 1 / Professional (local-regional): -63% from B2B price (pay 37%).
+  // Tier 2 / Authority (national): -78% from B2B price (pay 22%).
+  const tierPriceMultiplier = tier === 'authority' ? 0.22 : tier === 'professional' ? 0.37 : 1.0
   const location = useLocation()
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
