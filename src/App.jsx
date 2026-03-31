@@ -4071,7 +4071,7 @@ function FullCataloguePage() {
             <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12 sm:px-8 sm:py-16 lg:flex-row lg:items-center lg:gap-0">
               {/* Text column */}
               <div className="flex-1 lg:max-w-[520px]">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-300">The Core Pigment Library</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#c084fc' }}>The Core Pigment Library</p>
                 <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">1,000+ Gel Polish Colours</h2>
                 <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
                   The Gel It Up gel polish archive. Over 1,000 laboratory-grade gel polish shades categorised by undertone and finish — from the deepest onyx to glass-top effects. Includes Solid Gel Polish, Cat Eye gel polish, Glitters, Thermos, and seasonal collections. Find your signature shade.
@@ -4123,7 +4123,7 @@ function FullCataloguePage() {
 
               <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
                 <div className="flex-1 lg:max-w-[500px]">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300">The Essentials</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#67e8f9' }}>The Essentials</p>
                   <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Base Coat &amp; Top Coat Systems</h2>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
                     The non-negotiables of every nail service. Our professional base coat range protects the natural nail and maximises colour adhesion, while our top coat systems deliver the perfect finish — from high-gloss brilliance to matte sophistication. Includes the 5-in-1 base coat, Flexi Base, Brush On Builder (BIAB), and our full top coat collection.
@@ -4210,7 +4210,7 @@ function FullCataloguePage() {
 
               <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
                 <div className="flex-1 lg:max-w-[500px]">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700">Structural Innovation</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#86efac' }}>Structural Innovation</p>
                   <h2 className="mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-gray-800 sm:text-4xl">Professional Builder Gel Systems</h2>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-700 sm:text-base">
                     From Liquid Polygel to the fiberglass builder gel (3-in-1 Premium) and Multimix Synthogel — our complete builder gel range delivers strength, flexibility, and flawless structure. Engineered for nail extensions, natural nail reinforcement, and zero-file technique. BIAB and brush-on builder options also available.
@@ -4270,7 +4270,7 @@ function FullCataloguePage() {
               />
               <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
                 <div className="flex-1 lg:max-w-[500px]">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-300">The Professional Toolset</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#fcd34d' }}>The Professional Toolset</p>
                   <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Tools &amp; Equipment</h2>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
                     Precision finishing products, expert hardware, and maintenance tools for flawless studio finishes.
@@ -4330,7 +4330,7 @@ function FullCataloguePage() {
               />
               <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
                 <div className="flex-1 lg:max-w-[500px]">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-pink-300">Artistic Mastery</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#f9a8d4' }}>Artistic Mastery</p>
                   <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Nail Art</h2>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
                     Creative nail art supplies for professional nail technicians.
@@ -4381,7 +4381,7 @@ function FullCataloguePage() {
               />
               <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
                 <div className="flex-1 lg:max-w-[500px]">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-orange-600">Studio Essentials</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#fb923c' }}>Studio Essentials</p>
                   <h2 className="mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-gray-800 sm:text-4xl">Consumables</h2>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-700 sm:text-base">
                     Professional-grade consumable supplies for everyday salon use.
@@ -4432,7 +4432,7 @@ function FullCataloguePage() {
               />
               <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
                 <div className="flex-1 lg:max-w-[500px]">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-300">Professional Aftercare</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#6ee7b7' }}>Professional Aftercare</p>
                   <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Nail, Hand &amp; Foot Care</h2>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
                     Therapeutic formulations for professional nail, hand and foot aftercare.
