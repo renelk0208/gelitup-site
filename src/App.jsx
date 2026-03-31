@@ -7004,50 +7004,6 @@ function PortalRegister({ onRegister }) {
               </label>
             )}
 
-            {/* Pricing structure card — shown when a distributor tier is selected (not sales) */}
-            {isDistributorFlow && application.distributorTier && !isSalesRepFlow && (
-              <div className="md:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
-                <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500 mb-3">Pricing Structure</p>
-                <div className="space-y-2.5">
-                  {[{
-                    tier: 'professional',
-                    label: 'Professional Distributor',
-                    sub: 'Regional Distribution',
-                    detail: '-63% on all B2B prices',
-                    color: 'text-fuchsia-700',
-                  }, {
-                    tier: 'authority',
-                    label: 'Authority Distributor',
-                    sub: 'Country Distribution',
-                    detail: '-78% on all B2B prices',
-                    color: 'text-fuchsia-900',
-                  }, {
-                    tier: 'sales',
-                    label: 'Sales Representative',
-                    sub: 'Local Market',
-                    detail: 'Standard B2B + 0.4%',
-                    color: 'text-slate-700',
-                  }].map(row => (
-                    <div key={row.tier} className={`flex items-start gap-3 rounded-lg px-3 py-2.5 transition ${
-                      application.distributorTier === row.tier ? 'bg-white border border-slate-300 shadow-sm' : 'opacity-50'
-                    }`}>
-                      <div className={`mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full ${application.distributorTier === row.tier ? 'bg-fuchsia-600' : 'bg-slate-300'}`} />
-                      <div className="flex-1 min-w-0">
-                        <p className={`font-semibold ${row.color}`}>{row.label}</p>
-                        <p className="text-xs text-slate-500">{row.sub}</p>
-                      </div>
-                      <p className={`shrink-0 text-xs font-bold ${application.distributorTier === row.tier ? 'text-fuchsia-700' : 'text-slate-400'}`}>{row.detail}</p>
-                    </div>
-                  ))}
-                </div>
-                {application.distributorTier === 'sales' && (
-                  <p className="mt-3 text-xs text-slate-500 leading-relaxed">
-                    Build your presence. A focused product range and essential tools designed for professionals entering the market and developing their client network. Full product knowledge support included.
-                  </p>
-                )}
-              </div>
-            )}
-
             {isB2BOrderFlow && (
               <label className="block text-sm font-medium text-slate-700 md:col-span-2">
                 Buyer Type
