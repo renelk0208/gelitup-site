@@ -5275,36 +5275,19 @@ function BaselinePageView() {
 }
 
 function InstagramFeedStrip() {
-  const [posts, setPosts] = useState([])
-  const [status, setStatus] = useState('loading') // 'loading' | 'ok' | 'error'
-
   useEffect(() => {
-    let mounted = true
-    const load = async () => {
-      try {
-        const res = await fetch('/.netlify/functions/instagram-feed')
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const data = await res.json()
-        if (mounted) {
-          setPosts(data.posts || [])
-          setStatus((data.posts || []).length > 0 ? 'ok' : 'error')
-        }
-      } catch {
-        if (mounted) setStatus('error')
-      }
-    }
-    load()
-    return () => { mounted = false }
+    if (document.querySelector('script[src="https://elfsightcdn.com/platform.js"]')) return
+    const script = document.createElement('script')
+    script.src = 'https://elfsightcdn.com/platform.js'
+    script.async = true
+    document.body.appendChild(script)
   }, [])
-
-  if (status === 'error' || (status !== 'loading' && posts.length === 0)) return null
 
   return (
     <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#0F0F0F] py-8">
       <div className="mx-auto max-w-6xl px-4 sm:px-8">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {/* Instagram gradient icon */}
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
@@ -5332,47 +5315,7 @@ function InstagramFeedStrip() {
             Follow Us ?
           </a>
         </div>
-
-        {status === 'loading' ? (
-          <div className="flex gap-3 overflow-hidden">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-40 w-40 flex-shrink-0 animate-pulse rounded-xl bg-white/10 sm:h-48 sm:w-48" />
-            ))}
-          </div>
-        ) : (
-          <div className="scrollbar-hide -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:-mx-8 sm:px-8">
-            {posts.map((post) => {
-              const thumb = post.media_type === 'VIDEO' ? (post.thumbnail_url || post.media_url) : post.media_url
-              const isVideo = post.media_type === 'VIDEO'
-              return (
-                <a
-                  key={post.id}
-                  href={post.permalink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group relative h-40 w-40 flex-shrink-0 snap-start overflow-hidden rounded-xl sm:h-48 sm:w-48"
-                >
-                  <img
-                    src={thumb}
-                    alt={post.caption ? post.caption.slice(0, 80) : 'Instagram post'}
-                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                  {isVideo && (
-                    <div className="absolute right-2 top-2 rounded-full bg-black/60 p-1">
-                      <svg className="h-3 w-3 fill-white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                    </div>
-                  )}
-                  <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 transition duration-300 group-hover:opacity-100">
-                    {post.caption && (
-                      <p className="line-clamp-3 p-3 text-[10px] leading-relaxed text-white">{post.caption}</p>
-                    )}
-                  </div>
-                </a>
-              )
-            })}
-          </div>
-        )}
+        <div className="elfsight-app-42ee70be-f926-412b-b52f-47a51f35a691" data-elfsight-app-lazy />
       </div>
     </div>
   )
