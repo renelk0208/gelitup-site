@@ -262,6 +262,17 @@ function RegistrationsPanel() {
     setRows(prev => prev.map(r => r.id === row.id ? { ...r, prices_allocated: next } : r))
   }
 
+  const updateTier = async (row, newTier) => {
+    setSaving(row.id)
+    const { error: err } = await supabase
+      .from(REGISTRATIONS_TABLE)
+      .update({ distributor_tier: newTier || null })
+      .eq('id', row.id)
+    setSaving(null)
+    if (err) { alert(err.message); return }
+    setRows(prev => prev.map(r => r.id === row.id ? { ...r, distributor_tier: newTier || null } : r))
+  }
+
   const FILTERS = ['pending', 'approved', 'rejected', 'all']
   const counts = FILTERS.reduce((acc, f) => {
     if (f === 'all') acc[f] = rows.length
@@ -331,17 +342,32 @@ function RegistrationsPanel() {
                   <div><span className="font-semibold text-slate-400">VAT</span><br />{row.vat_number || '—'}</div>
                   <div><span className="font-semibold text-slate-400">Business Type</span><br />{row.business_type || '—'}</div>
                   <div><span className="font-semibold text-slate-400">Application Type</span><br />{row.application_type || '—'}</div>
-                  {row.distributor_tier && (
-                    <div><span className="font-semibold text-slate-400">Distributor Tier</span><br />
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${
-                        row.distributor_tier === 'authority' ? 'bg-fuchsia-100 text-fuchsia-700' :
-                        row.distributor_tier === 'country' ? 'bg-sky-100 text-sky-700' :
-                        row.distributor_tier === 'professional' ? 'bg-pink-100 text-pink-700' :
-                        row.distributor_tier === 'sales' ? 'bg-slate-100 text-slate-600' :
-                        'bg-slate-100 text-slate-600'
-                      }`}>{row.distributor_tier}</span>
+                  <div>
+                    <span className="font-semibold text-slate-400">Distributor Tier</span><br />
+                    <div className="mt-1 flex items-center gap-2">
+                      {row.distributor_tier && (
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${
+                          row.distributor_tier === 'authority' ? 'bg-fuchsia-100 text-fuchsia-700' :
+                          row.distributor_tier === 'country' ? 'bg-sky-100 text-sky-700' :
+                          row.distributor_tier === 'professional' ? 'bg-pink-100 text-pink-700' :
+                          row.distributor_tier === 'sales' ? 'bg-slate-100 text-slate-600' :
+                          'bg-slate-100 text-slate-600'
+                        }`}>{row.distributor_tier === 'country' ? 'Level 2 Country' : row.distributor_tier}</span>
+                      )}
+                      <select
+                        value={row.distributor_tier || ''}
+                        onChange={(e) => updateTier(row, e.target.value)}
+                        disabled={saving === row.id}
+                        className="rounded-lg border border-slate-300 px-2 py-1 text-xs outline-none ring-slate-900/20 focus:ring disabled:opacity-50"
+                      >
+                        <option value="">— No tier —</option>
+                        <option value="professional">Professional</option>
+                        <option value="authority">Authority</option>
+                        <option value="country">Level 2 Country Tier</option>
+                        <option value="sales">Sales Representative</option>
+                      </select>
                     </div>
-                  )}
+                  </div>
                   <div className="sm:col-span-2">
                     <span className="font-semibold text-slate-400">Address</span><br />
                     {[row.address, row.city, row.postal_code, row.country].filter(Boolean).join(', ') || '—'}
@@ -925,6 +951,59 @@ function AdminsPanel() {
   )
 }
 
+// ─── Tier Pricing panel ───────────────────────────────────────────────────────
+
+const TIER_PRICING_DATA = [
+  { key: 'authority',    label: 'Authority Distributor',    multiplier: 0.22,  description: 'Exclusive country-level distribution rights. Pays 22% of B2B price (−78%).',       colour: 'bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200' },
+  { key: 'professional', label: 'Professional Distributor', multiplier: 0.37,  description: 'Multi-salon or regional reach. Pays 37% of B2B price (−63%).',                     colour: 'bg-pink-100 text-pink-700 border-pink-200' },
+  { key: 'sales',        label: 'Sales Representative',     multiplier: 1.004, description: 'Direct sales & local market development. Pays B2B price + 0.4%.',                  colour: 'bg-slate-100 text-slate-700 border-slate-200' },
+  { key: 'country',      label: 'Level 2 Country Tier',     multiplier: 1.20,  description: 'Country-level distribution at B2B + 20%. Admin-assigned only (not client-selectable).', colour: 'bg-sky-100 text-sky-700 border-sky-200' },
+]
+
+function TierPricingPanel() {
+  const exampleB2B = 10.00
+  return (
+    <div>
+      <h2 className="text-sm font-bold text-slate-900 mb-1">Distributor Tier Pricing Overview</h2>
+      <p className="text-xs text-slate-500 mb-4">These multipliers are applied to the B2B wholesale price for each tier. Example below uses a €{exampleB2B.toFixed(2)} B2B price.</p>
+      <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+            <tr>
+              <th className="px-4 py-3">Tier</th>
+              <th className="px-4 py-3">Multiplier</th>
+              <th className="px-4 py-3">Discount / Markup</th>
+              <th className="px-4 py-3">Example Price</th>
+              <th className="px-4 py-3 hidden sm:table-cell">Description</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {TIER_PRICING_DATA.map(t => {
+              const pct = t.multiplier < 1
+                ? `−${((1 - t.multiplier) * 100).toFixed(0)}%`
+                : t.multiplier > 1
+                  ? `+${((t.multiplier - 1) * 100).toFixed(1)}%`
+                  : '—'
+              return (
+                <tr key={t.key} className="hover:bg-slate-50">
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${t.colour}`}>{t.label}</span>
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs font-semibold text-slate-800">×{t.multiplier}</td>
+                  <td className={`px-4 py-3 text-xs font-semibold ${t.multiplier < 1 ? 'text-emerald-600' : t.multiplier > 1 ? 'text-amber-600' : 'text-slate-500'}`}>{pct}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-slate-700">€{(exampleB2B * t.multiplier).toFixed(2)}</td>
+                  <td className="px-4 py-3 text-xs text-slate-500 hidden sm:table-cell">{t.description}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-3 text-[11px] text-slate-400">Multipliers are set in code (App.jsx → ProductsModule). The Level 2 Country Tier is only assignable by admin — it does not appear on the client registration form.</p>
+    </div>
+  )
+}
+
 // ─── Admin Dashboard shell ────────────────────────────────────────────────────
 
 export default function AdminDashboard({ onLogout }) {
@@ -966,6 +1045,12 @@ export default function AdminDashboard({ onLogout }) {
           >
             Admins
           </button>
+          <button
+            onClick={() => setTab('pricing')}
+            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${tab === 'pricing' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+          >
+            Tier Pricing
+          </button>
         </div>
       </div>
 
@@ -973,6 +1058,7 @@ export default function AdminDashboard({ onLogout }) {
         {tab === 'registrations' && <RegistrationsPanel />}
         {tab === 'orders' && <OrdersPanel />}
         {tab === 'admins' && <AdminsPanel />}
+        {tab === 'pricing' && <TierPricingPanel />}
       </div>
     </section>
   )

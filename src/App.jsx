@@ -5276,7 +5276,13 @@ function BaselinePageView() {
 
 function InstagramFeedStrip() {
   useEffect(() => {
-    if (document.querySelector('script[src="https://elfsightcdn.com/platform.js"]')) return
+    // Script already loaded — tell Elfsight to re-scan for new widget divs (SPA navigation)
+    if (document.querySelector('script[src="https://elfsightcdn.com/platform.js"]')) {
+      try {
+        if (window.eapps?.Platform?.setupWidgets) window.eapps.Platform.setupWidgets()
+      } catch (_) { /* Elfsight not ready yet */ }
+      return
+    }
     const script = document.createElement('script')
     script.src = 'https://elfsightcdn.com/platform.js'
     script.async = true
@@ -6941,10 +6947,9 @@ function PortalRegister({ onRegister }) {
                   <option value="" disabled>Select your distribution tier</option>
                   <option value="professional">Professional Distributor — Regional Distribution</option>
                   <option value="authority">Authority Distributor — Country Distribution</option>
-                  <option value="country">Level 2 Country Tier — Country-Level Distribution</option>
                   <option value="sales">Sales Representative — Direct Sales / Local Market</option>
                 </select>
-                <p className="mt-1 text-xs text-slate-400">Professional: multi-salon or regional reach. Authority: exclusive country-level distribution rights. Level 2 Country Tier: country-level distribution at B2B+20%. Sales Representative: direct sales and local market development.</p>
+                <p className="mt-1 text-xs text-slate-400">Professional: multi-salon or regional reach. Authority: exclusive country-level distribution rights. Sales Representative: direct sales and local market development.</p>
               </label>
             )}
 
@@ -11152,6 +11157,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             {tier === 'authority' ? '★ Authority Distributor Portal' : tier === 'professional' ? 'Professional Distributor Portal' : tier === 'country' ? 'Level 2 Country Tier Portal' : tier === 'sales' ? 'Sales Representative Portal' : 'Distributor Portal'}
           </p>
           <div className="flex items-center gap-2 text-xs text-slate-500">
+            {selectedLineItems > 0 && <span className="text-[10px] text-emerald-600 font-medium">✓ Draft auto-saved</span>}
             <span>{selectedLineItems} items</span>
             <span>/</span>
             <span>{totalUnits} total units</span>
@@ -11185,7 +11191,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                     </div>
                     <div className="flex items-center gap-1">
                       <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(prev => ({...prev, [product.code]: q})) }} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">-</button>
-                      <span className="w-6 text-center text-xs font-semibold text-slate-900">{qty}</span>
+                      <input type="number" min="1" value={qty} onChange={(e) => { const v = parseInt(e.target.value, 10); if (v > 0) setItemQtys(prev => ({...prev, [product.code]: v})); else if (e.target.value === '') setItemQtys(prev => ({...prev, [product.code]: ''})) }} onBlur={(e) => { const v = parseInt(e.target.value, 10); if (!v || v <= 0) toggleSelection(product.code) }} className="h-6 w-12 rounded border border-slate-200 text-center text-xs font-semibold text-slate-900 outline-none focus:border-fuchsia-400 focus:ring-1 focus:ring-fuchsia-200 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
                       <button onClick={() => setItemQtys(prev => ({...prev, [product.code]: qty + 1}))} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">+</button>
                     </div>
                     <div className="w-16 text-right">
@@ -11711,7 +11717,10 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           </span>
           <div className="flex shrink-0 items-center gap-2">
             {(selectedCodes.length > 0 || packageCartItems.length > 0) && (
-              <button onClick={() => { setSelectedCodes([]); setItemQtys({}); setPackageCartItems([]); setGeneratedPackageTier('') }} className="text-xs text-slate-400 hover:text-rose-500">Clear</button>
+              <>
+                <span className="text-[10px] text-emerald-600 font-medium">✓ Draft saved</span>
+                <button onClick={() => { setSelectedCodes([]); setItemQtys({}); setPackageCartItems([]); setGeneratedPackageTier('') }} className="text-xs text-slate-400 hover:text-rose-500">Clear</button>
+              </>
             )}
             <button onClick={() => navigate('/portal/dashboard/products')} className="btn-cta-rose rounded px-3 py-1 text-xs font-semibold">
               Review
@@ -11841,7 +11850,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                           {selected ? (
                             <div className="mt-auto flex items-center justify-center gap-1 border-t px-1 py-1" style={{ borderColor: '#fde8f0' }}>
                               <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(p => ({...p, [product.code]: q})) }} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>-</button>
-                              <span className="w-4 text-center text-[10px] font-bold">{qty}</span>
+                              <input type="number" min="1" value={qty} onChange={(e) => { const v = parseInt(e.target.value, 10); if (v > 0) setItemQtys(p => ({...p, [product.code]: v})); else if (e.target.value === '') setItemQtys(p => ({...p, [product.code]: ''})) }} onBlur={(e) => { const v = parseInt(e.target.value, 10); if (!v || v <= 0) toggleSelection(product.code) }} className="h-5 w-10 rounded border text-center text-[10px] font-bold outline-none focus:border-fuchsia-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" style={{ borderColor: '#f0c4d0', color: '#c8386e' }} />
                               <button onClick={() => setItemQtys(p => ({...p, [product.code]: qty + 1}))} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>+</button>
                             </div>
                           ) : (
