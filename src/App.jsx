@@ -5275,33 +5275,29 @@ function BaselinePageView() {
 }
 
 function InstagramFeedStrip() {
-  useEffect(() => {
-    const trySetup = () => {
-      try {
-        if (window.eapps?.Platform?.setupWidgets) {
-          window.eapps.Platform.setupWidgets()
-          return true
-        }
-      } catch (_) { /* not ready */ }
-      return false
-    }
+  const [posts, setPosts] = useState([])
+  const [status, setStatus] = useState('loading') // 'loading' | 'ok' | 'error'
 
-    // Script already loaded — retry setupWidgets until the platform is ready
-    if (document.querySelector('script[src*="elfsightcdn.com/platform"]')) {
-      if (!trySetup()) {
-        let attempts = 0
-        const iv = setInterval(() => {
-          if (trySetup() || ++attempts >= 30) clearInterval(iv)
-        }, 500)
-        return () => clearInterval(iv)
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      try {
+        const res = await fetch('/.netlify/functions/instagram-feed')
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data = await res.json()
+        if (mounted) {
+          setPosts(data.posts || [])
+          setStatus((data.posts || []).length > 0 ? 'ok' : 'error')
+        }
+      } catch {
+        if (mounted) setStatus('error')
       }
-      return
     }
-    const script = document.createElement('script')
-    script.src = 'https://elfsightcdn.com/platform.js'
-    script.async = true
-    document.body.appendChild(script)
+    load()
+    return () => { mounted = false }
   }, [])
+
+  if (status === 'error') return null
 
   return (
     <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#0F0F0F] py-8">
@@ -5332,10 +5328,53 @@ function InstagramFeedStrip() {
             rel="noreferrer"
             className="text-xs font-semibold uppercase tracking-widest text-[#D43790] transition hover:text-fuchsia-300"
           >
-            Follow Us ?
+            Follow Us →
           </a>
         </div>
-        <div className="elfsight-app-42ee70be-f926-412b-b52f-47a51f35a691" data-elfsight-app-lazy />
+
+        {status === 'loading' && (
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i} className="aspect-square animate-pulse rounded-lg bg-white/10" />
+            ))}
+          </div>
+        )}
+
+        {status === 'ok' && (
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            {posts.map((post) => (
+              <a
+                key={post.id}
+                href={post.permalink}
+                target="_blank"
+                rel="noreferrer"
+                className="group relative aspect-square overflow-hidden rounded-lg bg-white/5"
+              >
+                <img
+                  src={post.media_type === 'VIDEO' ? post.thumbnail_url : post.media_url}
+                  alt={post.caption ? post.caption.slice(0, 80) : 'Instagram post'}
+                  className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                  loading="lazy"
+                />
+                {post.media_type === 'VIDEO' && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <svg viewBox="0 0 24 24" fill="white" className="h-8 w-8 drop-shadow-lg opacity-80" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                )}
+                {post.media_type === 'CAROUSEL_ALBUM' && (
+                  <div className="absolute right-2 top-2">
+                    <svg viewBox="0 0 24 24" fill="white" className="h-4 w-4 drop-shadow-lg opacity-80" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z" />
+                    </svg>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/0 transition duration-300 group-hover:bg-black/30" />
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -5682,7 +5721,7 @@ function HomePage({ onOpenContactModal }) {
         />
         <div className="absolute inset-0 bg-[#1A1A1A]/45" />
 
-        <div className="relative mx-auto max-w-6xl overflow-hidden">
+        <div className="relative mx-auto max-w-6xl overflow-x-hidden">
           <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8">
             <div className="min-w-0 rounded-2xl border border-white/20 bg-black/35 p-5 sm:p-7">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Spring / Summer News</p>
