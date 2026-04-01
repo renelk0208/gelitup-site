@@ -715,23 +715,34 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
 
     return (
       <section className="space-y-6 bg-white">
-        <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#1A1A1A]">
-          <article className="overflow-hidden bg-[#1A1A1A]">
+        <div className="mx-auto w-full max-w-6xl overflow-hidden rounded-2xl bg-black">
+          <div className="relative h-[58vh] min-h-[320px] w-full sm:h-[66vh] sm:min-h-[400px]">
             <img
               src={ABOUT_US_HERO_IMAGE_URL || manifestoVisual?.displayUrl || '/logo.png'}
               alt="About Us hero visual"
-              className="block h-auto w-full"
+              className="h-full w-full object-cover"
               loading="lazy"
               onError={(event) => {
                 const currentSrc = event.currentTarget.getAttribute('src') || ''
-                if (currentSrc.includes('about-us-hero-image.webp')) {
+                if (currentSrc.includes('about-us-page-hero-image')) {
                   event.currentTarget.src = ABOUT_US_HERO_IMAGE_FALLBACK_URL
                   return
                 }
                 event.currentTarget.src = manifestoVisual?.displayUrl || '/logo.png'
               }}
             />
-          </article>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+            <div className="absolute inset-0 flex flex-col justify-end px-6 pb-8 sm:px-10 sm:pb-10">
+              <div className="max-w-xl">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-300">
+                  GEL.IT.UP by GIUP®
+                </p>
+                <h1 className="text-3xl font-bold leading-[1.25] tracking-tight text-white sm:text-4xl lg:text-5xl">
+                  About Us
+                </h1>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="rounded-2xl border border-[#E8E8E8] bg-white p-5 sm:p-8">
