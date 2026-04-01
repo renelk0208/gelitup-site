@@ -63,50 +63,114 @@ function categoryFromImagePath(imgPath) {
   return map[cat] || 'Nail Care'
 }
 
+/* ── Normalization helpers (mirrored from App.jsx) ──────────────────────────── */
+function normalizeSkuCode(value) {
+  return String(value || '').trim().toUpperCase().replace(/\s+/g, ' ')
+}
+
+function normalizeProductName(value) {
+  return normalizeSkuCode(value)
+    .replace(/GEL\.?IT\.?UP|GEL\s*IT\s*UP|GIUP/gi, ' ')
+    .replace(/[^A-Z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/* ── Build a normalized image lookup (same as App.jsx normalizeImageMap) ───── */
+const normalizedImageMap = new Map()
+for (const [rawKey, rawValue] of Object.entries(imageMap)) {
+  const url = typeof rawValue === 'string' ? rawValue.trim() : ''
+  if (!url) continue
+  const nSku = normalizeSkuCode(rawKey)
+  const nName = normalizeProductName(rawKey)
+  if (nSku && !normalizedImageMap.has(nSku)) normalizedImageMap.set(nSku, url)
+  if (nName && !normalizedImageMap.has(nName)) normalizedImageMap.set(nName, url)
+}
+
+// Also index by GIUP + number aliases (the app uses buildColorAliases)
+for (const [rawKey, rawValue] of Object.entries(imageMap)) {
+  const url = typeof rawValue === 'string' ? rawValue.trim() : ''
+  if (!url) continue
+  const norm = normalizeSkuCode(rawKey)
+  // Extract numeric code from "GIUP 01", "GIUP-2037", "GIUP N001" etc.
+  const giupMatch = norm.match(/^GIUP[\s-]*(.+)$/)
+  if (giupMatch) {
+    const code = giupMatch[1].replace(/[\s-]+/g, ' ').trim()
+    if (!normalizedImageMap.has(code)) normalizedImageMap.set(code, url)
+    // For numeric codes, add zero-padded variants
+    const numMatch = code.match(/^(\d{1,4})([A-Z]?)$/)
+    if (numMatch) {
+      const num = parseInt(numMatch[1], 10)
+      const suffix = numMatch[2] || ''
+      for (const pad of [String(num), String(num).padStart(2, '0'), String(num).padStart(3, '0')]) {
+        const alias = `${pad}${suffix}`
+        if (!normalizedImageMap.has(alias)) normalizedImageMap.set(alias, url)
+      }
+    }
+  }
+}
+
 /** Find the best matching image for a product name */
 function findImage(name) {
-  // Exact match
-  if (imageMap[name]) return imageMap[name]
-
   // Strip -HTF / - HTF suffix
   const clean = name.replace(/\s*-\s*HTF$/i, '').trim()
-  if (imageMap[clean]) return imageMap[clean]
 
-  // ── Strategy 1: Extract leading code  (e.g. "01 Ice Ice Baby" → "01")
+  // ── Strategy 1: Exact normalized lookups (same as resolveCatalogImageUrl in App.jsx)
+  const lookups = [
+    normalizeSkuCode(name),
+    normalizeSkuCode(clean),
+    normalizeProductName(name),
+    normalizeProductName(clean),
+  ]
+  for (const key of lookups) {
+    if (key && normalizedImageMap.has(key)) return normalizedImageMap.get(key)
+  }
+
+  // ── Strategy 2: Extract leading alphanumeric code (e.g. "01 Ice Ice Baby" → "01")
   const leadMatch = clean.match(/^([A-Z]*\d+[A-Z]*)\b/i)
   if (leadMatch) {
-    const code = leadMatch[1]
-    const stripped = code.replace(/^0+(?=\d)/, '') // "010" → "10"
-    for (const t of [`GIUP ${code}`, `GIUP ${stripped}`, `GIUP-${code}`, `GIUP-${stripped}`, code, stripped]) {
-      if (imageMap[t]) return imageMap[t]
-    }
+    const code = normalizeSkuCode(leadMatch[1])
+    if (normalizedImageMap.has(code)) return normalizedImageMap.get(code)
+    // Try with GIUP prefix
+    const giup = `GIUP ${code}`
+    if (normalizedImageMap.has(giup)) return normalizedImageMap.get(giup)
   }
 
-  // ── Strategy 2: Extract trailing code  (e.g. "Autumn 2021 OTA01" → "OTA01")
+  // ── Strategy 3: Extract trailing code (e.g. "Autumn 2021 OTA01" → "OTA01")
   const parts = clean.split(/[\s#]+/)
-  const lastWord = parts[parts.length - 1]
-  if (/[A-Z]*\d+/i.test(lastWord) && lastWord !== (leadMatch && leadMatch[1])) {
-    for (const t of [`GIUP ${lastWord}`, `GIUP-${lastWord}`, lastWord]) {
-      if (imageMap[t]) return imageMap[t]
+  const lastWord = normalizeSkuCode(parts[parts.length - 1])
+  if (/[A-Z]*\d+/i.test(lastWord) && lastWord !== (leadMatch && normalizeSkuCode(leadMatch[1]))) {
+    if (normalizedImageMap.has(lastWord)) return normalizedImageMap.get(lastWord)
+    const giup = `GIUP ${lastWord}`
+    if (normalizedImageMap.has(giup)) return normalizedImageMap.get(giup)
+  }
+
+  // ── Strategy 4: Fuzzy substring match on normalized names
+  const nName = normalizeProductName(clean)
+  if (nName && nName.length >= 4) {
+    for (const [key, url] of normalizedImageMap) {
+      if (key.includes(nName) || nName.includes(key)) return url
     }
   }
 
-  // ── Strategy 3: Special prefix patterns (FFF, CMU, etc.)
-  const specialMatch = clean.match(/\b(FFF|CMU\d*|SPX\d*)\b/i)
-  if (specialMatch) {
-    const code = specialMatch[1]
-    for (const t of [`GIUP ${code}`, `GIUP-${code}`, code]) {
-      if (imageMap[t]) return imageMap[t]
+  // ── Strategy 5: Word-overlap match (all significant words must appear)
+  //    e.g. "LINE IT UP APRICOT" matches "line it UP 0017 Apricot"
+  const STOP_WORDS = new Set(['GEL', 'PRO', 'NEW', 'THE', 'AND', 'FOR', 'HTF', 'GIUP', 'BY'])
+  if (nName) {
+    const words = nName.split(' ').filter(w => w.length >= 3 && !STOP_WORDS.has(w))
+    if (words.length >= 2) {
+      for (const [key, url] of normalizedImageMap) {
+        if (words.every(w => key.includes(w))) return url
+      }
+    }
+    // Try with just 1 significant word if product name is short
+    if (words.length === 1 && words[0].length >= 5) {
+      for (const [key, url] of normalizedImageMap) {
+        if (key.includes(words[0])) return url
+      }
     }
   }
 
-  // ── Strategy 4: Case-insensitive partial match (fallback)
-  const lower = clean.toLowerCase()
-  for (const [key, val] of Object.entries(imageMap)) {
-    if (key.toLowerCase() === lower) return val
-    if (key.endsWith('_B') || key.endsWith(' B')) continue
-    if (key.toLowerCase().includes(lower) || lower.includes(key.toLowerCase())) return val
-  }
   return null
 }
 
