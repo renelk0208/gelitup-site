@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/generate-meta-product-feed.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "sync:gelitup-products": "node scripts/sync-gelitup-products.mjs",
