@@ -14095,6 +14095,26 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
                 >
                   Authority
                 </button>
+                <button
+                  onClick={() => setAdminTierPreview('sales')}
+                  className={`rounded-full border px-2 py-0.5 text-xs font-semibold transition ${
+                    adminTierPreview === 'sales'
+                      ? 'border-slate-700 bg-slate-700 text-white'
+                      : 'border-amber-300 bg-white text-amber-800 hover:bg-amber-100'
+                  }`}
+                >
+                  Sales Rep
+                </button>
+                <button
+                  onClick={() => setAdminTierPreview('country')}
+                  className={`rounded-full border px-2 py-0.5 text-xs font-semibold transition ${
+                    adminTierPreview === 'country'
+                      ? 'border-sky-600 bg-sky-600 text-white'
+                      : 'border-amber-300 bg-white text-amber-800 hover:bg-amber-100'
+                  }`}
+                >
+                  L2 Country
+                </button>
               </>
             )}
             {/* Price toggle — shown for both portal types */}
