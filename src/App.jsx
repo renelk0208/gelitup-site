@@ -6683,8 +6683,8 @@ function PortalRegister({ onRegister }) {
   }
 
   return (
-    <section className="mx-auto grid max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
-      <div className="bg-[#111111] p-8 text-white">
+    <section className="mx-auto grid max-w-4xl rounded-2xl border border-slate-200 bg-white md:grid-cols-2 md:overflow-hidden">
+      <div className="bg-[#111111] p-5 sm:p-6 md:p-8 text-white">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-400">GEL.IT.UP by GIUP®</p>
         <h2 className="heading-on-dark mt-3 text-3xl font-bold">
           {isDistributorFlow ? 'Distribution Application' : 'Trade Registration'}
@@ -6694,7 +6694,7 @@ function PortalRegister({ onRegister }) {
             ? 'Apply to become a GEL.IT.UP distributor. Your application will be reviewed and you will be notified by email once approved.'
             : 'Register your B2B account. No approval needed — you can set your password and log in immediately.'}
         </p>
-        <ul className="mt-6 space-y-3">
+        <ul className="mt-6 space-y-3 hidden md:block">
           {isDistributorFlow ? (
             <>
               <li className="flex items-start gap-2.5 text-sm text-slate-300">
@@ -6737,7 +6737,7 @@ function PortalRegister({ onRegister }) {
         </ul>
       </div>
 
-      <div className="p-8">
+      <div className="p-5 sm:p-6 md:p-8">
         <h3 className="text-xl font-semibold text-slate-900">
           {isSalesRepFlow ? 'Sales Representative Application' : isDistributorFlow ? 'Distributor Application' : 'B2B Registration Request'}
         </h3>
@@ -6752,7 +6752,7 @@ function PortalRegister({ onRegister }) {
                 customerType: 'company',
               }))
             }}
-            className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${isDistributorFlow && !isSalesRepFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
+            className={`rounded-lg px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] transition min-h-[44px] ${isDistributorFlow && !isSalesRepFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
           >
             Distribution Application
           </button>
@@ -6766,7 +6766,7 @@ function PortalRegister({ onRegister }) {
                 customerType: 'company',
               }))
             }}
-            className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${isSalesRepFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
+            className={`rounded-lg px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] transition min-h-[44px] ${isSalesRepFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
           >
             Sales Representative
           </button>
@@ -6779,7 +6779,7 @@ function PortalRegister({ onRegister }) {
                 customerType: current.orderProfile === 'personal' ? 'personal' : 'company',
               }))
             }}
-            className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${isB2BOrderFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
+            className={`rounded-lg px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] transition min-h-[44px] ${isB2BOrderFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
           >
             B2B (Client)
           </button>
@@ -7046,8 +7046,9 @@ function PortalRegister({ onRegister }) {
             <label className="block text-sm font-medium text-slate-700">
               Phone
               <input
-                type="text"
+                type="tel"
                 required
+                autoComplete="tel"
                 value={application.phone}
                 onChange={(event) => setField('phone', event.target.value)}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
@@ -7057,11 +7058,12 @@ function PortalRegister({ onRegister }) {
             <label className="block text-sm font-medium text-slate-700">
               Website
               <input
-                type="url"
+                type="text"
+                inputMode="url"
                 value={application.website}
                 onChange={(event) => setField('website', event.target.value)}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
-                placeholder="https://company.com"
+                placeholder="company.com"
               />
             </label>
             {/* Country — always shown */}
@@ -7384,7 +7386,7 @@ function PortalRegister({ onRegister }) {
           role="dialog"
           aria-modal="true"
           aria-label="Application submitted"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-start md:items-center justify-center overflow-y-auto bg-black/60 px-4 py-8 backdrop-blur-sm"
         >
           <div className="relative w-full max-w-md overflow-hidden rounded-3xl shadow-2xl">
             {/* gradient header */}
