@@ -1012,9 +1012,11 @@ function TierPricingPanel() {
         const items = Array.isArray(payload?.items) ? payload.items : []
         // Group by category
         const groups = {}
+        const isMultimix30g = (n) => /multimix/i.test(n) && /\b30\s*g/i.test(n)
         for (const { name, price } of items) {
           if (price == null || Number(price) <= 0) continue
-          const b2bPrice = Math.ceil(Number(price) * B2B_PRICE_MULTIPLIER * 10) / 10
+          const surcharge = isMultimix30g(name) ? 1.1 : 1
+          const b2bPrice = Math.ceil(Number(price) * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10
           const cat = classifyProduct(name)
           if (!groups[cat]) groups[cat] = { products: [], min: Infinity, max: -Infinity, total: 0 }
           groups[cat].products.push({ name, b2bPrice })

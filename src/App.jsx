@@ -8500,9 +8500,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         const map = new Map()
         const wordIndex = []
         const stripSuffix = (s) => String(s || '').replace(/\s*[-—]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '').trim()
+        const isMultimix30g = (n) => /multimix/i.test(n) && /\b30\s*g/i.test(n)
         for (const { name, sku, price } of items) {
           const cleanName = stripSuffix(name)
-          const entry = { name, price: price != null ? Math.ceil(Number(price) * B2B_PRICE_MULTIPLIER * 10) / 10 : null }
+          const surcharge = isMultimix30g(name) ? 1.1 : 1
+          const entry = { name, price: price != null ? Math.ceil(Number(price) * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10 : null }
           const keys = [
             normalizeSkuCode(sku),
             normalizeSkuCode(stripSuffix(sku)),
