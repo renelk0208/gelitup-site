@@ -6105,14 +6105,10 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
     || /type=recovery/.test(window.location.hash)
   const showDebugTrace = loginParams.get('debug') === '1'
   const [email, setEmail] = useState(prefilledEmail || localStorage.getItem('portalRememberedEmail') || '')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(() => {
-    const stored = localStorage.getItem('portalRememberMe')
-    // If the user has explicitly chosen before, honour that. Otherwise default to true.
-    if (stored === 'false') return false
-    return true
+  const [password, setPassword] = useState(() => {
+    try { const s = localStorage.getItem('portalRememberedPassword'); return s ? atob(s) : '' } catch { return '' }
   })
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [infoMessage, setInfoMessage] = useState('')
@@ -6166,7 +6162,6 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
               email,
               password,
               confirmPassword,
-              rememberMe,
               isRecoveryFlow: isPasswordResetFlow,
             })
 
@@ -6185,6 +6180,10 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
               setDebugTrace(result.debugTrace)
             }
 
+            // Save credentials after successful password creation
+            localStorage.setItem('portalRememberedEmail', String(email || '').trim().toLowerCase())
+            try { localStorage.setItem('portalRememberedPassword', btoa(password)) } catch { /* ignore */ }
+
             if (result.navigateToDashboard) {
               onRecoverySessionConsumed?.()
               navigate('/portal/dashboard/overview')
@@ -6198,18 +6197,11 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
             return
           }
 
-          // Set session flags BEFORE calling onLogin so the SIGNED_IN event (which fires
-          // inside signInWithPassword) sees the correct portalSessionOnly state.
+          // Always persist session and credentials
           sessionStorage.setItem('portalTabActive', 'true')
-          if (rememberMe) {
-            localStorage.setItem('portalRememberedEmail', String(email || '').trim().toLowerCase())
-            localStorage.setItem('portalRememberMe', 'true')
-            localStorage.removeItem('portalSessionOnly')
-          } else {
-            localStorage.setItem('portalSessionOnly', 'true')
-            localStorage.removeItem('portalRememberedEmail')
-            localStorage.removeItem('portalRememberMe')
-          }
+          localStorage.setItem('portalRememberedEmail', String(email || '').trim().toLowerCase())
+          try { localStorage.setItem('portalRememberedPassword', btoa(password)) } catch { /* ignore */ }
+          localStorage.removeItem('portalSessionOnly')
 
           const result = await onLogin(email, password)
           setIsSubmitting(false)
@@ -6221,7 +6213,6 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           if (!result.ok) {
             // Revert session flags on login failure
             sessionStorage.removeItem('portalTabActive')
-            localStorage.removeItem('portalSessionOnly')
             setErrorMessage(result.message || 'Unable to sign in.')
             return
           }
@@ -6399,13 +6390,10 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
   const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
   const needsEmailConfirm = loginParams.get('confirm') === '1'
   const [email, setEmail] = useState(prefilledEmail || localStorage.getItem('adminRememberedEmail') || '')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(() => {
-    const stored = localStorage.getItem('adminRememberMe')
-    if (stored === 'false') return false
-    return true
+  const [password, setPassword] = useState(() => {
+    try { const s = localStorage.getItem('adminRememberedPassword'); return s ? atob(s) : '' } catch { return '' }
   })
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [infoMessage, setInfoMessage] = useState('')
@@ -6452,7 +6440,6 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
               email,
               password,
               confirmPassword,
-              rememberMe,
             })
             setIsSubmitting(false)
 
@@ -6461,15 +6448,17 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
               return
             }
 
-            // Clear sensitive fields
+            // Save credentials after successful password creation
+            localStorage.setItem('adminRememberedEmail', String(email || '').trim().toLowerCase())
+            try { localStorage.setItem('adminRememberedPassword', btoa(password)) } catch { /* ignore */ }
+
+            // Clear sensitive state fields
             setPassword('')
             setConfirmPassword('')
 
             if (createResult.navigateToDashboard) {
               // Already authenticated — go straight to the dashboard
               sessionStorage.setItem('portalTabActive', 'true')
-              localStorage.setItem('adminRememberedEmail', String(email || '').trim().toLowerCase())
-              localStorage.setItem('adminRememberMe', 'true')
               localStorage.removeItem('portalSessionOnly')
               navigate('/portal/dashboard/applications')
             } else {
@@ -6479,17 +6468,11 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
             return
           }
 
-          // Set session flags BEFORE calling onAdminLogin so the SIGNED_IN event sees them
+          // Always persist session and credentials
           sessionStorage.setItem('portalTabActive', 'true')
-          if (rememberMe) {
-            localStorage.setItem('adminRememberedEmail', String(email || '').trim().toLowerCase())
-            localStorage.setItem('adminRememberMe', 'true')
-            localStorage.removeItem('portalSessionOnly')
-          } else {
-            localStorage.setItem('portalSessionOnly', 'true')
-            localStorage.removeItem('adminRememberedEmail')
-            localStorage.removeItem('adminRememberMe')
-          }
+          localStorage.setItem('adminRememberedEmail', String(email || '').trim().toLowerCase())
+          try { localStorage.setItem('adminRememberedPassword', btoa(password)) } catch { /* ignore */ }
+          localStorage.removeItem('portalSessionOnly')
 
           const result = await onAdminLogin(email, password)
           setIsSubmitting(false)
@@ -6497,7 +6480,6 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
           if (!result.ok) {
             // Revert session flags on login failure
             sessionStorage.removeItem('portalTabActive')
-            localStorage.removeItem('portalSessionOnly')
             setErrorMessage(result.message || 'Unable to sign in as admin.')
             return
           }
@@ -6562,17 +6544,6 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
               />
             </label>
           )}
-
-          <label className="flex items-center gap-2 text-xs text-slate-700">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(event) => setRememberMe(event.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20"
-              required={isCreatePasswordMode}
-            />
-            Remember me
-          </label>
 
           <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
             {isSubmitting
@@ -12798,7 +12769,7 @@ function PendingApplicationsModule() {
               </tr>
               <tr>
                 <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#D43790;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">2</span></td>
-                <td style="padding-left:10px;padding-bottom:12px;font-size:14px;color:#374151;"><strong>Create your password</strong>, confirm it, and tick <em>Remember me</em>.</td>
+                <td style="padding-left:10px;padding-bottom:12px;font-size:14px;color:#374151;"><strong>Create your password</strong> and confirm it.</td>
               </tr>
               <tr>
                 <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#D43790;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">3</span></td>
@@ -14387,15 +14358,6 @@ function App() {
     supabase.auth.getSession().then(async ({ data }) => {
       if (!mounted) return
       if (data.session) {
-        const sessionOnly = localStorage.getItem('portalSessionOnly') === 'true'
-        const tabActive = sessionStorage.getItem('portalTabActive') === 'true'
-        if (sessionOnly && !tabActive) {
-          // Browser was closed & reopened, user had "don't remember me" → sign out
-          await supabase.auth.signOut()
-          localStorage.removeItem('portalSessionOnly')
-          if (mounted) { setIsPortalAuthenticated(false); setAuthReady(true) }
-          return
-        }
         // Mark this tab as having an active authenticated session
         sessionStorage.setItem('portalTabActive', 'true')
         // Re-verify admin status on session restore (handles new devices / cleared localStorage)
@@ -14438,9 +14400,6 @@ function App() {
         // condition where ProtectedPortal renders with stale isAdminSession=true before
         // the async check can correct it, routing B2B clients to the admin panel.
         const userEmail = session.user?.email
-        const sessionOnly = localStorage.getItem('portalSessionOnly') === 'true'
-        const tabActive = sessionStorage.getItem('portalTabActive') === 'true'
-        if (sessionOnly && !tabActive) return
         setIsPortalAuthenticated(true)
         if (userEmail && supabase) {
           supabase
@@ -14477,15 +14436,7 @@ function App() {
         return
       }
       if (session) {
-        // Don't restore a session-only login that should have been cleared on browser close
-        const sessionOnly = localStorage.getItem('portalSessionOnly') === 'true'
-        const tabActive = sessionStorage.getItem('portalTabActive') === 'true'
-        if (sessionOnly && !tabActive) {
-          // getSession handler will perform the sign-out; skip setting authenticated here
-          return
-        }
         // Mark this tab active so future TOKEN_REFRESHED / INITIAL_SESSION events pass
-        // the tabActive check even if sessionStorage was empty on page load.
         sessionStorage.setItem('portalTabActive', 'true')
       }
       setIsPortalAuthenticated(Boolean(session))
@@ -14828,7 +14779,7 @@ function App() {
     return { ok: true }
   }
 
-  const handleCreateAdminPassword = async ({ email, password, confirmPassword, rememberMe }) => {
+  const handleCreateAdminPassword = async ({ email, password, confirmPassword }) => {
     const normalizedEmail = String(email || '').trim().toLowerCase()
 
     if (!normalizedEmail) {
@@ -14841,10 +14792,6 @@ function App() {
 
     if (password !== confirmPassword) {
       return { ok: false, message: 'Password and confirmation do not match.' }
-    }
-
-    if (!rememberMe) {
-      return { ok: false, message: 'Please confirm the remember me checkbox.' }
     }
 
     if (!hasSupabaseConfig || !supabase) {
@@ -14920,7 +14867,7 @@ function App() {
     }
   }
 
-  const handleCreatePortalPassword = async ({ email, password, confirmPassword, rememberMe, isRecoveryFlow = false }) => {
+  const handleCreatePortalPassword = async ({ email, password, confirmPassword, isRecoveryFlow = false }) => {
     const normalizedEmail = String(email || '').trim().toLowerCase()
     const isInternalBypassEmail = PORTAL_INTERNAL_BYPASS_EMAILS.has(normalizedEmail)
 
@@ -14934,10 +14881,6 @@ function App() {
 
     if (password !== confirmPassword) {
       return { ok: false, message: 'Password and confirmation do not match.' }
-    }
-
-    if (!rememberMe) {
-      return { ok: false, message: 'Please confirm the remember me checkbox.' }
     }
 
     if (!hasSupabaseConfig || !supabase) {
