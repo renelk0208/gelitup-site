@@ -92,7 +92,7 @@ const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
 const HOME_HERO_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
-const HOME_HERO_POSTER_URL = '/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg'
+const HOME_HERO_POSTER_URL = '/gelitup-content/catalog-heroes/home-page-hero-image.webp'
 const HOME_NEWS_CLOUD_VIDEO_URL = Math.floor(Date.now() / 86400000) % 2 === 0
   ? '/gelitup-media/videos/floating-clouds.mp4'
   : '/gelitup-media/videos/floating- clouds2.mp4'
@@ -5276,11 +5276,25 @@ function BaselinePageView() {
 
 function InstagramFeedStrip() {
   useEffect(() => {
-    // Script already loaded — tell Elfsight to re-scan for new widget divs (SPA navigation)
-    if (document.querySelector('script[src="https://elfsightcdn.com/platform.js"]')) {
+    const trySetup = () => {
       try {
-        if (window.eapps?.Platform?.setupWidgets) window.eapps.Platform.setupWidgets()
-      } catch (_) { /* Elfsight not ready yet */ }
+        if (window.eapps?.Platform?.setupWidgets) {
+          window.eapps.Platform.setupWidgets()
+          return true
+        }
+      } catch (_) { /* not ready */ }
+      return false
+    }
+
+    // Script already loaded — retry setupWidgets until the platform is ready
+    if (document.querySelector('script[src*="elfsightcdn.com/platform"]')) {
+      if (!trySetup()) {
+        let attempts = 0
+        const iv = setInterval(() => {
+          if (trySetup() || ++attempts >= 30) clearInterval(iv)
+        }, 500)
+        return () => clearInterval(iv)
+      }
       return
     }
     const script = document.createElement('script')
