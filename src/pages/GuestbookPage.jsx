@@ -95,7 +95,6 @@ function EntryCard({ entry, featured }) {
 /* ══════════════════════════════════════════════════════════════════════════════ */
 export default function GuestbookPage() {
   const [entries, setEntries] = useState([])
-  const [featured, setFeatured] = useState([])
   const [loading, setLoading] = useState(true)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
@@ -111,23 +110,13 @@ export default function GuestbookPage() {
 
   const loadEntries = useCallback(async () => {
     if (!hasSupabaseConfig || !supabase) return
-    const [allRes, featRes] = await Promise.all([
-      supabase
-        .from(TABLE)
-        .select('id, name, country, role, message, created_at, featured')
-        .eq('approved', true)
-        .order('created_at', { ascending: false })
-        .limit(100),
-      supabase
-        .from(TABLE)
-        .select('id, name, country, role, message, created_at, featured')
-        .eq('approved', true)
-        .eq('featured', true)
-        .order('created_at', { ascending: false })
-        .limit(3),
-    ])
-    setEntries(allRes.data || [])
-    setFeatured(featRes.data || [])
+    const { data } = await supabase
+      .from(TABLE)
+      .select('id, name, country, role, message, created_at, featured')
+      .eq('approved', true)
+      .order('created_at', { ascending: false })
+      .limit(100)
+    setEntries(data || [])
     setLoading(false)
   }, [])
 
@@ -193,20 +182,6 @@ export default function GuestbookPage() {
           </p>
         </div>
       </div>
-
-      {/* ─── Featured Professionals ───────────────────────────────────── */}
-      {featured.length > 0 && (
-        <div className="rounded-2xl border border-fuchsia-100 bg-gradient-to-br from-fuchsia-50/50 to-white p-5 sm:p-7">
-          <h2 className="flex items-center gap-2 text-lg font-extrabold text-slate-900">
-            <span>⭐</span> Featured Professionals
-          </h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((entry) => (
-              <EntryCard key={entry.id} entry={entry} featured />
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* ─── Submit Form ──────────────────────────────────────────────── */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
@@ -307,20 +282,23 @@ export default function GuestbookPage() {
         )}
       </div>
 
-      {/* ─── Incentive Banner ─────────────────────────────────────────── */}
-      <div className="rounded-2xl border border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 to-violet-50 px-5 py-4 text-center sm:px-7">
-        <p className="text-sm font-semibold text-fuchsia-700">
-          🌟 Selected professionals are featured on our Instagram{' '}
-          <a
-            href="https://www.instagram.com/gelitupinternational/"
-            target="_blank"
-            rel="noreferrer"
-            className="font-bold underline transition hover:text-fuchsia-900"
-          >
-            @gelitupinternational
-          </a>
-        </p>
-      </div>
+      {/* ─── Rotating Incentive Banner (cycles monthly) ────────────── */}
+      {(() => {
+        const incentives = [
+          { emoji: '📸', text: <>Every month, we feature <span className="font-extrabold">3 comments</span> on our Instagram{' '}<a href="https://www.instagram.com/gelitupinternational/" target="_blank" rel="noreferrer" className="font-bold underline transition hover:text-fuchsia-900">@gelitupinternational</a></> },
+          { emoji: '🔁', text: <>Selected salons get <span className="font-extrabold">reposted</span> on{' '}<a href="https://www.instagram.com/gelitupinternational/" target="_blank" rel="noreferrer" className="font-bold underline transition hover:text-fuchsia-900">@gelitupinternational</a></> },
+          { emoji: '🎁', text: <>Leave a comment → chance to <span className="font-extrabold">receive a sample pack</span></> },
+        ]
+        const idx = new Date().getMonth() % incentives.length
+        const { emoji, text } = incentives[idx]
+        return (
+          <div className="rounded-2xl border border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 to-violet-50 px-5 py-4 text-center sm:px-7">
+            <p className="text-sm font-semibold text-fuchsia-700">
+              {emoji} {text}
+            </p>
+          </div>
+        )
+      })()}
 
       {/* ─── All Entries ──────────────────────────────────────────────── */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">

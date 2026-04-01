@@ -43,19 +43,3 @@ create policy "Admins can delete guestbook entries"
     exists (select 1 from public.b2b_admins where email = auth.email())
   );
 
--- Seed data (professional tone, varied countries)
-insert into public.guestbook (name, country, role, message, approved, featured, created_at) values
-  ('Maria Rossi',      'Italy',         'Salon Owner',      'Builder gels are next level. Control and consistency are unmatched. My clients can always tell the difference.',                                        true, true,  now() - interval '12 days'),
-  ('Anke van der Berg', 'South Africa',  'Nail Technician',  'I switched to GEL.IT.UP 6 months ago and haven''t looked back. The colour payoff in one coat is incredible.',                                         true, true,  now() - interval '10 days'),
-  ('Elena Petrova',    'Bulgaria',      'Distributor',      'Our salons love the HEMA-free formula. Re-orders are consistent and the colour range keeps clients excited.',                                          true, true,  now() - interval '9 days'),
-  ('Sophie Laurent',   'France',        'Educator',         'I use GEL.IT.UP in all my masterclasses. The product quality speaks for itself — students notice immediately.',                                        true, false, now() - interval '8 days'),
-  ('Ayumi Tanaka',     'Japan',         'Nail Technician',  'The Multimix shades are perfect for nail art. Pigmentation is dense and the consistency allows fine detail work.',                                     true, false, now() - interval '7 days'),
-  ('Petra Kovač',      'Croatia',       'Salon Owner',      'We''ve been stocking GEL.IT.UP for two years. Client satisfaction is at an all-time high and wastage is minimal.',                                     true, false, now() - interval '6 days'),
-  ('Linda Müller',     'Germany',       'Distributor',      'Professional packaging, fast logistics, and a brand that salons actually ask for by name. Excellent partner.',                                         true, false, now() - interval '5 days'),
-  ('Chloe Williams',   'United Kingdom','Nail Technician',  'The top coat finish is genuinely glass-like. I get compliments from clients every single appointment.',                                                true, false, now() - interval '4 days'),
-  ('Fatima Al-Hassan', 'UAE',           'Salon Owner',      'EU certified and HEMA-free — exactly what our market demands. Premium quality at a fair B2B price point.',                                              true, false, now() - interval '3 days'),
-  ('Ana Morales',      'Spain',         'Educator',         'I''ve tested dozens of brands. GEL.IT.UP consistently outperforms on adhesion, cure time, and colour accuracy.',                                      true, false, now() - interval '2 days'),
-  ('Ingrid Svensson',  'Sweden',        'Nail Technician',  'Clean ingredients, beautiful shades, and a brand that actually cares about professionals. Highly recommend.',                                          true, false, now() - interval '1 day'),
-  ('Nadia Botha',      'South Africa',  'Distributor',      'The Cloud Dancer series sold out in our first week. The marketing support from GEL.IT.UP is outstanding.',                                             true, false, now() - interval '18 hours'),
-  ('Katarína Novotná', 'Czech Republic','Salon Owner',      'Finally a European brand that combines innovation with regulatory compliance. Our salon is 100% converted.',                                           true, false, now() - interval '10 hours')
-on conflict do nothing;
