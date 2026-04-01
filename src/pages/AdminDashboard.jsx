@@ -956,8 +956,8 @@ function AdminsPanel() {
 const TIER_PRICING_DATA = [
   { key: 'authority',    label: 'Authority Distributor',    multiplier: 0.22,  description: 'Exclusive country-level distribution rights. Pays 22% of B2B price (−78%).',       colour: 'bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200' },
   { key: 'professional', label: 'Professional Distributor', multiplier: 0.37,  description: 'Multi-salon or regional reach. Pays 37% of B2B price (−63%).',                     colour: 'bg-pink-100 text-pink-700 border-pink-200' },
-  { key: 'sales',        label: 'Sales Representative',     multiplier: 1.004, description: 'Direct sales & local market development. Pays B2B price + 0.4%.',                  colour: 'bg-slate-100 text-slate-700 border-slate-200' },
-  { key: 'country',      label: 'Level 2 Country Tier',     multiplier: 1.20,  description: 'Country-level distribution at B2B + 20%. Admin-assigned only (not client-selectable).', colour: 'bg-sky-100 text-sky-700 border-sky-200' },
+  { key: 'sales',        label: 'Sales Representative',     multiplier: 0.85,  description: 'Direct sales & local market development. Pays 85% of B2B price (−15%).',           colour: 'bg-slate-100 text-slate-700 border-slate-200' },
+  { key: 'country',      label: 'Level 2 Country Tier',     multiplier: 0.264, description: 'Authority price + 20% (0.22 × 1.20). Admin-assigned only (not client-selectable).', colour: 'bg-sky-100 text-sky-700 border-sky-200' },
 ]
 
 function TierPricingPanel() {

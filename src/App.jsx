@@ -7705,9 +7705,9 @@ const B2B_SIDEBAR_GROUPS = [
 function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated = false }) {
   // Tier 1 / Professional (local-regional): -63% from B2B price (pay 37%).
   // Tier 2 / Authority (national): -78% from B2B price (pay 22%).
-  // Level 2 Country Tier: B2B price + 20% (pay 120%).
-  // Sales Representative: standard B2B price + 0.4% (pay 100.4%).
-  const tierPriceMultiplier = tier === 'authority' ? 0.22 : tier === 'professional' ? 0.37 : tier === 'country' ? 1.20 : tier === 'sales' ? 1.004 : 1.0
+  // Level 2 Country Tier: Authority price + 20% (0.22 × 1.20 = 0.264).
+  // Sales Representative: B2B price - 15% (pay 85%).
+  const tierPriceMultiplier = tier === 'authority' ? 0.22 : tier === 'professional' ? 0.37 : tier === 'country' ? 0.264 : tier === 'sales' ? 0.85 : 1.0
   const location = useLocation()
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
