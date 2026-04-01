@@ -8,6 +8,7 @@ import useB2BIntelligence from './lib/useB2BIntelligence'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
+const GuestbookPage = lazy(() => import('./pages/GuestbookPage.jsx'))
 
 const B2B_EMAIL = 'gelitup.portal@gelitup.com'
 const PRODUCT_CATEGORIES = ['Solid Colours', 'Builder Gels', 'Base & Top', 'Nail Care', 'Accessories']
@@ -899,6 +900,7 @@ const navItems = [
   { to: '/for-academies', label: 'Academies' },
   { to: '/about-us', label: 'About us' },
   { to: '/distributor-packages', label: 'Distribution' },
+  { to: '/guestbook', label: 'Guestbook' },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -15489,6 +15491,7 @@ function App() {
           <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
+          <Route path="/guestbook" element={<GuestbookPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/cookie-policy" element={<CookiePolicyPage />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditionsPage />} />
@@ -15606,6 +15609,7 @@ function App() {
               <NavLink to="/full-catalogue" className="block transition duration-300 hover:text-fuchsia-300">Catalogue</NavLink>
               <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
               <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Become Distributor</NavLink>
+              <NavLink to="/guestbook" className="block transition duration-300 hover:text-fuchsia-300">Guestbook</NavLink>
               <NavLink to="/portal/register" className="block transition duration-300 hover:text-fuchsia-300">Client Registration</NavLink>
             </div>
           </div>

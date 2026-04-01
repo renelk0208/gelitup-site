@@ -951,6 +951,121 @@ function AdminsPanel() {
   )
 }
 
+// ─── Guestbook Moderation panel ───────────────────────────────────────────────
+
+const GUESTBOOK_TABLE = 'guestbook'
+
+function GuestbookPanel() {
+  const [rows, setRows] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState('pending') // 'pending' | 'approved' | 'featured' | 'all'
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    let query = supabase.from(GUESTBOOK_TABLE).select('*').order('created_at', { ascending: false }).limit(100)
+    if (filter === 'pending') query = query.eq('approved', false)
+    else if (filter === 'approved') query = query.eq('approved', true)
+    else if (filter === 'featured') query = query.eq('featured', true)
+    const { data } = await query
+    setRows(data || [])
+    setLoading(false)
+  }, [filter])
+
+  useEffect(() => { load() }, [load])
+
+  const handleApprove = async (id) => {
+    await supabase.from(GUESTBOOK_TABLE).update({ approved: true }).eq('id', id)
+    load()
+  }
+
+  const handleToggleFeatured = async (id, current) => {
+    await supabase.from(GUESTBOOK_TABLE).update({ featured: !current }).eq('id', id)
+    load()
+  }
+
+  const handleReject = async (id) => {
+    await supabase.from(GUESTBOOK_TABLE).delete().eq('id', id)
+    load()
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-base font-bold text-slate-900">Guestbook Moderation</h2>
+        <div className="flex flex-wrap gap-1.5">
+          {[{ key: 'pending', label: 'Pending' }, { key: 'approved', label: 'Approved' }, { key: 'featured', label: 'Featured' }, { key: 'all', label: 'All' }].map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${filter === f.key ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading && <p className="text-sm text-slate-500">Loading…</p>}
+
+      {!loading && rows.length === 0 && (
+        <p className="text-sm text-slate-500">{filter === 'pending' ? 'No pending messages.' : 'No messages found.'}</p>
+      )}
+
+      {!loading && rows.length > 0 && (
+        <div className="space-y-2">
+          {rows.map((row) => (
+            <div key={row.id} className={`rounded-xl border p-4 ${row.featured ? 'border-fuchsia-200 bg-fuchsia-50' : 'border-slate-200 bg-slate-50'}`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-sm font-semibold text-slate-900">{row.name}</p>
+                    {row.role && (
+                      <span className="inline-flex rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                        {row.role}
+                      </span>
+                    )}
+                    {row.featured && <span className="text-xs">⭐</span>}
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    {row.country && <span>{row.country} · </span>}
+                    {fmtDate(row.created_at)}
+                    {row.approved && <span className="ml-2 inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">Approved</span>}
+                  </p>
+                </div>
+                <div className="flex shrink-0 gap-1.5">
+                  {!row.approved && (
+                    <button
+                      onClick={() => handleApprove(row.id)}
+                      className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-500"
+                    >
+                      Approve
+                    </button>
+                  )}
+                  {row.approved && (
+                    <button
+                      onClick={() => handleToggleFeatured(row.id, row.featured)}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition ${row.featured ? 'bg-amber-500 hover:bg-amber-400' : 'bg-violet-600 hover:bg-violet-500'}`}
+                    >
+                      {row.featured ? 'Unfeature' : '⭐ Feature'}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleReject(row.id)}
+                    className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-rose-500"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-700">"{row.message}"</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Tier Pricing panel ───────────────────────────────────────────────────────
 
 const TIER_PRICING_DATA = [
@@ -1208,6 +1323,12 @@ export default function AdminDashboard({ onLogout }) {
           >
             Tier Pricing
           </button>
+          <button
+            onClick={() => setTab('guestbook')}
+            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${tab === 'guestbook' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+          >
+            Guestbook
+          </button>
         </div>
       </div>
 
@@ -1216,6 +1337,7 @@ export default function AdminDashboard({ onLogout }) {
         {tab === 'orders' && <OrdersPanel />}
         {tab === 'admins' && <AdminsPanel />}
         {tab === 'pricing' && <TierPricingPanel />}
+        {tab === 'guestbook' && <GuestbookPanel />}
       </div>
     </section>
   )
