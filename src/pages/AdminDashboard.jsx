@@ -1123,8 +1123,40 @@ function TierPricingPanel() {
         </table>
       </div>
       <p className="mt-3 text-[11px] text-slate-400">Click a category row to expand individual product pricing. Level 2 Country Tier is admin-assigned only.</p>
+      <div className="mt-4 flex gap-2">
+        <button
+          onClick={() => downloadCSV(priceData, sortedCategories)}
+          className="rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition"
+        >
+          ↓ Download CSV
+        </button>
+      </div>
     </div>
   )
+}
+
+function downloadCSV(priceData, sortedCategories) {
+  const tiers = TIER_PRICING_DATA.filter(t => t.key !== 'b2b')
+  const headers = ['Category', 'Product', 'B2B Price (€)', ...tiers.map(t => `${t.label} (€)`)]
+  const rows = [headers.join(',')]
+
+  for (const cat of sortedCategories) {
+    const g = priceData[cat]
+    const sorted = [...g.products].sort((a, b) => a.b2bPrice - b.b2bPrice)
+    for (const p of sorted) {
+      const escapeName = `"${p.name.replace(/"/g, '""')}"`
+      const tierPrices = tiers.map(t => (p.b2bPrice * t.multiplier).toFixed(2))
+      rows.push([`"${cat}"`, escapeName, p.b2bPrice.toFixed(2), ...tierPrices].join(','))
+    }
+  }
+
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `gelitup-tier-pricing-${new Date().toISOString().slice(0, 10)}.csv`
+  link.click()
+  URL.revokeObjectURL(url)
 }
 
 // ─── Admin Dashboard shell ────────────────────────────────────────────────────
