@@ -92,7 +92,7 @@ const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
 const HOME_HERO_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
-const HOME_HERO_POSTER_URL = '/gelitup-media/images/news/Spring%20Summer/NEWS%20Carousel/2600-1.jpg'
+const HOME_HERO_POSTER_URL = '/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg'
 const HOME_NEWS_CLOUD_VIDEO_URL = Math.floor(Date.now() / 86400000) % 2 === 0
   ? '/gelitup-media/videos/floating-clouds.mp4'
   : '/gelitup-media/videos/floating- clouds2.mp4'
@@ -1674,7 +1674,7 @@ function DistributorPackagesPage() {
         </div>
         <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
           <NavLink to="/become-distributor" className="btn-cta-dark inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Request Professional Tier Pricing ?
+            Request Professional Tier Pricing →
           </NavLink>
         </div>
       </article>
@@ -6941,9 +6941,10 @@ function PortalRegister({ onRegister }) {
                   <option value="" disabled>Select your distribution tier</option>
                   <option value="professional">Professional Distributor — Regional Distribution</option>
                   <option value="authority">Authority Distributor — Country Distribution</option>
+                  <option value="country">Level 2 Country Tier — Country-Level Distribution</option>
                   <option value="sales">Sales Representative — Direct Sales / Local Market</option>
                 </select>
-                <p className="mt-1 text-xs text-slate-400">Professional: multi-salon or regional reach. Authority: exclusive country-level distribution rights. Sales Representative: direct sales and local market development.</p>
+                <p className="mt-1 text-xs text-slate-400">Professional: multi-salon or regional reach. Authority: exclusive country-level distribution rights. Level 2 Country Tier: country-level distribution at B2B+20%. Sales Representative: direct sales and local market development.</p>
               </label>
             )}
 
@@ -7699,8 +7700,9 @@ const B2B_SIDEBAR_GROUPS = [
 function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated = false }) {
   // Tier 1 / Professional (local-regional): -63% from B2B price (pay 37%).
   // Tier 2 / Authority (national): -78% from B2B price (pay 22%).
+  // Level 2 Country Tier: B2B price + 20% (pay 120%).
   // Sales Representative: standard B2B price + 0.4% (pay 100.4%).
-  const tierPriceMultiplier = tier === 'authority' ? 0.22 : tier === 'professional' ? 0.37 : tier === 'sales' ? 1.004 : 1.0
+  const tierPriceMultiplier = tier === 'authority' ? 0.22 : tier === 'professional' ? 0.37 : tier === 'country' ? 1.20 : tier === 'sales' ? 1.004 : 1.0
   const location = useLocation()
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
@@ -11082,6 +11084,20 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           <p className="mt-2 text-xs leading-relaxed opacity-80">You hold exclusive country-level distribution rights for GEL.IT.UP products. Access the full wholesale catalogue, place orders for your entire country territory, and manage your exclusive distribution agreement below.</p>
         </div>
       )}
+      {tier === 'country' && (
+        <div className="rounded-2xl border border-sky-400 bg-gradient-to-r from-sky-700 to-indigo-700 p-4 text-white">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Level 2 Country Tier</p>
+              <p className="mt-0.5 text-base font-bold">Level 2 Country Tier Portal</p>
+            </div>
+            {!pricesAllocated && (
+              <span className="rounded-lg bg-white/20 px-3 py-1 text-xs font-semibold">Pricing pending allocation</span>
+            )}
+          </div>
+          <p className="mt-2 text-xs leading-relaxed opacity-80">You are an approved Level 2 Country Tier distributor of GEL.IT.UP products. Browse the wholesale catalogue at your country tier pricing and place orders below.</p>
+        </div>
+      )}
       {tier === 'professional' && (
         <div className="rounded-2xl border border-fuchsia-300 bg-gradient-to-r from-fuchsia-600 to-pink-600 p-4 text-white">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -11129,10 +11145,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className={`text-sm font-semibold ${
             tier === 'authority' ? 'text-fuchsia-700' :
+            tier === 'country' ? 'bg-gradient-to-r from-sky-600 to-indigo-600 bg-clip-text text-transparent' :
             tier === 'professional' ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent' :
             'bg-gradient-to-r from-fuchsia-600 to-fuchsia-800 bg-clip-text text-transparent'
           }`}>
-            {tier === 'authority' ? '★ Authority Distributor Portal' : tier === 'professional' ? 'Professional Distributor Portal' : tier === 'sales' ? 'Sales Representative Portal' : 'Distributor Portal'}
+            {tier === 'authority' ? '★ Authority Distributor Portal' : tier === 'professional' ? 'Professional Distributor Portal' : tier === 'country' ? 'Level 2 Country Tier Portal' : tier === 'sales' ? 'Sales Representative Portal' : 'Distributor Portal'}
           </p>
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <span>{selectedLineItems} items</span>

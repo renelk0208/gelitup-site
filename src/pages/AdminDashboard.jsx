@@ -331,6 +331,17 @@ function RegistrationsPanel() {
                   <div><span className="font-semibold text-slate-400">VAT</span><br />{row.vat_number || '—'}</div>
                   <div><span className="font-semibold text-slate-400">Business Type</span><br />{row.business_type || '—'}</div>
                   <div><span className="font-semibold text-slate-400">Application Type</span><br />{row.application_type || '—'}</div>
+                  {row.distributor_tier && (
+                    <div><span className="font-semibold text-slate-400">Distributor Tier</span><br />
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${
+                        row.distributor_tier === 'authority' ? 'bg-fuchsia-100 text-fuchsia-700' :
+                        row.distributor_tier === 'country' ? 'bg-sky-100 text-sky-700' :
+                        row.distributor_tier === 'professional' ? 'bg-pink-100 text-pink-700' :
+                        row.distributor_tier === 'sales' ? 'bg-slate-100 text-slate-600' :
+                        'bg-slate-100 text-slate-600'
+                      }`}>{row.distributor_tier}</span>
+                    </div>
+                  )}
                   <div className="sm:col-span-2">
                     <span className="font-semibold text-slate-400">Address</span><br />
                     {[row.address, row.city, row.postal_code, row.country].filter(Boolean).join(', ') || '—'}
