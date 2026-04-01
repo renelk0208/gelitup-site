@@ -68,15 +68,42 @@ function findImage(name) {
   // Exact match
   if (imageMap[name]) return imageMap[name]
 
-  // Try without -HTF suffix
-  const clean = name.replace(/\s*-HTF$/i, '').trim()
+  // Strip -HTF / - HTF suffix
+  const clean = name.replace(/\s*-\s*HTF$/i, '').trim()
   if (imageMap[clean]) return imageMap[clean]
 
-  // Try case-insensitive partial match
+  // ── Strategy 1: Extract leading code  (e.g. "01 Ice Ice Baby" → "01")
+  const leadMatch = clean.match(/^([A-Z]*\d+[A-Z]*)\b/i)
+  if (leadMatch) {
+    const code = leadMatch[1]
+    const stripped = code.replace(/^0+(?=\d)/, '') // "010" → "10"
+    for (const t of [`GIUP ${code}`, `GIUP ${stripped}`, `GIUP-${code}`, `GIUP-${stripped}`, code, stripped]) {
+      if (imageMap[t]) return imageMap[t]
+    }
+  }
+
+  // ── Strategy 2: Extract trailing code  (e.g. "Autumn 2021 OTA01" → "OTA01")
+  const parts = clean.split(/[\s#]+/)
+  const lastWord = parts[parts.length - 1]
+  if (/[A-Z]*\d+/i.test(lastWord) && lastWord !== (leadMatch && leadMatch[1])) {
+    for (const t of [`GIUP ${lastWord}`, `GIUP-${lastWord}`, lastWord]) {
+      if (imageMap[t]) return imageMap[t]
+    }
+  }
+
+  // ── Strategy 3: Special prefix patterns (FFF, CMU, etc.)
+  const specialMatch = clean.match(/\b(FFF|CMU\d*|SPX\d*)\b/i)
+  if (specialMatch) {
+    const code = specialMatch[1]
+    for (const t of [`GIUP ${code}`, `GIUP-${code}`, code]) {
+      if (imageMap[t]) return imageMap[t]
+    }
+  }
+
+  // ── Strategy 4: Case-insensitive partial match (fallback)
   const lower = clean.toLowerCase()
   for (const [key, val] of Object.entries(imageMap)) {
     if (key.toLowerCase() === lower) return val
-    // Skip _B variants (back-of-product images)
     if (key.endsWith('_B') || key.endsWith(' B')) continue
     if (key.toLowerCase().includes(lower) || lower.includes(key.toLowerCase())) return val
   }
