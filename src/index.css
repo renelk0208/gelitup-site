@@ -132,6 +132,17 @@ h2 {
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
 }
 
+/* Force Elfsight Instagram widget text to be visible on the dark strip */
+[class*="elfsight-app-"] h1,
+[class*="elfsight-app-"] h2,
+[class*="elfsight-app-"] h3,
+[class*="elfsight-app-"] h4,
+[class*="elfsight-app-"] p,
+[class*="elfsight-app-"] span,
+[class*="elfsight-app-"] a {
+  color: #ffffff !important;
+}
+
 .lux-theme .portal-luxe {
   font-family: 'Montserrat', 'Inter', 'PF Futura Neu', 'Futura PT', 'Futura', 'Avenir Next', 'Segoe UI', sans-serif;
   color: #1A1A1A;

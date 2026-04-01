@@ -7,6 +7,7 @@ import { hasSupabaseConfig, supabase } from './lib/supabaseClient'
 import useB2BIntelligence from './lib/useB2BIntelligence'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
+const BookAppointmentPage = lazy(() => import('./pages/BookAppointmentPage.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
 const GuestbookPage = lazy(() => import('./pages/GuestbookPage.jsx'))
 
@@ -898,6 +899,7 @@ function createFallbackProducts(count = 120) {
 const navItems = [
   { to: '/about-us', label: 'About us' },
   { to: '/for-academies', label: 'Academies' },
+  { to: '/book-appointment', label: 'Book Appointment' },
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/guestbook', label: 'Guestbook' },
   { to: '/full-catalogue', label: 'Our Products' },
@@ -5331,7 +5333,7 @@ function InstagramFeedStrip() {
             href={INSTAGRAM_URL}
             target="_blank"
             rel="noreferrer"
-            className="text-xs font-semibold uppercase tracking-widest text-[#D43790] transition hover:text-fuchsia-300"
+            className="text-xs font-semibold uppercase tracking-widest text-[#E879F9] transition hover:text-white"
           >
             Follow Us →
           </a>
@@ -15491,6 +15493,7 @@ function App() {
           <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
+          <Route path="/book-appointment" element={<BookAppointmentPage />} />
           <Route path="/guestbook" element={<GuestbookPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/cookie-policy" element={<CookiePolicyPage />} />
