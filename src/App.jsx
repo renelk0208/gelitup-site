@@ -896,11 +896,11 @@ function createFallbackProducts(count = 120) {
 }
 
 const navItems = [
-  { to: '/full-catalogue', label: 'Our Products' },
-  { to: '/for-academies', label: 'Academies' },
   { to: '/about-us', label: 'About us' },
+  { to: '/for-academies', label: 'Academies' },
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/guestbook', label: 'Guestbook' },
+  { to: '/full-catalogue', label: 'Our Products' },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
