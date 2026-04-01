@@ -954,52 +954,175 @@ function AdminsPanel() {
 // ─── Tier Pricing panel ───────────────────────────────────────────────────────
 
 const TIER_PRICING_DATA = [
-  { key: 'authority',    label: 'Authority Distributor',    multiplier: 0.22,  description: 'Exclusive country-level distribution rights. Pays 22% of B2B price (−78%).',       colour: 'bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200' },
-  { key: 'professional', label: 'Professional Distributor', multiplier: 0.37,  description: 'Multi-salon or regional reach. Pays 37% of B2B price (−63%).',                     colour: 'bg-pink-100 text-pink-700 border-pink-200' },
-  { key: 'sales',        label: 'Sales Representative',     multiplier: 0.85,  description: 'Direct sales & local market development. Pays 85% of B2B price (−15%).',           colour: 'bg-slate-100 text-slate-700 border-slate-200' },
-  { key: 'country',      label: 'Level 2 Country Tier',     multiplier: 0.264, description: 'Authority price + 20% (0.22 × 1.20). Admin-assigned only (not client-selectable).', colour: 'bg-sky-100 text-sky-700 border-sky-200' },
+  { key: 'b2b',          label: 'B2B (Salon)',               multiplier: 1.0,   colour: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+  { key: 'authority',    label: 'Authority Distributor',     multiplier: 0.22,  colour: 'bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200' },
+  { key: 'professional', label: 'Professional Distributor',  multiplier: 0.37,  colour: 'bg-pink-100 text-pink-700 border-pink-200' },
+  { key: 'sales',        label: 'Sales Representative',      multiplier: 0.85,  colour: 'bg-slate-100 text-slate-700 border-slate-200' },
+  { key: 'country',      label: 'Level 2 Country Tier',      multiplier: 0.264, colour: 'bg-sky-100 text-sky-700 border-sky-200' },
 ]
 
+const B2B_PRICE_MULTIPLIER = 1.2
+
+// Map price-list item names to display categories
+function classifyProduct(name) {
+  const n = (name || '').toUpperCase()
+  if (/\bSOLID GEL POLISH\b|SOLID\s*\d|^\d{1,4}[A-Z]?\s/.test(n)) return 'SOLID GEL POLISH'
+  if (/CAT\s*EYE|GCE\b/.test(n)) return 'CAT EYE'
+  if (/GLITTER/i.test(n)) return 'GLITTERS'
+  if (/GLASS\s*EFFECT/i.test(n)) return 'GLASS EFFECT'
+  if (/SHIMMER/i.test(n)) return 'SHIMMER'
+  if (/METALLIC/i.test(n)) return 'METALLIC'
+  if (/\bPEARL\b/i.test(n)) return 'PEARL'
+  if (/\bJELLY\b/i.test(n)) return 'JELLY'
+  if (/SNOWFLAKE/i.test(n)) return 'SNOWFLAKE'
+  if (/\bPMA\b/i.test(n)) return 'PMA'
+  if (/NEW\s*YORK|NYP/i.test(n)) return 'NEW YORK'
+  if (/BY\s*THE\s*OCEAN|BTO/i.test(n)) return 'BY THE OCEAN'
+  if (/SPIX|SPEX/i.test(n)) return 'SPIX & SPEX'
+  if (/TUTTI\s*FRUTTI/i.test(n)) return 'TUTTI FRUTTI'
+  if (/\bFRENCH\b/i.test(n)) return 'FRENCH'
+  if (/BUILDER\s*GEL|BUILD/i.test(n)) return 'BUILDER GEL'
+  if (/ACRYLIC/i.test(n)) return 'ACRYLICS'
+  if (/\bBASE\b|FLEXI\s*BASE|SUPERIOR\s*BASE/i.test(n)) return 'BASES'
+  if (/\bTOP\s*COAT\b|\bTOP\b.*\b(MATTE|GLOSS|WIPE|MILKY|SHIMMER)\b/i.test(n)) return 'TOPS'
+  if (/MAGNET|LAMP|LED|FILE|BUFFER|DRILL/i.test(n)) return 'EQUIPMENT'
+  if (/BRUSH/i.test(n)) return 'BRUSHES'
+  if (/NAIL\s*ART|FOIL|STICKER|STAMP/i.test(n)) return 'NAIL ART'
+  if (/REMOVER|CLEANSER|ACETONE|WIPE|PAD/i.test(n)) return 'CONSUMABLES'
+  if (/HAND|FOOT|CREAM|OIL|CUTICLE/i.test(n)) return 'NAIL HAND & FOOT CARE'
+  if (/SUPERBOND|DEHYDRAT|PRIMER|PREP/i.test(n)) return 'NAIL PREPARATIONS'
+  if (/LIQUID|MONOMER/i.test(n)) return 'LIQUIDS'
+  if (/DUAL\s*FORM|NAIL\s*TIP/i.test(n)) return 'TOOLS'
+  return 'OTHER'
+}
+
 function TierPricingPanel() {
-  const exampleB2B = 10.00
+  const [priceData, setPriceData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [expandedCat, setExpandedCat] = useState(null)
+
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      try {
+        const res = await fetch('/gelitup-content/b2b-price-list.json')
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const payload = await res.json()
+        const items = Array.isArray(payload?.items) ? payload.items : []
+        // Group by category
+        const groups = {}
+        for (const { name, price } of items) {
+          if (price == null || Number(price) <= 0) continue
+          const b2bPrice = Math.ceil(Number(price) * B2B_PRICE_MULTIPLIER * 10) / 10
+          const cat = classifyProduct(name)
+          if (!groups[cat]) groups[cat] = { products: [], min: Infinity, max: -Infinity, total: 0 }
+          groups[cat].products.push({ name, b2bPrice })
+          groups[cat].min = Math.min(groups[cat].min, b2bPrice)
+          groups[cat].max = Math.max(groups[cat].max, b2bPrice)
+          groups[cat].total += b2bPrice
+        }
+        if (mounted) { setPriceData(groups); setLoading(false) }
+      } catch (e) {
+        if (mounted) { setError(e.message); setLoading(false) }
+      }
+    }
+    load()
+    return () => { mounted = false }
+  }, [])
+
+  if (loading) return <p className="text-xs text-slate-400">Loading B2B price data…</p>
+  if (error) return <p className="text-xs text-rose-600">Failed to load prices: {error}</p>
+  if (!priceData) return null
+
+  const CATEGORY_ORDER = [
+    'SOLID GEL POLISH', 'CAT EYE', 'GLITTERS', 'GLASS EFFECT', 'SHIMMER', 'METALLIC', 'PEARL', 'JELLY',
+    'SNOWFLAKE', 'PMA', 'NEW YORK', 'BY THE OCEAN', 'SPIX & SPEX', 'TUTTI FRUTTI', 'FRENCH',
+    'BUILDER GEL', 'ACRYLICS', 'BASES', 'TOPS', 'EQUIPMENT', 'BRUSHES', 'NAIL ART',
+    'CONSUMABLES', 'NAIL HAND & FOOT CARE', 'NAIL PREPARATIONS', 'LIQUIDS', 'TOOLS', 'OTHER',
+  ]
+  const sortedCategories = Object.keys(priceData).sort((a, b) => {
+    const ai = CATEGORY_ORDER.indexOf(a)
+    const bi = CATEGORY_ORDER.indexOf(b)
+    if (ai !== -1 && bi !== -1) return ai - bi
+    if (ai !== -1) return -1
+    if (bi !== -1) return 1
+    return a.localeCompare(b)
+  })
+
   return (
     <div>
-      <h2 className="text-sm font-bold text-slate-900 mb-1">Distributor Tier Pricing Overview</h2>
-      <p className="text-xs text-slate-500 mb-4">These multipliers are applied to the B2B wholesale price for each tier. Example below uses a €{exampleB2B.toFixed(2)} B2B price.</p>
+      <h2 className="text-sm font-bold text-slate-900 mb-1">Distributor Tier Pricing — Live B2B Prices</h2>
+      <p className="text-xs text-slate-500 mb-2">Prices are sourced from the B2B price list. Each tier multiplier is applied to the actual B2B wholesale price.</p>
+
+      {/* Tier multiplier legend */}
+      <div className="mb-4 flex flex-wrap gap-2">
+        {TIER_PRICING_DATA.map(t => (
+          <span key={t.key} className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${t.colour}`}>
+            {t.label}: ×{t.multiplier}
+            {t.multiplier < 1 ? ` (−${((1 - t.multiplier) * 100).toFixed(0)}%)` : ''}
+          </span>
+        ))}
+      </div>
+
+      {/* Category pricing table */}
       <div className="overflow-x-auto rounded-xl border border-slate-200">
         <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+          <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
             <tr>
-              <th className="px-4 py-3">Tier</th>
-              <th className="px-4 py-3">Multiplier</th>
-              <th className="px-4 py-3">Discount / Markup</th>
-              <th className="px-4 py-3">Example Price</th>
-              <th className="px-4 py-3 hidden sm:table-cell">Description</th>
+              <th className="px-3 py-2.5 text-left">Category</th>
+              <th className="px-3 py-2.5 text-center">#</th>
+              <th className="px-3 py-2.5 text-right">B2B Price Range</th>
+              {TIER_PRICING_DATA.filter(t => t.key !== 'b2b').map(t => (
+                <th key={t.key} className="px-3 py-2.5 text-right">{t.label.split(' ')[0]}</th>
+              ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {TIER_PRICING_DATA.map(t => {
-              const pct = t.multiplier < 1
-                ? `−${((1 - t.multiplier) * 100).toFixed(0)}%`
-                : t.multiplier > 1
-                  ? `+${((t.multiplier - 1) * 100).toFixed(1)}%`
-                  : '—'
-              return (
-                <tr key={t.key} className="hover:bg-slate-50">
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${t.colour}`}>{t.label}</span>
+            {sortedCategories.map(cat => {
+              const g = priceData[cat]
+              const isExpanded = expandedCat === cat
+              return [
+                <tr
+                  key={cat}
+                  className="hover:bg-slate-50 cursor-pointer"
+                  onClick={() => setExpandedCat(isExpanded ? null : cat)}
+                >
+                  <td className="px-3 py-2.5 text-xs font-semibold text-slate-800 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={`h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                      <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+                    </svg>
+                    {cat}
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs font-semibold text-slate-800">×{t.multiplier}</td>
-                  <td className={`px-4 py-3 text-xs font-semibold ${t.multiplier < 1 ? 'text-emerald-600' : t.multiplier > 1 ? 'text-amber-600' : 'text-slate-500'}`}>{pct}</td>
-                  <td className="px-4 py-3 font-mono text-xs text-slate-700">€{(exampleB2B * t.multiplier).toFixed(2)}</td>
-                  <td className="px-4 py-3 text-xs text-slate-500 hidden sm:table-cell">{t.description}</td>
-                </tr>
-              )
+                  <td className="px-3 py-2.5 text-center text-xs text-slate-500">{g.products.length}</td>
+                  <td className="px-3 py-2.5 text-right font-mono text-xs text-slate-700">
+                    €{g.min.toFixed(2)}{g.min !== g.max ? ` – €${g.max.toFixed(2)}` : ''}
+                  </td>
+                  {TIER_PRICING_DATA.filter(t => t.key !== 'b2b').map(t => (
+                    <td key={t.key} className="px-3 py-2.5 text-right font-mono text-xs text-slate-700">
+                      €{(g.min * t.multiplier).toFixed(2)}{g.min !== g.max ? ` – €${(g.max * t.multiplier).toFixed(2)}` : ''}
+                    </td>
+                  ))}
+                </tr>,
+                // Expanded: individual products
+                ...(isExpanded ? g.products
+                  .sort((a, b) => a.b2bPrice - b.b2bPrice)
+                  .map((p, i) => (
+                    <tr key={`${cat}-${i}`} className="bg-slate-50/60">
+                      <td className="pl-8 pr-3 py-1.5 text-[11px] text-slate-600 truncate max-w-[200px]" title={p.name}>{p.name}</td>
+                      <td className="px-3 py-1.5" />
+                      <td className="px-3 py-1.5 text-right font-mono text-[11px] text-slate-600">€{p.b2bPrice.toFixed(2)}</td>
+                      {TIER_PRICING_DATA.filter(t => t.key !== 'b2b').map(t => (
+                        <td key={t.key} className="px-3 py-1.5 text-right font-mono text-[11px] text-slate-500">€{(p.b2bPrice * t.multiplier).toFixed(2)}</td>
+                      ))}
+                    </tr>
+                  )) : []),
+              ]
             })}
           </tbody>
         </table>
       </div>
-      <p className="mt-3 text-[11px] text-slate-400">Multipliers are set in code (App.jsx → ProductsModule). The Level 2 Country Tier is only assignable by admin — it does not appear on the client registration form.</p>
+      <p className="mt-3 text-[11px] text-slate-400">Click a category row to expand individual product pricing. Level 2 Country Tier is admin-assigned only.</p>
     </div>
   )
 }
