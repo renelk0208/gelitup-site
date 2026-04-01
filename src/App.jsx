@@ -6733,7 +6733,7 @@ function PortalRegister({ onRegister }) {
 
       <div className="p-8">
         <h3 className="text-xl font-semibold text-slate-900">
-          {isSalesRepFlow ? 'Sales Representative Application' : isDistributorFlow ? 'Distributor Application' : 'B2B Order Request'}
+          {isSalesRepFlow ? 'Sales Representative Application' : isDistributorFlow ? 'Distributor Application' : 'B2B Registration Request'}
         </h3>
 
         <div className="mt-4 flex flex-wrap gap-2">
@@ -12606,7 +12606,7 @@ function PendingApplicationsModule() {
 
     const lines = [
       `Application #${application.id}`,
-      `Type: ${applicationType === 'distributor' ? 'Distributor Application' : 'B2B Order Request'}`,
+      `Type: ${applicationType === 'distributor' ? 'Distributor Application' : 'B2B Registration Request'}`,
       `Order Profile: ${applicationType === 'b2b_order' ? orderProfile : '-'}`,
       `Submission Status: ${application.status || '-'}`,
       `Company/Client: ${application.company_name || '-'}`,
@@ -15215,10 +15215,10 @@ function App() {
           </div>`
         : `<div style="font-family:sans-serif;max-width:600px;">
             <div style="background:#16a34a;color:#fff;padding:16px 24px;border-radius:8px 8px 0 0;">
-              <strong style="font-size:13px;letter-spacing:2px;text-transform:uppercase;">&#128722; New B2B Order Request</strong>
+              <strong style="font-size:13px;letter-spacing:2px;text-transform:uppercase;">&#128722; New B2B Registration Request</strong>
             </div>
             <div style="border:1px solid #e5e7eb;border-top:none;padding:20px 24px;border-radius:0 0 8px 8px;">
-              <p style="margin:0 0 12px;"><strong>Order Request ID:</strong> ${createdApplication?.id}</p>
+              <p style="margin:0 0 12px;"><strong>Registration ID:</strong> ${createdApplication?.id}</p>
               <p style="margin:0 0 8px;"><strong>Company/Client:</strong> ${payload.company_name}</p>
               <p style="margin:0 0 8px;"><strong>Contact:</strong> ${payload.contact_name} (<a href="mailto:${payload.contact_email}">${payload.contact_email}</a>)</p>
               <p style="margin:0 0 8px;"><strong>Business Type:</strong> ${payload.business_type}</p>
@@ -15241,10 +15241,10 @@ function App() {
         sendPortalEmailNotification({
           eventType: 'application_received',
           to: payload.contact_email,
-          subject: `${isDistributorApplication ? 'Distributor application received' : 'B2B order request received'}: ${payload.company_name}`,
+          subject: `${isDistributorApplication ? 'Distributor application received' : 'B2B registration request received'}: ${payload.company_name}`,
           html: isDistributorApplication
             ? `<p>Hello ${payload.contact_name},</p><p>Welcome to <strong>GEL.IT.UP by GIUP®</strong>.</p><p>Thank you for submitting your distributor information for <strong>${payload.company_name}</strong>.</p><p>Your submission has been sent to ${ORDER_INBOX_EMAIL}. You will soon receive an approval email confirming that you can log in to the portal.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`
-            : `<p>Hello ${payload.contact_name},</p><p>Thank you for your B2B order request for <strong>${payload.company_name}</strong>.</p><p>Your request has been sent to ${ORDER_INBOX_EMAIL} and stored in our admin portal for processing.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
+            : `<p>Hello ${payload.contact_name},</p><p>Thank you for your B2B registration request for <strong>${payload.company_name}</strong>.</p><p>Your request has been received and stored in our admin portal. Our team will review it and be in touch shortly.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
           applicationId: createdApplication?.id,
           companyName: payload.company_name,
           contactName: payload.contact_name,
