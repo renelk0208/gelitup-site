@@ -5749,6 +5749,8 @@ function HomePage({ onOpenContactModal }) {
         </div>
       </div>
 
+      <InstagramFeedStrip />
+
       <InfoCard id="products" title="Our Products">
         <p>
           The GEL.IT.UP lineup includes Soak-off Gel Polish, Base and Top Coats, Builder System,
@@ -5848,7 +5850,6 @@ function HomePage({ onOpenContactModal }) {
       </div>
 
       <GoogleReviewsStrip />
-      <InstagramFeedStrip />
 
     </section>
   )
