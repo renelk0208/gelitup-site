@@ -6642,6 +6642,7 @@ function PortalRegister({ onRegister }) {
     shippingRegion: '',
     shippingCountry: '',
     shippingPostalCode: '',
+    salonName: '',
     businessType: '',
     yearsInBusiness: '',
     distributionCountryInterests: '',
@@ -6880,7 +6881,7 @@ function PortalRegister({ onRegister }) {
           const b2bFullName = isB2BOrderFlow ? `${application.firstName || ''} ${application.lastName || ''}`.trim() : ''
           const capturedName = isB2BOrderFlow ? b2bFullName : String(application.contactName || '').trim()
           const capturedIsDistributor = application.applicationType === 'distributor'
-          const appToSubmit = isB2BOrderFlow ? { ...application, contactName: b2bFullName, companyName: b2bFullName } : application
+          const appToSubmit = isB2BOrderFlow ? { ...application, contactName: b2bFullName, companyName: (application.salonName || '').trim() || b2bFullName } : application
           const result = await onRegister(appToSubmit)
           setIsSubmitting(false)
 
@@ -6910,6 +6911,10 @@ function PortalRegister({ onRegister }) {
                 <label className="block text-sm font-medium text-slate-700">
                   Contact Number
                   <input type="tel" required autoComplete="tel" value={application.phone} onChange={(e) => setField('phone', e.target.value)} placeholder="+30 210 0000000" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
+                </label>
+                <label className="block text-sm font-medium text-slate-700 md:col-span-2">
+                  Franchise / Salon Name
+                  <input type="text" required value={application.salonName || ''} onChange={(e) => setField('salonName', e.target.value)} placeholder="e.g. Glow Nails Studio" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700 md:col-span-2">
                   Business Type
@@ -7502,6 +7507,7 @@ function PortalRegister({ onRegister }) {
                       shippingCountry: '',
                       shippingPostalCode: '',
                       distributorTier: '',
+                      salonName: '',
                       businessType: '',
                       yearsInBusiness: '',
                       distributionCountryInterests: '',
@@ -15062,6 +15068,8 @@ function App() {
       const shippingCountry = shippingSameAsInvoice ? invoiceCountry : application.shippingCountry.trim()
       const shippingPostalCode = shippingSameAsInvoice ? invoicePostalCode : application.shippingPostalCode.trim()
 
+      const isB2BOrderApplication = applicationType === 'b2b_order'
+
       const requiredFields = [
         ['client type', application.customerType],
         ['company/client name', application.companyName],
@@ -15069,6 +15077,10 @@ function App() {
         ['contact email', application.contactEmail],
         ['phone', application.phone],
       ]
+
+      if (isB2BOrderApplication) {
+        requiredFields.push(['franchise / salon name', application.salonName])
+      }
 
       if (isDistributorApplication) {
         requiredFields.push(
@@ -15229,7 +15241,7 @@ function App() {
             </div>
             <div style="border:1px solid #e5e7eb;border-top:none;padding:20px 24px;border-radius:0 0 8px 8px;">
               <p style="margin:0 0 12px;"><strong>Registration ID:</strong> ${createdApplication?.id}</p>
-              <p style="margin:0 0 8px;"><strong>Company/Client:</strong> ${payload.company_name}</p>
+              <p style="margin:0 0 8px;"><strong>Franchise / Salon:</strong> ${payload.company_name}</p>
               <p style="margin:0 0 8px;"><strong>Contact:</strong> ${payload.contact_name} (<a href="mailto:${payload.contact_email}">${payload.contact_email}</a>)</p>
               <p style="margin:0 0 8px;"><strong>Business Type:</strong> ${payload.business_type}</p>
               <p style="margin:0 0 8px;"><strong>VAT:</strong> ${payload.vat_number || 'N/A'}</p>
