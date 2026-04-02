@@ -10,6 +10,7 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const BookAppointmentPage = lazy(() => import('./pages/BookAppointmentPage.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
 const GuestbookPage = lazy(() => import('./pages/GuestbookPage.jsx'))
+const InspirationPage = lazy(() => import('./pages/InspirationPage.jsx'))
 
 const B2B_EMAIL = 'gelitup.portal@gelitup.com'
 const PRODUCT_CATEGORIES = ['Solid Colours', 'Builder Gels', 'Base & Top', 'Nail Care', 'Accessories']
@@ -902,6 +903,7 @@ const navItems = [
   { to: '/book-appointment', label: 'Book Appointment' },
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/guestbook', label: 'Guestbook' },
+  { to: '/inspiration', label: 'Inspiration' },
   { to: '/full-catalogue', label: 'Our Products' },
 ]
 
@@ -1162,13 +1164,15 @@ function buildProformaFromCart({
   includeProfessionalBasePack,
   products,
   priceMap,
+  tierPriceMultiplier = 1.0,
 }) {
   const productMap = new Map(products.map((product) => [normalizeSkuCode(product.code), product]))
 
   const selectedLines = selectedCodes.map((code) => {
     const normalized = normalizeSkuCode(code)
     const product = productMap.get(normalized)
-    const unitPriceEur = priceMap?.get(normalized)?.price ?? getUnitPriceEurForSku(normalized)
+    const basePriceEur = priceMap?.get(normalized)?.price ?? getUnitPriceEurForSku(normalized)
+    const unitPriceEur = Number((basePriceEur * tierPriceMultiplier).toFixed(2))
     const qty = Number(itemQtys?.[code] || itemQtys?.[normalized] || 1)
 
     return {
@@ -1182,7 +1186,8 @@ function buildProformaFromCart({
   })
 
   const packageLines = packageCartItems.map((item) => {
-    const unitPriceEur = priceMap?.get(normalizeSkuCode(item.sku))?.price ?? getUnitPriceEurForSku(item.sku)
+    const basePriceEur = priceMap?.get(normalizeSkuCode(item.sku))?.price ?? getUnitPriceEurForSku(item.sku)
+    const unitPriceEur = Number((basePriceEur * tierPriceMultiplier).toFixed(2))
     const qty = Number(item.qty || 0)
     return {
       sku: item.sku,
@@ -1198,7 +1203,7 @@ function buildProformaFromCart({
     ? (() => {
       const listUnitPriceEur = FACTORY_PRICE_BOOK_EUR.technicalBySku['5IN1_CLR'] || 14
       const discountPct = FACTORY_PRICE_BOOK_EUR.professionalPackDiscountPct
-      const discountedUnitPriceEur = Number((listUnitPriceEur * (1 - (discountPct / 100))).toFixed(2))
+      const discountedUnitPriceEur = Number((listUnitPriceEur * (1 - (discountPct / 100)) * tierPriceMultiplier).toFixed(2))
       const qty = PROFESSIONAL_BASE_PACK.qty
       return [{
         sku: PROFESSIONAL_BASE_PACK.sku,
@@ -9096,6 +9101,37 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     navigate({ pathname: location.pathname, search: nextSearch ? `?${nextSearch}` : '' }, { replace: true })
   }, [location.pathname, location.search, navigate, products])
 
+  // Inspiration look deep-link: ?look=SKU1,SKU2,SKU3
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const lookParam = params.get('look')
+    if (!lookParam || !products.length) return
+
+    const codes = lookParam.split(',').map(s => s.trim()).filter(Boolean)
+    if (codes.length === 0) return
+
+    setSelectedCodes((current) => {
+      const merged = [...current]
+      codes.forEach((code) => {
+        if (!merged.includes(code)) merged.push(code)
+      })
+      return merged
+    })
+    setItemQtys((current) => {
+      const next = { ...current }
+      codes.forEach((code) => {
+        if (!next[code]) next[code] = 1
+      })
+      return next
+    })
+    setCheckoutMessage(`${codes.length} shade${codes.length === 1 ? '' : 's'} added from inspiration look`)
+    setCheckoutError('')
+
+    params.delete('look')
+    const nextSearch = params.toString()
+    navigate({ pathname: location.pathname, search: nextSearch ? `?${nextSearch}` : '' }, { replace: true })
+  }, [location.pathname, location.search, navigate, products])
+
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const action = params.get('quickRestock')
@@ -10159,6 +10195,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       includeProfessionalBasePack,
       products,
       priceMap,
+      tierPriceMultiplier,
     })
 
     let { data: insertedOrder, error } = await supabase
@@ -15507,6 +15544,7 @@ function App() {
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/book-appointment" element={<BookAppointmentPage />} />
           <Route path="/guestbook" element={<GuestbookPage />} />
+          <Route path="/inspiration" element={<InspirationPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/cookie-policy" element={<CookiePolicyPage />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditionsPage />} />
