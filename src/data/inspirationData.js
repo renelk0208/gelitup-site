@@ -1,0 +1,90 @@
+export const inspirationCategories = [
+  { key: 'all', label: 'All' },
+  { key: 'gel-polish', label: 'Gel Polish' },
+  { key: 'vitro', label: 'Vitro Collection' },
+  { key: 'flash-glitters', label: 'Flash Glitters' },
+  { key: 'builder-systems', label: 'Builder Systems' },
+  { key: 'nail-art', label: 'Nail Art' },
+  { key: 'salon-work', label: 'Salon Work' },
+]
+
+export const inspirationItems = [
+  {
+    id: 'vitro-01',
+    title: 'Vitro Glass Finish',
+    category: 'vitro',
+    image: '/img/inspiration/vitro-01.webp',
+    description: 'Translucent glass-effect finish with layered depth and a clean salon result.',
+    collection: 'Vitro Collection',
+    shades: ['GIUP-SC-0007', 'GIUP-SC-0008', 'GIUP-SC-0009'],
+    products: [
+      { label: 'Shop Vitro', href: '/collections/vitro' },
+      { label: 'Enter B2B Portal', href: '/b2b-solid-colour' },
+    ],
+  },
+  {
+    id: 'flash-01',
+    title: 'Flash Glitter Impact',
+    category: 'flash-glitters',
+    image: '/img/inspiration/flash-01.webp',
+    description: 'High-reflective glitter effect that transforms under direct light.',
+    collection: 'Flash Glitters',
+    shades: ['GIUP-SC-0010', 'GIUP-SC-0012', 'GIUP-SC-0006'],
+    products: [
+      { label: 'Shop Flash Glitters', href: '/collections/flash-glitters' },
+      { label: 'Enter B2B Portal', href: '/b2b-solid-colour' },
+    ],
+  },
+  {
+    id: 'builder-01',
+    title: 'Structured Builder Finish',
+    category: 'builder-systems',
+    image: '/img/inspiration/builder-01.webp',
+    description: 'Structured salon finish using builder system for strength and elegance.',
+    collection: 'Builder Systems',
+    shades: ['GIUP-SC-0004', 'GIUP-SC-0005', 'GIUP-SC-0007'],
+    products: [
+      { label: 'Shop Builder Systems', href: '/collections/builder-gels' },
+      { label: 'Register B2B', href: '/register' },
+    ],
+  },
+  {
+    id: 'gelpolish-01',
+    title: 'Classic Gel Polish Result',
+    category: 'gel-polish',
+    image: '/img/inspiration/gel-polish-01.webp',
+    description: 'Smooth, even colour payoff with a clean glossy finish.',
+    collection: 'Gel Polish',
+    shades: ['GIUP-SC-0001', 'GIUP-SC-0002', 'GIUP-SC-0003'],
+    products: [
+      { label: 'Shop Gel Polish', href: '/collections/gel-polish' },
+      { label: 'Enter B2B Portal', href: '/b2b-solid-colour' },
+    ],
+  },
+  {
+    id: 'nailart-01',
+    title: 'Creative Professional Detail',
+    category: 'nail-art',
+    image: '/img/inspiration/nail-art-01.webp',
+    description: 'Refined nail art result using GEL.IT.UP systems for creative salon work.',
+    collection: 'Nail Art',
+    shades: ['GIUP-SC-0013', 'GIUP-SC-0014', 'GIUP-SC-0006'],
+    products: [
+      { label: 'Explore Products', href: '/products' },
+      { label: 'Register B2B', href: '/register' },
+    ],
+  },
+  {
+    id: 'salon-01',
+    title: 'Real Salon Work',
+    category: 'salon-work',
+    image: '/img/inspiration/salon-01.webp',
+    description: 'Professional application result created for real salon performance.',
+    collection: 'Salon Work',
+    shades: ['GIUP-SC-0001', 'GIUP-SC-0004', 'GIUP-SC-0007'],
+    products: [
+      { label: 'Explore Collections', href: '/collections' },
+      { label: 'Enter B2B Portal', href: '/b2b-solid-colour' },
+    ],
+  },
+]
