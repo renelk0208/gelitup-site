@@ -76,8 +76,8 @@ export const inspirationCategories = [
     description: 'Real salon results and professional application examples.',
     cover: enc(`${BASE}/Salon Inspiration/salon-inspiration (1).webp`),
     images: [
-      ...[1,2,3,4].map(n => enc(`${BASE}/Salon Inspiration/salon-inspiration (${n}).webp`)),
-      ...Array.from({ length: 45 }, (_, i) => enc(`${BASE}/Salon Inspiration/salon-inspiration (${i + 1}).webp`)),
+      ...Array.from({ length: 23 }, (_, i) => enc(`${BASE}/Salon Inspiration/salon-inspiration (${i + 1}).webp`)),
+      ...Array.from({ length: 40 }, (_, i) => enc(`${BASE}/Salon Inspiration/salon-inspiration (${i + 45}).webp`)),
     ],
   },
   {
