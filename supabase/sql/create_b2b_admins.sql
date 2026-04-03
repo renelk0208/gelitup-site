@@ -18,6 +18,9 @@ create policy "Admins readable by authenticated users"
   to authenticated
   using (true);
 
+-- Note: Do NOT use a self-referencing policy (e.g. exists select from b2b_admins)
+-- as it causes infinite recursion. The admin panel UI is already gated by login.
+
 -- ── Seed admin accounts ──────────────────────────────────────────────────────
 -- Add or remove rows here. Email matching is case-insensitive in the app.
 insert into public.b2b_admins (email)

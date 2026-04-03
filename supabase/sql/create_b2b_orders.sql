@@ -32,3 +32,16 @@ on public.b2b_orders
 for select
 to authenticated
 using (customer_email = auth.email());
+
+-- Admin policies — admins (listed in b2b_admins) can read, update, and delete all orders.
+create policy if not exists "Admins can read all orders"
+  on public.b2b_orders for select to authenticated
+  using (exists (select 1 from public.b2b_admins where email = auth.email()));
+
+create policy if not exists "Admins can update orders"
+  on public.b2b_orders for update to authenticated
+  using (exists (select 1 from public.b2b_admins where email = auth.email()));
+
+create policy if not exists "Admins can delete orders"
+  on public.b2b_orders for delete to authenticated
+  using (exists (select 1 from public.b2b_admins where email = auth.email()));

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import * as XLSX from 'xlsx'
 
 const REGISTRATIONS_TABLE = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || 'b2b_registrations'
 const ORDERS_TABLE = import.meta.env.VITE_B2B_ORDERS_TABLE || 'b2b_orders'
@@ -504,6 +505,17 @@ function RegistrationsPanel() {
 
 // ─── Orders panel ─────────────────────────────────────────────────────────────
 
+const STATUS_OPTIONS = ['received', 'submitted', 'processing', 'shipped', 'completed', 'cancelled', 'cancellation_requested']
+const STATUS_COLORS = {
+  received: 'bg-sky-100 text-sky-700',
+  submitted: 'bg-amber-100 text-amber-700',
+  processing: 'bg-blue-100 text-blue-700',
+  shipped: 'bg-indigo-100 text-indigo-700',
+  completed: 'bg-emerald-100 text-emerald-700',
+  cancelled: 'bg-rose-100 text-rose-700',
+  cancellation_requested: 'bg-orange-100 text-orange-700',
+}
+
 function OrdersPanel() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
@@ -511,10 +523,11 @@ function OrdersPanel() {
   const [filter, setFilter] = useState('all')
   const [expanded, setExpanded] = useState(null)
   const [saving, setSaving] = useState(null)
-  // per-order tracking draft state
-  const [trackingDraft, setTrackingDraft] = useState({}) // { [id]: { number, url } }
-  // per-order payment confirmation state (required before → processing)
-  const [paymentConfirmed, setPaymentConfirmed] = useState({}) // { [id]: bool }
+  const [trackingDraft, setTrackingDraft] = useState({})
+  const [paymentConfirmed, setPaymentConfirmed] = useState({})
+  // editing state
+  const [editing, setEditing] = useState(null) // order id being edited
+  const [editDraft, setEditDraft] = useState({})
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -533,15 +546,29 @@ function OrdersPanel() {
 
   useEffect(() => { load() }, [load])
 
-  const updateStatus = async (id, status, extra = {}) => {
+  const updateOrder = async (id, patch) => {
     setSaving(id)
     const { error: err } = await supabase
       .from(ORDERS_TABLE)
-      .update({ status, ...extra })
+      .update(patch)
+      .eq('id', id)
+    setSaving(null)
+    if (err) { alert(err.message); return false }
+    setRows(prev => prev.map(r => r.id === id ? { ...r, ...patch } : r))
+    return true
+  }
+
+  const deleteOrder = async (id) => {
+    if (!window.confirm('Permanently delete this order? This cannot be undone.')) return
+    setSaving(id)
+    const { error: err } = await supabase
+      .from(ORDERS_TABLE)
+      .delete()
       .eq('id', id)
     setSaving(null)
     if (err) { alert(err.message); return }
-    setRows(prev => prev.map(r => r.id === id ? { ...r, status, ...extra } : r))
+    setRows(prev => prev.filter(r => r.id !== id))
+    setExpanded(null)
   }
 
   const markShipped = async (id) => {
@@ -549,12 +576,46 @@ function OrdersPanel() {
     const trackingNumber = (draft.number || '').trim()
     const trackingUrl = (draft.url || '').trim()
     if (!trackingNumber) { alert('Please enter a tracking number before marking as shipped.'); return }
-    await updateStatus(id, 'shipped', { tracking_number: trackingNumber, tracking_url: trackingUrl || null })
+    await updateOrder(id, { status: 'shipped', tracking_number: trackingNumber, tracking_url: trackingUrl || null })
   }
 
   const markProcessing = async (id) => {
     if (!paymentConfirmed[id]) { alert('Please confirm payment has been received before marking as Processing.'); return }
-    await updateStatus(id, 'processing', { payment_confirmed: true })
+    await updateOrder(id, { status: 'processing', payment_confirmed: true })
+  }
+
+  const startEdit = (row) => {
+    setEditing(row.id)
+    setEditDraft({
+      customer_email: row.customer_email || '',
+      consignee_name: row.consignee_name || '',
+      consignee_phone: row.consignee_phone || '',
+      shipping_address: row.shipping_address || '',
+      tracking_number: row.tracking_number || '',
+      tracking_url: row.tracking_url || '',
+      status: row.status,
+      items: Array.isArray(row.items) ? row.items.map(it => typeof it === 'string' ? it : JSON.stringify(it)) : [],
+    })
+  }
+
+  const saveEdit = async (id) => {
+    const items = editDraft.items.filter(it => it.trim())
+    const totalUnits = items.reduce((sum, it) => {
+      const m = it.match(/ x(\d+)$/)
+      return sum + (m ? parseInt(m[1], 10) : 1)
+    }, 0)
+    const ok = await updateOrder(id, {
+      customer_email: editDraft.customer_email.trim() || null,
+      consignee_name: editDraft.consignee_name.trim() || null,
+      consignee_phone: editDraft.consignee_phone.trim() || null,
+      shipping_address: editDraft.shipping_address.trim() || null,
+      tracking_number: editDraft.tracking_number.trim() || null,
+      tracking_url: editDraft.tracking_url.trim() || null,
+      status: editDraft.status,
+      items,
+      total_units: totalUnits,
+    })
+    if (ok) setEditing(null)
   }
 
   const FILTERS = ['all', 'received', 'submitted', 'cancellation_requested', 'processing', 'shipped', 'completed', 'cancelled']
@@ -568,11 +629,43 @@ function OrdersPanel() {
             onClick={() => setFilter(f)}
             className={`rounded-full px-3 py-1 text-xs font-semibold transition ${filter === f ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
-            {f.charAt(0).toUpperCase() + f.slice(1)}
+            {f === 'cancellation_requested' ? 'Cancel Req.' : f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
         ))}
         <button onClick={load} className="ml-auto rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-500 hover:bg-slate-50">
           ↻ Refresh
+        </button>
+        <button
+          onClick={() => {
+            if (!rows.length) { alert('No orders to export.'); return }
+            const data = rows.map(r => {
+              const items = Array.isArray(r.items) ? r.items : []
+              return {
+                'Order ID': r.id,
+                'Date': r.created_at ? new Date(r.created_at).toLocaleDateString() : '',
+                'Status': r.status,
+                'Customer Email': r.customer_email || '',
+                'Consignee': r.consignee_name || '',
+                'Phone': r.consignee_phone || '',
+                'Shipping Address': r.shipping_address || '',
+                'Total Units': r.total_units,
+                'Items': items.map(it => typeof it === 'string' ? it : (it.name || it.sku || JSON.stringify(it))).join('; '),
+                'Payment Confirmed': r.payment_confirmed ? 'Yes' : 'No',
+                'Tracking #': r.tracking_number || '',
+                'Tracking URL': r.tracking_url || '',
+                'Zoho SO #': r.zoho_salesorder_number || '',
+                'Zoho Invoice #': r.zoho_invoice_number || '',
+              }
+            })
+            const ws = XLSX.utils.json_to_sheet(data)
+            const wb = XLSX.utils.book_new()
+            XLSX.utils.book_append_sheet(wb, ws, 'Orders')
+            XLSX.writeFile(wb, `gelitup-orders-${filter}-${new Date().toISOString().slice(0,10)}.xlsx`)
+          }}
+          disabled={!rows.length}
+          className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 disabled:opacity-40"
+        >
+          ↓ Export Excel
         </button>
       </div>
 
@@ -600,13 +693,14 @@ function OrdersPanel() {
           const isSubmitted = row.status === 'submitted' || row.status === 'received'
           const isProcessing = row.status === 'processing'
           const isCancellationRequested = row.status === 'cancellation_requested'
+          const isEditing = editing === row.id
 
           return (
             <li key={row.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
               <button
                 type="button"
                 className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-slate-50"
-                onClick={() => setExpanded(expanded === row.id ? null : row.id)}
+                onClick={() => { setExpanded(expanded === row.id ? null : row.id); if (editing === row.id) setEditing(null) }}
               >
                 {statusBadge(row.status)}
                 <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">{row.customer_email || '—'}</span>
@@ -619,67 +713,153 @@ function OrdersPanel() {
 
               {expanded === row.id && (
                 <div className="space-y-4 border-t border-slate-100 px-4 py-4">
-                  {/* Order details */}
-                  <div className="grid gap-3 text-xs text-slate-700 sm:grid-cols-2">
-                    <div><span className="font-semibold text-slate-400">Customer</span><br />{row.customer_email || '—'}</div>
-                    <div><span className="font-semibold text-slate-400">Consignee</span><br />{row.consignee_name || '—'}</div>
-                    <div><span className="font-semibold text-slate-400">Phone</span><br />{row.consignee_phone || '—'}</div>
-                    <div><span className="font-semibold text-slate-400">Payment confirmed</span><br />
-                      <span className={row.payment_confirmed ? 'font-semibold text-emerald-600' : 'text-slate-400'}>
-                        {row.payment_confirmed ? '✓ Yes' : 'Not yet'}
-                      </span>
-                    </div>
-                    <div className="sm:col-span-2"><span className="font-semibold text-slate-400">Shipping Address</span><br />{row.shipping_address || '—'}</div>
-                    {isShipped && (
-                      <>
-                        <div><span className="font-semibold text-slate-400">Tracking #</span><br />{row.tracking_number || '—'}</div>
-                        <div><span className="font-semibold text-slate-400">Tracking URL</span><br />
-                          {row.tracking_url
-                            ? <a href={row.tracking_url} target="_blank" rel="noreferrer" className="text-fuchsia-600 hover:underline break-all">{row.tracking_url}</a>
-                            : '—'}
-                        </div>
-                      </>
-                    )}
-                  </div>
 
-                  {/* Items */}
-                  {items.length > 0 && (
-                    <div>
-                      <p className="mb-2 text-xs font-semibold text-slate-400">Items ({items.length})</p>
-                      <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 text-xs">
-                        {items.map((item, i) => {
-                          const label = typeof item === 'string'
-                            ? item.replace(/ x\d+$/, '')
-                            : (item.name || item.displayName || item.sku || `Item ${i + 1}`)
-                          const qty = typeof item === 'string'
-                            ? (item.match(/ x(\d+)$/)?.[1] ?? 1)
-                            : (item.qty ?? item.quantity ?? 1)
-                          return (
-                            <li key={i} className="flex items-center justify-between px-3 py-2">
-                              <span className="text-slate-700">{label}</span>
-                              <span className="font-semibold text-slate-900">×{qty}</span>
+                  {/* ── VIEW MODE ── */}
+                  {!isEditing && (
+                    <>
+                      <div className="grid gap-3 text-xs text-slate-700 sm:grid-cols-2">
+                        <div><span className="font-semibold text-slate-400">Customer</span><br />{row.customer_email || '—'}</div>
+                        <div><span className="font-semibold text-slate-400">Consignee</span><br />{row.consignee_name || '—'}</div>
+                        <div><span className="font-semibold text-slate-400">Phone</span><br />{row.consignee_phone || '—'}</div>
+                        <div><span className="font-semibold text-slate-400">Payment confirmed</span><br />
+                          <span className={row.payment_confirmed ? 'font-semibold text-emerald-600' : 'text-slate-400'}>
+                            {row.payment_confirmed ? '✓ Yes' : 'Not yet'}
+                          </span>
+                        </div>
+                        <div className="sm:col-span-2"><span className="font-semibold text-slate-400">Shipping Address</span><br />{row.shipping_address || '—'}</div>
+                        {(row.tracking_number || isShipped) && (
+                          <>
+                            <div><span className="font-semibold text-slate-400">Tracking #</span><br />{row.tracking_number || '—'}</div>
+                            <div><span className="font-semibold text-slate-400">Tracking URL</span><br />
+                              {row.tracking_url
+                                ? <a href={row.tracking_url} target="_blank" rel="noreferrer" className="text-fuchsia-600 hover:underline break-all">{row.tracking_url}</a>
+                                : '—'}
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {items.length > 0 && (
+                        <div>
+                          <p className="mb-2 text-xs font-semibold text-slate-400">Items ({items.length})</p>
+                          <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 text-xs">
+                            {items.map((item, i) => {
+                              const label = typeof item === 'string'
+                                ? item.replace(/ x\d+$/, '')
+                                : (item.name || item.displayName || item.sku || `Item ${i + 1}`)
+                              const qty = typeof item === 'string'
+                                ? (item.match(/ x(\d+)$/)?.[1] ?? 1)
+                                : (item.qty ?? item.quantity ?? 1)
+                              return (
+                                <li key={i} className="flex items-center justify-between px-3 py-2">
+                                  <span className="text-slate-700">{label}</span>
+                                  <span className="font-semibold text-slate-900">×{qty}</span>
+                                </li>
+                              )
+                            })}
+                          </ul>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* ── EDIT MODE ── */}
+                  {isEditing && (
+                    <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50/50 p-4">
+                      <p className="text-xs font-semibold text-amber-700">Editing Order #{row.id}</p>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-1 block text-xs font-medium text-slate-600">Customer Email</label>
+                          <input type="email" value={editDraft.customer_email} onChange={e => setEditDraft(d => ({ ...d, customer_email: e.target.value }))} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-200" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-medium text-slate-600">Consignee Name</label>
+                          <input type="text" value={editDraft.consignee_name} onChange={e => setEditDraft(d => ({ ...d, consignee_name: e.target.value }))} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-200" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-medium text-slate-600">Phone</label>
+                          <input type="text" value={editDraft.consignee_phone} onChange={e => setEditDraft(d => ({ ...d, consignee_phone: e.target.value }))} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-200" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-medium text-slate-600">Status</label>
+                          <select value={editDraft.status} onChange={e => setEditDraft(d => ({ ...d, status: e.target.value }))} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-200">
+                            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, ' ')}</option>)}
+                          </select>
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="mb-1 block text-xs font-medium text-slate-600">Shipping Address</label>
+                          <textarea value={editDraft.shipping_address} onChange={e => setEditDraft(d => ({ ...d, shipping_address: e.target.value }))} rows={2} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-200" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-medium text-slate-600">Tracking Number</label>
+                          <input type="text" value={editDraft.tracking_number} onChange={e => setEditDraft(d => ({ ...d, tracking_number: e.target.value }))} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-200" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-medium text-slate-600">Tracking URL</label>
+                          <input type="url" value={editDraft.tracking_url} onChange={e => setEditDraft(d => ({ ...d, tracking_url: e.target.value }))} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-200" />
+                        </div>
+                      </div>
+
+                      {/* Editable items list */}
+                      <div>
+                        <p className="mb-2 text-xs font-semibold text-slate-600">Items (format: <code className="text-amber-700">SKU x2</code>)</p>
+                        <ul className="space-y-1">
+                          {editDraft.items.map((it, i) => (
+                            <li key={i} className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={it}
+                                onChange={e => {
+                                  const updated = [...editDraft.items]
+                                  updated[i] = e.target.value
+                                  setEditDraft(d => ({ ...d, items: updated }))
+                                }}
+                                className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-200"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setEditDraft(d => ({ ...d, items: d.items.filter((_, j) => j !== i) }))}
+                                className="shrink-0 rounded px-2 py-1 text-xs text-rose-500 hover:bg-rose-50"
+                              >✕</button>
                             </li>
-                          )
-                        })}
-                      </ul>
+                          ))}
+                        </ul>
+                        <button
+                          type="button"
+                          onClick={() => setEditDraft(d => ({ ...d, items: [...d.items, ''] }))}
+                          className="mt-2 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs text-slate-500 hover:bg-slate-50"
+                        >+ Add Item</button>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 pt-2">
+                        <button
+                          onClick={() => saveEdit(row.id)}
+                          disabled={saving === row.id}
+                          className="rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-700 disabled:opacity-50"
+                        >{saving === row.id ? 'Saving…' : '✓ Save Changes'}</button>
+                        <button
+                          onClick={() => setEditing(null)}
+                          className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                        >Cancel</button>
+                      </div>
                     </div>
                   )}
 
                   {/* ── Cancellation Request ── */}
-                  {isCancellationRequested && (
+                  {isCancellationRequested && !isEditing && (
                     <div className="rounded-xl border border-orange-200 bg-orange-50 p-3 space-y-2">
                       <p className="text-xs font-semibold text-orange-700">⚠ Cancellation Requested by Customer</p>
                       <p className="text-xs text-slate-600">The customer has requested to cancel this order. Confirm to cancel it, or reject to keep it active.</p>
                       <div className="flex flex-wrap gap-2">
                         <button
-                          onClick={() => updateStatus(row.id, 'cancelled')}
+                          onClick={() => updateOrder(row.id, { status: 'cancelled' })}
                           disabled={saving === row.id}
                           className="rounded-lg bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
                         >
                           {saving === row.id ? 'Saving…' : '✕ Confirm Cancellation'}
                         </button>
                         <button
-                          onClick={() => updateStatus(row.id, 'submitted')}
+                          onClick={() => updateOrder(row.id, { status: 'submitted' })}
                           disabled={saving === row.id}
                           className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
                         >
@@ -690,7 +870,7 @@ function OrdersPanel() {
                   )}
 
                   {/* ── Mark as Processing (requires payment confirmation) ── */}
-                  {isSubmitted && (
+                  {isSubmitted && !isEditing && (
                     <div className="rounded-xl border border-blue-200 bg-blue-50 p-3 space-y-2">
                       <p className="text-xs font-semibold text-blue-700">Mark as Processing</p>
                       <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
@@ -713,7 +893,7 @@ function OrdersPanel() {
                   )}
 
                   {/* ── Mark as Shipped (requires tracking number) ── */}
-                  {isProcessing && (
+                  {isProcessing && !isEditing && (
                     <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3 space-y-2">
                       <p className="text-xs font-semibold text-indigo-700">Mark as Shipped</p>
                       <div className="grid gap-2 sm:grid-cols-2">
@@ -748,39 +928,54 @@ function OrdersPanel() {
                     </div>
                   )}
 
-                  {/* Other status transitions */}
-                  <div>
-                    <p className="mb-2 text-xs font-semibold text-slate-400">Other Actions</p>
-                    <div className="flex flex-wrap gap-2">
-                      {isShipped && (
+                  {/* ── Actions toolbar ── */}
+                  {!isEditing && (
+                    <div>
+                      <p className="mb-2 text-xs font-semibold text-slate-400">Actions</p>
+                      <div className="flex flex-wrap gap-2">
                         <button
-                          onClick={() => updateStatus(row.id, 'completed')}
-                          disabled={saving === row.id}
-                          className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                          onClick={() => startEdit(row)}
+                          className="rounded-lg border border-amber-200 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-50"
                         >
-                          ✓ Mark Completed
+                          ✎ Edit Order
                         </button>
-                      )}
-                      {row.status !== 'cancelled' && row.status !== 'completed' && (
+                        {isShipped && (
+                          <button
+                            onClick={() => updateOrder(row.id, { status: 'completed' })}
+                            disabled={saving === row.id}
+                            className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                          >
+                            ✓ Mark Completed
+                          </button>
+                        )}
+                        {row.status !== 'cancelled' && row.status !== 'completed' && (
+                          <button
+                            onClick={() => updateOrder(row.id, { status: 'cancelled' })}
+                            disabled={saving === row.id}
+                            className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                          >
+                            ✕ Cancel Order
+                          </button>
+                        )}
+                        {(row.status === 'cancelled' || row.status === 'completed') && (
+                          <button
+                            onClick={() => updateOrder(row.id, { status: 'submitted' })}
+                            disabled={saving === row.id}
+                            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                          >
+                            ↩ Reopen Order
+                          </button>
+                        )}
                         <button
-                          onClick={() => updateStatus(row.id, 'cancelled')}
+                          onClick={() => deleteOrder(row.id)}
                           disabled={saving === row.id}
                           className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
                         >
-                          ✕ Cancel Order
+                          🗑 Delete
                         </button>
-                      )}
-                      {(row.status === 'cancelled' || row.status === 'completed') && (
-                        <button
-                          onClick={() => updateStatus(row.id, 'submitted')}
-                          disabled={saving === row.id}
-                          className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
-                        >
-                          ↩ Reset to Submitted
-                        </button>
-                      )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
             </li>
@@ -805,6 +1000,8 @@ function AdminsPanel() {
   const [saving, setSaving] = useState(false)
   const [feedback, setFeedback] = useState(null) // { type: 'ok'|'error', message }
   const [removing, setRemoving] = useState(null)
+  const [showPw, setShowPw] = useState(false)
+  const [showConfirmPw, setShowConfirmPw] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -884,30 +1081,40 @@ function AdminsPanel() {
               placeholder="newadmin@gelitup.com"
             />
           </label>
-          <label className="block text-sm font-medium text-slate-700">
+          <div className="block text-sm font-medium text-slate-700">
             Password
-            <input
-              type="password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(e) => { setPassword(e.target.value); setFeedback(null) }}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-              placeholder="Min. 8 characters"
-            />
-          </label>
-          <label className="block text-sm font-medium text-slate-700">
+            <div className="relative mt-1">
+              <input
+                type={showPw ? 'text' : 'password'}
+                required
+                minLength={8}
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setFeedback(null) }}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 pr-10 text-sm outline-none ring-slate-900/20 focus:ring"
+                placeholder="Min. 8 characters"
+              />
+              <button type="button" onClick={() => setShowPw(v => !v)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" tabIndex={-1} aria-label={showPw ? 'Hide password' : 'Show password'}>
+                {showPw ? <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074L3.707 2.293zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" /><path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" /></svg> : <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" /></svg>}
+              </button>
+            </div>
+          </div>
+          <div className="block text-sm font-medium text-slate-700">
             Confirm Password
-            <input
-              type="password"
-              required
-              minLength={8}
-              value={confirmPassword}
-              onChange={(e) => { setConfirmPassword(e.target.value); setFeedback(null) }}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-900/20 focus:ring"
-              placeholder="Repeat password"
-            />
-          </label>
+            <div className="relative mt-1">
+              <input
+                type={showConfirmPw ? 'text' : 'password'}
+                required
+                minLength={8}
+                value={confirmPassword}
+                onChange={(e) => { setConfirmPassword(e.target.value); setFeedback(null) }}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 pr-10 text-sm outline-none ring-slate-900/20 focus:ring"
+                placeholder="Repeat password"
+              />
+              <button type="button" onClick={() => setShowConfirmPw(v => !v)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" tabIndex={-1} aria-label={showConfirmPw ? 'Hide password' : 'Show password'}>
+                {showConfirmPw ? <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074L3.707 2.293zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" /><path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" /></svg> : <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" /></svg>}
+              </button>
+            </div>
+          </div>
           <button
             type="submit"
             disabled={saving}
