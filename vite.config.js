@@ -38,6 +38,35 @@ export default defineConfig({
       cleanupOutdatedCaches: true,
       clientsClaim: true,
       skipWaiting: true,
+      runtimeCaching: [
+        {
+          urlPattern: /\/gelitup-media\/.+\.(?:png|jpg|jpeg|webp|gif|svg)$/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'media-images',
+            expiration: { maxEntries: 200, maxAgeSeconds: 30 * 24 * 60 * 60 },
+            cacheableResponse: { statuses: [0, 200] },
+          },
+        },
+        {
+          urlPattern: /\/fonts\/.+\.(?:woff2?|ttf|otf|eot)$/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'fonts',
+            expiration: { maxEntries: 20, maxAgeSeconds: 365 * 24 * 60 * 60 },
+            cacheableResponse: { statuses: [0, 200] },
+          },
+        },
+        {
+          urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'google-fonts',
+            expiration: { maxEntries: 10, maxAgeSeconds: 365 * 24 * 60 * 60 },
+            cacheableResponse: { statuses: [0, 200] },
+          },
+        },
+      ],
     },
 
     devOptions: {

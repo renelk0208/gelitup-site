@@ -4947,7 +4947,8 @@ function MobileNav({ onOpenContactModal }) {
         aria-label={open ? 'Close menu' : 'Open navigation menu'}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="fixed right-3 top-[9px] z-[60] flex h-11 w-11 flex-col items-center justify-center gap-[5px] rounded-lg border border-white/20 bg-black/85 backdrop-blur md:hidden"
+        style={{ top: 'calc(9px + env(safe-area-inset-top, 0px))', right: 'calc(12px + env(safe-area-inset-right, 0px))' }}
+        className="fixed z-[60] flex h-11 w-11 flex-col items-center justify-center gap-[5px] rounded-lg border border-white/20 bg-black/85 backdrop-blur md:hidden"
       >
         <span className={`block h-px w-[18px] origin-center bg-white transition-all duration-200 ${open ? 'translate-y-[6px] rotate-45' : ''}`} />
         <span className={`block h-px w-[18px] bg-white transition-all duration-200 ${open ? 'opacity-0 scale-x-0' : ''}`} />
@@ -15733,7 +15734,7 @@ function App() {
       </footer>
 
       {/* Floating chat widget + back-to-top */}
-      <div className="fixed bottom-6 right-3 z-50 flex flex-col items-end gap-2 md:right-4">
+      <div className="fixed z-50 flex flex-col items-end gap-2" style={{ bottom: 'calc(24px + env(safe-area-inset-bottom, 0px))', right: 'calc(12px + env(safe-area-inset-right, 0px))' }}>
         {/* Expandable chat panel */}
         {showChatPanel && (
           <div className="mb-1 w-64 rounded-2xl border border-white/10 bg-[#1a1a1a] shadow-2xl">
