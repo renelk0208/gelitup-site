@@ -5798,8 +5798,8 @@ function HomePage({ onOpenContactModal }) {
               { src: '/gelitup-media/inspiration/French/french%20(1).webp', label: 'French' },
               { src: '/gelitup-media/inspiration/Red/red%20(1).webp', label: 'Red' },
               { src: '/gelitup-media/inspiration/Salon%20Inspiration/salon-inspiration%20(1).webp', label: 'Salon' },
-              { src: '/gelitup-media/inspiration/BIAB%20-%20Brush-on-Builder/brush-on-builder%20(1).jpg', label: 'BIAB' },
-              { src: '/gelitup-media/inspiration/Multimix%20Polygel/multimix-polygel%20(1).webp', label: 'Polygel' },
+              { src: '/gelitup-media/inspiration/BIAB%20-%20Brush-on-Builder/bob-biab.webp', label: 'BIAB' },
+              { src: '/gelitup-media/inspiration/multimix-polygel/multimix-polygel%20(1).webp', label: 'Polygel' },
               { src: '/gelitup-media/inspiration/Colours/gelitup-colour-collection%20(5).webp', label: 'Nudes' },
             ].map((item, i) => (
               <div key={i} className="relative overflow-hidden">
