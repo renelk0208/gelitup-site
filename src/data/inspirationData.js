@@ -15,42 +15,34 @@ export const inspirationCategories = [
     images: [
       'cloud-dancer-inspiration-cover-card.webp',
       'gelitup_cloudancer_cover_post.webp',
+      'cloud%20dancer%20pt1.webp',
       // 2600
-      '2600.webp','gelitup_cloudancer_2600_card.webp','gelitup_cloudancer_2600_card_hand.webp',
+      '2600.webp','gelitup_cloudancer_2600_card_hand.webp',
       // 2601
-      '2601.webp','gelitup_cloudancer_2601_card.webp','gelitup_cloudancer_2601_card_hand.webp',
+      '2601.webp','gelitup_cloudancer_2601_card_hand.webp',
       // 2602
-      '2602.webp','gelitup_cloudancer_2602_card.webp','gelitup_cloudancer_2602_card_hand.webp',
+      '2602.webp','gelitup_cloudancer_2602_card_hand.webp',
+      // 2600-2601-2602 combo
+      '2600-2601-2602%20(1).webp','2600-2601-2602%20(2).webp',
       // 2603
-      '2603.webp','2603-1.webp','gelitup_cloudancer_2603_card.webp','gelitup_cloudancer_2603_card_hand.webp',
+      '2603.webp','2603-1.webp','2603%20(1).webp','2603%20(2).webp','gelitup_cloudancer_2603_card_hand.webp',
       // 2604
-      '2604.webp','gelitup_cloudancer_2604_card.webp','gelitup_cloudancer_2604_card_hand.webp',
+      '2604.webp','2604--1.webp','gelitup_cloudancer_2604_card_hand.webp',
       // 2605
-      '2605.webp','gelitup_cloudancer_2605_card.webp','gelitup_cloudancer_2605_card_hand.webp',
+      '2605.webp','2605-1.webp','gelitup_cloudancer_2605_card_hand.webp',
       // 2606
-      '2606.webp','gelitup_cloudancer_2606_card.webp','gelitup_cloudancer_2606_card_hand.webp',
+      '2606.webp','2606-1.webp','2606-2.webp','gelitup_cloudancer_2606_card_hand.webp',
       // 2607
-      '2607.webp','gelitup_cloudancer_2607_card.webp','gelitup_cloudancer_2607_card_hand.webp',
+      '2607.webp','2607-1.webp','2607-2.webp','gelitup_cloudancer_2607_card_hand.webp',
       // 2608
-      '2608.webp','gelitup_cloudancer_2608_card.webp','gelitup_cloudancer_2608_card_hand.webp',
+      '2608.webp','2608-1.webp','2608-2.webp','gelitup_cloudancer_2608_card_hand.webp',
       // 2609
-      '2609.webp','gelitup_cloudancer_2609_card.webp','gelitup_cloudancer_2609_card_hand.webp',
+      '2609.webp','2609-1.webp','gelitup_cloudancer_2609_card_hand.webp',
       // 2610
-      '2610.webp','gelitup_cloudancer_2610_card.webp','gelitup_cloudancer_2610_card_hand.webp',
-      // Colour swatches
-      'gelitup_cloudancer_blue.webp','gelitup_cloudancer_blue_hand.webp',
-      'gelitup_cloudancer_green.webp','gelitup_cloudancer_green_hand.webp',
-      'gelitup_cloudancer_grey.webp','gelitup_cloudancer_grey_hand.webp',
-      'gelitup_cloudancer_nude.webp','gelitup_cloudancer_nude_hand.webp',
-      'gelitup_cloudancer_peach.webp','gelitup_cloudancer_peach_hand.webp',
-      'gelitup_cloudancer_pink.webp','gelitup_cloudancer_pink_hand.webp',
-      'gelitup_cloudancer_purple.webp','gelitup_cloudancer_purple_hand.webp',
-      'gelitup_cloudancer_yellow.webp','gelitup_cloudancer_yellow_hand.webp',
+      '2610.webp','2610-1.webp','2610-2.webp','gelitup_cloudancer_2610_card_hand.webp',
+      // Other
+      '2906-2.webp',
     ].map(f => `${BASE}/2026/${f}`),
-    videos: [
-      `${BASE}/2026/cloud%20dancer%20video%20(1).mov`,
-      `${BASE}/2026/cloud%20dancer%20video%20(2).mov`,
-    ],
     pinFirst: true,
   },
   {

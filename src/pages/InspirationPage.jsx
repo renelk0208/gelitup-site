@@ -105,14 +105,12 @@ function CategoryGallery({ category, onBack }) {
               onClick={() => openLightbox(i)}
               className="group overflow-hidden rounded-2xl bg-neutral-100 shadow-sm transition hover:shadow-lg"
             >
-              <div className="aspect-square overflow-hidden">
-                <img
-                  src={src}
-                  alt={`${category.label} ${i + 1}`}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                />
-              </div>
+              <img
+                src={src}
+                alt={`${category.label} ${i + 1}`}
+                loading="lazy"
+                className="w-full rounded-2xl object-contain transition duration-300 group-hover:scale-105"
+              />
             </button>
           ))}
         </div>
