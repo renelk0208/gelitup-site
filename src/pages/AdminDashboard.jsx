@@ -837,7 +837,11 @@ function AdminsPanel() {
     })
     setSaving(false)
     if (err || data?.error) {
-      setFeedback({ type: 'error', message: data?.error || err?.message || 'Failed to create admin.' })
+      let detail = data?.error || ''
+      if (!detail && err?.context instanceof Response) {
+        try { const body = await err.context.json(); detail = body?.error || '' } catch {}
+      }
+      setFeedback({ type: 'error', message: detail || err?.message || 'Failed to create admin.' })
       return
     }
     setFeedback({ type: 'ok', message: `Admin account created for ${email.trim().toLowerCase()}.` })
