@@ -216,11 +216,11 @@ export default function InspirationPage() {
                 Explore the professional side of GEL.IT.UP
               </h2>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                <a href="/b2b-solid-colour"
-                  className="inline-flex rounded-2xl bg-neutral-900 px-5 py-3 text-sm font-semibold text-white">
-                  Enter B2B Portal
+                <a href="/full-catalogue"
+                  className="inline-flex rounded-2xl bg-neutral-900 px-5 py-3 text-sm font-semibold" style={{ color: '#fff' }}>
+                  Browse Catalogue
                 </a>
-                <a href="/register"
+                <a href="/portal/register"
                   className="inline-flex rounded-2xl border border-neutral-300 bg-white px-5 py-3 text-sm font-semibold text-neutral-900">
                   Register
                 </a>

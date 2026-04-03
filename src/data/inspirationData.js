@@ -110,10 +110,10 @@ export const inspirationCategories = [
     label: 'BIAB — Brush‑on Builder',
     folder: 'BIAB - Brush-on-Builder',
     description: 'Brush-on builder for natural nail strengthening and overlays.',
-    cover: enc(`${BASE}/BIAB - Brush-on-Builder/brush-on-builder (1).webp`),
+    cover: `${BASE}/BIAB%20-%20Brush-on-Builder/bob-biab.webp`,
     images: [
-      ...Array.from({ length: 7 }, (_, i) => enc(`${BASE}/BIAB - Brush-on-Builder/brush-on-builder (${i + 1}).webp`)),
       `${BASE}/BIAB%20-%20Brush-on-Builder/bob-biab.webp`,
+      ...Array.from({ length: 6 }, (_, i) => enc(`${BASE}/BIAB - Brush-on-Builder/brush-on-builder (${i + 2}).webp`)),
     ],
   },
   {
