@@ -62,12 +62,7 @@ export const inspirationCategories = [
     folder: 'Effects',
     description: 'Flash glitters, cat-eye, chrome, and special-finish effects.',
     cover: enc(`${BASE}/Effects/gel-it-up-effects (1).webp`),
-    images: Array.from({ length: 45 }, (_, i) => {
-      const n = i + 1
-      // These two originals failed conversion — keep as .jpg fallback
-      if (n === 17 || n === 31) return enc(`${BASE}/Effects/gel-it-up-effects (${n}).jpg`)
-      return enc(`${BASE}/Effects/gel-it-up-effects (${n}).webp`)
-    }),
+    images: Array.from({ length: 45 }, (_, i) => enc(`${BASE}/Effects/gel-it-up-effects (${i + 1}).webp`)),
   },
   {
     key: 'salon-inspiration',
@@ -115,12 +110,11 @@ export const inspirationCategories = [
     label: 'BIAB — Brush‑on Builder',
     folder: 'BIAB - Brush-on-Builder',
     description: 'Brush-on builder for natural nail strengthening and overlays.',
-    // brush-on-builder (1).jpg failed conversion — keep original for cover
-    cover: enc(`${BASE}/BIAB - Brush-on-Builder/brush-on-builder (1).jpg`),
-    images: [1,2,3,4,5,6,7].map(n => {
-      if (n === 1) return enc(`${BASE}/BIAB - Brush-on-Builder/brush-on-builder (1).jpg`)
-      return enc(`${BASE}/BIAB - Brush-on-Builder/brush-on-builder (${n}).webp`)
-    }),
+    cover: enc(`${BASE}/BIAB - Brush-on-Builder/brush-on-builder (1).webp`),
+    images: [
+      ...Array.from({ length: 7 }, (_, i) => enc(`${BASE}/BIAB - Brush-on-Builder/brush-on-builder (${i + 1}).webp`)),
+      `${BASE}/BIAB%20-%20Brush-on-Builder/bob-biab.webp`,
+    ],
   },
   {
     key: 'multimix-polygel',
@@ -128,7 +122,7 @@ export const inspirationCategories = [
     folder: 'multimix-polygel',
     description: 'Versatile polygel system for sculpting and extensions.',
     cover: enc(`${BASE}/multimix-polygel/multimix-polygel (1).webp`),
-    images: [1,4,5,6,7,8,9].map(n => enc(`${BASE}/multimix-polygel/multimix-polygel (${n}).webp`)),
+    images: [1,4,5,6,7,8].map(n => enc(`${BASE}/multimix-polygel/multimix-polygel (${n}).webp`)),
   },
   {
     key: 'liquid-polygel',
