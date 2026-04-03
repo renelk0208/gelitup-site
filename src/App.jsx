@@ -5783,6 +5783,37 @@ function HomePage({ onOpenContactModal }) {
         )}
       </InfoCard>
 
+      {/* INSPIRATION CTA CARD */}
+      <div className="overflow-hidden rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A]">
+        <div className="p-5 sm:p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Gallery</p>
+          <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">Inspiration Gallery</h2>
+          <p className="mt-2 max-w-lg text-sm text-white/80">Browse hundreds of professional nail art looks — colours, effects, French, builder gels and more. Find your next signature set.</p>
+        </div>
+        <NavLink to="/inspiration" className="group block">
+          <div className="grid grid-cols-4 gap-0.5 sm:grid-cols-4">
+            {[
+              { src: '/gelitup-media/inspiration/Colours/gelitup-colour-collection%20(1).webp', label: 'Colours' },
+              { src: '/gelitup-media/inspiration/Effects/gel-it-up-effects%20(1).webp', label: 'Effects' },
+              { src: '/gelitup-media/inspiration/French/french%20(1).webp', label: 'French' },
+              { src: '/gelitup-media/inspiration/Red/red%20(1).webp', label: 'Red' },
+              { src: '/gelitup-media/inspiration/Salon%20Inspiration/salon-inspiration%20(1).webp', label: 'Salon' },
+              { src: '/gelitup-media/inspiration/BIAB%20-%20Brush-on-Builder/brush-on-builder%20(1).jpg', label: 'BIAB' },
+              { src: '/gelitup-media/inspiration/Multimix%20Polygel/multimix-polygel%20(1).webp', label: 'Polygel' },
+              { src: '/gelitup-media/inspiration/Colours/gelitup-colour-collection%20(5).webp', label: 'Nudes' },
+            ].map((item, i) => (
+              <div key={i} className="relative overflow-hidden">
+                <img src={item.src} alt={item.label} className="aspect-square w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" onError={e => { e.currentTarget.parentElement.style.display = 'none' }} />
+                <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-1 py-1 text-center text-[10px] font-semibold uppercase tracking-wider text-white sm:text-xs">{item.label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-center gap-2 bg-fuchsia-600 py-3 text-sm font-bold text-white transition duration-300 group-hover:bg-fuchsia-500">
+            Explore All Categories &rarr;
+          </div>
+        </NavLink>
+      </div>
+
       {/* B2B SALON CTA CARD */}
       <div className="rounded-2xl p-5 sm:p-6 shadow-[0_4px_32px_rgba(212,55,144,0.35)]" style={{ background: 'linear-gradient(135deg, #f03988 0%, #D43790 45%, #8e1650 100%)' }}>
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -5823,32 +5854,6 @@ function HomePage({ onOpenContactModal }) {
           </div>
           <NavLink to="/for-academies" className="shrink-0 self-start rounded-xl border border-[#D43790]/60 px-5 py-3 text-sm font-bold text-[#D43790] transition duration-300 hover:bg-[#D43790]/10">
             Academy Info &rarr;
-          </NavLink>
-        </div>
-      </div>
-
-      {/* INSPIRATION CTA CARD */}
-      <div className="overflow-hidden rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A]">
-        <div className="flex flex-col sm:flex-row">
-          <div className="flex-1 p-5 sm:p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Gallery</p>
-            <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">Inspiration Gallery</h2>
-            <p className="mt-2 max-w-lg text-sm text-white/80">Browse hundreds of professional nail art looks — colours, effects, French, builder gels and more. Find your next signature set.</p>
-            <NavLink to="/inspiration" className="mt-4 inline-flex rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_14px_rgba(212,55,144,0.4)] transition duration-300 hover:bg-fuchsia-500">
-              Explore Inspiration &rarr;
-            </NavLink>
-          </div>
-          <NavLink to="/inspiration" className="grid grid-cols-3 gap-0.5 sm:w-[280px] lg:w-[340px]">
-            {[
-              '/gelitup-media/inspiration/Colours/gelitup-colour-collection%20(1).jpg',
-              '/gelitup-media/inspiration/Effects/gel-it-up-effects%20(1).jpg',
-              '/gelitup-media/inspiration/French/french%20(1).jpg',
-              '/gelitup-media/inspiration/Red/red%20(1).jpg',
-              '/gelitup-media/inspiration/Salon%20Inspiration/salon-inspiration%20(1).jpg',
-              '/gelitup-media/inspiration/BIAB%20-%20Brush-on-Builder/brush-on-builder%20(1).jpg',
-            ].map((src, i) => (
-              <img key={i} src={src} alt="" className="aspect-square w-full object-cover" loading="lazy" onError={e => { e.currentTarget.style.display = 'none' }} />
-            ))}
           </NavLink>
         </div>
       </div>

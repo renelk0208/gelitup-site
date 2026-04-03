@@ -7,35 +7,85 @@ function enc(path) {
 
 export const inspirationCategories = [
   {
+    key: '2026',
+    label: '2026 Inspiration',
+    folder: '2026',
+    description: 'The latest nail art and colour trends for 2026 — fresh looks updated throughout the year.',
+    cover: `${BASE}/2026/cloud-dancer-inspiration-cover-card.webp`,
+    images: [
+      'cloud-dancer-inspiration-cover-card.webp',
+      'gelitup_cloudancer_cover_post.webp',
+      // 2600
+      '2600.webp','gelitup_cloudancer_2600_card.webp','gelitup_cloudancer_2600_card_hand.webp',
+      // 2601
+      '2601.webp','gelitup_cloudancer_2601_card.webp','gelitup_cloudancer_2601_card_hand.webp',
+      // 2602
+      '2602.webp','gelitup_cloudancer_2602_card.webp','gelitup_cloudancer_2602_card_hand.webp',
+      // 2603
+      '2603.webp','2603-1.webp','gelitup_cloudancer_2603_card.webp','gelitup_cloudancer_2603_card_hand.webp',
+      // 2604
+      '2604.webp','gelitup_cloudancer_2604_card.webp','gelitup_cloudancer_2604_card_hand.webp',
+      // 2605
+      '2605.webp','gelitup_cloudancer_2605_card.webp','gelitup_cloudancer_2605_card_hand.webp',
+      // 2606
+      '2606.webp','gelitup_cloudancer_2606_card.webp','gelitup_cloudancer_2606_card_hand.webp',
+      // 2607
+      '2607.webp','gelitup_cloudancer_2607_card.webp','gelitup_cloudancer_2607_card_hand.webp',
+      // 2608
+      '2608.webp','gelitup_cloudancer_2608_card.webp','gelitup_cloudancer_2608_card_hand.webp',
+      // 2609
+      '2609.webp','gelitup_cloudancer_2609_card.webp','gelitup_cloudancer_2609_card_hand.webp',
+      // 2610
+      '2610.webp','gelitup_cloudancer_2610_card.webp','gelitup_cloudancer_2610_card_hand.webp',
+      // Colour swatches
+      'gelitup_cloudancer_blue.webp','gelitup_cloudancer_blue_hand.webp',
+      'gelitup_cloudancer_green.webp','gelitup_cloudancer_green_hand.webp',
+      'gelitup_cloudancer_grey.webp','gelitup_cloudancer_grey_hand.webp',
+      'gelitup_cloudancer_nude.webp','gelitup_cloudancer_nude_hand.webp',
+      'gelitup_cloudancer_peach.webp','gelitup_cloudancer_peach_hand.webp',
+      'gelitup_cloudancer_pink.webp','gelitup_cloudancer_pink_hand.webp',
+      'gelitup_cloudancer_purple.webp','gelitup_cloudancer_purple_hand.webp',
+      'gelitup_cloudancer_yellow.webp','gelitup_cloudancer_yellow_hand.webp',
+    ].map(f => `${BASE}/2026/${f}`),
+    videos: [
+      `${BASE}/2026/cloud%20dancer%20video%20(1).mov`,
+      `${BASE}/2026/cloud%20dancer%20video%20(2).mov`,
+    ],
+    pinFirst: true,
+  },
+  {
     key: 'colours',
     label: 'Colours',
     folder: 'Colours',
     description: 'The full GEL.IT.UP colour collection — vivid shades for every client.',
-    cover: enc(`${BASE}/Colours/gelitup-colour-collection (1).jpg`),
+    cover: enc(`${BASE}/Colours/gelitup-colour-collection (1).webp`),
     images: Array.from({ length: 64 }, (_, i) => {
       const n = i + 1
-      if (n === 1) return [`gelitup-colour-collection (1).jpeg`, `gelitup-colour-collection (1).jpg`]
-      if (n === 2) return [`gelitup-colour-collection (2).jpeg`, `gelitup-colour-collection (2).jpg`]
-      return [`gelitup-colour-collection (${n}).jpg`]
-    }).flat().map(f => enc(`${BASE}/Colours/${f}`)),
+      return enc(`${BASE}/Colours/gelitup-colour-collection (${n}).webp`)
+    }),
   },
   {
     key: 'effects',
     label: 'Effects',
     folder: 'Effects',
     description: 'Flash glitters, cat-eye, chrome, and special-finish effects.',
-    cover: enc(`${BASE}/Effects/gel-it-up-effects (1).jpg`),
-    images: Array.from({ length: 45 }, (_, i) => enc(`${BASE}/Effects/gel-it-up-effects (${i + 1}).jpg`)),
+    cover: enc(`${BASE}/Effects/gel-it-up-effects (1).webp`),
+    images: Array.from({ length: 45 }, (_, i) => {
+      const n = i + 1
+      // These two originals failed conversion — keep as .jpg fallback
+      if (n === 17 || n === 31) return enc(`${BASE}/Effects/gel-it-up-effects (${n}).jpg`)
+      return enc(`${BASE}/Effects/gel-it-up-effects (${n}).webp`)
+    }),
   },
   {
     key: 'salon-inspiration',
     label: 'Salon Inspiration',
     folder: 'Salon Inspiration',
     description: 'Real salon results and professional application examples.',
-    cover: enc(`${BASE}/Salon Inspiration/salon-inspiration (1).jpg`),
+    cover: enc(`${BASE}/Salon Inspiration/salon-inspiration (1).webp`),
     images: [
-      ...[1,2,3,4].map(n => enc(`${BASE}/Salon Inspiration/salon-inspiration (${n}).jpeg`)),
-      ...Array.from({ length: 45 }, (_, i) => enc(`${BASE}/Salon Inspiration/salon-inspiration (${i + 1}).jpg`)),
+      ...[1,2,3,4].map(n => enc(`${BASE}/Salon Inspiration/salon-inspiration (${n}).webp`)),
+      ...Array.from({ length: 45 }, (_, i) => enc(`${BASE}/Salon Inspiration/salon-inspiration (${i + 1}).webp`)),
     ],
   },
   {
@@ -43,27 +93,21 @@ export const inspirationCategories = [
     label: 'French',
     folder: 'French',
     description: 'Classic and modern French manicure looks.',
-    cover: enc(`${BASE}/French/french (1).jpg`),
-    images: [1,7,8,9,10,11,12,14,16].map(n => {
-      const ext = n === 12 ? 'JPG' : 'jpg'
-      return enc(`${BASE}/French/french (${n}).${ext}`)
-    }),
+    cover: enc(`${BASE}/French/french (1).webp`),
+    images: [1,7,8,9,10,11,12,14,16].map(n => enc(`${BASE}/French/french (${n}).webp`)),
   },
   {
     key: 'red',
     label: 'Red',
     folder: 'Red',
     description: 'Bold reds — the timeless salon staple.',
-    cover: enc(`${BASE}/Red/red (1).jpg`),
+    cover: enc(`${BASE}/Red/red (1).webp`),
     images: [
-      enc(`${BASE}/Red/red (1).jfif`),
-      enc(`${BASE}/Red/red (1).jpeg`),
-      enc(`${BASE}/Red/red (1).jpg`),
-      enc(`${BASE}/Red/red (2).jpeg`),
-      enc(`${BASE}/Red/red (2).jpg`),
-      enc(`${BASE}/Red/red (3).jpg`),
-      enc(`${BASE}/Red/red (4).jpg`),
-      enc(`${BASE}/Red/red (5).jpg`),
+      enc(`${BASE}/Red/red (1).webp`),
+      enc(`${BASE}/Red/red (2).webp`),
+      enc(`${BASE}/Red/red (3).webp`),
+      enc(`${BASE}/Red/red (4).webp`),
+      enc(`${BASE}/Red/red (5).webp`),
     ],
   },
   {
@@ -71,18 +115,19 @@ export const inspirationCategories = [
     label: '3‑in‑1 Builder Gels',
     folder: '3-in-1-builder-gels',
     description: 'Strong, self-levelling builder gels for structure and overlay.',
-    cover: enc(`${BASE}/3-in-1-builder-gels/3-in-1-builder-gel (1).jpg`),
-    images: Array.from({ length: 6 }, (_, i) => enc(`${BASE}/3-in-1-builder-gels/3-in-1-builder-gel (${i + 1}).jpg`)),
+    cover: enc(`${BASE}/3-in-1-builder-gels/3-in-1-builder-gel (1).webp`),
+    images: Array.from({ length: 6 }, (_, i) => enc(`${BASE}/3-in-1-builder-gels/3-in-1-builder-gel (${i + 1}).webp`)),
   },
   {
     key: 'biab',
     label: 'BIAB — Brush‑on Builder',
     folder: 'BIAB - Brush-on-Builder',
     description: 'Brush-on builder for natural nail strengthening and overlays.',
+    // brush-on-builder (1).jpg failed conversion — keep original for cover
     cover: enc(`${BASE}/BIAB - Brush-on-Builder/brush-on-builder (1).jpg`),
     images: [1,2,3,4,5,6,7].map(n => {
-      const ext = (n === 2 || n === 5) ? 'JPG' : 'jpg'
-      return enc(`${BASE}/BIAB - Brush-on-Builder/brush-on-builder (${n}).${ext}`)
+      if (n === 1) return enc(`${BASE}/BIAB - Brush-on-Builder/brush-on-builder (1).jpg`)
+      return enc(`${BASE}/BIAB - Brush-on-Builder/brush-on-builder (${n}).webp`)
     }),
   },
   {
@@ -90,61 +135,55 @@ export const inspirationCategories = [
     label: 'Multimix Polygel',
     folder: 'multimix-polygel',
     description: 'Versatile polygel system for sculpting and extensions.',
-    cover: enc(`${BASE}/multimix-polygel/multimix-polygel (1).jpg`),
-    images: [1,4,5,6,7,8,9].map(n => {
-      const ext = n === 7 ? 'JPG' : 'jpg'
-      return enc(`${BASE}/multimix-polygel/multimix-polygel (${n}).${ext}`)
-    }),
+    cover: enc(`${BASE}/multimix-polygel/multimix-polygel (1).webp`),
+    images: [1,4,5,6,7,8,9].map(n => enc(`${BASE}/multimix-polygel/multimix-polygel (${n}).webp`)),
   },
   {
     key: 'liquid-polygel',
     label: 'Liquid Polygel',
     folder: 'Liquid Polygel',
     description: 'Flowing polygel formula for smooth sculpted results.',
-    cover: enc(`${BASE}/Liquid Polygel/liquid-polygel (1).jpg`),
-    images: [1,2].map(n => enc(`${BASE}/Liquid Polygel/liquid-polygel (${n}).jpg`)),
+    cover: enc(`${BASE}/Liquid Polygel/liquid-polygel (1).webp`),
+    images: [1,2].map(n => enc(`${BASE}/Liquid Polygel/liquid-polygel (${n}).webp`)),
   },
   {
     key: 'premium-builder-gel',
     label: 'Premium Builder Gel',
     folder: 'Premium Builder Gel',
     description: 'Premium-grade builder gel for advanced salon work.',
-    cover: enc(`${BASE}/Premium Builder Gel/premium builder-gel.jpg`),
-    images: [enc(`${BASE}/Premium Builder Gel/premium builder-gel.jpg`)],
+    cover: enc(`${BASE}/Premium Builder Gel/premium builder-gel.webp`),
+    images: [enc(`${BASE}/Premium Builder Gel/premium builder-gel.webp`)],
   },
   {
     key: '5-in-1-base-coat',
     label: '5‑in‑1 Base Coat',
     folder: '5-in-1-base-coat',
     description: 'Multi-function base coat — bond, strengthen, protect, prime, and prep.',
-    cover: enc(`${BASE}/5-in-1-base-coat/5-in-1bases (1).jpg`),
-    images: Array.from({ length: 6 }, (_, i) => enc(`${BASE}/5-in-1-base-coat/5-in-1bases (${i + 1}).jpg`)),
+    cover: enc(`${BASE}/5-in-1-base-coat/5-in-1bases (1).webp`),
+    images: Array.from({ length: 6 }, (_, i) => enc(`${BASE}/5-in-1-base-coat/5-in-1bases (${i + 1}).webp`)),
   },
   {
     key: 'top-coats',
     label: 'Top Coats',
     folder: 'top-coats',
     description: 'High-shine, matte, and specialty top coat finishes.',
-    cover: enc(`${BASE}/top-coats/top-coats (1).jpg`),
-    images: [1,2,3,4,5,6].map(n => {
-      const ext = n === 5 ? 'JPG' : 'jpg'
-      return enc(`${BASE}/top-coats/top-coats (${n}).${ext}`)
-    }),
+    cover: enc(`${BASE}/top-coats/top-coats (1).webp`),
+    images: [1,2,3,4,5,6].map(n => enc(`${BASE}/top-coats/top-coats (${n}).webp`)),
   },
   {
     key: 'hand-nail-care',
     label: 'Hand & Nail Care',
     folder: 'Hand-nail-care',
     description: 'Cuticle oils, hand creams, and professional nail care.',
-    cover: enc(`${BASE}/Hand-nail-care/hand-foot-nail-care (1).jpg`),
-    images: Array.from({ length: 8 }, (_, i) => enc(`${BASE}/Hand-nail-care/hand-foot-nail-care (${i + 1}).jpg`)),
+    cover: enc(`${BASE}/Hand-nail-care/hand-foot-nail-care (1).webp`),
+    images: Array.from({ length: 8 }, (_, i) => enc(`${BASE}/Hand-nail-care/hand-foot-nail-care (${i + 1}).webp`)),
   },
   {
     key: 'pro-tools',
     label: 'ProTools',
     folder: 'ProTools',
     description: 'Professional tools, brushes, and salon accessories.',
-    cover: enc(`${BASE}/ProTools/pro-tools (1).jpg`),
-    images: Array.from({ length: 5 }, (_, i) => enc(`${BASE}/ProTools/pro-tools (${i + 1}).jpg`)),
+    cover: enc(`${BASE}/ProTools/pro-tools (1).webp`),
+    images: Array.from({ length: 5 }, (_, i) => enc(`${BASE}/ProTools/pro-tools (${i + 1}).webp`)),
   },
 ]

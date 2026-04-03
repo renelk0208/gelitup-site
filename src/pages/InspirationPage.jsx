@@ -70,7 +70,7 @@ function CategoryCard({ category, onClick }) {
       <div className="px-4 py-3">
         <h3 className="text-base font-semibold text-neutral-900">{category.label}</h3>
         <p className="mt-0.5 text-sm text-neutral-500">
-          {category.images.length} image{category.images.length === 1 ? '' : 's'} · Tap to view
+          {category.images.length} image{category.images.length === 1 ? '' : 's'}{category.videos?.length ? ` · ${category.videos.length} video${category.videos.length === 1 ? '' : 's'}` : ''} · Tap to view
         </p>
       </div>
     </button>
@@ -116,6 +116,25 @@ function CategoryGallery({ category, onBack }) {
             </button>
           ))}
         </div>
+
+        {category.videos?.length > 0 && (
+          <div className="mt-10">
+            <h3 className="text-xl font-semibold text-neutral-900">Videos</h3>
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {category.videos.map((src, i) => (
+                <video
+                  key={src}
+                  controls
+                  preload="metadata"
+                  playsInline
+                  className="w-full rounded-2xl bg-black shadow-lg"
+                >
+                  <source src={src} />
+                </video>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {lightboxIndex !== null && (
@@ -179,7 +198,11 @@ export default function InspirationPage() {
               {inspirationCategories.length} categories · {inspirationCategories.reduce((s, c) => s + c.images.length, 0)} images
             </p>
             <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {inspirationCategories.map((cat) => (
+              {[...inspirationCategories].sort((a, b) => {
+                  if (a.pinFirst && !b.pinFirst) return -1;
+                  if (!a.pinFirst && b.pinFirst) return 1;
+                  return a.label.localeCompare(b.label);
+                }).map((cat) => (
                 <CategoryCard key={cat.key} category={cat} onClick={setOpenCategory} />
               ))}
             </div>
