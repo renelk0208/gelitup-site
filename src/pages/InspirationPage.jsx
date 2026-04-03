@@ -57,7 +57,7 @@ function CategoryCard({ category, onClick }) {
     <button
       type="button"
       onClick={() => onClick(category)}
-      className="group relative overflow-hidden rounded-3xl bg-neutral-100 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+      className="group overflow-hidden rounded-3xl bg-neutral-100 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
     >
       <div className="aspect-[4/5] overflow-hidden">
         <img
@@ -67,10 +67,9 @@ function CategoryCard({ category, onClick }) {
           className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
         />
       </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 p-5 text-white">
-        <h3 className="text-xl font-semibold">{category.label}</h3>
-        <p className="mt-1 text-sm text-white/85">
+      <div className="px-4 py-3">
+        <h3 className="text-base font-semibold text-neutral-900">{category.label}</h3>
+        <p className="mt-0.5 text-sm text-neutral-500">
           {category.images.length} image{category.images.length === 1 ? '' : 's'} · Tap to view
         </p>
       </div>
