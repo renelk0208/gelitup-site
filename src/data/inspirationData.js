@@ -1,90 +1,145 @@
-export const inspirationCategories = [
-  { key: 'all', label: 'All' },
-  { key: 'gel-polish', label: 'Gel Polish' },
-  { key: 'vitro', label: 'Vitro Collection' },
-  { key: 'flash-glitters', label: 'Flash Glitters' },
-  { key: 'builder-systems', label: 'Builder Systems' },
-  { key: 'nail-art', label: 'Nail Art' },
-  { key: 'salon-work', label: 'Salon Work' },
-]
+const BASE = '/gelitup-media/inspiration'
 
-export const inspirationItems = [
+export const inspirationCategories = [
   {
-    id: 'vitro-01',
-    title: 'Vitro Glass Finish',
-    category: 'vitro',
-    image: '/img/inspiration/vitro-01.webp',
-    description: 'Translucent glass-effect finish with layered depth and a clean salon result.',
-    collection: 'Vitro Collection',
-    shades: ['GIUP-SC-0007', 'GIUP-SC-0008', 'GIUP-SC-0009'],
-    products: [
-      { label: 'Shop Vitro', href: '/collections/vitro' },
-      { label: 'Enter B2B Portal', href: '/b2b-solid-colour' },
+    key: 'colours',
+    label: 'Colours',
+    folder: 'Colours',
+    description: 'The full GEL.IT.UP colour collection — vivid shades for every client.',
+    cover: `${BASE}/Colours/gelitup-colour-collection (1).jpg`,
+    images: Array.from({ length: 64 }, (_, i) => {
+      const n = i + 1
+      if (n === 1) return [`gelitup-colour-collection (1).jpeg`, `gelitup-colour-collection (1).jpg`]
+      if (n === 2) return [`gelitup-colour-collection (2).jpeg`, `gelitup-colour-collection (2).jpg`]
+      return [`gelitup-colour-collection (${n}).jpg`]
+    }).flat().map(f => `${BASE}/Colours/${f}`),
+  },
+  {
+    key: 'effects',
+    label: 'Effects',
+    folder: 'Effects',
+    description: 'Flash glitters, cat-eye, chrome, and special-finish effects.',
+    cover: `${BASE}/Effects/gel-it-up-effects (1).jpg`,
+    images: Array.from({ length: 45 }, (_, i) => `${BASE}/Effects/gel-it-up-effects (${i + 1}).jpg`),
+  },
+  {
+    key: 'salon-inspiration',
+    label: 'Salon Inspiration',
+    folder: 'Salon Inspiration',
+    description: 'Real salon results and professional application examples.',
+    cover: `${BASE}/Salon Inspiration/salon-inspiration (1).jpg`,
+    images: [
+      ...[1,2,3,4].map(n => `${BASE}/Salon Inspiration/salon-inspiration (${n}).jpeg`),
+      ...Array.from({ length: 45 }, (_, i) => `${BASE}/Salon Inspiration/salon-inspiration (${i + 1}).jpg`),
     ],
   },
   {
-    id: 'flash-01',
-    title: 'Flash Glitter Impact',
-    category: 'flash-glitters',
-    image: '/img/inspiration/flash-01.webp',
-    description: 'High-reflective glitter effect that transforms under direct light.',
-    collection: 'Flash Glitters',
-    shades: ['GIUP-SC-0010', 'GIUP-SC-0012', 'GIUP-SC-0006'],
-    products: [
-      { label: 'Shop Flash Glitters', href: '/collections/flash-glitters' },
-      { label: 'Enter B2B Portal', href: '/b2b-solid-colour' },
+    key: 'french',
+    label: 'French',
+    folder: 'French',
+    description: 'Classic and modern French manicure looks.',
+    cover: `${BASE}/French/french (1).jpg`,
+    images: [1,7,8,9,10,11,12,14,16].map(n => {
+      const ext = n === 12 ? 'JPG' : 'jpg'
+      return `${BASE}/French/french (${n}).${ext}`
+    }),
+  },
+  {
+    key: 'red',
+    label: 'Red',
+    folder: 'Red',
+    description: 'Bold reds — the timeless salon staple.',
+    cover: `${BASE}/Red/red (1).jpg`,
+    images: [
+      `${BASE}/Red/red (1).jfif`,
+      `${BASE}/Red/red (1).jpeg`,
+      `${BASE}/Red/red (1).jpg`,
+      `${BASE}/Red/red (2).jpeg`,
+      `${BASE}/Red/red (2).jpg`,
+      `${BASE}/Red/red (3).jpg`,
+      `${BASE}/Red/red (4).jpg`,
+      `${BASE}/Red/red (5).jpg`,
     ],
   },
   {
-    id: 'builder-01',
-    title: 'Structured Builder Finish',
-    category: 'builder-systems',
-    image: '/img/inspiration/builder-01.webp',
-    description: 'Structured salon finish using builder system for strength and elegance.',
-    collection: 'Builder Systems',
-    shades: ['GIUP-SC-0004', 'GIUP-SC-0005', 'GIUP-SC-0007'],
-    products: [
-      { label: 'Shop Builder Systems', href: '/collections/builder-gels' },
-      { label: 'Register B2B', href: '/register' },
-    ],
+    key: '3-in-1-builder-gels',
+    label: '3‑in‑1 Builder Gels',
+    folder: '3-in-1-builder-gels',
+    description: 'Strong, self-levelling builder gels for structure and overlay.',
+    cover: `${BASE}/3-in-1-builder-gels/3-in-1-builder-gel (1).jpg`,
+    images: Array.from({ length: 6 }, (_, i) => `${BASE}/3-in-1-builder-gels/3-in-1-builder-gel (${i + 1}).jpg`),
   },
   {
-    id: 'gelpolish-01',
-    title: 'Classic Gel Polish Result',
-    category: 'gel-polish',
-    image: '/img/inspiration/gel-polish-01.webp',
-    description: 'Smooth, even colour payoff with a clean glossy finish.',
-    collection: 'Gel Polish',
-    shades: ['GIUP-SC-0001', 'GIUP-SC-0002', 'GIUP-SC-0003'],
-    products: [
-      { label: 'Shop Gel Polish', href: '/collections/gel-polish' },
-      { label: 'Enter B2B Portal', href: '/b2b-solid-colour' },
-    ],
+    key: 'biab',
+    label: 'BIAB — Brush‑on Builder',
+    folder: 'BIAB - Brush-on-Builder',
+    description: 'Brush-on builder for natural nail strengthening and overlays.',
+    cover: `${BASE}/BIAB - Brush-on-Builder/brush-on-builder (1).jpg`,
+    images: [1,2,3,4,5,6,7].map(n => {
+      const ext = (n === 2 || n === 5) ? 'JPG' : 'jpg'
+      return `${BASE}/BIAB - Brush-on-Builder/brush-on-builder (${n}).${ext}`
+    }),
   },
   {
-    id: 'nailart-01',
-    title: 'Creative Professional Detail',
-    category: 'nail-art',
-    image: '/img/inspiration/nail-art-01.webp',
-    description: 'Refined nail art result using GEL.IT.UP systems for creative salon work.',
-    collection: 'Nail Art',
-    shades: ['GIUP-SC-0013', 'GIUP-SC-0014', 'GIUP-SC-0006'],
-    products: [
-      { label: 'Explore Products', href: '/products' },
-      { label: 'Register B2B', href: '/register' },
-    ],
+    key: 'multimix-polygel',
+    label: 'Multimix Polygel',
+    folder: 'multimix-polygel',
+    description: 'Versatile polygel system for sculpting and extensions.',
+    cover: `${BASE}/multimix-polygel/multimix-polygel (1).jpg`,
+    images: [1,4,5,6,7,8,9].map(n => {
+      const ext = n === 7 ? 'JPG' : 'jpg'
+      return `${BASE}/multimix-polygel/multimix-polygel (${n}).${ext}`
+    }),
   },
   {
-    id: 'salon-01',
-    title: 'Real Salon Work',
-    category: 'salon-work',
-    image: '/img/inspiration/salon-01.webp',
-    description: 'Professional application result created for real salon performance.',
-    collection: 'Salon Work',
-    shades: ['GIUP-SC-0001', 'GIUP-SC-0004', 'GIUP-SC-0007'],
-    products: [
-      { label: 'Explore Collections', href: '/collections' },
-      { label: 'Enter B2B Portal', href: '/b2b-solid-colour' },
-    ],
+    key: 'liquid-polygel',
+    label: 'Liquid Polygel',
+    folder: 'Liquid Polygel',
+    description: 'Flowing polygel formula for smooth sculpted results.',
+    cover: `${BASE}/Liquid Polygel/liquid-polygel (1).jpg`,
+    images: [1,2].map(n => `${BASE}/Liquid Polygel/liquid-polygel (${n}).jpg`),
+  },
+  {
+    key: 'premium-builder-gel',
+    label: 'Premium Builder Gel',
+    folder: 'Premium Builder Gel',
+    description: 'Premium-grade builder gel for advanced salon work.',
+    cover: `${BASE}/Premium Builder Gel/premium builder-gel.jpg`,
+    images: [`${BASE}/Premium Builder Gel/premium builder-gel.jpg`],
+  },
+  {
+    key: '5-in-1-base-coat',
+    label: '5‑in‑1 Base Coat',
+    folder: '5-in-1-base-coat',
+    description: 'Multi-function base coat — bond, strengthen, protect, prime, and prep.',
+    cover: `${BASE}/5-in-1-base-coat/5-in-1bases (1).jpg`,
+    images: Array.from({ length: 6 }, (_, i) => `${BASE}/5-in-1-base-coat/5-in-1bases (${i + 1}).jpg`),
+  },
+  {
+    key: 'top-coats',
+    label: 'Top Coats',
+    folder: 'top-coats',
+    description: 'High-shine, matte, and specialty top coat finishes.',
+    cover: `${BASE}/top-coats/top-coats (1).jpg`,
+    images: [1,2,3,4,5,6].map(n => {
+      const ext = n === 5 ? 'JPG' : 'jpg'
+      return `${BASE}/top-coats/top-coats (${n}).${ext}`
+    }),
+  },
+  {
+    key: 'hand-nail-care',
+    label: 'Hand & Nail Care',
+    folder: 'Hand-nail-care',
+    description: 'Cuticle oils, hand creams, and professional nail care.',
+    cover: `${BASE}/Hand-nail-care/hand-foot-nail-care (1).jpg`,
+    images: Array.from({ length: 8 }, (_, i) => `${BASE}/Hand-nail-care/hand-foot-nail-care (${i + 1}).jpg`),
+  },
+  {
+    key: 'pro-tools',
+    label: 'ProTools',
+    folder: 'ProTools',
+    description: 'Professional tools, brushes, and salon accessories.',
+    cover: `${BASE}/ProTools/pro-tools (1).jpg`,
+    images: Array.from({ length: 5 }, (_, i) => `${BASE}/ProTools/pro-tools (${i + 1}).jpg`),
   },
 ]
