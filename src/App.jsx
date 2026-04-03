@@ -903,7 +903,7 @@ const navItems = [
   { to: '/book-appointment', label: 'Book Appointment' },
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/guestbook', label: 'Guestbook' },
-  { to: '/inspiration', label: 'Inspiration' },
+  { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
   { to: '/full-catalogue', label: 'Our Products' },
 ]
 
@@ -4869,7 +4869,7 @@ function Nav({ onOpenContactModal }) {
   return (
     <nav className="hidden gap-1 md:flex items-center">
       {/* Content links */}
-      {navItems.map((item) => {
+      {navItems.filter(item => !item.mobileOnly).map((item) => {
         if (item.isContactAction) {
           return (
             <button
@@ -5823,6 +5823,32 @@ function HomePage({ onOpenContactModal }) {
           </div>
           <NavLink to="/for-academies" className="shrink-0 self-start rounded-xl border border-[#D43790]/60 px-5 py-3 text-sm font-bold text-[#D43790] transition duration-300 hover:bg-[#D43790]/10">
             Academy Info &rarr;
+          </NavLink>
+        </div>
+      </div>
+
+      {/* INSPIRATION CTA CARD */}
+      <div className="overflow-hidden rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A]">
+        <div className="flex flex-col sm:flex-row">
+          <div className="flex-1 p-5 sm:p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Gallery</p>
+            <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">Inspiration Gallery</h2>
+            <p className="mt-2 max-w-lg text-sm text-white/80">Browse hundreds of professional nail art looks — colours, effects, French, builder gels and more. Find your next signature set.</p>
+            <NavLink to="/inspiration" className="mt-4 inline-flex rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_14px_rgba(212,55,144,0.4)] transition duration-300 hover:bg-fuchsia-500">
+              Explore Inspiration &rarr;
+            </NavLink>
+          </div>
+          <NavLink to="/inspiration" className="grid grid-cols-3 gap-0.5 sm:w-[280px] lg:w-[340px]">
+            {[
+              '/gelitup-media/inspiration/Colours/gelitup-colour-collection%20(1).jpg',
+              '/gelitup-media/inspiration/Effects/gel-it-up-effects%20(1).jpg',
+              '/gelitup-media/inspiration/French/french%20(1).jpg',
+              '/gelitup-media/inspiration/Red/red%20(1).jpg',
+              '/gelitup-media/inspiration/Salon%20Inspiration/salon-inspiration%20(1).jpg',
+              '/gelitup-media/inspiration/BIAB%20-%20Brush-on-Builder/brush-on-builder%20(1).jpg',
+            ].map((src, i) => (
+              <img key={i} src={src} alt="" className="aspect-square w-full object-cover" loading="lazy" onError={e => { e.currentTarget.style.display = 'none' }} />
+            ))}
           </NavLink>
         </div>
       </div>
