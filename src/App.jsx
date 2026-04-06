@@ -5093,6 +5093,60 @@ function FullCataloguePage() {
           </div>
         </div>
       )}
+
+      {/* BUY NOW POPUP */}
+      {showBuyPopup && (
+        <div
+          className="fixed inset-0 z-[500] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          onClick={() => setShowBuyPopup(false)}
+        >
+          <div
+            className="relative w-full max-w-md rounded-2xl bg-white px-6 py-8 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowBuyPopup(false)}
+              className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-black/40 transition hover:bg-black/5 hover:text-black/70"
+              aria-label="Close"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            </button>
+            <div className="text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-fuchsia-50">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-7 w-7 text-fuchsia-600" aria-hidden="true">
+                  <path d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-black" style={{ fontFamily: 'Montserrat, sans-serif' }}>Ready to place an order?</h3>
+              <p className="mt-2 text-sm leading-relaxed text-black/60">
+                Create a free account in under 30 seconds to start ordering. Already have an account? Sign in to continue.
+              </p>
+              <div className="mt-6 flex flex-col gap-3">
+                <NavLink
+                  to="/portal/buy"
+                  onClick={() => setShowBuyPopup(false)}
+                  className="inline-flex items-center justify-center rounded-xl bg-fuchsia-600 px-5 py-3 text-sm font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
+                >
+                  Create Free Account
+                </NavLink>
+                <NavLink
+                  to="/portal/login"
+                  onClick={() => setShowBuyPopup(false)}
+                  className="inline-flex items-center justify-center rounded-xl border border-fuchsia-500/30 bg-white px-5 py-3 text-sm font-semibold uppercase tracking-wider text-fuchsia-700 transition hover:bg-fuchsia-50"
+                >
+                  Sign In
+                </NavLink>
+                <button
+                  onClick={() => setShowBuyPopup(false)}
+                  className="mt-1 text-sm text-black/40 transition hover:text-black/60"
+                >
+                  Keep browsing
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
