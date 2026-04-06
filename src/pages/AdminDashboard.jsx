@@ -13,6 +13,7 @@ const ORDER_STATUSES = ['submitted', 'processing', 'shipped', 'completed', 'canc
 function statusBadge(status) {
   const map = {
     pending:                 'bg-amber-100 text-amber-700',
+    pending_approval:        'bg-violet-100 text-violet-700',
     approved:                'bg-emerald-100 text-emerald-700',
     rejected:                'bg-rose-100 text-rose-700',
     received:                'bg-sky-100 text-sky-700',
@@ -505,7 +506,7 @@ function RegistrationsPanel() {
 
 // ─── Orders panel ─────────────────────────────────────────────────────────────
 
-const STATUS_OPTIONS = ['received', 'submitted', 'processing', 'shipped', 'completed', 'cancelled', 'cancellation_requested']
+const STATUS_OPTIONS = ['pending_approval', 'received', 'submitted', 'processing', 'shipped', 'completed', 'cancelled', 'cancellation_requested']
 const STATUS_COLORS = {
   received: 'bg-sky-100 text-sky-700',
   submitted: 'bg-amber-100 text-amber-700',
@@ -618,7 +619,7 @@ function OrdersPanel() {
     if (ok) setEditing(null)
   }
 
-  const FILTERS = ['all', 'received', 'submitted', 'cancellation_requested', 'processing', 'shipped', 'completed', 'cancelled']
+  const FILTERS = ['all', 'pending_approval', 'received', 'submitted', 'cancellation_requested', 'processing', 'shipped', 'completed', 'cancelled']
 
   return (
     <div>
@@ -629,7 +630,7 @@ function OrdersPanel() {
             onClick={() => setFilter(f)}
             className={`rounded-full px-3 py-1 text-xs font-semibold transition ${filter === f ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
-            {f === 'cancellation_requested' ? 'Cancel Req.' : f.charAt(0).toUpperCase() + f.slice(1)}
+            {f === 'cancellation_requested' ? 'Cancel Req.' : f === 'pending_approval' ? 'Pending Approval' : f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
         ))}
         <button onClick={load} className="ml-auto rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-500 hover:bg-slate-50">
@@ -693,6 +694,7 @@ function OrdersPanel() {
           const isSubmitted = row.status === 'submitted' || row.status === 'received'
           const isProcessing = row.status === 'processing'
           const isCancellationRequested = row.status === 'cancellation_requested'
+          const isPendingApproval = row.status === 'pending_approval'
           const isEditing = editing === row.id
 
           return (
@@ -841,6 +843,30 @@ function OrdersPanel() {
                           onClick={() => setEditing(null)}
                           className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
                         >Cancel</button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── Pending Approval (below minimum order) ── */}
+                  {isPendingApproval && !isEditing && (
+                    <div className="rounded-xl border border-violet-200 bg-violet-50 p-3 space-y-2">
+                      <p className="text-xs font-semibold text-violet-700">⏳ Below Minimum Order — Awaiting Approval</p>
+                      <p className="text-xs text-slate-600">This order is below the €100 NET minimum. Approve to accept and process it, or reject to cancel.</p>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => updateOrder(row.id, { status: 'received' })}
+                          disabled={saving === row.id}
+                          className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                        >
+                          {saving === row.id ? 'Saving…' : '✓ Approve Order'}
+                        </button>
+                        <button
+                          onClick={() => updateOrder(row.id, { status: 'cancelled' })}
+                          disabled={saving === row.id}
+                          className="rounded-lg bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
+                        >
+                          {saving === row.id ? 'Saving…' : '✕ Reject Order'}
+                        </button>
                       </div>
                     </div>
                   )}

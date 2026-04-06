@@ -10597,11 +10597,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       return
     }
 
-    if (orderTotal > 0 && orderTotal < MIN_ORDER_EUR) {
-      setCheckoutError(`Minimum order value is €${MIN_ORDER_EUR.toFixed(2)} NET. Your current order is €${orderTotal.toFixed(2)}. Please add more products before submitting.`)
-      setCheckoutMessage('')
-      return
-    }
+    const belowMinimum = orderTotal > 0 && orderTotal < MIN_ORDER_EUR
 
     if (!hasSupabaseConfig || !supabase) {
       setCheckoutError('Order intake API is not configured. Use Send to Order Inbox.')
@@ -10708,7 +10704,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       total_units: totalUnits,
       source: 'portal',
       module: 'products',
-      status: 'received',
+      status: belowMinimum ? 'pending_approval' : 'received',
       consignee_name: shipping.name || null,
       consignee_phone: shipping.phone || null,
       shipping_address: shipping.address || null,
@@ -11102,7 +11098,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     const emailNote = emailSentOk
       ? ` Confirmation emails sent.`
       : ` ?? Email notifications could not be sent — see details below.`
-    setCheckoutMessage(`Order received (#${insertedOrder?.id ?? '-'} | ${totalUnits} units). Order stored successfully.${emailNote}${zohoStatusNote}`)
+    const approvalNote = belowMinimum ? ' Your order is below the €' + MIN_ORDER_EUR.toFixed(2) + ' minimum and requires admin approval before processing.' : ''
+    setCheckoutMessage(`Order received (#${insertedOrder?.id ?? '-'} | ${totalUnits} units). Order stored successfully.${approvalNote}${emailNote}${zohoStatusNote}`)
     setSelectedCodes([])
     setItemQtys({})
     setPackageCartItems([])
@@ -11385,7 +11382,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                 {_belowMin && (
                   <div className="mb-2 flex items-center gap-2 rounded-lg border border-amber-400 bg-amber-100 px-3 py-2">
                     <svg className="h-4 w-4 flex-none text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
-                    <p className="text-xs font-semibold text-amber-800">Minimum order is €{MIN_ORDER_EUR.toFixed(2)} NET — your order is €{orderTotal.toFixed(2)}. Please add more products to reach the minimum.</p>
+                    <p className="text-xs font-semibold text-amber-800">Orders below €{MIN_ORDER_EUR.toFixed(2)} NET require admin approval. Your order (€{orderTotal.toFixed(2)}) will be submitted for review.</p>
                   </div>
                 )}
                 <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
@@ -11808,7 +11805,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
               {_belowMin && (
                 <div className="mb-2 flex items-center gap-2 rounded-lg border border-amber-400 bg-amber-100 px-3 py-2">
                   <svg className="h-4 w-4 flex-none text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
-                  <p className="text-xs font-semibold text-amber-800">Minimum order is €{MIN_ORDER_EUR.toFixed(2)} NET — your order is €{orderTotal.toFixed(2)}. Please add more products to reach the minimum.</p>
+                  <p className="text-xs font-semibold text-amber-800">Orders below €{MIN_ORDER_EUR.toFixed(2)} NET require admin approval. Your order (€{orderTotal.toFixed(2)}) will be submitted for review.</p>
                 </div>
               )}
               <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
@@ -12940,9 +12937,11 @@ function OrdersModule() {
                         ? <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">Cancellation Requested</span>
                         : String(order.status || '').toLowerCase() === 'cancelled'
                           ? <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-700">Cancelled</span>
-                          : order.payment_status === 'invoice_ready'
-                            ? <span className="rounded-full bg-fuchsia-100 px-2 py-0.5 text-xs font-semibold text-fuchsia-700">Invoice Ready</span>
-                            : <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600 capitalize">{order.status || 'received'}</span>}
+                          : String(order.status || '').toLowerCase() === 'pending_approval'
+                            ? <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-700">Pending Approval</span>
+                            : order.payment_status === 'invoice_ready'
+                              ? <span className="rounded-full bg-fuchsia-100 px-2 py-0.5 text-xs font-semibold text-fuchsia-700">Invoice Ready</span>
+                              : <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600 capitalize">{order.status || 'received'}</span>}
                       {order.zoho_invoice_number && (
                         <span className="text-xs text-slate-500">Invoice: {order.zoho_invoice_number}</span>
                       )}
