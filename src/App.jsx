@@ -4367,7 +4367,7 @@ function FullCataloguePage() {
                         </p>
                         <div className="mt-auto pt-3 flex items-center">
                           <NavLink
-                            to="/portal/register"
+                            to="/portal/buy"
                             className="ml-auto inline-flex min-h-10 items-center rounded-[10px] bg-fuchsia-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500"
                           >
                             Buy Now
@@ -6369,7 +6369,7 @@ function PortalAccessNotice({ onOpenContactModal }) {
         <NavLink to="/become-distributor" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
           Distributor Registration
         </NavLink>
-        <NavLink to="/portal/login?mode=create-password" className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition duration-300 hover:bg-slate-100">
+        <NavLink to="/portal/buy" className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition duration-300 hover:bg-slate-100">
           Buy Now
         </NavLink>
       </div>
@@ -7101,6 +7101,187 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
               </>
             )}
         </div>
+      </div>
+    </section>
+  )
+}
+
+function BuyerRegister() {
+  const navigate = useNavigate()
+  const [form, setForm] = useState({ email: '', password: '', confirmPassword: '', companyName: '', vatNumber: '' })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [viesResult, setViesResult] = useState(null)
+  const [viesLoading, setViesLoading] = useState(false)
+  const [viesError, setViesError] = useState('')
+
+  const verifyVat = useCallback(async () => {
+    const vat = String(form.vatNumber || '').trim().toUpperCase().replace(/[\s\-\.]/g, '')
+    if (vat.length < 4) { setViesError('Enter a full VAT number to verify'); return }
+    setViesLoading(true)
+    setViesError('')
+    setViesResult(null)
+    try {
+      const res = await fetch('/.netlify/functions/validate-vat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vatNumber: vat }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setViesError(data.error || 'VIES check failed'); return }
+      setViesResult(data)
+      if (!data.valid) setViesError('VAT number not found in VIES — please check and try again')
+      else if (data.name && !form.companyName) setForm(f => ({ ...f, companyName: data.name }))
+    } catch { setViesError('Unable to reach VAT validation service') }
+    finally { setViesLoading(false) }
+  }, [form.vatNumber, form.companyName])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    const email = form.email.trim().toLowerCase()
+    const password = form.password
+    if (!email || !password) { setError('Email and password are required.'); return }
+    if (password.length < 6) { setError('Password must be at least 6 characters.'); return }
+    if (password !== form.confirmPassword) { setError('Passwords do not match.'); return }
+    const vat = form.vatNumber.trim()
+    if (!vat) { setError('A valid VAT number is required to place B2B orders.'); return }
+    if (!viesResult?.valid) { setError('Please verify your VAT number before continuing.'); return }
+
+    setIsSubmitting(true)
+    try {
+      if (!hasSupabaseConfig || !supabase) { setError('Supabase is not configured.'); setIsSubmitting(false); return }
+
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            company_name: form.companyName.trim(),
+            vat_number: vat,
+            vies_vat: vat,
+            account_type: 'b2b_buyer',
+          },
+          emailRedirectTo: `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(email)}`,
+        },
+      })
+
+      if (signUpError) {
+        const msg = signUpError.message || ''
+        if (/already registered|already been registered/i.test(msg)) {
+          setError('This email is already registered. Please sign in instead.')
+        } else {
+          setError(msg || 'Registration failed. Please try again.')
+        }
+        setIsSubmitting(false)
+        return
+      }
+
+      // Check if the user session was created immediately (email confirmation disabled)
+      if (signUpData?.session) {
+        localStorage.setItem('portalAuth', 'true')
+        navigate('/portal/dashboard/products')
+        return
+      }
+
+      // Email confirmation required — show check inbox message
+      navigate('/portal/login', { state: { checkInbox: email } })
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <section className="mx-auto grid max-w-4xl rounded-2xl border border-slate-200 bg-white md:grid-cols-2 md:overflow-hidden">
+      <div className="bg-[#111111] p-5 sm:p-6 md:p-8 text-white">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-400">GEL.IT.UP by GIUP®</p>
+        <h2 className="heading-on-dark mt-3 text-3xl font-bold">Create Your Account</h2>
+        <p className="mt-3 text-sm text-slate-300">
+          Register with your VAT number to access B2B pricing and place orders immediately. No approval needed.
+        </p>
+        <ul className="mt-6 space-y-3 hidden md:block">
+          <li className="flex items-start gap-2.5 text-sm text-slate-300">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
+            Instant account — no waiting for approval
+          </li>
+          <li className="flex items-start gap-2.5 text-sm text-slate-300">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
+            1,000+ professional shades at B2B pricing
+          </li>
+          <li className="flex items-start gap-2.5 text-sm text-slate-300">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
+            EU-certified, HEMA &amp; TPO-free formulas
+          </li>
+          <li className="flex items-start gap-2.5 text-sm text-slate-300">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
+            Valid EU VAT number required
+          </li>
+        </ul>
+        <p className="mt-8 text-xs text-slate-400">
+          Looking for wholesale distribution?{' '}
+          <NavLink to="/portal/register" className="font-semibold text-fuchsia-400 hover:underline">Apply as a distributor</NavLink>
+        </p>
+      </div>
+
+      <div className="p-5 sm:p-6 md:p-8">
+        <h3 className="text-xl font-semibold text-slate-900">Quick Registration</h3>
+        <p className="mt-1 text-sm text-slate-500">Create your account in under a minute.</p>
+
+        {error && (
+          <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>
+        )}
+
+        <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
+          <label className="block text-sm font-medium text-slate-700">
+            Email Address <span className="text-rose-500">*</span>
+            <input type="email" required autoComplete="email" value={form.email} onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))} placeholder="you@company.com" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
+          </label>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700">
+              VAT Number <span className="text-rose-500">*</span>
+              <div className="mt-1 flex gap-2">
+                <input type="text" required value={form.vatNumber} onChange={(e) => { setForm(f => ({ ...f, vatNumber: e.target.value })); setViesResult(null) }} placeholder="EU123456789" className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
+                <button type="button" onClick={verifyVat} disabled={viesLoading} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50">
+                  {viesLoading ? 'Checking…' : 'Verify'}
+                </button>
+              </div>
+            </label>
+            {viesResult?.valid && (
+              <p className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-700">
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-[10px]">✓</span>
+                VAT verified{viesResult.name ? ` — ${viesResult.name}` : ''}
+              </p>
+            )}
+            {viesError && <p className="mt-1.5 text-xs text-rose-600">{viesError}</p>}
+          </div>
+
+          <label className="block text-sm font-medium text-slate-700">
+            Company Name
+            <input type="text" value={form.companyName} onChange={(e) => setForm(f => ({ ...f, companyName: e.target.value }))} placeholder="Your Company Ltd" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
+          </label>
+
+          <label className="block text-sm font-medium text-slate-700">
+            Password <span className="text-rose-500">*</span>
+            <input type="password" required autoComplete="new-password" value={form.password} onChange={(e) => setForm(f => ({ ...f, password: e.target.value }))} placeholder="Min. 6 characters" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
+          </label>
+
+          <label className="block text-sm font-medium text-slate-700">
+            Confirm Password <span className="text-rose-500">*</span>
+            <input type="password" required autoComplete="new-password" value={form.confirmPassword} onChange={(e) => setForm(f => ({ ...f, confirmPassword: e.target.value }))} placeholder="Re-enter password" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
+          </label>
+
+          <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-fuchsia-600 px-4 py-3 text-sm font-bold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500 disabled:opacity-50">
+            {isSubmitting ? 'Creating Account…' : 'Create Account & Start Ordering'}
+          </button>
+        </form>
+
+        <p className="mt-4 text-center text-xs text-slate-500">
+          Already have an account?{' '}
+          <NavLink to="/portal/login" className="font-semibold text-slate-800 hover:underline">Sign in</NavLink>
+        </p>
       </div>
     </section>
   )
@@ -16113,6 +16294,7 @@ function App() {
                 <Route path="/portal-client-login" element={<Navigate to="/portal/login" replace />} />
                 <Route path="/portal-admin-login" element={<Navigate to="/portal/admin-login" replace />} />
                 <Route path="/portal/register" element={<PortalRegister onRegister={handlePortalRegister} />} />
+                <Route path="/portal/buy" element={<BuyerRegister />} />
                 <Route path="/portal/forgot-password" element={<PortalForgotPassword />} />
                 <Route
                   path="/portal/dashboard/:module"
