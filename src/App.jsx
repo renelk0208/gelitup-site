@@ -90,6 +90,7 @@ const YOUTUBE_HANDLE = import.meta.env.VITE_YOUTUBE_HANDLE || '@GELITUP'
 const PORTAL_FONT_TTF_URL = import.meta.env.VITE_PORTAL_FONT_TTF_URL || '/fonts/PF-Futura-Neu.ttf'
 const CLIENT_PROFILE_STORAGE_KEY = 'gelitup.portal.client_profile.v1'
 const B2B_CART_STORAGE_KEY_PREFIX = 'gelitup.portal.b2b_cart.v1'
+const QUICK_CART_STORAGE_KEY = 'gelitup.catalogue.quick_cart.v1'
 const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
@@ -2916,9 +2917,16 @@ function FullCataloguePage() {
   const [bulkMode, setBulkMode] = useState(false)
   const [heroCandidateIndexByCategory, setHeroCandidateIndexByCategory] = useState({})
   const [itemQuantities, setItemQuantities] = useState({})
-  const [quickCart, setQuickCart] = useState({})
+  const [quickCart, setQuickCart] = useState(() => {
+    try { const saved = localStorage.getItem(QUICK_CART_STORAGE_KEY); return saved ? JSON.parse(saved) : {} } catch { return {} }
+  })
   const [showBasketDetail, setShowBasketDetail] = useState(false)
   const [pulseItemKey, setPulseItemKey] = useState('')
+
+  // Persist quickCart to localStorage on every change
+  useEffect(() => {
+    try { localStorage.setItem(QUICK_CART_STORAGE_KEY, JSON.stringify(quickCart)) } catch {}
+  }, [quickCart])
   const [gridColumns, setGridColumns] = useState(5)
   const [scrollTop, setScrollTop] = useState(0)
   const [viewportHeight, setViewportHeight] = useState(720)
@@ -5251,6 +5259,11 @@ function FullCataloguePage() {
                 </svg>
               </div>
               <h3 className="text-lg font-bold text-black" style={{ fontFamily: 'Montserrat, sans-serif' }}>Ready to place an order?</h3>
+              {quickCartUnits > 0 && (
+                <p className="mt-2 rounded-lg bg-fuchsia-50 px-3 py-2 text-sm font-semibold text-fuchsia-700">
+                  Your basket ({quickCartUnits} item{quickCartUnits !== 1 ? 's' : ''} — €{quickCartTotal.toFixed(2)}) is saved and will be waiting for you.
+                </p>
+              )}
               <p className="mt-2 text-sm leading-relaxed text-black/60">
                 Create a free account in under 30 seconds to start ordering. Already have an account? Sign in to continue.
               </p>
@@ -7391,12 +7404,12 @@ function BuyerRegister() {
       // Check if the user session was created immediately (email confirmation disabled)
       if (signUpData?.session) {
         localStorage.setItem('portalAuth', 'true')
-        navigate('/portal/dashboard/products')
+        navigate('/full-catalogue')
         return
       }
 
       // Email confirmation required — show check inbox message
-      navigate('/portal/login', { state: { checkInbox: email } })
+      navigate('/portal/login', { state: { checkInbox: email, returnTo: '/full-catalogue' } })
     } catch (err) {
       setError('An unexpected error occurred. Please try again.')
     } finally {
