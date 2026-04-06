@@ -904,7 +904,7 @@ const navItems = [
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/guestbook', label: 'Guestbook' },
   { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
-  { to: '/full-catalogue', label: 'Our Products' },
+  { to: '/full-catalogue', label: 'Buy Here' },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -1589,7 +1589,7 @@ function DistributorPackagesPage() {
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <NavLink to="/full-catalogue" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            View Product Catalogue
+            Buy Here
           </NavLink>
           <NavLink to="/become-distributor" className="btn-cta-ghost-white inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
             Apply for Partnership
@@ -1773,7 +1773,7 @@ function ForAcademiesPage() {
                   Register Your Academy
                 </NavLink>
                 <NavLink to="/full-catalogue" className="btn-cta-ghost-white inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-                  Browse Product Catalogue
+                  Buy Here
                 </NavLink>
               </div>
             </div>
@@ -1904,7 +1904,7 @@ function ForAcademiesPage() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/75">Academy B2B Access</p>
             <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">Register your academy for B2B access</h2>
-            <p className="mt-2 max-w-lg text-sm text-white/90">Free registration in under 2 minutes. Instant access to wholesale pricing, compliance documentation, and the full GEL.IT.UP product catalogue.</p>
+            <p className="mt-2 max-w-lg text-sm text-white/90">Free registration in under 2 minutes. Instant access to wholesale pricing, compliance documentation, and the full GEL.IT.UP product range.</p>
             <ul className="mt-3 space-y-1">
               {[
                 '1,000+ professional shades',
@@ -2846,7 +2846,7 @@ function getB2BCategoryDescription(categoryName = '') {
 
 const SPRING_SUMMER_LOOKBOOK_DEFAULT = {
   title: 'Spring/Summer Collection 2026 Lookbook',
-  subtitle: 'Flip through the seasonal edit before exploring the full catalogue.',
+  subtitle: 'Flip through the seasonal edit before exploring the full range.',
   groups: [
     {
       id: 'default',
@@ -2930,6 +2930,7 @@ function FullCataloguePage() {
   const [solidGelColourFamilies, setSolidGelColourFamilies] = useState({})
   // cataloguePriceMap: normalised key → { name, price } for public price display
   const [cataloguePriceMap, setCataloguePriceMap] = useState(null)
+  const [catalogueWordIndex, setCatalogueWordIndex] = useState([])
   const [springSummerLookbook, setSpringSummerLookbook] = useState(SPRING_SUMMER_LOOKBOOK_DEFAULT)
   const [expandedLookbookGroup, setExpandedLookbookGroup] = useState(0)
   const [selectedLookbookPageByGroup, setSelectedLookbookPageByGroup] = useState({})
@@ -3040,6 +3041,7 @@ function FullCataloguePage() {
         const payload = await res.json()
         const items = Array.isArray(payload?.items) ? payload.items : []
         const map = new Map()
+        const wordIndex = []
         const stripSuffix = (s) => String(s || '').replace(/\s*[-—]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '').trim()
         const isMultimix30g = (n) => /multimix/i.test(n) && /\b30\s*g/i.test(n)
         for (const { name, sku, price } of items) {
@@ -3074,8 +3076,369 @@ function FullCataloguePage() {
           for (const k of keys) {
             if (k && !map.has(k)) map.set(k, entry)
           }
+          wordIndex.push({ words: new Set(normalizeSkuCode(name).split(/\s+/)), entry })
         }
-        if (mounted) setCataloguePriceMap(map)
+        // Hard-wire acronym codes that can't be auto-derived from price-list names
+        const pnLookup = t => map.get(normalizeProductName(t))
+        const aliasGroups = [
+          { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-FBCLR'], target: 'Flexi Base Clear -HTF' },
+          { codes: ['GIUP SBCCLR', 'GIUP-SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
+          { codes: ['GIUP SBCMP', 'GIUP-SBCMP'], target: '5-in-1 Superior Base 15ml Milky Pink -HTF' },
+          { codes: ['GIUP SBCPP', 'GIUP-SBCPP'], target: '5-in-1 Superior Base 15ml Pretty Pink -HTF' },
+          { codes: ['GIUP SBCBP', 'GIUP-SBCBP'], target: '5-in-1 Superior Base 15ml Baby Pink -HTF' },
+          { codes: ['GIUP SBCCP', 'GIUP-SBCCP'], target: '5-in-1 Superior Base 15ml Candy Pink -HTF' },
+          { codes: ['GIUP SBCSP', 'GIUP-SBCSP'], target: '5-in-1 Superior Base 15ml Sweet Pink -HTF' },
+          { codes: ['GIUP SBCGLPI', 'GIUP-SBCGLPI'], target: '5-IN-1 Superior Base 15ml Glittery Pink -HTF' },
+          { codes: ['GIUP SBCGP', 'GIUP-SBCGP'], target: '5-in-1 Superior Base 15ml Glittery Peach -HTF' },
+          { codes: ['GIUP SBCIRPI', 'GIUP-SBCIRPI'], target: '5-IN-1 Superior Base 15ml Irridecent Pink -HTF' },
+          { codes: ['GIUP SBCIMF', 'GIUP-SBCIMF'], target: '5-in-1 Superior Base 15ml Iridescent Milky Flakes -HTF' },
+          { codes: ['GIUP SBCCLI', 'GIUP-SBCCLI'], target: '5-in-1 Superior Base 15ml Lilac -HTF' },
+          { codes: ['GIUP SBCMW', 'GIUP-SBCMW'], target: '5-in-1 Superior Base 15ml Milky White -HTF' },
+          { codes: ['GIUP SBCN', 'GIUP-SBCN'], target: '5-in-1 Superior Base 15ml Nude -HTF' },
+          { codes: ['GIUP SBCSN', 'GIUP-SBCSN'], target: '5-IN-1 Superior Base 15ml Soft Nude -HTF' },
+          { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
+          { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
+          { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
+          { codes: ['GIUP-SB-WITH-ACID', 'GIUP SB WITH ACID', 'SB WITH ACID'], target: 'Superbond Nail Dehydrator 11ml - with Acid -HTF' },
+          { codes: ['ALMOND', 'DUAL FORMS ALMOND'], target: 'DUAL FORMS ALMOND' },
+          { codes: ['BALLERINA', 'DUAL FORMS BALLERINA'], target: 'DUAL FORMS BALLERINA' },
+          { codes: ['LONG ALMOND', 'DUAL FORMS LONG ALMOND'], target: 'DUAL FORMS LONG ALMOND' },
+          { codes: ['MODERNS SQUARE', 'MODERN SQUARE', 'DUAL FORMS MODERN SQUARE'], target: 'DUAL FORMS MODERN SQUARE' },
+          { codes: ['RUSSIAN ALMOND', 'DUAL FORMS RUSSIAN ALMOND'], target: 'DUAL FORMS RUSSIAN ALMOND' },
+          { codes: ['SQUARE', 'DUAL FORMS SQUARE'], target: 'DUAL FORMS SQUARE' },
+          { codes: ['SQUOVAL', 'DUAL FORMS SQUOVAL'], target: 'DUAL FORMS SQUOVAL' },
+          { codes: ['STANDARD', 'DUAL FORMS STANDARD'], target: 'Standard Dual Reverse Tips 120 s' },
+          { codes: ['DUAL MIX', 'DUAL MIX 2', 'DUAL MIX 3'], target: 'DUAL FORMS MIX COLOR AND SHAPE' },
+          { codes: ['SQUARE XL', 'DUAL FORM SQUARE XL'], target: 'DUAL FORMS SQUARE' },
+          { codes: ['SOAK OFF GEL TIPS LONG ALMOND', 'G.T.LONG ALMOND', 'GT LONG ALMOND'], target: 'SOAK OFF GEL TIPS LONG ALMOND' },
+          { codes: ['SOAK OFF GEL TIPS LONG COFFIN', 'G.T.LONG COFFIN', 'GT LONG COFFIN'], target: 'SOAK OFF GEL TIPS LONG COFFIN' },
+          { codes: ['SOAK OFF GEL TIPS MEDIUM SQUARE', 'G.T.MEDIUM SQUARE', 'GT MEDIUM SQUARE'], target: 'SOAK OFF GEL TIPS MEDIUM SQUARE' },
+          { codes: ['SOAK OFF GEL TIPS SHORT ALMOND', 'G.T.SHORT ALMOND', 'GT SHORT ALMOND', 'SHORT ALMOND'], target: 'SOAK OFF GEL TIPS SHORT ALMOND' },
+          { codes: ['GIUP SS01Kaleidascope','GIUP-SS01Kaleidascope','GIUP-SS01KALEIDASCOPE','SS01'], target: 'SS01 SPIX and SPEX Kaleidascope -HTF' },
+          { codes: ['GIUP SS02Delphinium','GIUP-SS02Delphinium','GIUP-SS02DELPHINIUM','SS02'], target: 'SS02 SPIX and SPEX Delphinium -HTF' },
+          { codes: ['GIUP SS03Giddy Grape','GIUP-SS03Giddy Grape','GIUP-SS03GIDDY-GRAPE','SS03'], target: 'SS03 SPIX and SPEX Giddy Grape -HTF' },
+          { codes: ['GIUP SS04Popping Candy','GIUP-SS04Popping Candy','GIUP-SS04POPPING-CANDY','SS04'], target: 'SS04 SPIX and SPEX Popping Candy -HTF' },
+          { codes: ['GIUP SS05Lemon Sorbet','GIUP-SS05Lemon Sorbet','GIUP-SS05LEMON-SORBET','SS05'], target: 'SS05 SPIX and SPEX Lemon Sorbet -HTF' },
+          { codes: ['GIUP SS06Tusk Tusk','GIUP-SS06Tusk Tusk','GIUP-SS06TUSK-TUSK','SS06'], target: 'SS06 SPIX and SPEX Tusk Tusk -HTF' },
+          { codes: ['FLEXI LONG ALMOND', 'FLEXI-LONG-ALMOND', 'Super Flexi Long Almond', 'SUPER FLEXI LONG ALMOND', 'GIUP FLEXI LONG ALMOND'], target: 'FLEXI Soak Off Nail Tips Long Almond -2025' },
+          { codes: ['FLEXI SHORT ALMOND', 'FLEXI-SHORT-ALMOND', 'Super Flexi Short Almond', 'SUPER FLEXI SHORT ALMOND', 'GIUP FLEXI SHORT ALMOND'], target: 'FLEXI Soak Off Nail Tips Short Almond -2025' },
+          { codes: ['FLEXI SHORT SQUARE', 'FLEXI-SHORT-SQUARE', 'Super Flexi Short Square', 'SUPER FLEXI SHORT SQUARE', 'GIUP FLEXI SHORT SQUARE'], target: 'FLEXI Soak Off Nail Tips Medium Square -2025' },
+          { codes: ['1280x1280_nail_bufer_100', '1280x1280 nail bufer 100'], target: 'Nail Files With Back Glue 100 Packet of 10' },
+          { codes: ['1280x1280_nail_bufer_120', '1280x1280 nail bufer 120'], target: 'Nail Files With Back Glue 120 Packet of 10' },
+          { codes: ['1280x1280_nail_bufer_180', '1280x1280 nail bufer 180'], target: 'Nail Files With Back Glue 180 Packet of 10' },
+          { codes: ['1280x1280_nail_bufer_metallic', '1280x1280 nail bufer metallic', 'Boat Shape metallic Nail Base', 'Boat-Shape-metallic-Nail-Base'], target: 'GIUP Boat Shape metallic Nail File' },
+          { codes: ['1280x1280_buffer_100_120', '1280x1280 buffer 100 120', '100_120_file2', '100 120 file2'], target: 'GIUP Boat Shape Nail File 100/120 Purple Sponge' },
+          { codes: ['1280x1280_buffer_180_180', '1280x1280 buffer 180 180', '180_180_file2', '180 180 file2'], target: 'Nail Files 180/180 Pink Sponge' },
+          { codes: ['buffing block', 'BUFFING BLOCK', '\u0392uffing block', '\u0392uffing_block'], target: 'Nail Files 100/100' },
+          { codes: ['nail file 100 1001', 'nail-file 100-1001'], target: 'Nail Files 100/100' },
+          { codes: ['nail_forms_5', 'nail forms 5', 'NAIL FORMS 5', 'NAIL FORMS'], target: 'GEL.IT.UP by GIUP® Nail Forms' },
+          { codes: ['MIRROR CLEAR', 'SP 8001', 'SP8001'], target: 'SP8001 Mirror Clear Powder' },
+          { codes: ['MIRROR X1', 'TR 1', 'TR1'], target: 'TR01 Mirror X1 Powder' },
+          { codes: ['MIRROR X2', 'TR 2', 'TR2'], target: 'TR02 Mirror X2 Powder' },
+          { codes: ['MIRROR X3', 'TR 3', 'TR3'], target: 'TR03 Mirror X3 Powder' },
+          { codes: ['MIRROR X4', 'TR 4', 'TR4'], target: 'TR04 Mirror X4 Powder' },
+          { codes: ['MIRROR X5', 'TR 5', 'TR5'], target: 'TR05 Mirror X5 Powder' },
+          { codes: ['MIRROR X6', 'TR 6', 'TR6'], target: 'TR06 Mirror X6 Powder' },
+          { codes: ['3 IN 1 CLEAR', '3IN1CLEAR'], target: '3-in-1 Builder Gel Clear 40g -HTF' },
+          { codes: ['3IN1COVER'], target: '3-in-1 Builder Gel Cover 40g -HTF' },
+          { codes: ['3IN1PINK'], target: '3-in-1 Builder Gel Pink 40g -HTF' },
+          { codes: ['3 IN 1 SHIMMER COVER'], target: '3-in-1 Shimmery Builder Gel 40g Cover -HTF' },
+          { codes: ['3 IN 1 SHIMMER IRIDESCENT CLEAR'], target: '3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF' },
+          { codes: ['3 IN 1 SHIMMER LIGHT LILAC'], target: '3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF' },
+          { codes: ['3 IN 1 MARMALADE SHIMMER PINK'], target: '3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF' },
+          { codes: ['3 IN 1 PREMIUM CLEAR', '3IN 1 PREMIUM CLEAR'], target: 'Premium Builder Gel Clear 40gr -HTF' },
+          { codes: ['3IN 1 PREMIUM BUILDER GEL COVER', '3 IN 1 PREMIUM BUILDER GEL COVER'], target: 'Premium Builder Gel Cover 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL BLUSH'], target: 'Premium Builder Gel Blush 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL MILKY'], target: 'Premium Builder Gel Milky 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL NUDE'], target: 'Premium Builder Gel Nude 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL PEARLY NUDE'], target: 'Premium Builder Gel Pearly Nude 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL PEARLY PINK'], target: 'Premium Builder Gel Pearly Pink 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GELS PINK'], target: 'Premium Builder Gel Pink 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GELS WHITE'], target: 'Premium Builder Gel White 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM PLUS', '3 IN 1.PREMIUM.PLUS'], target: 'Premium Plus Fiber Glass Builder Gel 40gr -HTF' },
+          { codes: ['GIUP BOBCLR', 'GIUP-BOBCLR'], target: 'Brush on Builder Gel Clear 15ml -HTF' },
+          { codes: ['GIUP BOBCOV', 'GIUP-BOBCOV'], target: 'Brush on Builder Gel Cover 15ml -HTF' },
+          { codes: ['GIUP BOBPNK', 'GIUP-BOBPNK'], target: 'Brush on Builder Gel Pink 15ml -HTF' },
+          { codes: ['GIUP BOBCRM', 'GIUP-BOBCRM'], target: 'Brush on Builder Gel Creamy 15ml -HTF' },
+          { codes: ['GIUP BOBNUD', 'GIUP-BOBNUD'], target: 'Brush on Builder Gel Nude 15ml -HTF' },
+          { codes: ['GIUP BOBPRL', 'GIUP-BOBPRL'], target: 'Brush on Builder Gel Purple 15ml -HTF' },
+          { codes: ['GIUP BOBDS', 'GIUP-BOBDS'], target: 'Brush on Builder Gel Dusty Shimmer 15ml -HTF' },
+          { codes: ['GIUP BOBMILK', 'GIUP-BOBMILK'], target: 'Brush on Builder Gel Milky 15ml -HTF' },
+          { codes: ['GIUP BOBLIL', 'GIUP-BOBLIL'], target: 'Brush on Builder Gel Lilac 15ml -HTF' },
+          { codes: ['GIUP BOBBLPN', 'GIUP-BOBBLPN'], target: 'Brush on Builder Gel Blush Pink 15ml -HTF' },
+          { codes: ['GIUP BOBSTPN', 'GIUP-BOBSTPN'], target: 'Brush on Builder Gel Soft Pink 15ml -HTF' },
+          { codes: ['GIUP BOBGLPN', 'GIUP-BOBGLPN'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
+          { codes: ['GIUP BOBGLMG', 'GIUP-BOBGLMG'], target: 'Brush on Builder Gel Magenta Glitter 15ml -HTF' },
+          { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL'], target: 'Brush on Builder Gel Milky Glitter 15ml -HTF' },
+          { codes: ['GIUP BOBGLROS', 'GIUP-BOBGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
+          { codes: ['GIUP BOBGLSLM', 'GIUP-BOBGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
+          { codes: ['MULTIMIX BABY BLUE COLOR'], target: 'MultiMix Synthogel 30gr Baby Blue -HTF' },
+          { codes: ['MULTIMIX BABY PINK GLITTER COLOR'], target: 'MultiMix Synthogel 30gr Baby Pink Glitter -HTF' },
+          { codes: ['MULTIMIX BLUE GLITTER COLOR'], target: 'MultiMix Synthogel 30g Blue Glitter -HTF' },
+          { codes: ['MULTIMIX BUBBLE GUM GLITTER COLOR'], target: 'MultiMix Synthogel 30gr Bubble Gum Glitter -HTF' },
+          { codes: ['MULTIMIX GLITSY GREEN COLOR'], target: 'MultiMix Synthogel 30gr Glitsy Green -HTF' },
+          { codes: ['MULTIMIX LIGHT NUDE COLOR'], target: 'Multimix Synthogel 30g Light Nude -HTF' },
+          { codes: ['MULTIMIX MINT GREEN COLOR'], target: 'MultiMix Synthogel 30gr Minty Green -HTF' },
+          { codes: ['MULTIMIX PINKIII COLOR'], target: 'MultiMix Synthogel 30gr Pink III -HTF' },
+          { codes: ['MULTIMIX SUPER SOFT PINK COLOR'], target: 'MultiMix Synthogel 30gr Super Soft Pink -HTF' },
+          { codes: ['MULTIMIX BLACK COLOR'], target: 'MultiMix Synthogel 60gr Black -HTF' },
+          { codes: ['MULTIMIX CLEAR COLOR'], target: 'MultiMix Synthogel 60gr Clear -HTF' },
+          { codes: ['MULTIMIX COVER COLOR'], target: 'MultiMix Synthogel 60gr Cover -HTF' },
+          { codes: ['MULTIMIX COVER II COLOR'], target: 'MultiMix Synthogel 60gr Cover II -HTF' },
+          { codes: ['MULTIMIX CRYSTAL CLEAR COLOR'], target: 'MultiMix Synthogel 60gr Crystal Clear -HTF' },
+          { codes: ['MULTIMIX GLITTERPINK COLOR'], target: 'MultiMix Synthogel 60gr Glitter Pink -HTF' },
+          { codes: ['MULTIMIX GLITTERS CLEAR'], target: 'MultiMix Synthogel 60gr Clear Glitter -HTF' },
+          { codes: ['MULTIMIX GLITTERS GOLD'], target: 'MultiMix Synthogel 60gr Glitter Gold -HTF' },
+          { codes: ['MULTIMIX GLITTERS NUDE'], target: 'MultiMix Synthogel 60gr Glitter Nude -HTF' },
+          { codes: ['MULTIMIX GLITTERS PINK'], target: 'MultiMix Synthogel 60gr Glitter Pink -HTF' },
+          { codes: ['MULTIMIX GLITTERS WHITE'], target: 'MultiMix Synthogel 60gr Glitter White -HTF' },
+          { codes: ['MULTIMIX LIGHT PINK COLOR'], target: 'MultiMix Synthogel 60gr Light Pink -HTF' },
+          { codes: ['MULTIMIX LILAC COLOR'], target: 'MultiMix Synthogel 60gr Light Lilac -HTF' },
+          { codes: ['MULTIMIX MILKY WHITE COLOR'], target: 'MultiMix Synthogel 60gr Milky White -HTF' },
+          { codes: ['MULTIMIX NUDE COLOR'], target: 'MultiMix Synthogel 60gr Nude -HTF' },
+          { codes: ['MULTIMIX PINK COLOR'], target: 'MultiMix Synthogel 60gr Pink -HTF' },
+          { codes: ['MULTIMIX PINK II COLOR'], target: 'MultiMix Synthogel 60gr Pink II -HTF' },
+          { codes: ['MULTIMIX SUPER MILKY COLOR'], target: 'MultiMix Synthogel 60gr Super Milky -HTF' },
+          { codes: ['MULTIMIX WHITE COLOR'], target: 'MultiMix Synthogel 60gr White -HTF' },
+          { codes: ['CLEANSER'], target: 'Cleanser 200 ml -HTF' },
+          { codes: ['SANITIZER'], target: 'Sanitizer 200ml -HTF' },
+          { codes: ['CUTICLE OIL PEACH', 'WHITE SATIN CUTICLE OIL PEACH'], target: 'Perky Peach Cuticle Oil 100ml -HTF' },
+          { codes: ['CUTICLE OIL MELON', 'WHITE SATIN CUTICLE OIL MELON'], target: 'Chilled Melon Cuticle Oil 100ml -HTF' },
+          { codes: ['CUTICLE OIL COCONUT', 'WHITE SATIN CUTICLE OIL COCONUT OIL'], target: 'Cooling Coconut Cuticle Oil 100ml -HTF' },
+          { codes: ['PHOTO PERFECT CUTICLE OIL'], target: 'PhotoPerfect Cuticle Oil New' },
+          { codes: ['FOOT CREAM 100 CALMFROST'], target: 'GEL IT UP FOOT CREAM 100ml CALM FROST NEW' },
+          { codes: ['FOOT CREAM 100 SASSYSASSY'], target: 'GEL IT UP FOOT CREAM 100ml SASSY SASSY NEW' },
+          { codes: ['FOOT CREAM 100 SILKYBLISS'], target: 'GEL IT UP FOOT CREAM 100ml SILKY BLISS NEW' },
+          { codes: ['FOOT CREAM 1000 CALMFROST'], target: 'GEL IT UP FOOT CREAM 1000ml CALM FROST NEW' },
+          { codes: ['FOOT CREAM 1000 SASSYSASSY'], target: 'GEL IT UP FOOT CREAM 1000ml SASSY SASSY NEW' },
+          { codes: ['FOOT CREAM 1000 SILKYBLISS'], target: 'GEL IT UP FOOT CREAM 1000ml SILKY BLISS NEW' },
+          { codes: ['HANDANDBODY CREAM 100 CALMFROST'], target: 'GEL IT UP HAND AND BODY CREAM 100ml CALM FROST NEW' },
+          { codes: ['HANDANDBODY CREAM 100 SASSYSASSY'], target: 'GEL IT UP HAND AND BODY CREAM 100ml SASSY SASSY NEW' },
+          { codes: ['HANDANDBODY CREAM 100 SILKYBLISS'], target: 'GEL IT UP HAND AND BODY CREAM 100ml SILKY BLISS NEW' },
+          { codes: ['HANDANDBODY CREAM 1000 CALMFROST'], target: 'GEL IT UP HAND AND BODY CREAM 1000ml CALM FROST NEW' },
+          { codes: ['HANDANDBODY CREAM 1000 SASSYSASSY'], target: 'GEL IT UP HAND AND BODY CREAM 1000ml SASSY SASSY NEW' },
+          { codes: ['HANDANDBODY CREAM 1000 SILKYBLISS'], target: 'GEL IT UP HAND AND BODY CREAM 1000ml SILKY BLISS NEW' },
+          { codes: ['SCRUB 200 CALMFROST'], target: 'GEL IT UP SCRUB 200ml CALM FROST NEW' },
+          { codes: ['SCRUB 200 SASSYSASSY'], target: 'GEL IT UP SCRUB 200ml SASSY SASSY NEW' },
+          { codes: ['SCRUB 200 SILKYBLISS'], target: 'GEL IT UP SCRUB 200ml SILKY BLISS NEW' },
+          { codes: ['SCRUB 750 CALMFROST'], target: 'GEL IT UP SCRUB 750ml CALM FROST NEW' },
+          { codes: ['SCRUB 750 SASSYSASSY'], target: 'GEL IT UP SCRUB 750ml SASSY SASSY NEW' },
+          { codes: ['SCRUB 750 SILKYBLISS'], target: 'GEL IT UP SCRUB 750ml SILKY BLISS NEW' },
+          { codes: ['LINE IT UP 0001 YELLOW', 'LINE IT UP  0001 YELLOW'], target: 'LINE IT UP YELLOW -HTF' },
+          { codes: ['LINE IT UP 0002 WHITE', 'LINE IT UP  0002 WHITE'], target: 'LINE IT UP WHITE -HTF' },
+          { codes: ['LINE IT UP 0003 SKY', 'LINE IT UP  0003 SKY'], target: 'LINE IT UP SKY -HTF' },
+          { codes: ['LINE IT UP 0004 SILVER', 'LINE IT UP  0004 SILVER'], target: 'LINE IT UP SILVER -HTF' },
+          { codes: ['LINE IT UP 0005 ROSE', 'LINE IT UP  0005 ROSE'], target: 'LINE IT UP ROSE -HTF' },
+          { codes: ['LINE IT UP 0006 RED', 'LINE IT UP  0006 RED'], target: 'LINE IT UP RED -HTF' },
+          { codes: ['LINE IT UP 0007 PYRITE', 'LINE IT UP  0007 PYRITE'], target: 'LINE IT UP PYRITE -HTF' },
+          { codes: ['LINE IT UP 0008 PISTACHIO', 'LINE IT UP  0008 PISTACHIO'], target: 'LINE IT UP PISTACHIO -HTF' },
+          { codes: ['LINE IT UP 0009 PINK', 'LINE IT UP  0009 PINK'], target: 'LINE IT UP PINK -HTF' },
+          { codes: ['LINE IT UP 0010 ORANGE', 'LINE IT UP  0010 ORANGE'], target: 'LINE IT UP ORANGE -HTF' },
+          { codes: ['LINE IT UP 0011 MINT', 'LINE IT UP  0011 MINT'], target: 'LINE IT UP MINT -HTF' },
+          { codes: ['LINE IT UP 0012 MAGENTA', 'LINE IT UP  0012 MAGENTA'], target: 'LINE IT UP MAGENTA -HTF' },
+          { codes: ['LINE IT UP 0013 LILAC', 'LINE IT UP  0013 LILAC'], target: 'LINE IT UP LILAC -HTF' },
+          { codes: ['LINE IT UP 0014 LAVENDER', 'LINE IT UP  0014 LAVENDER'], target: 'LINE IT UP LAVENDER -HTF' },
+          { codes: ['LINE IT UP 0015 GREEN', 'LINE IT UP  0015 GREEN'], target: 'LINE IT UP GREEN -HTF' },
+          { codes: ['LINE IT UP 0016 GOLD', 'LINE IT UP  0016 GOLD'], target: 'LINE IT UP GOLD -HTF' },
+          { codes: ['LINE IT UP 0017 BLACK', 'LINE IT UP  0017 BLACK'], target: 'LINE IT UP BLACK -HTF' },
+          { codes: ['LINE IT UP 0018 APRICOT', 'LINE IT UP  0018 APRICOT'], target: 'LINE IT UP APRICOT -HTF' },
+          { codes: ['MARBLE 1'], target: 'Marble-It by GIUP #01' },
+          { codes: ['MARBLE 2'], target: 'Marble-It by GIUP #02' },
+          { codes: ['MARBLE 3'], target: 'Marble-It by GIUP #03' },
+          { codes: ['MARBLE 4'], target: 'Marble-It by GIUP #04' },
+          { codes: ['MARBLE 5'], target: 'Marble-It by GIUP #05' },
+          { codes: ['MARBLE 6'], target: 'Marble-It by GIUP #06' },
+          { codes: ['MARBLE 7'], target: 'Marble-It by GIUP #07' },
+          { codes: ['MARBLE 8'], target: 'Marble-It by GIUP #08' },
+          { codes: ['MARBLE 9'], target: 'Marble-It by GIUP #09' },
+          { codes: ['MARBLE 10'], target: 'Marble-It by GIUP #10' },
+          { codes: ['MARBLE 11'], target: 'Marble-It by GIUP #11' },
+          { codes: ['MARBLE 12'], target: 'Marble-It by GIUP #12' },
+          { codes: ['MARBLE 13'], target: 'Marble-It by GIUP #13' },
+          { codes: ['MARBLE 14'], target: 'Marble-It by GIUP #14' },
+          { codes: ['MARBLE 15'], target: 'Marble-It by GIUP #15' },
+          { codes: ['MARBLE 16'], target: 'Marble-It by GIUP #16' },
+          { codes: ['MARBLE 17'], target: 'Marble-It by GIUP #17' },
+          { codes: ['MARBLE 18'], target: 'Marble-It by GIUP #18' },
+          { codes: ['SUGARY GLITTER 01'], target: 'Sugary Glitter pigment 3gr 01 -HTF' },
+          { codes: ['SUGARY GLITTER 02'], target: 'Sugary Glitter pigment 3gr 02 -HTF' },
+          { codes: ['SUGARY GLITTER 03'], target: 'Sugary Glitter pigment 3gr 03 -HTF' },
+          { codes: ['SUGARY GLITTER 04'], target: 'Sugary Glitter pigment 3gr 04 -HTF' },
+          { codes: ['SUGARY GLITTER 05'], target: 'Sugary Glitter pigment 3gr 05 -HTF' },
+          { codes: ['SUGARY GLITTER 06'], target: 'Sugary Glitter pigment 3gr 06 -HTF' },
+          { codes: ['SUGARY GLITTER 07'], target: 'Sugary Glitter pigment 3gr 07 -HTF' },
+          { codes: ['GIUP CT 01', 'GIUP-CT-01'], target: 'Velvet Cat Eye #VCE01 -HTF' },
+          { codes: ['GIUP CT 02', 'GIUP-CT-02'], target: 'Velvet Cat Eye #VCE02 -HTF' },
+          { codes: ['GIUP CT 03', 'GIUP-CT-03'], target: 'Velvet Cat Eye #VCE03 -HTF' },
+          { codes: ['GIUP CT 04', 'GIUP-CT-04'], target: 'Velvet Cat Eye #VCE04 -HTF' },
+          { codes: ['GIUP CT 05', 'GIUP-CT-05'], target: 'Velvet Cat Eye #VCE05 -HTF' },
+          { codes: ['GIUP CT 06', 'GIUP-CT-06'], target: 'Velvet Cat Eye #VCE06 -HTF' },
+          { codes: ['GIUP CT 07', 'GIUP-CT-07'], target: 'Velvet Cat Eye #VCE07 -HTF' },
+          { codes: ['GIUP CT 08', 'GIUP-CT-08'], target: 'Velvet Cat Eye #VCE08 -HTF' },
+          { codes: ['GIUP CT 09', 'GIUP-CT-09'], target: 'Velvet Cat Eye #VCE09 -HTF' },
+          { codes: ['GIUP CT 10', 'GIUP-CT-10'], target: 'Velvet Cat Eye #VCE10 -HTF' },
+          { codes: ['GIUP-.BLOSSOM', 'GIUP.Blossom', 'BLOSSOM'], target: 'Blossom Flower Power 15ml -HTF' },
+          { codes: ['water colors', 'water_colors', 'WATER COLORS'], target: 'Watercolors Aquarelle Pallete' },
+          { codes: ['aquarelle brush', 'aquarelle_brush', 'AQUARELLE BRUSH'], target: 'Aquarela Brush Rose Gold' },
+          { codes: ['french curved brush', 'french_curved_brush', 'FRENCH CURVED BRUSH'], target: 'French Nail Brush Rose Gold' },
+          { codes: ['ACRYLIC BRUSH NO10', 'acrylic brush no10'], target: '#10 Acrylic Application Brush Rose Gold' },
+          { codes: ['ACRYLIC BRUSH NO12', 'acrylic brush no12'], target: '#12 Acrylic Brush Rose Gold' },
+          { codes: ['GEL BRUSH NO6', 'gel brush no6'], target: '#6 Gel Brush Rose Gold' },
+          { codes: ['GEL BRUSH NO8', 'gel brush no8'], target: '#8 Gel Brush Rose Gold' },
+          { codes: ['polygel', 'POLYGEL'], target: 'Polygel Brush and Spatula Rose Gold' },
+          { codes: ['polygel 2', 'POLYGEL 2'], target: 'Polygel 2 Brush and Spatula Rose Gold' },
+          { codes: ['synthogel brush', 'synthogel_brush', 'SYNTHOGEL BRUSH'], target: 'Polygel Brush and Spatula Rose Gold' },
+          { codes: ['DUST COLLECTOR', 'DUST COLLECTOR 2'], target: 'Wireless Nail Dust Collector New' },
+          { codes: ['PORTABLE LAMP'], target: 'White Nail Lamp New' },
+          { codes: ['airbrush 1', 'airbrush_1', 'AIRBRUSH 1'], target: 'AirBrush Machine New' },
+          { codes: ['stamp lamp', 'STAMP LAMP'], target: 'Stamp Lamp' },
+          { codes: ['new logo acrylic liquid classic 500ml', 'NEW LOGO ACRYLIC LIQUID CLASSIC 500ML'], target: 'Acrylic Classic Liquid 500ml -HTF' },
+          { codes: ['new logo acrylic liquid compete 500ml 1', 'NEW LOGO ACRYLIC LIQUID COMPETE 500ML 1'], target: 'Acrylic Compete Liquid 500ml -HTF' },
+          { codes: ['clear', 'CLEAR'], target: 'Acrylic Compete Powder Clear 35g -HTF' },
+          { codes: ['PODODISC'], target: 'Pododisc + 5 Replacement Stickers M-20 mm New' },
+          { codes: ['PROBES'], target: 'Probes Stainless Steel Rounded 1222 New' },
+          { codes: ['TWEEZER', 'TWEEZER B'], target: 'Splinter tweezer — 13 cm 1386 New' },
+          { codes: ['01. HEAD CUTTER, PLAIN HANDLE, HALF BLADE', '01 HEAD CUTTER PLAIN HANDLE HALF BLADE'], target: 'Professional Head Cutter Nipper Half Blade L 11.5cm 1006 New' },
+          { codes: ['02. CORNER NIPPER, EXTRA SLIM (Flame Shaped)'], target: 'Corner Nippers Flame Shaped L 10cm 1115 New' },
+          { codes: ['03. CORNER NIPPER, DESIGN HANDLE'], target: 'Corner Nippers Straight Cutter Design Handle  L 11cm 1119 New' },
+          { codes: ['01. CUTICLE PUSHER, DOUBLE ACTION, ROUNDED', '01 CUTICLE PUSHER DOUBLE ACTION ROUNDED'], target: 'Professional Cuticle Pusher- Double Action, Rounded 2042 New' },
+          { codes: ['02. CUTICLE PUSHER, DOUBLE ACTION', '02 CUTICLE PUSHER DOUBLE ACTION'], target: 'Professional Cuticle Pusher- Double Action 2044 New' },
+          { codes: ['01. CUTICLE SCISSOR, CURVED 10,5 19', '01 CUTICLE SCISSOR CURVED 10 5 19'], target: 'Professional Cuticle Scissors, Curved 1466 New' },
+          { codes: ['03. CUTICLE SCISSOR, CURVED 10 18', '03 CUTICLE SCISSOR CURVED 10 18'], target: 'Professional Cuticle Scissors, Curved 1463 New' },
+          { codes: ['04. CUTICLE SPRING SCISSOR, CURVED', '04 CUTICLE SPRING SCISSOR CURVED'], target: 'Professional Spring Scissors, Curved 1468 New' },
+          { codes: ['04. CUTICLE NIPPER, OVAL FINE CUT', '04 CUTICLE NIPPER OVAL FINE CUT'], target: 'Professional Premium Cuticle Nipper, Oval Fine Cut – 5mm 2119 New' },
+          { codes: ['05. CUTICLE NIPPER, OVAL ROUND FINE CUT', '05 CUTICLE NIPPER OVAL ROUND FINE CUT'], target: 'Professional Premium Cuticle Nipper, Oval Round Fine Cut – 5mm 2120 New' },
+          { codes: ['06. CUTICLE NIPPER, FINE CUT', '06 CUTICLE NIPPER FINE CUT'], target: 'Professional Premium Cuticle Nipper, Fine Cut – 5mm 2117 New' },
+          { codes: ['COMER'], target: 'Corner File Straight & Curved Stainless Steel 1289 New' },
+          { codes: ['cuticle remover 5ml', 'CUTICLE REMOVER 5ML'], target: 'Almond Cuticle Scrub Remover 5ml -HTF' },
+          { codes: ['white satin cuticle scrub remover', 'WHITE SATIN CUTICLE SCRUB REMOVER'], target: 'Almond Cuticle Scrub Remover 100ml -HTF' },
+          { codes: ['GIUP FFF', 'GIUP-FFF', 'GIUP 01 FFF', 'GIUP-01-FFF'], target: 'FFF White Years Ahead -HTF' },
+          { codes: ['5D NAIL STICKERS BLACK'], target: 'SD-1934 Nail Decals French - Black' },
+          { codes: ['5D NAIL STICKERS WHITE'], target: 'SD-1933 Nail Decals French - White' },
+          { codes: ['GIUP MT1', 'GIUP-MT1'], target: 'MT01 Spot my top -HTF' },
+          { codes: ['GIUP MT2', 'GIUP-MT2', 'GIUP MT2 1', 'GIUP-MT2-1'], target: 'MT02 Spot my top -HTF' },
+          { codes: ['GIUP MT6', 'GIUP-MT6'], target: 'MT06 Spot my top -HTF' },
+          { codes: ['GIUP NW1', 'GIUP-NW1'], target: 'NW01 Spot my top -HTF' },
+          { codes: ['GIUP NW2', 'GIUP-NW2'], target: 'NW02 Sopt my top -HTF' },
+          { codes: ['GIUP NW3', 'GIUP-NW3'], target: 'NW03 Spot my top -HTF' },
+          { codes: ['GIUP NWT', 'GIUP-NWT'], target: 'Non Wipe Top Coat 15ml -HTF' },
+          { codes: ['GIUP SATMAT', 'GIUP-SATMAT'], target: 'Satin Matt RS Top 15 ml -HTF' },
+          { codes: ['GIUP WOTC', 'GIUP-WOTC'], target: 'Wipe Off Top Coat 15 ml' },
+          { codes: ['STF01', 'STF 01'], target: 'Shimmer Top Fairy #STF 01 -HTF' },
+          { codes: ['STF02', 'STF 02'], target: 'Shimmer Top Fairy #STF 02 -HTF' },
+          { codes: ['STF03', 'STF 03'], target: 'Shimmer Top Fairy #STF 03 -HTF' },
+          { codes: ['STF04', 'STF 04'], target: 'Shimmer Top Fairy #STF 04 -HTF' },
+          { codes: ['STF05', 'STF 05'], target: 'Shimmer Top Fairy #STF 05 -HTF' },
+          { codes: ['GIUP DT01Dandelion', 'GIUP-DT01Dandelion', 'DT01'], target: 'DT01 Dandelion Diamond Top 11ml -HTF' },
+          { codes: ['GIUP DT02Diamond Dust', 'GIUP-DT02Diamond Dust', 'DT02'], target: 'DT02 Diamond Dust Diamond Top 11ml -HTF' },
+          { codes: ['GIUP DT03Sugar Socks', 'GIUP-DT03Sugar Socks', 'DT03'], target: 'DT03 Sugar Socks Diamond Top 11ml -HTF' },
+          { codes: ['GIUP DT04Chipper', 'GIUP-DT04Chipper', 'DT04'], target: 'DT04 Chipper Diamond Top 11ml -HTF' },
+          { codes: ['FAN12', 'GIUP FAN12', 'GIUP-FAN12'], target: 'Super Fan Top Coat 11ml FAN12 -HTF' },
+          { codes: ['LPG1', 'LPG 1'], target: 'Liquid Polygel #LPG1 -HTF' },
+          { codes: ['LPG2', 'LPG 2'], target: 'Liquid Polygel #LPG2 -HTF' },
+          { codes: ['LPG3', 'LPG 3'], target: 'Liquid Polygel #LPG3 -HTF' },
+          { codes: ['LPG4', 'LPG 4'], target: 'Liquid Polygel #LPG4 -HTF' },
+          { codes: ['LPG5', 'LPG 5'], target: 'Liquid Polygel #LPG5 -HTF' },
+          { codes: ['LPG6', 'LPG 6'], target: 'Liquid Polygel #LPG6 -HTF' },
+          { codes: ['LPG7', 'LPG 7'], target: 'Liquid Polygel #LPG7 -HTF' },
+          { codes: ['LPG8', 'LPG 8'], target: 'Liquid Polygel #LPG8 -HTF' },
+          { codes: ['GIUP BTO01', 'GIUP-BTO01', 'BTO01', 'BTO 01'], target: 'By The Ocean BTO01 -HTF' },
+          { codes: ['GIUP BTO02', 'GIUP-BTO02', 'BTO02', 'BTO 02'], target: 'By The Ocean BTO02 -HTF' },
+          { codes: ['GIUP BTO03', 'GIUP-BTO03', 'BTO03', 'BTO 03'], target: 'By The Ocean BTO03 -HTF' },
+          { codes: ['GIUP BTO04', 'GIUP-BTO04', 'BTO04', 'BTO 04'], target: 'By The Ocean BTO04 -HTF' },
+          { codes: ['GIUP BTO05', 'GIUP-BTO05', 'BTO05', 'BTO 05'], target: 'By The Ocean BTO05 -HTF' },
+          { codes: ['GIUP BTO06', 'GIUP-BTO06', 'BTO06', 'BTO 06'], target: 'By The Ocean BTO06 -HTF' },
+          { codes: ['GIUP BTO07', 'GIUP-BTO07', 'BTO07', 'BTO 07'], target: 'By The Ocean BTO07 -HTF' },
+          { codes: ['GIUP VCE01', 'VCE01', 'VCE 01', 'VCE1'], target: 'Velvet Cat Eye #VCE01 -HTF' },
+          { codes: ['GIUP VCE02', 'VCE02', 'VCE 02', 'VCE2'], target: 'Velvet Cat Eye #VCE02 -HTF' },
+          { codes: ['GIUP VCE03', 'VCE03', 'VCE 03', 'VCE3'], target: 'Velvet Cat Eye #VCE03 -HTF' },
+          { codes: ['GIUP VCE04', 'VCE04', 'VCE 04', 'VCE4'], target: 'Velvet Cat Eye #VCE04 -HTF' },
+          { codes: ['GIUP VCE05', 'VCE05', 'VCE 05', 'VCE5'], target: 'Velvet Cat Eye #VCE05 -HTF' },
+          { codes: ['GIUP VCE06', 'VCE06', 'VCE 06', 'VCE6'], target: 'Velvet Cat Eye #VCE06 -HTF' },
+          { codes: ['GIUP VCE07', 'VCE07', 'VCE 07', 'VCE7'], target: 'Velvet Cat Eye #VCE07 -HTF' },
+          { codes: ['GIUP VCE08', 'VCE08', 'VCE 08', 'VCE8'], target: 'Velvet Cat Eye #VCE08 -HTF' },
+          { codes: ['GIUP VCE09', 'VCE09', 'VCE 09', 'VCE9'], target: 'Velvet Cat Eye #VCE09 -HTF' },
+          { codes: ['GIUP VCE10', 'VCE10', 'VCE 10'], target: 'Velvet Cat Eye #VCE10 -HTF' },
+          { codes: ['DCE1', 'DCE 1', 'GIUP DCE1'], target: 'Dreamy Cat Eye #DCE1 -HTF' },
+          { codes: ['DCE2', 'DCE 2', 'GIUP DCE2'], target: 'Dreamy Cat Eye #DCE2 -HTF' },
+          { codes: ['DCE3', 'DCE 3', 'GIUP DCE3'], target: 'Dreamy Cat Eye #DCE3 -HTF' },
+          { codes: ['DCE4', 'DCE 4', 'GIUP DCE4'], target: 'Dreamy Cat Eye #DCE4 -HTF' },
+          { codes: ['RQCE1', 'RQCE 1', 'GIUP RQCE1'], target: 'Rose Quartz Cat Eye #RQCE1 -HTF' },
+          { codes: ['RQCE2', 'RQCE 2', 'GIUP RQCE2'], target: 'Rose Quartz Cat Eye #RQCE2 -HTF' },
+          { codes: ['RQCE3', 'RQCE 3', 'GIUP RQCE3'], target: 'Rose Quartz Cat Eye #RQCE3 -HTF' },
+          { codes: ['GCE01', 'GCE 01', 'GCE1', 'GIUP GCE01'], target: 'Glass Cat Eye #GCE01 -HTF' },
+          { codes: ['GCE02', 'GCE 02', 'GCE2', 'GIUP GCE02'], target: 'Glass Cat Eye #GCE02 -HTF' },
+          { codes: ['GCE03', 'GCE 03', 'GCE3', 'GIUP GCE03'], target: 'Glass Cat Eye #GCE03 -HTF' },
+          { codes: ['GCE04', 'GCE 04', 'GCE4', 'GIUP GCE04'], target: 'Glass Cat Eye #GCE04 -HTF' },
+          { codes: ['GCE05', 'GCE 05', 'GCE5', 'GIUP GCE05'], target: 'Glass Cat Eye #GCE05 -HTF' },
+          { codes: ['GCE06', 'GCE 06', 'GCE6', 'GIUP GCE06'], target: 'Glass Cat Eye #GCE06 -HTF' },
+          { codes: ['GCE07', 'GCE 07', 'GCE7', 'GIUP GCE07'], target: 'Glass Cat Eye #GCE07 -HTF' },
+          { codes: ['TFG01', 'TFG 01', 'GIUP TFG01'], target: 'Tuttie Fruity Glass #TFG01 -HTF' },
+          { codes: ['TFG02', 'TFG 02', 'GIUP TFG02'], target: 'Tuttie Fruity Glass #TFG02 -HTF' },
+          { codes: ['TFG03', 'TFG 03', 'GIUP TFG03'], target: 'Tuttie Fruity Glass #TFG03 -HTF' },
+          { codes: ['TFG04', 'TFG 04', 'GIUP TFG04'], target: 'Tuttie Fruity Glass #TFG04 -HTF' },
+          { codes: ['TFG05', 'TFG 05', 'GIUP TFG05'], target: 'Tuttie Fruity Glass #TFG05 -HTF' },
+          { codes: ['TFG06', 'TFG 06', 'GIUP TFG06'], target: 'Tuttie Fruity Glass #TFG06 -HTF' },
+          { codes: ['SH1', 'SH 1', 'GIUP SH1'], target: 'Shimmer Collection #SH1 -HTF' },
+          { codes: ['SH2', 'SH 2', 'GIUP SH2'], target: 'Shimmer Collection #SH2 -HTF' },
+          { codes: ['SH3', 'SH 3', 'GIUP SH3'], target: 'Shimmer Collection #SH3 -HTF' },
+          { codes: ['SH4', 'SH 4', 'GIUP SH4'], target: 'Shimmer Collection #SH4 -HTF' },
+          { codes: ['SH5', 'SH 5', 'GIUP SH5'], target: 'Shimmer Collection #SH5 -HTF' },
+          { codes: ['SH6', 'SH 6', 'GIUP SH6'], target: 'Shimmer Collection #SH6 -HTF' },
+          { codes: ['MC1', 'MC 1', 'GIUP MC1'], target: 'Metallic Collection #MC1 -HTF' },
+          { codes: ['MC2', 'MC 2', 'GIUP MC2'], target: 'Metallic Collection #MC2 -HTF' },
+          { codes: ['MC3', 'MC 3', 'GIUP MC3'], target: 'Metallic Collection #MC3 -HTF' },
+          { codes: ['MC4', 'MC 4', 'GIUP MC4'], target: 'Metallic Collection #MC4 -HTF' },
+          { codes: ['MC5', 'MC 5', 'GIUP MC5'], target: 'Metallic Collection #MC5 -HTF' },
+          { codes: ['MC6', 'MC 6', 'GIUP MC6'], target: 'Metallic Collection #MC6 -HTF' },
+          { codes: ['MC7', 'MC 7', 'GIUP MC7'], target: 'Metallic Collection #MC7 -HTF' },
+          { codes: ['MC8', 'MC 8', 'GIUP MC8'], target: 'Metallic Collection #MC8 -HTF' },
+          { codes: ['BTB01', 'GIUP BTB01', 'GIUP B2BRED0001', 'GIUP B2BRed0001'], target: 'BTB01 Rosso Corso -HTF' },
+          { codes: ['BTB02', 'GIUP BTB02', 'GIUP B2BBLUE0003', 'GIUP B2BBlue0003'], target: 'BTB02 Nautilus -HTF' },
+          { codes: ['BTB03', 'GIUP BTB03', 'GIUP B2BYELLOW0002', 'GIUP B2BYellow0002'], target: 'BTB03 Brimstone -HTF' },
+          { codes: ['OTA01', 'OTA 01', 'GIUP OTA01'], target: 'Autumn 2021 OTA01 -HTF' },
+          { codes: ['OTA02', 'OTA 02', 'GIUP OTA02'], target: 'Autumn 2021 OTA02 -HTF' },
+          { codes: ['OTA03', 'OTA 03', 'GIUP OTA03'], target: 'Autumn 2021 OTA03 -HTF' },
+          { codes: ['OTA04', 'OTA 04', 'GIUP OTA04'], target: 'Autumn 2021 OTA04 -HTF' },
+          { codes: ['OTA05', 'OTA 05', 'GIUP OTA05'], target: 'Autumn 2021 OTA05 -HTF' },
+          { codes: ['OTA06', 'OTA 06', 'GIUP OTA06'], target: 'Autumn 2021 OTA06 -HTF' },
+          { codes: ['OTA07', 'OTA 07', 'GIUP OTA07'], target: 'Autumn 2021 OTA07 -HTF' },
+          { codes: ['OTA08', 'OTA 08', 'GIUP OTA08'], target: 'Autumn 2021 OTA08 -HTF' },
+          { codes: ['JNF01', 'JNF 01', 'GIUP JNF01'], target: 'Jelly Neon Flash #JNF01 -HTF' },
+          { codes: ['JNF02', 'JNF 02', 'GIUP JNF02'], target: 'Jelly Neon Flash #JNF02 -HTF' },
+          { codes: ['JNF03', 'JNF 03', 'GIUP JNF03'], target: 'Jelly Neon Flash #JNF03 -HTF' },
+          { codes: ['JNF04', 'JNF 04', 'GIUP JNF04'], target: 'Jelly Neon Flash #JNF04 -HTF' },
+          { codes: ['JNF05', 'JNF 05', 'GIUP JNF05'], target: 'Jelly Neon Flash #JNF05 -HTF' },
+          { codes: ['JNF06', 'JNF 06', 'GIUP JNF06'], target: 'Jelly Neon Flash #JNF06 -HTF' },
+          { codes: ['NYP01', 'NYP 01', 'GIUP NYP01'], target: 'New York Party #NYP01 -HTF' },
+          { codes: ['NYP02', 'NYP 02', 'GIUP NYP02'], target: 'New York Party #NYP02 -HTF' },
+          { codes: ['NYP03', 'NYP 03', 'GIUP NYP03'], target: 'New York Party #NYP03 -HTF' },
+          { codes: ['NYP04', 'NYP 04', 'GIUP NYP04'], target: 'New York Party #NYP04 -HTF' },
+          { codes: ['AD01', 'AD 01', 'GIUP AD01'], target: 'AD01 Bloody Red Moon -HTF' },
+          { codes: ['AD02', 'AD 02', 'GIUP AD02'], target: 'AD02 Cyprus Hill Asylum -HTF' },
+          { codes: ['AD03', 'AD 03', 'GIUP AD03'], target: 'AD03 Strange Blue Things -HTF' },
+          { codes: ['FR01', 'FR 01', 'GIUP FR01'], target: 'FR01 Egalité -HTF' },
+          { codes: ['FR02', 'FR 02', 'GIUP FR02'], target: 'FR02 Fraternité -HTF' },
+          { codes: ['FR03', 'FR 03', 'GIUP FR03'], target: 'FR03 Garnet -HTF' },
+          { codes: ['FR04', 'FR 04', 'GIUP FR04'], target: 'FR04 Living Coral -HTF' },
+          { codes: ['FR05', 'FR 05', 'GIUP FR05'], target: 'FR05 Almond Glaze -HTF' },
+          { codes: ['FR06', 'FR 06', 'GIUP FR06'], target: 'FR06 The Perfect Nude -HTF' },
+          { codes: ['FR08', 'FR 08', 'GIUP FR08'], target: 'FR08 Ice Drop -HTF' },
+          { codes: ['GIUP SB', 'GIUP-SB'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
+          { codes: ['sb ac', 'SB AC', 'SB-AC'], target: 'Superbond Nail Dehydrator 11ml - with Acid -HTF' },
+          { codes: ['nailduster 1', 'nailduster_1', 'NAILDUSTER 1'], target: 'Wireless Nail Dust Collector New' },
+          { codes: ['apron', 'APRON'], target: 'Apron Black With Logo' },
+          { codes: ['nailsticks clear scaled 1', 'nailsticks_clear-scaled-1'], target: 'Nail sticks clear with ring' },
+          { codes: ['cushion sponge', 'cushion sponge 2', 'CUSHION SPONGE'], target: 'Ombre sponge' },
+        ]
+        for (const { codes, target } of aliasGroups) {
+          const entry = pnLookup(target)
+          if (entry) { for (const c of codes) { if (!map.has(c)) map.set(c, entry) } }
+        }
+        if (mounted) {
+          setCataloguePriceMap(map)
+          setCatalogueWordIndex(wordIndex)
+        }
       } catch (_) { /* price display is best-effort */ }
     }
     void load()
@@ -3483,10 +3846,24 @@ function FullCataloguePage() {
     if (giupSeriesMatch) {
       const s = giupSeriesMatch[1], n = giupSeriesMatch[2]
       const e = cataloguePriceMap.get(`${s} ${n}`) || cataloguePriceMap.get(`${s} ${n.padStart(2, '0')}`) || cataloguePriceMap.get(`${s}${n}`) || cataloguePriceMap.get(`${s}${n.padStart(2, '0')}`)
+        || cataloguePriceMap.get(`${s} ${n.replace(/^0+(\d)/, '$1')}`)
       if (e?.price != null) return e.price
     }
+    // Loose series match: GIUP SS01Kaleidascope → SS 01
+    const giupLooseSeriesMatch = !giupSeriesMatch && normalizeSkuCode(itemCode).match(/^(?:GIUP[-\s]+)?([A-Z]{2,5})(\d{1,3})(?=[A-Z])/)
+    if (giupLooseSeriesMatch) {
+      const s = giupLooseSeriesMatch[1], n = giupLooseSeriesMatch[2]
+      const e = cataloguePriceMap.get(`${s} ${n}`) || cataloguePriceMap.get(`${s} ${n.padStart(2, '0')}`)
+      if (e?.price != null) return e.price
+    }
+    // Try direct alias lookup by full item name (handles filenames like "MULTIMIX BABY BLUE COLOR")
+    const byFullName = cataloguePriceMap.get(normalizeSkuCode(itemName))
+    if (byFullName?.price != null) return byFullName.price
+    // Fuzzy word-overlap fallback
+    const fuzzy = fuzzyPriceLookup(itemCode, itemName, catalogueWordIndex)
+    if (fuzzy?.price != null) return fuzzy.price
     return null
-  }, [cataloguePriceMap])
+  }, [cataloguePriceMap, catalogueWordIndex])
 
   const getTileVariant = useCallback((index) => {
     const variant = index % 6
@@ -4012,7 +4389,7 @@ function FullCataloguePage() {
                 className="inline-flex items-center gap-1 rounded-lg border border-fuchsia-500/40 bg-fuchsia-50 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 transition hover:bg-fuchsia-100"
               >
                 <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" /></svg>
-                Register to order
+                Register as Distributor
               </NavLink>
             </div>
           </>
@@ -4097,16 +4474,16 @@ function FullCataloguePage() {
         <>
           <div id={CATALOGUE_RESULTS_ANCHOR_ID} className="scroll-mt-28" />
 
-          {/* GUEST INFO BANNER */}
+          {/* DISTRIBUTOR BANNER */}
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-fuchsia-200 bg-fuchsia-50 px-4 py-2.5">
             <p className="text-xs text-fuchsia-800">
-              <span className="font-semibold">B2B wholesale prices shown.</span>{' '}To place an order, register with your VAT number.
+              <span className="font-semibold">Distributors:</span>{' '}Register to see wholesale pricing.
             </p>
             <NavLink
               to="/portal/register"
               className="shrink-0 rounded-lg bg-fuchsia-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-fuchsia-500"
             >
-              Register to Order &rarr;
+              Register as Distributor &rarr;
             </NavLink>
           </div>
 
