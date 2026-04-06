@@ -2917,6 +2917,7 @@ function FullCataloguePage() {
   const [heroCandidateIndexByCategory, setHeroCandidateIndexByCategory] = useState({})
   const [itemQuantities, setItemQuantities] = useState({})
   const [quickCart, setQuickCart] = useState({})
+  const [showBasketDetail, setShowBasketDetail] = useState(false)
   const [pulseItemKey, setPulseItemKey] = useState('')
   const [gridColumns, setGridColumns] = useState(5)
   const [scrollTop, setScrollTop] = useState(0)
@@ -4422,30 +4423,94 @@ function FullCataloguePage() {
 
             {/* FLOATING BASKET BAR */}
             {quickCartUnits > 0 && (
-              <div className="mt-3 flex items-center gap-3 rounded-xl border border-fuchsia-500/30 bg-gradient-to-r from-fuchsia-50 to-white px-4 py-3 shadow-sm">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-fuchsia-600 text-white">
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path d="M1 1.75A.75.75 0 0 1 1.75 1h1.628a1.75 1.75 0 0 1 1.734 1.51L5.18 3H17.25a.75.75 0 0 1 .727.936l-1.875 7.5A.75.75 0 0 1 15.375 12h-8.75a.75.75 0 0 1-.727-.564L4.023 3.756 3.81 2.5H1.75A.75.75 0 0 1 1 1.75ZM7.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM15.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" /></svg>
+              <div className="mt-3 rounded-xl border border-fuchsia-500/30 bg-gradient-to-r from-fuchsia-50 to-white shadow-sm">
+                <div className="flex items-center gap-3 px-4 py-3">
+                  <button
+                    onClick={() => setShowBasketDetail((v) => !v)}
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-fuchsia-600 text-white transition hover:bg-fuchsia-500"
+                    title={showBasketDetail ? 'Hide basket' : 'View basket'}
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path d="M1 1.75A.75.75 0 0 1 1.75 1h1.628a1.75 1.75 0 0 1 1.734 1.51L5.18 3H17.25a.75.75 0 0 1 .727.936l-1.875 7.5A.75.75 0 0 1 15.375 12h-8.75a.75.75 0 0 1-.727-.564L4.023 3.756 3.81 2.5H1.75A.75.75 0 0 1 1 1.75ZM7.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM15.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" /></svg>
+                  </button>
+                  <button onClick={() => setShowBasketDetail((v) => !v)} className="flex-1 text-left">
+                    <p className="text-sm font-bold text-black">{quickCartUnits} item{quickCartUnits !== 1 ? 's' : ''} in your basket — €{quickCartTotal.toFixed(2)}</p>
+                    <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
+                      <div className="h-full rounded-full bg-fuchsia-600 transition-all duration-500" style={{ width: `${quickProgress}%` }} />
+                    </div>
+                    <p className="mt-0.5 text-[10px] text-black/50">{quickProgress < 100 ? `€${(MIN_ORDER_EUR - quickCartTotal).toFixed(2)} more to reach €${MIN_ORDER_EUR} minimum order` : 'Minimum order reached!'}</p>
+                  </button>
+                  <button
+                    onClick={() => setShowBasketDetail((v) => !v)}
+                    className="text-xs font-semibold text-fuchsia-700 transition hover:text-fuchsia-500"
+                  >
+                    {showBasketDetail ? 'Hide' : 'View'}
+                  </button>
+                  <button
+                    onClick={() => setShowBuyPopup(true)}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
+                  >
+                    Checkout
+                  </button>
+                  <button
+                    onClick={() => { setQuickCart({}); setItemQuantities({}); setShowBasketDetail(false) }}
+                    className="text-xs text-black/40 transition hover:text-red-500"
+                    title="Clear basket"
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.519.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clipRule="evenodd" /></svg>
+                  </button>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-black">{quickCartUnits} item{quickCartUnits !== 1 ? 's' : ''} in your basket — €{quickCartTotal.toFixed(2)}</p>
-                  <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
-                    <div className="h-full rounded-full bg-fuchsia-600 transition-all duration-500" style={{ width: `${quickProgress}%` }} />
+
+                {/* BASKET DETAIL PANEL */}
+                {showBasketDetail && (
+                  <div className="border-t border-fuchsia-200/50 px-4 pb-4 pt-3">
+                    <div className="max-h-64 space-y-2 overflow-y-auto">
+                      {Object.entries(quickCart).filter(([, q]) => q > 0).map(([key, cartQty]) => {
+                        const [name, code] = key.split('::')
+                        const price = lookupCataloguePrice(name, code)
+                        const lineTotal = price != null ? Number(price) * cartQty : null
+                        return (
+                          <div key={key} className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 shadow-sm">
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{name}</p>
+                              <p className="text-[11px] text-black/45">{code}{price != null && <span className="ml-2 text-fuchsia-700">€{Number(price).toFixed(2)} ea.</span>}</p>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => {
+                                  if (cartQty <= 1) {
+                                    setQuickCart((c) => { const n = { ...c }; delete n[key]; return n })
+                                  } else {
+                                    setQuickCart((c) => ({ ...c, [key]: c[key] - 1 }))
+                                  }
+                                }}
+                                className="flex h-6 w-6 items-center justify-center rounded-md border border-black/20 text-xs text-black/60 transition hover:border-fuchsia-500 hover:text-fuchsia-600"
+                              >−</button>
+                              <span className="w-8 text-center text-xs font-bold text-black">{cartQty}</span>
+                              <button
+                                onClick={() => setQuickCart((c) => ({ ...c, [key]: (c[key] || 0) + 1 }))}
+                                className="flex h-6 w-6 items-center justify-center rounded-md border border-black/20 text-xs text-black/60 transition hover:border-fuchsia-500 hover:text-fuchsia-600"
+                              >+</button>
+                            </div>
+                            {lineTotal != null && (
+                              <span className="w-16 text-right text-xs font-bold text-fuchsia-700">€{lineTotal.toFixed(2)}</span>
+                            )}
+                            <button
+                              onClick={() => setQuickCart((c) => { const n = { ...c }; delete n[key]; return n })}
+                              className="ml-1 text-black/30 transition hover:text-red-500"
+                              title="Remove"
+                            >
+                              <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true"><path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" /></svg>
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                    <div className="mt-3 flex items-center justify-between border-t border-black/10 pt-3">
+                      <span className="text-sm font-bold text-black">Total</span>
+                      <span className="text-lg font-bold text-fuchsia-700">€{quickCartTotal.toFixed(2)}</span>
+                    </div>
                   </div>
-                  <p className="mt-0.5 text-[10px] text-black/50">{quickProgress < 100 ? `€${(MIN_ORDER_EUR - quickCartTotal).toFixed(2)} more to reach €${MIN_ORDER_EUR} minimum order` : 'Minimum order reached!'}</p>
-                </div>
-                <button
-                  onClick={() => setShowBuyPopup(true)}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
-                >
-                  Checkout
-                </button>
-                <button
-                  onClick={() => { setQuickCart({}); setItemQuantities({}) }}
-                  className="text-xs text-black/40 transition hover:text-red-500"
-                  title="Clear basket"
-                >
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.519.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clipRule="evenodd" /></svg>
-                </button>
+                )}
               </div>
             )}
 
