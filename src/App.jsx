@@ -7,7 +7,6 @@ import { hasSupabaseConfig, supabase } from './lib/supabaseClient'
 import useB2BIntelligence from './lib/useB2BIntelligence'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
-const BookAppointmentPage = lazy(() => import('./pages/BookAppointmentPage.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
 const GuestbookPage = lazy(() => import('./pages/GuestbookPage.jsx'))
 const InspirationPage = lazy(() => import('./pages/InspirationPage.jsx'))
@@ -900,7 +899,6 @@ function createFallbackProducts(count = 120) {
 const navItems = [
   { to: '/about-us', label: 'About us' },
   { to: '/for-academies', label: 'Academies' },
-  { to: '/book-appointment', label: 'Book Appointment' },
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/guestbook', label: 'Guestbook' },
   { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
@@ -2935,12 +2933,13 @@ function FullCataloguePage() {
   const [expandedLookbookGroup, setExpandedLookbookGroup] = useState(0)
   const [selectedLookbookPageByGroup, setSelectedLookbookPageByGroup] = useState({})
   const [lightboxUrl, setLightboxUrl] = useState(null)
+  const [showBuyPopup, setShowBuyPopup] = useState(false)
   useEffect(() => {
-    if (!lightboxUrl) return
-    const handler = (e) => { if (e.key === 'Escape') setLightboxUrl(null) }
+    if (!lightboxUrl && !showBuyPopup) return
+    const handler = (e) => { if (e.key === 'Escape') { setLightboxUrl(null); setShowBuyPopup(false) } }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [lightboxUrl])
+  }, [lightboxUrl, showBuyPopup])
 
   const [activeNavAnchor, setActiveNavAnchor] = useState('')
   useEffect(() => {
@@ -4366,12 +4365,12 @@ function FullCataloguePage() {
                           })()}
                         </p>
                         <div className="mt-auto pt-3 flex items-center">
-                          <NavLink
-                            to="/portal/buy"
+                          <button
+                            onClick={() => setShowBuyPopup(true)}
                             className="ml-auto inline-flex min-h-10 items-center rounded-[10px] bg-fuchsia-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500"
                           >
                             Buy Now
-                          </NavLink>
+                          </button>
                         </div>
                       </div>
                     </article>
@@ -16276,7 +16275,6 @@ function App() {
           <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
-          <Route path="/book-appointment" element={<BookAppointmentPage />} />
           <Route path="/guestbook" element={<GuestbookPage />} />
           <Route path="/inspiration" element={<InspirationPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
