@@ -7251,40 +7251,8 @@ function PortalRegister({ onRegister }) {
 
       <div className="p-5 sm:p-6 md:p-8">
         <h3 className="text-xl font-semibold text-slate-900">
-          {isSalesRepFlow ? 'Sales Representative Application' : isDistributorFlow ? 'Distributor Application' : 'B2B Registration Request'}
+          Distributor Application
         </h3>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              setApplication((current) => ({
-                ...current,
-                applicationType: 'distributor',
-                distributorTier: '',
-                customerType: 'company',
-              }))
-            }}
-            className={`rounded-lg px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] transition min-h-[44px] ${isDistributorFlow && !isSalesRepFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
-          >
-            Distribution Application
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setApplication((current) => ({
-                ...current,
-                applicationType: 'distributor',
-                distributorTier: 'sales',
-                customerType: 'company',
-              }))
-            }}
-            className={`rounded-lg px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] transition min-h-[44px] ${isSalesRepFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
-          >
-            Sales Representative
-          </button>
-
-        </div>
 
         {false && (
           <div className="mt-5">
