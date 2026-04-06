@@ -3821,8 +3821,6 @@ function FullCataloguePage() {
     }))
   }, [itemQuantities])
 
-  const quickProgress = Math.min(100, Math.round((quickCartUnits / 100) * 100))
-
   const extractProductCode = useCallback((name = '') => {
     const cleaned = String(name || '').trim()
     const codeMatch = cleaned.match(/[A-Z]{2,8}\s*-?\s*\d+[A-Z0-9-]*/i)
@@ -3863,6 +3861,18 @@ function FullCataloguePage() {
     if (fuzzy?.price != null) return fuzzy.price
     return null
   }, [cataloguePriceMap, catalogueWordIndex])
+
+  const quickCartTotal = useMemo(() => {
+    let total = 0
+    for (const [key, qty] of Object.entries(quickCart)) {
+      const [name, code] = key.split('::')
+      const price = lookupCataloguePrice(name, code)
+      if (price != null) total += Number(price) * Number(qty || 0)
+    }
+    return total
+  }, [quickCart, lookupCataloguePrice])
+
+  const quickProgress = Math.min(100, Math.round((quickCartTotal / MIN_ORDER_EUR) * 100))
 
   const getTileVariant = useCallback((index) => {
     const variant = index % 6
@@ -4417,11 +4427,11 @@ function FullCataloguePage() {
                   <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path d="M1 1.75A.75.75 0 0 1 1.75 1h1.628a1.75 1.75 0 0 1 1.734 1.51L5.18 3H17.25a.75.75 0 0 1 .727.936l-1.875 7.5A.75.75 0 0 1 15.375 12h-8.75a.75.75 0 0 1-.727-.564L4.023 3.756 3.81 2.5H1.75A.75.75 0 0 1 1 1.75ZM7.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM15.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" /></svg>
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-bold text-black">{quickCartUnits} item{quickCartUnits !== 1 ? 's' : ''} in your basket</p>
+                  <p className="text-sm font-bold text-black">{quickCartUnits} item{quickCartUnits !== 1 ? 's' : ''} in your basket — €{quickCartTotal.toFixed(2)}</p>
                   <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
                     <div className="h-full rounded-full bg-fuchsia-600 transition-all duration-500" style={{ width: `${quickProgress}%` }} />
                   </div>
-                  <p className="mt-0.5 text-[10px] text-black/50">{quickProgress < 100 ? `${100 - quickCartUnits} more to reach minimum order` : 'Minimum order reached!'}</p>
+                  <p className="mt-0.5 text-[10px] text-black/50">{quickProgress < 100 ? `€${(MIN_ORDER_EUR - quickCartTotal).toFixed(2)} more to reach €${MIN_ORDER_EUR} minimum order` : 'Minimum order reached!'}</p>
                 </div>
                 <button
                   onClick={() => setShowBuyPopup(true)}
