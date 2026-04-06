@@ -5365,12 +5365,12 @@ function Nav({ onOpenContactModal }) {
       <NavLink
         to="/portal/register"
         className={({ isActive }) =>
-          `rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-bold uppercase tracking-[0.06em] text-white shadow-[0_0_8px_rgba(212,55,144,0.45)] transition duration-300 hover:bg-fuchsia-500 hover:shadow-[0_0_14px_rgba(212,55,144,0.65)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 ${
-            isActive ? 'shadow-[0_0_14px_rgba(212,55,144,0.7)]' : ''
+          `rounded-lg px-4 py-2 text-sm font-bold uppercase tracking-[0.06em] text-white transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 ${
+            isActive ? 'bg-fuchsia-700 shadow-[0_0_14px_rgba(212,55,144,0.7)] ring-2 ring-fuchsia-400' : 'bg-fuchsia-600 shadow-[0_0_8px_rgba(212,55,144,0.45)] hover:bg-fuchsia-500 hover:shadow-[0_0_14px_rgba(212,55,144,0.65)]'
           }`
         }
       >
-        Register Free
+        Distribution Registration
       </NavLink>
 
       {/* Sign In — compact, for returning users */}
@@ -5445,9 +5445,13 @@ function MobileNav({ onOpenContactModal }) {
           <NavLink
             to="/portal/register"
             onClick={() => setOpen(false)}
-            className="block rounded-lg bg-fuchsia-600 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.06em] text-white shadow-[0_0_8px_rgba(212,55,144,0.4)] transition duration-200 hover:bg-fuchsia-500"
+            className={({ isActive }) =>
+              `block rounded-lg px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.06em] text-white transition duration-200 ${
+                isActive ? 'bg-fuchsia-700 shadow-[0_0_14px_rgba(212,55,144,0.7)] ring-2 ring-fuchsia-400' : 'bg-fuchsia-600 shadow-[0_0_8px_rgba(212,55,144,0.4)] hover:bg-fuchsia-500'
+              }`
+            }
           >
-            Register Free &rarr;
+            Distribution Registration &rarr;
           </NavLink>
           <NavLink
             to="/portal/login"
