@@ -4307,11 +4307,27 @@ function FullCataloguePage() {
               </div>
             )}
 
+            <div className="mt-4 flex items-center justify-between">
+              <div className="flex rounded-lg border border-[#4A4A4A]/25 bg-white">
+                <button onClick={() => setBulkMode(false)} className={`inline-flex items-center gap-1.5 rounded-l-lg px-3 py-1.5 text-xs font-semibold transition ${!bulkMode ? 'bg-fuchsia-600 text-white' : 'text-black/60 hover:bg-black/5'}`} title="Grid view">
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path fillRule="evenodd" d="M4.25 2A2.25 2.25 0 0 0 2 4.25v2.5A2.25 2.25 0 0 0 4.25 9h2.5A2.25 2.25 0 0 0 9 6.75v-2.5A2.25 2.25 0 0 0 6.75 2h-2.5Zm0 9A2.25 2.25 0 0 0 2 13.25v2.5A2.25 2.25 0 0 0 4.25 18h2.5A2.25 2.25 0 0 0 9 15.75v-2.5A2.25 2.25 0 0 0 6.75 11h-2.5Zm9-9A2.25 2.25 0 0 0 11 4.25v2.5A2.25 2.25 0 0 0 13.25 9h2.5A2.25 2.25 0 0 0 18 6.75v-2.5A2.25 2.25 0 0 0 15.75 2h-2.5Zm0 9A2.25 2.25 0 0 0 11 13.25v2.5A2.25 2.25 0 0 0 13.25 18h2.5A2.25 2.25 0 0 0 18 15.75v-2.5A2.25 2.25 0 0 0 15.75 11h-2.5Z" clipRule="evenodd" /></svg>
+                  Grid
+                </button>
+                <button onClick={() => setBulkMode(true)} className={`inline-flex items-center gap-1.5 rounded-r-lg px-3 py-1.5 text-xs font-semibold transition ${bulkMode ? 'bg-fuchsia-600 text-white' : 'text-black/60 hover:bg-black/5'}`} title="List view — quick order mode">
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path fillRule="evenodd" d="M2 3.75A.75.75 0 0 1 2.75 3h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 3.75Zm0 4.167a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Zm0 4.166a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Zm0 4.167a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z" clipRule="evenodd" /></svg>
+                  Quick Order
+                </button>
+              </div>
+              {quickCartUnits > 0 && (
+                <span className="text-xs font-semibold text-fuchsia-700">{quickCartUnits} item{quickCartUnits !== 1 ? 's' : ''} in basket</span>
+              )}
+            </div>
+
             <div
               id="catalogue-items-grid"
               ref={virtualContainerRef}
               onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
-              className="mt-4 max-h-[68vh] overflow-auto rounded-[14px] border border-[#4A4A4A]/30 bg-white md:max-h-[72vh] scroll-mt-24"
+              className="mt-2 max-h-[68vh] overflow-auto rounded-[14px] border border-[#4A4A4A]/30 bg-white md:max-h-[72vh] scroll-mt-24"
             >
               <div style={{ height: topSpacerHeight }} />
 
@@ -4321,15 +4337,21 @@ function FullCataloguePage() {
               >
                 {virtualItems.map(({ item, itemIndex }) => {
                   const itemCode = extractProductCode(item.name)
+                  const itemKey = `${item.name}::${itemCode}`
+                  const qty = getQty(itemKey)
+                  const hasChangedQty = qty !== 1
+                  const inCart = quickCart[itemKey] > 0
 
                   if (bulkMode) {
+                    const rowPrice = lookupCataloguePrice(item.name, itemCode)
                     return (
                       <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 rounded-[12px] border border-[#4A4A4A]/30 bg-[#E8E8E8] px-3 py-2 transition duration-300 hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_1px_rgba(212,55,144,0.26)]" data-catalogue-item>
                         <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-black/10 bg-white object-contain opacity-0 transition-opacity duration-300" loading="lazy" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
                         <div className="min-w-0 flex-1">
                           <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                          <p className="break-words text-[11px] font-light text-black/55">{itemCode}</p>
+                          <p className="break-words text-[11px] font-light text-black/55">{itemCode}{rowPrice != null && <span className="ml-2 font-bold text-fuchsia-700">€{Number(rowPrice).toFixed(2)}</span>}</p>
                         </div>
+                        {inCart && <span className="rounded-md bg-fuchsia-100 px-1.5 py-0.5 text-[10px] font-semibold text-fuchsia-700">{quickCart[itemKey]} in basket</span>}
                         <button onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>-</button>
                         <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className={`h-7 w-10 rounded-[10px] border text-center text-xs ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/20 text-black/70'}`} />
                         <button onClick={() => updateQty(itemKey, qty + 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>+</button>
@@ -4364,7 +4386,14 @@ function FullCataloguePage() {
                             return <span>Price on request</span>
                           })()}
                         </p>
-                        <div className="mt-auto pt-3 flex items-center">
+                        <div className="mt-auto pt-3 flex items-center gap-2">
+                          <button
+                            onClick={() => { addQuickItem(itemKey); }}
+                            className={`inline-flex min-h-10 items-center gap-1.5 rounded-[10px] border px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition duration-300 ${inCart ? 'border-fuchsia-600 bg-fuchsia-50 text-fuchsia-700' : 'border-black/20 bg-white text-black/70 hover:border-fuchsia-500 hover:text-fuchsia-600'}`}
+                          >
+                            <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true"><path d="M1 1.75A.75.75 0 0 1 1.75 1h1.628a1.75 1.75 0 0 1 1.734 1.51L5.18 3H17.25a.75.75 0 0 1 .727.936l-1.875 7.5A.75.75 0 0 1 15.375 12h-8.75a.75.75 0 0 1-.727-.564L4.023 3.756 3.81 2.5H1.75A.75.75 0 0 1 1 1.75ZM7.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM15.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" /></svg>
+                            {inCart ? `${quickCart[itemKey]} added` : 'Add'}
+                          </button>
                           <button
                             onClick={() => setShowBuyPopup(true)}
                             className="ml-auto inline-flex min-h-10 items-center rounded-[10px] bg-fuchsia-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500"
@@ -4380,6 +4409,35 @@ function FullCataloguePage() {
 
               <div style={{ height: bottomSpacerHeight }} />
             </div>
+
+            {/* FLOATING BASKET BAR */}
+            {quickCartUnits > 0 && (
+              <div className="mt-3 flex items-center gap-3 rounded-xl border border-fuchsia-500/30 bg-gradient-to-r from-fuchsia-50 to-white px-4 py-3 shadow-sm">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-fuchsia-600 text-white">
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path d="M1 1.75A.75.75 0 0 1 1.75 1h1.628a1.75 1.75 0 0 1 1.734 1.51L5.18 3H17.25a.75.75 0 0 1 .727.936l-1.875 7.5A.75.75 0 0 1 15.375 12h-8.75a.75.75 0 0 1-.727-.564L4.023 3.756 3.81 2.5H1.75A.75.75 0 0 1 1 1.75ZM7.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM15.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" /></svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-black">{quickCartUnits} item{quickCartUnits !== 1 ? 's' : ''} in your basket</p>
+                  <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
+                    <div className="h-full rounded-full bg-fuchsia-600 transition-all duration-500" style={{ width: `${quickProgress}%` }} />
+                  </div>
+                  <p className="mt-0.5 text-[10px] text-black/50">{quickProgress < 100 ? `${100 - quickCartUnits} more to reach minimum order` : 'Minimum order reached!'}</p>
+                </div>
+                <button
+                  onClick={() => setShowBuyPopup(true)}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
+                >
+                  Checkout
+                </button>
+                <button
+                  onClick={() => { setQuickCart({}); setItemQuantities({}) }}
+                  className="text-xs text-black/40 transition hover:text-red-500"
+                  title="Clear basket"
+                >
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.519.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clipRule="evenodd" /></svg>
+                </button>
+              </div>
+            )}
 
             <div className="mt-2 flex flex-wrap items-center justify-between gap-3 text-xs text-black/55">
               <span>Showing {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''}</span>
