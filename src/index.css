@@ -31,9 +31,11 @@
   --lux-fuchsia: #D43790;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 img {

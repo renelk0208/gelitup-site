@@ -2928,6 +2928,8 @@ function FullCataloguePage() {
   const [errorMessage, setErrorMessage] = useState('')
   // solidGelColourFamilies: sku ? colorFamily, loaded from JSON built via CSV
   const [solidGelColourFamilies, setSolidGelColourFamilies] = useState({})
+  // cataloguePriceMap: normalised key → { name, price } for public price display
+  const [cataloguePriceMap, setCataloguePriceMap] = useState(null)
   const [springSummerLookbook, setSpringSummerLookbook] = useState(SPRING_SUMMER_LOOKBOOK_DEFAULT)
   const [expandedLookbookGroup, setExpandedLookbookGroup] = useState(0)
   const [selectedLookbookPageByGroup, setSelectedLookbookPageByGroup] = useState({})
@@ -3026,6 +3028,58 @@ function FullCataloguePage() {
     return () => {
       mounted = false
     }
+  }, [])
+
+  // Load B2B price list for public price display
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      try {
+        const res = await fetch('/gelitup-content/b2b-price-list.json')
+        if (!res.ok) return
+        const payload = await res.json()
+        const items = Array.isArray(payload?.items) ? payload.items : []
+        const map = new Map()
+        const stripSuffix = (s) => String(s || '').replace(/\s*[-—]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '').trim()
+        const isMultimix30g = (n) => /multimix/i.test(n) && /\b30\s*g/i.test(n)
+        for (const { name, sku, price } of items) {
+          const cleanName = stripSuffix(name)
+          const surcharge = isMultimix30g(name) ? 1.1 : 1
+          const entry = { name, price: price != null ? Math.ceil(Number(price) * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10 : null }
+          const keys = [
+            normalizeSkuCode(sku),
+            normalizeSkuCode(stripSuffix(sku)),
+            normalizeProductName(name),
+            normalizeProductName(cleanName),
+          ]
+          const numMatch = cleanName.match(/^(\d+[A-Z]?)\s/)
+          if (numMatch) {
+            keys.push(numMatch[1].replace(/^(\d+)/, n => n.padStart(2, '0')), numMatch[1].replace(/^0+(\d)/, '$1'), numMatch[1])
+          }
+          const seriesNumMatch = cleanName.match(/^([A-Z]+)\s*#\s*(\d+[A-Z]?)\b/i)
+          if (seriesNumMatch) {
+            const s = seriesNumMatch[1].toUpperCase(), n = seriesNumMatch[2]
+            keys.push(`${s} ${n}`, `${s} ${n.padStart(2, '0')}`, `${s}${n}`, `${s}${n.padStart(2, '0')}`)
+          }
+          const embeddedCodeMatch = cleanName.match(/#([A-Z]+)\s*(\d+[A-Z]?)\b/i)
+          if (embeddedCodeMatch) {
+            const s = embeddedCodeMatch[1].toUpperCase(), n = embeddedCodeMatch[2]
+            keys.push(`${s} ${n}`, `${s} ${n.padStart(2, '0')}`, `${s}${n}`, `${s}${n.padStart(2, '0')}`)
+          }
+          const tokenMatches = [...cleanName.matchAll(/\b([A-Z]{1,5})(\d{1,3}[A-Z]?)\b/gi)]
+          for (const tm of tokenMatches) {
+            const s = tm[1].toUpperCase(), n = tm[2]
+            keys.push(`${s} ${n}`, `${s} ${n.padStart(2, '0')}`, `${s}${n}`, `${s}${n.padStart(2, '0')}`)
+          }
+          for (const k of keys) {
+            if (k && !map.has(k)) map.set(k, entry)
+          }
+        }
+        if (mounted) setCataloguePriceMap(map)
+      } catch (_) { /* price display is best-effort */ }
+    }
+    void load()
+    return () => { mounted = false }
   }, [])
 
   useEffect(() => {
@@ -3412,6 +3466,27 @@ function FullCataloguePage() {
     const codeMatch = cleaned.match(/[A-Z]{2,8}\s*-?\s*\d+[A-Z0-9-]*/i)
     return codeMatch ? codeMatch[0].toUpperCase() : 'SKU'
   }, [])
+
+  const lookupCataloguePrice = useCallback((itemName = '', itemCode = '') => {
+    if (!cataloguePriceMap) return null
+    const byName = cataloguePriceMap.get(normalizeProductName(itemName))
+    if (byName?.price != null) return byName.price
+    const byCode = cataloguePriceMap.get(normalizeSkuCode(itemCode))
+    if (byCode?.price != null) return byCode.price
+    // Try GIUP-prefixed code variants
+    const giupNumMatch = normalizeSkuCode(itemCode).match(/^(?:GIUP\s+)?(\d+[A-Z]?)$/)
+    if (giupNumMatch) {
+      const e = cataloguePriceMap.get(giupNumMatch[1].padStart(2, '0')) || cataloguePriceMap.get(giupNumMatch[1])
+      if (e?.price != null) return e.price
+    }
+    const giupSeriesMatch = normalizeSkuCode(itemCode).match(/^(?:GIUP[-\s]+)?([A-Z]+)(\d+[A-Z]?)$/)
+    if (giupSeriesMatch) {
+      const s = giupSeriesMatch[1], n = giupSeriesMatch[2]
+      const e = cataloguePriceMap.get(`${s} ${n}`) || cataloguePriceMap.get(`${s} ${n.padStart(2, '0')}`) || cataloguePriceMap.get(`${s}${n}`) || cataloguePriceMap.get(`${s}${n.padStart(2, '0')}`)
+      if (e?.price != null) return e.price
+    }
+    return null
+  }, [cataloguePriceMap])
 
   const getTileVariant = useCallback((index) => {
     const variant = index % 6
@@ -3907,8 +3982,11 @@ function FullCataloguePage() {
                           <p className="break-words text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
                         </div>
                         <p className="mt-1.5 flex items-center gap-1 text-[10px] text-black/38">
-                          <svg viewBox="0 0 16 16" fill="currentColor" className="h-3 w-3 shrink-0" aria-hidden="true"><path fillRule="evenodd" d="M8 1a3.5 3.5 0 0 0-3.5 3.5V6H4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-.5V4.5A3.5 3.5 0 0 0 8 1Zm2 5V4.5a2 2 0 1 0-4 0V6h4Z" clipRule="evenodd" /></svg>
-                          Register for wholesale price
+                          {(() => {
+                            const price = lookupCataloguePrice(item.name, itemCode)
+                            if (price != null) return <span className="text-xs font-bold text-fuchsia-700">€{Number(price).toFixed(2)}</span>
+                            return <span>Price on request</span>
+                          })()}
                         </p>
                         <div className="mt-auto pt-3 flex items-center">
                           <NavLink
@@ -3934,7 +4012,7 @@ function FullCataloguePage() {
                 className="inline-flex items-center gap-1 rounded-lg border border-fuchsia-500/40 bg-fuchsia-50 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 transition hover:bg-fuchsia-100"
               >
                 <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" /></svg>
-                Register to purchase
+                Register to order
               </NavLink>
             </div>
           </>
@@ -4019,16 +4097,16 @@ function FullCataloguePage() {
         <>
           <div id={CATALOGUE_RESULTS_ANCHOR_ID} className="scroll-mt-28" />
 
-          {/* GUEST CONVERSION BANNER */}
+          {/* GUEST INFO BANNER */}
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-fuchsia-200 bg-fuchsia-50 px-4 py-2.5">
             <p className="text-xs text-fuchsia-800">
-              <span className="font-semibold">You&rsquo;re browsing as a guest.</span>{' '}Register free for B2B wholesale pricing and ordering.
+              <span className="font-semibold">B2B wholesale prices shown.</span>{' '}To place an order, register with your VAT number.
             </p>
             <NavLink
               to="/portal/register"
               className="shrink-0 rounded-lg bg-fuchsia-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-fuchsia-500"
             >
-              Register Free &rarr;
+              Register to Order &rarr;
             </NavLink>
           </div>
 
@@ -6702,11 +6780,37 @@ function PortalRegister({ onRegister }) {
   const isSalesRepFlow = isDistributorFlow && application.distributorTier === 'sales'
   const isBusinessOrderProfile = application.orderProfile === 'business'
 
+  // VIES VAT validation for registration
+  const [regViesResult, setRegViesResult] = useState(null)
+  const [regViesLoading, setRegViesLoading] = useState(false)
+  const [regViesError, setRegViesError] = useState('')
+
+  const verifyRegVat = useCallback(async (vatNumber) => {
+    const vat = String(vatNumber || '').trim().toUpperCase().replace(/[\s\-\.]/g, '')
+    if (vat.length < 4) { setRegViesError('Enter a full VAT number to verify'); return }
+    setRegViesLoading(true)
+    setRegViesError('')
+    setRegViesResult(null)
+    try {
+      const res = await fetch('/.netlify/functions/validate-vat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vatNumber: vat }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setRegViesError(data.error || 'VIES check failed'); return }
+      setRegViesResult(data)
+      if (!data.valid) setRegViesError('VAT number not found in VIES — please check and try again')
+    } catch { setRegViesError('Unable to reach VAT validation service') }
+    finally { setRegViesLoading(false) }
+  }, [])
+
   const setField = (fieldName, value) => {
     setApplication((current) => ({
       ...current,
       [fieldName]: value,
     }))
+    if (fieldName === 'vatNumber') setRegViesResult(null)
   }
 
   return (
@@ -6776,6 +6880,7 @@ function PortalRegister({ onRegister }) {
               setApplication((current) => ({
                 ...current,
                 applicationType: 'distributor',
+                distributorTier: '',
                 customerType: 'company',
               }))
             }}
@@ -6797,19 +6902,7 @@ function PortalRegister({ onRegister }) {
           >
             Sales Representative
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              setApplication((current) => ({
-                ...current,
-                applicationType: 'b2b_order',
-                customerType: current.orderProfile === 'personal' ? 'personal' : 'company',
-              }))
-            }}
-            className={`rounded-lg px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] transition min-h-[44px] ${isB2BOrderFlow ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
-          >
-            B2B (Client)
-          </button>
+
         </div>
 
         {false && (
@@ -6966,23 +7059,7 @@ function PortalRegister({ onRegister }) {
                 </label>
               </>
             ) : (<>
-            {isDistributorFlow && (
-              <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-                Distribution Tier
-                <select
-                  required
-                  value={application.distributorTier}
-                  onChange={(event) => setField('distributorTier', event.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
-                >
-                  <option value="" disabled>Select your distribution tier</option>
-                  <option value="professional">Professional Distributor — Regional Distribution</option>
-                  <option value="authority">Authority Distributor — Country Distribution</option>
-                  <option value="sales">Sales Representative — Direct Sales / Local Market</option>
-                </select>
-                <p className="mt-1 text-xs text-slate-400">Professional: multi-salon or regional reach. Authority: exclusive country-level distribution rights. Sales Representative: direct sales and local market development.</p>
-              </label>
-            )}
+
 
             {isB2BOrderFlow && (
               <label className="block text-sm font-medium text-slate-700 md:col-span-2">
@@ -7043,14 +7120,27 @@ function PortalRegister({ onRegister }) {
             </label>
             <label className="block text-sm font-medium text-slate-700">
               VAT Number
-              <input
-                type="text"
-                required={isDistributorFlow || isBusinessOrderProfile}
-                value={application.vatNumber}
-                onChange={(event) => setField('vatNumber', event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
-                placeholder={(isDistributorFlow || isBusinessOrderProfile) ? 'EU123456789' : 'Optional for personal purchases'}
-              />
+              <div className="mt-1 flex gap-1.5">
+                <input
+                  type="text"
+                  required={isDistributorFlow || isBusinessOrderProfile}
+                  value={application.vatNumber}
+                  onChange={(event) => setField('vatNumber', event.target.value.toUpperCase())}
+                  className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
+                  placeholder={(isDistributorFlow || isBusinessOrderProfile) ? 'EU123456789' : 'Optional for personal purchases'}
+                />
+                <button type="button" disabled={regViesLoading || !application.vatNumber.trim()} onClick={() => verifyRegVat(application.vatNumber)} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40">
+                  {regViesLoading ? 'Checking…' : 'Verify'}
+                </button>
+              </div>
+              {regViesError && <p className="mt-0.5 text-xs text-rose-600">{regViesError}</p>}
+              {regViesResult?.valid && (
+                <div className="mt-1 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1.5">
+                  <p className="text-xs font-semibold text-emerald-700">✓ Valid — verified via EU VIES</p>
+                  {regViesResult.name && <p className="text-xs text-emerald-600">{regViesResult.name}</p>}
+                  {regViesResult.address && <p className="text-xs text-emerald-600">{regViesResult.address}</p>}
+                </div>
+              )}
             </label>
             <label className="block text-sm font-medium text-slate-700">
               Contact Name
@@ -7937,6 +8027,32 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   const setClientField = useCallback((key, value) => {
     setClientProfile((current) => ({ ...current, [key]: value }))
+    if (key === 'vatNumber') setViesResult(null) // reset VIES result when VAT changes
+  }, [])
+
+  // VIES VAT validation state
+  const [viesResult, setViesResult] = useState(null) // { valid, name, address } | null
+  const [viesLoading, setViesLoading] = useState(false)
+  const [viesError, setViesError] = useState('')
+
+  const verifyVat = useCallback(async (vatNumber) => {
+    const vat = String(vatNumber || '').trim().toUpperCase().replace(/[\s\-\.]/g, '')
+    if (vat.length < 4) { setViesError('Enter a full VAT number to verify'); return }
+    setViesLoading(true)
+    setViesError('')
+    setViesResult(null)
+    try {
+      const res = await fetch('/.netlify/functions/validate-vat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vatNumber: vat }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setViesError(data.error || 'VIES check failed'); return }
+      setViesResult(data)
+      if (!data.valid) setViesError('VAT number not found in VIES — please check and try again')
+    } catch { setViesError('Unable to reach VAT validation service') }
+    finally { setViesLoading(false) }
   }, [])
 
   const invoiceAddressComposed = useMemo(() => composeAddress({
@@ -7987,11 +8103,12 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   const clientValidation = useMemo(() => {
     const vatPrefixError = validateVatPrefix(clientProfile.vatNumber, clientProfile.invoiceCountry)
+    const vatNotVerified = String(clientProfile.vatNumber || '').trim().length >= 4 && !vatPrefixError && (!viesResult || !viesResult.valid)
     const missing = {
       customerType: !String(clientProfile.customerType || '').trim(),
       shippingType: !String(clientProfile.shippingType || '').trim(),
       customerName: !String(clientProfile.customerName || '').trim(),
-      vatNumber: !String(clientProfile.vatNumber || '').trim() || Boolean(vatPrefixError),
+      vatNumber: !String(clientProfile.vatNumber || '').trim() || Boolean(vatPrefixError) || vatNotVerified,
       contactPhone: !String(clientProfile.contactPhone || '').trim(),
       contactEmail: !String(clientProfile.contactEmail || '').trim(),
       invoiceAddressLine1: !String(clientProfile.invoiceAddressLine1 || '').trim(),
@@ -8031,7 +8148,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
     const missingLabels = Object.entries(missing)
       .filter(([, isMissing]) => isMissing)
-      .map(([field]) => field === 'vatNumber' && vatPrefixError ? vatPrefixError : labelByField[field])
+      .map(([field]) => {
+        if (field === 'vatNumber' && vatPrefixError) return vatPrefixError
+        if (field === 'vatNumber' && vatNotVerified) return 'VAT number (click Verify to validate via VIES)'
+        return labelByField[field]
+      })
 
     if (!invoiceAddressComposed.trim()) missingLabels.push('invoice address')
     if (!shippingAddressComposed.trim()) missingLabels.push('shipping address')
@@ -8064,6 +8185,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     clientProfile.vatNumber,
     invoiceAddressComposed,
     shippingAddressComposed,
+    viesResult,
   ])
 
   const hasClientFieldError = useCallback(
@@ -10780,11 +10902,24 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
               <input type="text" value={clientProfile.customerName} onChange={(e) => setClientField('customerName', e.target.value)} className={getClientInputClass('customerName')} placeholder={clientProfile.customerType === 'company' ? 'Company name' : 'Client name'} />
             </label>
             <label className="text-xs text-slate-700">VAT Number <span className="text-rose-600">*</span>
-              <input type="text" value={clientProfile.vatNumber} onChange={(e) => setClientField('vatNumber', e.target.value.toUpperCase())} className={getClientInputClass('vatNumber')} placeholder={COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry] ? `${COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry]}123456789` : 'VAT / Tax ID'} />
+              <div className="mt-1 flex gap-1.5">
+                <input type="text" value={clientProfile.vatNumber} onChange={(e) => setClientField('vatNumber', e.target.value.toUpperCase())} className={`flex-1 rounded-lg border px-3 py-2 text-xs text-slate-700 ${hasClientFieldError('vatNumber') ? 'border-rose-400 bg-rose-50' : 'border-slate-300 bg-white'}`} placeholder={COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry] ? `${COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry]}123456789` : 'VAT / Tax ID'} />
+                <button type="button" disabled={viesLoading || !clientProfile.vatNumber.trim()} onClick={() => verifyVat(clientProfile.vatNumber)} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40">
+                  {viesLoading ? 'Checking…' : 'Verify'}
+                </button>
+              </div>
               {COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry] && (
                 <span className="mt-0.5 block text-[10px] text-slate-400">Must start with <strong>{COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry]}</strong> for {clientProfile.invoiceCountry}</span>
               )}
               {clientValidation.vatPrefixError && <span className="mt-0.5 block text-[10px] text-rose-600">{clientValidation.vatPrefixError}</span>}
+              {viesError && <span className="mt-0.5 block text-[10px] text-rose-600">{viesError}</span>}
+              {viesResult?.valid && (
+                <div className="mt-1 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1.5">
+                  <p className="text-[10px] font-semibold text-emerald-700">✓ Valid — verified via EU VIES</p>
+                  {viesResult.name && <p className="text-[10px] text-emerald-600">{viesResult.name}</p>}
+                  {viesResult.address && <p className="text-[10px] text-emerald-600">{viesResult.address}</p>}
+                </div>
+              )}
             </label>
             <label className="text-xs text-slate-700">Contact Number (with country code) <span className="text-rose-600">*</span>
               <input type="text" value={clientProfile.contactPhone} onChange={(e) => setClientField('contactPhone', e.target.value)} className={getClientInputClass('contactPhone')} placeholder="+359..." />
@@ -11367,13 +11502,26 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
             <label className="text-xs text-slate-700">
               VAT Number <span className="text-rose-600">*</span>
-              <input
-                type="text"
-                value={clientProfile.vatNumber}
-                onChange={(event) => setClientField('vatNumber', event.target.value)}
-                className={getClientInputClass('vatNumber')}
-                placeholder="VAT / Tax ID"
-              />
+              <div className="mt-1 flex gap-1.5">
+                <input
+                  type="text"
+                  value={clientProfile.vatNumber}
+                  onChange={(event) => setClientField('vatNumber', event.target.value.toUpperCase())}
+                  className={`flex-1 rounded-lg border px-3 py-2 text-xs text-slate-700 ${hasClientFieldError('vatNumber') ? 'border-rose-400 bg-rose-50' : 'border-slate-300 bg-white'}`}
+                  placeholder="VAT / Tax ID"
+                />
+                <button type="button" disabled={viesLoading || !clientProfile.vatNumber.trim()} onClick={() => verifyVat(clientProfile.vatNumber)} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40">
+                  {viesLoading ? 'Checking…' : 'Verify'}
+                </button>
+              </div>
+              {viesError && <span className="mt-0.5 block text-[10px] text-rose-600">{viesError}</span>}
+              {viesResult?.valid && (
+                <div className="mt-1 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1.5">
+                  <p className="text-[10px] font-semibold text-emerald-700">✓ Valid — verified via EU VIES</p>
+                  {viesResult.name && <p className="text-[10px] text-emerald-600">{viesResult.name}</p>}
+                  {viesResult.address && <p className="text-[10px] text-emerald-600">{viesResult.address}</p>}
+                </div>
+              )}
             </label>
 
             <label className="text-xs text-slate-700">
