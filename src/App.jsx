@@ -5361,12 +5361,24 @@ function Nav({ onOpenContactModal }) {
       {/* Divider */}
       <span className="mx-1.5 h-5 w-px bg-white/20" aria-hidden="true" />
 
-      {/* Primary CTA — visible, actionable */}
+      {/* Primary CTA — Buy Now */}
       <NavLink
-        to="/portal/register"
+        to="/portal/buy"
         className={({ isActive }) =>
           `rounded-lg px-4 py-2 text-sm font-bold uppercase tracking-[0.06em] text-white transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 ${
             isActive ? 'bg-fuchsia-700 shadow-[0_0_14px_rgba(212,55,144,0.7)] ring-2 ring-fuchsia-400' : 'bg-fuchsia-600 shadow-[0_0_8px_rgba(212,55,144,0.45)] hover:bg-fuchsia-500 hover:shadow-[0_0_14px_rgba(212,55,144,0.65)]'
+          }`
+        }
+      >
+        Buy Now
+      </NavLink>
+
+      {/* Secondary — Distribution Registration */}
+      <NavLink
+        to="/portal/register"
+        className={({ isActive }) =>
+          `rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+            isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/80 hover:border-white/50 hover:bg-white/10 hover:!text-white'
           }`
         }
       >
@@ -5442,8 +5454,9 @@ function MobileNav({ onOpenContactModal }) {
         {/* Nav links */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           {/* Quick-action CTAs at the top */}
+          {/* Primary CTA — Buy Now */}
           <NavLink
-            to="/portal/register"
+            to="/portal/buy"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
               `block rounded-lg px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.06em] text-white transition duration-200 ${
@@ -5451,7 +5464,19 @@ function MobileNav({ onOpenContactModal }) {
               }`
             }
           >
-            Distribution Registration &rarr;
+            Buy Now &rarr;
+          </NavLink>
+          {/* Secondary — Distribution Registration */}
+          <NavLink
+            to="/portal/register"
+            onClick={() => setOpen(false)}
+            className={({ isActive }) =>
+              `block rounded-lg border border-white/25 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-[0.06em] transition duration-200 ${
+                isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/70 hover:border-white/40 hover:bg-white/10 hover:!text-white'
+              }`
+            }
+          >
+            Distribution Registration
           </NavLink>
           <NavLink
             to="/portal/login"
