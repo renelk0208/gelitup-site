@@ -5560,18 +5560,6 @@ function Nav({ onOpenContactModal }) {
       {/* Divider */}
       <span className="mx-1.5 h-5 w-px bg-white/20" aria-hidden="true" />
 
-      {/* Primary CTA — Buy Now */}
-      <NavLink
-        to="/portal/buy"
-        className={({ isActive }) =>
-          `rounded-lg px-4 py-2 text-sm font-bold uppercase tracking-[0.06em] text-white transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 ${
-            isActive ? 'bg-fuchsia-700 shadow-[0_0_14px_rgba(212,55,144,0.7)] ring-2 ring-fuchsia-400' : 'bg-fuchsia-600 shadow-[0_0_8px_rgba(212,55,144,0.45)] hover:bg-fuchsia-500 hover:shadow-[0_0_14px_rgba(212,55,144,0.65)]'
-          }`
-        }
-      >
-        Buy Now
-      </NavLink>
-
       {/* Secondary — Distribution Registration */}
       <NavLink
         to="/portal/register"
@@ -5653,18 +5641,6 @@ function MobileNav({ onOpenContactModal }) {
         {/* Nav links */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           {/* Quick-action CTAs at the top */}
-          {/* Primary CTA — Buy Now */}
-          <NavLink
-            to="/portal/buy"
-            onClick={() => setOpen(false)}
-            className={({ isActive }) =>
-              `block rounded-lg px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.06em] text-white transition duration-200 ${
-                isActive ? 'bg-fuchsia-700 shadow-[0_0_14px_rgba(212,55,144,0.7)] ring-2 ring-fuchsia-400' : 'bg-fuchsia-600 shadow-[0_0_8px_rgba(212,55,144,0.4)] hover:bg-fuchsia-500'
-              }`
-            }
-          >
-            Buy Now &rarr;
-          </NavLink>
           {/* Secondary — Distribution Registration */}
           <NavLink
             to="/portal/register"
