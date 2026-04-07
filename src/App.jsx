@@ -903,7 +903,7 @@ const navItems = [
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/guestbook', label: 'Guestbook' },
   { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
-  { to: '/full-catalogue', label: 'Buy Here' },
+  { to: '/full-catalogue', label: 'Buy Here', highlight: true },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -4375,7 +4375,17 @@ function FullCataloguePage() {
                 </button>
               </div>
               {quickCartUnits > 0 && (
-                <span className="text-xs font-semibold text-fuchsia-700">{quickCartUnits} item{quickCartUnits !== 1 ? 's' : ''} in basket</span>
+                <span className="inline-flex items-center gap-2 text-xs font-semibold text-fuchsia-700">
+                  {quickCartUnits} item{quickCartUnits !== 1 ? 's' : ''} in basket
+                  <button
+                    onClick={() => { setQuickCart({}); setItemQuantities({}); setShowBasketDetail(false) }}
+                    className="inline-flex items-center gap-0.5 rounded-md border border-red-300 bg-red-50 px-1.5 py-0.5 text-[10px] font-semibold text-red-600 transition hover:bg-red-100"
+                    title="Clear basket"
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3" aria-hidden="true"><path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.519.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clipRule="evenodd" /></svg>
+                    Clear
+                  </button>
+                </span>
               )}
             </div>
 
@@ -4443,21 +4453,12 @@ function FullCataloguePage() {
                           })()}
                         </p>
                         <div className="mt-auto pt-3">
-                          {isLoggedIn ? (
-                            <div className="flex items-center gap-2">
-                              <button onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
-                              <span className={`w-8 text-center text-xs font-bold ${inCart ? 'text-fuchsia-700' : 'text-black/40'}`}>{quickCart[itemKey] || 0}</span>
-                              <button onClick={() => { addQuickItem(itemKey); }} className="flex h-8 w-8 items-center justify-center rounded-[10px] border border-fuchsia-600 text-sm text-fuchsia-600 transition duration-300 hover:bg-fuchsia-50">+</button>
-                              {inCart && <span className="ml-auto text-[10px] font-semibold text-fuchsia-700">in basket</span>}
-                            </div>
-                          ) : (
-                            <NavLink
-                              to="/portal/buy"
-                              className="inline-flex w-full min-h-10 items-center justify-center gap-1.5 rounded-[10px] border border-fuchsia-500/30 bg-fuchsia-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-fuchsia-700 transition duration-300 hover:bg-fuchsia-100"
-                            >
-                              Register to Order
-                            </NavLink>
-                          )}
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
+                            <span className={`w-8 text-center text-xs font-bold ${inCart ? 'text-fuchsia-700' : 'text-black/40'}`}>{quickCart[itemKey] || 0}</span>
+                            <button onClick={() => { addQuickItem(itemKey); }} className="flex h-8 w-8 items-center justify-center rounded-[10px] border border-fuchsia-600 text-sm text-fuchsia-600 transition duration-300 hover:bg-fuchsia-50">+</button>
+                            {inCart && <span className="ml-auto text-[10px] font-semibold text-fuchsia-700">in basket</span>}
+                          </div>
                         </div>
                       </div>
                     </article>
@@ -4493,10 +4494,10 @@ function FullCataloguePage() {
                     {showBasketDetail ? 'Hide' : 'View'}
                   </button>
                   <NavLink
-                    to="/portal/dashboard/products"
+                    to="/checkout"
                     className="inline-flex items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
                   >
-                    Submit Order
+                    Checkout
                   </NavLink>
                   <button
                     onClick={() => { setQuickCart({}); setItemQuantities({}); setShowBasketDetail(false) }}
@@ -7464,6 +7465,642 @@ function BuyerRegister() {
           Already have an account?{' '}
           <NavLink to="/portal/login" className="font-semibold text-slate-800 hover:underline">Sign in</NavLink>
         </p>
+      </div>
+    </section>
+  )
+}
+
+function CheckoutPage() {
+  const navigate = useNavigate()
+  const [cart, setCart] = useState(() => {
+    try { const saved = localStorage.getItem(QUICK_CART_STORAGE_KEY); return saved ? JSON.parse(saved) : {} } catch { return {} }
+  })
+  const [priceMap, setPriceMap] = useState(null)
+  const [wordIndex, setWordIndex] = useState([])
+
+  // Customer details form
+  const [form, setForm] = useState({
+    email: '', companyName: '', vatNumber: '', contactName: '', phone: '',
+    invoiceAddressLine1: '', invoiceAddressLine2: '', invoiceArea: '', invoiceRegion: '', invoiceCountry: '', invoicePostalCode: '',
+    shipToDifferentAddress: false, shippingName: '', shippingPhone: '',
+    shippingAddressLine1: '', shippingAddressLine2: '', shippingArea: '', shippingRegion: '', shippingCountry: '', shippingPostalCode: '',
+    createAccount: false, password: '',
+    subscribeEmails: false,
+    orderNotes: '',
+    agreeTerms: false,
+  })
+  const [viesResult, setViesResult] = useState(null)
+  const [viesLoading, setViesLoading] = useState(false)
+  const [viesError, setViesError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [orderConfirmed, setOrderConfirmed] = useState(null)
+
+  const updateField = (field, value) => setForm(f => ({ ...f, [field]: value }))
+
+  // Load price list
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      try {
+        const res = await fetch('/gelitup-content/b2b-price-list.json')
+        if (!res.ok) return
+        const payload = await res.json()
+        const items = Array.isArray(payload?.items) ? payload.items : []
+        const map = new Map()
+        const wIdx = []
+        const stripSuffix = (s) => String(s || '').replace(/\s*[-—]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '').trim()
+        const isMultimix30g = (n) => /multimix/i.test(n) && /\b30\s*g/i.test(n)
+        for (const { name, sku, price } of items) {
+          const cleanName = stripSuffix(name)
+          const surcharge = isMultimix30g(name) ? 1.1 : 1
+          const entry = { name, price: price != null ? Math.ceil(Number(price) * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10 : null }
+          const keys = [normalizeSkuCode(sku), normalizeSkuCode(stripSuffix(sku)), normalizeProductName(name), normalizeProductName(cleanName)]
+          for (const k of keys) { if (k && !map.has(k)) map.set(k, entry) }
+          const words = new Set(normalizeSkuCode(name).split(/\s+/).filter(w => w.length >= 4))
+          if (words.size >= 2) wIdx.push({ words, entry })
+        }
+        if (mounted) { setPriceMap(map); setWordIndex(wIdx) }
+      } catch {}
+    }
+    void load()
+    return () => { mounted = false }
+  }, [])
+
+  const lookupPrice = useCallback((itemName = '', itemCode = '') => {
+    if (!priceMap) return null
+    const byName = priceMap.get(normalizeProductName(itemName))
+    if (byName?.price != null) return byName.price
+    const byCode = priceMap.get(normalizeSkuCode(itemCode))
+    if (byCode?.price != null) return byCode.price
+    const fuzzy = fuzzyPriceLookup(itemCode, itemName, wordIndex)
+    if (fuzzy?.price != null) return fuzzy.price
+    return null
+  }, [priceMap, wordIndex])
+
+  const cartEntries = useMemo(() =>
+    Object.entries(cart).filter(([, q]) => q > 0).map(([key, qty]) => {
+      const [name, code] = key.split('::')
+      const price = lookupPrice(name, code)
+      return { key, name, code, qty, price, lineTotal: price != null ? Number(price) * qty : null }
+    }), [cart, lookupPrice])
+
+  const cartTotal = useMemo(() => cartEntries.reduce((s, e) => s + (e.lineTotal || 0), 0), [cartEntries])
+  const cartUnits = useMemo(() => cartEntries.reduce((s, e) => s + e.qty, 0), [cartEntries])
+  const progress = Math.min(100, Math.round((cartTotal / MIN_ORDER_EUR) * 100))
+
+  // Persist cart back to localStorage
+  useEffect(() => {
+    try { localStorage.setItem(QUICK_CART_STORAGE_KEY, JSON.stringify(cart)) } catch {}
+  }, [cart])
+
+  const verifyVat = useCallback(async () => {
+    const vat = String(form.vatNumber || '').trim().toUpperCase().replace(/[\s\-\.]/g, '')
+    if (vat.length < 4) { setViesError('Enter a full VAT number to verify'); return }
+    setViesLoading(true)
+    setViesError('')
+    setViesResult(null)
+    try {
+      const res = await fetch('/.netlify/functions/validate-vat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vatNumber: vat }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setViesError(data.error || 'VIES check failed'); return }
+      setViesResult(data)
+      if (!data.valid) setViesError('VAT number not found in VIES — please check and try again')
+      else if (data.name && !form.companyName) setForm(f => ({ ...f, companyName: data.name }))
+    } catch { setViesError('Unable to reach VAT validation service') }
+    finally { setViesLoading(false) }
+  }, [form.vatNumber, form.companyName])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+
+    if (!cartEntries.length) { setError('Your basket is empty.'); return }
+    if (cartTotal < MIN_ORDER_EUR) { setError(`Minimum order is €${MIN_ORDER_EUR}. You need €${(MIN_ORDER_EUR - cartTotal).toFixed(2)} more.`); return }
+
+    const email = form.email.trim().toLowerCase()
+    if (!email) { setError('Email is required.'); return }
+    const vat = form.vatNumber.trim()
+    if (!vat) { setError('A valid VAT number is required for B2B orders.'); return }
+    if (!viesResult?.valid) { setError('Please verify your VAT number before placing your order.'); return }
+    if (!form.companyName.trim()) { setError('Company name is required.'); return }
+    if (!form.contactName.trim()) { setError('Contact name is required.'); return }
+    if (!form.invoiceAddressLine1.trim()) { setError('Invoice address is required.'); return }
+    if (!form.invoiceArea.trim()) { setError('Invoice city is required.'); return }
+    if (!form.invoiceCountry.trim()) { setError('Invoice country is required.'); return }
+    if (!form.invoicePostalCode.trim()) { setError('Invoice postal code is required.'); return }
+
+    if (form.shipToDifferentAddress) {
+      if (!form.shippingAddressLine1.trim()) { setError('Shipping address is required.'); return }
+      if (!form.shippingArea.trim()) { setError('Shipping city is required.'); return }
+      if (!form.shippingCountry.trim()) { setError('Shipping country is required.'); return }
+      if (!form.shippingPostalCode.trim()) { setError('Shipping postal code is required.'); return }
+    }
+    if (form.createAccount && form.password.length < 6) { setError('Password must be at least 6 characters.'); return }
+    if (!form.agreeTerms) { setError('You must agree to the terms and conditions to place your order.'); return }
+
+    if (!hasSupabaseConfig || !supabase) { setError('Order system is not configured. Please contact us.'); return }
+
+    setIsSubmitting(true)
+
+    try {
+      // 1. Create Supabase account (optional — or silent temp account)
+      const chosenPassword = form.createAccount ? form.password : crypto.randomUUID().slice(0, 16)
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password: chosenPassword,
+        options: {
+          data: {
+            company_name: form.companyName.trim(),
+            vat_number: vat,
+            vies_vat: vat,
+            account_type: 'b2b_buyer',
+            full_name: form.contactName.trim(),
+            contact_phone: form.phone.trim(),
+            contact_email: email,
+            customer_type: 'company',
+            invoice_address_line1: form.invoiceAddressLine1.trim(),
+            invoice_address_line2: form.invoiceAddressLine2.trim(),
+            invoice_area: form.invoiceArea.trim(),
+            invoice_region: form.invoiceRegion.trim(),
+            invoice_country: form.invoiceCountry.trim(),
+            invoice_postal_code: form.invoicePostalCode.trim(),
+            shipping_same_as_invoice: !form.shipToDifferentAddress,
+            shipping_name: !form.shipToDifferentAddress ? form.contactName.trim() : form.shippingName.trim(),
+            shipping_phone: !form.shipToDifferentAddress ? form.phone.trim() : form.shippingPhone.trim(),
+            shipping_address_line1: !form.shipToDifferentAddress ? form.invoiceAddressLine1.trim() : form.shippingAddressLine1.trim(),
+            shipping_address_line2: !form.shipToDifferentAddress ? form.invoiceAddressLine2.trim() : form.shippingAddressLine2.trim(),
+            shipping_area: !form.shipToDifferentAddress ? form.invoiceArea.trim() : form.shippingArea.trim(),
+            shipping_region: !form.shipToDifferentAddress ? form.invoiceRegion.trim() : form.shippingRegion.trim(),
+            shipping_country: !form.shipToDifferentAddress ? form.invoiceCountry.trim() : form.shippingCountry.trim(),
+            shipping_postal_code: !form.shipToDifferentAddress ? form.invoicePostalCode.trim() : form.shippingPostalCode.trim(),
+            subscribe_emails: form.subscribeEmails,
+          },
+          emailRedirectTo: `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(email)}`,
+        },
+      })
+
+      if (signUpError) {
+        const msg = signUpError.message || ''
+        if (/already registered|already been registered/i.test(msg)) {
+          // Account exists — try to proceed without blocking (order still goes through)
+          // They'll get an email to set/reset password
+        } else {
+          setError(msg || 'Account creation failed. Please try again.')
+          setIsSubmitting(false)
+          return
+        }
+      }
+
+      if (signUpData?.session) {
+        localStorage.setItem('portalAuth', 'true')
+      }
+
+      // 2. Build order items
+      const checkoutItems = cartEntries.map(e => e.qty > 1 ? `${e.code} x${e.qty}` : e.code)
+
+      const invoiceAddress = [form.invoiceAddressLine1, form.invoiceAddressLine2, form.invoiceArea, form.invoiceRegion, form.invoicePostalCode].filter(Boolean).join(', ')
+      const shippingAddr = !form.shipToDifferentAddress
+        ? invoiceAddress
+        : [form.shippingAddressLine1, form.shippingAddressLine2, form.shippingArea, form.shippingRegion, form.shippingPostalCode].filter(Boolean).join(', ')
+
+      const shipping = {
+        name: !form.shipToDifferentAddress ? form.contactName.trim() : form.shippingName.trim(),
+        phone: !form.shipToDifferentAddress ? form.phone.trim() : form.shippingPhone.trim(),
+        address: shippingAddr,
+        country: !form.shipToDifferentAddress ? form.invoiceCountry.trim() : form.shippingCountry.trim(),
+        type: 'road',
+      }
+      const invoice = {
+        name: form.companyName.trim(),
+        vatNumber: vat,
+        address: invoiceAddress,
+        country: form.invoiceCountry.trim(),
+        contactEmail: email,
+        contactPhone: form.phone.trim(),
+        customerType: 'company',
+      }
+
+      const escapeHtml = (value) => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;')
+
+      // 3. Insert order to Supabase
+      const payload = {
+        customer_email: email,
+        items: checkoutItems,
+        total_units: cartUnits,
+        source: 'catalogue_checkout',
+        module: 'products',
+        status: 'received',
+        consignee_name: shipping.name || null,
+        consignee_phone: shipping.phone || null,
+        shipping_address: shipping.address || null,
+      }
+
+      const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
+
+      let { data: insertedOrder, error: insertError } = await supabase
+        .from(ordersTable)
+        .insert([payload])
+        .select('id, created_at')
+        .single()
+
+      const missingCols = insertError?.message?.includes('consignee_name') || insertError?.message?.includes('consignee_phone') || insertError?.message?.includes('shipping_address')
+      if (missingCols) {
+        const retry = await supabase.from(ordersTable).insert([{ customer_email: email, items: checkoutItems, total_units: cartUnits, source: 'catalogue_checkout', module: 'products', status: 'received' }]).select('id, created_at').single()
+        insertedOrder = retry.data
+        insertError = retry.error
+      }
+
+      if (insertError) {
+        setError(`Order failed: ${insertError.message}`)
+        setIsSubmitting(false)
+        return
+      }
+
+      // 4. Build item rates for Zoho
+      const itemRates = {}
+      for (const e of cartEntries) {
+        if (e.price != null) itemRates[normalizeSkuCode(e.code)] = e.price
+      }
+
+      // 5. Zoho sync
+      await sendZohoOrderSync({
+        orderId: insertedOrder?.id,
+        customerEmail: email,
+        accountType: 'b2b_buyer',
+        generatedPackageTier: null,
+        items: checkoutItems,
+        itemRates,
+        totalUnits: cartUnits,
+        status: 'received',
+        source: 'catalogue_checkout',
+        orderInboxEmail: ORDER_INBOX_EMAIL,
+        invoice,
+        shipping,
+        totalValueEurBase: cartTotal,
+      })
+
+      // 6. Email notification
+      const thStyle = 'border:1px solid #ccc;padding:6px 10px;background:#f3f4f6;font-weight:bold;text-align:left;white-space:nowrap'
+      const tdStyle = 'border:1px solid #ddd;padding:5px 10px'
+      const tdRStyle = 'border:1px solid #ddd;padding:5px 10px;text-align:right'
+      const orderTableRows = cartEntries.map(line => `
+        <tr>
+          <td style="${tdStyle}">${escapeHtml(line.code)}</td>
+          <td style="${tdStyle}">${escapeHtml(line.name)}</td>
+          <td style="${tdRStyle}">${line.qty}</td>
+          <td style="${tdRStyle}">${line.price != null ? line.price.toFixed(2) : '-'}</td>
+          <td style="${tdRStyle}">${line.lineTotal != null ? line.lineTotal.toFixed(2) : '-'}</td>
+        </tr>`).join('')
+
+      const invoiceBlockHtml = `
+        <p style="margin:2px 0"><strong>Company:</strong> ${escapeHtml(invoice.name)}</p>
+        <p style="margin:2px 0"><strong>VAT Number:</strong> ${escapeHtml(invoice.vatNumber)}</p>
+        <p style="margin:2px 0"><strong>Invoice Address:</strong> ${escapeHtml(invoice.address)}</p>
+        <p style="margin:2px 0"><strong>Country:</strong> ${escapeHtml(invoice.country)}</p>
+        <p style="margin:2px 0"><strong>Contact:</strong> ${escapeHtml(form.contactName.trim())} / ${escapeHtml(email)}</p>
+        <p style="margin:2px 0"><strong>Phone:</strong> ${escapeHtml(form.phone.trim() || '-')}</p>
+      `
+      const shippingBlockHtml = `
+        <p style="margin:2px 0"><strong>Consignee:</strong> ${escapeHtml(shipping.name || '-')}</p>
+        <p style="margin:2px 0"><strong>Phone:</strong> ${escapeHtml(shipping.phone || '-')}</p>
+        <p style="margin:2px 0"><strong>Address:</strong> ${escapeHtml(shipping.address || '-')}</p>
+        <p style="margin:2px 0"><strong>Country:</strong> ${escapeHtml(shipping.country || '-')}</p>
+        <p style="margin:2px 0"><strong>Same as invoice:</strong> ${!form.shipToDifferentAddress ? 'Yes' : 'No'}</p>
+      `
+
+      const orderNotesHtml = form.orderNotes.trim()
+        ? `<h3 style="margin-top:16px">Order Notes</h3><p>${escapeHtml(form.orderNotes.trim())}</p>`
+        : ''
+      const optInsHtml = `
+        <p style="margin-top:8px"><strong>Account created:</strong> ${form.createAccount ? 'Yes' : 'No (guest)'}</p>
+        <p style="margin:2px 0"><strong>Email subscription:</strong> ${form.subscribeEmails ? 'Yes' : 'No'}</p>
+      `
+
+      await sendPortalEmailNotification({
+        eventType: 'b2b_order_received',
+        to: ORDER_INBOX_EMAIL,
+        subject: `New B2B Order #${insertedOrder?.id ?? 'N/A'} — ${form.companyName.trim()} (${cartUnits} units / €${cartTotal.toFixed(2)})`,
+        html: `
+          <h2 style="color:#1a1a1a">New B2B Order via Catalogue Checkout</h2>
+          <p><strong>Order #:</strong> ${insertedOrder?.id ?? '-'}</p>
+          <p><strong>Customer:</strong> ${escapeHtml(email)}</p>
+          ${optInsHtml}
+          <h3 style="margin-top:16px">Invoice Details</h3>
+          ${invoiceBlockHtml}
+          <h3 style="margin-top:16px">Shipping Details</h3>
+          ${shippingBlockHtml}
+          ${orderNotesHtml}
+          <h3 style="margin-top:16px">Order Items</h3>
+          <table style="border-collapse:collapse;width:100%;font-size:13px;font-family:Arial,sans-serif">
+            <thead><tr>
+              <th style="${thStyle}">SKU</th><th style="${thStyle}">Item</th><th style="${thStyle}">Qty</th><th style="${thStyle}">Unit (EUR)</th><th style="${thStyle}">Line Total</th>
+            </tr></thead>
+            <tbody>${orderTableRows}
+              <tr><td colspan="4" style="${tdStyle};text-align:right;font-weight:bold">TOTAL (EUR)</td><td style="${tdRStyle};font-weight:bold">${cartTotal.toFixed(2)}</td></tr>
+            </tbody>
+          </table>
+        `,
+      })
+
+      // 7. Send confirmation to customer
+      await sendPortalEmailNotification({
+        eventType: 'order_confirmation',
+        to: email,
+        subject: `Order Confirmation #${insertedOrder?.id ?? 'N/A'} — GEL.IT.UP by GIUP®`,
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+            <h2 style="color:#1a1a1a">Thank you for your order!</h2>
+            <p>Hi ${escapeHtml(form.contactName.trim() || form.companyName.trim())},</p>
+            <p>We've received your order <strong>#${insertedOrder?.id ?? '-'}</strong> and our team will process it shortly.</p>
+            <p><strong>Order Total:</strong> €${cartTotal.toFixed(2)} (${cartUnits} items)</p>
+            ${form.createAccount ? '<p>You can now log in with your email and password to track your orders.</p>' : '<p>If you would like to track future orders, you can create an account at checkout next time.</p>'}
+            <p style="margin-top:24px;color:#666;font-size:12px">GEL.IT.UP by GIUP® — Professional Gel Polish</p>
+          </div>
+        `,
+      })
+
+      // 8. Clear cart and show confirmation
+      setCart({})
+      localStorage.removeItem(QUICK_CART_STORAGE_KEY)
+      setOrderConfirmed({ id: insertedOrder?.id ?? 'confirmed', accountCreated: form.createAccount })
+
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again or contact us.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // ORDER CONFIRMED VIEW
+  if (orderConfirmed) {
+    return (
+      <section className="mx-auto max-w-2xl px-4 py-12 text-center">
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-8">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+            <svg viewBox="0 0 20 20" fill="currentColor" className="h-8 w-8 text-emerald-600"><path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" /></svg>
+          </div>
+          <h2 className="text-2xl font-bold text-emerald-800">Order Placed Successfully!</h2>
+          <p className="mt-2 text-emerald-700">Order #{orderConfirmed.id}</p>
+          <p className="mt-4 text-sm text-emerald-600">
+            We've sent a confirmation to your email.{' '}
+            {orderConfirmed.accountCreated
+              ? 'You can now sign in to track your orders.'
+              : 'Create an account at your next checkout to track future orders.'}
+          </p>
+          <div className="mt-6 flex justify-center gap-3">
+            <NavLink to="/full-catalogue" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-fuchsia-500">
+              Continue Shopping
+            </NavLink>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  // EMPTY CART VIEW
+  if (!cartEntries.length) {
+    return (
+      <section className="mx-auto max-w-2xl px-4 py-12 text-center">
+        <div className="rounded-2xl border border-slate-200 bg-white p-8">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+            <svg viewBox="0 0 20 20" fill="currentColor" className="h-8 w-8 text-slate-400"><path d="M1 1.75A.75.75 0 0 1 1.75 1h1.628a1.75 1.75 0 0 1 1.734 1.51L5.18 3H17.25a.75.75 0 0 1 .727.936l-1.875 7.5A.75.75 0 0 1 15.375 12h-8.75a.75.75 0 0 1-.727-.564L4.023 3.756 3.81 2.5H1.75A.75.75 0 0 1 1 1.75ZM7.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM15.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" /></svg>
+          </div>
+          <h2 className="text-xl font-bold text-slate-800">Your basket is empty</h2>
+          <p className="mt-2 text-sm text-slate-500">Browse our catalogue and add products to get started.</p>
+          <NavLink to="/full-catalogue" className="mt-5 inline-flex rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-fuchsia-500">
+            Browse Catalogue
+          </NavLink>
+        </div>
+      </section>
+    )
+  }
+
+  const inputClass = "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring"
+
+  return (
+    <section className="mx-auto max-w-5xl px-4 py-6">
+      <h1 className="text-2xl font-bold text-slate-900">Checkout</h1>
+      <p className="mt-1 text-sm text-slate-500">Review your order and complete your details to place it.</p>
+
+      {error && (
+        <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>
+      )}
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-5">
+        {/* LEFT: FORM */}
+        <form onSubmit={handleSubmit} className="space-y-6 lg:col-span-3">
+
+          {/* YOUR DETAILS */}
+          <fieldset className="rounded-xl border border-slate-200 bg-white p-5">
+            <legend className="px-2 text-sm font-bold uppercase tracking-[0.08em] text-slate-700">Your Details</legend>
+            <div className="mt-2 grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm font-medium text-slate-700">
+                Email <span className="text-rose-500">*</span>
+                <input type="email" required autoComplete="email" value={form.email} onChange={e => updateField('email', e.target.value)} placeholder="you@company.com" className={inputClass} />
+              </label>
+              <label className="block text-sm font-medium text-slate-700">
+                Contact Name <span className="text-rose-500">*</span>
+                <input type="text" required value={form.contactName} onChange={e => updateField('contactName', e.target.value)} placeholder="Full name" className={inputClass} />
+              </label>
+              <label className="block text-sm font-medium text-slate-700">
+                Phone
+                <input type="tel" value={form.phone} onChange={e => updateField('phone', e.target.value)} placeholder="+353 …" className={inputClass} />
+              </label>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">
+                  VAT Number <span className="text-rose-500">*</span>
+                  <div className="mt-1 flex gap-2">
+                    <input type="text" required value={form.vatNumber} onChange={e => { updateField('vatNumber', e.target.value); setViesResult(null) }} placeholder="EU123456789" className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
+                    <button type="button" onClick={verifyVat} disabled={viesLoading} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50">
+                      {viesLoading ? 'Checking…' : 'Verify'}
+                    </button>
+                  </div>
+                </label>
+                {viesResult?.valid && (
+                  <p className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-700">
+                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-[10px]">✓</span>
+                    VAT verified{viesResult.name ? ` — ${viesResult.name}` : ''}
+                  </p>
+                )}
+                {viesError && <p className="mt-1.5 text-xs text-rose-600">{viesError}</p>}
+              </div>
+              <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
+                Company Name <span className="text-rose-500">*</span>
+                <input type="text" required value={form.companyName} onChange={e => updateField('companyName', e.target.value)} placeholder="Your Company Ltd" className={inputClass} />
+              </label>
+            </div>
+          </fieldset>
+
+          {/* INVOICE ADDRESS */}
+          <fieldset className="rounded-xl border border-slate-200 bg-white p-5">
+            <legend className="px-2 text-sm font-bold uppercase tracking-[0.08em] text-slate-700">Invoice Address</legend>
+            <div className="mt-2 grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
+                Address Line 1 <span className="text-rose-500">*</span>
+                <input type="text" required value={form.invoiceAddressLine1} onChange={e => updateField('invoiceAddressLine1', e.target.value)} className={inputClass} />
+              </label>
+              <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
+                Address Line 2
+                <input type="text" value={form.invoiceAddressLine2} onChange={e => updateField('invoiceAddressLine2', e.target.value)} className={inputClass} />
+              </label>
+              <label className="block text-sm font-medium text-slate-700">
+                City / Area <span className="text-rose-500">*</span>
+                <input type="text" required value={form.invoiceArea} onChange={e => updateField('invoiceArea', e.target.value)} className={inputClass} />
+              </label>
+              <label className="block text-sm font-medium text-slate-700">
+                Region / State
+                <input type="text" value={form.invoiceRegion} onChange={e => updateField('invoiceRegion', e.target.value)} className={inputClass} />
+              </label>
+              <label className="block text-sm font-medium text-slate-700">
+                Country <span className="text-rose-500">*</span>
+                <input type="text" required value={form.invoiceCountry} onChange={e => updateField('invoiceCountry', e.target.value)} placeholder="e.g. Ireland" className={inputClass} />
+              </label>
+              <label className="block text-sm font-medium text-slate-700">
+                Postal Code <span className="text-rose-500">*</span>
+                <input type="text" required value={form.invoicePostalCode} onChange={e => updateField('invoicePostalCode', e.target.value)} className={inputClass} />
+              </label>
+            </div>
+          </fieldset>
+
+          {/* SHIPPING ADDRESS */}
+          <fieldset className="rounded-xl border border-slate-200 bg-white p-5">
+            <legend className="px-2 text-sm font-bold uppercase tracking-[0.08em] text-slate-700">Shipping</legend>
+            <label className="mt-2 flex items-center gap-2 text-sm text-slate-700">
+              <input type="checkbox" checked={form.shipToDifferentAddress} onChange={e => updateField('shipToDifferentAddress', e.target.checked)} className="rounded border-slate-300" />
+              Ship to a different address?
+            </label>
+            {form.shipToDifferentAddress && (
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  Consignee Name
+                  <input type="text" value={form.shippingName} onChange={e => updateField('shippingName', e.target.value)} className={inputClass} />
+                </label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Consignee Phone
+                  <input type="tel" value={form.shippingPhone} onChange={e => updateField('shippingPhone', e.target.value)} className={inputClass} />
+                </label>
+                <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
+                  Address Line 1 <span className="text-rose-500">*</span>
+                  <input type="text" required value={form.shippingAddressLine1} onChange={e => updateField('shippingAddressLine1', e.target.value)} className={inputClass} />
+                </label>
+                <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
+                  Address Line 2
+                  <input type="text" value={form.shippingAddressLine2} onChange={e => updateField('shippingAddressLine2', e.target.value)} className={inputClass} />
+                </label>
+                <label className="block text-sm font-medium text-slate-700">
+                  City / Area <span className="text-rose-500">*</span>
+                  <input type="text" required value={form.shippingArea} onChange={e => updateField('shippingArea', e.target.value)} className={inputClass} />
+                </label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Region / State
+                  <input type="text" value={form.shippingRegion} onChange={e => updateField('shippingRegion', e.target.value)} className={inputClass} />
+                </label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Country <span className="text-rose-500">*</span>
+                  <input type="text" required value={form.shippingCountry} onChange={e => updateField('shippingCountry', e.target.value)} className={inputClass} />
+                </label>
+                <label className="block text-sm font-medium text-slate-700">
+                  Postal Code <span className="text-rose-500">*</span>
+                  <input type="text" required value={form.shippingPostalCode} onChange={e => updateField('shippingPostalCode', e.target.value)} className={inputClass} />
+                </label>
+              </div>
+            )}
+          </fieldset>
+
+          {/* ORDER NOTES */}
+          <fieldset className="rounded-xl border border-slate-200 bg-white p-5">
+            <legend className="px-2 text-sm font-bold uppercase tracking-[0.08em] text-slate-700">Additional Information</legend>
+            <label className="mt-2 block text-sm font-medium text-slate-700">
+              Order Notes <span className="text-slate-400">(optional)</span>
+              <textarea value={form.orderNotes} onChange={e => updateField('orderNotes', e.target.value)} rows={3} placeholder="Notes about your order, e.g. special delivery instructions." className={inputClass + ' resize-y'} />
+            </label>
+          </fieldset>
+
+          {/* ACCOUNT CREATION (OPTIONAL) */}
+          <fieldset className="rounded-xl border border-slate-200 bg-white p-5">
+            <legend className="px-2 text-sm font-bold uppercase tracking-[0.08em] text-slate-700">Account</legend>
+            <label className="mt-2 flex items-center gap-2 text-sm text-slate-700">
+              <input type="checkbox" checked={form.createAccount} onChange={e => updateField('createAccount', e.target.checked)} className="rounded border-slate-300" />
+              Create an account? <span className="text-slate-400">(track orders &amp; reorder easily)</span>
+            </label>
+            {form.createAccount && (
+              <label className="mt-3 block text-sm font-medium text-slate-700">
+                Password <span className="text-rose-500">*</span>
+                <input type="password" required autoComplete="new-password" value={form.password} onChange={e => updateField('password', e.target.value)} placeholder="Min. 6 characters" className={inputClass} />
+              </label>
+            )}
+          </fieldset>
+
+          {/* OPT-INS */}
+          <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-5">
+            <label className="flex items-start gap-2 text-sm text-slate-700">
+              <input type="checkbox" checked={form.subscribeEmails} onChange={e => updateField('subscribeEmails', e.target.checked)} className="mt-0.5 rounded border-slate-300" />
+              <span>Subscribe to our newsletter for new product launches, promotions, and professional tips. <span className="text-slate-400">(optional)</span></span>
+            </label>
+          </div>
+
+          {/* PRIVACY & TERMS */}
+          <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
+            <p className="text-xs leading-relaxed text-slate-500">
+              Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our{' '}
+              <NavLink to="/privacy-policy" className="font-semibold text-slate-700 underline hover:text-fuchsia-600" target="_blank">privacy policy</NavLink>.
+            </p>
+            <label className="flex items-start gap-2 text-sm text-slate-700">
+              <input type="checkbox" checked={form.agreeTerms} onChange={e => updateField('agreeTerms', e.target.checked)} className="mt-0.5 rounded border-slate-300" required />
+              <span>I have read and agree to the website{' '}<NavLink to="/terms-and-conditions" className="font-semibold text-slate-900 underline hover:text-fuchsia-600" target="_blank">terms and conditions</NavLink> <span className="text-rose-500">*</span></span>
+            </label>
+          </div>
+
+          <button type="submit" disabled={isSubmitting || cartTotal < MIN_ORDER_EUR || !form.agreeTerms} className="w-full rounded-xl bg-fuchsia-600 px-6 py-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500 disabled:opacity-50">
+            {isSubmitting ? 'Placing Order…' : `Place Order — €${cartTotal.toFixed(2)}`}
+          </button>
+        </form>
+
+        {/* RIGHT: ORDER SUMMARY */}
+        <div className="lg:col-span-2">
+          <div className="sticky top-24 rounded-xl border border-slate-200 bg-white p-5">
+            <h3 className="text-sm font-bold uppercase tracking-[0.08em] text-slate-700">Order Summary</h3>
+            <div className="mt-3 max-h-80 space-y-2 overflow-y-auto">
+              {cartEntries.map(e => (
+                <div key={e.key} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-semibold uppercase text-slate-800">{e.name}</p>
+                    <p className="text-[11px] text-slate-500">{e.code}{e.price != null && <span className="ml-1 text-fuchsia-700">€{e.price.toFixed(2)}</span>}</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button type="button" onClick={() => {
+                      if (e.qty <= 1) setCart(c => { const n = { ...c }; delete n[e.key]; return n })
+                      else setCart(c => ({ ...c, [e.key]: c[e.key] - 1 }))
+                    }} className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-300 text-xs text-slate-600 hover:border-fuchsia-500">−</button>
+                    <span className="w-6 text-center text-xs font-bold text-slate-800">{e.qty}</span>
+                    <button type="button" onClick={() => setCart(c => ({ ...c, [e.key]: (c[e.key] || 0) + 1 }))} className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-300 text-xs text-slate-600 hover:border-fuchsia-500">+</button>
+                  </div>
+                  {e.lineTotal != null && <span className="w-14 text-right text-xs font-bold text-fuchsia-700">€{e.lineTotal.toFixed(2)}</span>}
+                  <button type="button" onClick={() => setCart(c => { const n = { ...c }; delete n[e.key]; return n })} className="ml-1 text-slate-400 hover:text-red-500" title="Remove">
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5"><path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" /></svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 border-t border-slate-200 pt-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-slate-800">{cartUnits} item{cartUnits !== 1 ? 's' : ''}</span>
+                <span className="text-lg font-bold text-fuchsia-700">€{cartTotal.toFixed(2)}</span>
+              </div>
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+                <div className="h-full rounded-full bg-fuchsia-600 transition-all duration-500" style={{ width: `${progress}%` }} />
+              </div>
+              <p className="mt-1 text-[10px] text-slate-500">
+                {progress < 100 ? `€${(MIN_ORDER_EUR - cartTotal).toFixed(2)} more to reach €${MIN_ORDER_EUR} minimum` : 'Minimum order reached!'}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   )
@@ -16461,6 +17098,7 @@ function App() {
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
           <Route path="/for-academies" element={<ForAcademiesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
