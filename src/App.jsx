@@ -2922,6 +2922,16 @@ function FullCataloguePage() {
   })
   const [showBasketDetail, setShowBasketDetail] = useState(false)
   const [pulseItemKey, setPulseItemKey] = useState('')
+  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('portalAuth') === 'true')
+
+  // Listen for auth changes (login/logout from other tabs or after registration)
+  useEffect(() => {
+    const check = () => setIsLoggedIn(localStorage.getItem('portalAuth') === 'true')
+    window.addEventListener('storage', check)
+    // Also re-check on focus (same-tab navigation back)
+    window.addEventListener('focus', check)
+    return () => { window.removeEventListener('storage', check); window.removeEventListener('focus', check) }
+  }, [])
 
   // Persist quickCart to localStorage on every change
   useEffect(() => {
@@ -2942,13 +2952,12 @@ function FullCataloguePage() {
   const [expandedLookbookGroup, setExpandedLookbookGroup] = useState(0)
   const [selectedLookbookPageByGroup, setSelectedLookbookPageByGroup] = useState({})
   const [lightboxUrl, setLightboxUrl] = useState(null)
-  const [showBuyPopup, setShowBuyPopup] = useState(false)
   useEffect(() => {
-    if (!lightboxUrl && !showBuyPopup) return
-    const handler = (e) => { if (e.key === 'Escape') { setLightboxUrl(null); setShowBuyPopup(false) } }
+    if (!lightboxUrl) return
+    const handler = (e) => { if (e.key === 'Escape') { setLightboxUrl(null) } }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [lightboxUrl, showBuyPopup])
+  }, [lightboxUrl])
 
   const [activeNavAnchor, setActiveNavAnchor] = useState('')
   useEffect(() => {
@@ -4405,20 +4414,22 @@ function FullCataloguePage() {
                             return <span>Price on request</span>
                           })()}
                         </p>
-                        <div className="mt-auto pt-3 flex items-center gap-2">
-                          <button
-                            onClick={() => { addQuickItem(itemKey); }}
-                            className={`inline-flex min-h-10 items-center gap-1.5 rounded-[10px] border px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition duration-300 ${inCart ? 'border-fuchsia-600 bg-fuchsia-50 text-fuchsia-700' : 'border-black/20 bg-white text-black/70 hover:border-fuchsia-500 hover:text-fuchsia-600'}`}
-                          >
-                            <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true"><path d="M1 1.75A.75.75 0 0 1 1.75 1h1.628a1.75 1.75 0 0 1 1.734 1.51L5.18 3H17.25a.75.75 0 0 1 .727.936l-1.875 7.5A.75.75 0 0 1 15.375 12h-8.75a.75.75 0 0 1-.727-.564L4.023 3.756 3.81 2.5H1.75A.75.75 0 0 1 1 1.75ZM7.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM15.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" /></svg>
-                            {inCart ? `${quickCart[itemKey]} added` : 'Add'}
-                          </button>
-                          <button
-                            onClick={() => setShowBuyPopup(true)}
-                            className="ml-auto inline-flex min-h-10 items-center rounded-[10px] bg-fuchsia-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500"
-                          >
-                            Buy Now
-                          </button>
+                        <div className="mt-auto pt-3">
+                          {isLoggedIn ? (
+                            <div className="flex items-center gap-2">
+                              <button onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
+                              <span className={`w-8 text-center text-xs font-bold ${inCart ? 'text-fuchsia-700' : 'text-black/40'}`}>{quickCart[itemKey] || 0}</span>
+                              <button onClick={() => { addQuickItem(itemKey); }} className="flex h-8 w-8 items-center justify-center rounded-[10px] border border-fuchsia-600 text-sm text-fuchsia-600 transition duration-300 hover:bg-fuchsia-50">+</button>
+                              {inCart && <span className="ml-auto text-[10px] font-semibold text-fuchsia-700">in basket</span>}
+                            </div>
+                          ) : (
+                            <NavLink
+                              to="/portal/buy"
+                              className="inline-flex w-full min-h-10 items-center justify-center gap-1.5 rounded-[10px] border border-fuchsia-500/30 bg-fuchsia-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-fuchsia-700 transition duration-300 hover:bg-fuchsia-100"
+                            >
+                              Register to Order
+                            </NavLink>
+                          )}
                         </div>
                       </div>
                     </article>
@@ -4453,12 +4464,12 @@ function FullCataloguePage() {
                   >
                     {showBasketDetail ? 'Hide' : 'View'}
                   </button>
-                  <button
-                    onClick={() => setShowBuyPopup(true)}
+                  <NavLink
+                    to="/portal/dashboard/products"
                     className="inline-flex items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
                   >
-                    Checkout
-                  </button>
+                    Submit Order
+                  </NavLink>
                   <button
                     onClick={() => { setQuickCart({}); setItemQuantities({}); setShowBasketDetail(false) }}
                     className="text-xs text-black/40 transition hover:text-red-500"
@@ -5235,64 +5246,7 @@ function FullCataloguePage() {
         </div>
       )}
 
-      {/* BUY NOW POPUP */}
-      {showBuyPopup && (
-        <div
-          className="fixed inset-0 z-[500] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
-          onClick={() => setShowBuyPopup(false)}
-        >
-          <div
-            className="relative w-full max-w-md rounded-2xl bg-white px-6 py-8 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setShowBuyPopup(false)}
-              className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-black/40 transition hover:bg-black/5 hover:text-black/70"
-              aria-label="Close"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" /></svg>
-            </button>
-            <div className="text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-fuchsia-50">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-7 w-7 text-fuchsia-600" aria-hidden="true">
-                  <path d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-bold text-black" style={{ fontFamily: 'Montserrat, sans-serif' }}>Ready to place an order?</h3>
-              {quickCartUnits > 0 && (
-                <p className="mt-2 rounded-lg bg-fuchsia-50 px-3 py-2 text-sm font-semibold text-fuchsia-700">
-                  Your basket ({quickCartUnits} item{quickCartUnits !== 1 ? 's' : ''} — €{quickCartTotal.toFixed(2)}) is saved and will be waiting for you.
-                </p>
-              )}
-              <p className="mt-2 text-sm leading-relaxed text-black/60">
-                Create a free account in under 30 seconds to start ordering. Already have an account? Sign in to continue.
-              </p>
-              <div className="mt-6 flex flex-col gap-3">
-                <NavLink
-                  to="/portal/buy"
-                  onClick={() => setShowBuyPopup(false)}
-                  className="inline-flex items-center justify-center rounded-xl bg-fuchsia-600 px-5 py-3 text-sm font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
-                >
-                  Create Free Account
-                </NavLink>
-                <NavLink
-                  to="/portal/login"
-                  onClick={() => setShowBuyPopup(false)}
-                  className="inline-flex items-center justify-center rounded-xl border border-fuchsia-500/30 bg-white px-5 py-3 text-sm font-semibold uppercase tracking-wider text-fuchsia-700 transition hover:bg-fuchsia-50"
-                >
-                  Sign In
-                </NavLink>
-                <button
-                  onClick={() => setShowBuyPopup(false)}
-                  className="mt-1 text-sm text-black/40 transition hover:text-black/60"
-                >
-                  Keep browsing
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* BUY NOW POPUP — removed: registration-first flow */}
     </section>
   )
 }
