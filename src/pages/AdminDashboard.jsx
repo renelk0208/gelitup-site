@@ -1513,6 +1513,136 @@ function downloadCSV(priceData, sortedCategories) {
   URL.revokeObjectURL(url)
 }
 
+// ─── Draft Carts panel ────────────────────────────────────────────────────────
+
+const DRAFT_CARTS_TABLE = 'b2b_draft_carts'
+
+function DraftCartsPanel() {
+  const [carts, setCarts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [expanded, setExpanded] = useState(null)
+
+  const fetchCarts = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    const { data, error: err } = await supabase
+      .from(DRAFT_CARTS_TABLE)
+      .select('*')
+      .order('updated_at', { ascending: false })
+      .limit(200)
+    if (err) setError(`Could not load draft carts: ${err.message}`)
+    else setCarts(data || [])
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetchCarts() }, [fetchCarts])
+
+  function renderItems(items, source) {
+    if (!items) return <span className="text-xs text-slate-400">No items</span>
+    if (source === 'catalogue') {
+      // quickCart shape: { "name::code": qty }
+      const entries = Object.entries(items)
+      if (!entries.length) return <span className="text-xs text-slate-400">Empty cart</span>
+      return (
+        <ul className="space-y-1">
+          {entries.map(([key, qty]) => {
+            const [name, code] = key.split('::')
+            return (
+              <li key={key} className="flex items-center gap-2 text-xs">
+                <span className="font-mono text-slate-500">{code || '—'}</span>
+                <span className="flex-1 truncate text-slate-700">{name}</span>
+                <span className="font-semibold text-slate-900">×{qty}</span>
+              </li>
+            )
+          })}
+        </ul>
+      )
+    }
+    // portal shape: { products: [{code, qty}], packages: [{sku, name, qty, group}] }
+    const products = items.products || []
+    const packages = items.packages || []
+    if (!products.length && !packages.length) return <span className="text-xs text-slate-400">Empty cart</span>
+    return (
+      <ul className="space-y-1">
+        {products.map((p, i) => (
+          <li key={`p-${i}`} className="flex items-center gap-2 text-xs">
+            <span className="font-mono text-slate-500">{p.code}</span>
+            <span className="font-semibold text-slate-900">×{p.qty}</span>
+          </li>
+        ))}
+        {packages.map((p, i) => (
+          <li key={`k-${i}`} className="flex items-center gap-2 text-xs">
+            <span className="font-mono text-slate-500">{p.sku}</span>
+            <span className="flex-1 truncate text-slate-700">{p.name}</span>
+            <span className="font-semibold text-slate-900">×{p.qty}</span>
+            {p.group && <span className="text-[10px] text-slate-400">{p.group}</span>}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold text-slate-900">Draft / Abandoned Carts</h2>
+        <button onClick={fetchCarts} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">Refresh</button>
+      </div>
+      <p className="mt-1 text-xs text-slate-500">Live carts from clients who have not yet submitted. Updated every time a client changes their cart.</p>
+
+      {error && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p>}
+
+      {loading ? (
+        <p className="mt-6 text-center text-sm text-slate-400">Loading…</p>
+      ) : carts.length === 0 ? (
+        <p className="mt-6 text-center text-sm text-slate-400">No active draft carts.</p>
+      ) : (
+        <div className="mt-4 space-y-2">
+          {carts.map((cart) => (
+            <div key={cart.id} className="rounded-xl border border-slate-200 bg-slate-50">
+              <button
+                onClick={() => setExpanded(expanded === cart.id ? null : cart.id)}
+                className="flex w-full items-center gap-3 px-4 py-3 text-left"
+              >
+                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${cart.source === 'portal' ? 'bg-blue-100 text-blue-700' : 'bg-fuchsia-100 text-fuchsia-700'}`}>
+                  {cart.source}
+                </span>
+                <span className="flex-1 truncate text-sm font-semibold text-slate-800">{cart.customer_email || '—'}</span>
+                <span className="text-xs text-slate-500">{cart.total_units} unit{cart.total_units !== 1 ? 's' : ''}</span>
+                <span className="text-xs text-slate-400">{fmtDate(cart.updated_at)}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${expanded === cart.id ? 'rotate-180' : ''}`}>
+                  <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+                </svg>
+              </button>
+              {expanded === cart.id && (
+                <div className="border-t border-slate-200 px-4 py-3">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                    <span className="text-slate-400">Customer</span>
+                    <span className="text-slate-700">{cart.customer_email || '—'}</span>
+                    <span className="text-slate-400">Source</span>
+                    <span className="text-slate-700">{cart.source}</span>
+                    <span className="text-slate-400">Units</span>
+                    <span className="text-slate-700">{cart.total_units}</span>
+                    <span className="text-slate-400">Last updated</span>
+                    <span className="text-slate-700">{cart.updated_at ? new Date(cart.updated_at).toLocaleString() : '—'}</span>
+                    <span className="text-slate-400">Created</span>
+                    <span className="text-slate-700">{cart.created_at ? new Date(cart.created_at).toLocaleString() : '—'}</span>
+                  </div>
+                  <div className="mt-3 rounded-lg bg-white p-3">
+                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Cart Items</p>
+                    {renderItems(cart.items, cart.source)}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Admin Dashboard shell ────────────────────────────────────────────────────
 
 export default function AdminDashboard({ onLogout }) {
@@ -1566,6 +1696,12 @@ export default function AdminDashboard({ onLogout }) {
           >
             Guestbook
           </button>
+          <button
+            onClick={() => setTab('draft-carts')}
+            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${tab === 'draft-carts' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+          >
+            Draft Carts
+          </button>
         </div>
       </div>
 
@@ -1575,6 +1711,7 @@ export default function AdminDashboard({ onLogout }) {
         {tab === 'admins' && <AdminsPanel />}
         {tab === 'pricing' && <TierPricingPanel />}
         {tab === 'guestbook' && <GuestbookPanel />}
+        {tab === 'draft-carts' && <DraftCartsPanel />}
       </div>
     </section>
   )

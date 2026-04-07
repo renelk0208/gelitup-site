@@ -2937,6 +2937,34 @@ function FullCataloguePage() {
   useEffect(() => {
     try { localStorage.setItem(QUICK_CART_STORAGE_KEY, JSON.stringify(quickCart)) } catch {}
   }, [quickCart])
+
+  // Sync quickCart to Supabase draft_carts so admin can see abandoned carts
+  useEffect(() => {
+    if (!isLoggedIn || !supabase) return
+    const units = Object.values(quickCart).reduce((s, q) => s + Number(q || 0), 0)
+    if (units === 0) {
+      // Remove draft if cart is empty
+      supabase.auth.getUser().then(({ data }) => {
+        if (data?.user?.id) supabase.from('b2b_draft_carts').delete().eq('user_id', data.user.id).eq('source', 'catalogue').then(() => {})
+      })
+      return
+    }
+    const timer = setTimeout(() => {
+      supabase.auth.getUser().then(({ data }) => {
+        if (!data?.user?.id) return
+        supabase.from('b2b_draft_carts').upsert({
+          user_id: data.user.id,
+          customer_email: data.user.email,
+          items: quickCart,
+          total_units: units,
+          total_estimated: 0, // price lookup not available at this point without full map
+          source: 'catalogue',
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id,source' }).then(() => {})
+      })
+    }, 2000) // debounce 2s
+    return () => clearTimeout(timer)
+  }, [quickCart, isLoggedIn])
   const [gridColumns, setGridColumns] = useState(5)
   const [scrollTop, setScrollTop] = useState(0)
   const [viewportHeight, setViewportHeight] = useState(720)
@@ -8709,6 +8737,35 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     }))
   }, [selectedCodes, itemQtys, packageCartItems])
 
+  // Sync portal cart to Supabase draft_carts so admin can see abandoned carts
+  useEffect(() => {
+    if (!supabase) return
+    const uid = cartUserIdRef.current
+    if (!uid) return
+    const totalUnitsForDraft = selectedCodes.reduce((s, c) => s + (itemQtys[c] || 1), 0) + packageCartItems.reduce((s, i) => s + (i.qty || 0), 0)
+    if (totalUnitsForDraft === 0) {
+      supabase.from('b2b_draft_carts').delete().eq('user_id', uid).eq('source', 'portal').then(() => {})
+      return
+    }
+    const timer = setTimeout(() => {
+      supabase.auth.getUser().then(({ data }) => {
+        if (!data?.user?.id) return
+        const itemsSummary = selectedCodes.map(c => ({ code: c, qty: itemQtys[c] || 1 }))
+        const pkgSummary = packageCartItems.map(i => ({ sku: i.sku, name: i.name, qty: i.qty, group: i.group }))
+        supabase.from('b2b_draft_carts').upsert({
+          user_id: data.user.id,
+          customer_email: data.user.email,
+          items: { products: itemsSummary, packages: pkgSummary },
+          total_units: totalUnitsForDraft,
+          total_estimated: 0,
+          source: 'portal',
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id,source' }).then(() => {})
+      })
+    }, 2000) // debounce 2s
+    return () => clearTimeout(timer)
+  }, [selectedCodes, itemQtys, packageCartItems])
+
   const setClientField = useCallback((key, value) => {
     setClientProfile((current) => ({ ...current, [key]: value }))
     if (key === 'vatNumber') setViesResult(null) // reset VIES result when VAT changes
@@ -11412,6 +11469,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     const cartUid = cartUserIdRef.current || userData?.user?.id
     if (cartUid) {
       localStorage.removeItem(`${B2B_CART_STORAGE_KEY_PREFIX}_${cartUid}`)
+      // Also clear draft cart from Supabase
+      if (supabase) supabase.from('b2b_draft_carts').delete().eq('user_id', cartUid).eq('source', 'portal').then(() => {})
     }
     setIsSubmittingOrder(false)
   }
