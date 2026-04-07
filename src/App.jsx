@@ -2119,6 +2119,12 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
       .filter((value) => !isBlockedImagePath(value))
   )
 
+  // Merge alternate product images — these are extra angles/photos of the same product
+  const duplicateImagePaths = new Set([
+    '/gelitup-content/product-images/NAIL ART/CUSHION GEL/cushion sponge 2.webp',
+  ])
+  duplicateImagePaths.forEach(p => uniqueImagePaths.delete(p))
+
   const grouped = new Map()
 
   uniqueImagePaths.forEach((imagePath) => {
@@ -2924,6 +2930,16 @@ function FullCataloguePage() {
   const [showBasketDetail, setShowBasketDetail] = useState(false)
   const [pulseItemKey, setPulseItemKey] = useState('')
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('portalAuth') === 'true')
+
+  // Upsell essentials — popular items customers often forget
+  const CATALOGUE_UPSELLS = useMemo(() => [
+    { name: '5-in-1 Superior Base 15ml Clear', code: 'GIUP 5IN1CLR', label: '5-in-1 Base (Clear)' },
+    { name: 'Non Wipe Top Coat 15ml', code: 'GIUP NWT', label: 'Non-Wipe Top Coat' },
+    { name: 'Satin Matt RS Top 15 ml', code: 'GIUP SATMAT', label: 'Satin Matt Top' },
+    { name: 'Superbond Nail Dehydrator 11ml - Acid Free', code: 'GIUP SB', label: 'Superbond Primer' },
+    { name: 'Cleanser 200 ml', code: 'GIUP CLEANSER', label: 'Cleanser 200ml' },
+    { name: 'Perky Peach Cuticle Oil 5ml', code: 'GIUP PPCO5', label: 'Cuticle Oil 5ml' },
+  ], [])
 
   // Listen for auth changes (login/logout from other tabs or after registration)
   useEffect(() => {
@@ -4523,6 +4539,38 @@ function FullCataloguePage() {
                         <span className="text-sm font-bold text-black">Total</span>
                         <span className="text-lg font-bold text-fuchsia-700">€{quickCartTotal.toFixed(2)}</span>
                       </div>
+                      {/* Upsell suggestions */}
+                      {(() => {
+                        const notInCart = CATALOGUE_UPSELLS.filter(u => {
+                          const uKey = `${u.name}::${u.code}`
+                          return !quickCart[uKey] && !Object.keys(quickCart).some(k => k.toLowerCase().includes(u.code.replace('GIUP ', '').toLowerCase()))
+                        })
+                        if (notInCart.length === 0) return null
+                        return (
+                          <div className="border-t border-black/10 px-4 pb-3 pt-2">
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-black/40">You might also need</p>
+                            <div className="mt-1.5 flex flex-wrap gap-1.5">
+                              {notInCart.map(u => {
+                                const price = lookupCataloguePrice(u.name, u.code)
+                                return (
+                                  <button
+                                    key={u.code}
+                                    type="button"
+                                    onClick={() => {
+                                      const uKey = `${u.name}::${u.code}`
+                                      setQuickCart(c => ({ ...c, [uKey]: (c[uKey] || 0) + 1 }))
+                                    }}
+                                    className="inline-flex items-center gap-1 rounded-lg border border-fuchsia-300/60 bg-fuchsia-50 px-2 py-1 text-[11px] font-semibold text-fuchsia-700 transition hover:bg-fuchsia-100"
+                                  >
+                                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" /></svg>
+                                    {u.label}{price != null && <span className="text-black/40">€{price.toFixed(2)}</span>}
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )
+                      })()}
                     </div>
                   </div>
                 )}
@@ -6226,7 +6274,7 @@ function HomePage({ onOpenContactModal }) {
   return (
     <section className="space-y-6">
       <div className="mx-auto w-full max-w-6xl overflow-hidden rounded-2xl bg-black">
-        <div className="relative h-[58vh] min-h-[320px] w-full sm:h-[66vh] sm:min-h-[400px]">
+        <div className="relative h-[calc(100svh-80px)] min-h-[320px] w-full sm:h-[66svh] sm:min-h-[400px]">
           <img
             src={HOME_HERO_POSTER_URL || media.heroImage}
             alt="GEL.IT.UP cinematic hero"
@@ -7484,6 +7532,16 @@ function CheckoutPage() {
   const [priceMap, setPriceMap] = useState(null)
   const [wordIndex, setWordIndex] = useState([])
 
+  // Static upsell essentials — popular items customers often forget
+  const CHECKOUT_UPSELLS = useMemo(() => [
+    { name: '5-in-1 Superior Base 15ml Clear', code: 'GIUP 5IN1CLR', label: '5-in-1 Base (Clear)' },
+    { name: 'Non Wipe Top Coat 15ml', code: 'GIUP NWT', label: 'Non-Wipe Top Coat' },
+    { name: 'Satin Matt RS Top 15 ml', code: 'GIUP SATMAT', label: 'Satin Matt Top' },
+    { name: 'Superbond Nail Dehydrator 11ml - Acid Free', code: 'GIUP SB', label: 'Superbond Primer' },
+    { name: 'Cleanser 200 ml', code: 'GIUP CLEANSER', label: 'Cleanser 200ml' },
+    { name: 'Perky Peach Cuticle Oil 5ml', code: 'GIUP PPCO5', label: 'Cuticle Oil 5ml' },
+  ], [])
+
   // Customer details form
   const [form, setForm] = useState({
     email: '', companyName: '', vatNumber: '', firstName: '', lastName: '', phone: '',
@@ -7524,10 +7582,13 @@ function CheckoutPage() {
           const entry = { name, price: price != null ? Math.ceil(Number(price) * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10 : null }
           const keys = [normalizeSkuCode(sku), normalizeSkuCode(stripSuffix(sku)), normalizeProductName(name), normalizeProductName(cleanName)]
           // Extract short product code (e.g. "15", "15A", "BTO02", "FR01") from the SKU/name
-          const shortCodeMatch = normalizeSkuCode(cleanName).match(/^([A-Z]*\d+[A-Z]?)\b/)
-          if (shortCodeMatch) keys.push(shortCodeMatch[1])
-          // Also add GIUP-prefixed variant so "GIUP 15" lookups resolve
-          if (shortCodeMatch) keys.push(`GIUP ${shortCodeMatch[1]}`)
+          const norm = normalizeSkuCode(cleanName)
+          const shortCodeMatch = norm.match(/^([A-Z]*\d+[A-Z]?)\b/) || norm.match(/\b([A-Z]{2,5}\d{1,3}[A-Z]?)\b/)
+          if (shortCodeMatch) {
+            keys.push(shortCodeMatch[1])
+            // Also add GIUP-prefixed variant so "GIUP BTO02" lookups resolve
+            keys.push(`GIUP ${shortCodeMatch[1]}`)
+          }
           for (const k of keys) { if (k && !map.has(k)) map.set(k, entry) }
           const words = new Set(normalizeSkuCode(name).split(/\s+/).filter(w => w.length >= 4))
           if (words.size >= 2) wIdx.push({ words, entry })
@@ -7908,6 +7969,10 @@ function CheckoutPage() {
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-6">
+      <NavLink to="/full-catalogue" className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-fuchsia-700 transition hover:text-fuchsia-500">
+        <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4"><path fillRule="evenodd" d="M17 10a.75.75 0 0 1-.75.75H5.612l4.158 3.96a.75.75 0 1 1-1.04 1.08l-5.5-5.25a.75.75 0 0 1 0-1.08l5.5-5.25a.75.75 0 1 1 1.04 1.08L5.612 9.25H16.25A.75.75 0 0 1 17 10Z" clipRule="evenodd" /></svg>
+        Continue Shopping
+      </NavLink>
       <div className="flex items-baseline justify-between">
         <h1 className="text-2xl font-bold text-slate-900">Checkout</h1>
         <p className="text-sm text-slate-500">
@@ -8129,11 +8194,51 @@ function CheckoutPage() {
               <p className="mt-1 text-[10px] text-slate-500">
                 {progress < 100 ? `€${(MIN_ORDER_EUR - cartTotal).toFixed(2)} more to reach €${MIN_ORDER_EUR} minimum` : 'Minimum order reached!'}
               </p>
-              <p className="mt-3 text-[11px] leading-relaxed text-slate-500">
-                No payment is taken now. Once your order is confirmed, Thermitek Ltd will issue a formal invoice to your email. Payment is due upon receipt of invoice.
-              </p>
+              <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
+                <svg viewBox="0 0 20 20" fill="currentColor" className="mt-0.5 h-4 w-4 shrink-0 text-amber-500"><path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clipRule="evenodd" /></svg>
+                <p className="text-xs font-medium leading-relaxed text-amber-800">
+                  <strong>No payment is taken at checkout.</strong> A pro forma invoice will be issued by Thermitek Ltd after your order is confirmed. <strong>Payment is due upon receipt of the pro forma invoice.</strong>
+                </p>
+              </div>
             </div>
           </div>
+
+          {/* UPSELL SUGGESTIONS */}
+          {(() => {
+            const upsellsNotInCart = CHECKOUT_UPSELLS.filter(u => {
+              const uKey = `${u.name}::${u.code}`
+              return !cart[uKey] && !Object.keys(cart).some(k => k.toLowerCase().includes(u.code.replace('GIUP ', '').toLowerCase()))
+            })
+            if (upsellsNotInCart.length === 0) return null
+            return (
+              <div className="mt-4 rounded-xl border border-slate-200 bg-white p-5">
+                <h4 className="text-xs font-bold uppercase tracking-[0.08em] text-slate-700">You might also need</h4>
+                <div className="mt-3 space-y-2">
+                  {upsellsNotInCart.map(u => {
+                    const price = lookupPrice(u.name, u.code)
+                    return (
+                      <div key={u.code} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-semibold text-slate-800">{u.label}</p>
+                          {price != null && <p className="text-[11px] text-fuchsia-700">€{price.toFixed(2)}</p>}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const uKey = `${u.name}::${u.code}`
+                            setCart(c => ({ ...c, [uKey]: (c[uKey] || 0) + 1 }))
+                          }}
+                          className="shrink-0 rounded-lg bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-fuchsia-500"
+                        >
+                          + Add
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })()}
         </div>
       </div>
     </section>
