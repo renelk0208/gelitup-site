@@ -17336,9 +17336,13 @@ function App() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Contact</p>
             <a href={`tel:${String(PROFORMA_LEEUKOPF_PHONE || '').replace(/[\s()]/g, '')}`} className="mt-2 block transition hover:text-fuchsia-300">{PROFORMA_LEEUKOPF_PHONE}</a>
-            <a href={`mailto:${CONTACT_INBOX_EMAIL}`} className="mt-1 block transition hover:text-fuchsia-300">{CONTACT_INBOX_EMAIL}</a>
-            <a href="mailto:info@gelitup.com" className="mt-1 block transition hover:text-fuchsia-300">For Information: info@gelitup.com</a>
-            <a href="mailto:distribution@gelitup.com" className="mt-1 block transition hover:text-fuchsia-300">For Distribution: distribution@gelitup.com</a>
+            <a href="mailto:info@gelitup.com" className="mt-2 inline-flex items-center gap-2 transition hover:text-fuchsia-300">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4 shrink-0">
+                <rect x="3.5" y="5.5" width="17" height="13" rx="2" stroke="currentColor" strokeWidth="1.8" />
+                <path d="M4 6.5l8 5.5 8-5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              info@gelitup.com
+            </a>
             <a
               href={SUPPORT_WHATSAPP_URL}
               target="_blank"
@@ -17393,19 +17397,7 @@ function App() {
                   <span className="text-white/55">{social.handle}</span>
                 </a>
               ))}
-              {/* Email — clickable mailto */}
-              <a
-                href={`mailto:${B2B_EMAIL}`}
-                className="group flex items-center gap-2 transition duration-300 hover:text-fuchsia-300"
-              >
-                <span className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-white/30 bg-white/10 text-white/85 transition group-hover:border-fuchsia-400 group-hover:bg-fuchsia-600 group-hover:text-white">
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
-                    <rect x="3.5" y="5.5" width="17" height="13" rx="2" stroke="currentColor" strokeWidth="1.8" />
-                    <path d="M4 6.5l8 5.5 8-5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-                <span className="font-medium">Send us an email</span>
-              </a>
+
             </div>
           </div>
         </div>
