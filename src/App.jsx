@@ -9480,11 +9480,30 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           const itemCount = (saved.selectedCodes?.length || 0) + (saved.packageCartItems?.length || 0)
           const userEmail = String(data?.user?.email || '').trim()
           if (itemCount > 0 && userEmail) {
+            const firstName = String(data?.user?.user_metadata?.contact_name || '').split(' ')[0] || 'there'
             sendPortalEmailNotification({
               eventType: 'b2b_abandoned_cart',
               to: userEmail,
-              subject: 'You have items waiting in your GEL.IT.UP B2B cart',
-              html: `<p>Hello,</p><p>You have <strong>${itemCount} product${itemCount === 1 ? '' : 's'}</strong> saved in your GEL.IT.UP B2B portal cart that have not yet been ordered.</p><p>Log in to the portal to continue or cancel your current selection.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
+              subject: `Psst… your cart is calling you, ${firstName}! 🛒`,
+              html: `
+<div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;max-width:540px;margin:0 auto;background:#111;border-radius:16px;overflow:hidden;">
+  <div style="background:linear-gradient(135deg,#D43790,#9333ea);padding:32px 28px;text-align:center;">
+    <p style="margin:0;font-size:28px;">🛒✨</p>
+    <h1 style="margin:12px 0 0;font-size:22px;font-weight:800;color:#fff;letter-spacing:0.02em;">Come quickly — your cart is calling you!</h1>
+  </div>
+  <div style="padding:28px;color:#e5e5e5;font-size:14px;line-height:1.7;">
+    <p style="margin:0 0 16px;">Hey ${firstName},</p>
+    <p style="margin:0 0 16px;">You left <strong style="color:#D43790;">${itemCount} gorgeous item${itemCount === 1 ? '' : 's'}</strong> in your GEL.IT.UP cart and they're getting lonely in there. 💅</p>
+    <p style="margin:0 0 16px;">Good news — they're still waiting for you. But great colours don't wait forever!</p>
+    <div style="text-align:center;margin:28px 0;">
+      <a href="https://gelitup.com/portal/login" style="display:inline-block;background:#D43790;color:#fff;padding:14px 32px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:0.03em;">Take me to my cart →</a>
+    </div>
+    <p style="margin:0 0 8px;font-size:12px;color:#888;text-align:center;">No pressure — just a friendly nudge from your favourite gel polish brand. 💖</p>
+  </div>
+  <div style="border-top:1px solid #333;padding:16px 28px;text-align:center;">
+    <p style="margin:0;font-size:11px;color:#666;">GEL.IT.UP by GIUP® · Professional Nail Colour</p>
+  </div>
+</div>`,
             }).catch(() => {})
             // Reset the savedAt timer so the reminder doesn't fire every login
             localStorage.setItem(key, JSON.stringify({ ...saved, savedAt: Date.now() }))
@@ -16074,6 +16093,8 @@ function App() {
   const requireApproval = import.meta.env.VITE_REQUIRE_B2B_APPROVAL !== 'false'
   const [showBackToTop, setShowBackToTop] = useState(false)
   const [showChatPanel, setShowChatPanel] = useState(false)
+  const [showExitIntent, setShowExitIntent] = useState(false)
+  const exitIntentShownRef = useRef(false)
 
   const handleAcceptCookies = useCallback(() => {
     localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, 'accepted')
@@ -16084,6 +16105,49 @@ function App() {
     const onWindowScroll = () => setShowBackToTop(window.scrollY > 400)
     window.addEventListener('scroll', onWindowScroll, { passive: true })
     return () => window.removeEventListener('scroll', onWindowScroll)
+  }, [])
+
+  // Exit-intent detection — show popup when cursor leaves viewport (desktop)
+  // or after 60s idle + visible tab switch (mobile)
+  useEffect(() => {
+    const EXIT_INTENT_STORAGE_KEY = 'gelitup.exit_intent_shown'
+    const alreadyDismissed = sessionStorage.getItem(EXIT_INTENT_STORAGE_KEY)
+    if (alreadyDismissed) return
+
+    const hasCartItems = () => {
+      try {
+        const quick = JSON.parse(localStorage.getItem(QUICK_CART_STORAGE_KEY) || '{}')
+        return Object.keys(quick).length > 0
+      } catch { return false }
+    }
+
+    const trigger = () => {
+      if (exitIntentShownRef.current) return
+      if (localStorage.getItem('portalAuth') === 'true') return // logged-in users get email instead
+      if (!hasCartItems()) return
+      exitIntentShownRef.current = true
+      sessionStorage.setItem(EXIT_INTENT_STORAGE_KEY, '1')
+      setShowExitIntent(true)
+    }
+
+    // Desktop: mouse leaves viewport top
+    const onMouseLeave = (e) => { if (e.clientY <= 0) trigger() }
+    document.addEventListener('mouseout', onMouseLeave)
+
+    // Mobile: detect visibility change (switching tabs/apps) after 30s on page
+    let mobileTimer = null
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') trigger()
+    }
+    mobileTimer = setTimeout(() => {
+      document.addEventListener('visibilitychange', onVisibilityChange)
+    }, 30_000)
+
+    return () => {
+      document.removeEventListener('mouseout', onMouseLeave)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      if (mobileTimer) clearTimeout(mobileTimer)
+    }
   }, [])
 
   const openContactModal = useCallback(() => {
@@ -17305,6 +17369,50 @@ function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
+
+      {/* Exit-intent popup for visitors with items in cart */}
+      {showExitIntent && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowExitIntent(false)}>
+          <div className="relative mx-4 w-full max-w-md overflow-hidden rounded-3xl bg-[#111] shadow-2xl ring-1 ring-white/10" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => setShowExitIntent(false)}
+              className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white/60 transition hover:bg-white/20 hover:text-white"
+            >
+              <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+            <div className="bg-gradient-to-br from-fuchsia-600 to-purple-700 px-8 py-10 text-center">
+              <p className="text-4xl">🛒✨</p>
+              <h2 className="mt-3 text-2xl font-extrabold text-white">Wait — your cart is calling!</h2>
+              <p className="mt-2 text-sm text-white/80">You've picked some gorgeous products. Don't let them slip away!</p>
+            </div>
+            <div className="space-y-3 px-8 py-6">
+              <NavLink
+                to="/portal/register"
+                onClick={() => setShowExitIntent(false)}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-fuchsia-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-fuchsia-500"
+              >
+                Register to save my cart →
+              </NavLink>
+              <NavLink
+                to="/portal/login"
+                onClick={() => setShowExitIntent(false)}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/10"
+              >
+                I already have an account
+              </NavLink>
+              <button
+                type="button"
+                onClick={() => setShowExitIntent(false)}
+                className="w-full pt-1 text-center text-xs text-white/40 transition hover:text-white/60"
+              >
+                No thanks, I'll keep browsing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {!hasAcceptedCookies && (
         <div className="fixed bottom-4 left-0 right-0 z-40 px-3 md:px-6">
