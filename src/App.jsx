@@ -34,6 +34,7 @@ const SHIPPING_ZONES = [
   { zone: 6, rateEur: 28.00, maxKg: 5, countries: ['United Kingdom'] },
 ]
 const B2B_PRICE_MULTIPLIER = 1.2
+const EU_COUNTRIES = ['Austria','Belgium','Bulgaria','Croatia','Cyprus','Czech Republic','Denmark','Estonia','Finland','France','Germany','Greece','Hungary','Ireland','Italy','Latvia','Lithuania','Luxembourg','Malta','Netherlands','Poland','Portugal','Romania','Slovakia','Slovenia','Spain','Sweden','United Kingdom']
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL
@@ -7480,12 +7481,13 @@ function CheckoutPage() {
 
   // Customer details form
   const [form, setForm] = useState({
-    email: '', companyName: '', vatNumber: '', contactName: '', phone: '',
+    email: '', companyName: '', vatNumber: '', firstName: '', lastName: '', phone: '',
     invoiceAddressLine1: '', invoiceAddressLine2: '', invoiceArea: '', invoiceRegion: '', invoiceCountry: '', invoicePostalCode: '',
     shipToDifferentAddress: false, shippingName: '', shippingPhone: '',
     shippingAddressLine1: '', shippingAddressLine2: '', shippingArea: '', shippingRegion: '', shippingCountry: '', shippingPostalCode: '',
     createAccount: false, password: '',
     subscribeEmails: false,
+    smsUpdates: false,
     orderNotes: '',
     agreeTerms: false,
   })
@@ -7588,7 +7590,8 @@ function CheckoutPage() {
     if (!vat) { setError('A valid VAT number is required for B2B orders.'); return }
     if (!viesResult?.valid) { setError('Please verify your VAT number before placing your order.'); return }
     if (!form.companyName.trim()) { setError('Company name is required.'); return }
-    if (!form.contactName.trim()) { setError('Contact name is required.'); return }
+    if (!form.firstName.trim()) { setError('First name is required.'); return }
+    if (!form.lastName.trim()) { setError('Last name is required.'); return }
     if (!form.invoiceAddressLine1.trim()) { setError('Invoice address is required.'); return }
     if (!form.invoiceArea.trim()) { setError('Invoice city is required.'); return }
     if (!form.invoiceCountry.trim()) { setError('Invoice country is required.'); return }
@@ -7619,7 +7622,7 @@ function CheckoutPage() {
             vat_number: vat,
             vies_vat: vat,
             account_type: 'b2b_buyer',
-            full_name: form.contactName.trim(),
+            full_name: `${form.firstName.trim()} ${form.lastName.trim()}`,
             contact_phone: form.phone.trim(),
             contact_email: email,
             customer_type: 'company',
@@ -7630,7 +7633,7 @@ function CheckoutPage() {
             invoice_country: form.invoiceCountry.trim(),
             invoice_postal_code: form.invoicePostalCode.trim(),
             shipping_same_as_invoice: !form.shipToDifferentAddress,
-            shipping_name: !form.shipToDifferentAddress ? form.contactName.trim() : form.shippingName.trim(),
+            shipping_name: !form.shipToDifferentAddress ? `${form.firstName.trim()} ${form.lastName.trim()}` : form.shippingName.trim(),
             shipping_phone: !form.shipToDifferentAddress ? form.phone.trim() : form.shippingPhone.trim(),
             shipping_address_line1: !form.shipToDifferentAddress ? form.invoiceAddressLine1.trim() : form.shippingAddressLine1.trim(),
             shipping_address_line2: !form.shipToDifferentAddress ? form.invoiceAddressLine2.trim() : form.shippingAddressLine2.trim(),
@@ -7639,6 +7642,7 @@ function CheckoutPage() {
             shipping_country: !form.shipToDifferentAddress ? form.invoiceCountry.trim() : form.shippingCountry.trim(),
             shipping_postal_code: !form.shipToDifferentAddress ? form.invoicePostalCode.trim() : form.shippingPostalCode.trim(),
             subscribe_emails: form.subscribeEmails,
+            sms_updates: form.smsUpdates,
           },
           emailRedirectTo: `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(email)}`,
         },
@@ -7669,7 +7673,7 @@ function CheckoutPage() {
         : [form.shippingAddressLine1, form.shippingAddressLine2, form.shippingArea, form.shippingRegion, form.shippingPostalCode].filter(Boolean).join(', ')
 
       const shipping = {
-        name: !form.shipToDifferentAddress ? form.contactName.trim() : form.shippingName.trim(),
+        name: !form.shipToDifferentAddress ? `${form.firstName.trim()} ${form.lastName.trim()}` : form.shippingName.trim(),
         phone: !form.shipToDifferentAddress ? form.phone.trim() : form.shippingPhone.trim(),
         address: shippingAddr,
         country: !form.shipToDifferentAddress ? form.invoiceCountry.trim() : form.shippingCountry.trim(),
@@ -7762,7 +7766,7 @@ function CheckoutPage() {
         <p style="margin:2px 0"><strong>VAT Number:</strong> ${escapeHtml(invoice.vatNumber)}</p>
         <p style="margin:2px 0"><strong>Invoice Address:</strong> ${escapeHtml(invoice.address)}</p>
         <p style="margin:2px 0"><strong>Country:</strong> ${escapeHtml(invoice.country)}</p>
-        <p style="margin:2px 0"><strong>Contact:</strong> ${escapeHtml(form.contactName.trim())} / ${escapeHtml(email)}</p>
+        <p style="margin:2px 0"><strong>Contact:</strong> ${escapeHtml(`${form.firstName.trim()} ${form.lastName.trim()}`)} / ${escapeHtml(email)}</p>
         <p style="margin:2px 0"><strong>Phone:</strong> ${escapeHtml(form.phone.trim() || '-')}</p>
       `
       const shippingBlockHtml = `
@@ -7779,6 +7783,7 @@ function CheckoutPage() {
       const optInsHtml = `
         <p style="margin-top:8px"><strong>Account created:</strong> ${form.createAccount ? 'Yes' : 'No (guest)'}</p>
         <p style="margin:2px 0"><strong>Email subscription:</strong> ${form.subscribeEmails ? 'Yes' : 'No'}</p>
+        <p style="margin:2px 0"><strong>SMS order updates:</strong> ${form.smsUpdates ? 'Yes' : 'No'}</p>
       `
 
       await sendPortalEmailNotification({
@@ -7815,7 +7820,7 @@ function CheckoutPage() {
         html: `
           <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
             <h2 style="color:#1a1a1a">Thank you for your order!</h2>
-            <p>Hi ${escapeHtml(form.contactName.trim() || form.companyName.trim())},</p>
+            <p>Hi ${escapeHtml(`${form.firstName.trim()} ${form.lastName.trim()}` || form.companyName.trim())},</p>
             <p>We've received your order <strong>#${insertedOrder?.id ?? '-'}</strong> and our team will process it shortly.</p>
             <p><strong>Order Total:</strong> €${cartTotal.toFixed(2)} (${cartUnits} items)</p>
             ${form.createAccount ? '<p>You can now log in with your email and password to track your orders.</p>' : '<p>If you would like to track future orders, you can create an account at checkout next time.</p>'}
@@ -7884,8 +7889,14 @@ function CheckoutPage() {
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-6">
-      <h1 className="text-2xl font-bold text-slate-900">Checkout</h1>
-      <p className="mt-1 text-sm text-slate-500">Review your order and complete your details to place it.</p>
+      <div className="flex items-baseline justify-between">
+        <h1 className="text-2xl font-bold text-slate-900">Checkout</h1>
+        <p className="text-sm text-slate-500">
+          Returning customer?{' '}
+          <NavLink to="/portal/login" className="font-semibold text-fuchsia-700 hover:underline">Login</NavLink>
+        </p>
+      </div>
+      <p className="mt-1 text-sm text-slate-500">All orders include a VAT invoice. Review your order and complete your details to place it.</p>
 
       {error && (
         <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>
@@ -7895,23 +7906,23 @@ function CheckoutPage() {
         {/* LEFT: FORM */}
         <form onSubmit={handleSubmit} className="space-y-6 lg:col-span-3">
 
-          {/* YOUR DETAILS */}
+          {/* BILLING DETAILS */}
           <fieldset className="rounded-xl border border-slate-200 bg-white p-5">
-            <legend className="px-2 text-sm font-bold uppercase tracking-[0.08em] text-slate-700">Your Details</legend>
+            <legend className="px-2 text-sm font-bold uppercase tracking-[0.08em] text-slate-700">Billing Details</legend>
             <div className="mt-2 grid gap-4 sm:grid-cols-2">
               <label className="block text-sm font-medium text-slate-700">
-                Email <span className="text-rose-500">*</span>
-                <input type="email" required autoComplete="email" value={form.email} onChange={e => updateField('email', e.target.value)} placeholder="you@company.com" className={inputClass} />
+                First Name <span className="text-rose-500">*</span>
+                <input type="text" required autoComplete="given-name" value={form.firstName} onChange={e => updateField('firstName', e.target.value)} className={inputClass} />
               </label>
               <label className="block text-sm font-medium text-slate-700">
-                Contact Name <span className="text-rose-500">*</span>
-                <input type="text" required value={form.contactName} onChange={e => updateField('contactName', e.target.value)} placeholder="Full name" className={inputClass} />
+                Last Name <span className="text-rose-500">*</span>
+                <input type="text" required autoComplete="family-name" value={form.lastName} onChange={e => updateField('lastName', e.target.value)} className={inputClass} />
               </label>
-              <label className="block text-sm font-medium text-slate-700">
-                Phone
-                <input type="tel" value={form.phone} onChange={e => updateField('phone', e.target.value)} placeholder="+353 …" className={inputClass} />
+              <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
+                Company Name <span className="text-rose-500">*</span>
+                <input type="text" required value={form.companyName} onChange={e => updateField('companyName', e.target.value)} placeholder="Your Company Ltd" className={inputClass} />
               </label>
-              <div>
+              <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-slate-700">
                   VAT Number <span className="text-rose-500">*</span>
                   <div className="mt-1 flex gap-2">
@@ -7930,39 +7941,36 @@ function CheckoutPage() {
                 {viesError && <p className="mt-1.5 text-xs text-rose-600">{viesError}</p>}
               </div>
               <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
-                Company Name <span className="text-rose-500">*</span>
-                <input type="text" required value={form.companyName} onChange={e => updateField('companyName', e.target.value)} placeholder="Your Company Ltd" className={inputClass} />
-              </label>
-            </div>
-          </fieldset>
-
-          {/* INVOICE ADDRESS */}
-          <fieldset className="rounded-xl border border-slate-200 bg-white p-5">
-            <legend className="px-2 text-sm font-bold uppercase tracking-[0.08em] text-slate-700">Invoice Address</legend>
-            <div className="mt-2 grid gap-4 sm:grid-cols-2">
-              <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
-                Address Line 1 <span className="text-rose-500">*</span>
-                <input type="text" required value={form.invoiceAddressLine1} onChange={e => updateField('invoiceAddressLine1', e.target.value)} className={inputClass} />
+                Country / Region <span className="text-rose-500">*</span>
+                <select required value={form.invoiceCountry} onChange={e => updateField('invoiceCountry', e.target.value)} className={inputClass}>
+                  <option value="">Select a country…</option>
+                  {EU_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
               </label>
               <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
-                Address Line 2
-                <input type="text" value={form.invoiceAddressLine2} onChange={e => updateField('invoiceAddressLine2', e.target.value)} className={inputClass} />
+                Street Address <span className="text-rose-500">*</span>
+                <input type="text" required autoComplete="address-line1" value={form.invoiceAddressLine1} onChange={e => updateField('invoiceAddressLine1', e.target.value)} placeholder="House number and street name" className={inputClass} />
+                <input type="text" autoComplete="address-line2" value={form.invoiceAddressLine2} onChange={e => updateField('invoiceAddressLine2', e.target.value)} placeholder="Apartment, suite, unit, etc. (optional)" className={inputClass} />
               </label>
               <label className="block text-sm font-medium text-slate-700">
-                City / Area <span className="text-rose-500">*</span>
-                <input type="text" required value={form.invoiceArea} onChange={e => updateField('invoiceArea', e.target.value)} className={inputClass} />
+                Town / City <span className="text-rose-500">*</span>
+                <input type="text" required autoComplete="address-level2" value={form.invoiceArea} onChange={e => updateField('invoiceArea', e.target.value)} className={inputClass} />
               </label>
               <label className="block text-sm font-medium text-slate-700">
-                Region / State
-                <input type="text" value={form.invoiceRegion} onChange={e => updateField('invoiceRegion', e.target.value)} className={inputClass} />
+                State / County <span className="text-slate-400">(optional)</span>
+                <input type="text" autoComplete="address-level1" value={form.invoiceRegion} onChange={e => updateField('invoiceRegion', e.target.value)} className={inputClass} />
               </label>
               <label className="block text-sm font-medium text-slate-700">
-                Country <span className="text-rose-500">*</span>
-                <input type="text" required value={form.invoiceCountry} onChange={e => updateField('invoiceCountry', e.target.value)} placeholder="e.g. Ireland" className={inputClass} />
+                Postcode / ZIP <span className="text-rose-500">*</span>
+                <input type="text" required autoComplete="postal-code" value={form.invoicePostalCode} onChange={e => updateField('invoicePostalCode', e.target.value)} className={inputClass} />
               </label>
               <label className="block text-sm font-medium text-slate-700">
-                Postal Code <span className="text-rose-500">*</span>
-                <input type="text" required value={form.invoicePostalCode} onChange={e => updateField('invoicePostalCode', e.target.value)} className={inputClass} />
+                Phone <span className="text-rose-500">*</span>
+                <input type="tel" required autoComplete="tel" value={form.phone} onChange={e => updateField('phone', e.target.value)} placeholder="+353 …" className={inputClass} />
+              </label>
+              <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
+                Email Address <span className="text-rose-500">*</span>
+                <input type="email" required autoComplete="email" value={form.email} onChange={e => updateField('email', e.target.value)} placeholder="you@company.com" className={inputClass} />
               </label>
             </div>
           </fieldset>
@@ -7977,35 +7985,35 @@ function CheckoutPage() {
             {form.shipToDifferentAddress && (
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <label className="block text-sm font-medium text-slate-700">
-                  Consignee Name
+                  Recipient Name
                   <input type="text" value={form.shippingName} onChange={e => updateField('shippingName', e.target.value)} className={inputClass} />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
-                  Consignee Phone
+                  Recipient Phone
                   <input type="tel" value={form.shippingPhone} onChange={e => updateField('shippingPhone', e.target.value)} className={inputClass} />
                 </label>
                 <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
-                  Address Line 1 <span className="text-rose-500">*</span>
-                  <input type="text" required value={form.shippingAddressLine1} onChange={e => updateField('shippingAddressLine1', e.target.value)} className={inputClass} />
+                  Country / Region <span className="text-rose-500">*</span>
+                  <select required value={form.shippingCountry} onChange={e => updateField('shippingCountry', e.target.value)} className={inputClass}>
+                    <option value="">Select a country…</option>
+                    {EU_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
                 </label>
                 <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
-                  Address Line 2
-                  <input type="text" value={form.shippingAddressLine2} onChange={e => updateField('shippingAddressLine2', e.target.value)} className={inputClass} />
+                  Street Address <span className="text-rose-500">*</span>
+                  <input type="text" required value={form.shippingAddressLine1} onChange={e => updateField('shippingAddressLine1', e.target.value)} placeholder="House number and street name" className={inputClass} />
+                  <input type="text" value={form.shippingAddressLine2} onChange={e => updateField('shippingAddressLine2', e.target.value)} placeholder="Apartment, suite, unit, etc. (optional)" className={inputClass} />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
-                  City / Area <span className="text-rose-500">*</span>
+                  Town / City <span className="text-rose-500">*</span>
                   <input type="text" required value={form.shippingArea} onChange={e => updateField('shippingArea', e.target.value)} className={inputClass} />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
-                  Region / State
+                  State / County <span className="text-slate-400">(optional)</span>
                   <input type="text" value={form.shippingRegion} onChange={e => updateField('shippingRegion', e.target.value)} className={inputClass} />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
-                  Country <span className="text-rose-500">*</span>
-                  <input type="text" required value={form.shippingCountry} onChange={e => updateField('shippingCountry', e.target.value)} className={inputClass} />
-                </label>
-                <label className="block text-sm font-medium text-slate-700">
-                  Postal Code <span className="text-rose-500">*</span>
+                  Postcode / ZIP <span className="text-rose-500">*</span>
                   <input type="text" required value={form.shippingPostalCode} onChange={e => updateField('shippingPostalCode', e.target.value)} className={inputClass} />
                 </label>
               </div>
@@ -8041,6 +8049,10 @@ function CheckoutPage() {
             <label className="flex items-start gap-2 text-sm text-slate-700">
               <input type="checkbox" checked={form.subscribeEmails} onChange={e => updateField('subscribeEmails', e.target.checked)} className="mt-0.5 rounded border-slate-300" />
               <span>Subscribe to our newsletter for new product launches, promotions, and professional tips. <span className="text-slate-400">(optional)</span></span>
+            </label>
+            <label className="flex items-start gap-2 text-sm text-slate-700">
+              <input type="checkbox" checked={form.smsUpdates} onChange={e => updateField('smsUpdates', e.target.checked)} className="mt-0.5 rounded border-slate-300" />
+              <span>Send me order updates via text message. Please add your mobile number above to receive the message. <span className="text-slate-400">(optional)</span></span>
             </label>
           </div>
 
