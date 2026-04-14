@@ -173,9 +173,9 @@ export default function InspirationPage() {
                 className="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-neutral-900 transition hover:bg-neutral-100">
                 Explore Products
               </a>
-              <a href="/portal"
+              <a href="/full-catalogue"
                 className="inline-flex items-center justify-center rounded-2xl border border-white/40 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20">
-                Enter B2B Portal
+                Our Products
               </a>
             </div>
           </div>

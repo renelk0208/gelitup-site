@@ -904,7 +904,7 @@ const navItems = [
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/guestbook', label: 'Guestbook' },
   { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
-  { to: '/full-catalogue', label: 'Buy Here', highlight: true },
+  { to: '/full-catalogue', label: 'Our Products', highlight: true },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -1589,7 +1589,7 @@ function DistributorPackagesPage() {
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <NavLink to="/full-catalogue" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Buy Here
+            Our Products
           </NavLink>
           <NavLink to="/become-distributor" className="btn-cta-ghost-white inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
             Apply for Partnership
@@ -1773,7 +1773,7 @@ function ForAcademiesPage() {
                   Register Your Academy
                 </NavLink>
                 <NavLink to="/full-catalogue" className="btn-cta-ghost-white inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-                  Buy Here
+                  Our Products
                 </NavLink>
               </div>
             </div>
@@ -8608,27 +8608,14 @@ function PortalRegister({ onRegister }) {
             </label>
             <label className="block text-sm font-medium text-slate-700">
               VAT Number
-              <div className="mt-1 flex gap-1.5">
-                <input
-                  type="text"
-                  required={isDistributorFlow || isBusinessOrderProfile}
-                  value={application.vatNumber}
-                  onChange={(event) => setField('vatNumber', event.target.value.toUpperCase())}
-                  className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
-                  placeholder={(isDistributorFlow || isBusinessOrderProfile) ? 'EU123456789' : 'Optional for personal purchases'}
-                />
-                <button type="button" disabled={regViesLoading || !application.vatNumber.trim()} onClick={() => verifyRegVat(application.vatNumber)} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40">
-                  {regViesLoading ? 'Checking…' : 'Verify'}
-                </button>
-              </div>
-              {regViesError && <p className="mt-0.5 text-xs text-rose-600">{regViesError}</p>}
-              {regViesResult?.valid && (
-                <div className="mt-1 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1.5">
-                  <p className="text-xs font-semibold text-emerald-700">✓ Valid — verified via EU VIES</p>
-                  {regViesResult.name && <p className="text-xs text-emerald-600">{regViesResult.name}</p>}
-                  {regViesResult.address && <p className="text-xs text-emerald-600">{regViesResult.address}</p>}
-                </div>
-              )}
+              <input
+                type="text"
+                required={isDistributorFlow || isBusinessOrderProfile}
+                value={application.vatNumber}
+                onChange={(event) => setField('vatNumber', event.target.value.toUpperCase())}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
+                placeholder={(isDistributorFlow || isBusinessOrderProfile) ? 'EU123456789' : 'Optional for personal purchases'}
+              />
             </label>
             <label className="block text-sm font-medium text-slate-700">
               Contact Name
