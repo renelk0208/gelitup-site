@@ -10,10 +10,11 @@ export const inspirationCategories = [
     key: '2026',
     label: '2026 Inspiration',
     folder: '2026',
-    description: 'The latest nail art and colour trends for 2026 — fresh looks updated throughout the year.',
+    description: 'The latest nail art and colour trends for 2026 — Cloud Dancer, Sunshine Ready & Shimmer collections.',
     cover: `${BASE}/2026/cloud-dancer-inspiration-cover-card.webp`,
     images: [
-      'cloud-dancer-inspiration-cover-card.webp',
+      // Cloud Dancer
+      ...['cloud-dancer-inspiration-cover-card.webp',
       'gelitup_cloudancer_cover_post.webp',
       'cloud%20dancer%20pt1.webp',
       // 2600
@@ -42,7 +43,24 @@ export const inspirationCategories = [
       '2610.webp','2610-1.webp','2610-2.webp','gelitup_cloudancer_2610_card_hand.webp',
       // Other
       '2906-2.webp',
-    ].map(f => `${BASE}/2026/${f}`),
+      ].map(f => `${BASE}/2026/${f}`),
+      // Sunshine Ready Collection
+      ...[
+        'gelitup_summer_2026_1.jpg',
+        'gelitup_summer_2026_2.jpg',
+        'gelitup_summer_2026_3.jpg',
+        'gelitup_summer_2026_4.jpg',
+        'gelitup_summer_2026_2612.jpg',
+        'gelitup_summer_2026_2613.jpg',
+        'gelitup_summer_2026_2614.jpg',
+      ].map(f => enc(`/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/${f}`)),
+      // Shimmer Collection (New Effects)
+      ...[
+        'new-effects-1.jpg',
+        'new-effects-2.jpg',
+        'new-effects-3.jpg',
+      ].map(f => enc(`/gelitup-media/images/news/Spring Summer/New Effects Collection/${f}`)),
+    ],
     pinFirst: true,
   },
   {

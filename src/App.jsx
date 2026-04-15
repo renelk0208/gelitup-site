@@ -100,13 +100,13 @@ const HOME_HERO_POSTER_URL = '/gelitup-content/catalog-heroes/home-page-hero-ima
 const HOME_NEWS_CLOUD_VIDEO_URL = Math.floor(Date.now() / 86400000) % 2 === 0
   ? '/gelitup-media/videos/floating-clouds.mp4'
   : '/gelitup-media/videos/floating- clouds2.mp4'
-const HOME_NEWS_CAROUSEL_FOLDER = '/gelitup-media/images/news/Spring Summer/NEWS Carousel/'
-const CONTENT_CACHE_BUSTER = '2026-02-27-1'
+const HOME_NEWS_CAROUSEL_FOLDER = '/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/'
+const CONTENT_CACHE_BUSTER = '2026-04-15-1'
 const HOME_CLOUD_DANCER_DEFAULT = {
-  title: 'Cloud Dancer - The Story',
-  introText: 'The new professional neutral. 2026 begins with softness, refinement, and intention. Cloud Dancer Series introduces illuminated tones that enhance the nail without overpowering it. Modern shades designed to feel effortless, elevated, and timeless.',
-  ctaLabel: 'See Our Products',
-  ctaLink: '/full-catalogue',
+  title: 'Sunshine Ready - The Collection',
+  introText: 'Sunshine Ready is a summer gel polish collection shaped by retro femininity, sun-washed colour, and a playful mod spirit. Inspired by psychedelic fashion, soft pastel tones, and the energy of long summer days, the collection brings together a polished palette of expressive shades designed to feel fresh, modern, and effortlessly seasonal.',
+  ctaLabel: 'Coming Soon',
+  ctaLink: '',
 }
 const LEEUKOPF_DISTRIBUTORS_SOURCE_URL = 'https://leeukopf.com/our-brands'
 const DISTRIBUTOR_DIRECTORY = [
@@ -2851,48 +2851,34 @@ function getB2BCategoryDescription(categoryName = '') {
 }
 
 const SPRING_SUMMER_LOOKBOOK_DEFAULT = {
-  title: 'Spring/Summer Collection 2026 Lookbook',
-  subtitle: 'Flip through the seasonal edit before exploring the full range.',
+  title: 'Summer 2026 New Collections',
+  subtitle: 'Discover the latest seasonal additions before exploring the full range.',
   groups: [
     {
-      id: 'default',
-      title: 'Spring/Summer 2026',
-      heroImage: '/gelitup-media/images/news/spring-summer-2026-01.webp',
+      id: 'sunshine-ready',
+      title: 'Sunshine Ready',
+      heroImage: '/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_1.jpg',
       pages: [
-        {
-          title: 'Spring/Summer 2026 — 01',
-          imageUrl: '/gelitup-media/images/news/spring-summer-2026-01.webp',
-          link: '/portal/login',
-        },
-        {
-          title: 'Spring/Summer 2026 — 02',
-          imageUrl: '/gelitup-media/images/news/spring-summer-2026-02.webp',
-          link: '/portal/login',
-        },
-        {
-          title: 'Spring/Summer 2026 — 03',
-          imageUrl: '/gelitup-media/images/news/spring-summer-2026-03.webp',
-          link: '/portal/login',
-        },
+        { title: 'Sunshine Ready 1', imageUrl: '/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_1.jpg' },
+        { title: 'Sunshine Ready 2', imageUrl: '/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_2.jpg' },
+        { title: 'Sunshine Ready 3', imageUrl: '/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_3.jpg' },
+      ],
+    },
+    {
+      id: 'shimmer-collection',
+      title: 'Shimmer Collection',
+      heroImage: '/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-1.jpg',
+      pages: [
+        { title: 'Shimmer 1', imageUrl: '/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-1.jpg' },
+        { title: 'Shimmer 2', imageUrl: '/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-2.jpg' },
+        { title: 'Shimmer 3', imageUrl: '/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-3.jpg' },
       ],
     },
   ],
   pages: [
-    {
-      title: 'Spring/Summer 2026 — 01',
-      imageUrl: '/gelitup-media/images/news/spring-summer-2026-01.webp',
-      link: '/portal/login',
-    },
-    {
-      title: 'Spring/Summer 2026 — 02',
-      imageUrl: '/gelitup-media/images/news/spring-summer-2026-02.webp',
-      link: '/portal/login',
-    },
-    {
-      title: 'Spring/Summer 2026 — 03',
-      imageUrl: '/gelitup-media/images/news/spring-summer-2026-03.webp',
-      link: '/portal/login',
-    },
+    { title: 'Sunshine Ready 1', imageUrl: '/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_1.jpg' },
+    { title: 'Sunshine Ready 2', imageUrl: '/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_2.jpg' },
+    { title: 'Shimmer 1', imageUrl: '/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-1.jpg' },
   ],
 }
 
@@ -5198,103 +5184,122 @@ function FullCataloguePage() {
             )}
           </div>
 
-          <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl border border-[#4A4A4A]/25">
-            <div className="grid lg:grid-cols-2">
-              {/* LEFT: Cloud Dancer story */}
-              <div className="flex flex-col justify-center bg-[#1A1A1A] px-8 py-12 sm:px-12">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Additions — 2026</p>
-                <h2 className="heading-on-dark mt-3 text-3xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-4xl">
-                  Cloud Dancer<br /><span className="text-[#D43790]">The Series</span>
-                </h2>
-                <div className="mt-3 h-px w-10 bg-[#D43790]/60" />
-                <p className="mt-5 text-sm leading-relaxed !text-white/65">
-                  {HOME_CLOUD_DANCER_DEFAULT.introText}
-                </p>
-                <p className="mt-4 text-sm leading-relaxed !text-white/40">
-                  22 illuminated shades — each one chosen to complement every skin tone and every season. The complete Cloud Dancer collection is available exclusively through our professional portal.
-                </p>
-                <div className="mt-8">
-                  <NavLink
-                    to="/become-distributor"
-                    className="inline-block rounded-lg bg-[#D43790] px-7 py-3 text-sm font-bold uppercase tracking-[0.12em] text-white transition duration-300 hover:bg-[#b02d78]"
-                  >
-                    Add to Your Collection
-                  </NavLink>
+          {/* ── NEW COLLECTIONS: Sunshine Ready + Shimmer ── */}
+          <div className="mx-auto max-w-6xl space-y-6">
+
+            {/* SUNSHINE READY */}
+            <div className="overflow-hidden rounded-2xl border border-[#4A4A4A]/25">
+              <div className="grid lg:grid-cols-2">
+                <div className="flex flex-col justify-center bg-[#1A1A1A] px-8 py-12 sm:px-12">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Additions — Summer 2026</p>
+                  <h2 className="heading-on-dark mt-3 text-3xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-4xl">
+                    Sunshine Ready<br /><span className="text-[#D43790]">The Collection</span>
+                  </h2>
+                  <div className="mt-3 h-px w-10 bg-[#D43790]/60" />
+                  <p className="mt-5 text-sm leading-relaxed !text-white/65">
+                    Sunshine Ready is a summer gel polish collection shaped by retro femininity, sun-washed colour, and a playful mod spirit. Inspired by psychedelic fashion, soft pastel tones, and the energy of long summer days, the collection brings together a polished palette of expressive shades designed to feel fresh, modern, and effortlessly seasonal.
+                  </p>
+                  <p className="mt-4 text-sm leading-relaxed !text-white/40">
+                    From delicate coral-peach and angel pink to vivid rosy tones, soft iris lilac, and bright sky blue — each shade captures a different mood of summer. Vibrant, feminine, and highly wearable.
+                  </p>
+                  <div className="mt-8">
+                    <span className="inline-block rounded-lg bg-white/10 px-7 py-3 text-sm font-bold uppercase tracking-[0.12em] text-white/60 cursor-default">
+                      Coming Soon
+                    </span>
+                  </div>
+                </div>
+
+                {/* RIGHT: 9:16 portrait carousel */}
+                <div className="flex flex-col items-center justify-center bg-[#0F0F0F] p-6 sm:p-8">
+                  {displayedLookbookGroups.filter(g => g.id === 'sunshine-ready' || g.id === 'default').slice(0, 1).map((group) => {
+                    const pages = Array.isArray(group?.pages) ? group.pages : []
+                    if (!pages.length) return null
+                    const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
+                    const page = pages[selectedPageIndex]
+                    const pageType = String(page?.mediaType || '').toLowerCase()
+                    return (
+                      <div key={group.id} className="w-full max-w-[240px] sm:max-w-[260px]">
+                        <div className="relative overflow-hidden rounded-2xl bg-[#1A1A1A]" style={{ aspectRatio: '9/16' }}>
+                          <div className="flex h-full w-full items-center justify-center">
+                            {pageType === 'video'
+                              ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-full object-cover" autoPlay muted playsInline preload="metadata" />
+                              : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-cover" loading="lazy" />}
+                          </div>
+                          <button type="button" aria-label="Previous page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))} className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
+                          <button type="button" aria-label="Next page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))} className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg></button>
+                          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
+                            {pages.map((_, idx) => (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`h-1.5 rounded-full transition-all duration-300 ${idx === selectedPageIndex ? 'w-5 bg-[#D43790]' : 'w-1.5 bg-white/40'}`} />))}
+                          </div>
+                        </div>
+                        <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                          {pages.map((p, idx) => {
+                            const mt = String(p?.mediaType || '').toLowerCase()
+                            const isActive = idx === selectedPageIndex
+                            return (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-14 w-9 bg-[#222]">{mt === 'video' ? <video src={p.imageUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" /> : <img src={p.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}</div></button>)
+                          })}
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
+            </div>
 
-              {/* RIGHT: 9:16 portrait carousel */}
-              <div className="flex flex-col items-center justify-center bg-[#0F0F0F] p-6 sm:p-8">
-                {displayedLookbookGroups.map((group) => {
-                  const pages = Array.isArray(group?.pages) ? group.pages : []
-                  if (!pages.length) return null
-                  const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
-                  const page = pages[selectedPageIndex]
-                  const pageType = String(page?.mediaType || '').toLowerCase()
-                  return (
-                    <div key={group.id} className="w-full max-w-[240px] sm:max-w-[260px]">
-                      {/* Portrait stage — 9:16 */}
-                      <div className="relative overflow-hidden rounded-2xl bg-[#1A1A1A]" style={{ aspectRatio: '9/16' }}>
-                        <div className="flex h-full w-full items-center justify-center">
-                          {pageType === 'video'
-                            ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-full object-cover" autoPlay muted playsInline preload="metadata" />
-                            : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-cover" loading="lazy" />}
+            {/* SHIMMER COLLECTION */}
+            <div className="overflow-hidden rounded-2xl border border-[#4A4A4A]/25">
+              <div className="grid lg:grid-cols-2">
+                <div className="flex flex-col justify-center bg-[#1A1A1A] px-8 py-12 sm:px-12">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Effects — Summer 2026</p>
+                  <h2 className="heading-on-dark mt-3 text-3xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-4xl">
+                    Shimmer<br /><span className="text-[#D43790]">Collection</span>
+                  </h2>
+                  <div className="mt-3 h-px w-10 bg-[#D43790]/60" />
+                  <p className="mt-5 text-sm leading-relaxed !text-white/65">
+                    Discover the Shimmer Collection — luminous gel polish shades designed to glow from every angle. With pastel colour, shimmering pigment, and a glossy finish, this collection is perfect for fresh spring nails, summer manicures, and statement salon looks.
+                  </p>
+                  <div className="mt-8">
+                    <span className="inline-block rounded-lg bg-white/10 px-7 py-3 text-sm font-bold uppercase tracking-[0.12em] text-white/60 cursor-default">
+                      Coming Soon
+                    </span>
+                  </div>
+                </div>
+
+                {/* RIGHT: 9:16 portrait carousel */}
+                <div className="flex flex-col items-center justify-center bg-[#0F0F0F] p-6 sm:p-8">
+                  {displayedLookbookGroups.filter(g => g.id === 'shimmer-collection').slice(0, 1).map((group) => {
+                    const pages = Array.isArray(group?.pages) ? group.pages : []
+                    if (!pages.length) return null
+                    const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
+                    const page = pages[selectedPageIndex]
+                    const pageType = String(page?.mediaType || '').toLowerCase()
+                    return (
+                      <div key={group.id} className="w-full max-w-[240px] sm:max-w-[260px]">
+                        <div className="relative overflow-hidden rounded-2xl bg-[#1A1A1A]" style={{ aspectRatio: '9/16' }}>
+                          <div className="flex h-full w-full items-center justify-center">
+                            {pageType === 'video'
+                              ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-full object-cover" autoPlay muted playsInline preload="metadata" />
+                              : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-cover" loading="lazy" />}
+                          </div>
+                          <button type="button" aria-label="Previous page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))} className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
+                          <button type="button" aria-label="Next page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))} className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg></button>
+                          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
+                            {pages.map((_, idx) => (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`h-1.5 rounded-full transition-all duration-300 ${idx === selectedPageIndex ? 'w-5 bg-[#D43790]' : 'w-1.5 bg-white/40'}`} />))}
+                          </div>
                         </div>
-
-                        {/* Prev */}
-                        <button
-                          type="button"
-                          aria-label="Previous page"
-                          onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"
-                        ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
-                        {/* Next */}
-                        <button
-                          type="button"
-                          aria-label="Next page"
-                          onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"
-                        ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg></button>
-
-                        {/* Dot indicators */}
-                        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
-                          {pages.map((_, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))}
-                              className={`h-1.5 rounded-full transition-all duration-300 ${idx === selectedPageIndex ? 'w-5 bg-[#D43790]' : 'w-1.5 bg-white/40'}`}
-                            />
-                          ))}
+                        <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                          {pages.map((p, idx) => {
+                            const mt = String(p?.mediaType || '').toLowerCase()
+                            const isActive = idx === selectedPageIndex
+                            return (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-14 w-9 bg-[#222]">{mt === 'video' ? <video src={p.imageUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" /> : <img src={p.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}</div></button>)
+                          })}
                         </div>
                       </div>
-
-                      {/* Thumbnail filmstrip */}
-                      <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                        {pages.map((p, idx) => {
-                          const mt = String(p?.mediaType || '').toLowerCase()
-                          const isActive = idx === selectedPageIndex
-                          return (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))}
-                              className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}
-                            >
-                              <div className="h-14 w-9 bg-[#222]">
-                                {mt === 'video'
-                                  ? <video src={p.imageUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" />
-                                  : <img src={p.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}
-                              </div>
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )
-                })}
+                    )
+                  })}
+                </div>
               </div>
             </div>
+
           </div>
 
           </>}
@@ -6228,8 +6233,10 @@ function HomePage({ onOpenContactModal }) {
               const normalized = item.imageUrl.toLowerCase()
               const decoded = decodeURI(item.imageUrl).toLowerCase()
               const allowedPrefix = HOME_NEWS_CAROUSEL_FOLDER.toLowerCase()
+              const allowedPrefix2 = '/gelitup-media/images/news/spring summer/new effects collection/'
 
               return normalized.startsWith(allowedPrefix) || decoded.startsWith(allowedPrefix)
+                || normalized.startsWith(allowedPrefix2) || decoded.startsWith(allowedPrefix2)
             })
             .map((item) => ({
               ...item,
@@ -6390,15 +6397,21 @@ function HomePage({ onOpenContactModal }) {
         <div className="relative mx-auto max-w-6xl overflow-x-hidden">
           <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8">
             <div className="min-w-0 rounded-2xl border border-white/20 bg-black/35 p-5 sm:p-7">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Spring / Summer News</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Summer 2026 News</p>
               <h2 className="mt-2 text-xl font-extrabold uppercase tracking-[0.1em] !text-white sm:text-3xl">{homeCloudStory.title}</h2>
               <p className="mt-4 text-sm leading-relaxed text-white/90 sm:text-base">{homeCloudStory.introText}</p>
-              <NavLink
-                to={homeCloudStory.ctaLink}
-                className="mt-5 inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]"
-              >
-                {homeCloudStory.ctaLabel}
-              </NavLink>
+              {homeCloudStory.ctaLink ? (
+                <NavLink
+                  to={homeCloudStory.ctaLink}
+                  className="mt-5 inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]"
+                >
+                  {homeCloudStory.ctaLabel}
+                </NavLink>
+              ) : (
+                <span className="mt-5 inline-flex rounded-lg bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] text-white/60 cursor-default">
+                  {homeCloudStory.ctaLabel}
+                </span>
+              )}
             </div>
 
             <div className="min-w-0 w-full">

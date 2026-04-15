@@ -1,80 +1,32 @@
 {
-  "introText": "The new professional neutral. 2026 begins with softness, refinement, and intention. Cloud Dancer Series introduces illuminated tones that enhance the nail without overpowering it. Modern shades designed to feel effortless, elevated, and timeless. Minimalism becomes the new expression of confidence.",
-  "title": "Cloud Dancer - The Story",
-  "portalLabel": "Enter Portal",
-  "portalLink": "/portal/login",
-  "items": [
+  "collections": [
     {
-      "title": "Primary Image Starting On Carousel",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/Primary Image - Starting on Carousel.jpg",
-      "mediaType": "image",
-      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
+      "id": "sunshine-ready",
+      "title": "Sunshine Ready",
+      "introText": "Sunshine Ready is a summer gel polish collection shaped by retro femininity, sun-washed colour, and a playful mod spirit. From delicate coral-peach and angel pink to vivid rosy tones, soft iris lilac, and bright sky blue — each shade captures a different mood of summer.",
+      "portalLabel": "Coming Soon",
+      "portalLink": "",
+      "items": [
+        { "title": "Sunshine Ready 1", "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_1.jpg", "mediaType": "image" },
+        { "title": "Sunshine Ready 2", "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_2.jpg", "mediaType": "image" },
+        { "title": "Sunshine Ready 3", "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_3.jpg", "mediaType": "image" },
+        { "title": "Sunshine Ready 4", "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_4.jpg", "mediaType": "image" },
+        { "title": "Sunshine Ready 2612", "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_2612.jpg", "mediaType": "image" },
+        { "title": "Sunshine Ready 2613", "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_2613.jpg", "mediaType": "image" },
+        { "title": "Sunshine Ready 2614", "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_2614.jpg", "mediaType": "image" }
+      ]
     },
     {
-      "title": "2600 2",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2600-2.jpg",
-      "mediaType": "image",
-      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-    },
-    {
-      "title": "2601 2",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2601-2.jpg",
-      "mediaType": "image",
-      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-    },
-    {
-      "title": "2602 1",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2602-1.jpg",
-      "mediaType": "image",
-      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-    },
-    {
-      "title": "2603 1",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2603-1.jpg",
-      "mediaType": "image",
-      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-    },
-    {
-      "title": "2604 1",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2604-1.jpg",
-      "mediaType": "image",
-      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-    },
-    {
-      "title": "2605 1",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2605-1.jpg",
-      "mediaType": "image",
-      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-    },
-    {
-      "title": "2606 1",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2606-1.jpg",
-      "mediaType": "image",
-      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-    },
-    {
-      "title": "2607 1",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2607-1.jpg",
-      "mediaType": "image",
-      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-    },
-    {
-      "title": "2608 1",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2608-1.jpg",
-      "mediaType": "image",
-      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-    },
-    {
-      "title": "2609 1",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2609-1.jpg",
-      "mediaType": "image",
-      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
-    },
-    {
-      "title": "2610 1",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/1088x1440/2610-1.jpg",
-      "mediaType": "image",
-      "link": "/gelitup-media/images/news/gelitup_cloud_dancer_collection_pamphlet.pdf"
+      "id": "shimmer-collection",
+      "title": "Shimmer Collection",
+      "introText": "Discover the Shimmer Collection — luminous gel polish shades designed to glow from every angle. With pastel colour, shimmering pigment, and a glossy finish, this collection is perfect for fresh spring nails, summer manicures, and statement salon looks.",
+      "portalLabel": "Coming Soon",
+      "portalLink": "",
+      "items": [
+        { "title": "Shimmer 1", "imageUrl": "/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-1.jpg", "mediaType": "image" },
+        { "title": "Shimmer 2", "imageUrl": "/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-2.jpg", "mediaType": "image" },
+        { "title": "Shimmer 3", "imageUrl": "/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-3.jpg", "mediaType": "image" }
+      ]
     }
   ]
 }
