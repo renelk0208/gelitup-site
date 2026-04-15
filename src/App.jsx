@@ -9462,21 +9462,30 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         if (Array.isArray(saved.selectedCodes) && saved.selectedCodes.length) setSelectedCodes(saved.selectedCodes)
         if (saved.itemQtys && typeof saved.itemQtys === 'object') setItemQtys(saved.itemQtys)
         if (Array.isArray(saved.packageCartItems) && saved.packageCartItems.length) setPackageCartItems(saved.packageCartItems)
-        // Trigger abandoned cart email if cart is older than 24 hours
-        if (saved.savedAt && Date.now() - saved.savedAt > 24 * 60 * 60 * 1000) {
+        // Abandoned cart reminder — every 48 h, max 3 times (~1 week), then stop
+        const REMINDER_INTERVAL = 48 * 60 * 60 * 1000 // 48 hours
+        const MAX_REMINDERS = 3
+        const reminderCount = saved.abandonedReminderCount || 0
+        const lastReminder = saved.lastReminderAt || saved.savedAt
+        if (lastReminder && reminderCount < MAX_REMINDERS && Date.now() - lastReminder > REMINDER_INTERVAL) {
           const itemCount = (saved.selectedCodes?.length || 0) + (saved.packageCartItems?.length || 0)
           const userEmail = String(data?.user?.email || '').trim()
           if (itemCount > 0 && userEmail) {
             const firstName = String(data?.user?.user_metadata?.contact_name || '').split(' ')[0] || 'there'
+            const newCount = reminderCount + 1
             sendPortalEmailNotification({
               eventType: 'b2b_abandoned_cart',
               to: userEmail,
-              subject: `Psst… your cart is calling you, ${firstName}! 🛒`,
+              subject: newCount === 1
+                ? `Psst… your cart is calling you, ${firstName}! 🛒`
+                : newCount === 2
+                  ? `Still thinking it over, ${firstName}? Your cart misses you 💅`
+                  : `Last call, ${firstName} — your colours are waiting! ✨`,
               html: `
 <div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;max-width:540px;margin:0 auto;background:#111;border-radius:16px;overflow:hidden;">
   <div style="background:linear-gradient(135deg,#D43790,#9333ea);padding:32px 28px;text-align:center;">
     <p style="margin:0;font-size:28px;">🛒✨</p>
-    <h1 style="margin:12px 0 0;font-size:22px;font-weight:800;color:#fff;letter-spacing:0.02em;">Come quickly — your cart is calling you!</h1>
+    <h1 style="margin:12px 0 0;font-size:22px;font-weight:800;color:#fff;letter-spacing:0.02em;">${newCount < 3 ? 'Come quickly — your cart is calling you!' : 'Last chance — your cart is about to expire!'}</h1>
   </div>
   <div style="padding:28px;color:#e5e5e5;font-size:14px;line-height:1.7;">
     <p style="margin:0 0 16px;">Hey ${firstName},</p>
@@ -9492,8 +9501,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   </div>
 </div>`,
             }).catch(() => {})
-            // Reset the savedAt timer so the reminder doesn't fire every login
-            localStorage.setItem(key, JSON.stringify({ ...saved, savedAt: Date.now() }))
+            // Update reminder tracking so we don't exceed 3 nudges
+            localStorage.setItem(key, JSON.stringify({ ...saved, lastReminderAt: Date.now(), abandonedReminderCount: newCount }))
           }
         }
       }
@@ -9511,11 +9520,16 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       return
     }
     const existing = (() => { try { return JSON.parse(localStorage.getItem(key) || 'null') } catch { return null } })()
+    // Detect if cart contents changed — if so, reset reminder cycle
+    const contentsChanged = JSON.stringify(existing?.selectedCodes) !== JSON.stringify(selectedCodes)
+      || JSON.stringify(existing?.packageCartItems) !== JSON.stringify(packageCartItems)
     localStorage.setItem(key, JSON.stringify({
       selectedCodes,
       itemQtys,
       packageCartItems,
-      savedAt: existing?.savedAt ?? Date.now(),
+      savedAt: contentsChanged ? Date.now() : (existing?.savedAt ?? Date.now()),
+      lastReminderAt: contentsChanged ? undefined : existing?.lastReminderAt,
+      abandonedReminderCount: contentsChanged ? 0 : (existing?.abandonedReminderCount || 0),
     }))
   }, [selectedCodes, itemQtys, packageCartItems])
 
