@@ -1120,7 +1120,7 @@ const PROFORMA_HEADER = {
 }
 const EUR_CURRENCY_CODE = 'EUR'
 const FACTORY_PRICE_BOOK_EUR = {
-  colorDefault: 9.5,
+  colorDefault: 8.9,
   technicalBySku: {
     SUPERBOND: 12.5,
     '5IN1_CLR': 14,
@@ -1155,6 +1155,41 @@ function getUnitPriceEurForSku(sku) {
   return FACTORY_PRICE_BOOK_EUR.colorDefault
 }
 
+function proformaLookupPrice(priceMap, code, productName) {
+  if (!priceMap || !priceMap.size) return null
+  const normalized = normalizeSkuCode(code)
+  // Direct code lookup
+  const byCode = priceMap.get(normalized)
+  if (byCode?.price != null) return byCode.price
+  // By product name
+  if (productName) {
+    const byName = priceMap.get(normalizeProductName(productName))
+    if (byName?.price != null) return byName.price
+  }
+  // Strip GIUP prefix: "GIUP N008" → "N008", "GIUP 204" → "204"
+  const stripped = normalized.replace(/^GIUP[-\s]+/, '')
+  if (stripped !== normalized) {
+    const byStripped = priceMap.get(stripped)
+    if (byStripped?.price != null) return byStripped.price
+    // Try zero-padded and zero-stripped variants for number codes
+    const numOnly = stripped.match(/^(\d+[A-Z]?)$/)
+    if (numOnly) {
+      const padded = numOnly[1].replace(/^(\d+)/, n => n.padStart(2, '0'))
+      const unpadded = numOnly[1].replace(/^0+(\d)/, '$1')
+      const e = priceMap.get(padded) || priceMap.get(unpadded)
+      if (e?.price != null) return e.price
+    }
+    // Try series+number: "GIUP BTO02" → "BTO 02", "BTO02"
+    const seriesMatch = stripped.match(/^([A-Z]+)(\d+[A-Z]?)$/)
+    if (seriesMatch) {
+      const s = seriesMatch[1], n = seriesMatch[2]
+      const e = priceMap.get(`${s} ${n}`) || priceMap.get(`${s} ${n.padStart(2, '0')}`) || priceMap.get(`${s}${n}`) || priceMap.get(`${s}${n.padStart(2, '0')}`)
+      if (e?.price != null) return e.price
+    }
+  }
+  return null
+}
+
 function buildProformaFromCart({
   orderId,
   userProfile,
@@ -1171,7 +1206,9 @@ function buildProformaFromCart({
   const selectedLines = selectedCodes.map((code) => {
     const normalized = normalizeSkuCode(code)
     const product = productMap.get(normalized)
-    const basePriceEur = priceMap?.get(normalized)?.price ?? getUnitPriceEurForSku(normalized)
+    // Use the price already resolved during feed loading (full matching logic),
+    // then try priceMap lookup, then hardcoded fallback as last resort.
+    const basePriceEur = product?.price ?? proformaLookupPrice(priceMap, code, product?.name) ?? getUnitPriceEurForSku(normalized)
     const unitPriceEur = Number((basePriceEur * tierPriceMultiplier).toFixed(2))
     const qty = Number(itemQtys?.[code] || itemQtys?.[normalized] || 1)
 
@@ -1186,7 +1223,8 @@ function buildProformaFromCart({
   })
 
   const packageLines = packageCartItems.map((item) => {
-    const basePriceEur = priceMap?.get(normalizeSkuCode(item.sku))?.price ?? getUnitPriceEurForSku(item.sku)
+    const product = productMap.get(normalizeSkuCode(item.sku))
+    const basePriceEur = product?.price ?? item.price ?? proformaLookupPrice(priceMap, item.sku, item.name) ?? getUnitPriceEurForSku(item.sku)
     const unitPriceEur = Number((basePriceEur * tierPriceMultiplier).toFixed(2))
     const qty = Number(item.qty || 0)
     return {
@@ -11762,6 +11800,12 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const submitOrder = async () => {
     if (!selectedCodes.length && !packageCartItems.length && !includeProfessionalBasePack) {
       setCheckoutError('Select at least one product to finalize order.')
+      setCheckoutMessage('')
+      return
+    }
+
+    if (!priceMap || !priceMap.size) {
+      setCheckoutError('Price list is still loading — please wait a moment and try again.')
       setCheckoutMessage('')
       return
     }
