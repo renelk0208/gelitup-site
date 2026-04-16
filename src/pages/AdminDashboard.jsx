@@ -581,8 +581,11 @@ function OrdersPanel() {
   }
 
   const markProcessing = async (id) => {
-    if (!paymentConfirmed[id]) { alert('Please confirm payment has been received before marking as Processing.'); return }
-    await updateOrder(id, { status: 'processing', payment_confirmed: true })
+    await updateOrder(id, { status: 'processing' })
+  }
+
+  const togglePaymentConfirmed = async (id, currentValue) => {
+    await updateOrder(id, { payment_confirmed: !currentValue })
   }
 
   const startEdit = (row) => {
@@ -727,6 +730,14 @@ function OrdersPanel() {
                           <span className={row.payment_confirmed ? 'font-semibold text-emerald-600' : 'text-slate-400'}>
                             {row.payment_confirmed ? '✓ Yes' : 'Not yet'}
                           </span>
+                          <button
+                            type="button"
+                            onClick={() => togglePaymentConfirmed(row.id, row.payment_confirmed)}
+                            disabled={saving === row.id}
+                            className={`ml-2 rounded px-2 py-0.5 text-[10px] font-semibold transition ${row.payment_confirmed ? 'bg-rose-100 text-rose-600 hover:bg-rose-200' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'} disabled:opacity-40`}
+                          >
+                            {saving === row.id ? '…' : row.payment_confirmed ? 'Undo' : 'Confirm Payment'}
+                          </button>
                         </div>
                         <div className="sm:col-span-2"><span className="font-semibold text-slate-400">Shipping Address</span><br />{row.shipping_address || '—'}</div>
                         {(row.tracking_number || isShipped) && (
@@ -895,22 +906,14 @@ function OrdersPanel() {
                     </div>
                   )}
 
-                  {/* ── Mark as Processing (requires payment confirmation) ── */}
+                  {/* ── Mark as Processing ── */}
                   {isSubmitted && !isEditing && (
                     <div className="rounded-xl border border-blue-200 bg-blue-50 p-3 space-y-2">
                       <p className="text-xs font-semibold text-blue-700">Mark as Processing</p>
-                      <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={paymentConfirmed[row.id] || false}
-                          onChange={e => setPaymentConfirmed(prev => ({ ...prev, [row.id]: e.target.checked }))}
-                          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        Payment received (full or part payment confirmed)
-                      </label>
+                      <p className="text-[10px] text-slate-500">You can confirm payment separately using the button above.</p>
                       <button
                         onClick={() => markProcessing(row.id)}
-                        disabled={saving === row.id || !paymentConfirmed[row.id]}
+                        disabled={saving === row.id}
                         className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-40"
                       >
                         {saving === row.id ? 'Saving…' : '→ Mark as Processing'}
