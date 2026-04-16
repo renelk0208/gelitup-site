@@ -6201,6 +6201,14 @@ function HomePage({ onOpenContactModal }) {
   const [activeHomeNewsSlide, setActiveHomeNewsSlide] = useState(0)
   const [homeCloudStory, setHomeCloudStory] = useState(HOME_CLOUD_DANCER_DEFAULT)
 
+  const HOME_SHIMMER_IMAGES = [
+    '/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-1.jpg',
+    '/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-2.jpg',
+    '/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-3.jpg',
+  ]
+  const [activeShimmerSlide, setActiveShimmerSlide] = useState(0)
+  const safeShimmerIndex = HOME_SHIMMER_IMAGES.length ? Math.min(activeShimmerSlide, HOME_SHIMMER_IMAGES.length - 1) : 0
+
   useEffect(() => setPageSEO({
     title: 'GEL.IT.UP by GIUP® | Professional Gel Polish, Builder Gel & Nail Systems',
     description: 'Professional gel polish with 1,000+ shades, builder gel systems, base coats and top coats. HEMA-free, TPO-free, EU certified. Available wholesale to professional nail technicians worldwide.',
@@ -6472,7 +6480,22 @@ function HomePage({ onOpenContactModal }) {
               </div>
               <div className="relative bg-[#0F0F0F]">
                 <div className="relative aspect-[4/5] w-full overflow-hidden">
-                  <img src="/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-1.jpg" alt="Shimmer Collection" className="h-full w-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
+                  <img src={HOME_SHIMMER_IMAGES[safeShimmerIndex]} alt="Shimmer Collection" className="h-full w-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
+                  {HOME_SHIMMER_IMAGES.length > 1 && (
+                    <>
+                      <button type="button" aria-label="Previous" onClick={() => setActiveShimmerSlide((s) => (s - 1 + HOME_SHIMMER_IMAGES.length) % HOME_SHIMMER_IMAGES.length)} className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4"><path d="M15 18l-6-6 6-6" /></svg></button>
+                      <button type="button" aria-label="Next" onClick={() => setActiveShimmerSlide((s) => (s + 1) % HOME_SHIMMER_IMAGES.length)} className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4"><path d="M9 18l6-6-6-6" /></svg></button>
+                      <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
+                        {HOME_SHIMMER_IMAGES.map((_, idx) => (<button key={idx} type="button" onClick={() => setActiveShimmerSlide(idx)} className={`h-1.5 rounded-full transition-all duration-300 ${idx === safeShimmerIndex ? 'w-5 bg-[#D43790]' : 'w-1.5 bg-white/40'}`} />))}
+                      </div>
+                    </>
+                  )}
+                </div>
+                <div className="flex gap-1.5 overflow-x-auto bg-[#0F0F0F] px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {HOME_SHIMMER_IMAGES.map((src, idx) => {
+                    const isActive = idx === safeShimmerIndex
+                    return (<button key={idx} type="button" onClick={() => setActiveShimmerSlide(idx)} className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-12 w-9 bg-[#222]"><img src={src} alt="" className="h-full w-full object-cover" loading="lazy" /></div></button>)
+                  })}
                 </div>
               </div>
             </div>
