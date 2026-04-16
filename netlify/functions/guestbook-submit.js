@@ -72,7 +72,7 @@ export const handler = async (event) => {
       return {
         statusCode: 500,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'Failed to save entry.' }),
+        body: JSON.stringify({ error: `Failed to save entry: ${insertErr.message || insertErr.code || JSON.stringify(insertErr)}` }),
       }
     }
 
