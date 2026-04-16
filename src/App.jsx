@@ -5257,11 +5257,11 @@ function FullCataloguePage() {
                     const pageType = String(page?.mediaType || '').toLowerCase()
                     return (
                       <div key={group.id} className="w-full max-w-[240px] sm:max-w-[260px]">
-                        <div className="relative overflow-hidden rounded-2xl bg-[#1A1A1A]" style={{ aspectRatio: '9/16' }}>
+                        <div className="relative overflow-hidden rounded-2xl bg-[#0F0F0F]" style={{ aspectRatio: '9/16' }}>
                           <div className="flex h-full w-full items-center justify-center">
                             {pageType === 'video'
-                              ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-full object-cover" autoPlay muted playsInline preload="metadata" />
-                              : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-cover" loading="lazy" />}
+                              ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-full object-contain" autoPlay muted playsInline preload="metadata" />
+                              : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-contain" loading="lazy" />}
                           </div>
                           <button type="button" aria-label="Previous page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))} className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
                           <button type="button" aria-label="Next page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))} className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg></button>
@@ -5312,11 +5312,11 @@ function FullCataloguePage() {
                     const pageType = String(page?.mediaType || '').toLowerCase()
                     return (
                       <div key={group.id} className="w-full max-w-[240px] sm:max-w-[260px]">
-                        <div className="relative overflow-hidden rounded-2xl bg-[#1A1A1A]" style={{ aspectRatio: '9/16' }}>
+                        <div className="relative overflow-hidden rounded-2xl bg-[#0F0F0F]" style={{ aspectRatio: '9/16' }}>
                           <div className="flex h-full w-full items-center justify-center">
                             {pageType === 'video'
-                              ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-full object-cover" autoPlay muted playsInline preload="metadata" />
-                              : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-cover" loading="lazy" />}
+                              ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-full object-contain" autoPlay muted playsInline preload="metadata" />
+                              : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-contain" loading="lazy" />}
                           </div>
                           <button type="button" aria-label="Previous page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))} className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
                           <button type="button" aria-label="Next page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))} className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg></button>
@@ -6441,8 +6441,8 @@ function HomePage({ onOpenContactModal }) {
               <div className="flex flex-1 flex-col items-center justify-center bg-[#0F0F0F] p-4 sm:p-6">
                 {activeHomeNewsItem && (
                   <div className="w-full max-w-[240px] sm:max-w-[260px]">
-                    <div className="relative overflow-hidden rounded-2xl bg-[#1A1A1A]" style={{ aspectRatio: '9/16' }}>
-                      <img src={activeHomeNewsItem.imageUrl} alt="Sunshine Ready" className="h-full w-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
+                    <div className="relative overflow-hidden rounded-2xl bg-[#0F0F0F]" style={{ aspectRatio: '9/16' }}>
+                      <img src={activeHomeNewsItem.imageUrl} alt="Sunshine Ready" className="h-full w-full object-contain" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
                       {homeNewsCarousel.length > 1 && (
                         <>
                           <button type="button" aria-label="Previous" onClick={() => setActiveHomeNewsSlide((s) => (s - 1 + homeNewsCarousel.length) % homeNewsCarousel.length)} className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4"><path d="M15 18l-6-6 6-6" /></svg></button>
@@ -6477,8 +6477,8 @@ function HomePage({ onOpenContactModal }) {
               </div>
               <div className="flex flex-1 flex-col items-center justify-center bg-[#0F0F0F] p-4 sm:p-6">
                 <div className="w-full max-w-[240px] sm:max-w-[260px]">
-                  <div className="relative overflow-hidden rounded-2xl bg-[#1A1A1A]" style={{ aspectRatio: '9/16' }}>
-                    <img src="/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-1.jpg" alt="Shimmer Collection" className="h-full w-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
+                  <div className="relative overflow-hidden rounded-2xl bg-[#0F0F0F]" style={{ aspectRatio: '9/16' }}>
+                    <img src="/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-1.jpg" alt="Shimmer Collection" className="h-full w-full object-contain" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
                   </div>
                 </div>
               </div>
