@@ -5226,8 +5226,8 @@ function FullCataloguePage() {
           <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* SUNSHINE READY */}
-            <div className="overflow-hidden rounded-2xl border border-[#4A4A4A]/25">
-              <div>
+            <div className="flex overflow-hidden rounded-2xl border border-[#4A4A4A]/25">
+              <div className="flex h-full w-full flex-col">
                 <div className="flex flex-col justify-center bg-[#1A1A1A] px-6 py-8 sm:px-8">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Additions — Summer 2026</p>
                   <h2 className="heading-on-dark mt-3 text-2xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-3xl">
@@ -5248,7 +5248,7 @@ function FullCataloguePage() {
                 </div>
 
                 {/* CAROUSEL */}
-                <div className="flex flex-col items-center justify-center bg-[#0F0F0F] p-4 sm:p-6">
+                <div className="flex flex-1 flex-col items-center justify-center bg-[#0F0F0F] p-4 sm:p-6">
                   {displayedLookbookGroups.filter(g => g.id === 'sunshine-ready' || g.id === 'default').slice(0, 1).map((group) => {
                     const pages = Array.isArray(group?.pages) ? group.pages : []
                     if (!pages.length) return null
@@ -5284,8 +5284,8 @@ function FullCataloguePage() {
             </div>
 
             {/* SHIMMER COLLECTION */}
-            <div className="overflow-hidden rounded-2xl border border-[#4A4A4A]/25">
-              <div>
+            <div className="flex overflow-hidden rounded-2xl border border-[#4A4A4A]/25">
+              <div className="flex h-full w-full flex-col">
                 <div className="flex flex-col justify-center bg-[#1A1A1A] px-6 py-8 sm:px-8">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Effects — Summer 2026</p>
                   <h2 className="heading-on-dark mt-3 text-2xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-3xl">
@@ -5303,7 +5303,7 @@ function FullCataloguePage() {
                 </div>
 
                 {/* CAROUSEL */}
-                <div className="flex flex-col items-center justify-center bg-[#0F0F0F] p-4 sm:p-6">
+                <div className="flex flex-1 flex-col items-center justify-center bg-[#0F0F0F] p-4 sm:p-6">
                   {displayedLookbookGroups.filter(g => g.id === 'shimmer-collection').slice(0, 1).map((group) => {
                     const pages = Array.isArray(group?.pages) ? group.pages : []
                     if (!pages.length) return null
@@ -6418,77 +6418,73 @@ function HomePage({ onOpenContactModal }) {
       </div>
 
       <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-x-hidden bg-[#1A1A1A] px-4 py-10 sm:px-8 sm:py-12">
+        <div className="relative mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <div className="relative mx-auto max-w-6xl overflow-x-hidden">
-          <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8">
-            <div className="min-w-0 rounded-2xl border border-white/20 bg-black/35 p-5 sm:p-7">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Summer 2026 News</p>
-              <h2 className="mt-2 text-xl font-extrabold uppercase tracking-[0.1em] !text-white sm:text-3xl">{homeCloudStory.title}</h2>
-              <p className="mt-4 text-sm leading-relaxed text-white/90 sm:text-base">{homeCloudStory.introText}</p>
-              {homeCloudStory.ctaLink ? (
-                <NavLink
-                  to={homeCloudStory.ctaLink}
-                  className="mt-5 inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]"
-                >
-                  {homeCloudStory.ctaLabel}
-                </NavLink>
-              ) : (
-                <span className="mt-5 inline-flex rounded-lg bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] text-white/60 cursor-default">
-                  {homeCloudStory.ctaLabel}
-                </span>
-              )}
-            </div>
-
-            <div className="min-w-0 w-full">
-              {activeHomeNewsItem && (
-                <div className="mx-auto w-full max-w-[280px] sm:max-w-[520px]">
-                  <div className="overflow-hidden rounded-xl border border-white/20 bg-black/20 p-2">
-                    <div className="aspect-square w-full overflow-hidden rounded-lg bg-[#F8F8F8] sm:aspect-[4/5]">
-                      <img
-                        src={activeHomeNewsItem.imageUrl}
-                        alt="Spring/Summer carousel visual"
-                        className="h-full w-full object-cover"
-                        loading="lazy"
-                        onError={(event) => {
-                          event.currentTarget.src = '/logo.png'
-                        }}
-                      />
+          {/* SUNSHINE READY */}
+          <div className="flex overflow-hidden rounded-2xl border border-white/15">
+            <div className="flex h-full w-full flex-col">
+              <div className="flex flex-col justify-center bg-[#1A1A1A] px-6 py-8 sm:px-8">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Additions — Summer 2026</p>
+                <h2 className="heading-on-dark mt-3 text-2xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-3xl">
+                  Sunshine Ready<br /><span className="text-[#D43790]">The Collection</span>
+                </h2>
+                <div className="mt-3 h-px w-10 bg-[#D43790]/60" />
+                <p className="mt-5 text-sm leading-relaxed !text-white/65">{homeCloudStory.introText}</p>
+                <div className="mt-6">
+                  {homeCloudStory.ctaLink ? (
+                    <NavLink to={homeCloudStory.ctaLink} className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-xs font-bold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]">{homeCloudStory.ctaLabel}</NavLink>
+                  ) : (
+                    <span className="inline-block rounded-lg bg-white/10 px-5 py-2.5 text-sm font-bold uppercase tracking-[0.12em] text-white/60 cursor-default">{homeCloudStory.ctaLabel}</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-1 flex-col items-center justify-center bg-[#0F0F0F] p-4 sm:p-6">
+                {activeHomeNewsItem && (
+                  <div className="w-full max-w-[240px] sm:max-w-[260px]">
+                    <div className="relative overflow-hidden rounded-2xl bg-[#1A1A1A]" style={{ aspectRatio: '9/16' }}>
+                      <img src={activeHomeNewsItem.imageUrl} alt="Sunshine Ready" className="h-full w-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
+                      {homeNewsCarousel.length > 1 && (
+                        <>
+                          <button type="button" aria-label="Previous" onClick={() => setActiveHomeNewsSlide((s) => (s - 1 + homeNewsCarousel.length) % homeNewsCarousel.length)} className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4"><path d="M15 18l-6-6 6-6" /></svg></button>
+                          <button type="button" aria-label="Next" onClick={() => setActiveHomeNewsSlide((s) => (s + 1) % homeNewsCarousel.length)} className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4"><path d="M9 18l6-6-6-6" /></svg></button>
+                          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
+                            {homeNewsCarousel.map((_, idx) => (<button key={idx} type="button" onClick={() => setActiveHomeNewsSlide(idx)} className={`h-1.5 rounded-full transition-all duration-300 ${idx === safeHomeNewsIndex ? 'w-5 bg-[#D43790]' : 'w-1.5 bg-white/40'}`} />))}
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
-                </div>
-              )}
-
-              {homeNewsCarousel.length > 1 && (
-                <div className="mt-4 flex items-center justify-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setActiveHomeNewsSlide((s) => (s - 1 + homeNewsCarousel.length) % homeNewsCarousel.length)}
-                    aria-label="Previous slide"
-                    className="flex h-7 w-7 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white/70 transition hover:border-white/50 hover:text-white"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
-                  </button>
-                  {homeNewsCarousel.map((item, index) => (
-                    <button
-                      key={`${item.id || item.imageUrl}-${index}`}
-                      type="button"
-                      onClick={() => setActiveHomeNewsSlide(index)}
-                      aria-label={`Go to carousel slide ${index + 1}`}
-                      className={`h-2.5 rounded-full transition ${index === safeHomeNewsIndex ? 'w-7 bg-[#D43790]' : 'w-2.5 bg-white/35 hover:bg-white/55'}`}
-                    />
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => setActiveHomeNewsSlide((s) => (s + 1) % homeNewsCarousel.length)}
-                    aria-label="Next slide"
-                    className="flex h-7 w-7 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white/70 transition hover:border-white/50 hover:text-white"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-                  </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
+
+          {/* SHIMMER COLLECTION */}
+          <div className="flex overflow-hidden rounded-2xl border border-white/15">
+            <div className="flex h-full w-full flex-col">
+              <div className="flex flex-col justify-center bg-[#1A1A1A] px-6 py-8 sm:px-8">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Effects — Summer 2026</p>
+                <h2 className="heading-on-dark mt-3 text-2xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-3xl">
+                  Shimmer<br /><span className="text-[#D43790]">Collection</span>
+                </h2>
+                <div className="mt-3 h-px w-10 bg-[#D43790]/60" />
+                <p className="mt-5 text-sm leading-relaxed !text-white/65">
+                  Discover the Shimmer Collection — luminous gel polish shades designed to glow from every angle. With pastel colour, shimmering pigment, and a glossy finish, this collection is perfect for fresh spring nails, summer manicures, and statement salon looks.
+                </p>
+                <div className="mt-6">
+                  <span className="inline-block rounded-lg bg-white/10 px-5 py-2.5 text-sm font-bold uppercase tracking-[0.12em] text-white/60 cursor-default">Coming Soon</span>
+                </div>
+              </div>
+              <div className="flex flex-1 flex-col items-center justify-center bg-[#0F0F0F] p-4 sm:p-6">
+                <div className="w-full max-w-[240px] sm:max-w-[260px]">
+                  <div className="relative overflow-hidden rounded-2xl bg-[#1A1A1A]" style={{ aspectRatio: '9/16' }}>
+                    <img src="/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-1.jpg" alt="Shimmer Collection" className="h-full w-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
