@@ -11,6 +11,14 @@ export const handler = async (event) => {
   const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
 
+  console.log('[guestbook-submit] ENV check:', {
+    hasViteUrl: !!process.env.VITE_SUPABASE_URL,
+    hasSupabaseUrl: !!process.env.SUPABASE_URL,
+    hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    hasViteAnon: !!process.env.VITE_SUPABASE_ANON_KEY,
+    resolvedUrl: supabaseUrl ? supabaseUrl.substring(0, 30) + '...' : 'MISSING',
+  })
+
   if (!supabaseUrl || !supabaseKey) {
     return {
       statusCode: 503,
