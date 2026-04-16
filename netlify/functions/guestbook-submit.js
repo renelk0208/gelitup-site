@@ -9,6 +9,9 @@ export const handler = async (event) => {
   const supabaseUrl = (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '').replace(/\/+$/, '')
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
 
+  const keySource = process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SERVICE_ROLE' : (process.env.VITE_SUPABASE_ANON_KEY ? 'VITE_ANON' : 'NONE')
+  console.log('[guestbook-submit] Debug:', { keySource, keyLen: supabaseKey?.length, urlPrefix: supabaseUrl?.substring(0, 40) })
+
   if (!supabaseUrl || !supabaseKey) {
     return {
       statusCode: 503,
@@ -79,7 +82,7 @@ export const handler = async (event) => {
       return {
         statusCode: 500,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: `Failed to save entry (${res.status}): ${errBody}` }),
+        body: JSON.stringify({ error: `Failed to save entry (${res.status}): ${errBody}`, debug: { keySource, keyLen: supabaseKey?.length, urlPrefix: supabaseUrl?.substring(0, 40) } }),
       }
     }
 
