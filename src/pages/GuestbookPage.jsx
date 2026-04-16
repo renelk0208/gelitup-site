@@ -267,7 +267,7 @@ export default function GuestbookPage() {
                 maxLength={1000}
                 rows={4}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-200"
-                placeholder={`Hi, I'm ${name || '[Name]'} from ${country || '[Country]'}. My favorite GEL.IT.UP product is…`}
+                placeholder="Share your experience with GEL.IT.UP products…"
               />
               <p className="mt-1 text-right text-xs text-slate-400">{comment.length}/1,000</p>
             </div>
