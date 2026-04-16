@@ -1,5 +1,3 @@
-import { createClient } from '@supabase/supabase-js'
-
 const TABLE = 'guestbook'
 const VALID_ROLES = ['Nail Technician', 'Salon Owner', 'Distributor', 'Educator']
 
@@ -8,16 +6,8 @@ export const handler = async (event) => {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) }
   }
 
-  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL
+  const supabaseUrl = (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '').replace(/\/+$/, '')
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
-
-  console.log('[guestbook-submit] ENV check:', {
-    hasViteUrl: !!process.env.VITE_SUPABASE_URL,
-    hasSupabaseUrl: !!process.env.SUPABASE_URL,
-    hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-    hasViteAnon: !!process.env.VITE_SUPABASE_ANON_KEY,
-    resolvedUrl: supabaseUrl ? supabaseUrl.substring(0, 30) + '...' : 'MISSING',
-  })
 
   if (!supabaseUrl || !supabaseKey) {
     return {
@@ -64,23 +54,32 @@ export const handler = async (event) => {
   }
 
   try {
-    const supabase = createClient(supabaseUrl, supabaseKey)
-    const { error: insertErr } = await supabase.from(TABLE).insert([{
-      name: name.trim(),
-      country: country.trim(),
-      role,
-      message: comment.trim(),
-      anonymous: !!anonymous,
-      approved: false,
-      featured: false,
-    }])
+    const res = await fetch(`${supabaseUrl}/rest/v1/${TABLE}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify({
+        name: name.trim(),
+        country: country.trim(),
+        role,
+        message: comment.trim(),
+        anonymous: !!anonymous,
+        approved: false,
+        featured: false,
+      }),
+    })
 
-    if (insertErr) {
-      console.error('[guestbook-submit] Insert error:', insertErr)
+    if (!res.ok) {
+      const errBody = await res.text()
+      console.error('[guestbook-submit] Insert error:', res.status, errBody)
       return {
         statusCode: 500,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: `Failed to save entry: ${insertErr.message || insertErr.code || JSON.stringify(insertErr)}` }),
+        body: JSON.stringify({ error: `Failed to save entry (${res.status}).` }),
       }
     }
 
@@ -94,7 +93,7 @@ export const handler = async (event) => {
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: 'Server error.' }),
+      body: JSON.stringify({ error: `Server error: ${err.message}` }),
     }
   }
 }
