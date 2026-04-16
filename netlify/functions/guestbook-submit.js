@@ -39,7 +39,7 @@ export const handler = async (event) => {
     }
   }
 
-  const { name, country, role, comment } = payload
+  const { name, country, role, comment, anonymous } = payload
 
   // Validation
   if (!name || typeof name !== 'string' || name.trim().length < 1 || name.trim().length > 100) {
@@ -62,6 +62,7 @@ export const handler = async (event) => {
       country: country.trim(),
       role,
       message: comment.trim(),
+      anonymous: !!anonymous,
       approved: false,
       featured: false,
     }])

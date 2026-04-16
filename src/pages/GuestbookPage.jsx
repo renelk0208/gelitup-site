@@ -68,12 +68,12 @@ function EntryCard({ entry, featured }) {
   return (
     <div className={`rounded-2xl border p-5 transition ${featured ? 'border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 via-white to-violet-50 shadow-[0_2px_20px_rgba(212,55,144,0.12)]' : 'border-slate-100 bg-white'}`}>
       <div className="flex items-start gap-3">
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${colorFor(entry.name)}`}>
-          {initials(entry.name)}
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${entry.anonymous ? 'bg-slate-400' : colorFor(entry.name)}`}>
+          {entry.anonymous ? '🙈' : initials(entry.name)}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-sm font-bold text-slate-900">{entry.name}</p>
+            <p className="text-sm font-bold text-slate-900">{entry.anonymous ? 'Anonymous' : entry.name}</p>
             <span className="text-sm" title={entry.country}>{flagFor(entry.country)}</span>
             {featured && <span className="text-xs">⭐</span>}
           </div>
@@ -104,6 +104,7 @@ export default function GuestbookPage() {
   const [role, setRole] = useState('')
   const [comment, setComment] = useState('')
   const [website, setWebsite] = useState('') // honeypot
+  const [anonymous, setAnonymous] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
@@ -112,7 +113,7 @@ export default function GuestbookPage() {
     if (!hasSupabaseConfig || !supabase) return
     const { data } = await supabase
       .from(TABLE)
-      .select('id, name, country, role, message, created_at, featured')
+      .select('id, name, country, role, message, created_at, featured, anonymous')
       .eq('approved', true)
       .order('created_at', { ascending: false })
       .limit(100)
@@ -147,6 +148,7 @@ export default function GuestbookPage() {
           country: country.trim(),
           role,
           comment: comment.trim(),
+          anonymous,
           website, // honeypot
         }),
       })
@@ -157,6 +159,7 @@ export default function GuestbookPage() {
       setCountry('')
       setRole('')
       setComment('')
+      setAnonymous(false)
       setWebsite('')
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.')
@@ -268,6 +271,16 @@ export default function GuestbookPage() {
               />
               <p className="mt-1 text-right text-xs text-slate-400">{comment.length}/1,000</p>
             </div>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={anonymous}
+                onChange={(e) => setAnonymous(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-fuchsia-600 focus:ring-fuchsia-200"
+              />
+              <span className="text-sm text-slate-600">I prefer to remain anonymous</span>
+            </label>
 
             {error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-600">{error}</p>}
 
