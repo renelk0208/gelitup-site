@@ -5223,14 +5223,14 @@ function FullCataloguePage() {
           </div>
 
           {/* ── NEW COLLECTIONS: Sunshine Ready + Shimmer ── */}
-          <div className="mx-auto max-w-6xl space-y-6">
+          <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* SUNSHINE READY */}
             <div className="overflow-hidden rounded-2xl border border-[#4A4A4A]/25">
-              <div className="grid lg:grid-cols-2">
-                <div className="flex flex-col justify-center bg-[#1A1A1A] px-8 py-12 sm:px-12">
+              <div>
+                <div className="flex flex-col justify-center bg-[#1A1A1A] px-6 py-8 sm:px-8">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Additions — Summer 2026</p>
-                  <h2 className="heading-on-dark mt-3 text-3xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-4xl">
+                  <h2 className="heading-on-dark mt-3 text-2xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-3xl">
                     Sunshine Ready<br /><span className="text-[#D43790]">The Collection</span>
                   </h2>
                   <div className="mt-3 h-px w-10 bg-[#D43790]/60" />
@@ -5247,8 +5247,8 @@ function FullCataloguePage() {
                   </div>
                 </div>
 
-                {/* RIGHT: 9:16 portrait carousel */}
-                <div className="flex flex-col items-center justify-center bg-[#0F0F0F] p-6 sm:p-8">
+                {/* CAROUSEL */}
+                <div className="flex flex-col items-center justify-center bg-[#0F0F0F] p-4 sm:p-6">
                   {displayedLookbookGroups.filter(g => g.id === 'sunshine-ready' || g.id === 'default').slice(0, 1).map((group) => {
                     const pages = Array.isArray(group?.pages) ? group.pages : []
                     if (!pages.length) return null
@@ -5285,10 +5285,10 @@ function FullCataloguePage() {
 
             {/* SHIMMER COLLECTION */}
             <div className="overflow-hidden rounded-2xl border border-[#4A4A4A]/25">
-              <div className="grid lg:grid-cols-2">
-                <div className="flex flex-col justify-center bg-[#1A1A1A] px-8 py-12 sm:px-12">
+              <div>
+                <div className="flex flex-col justify-center bg-[#1A1A1A] px-6 py-8 sm:px-8">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Effects — Summer 2026</p>
-                  <h2 className="heading-on-dark mt-3 text-3xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-4xl">
+                  <h2 className="heading-on-dark mt-3 text-2xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-3xl">
                     Shimmer<br /><span className="text-[#D43790]">Collection</span>
                   </h2>
                   <div className="mt-3 h-px w-10 bg-[#D43790]/60" />
@@ -5302,8 +5302,8 @@ function FullCataloguePage() {
                   </div>
                 </div>
 
-                {/* RIGHT: 9:16 portrait carousel */}
-                <div className="flex flex-col items-center justify-center bg-[#0F0F0F] p-6 sm:p-8">
+                {/* CAROUSEL */}
+                <div className="flex flex-col items-center justify-center bg-[#0F0F0F] p-4 sm:p-6">
                   {displayedLookbookGroups.filter(g => g.id === 'shimmer-collection').slice(0, 1).map((group) => {
                     const pages = Array.isArray(group?.pages) ? group.pages : []
                     if (!pages.length) return null
@@ -6418,19 +6418,6 @@ function HomePage({ onOpenContactModal }) {
       </div>
 
       <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-x-hidden bg-[#1A1A1A] px-4 py-10 sm:px-8 sm:py-12">
-        <video
-          src={HOME_NEWS_CLOUD_VIDEO_URL}
-          className="absolute inset-0 h-full w-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
-          controls={false}
-          preload="metadata"
-          aria-hidden="true"
-          onLoadedData={(e) => { e.target.playbackRate = 0.5 }}
-        />
-        <div className="absolute inset-0 bg-[#1A1A1A]/45" />
 
         <div className="relative mx-auto max-w-6xl overflow-x-hidden">
           <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8">
