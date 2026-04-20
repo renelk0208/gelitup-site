@@ -2944,6 +2944,7 @@ function FullCataloguePage() {
   const [expandedSections, setExpandedSections] = useState({})
   const [activeSubcategory, setActiveSubcategory] = useState('')
   const [activeColorFamily, setActiveColorFamily] = useState('ALL')
+  const [activeCatEyeVariant, setActiveCatEyeVariant] = useState('ALL')
   const [searchQuery, setSearchQuery] = useState('')
   const [bulkMode, setBulkMode] = useState(false)
   const [heroCandidateIndexByCategory, setHeroCandidateIndexByCategory] = useState({})
@@ -3657,6 +3658,16 @@ function FullCataloguePage() {
 
   const isColorsCategory = isColorsCategoryName(activeSection?.category)
   const isSolidGelPolish = isColorsCategory && normalizeCatalogueToken(activeSubcategory) === 'SOLID GEL POLISH'
+  const isCatEye = isColorsCategory && normalizeCatalogueToken(activeSubcategory) === 'CAT EYE'
+
+  const catEyeVariantFilters = useMemo(() => {
+    if (!isCatEye) return []
+    const variants = new Set()
+    const sub = activeSection?.subcategories?.find((s) => s.name === activeSubcategory)
+    if (sub) sub.items.forEach((item) => { if (item.colorFamily) variants.add(item.colorFamily) })
+    const sorted = [...variants].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+    return ['ALL', ...sorted]
+  }, [isCatEye, activeSection, activeSubcategory])
 
   const lookbookGroups = useMemo(() => {
     const groups = Array.isArray(springSummerLookbook?.groups) ? springSummerLookbook.groups : []
@@ -3713,10 +3724,14 @@ function FullCataloguePage() {
       ? baseItems
       : baseItems.filter((item) => resolveFamily(item) === activeColorFamily)
 
-    const normalizedSearch = normalizeCatalogueToken(searchQuery)
-    if (!normalizedSearch) return colorFiltered
+    const catEyeFiltered = (!isCatEye || activeCatEyeVariant === 'ALL')
+      ? colorFiltered
+      : colorFiltered.filter((item) => item.colorFamily === activeCatEyeVariant)
 
-    return colorFiltered.filter((item) => {
+    const normalizedSearch = normalizeCatalogueToken(searchQuery)
+    if (!normalizedSearch) return catEyeFiltered
+
+    return catEyeFiltered.filter((item) => {
       const nameToken = normalizeCatalogueToken(item.name)
       const subcategoryToken = normalizeCatalogueToken(item.subcategory)
       const pathToken = normalizeCatalogueToken(item.imageUrl)
@@ -3724,11 +3739,11 @@ function FullCataloguePage() {
         || subcategoryToken.includes(normalizedSearch)
         || pathToken.includes(normalizedSearch)
     })
-  }, [activeColorFamily, baseItems, isSolidGelPolish, solidGelColourFamilies, searchQuery])
+  }, [activeColorFamily, activeCatEyeVariant, baseItems, isCatEye, isSolidGelPolish, solidGelColourFamilies, searchQuery])
 
   useEffect(() => {
     setScrollTop(0)
-  }, [activeCategory, activeSubcategory, activeColorFamily])
+  }, [activeCategory, activeSubcategory, activeColorFamily, activeCatEyeVariant])
 
   useEffect(() => {
     setScrollTop(0)
@@ -4050,6 +4065,7 @@ function FullCataloguePage() {
     setActiveCategory(categoryName)
     setActiveSubcategory(subcategoryName || 'ALL')
     setActiveColorFamily('ALL')
+    setActiveCatEyeVariant('ALL')
     setSearchQuery('')
     // Expand the correct section so categoryDetail renders
     // Colours skips the grid — categoryDetail is rendered standalone below the banner
@@ -4242,6 +4258,7 @@ function FullCataloguePage() {
               setActiveCategory('')
               setActiveSubcategory('')
               setActiveColorFamily('ALL')
+              setActiveCatEyeVariant('ALL')
             }}
             className="inline-flex items-center gap-1.5 rounded-lg border border-[#4A4A4A]/30 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-black/70 transition hover:border-fuchsia-500/50 hover:text-fuchsia-600"
           >
@@ -4275,7 +4292,7 @@ function FullCataloguePage() {
               return (
                 <button
                   key={`subcategory-${subcategory}`}
-                  onClick={() => { setActiveSubcategory(subcategory); scrollToCategoryDetail() }}
+                  onClick={() => { setActiveSubcategory(subcategory); setActiveCatEyeVariant('ALL'); setActiveColorFamily('ALL'); scrollToCategoryDetail() }}
                   className="relative rounded-full border px-4 py-2 text-xs font-semibold tracking-wide transition duration-200"
                   style={
                     isActive
@@ -4397,6 +4414,27 @@ function FullCataloguePage() {
                       >
                         <span className={`h-3 w-3 rounded-full ${family.swatchClass}`} />
                         {family.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {isCatEye && catEyeVariantFilters.length > 1 && (
+              <div className="mt-3 rounded-[12px] border border-[#4A4A4A]/30 bg-black/[0.02] p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/55">Cat Eye Collection</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {catEyeVariantFilters.map((variant) => {
+                    const isActive = activeCatEyeVariant === variant
+                    const label = variant === 'ALL' ? 'All Cat Eye' : toTitleCaseLabel(variant)
+                    return (
+                      <button
+                        key={variant}
+                        onClick={() => { setActiveCatEyeVariant(variant); scrollToCategoryDetail() }}
+                        className={`rounded-[12px] border px-2.5 py-1.5 text-xs font-semibold transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-[#4A4A4A]/35 bg-white text-black/70 hover:border-fuchsia-500'}`}
+                      >
+                        {label}
                       </button>
                     )
                   })}
