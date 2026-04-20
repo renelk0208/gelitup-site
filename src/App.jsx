@@ -2120,6 +2120,17 @@ function applyManualCatalogueOrder(items = [], rule = null) {
   return [...ordered, ...remainder]
 }
 
+function applyHiddenProductsFilter(payload, hiddenKeys = []) {
+  if (!Array.isArray(hiddenKeys) || hiddenKeys.length === 0) return payload
+  const hiddenSet = new Set(hiddenKeys.map(k => String(k).trim()).filter(Boolean))
+  if (hiddenSet.size === 0) return payload
+  const filtered = {}
+  for (const [key, value] of Object.entries(payload)) {
+    if (!hiddenSet.has(key)) filtered[key] = value
+  }
+  return filtered
+}
+
 function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()) {
   if (!payload || typeof payload !== 'object') return []
 
@@ -3072,10 +3083,11 @@ function FullCataloguePage() {
       setErrorMessage('')
 
       try {
-        const [mapResponse, orderResponse, colourFamiliesResponse] = await Promise.all([
+        const [mapResponse, orderResponse, colourFamiliesResponse, hiddenResponse] = await Promise.all([
           fetch('/gelitup-content/product-image-map.json'),
           fetch('/gelitup-content/catalog-order.json'),
           fetch('/gelitup-content/solid-gel-colour-families.json'),
+          fetch('/gelitup-content/hidden-products.json'),
         ])
 
         if (!mapResponse.ok) {
@@ -3087,10 +3099,11 @@ function FullCataloguePage() {
         const colourFamiliesPayload = (colourFamiliesResponse.ok && (colourFamiliesResponse.headers.get('content-type') || '').includes('application/json'))
           ? await colourFamiliesResponse.json()
           : {}
+        const hiddenKeys = hiddenResponse.ok ? await hiddenResponse.json() : []
         const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
         if (!mounted) return
 
-        const nextSections = buildCatalogueSectionsFromImageMap(payload, manualRuleIndex)
+        const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(payload, hiddenKeys), manualRuleIndex)
         setSections(nextSections)
         setSolidGelColourFamilies(colourFamiliesPayload)
         setHeroCandidateIndexByCategory({})
@@ -5417,9 +5430,10 @@ function MissingImagesReport() {
       setErrorMessage('')
 
       try {
-        const [response, orderResponse] = await Promise.all([
+        const [response, orderResponse, hiddenResponse] = await Promise.all([
           fetch('/gelitup-content/product-image-map.json'),
           fetch('/gelitup-content/catalog-order.json'),
+          fetch('/gelitup-content/hidden-products.json'),
         ])
         if (!response.ok) {
           throw new Error(`Catalogue map unavailable (${response.status})`)
@@ -5427,10 +5441,11 @@ function MissingImagesReport() {
 
         const payload = await response.json()
         const manualOrderPayload = orderResponse.ok ? await orderResponse.json() : { rules: [] }
+        const hiddenKeys = hiddenResponse.ok ? await hiddenResponse.json() : []
         const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
         if (!mounted) return
 
-        const nextSections = buildCatalogueSectionsFromImageMap(payload, manualRuleIndex)
+        const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(payload, hiddenKeys), manualRuleIndex)
         setSections(nextSections)
       }
       catch (error) {
@@ -10961,15 +10976,17 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           : await (async () => {
             // Mirror the public catalogue exactly — load from product-image-map.json
             // so every product has the same category, name and image as shown on the site.
-            const [response, orderResponse] = await Promise.all([
+            const [response, orderResponse, hiddenResponse] = await Promise.all([
               fetch('/gelitup-content/product-image-map.json'),
               fetch('/gelitup-content/catalog-order.json'),
+              fetch('/gelitup-content/hidden-products.json'),
             ])
             if (!response.ok) throw new Error('Could not load product image map')
             const mapPayload = await response.json()
             const manualOrderPayload = orderResponse.ok ? await orderResponse.json() : { rules: [] }
+            const hiddenKeys = hiddenResponse.ok ? await hiddenResponse.json() : []
             const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
-            const sections = buildCatalogueSectionsFromImageMap(mapPayload, manualRuleIndex)
+            const sections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(mapPayload, hiddenKeys), manualRuleIndex)
             return sections.flatMap((section) =>
               section.subcategories.flatMap((sub) =>
                 sub.items.map((item) => ({
