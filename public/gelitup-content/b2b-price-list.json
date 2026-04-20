@@ -1,8 +1,8 @@
 {
   "_meta": {
     "source": "gelitup-b2b-pricelist-names-zoho-order-form.xlsx",
-    "generated": "2026-03-04T17:57:46.431Z",
-    "count": 1036
+    "generated": "2026-04-20T10:45:17.1950370+03:00",
+    "count": 1034
   },
   "items": [
     {
@@ -5043,7 +5043,7 @@
     {
       "name": "Professional Cuticle Scissors, Curved 1466 New",
       "sku": "Professional Cuticle Scissors, Curved 1466 New",
-      "price": 19.70
+      "price": 19.7
     },
     {
       "name": "Professional Spring Scissors, Curved 1468 New",
@@ -5149,6 +5149,31 @@
       "name": "AirBrush Machine New",
       "sku": "AirBrush Machine New",
       "price": 58.24
+    },
+    {
+      "name": "2611 Angel Pink -HTF",
+      "price": 7.41,
+      "sku": "2611 Angel Pink -HTF"
+    },
+    {
+      "name": "2612 Coral Milk -HTF",
+      "price": 7.41,
+      "sku": "2612 Coral Milk -HTF"
+    },
+    {
+      "name": "2613 Rosy Pop -HTF",
+      "price": 7.41,
+      "sku": "2613 Rosy Pop -HTF"
+    },
+    {
+      "name": "2614 Soft Iris -HTF",
+      "price": 7.41,
+      "sku": "2614 Soft Iris -HTF"
+    },
+    {
+      "name": "2615 Sky Cream -HTF",
+      "price": 7.41,
+      "sku": "2615 Sky Cream -HTF"
     }
   ]
 }
