@@ -3746,9 +3746,11 @@ function FullCataloguePage() {
 
     return catEyeFiltered.filter((item) => {
       const nameToken = normalizeCatalogueToken(item.name)
+      const codeToken = normalizeCatalogueToken(item.code)
       const subcategoryToken = normalizeCatalogueToken(item.subcategory)
       const pathToken = normalizeCatalogueToken(item.imageUrl)
       return nameToken.includes(normalizedSearch)
+        || codeToken.includes(normalizedSearch)
         || subcategoryToken.includes(normalizedSearch)
         || pathToken.includes(normalizedSearch)
     })
@@ -3770,11 +3772,13 @@ function FullCataloguePage() {
       for (const sub of section.subcategories) {
         for (const item of sub.items) {
           const nameToken = normalizeCatalogueToken(item.name)
+          const codeToken = normalizeCatalogueToken(item.code)
           const subcategoryToken = normalizeCatalogueToken(sub.name)
           const pathToken = normalizeCatalogueToken(item.imageUrl)
           const categoryToken = normalizeCatalogueToken(section.category)
           if (
             nameToken.includes(normalizedSearch) ||
+            codeToken.includes(normalizedSearch) ||
             subcategoryToken.includes(normalizedSearch) ||
             pathToken.includes(normalizedSearch) ||
             categoryToken.includes(normalizedSearch)
