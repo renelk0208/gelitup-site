@@ -2040,7 +2040,7 @@ function sortCatalogueItems(items = []) {
     const rightFamily = extractCatalogueFamilyKey(right.name)
 
     if (leftFamily !== rightFamily) {
-      return leftFamily.localeCompare(rightFamily, undefined, { sensitivity: 'base' })
+      return leftFamily.localeCompare(rightFamily, undefined, { sensitivity: 'base', numeric: true })
     }
 
     const leftIsSwatch = isLikelySwatchName(left.name)
