@@ -2927,7 +2927,7 @@ const SPRING_SUMMER_LOOKBOOK_DEFAULT = {
   pages: [
     { title: 'Sunshine Ready 1', imageUrl: '/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_1.jpg' },
     { title: 'Sunshine Ready 2', imageUrl: '/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_2.jpg' },
-    { title: 'Shimmer 1', imageUrl: '/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-1.jpg' },
+    { title: 'Sunshine Ready 3', imageUrl: '/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_3.jpg' },
   ],
 }
 
@@ -4888,10 +4888,10 @@ function FullCataloguePage() {
             return (
               <div id="catalogue-section-new-products" className="scroll-mt-28">
                 {/* NEW PRODUCTS banner with hero image */}
-                <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden">
-                  <img src="/gelitup-content/catalog-heroes/2026-new-products-banner.webp" alt="" aria-hidden="true" className="block h-auto w-full object-cover object-center" />
-                  <div className="absolute inset-0 flex flex-col justify-center">
-                  <div className="relative mx-auto w-full max-w-6xl px-6 py-10 sm:px-10 lg:py-14">
+                <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#f0c0d8] lg:min-h-[360px]">
+                  <img src="/gelitup-content/catalog-heroes/2026-new-products-banner.webp" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-center" />
+                  <div className="absolute inset-0 bg-black/40 pointer-events-none" aria-hidden="true" />
+                  <div className="relative z-10 mx-auto max-w-6xl px-6 py-10 sm:px-10 lg:py-14">
                     <div className="flex items-center gap-3">
                       <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em] text-white">✦ Summer 2026 Launch</span>
                     </div>
@@ -4899,7 +4899,7 @@ function FullCataloguePage() {
                       New Products
                     </h2>
                     <div className="mt-3 h-1 w-14 rounded-full bg-white/50" />
-                    <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/85">
+                    <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/90">
                       The latest additions to the GEL.IT.UP range — new gel polish collections, innovative bases, and premium effects. Select a collection to browse and order.
                     </p>
                     {/* Collection pills */}
@@ -4913,14 +4913,13 @@ function FullCataloguePage() {
                             onClick={() => setActiveNewCollection(isActive ? '' : col.key)}
                             className="rounded-full px-4 py-2 text-xs font-bold tracking-wide transition duration-200"
                             style={isActive
-                              ? { background: '#fff', color: '#D43790', boxShadow: '0 2px 12px rgba(0,0,0,0.18)' }
-                              : { background: 'rgba(255,255,255,0.18)', color: '#fff', border: '1.5px solid rgba(255,255,255,0.55)' }
+                              ? { background: '#D43790', color: '#fff', boxShadow: '0 2px 12px rgba(0,0,0,0.25)' }
+                              : { background: 'rgba(255,255,255,0.92)', color: '#1A1A1A', border: '1.5px solid rgba(255,255,255,0.8)' }
                             }
                           >{col.label}</button>
                         )
                       })}
                     </div>
-                  </div>
                   </div>
                 </div>
                 {activeNewCollection && (
@@ -5379,7 +5378,10 @@ function FullCataloguePage() {
           </div>
 
           {/* ── NEW COLLECTIONS: Sunshine Ready + Shimmer ── */}
-          <div id="catalogue-section-2026-new" className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6 scroll-mt-28">
+          <div id="catalogue-section-2026-new" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden scroll-mt-28">
+            <img src="/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/background-image-spring-summer-home-page.webp" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-center" />
+            <div className="absolute inset-0 bg-white/70 pointer-events-none" aria-hidden="true" />
+            <div className="relative mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6 px-4 py-8 sm:px-8">
 
             {/* SUNSHINE READY */}
             <div className="flex overflow-hidden rounded-2xl border border-[#E0E0E0]">
@@ -5404,7 +5406,7 @@ function FullCataloguePage() {
 
                 {/* IMAGE CAROUSEL */}
                 <div className="relative bg-white">
-                  {displayedLookbookGroups.filter(g => g.id === 'sunshine-ready' || g.id === 'default').slice(0, 1).map((group) => {
+                  {displayedLookbookGroups.filter(g => g.id === 'sunshine-ready').slice(0, 1).map((group) => {
                     const pages = Array.isArray(group?.pages) ? group.pages : []
                     if (!pages.length) return null
                     const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
@@ -5491,6 +5493,7 @@ function FullCataloguePage() {
               </div>
             </div>
 
+          </div>
           </div>
 
           </>}
@@ -6580,7 +6583,9 @@ function HomePage({ onOpenContactModal }) {
         </p>
       </div>
 
-      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-x-hidden bg-white px-4 py-10 sm:px-8 sm:py-12">
+      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-white px-4 py-10 sm:px-8 sm:py-12">
+        <img src="/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/background-image-spring-summer-home-page.webp" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-center" />
+        <div className="absolute inset-0 bg-white/70 pointer-events-none" aria-hidden="true" />
         <div className="relative mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6">
 
           {/* SUNSHINE READY */}
@@ -6664,6 +6669,7 @@ function HomePage({ onOpenContactModal }) {
           </div>
 
         </div>
+      </div>
       </div>
 
       <InstagramFeedStrip />
