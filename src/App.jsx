@@ -4887,10 +4887,11 @@ function FullCataloguePage() {
               : []
             return (
               <div id="catalogue-section-new-products" className="scroll-mt-28">
-                {/* Bright NEW PRODUCTS banner */}
-                <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden" style={{ background: 'linear-gradient(135deg, #D43790 0%, #e0449a 35%, #c026d3 100%)' }}>
-                  {/* Subtle light shimmer overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/5 pointer-events-none" aria-hidden="true" />
+                {/* NEW PRODUCTS banner with hero image */}
+                <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden">
+                  <img src="/gelitup-content/product-images/2026 NEW!/hero-image-banner-new-2026.webp" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-center" />
+                  {/* Dark overlay so text stays legible */}
+                  <div className="absolute inset-0 bg-[#D43790]/55 pointer-events-none" aria-hidden="true" />
                   <div className="relative mx-auto max-w-6xl px-6 py-10 sm:px-10 lg:py-14">
                     <div className="flex items-center gap-3">
                       <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em] text-white">✦ Summer 2026 Launch</span>
