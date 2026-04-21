@@ -4900,7 +4900,7 @@ function FullCataloguePage() {
                     aria-hidden="true"
                     src="/gelitup-content/catalog-heroes/2026-new-products-banner.webp"
                     alt=""
-                    className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-[center_20%] lg:block"
+                    className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-[center_60%] lg:block"
                     style={{
                       maskImage: 'linear-gradient(to right, transparent 0%, rgba(240,192,216,0.6) 25%, rgb(240,192,216) 50%)',
                       WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(240,192,216,0.6) 25%, rgb(240,192,216) 50%)',
