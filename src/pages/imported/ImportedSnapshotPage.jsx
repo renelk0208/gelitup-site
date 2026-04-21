@@ -760,7 +760,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
 
         {/* ── Instagram Feed ───────────────────────────────────────────── */}
         {igStatus !== 'error' && igStatus !== 'empty' && (
-          <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#0F0F0F] py-8">
+          <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#F5F5F5] py-8">
             <div className="mx-auto max-w-6xl px-4 sm:px-8">
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -778,7 +778,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                     <circle cx="12" cy="12" r="4" stroke="url(#ig-grad-au)" strokeWidth="2" fill="none" />
                     <circle cx="17.5" cy="6.5" r="1" fill="url(#ig-grad-au)" />
                   </svg>
-                  <span className="text-sm font-bold uppercase tracking-[0.12em] text-white">@{INSTAGRAM_HANDLE}</span>
+                  <span className="text-sm font-bold uppercase tracking-[0.12em] text-[#1A1A1A]">@{INSTAGRAM_HANDLE}</span>
                 </div>
                 <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="rounded-lg bg-[#D43790] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]">
                   Follow Us Now →
@@ -787,7 +787,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
               {igStatus === 'loading' ? (
                 <div className="flex gap-3 overflow-hidden">
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="h-40 w-40 flex-shrink-0 animate-pulse rounded-xl bg-white/10 sm:h-48 sm:w-48" />
+                    <div key={i} className="h-40 w-40 flex-shrink-0 animate-pulse rounded-xl bg-black/10 sm:h-48 sm:w-48" />
                   ))}
                 </div>
               ) : (
