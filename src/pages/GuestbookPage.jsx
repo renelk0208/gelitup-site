@@ -174,8 +174,10 @@ export default function GuestbookPage() {
   return (
     <section className="space-y-6">
       {/* ─── Hero ─────────────────────────────────────────────────────── */}
-      <div className="mx-auto w-full max-w-6xl overflow-hidden rounded-2xl bg-gradient-to-br from-[#D43790] via-[#8e1650] to-[#1A1A1A]">
-        <div className="px-6 py-14 text-center sm:px-10 sm:py-20">
+      <div className="relative mx-auto w-full max-w-6xl overflow-hidden rounded-2xl">
+        <img src="/gelitup-content/catalog-heroes/guestbook-banner.webp" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-center" />
+        <div className="absolute inset-0 bg-[#D43790]/50 pointer-events-none" aria-hidden="true" />
+        <div className="relative px-6 py-14 text-center sm:px-10 sm:py-20">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">For Professional Use Only</p>
           <h1 className="mt-4 text-3xl font-extrabold text-white sm:text-4xl lg:text-5xl">
             Join the GEL.IT.UP Global Guestbook 🌍

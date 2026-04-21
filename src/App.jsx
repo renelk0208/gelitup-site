@@ -4889,10 +4889,9 @@ function FullCataloguePage() {
               <div id="catalogue-section-new-products" className="scroll-mt-28">
                 {/* NEW PRODUCTS banner with hero image */}
                 <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden">
-                  <img src="/gelitup-content/catalog-heroes/2026-new-products-banner.webp" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-center" />
-                  {/* Dark overlay so text stays legible */}
-                  <div className="absolute inset-0 bg-[#D43790]/55 pointer-events-none" aria-hidden="true" />
-                  <div className="relative mx-auto max-w-6xl px-6 py-10 sm:px-10 lg:py-14">
+                  <img src="/gelitup-content/catalog-heroes/2026-new-products-banner.webp" alt="" aria-hidden="true" className="block h-auto w-full object-cover object-center" />
+                  <div className="absolute inset-0 flex flex-col justify-center">
+                  <div className="relative mx-auto w-full max-w-6xl px-6 py-10 sm:px-10 lg:py-14">
                     <div className="flex items-center gap-3">
                       <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em] text-white">✦ Summer 2026 Launch</span>
                     </div>
@@ -4922,8 +4921,8 @@ function FullCataloguePage() {
                       })}
                     </div>
                   </div>
+                  </div>
                 </div>
-                {/* Product grid for selected collection */}
                 {activeNewCollection && (
                   <div className="mx-auto max-w-6xl py-6">
                     <p className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-black/50">{activeNewCollection} — {activeSubItems.length} product{activeSubItems.length !== 1 ? 's' : ''}</p>
