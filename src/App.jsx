@@ -6670,7 +6670,6 @@ function HomePage({ onOpenContactModal }) {
 
         </div>
       </div>
-      </div>
 
       <InstagramFeedStrip />
 
