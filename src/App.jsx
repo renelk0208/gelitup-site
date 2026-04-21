@@ -4889,7 +4889,7 @@ function FullCataloguePage() {
               <div id="catalogue-section-new-products" className="scroll-mt-28">
                 {/* NEW PRODUCTS banner with hero image */}
                 <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden">
-                  <img src="/gelitup-content/product-images/2026 NEW!/hero-image-banner-new-2026.webp" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-center" />
+                  <img src="/gelitup-content/catalog-heroes/2026-new-products-banner.webp" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-center" />
                   {/* Dark overlay so text stays legible */}
                   <div className="absolute inset-0 bg-[#D43790]/55 pointer-events-none" aria-hidden="true" />
                   <div className="relative mx-auto max-w-6xl px-6 py-10 sm:px-10 lg:py-14">
