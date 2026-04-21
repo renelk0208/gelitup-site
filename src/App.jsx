@@ -1787,13 +1787,13 @@ function ForAcademiesPage() {
           <img
             src="/gelitup-content/catalog-heroes/academy-hero-image.webp"
             alt="Professional nail academy training"
-            className="h-full w-full object-cover object-center brightness-[0.72]"
+            className="h-full w-full object-cover object-center"
             loading="eager"
             fetchPriority="high"
           />
           {/* Gradient overlays — vertical pull from bottom + left-side bias for text legibility */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/20" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/10 to-transparent" />
           {/* Text content */}
           <div className="absolute inset-0 flex flex-col justify-end px-7 pb-9 sm:px-12 sm:pb-12">
             <div className="max-w-2xl">
@@ -3142,6 +3142,9 @@ function FullCataloguePage() {
   useEffect(() => {
     const scrollTo = location?.state?.scrollTo
     if (!scrollTo || isLoading) return
+    if (scrollTo === 'catalogue-section-new-products') {
+      setShowNewCollections(true)
+    }
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const el = document.getElementById(scrollTo)

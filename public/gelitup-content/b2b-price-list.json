@@ -5224,6 +5224,36 @@
       "name": "Shimmer Collection #SH12 -HTF",
       "price": 8.90,
       "sku": "Shimmer Collection #SH12 -HTF"
+    },
+    {
+      "name": "5 in 1 Lemon Serenity Drop",
+      "sku": "5 in 1 Lemon Serenity Drop",
+      "price": 12.84
+    },
+    {
+      "name": "5 in 1 Mint Serenity Drop",
+      "sku": "5 in 1 Mint Serenity Drop",
+      "price": 12.84
+    },
+    {
+      "name": "5 in 1 Peach Blue Drop",
+      "sku": "5 in 1 Peach Blue Drop",
+      "price": 12.84
+    },
+    {
+      "name": "5 in 1 Peach Serenity Drop",
+      "sku": "5 in 1 Peach Serenity Drop",
+      "price": 12.84
+    },
+    {
+      "name": "5 in 1 Purple Serenity Drop",
+      "sku": "5 in 1 Purple Serenity Drop",
+      "price": 12.84
+    },
+    {
+      "name": "Mirror Top Coat",
+      "sku": "Mirror Top Coat",
+      "price": 8.25
     }
   ]
 }
