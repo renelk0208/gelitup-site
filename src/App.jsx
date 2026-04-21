@@ -5463,7 +5463,7 @@ function FullCataloguePage() {
                   <div key={group.id} className="relative w-[42%] shrink-0 overflow-hidden">
                     {pageType === 'video'
                       ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-full object-cover" autoPlay muted playsInline preload="metadata" />
-                      : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-cover" loading="lazy" />}
+                      : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-cover cursor-pointer" loading="lazy" onClick={() => document.getElementById('catalogue-section-new-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />}
                     {pages.length > 1 && (<>
                       <button type="button" aria-label="Previous page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))} className="absolute left-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
                       <button type="button" aria-label="Next page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))} className="absolute right-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg></button>
@@ -5512,7 +5512,7 @@ function FullCataloguePage() {
                   <div key={group.id} className="relative w-[42%] shrink-0 overflow-hidden">
                     {pageType === 'video'
                       ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-full object-cover" autoPlay muted playsInline preload="metadata" />
-                      : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-cover" loading="lazy" />}
+                      : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-cover cursor-pointer" loading="lazy" onClick={() => document.getElementById('catalogue-section-new-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />}
                     {pages.length > 1 && (<>
                       <button type="button" aria-label="Previous page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))} className="absolute left-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
                       <button type="button" aria-label="Next page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))} className="absolute right-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg></button>
@@ -6642,7 +6642,9 @@ function HomePage({ onOpenContactModal }) {
             {/* Image right */}
             {activeHomeNewsItem && (
               <div className="relative w-[42%] shrink-0 overflow-hidden">
-                <img src={activeHomeNewsItem.imageUrl} alt="Sunshine Ready" className="h-full w-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
+                <NavLink to="/full-catalogue" state={{ scrollTo: 'catalogue-section-new-products' }} className="block h-full w-full cursor-pointer" tabIndex={-1} aria-label="Browse Sunshine Ready collection">
+                  <img src={activeHomeNewsItem.imageUrl} alt="Sunshine Ready" className="h-full w-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
+                </NavLink>
                 {homeNewsCarousel.length > 1 && (<>
                   <button type="button" aria-label="Previous" onClick={() => setActiveHomeNewsSlide((s) => (s - 1 + homeNewsCarousel.length) % homeNewsCarousel.length)} className="absolute left-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5"><path d="M15 18l-6-6 6-6" /></svg></button>
                   <button type="button" aria-label="Next" onClick={() => setActiveHomeNewsSlide((s) => (s + 1) % homeNewsCarousel.length)} className="absolute right-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5"><path d="M9 18l6-6-6-6" /></svg></button>
@@ -6675,7 +6677,9 @@ function HomePage({ onOpenContactModal }) {
             </div>
             {/* Image right */}
             <div className="relative w-[42%] shrink-0 overflow-hidden">
-              <img src={HOME_SHIMMER_IMAGES[safeShimmerIndex]} alt="Shimmer Collection" className="h-full w-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
+              <NavLink to="/full-catalogue" state={{ scrollTo: 'catalogue-section-new-products' }} className="block h-full w-full cursor-pointer" tabIndex={-1} aria-label="Browse Shimmer Collection">
+                <img src={HOME_SHIMMER_IMAGES[safeShimmerIndex]} alt="Shimmer Collection" className="h-full w-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
+              </NavLink>
               {HOME_SHIMMER_IMAGES.length > 1 && (<>
                 <button type="button" aria-label="Previous" onClick={() => setActiveShimmerSlide((s) => (s - 1 + HOME_SHIMMER_IMAGES.length) % HOME_SHIMMER_IMAGES.length)} className="absolute left-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5"><path d="M15 18l-6-6 6-6" /></svg></button>
                 <button type="button" aria-label="Next" onClick={() => setActiveShimmerSlide((s) => (s + 1) % HOME_SHIMMER_IMAGES.length)} className="absolute right-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5"><path d="M9 18l6-6-6-6" /></svg></button>
