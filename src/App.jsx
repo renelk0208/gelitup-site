@@ -5380,15 +5380,15 @@ function FullCataloguePage() {
           <div id="catalogue-section-2026-new" className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6 scroll-mt-28">
 
             {/* SUNSHINE READY */}
-            <div className="flex overflow-hidden rounded-2xl border border-[#4A4A4A]/25">
+            <div className="flex overflow-hidden rounded-2xl border border-[#E0E0E0]">
               <div className="flex h-full w-full flex-col">
-                <div className="flex flex-1 flex-col justify-center bg-[#1A1A1A] px-6 py-6 sm:px-8">
+                <div className="flex flex-1 flex-col justify-center bg-white px-6 py-6 sm:px-8">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Additions — Summer 2026</p>
-                  <h2 className="heading-on-dark mt-2 text-xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-2xl">
+                  <h2 className="mt-2 text-xl font-extrabold uppercase leading-tight tracking-[0.06em] text-black sm:text-2xl">
                     Sunshine Ready<br /><span className="text-[#D43790]">The Collection</span>
                   </h2>
                   <div className="mt-2 h-px w-10 bg-[#D43790]/60" />
-                  <p className="mt-3 text-sm leading-relaxed !text-white/65 line-clamp-4">
+                  <p className="mt-3 text-sm leading-relaxed text-black/60 line-clamp-4">
                     Sunshine Ready is a summer gel polish collection shaped by retro femininity, sun-washed colour, and a playful mod spirit. Inspired by psychedelic fashion, soft pastel tones, and the energy of long summer days.
                   </p>
                   <div className="mt-4">
@@ -5401,7 +5401,7 @@ function FullCataloguePage() {
                 </div>
 
                 {/* IMAGE CAROUSEL */}
-                <div className="relative bg-[#0F0F0F]">
+                <div className="relative bg-white">
                   {displayedLookbookGroups.filter(g => g.id === 'sunshine-ready' || g.id === 'default').slice(0, 1).map((group) => {
                     const pages = Array.isArray(group?.pages) ? group.pages : []
                     if (!pages.length) return null
@@ -5420,11 +5420,11 @@ function FullCataloguePage() {
                             {pages.map((_, idx) => (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`h-1.5 rounded-full transition-all duration-300 ${idx === selectedPageIndex ? 'w-5 bg-[#D43790]' : 'w-1.5 bg-white/40'}`} />))}
                           </div>
                         </div>
-                        <div className="flex gap-1.5 overflow-x-auto bg-[#0F0F0F] px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                        <div className="flex gap-1.5 overflow-x-auto bg-gray-50 px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                           {pages.map((p, idx) => {
                             const mt = String(p?.mediaType || '').toLowerCase()
                             const isActive = idx === selectedPageIndex
-                            return (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-12 w-9 bg-[#222]">{mt === 'video' ? <video src={p.imageUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" /> : <img src={p.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}</div></button>)
+                            return (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-12 w-9 bg-gray-100">{mt === 'video' ? <video src={p.imageUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" /> : <img src={p.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}</div></button>)
                           })}
                         </div>
                       </div>
@@ -5435,15 +5435,15 @@ function FullCataloguePage() {
             </div>
 
             {/* SHIMMER COLLECTION */}
-            <div className="flex overflow-hidden rounded-2xl border border-[#4A4A4A]/25">
+            <div className="flex overflow-hidden rounded-2xl border border-[#E0E0E0]">
               <div className="flex h-full w-full flex-col">
-                <div className="flex flex-1 flex-col justify-center bg-[#1A1A1A] px-6 py-6 sm:px-8">
+                <div className="flex flex-1 flex-col justify-center bg-white px-6 py-6 sm:px-8">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Effects — Summer 2026</p>
-                  <h2 className="heading-on-dark mt-2 text-xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-2xl">
+                  <h2 className="mt-2 text-xl font-extrabold uppercase leading-tight tracking-[0.06em] text-black sm:text-2xl">
                     Shimmer<br /><span className="text-[#D43790]">Collection</span>
                   </h2>
                   <div className="mt-2 h-px w-10 bg-[#D43790]/60" />
-                  <p className="mt-3 text-sm leading-relaxed !text-white/65 line-clamp-4">
+                  <p className="mt-3 text-sm leading-relaxed text-black/60 line-clamp-4">
                     Discover the Shimmer Collection — luminous gel polish shades designed to glow from every angle. With pastel colour, shimmering pigment, and a glossy finish, this collection is perfect for fresh spring nails, summer manicures, and statement salon looks.
                   </p>
                   <div className="mt-4">
@@ -5456,7 +5456,7 @@ function FullCataloguePage() {
                 </div>
 
                 {/* IMAGE CAROUSEL */}
-                <div className="relative bg-[#0F0F0F]">
+                <div className="relative bg-white">
                   {displayedLookbookGroups.filter(g => g.id === 'shimmer-collection').slice(0, 1).map((group) => {
                     const pages = Array.isArray(group?.pages) ? group.pages : []
                     if (!pages.length) return null
@@ -5475,11 +5475,11 @@ function FullCataloguePage() {
                             {pages.map((_, idx) => (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`h-1.5 rounded-full transition-all duration-300 ${idx === selectedPageIndex ? 'w-5 bg-[#D43790]' : 'w-1.5 bg-white/40'}`} />))}
                           </div>
                         </div>
-                        <div className="flex gap-1.5 overflow-x-auto bg-[#0F0F0F] px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                        <div className="flex gap-1.5 overflow-x-auto bg-gray-50 px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                           {pages.map((p, idx) => {
                             const mt = String(p?.mediaType || '').toLowerCase()
                             const isActive = idx === selectedPageIndex
-                            return (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-12 w-9 bg-[#222]">{mt === 'video' ? <video src={p.imageUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" /> : <img src={p.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}</div></button>)
+                            return (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-12 w-9 bg-gray-100">{mt === 'video' ? <video src={p.imageUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" /> : <img src={p.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}</div></button>)
                           })}
                         </div>
                       </div>
@@ -6595,7 +6595,7 @@ function HomePage({ onOpenContactModal }) {
                   <NavLink to="/full-catalogue" state={{ scrollTo: 'catalogue-section-new-products' }} className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-xs font-bold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]">Shop the New Collection</NavLink>
                 </div>
               </div>
-              <div className="relative bg-[#0F0F0F]">
+              <div className="relative bg-white">
                 {activeHomeNewsItem && (
                   <>
                     <div className="relative aspect-[4/5] w-full overflow-hidden">
@@ -6610,10 +6610,10 @@ function HomePage({ onOpenContactModal }) {
                         </>
                       )}
                     </div>
-                    <div className="flex gap-1.5 overflow-x-auto bg-[#0F0F0F] px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <div className="flex gap-1.5 overflow-x-auto bg-gray-50 px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                       {homeNewsCarousel.map((item, idx) => {
                         const isActive = idx === safeHomeNewsIndex
-                        return (<button key={idx} type="button" onClick={() => setActiveHomeNewsSlide(idx)} className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-12 w-9 bg-[#222]"><img src={item.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" /></div></button>)
+                        return (<button key={idx} type="button" onClick={() => setActiveHomeNewsSlide(idx)} className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-12 w-9 bg-gray-100"><img src={item.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" /></div></button>)
                       })}
                     </div>
                   </>
@@ -6638,7 +6638,7 @@ function HomePage({ onOpenContactModal }) {
                   <NavLink to="/full-catalogue" state={{ scrollTo: 'catalogue-section-new-products' }} className="inline-block rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]">Shop the New Collection</NavLink>
                 </div>
               </div>
-              <div className="relative bg-[#0F0F0F]">
+              <div className="relative bg-white">
                 <div className="relative aspect-[4/5] w-full overflow-hidden">
                   <img src={HOME_SHIMMER_IMAGES[safeShimmerIndex]} alt="Shimmer Collection" className="h-full w-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
                   {HOME_SHIMMER_IMAGES.length > 1 && (
@@ -6651,10 +6651,10 @@ function HomePage({ onOpenContactModal }) {
                     </>
                   )}
                 </div>
-                <div className="flex gap-1.5 overflow-x-auto bg-[#0F0F0F] px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="flex gap-1.5 overflow-x-auto bg-gray-50 px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {HOME_SHIMMER_IMAGES.map((src, idx) => {
                     const isActive = idx === safeShimmerIndex
-                    return (<button key={idx} type="button" onClick={() => setActiveShimmerSlide(idx)} className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-12 w-9 bg-[#222]"><img src={src} alt="" className="h-full w-full object-cover" loading="lazy" /></div></button>)
+                    return (<button key={idx} type="button" onClick={() => setActiveShimmerSlide(idx)} className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-12 w-9 bg-gray-100"><img src={src} alt="" className="h-full w-full object-cover" loading="lazy" /></div></button>)
                   })}
                 </div>
               </div>
