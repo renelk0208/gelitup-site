@@ -6591,19 +6591,19 @@ function HomePage({ onOpenContactModal }) {
         </p>
       </div>
 
-      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-x-hidden bg-[#1A1A1A] px-4 py-10 sm:px-8 sm:py-12">
+      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-x-hidden bg-white px-4 py-10 sm:px-8 sm:py-12">
         <div className="relative mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6">
 
           {/* SUNSHINE READY */}
-          <div className="flex overflow-hidden rounded-2xl border border-white/15">
+          <div className="flex overflow-hidden rounded-2xl border border-[#E0E0E0]">
             <div className="flex h-full w-full flex-col">
-              <div className="flex flex-1 flex-col justify-center bg-[#1A1A1A] px-6 py-8 sm:px-8">
+              <div className="flex flex-1 flex-col justify-center bg-white px-6 py-8 sm:px-8">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Additions — Summer 2026</p>
-                <h2 className="heading-on-dark mt-3 text-2xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-3xl">
+                <h2 className="mt-3 text-2xl font-extrabold uppercase leading-tight tracking-[0.06em] text-black sm:text-3xl">
                   Sunshine Ready<br /><span className="text-[#D43790]">The Collection</span>
                 </h2>
                 <div className="mt-3 h-px w-10 bg-[#D43790]/60" />
-                <p className="mt-5 text-sm leading-relaxed !text-white/65 line-clamp-4">{homeCloudStory.introText}</p>
+                <p className="mt-5 text-sm leading-relaxed text-black/60 line-clamp-4">{homeCloudStory.introText}</p>
                 <div className="mt-6">
                   <NavLink to="/full-catalogue" state={{ scrollTo: 'catalogue-section-new-products' }} className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-xs font-bold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]">Shop the New Collection</NavLink>
                 </div>
@@ -6636,15 +6636,15 @@ function HomePage({ onOpenContactModal }) {
           </div>
 
           {/* SHIMMER COLLECTION */}
-          <div className="flex overflow-hidden rounded-2xl border border-white/15">
+          <div className="flex overflow-hidden rounded-2xl border border-[#E0E0E0]">
             <div className="flex h-full w-full flex-col">
-              <div className="flex flex-1 flex-col justify-center bg-[#1A1A1A] px-6 py-8 sm:px-8">
+              <div className="flex flex-1 flex-col justify-center bg-white px-6 py-8 sm:px-8">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Effects — Summer 2026</p>
-                <h2 className="heading-on-dark mt-3 text-2xl font-extrabold uppercase leading-tight tracking-[0.06em] !text-white sm:text-3xl">
+                <h2 className="mt-3 text-2xl font-extrabold uppercase leading-tight tracking-[0.06em] text-black sm:text-3xl">
                   Shimmer<br /><span className="text-[#D43790]">Collection</span>
                 </h2>
                 <div className="mt-3 h-px w-10 bg-[#D43790]/60" />
-                <p className="mt-5 text-sm leading-relaxed !text-white/65 line-clamp-4">
+                <p className="mt-5 text-sm leading-relaxed text-black/60 line-clamp-4">
                   Discover the Shimmer Collection — luminous gel polish shades designed to glow from every angle. With pastel colour, shimmering pigment, and a glossy finish, this collection is perfect for fresh spring nails, summer manicures, and statement salon looks.
                 </p>
                 <div className="mt-6">
