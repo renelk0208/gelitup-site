@@ -4887,17 +4887,19 @@ function FullCataloguePage() {
               : []
             return (
               <div id="catalogue-section-new-products" className="scroll-mt-28">
-                {/* Dark hero banner */}
-                <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#140008] lg:min-h-[280px]">
-                  {/* Placeholder for hero image — will be replaced with uploaded image */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#D43790]/25 via-[#7a1040]/10 to-transparent pointer-events-none" aria-hidden="true" />
+                {/* Bright NEW PRODUCTS banner */}
+                <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden" style={{ background: 'linear-gradient(135deg, #D43790 0%, #e0449a 35%, #c026d3 100%)' }}>
+                  {/* Subtle light shimmer overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/5 pointer-events-none" aria-hidden="true" />
                   <div className="relative mx-auto max-w-6xl px-6 py-10 sm:px-10 lg:py-14">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D43790]">Summer 2026 Launch</p>
-                    <h2 className="heading-on-dark mt-3 text-3xl font-extrabold uppercase tracking-[0.06em] text-white sm:text-4xl">
-                      New Products <span className="text-[#D43790]">✦</span>
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em] text-white">✦ Summer 2026 Launch</span>
+                    </div>
+                    <h2 className="mt-4 text-3xl font-extrabold uppercase tracking-[0.06em] text-white drop-shadow-sm sm:text-5xl">
+                      New Products
                     </h2>
-                    <div className="mt-3 h-px w-12 bg-[#D43790]/50" />
-                    <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/60">
+                    <div className="mt-3 h-1 w-14 rounded-full bg-white/50" />
+                    <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/85">
                       The latest additions to the GEL.IT.UP range — new gel polish collections, innovative bases, and premium effects. Select a collection to browse and order.
                     </p>
                     {/* Collection pills */}
@@ -4909,10 +4911,10 @@ function FullCataloguePage() {
                             key={col.key}
                             type="button"
                             onClick={() => setActiveNewCollection(isActive ? '' : col.key)}
-                            className="rounded-full border px-4 py-2 text-xs font-semibold tracking-wide transition duration-200"
+                            className="rounded-full px-4 py-2 text-xs font-bold tracking-wide transition duration-200"
                             style={isActive
-                              ? { background: '#D43790', color: '#fff', borderColor: '#D43790', boxShadow: '0 0 0 3px rgba(212,55,144,0.22)' }
-                              : { borderColor: 'rgba(212,55,144,0.55)', background: 'rgba(212,55,144,0.10)', color: '#D43790' }
+                              ? { background: '#fff', color: '#D43790', boxShadow: '0 2px 12px rgba(0,0,0,0.18)' }
+                              : { background: 'rgba(255,255,255,0.18)', color: '#fff', border: '1.5px solid rgba(255,255,255,0.55)' }
                             }
                           >{col.label}</button>
                         )
