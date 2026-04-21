@@ -27,38 +27,14 @@
     },
     {
       "id": "home-news-carousel-5",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_2612.jpg",
+      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_2613.jpg",
       "order": 5,
       "isPrimary": false
     },
     {
       "id": "home-news-carousel-6",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_2613.jpg",
-      "order": 6,
-      "isPrimary": false
-    },
-    {
-      "id": "home-news-carousel-7",
       "imageUrl": "/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_2614.jpg",
-      "order": 7,
-      "isPrimary": false
-    },
-    {
-      "id": "home-news-carousel-8",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-1.jpg",
-      "order": 8,
-      "isPrimary": false
-    },
-    {
-      "id": "home-news-carousel-9",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-2.jpg",
-      "order": 9,
-      "isPrimary": false
-    },
-    {
-      "id": "home-news-carousel-10",
-      "imageUrl": "/gelitup-media/images/news/Spring Summer/New Effects Collection/new-effects-3.jpg",
-      "order": 10,
+      "order": 6,
       "isPrimary": false
     }
   ]

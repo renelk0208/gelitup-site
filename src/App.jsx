@@ -2911,6 +2911,9 @@ const SPRING_SUMMER_LOOKBOOK_DEFAULT = {
         { title: 'Sunshine Ready 1', imageUrl: '/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_1.jpg' },
         { title: 'Sunshine Ready 2', imageUrl: '/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_2.jpg' },
         { title: 'Sunshine Ready 3', imageUrl: '/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_3.jpg' },
+        { title: 'Sunshine Ready 4', imageUrl: '/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_4.jpg' },
+        { title: 'Sunshine Ready 2613', imageUrl: '/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_2613.jpg' },
+        { title: 'Sunshine Ready 2614', imageUrl: '/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/gelitup_summer_2026_2614.jpg' },
       ],
     },
     {
