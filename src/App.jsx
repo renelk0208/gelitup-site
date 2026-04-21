@@ -105,7 +105,7 @@ const CONTENT_CACHE_BUSTER = '2026-04-15-1'
 const HOME_CLOUD_DANCER_DEFAULT = {
   title: 'Sunshine Ready - The Collection',
   introText: 'Sunshine Ready is a summer gel polish collection shaped by retro femininity, sun-washed colour, and a playful mod spirit. Inspired by psychedelic fashion, soft pastel tones, and the energy of long summer days, the collection brings together a polished palette of expressive shades designed to feel fresh, modern, and effortlessly seasonal.',
-  ctaLabel: 'View 2026 New Collection',
+  ctaLabel: 'Shop the New Collection',
   ctaLink: '/full-catalogue',
 }
 const LEEUKOPF_DISTRIBUTORS_SOURCE_URL = 'https://leeukopf.com/our-brands'
@@ -5303,7 +5303,7 @@ function FullCataloguePage() {
                       type="button"
                       onClick={() => openCatalogueCategory('2026 NEW!', 'ALL')}
                       className="inline-block rounded-lg bg-[#D43790] px-5 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]"
-                    >View 2026 Collection</button>
+                    >Shop the New Collection</button>
                   </div>
                 </div>
 
@@ -5358,7 +5358,7 @@ function FullCataloguePage() {
                       type="button"
                       onClick={() => openCatalogueCategory('2026 NEW!', 'ALL')}
                       className="inline-block rounded-lg bg-[#D43790] px-5 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]"
-                    >View 2026 Collection</button>
+                    >Shop the New Collection</button>
                   </div>
                 </div>
 
@@ -6546,7 +6546,7 @@ function HomePage({ onOpenContactModal }) {
                   Discover the Shimmer Collection — luminous gel polish shades designed to glow from every angle. With pastel colour, shimmering pigment, and a glossy finish, this collection is perfect for fresh spring nails, summer manicures, and statement salon looks.
                 </p>
                 <div className="mt-6">
-                  <NavLink to="/full-catalogue" className="inline-block rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]">View 2026 Collection</NavLink>
+                  <NavLink to="/full-catalogue" className="inline-block rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]">Shop the New Collection</NavLink>
                 </div>
               </div>
               <div className="relative bg-[#0F0F0F]">
