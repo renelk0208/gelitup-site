@@ -4892,27 +4892,46 @@ function FullCataloguePage() {
             return (
               <div id="catalogue-section-new-products" className="scroll-mt-28">
                 {/* NEW PRODUCTS banner with hero image */}
-                <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#f0c0d8]">
-                  <img src="/gelitup-content/catalog-heroes/2026-new-products-banner.webp" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-[center_20%]" />
-                  <div className="absolute inset-0 bg-black/35 pointer-events-none" aria-hidden="true" />
-                  <div className="relative z-10 mx-auto max-w-6xl px-6 py-12 sm:px-10 lg:py-20">
-                    <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em] text-white">✦ Summer 2026 Launch</span>
-                    <h2 className="mt-4 text-3xl font-extrabold uppercase tracking-[0.06em] text-white drop-shadow-sm sm:text-5xl">
-                      New Products
-                    </h2>
-                    <div className="mt-3 h-1 w-14 rounded-full bg-white/50" />
-                    <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/90">
-                      The latest additions to the GEL.IT.UP range — new gel polish collections, innovative bases, and premium effects.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setShowNewCollections(v => !v)}
-                      className="mt-6 inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold uppercase tracking-[0.1em] text-white transition duration-200"
-                      style={{ background: 'linear-gradient(135deg,#D43790,#9B1268)', boxShadow: '0 4px 20px rgba(212,55,144,0.55)' }}
-                    >
-                      Browse New Collections
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`h-4 w-4 transition-transform duration-200 ${showNewCollections ? 'rotate-180' : ''}`} aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-                    </button>
+                <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#f0c0d8] lg:min-h-[360px]">
+                  <img
+                    aria-hidden="true"
+                    src="/gelitup-content/catalog-heroes/2026-new-products-banner.webp"
+                    alt=""
+                    className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-[center_20%] lg:block"
+                    style={{
+                      maskImage: 'linear-gradient(to right, transparent 0%, rgba(240,192,216,0.6) 25%, rgb(240,192,216) 50%)',
+                      WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(240,192,216,0.6) 25%, rgb(240,192,216) 50%)',
+                    }}
+                  />
+                  <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
+                    <div className="flex-1 lg:max-w-[500px]">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#9B1268' }}>✦ Summer 2026 Launch</p>
+                      <h2 className="mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-gray-800 sm:text-4xl">New Products</h2>
+                      <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-700 sm:text-base">
+                        The latest additions to the GEL.IT.UP range — new gel polish collections, innovative bases, and premium effects.
+                      </p>
+                      <div className="mt-6">
+                        <button
+                          type="button"
+                          onClick={() => setShowNewCollections(v => !v)}
+                          className="inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-bold uppercase tracking-[0.1em] text-white transition duration-200"
+                          style={{ background: 'linear-gradient(135deg,#D43790,#9B1268)', boxShadow: '0 4px 20px rgba(212,55,144,0.45)' }}
+                        >
+                          Browse New Collections
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`h-4 w-4 transition-transform duration-200 ${showNewCollections ? 'rotate-180' : ''}`} aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div className="lg:hidden">
+                      <div className="relative mx-auto max-w-[260px]">
+                        <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(212,55,144,0.25)_0%,transparent_70%)] blur-2xl" />
+                        <img
+                          src="/gelitup-content/catalog-heroes/2026-new-products-banner.webp"
+                          alt="GEL.IT.UP 2026 New Products"
+                          className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(212,55,144,0.3)]"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
                 {/* Collection selector — slides open below the banner */}
