@@ -105,8 +105,8 @@ const CONTENT_CACHE_BUSTER = '2026-04-15-1'
 const HOME_CLOUD_DANCER_DEFAULT = {
   title: 'Sunshine Ready - The Collection',
   introText: 'Sunshine Ready is a summer gel polish collection shaped by retro femininity, sun-washed colour, and a playful mod spirit. Inspired by psychedelic fashion, soft pastel tones, and the energy of long summer days, the collection brings together a polished palette of expressive shades designed to feel fresh, modern, and effortlessly seasonal.',
-  ctaLabel: 'Coming Soon',
-  ctaLink: '',
+  ctaLabel: 'View 2026 New Collection',
+  ctaLink: '/full-catalogue',
 }
 const LEEUKOPF_DISTRIBUTORS_SOURCE_URL = 'https://leeukopf.com/our-brands'
 const DISTRIBUTOR_DIRECTORY = [
@@ -4729,6 +4729,7 @@ function FullCataloguePage() {
         <div className="sticky top-[61px] z-30 -mx-3 border-b border-white/10 bg-[#111111]/95 backdrop-blur-sm md:-mx-6 md:top-[69px]">
           <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-6">
             {[
+              { label: '2026 NEW! ✦',   anchor: 'catalogue-section-2026-new',     color: '#D43790' },
               { label: 'Colours',        anchor: 'catalogue-section-colours',       color: '#c084fc' },
               { label: 'Bases & Tops',   anchor: 'catalogue-section-essentials',    color: '#67e8f9' },
               { label: 'Builder Systems',anchor: 'catalogue-section-builders',      color: '#86efac' },
@@ -5278,7 +5279,7 @@ function FullCataloguePage() {
           </div>
 
           {/* ── NEW COLLECTIONS: Sunshine Ready + Shimmer ── */}
-          <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div id="catalogue-section-2026-new" className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6 scroll-mt-28">
 
             {/* SUNSHINE READY */}
             <div className="flex overflow-hidden rounded-2xl border border-[#4A4A4A]/25">
@@ -5293,7 +5294,11 @@ function FullCataloguePage() {
                     Sunshine Ready is a summer gel polish collection shaped by retro femininity, sun-washed colour, and a playful mod spirit. Inspired by psychedelic fashion, soft pastel tones, and the energy of long summer days.
                   </p>
                   <div className="mt-4">
-                    <span className="inline-block rounded-lg bg-white/10 px-5 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white/60 cursor-default">Coming Soon</span>
+                    <button
+                      type="button"
+                      onClick={() => openCatalogueCategory('2026 NEW!', 'ALL')}
+                      className="inline-block rounded-lg bg-[#D43790] px-5 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]"
+                    >View 2026 Collection</button>
                   </div>
                 </div>
 
@@ -5344,7 +5349,11 @@ function FullCataloguePage() {
                     Discover the Shimmer Collection — luminous gel polish shades designed to glow from every angle. With pastel colour, shimmering pigment, and a glossy finish, this collection is perfect for fresh spring nails, summer manicures, and statement salon looks.
                   </p>
                   <div className="mt-4">
-                    <span className="inline-block rounded-lg bg-white/10 px-5 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white/60 cursor-default">Coming Soon</span>
+                    <button
+                      type="button"
+                      onClick={() => openCatalogueCategory('2026 NEW!', 'ALL')}
+                      className="inline-block rounded-lg bg-[#D43790] px-5 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]"
+                    >View 2026 Collection</button>
                   </div>
                 </div>
 
@@ -6532,7 +6541,7 @@ function HomePage({ onOpenContactModal }) {
                   Discover the Shimmer Collection — luminous gel polish shades designed to glow from every angle. With pastel colour, shimmering pigment, and a glossy finish, this collection is perfect for fresh spring nails, summer manicures, and statement salon looks.
                 </p>
                 <div className="mt-6">
-                  <span className="inline-block rounded-lg bg-white/10 px-5 py-2.5 text-sm font-bold uppercase tracking-[0.12em] text-white/60 cursor-default">Coming Soon</span>
+                  <NavLink to="/full-catalogue" className="inline-block rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]">View 2026 Collection</NavLink>
                 </div>
               </div>
               <div className="relative bg-[#0F0F0F]">
