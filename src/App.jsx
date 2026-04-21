@@ -3038,6 +3038,7 @@ function FullCataloguePage() {
   const [selectedLookbookPageByGroup, setSelectedLookbookPageByGroup] = useState({})
   const [lightboxUrl, setLightboxUrl] = useState(null)
   const [activeNewCollection, setActiveNewCollection] = useState('')
+  const [showNewCollections, setShowNewCollections] = useState(false)
   useEffect(() => {
     if (!lightboxUrl) return
     const handler = (e) => { if (e.key === 'Escape') { setLightboxUrl(null) } }
@@ -4903,9 +4904,19 @@ function FullCataloguePage() {
                     <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/90">
                       The latest additions to the GEL.IT.UP range — new gel polish collections, innovative bases, and premium effects.
                     </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowNewCollections(v => !v)}
+                      className="mt-6 inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold uppercase tracking-[0.1em] text-white transition duration-200"
+                      style={{ background: 'linear-gradient(135deg,#D43790,#9B1268)', boxShadow: '0 4px 20px rgba(212,55,144,0.55)' }}
+                    >
+                      Browse New Collections
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`h-4 w-4 transition-transform duration-200 ${showNewCollections ? 'rotate-180' : ''}`} aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                    </button>
                   </div>
                 </div>
-                {/* Collection selector — below the banner */}
+                {/* Collection selector — slides open below the banner */}
+                {showNewCollections && (
                 <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-5 sm:px-10">
                   <div className="mx-auto max-w-6xl">
                     <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Select a collection to browse</p>
@@ -4932,6 +4943,7 @@ function FullCataloguePage() {
                     </div>
                   </div>
                 </div>
+                )}
                 {activeNewCollection && (
                   <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8">
                     <p className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-black/50">{activeNewCollection} — {activeSubItems.length} product{activeSubItems.length !== 1 ? 's' : ''}</p>
