@@ -4077,13 +4077,13 @@ function FullCataloguePage() {
     })
   }, [])
 
-  const openCatalogueCategory = useCallback((categoryName = '', subcategoryName = 'ALL') => {
+  const openCatalogueCategory = useCallback((categoryName = '', subcategoryName = 'ALL', { keepSearch = false } = {}) => {
     if (!categoryName) return
     setActiveCategory(categoryName)
     setActiveSubcategory(subcategoryName || 'ALL')
     setActiveColorFamily('ALL')
     setActiveCatEyeVariant('ALL')
-    setSearchQuery('')
+    if (!keepSearch) setSearchQuery('')
     // Expand the correct section so categoryDetail renders
     // Colours skips the grid — categoryDetail is rendered standalone below the banner
     const normalized = normalizeCatalogueToken(categoryName)
@@ -4269,7 +4269,7 @@ function FullCataloguePage() {
   const categoryDetail = activeCategory
     ? (
       <div id="catalogue-category-detail" className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5 scroll-mt-28">
-        <div className="mb-3">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
           <button
             onClick={() => {
               setActiveCategory('')
@@ -4282,8 +4282,13 @@ function FullCataloguePage() {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5 flex-shrink-0">
               <path fillRule="evenodd" d="M14 8a.75.75 0 0 1-.75.75H4.56l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 1.06L4.56 7.25H13.25A.75.75 0 0 1 14 8Z" clipRule="evenodd" />
             </svg>
-            <span>Back to Categories</span>
+            <span>{searchQuery ? 'Back to Search Results' : 'Back to Categories'}</span>
           </button>
+          {searchQuery && (
+            <span className="rounded-full border border-fuchsia-300 bg-fuchsia-50 px-3 py-1 text-xs font-semibold text-fuchsia-700">
+              Filtered: &ldquo;{searchQuery}&rdquo; &mdash; {filteredItems.length} result{filteredItems.length === 1 ? '' : 's'}
+            </span>
+          )}
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -4810,7 +4815,7 @@ function FullCataloguePage() {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => { setSearchQuery(e.target.value); if (activeCategory) { setActiveCategory(''); setActiveSubcategory(''); } }}
                 placeholder="Search all products by name, code or category..."
                 className="w-full rounded-[14px] border border-[#4A4A4A]/35 bg-white py-2.5 pl-9 pr-10 text-base text-black outline-none ring-fuchsia-500/25 transition focus:border-fuchsia-400 focus:ring"
               />
@@ -4844,8 +4849,8 @@ function FullCataloguePage() {
                       <article
                         key={idx}
                         className="cursor-pointer overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 hover:border-fuchsia-500/70 hover:shadow-md"
-                        onClick={() => openCatalogueCategory(item.category, item.subcategory)}
-                        title={`View in ${item.category}`}
+                        onClick={() => openCatalogueCategory(item.category, item.subcategory, { keepSearch: true })}
+                        title={`View in ${item.category} — ${item.subcategory}`}
                       >
                         <div className="flex h-36 w-full items-center justify-center overflow-hidden bg-white p-1.5">
                           <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => e.currentTarget.closest('article')?.classList.add('!hidden')} />
