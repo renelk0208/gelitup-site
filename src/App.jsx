@@ -5384,113 +5384,101 @@ function FullCataloguePage() {
             <div className="relative mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6 px-4 py-8 sm:px-8">
 
             {/* SUNSHINE READY */}
-            <div className="flex overflow-hidden rounded-2xl border border-[#E0E0E0]">
-              <div className="flex h-full w-full flex-col">
-                <div className="flex flex-1 flex-col justify-center bg-white px-6 py-6 sm:px-8">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Additions — Summer 2026</p>
-                  <h2 className="mt-2 text-xl font-extrabold uppercase leading-tight tracking-[0.06em] text-black sm:text-2xl">
-                    Sunshine Ready<br /><span className="text-[#D43790]">The Collection</span>
-                  </h2>
-                  <div className="mt-2 h-px w-10 bg-[#D43790]/60" />
-                  <p className="mt-3 text-sm leading-relaxed text-black/60 line-clamp-4">
-                    Sunshine Ready is a summer gel polish collection shaped by retro femininity, sun-washed colour, and a playful mod spirit. Inspired by psychedelic fashion, soft pastel tones, and the energy of long summer days.
-                  </p>
-                  <div className="mt-4">
-                    <button
-                      type="button"
-                      onClick={() => { document.getElementById('catalogue-section-new-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
-                      className="inline-block rounded-lg bg-[#D43790] px-5 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]"
-                    >Shop the New Collection</button>
-                  </div>
+            <div className="flex overflow-hidden rounded-xl border border-[#E0E0E0] bg-white">
+              {/* Text left */}
+              <div className="flex flex-1 flex-col justify-center px-5 py-5 sm:px-6">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Additions — Summer 2026</p>
+                <h2 className="mt-1.5 text-base font-extrabold uppercase leading-tight tracking-[0.06em] text-black sm:text-lg">
+                  Sunshine Ready<br /><span className="text-[#D43790]">The Collection</span>
+                </h2>
+                <div className="mt-2 h-px w-8 bg-[#D43790]/60" />
+                <p className="mt-2 text-xs leading-relaxed text-black/60 line-clamp-3">Summer gel polish shaped by retro femininity, sun-washed colour, and a playful mod spirit.</p>
+                <div className="mt-3">
+                  <button type="button" onClick={() => { document.getElementById('catalogue-section-new-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }} className="inline-block rounded-lg bg-[#D43790] px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]">Shop Collection</button>
                 </div>
-
-                {/* IMAGE CAROUSEL */}
-                <div className="relative bg-white">
-                  {displayedLookbookGroups.filter(g => g.id === 'sunshine-ready').slice(0, 1).map((group) => {
-                    const pages = Array.isArray(group?.pages) ? group.pages : []
-                    if (!pages.length) return null
-                    const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
-                    const page = pages[selectedPageIndex]
-                    const pageType = String(page?.mediaType || '').toLowerCase()
-                    return (
-                      <div key={group.id}>
-                        <div className="relative aspect-[4/5] w-full overflow-hidden">
-                          {pageType === 'video'
-                            ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-full object-cover" autoPlay muted playsInline preload="metadata" />
-                            : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-cover" loading="lazy" />}
-                          <button type="button" aria-label="Previous page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))} className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
-                          <button type="button" aria-label="Next page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))} className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg></button>
-                          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
-                            {pages.map((_, idx) => (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`h-1.5 rounded-full transition-all duration-300 ${idx === selectedPageIndex ? 'w-5 bg-[#D43790]' : 'w-1.5 bg-white/40'}`} />))}
-                          </div>
-                        </div>
-                        <div className="flex gap-1.5 overflow-x-auto bg-gray-50 px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                          {pages.map((p, idx) => {
-                            const mt = String(p?.mediaType || '').toLowerCase()
-                            const isActive = idx === selectedPageIndex
-                            return (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-12 w-9 bg-gray-100">{mt === 'video' ? <video src={p.imageUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" /> : <img src={p.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}</div></button>)
-                          })}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
+                {displayedLookbookGroups.filter(g => g.id === 'sunshine-ready').slice(0, 1).map((group) => {
+                  const pages = Array.isArray(group?.pages) ? group.pages : []
+                  if (pages.length < 2) return null
+                  const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
+                  return (
+                    <div key={group.id} className="mt-3 flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                      {pages.map((p, idx) => {
+                        const mt = String(p?.mediaType || '').toLowerCase()
+                        const isActive = idx === selectedPageIndex
+                        return (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`shrink-0 overflow-hidden rounded border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-9 w-7 bg-gray-100">{mt === 'video' ? <video src={p.imageUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" /> : <img src={p.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}</div></button>)
+                      })}
+                    </div>
+                  )
+                })}
               </div>
+              {/* Image right */}
+              {displayedLookbookGroups.filter(g => g.id === 'sunshine-ready').slice(0, 1).map((group) => {
+                const pages = Array.isArray(group?.pages) ? group.pages : []
+                if (!pages.length) return null
+                const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
+                const page = pages[selectedPageIndex]
+                const pageType = String(page?.mediaType || '').toLowerCase()
+                return (
+                  <div key={group.id} className="relative w-[42%] shrink-0 overflow-hidden">
+                    {pageType === 'video'
+                      ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-full object-cover" autoPlay muted playsInline preload="metadata" />
+                      : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-cover" loading="lazy" />}
+                    {pages.length > 1 && (<>
+                      <button type="button" aria-label="Previous page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))} className="absolute left-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
+                      <button type="button" aria-label="Next page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))} className="absolute right-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg></button>
+                    </>)}
+                  </div>
+                )
+              })}
             </div>
 
             {/* SHIMMER COLLECTION */}
-            <div className="flex overflow-hidden rounded-2xl border border-[#E0E0E0]">
-              <div className="flex h-full w-full flex-col">
-                <div className="flex flex-1 flex-col justify-center bg-white px-6 py-6 sm:px-8">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Effects — Summer 2026</p>
-                  <h2 className="mt-2 text-xl font-extrabold uppercase leading-tight tracking-[0.06em] text-black sm:text-2xl">
-                    Shimmer<br /><span className="text-[#D43790]">Collection</span>
-                  </h2>
-                  <div className="mt-2 h-px w-10 bg-[#D43790]/60" />
-                  <p className="mt-3 text-sm leading-relaxed text-black/60 line-clamp-4">
-                    Discover the Shimmer Collection — luminous gel polish shades designed to glow from every angle. With pastel colour, shimmering pigment, and a glossy finish, this collection is perfect for fresh spring nails, summer manicures, and statement salon looks.
-                  </p>
-                  <div className="mt-4">
-                    <button
-                      type="button"
-                      onClick={() => { document.getElementById('catalogue-section-new-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
-                      className="inline-block rounded-lg bg-[#D43790] px-5 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]"
-                    >Shop the New Collection</button>
-                  </div>
+            <div className="flex overflow-hidden rounded-xl border border-[#E0E0E0] bg-white">
+              {/* Text left */}
+              <div className="flex flex-1 flex-col justify-center px-5 py-5 sm:px-6">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Effects — Summer 2026</p>
+                <h2 className="mt-1.5 text-base font-extrabold uppercase leading-tight tracking-[0.06em] text-black sm:text-lg">
+                  Shimmer<br /><span className="text-[#D43790]">Collection</span>
+                </h2>
+                <div className="mt-2 h-px w-8 bg-[#D43790]/60" />
+                <p className="mt-2 text-xs leading-relaxed text-black/60 line-clamp-3">Luminous gel polish shades designed to glow from every angle — pastel shimmer pigment with a glossy finish.</p>
+                <div className="mt-3">
+                  <button type="button" onClick={() => { document.getElementById('catalogue-section-new-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }} className="inline-block rounded-lg bg-[#D43790] px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]">Shop Collection</button>
                 </div>
-
-                {/* IMAGE CAROUSEL */}
-                <div className="relative bg-white">
-                  {displayedLookbookGroups.filter(g => g.id === 'shimmer-collection').slice(0, 1).map((group) => {
-                    const pages = Array.isArray(group?.pages) ? group.pages : []
-                    if (!pages.length) return null
-                    const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
-                    const page = pages[selectedPageIndex]
-                    const pageType = String(page?.mediaType || '').toLowerCase()
-                    return (
-                      <div key={group.id}>
-                        <div className="relative aspect-[4/5] w-full overflow-hidden">
-                          {pageType === 'video'
-                            ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-full object-cover" autoPlay muted playsInline preload="metadata" />
-                            : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-cover" loading="lazy" />}
-                          <button type="button" aria-label="Previous page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))} className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
-                          <button type="button" aria-label="Next page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))} className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg></button>
-                          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
-                            {pages.map((_, idx) => (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`h-1.5 rounded-full transition-all duration-300 ${idx === selectedPageIndex ? 'w-5 bg-[#D43790]' : 'w-1.5 bg-white/40'}`} />))}
-                          </div>
-                        </div>
-                        <div className="flex gap-1.5 overflow-x-auto bg-gray-50 px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                          {pages.map((p, idx) => {
-                            const mt = String(p?.mediaType || '').toLowerCase()
-                            const isActive = idx === selectedPageIndex
-                            return (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-12 w-9 bg-gray-100">{mt === 'video' ? <video src={p.imageUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" /> : <img src={p.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}</div></button>)
-                          })}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
+                {displayedLookbookGroups.filter(g => g.id === 'shimmer-collection').slice(0, 1).map((group) => {
+                  const pages = Array.isArray(group?.pages) ? group.pages : []
+                  if (pages.length < 2) return null
+                  const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
+                  return (
+                    <div key={group.id} className="mt-3 flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                      {pages.map((p, idx) => {
+                        const mt = String(p?.mediaType || '').toLowerCase()
+                        const isActive = idx === selectedPageIndex
+                        return (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`shrink-0 overflow-hidden rounded border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-9 w-7 bg-gray-100">{mt === 'video' ? <video src={p.imageUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" /> : <img src={p.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}</div></button>)
+                      })}
+                    </div>
+                  )
+                })}
               </div>
+              {/* Image right */}
+              {displayedLookbookGroups.filter(g => g.id === 'shimmer-collection').slice(0, 1).map((group) => {
+                const pages = Array.isArray(group?.pages) ? group.pages : []
+                if (!pages.length) return null
+                const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
+                const page = pages[selectedPageIndex]
+                const pageType = String(page?.mediaType || '').toLowerCase()
+                return (
+                  <div key={group.id} className="relative w-[42%] shrink-0 overflow-hidden">
+                    {pageType === 'video'
+                      ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-full object-cover" autoPlay muted playsInline preload="metadata" />
+                      : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-cover" loading="lazy" />}
+                    {pages.length > 1 && (<>
+                      <button type="button" aria-label="Previous page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))} className="absolute left-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
+                      <button type="button" aria-label="Next page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))} className="absolute right-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg></button>
+                    </>)}
+                  </div>
+                )
+              })}
             </div>
 
           </div>
@@ -6210,7 +6198,7 @@ function InstagramFeedStrip() {
   }, [])
 
   return (
-    <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#0F0F0F] py-8">
+    <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#F5F5F5] py-8">
       <div className="mx-auto max-w-6xl px-4 sm:px-8">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -6228,7 +6216,7 @@ function InstagramFeedStrip() {
               <circle cx="12" cy="12" r="4" stroke="url(#ig-grad)" strokeWidth="2" fill="none" />
               <circle cx="17.5" cy="6.5" r="1" fill="url(#ig-grad)" />
             </svg>
-            <span className="text-sm font-bold uppercase tracking-[0.12em] text-white">
+            <span className="text-sm font-bold uppercase tracking-[0.12em] text-[#1A1A1A]">
               @{INSTAGRAM_HANDLE}
             </span>
           </div>
@@ -6236,7 +6224,7 @@ function InstagramFeedStrip() {
             href={INSTAGRAM_URL}
             target="_blank"
             rel="noreferrer"
-            className="text-xs font-semibold uppercase tracking-widest text-[#E879F9] transition hover:text-white"
+            className="text-xs font-semibold uppercase tracking-widest text-[#D43790] transition hover:text-[#BF3182]"
           >
             Follow Us →
           </a>
@@ -6589,82 +6577,68 @@ function HomePage({ onOpenContactModal }) {
         <div className="relative mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6">
 
           {/* SUNSHINE READY */}
-          <div className="flex overflow-hidden rounded-2xl border border-[#E0E0E0]">
-            <div className="flex h-full w-full flex-col">
-              <div className="flex flex-1 flex-col justify-center bg-white px-6 py-8 sm:px-8">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Additions — Summer 2026</p>
-                <h2 className="mt-3 text-2xl font-extrabold uppercase leading-tight tracking-[0.06em] text-black sm:text-3xl">
-                  Sunshine Ready<br /><span className="text-[#D43790]">The Collection</span>
-                </h2>
-                <div className="mt-3 h-px w-10 bg-[#D43790]/60" />
-                <p className="mt-5 text-sm leading-relaxed text-black/60 line-clamp-4">{homeCloudStory.introText}</p>
-                <div className="mt-6">
-                  <NavLink to="/full-catalogue" state={{ scrollTo: 'catalogue-section-new-products' }} className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-xs font-bold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]">Shop the New Collection</NavLink>
+          <div className="flex overflow-hidden rounded-xl border border-[#E0E0E0] bg-white">
+            {/* Text left */}
+            <div className="flex flex-1 flex-col justify-center px-5 py-5 sm:px-6">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Additions — Summer 2026</p>
+              <h2 className="mt-1.5 text-base font-extrabold uppercase leading-tight tracking-[0.06em] text-black sm:text-lg">
+                Sunshine Ready<br /><span className="text-[#D43790]">The Collection</span>
+              </h2>
+              <div className="mt-2 h-px w-8 bg-[#D43790]/60" />
+              <p className="mt-2 text-xs leading-relaxed text-black/60 line-clamp-3">{homeCloudStory.introText}</p>
+              <div className="mt-3">
+                <NavLink to="/full-catalogue" state={{ scrollTo: 'catalogue-section-new-products' }} className="inline-block rounded-lg bg-[#D43790] px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white transition duration-200 hover:bg-[#BF3182]">Shop Collection</NavLink>
+              </div>
+              {homeNewsCarousel.length > 1 && (
+                <div className="mt-3 flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {homeNewsCarousel.map((item, idx) => {
+                    const isActive = idx === safeHomeNewsIndex
+                    return (<button key={idx} type="button" onClick={() => setActiveHomeNewsSlide(idx)} className={`shrink-0 overflow-hidden rounded border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-9 w-7 bg-gray-100"><img src={item.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" /></div></button>)
+                  })}
                 </div>
-              </div>
-              <div className="relative bg-white">
-                {activeHomeNewsItem && (
-                  <>
-                    <div className="relative aspect-[4/5] w-full overflow-hidden">
-                      <img src={activeHomeNewsItem.imageUrl} alt="Sunshine Ready" className="h-full w-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
-                      {homeNewsCarousel.length > 1 && (
-                        <>
-                          <button type="button" aria-label="Previous" onClick={() => setActiveHomeNewsSlide((s) => (s - 1 + homeNewsCarousel.length) % homeNewsCarousel.length)} className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4"><path d="M15 18l-6-6 6-6" /></svg></button>
-                          <button type="button" aria-label="Next" onClick={() => setActiveHomeNewsSlide((s) => (s + 1) % homeNewsCarousel.length)} className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4"><path d="M9 18l6-6-6-6" /></svg></button>
-                          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
-                            {homeNewsCarousel.map((_, idx) => (<button key={idx} type="button" onClick={() => setActiveHomeNewsSlide(idx)} className={`h-1.5 rounded-full transition-all duration-300 ${idx === safeHomeNewsIndex ? 'w-5 bg-[#D43790]' : 'w-1.5 bg-white/40'}`} />))}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                    <div className="flex gap-1.5 overflow-x-auto bg-gray-50 px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                      {homeNewsCarousel.map((item, idx) => {
-                        const isActive = idx === safeHomeNewsIndex
-                        return (<button key={idx} type="button" onClick={() => setActiveHomeNewsSlide(idx)} className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-12 w-9 bg-gray-100"><img src={item.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" /></div></button>)
-                      })}
-                    </div>
-                  </>
-                )}
-              </div>
+              )}
             </div>
+            {/* Image right */}
+            {activeHomeNewsItem && (
+              <div className="relative w-[42%] shrink-0 overflow-hidden">
+                <img src={activeHomeNewsItem.imageUrl} alt="Sunshine Ready" className="h-full w-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
+                {homeNewsCarousel.length > 1 && (<>
+                  <button type="button" aria-label="Previous" onClick={() => setActiveHomeNewsSlide((s) => (s - 1 + homeNewsCarousel.length) % homeNewsCarousel.length)} className="absolute left-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5"><path d="M15 18l-6-6 6-6" /></svg></button>
+                  <button type="button" aria-label="Next" onClick={() => setActiveHomeNewsSlide((s) => (s + 1) % homeNewsCarousel.length)} className="absolute right-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5"><path d="M9 18l6-6-6-6" /></svg></button>
+                </>)}
+              </div>
+            )}
           </div>
 
           {/* SHIMMER COLLECTION */}
-          <div className="flex overflow-hidden rounded-2xl border border-[#E0E0E0]">
-            <div className="flex h-full w-full flex-col">
-              <div className="flex flex-1 flex-col justify-center bg-white px-6 py-8 sm:px-8">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Effects — Summer 2026</p>
-                <h2 className="mt-3 text-2xl font-extrabold uppercase leading-tight tracking-[0.06em] text-black sm:text-3xl">
-                  Shimmer<br /><span className="text-[#D43790]">Collection</span>
-                </h2>
-                <div className="mt-3 h-px w-10 bg-[#D43790]/60" />
-                <p className="mt-5 text-sm leading-relaxed text-black/60 line-clamp-4">
-                  Discover the Shimmer Collection — luminous gel polish shades designed to glow from every angle. With pastel colour, shimmering pigment, and a glossy finish, this collection is perfect for fresh spring nails, summer manicures, and statement salon looks.
-                </p>
-                <div className="mt-6">
-                  <NavLink to="/full-catalogue" state={{ scrollTo: 'catalogue-section-new-products' }} className="inline-block rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]">Shop the New Collection</NavLink>
-                </div>
+          <div className="flex overflow-hidden rounded-xl border border-[#E0E0E0] bg-white">
+            {/* Text left */}
+            <div className="flex flex-1 flex-col justify-center px-5 py-5 sm:px-6">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Effects — Summer 2026</p>
+              <h2 className="mt-1.5 text-base font-extrabold uppercase leading-tight tracking-[0.06em] text-black sm:text-lg">
+                Shimmer<br /><span className="text-[#D43790]">Collection</span>
+              </h2>
+              <div className="mt-2 h-px w-8 bg-[#D43790]/60" />
+              <p className="mt-2 text-xs leading-relaxed text-black/60 line-clamp-3">Luminous gel polish shades designed to glow from every angle — pastel shimmer pigment with a glossy finish.</p>
+              <div className="mt-3">
+                <NavLink to="/full-catalogue" state={{ scrollTo: 'catalogue-section-new-products' }} className="inline-block rounded-lg bg-[#D43790] px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]">Shop Collection</NavLink>
               </div>
-              <div className="relative bg-white">
-                <div className="relative aspect-[4/5] w-full overflow-hidden">
-                  <img src={HOME_SHIMMER_IMAGES[safeShimmerIndex]} alt="Shimmer Collection" className="h-full w-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
-                  {HOME_SHIMMER_IMAGES.length > 1 && (
-                    <>
-                      <button type="button" aria-label="Previous" onClick={() => setActiveShimmerSlide((s) => (s - 1 + HOME_SHIMMER_IMAGES.length) % HOME_SHIMMER_IMAGES.length)} className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4"><path d="M15 18l-6-6 6-6" /></svg></button>
-                      <button type="button" aria-label="Next" onClick={() => setActiveShimmerSlide((s) => (s + 1) % HOME_SHIMMER_IMAGES.length)} className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4"><path d="M9 18l6-6-6-6" /></svg></button>
-                      <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
-                        {HOME_SHIMMER_IMAGES.map((_, idx) => (<button key={idx} type="button" onClick={() => setActiveShimmerSlide(idx)} className={`h-1.5 rounded-full transition-all duration-300 ${idx === safeShimmerIndex ? 'w-5 bg-[#D43790]' : 'w-1.5 bg-white/40'}`} />))}
-                      </div>
-                    </>
-                  )}
-                </div>
-                <div className="flex gap-1.5 overflow-x-auto bg-gray-50 px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {HOME_SHIMMER_IMAGES.length > 1 && (
+                <div className="mt-3 flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {HOME_SHIMMER_IMAGES.map((src, idx) => {
                     const isActive = idx === safeShimmerIndex
-                    return (<button key={idx} type="button" onClick={() => setActiveShimmerSlide(idx)} className={`shrink-0 overflow-hidden rounded-md border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-12 w-9 bg-gray-100"><img src={src} alt="" className="h-full w-full object-cover" loading="lazy" /></div></button>)
+                    return (<button key={idx} type="button" onClick={() => setActiveShimmerSlide(idx)} className={`shrink-0 overflow-hidden rounded border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-9 w-7 bg-gray-100"><img src={src} alt="" className="h-full w-full object-cover" loading="lazy" /></div></button>)
                   })}
                 </div>
-              </div>
+              )}
+            </div>
+            {/* Image right */}
+            <div className="relative w-[42%] shrink-0 overflow-hidden">
+              <img src={HOME_SHIMMER_IMAGES[safeShimmerIndex]} alt="Shimmer Collection" className="h-full w-full object-cover" loading="lazy" onError={(e) => { e.currentTarget.src = '/logo.png' }} />
+              {HOME_SHIMMER_IMAGES.length > 1 && (<>
+                <button type="button" aria-label="Previous" onClick={() => setActiveShimmerSlide((s) => (s - 1 + HOME_SHIMMER_IMAGES.length) % HOME_SHIMMER_IMAGES.length)} className="absolute left-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5"><path d="M15 18l-6-6 6-6" /></svg></button>
+                <button type="button" aria-label="Next" onClick={() => setActiveShimmerSlide((s) => (s + 1) % HOME_SHIMMER_IMAGES.length)} className="absolute right-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5"><path d="M9 18l6-6-6-6" /></svg></button>
+            </>)}
             </div>
           </div>
 
