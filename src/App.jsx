@@ -3034,6 +3034,7 @@ function FullCataloguePage() {
   const [expandedLookbookGroup, setExpandedLookbookGroup] = useState(0)
   const [selectedLookbookPageByGroup, setSelectedLookbookPageByGroup] = useState({})
   const [lightboxUrl, setLightboxUrl] = useState(null)
+  const [activeNewCollection, setActiveNewCollection] = useState('')
   useEffect(() => {
     if (!lightboxUrl) return
     const handler = (e) => { if (e.key === 'Escape') { setLightboxUrl(null) } }
@@ -3044,6 +3045,7 @@ function FullCataloguePage() {
   const [activeNavAnchor, setActiveNavAnchor] = useState('')
   useEffect(() => {
     const anchors = [
+      'catalogue-section-new-products',
       'catalogue-section-colours',
       'catalogue-section-essentials',
       'catalogue-section-builders',
@@ -3108,14 +3110,8 @@ function FullCataloguePage() {
         setSections(nextSections)
         setSolidGelColourFamilies(colourFamiliesPayload)
         setHeroCandidateIndexByCategory({})
-        const openCat = location?.state?.openCategory
-        if (openCat) {
-          setActiveCategory(openCat)
-          setActiveSubcategory('ALL')
-        } else {
-          setActiveCategory('')
-          setActiveSubcategory('')
-        }
+        setActiveCategory('')
+        setActiveSubcategory('')
         setActiveColorFamily('ALL')
       }
       catch (error) {
@@ -3138,18 +3134,17 @@ function FullCataloguePage() {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // If navigated here with openCategory state, scroll to that section after load
+  // If navigated here with scrollTo state, scroll to that section after load
   useEffect(() => {
-    const openCat = location?.state?.openCategory
-    if (!openCat || isLoading) return
-    const anchorId = openCat === '2026 NEW!' ? 'catalogue-section-2026-new' : 'catalogue-category-detail'
+    const scrollTo = location?.state?.scrollTo
+    if (!scrollTo || isLoading) return
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        const el = document.getElementById(anchorId)
+        const el = document.getElementById(scrollTo)
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       })
     })
-  }, [isLoading, location?.state?.openCategory])
+  }, [isLoading, location?.state?.scrollTo])
 
   // Load B2B price list for public price display
   useEffect(() => {
@@ -4754,7 +4749,7 @@ function FullCataloguePage() {
         <div className="sticky top-[61px] z-30 -mx-3 border-b border-white/10 bg-[#111111]/95 backdrop-blur-sm md:-mx-6 md:top-[69px]">
           <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-6">
             {[
-              { label: '2026 NEW! ✦',   anchor: 'catalogue-section-2026-new',     color: '#D43790' },
+              { label: '2026 NEW! ✦',   anchor: 'catalogue-section-new-products',  color: '#D43790' },
               { label: 'Colours',        anchor: 'catalogue-section-colours',       color: '#c084fc' },
               { label: 'Bases & Tops',   anchor: 'catalogue-section-essentials',    color: '#67e8f9' },
               { label: 'Builder Systems',anchor: 'catalogue-section-builders',      color: '#86efac' },
@@ -4889,6 +4884,97 @@ function FullCataloguePage() {
           )}
 
           {!searchQuery && <>
+          {/* ── NEW PRODUCTS 2026 ── */}
+          {(() => {
+            const newSection = sections.find(s => s.category === '2026 NEW!')
+            const NEW_COLS = [
+              { key: 'Cloud Dancer', label: 'Cloud Dancer Collection' },
+              { key: 'Summer Vibes', label: 'Summer Vibes' },
+              { key: 'Sapphire Cat Eye', label: 'Sapphire Cat Eye' },
+              { key: 'Shimmer Colors', label: 'Shimmer Colors' },
+              { key: 'Mirror Top Coat', label: 'Mirror Top Coat' },
+              { key: '5-in-1 Superior Base', label: '5-in-1 Superior Base' },
+            ]
+            const activeSubItems = activeNewCollection && newSection
+              ? (newSection.subcategories.find(s => s.name === activeNewCollection)?.items || [])
+              : []
+            return (
+              <div id="catalogue-section-new-products" className="scroll-mt-28">
+                {/* Dark hero banner */}
+                <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#140008] lg:min-h-[280px]">
+                  {/* Placeholder for hero image — will be replaced with uploaded image */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#D43790]/25 via-[#7a1040]/10 to-transparent pointer-events-none" aria-hidden="true" />
+                  <div className="relative mx-auto max-w-6xl px-6 py-10 sm:px-10 lg:py-14">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D43790]">Summer 2026 Launch</p>
+                    <h2 className="heading-on-dark mt-3 text-3xl font-extrabold uppercase tracking-[0.06em] text-white sm:text-4xl">
+                      New Products <span className="text-[#D43790]">✦</span>
+                    </h2>
+                    <div className="mt-3 h-px w-12 bg-[#D43790]/50" />
+                    <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/60">
+                      The latest additions to the GEL.IT.UP range — new gel polish collections, innovative bases, and premium effects. Select a collection to browse and order.
+                    </p>
+                    {/* Collection pills */}
+                    <div className="mt-6 flex flex-wrap gap-2">
+                      {NEW_COLS.map(col => {
+                        const isActive = activeNewCollection === col.key
+                        return (
+                          <button
+                            key={col.key}
+                            type="button"
+                            onClick={() => setActiveNewCollection(isActive ? '' : col.key)}
+                            className="rounded-full border px-4 py-2 text-xs font-semibold tracking-wide transition duration-200"
+                            style={isActive
+                              ? { background: '#D43790', color: '#fff', borderColor: '#D43790', boxShadow: '0 0 0 3px rgba(212,55,144,0.22)' }
+                              : { borderColor: 'rgba(212,55,144,0.55)', background: 'rgba(212,55,144,0.10)', color: '#D43790' }
+                            }
+                          >{col.label}</button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+                {/* Product grid for selected collection */}
+                {activeNewCollection && (
+                  <div className="mx-auto max-w-6xl py-6">
+                    <p className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-black/50">{activeNewCollection} — {activeSubItems.length} product{activeSubItems.length !== 1 ? 's' : ''}</p>
+                    {activeSubItems.length === 0 ? (
+                      <p className="text-sm text-black/45">No products found for this collection.</p>
+                    ) : (
+                      <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}>
+                        {activeSubItems.map((item, idx) => {
+                          const itemCode = extractProductCode(item.name)
+                          const itemKey = `${item.name}::${itemCode}`
+                          const price = lookupCataloguePrice(item.name, itemCode)
+                          const inCart = (quickCart[itemKey] || 0) > 0
+                          return (
+                            <article key={idx} className="flex flex-col overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)]" data-catalogue-item>
+                              <div className="flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
+                                <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={e => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={e => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
+                              </div>
+                              <div className="flex flex-1 flex-col border-t border-black/10 px-2.5 py-2">
+                                <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
+                                <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
+                                <p className="mt-1.5 text-xs font-bold text-fuchsia-700">{price != null ? `€${Number(price).toFixed(2)}` : 'Price on request'}</p>
+                                <div className="mt-auto pt-3">
+                                  <div className="flex items-center gap-2">
+                                    <button onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
+                                    <span className={`w-8 text-center text-xs font-bold ${inCart ? 'text-fuchsia-700' : 'text-black/40'}`}>{quickCart[itemKey] || 0}</span>
+                                    <button onClick={() => addQuickItem(itemKey)} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border border-fuchsia-600 text-sm text-fuchsia-600 transition duration-300 hover:bg-fuchsia-50 ${pulseItemKey === itemKey ? 'lux-pulse' : ''}`}>+</button>
+                                    {inCart && <span className="ml-auto text-[10px] font-semibold text-fuchsia-700">in basket</span>}
+                                  </div>
+                                </div>
+                              </div>
+                            </article>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })()}
+
           {/* CHAPTER 01: THE INFINITE SPECTRUM */}
           <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 overflow-hidden bg-[#7a1040] lg:min-h-[400px]">
             <img
@@ -5321,7 +5407,7 @@ function FullCataloguePage() {
                   <div className="mt-4">
                     <button
                       type="button"
-                      onClick={() => openCatalogueCategory('2026 NEW!', 'ALL')}
+                      onClick={() => { document.getElementById('catalogue-section-new-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
                       className="inline-block rounded-lg bg-[#D43790] px-5 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]"
                     >Shop the New Collection</button>
                   </div>
@@ -5376,7 +5462,7 @@ function FullCataloguePage() {
                   <div className="mt-4">
                     <button
                       type="button"
-                      onClick={() => openCatalogueCategory('2026 NEW!', 'ALL')}
+                      onClick={() => { document.getElementById('catalogue-section-new-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
                       className="inline-block rounded-lg bg-[#D43790] px-5 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]"
                     >Shop the New Collection</button>
                   </div>
@@ -6519,7 +6605,7 @@ function HomePage({ onOpenContactModal }) {
                 <div className="mt-3 h-px w-10 bg-[#D43790]/60" />
                 <p className="mt-5 text-sm leading-relaxed !text-white/65 line-clamp-4">{homeCloudStory.introText}</p>
                 <div className="mt-6">
-                  <NavLink to="/full-catalogue" state={{ openCategory: '2026 NEW!' }} className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-xs font-bold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]">Shop the New Collection</NavLink>
+                  <NavLink to="/full-catalogue" state={{ scrollTo: 'catalogue-section-new-products' }} className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-xs font-bold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]">Shop the New Collection</NavLink>
                 </div>
               </div>
               <div className="relative bg-[#0F0F0F]">
@@ -6562,7 +6648,7 @@ function HomePage({ onOpenContactModal }) {
                   Discover the Shimmer Collection — luminous gel polish shades designed to glow from every angle. With pastel colour, shimmering pigment, and a glossy finish, this collection is perfect for fresh spring nails, summer manicures, and statement salon looks.
                 </p>
                 <div className="mt-6">
-                  <NavLink to="/full-catalogue" state={{ openCategory: '2026 NEW!' }} className="inline-block rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]">Shop the New Collection</NavLink>
+                  <NavLink to="/full-catalogue" state={{ scrollTo: 'catalogue-section-new-products' }} className="inline-block rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]">Shop the New Collection</NavLink>
                 </div>
               </div>
               <div className="relative bg-[#0F0F0F]">
