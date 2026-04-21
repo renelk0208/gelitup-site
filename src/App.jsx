@@ -4808,19 +4808,6 @@ function FullCataloguePage() {
         <>
           <div id={CATALOGUE_RESULTS_ANCHOR_ID} className="scroll-mt-28" />
 
-          {/* DISTRIBUTOR BANNER */}
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-fuchsia-200 bg-fuchsia-50 px-4 py-2.5">
-            <p className="text-xs text-fuchsia-800">
-              <span className="font-semibold">Distributors:</span>{' '}Register to see wholesale pricing.
-            </p>
-            <NavLink
-              to="/portal/register"
-              className="shrink-0 rounded-lg bg-fuchsia-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-fuchsia-500"
-            >
-              Register as Distributor &rarr;
-            </NavLink>
-          </div>
-
           {/* GLOBAL SEARCH BAR */}
           <div className="mx-auto max-w-6xl px-4 sm:px-8 py-4">
             <div className="relative flex items-center">
