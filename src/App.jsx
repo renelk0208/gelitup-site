@@ -4888,22 +4888,25 @@ function FullCataloguePage() {
             return (
               <div id="catalogue-section-new-products" className="scroll-mt-28">
                 {/* NEW PRODUCTS banner with hero image */}
-                <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#f0c0d8] lg:min-h-[360px]">
-                  <img src="/gelitup-content/catalog-heroes/2026-new-products-banner.webp" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-center" />
-                  <div className="absolute inset-0 bg-black/40 pointer-events-none" aria-hidden="true" />
-                  <div className="relative z-10 mx-auto max-w-6xl px-6 py-10 sm:px-10 lg:py-14">
-                    <div className="flex items-center gap-3">
-                      <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em] text-white">✦ Summer 2026 Launch</span>
-                    </div>
+                <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#f0c0d8]">
+                  <img src="/gelitup-content/catalog-heroes/2026-new-products-banner.webp" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-[center_20%]" />
+                  <div className="absolute inset-0 bg-black/35 pointer-events-none" aria-hidden="true" />
+                  <div className="relative z-10 mx-auto max-w-6xl px-6 py-12 sm:px-10 lg:py-20">
+                    <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em] text-white">✦ Summer 2026 Launch</span>
                     <h2 className="mt-4 text-3xl font-extrabold uppercase tracking-[0.06em] text-white drop-shadow-sm sm:text-5xl">
                       New Products
                     </h2>
                     <div className="mt-3 h-1 w-14 rounded-full bg-white/50" />
                     <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/90">
-                      The latest additions to the GEL.IT.UP range — new gel polish collections, innovative bases, and premium effects. Select a collection to browse and order.
+                      The latest additions to the GEL.IT.UP range — new gel polish collections, innovative bases, and premium effects.
                     </p>
-                    {/* Collection pills */}
-                    <div className="mt-6 flex flex-wrap gap-2">
+                  </div>
+                </div>
+                {/* Collection selector — below the banner */}
+                <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-5 sm:px-10">
+                  <div className="mx-auto max-w-6xl">
+                    <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Select a collection to browse</p>
+                    <div className="flex flex-wrap gap-2">
                       {NEW_COLS.map(col => {
                         const isActive = activeNewCollection === col.key
                         return (
@@ -4911,19 +4914,23 @@ function FullCataloguePage() {
                             key={col.key}
                             type="button"
                             onClick={() => setActiveNewCollection(isActive ? '' : col.key)}
-                            className="rounded-full px-4 py-2 text-xs font-bold tracking-wide transition duration-200"
+                            className="group relative flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-bold tracking-wide transition-all duration-200"
                             style={isActive
-                              ? { background: '#D43790', color: '#fff', boxShadow: '0 2px 12px rgba(0,0,0,0.25)' }
-                              : { background: 'rgba(255,255,255,0.92)', color: '#1A1A1A', border: '1.5px solid rgba(255,255,255,0.8)' }
+                              ? { background: 'linear-gradient(135deg,#D43790,#9B1268)', color: '#fff', boxShadow: '0 4px 18px rgba(212,55,144,0.5)' }
+                              : { background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.12)' }
                             }
-                          >{col.label}</button>
+                          >
+                            <span className={`h-1.5 w-1.5 rounded-full transition-all ${isActive ? 'bg-white' : 'bg-[#D43790]'}`} />
+                            {col.label}
+                            {isActive && <span className="ml-1 text-white/70">✕</span>}
+                          </button>
                         )
                       })}
                     </div>
                   </div>
                 </div>
                 {activeNewCollection && (
-                  <div className="mx-auto max-w-6xl py-6">
+                  <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8">
                     <p className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-black/50">{activeNewCollection} — {activeSubItems.length} product{activeSubItems.length !== 1 ? 's' : ''}</p>
                     {activeSubItems.length === 0 ? (
                       <p className="text-sm text-black/45">No products found for this collection.</p>
