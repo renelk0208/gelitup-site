@@ -2950,6 +2950,7 @@ const CATEGORY_LAB_SPECS = {
 const DEFAULT_LAB_SPECS = { pigmentDots: null, cure: '60s LED — 120s UV', llab: true }
 
 function FullCataloguePage() {
+  const location = useLocation()
   const [sections, setSections] = useState([])
   const [activeCategory, setActiveCategory] = useState('')
   const [expandedSections, setExpandedSections] = useState({})
@@ -3107,8 +3108,14 @@ function FullCataloguePage() {
         setSections(nextSections)
         setSolidGelColourFamilies(colourFamiliesPayload)
         setHeroCandidateIndexByCategory({})
-        setActiveCategory('')
-        setActiveSubcategory('')
+        const openCat = location?.state?.openCategory
+        if (openCat) {
+          setActiveCategory(openCat)
+          setActiveSubcategory('ALL')
+        } else {
+          setActiveCategory('')
+          setActiveSubcategory('')
+        }
         setActiveColorFamily('ALL')
       }
       catch (error) {
@@ -3129,7 +3136,20 @@ function FullCataloguePage() {
     return () => {
       mounted = false
     }
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // If navigated here with openCategory state, scroll to that section after load
+  useEffect(() => {
+    const openCat = location?.state?.openCategory
+    if (!openCat || isLoading) return
+    const anchorId = openCat === '2026 NEW!' ? 'catalogue-section-2026-new' : 'catalogue-category-detail'
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const el = document.getElementById(anchorId)
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    })
+  }, [isLoading, location?.state?.openCategory])
 
   // Load B2B price list for public price display
   useEffect(() => {
@@ -6499,11 +6519,7 @@ function HomePage({ onOpenContactModal }) {
                 <div className="mt-3 h-px w-10 bg-[#D43790]/60" />
                 <p className="mt-5 text-sm leading-relaxed !text-white/65 line-clamp-4">{homeCloudStory.introText}</p>
                 <div className="mt-6">
-                  {homeCloudStory.ctaLink ? (
-                    <NavLink to={homeCloudStory.ctaLink} className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-xs font-bold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]">{homeCloudStory.ctaLabel}</NavLink>
-                  ) : (
-                    <span className="inline-block rounded-lg bg-white/10 px-5 py-2.5 text-sm font-bold uppercase tracking-[0.12em] text-white/60 cursor-default">{homeCloudStory.ctaLabel}</span>
-                  )}
+                  <NavLink to="/full-catalogue" state={{ openCategory: '2026 NEW!' }} className="inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-xs font-bold uppercase tracking-[0.06em] text-white transition duration-200 hover:bg-[#BF3182]">Shop the New Collection</NavLink>
                 </div>
               </div>
               <div className="relative bg-[#0F0F0F]">
@@ -6546,7 +6562,7 @@ function HomePage({ onOpenContactModal }) {
                   Discover the Shimmer Collection — luminous gel polish shades designed to glow from every angle. With pastel colour, shimmering pigment, and a glossy finish, this collection is perfect for fresh spring nails, summer manicures, and statement salon looks.
                 </p>
                 <div className="mt-6">
-                  <NavLink to="/full-catalogue" className="inline-block rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]">Shop the New Collection</NavLink>
+                  <NavLink to="/full-catalogue" state={{ openCategory: '2026 NEW!' }} className="inline-block rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]">Shop the New Collection</NavLink>
                 </div>
               </div>
               <div className="relative bg-[#0F0F0F]">
