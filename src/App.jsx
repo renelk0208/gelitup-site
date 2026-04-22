@@ -6773,56 +6773,6 @@ function HomePage({ onOpenContactModal }) {
       </div>
 
       {/* ACADEMY CTA CARD */}
-      <div className="overflow-hidden rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-5 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">For Nail Academies</p>
-            <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">Do you run a nail academy or training school?</h2>
-            <p className="mt-2 max-w-lg text-sm text-white/80">EU-certified, HEMA-free products built for training volume. From classroom consumables to student kits — with compliance documentation included.</p>
-            <ul className="mt-3 space-y-1">
-              {['CPNP notified · EU compliant', 'HEMA-free · SDS docs included', 'No MOQ · Sample packs available', 'Intake-cycle ordering support'].map((item) => (
-                <li key={item} className="flex items-center gap-2 text-sm text-white/80">
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#D43790]/70" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <NavLink to="/for-academies" className="shrink-0 self-start rounded-xl border border-[#D43790]/60 px-5 py-3 text-sm font-bold text-[#D43790] transition duration-300 hover:bg-[#D43790]/10">
-            Academy Info &rarr;
-          </NavLink>
-        </div>
-      </div>
-
-      {/* DISTRIBUTOR TIERS CARD */}
-      <div className="rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-5 sm:p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Distribution</p>
-        <h2 className="heading-on-dark mt-1 text-xl font-extrabold uppercase tracking-[0.08em] text-white">Become a Distributor</h2>
-        <p className="mt-2 text-sm text-white/80">Two tiers for regional and country-level distribution — with marketing, brand support and territory protection.</p>
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          {[
-            { name: 'PROFESSIONAL', tagline: 'Regional distribution', skus: '250+', shades: '180 core shades', badge: 'Growth' },
-            { name: 'AUTHORITY', tagline: 'Territory dominance', skus: '500+', shades: 'Full portfolio', badge: 'Elite' },
-          ].map((tier) => (
-            <div key={tier.name} className="rounded-xl border border-white/15 bg-white/5 p-4">
-              <div className="flex items-start justify-between gap-2">
-                <p className="text-sm font-extrabold uppercase tracking-[0.08em] text-white">{tier.name}</p>
-                <span className="rounded-full border border-[#D43790]/50 bg-[#D43790]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#D43790]">{tier.badge}</span>
-              </div>
-              <p className="mt-1 text-xs text-white/55">{tier.tagline}</p>
-              <div className="mt-3 space-y-1 text-xs text-white/80">
-                <p>— {tier.shades}</p>
-                <p>— {tier.skus} total SKUs</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <NavLink to="/distributor-packages" className="mt-5 inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
-          View Distribution Options
-        </NavLink>
-      </div>
 
       <GoogleReviewsStrip />
 
