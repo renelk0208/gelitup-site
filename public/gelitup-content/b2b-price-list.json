@@ -2,7 +2,7 @@
   "_meta": {
     "source": "gelitup-b2b-pricelist-names-zoho-order-form.xlsx",
     "generated": "2026-04-20T10:45:17.1950370+03:00",
-    "count": 1052
+    "count": 1077
   },
   "items": [
     {
@@ -5272,6 +5272,31 @@
     { "name": "GIUP 8E", "sku": "GIUP 8E", "price": 7.41 },
     { "name": "GIUP 8F", "sku": "GIUP 8F", "price": 7.41 },
     { "name": "GIUP 9A", "sku": "GIUP 9A", "price": 7.41 },
-    { "name": "GIUP 9B", "sku": "GIUP 9B", "price": 7.41 }
+    { "name": "GIUP 9B", "sku": "GIUP 9B", "price": 7.41 },
+    { "name": "1920 -HTF", "sku": "1920 -HTF", "price": 7.41 },
+    { "name": "1922 -HTF", "sku": "1922 -HTF", "price": 7.41 },
+    { "name": "1931 -HTF", "sku": "1931 -HTF", "price": 7.41 },
+    { "name": "2037 -HTF", "sku": "2037 -HTF", "price": 7.41 },
+    { "name": "2044 -HTF", "sku": "2044 -HTF", "price": 7.41 },
+    { "name": "2100 -HTF", "sku": "2100 -HTF", "price": 7.41 },
+    { "name": "2107 -HTF", "sku": "2107 -HTF", "price": 7.41 },
+    { "name": "2128 -HTF", "sku": "2128 -HTF", "price": 7.41 },
+    { "name": "2136 -HTF", "sku": "2136 -HTF", "price": 7.41 },
+    { "name": "2144 -HTF", "sku": "2144 -HTF", "price": 7.41 },
+    { "name": "2207 -HTF", "sku": "2207 -HTF", "price": 7.41 },
+    { "name": "2208 -HTF", "sku": "2208 -HTF", "price": 7.41 },
+    { "name": "2209 -HTF", "sku": "2209 -HTF", "price": 7.41 },
+    { "name": "2210 -HTF", "sku": "2210 -HTF", "price": 7.41 },
+    { "name": "2211 -HTF", "sku": "2211 -HTF", "price": 7.41 },
+    { "name": "2212 -HTF", "sku": "2212 -HTF", "price": 7.41 },
+    { "name": "2213 -HTF", "sku": "2213 -HTF", "price": 7.41 },
+    { "name": "2214 -HTF", "sku": "2214 -HTF", "price": 7.41 },
+    { "name": "2215 -HTF", "sku": "2215 -HTF", "price": 7.41 },
+    { "name": "2216 -HTF", "sku": "2216 -HTF", "price": 7.41 },
+    { "name": "2217 -HTF", "sku": "2217 -HTF", "price": 7.41 },
+    { "name": "2218 -HTF", "sku": "2218 -HTF", "price": 7.41 },
+    { "name": "2219 -HTF", "sku": "2219 -HTF", "price": 7.41 },
+    { "name": "2302 -HTF", "sku": "2302 -HTF", "price": 7.41 },
+    { "name": "2408 -HTF", "sku": "2408 -HTF", "price": 7.41 }
   ]
 }
