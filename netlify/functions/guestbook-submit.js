@@ -37,7 +37,7 @@ export const handler = async (event) => {
     }
   }
 
-  const { name, country, role, comment, anonymous } = payload
+  const { name, country, role, comment, anonymous, rating } = payload
 
   // Validation
   if (!name || typeof name !== 'string' || name.trim().length < 1 || name.trim().length > 100) {
@@ -52,6 +52,7 @@ export const handler = async (event) => {
   if (!comment || typeof comment !== 'string' || comment.trim().length < 10 || comment.trim().length > 1000) {
     return { statusCode: 400, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Comment must be 10–1,000 characters.' }) }
   }
+  const ratingValue = rating != null && Number.isInteger(Number(rating)) && Number(rating) >= 1 && Number(rating) <= 5 ? Number(rating) : null
 
   try {
     const res = await fetch(`${supabaseUrl}/rest/v1/${TABLE}`, {
@@ -67,6 +68,7 @@ export const handler = async (event) => {
         country: country.trim(),
         role,
         message: comment.trim(),
+        rating: ratingValue,
         anonymous: !!anonymous,
         approved: false,
         featured: false,

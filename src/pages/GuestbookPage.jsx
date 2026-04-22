@@ -63,8 +63,16 @@ const initials = (n) => {
   return parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : n.trim().slice(0, 2).toUpperCase()
 }
 
+const STAR_LABELS = ['', 'Bad', 'Poor', 'OK', 'Good', 'Excellent']
+const TRUNCATE_LENGTH = 120
+
 /* ── Entry Card ─────────────────────────────────────────────────────────────── */
 function EntryCard({ entry, featured }) {
+  const [expanded, setExpanded] = useState(false)
+  const message = entry.message || ''
+  const isLong = message.length > TRUNCATE_LENGTH
+  const displayMessage = expanded || !isLong ? message : message.slice(0, TRUNCATE_LENGTH).trimEnd() + '…'
+
   return (
     <div className={`rounded-2xl border p-5 transition ${featured ? 'border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 via-white to-violet-50 shadow-[0_2px_20px_rgba(212,55,144,0.12)]' : 'border-slate-100 bg-white'}`}>
       <div className="flex items-start gap-3">
@@ -85,9 +93,26 @@ function EntryCard({ entry, featured }) {
             )}
             <span className="text-[11px] text-slate-400">{entry.country} · {timeAgo(entry.created_at)}</span>
           </div>
+          {entry.rating > 0 && (
+            <div className="mt-1 flex items-center gap-1">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <span key={s} className={`text-base leading-none ${s <= entry.rating ? 'text-amber-400' : 'text-slate-200'}`}>★</span>
+              ))}
+              <span className="ml-1 text-[10px] text-slate-400">{STAR_LABELS[entry.rating]}</span>
+            </div>
+          )}
         </div>
       </div>
-      <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-700">"{entry.message}"</p>
+      <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-700">"{displayMessage}"</p>
+      {isLong && (
+        <button
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          className="mt-1.5 text-xs font-semibold text-fuchsia-600 hover:text-fuchsia-800 transition"
+        >
+          {expanded ? 'Show less ▲' : 'Read more ▼'}
+        </button>
+      )}
     </div>
   )
 }
@@ -103,6 +128,8 @@ export default function GuestbookPage() {
   const [country, setCountry] = useState('')
   const [role, setRole] = useState('')
   const [comment, setComment] = useState('')
+  const [rating, setRating] = useState(0)
+  const [hoverRating, setHoverRating] = useState(0)
   const [website, setWebsite] = useState('') // honeypot
   const [anonymous, setAnonymous] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -113,7 +140,7 @@ export default function GuestbookPage() {
     if (!hasSupabaseConfig || !supabase) return
     const { data } = await supabase
       .from(TABLE)
-      .select('id, name, country, role, message, created_at, featured, anonymous')
+      .select('id, name, country, role, message, rating, created_at, featured, anonymous')
       .eq('approved', true)
       .order('created_at', { ascending: false })
       .limit(100)
@@ -148,6 +175,7 @@ export default function GuestbookPage() {
           country: country.trim(),
           role,
           comment: comment.trim(),
+          rating: rating > 0 ? rating : null,
           anonymous,
           website, // honeypot
         }),
@@ -159,6 +187,8 @@ export default function GuestbookPage() {
       setCountry('')
       setRole('')
       setComment('')
+      setRating(0)
+      setHoverRating(0)
       setAnonymous(false)
       setWebsite('')
     } catch (err) {
@@ -259,6 +289,27 @@ export default function GuestbookPage() {
                 <option value="">Select your role…</option>
                 {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
               </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Rating <span className="text-slate-400 font-normal">(optional)</span></label>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setRating(rating === s ? 0 : s)}
+                    onMouseEnter={() => setHoverRating(s)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    className="text-2xl leading-none transition hover:scale-110"
+                  >
+                    <span className={(hoverRating || rating) >= s ? 'text-amber-400' : 'text-slate-200'}>★</span>
+                  </button>
+                ))}
+                {(hoverRating || rating) > 0 && (
+                  <span className="ml-2 text-xs text-slate-500">{STAR_LABELS[hoverRating || rating]}</span>
+                )}
+              </div>
             </div>
 
             <div>
