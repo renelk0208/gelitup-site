@@ -140,7 +140,7 @@ export default function GuestbookPage() {
     if (!hasSupabaseConfig || !supabase) return
     const { data } = await supabase
       .from(TABLE)
-      .select('id, name, country, role, message, created_at, featured, anonymous')
+      .select('id, name, country, role, message, rating, created_at, featured, anonymous')
       .eq('approved', true)
       .order('created_at', { ascending: false })
       .limit(100)
