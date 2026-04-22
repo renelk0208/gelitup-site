@@ -93,6 +93,8 @@ const PORTAL_FONT_TTF_URL = import.meta.env.VITE_PORTAL_FONT_TTF_URL || '/fonts/
 const CLIENT_PROFILE_STORAGE_KEY = 'gelitup.portal.client_profile.v1'
 const B2B_CART_STORAGE_KEY_PREFIX = 'gelitup.portal.b2b_cart.v1'
 const QUICK_CART_STORAGE_KEY = 'gelitup.catalogue.quick_cart.v1'
+const CHECKOUT_FORM_STORAGE_KEY = 'gelitup.checkout.form.v1'
+const CHECKOUT_LAST_ORDER_KEY = 'gelitup.checkout.lastorder.v1'
 const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
@@ -8323,7 +8325,7 @@ function CheckoutPage() {
   ], [])
 
   // Customer details form
-  const [form, setForm] = useState({
+  const BLANK_FORM = {
     email: '', companyName: '', vatNumber: '', firstName: '', lastName: '', phone: '',
     invoiceAddressLine1: '', invoiceAddressLine2: '', invoiceArea: '', invoiceRegion: '', invoiceCountry: '', invoicePostalCode: '',
     shipToDifferentAddress: false, shippingName: '', shippingPhone: '',
@@ -8333,15 +8335,32 @@ function CheckoutPage() {
     smsUpdates: false,
     orderNotes: '',
     agreeTerms: false,
+  }
+  const [form, setForm] = useState(() => {
+    try {
+      const saved = localStorage.getItem(CHECKOUT_FORM_STORAGE_KEY)
+      if (saved) { const parsed = JSON.parse(saved); return { ...BLANK_FORM, ...parsed, password: '', agreeTerms: false } }
+    } catch {}
+    return BLANK_FORM
   })
   const [viesResult, setViesResult] = useState(null)
   const [viesLoading, setViesLoading] = useState(false)
   const [viesError, setViesError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [orderConfirmed, setOrderConfirmed] = useState(null)
+  const [orderConfirmed, setOrderConfirmed] = useState(() => {
+    try { const saved = localStorage.getItem(CHECKOUT_LAST_ORDER_KEY); return saved ? JSON.parse(saved) : null } catch { return null }
+  })
 
   const updateField = (field, value) => setForm(f => ({ ...f, [field]: value }))
+
+  // Persist form fields (except password) to localStorage so navigation doesn't lose them
+  useEffect(() => {
+    try {
+      const { password: _pw, agreeTerms: _ag, ...safe } = form
+      localStorage.setItem(CHECKOUT_FORM_STORAGE_KEY, JSON.stringify(safe))
+    } catch {}
+  }, [form])
 
   // Load price list
   useEffect(() => {
@@ -8661,7 +8680,7 @@ function CheckoutPage() {
         <p style="margin:2px 0"><strong>SMS order updates:</strong> ${form.smsUpdates ? 'Yes' : 'No'}</p>
       `
 
-      await sendPortalEmailNotification({
+      const inboxEmailResult = await sendPortalEmailNotification({
         eventType: 'b2b_order_received',
         to: ORDER_INBOX_EMAIL,
         subject: `New B2B Order #${insertedOrder?.id ?? 'N/A'} — ${form.companyName.trim()} (${cartUnits} units / €${cartTotal.toFixed(2)})`,
@@ -8688,7 +8707,7 @@ function CheckoutPage() {
       })
 
       // 7. Send confirmation to customer
-      await sendPortalEmailNotification({
+      const confirmEmailResult = await sendPortalEmailNotification({
         eventType: 'order_confirmation',
         to: email,
         subject: `Order Confirmation #${insertedOrder?.id ?? 'N/A'} — GEL.IT.UP by GIUP®`,
@@ -8707,7 +8726,14 @@ function CheckoutPage() {
       // 8. Clear cart and show confirmation
       setCart({})
       localStorage.removeItem(QUICK_CART_STORAGE_KEY)
-      setOrderConfirmed({ id: insertedOrder?.id ?? 'confirmed', accountCreated: form.createAccount })
+      localStorage.removeItem(CHECKOUT_FORM_STORAGE_KEY)
+      const confirmed = {
+        id: insertedOrder?.id ?? 'confirmed',
+        accountCreated: form.createAccount,
+        emailWarning: (!inboxEmailResult.ok && !inboxEmailResult.skipped) || (!confirmEmailResult.ok && !confirmEmailResult.skipped),
+      }
+      localStorage.setItem(CHECKOUT_LAST_ORDER_KEY, JSON.stringify(confirmed))
+      setOrderConfirmed(confirmed)
 
     } catch (err) {
       setError('An unexpected error occurred. Please try again or contact us.')
@@ -8726,14 +8752,20 @@ function CheckoutPage() {
           </div>
           <h2 className="text-2xl font-bold text-emerald-800">Order Placed Successfully!</h2>
           <p className="mt-2 text-emerald-700">Order #{orderConfirmed.id}</p>
-          <p className="mt-4 text-sm text-emerald-600">
-            We've sent a confirmation to your email.{' '}
-            {orderConfirmed.accountCreated
-              ? 'You can now sign in to track your orders.'
-              : 'Create an account at your next checkout to track future orders.'}
-          </p>
+          {orderConfirmed.emailWarning ? (
+            <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              ⚠️ Your order was saved, but the confirmation email could not be sent. Please contact us at <strong>distribution@gelitup.com</strong> and quote your order number above.
+            </p>
+          ) : (
+            <p className="mt-4 text-sm text-emerald-600">
+              We've sent a confirmation to your email.{' '}
+              {orderConfirmed.accountCreated
+                ? 'You can now sign in to track your orders.'
+                : 'Create an account at your next checkout to track future orders.'}
+            </p>
+          )}
           <div className="mt-6 flex justify-center gap-3">
-            <NavLink to="/full-catalogue" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-fuchsia-500">
+            <NavLink to="/full-catalogue" onClick={() => { try { localStorage.removeItem(CHECKOUT_LAST_ORDER_KEY) } catch {} }} className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-fuchsia-500">
               Continue Shopping
             </NavLink>
           </div>
