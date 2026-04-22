@@ -26,15 +26,17 @@
   status = 301
   force = true
 
+# www.gelitup.eu → gelitup.eu (keep www canonical)
+
 [[redirects]]
   from = "https://gelitup.eu/*"
-  to = "https://gelitup.com/:splat"
-  status = 301
-  force = true
+  to = "https://gelitup.eu/:splat"
+  status = 200
+  force = false
 
 [[redirects]]
   from = "https://www.gelitup.eu/*"
-  to = "https://gelitup.com/:splat"
+  to = "https://gelitup.eu/:splat"
   status = 301
   force = true
 

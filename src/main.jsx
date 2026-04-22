@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import 'leaflet/dist/leaflet.css'
 import './index.css'
 import App from './App.jsx'
+import { LangContext, detectLang } from './lib/i18n.js'
 
 // Block right-click saving on all images globally
 document.addEventListener('contextmenu', (e) => {
@@ -13,7 +14,9 @@ document.addEventListener('contextmenu', (e) => {
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <LangContext.Provider value={detectLang()}>
+        <App />
+      </LangContext.Provider>
     </BrowserRouter>
   </StrictMode>,
 )

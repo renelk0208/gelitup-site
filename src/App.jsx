@@ -5,6 +5,7 @@ import PWABadge from './PWABadge.jsx'
 import ImportedAnyPage from './pages/imported/ImportedAnyPage.jsx'
 import { hasSupabaseConfig, supabase } from './lib/supabaseClient'
 import useB2BIntelligence from './lib/useB2BIntelligence'
+import { useLang, it as itTranslations } from './lib/i18n.js'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
@@ -5790,6 +5791,16 @@ function NotFoundPage() {
 }
 
 function Nav({ onOpenContactModal }) {
+  const lang = useLang()
+  const T = lang === 'it' ? itTranslations : null
+  const navLabels = T ? {
+    '/about-us': T.nav.about,
+    '/for-academies': T.nav.academy,
+    '/distributor-packages': T.nav.distributors,
+    '/guestbook': T.nav.guestbook,
+    '/inspiration': 'Ispirazione',
+    '/full-catalogue': T.nav.catalogue,
+  } : {}
   return (
     <nav className="hidden gap-1 md:flex items-center">
       {/* Content links */}
@@ -5802,7 +5813,7 @@ function Nav({ onOpenContactModal }) {
               onClick={onOpenContactModal}
               className="rounded-lg px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] !text-white/75 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
             >
-              {item.label}
+              {navLabels[item.to] || item.label}
             </button>
           )
         }
@@ -5822,7 +5833,7 @@ function Nav({ onOpenContactModal }) {
                   }`
             }
           >
-            {item.label}
+            {navLabels[item.to] || item.label}
           </NavLink>
         )
       })}
@@ -5839,7 +5850,7 @@ function Nav({ onOpenContactModal }) {
           }`
         }
       >
-        Distribution Registration
+        {T ? T.distributor.apply_title : 'Distribution Registration'}
       </NavLink>
 
       {/* Sign In — compact, for returning users */}
@@ -5851,7 +5862,7 @@ function Nav({ onOpenContactModal }) {
           }`
         }
       >
-        Sign In
+        {T ? T.nav.login : 'Sign In'}
       </NavLink>
     </nav>
   )
@@ -5860,6 +5871,16 @@ function Nav({ onOpenContactModal }) {
 function MobileNav({ onOpenContactModal }) {
   const [open, setOpen] = useState(false)
   const location = useLocation()
+  const lang = useLang()
+  const T = lang === 'it' ? itTranslations : null
+  const navLabels = T ? {
+    '/about-us': T.nav.about,
+    '/for-academies': T.nav.academy,
+    '/distributor-packages': T.nav.distributors,
+    '/guestbook': T.nav.guestbook,
+    '/inspiration': 'Ispirazione',
+    '/full-catalogue': T.nav.catalogue,
+  } : {}
 
   useEffect(() => { setOpen(false) }, [location.pathname])
 
@@ -5921,7 +5942,7 @@ function MobileNav({ onOpenContactModal }) {
               }`
             }
           >
-            Distribution Registration
+            {T ? T.distributor.apply_title : 'Distribution Registration'}
           </NavLink>
           <NavLink
             to="/portal/login"
@@ -5932,7 +5953,7 @@ function MobileNav({ onOpenContactModal }) {
               }`
             }
           >
-            Sign In
+            {T ? T.nav.login : 'Sign In'}
           </NavLink>
 
           <div className="my-2 border-t border-white/10" />
@@ -5946,7 +5967,7 @@ function MobileNav({ onOpenContactModal }) {
                   onClick={() => { setOpen(false); onOpenContactModal?.() }}
                   className="block w-full rounded-lg px-4 py-3 text-left text-sm font-semibold uppercase tracking-[0.04em] text-white/75 transition duration-200 hover:bg-white/10 hover:text-white"
                 >
-                  {item.label}
+                  {navLabels[item.to] || item.label}
                 </button>
               )
             }
@@ -5969,7 +5990,7 @@ function MobileNav({ onOpenContactModal }) {
                       }`
                 }
               >
-                {item.label}
+                {navLabels[item.to] || item.label}
               </NavLink>
             )
           })}
@@ -6393,6 +6414,8 @@ function GoogleReviewsStrip() {
 }
 
 function HomePage({ onOpenContactModal }) {
+  const lang = useLang()
+  const T = lang === 'it' ? itTranslations : null
   const [media, setMedia] = useState(() => ({
     heroImage: '/logo.png',
     heroVideo: null,
@@ -6536,22 +6559,25 @@ function HomePage({ onOpenContactModal }) {
                 GEL.IT.UP by GIUP®
               </p>
               <h1 className="hero-copy-shadow heading-on-dark text-3xl font-bold leading-[1.25] tracking-tight text-white sm:text-4xl lg:text-5xl">
-                The home of professional nail colour.
+                {T ? T.hero.title : 'The home of professional nail colour.'}
               </h1>
               <p className="hero-copy-shadow mt-3 text-sm leading-relaxed text-white/80 sm:text-base">
-                A decade of mastery · EU regulated · HEMA &amp; TPO-free
+                {T ? 'Un decennio di maestria · Regolamentato EU · HEMA & TPO-free' : 'A decade of mastery · EU regulated · HEMA & TPO-free'}
               </p>
               <div className="mt-5 flex flex-wrap items-center gap-3">
                 <NavLink to="/portal/register" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_16px_rgba(212,55,144,0.55)] transition duration-300 hover:bg-fuchsia-500">
-                  Register Free &rarr;
+                  {T ? T.common.register_free + ' →' : 'Register Free →'}
                 </NavLink>
                 <NavLink to="/become-distributor" className="rounded-lg border-2 border-white/80 bg-white/15 px-5 py-2.5 text-sm font-bold text-white shadow-[0_2px_12px_rgba(0,0,0,0.35)] backdrop-blur-sm transition duration-300 hover:bg-white/25">
-                  Become a Distributor
+                  {T ? T.distributor.become_title : 'Become a Distributor'}
                 </NavLink>
               </div>
               {/* Trust bar */}
               <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5">
-                {['1,000+ shades', 'HEMA-free', 'EU certified', '30+ countries'].map((badge) => (
+                {(T
+                  ? ['1.000+ sfumature', 'HEMA-free', 'Certificato EU', '30+ paesi']
+                  : ['1,000+ shades', 'HEMA-free', 'EU certified', '30+ countries']
+                ).map((badge) => (
                   <span key={badge} className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/70">
                     <span className="h-1 w-1 rounded-full bg-fuchsia-400" aria-hidden="true" />
                     {badge}
@@ -6572,8 +6598,8 @@ function HomePage({ onOpenContactModal }) {
                 <path d="M5 12l4 4 10-10" />
               </svg>
             </div>
-            <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790]">CPNP NOTIFIED</p>
-            <p className="mt-2 text-sm leading-relaxed text-white">Every formula in The Spectrum is CPNP Notified. This is your legal guarantee that GEL.IT.UP by GIUP® is fully authorized for sale across every EU member state.</p>
+            <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790]">{T ? T.home_features.cpnp_label : 'CPNP NOTIFIED'}</p>
+            <p className="mt-2 text-sm leading-relaxed text-white">{T ? T.home_features.cpnp_body : 'Every formula in The Spectrum is CPNP Notified. This is your legal guarantee that GEL.IT.UP by GIUP® is fully authorized for sale across every EU member state.'}</p>
           </article>
 
           <article className="rounded-xl border border-white/15 bg-black/20 p-4">
@@ -6593,8 +6619,8 @@ function HomePage({ onOpenContactModal }) {
                 <path d="M8 9v5a4 4 0 0 0 8 0V9" />
               </svg>
             </div>
-            <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790]">CLEAN SCIENCE</p>
-            <p className="mt-2 text-sm leading-relaxed text-white">Our clean-science policy enforces HEMA-free and TPO-free formulation standards across current production lines, prioritizing professional safety.</p>
+            <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790]">{T ? T.home_features.clean_label : 'CLEAN SCIENCE'}</p>
+            <p className="mt-2 text-sm leading-relaxed text-white">{T ? T.home_features.clean_body : 'Our clean-science policy enforces HEMA-free and TPO-free formulation standards across current production lines, prioritizing professional safety.'}</p>
           </article>
 
           <article className="rounded-xl border border-white/15 bg-black/20 p-4">
@@ -6605,13 +6631,13 @@ function HomePage({ onOpenContactModal }) {
                 <circle cx="12" cy="14" r="5" />
               </svg>
             </div>
-            <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="mt-3 block text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790] hover:underline">CRUELTY-FREE</a>
-            <p className="mt-2 text-sm leading-relaxed text-white">Ethics without compromise. We are 100% <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="font-semibold text-[#D43790] hover:underline">Leaping Bunny Approved</a>—the global gold standard for cruelty-free cosmetics.</p>
+            <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="mt-3 block text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790] hover:underline">{T ? T.home_features.cruelty_label : 'CRUELTY-FREE'}</a>
+            <p className="mt-2 text-sm leading-relaxed text-white">{T ? T.home_features.cruelty_body : <>Ethics without compromise. We are 100% <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="font-semibold text-[#D43790] hover:underline">Leaping Bunny Approved</a>—the global gold standard for cruelty-free cosmetics.</>}</p>
           </article>
         </div>
 
         <p className="mt-5 border-t border-white/20 pt-4 text-center text-sm font-extrabold uppercase tracking-[0.08em] text-white sm:text-base">
-          WHEN YOU CHOOSE GEL.IT.UP by GIUP®, YOU ARE BUYING TOTAL REGULATORY PEACE OF MIND.
+          {T ? T.home_features.tagline : 'WHEN YOU CHOOSE GEL.IT.UP by GIUP®, YOU ARE BUYING TOTAL REGULATORY PEACE OF MIND.'}
         </p>
       </div>
 
@@ -7032,6 +7058,8 @@ function DistributorsPage() {
 }
 
 function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false, onRecoverySessionConsumed }) {
+  const lang = useLang()
+  const T = lang === 'it' ? itTranslations : null
   const navigate = useNavigate()
   const location = useLocation()
   const loginParams = useMemo(() => new URLSearchParams(location.search), [location.search])
@@ -7074,7 +7102,11 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
       <div className="rounded-t-2xl bg-[#111111] px-8 py-7 text-center">
         <p className="text-[10px] font-bold uppercase tracking-[0.25em]" style={{color:'rgba(255,255,255,0.5)'}}>GEL.IT.UP by GIUP®</p>
         <h2 className="mt-2 text-xl font-extrabold uppercase tracking-[0.08em]" style={{color:'#ffffff'}}>
-          {isCreatePasswordMode ? 'Create Password' : portalType === 'distributor' ? 'Distributor Portal' : 'B2B Portal'}
+          {isCreatePasswordMode
+            ? (T ? 'Crea Password' : 'Create Password')
+            : portalType === 'distributor'
+              ? (T ? 'Portale Distributori' : 'Distributor Portal')
+              : (T ? T.portal.login_title : 'B2B Portal')}
         </h2>
       </div>
 
@@ -7083,10 +7115,10 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
         {/* Mode/register sub-link */}
         <p className="mb-5 text-center text-xs text-slate-500">
           {isCreatePasswordMode
-            ? <>Returning client?{' '}<NavLink to={prefilledEmail ? `/portal/login?portal=${portalType}&email=${encodeURIComponent(prefilledEmail)}` : `/portal/login?portal=${portalType}`} className="font-semibold text-slate-800 hover:underline">Sign in</NavLink></>
+            ? <>{T ? 'Cliente già registrato?' : 'Returning client?'}{' '}<NavLink to={prefilledEmail ? `/portal/login?portal=${portalType}&email=${encodeURIComponent(prefilledEmail)}` : `/portal/login?portal=${portalType}`} className="font-semibold text-slate-800 hover:underline">{T ? T.portal.login_btn : 'Sign in'}</NavLink></>
             : portalType === 'distributor'
-              ? <>No account?{' '}<NavLink to="/become-distributor" className="font-semibold text-slate-800 hover:underline">Apply here</NavLink></>
-              : <>New client?{' '}<NavLink to="/portal/register" className="font-semibold text-slate-800 hover:underline">Register</NavLink></>
+              ? <>{T ? 'Nessun account?' : 'No account?'}{' '}<NavLink to="/become-distributor" className="font-semibold text-slate-800 hover:underline">{T ? 'Candidati qui' : 'Apply here'}</NavLink></>
+              : <>{T ? 'Nuovo cliente?' : 'New client?'}{' '}<NavLink to="/portal/register" className="font-semibold text-slate-800 hover:underline">{T ? T.portal.register_btn : 'Register'}</NavLink></>
           }
         </p>
 
@@ -7257,7 +7289,9 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           )}
 
           <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-[#111111] px-4 py-3 text-sm font-bold text-white transition hover:bg-black disabled:opacity-60">
-            {isSubmitting ? (isCreatePasswordMode ? 'Creating password...' : 'Signing in...') : (isCreatePasswordMode ? 'Create Password & Continue' : 'Sign In')}
+            {isSubmitting
+              ? (isCreatePasswordMode ? (T ? 'Creazione password...' : 'Creating password...') : (T ? 'Accesso in corso...' : 'Signing in...'))
+              : (isCreatePasswordMode ? (T ? 'Crea Password e Continua' : 'Create Password & Continue') : (T ? T.portal.login_btn : 'Sign In'))}
           </button>
 
           {!isCreatePasswordMode && (
@@ -7266,7 +7300,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
                 to={email ? `/portal/forgot-password?email=${encodeURIComponent(email)}` : '/portal/forgot-password'}
                 className="hover:text-slate-800 hover:underline"
               >
-                Forgot password?
+                {T ? T.portal.forgot_password : 'Forgot password?'}
               </NavLink>
             </p>
           )}
@@ -7314,7 +7348,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.570-.347z" />
               <path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.522 5.836L.057 23.928a.5.5 0 00.608.593l6.358-1.43A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-4.985-1.356l-.357-.213-3.704.833.886-3.576-.233-.369A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z" />
             </svg>
-            Need help? Chat on WhatsApp
+            {T ? 'Hai bisogno di aiuto? Chatta su WhatsApp' : 'Need help? Chat on WhatsApp'}
           </a>
         </div>
       </div>
@@ -8435,6 +8469,8 @@ function CheckoutPage() {
 }
 
 function PortalRegister({ onRegister }) {
+  const lang = useLang()
+  const T = lang === 'it' ? itTranslations : null
   const defaultApplicationType = 'distributor'
 
   const [application, setApplication] = useState({
@@ -8527,50 +8563,52 @@ function PortalRegister({ onRegister }) {
       <div className="bg-[#111111] p-5 sm:p-6 md:p-8 text-white">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-400">GEL.IT.UP by GIUP®</p>
         <h2 className="heading-on-dark mt-3 text-3xl font-bold">
-          {isDistributorFlow ? 'Distribution Application' : 'Trade Registration'}
+          {isDistributorFlow
+            ? (T ? T.distributor.apply_title : 'Distribution Application')
+            : (T ? 'Registrazione Commerciale' : 'Trade Registration')}
         </h2>
         <p className="mt-3 text-sm text-slate-100">
           {isDistributorFlow
-            ? 'Apply to become a GEL.IT.UP distributor. Your application will be reviewed and you will be notified by email once approved.'
-            : 'Register your B2B account. No approval needed — you can set your password and log in immediately.'}
+            ? (T ? T.distributor.apply_subtitle : 'Apply to become a GEL.IT.UP distributor. Your application will be reviewed and you will be notified by email once approved.')
+            : (T ? 'Registra il tuo account B2B. Nessuna approvazione richiesta — puoi impostare la tua password e accedere immediatamente.' : 'Register your B2B account. No approval needed — you can set your password and log in immediately.')}
         </p>
         <ul className="mt-6 space-y-3 hidden md:block">
           {isDistributorFlow ? (
             <>
               <li className="flex items-start gap-2.5 text-sm text-slate-100">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                Exclusive regional or country distribution rights
+                {T ? T.distributor.exclusive_rights : 'Exclusive regional or country distribution rights'}
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-100">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                Full catalogue access with distributor pricing
+                {T ? T.distributor.full_catalogue : 'Full catalogue access with distributor pricing'}
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-100">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                Co-marketing tools, training &amp; ongoing support
+                {T ? T.distributor.comarketing : 'Co-marketing tools, training & ongoing support'}
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-100">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                Review within 1–2 business days
+                {T ? T.distributor.review_time : 'Review within 1–2 business days'}
               </li>
             </>
           ) : (
             <>
               <li className="flex items-start gap-2.5 text-sm text-slate-100">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                Instant access — no waiting for approval
+                {T ? 'Accesso immediato — nessuna approvazione richiesta' : 'Instant access — no waiting for approval'}
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-100">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                Wholesale pricing on 200+ HEMA-free products
+                {T ? 'Prezzi all\'ingrosso su 200+ prodotti HEMA-free' : 'Wholesale pricing on 200+ HEMA-free products'}
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-100">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                Place orders and track shipments from your dashboard
+                {T ? 'Effettua ordini e traccia le spedizioni dalla tua dashboard' : 'Place orders and track shipments from your dashboard'}
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-100">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                EU-certified, dermatologist-tested formulas
+                {T ? 'Formule certificate EU, testate dermatologicamente' : 'EU-certified, dermatologist-tested formulas'}
               </li>
             </>
           )}
@@ -8579,7 +8617,7 @@ function PortalRegister({ onRegister }) {
 
       <div className="p-5 sm:p-6 md:p-8">
         <h3 className="text-xl font-semibold text-slate-900">
-          Distributor Application
+          {T ? T.distributor.apply_title : 'Distributor Application'}
         </h3>
 
         {false && (
