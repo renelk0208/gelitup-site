@@ -183,7 +183,7 @@ export default function GuestbookPage() {
             Join the GEL.IT.UP Global Guestbook
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-black sm:text-base">
-            Tell us where you're from and your favorite product — connect with professionals worldwide.
+            Tell us where you're from and connect with professionals worldwide! If you have tried GEL.IT.UP please give us your feedback and tell us which is your favourite product.
           </p>
         </div>
       </div>
