@@ -14015,6 +14015,12 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             </p>
           )}
         </div>
+        {(selectedCodes.length > 0 || packageCartItems.length > 0) && (
+          <p className="mt-3 flex items-center gap-1.5 text-xs text-emerald-700">
+            <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold">✓</span>
+            Draft saved — your cart is preserved even if you log out or close the browser.
+          </p>
+        )}
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <button
             onClick={() => clientValidation.hasMissing ? navigate('/portal/dashboard/profile') : submitOrder()}
@@ -14023,20 +14029,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           >
             {isSubmittingOrder ? 'Submitting...' : clientValidation.hasMissing ? 'Complete Details ?' : `Place Order (${totalUnits} units)`}
           </button>
-          <a
-            href={checkoutHref}
-            onClick={(event) => {
-              if (!selectedCodes.length && !packageCartItems.length && !includeProfessionalBasePack) {
-                event.preventDefault()
-                return
-              }
-              // Do NOT clear cart here — we have no way to confirm the email was sent.
-              // The user can clear manually once they've confirmed the email was sent.
-            }}
-            className={actionButtonSecondaryClass}
-          >
-            Send to Order Inbox
-          </a>
           <button
             onClick={copyCodes}
             className={actionButtonSecondaryClass}
@@ -14045,6 +14037,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           </button>
           <button
             onClick={() => {
+              if (!window.confirm('Clear your entire order list? This cannot be undone.')) return
               setSelectedCodes([])
               setItemQtys({})
               setPackageCartItems([])
@@ -14053,11 +14046,29 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
               setLastPackingList(null)
               setLastProformaInvoice(null)
             }}
-            className={actionButtonSecondaryClass}
+            className={`${actionButtonSecondaryClass} hover:border-rose-300 hover:text-rose-600`}
           >
             Clear list
           </button>
         </div>
+        {!checkoutIsLive && (
+          <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <strong>Online ordering unavailable.</strong> Use the fallback below to email your order manually.
+            <div className="mt-2">
+              <a
+                href={checkoutHref}
+                onClick={(event) => {
+                  if (!selectedCodes.length && !packageCartItems.length && !includeProfessionalBasePack) {
+                    event.preventDefault()
+                  }
+                }}
+                className={actionButtonSecondaryClass}
+              >
+                Send to Order Inbox (email fallback)
+              </a>
+            </div>
+          </div>
+        )}
 
         {/* Packing list hidden until product dimensions are complete
         {lastPackingList && (
@@ -14303,7 +14314,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             {(selectedCodes.length > 0 || packageCartItems.length > 0) && (
               <>
                 <span className="text-[10px] text-emerald-600 font-medium">✓ Draft saved</span>
-                <button onClick={() => { setSelectedCodes([]); setItemQtys({}); setPackageCartItems([]); setGeneratedPackageTier('') }} className="text-xs text-slate-400 hover:text-rose-500">Clear</button>
+                <button onClick={() => { if (!window.confirm('Clear your entire order list?')) return; setSelectedCodes([]); setItemQtys({}); setPackageCartItems([]); setGeneratedPackageTier('') }} className="text-xs text-slate-400 hover:text-rose-500">Clear</button>
               </>
             )}
             <button onClick={() => navigate('/portal/dashboard/products')} className="btn-cta-rose rounded px-3 py-1 text-xs font-semibold">
