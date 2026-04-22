@@ -96,7 +96,7 @@ function EntryCard({ entry, featured }) {
           {entry.rating > 0 && (
             <div className="mt-1 flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((s) => (
-                <span key={s} className={`text-base leading-none ${s <= entry.rating ? 'text-amber-400' : 'text-slate-200'}`}>★</span>
+                <span key={s} className={`text-base leading-none ${s <= entry.rating ? 'text-[#D43790]' : 'text-slate-300'}`}>★</span>
               ))}
               <span className="ml-1 text-[10px] text-slate-400">{STAR_LABELS[entry.rating]}</span>
             </div>
@@ -303,7 +303,7 @@ export default function GuestbookPage() {
                     onMouseLeave={() => setHoverRating(0)}
                     className="text-2xl leading-none transition hover:scale-110"
                   >
-                    <span className={(hoverRating || rating) >= s ? 'text-amber-400' : 'text-slate-200'}>★</span>
+                    <span className={(hoverRating || rating) >= s ? 'text-[#D43790]' : 'text-slate-300'}>★</span>
                   </button>
                 ))}
                 {(hoverRating || rating) > 0 && (
