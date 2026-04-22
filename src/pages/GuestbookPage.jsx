@@ -179,7 +179,7 @@ export default function GuestbookPage() {
         <div className="absolute inset-0 bg-[#D43790]/50 pointer-events-none" aria-hidden="true" />
         <div className="relative px-6 py-14 text-center sm:px-10 sm:py-20">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">For Professional Use Only</p>
-          <h1 className="mt-4 text-3xl font-extrabold text-white sm:text-4xl lg:text-5xl">
+          <h1 className="heading-on-dark mt-4 text-3xl font-extrabold text-white sm:text-4xl lg:text-5xl">
             Join the GEL.IT.UP Global Guestbook
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-black sm:text-base">
