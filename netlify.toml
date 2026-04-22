@@ -26,6 +26,18 @@
   status = 301
   force = true
 
+[[redirects]]
+  from = "https://gelitup.eu/*"
+  to = "https://gelitup.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.gelitup.eu/*"
+  to = "https://gelitup.com/:splat"
+  status = 301
+  force = true
+
 # Prevent iOS from caching the service worker or app shell
 [[headers]]
   for = "/sw.js"

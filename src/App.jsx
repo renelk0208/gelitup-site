@@ -1927,8 +1927,8 @@ function ForAcademiesPage() {
               q: 'Can we incorporate GEL.IT.UP products into our course curriculum?',
               a: 'Absolutely. We can provide product information, application guides, and technical details to support your course materials. Get in touch after registering your academy account.',
             },
-          ].map(({ q, a }) => (
-            <div key={q} className="px-6 py-4">
+          ].map(({ q, a }, i) => (
+            <div key={q} className={`px-6 py-4 ${i % 2 === 1 ? 'bg-pink-50' : ''}`}>
               <p className="text-sm font-semibold text-[#1a1a1a]">{q}</p>
               <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{a}</p>
             </div>
@@ -8579,7 +8579,7 @@ function PortalRegister({ onRegister }) {
         <h2 className="heading-on-dark mt-3 text-3xl font-bold">
           {isDistributorFlow ? 'Distribution Application' : 'Trade Registration'}
         </h2>
-        <p className="mt-3 text-sm text-slate-300">
+        <p className="mt-3 text-sm text-slate-100">
           {isDistributorFlow
             ? 'Apply to become a GEL.IT.UP distributor. Your application will be reviewed and you will be notified by email once approved.'
             : 'Register your B2B account. No approval needed — you can set your password and log in immediately.'}
@@ -8587,38 +8587,38 @@ function PortalRegister({ onRegister }) {
         <ul className="mt-6 space-y-3 hidden md:block">
           {isDistributorFlow ? (
             <>
-              <li className="flex items-start gap-2.5 text-sm text-slate-300">
+              <li className="flex items-start gap-2.5 text-sm text-slate-100">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
                 Exclusive regional or country distribution rights
               </li>
-              <li className="flex items-start gap-2.5 text-sm text-slate-300">
+              <li className="flex items-start gap-2.5 text-sm text-slate-100">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
                 Full catalogue access with distributor pricing
               </li>
-              <li className="flex items-start gap-2.5 text-sm text-slate-300">
+              <li className="flex items-start gap-2.5 text-sm text-slate-100">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
                 Co-marketing tools, training &amp; ongoing support
               </li>
-              <li className="flex items-start gap-2.5 text-sm text-slate-300">
+              <li className="flex items-start gap-2.5 text-sm text-slate-100">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
                 Review within 1–2 business days
               </li>
             </>
           ) : (
             <>
-              <li className="flex items-start gap-2.5 text-sm text-slate-300">
+              <li className="flex items-start gap-2.5 text-sm text-slate-100">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
                 Instant access — no waiting for approval
               </li>
-              <li className="flex items-start gap-2.5 text-sm text-slate-300">
+              <li className="flex items-start gap-2.5 text-sm text-slate-100">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
                 Wholesale pricing on 200+ HEMA-free products
               </li>
-              <li className="flex items-start gap-2.5 text-sm text-slate-300">
+              <li className="flex items-start gap-2.5 text-sm text-slate-100">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
                 Place orders and track shipments from your dashboard
               </li>
-              <li className="flex items-start gap-2.5 text-sm text-slate-300">
+              <li className="flex items-start gap-2.5 text-sm text-slate-100">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
                 EU-certified, dermatologist-tested formulas
               </li>
