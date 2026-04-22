@@ -1608,6 +1608,8 @@ function isTechnicalSku(code) {
 }
 
 function DistributorPackagesPage() {
+  const lang = useLang()
+  const T = lang === 'it' ? itTranslations : null
   useEffect(() => setPageSEO({
     title: 'Distribution Partnership Tiers | GEL.IT.UP by GIUP®',
     description: 'Explore GEL.IT.UP wholesale distribution tiers — gel polish, builder gel, base coats, top coats and a full professional nail range. EU certified, HEMA-free. Apply to become a distributor.',
@@ -1619,19 +1621,19 @@ function DistributorPackagesPage() {
 
       {/* HERO */}
       <div className="relative overflow-hidden rounded-2xl bg-[#1a1a1a] p-7 sm:p-10" style={{ color: '#ffffff' }}>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#c8386e' }}>GEL.IT.UP by GIUP® — Verified Distribution Network</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#c8386e' }}>{T ? 'GEL.IT.UP by GIUP® — Rete di Distribuzione Verificata' : 'GEL.IT.UP by GIUP® — Verified Distribution Network'}</p>
         <h1 className="heading-on-dark mt-3 text-3xl font-black leading-tight tracking-tight sm:text-5xl">
-          Distribution<br className="hidden sm:block" /> Partnership Tiers
+          {T ? <>Livelli di<br className="hidden sm:block" /> Partnership Distributiva</> : <>Distribution<br className="hidden sm:block" /> Partnership Tiers</>}
         </h1>
         <p className="mt-3 max-w-2xl text-sm sm:text-base" style={{ color: 'rgba(255,255,255,0.70)' }}>
-          Built for serious operators. Every tier ships with full EU regulatory documentation and a social media brand engine — because your success is our brand in motion.
+          {T ? 'Per operatori seri. Ogni livello include documentazione normativa UE completa e un motore di branding social media — perché il tuo successo è il nostro brand in movimento.' : 'Built for serious operators. Every tier ships with full EU regulatory documentation and a social media brand engine — because your success is our brand in motion.'}
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <NavLink to="/full-catalogue" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Our Products
+            {T ? 'I Nostri Prodotti' : 'Our Products'}
           </NavLink>
           <NavLink to="/become-distributor" className="btn-cta-ghost-white inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Apply for Partnership
+            {T ? 'Richiedi Partnership' : 'Apply for Partnership'}
           </NavLink>
         </div>
       </div>
@@ -1643,8 +1645,8 @@ function DistributorPackagesPage() {
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
           </div>
           <div>
-            <p className="text-sm font-bold" style={{ color: '#1a1a1a' }}>EU Regulatory Ready</p>
-            <p className="mt-0.5 text-xs" style={{ color: '#6b7280' }}>Full compliance documentation, HEMA-Free &amp; TPO-Free certificates, and EC 1223/2009 declaration support — handled for you, not by you.</p>
+            <p className="text-sm font-bold" style={{ color: '#1a1a1a' }}>{T ? 'Pronto per la Normativa UE' : 'EU Regulatory Ready'}</p>
+            <p className="mt-0.5 text-xs" style={{ color: '#6b7280' }}>{T ? 'Documentazione di conformità completa, certificati HEMA-Free &amp; TPO-Free e supporto per la dichiarazione CE 1223/2009 — gestiti per te.' : 'Full compliance documentation, HEMA-Free & TPO-Free certificates, and EC 1223/2009 declaration support — handled for you, not by you.'}</p>
           </div>
         </div>
         <div className="flex items-start gap-3 rounded-2xl p-4" style={{ border: '1px solid #e2e8f0', backgroundColor: '#ffffff' }}>
@@ -1652,8 +1654,8 @@ function DistributorPackagesPage() {
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
           </div>
           <div>
-            <p className="text-sm font-bold" style={{ color: '#1a1a1a' }}>Social Media Brand Engine</p>
-            <p className="mt-0.5 text-xs" style={{ color: '#6b7280' }}>Viral-ready content, branded assets, and territory advertising support that turns your distribution into a visible, growing movement.</p>
+            <p className="text-sm font-bold" style={{ color: '#1a1a1a' }}>{T ? 'Motore di Branding Social Media' : 'Social Media Brand Engine'}</p>
+            <p className="mt-0.5 text-xs" style={{ color: '#6b7280' }}>{T ? 'Contenuti virali pronti all’uso, asset del brand e supporto pubblicitario territoriale che trasformano la tua distribuzione in un movimento visibile e in crescita.' : 'Viral-ready content, branded assets, and territory advertising support that turns your distribution into a visible, growing movement.'}</p>
           </div>
         </div>
       </div>
@@ -2954,6 +2956,8 @@ const CATEGORY_LAB_SPECS = {
 const DEFAULT_LAB_SPECS = { pigmentDots: null, cure: '60s LED — 120s UV', llab: true }
 
 function FullCataloguePage() {
+  const lang = useLang()
+  const T = lang === 'it' ? itTranslations : null
   const location = useLocation()
   const [sections, setSections] = useState([])
   const [activeCategory, setActiveCategory] = useState('')
@@ -4440,14 +4444,14 @@ function FullCataloguePage() {
                 type="text"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search product name, code, or subcategory..."
+                placeholder={T ? T.catalogue.search_placeholder : 'Search product name, code, or subcategory...'}
                 className="w-full rounded-[12px] border border-[#4A4A4A]/35 bg-white px-3 py-2 text-base text-black outline-none ring-fuchsia-500/20 focus:ring"
               />
             </div>
 
             {isSolidGelPolish && (
               <div className="mt-3 rounded-[12px] border border-[#4A4A4A]/30 bg-black/[0.02] p-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/55">Quick Filter</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/55">{T ? T.catalogue.quick_filter : 'Quick Filter'}</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {COLOR_FAMILY_FILTERS.map((family) => {
                     const isActive = activeColorFamily === family.key
@@ -4468,11 +4472,11 @@ function FullCataloguePage() {
 
             {isCatEye && catEyeVariantFilters.length > 1 && (
               <div className="mt-3 rounded-[12px] border border-[#4A4A4A]/30 bg-black/[0.02] p-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/55">Cat Eye Collection</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/55">{T ? T.catalogue.cat_eye_collection : 'Cat Eye Collection'}</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {catEyeVariantFilters.map((variant) => {
                     const isActive = activeCatEyeVariant === variant
-                    const label = variant === 'ALL' ? 'All Cat Eye' : toTitleCaseLabel(variant)
+                    const label = variant === 'ALL' ? (T ? 'Tutto Cat Eye' : 'All Cat Eye') : toTitleCaseLabel(variant)
                     return (
                       <button
                         key={variant}
@@ -4491,23 +4495,26 @@ function FullCataloguePage() {
               <div className="flex rounded-lg border border-[#4A4A4A]/25 bg-white">
                 <button onClick={() => setBulkMode(false)} className={`inline-flex items-center gap-1.5 rounded-l-lg px-3 py-1.5 text-xs font-semibold transition ${!bulkMode ? 'bg-fuchsia-600 text-white' : 'text-black/60 hover:bg-black/5'}`} title="Grid view">
                   <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path fillRule="evenodd" d="M4.25 2A2.25 2.25 0 0 0 2 4.25v2.5A2.25 2.25 0 0 0 4.25 9h2.5A2.25 2.25 0 0 0 9 6.75v-2.5A2.25 2.25 0 0 0 6.75 2h-2.5Zm0 9A2.25 2.25 0 0 0 2 13.25v2.5A2.25 2.25 0 0 0 4.25 18h2.5A2.25 2.25 0 0 0 9 15.75v-2.5A2.25 2.25 0 0 0 6.75 11h-2.5Zm9-9A2.25 2.25 0 0 0 11 4.25v2.5A2.25 2.25 0 0 0 13.25 9h2.5A2.25 2.25 0 0 0 18 6.75v-2.5A2.25 2.25 0 0 0 15.75 2h-2.5Zm0 9A2.25 2.25 0 0 0 11 13.25v2.5A2.25 2.25 0 0 0 13.25 18h2.5A2.25 2.25 0 0 0 18 15.75v-2.5A2.25 2.25 0 0 0 15.75 11h-2.5Z" clipRule="evenodd" /></svg>
-                  Grid
+                  {T ? T.catalogue.grid_view : 'Grid'}
                 </button>
                 <button onClick={() => setBulkMode(true)} className={`inline-flex items-center gap-1.5 rounded-r-lg px-3 py-1.5 text-xs font-semibold transition ${bulkMode ? 'bg-fuchsia-600 text-white' : 'text-black/60 hover:bg-black/5'}`} title="List view — quick order mode">
                   <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path fillRule="evenodd" d="M2 3.75A.75.75 0 0 1 2.75 3h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 3.75Zm0 4.167a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Zm0 4.166a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Zm0 4.167a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z" clipRule="evenodd" /></svg>
-                  Quick Order
+                  {T ? T.catalogue.quick_order : 'Quick Order'}
                 </button>
               </div>
               {quickCartUnits > 0 && (
                 <span className="inline-flex items-center gap-2 text-xs font-semibold text-fuchsia-700">
-                  {quickCartUnits} item{quickCartUnits !== 1 ? 's' : ''} in basket
+                  {T
+                    ? `${quickCartUnits} articol${quickCartUnits !== 1 ? 'i' : 'o'} nel carrello`
+                    : `${quickCartUnits} item${quickCartUnits !== 1 ? 's' : ''} in basket`
+                  }
                   <button
                     onClick={() => { setQuickCart({}); setItemQuantities({}); setShowBasketDetail(false) }}
                     className="inline-flex items-center gap-0.5 rounded-md border border-red-300 bg-red-50 px-1.5 py-0.5 text-[10px] font-semibold text-red-600 transition hover:bg-red-100"
                     title="Clear basket"
                   >
                     <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3" aria-hidden="true"><path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.519.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clipRule="evenodd" /></svg>
-                    Clear
+                    {T ? T.catalogue.clear : 'Clear'}
                   </button>
                 </span>
               )}
@@ -4541,11 +4548,11 @@ function FullCataloguePage() {
                           <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                           <p className="break-words text-[11px] font-light text-black/55">{itemCode}{rowPrice != null && <span className="ml-2 font-bold text-fuchsia-700">€{Number(rowPrice).toFixed(2)}</span>}</p>
                         </div>
-                        {inCart && <span className="rounded-md bg-fuchsia-100 px-1.5 py-0.5 text-[10px] font-semibold text-fuchsia-700">{quickCart[itemKey]} in basket</span>}
+                        {inCart && <span className="rounded-md bg-fuchsia-100 px-1.5 py-0.5 text-[10px] font-semibold text-fuchsia-700">{quickCart[itemKey]} {T ? T.catalogue.in_basket : 'in basket'}</span>}
                         <button onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>-</button>
                         <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className={`h-7 w-10 rounded-[10px] border text-center text-xs ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/20 text-black/70'}`} />
                         <button onClick={() => updateQty(itemKey, qty + 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>+</button>
-                        <button onClick={() => addQuickItem(itemKey)} className={`rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition duration-300 ${pulseItemKey === itemKey ? 'lux-pulse bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`}>Add</button>
+                        <button onClick={() => addQuickItem(itemKey)} className={`rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition duration-300 ${pulseItemKey === itemKey ? 'lux-pulse bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`}>{T ? T.catalogue.add_to_cart : 'Add'}</button>
                       </div>
                     )
                   }
@@ -4573,7 +4580,7 @@ function FullCataloguePage() {
                           {(() => {
                             const price = lookupCataloguePrice(item.name, itemCode)
                             if (price != null) return <span className="text-xs font-bold text-fuchsia-700">€{Number(price).toFixed(2)}</span>
-                            return <span>Price on request</span>
+                            return <span>{T ? T.catalogue.price_on_request : 'Price on request'}</span>
                           })()}
                         </p>
                         <div className="mt-auto pt-3">
@@ -4581,7 +4588,7 @@ function FullCataloguePage() {
                             <button onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
                             <span className={`w-8 text-center text-xs font-bold ${inCart ? 'text-fuchsia-700' : 'text-black/40'}`}>{quickCart[itemKey] || 0}</span>
                             <button onClick={() => { addQuickItem(itemKey); }} className="flex h-8 w-8 items-center justify-center rounded-[10px] border border-fuchsia-600 text-sm text-fuchsia-600 transition duration-300 hover:bg-fuchsia-50">+</button>
-                            {inCart && <span className="ml-auto text-[10px] font-semibold text-fuchsia-700">in basket</span>}
+                            {inCart && <span className="ml-auto text-[10px] font-semibold text-fuchsia-700">{T ? T.catalogue.in_basket : 'in basket'}</span>}
                           </div>
                         </div>
                       </div>
@@ -4643,7 +4650,7 @@ function FullCataloguePage() {
                         })}
                       </div>
                       <div className="flex items-center justify-between border-t border-black/10 px-4 py-3">
-                        <span className="text-sm font-bold text-black">Total</span>
+                        <span className="text-sm font-bold text-black">{T ? T.catalogue.total : 'Total'}</span>
                         <span className="text-lg font-bold text-fuchsia-700">€{quickCartTotal.toFixed(2)}</span>
                       </div>
                       {/* Upsell suggestions */}
@@ -4655,7 +4662,7 @@ function FullCataloguePage() {
                         if (notInCart.length === 0) return null
                         return (
                           <div className="border-t border-black/10 px-4 pb-3 pt-2">
-                            <p className="text-[10px] font-bold uppercase tracking-wide text-black/40">You might also need</p>
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-black/40">{T ? T.catalogue.you_might_need : 'You might also need'}</p>
                             <div className="mt-1.5 flex flex-wrap gap-1.5">
                               {notInCart.map(u => {
                                 const price = lookupCataloguePrice(u.name, u.code)
@@ -4697,24 +4704,24 @@ function FullCataloguePage() {
                       <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
                         <div className="h-full rounded-full bg-fuchsia-600 transition-all duration-500" style={{ width: `${quickProgress}%` }} />
                       </div>
-                      <p className="mt-0.5 text-[10px] text-black/50">{quickProgress < 100 ? `€${(MIN_ORDER_EUR - quickCartTotal).toFixed(2)} more to reach €${MIN_ORDER_EUR} minimum order` : 'Minimum order reached!'}</p>
+                      <p className="mt-0.5 text-[10px] text-black/50">{quickProgress < 100 ? (T ? T.catalogue.moq_progress((MIN_ORDER_EUR - quickCartTotal).toFixed(2), MIN_ORDER_EUR) : `€${(MIN_ORDER_EUR - quickCartTotal).toFixed(2)} more to reach €${MIN_ORDER_EUR} minimum order`) : (T ? T.catalogue.moq_reached : 'Minimum order reached!')}</p>
                     </button>
                     <button
                       onClick={() => setShowBasketDetail((v) => !v)}
                       className="hidden text-xs font-semibold text-fuchsia-700 transition hover:text-fuchsia-500 sm:block"
                     >
-                      {showBasketDetail ? 'Hide' : 'View'}
+                      {showBasketDetail ? (T ? T.catalogue.hide_basket : 'Hide') : (T ? T.catalogue.view_basket : 'View')}
                     </button>
                     <NavLink
                       to="/checkout"
                       className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
                     >
-                      Checkout
+                      {T ? T.catalogue.checkout : 'Checkout'}
                     </NavLink>
                     <button
                       onClick={() => { setQuickCart({}); setItemQuantities({}); setShowBasketDetail(false) }}
                       className="shrink-0 text-xs text-black/40 transition hover:text-red-500"
-                      title="Clear basket"
+                      title={T ? 'Svuota carrello' : 'Clear basket'}
                     >
                       <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.519.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clipRule="evenodd" /></svg>
                     </button>
@@ -4730,7 +4737,7 @@ function FullCataloguePage() {
                 className="inline-flex items-center gap-1 rounded-lg border border-fuchsia-500/40 bg-fuchsia-50 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 transition hover:bg-fuchsia-100"
               >
                 <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" /></svg>
-                Register as Distributor
+                {T ? T.catalogue.register_as_distributor : 'Register as Distributor'}
               </NavLink>
             </div>
           </>
@@ -4744,10 +4751,13 @@ function FullCataloguePage() {
       <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
         <div className="mx-auto max-w-6xl">
           <h1 className="heading-on-dark text-4xl font-extrabold uppercase tracking-[0.15em] text-white sm:text-5xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
-            Gel Polish &amp; Professional Nail Systems
+            {T ? T.catalogue.hero_title : 'Gel Polish & Professional Nail Systems'}
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-white/90 sm:text-lg" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-            The complete professional nail range — gel polish, builder gel, base coats, top coats, and accessories. HEMA &amp; TPO-Free formulations, <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-300 hover:underline">Cruelty-Free certified</a>, and engineered for professional excellence. Browse every shade, system, and tool in the Gel It Up collection.
+            {T
+              ? T.catalogue.hero_body
+              : <>The complete professional nail range — gel polish, builder gel, base coats, top coats, and accessories. HEMA &amp; TPO-Free formulations, <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-300 hover:underline">Cruelty-Free certified</a>, and engineered for professional excellence. Browse every shade, system, and tool in the Gel It Up collection.</>
+            }
           </p>
         </div>
       </div>
@@ -4757,14 +4767,14 @@ function FullCataloguePage() {
         <div className="sticky top-[61px] z-30 -mx-3 border-b border-white/10 bg-[#111111]/95 backdrop-blur-sm md:-mx-6 md:top-[69px]">
           <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-6">
             {[
-              { label: '2026 NEW! ✦',   anchor: 'catalogue-section-new-products',  color: '#D43790' },
-              { label: 'Colours',        anchor: 'catalogue-section-colours',       color: '#c084fc' },
-              { label: 'Bases & Tops',   anchor: 'catalogue-section-essentials',    color: '#67e8f9' },
-              { label: 'Builder Systems',anchor: 'catalogue-section-builders',      color: '#86efac' },
-              { label: 'Tools',          anchor: 'catalogue-section-tools',         color: '#fcd34d' },
-              { label: 'Nail Art',       anchor: 'catalogue-section-nail-art',      color: '#f9a8d4' },
-              { label: 'Consumables',    anchor: 'catalogue-section-consumables',   color: '#fb923c' },
-              { label: 'Nail Care',      anchor: 'catalogue-section-nail-hand-foot',color: '#6ee7b7' },
+              { label: T ? T.catalogue.nav_new        : '2026 NEW! ✦',    anchor: 'catalogue-section-new-products',  color: '#D43790' },
+              { label: T ? T.catalogue.nav_colours    : 'Colours',         anchor: 'catalogue-section-colours',       color: '#c084fc' },
+              { label: T ? T.catalogue.nav_bases_tops : 'Bases & Tops',    anchor: 'catalogue-section-essentials',    color: '#67e8f9' },
+              { label: T ? T.catalogue.nav_builders   : 'Builder Systems', anchor: 'catalogue-section-builders',      color: '#86efac' },
+              { label: T ? T.catalogue.nav_tools      : 'Tools',           anchor: 'catalogue-section-tools',         color: '#fcd34d' },
+              { label: T ? T.catalogue.nav_nail_art   : 'Nail Art',        anchor: 'catalogue-section-nail-art',      color: '#f9a8d4' },
+              { label: T ? T.catalogue.nav_consumables: 'Consumables',     anchor: 'catalogue-section-consumables',   color: '#fb923c' },
+              { label: T ? T.catalogue.nav_nail_care  : 'Nail Care',       anchor: 'catalogue-section-nail-hand-foot',color: '#6ee7b7' },
             ].map((item) => {
               const isActive = activeNavAnchor === item.anchor
               return (
@@ -4826,7 +4836,7 @@ function FullCataloguePage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.target.value); if (activeCategory) { setActiveCategory(''); setActiveSubcategory(''); } }}
-                placeholder="Search all products by name, code or category..."
+                placeholder={T ? T.catalogue.search_placeholder : 'Search all products by name, code or category...'}
                 className="w-full rounded-[14px] border border-[#4A4A4A]/35 bg-white py-2.5 pl-9 pr-10 text-base text-black outline-none ring-fuchsia-500/25 transition focus:border-fuchsia-400 focus:ring"
               />
               {searchQuery && (
@@ -4971,7 +4981,7 @@ function FullCataloguePage() {
                   <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8">
                     <p className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-black/50">{activeNewCollection} — {activeSubItems.length} product{activeSubItems.length !== 1 ? 's' : ''}</p>
                     {activeSubItems.length === 0 ? (
-                      <p className="text-sm text-black/45">No products found for this collection.</p>
+                      <p className="text-sm text-black/45">{T ? T.catalogue.no_results_collection : 'No products found for this collection.'}</p>
                     ) : (
                       <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}>
                         {activeSubItems.map((item, idx) => {
@@ -4987,13 +4997,13 @@ function FullCataloguePage() {
                               <div className="flex flex-1 flex-col border-t border-black/10 px-2.5 py-2">
                                 <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                                 <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                                <p className="mt-1.5 text-xs font-bold text-fuchsia-700">{price != null ? `€${Number(price).toFixed(2)}` : 'Price on request'}</p>
+                                <p className="mt-1.5 text-xs font-bold text-fuchsia-700">{price != null ? `€${Number(price).toFixed(2)}` : (T ? T.catalogue.price_on_request : 'Price on request')}</p>
                                 <div className="mt-auto pt-3">
                                   <div className="flex items-center gap-2">
                                     <button onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
                                     <span className={`w-8 text-center text-xs font-bold ${inCart ? 'text-fuchsia-700' : 'text-black/40'}`}>{quickCart[itemKey] || 0}</span>
                                     <button onClick={() => addQuickItem(itemKey)} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border border-fuchsia-600 text-sm text-fuchsia-600 transition duration-300 hover:bg-fuchsia-50 ${pulseItemKey === itemKey ? 'lux-pulse' : ''}`}>+</button>
-                                    {inCart && <span className="ml-auto text-[10px] font-semibold text-fuchsia-700">in basket</span>}
+                                    {inCart && <span className="ml-auto text-[10px] font-semibold text-fuchsia-700">{T ? T.catalogue.in_basket : 'in basket'}</span>}
                                   </div>
                                 </div>
                               </div>
@@ -16309,6 +16319,8 @@ function FooterSocialIcon({ platform }) {
 }
 
 function App() {
+  const lang = useLang()
+  const T = lang === 'it' ? itTranslations : null
   const routerLocation = useLocation()
   const navigate = useNavigate()
   const [isPortalAuthenticated, setIsPortalAuthenticated] = useState(() => localStorage.getItem('portalAuth') === 'true')
@@ -17672,13 +17684,13 @@ function App() {
       <footer className="mx-auto mt-6 max-w-6xl space-y-5 rounded-2xl border border-white/15 bg-black/85 px-3 pb-4 pt-4 text-xs text-white/80 backdrop-blur-[10px] md:mt-8 md:px-6 md:pt-5">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Company</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/55">{T ? 'Azienda' : 'Company'}</p>
             <p className="mt-2 text-sm font-semibold text-white">GEL.IT.UP by GIUP® Professional</p>
-            <p className="mt-1">Global Professional Distribution Network</p>
+            <p className="mt-1">{T ? 'Rete Globale di Distribuzione Professionale' : 'Global Professional Distribution Network'}</p>
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Contact</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/55">{T ? 'Contatto' : 'Contact'}</p>
             <a href={`tel:${String(PROFORMA_LEEUKOPF_PHONE || '').replace(/[\s()]/g, '')}`} className="mt-2 block transition hover:text-fuchsia-300">{PROFORMA_LEEUKOPF_PHONE}</a>
             <a href="mailto:info@gelitup.com" className="mt-2 inline-flex items-center gap-2 transition hover:text-fuchsia-300">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4 shrink-0">
@@ -17697,7 +17709,7 @@ function App() {
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.570-.347z"/>
                 <path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.522 5.836L.057 23.928a.5.5 0 00.608.593l6.358-1.43A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-4.985-1.356l-.357-.213-3.704.833.886-3.576-.233-.369A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
               </svg>
-              WhatsApp Support
+              {T ? 'Supporto WhatsApp' : 'WhatsApp Support'}
             </a>
           </div>
 
@@ -17705,26 +17717,26 @@ function App() {
             <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Menu</p>
             <div className="mt-2 space-y-1.5">
               <NavLink to="/" className="block transition duration-300 hover:text-fuchsia-300">Home</NavLink>
-              <NavLink to="/about-us" className="block transition duration-300 hover:text-fuchsia-300">About Us</NavLink>
-              <NavLink to="/full-catalogue" className="block transition duration-300 hover:text-fuchsia-300">Catalogue</NavLink>
-              <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
-              <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Become Distributor</NavLink>
-              <NavLink to="/guestbook" className="block transition duration-300 hover:text-fuchsia-300">Guestbook</NavLink>
-              <NavLink to="/portal/register" className="block transition duration-300 hover:text-fuchsia-300">Client Registration</NavLink>
+              <NavLink to="/about-us" className="block transition duration-300 hover:text-fuchsia-300">{T ? 'Chi Siamo' : 'About Us'}</NavLink>
+              <NavLink to="/full-catalogue" className="block transition duration-300 hover:text-fuchsia-300">{T ? 'Catalogo' : 'Catalogue'}</NavLink>
+              <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">{T ? 'Opzioni di Distribuzione' : 'Distribution Options'}</NavLink>
+              <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">{T ? 'Diventa Distributore' : 'Become Distributor'}</NavLink>
+              <NavLink to="/guestbook" className="block transition duration-300 hover:text-fuchsia-300">{T ? 'Guestbook' : 'Guestbook'}</NavLink>
+              <NavLink to="/portal/register" className="block transition duration-300 hover:text-fuchsia-300">{T ? 'Registrazione Cliente' : 'Client Registration'}</NavLink>
             </div>
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Legal</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/55">{T ? 'Legale' : 'Legal'}</p>
             <div className="mt-2 space-y-1.5">
-              <NavLink to="/privacy-policy" className="block transition duration-300 hover:text-fuchsia-300">Privacy Policy</NavLink>
+              <NavLink to="/privacy-policy" className="block transition duration-300 hover:text-fuchsia-300">{T ? 'Informativa sulla Privacy' : 'Privacy Policy'}</NavLink>
               <NavLink to="/cookie-policy" className="block transition duration-300 hover:text-fuchsia-300">Cookie Policy</NavLink>
-              <NavLink to="/terms-and-conditions" className="block transition duration-300 hover:text-fuchsia-300">Terms and Conditions</NavLink>
+              <NavLink to="/terms-and-conditions" className="block transition duration-300 hover:text-fuchsia-300">{T ? 'Termini e Condizioni' : 'Terms and Conditions'}</NavLink>
             </div>
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Connect</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/55">{T ? 'Connettiti' : 'Connect'}</p>
             <div className="mt-2 space-y-2">
               {FOOTER_SOCIAL_LINKS.map((social) => (
                 <a
@@ -17746,7 +17758,7 @@ function App() {
           </div>
         </div>
 
-        <p className="border-t border-white/15 pt-3 text-white/55">— 2026 GEL.IT.UP by GIUP®</p>
+        <p className="border-t border-white/15 pt-3 text-white/55">{T ? T.footer.rights : '— 2026 GEL.IT.UP by GIUP®'}</p>
       </footer>
 
       {/* Floating chat widget + back-to-top */}
