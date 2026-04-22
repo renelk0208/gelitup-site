@@ -1095,7 +1095,7 @@ const HERO_PRODUCT_COPY = [
   },
 ]
 
-const PACKAGE_TIER_OPTIONS = ['Silver', 'Gold', 'Platinum']
+const PACKAGE_TIER_OPTIONS = ['Silver', 'Gold', 'Platinum', 'Professional']
 const DEFAULT_PACKAGE_ITEM_QTY = 1
 const PACKAGE_TECH_ESSENTIALS = [
   { sku: 'SUPERBOND', code: 'SUPERBOND', name: 'Superbond Acid-Free Primer', category: 'Technical', group: 'Essentials' },
@@ -1291,12 +1291,15 @@ function buildTierPackageItems(tier, podCatalog, defaultQty = DEFAULT_PACKAGE_IT
   const pod2 = Array.isArray(podCatalog?.pod_2) ? podCatalog.pod_2 : []
   const pod3 = Array.isArray(podCatalog?.pod_3) ? podCatalog.pod_3 : []
   const pod4 = Array.isArray(podCatalog?.pod_4) ? podCatalog.pod_4 : []
+  const podSeasonal = Array.isArray(podCatalog?.pod_seasonal) ? podCatalog.pod_seasonal : []
 
   const source = tier === 'Silver'
     ? pod1
     : tier === 'Gold'
       ? [...pod1, ...pod2]
-      : [...pod1, ...pod2, ...pod3, ...pod4]
+      : tier === 'Professional'
+        ? podSeasonal
+        : [...pod1, ...pod2, ...pod3, ...pod4]
 
   return source.map((item) => ({
     sku: item.sku,
@@ -10621,7 +10624,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       ? podCatalog.pod_1.length + podCatalog.pod_2.length
       : generatedPackageTier === 'Platinum'
         ? podCatalog.pod_1.length + podCatalog.pod_2.length + podCatalog.pod_3.length + podCatalog.pod_4.length
-        : 0
+        : generatedPackageTier === 'Professional'
+          ? (podCatalog.pod_seasonal?.length ?? 0)
+          : 0
   const expectedTechCount = generatedPackageTier ? PACKAGE_TECH_ESSENTIALS.length : 0
   const expectedPackageItems = expectedColorCountByTier + expectedTechCount
   const expectedPackageUnits = expectedPackageItems * DEFAULT_PACKAGE_ITEM_QTY
@@ -10996,6 +11001,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           pod_2: Array.isArray(payload?.pod_2) ? payload.pod_2 : [],
           pod_3: Array.isArray(payload?.pod_3) ? payload.pod_3 : [],
           pod_4: Array.isArray(payload?.pod_4) ? payload.pod_4 : [],
+          pod_seasonal: Array.isArray(payload?.pod_seasonal) ? payload.pod_seasonal : [],
         })
       }
       catch {
@@ -12116,7 +12122,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
     const tierMessage = packageTier === 'Platinum'
       ? `Platinum package generated with ${generatedColorItems.length} colors (Pod_1 + Pod_2 + Pod_3 + Pod_4) + ${generatedTechItems.length} tech essentials.`
-      : `${packageTier} package generated with ${generatedColorItems.length} colors + ${generatedTechItems.length} tech essentials (qty ${DEFAULT_PACKAGE_ITEM_QTY}).`
+      : packageTier === 'Professional'
+        ? `Professional package generated with ${generatedColorItems.length} seasonal colors (Pod_Seasonal) + ${generatedTechItems.length} tech essentials.`
+        : `${packageTier} package generated with ${generatedColorItems.length} colors + ${generatedTechItems.length} tech essentials (qty ${DEFAULT_PACKAGE_ITEM_QTY}).`
 
     setCheckoutMessage(tierMessage)
     setDraftInvoice(formatDraftInvoiceText(invoice))
