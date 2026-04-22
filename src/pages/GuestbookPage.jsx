@@ -140,7 +140,7 @@ export default function GuestbookPage() {
     if (!hasSupabaseConfig || !supabase) return
     const { data } = await supabase
       .from(TABLE)
-      .select('id, name, country, role, message, rating, created_at, featured, anonymous')
+      .select('id, name, country, role, message, created_at, featured, anonymous')
       .eq('approved', true)
       .order('created_at', { ascending: false })
       .limit(100)
@@ -301,9 +301,10 @@ export default function GuestbookPage() {
                     onClick={() => setRating(rating === s ? 0 : s)}
                     onMouseEnter={() => setHoverRating(s)}
                     onMouseLeave={() => setHoverRating(0)}
-                    className="text-2xl leading-none transition hover:scale-110"
+                    className="text-3xl leading-none transition hover:scale-110 cursor-pointer"
+                    style={{ color: (hoverRating || rating) >= s ? '#D43790' : '#d1d5db' }}
                   >
-                    <span className={(hoverRating || rating) >= s ? 'text-[#D43790]' : 'text-slate-300'}>★</span>
+                    ★
                   </button>
                 ))}
                 {(hoverRating || rating) > 0 && (
