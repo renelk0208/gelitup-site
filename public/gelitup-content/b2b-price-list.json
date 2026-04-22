@@ -2,7 +2,7 @@
   "_meta": {
     "source": "gelitup-b2b-pricelist-names-zoho-order-form.xlsx",
     "generated": "2026-04-20T10:45:17.1950370+03:00",
-    "count": 1034
+    "count": 1052
   },
   "items": [
     {
@@ -5254,6 +5254,24 @@
       "name": "Mirror Top Coat",
       "sku": "Mirror Top Coat",
       "price": 8.25
-    }
+    },
+    { "name": "GIUP 2B", "sku": "GIUP 2B", "price": 7.41 },
+    { "name": "GIUP 2C", "sku": "GIUP 2C", "price": 7.41 },
+    { "name": "GIUP 2D", "sku": "GIUP 2D", "price": 7.41 },
+    { "name": "GIUP 2E", "sku": "GIUP 2E", "price": 7.41 },
+    { "name": "GIUP 2F", "sku": "GIUP 2F", "price": 7.41 },
+    { "name": "GIUP 2G", "sku": "GIUP 2G", "price": 7.41 },
+    { "name": "GIUP 2H", "sku": "GIUP 2H", "price": 7.41 },
+    { "name": "GIUP 2I", "sku": "GIUP 2I", "price": 7.41 },
+    { "name": "GIUP 7B", "sku": "GIUP 7B", "price": 7.41 },
+    { "name": "GIUP 7C", "sku": "GIUP 7C", "price": 7.41 },
+    { "name": "GIUP 7D", "sku": "GIUP 7D", "price": 7.41 },
+    { "name": "GIUP 8A", "sku": "GIUP 8A", "price": 7.41 },
+    { "name": "GIUP 8C", "sku": "GIUP 8C", "price": 7.41 },
+    { "name": "GIUP 8D", "sku": "GIUP 8D", "price": 7.41 },
+    { "name": "GIUP 8E", "sku": "GIUP 8E", "price": 7.41 },
+    { "name": "GIUP 8F", "sku": "GIUP 8F", "price": 7.41 },
+    { "name": "GIUP 9A", "sku": "GIUP 9A", "price": 7.41 },
+    { "name": "GIUP 9B", "sku": "GIUP 9B", "price": 7.41 }
   ]
 }
