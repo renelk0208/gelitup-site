@@ -14030,15 +14030,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                 event.preventDefault()
                 return
               }
-              // Clear cart after mailto order is sent
-              setSelectedCodes([])
-              setItemQtys({})
-              setPackageCartItems([])
-              setGeneratedPackageTier('')
-              setIncludeProfessionalBasePack(false)
-              if (cartUserIdRef.current) {
-                localStorage.removeItem(`${B2B_CART_STORAGE_KEY_PREFIX}_${cartUserIdRef.current}`)
-              }
+              // Do NOT clear cart here — we have no way to confirm the email was sent.
+              // The user can clear manually once they've confirmed the email was sent.
             }}
             className={actionButtonSecondaryClass}
           >
