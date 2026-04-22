@@ -10206,7 +10206,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [priceWordIndex, setPriceWordIndex] = useState([])
   const [shippingMetadata, setShippingMetadata] = useState(SHIPPING_RULES)
   const [shippingMetadataStatus, setShippingMetadataStatus] = useState('Using embedded shipping metadata rules.')
-  const isDistributorRole = useMemo(() => String(b2bUserRole || '').trim().toLowerCase().includes('distributor'), [b2bUserRole])
+  const isDistributorRole = useMemo(() => isDistributorOverride || String(b2bUserRole || '').trim().toLowerCase().includes('distributor'), [isDistributorOverride, b2bUserRole])
   const productsTable = import.meta.env.VITE_B2B_PRODUCTS_TABLE || DEFAULT_PRODUCTS_TABLE
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
@@ -15959,7 +15959,7 @@ function BuyerPortal({ onLogout, userName, userEmail }) {
   )
 }
 
-function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverride = null }) {
+function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverride = null, isDistributorOverride = false }) {
   const location = useLocation()
   const navigate = useNavigate()
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
@@ -16784,6 +16784,7 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
               onLogout={onLogout}
               tierOverride={adminPreviewType === 'distributor' ? adminTierPreview : null}
               pricesAllocatedOverride={adminPricesAllocated}
+              isDistributorOverride={adminPreviewType === 'distributor'}
             />
           : (
             <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#c8386e] border-t-transparent" /></div>}>
