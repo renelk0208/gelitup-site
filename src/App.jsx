@@ -11189,6 +11189,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         // Hard-wire acronym codes that can't be auto-derived from price-list names
         const pnLookup = t => map.get(normalizeProductName(t))
         const aliasGroups = [
+          // Bases & Primers
+          { codes: ['CLASSIC BASE COAT IMAGE', 'CLASSIC BASE COAT', 'Base Coat 15ml'], target: 'Base Coat 15ml -HTF' },
           { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-FBCLR'], target: 'Flexi Base Clear -HTF' },
           // 5-in-1 Superior Base coloureds (SBC*)
           { codes: ['GIUP SBCCLR', 'GIUP-SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
