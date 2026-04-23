@@ -65,15 +65,34 @@ create policy "Admins can update orders"
 
 // ─── Registrations panel ──────────────────────────────────────────────────────
 
+// Parse admin_comment field: returns array of {text, timestamp, author} objects.
+// Handles both legacy plain-text and new JSON-array format.
+function parseComments(raw) {
+  if (!raw) return []
+  try {
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) return parsed
+  } catch (_) { /* not JSON */ }
+  // Legacy plain text — wrap as single entry
+  return [{ text: raw, timestamp: null, author: null }]
+}
+
 function RegistrationsPanel() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState('all')
   const [expanded, setExpanded] = useState(null)
-  const [commentMap, setCommentMap] = useState({})
+  const [commentMap, setCommentMap] = useState({}) // new comment being typed, keyed by row id
   const [saving, setSaving] = useState(null)
   const [emailStatus, setEmailStatus] = useState({}) // { [id]: { state: 'sending'|'sent'|'error', message: '' } }
+  const [currentAdminEmail, setCurrentAdminEmail] = useState('')
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setCurrentAdminEmail(data?.user?.email || '')
+    })
+  }, [])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -242,14 +261,23 @@ function RegistrationsPanel() {
   }
 
   const saveComment = async (id) => {
+    const newText = (commentMap[id] ?? '').trim()
+    if (!newText) return
+    const row = rows.find(r => r.id === id)
+    const existing = parseComments(row?.admin_comment)
+    const newEntry = { text: newText, timestamp: new Date().toISOString(), author: currentAdminEmail || null }
+    const updated = [...existing, newEntry]
+    const updatedJson = JSON.stringify(updated)
     setSaving(id)
     const { error: err } = await supabase
       .from(REGISTRATIONS_TABLE)
-      .update({ admin_comment: commentMap[id] ?? '' })
+      .update({ admin_comment: updatedJson })
       .eq('id', id)
     setSaving(null)
     if (err) { alert(err.message); return }
-    setRows(prev => prev.map(r => r.id === id ? { ...r, admin_comment: commentMap[id] ?? '' } : r))
+    setRows(prev => prev.map(r => r.id === id ? { ...r, admin_comment: updatedJson } : r))
+    // Clear new-comment input so the save button hides
+    setCommentMap(prev => { const next = { ...prev }; delete next[id]; return next })
   }
 
   const togglePricesAllocated = async (row) => {
@@ -477,23 +505,44 @@ function RegistrationsPanel() {
                   </div>
                 )}
 
-                {/* Internal comment */}
+                {/* Internal comments thread */}
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-400">Internal Comment</label>
+                  <label className="mb-1 block text-xs font-semibold text-slate-400">Internal Comments</label>
+                  {(() => {
+                    const comments = parseComments(row.admin_comment)
+                    return comments.length > 0 && (
+                      <ul className="mb-2 space-y-1.5">
+                        {comments.map((c, i) => (
+                          <li key={c.timestamp || i} className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-700">
+                            <p className="whitespace-pre-wrap break-words">{c.text}</p>
+                            {(c.timestamp || c.author) && (
+                              <p className="mt-1 text-[10px] text-slate-400">
+                                {c.author && <span>{c.author}</span>}
+                                {c.author && c.timestamp && <span> · </span>}
+                                {c.timestamp && <span>{new Date(c.timestamp).toLocaleString()}</span>}
+                              </p>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )
+                  })()}
                   <textarea
                     rows={2}
-                    value={commentMap[row.id] ?? (row.admin_comment || '')}
+                    value={commentMap[row.id] ?? ''}
                     onChange={e => setCommentMap(prev => ({ ...prev, [row.id]: e.target.value }))}
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:border-fuchsia-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-100"
-                    placeholder="Internal note — not sent to applicant"
+                    placeholder="Add internal note — not sent to applicant"
                   />
-                  <button
-                    onClick={() => saveComment(row.id)}
-                    disabled={saving === row.id}
-                    className="mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
-                  >
-                    {saving === row.id ? 'Saving…' : 'Save Comment'}
-                  </button>
+                  {(commentMap[row.id] ?? '').trim() && (
+                    <button
+                      onClick={() => saveComment(row.id)}
+                      disabled={saving === row.id}
+                      className="mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                    >
+                      {saving === row.id ? 'Saving…' : 'Save Comment'}
+                    </button>
+                  )}
                 </div>
               </div>
             )}
