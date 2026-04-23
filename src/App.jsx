@@ -7733,7 +7733,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
             ? <>{T ? 'Cliente già registrato?' : 'Returning client?'}{' '}<NavLink to={prefilledEmail ? `/portal/login?portal=${portalType}&email=${encodeURIComponent(prefilledEmail)}` : `/portal/login?portal=${portalType}`} className="font-semibold text-slate-800 hover:underline">{T ? T.portal.login_btn : 'Sign in'}</NavLink></>
             : portalType === 'distributor'
               ? <>{T ? 'Nessun account?' : 'No account?'}{' '}<NavLink to="/become-distributor" className="font-semibold text-slate-800 hover:underline">{T ? 'Candidati qui' : 'Apply here'}</NavLink></>
-              : <>{T ? 'Nuovo cliente?' : 'New client?'}{' '}<NavLink to="/portal/signup" className="font-semibold text-slate-800 hover:underline">{T ? T.portal.register_btn : 'Create account'}</NavLink></>
+              : <>{T ? 'Nuovo cliente?' : 'New client?'}{' '}<NavLink to={`/portal/register?portal=${portalType}`} className="font-semibold text-slate-800 hover:underline">{T ? T.portal.register_btn : 'Register'}</NavLink></>
           }
         </p>
 
@@ -9294,7 +9294,10 @@ function CheckoutPage() {
 function PortalRegister({ onRegister }) {
   const lang = useLang()
   const T = lang === 'it' ? itTranslations : null
-  const defaultApplicationType = 'distributor'
+  const location = useLocation()
+  const registerParams = useMemo(() => new URLSearchParams(location.search), [location.search])
+  const portalParam = registerParams.get('portal') || 'distributor'
+  const defaultApplicationType = portalParam === 'b2b' ? 'b2b_order' : 'distributor'
 
   const [application, setApplication] = useState({
     applicationType: defaultApplicationType,
@@ -9440,7 +9443,9 @@ function PortalRegister({ onRegister }) {
 
       <div className="p-5 sm:p-6 md:p-8">
         <h3 className="text-xl font-semibold text-slate-900">
-          {T ? T.distributor.apply_title : 'Distributor Application'}
+          {isB2BOrderFlow
+            ? (T ? 'Registrazione B2B' : 'B2B Registration')
+            : (T ? T.distributor.apply_title : 'Distributor Application')}
         </h3>
 
         {false && (
