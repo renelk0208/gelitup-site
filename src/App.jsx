@@ -5452,20 +5452,38 @@ function FullCataloguePage() {
                 <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}>
                   {globalSearchResults.slice(0, 240).map((item, idx) => {
                     const itemCode = extractProductCode(item.name)
+                    const itemKey = `${item.name}::${itemCode}`
+                    const inCart = quickCart[itemKey] > 0
+                    const price = lookupCataloguePrice(item.name, itemCode)
                     return (
                       <article
                         key={idx}
-                        className="cursor-pointer overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 hover:border-fuchsia-500/70 hover:shadow-md"
+                        className="flex flex-col cursor-pointer overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 hover:border-fuchsia-500/70 hover:shadow-md"
                         onClick={() => openCatalogueCategory(item.category, item.subcategory, { keepSearch: true })}
                         title={`View in ${item.category} — ${item.subcategory}`}
                       >
                         <div className="flex h-36 w-full items-center justify-center overflow-hidden bg-white p-1.5">
                           <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => e.currentTarget.closest('article')?.classList.add('!hidden')} />
                         </div>
-                        <div className="border-t border-black/10 px-2 py-1.5">
+                        <div className="flex flex-1 flex-col border-t border-black/10 px-2 py-1.5">
                           <p className="truncate text-[10px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                           <p className="line-clamp-2 text-[11px] font-semibold uppercase leading-tight tracking-[0.02em] text-black">{item.name}</p>
                           <p className="mt-1 truncate text-[10px] text-fuchsia-600">{formatSubcategoryDisplayName(item.subcategory, item.category)}</p>
+                          {price != null && <p className="mt-0.5 text-[10px] font-bold text-fuchsia-700">€{Number(price).toFixed(2)}</p>}
+                          <div role="group" aria-label="Add to cart" className="mt-auto pt-2 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }}
+                              className={`flex h-7 w-7 items-center justify-center rounded-[8px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`}
+                              disabled={!inCart}
+                              title="Remove one"
+                            >−</button>
+                            <span className={`w-6 text-center text-xs font-bold ${inCart ? 'text-fuchsia-700' : 'text-black/40'}`}>{quickCart[itemKey] || 0}</span>
+                            <button
+                              onClick={() => addQuickItem(itemKey)}
+                              className={`flex h-7 w-7 items-center justify-center rounded-[8px] border border-fuchsia-600 text-sm text-fuchsia-600 transition duration-300 hover:bg-fuchsia-50 ${pulseItemKey === itemKey ? 'lux-pulse' : ''}`}
+                              title={T ? T.catalogue.add_to_cart : 'Add to cart'}
+                            >+</button>
+                          </div>
                         </div>
                       </article>
                     )
