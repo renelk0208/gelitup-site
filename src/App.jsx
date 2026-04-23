@@ -10198,6 +10198,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     }
   })
   const [packageCartItems, setPackageCartItems] = useState([])
+  const [cartSavedAt, setCartSavedAt] = useState(null)
+  const [isSavingCart, setIsSavingCart] = useState(false)
   const [podCatalog, setPodCatalog] = useState({ pod_1: [], pod_2: [], pod_3: [], pod_4: [] })
   const [localImageMap, setLocalImageMap] = useState(() => new Map())
   // priceMap: normalised-key ? { name, price }  (loaded from b2b-price-list.json)
@@ -10357,14 +10359,16 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     // Detect if cart contents changed — if so, reset reminder cycle
     const contentsChanged = JSON.stringify(existing?.selectedCodes) !== JSON.stringify(selectedCodes)
       || JSON.stringify(existing?.packageCartItems) !== JSON.stringify(packageCartItems)
+    const ts = contentsChanged ? Date.now() : (existing?.savedAt ?? Date.now())
     localStorage.setItem(key, JSON.stringify({
       selectedCodes,
       itemQtys,
       packageCartItems,
-      savedAt: contentsChanged ? Date.now() : (existing?.savedAt ?? Date.now()),
+      savedAt: ts,
       lastReminderAt: contentsChanged ? undefined : existing?.lastReminderAt,
       abandonedReminderCount: contentsChanged ? 0 : (existing?.abandonedReminderCount || 0),
     }))
+    if (contentsChanged) setCartSavedAt(ts)
   }, [selectedCodes, itemQtys, packageCartItems])
 
   // Sync portal cart to Supabase draft_carts so admin can see abandoned carts
@@ -10394,6 +10398,36 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       })
     }, 2000) // debounce 2s
     return () => clearTimeout(timer)
+  }, [selectedCodes, itemQtys, packageCartItems])
+
+  const saveCartNow = useCallback(async () => {
+    const uid = cartUserIdRef.current
+    if (!uid || (!selectedCodes.length && !packageCartItems.length)) return
+    setIsSavingCart(true)
+    const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${uid}`
+    const ts = Date.now()
+    localStorage.setItem(key, JSON.stringify({ selectedCodes, itemQtys, packageCartItems, savedAt: ts }))
+    if (supabase) {
+      try {
+        const { data } = await supabase.auth.getUser()
+        if (data?.user?.id) {
+          const itemsSummary = selectedCodes.map(c => ({ code: c, qty: itemQtys[c] || 1 }))
+          const pkgSummary = packageCartItems.map(i => ({ sku: i.sku, name: i.name, qty: i.qty, group: i.group }))
+          const total = selectedCodes.reduce((s, c) => s + (itemQtys[c] || 1), 0) + packageCartItems.reduce((s, i) => s + (i.qty || 0), 0)
+          await supabase.from('b2b_draft_carts').upsert({
+            user_id: data.user.id,
+            customer_email: data.user.email,
+            items: { products: itemsSummary, packages: pkgSummary },
+            total_units: total,
+            total_estimated: 0,
+            source: 'portal',
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'user_id,source' })
+        }
+      } catch { /* non-blocking */ }
+    }
+    setCartSavedAt(ts)
+    setIsSavingCart(false)
   }, [selectedCodes, itemQtys, packageCartItems])
 
   const setClientField = useCallback((key, value) => {
@@ -14024,10 +14058,19 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           )}
         </div>
         {(selectedCodes.length > 0 || packageCartItems.length > 0) && (
-          <p className="mt-3 flex items-center gap-1.5 text-xs text-emerald-700">
-            <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold">✓</span>
-            Draft saved — your cart is preserved even if you log out or close the browser.
-          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <p className="flex items-center gap-1.5 text-xs text-emerald-700">
+              <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold">✓</span>
+              {cartSavedAt ? `Saved at ${new Date(cartSavedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Auto-saved'}
+            </p>
+            <button
+              onClick={saveCartNow}
+              disabled={isSavingCart}
+              className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-60"
+            >
+              {isSavingCart ? 'Saving…' : '💾 Save Draft'}
+            </button>
+          </div>
         )}
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <button
@@ -14321,7 +14364,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           <div className="flex shrink-0 items-center gap-2">
             {(selectedCodes.length > 0 || packageCartItems.length > 0) && (
               <>
-                <span className="text-[10px] text-emerald-600 font-medium">✓ Draft saved</span>
+                <span className="text-[10px] text-emerald-600 font-medium">{cartSavedAt ? `✓ Saved ${new Date(cartSavedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : '✓ Auto-saved'}</span>
+                <button onClick={saveCartNow} disabled={isSavingCart} className="rounded border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-60">{isSavingCart ? 'Saving…' : '💾 Save'}</button>
                 <button onClick={() => { if (!window.confirm('Clear your entire order list?')) return; setSelectedCodes([]); setItemQtys({}); setPackageCartItems([]); setGeneratedPackageTier('') }} className="text-xs text-slate-400 hover:text-rose-500">Clear</button>
               </>
             )}
