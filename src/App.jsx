@@ -6450,16 +6450,16 @@ function Nav({ onOpenContactModal }) {
         {T ? T.distributor.apply_title : 'Distribution Registration'}
       </NavLink>
 
-      {/* Sign In — compact, for returning users */}
+      {/* B2B Login — for registered B2B clients */}
       <NavLink
-        to="/portal/login"
+        to="/portal/login?portal=b2b"
         className={({ isActive }) =>
           `rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
             isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/80 hover:border-white/50 hover:bg-white/10 hover:!text-white'
           }`
         }
       >
-        {T ? T.nav.login : 'Sign In'}
+        {T ? T.nav.login : 'B2B Login'}
       </NavLink>
     </nav>
   )
@@ -6542,7 +6542,7 @@ function MobileNav({ onOpenContactModal }) {
             {T ? T.distributor.apply_title : 'Distribution Registration'}
           </NavLink>
           <NavLink
-            to="/portal/login"
+            to="/portal/login?portal=b2b"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
               `block rounded-lg border border-white/25 px-4 py-3 text-center text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
@@ -6550,7 +6550,7 @@ function MobileNav({ onOpenContactModal }) {
               }`
             }
           >
-            {T ? T.nav.login : 'Sign In'}
+            {T ? T.nav.login : 'B2B Login'}
           </NavLink>
 
           <div className="my-2 border-t border-white/10" />
