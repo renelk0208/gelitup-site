@@ -7715,7 +7715,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
             ? <>{T ? 'Cliente già registrato?' : 'Returning client?'}{' '}<NavLink to={prefilledEmail ? `/portal/login?portal=${portalType}&email=${encodeURIComponent(prefilledEmail)}` : `/portal/login?portal=${portalType}`} className="font-semibold text-slate-800 hover:underline">{T ? T.portal.login_btn : 'Sign in'}</NavLink></>
             : portalType === 'distributor'
               ? <>{T ? 'Nessun account?' : 'No account?'}{' '}<NavLink to="/become-distributor" className="font-semibold text-slate-800 hover:underline">{T ? 'Candidati qui' : 'Apply here'}</NavLink></>
-              : <>{T ? 'Nuovo cliente?' : 'New client?'}{' '}<NavLink to="/portal/register" className="font-semibold text-slate-800 hover:underline">{T ? T.portal.register_btn : 'Register'}</NavLink></>
+              : <>{T ? 'Nuovo cliente?' : 'New client?'}{' '}<NavLink to="/portal/signup" className="font-semibold text-slate-800 hover:underline">{T ? T.portal.register_btn : 'Create account'}</NavLink></>
           }
         </p>
 
@@ -8339,6 +8339,169 @@ function BuyerRegister() {
           Already have an account?{' '}
           <NavLink to="/portal/login" className="font-semibold text-slate-800 hover:underline">Sign in</NavLink>
         </p>
+      </div>
+    </section>
+  )
+}
+
+function B2BClientSignup() {
+  const navigate = useNavigate()
+  const [form, setForm] = useState({ email: '', password: '', confirmPassword: '' })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [done, setDone] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    const email = form.email.trim().toLowerCase()
+    const { password, confirmPassword } = form
+    if (!email || !password) { setError('Email and password are required.'); return }
+    if (password.length < 6) { setError('Password must be at least 6 characters.'); return }
+    if (password !== confirmPassword) { setError('Passwords do not match.'); return }
+
+    setIsSubmitting(true)
+    try {
+      if (!hasSupabaseConfig || !supabase) { setError('Authentication is not configured.'); setIsSubmitting(false); return }
+
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/portal/login?email=${encodeURIComponent(email)}`,
+        },
+      })
+
+      if (signUpError) {
+        const msg = signUpError.message || ''
+        if (/already registered|already been registered/i.test(msg)) {
+          setError('This email is already registered. Please sign in instead.')
+        } else {
+          setError(msg || 'Registration failed. Please try again.')
+        }
+        setIsSubmitting(false)
+        return
+      }
+
+      // If Supabase immediately returns a session, email confirmation is disabled — go straight to dashboard
+      if (data?.session) {
+        navigate('/portal/dashboard/overview')
+        return
+      }
+
+      setDone(true)
+    } catch {
+      setError('An unexpected error occurred. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <section className="mx-auto max-w-sm">
+      <div className="rounded-t-2xl bg-[#111111] px-8 py-7 text-center">
+        <p className="text-[10px] font-bold uppercase tracking-[0.25em]" style={{color:'rgba(255,255,255,0.5)'}}>GEL.IT.UP by GIUP®</p>
+        <h2 className="mt-2 text-xl font-extrabold uppercase tracking-[0.08em]" style={{color:'#ffffff'}}>Create Account</h2>
+      </div>
+
+      <div className="rounded-b-2xl border border-t-0 border-slate-200 bg-white px-8 py-7">
+        <p className="mb-5 text-center text-xs text-slate-500">
+          Already have an account?{' '}
+          <NavLink to="/portal/login?portal=b2b" className="font-semibold text-slate-800 hover:underline">Sign in</NavLink>
+        </p>
+
+        {done ? (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+              <svg className="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <p className="text-sm font-bold text-emerald-800">Check your inbox!</p>
+            <p className="mt-1 text-xs text-emerald-700">
+              A confirmation email has been sent to <strong>{form.email}</strong>.<br />
+              Click the link to activate your account, then sign in.
+            </p>
+            <NavLink
+              to={`/portal/login?portal=b2b&email=${encodeURIComponent(form.email)}`}
+              className="mt-3 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
+            >
+              Go to Sign In →
+            </NavLink>
+          </div>
+        ) : (
+          <form className="space-y-3" onSubmit={handleSubmit}>
+            <label className="block text-sm font-medium text-slate-700">
+              Email
+              <input
+                type="email"
+                required
+                autoComplete="email"
+                value={form.email}
+                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                placeholder="you@example.com"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base outline-none ring-fuchsia-500/20 focus:border-fuchsia-400 focus:ring"
+              />
+            </label>
+
+            <label className="block text-sm font-medium text-slate-700">
+              Password
+              <div className="relative mt-1">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  autoComplete="new-password"
+                  value={form.password}
+                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                  placeholder="Min. 6 characters"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2.5 pr-10 text-base outline-none ring-fuchsia-500/20 focus:border-fuchsia-400 focus:ring"
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword
+                    ? <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    : <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  }
+                </button>
+              </div>
+            </label>
+
+            <label className="block text-sm font-medium text-slate-700">
+              Confirm Password
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                autoComplete="new-password"
+                value={form.confirmPassword}
+                onChange={(e) => setForm((f) => ({ ...f, confirmPassword: e.target.value }))}
+                placeholder="Re-enter your password"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base outline-none ring-fuchsia-500/20 focus:border-fuchsia-400 focus:ring"
+              />
+            </label>
+
+            {error && (
+              <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs text-rose-700">{error}</div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="mt-1 w-full rounded-lg bg-[#D43790] px-4 py-2.5 text-sm font-bold text-white transition duration-300 hover:bg-[#b8307a] disabled:opacity-50"
+            >
+              {isSubmitting ? 'Creating account…' : 'Create Account'}
+            </button>
+
+            <p className="pt-1 text-center text-xs text-slate-500">
+              After signing up, check your email to confirm your account and then log in to complete your order details.
+            </p>
+          </form>
+        )}
       </div>
     </section>
   )
@@ -18302,6 +18465,7 @@ function App() {
                 <Route path="/portal-client-login" element={<Navigate to="/portal/login" replace />} />
                 <Route path="/portal-admin-login" element={<Navigate to="/portal/admin-login" replace />} />
                 <Route path="/portal/register" element={<PortalRegister onRegister={handlePortalRegister} />} />
+                <Route path="/portal/signup" element={<B2BClientSignup />} />
                 <Route path="/portal/buy" element={<BuyerRegister />} />
                 <Route path="/portal/forgot-password" element={<PortalForgotPassword />} />
                 <Route
@@ -18344,7 +18508,7 @@ function App() {
             </div>
             <div className="space-y-3 px-8 py-6">
               <NavLink
-                to="/portal/register"
+                to="/portal/signup"
                 onClick={() => setShowExitIntent(false)}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-fuchsia-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-fuchsia-500"
               >
