@@ -4404,7 +4404,11 @@ function FullCataloguePage() {
             categoryToken.includes(normalizedSearch) ||
             priceNameToken.includes(normalizedSearch)
           ) {
-            hits.push({ ...item, subcategory: sub.name, category: section.category })
+            // Compute display name once here so the render loop doesn't need to re-look it up
+            const displayName = priceEntry?.name
+              ? priceEntry.name.replace(/\s*[-—]\s*HTF\s*$/i, '').trim()
+              : item.name
+            hits.push({ ...item, subcategory: sub.name, category: section.category, displayName })
           }
         }
       }
@@ -5462,10 +5466,7 @@ function FullCataloguePage() {
                     const itemKey = `${item.name}::${itemCode}`
                     const inCart = quickCart[itemKey] > 0
                     const price = lookupCataloguePrice(item.name, itemCode)
-                    const priceEntry = cataloguePriceMap?.get(normalizeProductName(item.name))
-                    const displayName = priceEntry?.name
-                      ? priceEntry.name.replace(/\s*[-—]\s*HTF\s*$/i, '').trim()
-                      : item.name
+                    const displayName = item.displayName || item.name
                     return (
                       <article
                         key={idx}
