@@ -1104,6 +1104,39 @@ const PACKAGE_TECH_ESSENTIALS = [
   { sku: '3IN1_CLR', code: '3IN1_CLR', name: '3-in-1 Premium Builder Gel Clear', category: 'Technical', group: 'Essentials' },
   { sku: 'SYN_MWH', code: 'SYN_MWH', name: 'Multimix Synthogel Milky White', category: 'Technical', group: 'Essentials' },
 ]
+// Per-tier technical product specs with individual quantities
+const TIER_TECH_SPECS = {
+  professional: [
+    { sku: 'Non Wipe Top Coat 15ml -HTF', code: 'NW_TOP', name: 'Non-Wipe Top Coat 15ml', category: 'Technical', group: 'Tops', qty: 50 },
+    { sku: 'Wipe Off Top Coat 15 ml', code: 'WIPE_TOP', name: 'Wipe Off Top Coat 15ml', category: 'Technical', group: 'Tops', qty: 30 },
+    { sku: 'Mirror Top Coat', code: 'MIRROR_TOP', name: 'Mirror Top Coat', category: 'Technical', group: 'Tops', qty: 20 },
+    { sku: 'Base Coat 15ml -HTF', code: 'BASE_COAT', name: 'Base Coat 15ml', category: 'Technical', group: 'Bases', qty: 50 },
+    { sku: '5-in-1 Superior Base 15ml Clear -HTF', code: '5IN1_CLR', name: '5-in-1 Superior Base Clear 15ml', category: 'Technical', group: 'Bases', qty: 50 },
+    { sku: 'Brush on Builder Gel Clear 15ml -HTF', code: 'BOB_CLR', name: 'Brush on Builder Gel Clear 15ml', category: 'Technical', group: 'Bases', qty: 50 },
+    { sku: 'Flexi Base Clear -HTF', code: 'FLEXI_BASE', name: 'Flexi Base Clear', category: 'Technical', group: 'Bases', qty: 50 },
+    { sku: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF', code: 'SUPERBOND', name: 'Superbond Acid-Free Primer', category: 'Technical', group: 'Essentials', qty: 50 },
+    { sku: 'Superbond Nail Dehydrator 11ml - with Acid -HTF', code: 'SUPERBOND_ACID', name: 'Superbond With Acid', category: 'Technical', group: 'Essentials', qty: 30 },
+    { sku: 'SP8001 Mirror Clear Powder', code: 'SP8001', name: 'Mirror Clear Powder', category: 'Technical', group: 'MirrorPowders', qty: 3 },
+    { sku: 'TR01 Mirror X1 Powder', code: 'TR01', name: 'Mirror X1 Powder', category: 'Technical', group: 'MirrorPowders', qty: 3 },
+    { sku: 'TR02 Mirror X2 Powder', code: 'TR02', name: 'Mirror X2 Powder', category: 'Technical', group: 'MirrorPowders', qty: 3 },
+    { sku: 'TR03 Mirror X3 Powder', code: 'TR03', name: 'Mirror X3 Powder', category: 'Technical', group: 'MirrorPowders', qty: 3 },
+    { sku: 'TR04 Mirror X4 Powder', code: 'TR04', name: 'Mirror X4 Powder', category: 'Technical', group: 'MirrorPowders', qty: 3 },
+    { sku: 'TR05 Mirror X5 Powder', code: 'TR05', name: 'Mirror X5 Powder', category: 'Technical', group: 'MirrorPowders', qty: 3 },
+    { sku: 'TR06 Mirror X6 Powder', code: 'TR06', name: 'Mirror X6 Powder', category: 'Technical', group: 'MirrorPowders', qty: 3 },
+    { sku: 'CM12 Mirror X7 Powder', code: 'CM12', name: 'Mirror X7 Powder', category: 'Technical', group: 'MirrorPowders', qty: 3 },
+    { sku: 'GEL IT UP HAND AND BODY CREAM 100ml CALM FROST NEW', code: 'CREAM_CF', name: 'Hand & Body Cream Calm Frost 100ml', category: 'Spa', group: 'Creams', qty: 3 },
+    { sku: 'GEL IT UP HAND AND BODY CREAM 100ml SASSY SASSY NEW', code: 'CREAM_SS', name: 'Hand & Body Cream Sassy Sassy 100ml', category: 'Spa', group: 'Creams', qty: 3 },
+    { sku: 'GEL IT UP HAND AND BODY CREAM 100ml SILKY BLISS NEW', code: 'CREAM_SB', name: 'Hand & Body Cream Silky Bliss 100ml', category: 'Spa', group: 'Creams', qty: 3 },
+    { sku: 'GEL IT UP SCRUB 200ml CALM FROST NEW', code: 'SCRUB_CF', name: 'Scrub Calm Frost 200ml', category: 'Spa', group: 'Scrubs', qty: 3 },
+    { sku: 'GEL IT UP SCRUB 200ml SASSY SASSY NEW', code: 'SCRUB_SS', name: 'Scrub Sassy Sassy 200ml', category: 'Spa', group: 'Scrubs', qty: 3 },
+    { sku: 'GEL IT UP SCRUB 200ml SILKY BLISS NEW', code: 'SCRUB_SB', name: 'Scrub Silky Bliss 200ml', category: 'Spa', group: 'Scrubs', qty: 3 },
+    { sku: 'Perky Peach Cuticle Oil 100ml -HTF', code: 'OIL_PP', name: 'Cuticle Oil Perky Peach 100ml', category: 'Spa', group: 'Oils', qty: 3 },
+    { sku: 'Chilled Melon Cuticle Oil 100ml -HTF', code: 'OIL_CM', name: 'Cuticle Oil Chilled Melon 100ml', category: 'Spa', group: 'Oils', qty: 3 },
+    { sku: 'Cooling Coconut Cuticle Oil 100ml -HTF', code: 'OIL_CC', name: 'Cuticle Oil Cooling Coconut 100ml', category: 'Spa', group: 'Oils', qty: 3 },
+  ],
+}
+// Authority tier: same products but every quantity doubled
+TIER_TECH_SPECS.authority = TIER_TECH_SPECS.professional.map(item => ({ ...item, qty: item.qty * 2 }))
 const PROFESSIONAL_BASE_PACK = {
   sku: '5IN1_CLR',
   description: '5-in-1 Superior Base Add-on',
@@ -1291,15 +1324,14 @@ function buildTierPackageItems(tier, podCatalog, defaultQty = DEFAULT_PACKAGE_IT
   const pod2 = Array.isArray(podCatalog?.pod_2) ? podCatalog.pod_2 : []
   const pod3 = Array.isArray(podCatalog?.pod_3) ? podCatalog.pod_3 : []
   const pod4 = Array.isArray(podCatalog?.pod_4) ? podCatalog.pod_4 : []
-  const podSeasonal = Array.isArray(podCatalog?.pod_seasonal) ? podCatalog.pod_seasonal : []
 
-  const source = tier === 'Silver'
-    ? pod1
-    : tier === 'Gold'
-      ? [...pod1, ...pod2]
-      : tier === 'Professional'
-        ? podSeasonal
-        : [...pod1, ...pod2, ...pod3, ...pod4]
+  const tierKey = String(tier).toLowerCase()
+  let source, colorQty
+  if (tierKey === 'silver') { source = pod1; colorQty = defaultQty }
+  else if (tierKey === 'gold') { source = [...pod1, ...pod2]; colorQty = defaultQty }
+  else if (tierKey === 'professional') { source = pod1; colorQty = 3 }
+  else if (tierKey === 'authority') { source = [...pod1, ...pod2]; colorQty = 6 }
+  else { source = [...pod1, ...pod2, ...pod3, ...pod4]; colorQty = defaultQty }
 
   return source.map((item) => ({
     sku: item.sku,
@@ -1307,11 +1339,14 @@ function buildTierPackageItems(tier, podCatalog, defaultQty = DEFAULT_PACKAGE_IT
     name: item.name,
     category: item.category,
     group: item.group,
-    qty: defaultQty,
+    qty: colorQty,
   }))
 }
 
-function buildTierTechnicalItems(defaultQty = DEFAULT_PACKAGE_ITEM_QTY) {
+function buildTierTechnicalItems(tier, defaultQty = DEFAULT_PACKAGE_ITEM_QTY) {
+  const tierKey = String(tier || '').toLowerCase()
+  const specs = TIER_TECH_SPECS[tierKey]
+  if (specs) return specs.map(item => ({ ...item }))
   return PACKAGE_TECH_ESSENTIALS.map((item) => ({
     ...item,
     qty: defaultQty,
@@ -10430,6 +10465,19 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     setIsSavingCart(false)
   }, [selectedCodes, itemQtys, packageCartItems])
 
+  const updatePackageItemQty = useCallback((sku, newQty) => {
+    const parsed = Math.max(0, Number(newQty) || 0)
+    if (parsed === 0) {
+      setPackageCartItems(prev => prev.filter(item => item.sku !== sku))
+    } else {
+      setPackageCartItems(prev => prev.map(item => item.sku === sku ? { ...item, qty: parsed } : item))
+    }
+  }, [])
+
+  const removePackageItem = useCallback((sku) => {
+    setPackageCartItems(prev => prev.filter(item => item.sku !== sku))
+  }, [])
+
   const setClientField = useCallback((key, value) => {
     setClientProfile((current) => ({ ...current, [key]: value }))
     if (key === 'vatNumber') setViesResult(null) // reset VIES result when VAT changes
@@ -10656,15 +10704,19 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     ? podCatalog.pod_1.length
     : generatedPackageTier === 'Gold'
       ? podCatalog.pod_1.length + podCatalog.pod_2.length
-      : generatedPackageTier === 'Platinum'
-        ? podCatalog.pod_1.length + podCatalog.pod_2.length + podCatalog.pod_3.length + podCatalog.pod_4.length
-        : generatedPackageTier === 'Professional'
-          ? (podCatalog.pod_seasonal?.length ?? 0)
-          : 0
-  const expectedTechCount = generatedPackageTier ? PACKAGE_TECH_ESSENTIALS.length : 0
+      : generatedPackageTier === 'Professional'
+        ? podCatalog.pod_1.length
+        : generatedPackageTier === 'Authority'
+          ? podCatalog.pod_1.length + podCatalog.pod_2.length
+          : generatedPackageTier === 'Platinum'
+            ? podCatalog.pod_1.length + podCatalog.pod_2.length + (podCatalog.pod_3?.length || 0) + (podCatalog.pod_4?.length || 0)
+            : 0
+  const expectedTechCount = generatedPackageTier
+    ? (TIER_TECH_SPECS[String(generatedPackageTier).toLowerCase()]?.length ?? PACKAGE_TECH_ESSENTIALS.length)
+    : 0
   const expectedPackageItems = expectedColorCountByTier + expectedTechCount
   const expectedPackageUnits = expectedPackageItems * DEFAULT_PACKAGE_ITEM_QTY
-  const packageIntegrityPass = packageCartItems.length === expectedPackageItems && packageUnits === expectedPackageUnits
+  const packageIntegrityPass = packageCartItems.length === expectedPackageItems
   const catalogBySku = useMemo(() => {
     const map = new Map()
 
@@ -10974,10 +11026,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     () => packageCartItems,
     [packageCartItems],
   )
-  const visiblePackagePreviewItems = useMemo(
-    () => packagePreviewItems.slice(0, packagePreviewVisibleCount),
-    [packagePreviewItems, packagePreviewVisibleCount],
-  )
+  const visiblePackagePreviewItems = packagePreviewItems
 
   useEffect(() => {
     if (!shouldShowTechnicalUpsellToast) {
@@ -12121,7 +12170,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     }
 
     const generatedColorItems = buildTierPackageItems(packageTier, podCatalog, DEFAULT_PACKAGE_ITEM_QTY)
-    const generatedTechItems = buildTierTechnicalItems(DEFAULT_PACKAGE_ITEM_QTY)
+    const generatedTechItems = buildTierTechnicalItems(packageTier)
     const generatedItems = [...generatedColorItems, ...generatedTechItems]
     const generatedItemsWithImages = generatedItems.map((item) => ({
       ...item,
@@ -12157,8 +12206,10 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     const tierMessage = packageTier === 'Platinum'
       ? `Platinum package generated with ${generatedColorItems.length} colors (Pod_1 + Pod_2 + Pod_3 + Pod_4) + ${generatedTechItems.length} tech essentials.`
       : packageTier === 'Professional'
-        ? `Professional package generated with ${generatedColorItems.length} seasonal colors (Pod_Seasonal) + ${generatedTechItems.length} tech essentials.`
-        : `${packageTier} package generated with ${generatedColorItems.length} colors + ${generatedTechItems.length} tech essentials (qty ${DEFAULT_PACKAGE_ITEM_QTY}).`
+        ? `Professional package generated: ${generatedColorItems.length} Pod_1 colours × qty 3 + ${generatedTechItems.length} technical products. Total units: ${generatedColorItems.reduce((s, i) => s + i.qty, 0) + generatedTechItems.reduce((s, i) => s + i.qty, 0)}.`
+        : packageTier === 'Authority'
+          ? `Authority package generated: ${generatedColorItems.length} colours (Pod_1 + Pod_2) × qty 6 + ${generatedTechItems.length} technical products. Total units: ${generatedColorItems.reduce((s, i) => s + i.qty, 0) + generatedTechItems.reduce((s, i) => s + i.qty, 0)}.`
+          : `${packageTier} package generated with ${generatedColorItems.length} colors + ${generatedTechItems.length} tech essentials (qty ${DEFAULT_PACKAGE_ITEM_QTY}).`
 
     setCheckoutMessage(tierMessage)
     setDraftInvoice(formatDraftInvoiceText(invoice))
@@ -14213,26 +14264,29 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           {packageCartItems.length > 0 && (
             <>
               <p className="mt-2 text-xs text-slate-600">
-                Package cart mapped: {packageCartItems.length} SKUs x {DEFAULT_PACKAGE_ITEM_QTY} qty (total package units: {packageUnits}).
+                Package: {packageCartItems.length} SKUs · {packageUnits} total units.
               </p>
               {generatedPackageTier && (
-                <p className={`mt-1 text-xs ${packageIntegrityPass ? 'text-emerald-700' : 'text-rose-600'}`}>
-                  Integrity check ({generatedPackageTier}): expected {expectedPackageItems} items / {expectedPackageUnits} units, got {packageCartItems.length} items / {packageUnits} units.
+                <p className={`mt-1 text-xs ${packageIntegrityPass ? 'text-emerald-700' : 'text-amber-600'}`}>
+                  {packageIntegrityPass
+                    ? `✓ ${generatedPackageTier} package complete (${packageCartItems.length} items / ${packageUnits} units)`
+                    : `${generatedPackageTier}: ${packageCartItems.length} items / ${packageUnits} units (expected ${expectedPackageItems} items)`}
                 </p>
               )}
-              {generatedPackageTier && packagePreviewItems.length > 0 && (
+              {packagePreviewItems.length > 0 && (
                 <div className="mt-2 rounded-lg border border-slate-200 bg-white p-2">
-                  <p className="text-xs font-semibold text-slate-700">
-                    {generatedPackageTier} Package Products (lazy loaded): showing {visiblePackagePreviewItems.length} of {packagePreviewItems.length}
+                  <p className="mb-2 text-xs font-semibold text-slate-700">
+                    {generatedPackageTier ? `${generatedPackageTier} Package` : 'Package'} — {packagePreviewItems.length} products, {packageUnits} units total
+                    <span className="ml-2 font-normal text-slate-400">(edit qty or remove items below)</span>
                   </p>
-                  <div className="mt-2 max-h-48 overflow-y-auto pr-1">
+                  <div className="max-h-96 overflow-y-auto pr-1">
                     <ul className="space-y-1 text-xs text-slate-700">
                       {visiblePackagePreviewItems.map((item) => {
                         const resolvedImageUrl = resolveCatalogImageUrl(item)
 
                         return (
                         <li key={`${item.sku}-${item.code}`} className="flex items-center gap-2 rounded border border-slate-100 bg-slate-50 px-2 py-1">
-                          <div className="h-8 w-8 overflow-hidden rounded border border-slate-200 bg-white">
+                          <div className="h-8 w-8 shrink-0 overflow-hidden rounded border border-slate-200 bg-white">
                             {resolvedImageUrl
                               ? (
                                 <img
@@ -14248,31 +14302,31 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                                 </div>
                                 )}
                           </div>
-                          <span>
+                          <span className="flex-1 min-w-0 truncate">
                             <span className="font-semibold">{item.code}</span>
-                            {' '}
-                            —
-                            {' '}
+                            {' — '}
                             {item.name}
                           </span>
-                          {!resolvedImageUrl && (
-                            <span className="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
-                              Missing image
-                            </span>
-                          )}
+                          <input
+                            type="number"
+                            min="1"
+                            value={item.qty}
+                            onChange={(e) => updatePackageItemQty(item.sku, e.target.value)}
+                            onFocus={(e) => e.target.select()}
+                            className="w-14 shrink-0 rounded border border-slate-300 px-1 py-0.5 text-center text-xs"
+                          />
+                          <button
+                            onClick={() => removePackageItem(item.sku)}
+                            className="shrink-0 text-slate-300 hover:text-rose-500"
+                            title="Remove from package"
+                          >
+                            ✕
+                          </button>
                         </li>
                         )
                       })}
                     </ul>
                   </div>
-                  {visiblePackagePreviewItems.length < packagePreviewItems.length && (
-                    <button
-                      onClick={() => setPackagePreviewVisibleCount((current) => current + 15)}
-                      className="mt-2 rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700"
-                    >
-                      Load 15 more products
-                    </button>
-                  )}
                 </div>
               )}
             </>
