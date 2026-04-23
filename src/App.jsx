@@ -4363,12 +4363,15 @@ function FullCataloguePage() {
       const codeToken = normalizeCatalogueToken(item.code)
       const subcategoryToken = normalizeCatalogueToken(item.subcategory)
       const pathToken = normalizeCatalogueToken(item.imageUrl)
+      const priceEntry = cataloguePriceMap?.get(normalizeProductName(item.name))
+      const priceNameToken = priceEntry ? normalizeCatalogueToken(priceEntry.name) : ''
       return nameToken.includes(normalizedSearch)
         || codeToken.includes(normalizedSearch)
         || subcategoryToken.includes(normalizedSearch)
         || pathToken.includes(normalizedSearch)
+        || priceNameToken.includes(normalizedSearch)
     })
-  }, [activeColorFamily, activeCatEyeVariant, baseItems, isCatEye, isSolidGelPolish, solidGelColourFamilies, searchQuery])
+  }, [activeColorFamily, activeCatEyeVariant, baseItems, isCatEye, isSolidGelPolish, solidGelColourFamilies, searchQuery, cataloguePriceMap])
 
   useEffect(() => {
     setScrollTop(0)
@@ -4390,12 +4393,16 @@ function FullCataloguePage() {
           const subcategoryToken = normalizeCatalogueToken(sub.name)
           const pathToken = normalizeCatalogueToken(item.imageUrl)
           const categoryToken = normalizeCatalogueToken(section.category)
+          // Also check the human-readable product name from the price list
+          const priceEntry = cataloguePriceMap?.get(normalizeProductName(item.name))
+          const priceNameToken = priceEntry ? normalizeCatalogueToken(priceEntry.name) : ''
           if (
             nameToken.includes(normalizedSearch) ||
             codeToken.includes(normalizedSearch) ||
             subcategoryToken.includes(normalizedSearch) ||
             pathToken.includes(normalizedSearch) ||
-            categoryToken.includes(normalizedSearch)
+            categoryToken.includes(normalizedSearch) ||
+            priceNameToken.includes(normalizedSearch)
           ) {
             hits.push({ ...item, subcategory: sub.name, category: section.category })
           }
@@ -4403,7 +4410,7 @@ function FullCataloguePage() {
       }
     }
     return hits
-  }, [sections, searchQuery])
+  }, [sections, searchQuery, cataloguePriceMap])
 
   useEffect(() => {
     if (activeCategory && !activeSubcategory) {
@@ -5455,6 +5462,10 @@ function FullCataloguePage() {
                     const itemKey = `${item.name}::${itemCode}`
                     const inCart = quickCart[itemKey] > 0
                     const price = lookupCataloguePrice(item.name, itemCode)
+                    const priceEntry = cataloguePriceMap?.get(normalizeProductName(item.name))
+                    const displayName = priceEntry?.name
+                      ? priceEntry.name.replace(/\s*[-—]\s*HTF\s*$/i, '').trim()
+                      : item.name
                     return (
                       <article
                         key={idx}
@@ -5463,11 +5474,11 @@ function FullCataloguePage() {
                         title={`View in ${item.category} — ${item.subcategory}`}
                       >
                         <div className="flex h-36 w-full items-center justify-center overflow-hidden bg-white p-1.5">
-                          <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => e.currentTarget.closest('article')?.classList.add('!hidden')} />
+                          <img src={item.imageUrl} alt={displayName} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => e.currentTarget.closest('article')?.classList.add('!hidden')} />
                         </div>
                         <div className="flex flex-1 flex-col border-t border-black/10 px-2 py-1.5">
                           <p className="truncate text-[10px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
-                          <p className="line-clamp-2 text-[11px] font-semibold uppercase leading-tight tracking-[0.02em] text-black">{item.name}</p>
+                          <p className="line-clamp-2 text-[11px] font-semibold uppercase leading-tight tracking-[0.02em] text-black">{displayName}</p>
                           <p className="mt-1 truncate text-[10px] text-fuchsia-600">{formatSubcategoryDisplayName(item.subcategory, item.category)}</p>
                           {price != null && <p className="mt-0.5 text-[10px] font-bold text-fuchsia-700">€{Number(price).toFixed(2)}</p>}
                           <div role="group" aria-label="Add to cart" className="mt-auto pt-2 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
@@ -5490,6 +5501,13 @@ function FullCataloguePage() {
                   })}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* CATEGORY DETAIL after clicking a search result */}
+          {searchQuery && activeCategory && (
+            <div className="mx-auto max-w-6xl px-4 sm:px-8 pb-12">
+              {categoryDetail}
             </div>
           )}
 
