@@ -598,12 +598,20 @@ function OrdersPanel() {
       tracking_number: row.tracking_number || '',
       tracking_url: row.tracking_url || '',
       status: row.status,
-      items: Array.isArray(row.items) ? row.items.map(it => typeof it === 'string' ? it : JSON.stringify(it)) : [],
+      items: Array.isArray(row.items)
+        ? row.items.map(it => {
+            const str = typeof it === 'string' ? it : JSON.stringify(it)
+            const m = str.match(/^(.+?) x(\d+)$/)
+            return m ? { text: m[1], qty: parseInt(m[2], 10) } : { text: str, qty: 1 }
+          })
+        : [],
     })
   }
 
   const saveEdit = async (id) => {
-    const items = editDraft.items.filter(it => it.trim())
+    const items = editDraft.items
+      .filter(it => it.text.trim())
+      .map(it => `${it.text.trim()} x${Math.max(1, Number(it.qty) || 1)}`)
     const totalUnits = items.reduce((sum, it) => {
       const m = it.match(/ x(\d+)$/)
       return sum + (m ? parseInt(m[1], 10) : 1)
@@ -815,19 +823,32 @@ function OrdersPanel() {
 
                       {/* Editable items list */}
                       <div>
-                        <p className="mb-2 text-xs font-semibold text-slate-600">Items (format: <code className="text-amber-700">SKU x2</code>)</p>
+                        <p className="mb-2 text-xs font-semibold text-slate-600">Items</p>
                         <ul className="space-y-1">
                           {editDraft.items.map((it, i) => (
                             <li key={i} className="flex items-center gap-2">
                               <input
                                 type="text"
-                                value={it}
+                                value={it.text}
                                 onChange={e => {
                                   const updated = [...editDraft.items]
-                                  updated[i] = e.target.value
+                                  updated[i] = { ...updated[i], text: e.target.value }
                                   setEditDraft(d => ({ ...d, items: updated }))
                                 }}
                                 className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-200"
+                                placeholder="Product name / SKU"
+                              />
+                              <input
+                                type="number"
+                                min="1"
+                                value={it.qty}
+                                onChange={e => {
+                                  const updated = [...editDraft.items]
+                                  updated[i] = { ...updated[i], qty: Math.max(1, parseInt(e.target.value, 10) || 1) }
+                                  setEditDraft(d => ({ ...d, items: updated }))
+                                }}
+                                onFocus={e => e.target.select()}
+                                className="w-16 shrink-0 rounded-lg border border-slate-200 px-2 py-1.5 text-center text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-200"
                               />
                               <button
                                 type="button"
@@ -839,7 +860,7 @@ function OrdersPanel() {
                         </ul>
                         <button
                           type="button"
-                          onClick={() => setEditDraft(d => ({ ...d, items: [...d.items, ''] }))}
+                          onClick={() => setEditDraft(d => ({ ...d, items: [...d.items, { text: '', qty: 1 }] }))}
                           className="mt-2 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs text-slate-500 hover:bg-slate-50"
                         >+ Add Item</button>
                       </div>
