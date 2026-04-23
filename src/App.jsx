@@ -10135,7 +10135,7 @@ const B2B_SIDEBAR_GROUPS = [
   },
 ]
 
-function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated = false }) {
+function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated = false, isDistributorOverride = false }) {
   // Tier 1 / Professional (local-regional): -63% from B2B price (pay 37%).
   // Tier 2 / Authority (national): -78% from B2B price (pay 22%).
   // Level 2 Country Tier: Authority price + 20% (0.22 × 1.20 = 0.264).
@@ -16482,7 +16482,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
 
       <div className="space-y-4">
         {activeModule === 'products' || activeModule === 'catalog' || activeModule === 'profile' ? (
-          <ProductsModule moduleView={activeModule} tier={effectiveTier} pricesAllocated={effectivePricesAllocated} />
+          <ProductsModule moduleView={activeModule} tier={effectiveTier} pricesAllocated={effectivePricesAllocated} isDistributorOverride={isDistributorOverride} />
         ) : activeModule === 'orders' ? (
           <OrdersModule />
         ) : activeModule === 'support' ? (
