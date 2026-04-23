@@ -5136,10 +5136,15 @@ function FullCataloguePage() {
                           <p className="break-words text-[11px] font-light text-black/55">{itemCode}{rowPrice != null && <span className="ml-2 font-bold text-fuchsia-700">€{Number(rowPrice).toFixed(2)}</span>}</p>
                         </div>
                         {inCart && <span className="rounded-md bg-fuchsia-100 px-1.5 py-0.5 text-[10px] font-semibold text-fuchsia-700">{quickCart[itemKey]} {T ? T.catalogue.in_basket : 'in basket'}</span>}
-                        <button onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>-</button>
-                        <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className={`h-7 w-10 rounded-[10px] border text-center text-xs ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/20 text-black/70'}`} />
-                        <button onClick={() => updateQty(itemKey, qty + 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>+</button>
-                        <button onClick={() => addQuickItem(itemKey)} className={`rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition duration-300 ${pulseItemKey === itemKey ? 'lux-pulse bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`}>{T ? T.catalogue.add_to_cart : 'Add'}</button>
+                        <button tabIndex={-1} onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>-</button>
+                        <input
+                          value={qty}
+                          onChange={(event) => updateQty(itemKey, event.target.value)}
+                          onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); addQuickItem(itemKey) } }}
+                          className={`h-7 w-10 rounded-[10px] border text-center text-xs ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/20 text-black/70'}`}
+                        />
+                        <button tabIndex={-1} onClick={() => updateQty(itemKey, qty + 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>+</button>
+                        <button tabIndex={-1} onClick={() => addQuickItem(itemKey)} className={`rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition duration-300 ${pulseItemKey === itemKey ? 'lux-pulse bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`}>{T ? T.catalogue.add_to_cart : 'Add'}</button>
                       </div>
                     )
                   }
@@ -5172,9 +5177,21 @@ function FullCataloguePage() {
                         </p>
                         <div className="mt-auto pt-3">
                           <div className="flex items-center gap-2">
-                            <button onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
-                            <span className={`w-8 text-center text-xs font-bold ${inCart ? 'text-fuchsia-700' : 'text-black/40'}`}>{quickCart[itemKey] || 0}</span>
-                            <button onClick={() => { addQuickItem(itemKey); }} className="flex h-8 w-8 items-center justify-center rounded-[10px] border border-fuchsia-600 text-sm text-fuchsia-600 transition duration-300 hover:bg-fuchsia-50">+</button>
+                            <button tabIndex={-1} onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
+                            <input
+                              type="number"
+                              min="0"
+                              value={quickCart[itemKey] || ''}
+                              placeholder="0"
+                              onChange={(event) => {
+                                const v = parseInt(event.target.value, 10)
+                                if (!isNaN(v) && v > 0) setQuickCart(c => ({ ...c, [itemKey]: v }))
+                                else setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n })
+                              }}
+                              onFocus={(e) => e.target.select()}
+                              className={`h-8 w-10 rounded-[10px] border text-center text-xs font-bold outline-none ring-fuchsia-500/20 transition focus:ring ${inCart ? 'border-fuchsia-600 text-fuchsia-700' : 'border-black/20 text-black/40'}`}
+                            />
+                            <button tabIndex={-1} onClick={() => { addQuickItem(itemKey); }} className="flex h-8 w-8 items-center justify-center rounded-[10px] border border-fuchsia-600 text-sm text-fuchsia-600 transition duration-300 hover:bg-fuchsia-50">+</button>
                             {inCart && <span className="ml-auto text-[10px] font-semibold text-fuchsia-700">{T ? T.catalogue.in_basket : 'in basket'}</span>}
                           </div>
                         </div>
@@ -5605,9 +5622,21 @@ function FullCataloguePage() {
                                 <p className="mt-1.5 text-xs font-bold text-fuchsia-700">{price != null ? `€${Number(price).toFixed(2)}` : (T ? T.catalogue.price_on_request : 'Price on request')}</p>
                                 <div className="mt-auto pt-3">
                                   <div className="flex items-center gap-2">
-                                    <button onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
-                                    <span className={`w-8 text-center text-xs font-bold ${inCart ? 'text-fuchsia-700' : 'text-black/40'}`}>{quickCart[itemKey] || 0}</span>
-                                    <button onClick={() => addQuickItem(itemKey)} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border border-fuchsia-600 text-sm text-fuchsia-600 transition duration-300 hover:bg-fuchsia-50 ${pulseItemKey === itemKey ? 'lux-pulse' : ''}`}>+</button>
+                                    <button tabIndex={-1} onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      value={quickCart[itemKey] || ''}
+                                      placeholder="0"
+                                      onChange={(event) => {
+                                        const v = parseInt(event.target.value, 10)
+                                        if (!isNaN(v) && v > 0) setQuickCart(c => ({ ...c, [itemKey]: v }))
+                                        else setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n })
+                                      }}
+                                      onFocus={(e) => e.target.select()}
+                                      className={`h-8 w-10 rounded-[10px] border text-center text-xs font-bold outline-none ring-fuchsia-500/20 transition focus:ring ${inCart ? 'border-fuchsia-600 text-fuchsia-700' : 'border-black/20 text-black/40'}`}
+                                    />
+                                    <button tabIndex={-1} onClick={() => addQuickItem(itemKey)} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border border-fuchsia-600 text-sm text-fuchsia-600 transition duration-300 hover:bg-fuchsia-50 ${pulseItemKey === itemKey ? 'lux-pulse' : ''}`}>+</button>
                                     {inCart && <span className="ml-auto text-[10px] font-semibold text-fuchsia-700">{T ? T.catalogue.in_basket : 'in basket'}</span>}
                                   </div>
                                 </div>
