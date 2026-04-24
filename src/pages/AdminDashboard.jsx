@@ -77,6 +77,50 @@ function parseComments(raw) {
   return [{ text: raw, timestamp: null, author: null }]
 }
 
+function extractTaggedValue(notesValue, tagName) {
+  const notes = String(notesValue || '')
+  const match = notes.match(new RegExp(`\\[${tagName}:([^\\]]+)\\]`, 'i'))
+  return String(match?.[1] || '').trim().toLowerCase()
+}
+
+function getResolvedApplicationType(row) {
+  const explicit = String(row?.application_type || '').trim().toLowerCase()
+  const tagged = extractTaggedValue(row?.notes, 'APPLICATION_TYPE')
+  if (tagged === 'distributor' || tagged === 'b2b_order') return tagged
+  if (explicit === 'distributor' || explicit === 'b2b_order') return explicit
+  return 'b2b_order'
+}
+
+function getDistributorAccessSummary(row) {
+  const resolvedType = getResolvedApplicationType(row)
+  if (resolvedType !== 'distributor') {
+    return { ok: false, label: 'Not a distributor record', tone: 'text-slate-600' }
+  }
+  if (String(row?.status || '').trim().toLowerCase() !== 'approved') {
+    return { ok: false, label: 'Pending approval', tone: 'text-amber-700' }
+  }
+  if (!row?.distributor_tier) {
+    return { ok: false, label: 'Tier not assigned', tone: 'text-amber-700' }
+  }
+  if (!row?.prices_allocated) {
+    return { ok: false, label: 'Tier pricing not allocated', tone: 'text-amber-700' }
+  }
+  return { ok: true, label: 'Distributor access enabled', tone: 'text-emerald-700' }
+}
+
+function titleCaseTierLabel(tier) {
+  if (!tier) return 'Not assigned'
+  if (tier === 'country') return 'Level 2 Country'
+  return tier.charAt(0).toUpperCase() + tier.slice(1)
+}
+
+function ensureApplicationTypeTag(notesValue, typeValue) {
+  const notes = String(notesValue || '')
+  const cleaned = notes.replace(/\[APPLICATION_TYPE:[^\]]+\]/gi, '').trim()
+  const prefix = cleaned ? `${cleaned}\n` : ''
+  return `${prefix}[APPLICATION_TYPE:${typeValue}]`
+}
+
 function RegistrationsPanel() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
@@ -112,18 +156,21 @@ function RegistrationsPanel() {
 
   useEffect(() => { load() }, [load])
 
-  const updateStatus = async (id, status) => {
-    setSaving(id)
+  const updateStatus = async (row, status) => {
+    const current = String(row?.status || '').toLowerCase()
+    if (current === status) return
+    const ok = window.confirm(`Are you sure you want to change status for "${row.company_name}" from ${current || 'unknown'} to ${status}?`)
+    if (!ok) return
+    setSaving(row.id)
     const { error: err } = await supabase
       .from(REGISTRATIONS_TABLE)
       .update({ status, reviewed_at: new Date().toISOString() })
-      .eq('id', id)
+      .eq('id', row.id)
     setSaving(null)
     if (err) { alert(err.message); return }
-    setRows(prev => prev.map(r => r.id === id ? { ...r, status } : r))
+    setRows(prev => prev.map(r => r.id === row.id ? { ...r, status } : r))
 
     // Send notification email
-    const row = rows.find(r => r.id === id)
     if (row?.contact_email && EMAIL_WEBHOOK_URL) {
       const subject = status === 'approved'
         ? `🎉 You're Approved — Welcome to GEL.IT.UP, ${row.contact_name}!`
@@ -184,7 +231,7 @@ function RegistrationsPanel() {
 </table>
 </body></html>`
         : `<p>Hi ${row.contact_name},</p><p>Thank you for applying to become a GEL.IT.UP distributor. Unfortunately your application has not been approved at this time.</p><p>If you have any questions please contact us at distribution@gelitup.com.</p>`
-      setEmailStatus(prev => ({ ...prev, [id]: { state: 'sending', message: '' } }))
+      setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sending', message: '' } }))
       const emailHeaders = { 'Content-Type': 'application/json' }
       if (SUPABASE_ANON_KEY) {
         emailHeaders['apikey'] = SUPABASE_ANON_KEY
@@ -198,16 +245,16 @@ function RegistrationsPanel() {
         })
         const resJson = await res.json().catch(() => null)
         if (res.ok) {
-          setEmailStatus(prev => ({ ...prev, [id]: { state: 'sent', message: `Email sent to ${row.contact_email}` } }))
+          setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sent', message: `Email sent to ${row.contact_email}` } }))
         } else {
           const errMsg = resJson?.error || `HTTP ${res.status}`
-          setEmailStatus(prev => ({ ...prev, [id]: { state: 'error', message: errMsg } }))
+          setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: errMsg } }))
         }
       } catch (emailErr) {
-        setEmailStatus(prev => ({ ...prev, [id]: { state: 'error', message: emailErr.message || 'Network error' } }))
+        setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: emailErr.message || 'Network error' } }))
       }
     } else if (row?.contact_email && !EMAIL_WEBHOOK_URL) {
-      setEmailStatus(prev => ({ ...prev, [id]: { state: 'error', message: 'VITE_EMAIL_WEBHOOK_URL is not configured — email not sent.' } }))
+      setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: 'VITE_EMAIL_WEBHOOK_URL is not configured — email not sent.' } }))
     }
   }
 
@@ -293,14 +340,73 @@ function RegistrationsPanel() {
   }
 
   const updateTier = async (row, newTier) => {
+    if ((row.distributor_tier || '') === (newTier || '')) return
+    const currentTierLabel = titleCaseTierLabel(row.distributor_tier || '')
+    const nextTierLabel = titleCaseTierLabel(newTier || '')
+    const ok = window.confirm(
+      `Are you sure you want to change ${row.company_name} tier from "${currentTierLabel}" to "${nextTierLabel}"?\n\n` +
+      (newTier
+        ? 'This will also set the client as Approved Distributor, enable login-ready tier pricing, and send a confirmation email.'
+        : 'This will remove distributor tier assignment.')
+    )
+    if (!ok) return
+
+    const patch = {
+      distributor_tier: newTier || null,
+      reviewed_at: new Date().toISOString(),
+    }
+
+    if (newTier) {
+      patch.application_type = 'distributor'
+      patch.status = 'approved'
+      patch.prices_allocated = true
+      patch.notes = ensureApplicationTypeTag(row.notes, 'distributor')
+    }
+
     setSaving(row.id)
     const { error: err } = await supabase
       .from(REGISTRATIONS_TABLE)
-      .update({ distributor_tier: newTier || null })
+      .update(patch)
       .eq('id', row.id)
     setSaving(null)
     if (err) { alert(err.message); return }
-    setRows(prev => prev.map(r => r.id === row.id ? { ...r, distributor_tier: newTier || null } : r))
+
+    const updatedRow = {
+      ...row,
+      distributor_tier: newTier || null,
+      ...(newTier ? { application_type: 'distributor', status: 'approved', prices_allocated: true, notes: patch.notes } : {}),
+    }
+    setRows(prev => prev.map(r => r.id === row.id ? updatedRow : r))
+
+    if (newTier && row?.contact_email && EMAIL_WEBHOOK_URL) {
+      const subject = 'Your Distributor Tier Is Active - Portal Login Ready'
+      const portalLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(row.contact_email || '')}`
+      const html = `<p>Dear ${row.contact_name},</p><p>Your account for <strong>${row.company_name}</strong> has been confirmed as a <strong>Distributor</strong>.</p><p>Your assigned tier: <strong>${nextTierLabel}</strong>.</p><p>You can now log in and view distributor pricing in your portal.</p><p><a href="${portalLink}" style="background:#7c3aed;color:#fff;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:700;display:inline-block;">Log In To Distributor Portal</a></p><p>If you have questions, contact us at distribution@gelitup.com.</p><p>The GEL.IT.UP Distribution Team</p>`
+      setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sending', message: '' } }))
+      const emailHeaders = { 'Content-Type': 'application/json' }
+      if (SUPABASE_ANON_KEY) {
+        emailHeaders['apikey'] = SUPABASE_ANON_KEY
+        emailHeaders['Authorization'] = `Bearer ${SUPABASE_ANON_KEY}`
+      }
+      try {
+        const res = await fetch(EMAIL_WEBHOOK_URL, {
+          method: 'POST',
+          headers: emailHeaders,
+          body: JSON.stringify({ to: row.contact_email, subject, html, from: FROM_EMAIL }),
+        })
+        const resJson = await res.json().catch(() => null)
+        if (res.ok) {
+          setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sent', message: `Distributor access email sent to ${row.contact_email}` } }))
+        } else {
+          const errMsg = resJson?.error || `HTTP ${res.status}`
+          setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: errMsg } }))
+        }
+      } catch (emailErr) {
+        setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: emailErr.message || 'Network error' } }))
+      }
+    } else if (newTier && row?.contact_email && !EMAIL_WEBHOOK_URL) {
+      setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: 'VITE_EMAIL_WEBHOOK_URL is not configured — distributor email not sent.' } }))
+    }
   }
 
   const FILTERS = ['pending', 'approved', 'rejected', 'all']
@@ -346,7 +452,10 @@ function RegistrationsPanel() {
       )}
 
       <ul className="space-y-2">
-        {rows.map(row => (
+        {rows.map(row => {
+          const resolvedType = getResolvedApplicationType(row)
+          const access = getDistributorAccessSummary(row)
+          return (
           <li key={row.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
             <button
               type="button"
@@ -371,7 +480,13 @@ function RegistrationsPanel() {
                   <div><span className="font-semibold text-slate-400">Phone</span><br />{row.phone || '—'}</div>
                   <div><span className="font-semibold text-slate-400">VAT</span><br />{row.vat_number || '—'}</div>
                   <div><span className="font-semibold text-slate-400">Business Type</span><br />{row.business_type || '—'}</div>
-                  <div><span className="font-semibold text-slate-400">Application Type</span><br />{row.application_type || '—'}</div>
+                  <div>
+                    <span className="font-semibold text-slate-400">Application Type</span><br />
+                    <span className="font-semibold capitalize">{resolvedType === 'b2b_order' ? 'B2B Client' : resolvedType}</span>
+                    {resolvedType !== String(row.application_type || '').toLowerCase() && (
+                      <span className="ml-1 text-[11px] text-amber-700">(resolved from notes tag)</span>
+                    )}
+                  </div>
                   <div>
                     <span className="font-semibold text-slate-400">Distributor Tier</span><br />
                     <div className="mt-1 flex items-center gap-2">
@@ -398,6 +513,10 @@ function RegistrationsPanel() {
                       </select>
                     </div>
                   </div>
+                  <div>
+                    <span className="font-semibold text-slate-400">Distributor Access</span><br />
+                    <span className={`font-semibold ${access.tone}`}>{access.label}</span>
+                  </div>
                   <div className="sm:col-span-2">
                     <span className="font-semibold text-slate-400">Address</span><br />
                     {[row.address, row.city, row.postal_code, row.country].filter(Boolean).join(', ') || '—'}
@@ -419,7 +538,7 @@ function RegistrationsPanel() {
                 <div className="flex flex-wrap gap-2">
                   {row.status !== 'approved' && (
                     <button
-                      onClick={() => updateStatus(row.id, 'approved')}
+                      onClick={() => updateStatus(row, 'approved')}
                       disabled={saving === row.id}
                       className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
                     >
@@ -428,7 +547,7 @@ function RegistrationsPanel() {
                   )}
                   {row.status !== 'rejected' && (
                     <button
-                      onClick={() => updateStatus(row.id, 'rejected')}
+                      onClick={() => updateStatus(row, 'rejected')}
                       disabled={saving === row.id}
                       className="rounded-lg bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
                     >
@@ -437,7 +556,7 @@ function RegistrationsPanel() {
                   )}
                   {row.status !== 'pending' && (
                     <button
-                      onClick={() => updateStatus(row.id, 'pending')}
+                      onClick={() => updateStatus(row, 'pending')}
                       disabled={saving === row.id}
                       className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
                     >
@@ -453,7 +572,7 @@ function RegistrationsPanel() {
                       {emailStatus[row.id]?.state === 'sending' ? '📨 Sending…' : '📧 Resend Approval Email'}
                     </button>
                   )}
-                  {row.application_type === 'distributor' && (
+                  {resolvedType === 'distributor' && (
                     <button
                       onClick={() => convertToB2B(row)}
                       disabled={saving === row.id}
@@ -465,7 +584,7 @@ function RegistrationsPanel() {
                 </div>
 
                 {/* Prices visibility toggle — approved distributors only */}
-                {row.status === 'approved' && row.application_type === 'distributor' && (
+                {row.status === 'approved' && resolvedType === 'distributor' && (
                   <div className={`flex items-center justify-between rounded-xl border px-4 py-3 ${row.prices_allocated ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}>
                     <div>
                       <p className={`text-xs font-semibold ${row.prices_allocated ? 'text-emerald-700' : 'text-amber-700'}`}>
@@ -547,7 +666,7 @@ function RegistrationsPanel() {
               </div>
             )}
           </li>
-        ))}
+        )})}
       </ul>
     </div>
   )
