@@ -1095,7 +1095,7 @@ const HERO_PRODUCT_COPY = [
   },
 ]
 
-const PACKAGE_TIER_OPTIONS = ['Silver', 'Gold', 'Platinum', 'Professional']
+const PACKAGE_TIER_OPTIONS = ['Silver', 'Gold', 'Platinum', 'Professional', 'Authority']
 const DEFAULT_PACKAGE_ITEM_QTY = 1
 const PACKAGE_TECH_ESSENTIALS = [
   { sku: 'SUPERBOND', code: 'SUPERBOND', name: 'Superbond Acid-Free Primer', category: 'Technical', group: 'Essentials' },
@@ -10386,11 +10386,12 @@ const B2B_SIDEBAR_GROUPS = [
 ]
 
 function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated = false, isDistributorOverride = false }) {
-  // Tier 1 / Professional (local-regional): -63% from B2B price (pay 37%).
-  // Tier 2 / Authority (national): -78% from B2B price (pay 22%).
-  // Level 2 Country Tier: Authority price + 20% (0.22 × 1.20 = 0.264).
-  // Sales Representative: B2B price - 15% (pay 85%).
-  const tierPriceMultiplier = tier === 'authority' ? 0.22 : tier === 'professional' ? 0.37 : tier === 'country' ? 0.264 : tier === 'sales' ? 0.85 : 1.0
+  const normalizedTier = String(tier || '').trim().toLowerCase()
+  const enforcedTier = normalizedTier === 'authority' || normalizedTier === 'professional'
+    ? normalizedTier
+    : null
+  // Only explicitly assigned Professional/Authority tiers receive tier pricing.
+  const tierPriceMultiplier = enforcedTier === 'authority' ? 0.22 : enforcedTier === 'professional' ? 0.37 : 1.0
   const location = useLocation()
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
@@ -10459,9 +10460,21 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [shippingMetadata, setShippingMetadata] = useState(SHIPPING_RULES)
   const [shippingMetadataStatus, setShippingMetadataStatus] = useState('Using embedded shipping metadata rules.')
   const isDistributorRole = useMemo(() => isDistributorOverride || String(b2bUserRole || '').trim().toLowerCase().includes('distributor'), [isDistributorOverride, b2bUserRole])
+  const allowedPackageTierOptions = useMemo(() => {
+    if (!isDistributorRole) return PACKAGE_TIER_OPTIONS
+    if (enforcedTier === 'professional') return ['Professional']
+    if (enforcedTier === 'authority') return ['Authority']
+    return PACKAGE_TIER_OPTIONS
+  }, [enforcedTier, isDistributorRole])
   const productsTable = import.meta.env.VITE_B2B_PRODUCTS_TABLE || DEFAULT_PRODUCTS_TABLE
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
+
+  useEffect(() => {
+    if (!allowedPackageTierOptions.includes(packageTier)) {
+      setPackageTier(allowedPackageTierOptions[0])
+    }
+  }, [allowedPackageTierOptions, packageTier])
 
   useEffect(() => {
     localStorage.setItem(CLIENT_PROFILE_STORAGE_KEY, JSON.stringify(clientProfile))
@@ -12386,6 +12399,12 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       return
     }
 
+    if (!allowedPackageTierOptions.includes(packageTier)) {
+      setCheckoutError('This account can generate only its assigned tier package.')
+      setCheckoutMessage('')
+      return
+    }
+
     const generatedColorItems = buildTierPackageItems(packageTier, podCatalog, DEFAULT_PACKAGE_ITEM_QTY)
     const generatedTechItems = buildTierTechnicalItems(packageTier)
     const generatedItems = [...generatedColorItems, ...generatedTechItems]
@@ -13963,7 +13982,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       )}
 
       {/* Distributor tier identity banner */}
-      {tier === 'authority' && (
+      {enforcedTier === 'authority' && (
         <div className="rounded-2xl border border-fuchsia-400 bg-gradient-to-r from-[#1a1a1a] to-[#3d0f22] p-4 text-white">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -13977,21 +13996,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           <p className="mt-2 text-xs leading-relaxed opacity-80">You hold exclusive country-level distribution rights for GEL.IT.UP products. Access the full wholesale catalogue, place orders for your entire country territory, and manage your exclusive distribution agreement below.</p>
         </div>
       )}
-      {tier === 'country' && (
-        <div className="rounded-2xl border border-sky-400 bg-gradient-to-r from-sky-700 to-indigo-700 p-4 text-white">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Level 2 Country Tier</p>
-              <p className="mt-0.5 text-base font-bold">Level 2 Country Tier Portal</p>
-            </div>
-            {!pricesAllocated && (
-              <span className="rounded-lg bg-white/20 px-3 py-1 text-xs font-semibold">Pricing pending allocation</span>
-            )}
-          </div>
-          <p className="mt-2 text-xs leading-relaxed opacity-80">You are an approved Level 2 Country Tier distributor of GEL.IT.UP products. Browse the wholesale catalogue at your country tier pricing and place orders below.</p>
-        </div>
-      )}
-      {tier === 'professional' && (
+      {enforcedTier === 'professional' && (
         <div className="rounded-2xl border border-fuchsia-300 bg-gradient-to-r from-fuchsia-600 to-pink-600 p-4 text-white">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -14037,12 +14042,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className={`text-sm font-semibold ${
-            tier === 'authority' ? 'text-fuchsia-700' :
-            tier === 'country' ? 'bg-gradient-to-r from-sky-600 to-indigo-600 bg-clip-text text-transparent' :
-            tier === 'professional' ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent' :
+            enforcedTier === 'authority' ? 'text-fuchsia-700' :
+            enforcedTier === 'professional' ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent' :
             'bg-gradient-to-r from-fuchsia-600 to-fuchsia-800 bg-clip-text text-transparent'
           }`}>
-            {tier === 'authority' ? '★ Authority Distributor Portal' : tier === 'professional' ? 'Professional Distributor Portal' : tier === 'country' ? 'Level 2 Country Tier Portal' : tier === 'sales' ? 'Sales Representative Portal' : 'Distributor Portal'}
+            {enforcedTier === 'authority' ? '★ Authority Distributor Portal' : enforcedTier === 'professional' ? 'Professional Distributor Portal' : 'Distributor Portal'}
           </p>
           <div className="flex items-center gap-2 text-xs text-slate-500">
             {selectedLineItems > 0 && <span className="text-[10px] text-emerald-600 font-medium">✓ Draft auto-saved</span>}
@@ -14453,7 +14457,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
               onChange={(event) => setPackageTier(event.target.value)}
               className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700"
             >
-              {PACKAGE_TIER_OPTIONS.map((tier) => (
+              {allowedPackageTierOptions.map((tier) => (
                 <option key={tier} value={tier}>{tier} Tier</option>
               ))}
             </select>
@@ -15469,7 +15473,17 @@ function PendingApplicationsModule() {
       shippingStatus: String(application.order_shipping_status || (isDistributorSubmission(application) ? '' : 'not_ready')),
       trackingNumber: String(application.tracking_number || ''),
       trackingUrl: String(application.tracking_url || ''),
+      distributorTier: String(application.distributor_tier || ''),
+      pricesAllocated: Boolean(application.prices_allocated),
     }
+  }
+
+  const formatTierLabel = (tierValue) => {
+    const normalized = String(tierValue || '').trim().toLowerCase()
+    if (normalized === 'professional') return 'Professional'
+    if (normalized === 'authority') return 'Authority'
+    if (!normalized) return 'Not set'
+    return normalized
   }
 
   const setActionDraftField = (applicationId, fieldName, value) => {
@@ -15520,6 +15534,85 @@ function PendingApplicationsModule() {
     }
 
     setSuccessMessage(`Workflow details saved for #${application.id}.`)
+    setIsSavingId(null)
+    await loadPendingApplications()
+  }
+
+  const saveTierAllocation = async (application) => {
+    if (!hasSupabaseConfig || !supabase) {
+      setErrorMessage('Supabase is not configured.')
+      return
+    }
+
+    if (!isDistributorSubmission(application)) {
+      setErrorMessage('Tier allocation can be updated only for distributor applications.')
+      return
+    }
+
+    const draft = getActionDraft(application)
+    const nextTier = String(draft.distributorTier || '').trim().toLowerCase()
+    const nextPricesAllocated = Boolean(draft.pricesAllocated)
+
+    if (nextTier && nextTier !== 'professional' && nextTier !== 'authority') {
+      setErrorMessage('Only Professional or Authority tier is allowed.')
+      return
+    }
+
+    setIsSavingId(application.id)
+    setErrorMessage('')
+    setSuccessMessage('')
+
+    const { data: userData } = await supabase.auth.getUser()
+    const reviewerEmail = userData?.user?.email ?? null
+
+    const previousTier = String(application.distributor_tier || '').trim().toLowerCase()
+    const previousPricesAllocated = Boolean(application.prices_allocated)
+    const changed = previousTier !== nextTier || previousPricesAllocated !== nextPricesAllocated
+
+    const { error } = await supabase
+      .from(registrationsTable)
+      .update({
+        distributor_tier: nextTier || null,
+        prices_allocated: nextPricesAllocated,
+        action_updated_at: new Date().toISOString(),
+        action_updated_by: reviewerEmail,
+      })
+      .eq('id', application.id)
+
+    if (error) {
+      setErrorMessage(error.message)
+      setIsSavingId(null)
+      return
+    }
+
+    let notificationText = 'No tier change detected.'
+    if (changed && application.contact_email) {
+      const portalLink = `${window.location.origin}/portal/login?portal=distributor&email=${encodeURIComponent(application.contact_email)}`
+      const tierLabel = formatTierLabel(nextTier)
+      const allocationLabel = nextPricesAllocated ? 'Enabled' : 'Disabled'
+
+      const notificationResult = await sendPortalEmailNotification({
+        eventType: 'tier_allocation_updated',
+        to: application.contact_email,
+        subject: `Your GEL.IT.UP distributor access has been updated`,
+        html: `<p>Hello ${application.contact_name || 'Partner'},</p>
+<p>Your distributor account settings were updated by the GEL.IT.UP team.</p>
+<p><strong>Tier:</strong> ${tierLabel}<br/>
+<strong>Tier pricing access:</strong> ${allocationLabel}</p>
+<p>You can sign in here: <a href="${portalLink}">${portalLink}</a></p>
+<p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`,
+        applicationId: application.id,
+        companyName: application.company_name,
+        contactName: application.contact_name,
+        status: application.status,
+      })
+
+      if (notificationResult.ok) notificationText = 'Customer notification sent.'
+      else if (notificationResult.skipped) notificationText = 'Email webhook not configured.'
+      else notificationText = `Notification failed: ${notificationResult.message}`
+    }
+
+    setSuccessMessage(`Tier allocation saved for #${application.id}. ${notificationText}`)
     setIsSavingId(null)
     await loadPendingApplications()
   }
@@ -15955,6 +16048,7 @@ function PendingApplicationsModule() {
                   <th className="py-2 pr-4">Created</th>
                   <th className="py-2 pr-4">Type</th>
                   <th className="py-2 pr-4">Status</th>
+                  <th className="py-2 pr-4">Tier Access</th>
                   <th className="py-2 pr-4">Company</th>
                   <th className="py-2 pr-4">Contact</th>
                   <th className="py-2 pr-4">Business</th>
@@ -15983,6 +16077,12 @@ function PendingApplicationsModule() {
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${getStatusBadgeClass(application.status)}`}>
                         {application.status || '-'}
                       </span>
+                    </td>
+                    <td className="py-2 pr-4">
+                      <div className="text-xs font-semibold text-slate-800">Tier: {formatTierLabel(application.distributor_tier)}</div>
+                      <div className={`text-xs ${application.prices_allocated ? 'text-emerald-700' : 'text-amber-700'}`}>
+                        Pricing: {application.prices_allocated ? 'Allocated' : 'Not allocated'}
+                      </div>
                     </td>
                     <td className="py-2 pr-4">{application.company_name}</td>
                     <td className="py-2 pr-4">
@@ -16104,6 +16204,42 @@ function PendingApplicationsModule() {
                           </>
                         )}
 
+                        {isDistributor && (
+                          <>
+                            <label className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                              Distributor Tier
+                              <select
+                                value={draft.distributorTier}
+                                onChange={(event) => setActionDraftField(application.id, 'distributorTier', event.target.value)}
+                                className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-xs"
+                              >
+                                <option value="">Not set</option>
+                                <option value="professional">Professional</option>
+                                <option value="authority">Authority</option>
+                              </select>
+                            </label>
+
+                            <label className="flex items-center gap-2 text-[11px] font-semibold text-slate-700">
+                              <input
+                                type="checkbox"
+                                checked={Boolean(draft.pricesAllocated)}
+                                onChange={(event) => setActionDraftField(application.id, 'pricesAllocated', event.target.checked)}
+                              />
+                              Tier prices allocated to this account
+                            </label>
+
+                            <button
+                              onClick={() => {
+                                void saveTierAllocation(application)
+                              }}
+                              disabled={isSavingId === application.id}
+                              className="rounded-md bg-fuchsia-700 px-2 py-1 text-xs font-semibold text-white disabled:opacity-60"
+                            >
+                              {isSavingId === application.id ? 'Saving...' : 'Save tier allocation'}
+                            </button>
+                          </>
+                        )}
+
                         <button
                           onClick={() => {
                             void saveWorkflowAction(application)
@@ -16219,6 +16355,7 @@ function PendingApplicationsModule() {
                   <th className="py-2 pr-4">ID</th>
                   <th className="py-2 pr-4">Status</th>
                   <th className="py-2 pr-4">Type</th>
+                  <th className="py-2 pr-4">Tier Access</th>
                   <th className="py-2 pr-4">Reviewed</th>
                   <th className="py-2 pr-4">Company</th>
                   <th className="py-2 pr-4">Contact</th>
@@ -16245,6 +16382,12 @@ function PendingApplicationsModule() {
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${isDistributor ? 'bg-fuchsia-100 text-fuchsia-800' : 'bg-sky-100 text-sky-800'}`}>
                         {isDistributor ? 'Distributor' : 'B2B Order'}
                       </span>
+                    </td>
+                    <td className="py-2 pr-4">
+                      <div className="text-xs font-semibold text-slate-800">Tier: {formatTierLabel(application.distributor_tier)}</div>
+                      <div className={`text-xs ${application.prices_allocated ? 'text-emerald-700' : 'text-amber-700'}`}>
+                        Pricing: {application.prices_allocated ? 'Allocated' : 'Not allocated'}
+                      </div>
                     </td>
                     <td className="py-2 pr-4">
                       <div>{application.reviewed_at ? new Date(application.reviewed_at).toLocaleString() : '-'}</div>
@@ -16946,11 +17089,16 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     }
   }, [activeModule, ordersTable])
 
-  // Prefer live registration data (always fresh) over stale user_metadata
-  const effectiveTier = tierOverride
+  // Prefer live registration data (always fresh) over stale user_metadata,
+  // but allow pricing tiers only for explicitly assigned professional/authority.
+  const rawTier = tierOverride
     ?? liveRegistration?.distributor_tier
     ?? portalUser?.user_metadata?.distributor_tier
     ?? null
+  const effectiveTier = (() => {
+    const normalized = String(rawTier || '').trim().toLowerCase()
+    return normalized === 'professional' || normalized === 'authority' ? normalized : null
+  })()
   // Prices are shown by default. The ONLY case where prices are hidden is when we have a
   // confirmed distributor registration with prices_allocated explicitly set to false.
   // B2B clients, unknown users, and any non-distributor always see prices.
