@@ -15410,7 +15410,7 @@ function PendingApplicationsModule() {
 
     const { data, error } = await supabase
       .from(registrationsTable)
-      .select('id, created_at, customer_type, company_name, vat_number, contact_name, contact_email, phone, shipping_type, country, business_type, status, notes, admin_comment, order_action, order_payment_status, order_shipping_status, tracking_number, tracking_url, action_updated_at, action_updated_by, invoice_address_line1, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_area, shipping_region, shipping_country, shipping_postal_code')
+      .select('id, created_at, customer_type, company_name, vat_number, contact_name, contact_email, phone, shipping_type, country, business_type, status, notes, admin_comment, order_action, order_payment_status, order_shipping_status, tracking_number, tracking_url, action_updated_at, action_updated_by, reviewed_at, reviewed_by, application_type, distributor_tier, prices_allocated, invoice_address_line1, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_area, shipping_region, shipping_country, shipping_postal_code')
       .in('status', ['pending', 'submitted', 'approved', 'rejected'])
       .order('created_at', { ascending: false })
 
@@ -15764,6 +15764,160 @@ function PendingApplicationsModule() {
     await loadPendingApplications()
   }
 
+  const convertApplicationToDistributor = async (application) => {
+    if (isDistributorSubmission(application)) {
+      setErrorMessage('This submission is already in distributor mode.')
+      return
+    }
+
+    const normalizedStatus = String(application?.status || '').trim().toLowerCase()
+    const canConvertStatus = normalizedStatus === 'pending' || normalizedStatus === 'submitted'
+    if (!canConvertStatus) {
+      setErrorMessage('Convert to Distributor is only available for Pending or Submitted rows.')
+      return
+    }
+
+    if (!hasSupabaseConfig || !supabase) {
+      setErrorMessage('Supabase is not configured.')
+      return
+    }
+
+    const shouldConvert = window.confirm(
+      `Convert application #${application.id} (${application.company_name || 'Unknown company'}) to distributor flow?\n\nThis will set the submission type to Distributor and move status to Pending for review.`
+    )
+
+    if (!shouldConvert) return
+
+    setIsSavingId(application.id)
+    setErrorMessage('')
+    setSuccessMessage('')
+
+    const { data: userData } = await supabase.auth.getUser()
+    const reviewerEmail = userData?.user?.email ?? null
+
+    const existingNotes = String(application.notes || '').trim()
+    const tagRegex = /\[APPLICATION_TYPE:[^\]]+\]/i
+    let updatedNotes = existingNotes
+    if (tagRegex.test(existingNotes)) {
+      updatedNotes = existingNotes.replace(tagRegex, '[APPLICATION_TYPE:distributor]')
+    }
+    else {
+      updatedNotes = existingNotes ? `${existingNotes}\n[APPLICATION_TYPE:distributor]` : '[APPLICATION_TYPE:distributor]'
+    }
+
+    const { error } = await supabase
+      .from(registrationsTable)
+      .update({
+        application_type: 'distributor',
+        status: 'pending',
+        distributor_tier: null,
+        prices_allocated: false,
+        order_action: null,
+        order_payment_status: null,
+        order_shipping_status: null,
+        tracking_number: null,
+        tracking_url: null,
+        reviewed_at: null,
+        reviewed_by: null,
+        action_updated_at: new Date().toISOString(),
+        action_updated_by: reviewerEmail,
+        notes: updatedNotes,
+      })
+      .eq('id', application.id)
+
+    if (error) {
+      setErrorMessage(error.message)
+      setIsSavingId(null)
+      return
+    }
+
+    setSuccessMessage(`Application #${application.id} converted to distributor flow and moved to pending review.`)
+    setIsSavingId(null)
+    await loadPendingApplications()
+  }
+
+  const convertAndApproveApplication = async (application) => {
+    if (!hasSupabaseConfig || !supabase) {
+      setErrorMessage('Supabase is not configured.')
+      return
+    }
+
+    if (isDistributorSubmission(application)) {
+      if (String(application.status || '').trim().toLowerCase() === 'approved') {
+        setErrorMessage('This distributor application is already approved.')
+        return
+      }
+
+      await reviewApplication(application, 'approved')
+      return
+    }
+
+    const normalizedStatus = String(application?.status || '').trim().toLowerCase()
+    const canConvertStatus = normalizedStatus === 'pending' || normalizedStatus === 'submitted'
+    if (!canConvertStatus) {
+      setErrorMessage('Convert and Approve is only available for Pending or Submitted rows.')
+      return
+    }
+
+    const shouldConvertAndApprove = window.confirm(
+      `Convert and approve application #${application.id} (${application.company_name || 'Unknown company'})?\n\nThis will switch to Distributor mode and immediately approve access.`
+    )
+
+    if (!shouldConvertAndApprove) return
+
+    setIsSavingId(application.id)
+    setErrorMessage('')
+    setSuccessMessage('')
+
+    const { data: userData } = await supabase.auth.getUser()
+    const reviewerEmail = userData?.user?.email ?? null
+
+    const existingNotes = String(application.notes || '').trim()
+    const tagRegex = /\[APPLICATION_TYPE:[^\]]+\]/i
+    let updatedNotes = existingNotes
+    if (tagRegex.test(existingNotes)) {
+      updatedNotes = existingNotes.replace(tagRegex, '[APPLICATION_TYPE:distributor]')
+    }
+    else {
+      updatedNotes = existingNotes ? `${existingNotes}\n[APPLICATION_TYPE:distributor]` : '[APPLICATION_TYPE:distributor]'
+    }
+
+    const { error } = await supabase
+      .from(registrationsTable)
+      .update({
+        application_type: 'distributor',
+        status: 'pending',
+        distributor_tier: null,
+        prices_allocated: false,
+        order_action: null,
+        order_payment_status: null,
+        order_shipping_status: null,
+        tracking_number: null,
+        tracking_url: null,
+        reviewed_at: null,
+        reviewed_by: null,
+        action_updated_at: new Date().toISOString(),
+        action_updated_by: reviewerEmail,
+        notes: updatedNotes,
+      })
+      .eq('id', application.id)
+
+    if (error) {
+      setErrorMessage(error.message)
+      setIsSavingId(null)
+      return
+    }
+
+    const convertedApplication = {
+      ...application,
+      application_type: 'distributor',
+      status: 'pending',
+      notes: updatedNotes,
+    }
+
+    await reviewApplication(convertedApplication, 'approved')
+  }
+
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
@@ -15813,6 +15967,8 @@ function PendingApplicationsModule() {
               <tbody>
                 {visibleApplications.map((application) => {
                   const isDistributor = isDistributorSubmission(application)
+                  const normalizedStatus = String(application?.status || '').trim().toLowerCase()
+                  const canPromoteToDistributor = !isDistributor && (normalizedStatus === 'pending' || normalizedStatus === 'submitted')
                   const draft = getActionDraft(application)
                   return (
                   <tr key={application.id} className="border-b border-slate-100 text-slate-700">
@@ -15985,6 +16141,28 @@ function PendingApplicationsModule() {
                             </button>
                           </>
                         )}
+                        {canPromoteToDistributor && (
+                          <button
+                            onClick={() => {
+                              void convertApplicationToDistributor(application)
+                            }}
+                            disabled={isSavingId === application.id}
+                            className="rounded-md bg-indigo-600 px-2 py-1 text-xs font-semibold text-white disabled:opacity-60"
+                          >
+                            Convert to Distributor
+                          </button>
+                        )}
+                        {canPromoteToDistributor && (
+                          <button
+                            onClick={() => {
+                              void convertAndApproveApplication(application)
+                            }}
+                            disabled={isSavingId === application.id}
+                            className="rounded-md bg-emerald-700 px-2 py-1 text-xs font-semibold text-white disabled:opacity-60"
+                          >
+                            Convert and Approve
+                          </button>
+                        )}
                         <button
                           onClick={() => {
                             void copyApplicationDetails(application)
@@ -16053,6 +16231,8 @@ function PendingApplicationsModule() {
               <tbody>
                 {reviewedApplications.map((application) => {
                   const isDistributor = isDistributorSubmission(application)
+                  const normalizedStatus = String(application?.status || '').trim().toLowerCase()
+                  const canPromoteToDistributor = !isDistributor && (normalizedStatus === 'pending' || normalizedStatus === 'submitted')
                   return (
                   <tr key={`reviewed-${application.id}`} className="border-b border-slate-100 text-slate-700">
                     <td className="py-2 pr-4 font-semibold">#{application.id}</td>
@@ -16119,6 +16299,28 @@ function PendingApplicationsModule() {
                     </td>
                     <td className="py-2 pr-4">
                       <div className="flex flex-wrap gap-2">
+                        {canPromoteToDistributor && (
+                          <button
+                            onClick={() => {
+                              void convertApplicationToDistributor(application)
+                            }}
+                            disabled={isSavingId === application.id}
+                            className="rounded-md bg-indigo-600 px-2 py-1 text-xs font-semibold text-white disabled:opacity-60"
+                          >
+                            Convert to Distributor
+                          </button>
+                        )}
+                        {canPromoteToDistributor && (
+                          <button
+                            onClick={() => {
+                              void convertAndApproveApplication(application)
+                            }}
+                            disabled={isSavingId === application.id}
+                            className="rounded-md bg-emerald-700 px-2 py-1 text-xs font-semibold text-white disabled:opacity-60"
+                          >
+                            Convert and Approve
+                          </button>
+                        )}
                         <button
                           onClick={() => {
                             void copyApplicationDetails(application)
