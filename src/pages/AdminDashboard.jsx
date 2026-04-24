@@ -143,7 +143,7 @@ function ensureApplicationTypeTag(notesValue, typeValue) {
   return `${prefix}[APPLICATION_TYPE:${typeValue}]`
 }
 
-function RegistrationsPanel() {
+function RegistrationsPanel({ onPreviewDistributor }) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -601,6 +601,19 @@ function RegistrationsPanel() {
                       className="rounded-lg border border-sky-300 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 hover:bg-sky-100 disabled:opacity-50"
                     >
                       ⇄ Convert to B2B Client
+                    </button>
+                  )}
+                  {resolvedType === 'distributor' && typeof onPreviewDistributor === 'function' && (
+                    <button
+                      onClick={() => onPreviewDistributor({
+                        tier: row.distributor_tier || null,
+                        pricesAllocated: Boolean(row.prices_allocated),
+                        email: row.contact_email || '',
+                        companyName: row.company_name || '',
+                      })}
+                      className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 hover:bg-amber-100"
+                    >
+                      👁 Preview This Distributor
                     </button>
                   )}
                   {row.status === 'rejected' && (
@@ -1972,7 +1985,7 @@ function DraftCartsPanel() {
 
 // ─── Admin Dashboard shell ────────────────────────────────────────────────────
 
-export default function AdminDashboard({ onLogout }) {
+export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
   const [tab, setTab] = useState('registrations')
 
   return (
@@ -2033,7 +2046,7 @@ export default function AdminDashboard({ onLogout }) {
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        {tab === 'registrations' && <RegistrationsPanel />}
+        {tab === 'registrations' && <RegistrationsPanel onPreviewDistributor={onPreviewDistributor} />}
         {tab === 'orders' && <OrdersPanel />}
         {tab === 'admins' && <AdminsPanel />}
         {tab === 'pricing' && <TierPricingPanel />}

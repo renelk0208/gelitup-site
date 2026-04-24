@@ -17306,6 +17306,16 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
     setAdminTierPreview(null)
     setAdminPricesAllocated(true)
   }
+  const previewDistributorFromRegistration = ({ tier, pricesAllocated }) => {
+    const normalizedTier = String(tier || '').trim().toLowerCase()
+    const supportedTier = ['professional', 'authority', 'sales', 'country'].includes(normalizedTier)
+      ? normalizedTier
+      : 'professional'
+
+    setAdminPreviewType('distributor')
+    setAdminTierPreview(supportedTier)
+    setAdminPricesAllocated(Boolean(pricesAllocated))
+  }
 
   if (!authReady) {
     return (
@@ -17444,7 +17454,7 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
             />
           : (
             <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#c8386e] border-t-transparent" /></div>}>
-              <AdminDashboard onLogout={onLogout} />
+              <AdminDashboard onLogout={onLogout} onPreviewDistributor={previewDistributorFromRegistration} />
             </Suspense>
           )
         }
