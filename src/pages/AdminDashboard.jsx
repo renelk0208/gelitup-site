@@ -48,6 +48,12 @@ create policy "Admins can update registrations"
   on public.b2b_registrations for update to authenticated
   using (exists (
     select 1 from public.b2b_admins where email = auth.email()
+  ));
+
+create policy "Admins can delete registrations"
+  on public.b2b_registrations for delete to authenticated
+  using (exists (
+    select 1 from public.b2b_admins where email = auth.email()
   ));`
 
 const RLS_HINT_ORDERS = `-- Run once in Supabase SQL Editor:
@@ -256,6 +262,41 @@ function RegistrationsPanel() {
     } else if (row?.contact_email && !EMAIL_WEBHOOK_URL) {
       setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: 'VITE_EMAIL_WEBHOOK_URL is not configured — email not sent.' } }))
     }
+  }
+
+  const deleteRegistration = async (row) => {
+    const normalizedStatus = String(row?.status || '').trim().toLowerCase()
+    if (normalizedStatus !== 'rejected') {
+      alert('Only rejected registrations can be deleted from admin panel.')
+      return
+    }
+
+    const firstConfirm = window.confirm(
+      `Permanently delete rejected registration "${row.company_name || 'Unknown company'}" (${row.contact_email || 'no email'})?\n\nThis cannot be undone.`
+    )
+    if (!firstConfirm) return
+
+    const typed = window.prompt('Type DELETE to confirm permanent removal:')
+    if (typed !== 'DELETE') {
+      alert('Delete cancelled. Confirmation text did not match.')
+      return
+    }
+
+    setSaving(row.id)
+    const { error: err } = await supabase
+      .from(REGISTRATIONS_TABLE)
+      .delete()
+      .eq('id', row.id)
+    setSaving(null)
+    if (err) { alert(err.message); return }
+
+    setRows(prev => prev.filter(r => r.id !== row.id))
+    setExpanded(prev => (prev === row.id ? null : prev))
+    setEmailStatus(prev => {
+      const next = { ...prev }
+      delete next[row.id]
+      return next
+    })
   }
 
   const resendApprovalEmail = async (row) => {
@@ -598,6 +639,15 @@ function RegistrationsPanel() {
                       className="rounded-lg border border-sky-300 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 hover:bg-sky-100 disabled:opacity-50"
                     >
                       ⇄ Convert to B2B Client
+                    </button>
+                  )}
+                  {row.status === 'rejected' && (
+                    <button
+                      onClick={() => deleteRegistration(row)}
+                      disabled={saving === row.id}
+                      className="rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-50"
+                    >
+                      🗑 Delete Rejected Account
                     </button>
                   )}
                 </div>
