@@ -27,6 +27,7 @@ function readBooleanEnvFlag(value, fallbackValue = false) {
 
 const PORTAL_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_PORTAL, false)
 const MIN_ORDER_EUR = 100
+const PROFESSIONAL_MIN_ORDER_EUR = 3000
 const SHIPPING_ZONES = [
   { zone: 2, rateEur: 0, maxKg: 5, countries: ['Austria', 'Germany', 'Hungary'] },
   { zone: 3, rateEur: 0, maxKg: 5, countries: ['Belgium', 'Italy', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'France', 'Croatia', 'Czech Republic'] },
@@ -12938,7 +12939,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       return
     }
 
-    const belowMinimum = orderTotal > 0 && orderTotal < MIN_ORDER_EUR
+    const effectiveMinOrderEur = enforcedTier === 'professional' ? PROFESSIONAL_MIN_ORDER_EUR : MIN_ORDER_EUR
+    const belowMinimum = orderTotal > 0 && orderTotal < effectiveMinOrderEur
 
     if (!hasSupabaseConfig || !supabase) {
       setCheckoutError('Order intake API is not configured. Use Send to Order Inbox.')
@@ -12951,6 +12953,14 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
     if (missingProfileFields.length) {
       const message = `Please complete the required fields before submitting: ${missingProfileFields.join(', ')}.`
+      window.alert(message)
+      setCheckoutError(message)
+      setCheckoutMessage('')
+      return
+    }
+
+    if (enforcedTier === 'professional' && belowMinimum) {
+      const message = `Professional tier orders must be at least €${PROFESSIONAL_MIN_ORDER_EUR.toFixed(2)} NET (excluding VAT and shipping). Current order total: €${orderTotal.toFixed(2)}. This order cannot be processed below €${PROFESSIONAL_MIN_ORDER_EUR.toFixed(2)}. You will be notified once a qualifying order is confirmed by Admin.`
       window.alert(message)
       setCheckoutError(message)
       setCheckoutMessage('')
@@ -13439,7 +13449,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     const emailNote = emailSentOk
       ? ` Confirmation emails sent.`
       : ` ?? Email notifications could not be sent — see details below.`
-    const approvalNote = belowMinimum ? ' Your order is below the €' + MIN_ORDER_EUR.toFixed(2) + ' minimum and requires admin approval before processing.' : ''
+    const approvalNote = belowMinimum ? ' Your order is below the €' + effectiveMinOrderEur.toFixed(2) + ' minimum and requires admin approval before processing.' : ''
     setCheckoutMessage(`Order received (#${insertedOrder?.id ?? '-'} | ${totalUnits} units). Order stored successfully.${approvalNote}${emailNote}${zohoStatusNote}`)
     setSelectedCodes([])
     setItemQtys({})
@@ -13719,26 +13729,31 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           {(() => {
             const _dest = (clientProfile.shippingCountry || clientProfile.invoiceCountry || '').trim()
             const _zone = _dest ? SHIPPING_ZONES.find((z) => z.countries.includes(_dest)) : null
-            const _belowMin = orderTotal > 0 && orderTotal < MIN_ORDER_EUR
+            const _effectiveMin = enforcedTier === 'professional' ? PROFESSIONAL_MIN_ORDER_EUR : MIN_ORDER_EUR
+            const _belowMin = orderTotal > 0 && orderTotal < _effectiveMin
             return (
               <div className={`mt-4 rounded-xl border p-3 ${_belowMin ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-slate-50'}`}>
                 {_belowMin && (
                   <div className="mb-2 flex items-center gap-2 rounded-lg border border-amber-400 bg-amber-100 px-3 py-2">
                     <svg className="h-4 w-4 flex-none text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
-                    <p className="text-xs font-semibold text-amber-800">Orders below €{MIN_ORDER_EUR.toFixed(2)} NET require admin approval. Your order (€{orderTotal.toFixed(2)}) will be submitted for review.</p>
+                    {enforcedTier === 'professional'
+                      ? <p className="text-xs font-semibold text-amber-800">Professional tier orders must be at least €{_effectiveMin.toFixed(2)} NET (excluding VAT and shipping). Orders below this threshold cannot be processed.</p>
+                      : <p className="text-xs font-semibold text-amber-800">Orders below €{_effectiveMin.toFixed(2)} NET require admin approval. Your order (€{orderTotal.toFixed(2)}) will be submitted for review.</p>
+                    }
                   </div>
                 )}
                 <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
                 <ul className="mt-1.5 space-y-2 text-xs text-slate-700">
                   <li className="flex items-start gap-2"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by Thermitek Ltd.</span></li>
                   <li className="flex items-start gap-2"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
+                  <li className="flex items-start gap-2"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Order Confirmation:</strong> Orders are reviewed by Admin. You will be notified once your order is confirmed.</span></li>
                 </ul>
               </div>
             )
           })()}
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <button onClick={submitOrder} disabled={isSubmittingOrder} className={`${actionButtonPrimaryClass} disabled:cursor-not-allowed disabled:border-fuchsia-300 disabled:bg-fuchsia-300`}>
+            <button onClick={submitOrder} disabled={isSubmittingOrder || (enforcedTier === 'professional' && orderTotal > 0 && orderTotal < PROFESSIONAL_MIN_ORDER_EUR)} className={`${actionButtonPrimaryClass} disabled:cursor-not-allowed disabled:border-fuchsia-300 disabled:bg-fuchsia-300`}>
               {isSubmittingOrder ? 'Submitting...' : `Place Order (${totalUnits} units)`}
             </button>
             <button
@@ -14127,19 +14142,24 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         {(() => {
           const _dest = (clientProfile.shippingCountry || clientProfile.invoiceCountry || '').trim()
           const _zone = _dest ? SHIPPING_ZONES.find((z) => z.countries.includes(_dest)) : null
-          const _belowMin = orderTotal > 0 && orderTotal < MIN_ORDER_EUR
+          const _effectiveMin = enforcedTier === 'professional' ? PROFESSIONAL_MIN_ORDER_EUR : MIN_ORDER_EUR
+          const _belowMin = orderTotal > 0 && orderTotal < _effectiveMin
           return (
             <div className={`mt-3 rounded-xl border p-3 ${_belowMin ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-slate-50'}`}>
               {_belowMin && (
                 <div className="mb-2 flex items-center gap-2 rounded-lg border border-amber-400 bg-amber-100 px-3 py-2">
                   <svg className="h-4 w-4 flex-none text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
-                  <p className="text-xs font-semibold text-amber-800">Orders below €{MIN_ORDER_EUR.toFixed(2)} NET require admin approval. Your order (€{orderTotal.toFixed(2)}) will be submitted for review.</p>
+                  {enforcedTier === 'professional'
+                    ? <p className="text-xs font-semibold text-amber-800">Professional tier orders must be at least €{_effectiveMin.toFixed(2)} NET (excluding VAT and shipping). Orders below this threshold cannot be processed.</p>
+                    : <p className="text-xs font-semibold text-amber-800">Orders below €{_effectiveMin.toFixed(2)} NET require admin approval. Your order (€{orderTotal.toFixed(2)}) will be submitted for review.</p>
+                  }
                 </div>
               )}
               <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
               <ul className="mt-1.5 space-y-2 text-xs text-slate-700">
                 <li className="flex items-start gap-2"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by Thermitek Ltd.</span></li>
                 <li className="flex items-start gap-2"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
+                <li className="flex items-start gap-2"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Order Confirmation:</strong> Orders are reviewed by Admin. You will be notified once your order is confirmed.</span></li>
               </ul>
             </div>
           )
