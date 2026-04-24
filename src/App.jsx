@@ -103,7 +103,6 @@ const QUICK_CART_STORAGE_KEY = 'gelitup.catalogue.quick_cart.v1'
 const CHECKOUT_FORM_STORAGE_KEY = 'gelitup.checkout.form.v1'
 const CHECKOUT_LAST_ORDER_KEY = 'gelitup.checkout.lastorder.v1'
 const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
-const FREE_SHIPPING_POPUP_STORAGE_KEY = 'gelitup.free_shipping_popup.dismissed.v1'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
 const HOME_HERO_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
@@ -2351,7 +2350,7 @@ function ForAcademiesPage() {
                 EU-certified, HEMA-free, and structured for training volume. From intake consumables to student kits — professional products your students can trust from day one.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <NavLink to="/portal/register" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
+                <NavLink to="/portal/signup" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
                   Register Your Academy
                 </NavLink>
                 <NavLink to="/full-catalogue" className="btn-cta-ghost-white inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
@@ -2501,7 +2500,7 @@ function ForAcademiesPage() {
               ))}
             </ul>
           </div>
-          <NavLink to="/portal/register" className="shrink-0 self-start rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#D43790] shadow-[0_2px_12px_rgba(0,0,0,0.18)] transition duration-300 hover:bg-fuchsia-50">
+          <NavLink to="/portal/signup" className="shrink-0 self-start rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#D43790] shadow-[0_2px_12px_rgba(0,0,0,0.18)] transition duration-300 hover:bg-fuchsia-50">
             Register Free &rarr;
           </NavLink>
         </div>
@@ -7229,7 +7228,7 @@ function HomePage({ onOpenContactModal }) {
                 {T ? 'Un decennio di maestria · Regolamentato EU · HEMA & TPO-free' : 'A decade of mastery · EU regulated · HEMA & TPO-free'}
               </p>
               <div className="mt-5 flex flex-wrap items-center gap-3">
-                <NavLink to="/portal/register" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_16px_rgba(212,55,144,0.55)] transition duration-300 hover:bg-fuchsia-500">
+                <NavLink to="/portal/signup" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_16px_rgba(212,55,144,0.55)] transition duration-300 hover:bg-fuchsia-500">
                   {T ? T.common.register_free + ' →' : 'Register Free →'}
                 </NavLink>
                 <NavLink to="/become-distributor" className="rounded-lg border-2 border-white/80 bg-white/15 px-5 py-2.5 text-sm font-bold text-white shadow-[0_2px_12px_rgba(0,0,0,0.35)] backdrop-blur-sm transition duration-300 hover:bg-white/25">
@@ -7456,7 +7455,7 @@ function HomePage({ onOpenContactModal }) {
               ))}
             </ul>
           </div>
-          <NavLink to="/portal/register" className="shrink-0 self-start rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#D43790] shadow-[0_2px_12px_rgba(0,0,0,0.18)] transition duration-300 hover:bg-fuchsia-50">
+          <NavLink to="/portal/signup" className="shrink-0 self-start rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#D43790] shadow-[0_2px_12px_rgba(0,0,0,0.18)] transition duration-300 hover:bg-fuchsia-50">
             Register Free &rarr;
           </NavLink>
         </div>
@@ -17709,18 +17708,10 @@ function App() {
   }, [])
 
   useEffect(() => {
-    const isHomeRoute = routerLocation.pathname === '/' || routerLocation.pathname === '/home'
-    if (!isHomeRoute) {
+    const currentPath = String(routerLocation.pathname || '')
+    const isPortalPath = currentPath.startsWith('/portal') || currentPath === '/admin-login'
+    if (isPortalPath) {
       setShowFreeShippingPopup(false)
-      return
-    }
-
-    if (isPortalAuthenticated) {
-      return
-    }
-
-    const alreadyDismissed = sessionStorage.getItem(FREE_SHIPPING_POPUP_STORAGE_KEY)
-    if (alreadyDismissed) {
       return
     }
 
@@ -17729,7 +17720,7 @@ function App() {
     }, 120)
 
     return () => clearTimeout(timer)
-  }, [isPortalAuthenticated, routerLocation.pathname])
+  }, [routerLocation.pathname])
 
   const openContactModal = useCallback(() => {
     setContactRequestError('')
@@ -18983,7 +18974,6 @@ function App() {
 
       {showFreeShippingPopup && (
         <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/65 p-4 backdrop-blur-sm sm:items-center" onClick={() => {
-          sessionStorage.setItem(FREE_SHIPPING_POPUP_STORAGE_KEY, '1')
           setShowFreeShippingPopup(false)
         }}>
           <div className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-white/20 bg-[#fffaf3] shadow-2xl" onClick={(e) => e.stopPropagation()}>
@@ -18991,7 +18981,6 @@ function App() {
               type="button"
               aria-label="Close"
               onClick={() => {
-                sessionStorage.setItem(FREE_SHIPPING_POPUP_STORAGE_KEY, '1')
                 setShowFreeShippingPopup(false)
               }}
               className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/10 text-black/60 transition hover:bg-black/20 hover:text-black"
@@ -19009,7 +18998,6 @@ function App() {
               <NavLink
                 to="/become-distributor"
                 onClick={() => {
-                  sessionStorage.setItem(FREE_SHIPPING_POPUP_STORAGE_KEY, '1')
                   setShowFreeShippingPopup(false)
                 }}
                 className="flex w-full items-center justify-center rounded-xl bg-[#166534] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#14532d]"
@@ -19019,7 +19007,6 @@ function App() {
               <button
                 type="button"
                 onClick={() => {
-                  sessionStorage.setItem(FREE_SHIPPING_POPUP_STORAGE_KEY, '1')
                   setShowFreeShippingPopup(false)
                 }}
                 className="w-full rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
