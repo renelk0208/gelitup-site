@@ -23,11 +23,16 @@ function statusBadge(status) {
     completed:               'bg-emerald-100 text-emerald-700',
     cancelled:               'bg-rose-100 text-rose-700',
     cancellation_requested:  'bg-orange-100 text-orange-700',
+    acknowledged_received:   'bg-cyan-100 text-cyan-700',
+    in_progress:             'bg-blue-100 text-blue-700',
+    payment_received:        'bg-emerald-100 text-emerald-700',
+    tracking_placed:         'bg-violet-100 text-violet-700',
   }
-  const cls = map[String(status).toLowerCase()] || 'bg-slate-100 text-slate-600'
+  const normalized = normalizeOrderStatus(status)
+  const cls = map[normalized] || 'bg-slate-100 text-slate-600'
   return (
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${cls}`}>
-      {status || '—'}
+      {formatOrderStatusLabel(normalized || status)}
     </span>
   )
 }
@@ -744,15 +749,41 @@ function RegistrationsPanel() {
 
 // ─── Orders panel ─────────────────────────────────────────────────────────────
 
-const STATUS_OPTIONS = ['pending_approval', 'received', 'submitted', 'processing', 'shipped', 'completed', 'cancelled', 'cancellation_requested']
+const STATUS_OPTIONS = [
+  'pending_approval',
+  'received',
+  'acknowledged_received',
+  'in_progress',
+  'payment_received',
+  'tracking_placed',
+  'shipped',
+  'completed',
+  'cancelled',
+  'cancellation_requested',
+]
 const STATUS_COLORS = {
   received: 'bg-sky-100 text-sky-700',
-  submitted: 'bg-amber-100 text-amber-700',
-  processing: 'bg-blue-100 text-blue-700',
+  acknowledged_received: 'bg-cyan-100 text-cyan-700',
+  in_progress: 'bg-blue-100 text-blue-700',
+  payment_received: 'bg-emerald-100 text-emerald-700',
+  tracking_placed: 'bg-violet-100 text-violet-700',
   shipped: 'bg-indigo-100 text-indigo-700',
   completed: 'bg-emerald-100 text-emerald-700',
   cancelled: 'bg-rose-100 text-rose-700',
   cancellation_requested: 'bg-orange-100 text-orange-700',
+}
+
+function normalizeOrderStatus(status) {
+  const value = String(status || '').trim().toLowerCase()
+  if (value === 'submitted') return 'acknowledged_received'
+  if (value === 'processing') return 'in_progress'
+  return value
+}
+
+function formatOrderStatusLabel(status) {
+  const normalized = normalizeOrderStatus(status)
+  if (!normalized) return '—'
+  return normalized.replace(/_/g, ' ')
 }
 
 function OrdersPanel() {
@@ -763,7 +794,6 @@ function OrdersPanel() {
   const [expanded, setExpanded] = useState(null)
   const [saving, setSaving] = useState(null)
   const [trackingDraft, setTrackingDraft] = useState({})
-  const [paymentConfirmed, setPaymentConfirmed] = useState({})
   // editing state
   const [editing, setEditing] = useState(null) // order id being edited
   const [editDraft, setEditDraft] = useState({})
@@ -776,7 +806,9 @@ function OrdersPanel() {
       .select('*')
       .order('created_at', { ascending: false })
       .limit(200)
-    if (filter !== 'all') query = query.eq('status', filter)
+    if (filter === 'acknowledged_received') query = query.in('status', ['acknowledged_received', 'submitted'])
+    else if (filter === 'in_progress') query = query.in('status', ['in_progress', 'processing'])
+    else if (filter !== 'all') query = query.eq('status', filter)
     const { data, error: err } = await query
     setLoading(false)
     if (err) { setError(err.message); return }
@@ -810,16 +842,28 @@ function OrdersPanel() {
     setExpanded(null)
   }
 
-  const markShipped = async (id) => {
+  const markTrackingPlaced = async (id) => {
     const draft = trackingDraft[id] || {}
     const trackingNumber = (draft.number || '').trim()
     const trackingUrl = (draft.url || '').trim()
-    if (!trackingNumber) { alert('Please enter a tracking number before marking as shipped.'); return }
-    await updateOrder(id, { status: 'shipped', tracking_number: trackingNumber, tracking_url: trackingUrl || null })
+    if (!trackingNumber) { alert('Please enter a tracking number before saving tracking details.'); return }
+    await updateOrder(id, { status: 'tracking_placed', tracking_number: trackingNumber, tracking_url: trackingUrl || null })
   }
 
-  const markProcessing = async (id) => {
-    await updateOrder(id, { status: 'processing' })
+  const markAcknowledged = async (id) => {
+    await updateOrder(id, { status: 'acknowledged_received' })
+  }
+
+  const markInProgress = async (id) => {
+    await updateOrder(id, { status: 'in_progress' })
+  }
+
+  const markPaymentReceived = async (id) => {
+    await updateOrder(id, { status: 'payment_received', payment_confirmed: true })
+  }
+
+  const markShipped = async (id) => {
+    await updateOrder(id, { status: 'shipped' })
   }
 
   const togglePaymentConfirmed = async (id, currentValue) => {
@@ -835,7 +879,7 @@ function OrdersPanel() {
       shipping_address: row.shipping_address || '',
       tracking_number: row.tracking_number || '',
       tracking_url: row.tracking_url || '',
-      status: row.status,
+      status: normalizeOrderStatus(row.status),
       items: Array.isArray(row.items)
         ? row.items.map(it => {
             const str = typeof it === 'string' ? it : JSON.stringify(it)
@@ -854,21 +898,41 @@ function OrdersPanel() {
       const m = it.match(/ x(\d+)$/)
       return sum + (m ? parseInt(m[1], 10) : 1)
     }, 0)
+    const trackingNumber = editDraft.tracking_number.trim()
+    let nextStatus = normalizeOrderStatus(editDraft.status)
+    if (trackingNumber && (nextStatus === 'in_progress' || nextStatus === 'payment_received')) {
+      nextStatus = 'tracking_placed'
+    }
+    if (!trackingNumber && nextStatus === 'tracking_placed') {
+      nextStatus = 'payment_received'
+    }
     const ok = await updateOrder(id, {
       customer_email: editDraft.customer_email.trim() || null,
       consignee_name: editDraft.consignee_name.trim() || null,
       consignee_phone: editDraft.consignee_phone.trim() || null,
       shipping_address: editDraft.shipping_address.trim() || null,
-      tracking_number: editDraft.tracking_number.trim() || null,
+      tracking_number: trackingNumber || null,
       tracking_url: editDraft.tracking_url.trim() || null,
-      status: editDraft.status,
+      status: nextStatus,
       items,
       total_units: totalUnits,
     })
     if (ok) setEditing(null)
   }
 
-  const FILTERS = ['all', 'pending_approval', 'received', 'submitted', 'cancellation_requested', 'processing', 'shipped', 'completed', 'cancelled']
+  const FILTERS = [
+    'all',
+    'pending_approval',
+    'received',
+    'acknowledged_received',
+    'in_progress',
+    'payment_received',
+    'tracking_placed',
+    'cancellation_requested',
+    'shipped',
+    'completed',
+    'cancelled',
+  ]
 
   return (
     <div>
@@ -879,7 +943,7 @@ function OrdersPanel() {
             onClick={() => setFilter(f)}
             className={`rounded-full px-3 py-1 text-xs font-semibold transition ${filter === f ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
-            {f === 'cancellation_requested' ? 'Cancel Req.' : f === 'pending_approval' ? 'Pending Approval' : f.charAt(0).toUpperCase() + f.slice(1)}
+            {f === 'cancellation_requested' ? 'Cancel Req.' : f === 'pending_approval' ? 'Pending Approval' : formatOrderStatusLabel(f).replace(/\b\w/g, (c) => c.toUpperCase())}
           </button>
         ))}
         <button onClick={load} className="ml-auto rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-500 hover:bg-slate-50">
@@ -939,11 +1003,15 @@ function OrdersPanel() {
         {rows.map(row => {
           const items = Array.isArray(row.items) ? row.items : []
           const draft = trackingDraft[row.id] || {}
-          const isShipped = row.status === 'shipped'
-          const isSubmitted = row.status === 'submitted' || row.status === 'received'
-          const isProcessing = row.status === 'processing'
-          const isCancellationRequested = row.status === 'cancellation_requested'
-          const isPendingApproval = row.status === 'pending_approval'
+          const currentStatus = normalizeOrderStatus(row.status)
+          const isShipped = currentStatus === 'shipped'
+          const isReceived = currentStatus === 'received'
+          const isAcknowledged = currentStatus === 'acknowledged_received'
+          const isInProgress = currentStatus === 'in_progress'
+          const isPaymentReceived = currentStatus === 'payment_received'
+          const isTrackingPlaced = currentStatus === 'tracking_placed'
+          const isCancellationRequested = currentStatus === 'cancellation_requested'
+          const isPendingApproval = currentStatus === 'pending_approval'
           const isEditing = editing === row.id
 
           return (
@@ -1155,7 +1223,7 @@ function OrdersPanel() {
                           {saving === row.id ? 'Saving…' : '✕ Confirm Cancellation'}
                         </button>
                         <button
-                          onClick={() => updateOrder(row.id, { status: 'submitted' })}
+                          onClick={() => updateOrder(row.id, { status: 'acknowledged_received' })}
                           disabled={saving === row.id}
                           className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
                         >
@@ -1165,25 +1233,52 @@ function OrdersPanel() {
                     </div>
                   )}
 
-                  {/* ── Mark as Processing ── */}
-                  {isSubmitted && !isEditing && (
-                    <div className="rounded-xl border border-blue-200 bg-blue-50 p-3 space-y-2">
-                      <p className="text-xs font-semibold text-blue-700">Mark as Processing</p>
-                      <p className="text-[10px] text-slate-500">You can confirm payment separately using the button above.</p>
+                  {/* ── Step 1: Acknowledge as received ── */}
+                  {isReceived && !isEditing && (
+                    <div className="rounded-xl border border-cyan-200 bg-cyan-50 p-3 space-y-2">
+                      <p className="text-xs font-semibold text-cyan-700">Step 1: Acknowledge as Received</p>
                       <button
-                        onClick={() => markProcessing(row.id)}
+                        onClick={() => markAcknowledged(row.id)}
                         disabled={saving === row.id}
-                        className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-40"
+                        className="rounded-lg bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-700 disabled:opacity-40"
                       >
-                        {saving === row.id ? 'Saving…' : '→ Mark as Processing'}
+                        {saving === row.id ? 'Saving…' : '→ Acknowledge'}
                       </button>
                     </div>
                   )}
 
-                  {/* ── Mark as Shipped (requires tracking number) ── */}
-                  {isProcessing && !isEditing && (
-                    <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3 space-y-2">
-                      <p className="text-xs font-semibold text-indigo-700">Mark as Shipped</p>
+                  {/* ── Step 2: In Progress ── */}
+                  {isAcknowledged && !isEditing && (
+                    <div className="rounded-xl border border-blue-200 bg-blue-50 p-3 space-y-2">
+                      <p className="text-xs font-semibold text-blue-700">Step 2: Move to In Progress</p>
+                      <button
+                        onClick={() => markInProgress(row.id)}
+                        disabled={saving === row.id}
+                        className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-40"
+                      >
+                        {saving === row.id ? 'Saving…' : '→ Mark In Progress'}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* ── Step 3: Payment received ── */}
+                  {isInProgress && !isEditing && (
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 space-y-2">
+                      <p className="text-xs font-semibold text-emerald-700">Step 3: Confirm Payment Received</p>
+                      <button
+                        onClick={() => markPaymentReceived(row.id)}
+                        disabled={saving === row.id}
+                        className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-40"
+                      >
+                        {saving === row.id ? 'Saving…' : '→ Mark Payment Received'}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* ── Step 4: Tracking number placed ── */}
+                  {isPaymentReceived && !isEditing && (
+                    <div className="rounded-xl border border-violet-200 bg-violet-50 p-3 space-y-2">
+                      <p className="text-xs font-semibold text-violet-700">Step 4: Place Tracking Number</p>
                       <div className="grid gap-2 sm:grid-cols-2">
                         <div>
                           <label className="mb-1 block text-xs font-medium text-slate-600">Tracking Number <span className="text-rose-500">*</span></label>
@@ -1192,7 +1287,7 @@ function OrdersPanel() {
                             value={draft.number || ''}
                             onChange={e => setTrackingDraft(prev => ({ ...prev, [row.id]: { ...prev[row.id], number: e.target.value } }))}
                             placeholder="e.g. DHL1234567890"
-                            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
                           />
                         </div>
                         <div>
@@ -1202,16 +1297,30 @@ function OrdersPanel() {
                             value={draft.url || ''}
                             onChange={e => setTrackingDraft(prev => ({ ...prev, [row.id]: { ...prev[row.id], url: e.target.value } }))}
                             placeholder="https://track.dhl.com/..."
-                            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
                           />
                         </div>
                       </div>
+                      <button
+                        onClick={() => markTrackingPlaced(row.id)}
+                        disabled={saving === row.id}
+                        className="rounded-lg bg-violet-600 px-4 py-2 text-xs font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
+                      >
+                        {saving === row.id ? 'Saving…' : '→ Save Tracking'}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* ── Step 5: Shipped ── */}
+                  {isTrackingPlaced && !isEditing && (
+                    <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3 space-y-2">
+                      <p className="text-xs font-semibold text-indigo-700">Step 5: Mark as Shipped</p>
                       <button
                         onClick={() => markShipped(row.id)}
                         disabled={saving === row.id}
                         className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
                       >
-                        {saving === row.id ? 'Saving…' : '→ Mark as Shipped'}
+                        {saving === row.id ? 'Saving…' : '→ Mark Shipped'}
                       </button>
                     </div>
                   )}
@@ -1236,7 +1345,7 @@ function OrdersPanel() {
                             ✓ Mark Completed
                           </button>
                         )}
-                        {row.status !== 'cancelled' && row.status !== 'completed' && (
+                        {currentStatus !== 'cancelled' && currentStatus !== 'completed' && (
                           <button
                             onClick={() => updateOrder(row.id, { status: 'cancelled' })}
                             disabled={saving === row.id}
@@ -1245,9 +1354,9 @@ function OrdersPanel() {
                             ✕ Cancel Order
                           </button>
                         )}
-                        {(row.status === 'cancelled' || row.status === 'completed') && (
+                        {(currentStatus === 'cancelled' || currentStatus === 'completed') && (
                           <button
-                            onClick={() => updateOrder(row.id, { status: 'submitted' })}
+                            onClick={() => updateOrder(row.id, { status: 'received' })}
                             disabled={saving === row.id}
                             className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
                           >

@@ -15306,7 +15306,7 @@ function OrdersModule() {
                             ? <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-700">Pending Approval</span>
                             : order.payment_status === 'invoice_ready'
                               ? <span className="rounded-full bg-fuchsia-100 px-2 py-0.5 text-xs font-semibold text-fuchsia-700">Invoice Ready</span>
-                              : <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600 capitalize">{order.status || 'received'}</span>}
+                              : <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600 capitalize">{String(order.status || 'received').replace(/_/g, ' ')}</span>}
                       {order.zoho_invoice_number && (
                         <span className="text-xs text-slate-500">Invoice: {order.zoho_invoice_number}</span>
                       )}
@@ -17042,7 +17042,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
 
       if (!isMounted || !Array.isArray(rows)) return
 
-      const openStatuses = new Set(['submitted', 'processing'])
+      const openStatuses = new Set(['received', 'submitted', 'acknowledged_received', 'processing', 'in_progress', 'payment_received', 'tracking_placed'])
       const openOrders = rows.filter((r) => openStatuses.has(String(r.status || '').toLowerCase())).length
       const inTransit = rows.filter((r) => String(r.status || '').toLowerCase() === 'shipped').length
       const totalOrders = rows.length
