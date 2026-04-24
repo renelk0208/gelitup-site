@@ -10,12 +10,12 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
 function buildDistributorAccessEmail(row) {
   const tierLabel = titleCaseTierLabel(row?.distributor_tier || '') || 'Distributor'
+  const createPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(row?.contact_email || '')}`
   const portalLink = `${window.location.origin}/portal/login?portal=distributor&email=${encodeURIComponent(row?.contact_email || '')}`
-  const forgotPasswordLink = `${window.location.origin}/portal/forgot-password?email=${encodeURIComponent(row?.contact_email || '')}`
 
   return {
     subject: 'Your Distributor Tier Is Active - Portal Login Ready',
-    html: `<p>Dear ${row?.contact_name || 'Partner'},</p><p>Your account for <strong>${row?.company_name || 'your company'}</strong> has been confirmed as a <strong>Distributor</strong>.</p><p>Your assigned tier: <strong>${tierLabel}</strong>.</p><p>You can now log in and view distributor pricing in your portal using your existing email and password.</p><p><a href="${portalLink}" style="background:#7c3aed;color:#fff;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:700;display:inline-block;">Log In To Distributor Portal</a></p><p style="margin-top:12px;">If you forgot your password, reset it here: <a href="${forgotPasswordLink}">${forgotPasswordLink}</a></p><p>If you have questions, contact us at distribution@gelitup.com.</p><p>The GEL.IT.UP Distribution Team</p>`,
+    html: `<p>Dear ${row?.contact_name || 'Partner'},</p><p>Your account for <strong>${row?.company_name || 'your company'}</strong> has been confirmed as a <strong>Distributor</strong>.</p><p>Your assigned tier: <strong>${tierLabel}</strong>.</p><p>To activate your access, first create or refresh your password using the secure link below.</p><p><a href="${createPasswordLink}" style="background:#7c3aed;color:#fff;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:700;display:inline-block;">Set Password & Access Portal</a></p><p style="margin-top:12px;">After setting your password, sign in here: <a href="${portalLink}">${portalLink}</a></p><p>If you have questions, contact us at distribution@gelitup.com.</p><p>The GEL.IT.UP Distribution Team</p>`,
   }
 }
 
@@ -391,10 +391,9 @@ function RegistrationsPanel() {
     setRows(prev => prev.map(r => r.id === row.id ? updatedRow : r))
 
     if (newTier && row?.contact_email && EMAIL_WEBHOOK_URL) {
-      const subject = 'Your Distributor Tier Is Active - Portal Login Ready'
-      const portalLink = `${window.location.origin}/portal/login?portal=distributor&email=${encodeURIComponent(row.contact_email || '')}`
-      const forgotPasswordLink = `${window.location.origin}/portal/forgot-password?email=${encodeURIComponent(row.contact_email || '')}`
-      const html = `<p>Dear ${row.contact_name},</p><p>Your account for <strong>${row.company_name}</strong> has been confirmed as a <strong>Distributor</strong>.</p><p>Your assigned tier: <strong>${nextTierLabel}</strong>.</p><p>You can now log in and view distributor pricing in your portal using your existing email and password.</p><p><a href="${portalLink}" style="background:#7c3aed;color:#fff;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:700;display:inline-block;">Log In To Distributor Portal</a></p><p style="margin-top:12px;">If you forgot your password, reset it here: <a href="${forgotPasswordLink}">${forgotPasswordLink}</a></p><p>If you have questions, contact us at distribution@gelitup.com.</p><p>The GEL.IT.UP Distribution Team</p>`
+      const tierEmail = buildDistributorAccessEmail({ ...row, distributor_tier: newTier || row.distributor_tier })
+      const subject = tierEmail.subject
+      const html = tierEmail.html
       setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sending', message: '' } }))
       const emailHeaders = { 'Content-Type': 'application/json' }
       if (SUPABASE_ANON_KEY) {
