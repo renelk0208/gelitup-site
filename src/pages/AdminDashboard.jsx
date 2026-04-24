@@ -186,7 +186,8 @@ function RegistrationsPanel() {
       const subject = status === 'approved'
         ? `🎉 You're Approved — Welcome to GEL.IT.UP, ${row.contact_name}!`
         : 'Update on your GEL.IT.UP distributor application'
-      const portalLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(row.contact_email || '')}`
+      const portalLink = `${window.location.origin}/portal/login?portal=distributor&email=${encodeURIComponent(row.contact_email || '')}`
+      const forgotPasswordLink = `${window.location.origin}/portal/forgot-password?email=${encodeURIComponent(row.contact_email || '')}`
       const html = status === 'approved'
         ? `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background-color:#f8f7ff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#f8f7ff;padding:32px 16px;">
@@ -202,11 +203,11 @@ function RegistrationsPanel() {
       <tr><td style="padding:40px 48px;">
         <p style="margin:0 0 8px;font-size:17px;font-weight:600;color:#1e1b4b;">Dear ${row.contact_name},</p>
         <p style="margin:0 0 20px;font-size:15px;line-height:1.65;color:#374151;">We are thrilled to let you know that your application for <strong style="color:#7c3aed;">${row.company_name}</strong> has been <strong>approved</strong>. Welcome aboard — we are so excited to have you as part of the GEL.IT.UP distribution network!</p>
-        <p style="margin:0 0 28px;font-size:15px;line-height:1.65;color:#374151;">Your exclusive distributor portal is ready and waiting. To get started, simply create your password using the button below — your email address is already prefilled for you.</p>
+        <p style="margin:0 0 28px;font-size:15px;line-height:1.65;color:#374151;">Your exclusive distributor portal is ready. Sign in using your existing email and password. If you need to refresh access, use the password reset link below.</p>
         <!-- CTA BUTTON -->
         <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:32px;">
           <tr><td align="center">
-            <a href="${portalLink}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#a855f7,#7c3aed);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:50px;letter-spacing:0.3px;box-shadow:0 4px 14px rgba(124,58,237,0.35);">Create Password &amp; Enter Portal →</a>
+            <a href="${portalLink}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#a855f7,#7c3aed);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:50px;letter-spacing:0.3px;box-shadow:0 4px 14px rgba(124,58,237,0.35);">Log In To Portal →</a>
           </td></tr>
         </table>
         <!-- STEPS -->
@@ -216,11 +217,11 @@ function RegistrationsPanel() {
             <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
               <tr>
                 <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#7c3aed;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">1</span></td>
-                <td style="padding-left:10px;padding-bottom:12px;font-size:14px;color:#374151;"><strong>Click the button above</strong> — your email is prefilled automatically.</td>
+                <td style="padding-left:10px;padding-bottom:12px;font-size:14px;color:#374151;"><strong>Click the button above</strong> to open the distributor portal login.</td>
               </tr>
               <tr>
                 <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#7c3aed;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">2</span></td>
-                <td style="padding-left:10px;padding-bottom:12px;font-size:14px;color:#374151;"><strong>Create your password</strong>, confirm it, and tick <em>Remember me</em>.</td>
+                <td style="padding-left:10px;padding-bottom:12px;font-size:14px;color:#374151;"><strong>Sign in with your existing password.</strong> If you cannot access the portal, reset it here: <a href="${forgotPasswordLink}">${forgotPasswordLink}</a></td>
               </tr>
               <tr>
                 <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#7c3aed;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">3</span></td>
@@ -307,8 +308,9 @@ function RegistrationsPanel() {
   const resendApprovalEmail = async (row) => {
     if (!row?.contact_email || !EMAIL_WEBHOOK_URL) return
     const subject = `🎉 You're Approved — Welcome to GEL.IT.UP, ${row.contact_name}!`
-    const portalLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(row.contact_email || '')}`
-    const html = `<p>Dear ${row.contact_name},</p><p>Your GEL.IT.UP distributor application for <strong>${row.company_name}</strong> has been <strong>approved</strong>.</p><p>Click the link below to create your password and access the portal:</p><p><a href="${portalLink}" style="background:#7c3aed;color:#fff;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:700;">Create Password &amp; Enter Portal →</a></p><p>If you have any questions, contact us at distribution@gelitup.com.</p><p>The GEL.IT.UP Distribution Team</p>`
+    const portalLink = `${window.location.origin}/portal/login?portal=distributor&email=${encodeURIComponent(row.contact_email || '')}`
+    const forgotPasswordLink = `${window.location.origin}/portal/forgot-password?email=${encodeURIComponent(row.contact_email || '')}`
+    const html = `<p>Dear ${row.contact_name},</p><p>Your GEL.IT.UP distributor application for <strong>${row.company_name}</strong> has been <strong>approved</strong>.</p><p>You can now log in to the distributor portal using your existing email and password:</p><p><a href="${portalLink}" style="background:#7c3aed;color:#fff;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:700;">Log In To Portal →</a></p><p>If you need to refresh your access, reset your password here: <a href="${forgotPasswordLink}">${forgotPasswordLink}</a></p><p>If you have any questions, contact us at distribution@gelitup.com.</p><p>The GEL.IT.UP Distribution Team</p>`
     setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sending', message: '' } }))
     const emailHeaders = { 'Content-Type': 'application/json' }
     if (SUPABASE_ANON_KEY) {

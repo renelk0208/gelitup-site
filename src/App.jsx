@@ -51,6 +51,12 @@ const SUPPORT_WHATSAPP_URL = import.meta.env.VITE_SUPPORT_WHATSAPP_URL
   || `https://wa.me/${String(SUPPORT_WHATSAPP_NUMBER).replace(/[^\d]/g, '')}`
 const SUPPORT_VIBER_URL = import.meta.env.VITE_SUPPORT_VIBER_URL
   || `viber://chat?number=${String(SUPPORT_WHATSAPP_NUMBER).replace(/[^\d+]/g, '')}`
+const DISTRIBUTOR_TIER_PRICE_MULTIPLIERS = {
+  authority: 0.22,
+  professional: 0.37,
+  country: 0.264,
+  sales: 0.85,
+}
 const PORTAL_INTERNAL_BYPASS_EMAILS = new Set(
   [
     'distributors@gelitup.com',
@@ -10400,11 +10406,10 @@ const B2B_SIDEBAR_GROUPS = [
 
 function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated = false, isDistributorOverride = false }) {
   const normalizedTier = String(tier || '').trim().toLowerCase()
-  const enforcedTier = normalizedTier === 'authority' || normalizedTier === 'professional'
+  const enforcedTier = Object.prototype.hasOwnProperty.call(DISTRIBUTOR_TIER_PRICE_MULTIPLIERS, normalizedTier)
     ? normalizedTier
     : null
-  // Only explicitly assigned Professional/Authority tiers receive tier pricing.
-  const tierPriceMultiplier = enforcedTier === 'authority' ? 0.22 : enforcedTier === 'professional' ? 0.37 : 1.0
+  const tierPriceMultiplier = enforcedTier ? DISTRIBUTOR_TIER_PRICE_MULTIPLIERS[enforcedTier] : 1.0
   const location = useLocation()
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
@@ -16690,13 +16695,8 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
       // even if user_metadata is stale (e.g. after a password reset flow).
       const email = data.user.email
       if (email) {
-        const { data: reg } = await supabase
-          .from(registrationsTable)
-          .select('prices_allocated, distributor_tier, status, application_type, notes')
-          .ilike('email', email)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle()
+        const registrationResult = await fetchLatestRegistrationByEmail(email, 'prices_allocated, distributor_tier, status, application_type, notes')
+        const reg = registrationResult.data
         if (reg) setLiveRegistration(reg)
       }
     })
@@ -17126,15 +17126,14 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     }
   }, [activeModule, ordersTable])
 
-  // Prefer live registration data (always fresh) over stale user_metadata,
-  // but allow pricing tiers only for explicitly assigned professional/authority.
+  // Prefer live registration data (always fresh) over stale user_metadata.
   const rawTier = tierOverride
     ?? liveRegistration?.distributor_tier
     ?? portalUser?.user_metadata?.distributor_tier
     ?? null
   const effectiveTier = (() => {
     const normalized = String(rawTier || '').trim().toLowerCase()
-    return normalized === 'professional' || normalized === 'authority' ? normalized : null
+    return Object.prototype.hasOwnProperty.call(DISTRIBUTOR_TIER_PRICE_MULTIPLIERS, normalized) ? normalized : null
   })()
   // Prices are shown by default. The ONLY case where prices are hidden is when we have a
   // confirmed distributor registration with prices_allocated explicitly set to false.
@@ -17892,7 +17891,36 @@ function App() {
 
       if (error) {
         const authErrorMessage = String(error.message || '').trim()
+        const isEmailNotConfirmed = /email not confirmed/i.test(authErrorMessage)
         const isInvalidCredentials = /invalid login credentials/i.test(authErrorMessage)
+
+        if (isEmailNotConfirmed) {
+          const registrationResult = await fetchLatestRegistrationByEmail(normalizedEmail, 'status, notes')
+          const latestRegistration = registrationResult.data || null
+          const status = String(latestRegistration?.status || '').trim().toLowerCase()
+          const applicationType = latestRegistration ? getApplicationTypeFromRecord(latestRegistration) : 'b2b_order'
+          const isDistributorRegistration = applicationType === 'distributor'
+
+          if (isDistributorRegistration && requireApproval && status === 'approved') {
+            await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+              redirectTo: `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(normalizedEmail)}`,
+            })
+
+            return {
+              ok: false,
+              message: 'Your distributor access is approved, but this account still needs activation. We have sent a secure password setup email to this address. Open that email, set your password, then sign in normally.',
+              applicationStatus: 'approved',
+              debugTrace: 'login-email-not-confirmed -> approved-distributor-reset-sent',
+            }
+          }
+
+          return {
+            ok: false,
+            message: 'Your email address is not yet confirmed. Please check your inbox and spam folder for the confirmation or password setup email, then try again.',
+            applicationStatus: status || '',
+            debugTrace: 'login-email-not-confirmed -> confirmation-required',
+          }
+        }
 
         if (!isInvalidCredentials) {
           return {
