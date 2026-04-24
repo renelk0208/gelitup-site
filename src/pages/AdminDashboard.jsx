@@ -8,6 +8,17 @@ const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL || ''
 const FROM_EMAIL = import.meta.env.VITE_EMAIL_FROM || 'GEL.IT.UP Distributors <distributors@gelitup.com>'
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
+function buildDistributorAccessEmail(row) {
+  const tierLabel = titleCaseTierLabel(row?.distributor_tier || '') || 'Distributor'
+  const portalLink = `${window.location.origin}/portal/login?portal=distributor&email=${encodeURIComponent(row?.contact_email || '')}`
+  const forgotPasswordLink = `${window.location.origin}/portal/forgot-password?email=${encodeURIComponent(row?.contact_email || '')}`
+
+  return {
+    subject: 'Your Distributor Tier Is Active - Portal Login Ready',
+    html: `<p>Dear ${row?.contact_name || 'Partner'},</p><p>Your account for <strong>${row?.company_name || 'your company'}</strong> has been confirmed as a <strong>Distributor</strong>.</p><p>Your assigned tier: <strong>${tierLabel}</strong>.</p><p>You can now log in and view distributor pricing in your portal using your existing email and password.</p><p><a href="${portalLink}" style="background:#7c3aed;color:#fff;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:700;display:inline-block;">Log In To Distributor Portal</a></p><p style="margin-top:12px;">If you forgot your password, reset it here: <a href="${forgotPasswordLink}">${forgotPasswordLink}</a></p><p>If you have questions, contact us at distribution@gelitup.com.</p><p>The GEL.IT.UP Distribution Team</p>`,
+  }
+}
+
 const ORDER_STATUSES = ['submitted', 'processing', 'shipped', 'completed', 'cancelled']
 
 function statusBadge(status) {
@@ -183,65 +194,12 @@ function RegistrationsPanel() {
 
     // Send notification email
     if (row?.contact_email && EMAIL_WEBHOOK_URL) {
+      const approvalEmail = buildDistributorAccessEmail(row)
       const subject = status === 'approved'
-        ? `🎉 You're Approved — Welcome to GEL.IT.UP, ${row.contact_name}!`
+        ? approvalEmail.subject
         : 'Update on your GEL.IT.UP distributor application'
-      const portalLink = `${window.location.origin}/portal/login?portal=distributor&email=${encodeURIComponent(row.contact_email || '')}`
-      const forgotPasswordLink = `${window.location.origin}/portal/forgot-password?email=${encodeURIComponent(row.contact_email || '')}`
       const html = status === 'approved'
-        ? `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background-color:#f8f7ff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#f8f7ff;padding:32px 16px;">
-  <tr><td align="center">
-    <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(168,85,247,0.10);">
-      <!-- HEADER -->
-      <tr><td style="background:linear-gradient(135deg,#a855f7 0%,#7c3aed 50%,#4f46e5 100%);padding:40px 48px 32px;text-align:center;">
-        <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;">GEL.IT.UP by GIUP®</p>
-        <h1 style="margin:0;font-size:28px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">You're Approved! 🎉</h1>
-        <p style="margin:10px 0 0;font-size:15px;color:rgba(255,255,255,0.85);">Welcome to the GEL.IT.UP Distributor Family</p>
-      </td></tr>
-      <!-- BODY -->
-      <tr><td style="padding:40px 48px;">
-        <p style="margin:0 0 8px;font-size:17px;font-weight:600;color:#1e1b4b;">Dear ${row.contact_name},</p>
-        <p style="margin:0 0 20px;font-size:15px;line-height:1.65;color:#374151;">We are thrilled to let you know that your application for <strong style="color:#7c3aed;">${row.company_name}</strong> has been <strong>approved</strong>. Welcome aboard — we are so excited to have you as part of the GEL.IT.UP distribution network!</p>
-        <p style="margin:0 0 28px;font-size:15px;line-height:1.65;color:#374151;">Your exclusive distributor portal is ready. Sign in using your existing email and password. If you need to refresh access, use the password reset link below.</p>
-        <!-- CTA BUTTON -->
-        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:32px;">
-          <tr><td align="center">
-            <a href="${portalLink}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#a855f7,#7c3aed);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:50px;letter-spacing:0.3px;box-shadow:0 4px 14px rgba(124,58,237,0.35);">Log In To Portal →</a>
-          </td></tr>
-        </table>
-        <!-- STEPS -->
-        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#faf5ff;border-radius:12px;padding:0;margin-bottom:28px;">
-          <tr><td style="padding:24px 28px;">
-            <p style="margin:0 0 14px;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7c3aed;">Getting Started — 3 Easy Steps</p>
-            <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-              <tr>
-                <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#7c3aed;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">1</span></td>
-                <td style="padding-left:10px;padding-bottom:12px;font-size:14px;color:#374151;"><strong>Click the button above</strong> to open the distributor portal login.</td>
-              </tr>
-              <tr>
-                <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#7c3aed;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">2</span></td>
-                <td style="padding-left:10px;padding-bottom:12px;font-size:14px;color:#374151;"><strong>Sign in with your existing password.</strong> If you cannot access the portal, reset it here: <a href="${forgotPasswordLink}">${forgotPasswordLink}</a></td>
-              </tr>
-              <tr>
-                <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#7c3aed;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">3</span></td>
-                <td style="padding-left:10px;font-size:14px;color:#374151;"><strong>Log in</strong> to browse our full product catalogue and place wholesale orders.</td>
-              </tr>
-            </table>
-          </td></tr>
-        </table>
-        <p style="margin:0 0 28px;font-size:15px;line-height:1.65;color:#374151;">We look forward to growing together and supporting your business with our premium gel polish collections. If you ever have questions, our team is always here for you.</p>
-        <p style="margin:0;font-size:15px;line-height:1.65;color:#374151;">With warmth &amp; excitement,<br/><strong style="color:#1e1b4b;">The GEL.IT.UP Distribution Team</strong></p>
-      </td></tr>
-      <!-- FOOTER -->
-      <tr><td style="background:#f3f0ff;padding:24px 48px;text-align:center;border-top:1px solid #ede9fe;">
-        <p style="margin:0 0 6px;font-size:12px;color:#6b7280;">Questions? Contact us at <a href="mailto:distribution@gelitup.com" style="color:#7c3aed;text-decoration:none;font-weight:600;">distribution@gelitup.com</a></p>
-        <p style="margin:0;font-size:11px;color:#9ca3af;">GEL.IT.UP by GIUP® — Premium Gel Polish Distribution</p>
-      </td></tr>
-    </table>
-  </td></tr>
-</table>
-</body></html>`
+        ? approvalEmail.html
         : `<p>Hi ${row.contact_name},</p><p>Thank you for applying to become a GEL.IT.UP distributor. Unfortunately your application has not been approved at this time.</p><p>If you have any questions please contact us at distribution@gelitup.com.</p>`
       setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sending', message: '' } }))
       const emailHeaders = { 'Content-Type': 'application/json' }
@@ -307,10 +265,7 @@ function RegistrationsPanel() {
 
   const resendApprovalEmail = async (row) => {
     if (!row?.contact_email || !EMAIL_WEBHOOK_URL) return
-    const subject = `🎉 You're Approved — Welcome to GEL.IT.UP, ${row.contact_name}!`
-    const portalLink = `${window.location.origin}/portal/login?portal=distributor&email=${encodeURIComponent(row.contact_email || '')}`
-    const forgotPasswordLink = `${window.location.origin}/portal/forgot-password?email=${encodeURIComponent(row.contact_email || '')}`
-    const html = `<p>Dear ${row.contact_name},</p><p>Your GEL.IT.UP distributor application for <strong>${row.company_name}</strong> has been <strong>approved</strong>.</p><p>You can now log in to the distributor portal using your existing email and password:</p><p><a href="${portalLink}" style="background:#7c3aed;color:#fff;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:700;">Log In To Portal →</a></p><p>If you need to refresh your access, reset your password here: <a href="${forgotPasswordLink}">${forgotPasswordLink}</a></p><p>If you have any questions, contact us at distribution@gelitup.com.</p><p>The GEL.IT.UP Distribution Team</p>`
+    const { subject, html } = buildDistributorAccessEmail(row)
     setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sending', message: '' } }))
     const emailHeaders = { 'Content-Type': 'application/json' }
     if (SUPABASE_ANON_KEY) {

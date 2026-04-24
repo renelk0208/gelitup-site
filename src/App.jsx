@@ -15822,63 +15822,11 @@ function PendingApplicationsModule() {
     const createPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(application.contact_email || '')}`
 
     const subject = status === 'approved'
-      ? `?? You're Approved — Welcome to GEL.IT.UP, ${application.contact_name}!`
+      ? 'Your Distributor Tier Is Active - Portal Login Ready'
       : `GEL.IT.UP Portal application update`
 
     const html = status === 'approved'
-      ? `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background-color:#f8f7ff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#f8f7ff;padding:32px 16px;">
-  <tr><td align="center">
-    <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(168,85,247,0.10);">
-      <!-- HEADER -->
-      <tr><td style="background:linear-gradient(135deg,#D43790 0%,#a8186e 50%,#7c1250 100%);padding:40px 48px 32px;text-align:center;">
-        <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,0.75);text-transform:uppercase;">GEL.IT.UP by GIUP®</p>
-        <h1 style="margin:0;font-size:28px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">You're Approved! ??</h1>
-        <p style="margin:10px 0 0;font-size:15px;color:rgba(255,255,255,0.85);">Welcome to the GEL.IT.UP Distributor Family</p>
-      </td></tr>
-      <!-- BODY -->
-      <tr><td style="padding:40px 48px;">
-        <p style="margin:0 0 8px;font-size:17px;font-weight:600;color:#1a1a1a;">Dear ${application.contact_name},</p>
-        <p style="margin:0 0 20px;font-size:15px;line-height:1.65;color:#374151;">We are thrilled to let you know that your application for <strong style="color:#D43790;">${application.company_name}</strong> has been <strong>approved</strong>. Welcome aboard — we are so excited to have you as part of the GEL.IT.UP distribution network!</p>
-        <p style="margin:0 0 28px;font-size:15px;line-height:1.65;color:#374151;">Your exclusive distributor portal is ready and waiting. To get started, simply create your password using the button below — your email address is already prefilled for you.</p>
-        <!-- CTA BUTTON -->
-        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:32px;">
-          <tr><td align="center">
-            <a href="${createPasswordLink}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#D43790,#a8186e);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:50px;letter-spacing:0.3px;box-shadow:0 4px 14px rgba(212,55,144,0.35);">Create Password &amp; Enter Portal ✨</a>
-          </td></tr>
-        </table>
-        <!-- STEPS -->
-        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#fdf2f8;border-radius:12px;padding:0;margin-bottom:28px;">
-          <tr><td style="padding:24px 28px;">
-            <p style="margin:0 0 14px;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#D43790;">Getting Started — 3 Easy Steps</p>
-            <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-              <tr>
-                <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#D43790;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">1</span></td>
-                <td style="padding-left:10px;padding-bottom:12px;font-size:14px;color:#374151;"><strong>Click the button above</strong> — your email is prefilled automatically.</td>
-              </tr>
-              <tr>
-                <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#D43790;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">2</span></td>
-                <td style="padding-left:10px;padding-bottom:12px;font-size:14px;color:#374151;"><strong>Create your password</strong> and confirm it.</td>
-              </tr>
-              <tr>
-                <td style="width:28px;vertical-align:top;padding-top:2px;"><span style="display:inline-block;width:22px;height:22px;background:#D43790;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;color:#fff;">3</span></td>
-                <td style="padding-left:10px;font-size:14px;color:#374151;"><strong>Log in</strong> to browse our full product catalogue and place wholesale orders.</td>
-              </tr>
-            </table>
-          </td></tr>
-        </table>
-        <p style="margin:0 0 28px;font-size:15px;line-height:1.65;color:#374151;">We look forward to growing together and supporting your business with our premium gel polish collections. If you ever have questions, our team is always here for you.</p>
-        <p style="margin:0;font-size:15px;line-height:1.65;color:#374151;">With warmth &amp; excitement,<br/><strong style="color:#D43790;">The GEL.IT.UP Distribution Team</strong></p>
-      </td></tr>
-      <!-- FOOTER -->
-      <tr><td style="background:#fdf2f8;padding:24px 48px;text-align:center;border-top:1px solid #fce7f3;">
-        <p style="margin:0 0 6px;font-size:12px;color:#6b7280;">Questions? Contact us at <a href="mailto:${B2B_EMAIL}" style="color:#D43790;text-decoration:none;font-weight:600;">${B2B_EMAIL}</a></p>
-        <p style="margin:0;font-size:11px;color:#9ca3af;">GEL.IT.UP by GIUP® — Premium Gel Polish Distribution</p>
-      </td></tr>
-    </table>
-  </td></tr>
-</table>
-</body></html>`
+      ? `<p>Dear ${application.contact_name || 'Partner'},</p><p>Your account for <strong>${application.company_name || 'your company'}</strong> has been approved.</p><p>You can now create your password and access the distributor portal.</p><p><a href="${createPasswordLink}" style="background:#D43790;color:#fff;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:700;display:inline-block;">Create Password and Enter Portal</a></p><p>If you have questions, contact us at ${B2B_EMAIL}.</p><p>The GEL.IT.UP Distribution Team</p>`
       : `<p>Hello ${application.contact_name},</p><p>Your GEL.IT.UP B2B Portal application for <strong>${application.company_name}</strong> has been reviewed and marked as rejected.</p><p>If you need support or want to re-apply, contact us at ${B2B_EMAIL}.</p><p>Best regards,<br/>GEL.IT.UP Distribution Team</p>`
 
     const notificationResult = await sendPortalEmailNotification({
