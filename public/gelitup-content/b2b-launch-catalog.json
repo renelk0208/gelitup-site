@@ -6,7 +6,12 @@
       {"id": "5IN1_CLR", "name": "5-in-1 Superior Base Coat Clear", "category": "Base", "best_seller": true},
       {"id": "5IN1_MPK", "name": "5-in-1 Superior Base Coat Milky Pink", "category": "Base", "best_seller": true},
       {"id": "5IN1_MWH", "name": "5-in-1 Superior Base Coat Milky White", "category": "Base", "best_seller": true},
-      {"id": "5IN1_SNU", "name": "5-in-1 Superior Base Coat Soft Nude", "category": "Base", "best_seller": true}
+        {"id": "5IN1_SNU", "name": "5-in-1 Superior Base Coat Soft Nude", "category": "Base", "best_seller": true},
+        {"id": "GIUP-SBPURS", "name": "5-in-1 Superior Base 15ml Purple Serenity", "category": "Base", "new_2026": true},
+        {"id": "GIUP-SBLS", "name": "5-in-1 Superior Base 15ml Lemon Serenity", "category": "Base", "new_2026": true},
+        {"id": "GIUP-SBMS", "name": "5-in-1 Superior Base 15ml Mint Serenity", "category": "Base", "new_2026": true},
+        {"id": "GIUP-SBBlue", "name": "5-in-1 Superior Base 15ml Blue Serenity", "category": "Base", "new_2026": true},
+        {"id": "GIUP-SBPS", "name": "5-in-1 Superior Base 15ml Peach Serenity", "category": "Base", "new_2026": true}
     ],
     "tops": [
       {"id": "NW_TOP", "name": "Non-Wipe Top Coat", "category": "Top", "best_seller": true},
@@ -17,7 +22,10 @@
       {"id": "3IN1_CLR", "name": "3-in-1 Premium Builder Gel Clear", "feature": "Fiberglass Infused"},
       {"id": "3IN1_COV", "name": "3-in-1 Premium Builder Gel Cover", "feature": "Fiberglass Infused"},
       {"id": "SYN_MWH", "name": "Multimix Synthogel Milky White", "category": "Acrygel"},
-      {"id": "CREME_COV", "name": "Crème de la Crème Builder Gel Cover", "category": "Self-Leveling"}
+      {"id": "CREME_COV", "name": "Crème de la Crème Builder Gel Cover", "category": "Self-Leveling"},
+      {"id": "GIUP-BOB-blush-sorbet", "name": "Brush on Builder Gel Blush Sorbet 15ml", "category": "Brush On Builder", "new_2026": true},
+      {"id": "GIUP-BOB-sky-sprinkle", "name": "Brush on Builder Gel Sky Sprinkle 15ml", "category": "Brush On Builder", "new_2026": true},
+      {"id": "GIUP-BOB-Berry-stardust", "name": "Brush on Builder Gel Berry Stardust 15ml", "category": "Brush On Builder", "new_2026": true}
     ],
     "prep": [
       {"id": "SUPERBOND", "name": "Superbond Acid-Free Primer", "mandatory": true}
