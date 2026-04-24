@@ -340,13 +340,22 @@ function RegistrationsPanel() {
   }
 
   const updateTier = async (row, newTier) => {
-    if ((row.distributor_tier || '') === (newTier || '')) return
+    const resolvedType = getResolvedApplicationType(row)
+    const sameTier = (row.distributor_tier || '') === (newTier || '')
+    const needsDistributorProvisioning = Boolean(newTier) && (
+      resolvedType !== 'distributor' ||
+      String(row?.status || '').toLowerCase() !== 'approved' ||
+      !row?.prices_allocated
+    )
+    if (sameTier && !needsDistributorProvisioning) return
     const currentTierLabel = titleCaseTierLabel(row.distributor_tier || '')
     const nextTierLabel = titleCaseTierLabel(newTier || '')
     const ok = window.confirm(
       `Are you sure you want to change ${row.company_name} tier from "${currentTierLabel}" to "${nextTierLabel}"?\n\n` +
       (newTier
-        ? 'This will also set the client as Approved Distributor, enable login-ready tier pricing, and send a confirmation email.'
+        ? (sameTier
+          ? 'This will confirm distributor activation on the current tier, enable login-ready tier pricing, and send a confirmation email.'
+          : 'This will also set the client as Approved Distributor, enable login-ready tier pricing, and send a confirmation email.')
         : 'This will remove distributor tier assignment.')
     )
     if (!ok) return
@@ -511,6 +520,16 @@ function RegistrationsPanel() {
                         <option value="country">Level 2 Country Tier</option>
                         <option value="sales">Sales Representative</option>
                       </select>
+                      {row.distributor_tier && access.ok === false && (
+                        <button
+                          type="button"
+                          onClick={() => updateTier(row, row.distributor_tier)}
+                          disabled={saving === row.id}
+                          className="rounded-lg border border-emerald-300 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
+                        >
+                          Confirm Distributor Access
+                        </button>
+                      )}
                     </div>
                   </div>
                   <div>
