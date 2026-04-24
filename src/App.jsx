@@ -103,6 +103,7 @@ const QUICK_CART_STORAGE_KEY = 'gelitup.catalogue.quick_cart.v1'
 const CHECKOUT_FORM_STORAGE_KEY = 'gelitup.checkout.form.v1'
 const CHECKOUT_LAST_ORDER_KEY = 'gelitup.checkout.lastorder.v1'
 const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
+const FREE_SHIPPING_POPUP_STORAGE_KEY = 'gelitup.free_shipping_popup.shown.v1'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
 const HOME_HERO_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
@@ -8472,6 +8473,12 @@ function B2BClientSignup() {
       </div>
 
       <div className="rounded-b-2xl border border-t-0 border-slate-200 bg-white px-8 py-7">
+        <div className="mb-5 rounded-xl border border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 via-pink-50 to-rose-50 p-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-fuchsia-700">Shipping Benefit</p>
+          <p className="mt-1 text-sm font-extrabold text-fuchsia-900">You qualify for FREE SHIPPING within the EU.</p>
+          <p className="mt-1 text-xs text-fuchsia-800/90">Complete your B2B registration to activate your account and start ordering.</p>
+        </div>
+
         <p className="mb-5 text-center text-xs text-slate-500">
           Already have an account?{' '}
           <NavLink to="/portal/login?portal=b2b" className="font-semibold text-slate-800 hover:underline">Sign in</NavLink>
@@ -17715,7 +17722,13 @@ function App() {
       return
     }
 
+    const alreadyShown = sessionStorage.getItem(FREE_SHIPPING_POPUP_STORAGE_KEY)
+    if (alreadyShown) {
+      return
+    }
+
     const timer = setTimeout(() => {
+      sessionStorage.setItem(FREE_SHIPPING_POPUP_STORAGE_KEY, '1')
       setShowFreeShippingPopup(true)
     }, 120)
 
@@ -18988,19 +19001,19 @@ function App() {
               <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12" /></svg>
             </button>
 
-            <div className="bg-gradient-to-r from-[#14532d] via-[#166534] to-[#0f766e] px-6 py-7 text-white sm:px-8">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-100">Limited Launch Benefit</p>
+            <div className="bg-gradient-to-r from-[#f04293] via-[#d43790] to-[#8e1650] px-6 py-7 text-white sm:px-8">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-pink-100/90">Limited Launch Benefit</p>
               <h2 className="mt-2 text-2xl font-black leading-tight sm:text-3xl">FREE SHIPPING within the EU</h2>
-              <p className="mt-2 text-sm text-emerald-50/90">Register now and qualify for free shipping on your approved B2B orders.</p>
+              <p className="mt-2 text-sm text-pink-50/95">Register now and qualify for free shipping on your approved B2B orders.</p>
             </div>
 
             <div className="space-y-3 px-6 py-5 sm:px-8 sm:py-6">
               <NavLink
-                to="/become-distributor"
+                to="/portal/signup"
                 onClick={() => {
                   setShowFreeShippingPopup(false)
                 }}
-                className="flex w-full items-center justify-center rounded-xl bg-[#166534] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#14532d]"
+                className="flex w-full items-center justify-center rounded-xl bg-[#b21f6a] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#8e1650]"
               >
                 Register now and qualify for free shipping
               </NavLink>
