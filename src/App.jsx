@@ -103,6 +103,7 @@ const QUICK_CART_STORAGE_KEY = 'gelitup.catalogue.quick_cart.v1'
 const CHECKOUT_FORM_STORAGE_KEY = 'gelitup.checkout.form.v1'
 const CHECKOUT_LAST_ORDER_KEY = 'gelitup.checkout.lastorder.v1'
 const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
+const FREE_SHIPPING_POPUP_STORAGE_KEY = 'gelitup.free_shipping_popup.dismissed.v1'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
 const HOME_HERO_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
@@ -17650,6 +17651,7 @@ function App() {
   const [showBackToTop, setShowBackToTop] = useState(false)
   const [showChatPanel, setShowChatPanel] = useState(false)
   const [showExitIntent, setShowExitIntent] = useState(false)
+  const [showFreeShippingPopup, setShowFreeShippingPopup] = useState(false)
   const exitIntentShownRef = useRef(false)
 
   const handleAcceptCookies = useCallback(() => {
@@ -17705,6 +17707,29 @@ function App() {
       if (mobileTimer) clearTimeout(mobileTimer)
     }
   }, [])
+
+  useEffect(() => {
+    const isHomeRoute = routerLocation.pathname === '/' || routerLocation.pathname === '/home'
+    if (!isHomeRoute) {
+      setShowFreeShippingPopup(false)
+      return
+    }
+
+    if (isPortalAuthenticated) {
+      return
+    }
+
+    const alreadyDismissed = sessionStorage.getItem(FREE_SHIPPING_POPUP_STORAGE_KEY)
+    if (alreadyDismissed) {
+      return
+    }
+
+    const timer = setTimeout(() => {
+      setShowFreeShippingPopup(true)
+    }, 120)
+
+    return () => clearTimeout(timer)
+  }, [isPortalAuthenticated, routerLocation.pathname])
 
   const openContactModal = useCallback(() => {
     setContactRequestError('')
@@ -18955,6 +18980,56 @@ function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
+
+      {showFreeShippingPopup && (
+        <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/65 p-4 backdrop-blur-sm sm:items-center" onClick={() => {
+          sessionStorage.setItem(FREE_SHIPPING_POPUP_STORAGE_KEY, '1')
+          setShowFreeShippingPopup(false)
+        }}>
+          <div className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-white/20 bg-[#fffaf3] shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => {
+                sessionStorage.setItem(FREE_SHIPPING_POPUP_STORAGE_KEY, '1')
+                setShowFreeShippingPopup(false)
+              }}
+              className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/10 text-black/60 transition hover:bg-black/20 hover:text-black"
+            >
+              <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12" /></svg>
+            </button>
+
+            <div className="bg-gradient-to-r from-[#14532d] via-[#166534] to-[#0f766e] px-6 py-7 text-white sm:px-8">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-100">Limited Launch Benefit</p>
+              <h2 className="mt-2 text-2xl font-black leading-tight sm:text-3xl">FREE SHIPPING within the EU</h2>
+              <p className="mt-2 text-sm text-emerald-50/90">Register now and qualify for free shipping on your approved B2B orders.</p>
+            </div>
+
+            <div className="space-y-3 px-6 py-5 sm:px-8 sm:py-6">
+              <NavLink
+                to="/become-distributor"
+                onClick={() => {
+                  sessionStorage.setItem(FREE_SHIPPING_POPUP_STORAGE_KEY, '1')
+                  setShowFreeShippingPopup(false)
+                }}
+                className="flex w-full items-center justify-center rounded-xl bg-[#166534] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#14532d]"
+              >
+                Register now and qualify for free shipping
+              </NavLink>
+              <button
+                type="button"
+                onClick={() => {
+                  sessionStorage.setItem(FREE_SHIPPING_POPUP_STORAGE_KEY, '1')
+                  setShowFreeShippingPopup(false)
+                }}
+                className="w-full rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Continue browsing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Exit-intent popup for visitors with items in cart */}
       {showExitIntent && (
