@@ -7,7 +7,7 @@
   NODE_VERSION = "20"
   VITE_ENABLE_PORTAL = "true"
   VITE_EMAIL_WEBHOOK_URL = "https://veyxwtdntcfsvldmrthc.functions.supabase.co/b2b-email-notifications"
-  VITE_EMAIL_FROM = "GEL.IT.UP Distributors <distributors@send.gelitup.com>"
+  VITE_EMAIL_FROM = "GEL.IT.UP Distributors <distributors@gelitup.com>"
   VITE_EMAIL_REPLY_TO = "distribution@gelitup.com"
   VITE_B2B_ORDER_INBOX = "leeukopf@gmail.com"
 

@@ -57,7 +57,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: payload.from || 'GEL.IT.UP Distributors <distributors@send.gelitup.com>',
+        from: payload.from || 'GEL.IT.UP Distributors <distributors@gelitup.com>',
         to: recipients,
         subject: payload.subject,
         html: payload.html,

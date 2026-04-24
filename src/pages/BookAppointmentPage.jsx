@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL
 const EMAIL_WEBHOOK_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-const EMAIL_FROM = import.meta.env.VITE_EMAIL_FROM || 'GEL.IT.UP Distributors <distributors@send.gelitup.com>'
+const EMAIL_FROM = import.meta.env.VITE_EMAIL_FROM || 'GEL.IT.UP Distributors <distributors@gelitup.com>'
 const INBOX = 'info@gelitup.com'
 
 const TOPICS = [
