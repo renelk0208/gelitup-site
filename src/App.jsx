@@ -15112,6 +15112,97 @@ function OrdersModule() {
       : '',
   )
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
+  const [priceLookupMap, setPriceLookupMap] = useState(new Map())
+
+  useEffect(() => {
+    let mounted = true
+    fetch('/gelitup-content/b2b-price-list.json')
+      .then(r => r.ok ? r.json() : null)
+      .then(payload => {
+        if (!mounted || !payload) return
+        const items = Array.isArray(payload?.items) ? payload.items : []
+        const map = new Map()
+        const norm = s => String(s || '').trim().toUpperCase().replace(/\s+/g, ' ')
+        const normName = s => norm(s).replace(/GEL\.?IT\.?UP|GEL\s*IT\s*UP|GIUP/gi, ' ').replace(/[^A-Z0-9]+/g, ' ').replace(/\s+/g, ' ').trim()
+        for (const { name, sku, price } of items) {
+          const unitPrice = price != null ? Math.ceil(Number(price) * 1.2 * 10) / 10 : null
+          const entry = { name: String(name || '').trim(), unitPrice }
+          const keys = [norm(sku), normName(name)]
+          const numMatch = String(name || '').match(/^(\d+[A-Z]?)\s/)
+          if (numMatch) {
+            const n = numMatch[1]
+            keys.push(norm(n), norm(n.padStart(2, '0')), norm(n.replace(/^0+(\d)/, '$1')))
+          }
+          for (const k of keys) {
+            if (k && !map.has(k)) map.set(k, entry)
+          }
+        }
+        setPriceLookupMap(map)
+      })
+      .catch(() => {})
+    return () => { mounted = false }
+  }, [])
+
+  const parseItem = (rawItem, idx) => {
+    if (rawItem && typeof rawItem === 'object') {
+      const qty = Math.max(1, Number(rawItem.qty ?? rawItem.quantity ?? 1) || 1)
+      const sku = String(rawItem.sku || rawItem.code || '').trim().toUpperCase().replace(/\s+/g, ' ')
+      const name = String(rawItem.name || rawItem.displayName || rawItem.description || sku || `Item ${idx + 1}`).trim()
+      return { sku, name, qty, storedPrice: rawItem.price ?? null, raw: `${sku || name} x${qty}` }
+    }
+    const raw = String(rawItem || '').trim()
+    const qtyMatch = raw.match(/\s+x(\d+)$/i)
+    const qty = qtyMatch ? Math.max(1, Number(qtyMatch[1]) || 1) : 1
+    const code = qtyMatch ? raw.replace(/\s+x\d+$/i, '').trim() : raw
+    return { sku: code, name: code || `Item ${idx + 1}`, qty, storedPrice: null, raw }
+  }
+
+  const lookupPrice = (item) => {
+    if (item.storedPrice != null) return item.storedPrice
+    if (!priceLookupMap.size) return null
+    const norm = s => String(s || '').trim().toUpperCase().replace(/\s+/g, ' ')
+    const normName = s => norm(s).replace(/GEL\.?IT\.?UP|GEL\s*IT\s*UP|GIUP/gi, ' ').replace(/[^A-Z0-9]+/g, ' ').replace(/\s+/g, ' ').trim()
+    const skuKey = norm(item.sku)
+    const nameKey = normName(item.name)
+    const byCode = priceLookupMap.get(skuKey) || priceLookupMap.get(nameKey)
+    if (byCode?.unitPrice != null) return byCode.unitPrice
+    const stripped = skuKey.replace(/^GIUP\s+/, '')
+    const byStripped = priceLookupMap.get(stripped) || priceLookupMap.get(stripped.replace(/^0+(\d)/, '$1'))
+    if (byStripped?.unitPrice != null) return byStripped.unitPrice
+    return null
+  }
+
+  const downloadOrderCsv = (order) => {
+    const items = (Array.isArray(order.items) ? order.items : []).map((item, idx) => parseItem(item, idx))
+    if (!items.length) return
+    const csvEsc = v => `"${String(v ?? '').replace(/"/g, '""')}"`
+    const orderDate = order.created_at ? new Date(order.created_at).toISOString().slice(0, 10) : ''
+    let orderTotal = 0
+    const lines = items.map((item, i) => {
+      const unitPrice = lookupPrice(item)
+      const lineTotal = unitPrice != null ? unitPrice * item.qty : null
+      if (lineTotal != null) orderTotal += lineTotal
+      return [
+        csvEsc(order.id), csvEsc(orderDate), csvEsc(userEmail),
+        csvEsc(order.consignee_name || ''), csvEsc(order.shipping_address || ''),
+        csvEsc(item.sku), csvEsc(item.name), csvEsc(item.qty),
+        csvEsc(unitPrice != null ? unitPrice.toFixed(2) : ''),
+        csvEsc(lineTotal != null ? lineTotal.toFixed(2) : ''),
+        csvEsc(i === items.length - 1 && orderTotal > 0 ? orderTotal.toFixed(2) : ''),
+      ].join(',')
+    })
+    const header = 'Order #,Order Date,Customer Email,Consignee Name,Shipping Address,SKU,Item Name,Qty,Unit Price (EUR),Line Total (EUR),Order Total (EUR)'
+    const csv = [header, ...lines].join('\r\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `order-${order.id}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.setTimeout(() => URL.revokeObjectURL(url), 1500)
+  }
 
   const isCancellable = (order) => {
     const s = String(order?.status || 'received').toLowerCase()
@@ -15123,7 +15214,7 @@ function OrdersModule() {
     setCancellingId(order.id)
     try {
       const itemList = Array.isArray(order.items)
-        ? order.items.filter(i => typeof i === 'string').map((i, n) => `<li>${n + 1}. ${i}</li>`).join('')
+        ? order.items.map((item, n) => { const p = parseItem(item, n); return `<li>${n + 1}. ${p.sku && p.sku !== p.name ? `${p.sku} — ` : ''}${p.name} ×${p.qty}</li>` }).join('')
         : '<li>No item detail available</li>'
 
       await sendPortalEmailNotification({
@@ -15335,7 +15426,7 @@ function OrdersModule() {
           <div className="space-y-3">
             {orders.map((order) => {
               const isExpanded = expandedOrderId === order.id
-              const itemLines = Array.isArray(order.items) ? order.items.filter(i => typeof i === 'string') : []
+              const parsedItems = Array.isArray(order.items) ? order.items.map((item, idx) => parseItem(item, idx)) : []
               const cancelRequested = cancelRequestedIds.has(order.id) || String(order.status || '').toLowerCase() === 'cancellation_requested'
               const isCancelling = cancellingId === order.id
               const isConfirming = cancelConfirmId === order.id
@@ -15368,23 +15459,31 @@ function OrdersModule() {
                       )}
                     </div>
                     <div className="flex items-center gap-2">
-                      {itemLines.length > 0 && (
+                      {parsedItems.length > 0 && (
                         <button
                           onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
                           className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
                         >
-                          {isExpanded ? 'Hide Items' : `View Items (${itemLines.length})`}
+                          {isExpanded ? 'Hide Items' : `View Items (${parsedItems.length})`}
                         </button>
                       )}
-                      {itemLines.length > 0 && (
+                      {parsedItems.length > 0 && (
                         <button
                           onClick={() => {
-                            const encoded = itemLines.map(i => encodeURIComponent(i)).join(',')
+                            const encoded = parsedItems.map(i => encodeURIComponent(i.raw)).join(',')
                             navigate(`/portal/dashboard/products?reorder=${encoded}`)
                           }}
                           className="rounded-md border border-fuchsia-300 bg-fuchsia-50 px-2 py-1 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100"
                         >
                           Re-Order
+                        </button>
+                      )}
+                      {parsedItems.length > 0 && (
+                        <button
+                          onClick={() => downloadOrderCsv(order)}
+                          className="rounded-md border border-emerald-300 bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                        >
+                          ↓ CSV
                         </button>
                       )}
                       <button
@@ -15429,15 +15528,27 @@ function OrdersModule() {
                   )}
 
                   {/* Expandable items detail */}
-                  {isExpanded && itemLines.length > 0 && (
+                  {isExpanded && parsedItems.length > 0 && (
                     <div className="border-t border-slate-200 px-4 pb-4 pt-3">
                       <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Order Contents</p>
-                      <ul className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
-                        {itemLines.map((item, idx) => (
-                          <li key={idx} className="rounded-md bg-white px-3 py-1.5 text-xs text-slate-700 border border-slate-200">
-                            {item}
-                          </li>
-                        ))}
+                      <ul className="space-y-1">
+                        {parsedItems.map((item, idx) => {
+                          const unitPrice = lookupPrice(item)
+                          const lineTotal = unitPrice != null ? unitPrice * item.qty : null
+                          return (
+                            <li key={idx} className="flex items-center justify-between gap-2 rounded-md bg-white px-3 py-2 text-xs border border-slate-200">
+                              <div className="flex-1 min-w-0">
+                                <span className="font-medium text-slate-800">{item.name}</span>
+                                {item.sku && item.sku !== item.name && <span className="ml-1.5 font-mono text-slate-400">{item.sku}</span>}
+                              </div>
+                              <div className="flex-none text-right whitespace-nowrap">
+                                <span className="text-slate-600">×{item.qty}</span>
+                                {unitPrice != null && <span className="ml-2 text-slate-500">@ €{unitPrice.toFixed(2)}</span>}
+                                {lineTotal != null && <span className="ml-1 font-semibold text-slate-800">= €{lineTotal.toFixed(2)}</span>}
+                              </div>
+                            </li>
+                          )
+                        })}
                       </ul>
                       {order.shipping_address && (
                         <p className="mt-3 text-xs text-slate-500">
@@ -16593,7 +16704,20 @@ function BuyerPortal({ onLogout, userName, userEmail }) {
           <div className="mt-3 space-y-2">
             {recentOrders.map((order) => {
               const isExpanded = expandedOrderId === order.id
-              const itemLines = Array.isArray(order.items) ? order.items.filter(i => typeof i === 'string') : []
+              const rawItems = Array.isArray(order.items) ? order.items : []
+              const parsedItems = rawItems.map((item, idx) => {
+                if (item && typeof item === 'object') {
+                  const qty = Math.max(1, Number(item.qty ?? item.quantity ?? 1) || 1)
+                  const sku = String(item.sku || item.code || '').trim().toUpperCase().replace(/\s+/g, ' ')
+                  const name = String(item.name || item.displayName || sku || `Item ${idx + 1}`).trim()
+                  return { name, sku, qty }
+                }
+                const raw = String(item || '').trim()
+                const qtyMatch = raw.match(/\s+x(\d+)$/i)
+                const qty = qtyMatch ? Math.max(1, Number(qtyMatch[1]) || 1) : 1
+                const code = qtyMatch ? raw.replace(/\s+x\d+$/i, '').trim() : raw
+                return { name: code || `Item ${idx + 1}`, sku: code, qty }
+              })
               return (
                 <div key={order.id} className="rounded-xl border border-slate-200 bg-slate-50">
                   <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3 text-sm">
@@ -16605,20 +16729,24 @@ function BuyerPortal({ onLogout, userName, userEmail }) {
                         ? <span className="rounded-full bg-fuchsia-100 px-2 py-0.5 text-xs font-semibold text-fuchsia-700">Invoice Ready</span>
                         : <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs text-slate-600 capitalize">{order.status || 'received'}</span>}
                     </div>
-                    {itemLines.length > 0 && (
+                    {parsedItems.length > 0 && (
                       <button
                         onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
                         className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
                       >
-                        {isExpanded ? 'Hide' : `View Items (${itemLines.length})`}
+                        {isExpanded ? 'Hide' : `View Items (${parsedItems.length})`}
                       </button>
                     )}
                   </div>
-                  {isExpanded && itemLines.length > 0 && (
+                  {isExpanded && parsedItems.length > 0 && (
                     <div className="border-t border-slate-200 px-4 pb-4 pt-3">
-                      <ul className="grid gap-1 sm:grid-cols-2">
-                        {itemLines.map((item, idx) => (
-                          <li key={idx} className="rounded-md bg-white px-3 py-1.5 text-xs text-slate-700 border border-slate-200">{item}</li>
+                      <ul className="space-y-1">
+                        {parsedItems.map((item, idx) => (
+                          <li key={idx} className="flex items-center justify-between gap-2 rounded-md bg-white px-3 py-2 text-xs border border-slate-200">
+                            <span className="font-medium text-slate-800">{item.name}</span>
+                            {item.sku && item.sku !== item.name && <span className="font-mono text-slate-400">{item.sku}</span>}
+                            <span className="flex-none text-slate-600">×{item.qty}</span>
+                          </li>
                         ))}
                       </ul>
                     </div>
