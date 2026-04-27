@@ -818,11 +818,12 @@ function parseOrderItemEntry(rawItem, index = 0) {
   const qty = qtyMatch ? Math.max(1, Number(qtyMatch[1]) || 1) : 1
   const label = qtyMatch ? raw.replace(/\s+x\d+$/i, '').trim() : raw
   const sku = extractOrderItemSkuToken(label)
+  const normLabel = normalizeAdminSkuToken(label)
   return {
     sku,
     name: label || `Item ${index + 1}`,
     qty,
-    unknown: normalizeAdminSkuToken(label) === 'SKU' || (!sku && !label),
+    unknown: normLabel === 'SKU' || normLabel === 'ITEM' || (!sku && !label),
     rawLabel: raw,
   }
 }
@@ -1389,7 +1390,7 @@ function OrdersPanel() {
                               return (
                                 <li key={i} className="flex items-center justify-between px-3 py-2">
                                   <div className="min-w-0">
-                                    <p className="truncate text-slate-700">{parsed.unknown ? `Unmapped product (${parsed.rawLabel || 'SKU'})` : parsed.name}</p>
+                                    <p className="truncate text-slate-700">{parsed.unknown ? 'Unknown product' : parsed.name}</p>
                                     <div className="flex flex-wrap items-center gap-2">
                                       <span className="font-mono text-[10px] text-slate-500">{parsed.sku || 'SKU unknown'}</span>
                                       {unitPrice != null && (

@@ -8837,7 +8837,10 @@ function CheckoutPage() {
       }
 
       // 2. Build order items
-      const checkoutItems = cartEntries.map(e => e.qty > 1 ? `${e.code} x${e.qty}` : e.code)
+      // Rich objects for Supabase (preserves product name even when code is generic/unmapped)
+      const checkoutItems = cartEntries.map(e => ({ name: e.name, sku: e.code, qty: e.qty }))
+      // String format for external Zoho webhook (code-based; backward-compatible)
+      const checkoutItemStrings = cartEntries.map(e => e.qty > 1 ? `${e.code} x${e.qty}` : e.code)
 
       const invoiceAddress = [form.invoiceAddressLine1, form.invoiceAddressLine2, form.invoiceArea, form.invoiceRegion, form.invoicePostalCode].filter(Boolean).join(', ')
       const shippingAddr = !form.shipToDifferentAddress
@@ -8909,7 +8912,7 @@ function CheckoutPage() {
         customerEmail: email,
         accountType: 'b2b_buyer',
         generatedPackageTier: null,
-        items: checkoutItems,
+        items: checkoutItemStrings,
         itemRates,
         totalUnits: cartUnits,
         status: 'received',
@@ -13058,9 +13061,19 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
     const packageItemsPayload = packageCartItems.map((item) => `${item.sku} x${item.qty}`)
     const selectedCodesWithQty = selectedCodes.map(code => (itemQtys[code] || 1) > 1 ? `${code} x${itemQtys[code]}` : code)
-    const checkoutItems = includeProfessionalBasePack
+    // String format for Zoho webhook (code-based; backward-compatible)
+    const checkoutItemsForZoho = includeProfessionalBasePack
       ? [...selectedCodesWithQty, ...packageItemsPayload, `${PROFESSIONAL_BASE_PACK.sku} x${PROFESSIONAL_BASE_PACK.qty}`]
       : [...selectedCodesWithQty, ...packageItemsPayload]
+    // Rich objects for Supabase — preserves product name alongside SKU code
+    const checkoutItems = [
+      ...selectedCodes.map(code => {
+        const product = products.find(p => p.code === code)
+        return { name: product?.name || code, sku: code, qty: itemQtys[code] || 1 }
+      }),
+      ...packageCartItems.map(item => ({ name: item.name || item.sku, sku: item.sku, qty: item.qty })),
+      ...(includeProfessionalBasePack ? [{ name: PROFESSIONAL_BASE_PACK.name || PROFESSIONAL_BASE_PACK.sku, sku: PROFESSIONAL_BASE_PACK.sku, qty: PROFESSIONAL_BASE_PACK.qty }] : []),
+    ]
 
     const verifiedUnits = selectedCodes.reduce((s, c) => s + (itemQtys[c] || 1), 0)
       + packageCartItems.reduce((sum, item) => sum + item.qty, 0)
@@ -13218,7 +13231,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       customerEmail: userData?.user?.email ?? null,
       accountType: userData?.user?.user_metadata?.account_type || null,
       generatedPackageTier: generatedPackageTier || null,
-      items: checkoutItems,
+      items: checkoutItemsForZoho,
       itemRates,
       totalUnits,
       status: 'received',
