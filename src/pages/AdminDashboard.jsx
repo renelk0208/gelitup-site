@@ -1059,8 +1059,15 @@ function OrdersPanel() {
 
   const downloadOrderCsv = (row) => {
     const parsedItems = (Array.isArray(row?.items) ? row.items : []).map((item, index) => parseOrderItemEntry(item, index))
+    // Always generate the CSV — if no items, generate a header-only row with order metadata
     if (!parsedItems.length) {
-      alert('This order has no items to export.')
+      const csvEsc = v => `"${String(v ?? '').replace(/"/g, '""')}"`
+      const header = 'Order #,Order Date,Customer Email,Consignee Name,Shipping Address,SKU,Item Name,Qty,Unit Price (EUR),Line Total (EUR),Order Total (EUR)'
+      const orderDate = row?.created_at ? new Date(row.created_at).toISOString().slice(0, 10) : ''
+      const dataRow = [csvEsc(row?.id), csvEsc(orderDate), csvEsc(row?.customer_email || ''), csvEsc(row?.consignee_name || ''), csvEsc(row?.shipping_address || ''), '', '', '', '', '', ''].join(',')
+      const csv = [header, dataRow].join('\r\n')
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      triggerFileDownload(blob, `order-${row?.id || 'unknown'}.csv`)
       return
     }
 
@@ -1390,7 +1397,7 @@ function OrdersPanel() {
                               return (
                                 <li key={i} className="flex items-center justify-between px-3 py-2">
                                   <div className="min-w-0">
-                                    <p className="truncate text-slate-700">{parsed.unknown ? 'Unknown product' : parsed.name}</p>
+                                    <p className="truncate text-slate-700">{parsed.unknown ? (parsed.rawLabel || 'Unknown product') : parsed.name}</p>
                                     <div className="flex flex-wrap items-center gap-2">
                                       <span className="font-mono text-[10px] text-slate-500">{parsed.sku || 'SKU unknown'}</span>
                                       {unitPrice != null && (
@@ -1408,34 +1415,36 @@ function OrdersPanel() {
                               )
                             })}
                           </ul>
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            <button
-                              type="button"
-                              onClick={() => downloadOrderCsv(row)}
-                              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                            >
-                              ↓ Download Order CSV
-                            </button>
-                            <button
-                              type="button"
-                              onClick={async () => {
-                                setEmailingOrderId(row.id)
-                                const result = await emailOrderCsvToInbox(row)
-                                setEmailingOrderId(null)
-                                if (!result.ok) {
-                                  alert(`Could not email order CSV: ${result.message}`)
-                                  return
-                                }
-                                alert(result.message)
-                              }}
-                              disabled={emailingOrderId === row.id}
-                              className="rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-50"
-                            >
-                              {emailingOrderId === row.id ? 'Sending…' : '✉ Email CSV to Inbox'}
-                            </button>
-                          </div>
                         </div>
                       )}
+
+                      {/* Download/email buttons — always visible regardless of items */}
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => downloadOrderCsv(row)}
+                          className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                        >
+                          ↓ Download Order CSV
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            setEmailingOrderId(row.id)
+                            const result = await emailOrderCsvToInbox(row)
+                            setEmailingOrderId(null)
+                            if (!result.ok) {
+                              alert(`Could not email order CSV: ${result.message}`)
+                              return
+                            }
+                            alert(result.message)
+                          }}
+                          disabled={emailingOrderId === row.id}
+                          className="rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-50"
+                        >
+                          {emailingOrderId === row.id ? 'Sending…' : '✉ Email CSV to Inbox'}
+                        </button>
+                      </div>
                     </>
                   )}
 
