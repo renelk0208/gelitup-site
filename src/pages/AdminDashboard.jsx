@@ -53,6 +53,19 @@ function fmtDate(iso) {
   return new Date(iso).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
+function triggerFileDownload(blob, filename) {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.rel = 'noopener'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  // Delay revoke to avoid Safari/iOS aborting the download before it starts.
+  window.setTimeout(() => URL.revokeObjectURL(url), 1500)
+}
+
 const RLS_HINT_REGISTRATIONS = `-- Run once in Supabase SQL Editor:
 create policy "Admins can read all registrations"
   on public.b2b_registrations for select to authenticated
@@ -943,7 +956,11 @@ function OrdersPanel() {
             const ws = XLSX.utils.json_to_sheet(data)
             const wb = XLSX.utils.book_new()
             XLSX.utils.book_append_sheet(wb, ws, 'Orders')
-            XLSX.writeFile(wb, `gelitup-orders-${filter}-${new Date().toISOString().slice(0,10)}.xlsx`)
+            const xlsxBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+            const xlsxBlob = new Blob([xlsxBuffer], {
+              type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            })
+            triggerFileDownload(xlsxBlob, `gelitup-orders-${filter}-${new Date().toISOString().slice(0,10)}.xlsx`)
           }}
           disabled={!rows.length}
           className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 disabled:opacity-40"
@@ -1845,12 +1862,7 @@ function downloadCSV(priceData, sortedCategories) {
   }
 
   const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `gelitup-tier-pricing-${new Date().toISOString().slice(0, 10)}.csv`
-  link.click()
-  URL.revokeObjectURL(url)
+  triggerFileDownload(blob, `gelitup-tier-pricing-${new Date().toISOString().slice(0, 10)}.csv`)
 }
 
 // ─── Draft Carts panel ────────────────────────────────────────────────────────

@@ -12,7 +12,12 @@ interface NotificationPayload {
   from?: string
   replyTo?: string
   eventType?: string
-  attachments?: Array<{ filename: string; content: string; content_type?: string }>
+  attachments?: Array<{
+    filename: string
+    content: string
+    content_type?: string
+    contentType?: string
+  }>
 }
 
 serve(async (req) => {
@@ -50,6 +55,16 @@ serve(async (req) => {
       })
     }
 
+    const attachments = (payload.attachments || [])
+      .filter((attachment) => attachment && attachment.filename && attachment.content)
+      .map((attachment) => ({
+        filename: String(attachment.filename),
+        content: String(attachment.content),
+        ...(attachment.contentType || attachment.content_type
+          ? { contentType: String(attachment.contentType || attachment.content_type) }
+          : {}),
+      }))
+
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -61,8 +76,8 @@ serve(async (req) => {
         to: recipients,
         subject: payload.subject,
         html: payload.html,
-        reply_to: payload.replyTo || 'distribution@gelitup.com',
-        ...(payload.attachments?.length ? { attachments: payload.attachments } : {}),
+        replyTo: payload.replyTo || 'distribution@gelitup.com',
+        ...(attachments.length ? { attachments } : {}),
       }),
     })
 

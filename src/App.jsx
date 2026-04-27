@@ -12282,14 +12282,47 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             const name = priceEntry?.name || rawName
             const price = priceEntry?.price ?? null
 
+            const normalizedCodeValue = normalizeSkuCode(code)
+            const normalizedSkuValue = normalizeSkuCode(sku)
+            const normalizedNameValue = normalizeSkuCode(name || rawName)
+            const isIceIceBaby = normalizedCodeValue === 'GIUP 01'
+              || normalizedSkuValue === 'GIUP 01'
+              || normalizedNameValue.includes('ICE ICE BABY')
+            const isSchizoPrincess = normalizedCodeValue === 'GIUP 221'
+              || normalizedSkuValue === 'GIUP 221'
+              || normalizedNameValue.includes('SCHIZO PRINCESS')
+            const isMultimixLiquid = normalizedNameValue.includes('MULTIMIX LIQUID')
+              || normalizedNameValue.includes('SYNTHOLIQUID')
+              || normalizedNameValue.includes('SYNTHOGEL LIQUID')
+
+            let normalizedCategoryName = categoryName
+            let normalizedColorFamily = item.colorFamily || null
+            let normalizedDisplayName = name
+
+            if (isIceIceBaby) {
+              normalizedCategoryName = 'SOLID GEL POLISH'
+              normalizedColorFamily = normalizedColorFamily || 'White'
+              normalizedDisplayName = priceEntry?.name || '01 Ice Ice Baby -HTF'
+            }
+
+            if (isSchizoPrincess) {
+              normalizedCategoryName = 'GLITTERS'
+              normalizedDisplayName = priceEntry?.name || '221 Schizo Princess -HTF'
+            }
+
+            if (isMultimixLiquid) {
+              normalizedCategoryName = 'Multimix Polygel'
+              normalizedDisplayName = priceEntry?.name || 'MultiMix Syntholiquid 100ml -HTF'
+            }
+
             return {
               code,
               sku,
-              name,
+              name: normalizedDisplayName,
               description,
-              category: categoryName,
+              category: normalizedCategoryName,
               parentSection: item.parentSection || null,
-              colorFamily: item.colorFamily || null,
+              colorFamily: normalizedColorFamily,
               preview,
               imageUrl,
               galleryImages: item.galleryImages || [],
@@ -13311,7 +13344,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     const csvBase64 = btoa(csvBinary)
 
     const emailAttachments = [
-      { filename: `order-${orderId}.csv`, content: csvBase64, content_type: 'text/csv' },
+      { filename: `order-${orderId}.csv`, content: csvBase64, contentType: 'text/csv' },
     ]
 
     const inboxOrderHtml = `
