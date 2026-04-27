@@ -854,12 +854,42 @@ function buildOrderPriceLookupMap(items = []) {
       setIfMissing(normalizeAdminSkuToken(n.replace(/^0+(\d)/, '$1')), entry)
       setIfMissing(normalizeAdminSkuToken(n.padStart(2, '0')), entry)
     }
+
+    // Also index by the extracted short SKU token from the full product name.
+    // This allows order items stored as "SH07" or "STF 01" to match price list
+    // entries like "Shimmer Collection #SH07 -HTF" or "Shimmer Top Fairy #STF 01 -HTF".
+    const shortToken = extractOrderItemSkuToken(name)
+    if (shortToken) {
+      setIfMissing(shortToken, entry)
+      // Also add compact (no-space) variant so "SH07" and "SH 07" both hit the same entry
+      const compact = normalizeAdminSkuToken(shortToken.replace(/\s+/g, ''))
+      if (compact !== shortToken) setIfMissing(compact, entry)
+    }
+
+    // Also index by "WORD NUMBER" prefix for products like "Polygel 2 Brush and Spatula..."
+    // so that order items stored as "POLYGEL 2" can find the price.
+    const wordNumPrefix = normalizeAdminSkuToken(name).match(/^([A-Z][A-Z0-9]{1,})\s+(\d{1,4})\b/)
+    if (wordNumPrefix) {
+      setIfMissing(`${wordNumPrefix[1]} ${wordNumPrefix[2]}`, entry)
+    }
   })
 
   return map
 }
 
-function resolveOrderItemUnitPrice(item, priceLookupMap) {
+const ADMIN_TIER_PRICE_MULTIPLIERS = {
+  authority: 0.22,
+  professional: 0.37,
+  country: 0.264,
+  sales: 0.85,
+}
+
+function getTierMultiplier(tier) {
+  const normalized = String(tier || '').trim().toLowerCase()
+  return ADMIN_TIER_PRICE_MULTIPLIERS[normalized] ?? 1.0
+}
+
+function resolveOrderItemUnitPrice(item, priceLookupMap, tierMultiplier = 1.0) {
   if (!priceLookupMap || !priceLookupMap.size) return null
 
   const sku = normalizeAdminSkuToken(item?.sku)
@@ -873,20 +903,20 @@ function resolveOrderItemUnitPrice(item, priceLookupMap) {
 
   for (const key of candidates) {
     const hit = priceLookupMap.get(key)
-    if (hit?.unitPrice != null) return hit.unitPrice
+    if (hit?.unitPrice != null) return Math.round(hit.unitPrice * tierMultiplier * 100) / 100
   }
 
   const compactSkuMatch = sku.match(/^([A-Z]{2,6})\s*(\d{1,4}[A-Z]?)$/)
   if (compactSkuMatch) {
     const key = `${compactSkuMatch[1]} ${compactSkuMatch[2]}`
     const hit = priceLookupMap.get(key)
-    if (hit?.unitPrice != null) return hit.unitPrice
+    if (hit?.unitPrice != null) return Math.round(hit.unitPrice * tierMultiplier * 100) / 100
   }
 
   return null
 }
 
-function buildOrderCsvPayload(row, parsedItems, priceLookupMap) {
+function buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier = 1.0) {
   const csvEsc = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`
   const orderId = row?.id ?? '-'
   const orderDate = row?.created_at ? new Date(row.created_at).toISOString().slice(0, 10) : ''
@@ -896,7 +926,7 @@ function buildOrderCsvPayload(row, parsedItems, priceLookupMap) {
 
   let orderTotal = 0
   const lines = parsedItems.map((item, index) => {
-    const unitPrice = resolveOrderItemUnitPrice(item, priceLookupMap)
+    const unitPrice = resolveOrderItemUnitPrice(item, priceLookupMap, tierMultiplier)
     const lineTotal = unitPrice != null ? unitPrice * item.qty : null
     if (lineTotal != null) orderTotal += lineTotal
 
@@ -906,6 +936,7 @@ function buildOrderCsvPayload(row, parsedItems, priceLookupMap) {
       csvEsc(customerEmail),
       csvEsc(consignee),
       csvEsc(shippingAddress),
+      csvEsc(row?.distributor_tier || 'b2b'),
       csvEsc(item.sku || ''),
       csvEsc(item.name || `Item ${index + 1}`),
       csvEsc(item.qty),
@@ -921,6 +952,7 @@ function buildOrderCsvPayload(row, parsedItems, priceLookupMap) {
     'Customer Email',
     'Consignee Name',
     'Shipping Address',
+    'Pricing Tier',
     'SKU',
     'Item Name',
     'Qty',
@@ -1059,19 +1091,20 @@ function OrdersPanel() {
 
   const downloadOrderCsv = (row) => {
     const parsedItems = (Array.isArray(row?.items) ? row.items : []).map((item, index) => parseOrderItemEntry(item, index))
+    const tierMultiplier = getTierMultiplier(row?.distributor_tier)
     // Always generate the CSV — if no items, generate a header-only row with order metadata
     if (!parsedItems.length) {
       const csvEsc = v => `"${String(v ?? '').replace(/"/g, '""')}"`
-      const header = 'Order #,Order Date,Customer Email,Consignee Name,Shipping Address,SKU,Item Name,Qty,Unit Price (EUR),Line Total (EUR),Order Total (EUR)'
+      const header = 'Order #,Order Date,Customer Email,Consignee Name,Shipping Address,Pricing Tier,SKU,Item Name,Qty,Unit Price (EUR),Line Total (EUR),Order Total (EUR)'
       const orderDate = row?.created_at ? new Date(row.created_at).toISOString().slice(0, 10) : ''
-      const dataRow = [csvEsc(row?.id), csvEsc(orderDate), csvEsc(row?.customer_email || ''), csvEsc(row?.consignee_name || ''), csvEsc(row?.shipping_address || ''), '', '', '', '', '', ''].join(',')
+      const dataRow = [csvEsc(row?.id), csvEsc(orderDate), csvEsc(row?.customer_email || ''), csvEsc(row?.consignee_name || ''), csvEsc(row?.shipping_address || ''), csvEsc(row?.distributor_tier || 'b2b'), '', '', '', '', '', ''].join(',')
       const csv = [header, dataRow].join('\r\n')
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
       triggerFileDownload(blob, `order-${row?.id || 'unknown'}.csv`)
       return
     }
 
-    const { csv } = buildOrderCsvPayload(row, parsedItems, priceLookupMap)
+    const { csv } = buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier)
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     triggerFileDownload(blob, `order-${row.id || 'unknown'}.csv`)
   }
@@ -1087,7 +1120,8 @@ function OrdersPanel() {
       return { ok: false, message: 'Order has no items.' }
     }
 
-    const { csv, orderTotal } = buildOrderCsvPayload(row, parsedItems, priceLookupMap)
+    const tierMultiplier = getTierMultiplier(row?.distributor_tier)
+    const { csv, orderTotal } = buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier)
     const csvBase64 = encodeCsvToBase64(csv)
     const toEmail = ORDER_INBOX_EMAIL || 'distribution@gelitup.com'
     const subject = `B2B Order #${row.id || '-'} CSV Export`
@@ -1358,6 +1392,18 @@ function OrdersPanel() {
                     <>
                       <div className="grid gap-3 text-xs text-slate-700 sm:grid-cols-2">
                         <div><span className="font-semibold text-slate-400">Customer</span><br />{row.customer_email || '—'}</div>
+                        <div>
+                          <span className="font-semibold text-slate-400">Pricing Tier</span><br />
+                          {row.distributor_tier ? (
+                            <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                              row.distributor_tier === 'authority' ? 'bg-fuchsia-100 text-fuchsia-700' :
+                              row.distributor_tier === 'professional' ? 'bg-pink-100 text-pink-700' :
+                              row.distributor_tier === 'country' ? 'bg-sky-100 text-sky-700' :
+                              row.distributor_tier === 'sales' ? 'bg-slate-100 text-slate-600' :
+                              'bg-slate-100 text-slate-600'
+                            }`}>{row.distributor_tier === 'country' ? 'Level 2 Country' : row.distributor_tier}</span>
+                          ) : <span className="text-slate-400">B2B (standard)</span>}
+                        </div>
                         <div><span className="font-semibold text-slate-400">Consignee</span><br />{row.consignee_name || '—'}</div>
                         <div><span className="font-semibold text-slate-400">Phone</span><br />{row.consignee_phone || '—'}</div>
                         <div><span className="font-semibold text-slate-400">Payment confirmed</span><br />
@@ -1392,7 +1438,8 @@ function OrdersPanel() {
                           <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 text-xs">
                             {items.map((item, i) => {
                               const parsed = parseOrderItemEntry(item, i)
-                              const unitPrice = resolveOrderItemUnitPrice(parsed, priceLookupMap)
+                              const rowTierMultiplier = getTierMultiplier(row.distributor_tier)
+                              const unitPrice = resolveOrderItemUnitPrice(parsed, priceLookupMap, rowTierMultiplier)
                               const lineTotal = unitPrice != null ? unitPrice * parsed.qty : null
                               return (
                                 <li key={i} className="flex items-center justify-between px-3 py-2">

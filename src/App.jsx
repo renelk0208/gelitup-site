@@ -13121,6 +13121,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       consignee_name: shipping.name || null,
       consignee_phone: shipping.phone || null,
       shipping_address: shipping.address || null,
+      distributor_tier: enforcedTier || null,
     }
 
     const userProfile = {
