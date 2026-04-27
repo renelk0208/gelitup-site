@@ -4577,7 +4577,11 @@ function FullCataloguePage() {
   const extractProductCode = useCallback((name = '') => {
     const cleaned = String(name || '').trim()
     const codeMatch = cleaned.match(/[A-Z]{2,8}\s*-?\s*\d+[A-Z0-9-]*/i)
-    return codeMatch ? codeMatch[0].toUpperCase() : 'SKU'
+    if (codeMatch) return codeMatch[0].toUpperCase()
+    const fallback = normalizeSkuCode(cleaned)
+      .replace(/[^A-Z0-9]+/g, ' ')
+      .trim()
+    return fallback || 'ITEM'
   }, [])
 
   const lookupCataloguePrice = useCallback((itemName = '', itemCode = '') => {

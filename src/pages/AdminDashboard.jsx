@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx'
 const REGISTRATIONS_TABLE = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || 'b2b_registrations'
 const ORDERS_TABLE = import.meta.env.VITE_B2B_ORDERS_TABLE || 'b2b_orders'
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL || ''
+const ORDER_INBOX_EMAIL = import.meta.env.VITE_B2B_ORDER_INBOX || 'distribution@gelitup.com'
 const FROM_EMAIL = import.meta.env.VITE_EMAIL_FROM || 'GEL.IT.UP Distributors <distributors@gelitup.com>'
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
@@ -768,6 +769,178 @@ function formatOrderStatusLabel(status) {
   return normalized.replace(/_/g, ' ')
 }
 
+function normalizeAdminSkuToken(value) {
+  return String(value || '').trim().toUpperCase().replace(/\s+/g, ' ')
+}
+
+function normalizeAdminNameToken(value) {
+  return normalizeAdminSkuToken(value)
+    .replace(/GEL\.?IT\.?UP|GEL\s*IT\s*UP|GIUP/gi, ' ')
+    .replace(/[^A-Z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function extractOrderItemSkuToken(value = '') {
+  const text = String(value || '').trim()
+  if (!text) return ''
+  const normalized = normalizeAdminSkuToken(text)
+
+  const giupMatch = normalized.match(/\bGIUP[-\s]*[A-Z0-9]+(?:[-\s]*[A-Z0-9]+)*\b/)
+  if (giupMatch) return normalizeAdminSkuToken(giupMatch[0].replace(/-/g, ' '))
+
+  const seriesMatch = normalized.match(/\b([A-Z]{2,6})\s*(\d{1,4}[A-Z]?)\b/)
+  if (seriesMatch) return `${seriesMatch[1]} ${seriesMatch[2]}`
+
+  const numericMatch = normalized.match(/^\d{1,4}[A-Z]?$/)
+  if (numericMatch) return numericMatch[0]
+
+  return ''
+}
+
+function parseOrderItemEntry(rawItem, index = 0) {
+  if (rawItem && typeof rawItem === 'object') {
+    const qty = Math.max(1, Number(rawItem.qty ?? rawItem.quantity ?? 1) || 1)
+    const explicitSku = normalizeAdminSkuToken(rawItem.sku || rawItem.code || '')
+    const name = String(rawItem.name || rawItem.displayName || rawItem.description || explicitSku || `Item ${index + 1}`).trim()
+    const sku = explicitSku || extractOrderItemSkuToken(name)
+    return {
+      sku,
+      name,
+      qty,
+      unknown: !sku && normalizeAdminSkuToken(name) === 'SKU',
+      rawLabel: name,
+    }
+  }
+
+  const raw = String(rawItem || '').trim()
+  const qtyMatch = raw.match(/\s+x(\d+)$/i)
+  const qty = qtyMatch ? Math.max(1, Number(qtyMatch[1]) || 1) : 1
+  const label = qtyMatch ? raw.replace(/\s+x\d+$/i, '').trim() : raw
+  const sku = extractOrderItemSkuToken(label)
+  return {
+    sku,
+    name: label || `Item ${index + 1}`,
+    qty,
+    unknown: normalizeAdminSkuToken(label) === 'SKU' || (!sku && !label),
+    rawLabel: raw,
+  }
+}
+
+function buildOrderPriceLookupMap(items = []) {
+  const map = new Map()
+  const setIfMissing = (key, entry) => {
+    if (!key || map.has(key)) return
+    map.set(key, entry)
+  }
+
+  items.forEach(({ name, sku, price }) => {
+    if (price == null) return
+    const numeric = Number(price)
+    if (!Number.isFinite(numeric) || numeric <= 0) return
+
+    const unitPrice = Math.ceil(numeric * 1.2 * 10) / 10
+    const entry = { name: String(name || '').trim(), unitPrice }
+
+    setIfMissing(normalizeAdminSkuToken(sku), entry)
+    setIfMissing(normalizeAdminSkuToken(name), entry)
+    setIfMissing(normalizeAdminNameToken(name), entry)
+
+    const numberPrefix = String(name || '').trim().match(/^(\d+[A-Z]?)\s/)
+    if (numberPrefix) {
+      const n = numberPrefix[1]
+      setIfMissing(normalizeAdminSkuToken(n), entry)
+      setIfMissing(normalizeAdminSkuToken(n.replace(/^0+(\d)/, '$1')), entry)
+      setIfMissing(normalizeAdminSkuToken(n.padStart(2, '0')), entry)
+    }
+  })
+
+  return map
+}
+
+function resolveOrderItemUnitPrice(item, priceLookupMap) {
+  if (!priceLookupMap || !priceLookupMap.size) return null
+
+  const sku = normalizeAdminSkuToken(item?.sku)
+  const name = String(item?.name || '').trim()
+
+  const candidates = [
+    sku,
+    normalizeAdminSkuToken(name),
+    normalizeAdminNameToken(name),
+  ].filter(Boolean)
+
+  for (const key of candidates) {
+    const hit = priceLookupMap.get(key)
+    if (hit?.unitPrice != null) return hit.unitPrice
+  }
+
+  const compactSkuMatch = sku.match(/^([A-Z]{2,6})\s*(\d{1,4}[A-Z]?)$/)
+  if (compactSkuMatch) {
+    const key = `${compactSkuMatch[1]} ${compactSkuMatch[2]}`
+    const hit = priceLookupMap.get(key)
+    if (hit?.unitPrice != null) return hit.unitPrice
+  }
+
+  return null
+}
+
+function buildOrderCsvPayload(row, parsedItems, priceLookupMap) {
+  const csvEsc = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`
+  const orderId = row?.id ?? '-'
+  const orderDate = row?.created_at ? new Date(row.created_at).toISOString().slice(0, 10) : ''
+  const customerEmail = row?.customer_email || ''
+  const consignee = row?.consignee_name || ''
+  const shippingAddress = row?.shipping_address || ''
+
+  let orderTotal = 0
+  const lines = parsedItems.map((item, index) => {
+    const unitPrice = resolveOrderItemUnitPrice(item, priceLookupMap)
+    const lineTotal = unitPrice != null ? unitPrice * item.qty : null
+    if (lineTotal != null) orderTotal += lineTotal
+
+    return [
+      csvEsc(orderId),
+      csvEsc(orderDate),
+      csvEsc(customerEmail),
+      csvEsc(consignee),
+      csvEsc(shippingAddress),
+      csvEsc(item.sku || ''),
+      csvEsc(item.name || `Item ${index + 1}`),
+      csvEsc(item.qty),
+      csvEsc(unitPrice != null ? unitPrice.toFixed(2) : ''),
+      csvEsc(lineTotal != null ? lineTotal.toFixed(2) : ''),
+      csvEsc(index === parsedItems.length - 1 && orderTotal > 0 ? orderTotal.toFixed(2) : ''),
+    ].join(',')
+  })
+
+  const header = [
+    'Order #',
+    'Order Date',
+    'Customer Email',
+    'Consignee Name',
+    'Shipping Address',
+    'SKU',
+    'Item Name',
+    'Qty',
+    'Unit Price (EUR)',
+    'Line Total (EUR)',
+    'Order Total (EUR)',
+  ].join(',')
+
+  const csv = [header, ...lines].join('\r\n')
+  return { csv, orderTotal }
+}
+
+function encodeCsvToBase64(csvText = '') {
+  const bytes = new TextEncoder().encode(String(csvText || ''))
+  let binary = ''
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte)
+  })
+  return btoa(binary)
+}
+
 function OrdersPanel() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
@@ -776,6 +949,10 @@ function OrdersPanel() {
   const [expanded, setExpanded] = useState(null)
   const [saving, setSaving] = useState(null)
   const [trackingDraft, setTrackingDraft] = useState({})
+  const [priceLookupMap, setPriceLookupMap] = useState(new Map())
+  const [isPriceLookupLoaded, setIsPriceLookupLoaded] = useState(false)
+  const [emailingOrderId, setEmailingOrderId] = useState(null)
+  const [emailingAllOrders, setEmailingAllOrders] = useState(false)
   // editing state
   const [editing, setEditing] = useState(null) // order id being edited
   const [editDraft, setEditDraft] = useState({})
@@ -798,6 +975,33 @@ function OrdersPanel() {
   }, [filter])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    let mounted = true
+
+    const loadPriceLookup = async () => {
+      try {
+        const response = await fetch('/gelitup-content/b2b-price-list.json')
+        if (!response.ok) throw new Error('price list unavailable')
+        const payload = await response.json()
+        const items = Array.isArray(payload?.items) ? payload.items : []
+        if (!mounted) return
+        setPriceLookupMap(buildOrderPriceLookupMap(items))
+      }
+      catch {
+        if (!mounted) return
+        setPriceLookupMap(new Map())
+      }
+      finally {
+        if (mounted) setIsPriceLookupLoaded(true)
+      }
+    }
+
+    void loadPriceLookup()
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   const updateOrder = async (id, patch) => {
     setSaving(id)
@@ -850,6 +1054,117 @@ function OrdersPanel() {
 
   const togglePaymentConfirmed = async (id, currentValue) => {
     await updateOrder(id, { payment_confirmed: !currentValue })
+  }
+
+  const downloadOrderCsv = (row) => {
+    const parsedItems = (Array.isArray(row?.items) ? row.items : []).map((item, index) => parseOrderItemEntry(item, index))
+    if (!parsedItems.length) {
+      alert('This order has no items to export.')
+      return
+    }
+
+    const { csv } = buildOrderCsvPayload(row, parsedItems, priceLookupMap)
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    triggerFileDownload(blob, `order-${row.id || 'unknown'}.csv`)
+  }
+
+  const emailOrderCsvToInbox = async (row) => {
+    if (!EMAIL_WEBHOOK_URL) {
+      alert('Email webhook is not configured. Set VITE_EMAIL_WEBHOOK_URL and retry.')
+      return { ok: false, message: 'Email webhook not configured.' }
+    }
+
+    const parsedItems = (Array.isArray(row?.items) ? row.items : []).map((item, index) => parseOrderItemEntry(item, index))
+    if (!parsedItems.length) {
+      return { ok: false, message: 'Order has no items.' }
+    }
+
+    const { csv, orderTotal } = buildOrderCsvPayload(row, parsedItems, priceLookupMap)
+    const csvBase64 = encodeCsvToBase64(csv)
+    const toEmail = ORDER_INBOX_EMAIL || 'distribution@gelitup.com'
+    const subject = `B2B Order #${row.id || '-'} CSV Export`
+    const html = `
+      <p style="font-family:Arial,sans-serif;font-size:13px;color:#1f2937;margin:0 0 8px">Order <strong>#${String(row.id || '-')}</strong> CSV export attached for Zoho import.</p>
+      <p style="font-family:Arial,sans-serif;font-size:12px;color:#6b7280;margin:0">Customer: ${String(row.customer_email || '-')}<br/>Units: ${String(row.total_units || 0)}<br/>Estimated total: ${orderTotal > 0 ? `EUR ${orderTotal.toFixed(2)}` : 'Not available'}</p>
+    `
+
+    const headers = { 'Content-Type': 'application/json' }
+    if (SUPABASE_ANON_KEY) {
+      headers.apikey = SUPABASE_ANON_KEY
+      headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`
+    }
+
+    try {
+      const response = await fetch(EMAIL_WEBHOOK_URL, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          from: FROM_EMAIL,
+          to: toEmail,
+          subject,
+          html,
+          attachments: [
+            {
+              filename: `order-${row.id || 'unknown'}.csv`,
+              content: csvBase64,
+              contentType: 'text/csv',
+            },
+          ],
+        }),
+      })
+
+      const responsePayload = await response.json().catch(() => null)
+      if (!response.ok) {
+        return { ok: false, message: responsePayload?.error || `HTTP ${response.status}` }
+      }
+
+      return { ok: true, message: `Order #${row.id} emailed to ${toEmail}.` }
+    }
+    catch (err) {
+      return { ok: false, message: err?.message || 'Network error while sending email.' }
+    }
+  }
+
+  const emailAllHistoricalOrdersToInbox = async () => {
+    const { data: allOrders, error: allOrdersError } = await supabase
+      .from(ORDERS_TABLE)
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(5000)
+
+    if (allOrdersError) {
+      alert(`Could not load all orders: ${allOrdersError.message}`)
+      return
+    }
+
+    const sourceRows = Array.isArray(allOrders) ? allOrders : []
+    if (!sourceRows.length) {
+      alert('No orders found in the orders table.')
+      return
+    }
+
+    const ok = window.confirm(`Email CSV attachments for ${sourceRows.length} current and past orders to ${ORDER_INBOX_EMAIL}? This may take several minutes.`)
+    if (!ok) return
+
+    setEmailingAllOrders(true)
+    let success = 0
+    const failures = []
+
+    for (const row of sourceRows) {
+      // Keep delivery safely below provider burst limits.
+      await new Promise((resolve) => setTimeout(resolve, 550))
+      const result = await emailOrderCsvToInbox(row)
+      if (result.ok) success += 1
+      else failures.push(`#${row.id}: ${result.message}`)
+    }
+
+    setEmailingAllOrders(false)
+    if (!failures.length) {
+      alert(`Done. Emailed ${success} order CSV attachments to ${ORDER_INBOX_EMAIL}.`)
+      return
+    }
+
+    alert(`Completed with issues. Success: ${success}/${sourceRows.length}. Failures:\n${failures.slice(0, 8).join('\n')}${failures.length > 8 ? `\n...and ${failures.length - 8} more` : ''}`)
   }
 
   const startEdit = (row) => {
@@ -967,7 +1282,18 @@ function OrdersPanel() {
         >
           ↓ Export Excel
         </button>
+        <button
+          onClick={emailAllHistoricalOrdersToInbox}
+          disabled={emailingAllOrders}
+          className="rounded-full border border-fuchsia-200 px-3 py-1 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-40"
+        >
+          {emailingAllOrders ? 'Sending CSVs…' : '✉ Email CSVs (All Orders)'}
+        </button>
       </div>
+
+      {!isPriceLookupLoaded && (
+        <p className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">Loading price list for order CSV exports… unit price columns may be temporarily empty.</p>
+      )}
 
       {error && (
         <div className="mb-4 rounded-xl bg-rose-50 p-4 text-sm text-rose-700">
@@ -1057,20 +1383,56 @@ function OrdersPanel() {
                           <p className="mb-2 text-xs font-semibold text-slate-400">Items ({items.length})</p>
                           <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 text-xs">
                             {items.map((item, i) => {
-                              const label = typeof item === 'string'
-                                ? item.replace(/ x\d+$/, '')
-                                : (item.name || item.displayName || item.sku || `Item ${i + 1}`)
-                              const qty = typeof item === 'string'
-                                ? (item.match(/ x(\d+)$/)?.[1] ?? 1)
-                                : (item.qty ?? item.quantity ?? 1)
+                              const parsed = parseOrderItemEntry(item, i)
+                              const unitPrice = resolveOrderItemUnitPrice(parsed, priceLookupMap)
+                              const lineTotal = unitPrice != null ? unitPrice * parsed.qty : null
                               return (
                                 <li key={i} className="flex items-center justify-between px-3 py-2">
-                                  <span className="text-slate-700">{label}</span>
-                                  <span className="font-semibold text-slate-900">×{qty}</span>
+                                  <div className="min-w-0">
+                                    <p className="truncate text-slate-700">{parsed.unknown ? `Unmapped product (${parsed.rawLabel || 'SKU'})` : parsed.name}</p>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <span className="font-mono text-[10px] text-slate-500">{parsed.sku || 'SKU unknown'}</span>
+                                      {unitPrice != null && (
+                                        <span className="text-[10px] text-slate-500">€{unitPrice.toFixed(2)} each</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="font-semibold text-slate-900">×{parsed.qty}</p>
+                                    {lineTotal != null && (
+                                      <p className="text-[11px] text-slate-500">€{lineTotal.toFixed(2)}</p>
+                                    )}
+                                  </div>
                                 </li>
                               )
                             })}
                           </ul>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              onClick={() => downloadOrderCsv(row)}
+                              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                            >
+                              ↓ Download Order CSV
+                            </button>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                setEmailingOrderId(row.id)
+                                const result = await emailOrderCsvToInbox(row)
+                                setEmailingOrderId(null)
+                                if (!result.ok) {
+                                  alert(`Could not email order CSV: ${result.message}`)
+                                  return
+                                }
+                                alert(result.message)
+                              }}
+                              disabled={emailingOrderId === row.id}
+                              className="rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-50"
+                            >
+                              {emailingOrderId === row.id ? 'Sending…' : '✉ Email CSV to Inbox'}
+                            </button>
+                          </div>
                         </div>
                       )}
                     </>
