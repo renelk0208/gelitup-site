@@ -10483,6 +10483,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [packageCartItems, setPackageCartItems] = useState([])
   const [cartSavedAt, setCartSavedAt] = useState(null)
   const [isSavingCart, setIsSavingCart] = useState(false)
+  const [cartRestoredFromCloud, setCartRestoredFromCloud] = useState(false)
   const [podCatalog, setPodCatalog] = useState({ pod_1: [], pod_2: [], pod_3: [], pod_4: [] })
   const [localImageMap, setLocalImageMap] = useState(() => new Map())
   // priceMap: normalised-key ? { name, price }  (loaded from b2b-price-list.json)
@@ -10589,7 +10590,40 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${uid}`
       try {
         const saved = JSON.parse(localStorage.getItem(key) || 'null')
-        if (!saved) return
+        if (!saved) {
+          // localStorage is empty (cleared cache, different device, incognito) —
+          // fall back to the cloud draft saved in Supabase so the cart is never lost.
+          supabase
+            .from('b2b_draft_carts')
+            .select('items, updated_at')
+            .eq('user_id', uid)
+            .eq('source', 'portal')
+            .maybeSingle()
+            .then(({ data: draft }) => {
+              if (!draft?.items) return
+              const { products, packages } = draft.items || {}
+              if (Array.isArray(products) && products.length) {
+                setSelectedCodes(products.map(p => p.code).filter(Boolean))
+                const qtys = {}
+                products.forEach(p => { if (p.code) qtys[p.code] = p.qty || 1 })
+                setItemQtys(qtys)
+              }
+              if (Array.isArray(packages) && packages.length) {
+                setPackageCartItems(packages.map(p => ({
+                  sku: p.sku || '',
+                  name: p.name || p.sku || '',
+                  qty: Math.max(1, Number(p.qty) || 1),
+                  group: p.group || '',
+                  imageUrl: null,
+                })))
+              }
+              if ((Array.isArray(products) && products.length) || (Array.isArray(packages) && packages.length)) {
+                setCartRestoredFromCloud(true)
+              }
+            })
+            .catch(() => {})
+          return
+        }
         if (Array.isArray(saved.selectedCodes) && saved.selectedCodes.length) setSelectedCodes(saved.selectedCodes)
         if (saved.itemQtys && typeof saved.itemQtys === 'object') setItemQtys(saved.itemQtys)
         if (Array.isArray(saved.packageCartItems) && saved.packageCartItems.length) setPackageCartItems(saved.packageCartItems)
@@ -10644,27 +10678,40 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   // Persist cart to localStorage whenever it changes
   useEffect(() => {
     const uid = cartUserIdRef.current
-    if (!uid) return
-    const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${uid}`
-    if (!selectedCodes.length && !Object.keys(itemQtys).length && !packageCartItems.length) {
-      localStorage.removeItem(key)
-      return
+    const persistToKey = (resolvedUid) => {
+      const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${resolvedUid}`
+      if (!selectedCodes.length && !Object.keys(itemQtys).length && !packageCartItems.length) {
+        localStorage.removeItem(key)
+        return
+      }
+      const existing = (() => { try { return JSON.parse(localStorage.getItem(key) || 'null') } catch { return null } })()
+      const contentsChanged = JSON.stringify(existing?.selectedCodes) !== JSON.stringify(selectedCodes)
+        || JSON.stringify(existing?.packageCartItems) !== JSON.stringify(packageCartItems)
+      const ts = contentsChanged ? Date.now() : (existing?.savedAt ?? Date.now())
+      localStorage.setItem(key, JSON.stringify({
+        selectedCodes,
+        itemQtys,
+        packageCartItems,
+        savedAt: ts,
+        lastReminderAt: contentsChanged ? undefined : existing?.lastReminderAt,
+        abandonedReminderCount: contentsChanged ? 0 : (existing?.abandonedReminderCount || 0),
+      }))
+      if (contentsChanged) setCartSavedAt(ts)
     }
-    const existing = (() => { try { return JSON.parse(localStorage.getItem(key) || 'null') } catch { return null } })()
-    // Detect if cart contents changed — if so, reset reminder cycle
-    const contentsChanged = JSON.stringify(existing?.selectedCodes) !== JSON.stringify(selectedCodes)
-      || JSON.stringify(existing?.packageCartItems) !== JSON.stringify(packageCartItems)
-    const ts = contentsChanged ? Date.now() : (existing?.savedAt ?? Date.now())
-    localStorage.setItem(key, JSON.stringify({
-      selectedCodes,
-      itemQtys,
-      packageCartItems,
-      savedAt: ts,
-      lastReminderAt: contentsChanged ? undefined : existing?.lastReminderAt,
-      abandonedReminderCount: contentsChanged ? 0 : (existing?.abandonedReminderCount || 0),
-    }))
-    if (contentsChanged) setCartSavedAt(ts)
-  }, [selectedCodes, itemQtys, packageCartItems])
+
+    if (uid) {
+      // uid already known — persist synchronously
+      persistToKey(uid)
+    } else if (hasSupabaseConfig && supabase) {
+      // uid not yet known — resolve it, set the ref, then persist
+      supabase.auth.getUser().then(({ data }) => {
+        const resolvedUid = data?.user?.id
+        if (!resolvedUid) return
+        cartUserIdRef.current = resolvedUid
+        persistToKey(resolvedUid)
+      }).catch(() => {})
+    }
+  }, [selectedCodes, itemQtys, packageCartItems]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Sync portal cart to Supabase draft_carts so admin can see abandoned carts
   useEffect(() => {
@@ -14431,6 +14478,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         </div>
         {(selectedCodes.length > 0 || packageCartItems.length > 0) && (
           <div className="mt-3 flex flex-wrap items-center gap-2">
+            {cartRestoredFromCloud && (
+              <p className="w-full rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-800">
+                ☁ Your cart was restored from your saved draft — your items are back!
+              </p>
+            )}
             <p className="flex items-center gap-1.5 text-xs text-emerald-700">
               <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold">✓</span>
               {cartSavedAt ? `Saved at ${new Date(cartSavedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Auto-saved'}
