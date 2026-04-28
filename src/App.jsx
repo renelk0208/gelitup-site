@@ -8866,7 +8866,14 @@ function CheckoutPage() {
 
       const escapeHtml = (value) => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;')
 
-      // 3. Insert order to Supabase
+      // 3. Capture distributor_tier from active portal session (if user is already a logged-in distributor)
+      let catalogueOrderTier = null
+      try {
+        const { data: { session: activeSession } } = await supabase.auth.getSession()
+        catalogueOrderTier = activeSession?.user?.user_metadata?.distributor_tier ?? null
+      } catch {}
+
+      // 4. Insert order to Supabase
       const payload = {
         customer_email: email,
         items: checkoutItems,
@@ -8877,6 +8884,7 @@ function CheckoutPage() {
         consignee_name: shipping.name || null,
         consignee_phone: shipping.phone || null,
         shipping_address: shipping.address || null,
+        distributor_tier: catalogueOrderTier,
       }
 
       const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
@@ -8889,7 +8897,7 @@ function CheckoutPage() {
 
       const missingCols = insertError?.message?.includes('consignee_name') || insertError?.message?.includes('consignee_phone') || insertError?.message?.includes('shipping_address')
       if (missingCols) {
-        const retry = await supabase.from(ordersTable).insert([{ customer_email: email, items: checkoutItems, total_units: cartUnits, source: 'catalogue_checkout', module: 'products', status: 'received' }]).select('id, created_at').single()
+        const retry = await supabase.from(ordersTable).insert([{ customer_email: email, items: checkoutItems, total_units: cartUnits, source: 'catalogue_checkout', module: 'products', status: 'received', distributor_tier: catalogueOrderTier }]).select('id, created_at').single()
         insertedOrder = retry.data
         insertError = retry.error
       }
