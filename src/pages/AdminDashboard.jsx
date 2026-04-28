@@ -841,9 +841,9 @@ const SKU_OVERRIDE_MAP = {
   'NWTP':              { name: 'Non Wipe Top Coat Milky 15ml -HTF', price: 11.54 },
   'NWMT15':            { name: 'Non Wipe Top Coat Milky 15ml -HTF', price: 11.54 },
 
-  // ── B2B Colour Series (not in price list — add prices when available) ──
-  'BRED0001':          { name: 'B2B Red 01',    price: null },
-  'BYELLOW0002':       { name: 'B2B Yellow 02', price: null },
+  // ── B2B Colour Series (same base price as standard gel polish) ────────
+  'BRED0001':          { name: 'B2B Red 01',    price: 7.41 },
+  'BYELLOW0002':       { name: 'B2B Yellow 02', price: 7.41 },
 
   // ── Superbond Nail Dehydrator (Acid-Free) ─────────────────────────
   // base 6.78 → B2B 8.2
