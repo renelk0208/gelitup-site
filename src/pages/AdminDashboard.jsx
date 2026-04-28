@@ -1600,9 +1600,14 @@ function OrdersPanel() {
           const isCancellationRequested = currentStatus === 'cancellation_requested'
           const isPendingApproval = currentStatus === 'pending_approval'
           const isEditing = editing === row.id
+          const rowTierMultiplier = getTierMultiplier(row.distributor_tier)
+          const missingPriceItems = items
+            .map((item, i) => parseOrderItemEntry(item, i))
+            .filter(parsed => resolveOrderItemPriceEntry(parsed, priceLookupMap, rowTierMultiplier).unitPrice == null)
+          const hasMissingPrices = missingPriceItems.length > 0
 
           return (
-            <li key={row.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <li key={row.id} className={`overflow-hidden rounded-xl border bg-white ${hasMissingPrices ? 'border-amber-300' : 'border-slate-200'}`}>
               <button
                 type="button"
                 className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-slate-50"
@@ -1610,6 +1615,11 @@ function OrdersPanel() {
               >
                 {statusBadge(row.status)}
                 <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">{row.customer_email || '—'}</span>
+                {hasMissingPrices && (
+                  <span className="shrink-0 inline-flex items-center gap-1 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">
+                    ⚠ {missingPriceItems.length} no price
+                  </span>
+                )}
                 <span className="shrink-0 text-xs text-slate-400">{row.total_units} units</span>
                 <span className="shrink-0 text-xs text-slate-400">{fmtDate(row.created_at)}</span>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${expanded === row.id ? 'rotate-180' : ''}`}>
@@ -1678,7 +1688,7 @@ function OrdersPanel() {
                               const unitPrice = resolveOrderItemUnitPrice(parsed, priceLookupMap, rowTierMultiplier)
                               const lineTotal = unitPrice != null ? unitPrice * parsed.qty : null
                               return (
-                                <li key={i} className="flex items-center justify-between px-3 py-2">
+                                <li key={i} className={`flex items-center justify-between px-3 py-2 ${unitPrice == null ? 'bg-amber-50' : ''}`}>
                                   <div className="min-w-0">
                                     <p className="truncate text-slate-700">{parsed.name || parsed.rawLabel || 'Unknown product'}</p>
                                     <div className="flex flex-wrap items-center gap-2">
@@ -1686,9 +1696,10 @@ function OrdersPanel() {
                                         ? <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold bg-orange-100 text-orange-700">⚠ SKU missing — edit to fix</span>
                                         : <span className="font-mono text-[10px] text-slate-500">{displaySku}</span>
                                       }
-                                      {unitPrice != null && (
-                                        <span className="text-[10px] text-slate-500">€{unitPrice.toFixed(2)} each</span>
-                                      )}
+                                      {unitPrice != null
+                                        ? <span className="text-[10px] text-slate-500">€{unitPrice.toFixed(2)} each</span>
+                                        : <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold bg-amber-100 text-amber-700">⚠ no price</span>
+                                      }
                                     </div>
                                   </div>
                                   <div className="text-right">
