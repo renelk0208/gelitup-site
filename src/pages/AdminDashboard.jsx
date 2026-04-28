@@ -828,6 +828,20 @@ function parseOrderItemEntry(rawItem, index = 0) {
   }
 }
 
+// Strips measurement units, variant suffixes and filler descriptor words from a price-list
+// product name to produce a shorter "content key" that can match loosely-stored order item
+// names (e.g. "Sugary Glitter pigment 3gr 01 -HTF" → "SUGARY GLITTER 01").
+function simplifyProductNameForIndex(name) {
+  const upper = normalizeAdminSkuToken(name)
+  return upper
+    .replace(/\s*-?\s*(HTF|HTE|HEMA[- ]FREE|NEW|-2025|2025)\s*$/i, '') // strip variant suffix
+    .replace(/\b\d+\s*(ML|GR|G|MG|KG|L|S)\b/g, '')                     // strip measurements (100ml, 30gr, 1000s)
+    .replace(/\b(BRUSH|SPATULA|PIGMENT|SYNTHOGEL|SYNTHOLIQUID|AND|OF)\b/g, '') // strip filler words
+    .replace(/-/g, ' ')       // normalize dashes (9-11 → 9 11)
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 function buildOrderPriceLookupMap(items = []) {
   const map = new Map()
   const setIfMissing = (key, entry) => {
@@ -871,6 +885,33 @@ function buildOrderPriceLookupMap(items = []) {
     const wordNumPrefix = normalizeAdminSkuToken(name).match(/^([A-Z][A-Z0-9]{1,})\s+(\d{1,4})\b/)
     if (wordNumPrefix) {
       setIfMissing(`${wordNumPrefix[1]} ${wordNumPrefix[2]}`, entry)
+    }
+
+    // ── Simplified-name indexing for loose-name matching ───────────────────────────────
+    const simplified = simplifyProductNameForIndex(name)
+    if (simplified && simplified !== normalizeAdminSkuToken(name)) {
+      setIfMissing(simplified, entry)
+
+      // For names starting with a single-letter + 3-4 digit code (e.g. "N008 If The Shoe...")
+      // also index under just that short code so "GIUP N008" → strip GIUP → "N008" hits it.
+      const nSeriesMatch = simplified.match(/^([A-Z]\d{3,4})\b/)
+      if (nSeriesMatch) setIfMissing(nSeriesMatch[1], entry)
+
+      // For names with a leading product code (SP8001, TR01, CM12 etc.) also add the name
+      // without the code so "SP8001 Mirror Clear Powder" → "MIRROR CLEAR" is findable.
+      const withoutLeadingCode = simplified.replace(/^[A-Z]{1,4}\d{3,5}\s*/, '').trim()
+      if (withoutLeadingCode && withoutLeadingCode !== simplified) setIfMissing(withoutLeadingCode, entry)
+    }
+
+    // ── Cuticle oil word-reorder ─────────────────────────────────────────────────────────
+    // Price list: "Cooling Coconut Cuticle Oil 100ml" → stored as "cuticle oil coconut".
+    // Extract the flavor noun and index as "CUTICLE OIL [FLAVOR]".
+    if (simplified.includes('CUTICLE') && simplified.includes('OIL')) {
+      const flavorWord = simplified
+        .replace(/\bCUTICLE\b/g, '').replace(/\bOIL\b/g, '')
+        .replace(/\b(COOLING|CHILLED|PERKY|SATIN|WHITE|RICH)\b/g, '')
+        .replace(/\s+/g, ' ').trim()
+      if (flavorWord) setIfMissing(`CUTICLE OIL ${flavorWord}`, entry)
     }
   })
 
@@ -924,14 +965,25 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) 
 
   const sku = normalizeAdminSkuToken(item?.sku)
   const name = String(item?.name || '').trim()
+  const nameNorm = normalizeAdminSkuToken(name)
 
   const candidates = [
     sku,
-    normalizeAdminSkuToken(name),
+    nameNorm,
     normalizeAdminNameToken(name),
+    // Strip GIUP prefix from SKU: "GIUP 01" → "01", "GIUP N008" → "N008", "GIUP 8E" → "8E"
+    sku.replace(/^GIUP\s*/i, '').trim(),
+    // Simplified version of name: strips measurements, filler words, normalizes dashes
+    simplifyProductNameForIndex(name),
+    // Strip 3–5 digit shade numbers from name: "LINE IT UP 0002 WHITE" → "LINE IT UP WHITE"
+    nameNorm.replace(/\b\d{3,5}\b/g, '').replace(/\s+/g, ' ').trim(),
   ].filter(Boolean)
 
-  for (const key of candidates) {
+  // Deduplicate while preserving order
+  const seen = new Set()
+  const uniqueCandidates = candidates.filter(c => { if (seen.has(c)) return false; seen.add(c); return true })
+
+  for (const key of uniqueCandidates) {
     const hit = priceLookupMap.get(key)
     if (hit?.unitPrice != null) {
       return {
