@@ -1089,24 +1089,99 @@ function OrdersPanel() {
     await updateOrder(id, { payment_confirmed: !currentValue })
   }
 
+  const resolveRawItems = (row) => {
+    if (Array.isArray(row?.items)) return row.items
+    if (typeof row?.items === 'string') {
+      try { return JSON.parse(row.items) } catch { /* fall through */ }
+    }
+    return []
+  }
+
   const downloadOrderCsv = (row) => {
-    const parsedItems = (Array.isArray(row?.items) ? row.items : []).map((item, index) => parseOrderItemEntry(item, index))
-    const tierMultiplier = getTierMultiplier(row?.distributor_tier)
-    // Always generate the CSV — if no items, generate a header-only row with order metadata
-    if (!parsedItems.length) {
-      const csvEsc = v => `"${String(v ?? '').replace(/"/g, '""')}"`
-      const header = 'Order #,Order Date,Customer Email,Consignee Name,Shipping Address,Pricing Tier,SKU,Item Name,Qty,Unit Price (EUR),Line Total (EUR),Order Total (EUR)'
-      const orderDate = row?.created_at ? new Date(row.created_at).toISOString().slice(0, 10) : ''
-      const dataRow = [csvEsc(row?.id), csvEsc(orderDate), csvEsc(row?.customer_email || ''), csvEsc(row?.consignee_name || ''), csvEsc(row?.shipping_address || ''), csvEsc(row?.distributor_tier || 'b2b'), '', '', '', '', '', ''].join(',')
-      const csv = [header, dataRow].join('\r\n')
+    try {
+      const parsedItems = resolveRawItems(row).map((item, index) => parseOrderItemEntry(item, index))
+      const tierMultiplier = getTierMultiplier(row?.distributor_tier)
+      // Always generate the CSV — if no items, generate a header-only row with order metadata
+      if (!parsedItems.length) {
+        const csvEsc = v => `"${String(v ?? '').replace(/"/g, '""')}"`
+        const header = 'Order #,Order Date,Customer Email,Consignee Name,Shipping Address,Pricing Tier,SKU,Item Name,Qty,Unit Price (EUR),Line Total (EUR),Order Total (EUR)'
+        const orderDate = row?.created_at ? new Date(row.created_at).toISOString().slice(0, 10) : ''
+        const dataRow = [csvEsc(row?.id), csvEsc(orderDate), csvEsc(row?.customer_email || ''), csvEsc(row?.consignee_name || ''), csvEsc(row?.shipping_address || ''), csvEsc(row?.distributor_tier || 'b2b'), '', '', '', '', '', ''].join(',')
+        const csv = [header, dataRow].join('\r\n')
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+        triggerFileDownload(blob, `order-${row?.id || 'unknown'}.csv`)
+        return
+      }
+
+      const { csv } = buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier)
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
       triggerFileDownload(blob, `order-${row?.id || 'unknown'}.csv`)
-      return
+    } catch (err) {
+      alert(`CSV download failed: ${err?.message || String(err)}\n\nOpen browser console (F12) for details.`)
+      console.error('[downloadOrderCsv]', err)
     }
+  }
 
-    const { csv } = buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier)
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    triggerFileDownload(blob, `order-${row.id || 'unknown'}.csv`)
+  const downloadOrderXlsx = (row) => {
+    try {
+      const rawItems = resolveRawItems(row)
+      const tierMultiplier = getTierMultiplier(row?.distributor_tier)
+
+      // Sheet 1: Order metadata
+      const meta = [{
+        'Order #': row?.id ?? '',
+        'Date': row?.created_at ? new Date(row.created_at).toISOString().slice(0, 10) : '',
+        'Status': row?.status || '',
+        'Customer Email': row?.customer_email || '',
+        'Consignee Name': row?.consignee_name || '',
+        'Phone': row?.consignee_phone || '',
+        'Shipping Address': row?.shipping_address || '',
+        'Pricing Tier': row?.distributor_tier || 'b2b',
+        'Total Units': row?.total_units || 0,
+        'Payment Confirmed': row?.payment_confirmed ? 'Yes' : 'No',
+        'Tracking #': row?.tracking_number || '',
+        'Tracking URL': row?.tracking_url || '',
+        'Zoho SO #': row?.zoho_salesorder_number || '',
+        'Zoho Invoice #': row?.zoho_invoice_number || '',
+        'Source': row?.source || '',
+      }]
+
+      // Sheet 2: Items with full raw + resolved data
+      let orderTotal = 0
+      const itemRows = rawItems.map((item, index) => {
+        const parsed = parseOrderItemEntry(item, index)
+        const rawSku = typeof item === 'object' && item !== null ? (item.sku || '') : ''
+        const rawName = typeof item === 'object' && item !== null ? (item.name || '') : String(item || '')
+        const unitPrice = resolveOrderItemUnitPrice(parsed, priceLookupMap, tierMultiplier)
+        const lineTotal = unitPrice != null ? unitPrice * parsed.qty : null
+        if (lineTotal != null) orderTotal += lineTotal
+        return {
+          'SKU': rawSku || parsed.sku || '',
+          'Item Name': rawName || parsed.name,
+          'Qty': parsed.qty,
+          'Unit Price (EUR)': unitPrice != null ? unitPrice : '',
+          'Line Total (EUR)': lineTotal != null ? lineTotal : '',
+          'Resolved SKU Token': parsed.sku || '',
+        }
+      })
+      if (itemRows.length > 0 && orderTotal > 0) {
+        itemRows[itemRows.length - 1]['Order Total (EUR)'] = orderTotal
+      }
+
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(meta), 'Order Details')
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.json_to_sheet(itemRows.length ? itemRows : [{ Note: 'No items stored for this order' }]),
+        'Items',
+      )
+      const xlsxBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+      const blob = new Blob([xlsxBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+      triggerFileDownload(blob, `order-${row?.id || 'unknown'}.xlsx`)
+    } catch (err) {
+      alert(`XLSX download failed: ${err?.message || String(err)}\n\nOpen browser console (F12) for details.`)
+      console.error('[downloadOrderXlsx]', err)
+    }
   }
 
   const emailOrderCsvToInbox = async (row) => {
@@ -1115,7 +1190,7 @@ function OrdersPanel() {
       return { ok: false, message: 'Email webhook not configured.' }
     }
 
-    const parsedItems = (Array.isArray(row?.items) ? row.items : []).map((item, index) => parseOrderItemEntry(item, index))
+    const parsedItems = resolveRawItems(row).map((item, index) => parseOrderItemEntry(item, index))
     if (!parsedItems.length) {
       return { ok: false, message: 'Order has no items.' }
     }
@@ -1236,7 +1311,7 @@ function OrdersPanel() {
   const saveEdit = async (id) => {
     const items = editDraft.items
       .filter(it => it.text.trim() || it.sku.trim())
-      .map(it => ({ name: it.text.trim(), sku: it.sku.trim() || it.text.trim(), qty: Math.max(1, Number(it.qty) || 1) }))
+      .map(it => ({ name: it.text.trim(), sku: it.sku.trim(), qty: Math.max(1, Number(it.qty) || 1) }))
     const totalUnits = items.reduce((sum, it) => sum + it.qty, 0)
     const trackingNumber = editDraft.tracking_number.trim()
     let nextStatus = normalizeOrderStatus(editDraft.status)
@@ -1357,7 +1432,7 @@ function OrdersPanel() {
 
       <ul className="space-y-2">
         {rows.map(row => {
-          const items = Array.isArray(row.items) ? row.items : []
+          const items = resolveRawItems(row)
           const draft = trackingDraft[row.id] || {}
           const currentStatus = normalizeOrderStatus(row.status)
           const isShipped = currentStatus === 'shipped'
@@ -1440,15 +1515,21 @@ function OrdersPanel() {
                           <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 text-xs">
                             {items.map((item, i) => {
                               const parsed = parseOrderItemEntry(item, i)
+                              const rawSku = typeof item === 'object' && item !== null ? (item.sku || item.code || '') : ''
+                              const displaySku = rawSku || parsed.sku || ''
+                              const skuMissing = !displaySku
                               const rowTierMultiplier = getTierMultiplier(row.distributor_tier)
                               const unitPrice = resolveOrderItemUnitPrice(parsed, priceLookupMap, rowTierMultiplier)
                               const lineTotal = unitPrice != null ? unitPrice * parsed.qty : null
                               return (
                                 <li key={i} className="flex items-center justify-between px-3 py-2">
                                   <div className="min-w-0">
-                                    <p className="truncate text-slate-700">{parsed.unknown ? (parsed.rawLabel || 'Unknown product') : parsed.name}</p>
+                                    <p className="truncate text-slate-700">{parsed.name || parsed.rawLabel || 'Unknown product'}</p>
                                     <div className="flex flex-wrap items-center gap-2">
-                                      <span className="font-mono text-[10px] text-slate-500">{parsed.sku || 'SKU unknown'}</span>
+                                      {skuMissing
+                                        ? <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold bg-orange-100 text-orange-700">⚠ SKU missing — edit to fix</span>
+                                        : <span className="font-mono text-[10px] text-slate-500">{displaySku}</span>
+                                      }
                                       {unitPrice != null && (
                                         <span className="text-[10px] text-slate-500">€{unitPrice.toFixed(2)} each</span>
                                       )}
@@ -1469,6 +1550,13 @@ function OrdersPanel() {
 
                       {/* Download/email buttons — always visible regardless of items */}
                       <div className="mt-2 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => downloadOrderXlsx(row)}
+                          className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
+                        >
+                          ↓ Download Order XLSX
+                        </button>
                         <button
                           type="button"
                           onClick={() => downloadOrderCsv(row)}
