@@ -916,6 +916,46 @@ function resolveOrderItemUnitPrice(item, priceLookupMap, tierMultiplier = 1.0) {
   return null
 }
 
+// Resolves both unit price AND the canonical Zoho item name (includes -HTF suffix etc.)
+// from the price list. Returns { unitPrice, resolvedName } where resolvedName is the
+// full price-list name when a match is found, or null when no match.
+function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) {
+  if (!priceLookupMap || !priceLookupMap.size) return { unitPrice: null, resolvedName: null }
+
+  const sku = normalizeAdminSkuToken(item?.sku)
+  const name = String(item?.name || '').trim()
+
+  const candidates = [
+    sku,
+    normalizeAdminSkuToken(name),
+    normalizeAdminNameToken(name),
+  ].filter(Boolean)
+
+  for (const key of candidates) {
+    const hit = priceLookupMap.get(key)
+    if (hit?.unitPrice != null) {
+      return {
+        unitPrice: Math.round(hit.unitPrice * tierMultiplier * 100) / 100,
+        resolvedName: hit.name || null,
+      }
+    }
+  }
+
+  const compactSkuMatch = sku.match(/^([A-Z]{2,6})\s*(\d{1,4}[A-Z]?)$/)
+  if (compactSkuMatch) {
+    const key = `${compactSkuMatch[1]} ${compactSkuMatch[2]}`
+    const hit = priceLookupMap.get(key)
+    if (hit?.unitPrice != null) {
+      return {
+        unitPrice: Math.round(hit.unitPrice * tierMultiplier * 100) / 100,
+        resolvedName: hit.name || null,
+      }
+    }
+  }
+
+  return { unitPrice: null, resolvedName: null }
+}
+
 function buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier = 1.0) {
   const csvEsc = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`
   const orderId = row?.id ?? '-'
@@ -926,9 +966,11 @@ function buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier =
 
   let orderTotal = 0
   const lines = parsedItems.map((item, index) => {
-    const unitPrice = resolveOrderItemUnitPrice(item, priceLookupMap, tierMultiplier)
+    const { unitPrice, resolvedName } = resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier)
     const lineTotal = unitPrice != null ? unitPrice * item.qty : null
     if (lineTotal != null) orderTotal += lineTotal
+    // Use canonical Zoho product name (includes -HTF etc.) when available; fall back to stored name
+    const exportName = resolvedName || item.name || `Item ${index + 1}`
 
     return [
       csvEsc(orderId),
@@ -938,7 +980,7 @@ function buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier =
       csvEsc(shippingAddress),
       csvEsc(row?.distributor_tier || 'b2b'),
       csvEsc(item.sku || ''),
-      csvEsc(item.name || `Item ${index + 1}`),
+      csvEsc(exportName),
       csvEsc(item.qty),
       csvEsc(unitPrice != null ? unitPrice.toFixed(2) : ''),
       csvEsc(lineTotal != null ? lineTotal.toFixed(2) : ''),
@@ -1152,12 +1194,14 @@ function OrdersPanel() {
         const parsed = parseOrderItemEntry(item, index)
         const rawSku = typeof item === 'object' && item !== null ? (item.sku || '') : ''
         const rawName = typeof item === 'object' && item !== null ? (item.name || '') : String(item || '')
-        const unitPrice = resolveOrderItemUnitPrice(parsed, priceLookupMap, tierMultiplier)
+        const { unitPrice, resolvedName } = resolveOrderItemPriceEntry(parsed, priceLookupMap, tierMultiplier)
         const lineTotal = unitPrice != null ? unitPrice * parsed.qty : null
         if (lineTotal != null) orderTotal += lineTotal
+        // Use canonical Zoho product name (includes -HTF etc.) when available; fall back to stored name
+        const exportName = resolvedName || rawName || parsed.name
         return {
           'SKU': rawSku || parsed.sku || '',
-          'Item Name': rawName || parsed.name,
+          'Item Name': exportName,
           'Qty': parsed.qty,
           'Unit Price (EUR)': unitPrice != null ? unitPrice : '',
           'Line Total (EUR)': lineTotal != null ? lineTotal : '',
