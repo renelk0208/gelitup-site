@@ -1219,11 +1219,15 @@ function OrdersPanel() {
       tracking_number: row.tracking_number || '',
       tracking_url: row.tracking_url || '',
       status: normalizeOrderStatus(row.status),
+      distributor_tier: row.distributor_tier || '',
       items: Array.isArray(row.items)
         ? row.items.map(it => {
-            const str = typeof it === 'string' ? it : JSON.stringify(it)
+            if (it && typeof it === 'object') {
+              return { text: it.name || it.sku || '', sku: it.sku || '', qty: Math.max(1, Number(it.qty) || 1) }
+            }
+            const str = String(it || '')
             const m = str.match(/^(.+?) x(\d+)$/)
-            return m ? { text: m[1], qty: parseInt(m[2], 10) } : { text: str, qty: 1 }
+            return m ? { text: m[1], sku: '', qty: parseInt(m[2], 10) } : { text: str, sku: '', qty: 1 }
           })
         : [],
     })
@@ -1231,12 +1235,9 @@ function OrdersPanel() {
 
   const saveEdit = async (id) => {
     const items = editDraft.items
-      .filter(it => it.text.trim())
-      .map(it => `${it.text.trim()} x${Math.max(1, Number(it.qty) || 1)}`)
-    const totalUnits = items.reduce((sum, it) => {
-      const m = it.match(/ x(\d+)$/)
-      return sum + (m ? parseInt(m[1], 10) : 1)
-    }, 0)
+      .filter(it => it.text.trim() || it.sku.trim())
+      .map(it => ({ name: it.text.trim(), sku: it.sku.trim() || it.text.trim(), qty: Math.max(1, Number(it.qty) || 1) }))
+    const totalUnits = items.reduce((sum, it) => sum + it.qty, 0)
     const trackingNumber = editDraft.tracking_number.trim()
     let nextStatus = normalizeOrderStatus(editDraft.status)
     if (trackingNumber && (nextStatus === 'in_progress' || nextStatus === 'payment_received')) {
@@ -1255,6 +1256,7 @@ function OrdersPanel() {
       status: nextStatus,
       items,
       total_units: totalUnits,
+      distributor_tier: editDraft.distributor_tier.trim() || null,
     })
     if (ok) setEditing(null)
   }
@@ -1518,6 +1520,16 @@ function OrdersPanel() {
                             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, ' ')}</option>)}
                           </select>
                         </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-medium text-slate-600">Pricing Tier</label>
+                          <select value={editDraft.distributor_tier} onChange={e => setEditDraft(d => ({ ...d, distributor_tier: e.target.value }))} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-200">
+                            <option value="">B2B (standard)</option>
+                            <option value="sales">Sales</option>
+                            <option value="professional">Professional</option>
+                            <option value="country">Level 2 Country</option>
+                            <option value="authority">Authority</option>
+                          </select>
+                        </div>
                         <div className="sm:col-span-2">
                           <label className="mb-1 block text-xs font-medium text-slate-600">Shipping Address</label>
                           <textarea value={editDraft.shipping_address} onChange={e => setEditDraft(d => ({ ...d, shipping_address: e.target.value }))} rows={2} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-200" />
@@ -1547,7 +1559,18 @@ function OrdersPanel() {
                                   setEditDraft(d => ({ ...d, items: updated }))
                                 }}
                                 className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-200"
-                                placeholder="Product name / SKU"
+                                placeholder="Product name"
+                              />
+                              <input
+                                type="text"
+                                value={it.sku}
+                                onChange={e => {
+                                  const updated = [...editDraft.items]
+                                  updated[i] = { ...updated[i], sku: e.target.value }
+                                  setEditDraft(d => ({ ...d, items: updated }))
+                                }}
+                                className="w-24 shrink-0 rounded-lg border border-slate-200 px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-200"
+                                placeholder="SKU"
                               />
                               <input
                                 type="number"
@@ -1571,7 +1594,7 @@ function OrdersPanel() {
                         </ul>
                         <button
                           type="button"
-                          onClick={() => setEditDraft(d => ({ ...d, items: [...d.items, { text: '', qty: 1 }] }))}
+                          onClick={() => setEditDraft(d => ({ ...d, items: [...d.items, { text: '', sku: '', qty: 1 }] }))}
                           className="mt-2 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs text-slate-500 hover:bg-slate-50"
                         >+ Add Item</button>
                       </div>
