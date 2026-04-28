@@ -1681,6 +1681,7 @@ const PRODUCT_ALIAS_GROUPS = [          { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-F
           { codes: ['GIUP-SBPS', 'GIUP SBPS'], target: '5-in-1 Superior Base 15ml Peach Serenity -HTF' },
           { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
           { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
+          { codes: ['GIUPSB', 'GIUP SB', 'GIUP-SB'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
           { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
           { codes: ['GIUP-SB-WITH-ACID', 'GIUP SB WITH ACID', 'SB WITH ACID'], target: 'Superbond Nail Dehydrator 11ml - with Acid -HTF' },
           // Dual form / nail tip shapes (image map uses bare shape names)
@@ -3771,6 +3772,7 @@ function FullCataloguePage() {
           { codes: ['GIUP-SBPS', 'GIUP SBPS'], target: '5-in-1 Superior Base 15ml Peach Serenity -HTF' },
           { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
           { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
+          { codes: ['GIUPSB', 'GIUP SB', 'GIUP-SB'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
           { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
           { codes: ['GIUP-SB-WITH-ACID', 'GIUP SB WITH ACID', 'SB WITH ACID'], target: 'Superbond Nail Dehydrator 11ml - with Acid -HTF' },
           { codes: ['ALMOND', 'DUAL FORMS ALMOND'], target: 'DUAL FORMS ALMOND' },
@@ -11530,6 +11532,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
           { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
           { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
+          { codes: ['GIUPSB', 'GIUP SB', 'GIUP-SB'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
           { codes: ['GIUP-SB-WITH-ACID', 'GIUP SB WITH ACID', 'SB WITH ACID'], target: 'Superbond Nail Dehydrator 11ml - with Acid -HTF' },
           // Dual form / nail tip shapes (image map uses bare shape names)
           { codes: ['ALMOND', 'DUAL FORMS ALMOND'], target: 'DUAL FORMS ALMOND' },

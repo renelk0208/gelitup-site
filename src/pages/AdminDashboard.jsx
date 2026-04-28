@@ -836,38 +836,45 @@ function parseOrderItemEntry(rawItem, index = 0) {
 //        Leave null to show the name but no price in exports.
 // The standard markup formula   Math.ceil(price * 1.2 * 10) / 10 * tierMultiplier   still applies.
 const SKU_OVERRIDE_MAP = {
-  // ── Non-Wipe Top Coat ──────────────────────────────────────────────
-  'NWTP':              { name: 'Non Wipe Top Coat 15ml -HTF', price: null },
-  'NWMT15':            { name: 'Non Wipe Top Coat 15ml -HTF', price: null },
+  // ── Non-Wipe Top Coat (Milky) ──────────────────────────────────────
+  // "Non Wipe Top Coat Milky 15ml -HTF" is in b2b-price-list.json at base 11.54 → B2B 13.9
+  'NWTP':              { name: 'Non Wipe Top Coat Milky 15ml -HTF', price: 11.54 },
+  'NWMT15':            { name: 'Non Wipe Top Coat Milky 15ml -HTF', price: 11.54 },
 
-  // ── B2B Colour Series ──────────────────────────────────────────────
+  // ── B2B Colour Series (not in price list — add prices when available) ──
   'BRED0001':          { name: 'B2B Red 01',    price: null },
   'BYELLOW0002':       { name: 'B2B Yellow 02', price: null },
 
-  // ── Superbond ─────────────────────────────────────────────────────
-  'GIUPSB':            { name: 'Superbond',     price: null },
-  'GIUP SB':           { name: 'Superbond',     price: null },
-  'GIUPSBPS':          { name: 'Superbond Primer Spray',  price: null },
-  'GIUP SBPS':         { name: 'Superbond Primer Spray',  price: null },
-  'GIUPSBBLUE':        { name: 'Superbond Blue',          price: null },
-  'GIUP SBBLUE':       { name: 'Superbond Blue',          price: null },
-  'GIUPSBLS':          { name: 'Superbond LS',            price: null },
-  'GIUP SBLS':         { name: 'Superbond LS',            price: null },
-  'GIUPSBMS':          { name: 'Superbond MS',            price: null },
-  'GIUP SBMS':         { name: 'Superbond MS',            price: null },
-  'GIUPSBPURS':        { name: 'Superbond Purple',        price: null },
-  'GIUP SBPURS':       { name: 'Superbond Purple',        price: null },
-  'GIUPSBCCLR':        { name: 'Superbond CC Clear',      price: null },
-  'GIUP SBCCLR':       { name: 'Superbond CC Clear',      price: null },
-  'GIUPSBCBP':         { name: 'Superbond CC Baby Pink',  price: null },
-  'GIUP SBCBP':        { name: 'Superbond CC Baby Pink',  price: null },
-  'GIUPSBCN':          { name: 'Superbond CC Nude',       price: null },
-  'GIUP SBCN':         { name: 'Superbond CC Nude',       price: null },
+  // ── Superbond Nail Dehydrator (Acid-Free) ─────────────────────────
+  // base 6.78 → B2B 8.2
+  'GIUPSB':            { name: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF', price: 6.78 },
+  'GIUP SB':           { name: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF', price: 6.78 },
 
-  // ── Flexi Base ────────────────────────────────────────────────────
-  'GIUPFBCLR':         { name: 'Flexi Base Clear',        price: null },
-  'GIUP FBCLR':        { name: 'Flexi Base Clear',        price: null },
-  'FBCLR':             { name: 'Flexi Base Clear',        price: null },
+  // ── 5-in-1 Superior Base 15ml — Serenity / Colour variants ────────
+  // All at base 12.84 → B2B 15.5
+  // "SB" in these codes = "Superior Base", NOT Superbond
+  'GIUPSBPS':          { name: '5-in-1 Superior Base 15ml Peach Serenity -HTF',   price: 12.84 },
+  'GIUP SBPS':         { name: '5-in-1 Superior Base 15ml Peach Serenity -HTF',   price: 12.84 },
+  'GIUPSBBLUE':        { name: '5-in-1 Superior Base 15ml Blue Serenity -HTF',    price: 12.84 },
+  'GIUP SBBLUE':       { name: '5-in-1 Superior Base 15ml Blue Serenity -HTF',    price: 12.84 },
+  'GIUPSBLS':          { name: '5-in-1 Superior Base 15ml Lemon Serenity -HTF',   price: 12.84 },
+  'GIUP SBLS':         { name: '5-in-1 Superior Base 15ml Lemon Serenity -HTF',   price: 12.84 },
+  'GIUPSBMS':          { name: '5-in-1 Superior Base 15ml Mint Serenity -HTF',    price: 12.84 },
+  'GIUP SBMS':         { name: '5-in-1 Superior Base 15ml Mint Serenity -HTF',    price: 12.84 },
+  'GIUPSBPURS':        { name: '5-in-1 Superior Base 15ml Purple Serenity -HTF',  price: 12.84 },
+  'GIUP SBPURS':       { name: '5-in-1 Superior Base 15ml Purple Serenity -HTF',  price: 12.84 },
+  'GIUPSBCCLR':        { name: '5-in-1 Superior Base 15ml Clear -HTF',            price: 12.84 },
+  'GIUP SBCCLR':       { name: '5-in-1 Superior Base 15ml Clear -HTF',            price: 12.84 },
+  'GIUPSBCBP':         { name: '5-in-1 Superior Base 15ml Baby Pink -HTF',        price: 12.84 },
+  'GIUP SBCBP':        { name: '5-in-1 Superior Base 15ml Baby Pink -HTF',        price: 12.84 },
+  'GIUPSBCN':          { name: '5-in-1 Superior Base 15ml Nude -HTF',             price: 12.84 },
+  'GIUP SBCN':         { name: '5-in-1 Superior Base 15ml Nude -HTF',             price: 12.84 },
+
+  // ── Flexi Base Clear ──────────────────────────────────────────────
+  // base 11.94 → B2B 14.4
+  'GIUPFBCLR':         { name: 'Flexi Base Clear -HTF', price: 11.94 },
+  'GIUP FBCLR':        { name: 'Flexi Base Clear -HTF', price: 11.94 },
+  'FBCLR':             { name: 'Flexi Base Clear -HTF', price: 11.94 },
 }
 // ────────────────────────────────────────────────────────────────────────────────────────────
 
