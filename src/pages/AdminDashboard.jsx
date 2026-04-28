@@ -828,6 +828,49 @@ function parseOrderItemEntry(rawItem, index = 0) {
   }
 }
 
+// ─── Manual SKU overrides ──────────────────────────────────────────────────────────────────
+// Add entries here for items that are NOT in b2b-price-list.json.
+// Key  : exact SKU/name as it appears in orders (will be upper-cased automatically).
+// name : canonical Zoho product name shown in exports.
+// price: BASE price (same scale as b2b-price-list.json — before the 1.2× markup).
+//        Leave null to show the name but no price in exports.
+// The standard markup formula   Math.ceil(price * 1.2 * 10) / 10 * tierMultiplier   still applies.
+const SKU_OVERRIDE_MAP = {
+  // ── Non-Wipe Top Coat ──────────────────────────────────────────────
+  'NWTP':              { name: 'Non Wipe Top Coat 15ml -HTF', price: null },
+  'NWMT15':            { name: 'Non Wipe Top Coat 15ml -HTF', price: null },
+
+  // ── B2B Colour Series ──────────────────────────────────────────────
+  'BRED0001':          { name: 'B2B Red 01',    price: null },
+  'BYELLOW0002':       { name: 'B2B Yellow 02', price: null },
+
+  // ── Superbond ─────────────────────────────────────────────────────
+  'GIUPSB':            { name: 'Superbond',     price: null },
+  'GIUP SB':           { name: 'Superbond',     price: null },
+  'GIUPSBPS':          { name: 'Superbond Primer Spray',  price: null },
+  'GIUP SBPS':         { name: 'Superbond Primer Spray',  price: null },
+  'GIUPSBBLUE':        { name: 'Superbond Blue',          price: null },
+  'GIUP SBBLUE':       { name: 'Superbond Blue',          price: null },
+  'GIUPSBLS':          { name: 'Superbond LS',            price: null },
+  'GIUP SBLS':         { name: 'Superbond LS',            price: null },
+  'GIUPSBMS':          { name: 'Superbond MS',            price: null },
+  'GIUP SBMS':         { name: 'Superbond MS',            price: null },
+  'GIUPSBPURS':        { name: 'Superbond Purple',        price: null },
+  'GIUP SBPURS':       { name: 'Superbond Purple',        price: null },
+  'GIUPSBCCLR':        { name: 'Superbond CC Clear',      price: null },
+  'GIUP SBCCLR':       { name: 'Superbond CC Clear',      price: null },
+  'GIUPSBCBP':         { name: 'Superbond CC Baby Pink',  price: null },
+  'GIUP SBCBP':        { name: 'Superbond CC Baby Pink',  price: null },
+  'GIUPSBCN':          { name: 'Superbond CC Nude',       price: null },
+  'GIUP SBCN':         { name: 'Superbond CC Nude',       price: null },
+
+  // ── Flexi Base ────────────────────────────────────────────────────
+  'GIUPFBCLR':         { name: 'Flexi Base Clear',        price: null },
+  'GIUP FBCLR':        { name: 'Flexi Base Clear',        price: null },
+  'FBCLR':             { name: 'Flexi Base Clear',        price: null },
+}
+// ────────────────────────────────────────────────────────────────────────────────────────────
+
 // Strips measurement units, variant suffixes and filler descriptor words from a price-list
 // product name to produce a shorter "content key" that can match loosely-stored order item
 // names (e.g. "Sugary Glitter pigment 3gr 01 -HTF" → "SUGARY GLITTER 01").
@@ -961,11 +1004,28 @@ function resolveOrderItemUnitPrice(item, priceLookupMap, tierMultiplier = 1.0) {
 // from the price list. Returns { unitPrice, resolvedName } where resolvedName is the
 // full price-list name when a match is found, or null when no match.
 function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) {
-  if (!priceLookupMap || !priceLookupMap.size) return { unitPrice: null, resolvedName: null }
+  if (!priceLookupMap && (!item?.sku && !item?.name)) return { unitPrice: null, resolvedName: null }
 
   const sku = normalizeAdminSkuToken(item?.sku)
   const name = String(item?.name || '').trim()
   const nameNorm = normalizeAdminSkuToken(name)
+
+  // Check manual override map first (items not in b2b-price-list.json)
+  for (const key of [sku, nameNorm, normalizeAdminSkuToken(name)]) {
+    if (!key) continue
+    const override = SKU_OVERRIDE_MAP[key]
+    if (override) {
+      const baseUnitPrice = override.price != null
+        ? Math.ceil(override.price * 1.2 * 10) / 10
+        : null
+      return {
+        unitPrice: baseUnitPrice != null ? Math.round(baseUnitPrice * tierMultiplier * 100) / 100 : null,
+        resolvedName: override.name || null,
+      }
+    }
+  }
+
+  if (!priceLookupMap || !priceLookupMap.size) return { unitPrice: null, resolvedName: null }
 
   const candidates = [
     sku,
