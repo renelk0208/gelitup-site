@@ -9568,6 +9568,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [b2bUserRole, setB2bUserRole] = useState('salon')
   const [liveUpsellRecommendation, setLiveUpsellRecommendation] = useState(null)
   const [dismissedSmartSuggestion, setDismissedSmartSuggestion] = useState(false)
+  const [showMinOrderNudge, setShowMinOrderNudge] = useState(false)
+  const [minOrderNudgeSeen, setMinOrderNudgeSeen] = useState(false)
   const [showClientValidation, setShowClientValidation] = useState(false)
   const [profileSaveStatus, setProfileSaveStatus] = useState(null) // null | 'saving' | 'saved' | 'error'
   const [packagePreviewVisibleCount, setPackagePreviewVisibleCount] = useState(15)
@@ -11174,6 +11176,13 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     return itemsTotal + pkgTotal
   }, [selectedProducts, packageCartItems, itemQtys, tierPriceMultiplier])
 
+  useEffect(() => {
+    if (!minOrderNudgeSeen && pricesAllocated && orderTotal > 0) {
+      setShowMinOrderNudge(true)
+      setMinOrderNudgeSeen(true)
+    }
+  }, [orderTotal, pricesAllocated, minOrderNudgeSeen])
+
   // Single-select: one category visible at a time in sidebar layout
   const toggleCategory = (cat) => {
     setExpandedCategories(new Set([cat]))
@@ -12629,6 +12638,30 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       {showAddOnRemovedToast && (
         <div className="fixed bottom-4 left-4 z-40 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-sm">
           Add-on removed
+        </div>
+      )}
+
+      {/* -- MINIMUM ORDER NUDGE POPUP -- */}
+      {showMinOrderNudge && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4" onClick={() => setShowMinOrderNudge(false)}>
+          <div className="w-full max-w-sm rounded-2xl border border-fuchsia-200 bg-white p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="mb-3 flex items-center gap-3">
+              <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-xl">🚚</span>
+              <div>
+                <p className="text-sm font-bold text-slate-900">Free shipping from €{(enforcedTier === 'authority' ? AUTHORITY_MIN_ORDER_EUR : enforcedTier === 'professional' ? PROFESSIONAL_MIN_ORDER_EUR : MIN_ORDER_EUR)}</p>
+                <p className="text-xs text-slate-500">Minimum order required</p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              Orders under <strong>€{(enforcedTier === 'authority' ? AUTHORITY_MIN_ORDER_EUR : enforcedTier === 'professional' ? PROFESSIONAL_MIN_ORDER_EUR : MIN_ORDER_EUR)} NET</strong> cannot be accepted on the portal. Reach the minimum to qualify for <strong>free shipping</strong> and to submit your order.
+            </p>
+            <button
+              onClick={() => setShowMinOrderNudge(false)}
+              className="mt-4 w-full rounded-xl bg-fuchsia-600 py-2.5 text-sm font-semibold text-white hover:bg-fuchsia-700 transition"
+            >
+              Got it — I'll keep shopping
+            </button>
+          </div>
         </div>
       )}
 
