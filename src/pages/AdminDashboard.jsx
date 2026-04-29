@@ -1712,7 +1712,7 @@ function OrdersPanel() {
                             {items.map((item, i) => {
                               const parsed = parseOrderItemEntry(item, i)
                               const rawSku = typeof item === 'object' && item !== null ? (item.sku || item.code || '') : ''
-                              const displaySku = rawSku || parsed.sku || ''
+                              const displaySku = (rawSku || parsed.sku || '').replace(/\s+IMAGE$/i, '')
                               const skuMissing = !displaySku
                               const rowTierMultiplier = getTierMultiplier(row.distributor_tier)
                               const unitPrice = resolveOrderItemUnitPrice(parsed, priceLookupMap, rowTierMultiplier)

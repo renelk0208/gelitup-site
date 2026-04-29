@@ -663,6 +663,11 @@ function normalizeSkuCode(value) {
   return String(value || '').trim().toUpperCase().replace(/\s+/g, ' ')
 }
 
+// Strip display-only noise from SKU codes (e.g. " IMAGE" suffix added by Zoho image-map entries)
+function displaySkuCode(value) {
+  return normalizeSkuCode(value).replace(/\s+IMAGE$/i, '')
+}
+
 function normalizeProductName(value) {
   return normalizeSkuCode(value)
     .replace(/GEL\.?IT\.?UP|GEL\s*IT\s*UP|GIUP/gi, ' ')
@@ -11656,7 +11661,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
     const rowsHtml = lastPackingList.lines
       .map((line) => `<tr>
-        <td>${escapeHtml(line.sku)}</td>
+        <td>${escapeHtml(displaySkuCode(line.sku))}</td>
         <td>${escapeHtml(line.description)}</td>
         <td>${line.qty}</td>
         <td>${line.unitWeightKg}</td>
@@ -12008,7 +12013,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     const tdRStyle = 'border:1px solid #ddd;padding:5px 10px;text-align:right'
     const orderTableRows = proformaInvoice.lines.map(line => `
       <tr>
-        <td style="${tdStyle}">${escapeHtml(line.sku)}</td>
+        <td style="${tdStyle}">${escapeHtml(displaySkuCode(line.sku))}</td>
         <td style="${tdStyle}">${escapeHtml(line.description)}</td>
         <td style="${tdRStyle}">${line.qty}</td>
         <td style="${tdRStyle}">${line.unitPriceEur.toFixed(2)}</td>
@@ -12082,7 +12087,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         csvEsc(shippingName),
         csvEsc(shippingAddress),
         csvEsc(shippingCountry),
-        csvEsc(line.sku),
+        csvEsc(displaySkuCode(line.sku)),
         csvEsc(line.description),
         csvEsc(line.qty),
         csvEsc(line.unitPriceEur.toFixed(2)),
