@@ -12865,6 +12865,18 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         </div>
       </div>
 
+      {/* -- MINIMUM ORDER NOTICE (always visible) -- */}
+      <div className="flex items-center gap-2 rounded-2xl border border-fuchsia-100 bg-fuchsia-50 px-4 py-2.5">
+        <svg className="h-4 w-4 flex-none text-fuchsia-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" /></svg>
+        <p className="text-xs text-fuchsia-700">
+          <strong>Minimum order:</strong>{' '}
+          {enforcedTier === 'authority'
+            ? `Authority tier orders must be at least €${AUTHORITY_MIN_ORDER_EUR} NET (excl. VAT & shipping).`
+            : enforcedTier === 'professional'
+              ? `Professional tier orders must be at least €${PROFESSIONAL_MIN_ORDER_EUR} NET (excl. VAT & shipping).`
+              : `Orders must be at least €${MIN_ORDER_EUR} NET (excl. VAT & shipping). Orders below this amount cannot be submitted.`}
+        </p>
+      </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
