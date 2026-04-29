@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import * as XLSX from 'xlsx'
+import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
 
 const REGISTRATIONS_TABLE = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || 'b2b_registrations'
 const ORDERS_TABLE = import.meta.env.VITE_B2B_ORDERS_TABLE || 'b2b_orders'
@@ -875,6 +876,38 @@ const SKU_OVERRIDE_MAP = {
   'GIUPFBCLR':         { name: 'Flexi Base Clear -HTF', price: 11.94 },
   'GIUP FBCLR':        { name: 'Flexi Base Clear -HTF', price: 11.94 },
   'FBCLR':             { name: 'Flexi Base Clear -HTF', price: 11.94 },
+
+  // ── Clear Polygel ─────────────────────────────────────────────────
+  // base 12.19 → B2B 14.7
+  'POLYGELCLR':        { name: 'MultiMix Synthogel 30gr Clear -HTF', price: 12.19 },
+  'POLYGEL CLR':       { name: 'MultiMix Synthogel 30gr Clear -HTF', price: 12.19 },
+  'CLEAR POLYGEL':     { name: 'MultiMix Synthogel 30gr Clear -HTF', price: 12.19 },
+
+  // ── MultiMix Synthogel short SKU aliases ──────────────────────────
+  // These use short SKU codes that won't hit the price list lookup;
+  // name-matching also fails because order names end in "color" vs price-list "Synthogel"
+  // (COLOR is now stripped as a filler word, but belt-and-suspenders override here too)
+  'MMSSPC':            { name: 'MultiMix Synthogel 30gr Super Soft Pink -HTF', price: 12.19 },
+  'MMLNC':             { name: 'Multimix Synthogel 30g Light Nude -HTF',       price: 12.19 },
+
+  // ── White Satin Cuticle Oil range (store brand → canonical price list name) ──────────
+  // All 100ml variants at base 7.2 → B2B 8.7
+  'WSCOILM':                           { name: 'Chilled Melon Cuticle Oil 100ml -HTF',   price: 7.2 },
+  'WHITE SATIN CUTICLE OIL MELON':     { name: 'Chilled Melon Cuticle Oil 100ml -HTF',   price: 7.2 },
+  'WSCOILP':                           { name: 'Perky Peach Cuticle Oil 100ml -HTF',     price: 7.2 },
+  'WHITE SATIN CUTICLE OIL PEACH':     { name: 'Perky Peach Cuticle Oil 100ml -HTF',     price: 7.2 },
+  'WSCOILC':                           { name: 'Cooling Coconut Cuticle Oil 100ml -HTF', price: 7.2 },
+  'WHITE SATIN CUTICLE OIL COCONUT OIL': { name: 'Cooling Coconut Cuticle Oil 100ml -HTF', price: 7.2 },
+
+  // ── Mirror Clear Powder ────────────────────────────────────────────────────────────
+  // base 5.15 → B2B 6.2
+  'MIRRORCLEAR':       { name: 'SP8001 Mirror Clear Powder', price: 5.15 },
+  'MIRROR CLEAR':      { name: 'SP8001 Mirror Clear Powder', price: 5.15 },
+
+  // ── Classic Base Coat ──────────────────────────────────────────────────────────────
+  // base 10.48 → B2B 12.6
+  'CLASSICBC':         { name: 'Base Coat 15ml -HTF', price: 10.48 },
+  'CLASSIC BASE COAT': { name: 'Base Coat 15ml -HTF', price: 10.48 },
 }
 // ────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -886,7 +919,7 @@ function simplifyProductNameForIndex(name) {
   return upper
     .replace(/\s*-?\s*(HTF|HTE|HEMA[- ]FREE|NEW|-2025|2025)\s*$/i, '') // strip variant suffix
     .replace(/\b\d+\s*(ML|GR|G|MG|KG|L|S)\b/g, '')                     // strip measurements (100ml, 30gr, 1000s)
-    .replace(/\b(BRUSH|SPATULA|PIGMENT|SYNTHOGEL|SYNTHOLIQUID|AND|OF)\b/g, '') // strip filler words
+    .replace(/\b(BRUSH|SPATULA|PIGMENT|SYNTHOGEL|SYNTHOLIQUID|AND|OF|COLOR|COLOUR)\b/g, '') // strip filler words
     .replace(/-/g, ' ')       // normalize dashes (9-11 → 9 11)
     .replace(/\s+/g, ' ')
     .trim()
@@ -965,6 +998,17 @@ function buildOrderPriceLookupMap(items = []) {
     }
   })
 
+  // Apply shared alias table: for each group, look up the target name in the map
+  // and register all alternate codes pointing to the same entry.
+  for (const { codes, target } of PRODUCT_ALIAS_GROUPS) {
+    const entry = map.get(normalizeAdminSkuToken(target)) ||
+                  map.get(normalizeAdminNameToken(target))
+    if (!entry) continue
+    for (const c of codes) {
+      setIfMissing(normalizeAdminSkuToken(c), entry)
+    }
+  }
+
   return map
 }
 
@@ -980,31 +1024,10 @@ function getTierMultiplier(tier) {
   return ADMIN_TIER_PRICE_MULTIPLIERS[normalized] ?? 1.0
 }
 
+// Delegates to resolveOrderItemPriceEntry so the UI uses the same full lookup logic
+// (override map + simplified name + digit-strip) as the export functions.
 function resolveOrderItemUnitPrice(item, priceLookupMap, tierMultiplier = 1.0) {
-  if (!priceLookupMap || !priceLookupMap.size) return null
-
-  const sku = normalizeAdminSkuToken(item?.sku)
-  const name = String(item?.name || '').trim()
-
-  const candidates = [
-    sku,
-    normalizeAdminSkuToken(name),
-    normalizeAdminNameToken(name),
-  ].filter(Boolean)
-
-  for (const key of candidates) {
-    const hit = priceLookupMap.get(key)
-    if (hit?.unitPrice != null) return Math.round(hit.unitPrice * tierMultiplier * 100) / 100
-  }
-
-  const compactSkuMatch = sku.match(/^([A-Z]{2,6})\s*(\d{1,4}[A-Z]?)$/)
-  if (compactSkuMatch) {
-    const key = `${compactSkuMatch[1]} ${compactSkuMatch[2]}`
-    const hit = priceLookupMap.get(key)
-    if (hit?.unitPrice != null) return Math.round(hit.unitPrice * tierMultiplier * 100) / 100
-  }
-
-  return null
+  return resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier).unitPrice
 }
 
 // Resolves both unit price AND the canonical Zoho item name (includes -HTF suffix etc.)
