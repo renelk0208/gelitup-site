@@ -12607,7 +12607,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   }
 
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4${pricesAllocated && orderTotal > 0 ? ' pb-20' : ''}`}>
       {/* Lightbox modal */}
       {lightboxUrl && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 p-4" onClick={() => setLightboxUrl(null)}>
@@ -12631,6 +12631,38 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           Add-on removed
         </div>
       )}
+
+      {/* -- FLOATING ORDER TOTAL BAR -- */}
+      {pricesAllocated && orderTotal > 0 && (() => {
+        const _floatMin = enforcedTier === 'authority' ? AUTHORITY_MIN_ORDER_EUR : enforcedTier === 'professional' ? PROFESSIONAL_MIN_ORDER_EUR : MIN_ORDER_EUR
+        const _floatPct = Math.min(100, (orderTotal / _floatMin) * 100)
+        const _reached = _floatPct >= 100
+        return (
+          <div className="fixed bottom-0 left-0 right-0 z-[60] border-t border-slate-200 bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] backdrop-blur-sm sm:px-6">
+            <div className="mx-auto max-w-4xl">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-xs text-slate-500 shrink-0">
+                  <span className="font-medium text-slate-700">Order total</span>
+                  <span className="font-bold text-fuchsia-700 text-sm">€{orderTotal.toFixed(2)}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${_reached ? 'bg-emerald-500' : 'bg-fuchsia-600'}`}
+                      style={{ width: `${_floatPct}%` }}
+                    />
+                  </div>
+                </div>
+                <p className="shrink-0 text-[11px] text-slate-500">
+                  {_reached
+                    ? <span className="font-semibold text-emerald-600">✓ Minimum reached</span>
+                    : <>€{(_floatMin - orderTotal).toFixed(2)} <span className="hidden sm:inline">more to reach</span> <span className="text-slate-700 font-medium">€{_floatMin} min</span></>}
+                </p>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Stacked upsell toasts (bottom-right column) */}
       <div className="fixed bottom-4 right-4 z-50 flex w-[min(92vw,440px)] flex-col gap-3">
