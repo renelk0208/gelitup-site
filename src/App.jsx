@@ -1659,6 +1659,7 @@ function isTechnicalSku(code) {
 // Maps product image-map codes / filenames to canonical price-list entry names.
 // Keep in sync with the inline aliasGroups in FullCataloguePage and ProductsModule.
 const PRODUCT_ALIAS_GROUPS = [          { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-FBCLR'], target: 'Flexi Base Clear -HTF' },
+          { codes: ['CLASSIC BASE COAT IMAGE', 'CLASSIC BASE COAT', 'CLASSICBC', 'Base Coat 15ml'], target: 'Base Coat 15ml -HTF' },
           // 5-in-1 Superior Base coloureds (SBC*)
           { codes: ['GIUP SBCCLR', 'GIUP-SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
           { codes: ['GIUP SBCMP', 'GIUP-SBCMP'], target: '5-in-1 Superior Base 15ml Milky Pink -HTF' },
@@ -1722,7 +1723,7 @@ const PRODUCT_ALIAS_GROUPS = [          { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-F
           // Nail Forms
           { codes: ['nail_forms_5', 'nail forms 5', 'NAIL FORMS 5', 'NAIL FORMS'], target: 'GEL.IT.UP by GIUP® Nail Forms' },
           // Mirror Powders
-          { codes: ['MIRROR CLEAR', 'SP 8001', 'SP8001'], target: 'SP8001 Mirror Clear Powder' },
+          { codes: ['MIRROR CLEAR', 'MIRRORCLEAR', 'SP 8001', 'SP8001'], target: 'SP8001 Mirror Clear Powder' },
           { codes: ['MIRROR X1', 'TR 1', 'TR1'], target: 'TR01 Mirror X1 Powder' },
           { codes: ['MIRROR X2', 'TR 2', 'TR2'], target: 'TR02 Mirror X2 Powder' },
           { codes: ['MIRROR X3', 'TR 3', 'TR3'], target: 'TR03 Mirror X3 Powder' },
@@ -1773,10 +1774,11 @@ const PRODUCT_ALIAS_GROUPS = [          { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-F
           { codes: ['MULTIMIX BLUE GLITTER COLOR'], target: 'MultiMix Synthogel 30g Blue Glitter -HTF' },
           { codes: ['MULTIMIX BUBBLE GUM GLITTER COLOR'], target: 'MultiMix Synthogel 30gr Bubble Gum Glitter -HTF' },
           { codes: ['MULTIMIX GLITSY GREEN COLOR'], target: 'MultiMix Synthogel 30gr Glitsy Green -HTF' },
-          { codes: ['MULTIMIX LIGHT NUDE COLOR'], target: 'Multimix Synthogel 30g Light Nude -HTF' },
+          { codes: ['MULTIMIX LIGHT NUDE COLOR', 'MMLNC'], target: 'Multimix Synthogel 30g Light Nude -HTF' },
           { codes: ['MULTIMIX MINT GREEN COLOR'], target: 'MultiMix Synthogel 30gr Minty Green -HTF' },
           { codes: ['MULTIMIX PINKIII COLOR'], target: 'MultiMix Synthogel 30gr Pink III -HTF' },
-          { codes: ['MULTIMIX SUPER SOFT PINK COLOR'], target: 'MultiMix Synthogel 30gr Super Soft Pink -HTF' },
+          { codes: ['MULTIMIX SUPER SOFT PINK COLOR', 'MMSSPC'], target: 'MultiMix Synthogel 30gr Super Soft Pink -HTF' },
+          { codes: ['MULTIMIX CLEAR COLOR 30', 'POLYGELCLR', 'POLYGEL CLR', 'CLEAR POLYGEL'], target: 'MultiMix Synthogel 30gr Clear -HTF' },
           // MultiMix Synthogel 60g
           { codes: ['MULTIMIX BLACK COLOR'], target: 'MultiMix Synthogel 60gr Black -HTF' },
           { codes: ['MULTIMIX CLEAR COLOR'], target: 'MultiMix Synthogel 60gr Clear -HTF' },
@@ -1801,9 +1803,9 @@ const PRODUCT_ALIAS_GROUPS = [          { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-F
           { codes: ['CLEANSER'], target: 'Cleanser 200 ml -HTF' },
           { codes: ['SANITIZER'], target: 'Sanitizer 200ml -HTF' },
           // Cuticle Oils
-          { codes: ['CUTICLE OIL PEACH', 'WHITE SATIN CUTICLE OIL PEACH'], target: 'Perky Peach Cuticle Oil 100ml -HTF' },
-          { codes: ['CUTICLE OIL MELON', 'WHITE SATIN CUTICLE OIL MELON'], target: 'Chilled Melon Cuticle Oil 100ml -HTF' },
-          { codes: ['CUTICLE OIL COCONUT', 'WHITE SATIN CUTICLE OIL COCONUT OIL'], target: 'Cooling Coconut Cuticle Oil 100ml -HTF' },
+          { codes: ['CUTICLE OIL PEACH', 'WHITE SATIN CUTICLE OIL PEACH', 'WSCOILP'], target: 'Perky Peach Cuticle Oil 100ml -HTF' },
+          { codes: ['CUTICLE OIL MELON', 'WHITE SATIN CUTICLE OIL MELON', 'WSCOILM'], target: 'Chilled Melon Cuticle Oil 100ml -HTF' },
+          { codes: ['CUTICLE OIL COCONUT', 'WHITE SATIN CUTICLE OIL COCONUT OIL', 'WSCOILC'], target: 'Cooling Coconut Cuticle Oil 100ml -HTF' },
           { codes: ['PHOTO PERFECT CUTICLE OIL'], target: 'PhotoPerfect Cuticle Oil New' },
           // Creams & Scrubs
           { codes: ['FOOT CREAM 100 CALMFROST'], target: 'GEL IT UP FOOT CREAM 100ml CALM FROST NEW' },
@@ -2027,9 +2029,9 @@ const PRODUCT_ALIAS_GROUPS = [          { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-F
           { codes: ['MC7', 'MC 7', 'GIUP MC7', 'GIUP-MC7'], target: 'Metallic Collection #MC7 -HTF' },
           { codes: ['MC8', 'MC 8', 'GIUP MC8', 'GIUP-MC8'], target: 'Metallic Collection #MC8 -HTF' },
           // BTB Collection (images stored as GIUP-B2BRed0001, GIUP-B2BBlue0003, GIUP-B2BYellow0002)
-          { codes: ['BTB01', 'BTB 01', 'GIUP BTB01', 'GIUP-BTB01', 'GIUP B2BRED0001', 'GIUP B2BRed0001'], target: 'BTB01 Rosso Corso -HTF' },
-          { codes: ['BTB02', 'BTB 02', 'GIUP BTB02', 'GIUP-BTB02', 'GIUP B2BBLUE0003', 'GIUP B2BBlue0003'], target: 'BTB02 Nautilus -HTF' },
-          { codes: ['BTB03', 'BTB 03', 'GIUP BTB03', 'GIUP-BTB03', 'GIUP B2BYELLOW0002', 'GIUP B2BYellow0002'], target: 'BTB03 Brimstone -HTF' },
+          { codes: ['BTB01', 'BTB 01', 'GIUP BTB01', 'GIUP-BTB01', 'GIUP B2BRED0001', 'GIUP B2BRed0001', 'BRED0001'], target: 'BTB01 Rosso Corso -HTF' },
+          { codes: ['BTB02', 'BTB 02', 'GIUP BTB02', 'GIUP-BTB02', 'GIUP B2BBLUE0003', 'GIUP B2BBlue0003', 'BBLUE0003'], target: 'BTB02 Nautilus -HTF' },
+          { codes: ['BTB03', 'BTB 03', 'GIUP BTB03', 'GIUP-BTB03', 'GIUP B2BYELLOW0002', 'GIUP B2BYellow0002', 'BYELLOW0002'], target: 'BTB03 Brimstone -HTF' },
           // Autumn 2021 (OTA series)
           { codes: ['OTA01', 'OTA 01', 'OTA1', 'OTA 1', 'GIUP OTA01', 'GIUP-OTA01'], target: 'Autumn 2021 OTA01 -HTF' },
           { codes: ['OTA02', 'OTA 02', 'OTA2', 'OTA 2', 'GIUP OTA02', 'GIUP-OTA02'], target: 'Autumn 2021 OTA02 -HTF' },
@@ -3751,6 +3753,7 @@ function FullCataloguePage() {
         const pnLookup = t => map.get(normalizeProductName(t))
         const aliasGroups = [
           { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-FBCLR'], target: 'Flexi Base Clear -HTF' },
+          { codes: ['CLASSIC BASE COAT IMAGE', 'CLASSIC BASE COAT', 'CLASSICBC', 'Base Coat 15ml'], target: 'Base Coat 15ml -HTF' },
           { codes: ['GIUP SBCCLR', 'GIUP-SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
           { codes: ['GIUP SBCMP', 'GIUP-SBCMP'], target: '5-in-1 Superior Base 15ml Milky Pink -HTF' },
           { codes: ['GIUP SBCPP', 'GIUP-SBCPP'], target: '5-in-1 Superior Base 15ml Pretty Pink -HTF' },
@@ -3807,7 +3810,7 @@ function FullCataloguePage() {
           { codes: ['buffing block', 'BUFFING BLOCK', '\u0392uffing block', '\u0392uffing_block'], target: 'Nail Files 100/100' },
           { codes: ['nail file 100 1001', 'nail-file 100-1001'], target: 'Nail Files 100/100' },
           { codes: ['nail_forms_5', 'nail forms 5', 'NAIL FORMS 5', 'NAIL FORMS'], target: 'GEL.IT.UP by GIUP® Nail Forms' },
-          { codes: ['MIRROR CLEAR', 'SP 8001', 'SP8001'], target: 'SP8001 Mirror Clear Powder' },
+          { codes: ['MIRROR CLEAR', 'MIRRORCLEAR', 'SP 8001', 'SP8001'], target: 'SP8001 Mirror Clear Powder' },
           { codes: ['MIRROR X1', 'TR 1', 'TR1'], target: 'TR01 Mirror X1 Powder' },
           { codes: ['MIRROR X2', 'TR 2', 'TR2'], target: 'TR02 Mirror X2 Powder' },
           { codes: ['MIRROR X3', 'TR 3', 'TR3'], target: 'TR03 Mirror X3 Powder' },
@@ -3852,10 +3855,11 @@ function FullCataloguePage() {
           { codes: ['MULTIMIX BLUE GLITTER COLOR'], target: 'MultiMix Synthogel 30g Blue Glitter -HTF' },
           { codes: ['MULTIMIX BUBBLE GUM GLITTER COLOR'], target: 'MultiMix Synthogel 30gr Bubble Gum Glitter -HTF' },
           { codes: ['MULTIMIX GLITSY GREEN COLOR'], target: 'MultiMix Synthogel 30gr Glitsy Green -HTF' },
-          { codes: ['MULTIMIX LIGHT NUDE COLOR'], target: 'Multimix Synthogel 30g Light Nude -HTF' },
+          { codes: ['MULTIMIX LIGHT NUDE COLOR', 'MMLNC'], target: 'Multimix Synthogel 30g Light Nude -HTF' },
           { codes: ['MULTIMIX MINT GREEN COLOR'], target: 'MultiMix Synthogel 30gr Minty Green -HTF' },
           { codes: ['MULTIMIX PINKIII COLOR'], target: 'MultiMix Synthogel 30gr Pink III -HTF' },
-          { codes: ['MULTIMIX SUPER SOFT PINK COLOR'], target: 'MultiMix Synthogel 30gr Super Soft Pink -HTF' },
+          { codes: ['MULTIMIX SUPER SOFT PINK COLOR', 'MMSSPC'], target: 'MultiMix Synthogel 30gr Super Soft Pink -HTF' },
+          { codes: ['MULTIMIX CLEAR COLOR 30', 'POLYGELCLR', 'POLYGEL CLR', 'CLEAR POLYGEL'], target: 'MultiMix Synthogel 30gr Clear -HTF' },
           { codes: ['MULTIMIX BLACK COLOR'], target: 'MultiMix Synthogel 60gr Black -HTF' },
           { codes: ['MULTIMIX CLEAR COLOR'], target: 'MultiMix Synthogel 60gr Clear -HTF' },
           { codes: ['MULTIMIX COVER COLOR'], target: 'MultiMix Synthogel 60gr Cover -HTF' },
@@ -3877,9 +3881,9 @@ function FullCataloguePage() {
           { codes: ['MULTIMIX WHITE COLOR'], target: 'MultiMix Synthogel 60gr White -HTF' },
           { codes: ['CLEANSER'], target: 'Cleanser 200 ml -HTF' },
           { codes: ['SANITIZER'], target: 'Sanitizer 200ml -HTF' },
-          { codes: ['CUTICLE OIL PEACH', 'WHITE SATIN CUTICLE OIL PEACH'], target: 'Perky Peach Cuticle Oil 100ml -HTF' },
-          { codes: ['CUTICLE OIL MELON', 'WHITE SATIN CUTICLE OIL MELON'], target: 'Chilled Melon Cuticle Oil 100ml -HTF' },
-          { codes: ['CUTICLE OIL COCONUT', 'WHITE SATIN CUTICLE OIL COCONUT OIL'], target: 'Cooling Coconut Cuticle Oil 100ml -HTF' },
+          { codes: ['CUTICLE OIL PEACH', 'WHITE SATIN CUTICLE OIL PEACH', 'WSCOILP'], target: 'Perky Peach Cuticle Oil 100ml -HTF' },
+          { codes: ['CUTICLE OIL MELON', 'WHITE SATIN CUTICLE OIL MELON', 'WSCOILM'], target: 'Chilled Melon Cuticle Oil 100ml -HTF' },
+          { codes: ['CUTICLE OIL COCONUT', 'WHITE SATIN CUTICLE OIL COCONUT OIL', 'WSCOILC'], target: 'Cooling Coconut Cuticle Oil 100ml -HTF' },
           { codes: ['PHOTO PERFECT CUTICLE OIL'], target: 'PhotoPerfect Cuticle Oil New' },
           { codes: ['FOOT CREAM 100 CALMFROST'], target: 'GEL IT UP FOOT CREAM 100ml CALM FROST NEW' },
           { codes: ['FOOT CREAM 100 SASSYSASSY'], target: 'GEL IT UP FOOT CREAM 100ml SASSY SASSY NEW' },
@@ -4068,9 +4072,9 @@ function FullCataloguePage() {
           { codes: ['MC6', 'MC 6', 'GIUP MC6'], target: 'Metallic Collection #MC6 -HTF' },
           { codes: ['MC7', 'MC 7', 'GIUP MC7'], target: 'Metallic Collection #MC7 -HTF' },
           { codes: ['MC8', 'MC 8', 'GIUP MC8'], target: 'Metallic Collection #MC8 -HTF' },
-          { codes: ['BTB01', 'GIUP BTB01', 'GIUP B2BRED0001', 'GIUP B2BRed0001'], target: 'BTB01 Rosso Corso -HTF' },
-          { codes: ['BTB02', 'GIUP BTB02', 'GIUP B2BBLUE0003', 'GIUP B2BBlue0003'], target: 'BTB02 Nautilus -HTF' },
-          { codes: ['BTB03', 'GIUP BTB03', 'GIUP B2BYELLOW0002', 'GIUP B2BYellow0002'], target: 'BTB03 Brimstone -HTF' },
+          { codes: ['BTB01', 'GIUP BTB01', 'GIUP B2BRED0001', 'GIUP B2BRed0001', 'BRED0001'], target: 'BTB01 Rosso Corso -HTF' },
+          { codes: ['BTB02', 'GIUP BTB02', 'GIUP B2BBLUE0003', 'GIUP B2BBlue0003', 'BBLUE0003'], target: 'BTB02 Nautilus -HTF' },
+          { codes: ['BTB03', 'GIUP BTB03', 'GIUP B2BYELLOW0002', 'GIUP B2BYellow0002', 'BYELLOW0002'], target: 'BTB03 Brimstone -HTF' },
           { codes: ['OTA01', 'OTA 01', 'GIUP OTA01'], target: 'Autumn 2021 OTA01 -HTF' },
           { codes: ['OTA02', 'OTA 02', 'GIUP OTA02'], target: 'Autumn 2021 OTA02 -HTF' },
           { codes: ['OTA03', 'OTA 03', 'GIUP OTA03'], target: 'Autumn 2021 OTA03 -HTF' },
@@ -11507,7 +11511,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         const pnLookup = t => map.get(normalizeProductName(t))
         const aliasGroups = [
           // Bases & Primers
-          { codes: ['CLASSIC BASE COAT IMAGE', 'CLASSIC BASE COAT', 'Base Coat 15ml'], target: 'Base Coat 15ml -HTF' },
+          { codes: ['CLASSIC BASE COAT IMAGE', 'CLASSIC BASE COAT', 'CLASSICBC', 'Base Coat 15ml'], target: 'Base Coat 15ml -HTF' },
           { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-FBCLR'], target: 'Flexi Base Clear -HTF' },
           // 5-in-1 Superior Base coloureds (SBC*)
           { codes: ['GIUP SBCCLR', 'GIUP-SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
@@ -11572,7 +11576,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           // Nail Forms
           { codes: ['nail_forms_5', 'nail forms 5', 'NAIL FORMS 5', 'NAIL FORMS'], target: 'GEL.IT.UP by GIUP® Nail Forms' },
           // Mirror Powders
-          { codes: ['MIRROR CLEAR', 'SP 8001', 'SP8001'], target: 'SP8001 Mirror Clear Powder' },
+          { codes: ['MIRROR CLEAR', 'MIRRORCLEAR', 'SP 8001', 'SP8001'], target: 'SP8001 Mirror Clear Powder' },
           { codes: ['MIRROR X1', 'TR 1', 'TR1'], target: 'TR01 Mirror X1 Powder' },
           { codes: ['MIRROR X2', 'TR 2', 'TR2'], target: 'TR02 Mirror X2 Powder' },
           { codes: ['MIRROR X3', 'TR 3', 'TR3'], target: 'TR03 Mirror X3 Powder' },
@@ -11621,10 +11625,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['MULTIMIX BLUE GLITTER COLOR'], target: 'MultiMix Synthogel 30g Blue Glitter -HTF' },
           { codes: ['MULTIMIX BUBBLE GUM GLITTER COLOR'], target: 'MultiMix Synthogel 30gr Bubble Gum Glitter -HTF' },
           { codes: ['MULTIMIX GLITSY GREEN COLOR'], target: 'MultiMix Synthogel 30gr Glitsy Green -HTF' },
-          { codes: ['MULTIMIX LIGHT NUDE COLOR'], target: 'Multimix Synthogel 30g Light Nude -HTF' },
+          { codes: ['MULTIMIX LIGHT NUDE COLOR', 'MMLNC'], target: 'Multimix Synthogel 30g Light Nude -HTF' },
           { codes: ['MULTIMIX MINT GREEN COLOR'], target: 'MultiMix Synthogel 30gr Minty Green -HTF' },
           { codes: ['MULTIMIX PINKIII COLOR'], target: 'MultiMix Synthogel 30gr Pink III -HTF' },
-          { codes: ['MULTIMIX SUPER SOFT PINK COLOR'], target: 'MultiMix Synthogel 30gr Super Soft Pink -HTF' },
+          { codes: ['MULTIMIX SUPER SOFT PINK COLOR', 'MMSSPC'], target: 'MultiMix Synthogel 30gr Super Soft Pink -HTF' },
+          { codes: ['MULTIMIX CLEAR COLOR 30', 'POLYGELCLR', 'POLYGEL CLR', 'CLEAR POLYGEL'], target: 'MultiMix Synthogel 30gr Clear -HTF' },
           // MultiMix Synthogel 60g
           { codes: ['MULTIMIX BLACK COLOR'], target: 'MultiMix Synthogel 60gr Black -HTF' },
           { codes: ['MULTIMIX CLEAR COLOR'], target: 'MultiMix Synthogel 60gr Clear -HTF' },
@@ -11649,9 +11654,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['CLEANSER'], target: 'Cleanser 200 ml -HTF' },
           { codes: ['SANITIZER'], target: 'Sanitizer 200ml -HTF' },
           // Cuticle Oils
-          { codes: ['CUTICLE OIL PEACH', 'WHITE SATIN CUTICLE OIL PEACH'], target: 'Perky Peach Cuticle Oil 100ml -HTF' },
-          { codes: ['CUTICLE OIL MELON', 'WHITE SATIN CUTICLE OIL MELON'], target: 'Chilled Melon Cuticle Oil 100ml -HTF' },
-          { codes: ['CUTICLE OIL COCONUT', 'WHITE SATIN CUTICLE OIL COCONUT OIL'], target: 'Cooling Coconut Cuticle Oil 100ml -HTF' },
+          { codes: ['CUTICLE OIL PEACH', 'WHITE SATIN CUTICLE OIL PEACH', 'WSCOILP'], target: 'Perky Peach Cuticle Oil 100ml -HTF' },
+          { codes: ['CUTICLE OIL MELON', 'WHITE SATIN CUTICLE OIL MELON', 'WSCOILM'], target: 'Chilled Melon Cuticle Oil 100ml -HTF' },
+          { codes: ['CUTICLE OIL COCONUT', 'WHITE SATIN CUTICLE OIL COCONUT OIL', 'WSCOILC'], target: 'Cooling Coconut Cuticle Oil 100ml -HTF' },
           { codes: ['PHOTO PERFECT CUTICLE OIL'], target: 'PhotoPerfect Cuticle Oil New' },
           // Creams & Scrubs
           { codes: ['FOOT CREAM 100 CALMFROST'], target: 'GEL IT UP FOOT CREAM 100ml CALM FROST NEW' },
@@ -11875,9 +11880,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['MC7', 'MC 7', 'GIUP MC7', 'GIUP-MC7'], target: 'Metallic Collection #MC7 -HTF' },
           { codes: ['MC8', 'MC 8', 'GIUP MC8', 'GIUP-MC8'], target: 'Metallic Collection #MC8 -HTF' },
           // BTB Collection (images stored as GIUP-B2BRed0001, GIUP-B2BBlue0003, GIUP-B2BYellow0002)
-          { codes: ['BTB01', 'BTB 01', 'GIUP BTB01', 'GIUP-BTB01', 'GIUP B2BRED0001', 'GIUP B2BRed0001'], target: 'BTB01 Rosso Corso -HTF' },
-          { codes: ['BTB02', 'BTB 02', 'GIUP BTB02', 'GIUP-BTB02', 'GIUP B2BBLUE0003', 'GIUP B2BBlue0003'], target: 'BTB02 Nautilus -HTF' },
-          { codes: ['BTB03', 'BTB 03', 'GIUP BTB03', 'GIUP-BTB03', 'GIUP B2BYELLOW0002', 'GIUP B2BYellow0002'], target: 'BTB03 Brimstone -HTF' },
+          { codes: ['BTB01', 'BTB 01', 'GIUP BTB01', 'GIUP-BTB01', 'GIUP B2BRED0001', 'GIUP B2BRed0001', 'BRED0001'], target: 'BTB01 Rosso Corso -HTF' },
+          { codes: ['BTB02', 'BTB 02', 'GIUP BTB02', 'GIUP-BTB02', 'GIUP B2BBLUE0003', 'GIUP B2BBlue0003', 'BBLUE0003'], target: 'BTB02 Nautilus -HTF' },
+          { codes: ['BTB03', 'BTB 03', 'GIUP BTB03', 'GIUP-BTB03', 'GIUP B2BYELLOW0002', 'GIUP B2BYellow0002', 'BYELLOW0002'], target: 'BTB03 Brimstone -HTF' },
           // Autumn 2021 (OTA series)
           { codes: ['OTA01', 'OTA 01', 'OTA1', 'OTA 1', 'GIUP OTA01', 'GIUP-OTA01'], target: 'Autumn 2021 OTA01 -HTF' },
           { codes: ['OTA02', 'OTA 02', 'OTA2', 'OTA 2', 'GIUP OTA02', 'GIUP-OTA02'], target: 'Autumn 2021 OTA02 -HTF' },
