@@ -1,0 +1,844 @@
+{% comment %}
+  GEL.IT.UP Full Catalogue Section
+  Mirrors the gelitup.com FullCataloguePage layout.
+
+  INSTALL:
+  1. Copy this file to your Shopify theme /sections/gelitup-catalogue.liquid
+  2. Copy templates/page.catalogue.json to your theme /templates/page.catalogue.json
+  3. In Shopify Admin → Pages, create a page titled "Full Catalogue"
+     and set its template to "catalogue" (page.catalogue)
+  4. In the Theme Customizer on that page, set each collection handle
+     in the section settings to match your actual collection handles.
+{% endcomment %}
+
+{%- liquid
+  assign col_new         = section.settings.collection_new         | default: 'new-products'
+  assign col_colours     = section.settings.collection_colours     | default: 'gel-polish'
+  assign col_essentials  = section.settings.collection_essentials  | default: 'bases-tops'
+  assign col_builders    = section.settings.collection_builders    | default: 'builder-gel'
+  assign col_tools       = section.settings.collection_tools       | default: 'tools'
+  assign col_nail_art    = section.settings.collection_nail_art    | default: 'nail-art'
+  assign col_consumables = section.settings.collection_consumables | default: 'consumables'
+  assign col_nail_care   = section.settings.collection_nail_care   | default: 'nail-care'
+
+  assign hero_title    = section.settings.hero_title    | default: 'Gel Polish & Professional Nail Systems'
+  assign hero_subtitle = section.settings.hero_subtitle | default: '1,000+ shades of gel polish, builder gel, base coats, top coats and accessories. HEMA-free & TPO-free formulations, EU certified. The complete professional nail range — all in one place.'
+  assign products_per_section = section.settings.products_per_section | default: 20
+-%}
+
+<style>
+  /* ── Reset & base ── */
+  .gc-catalogue * { box-sizing: border-box; }
+
+  /* ── Hero ── */
+  .gc-hero {
+    background: #1A1A1A;
+    padding: 64px 24px;
+    margin: 0 calc(-1 * var(--page-width-padding, 20px));
+  }
+  .gc-hero__inner { max-width: 1152px; margin: 0 auto; }
+  .gc-hero h1 {
+    font-family: Montserrat, sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.1;
+  }
+  .gc-hero p {
+    font-family: Montserrat, sans-serif;
+    font-size: clamp(14px, 2vw, 18px);
+    font-weight: 400;
+    color: rgba(255,255,255,0.88);
+    margin: 16px 0 0;
+    max-width: 720px;
+    line-height: 1.65;
+  }
+
+  /* ── Sticky chapter nav ── */
+  .gc-chapnav {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgba(17,17,17,0.97);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin: 0 calc(-1 * var(--page-width-padding, 20px));
+  }
+  .gc-chapnav__inner {
+    max-width: 1152px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    overflow-x: auto;
+    padding: 8px 24px;
+    scrollbar-width: none;
+  }
+  .gc-chapnav__inner::-webkit-scrollbar { display: none; }
+  .gc-chapnav__btn {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.45);
+    transition: color 0.15s;
+    text-decoration: none;
+    display: inline-block;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+  }
+  .gc-chapnav__btn:hover { color: inherit; }
+  .gc-chapnav__btn.is-active { border-bottom-color: currentColor; color: inherit; }
+
+  /* ── Search bar ── */
+  .gc-search-wrap {
+    max-width: 1152px;
+    margin: 24px auto 0;
+    padding: 0 24px;
+    position: relative;
+  }
+  .gc-search-wrap svg {
+    position: absolute;
+    left: 36px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: rgba(0,0,0,0.35);
+    pointer-events: none;
+  }
+  .gc-search-input {
+    width: 100%;
+    border: 1px solid rgba(74,74,74,0.35);
+    border-radius: 14px;
+    padding: 11px 40px 11px 40px;
+    font-size: 15px;
+    color: #111;
+    outline: none;
+    background: #fff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .gc-search-input:focus {
+    border-color: #D43790;
+    box-shadow: 0 0 0 3px rgba(212,55,144,0.15);
+  }
+  .gc-search-clear {
+    position: absolute;
+    right: 36px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.12);
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: rgba(0,0,0,0.5);
+  }
+  .gc-search-clear.is-visible { display: flex; }
+  .gc-search-results {
+    max-width: 1152px;
+    margin: 20px auto 0;
+    padding: 0 24px;
+    display: none;
+  }
+  .gc-search-results.is-visible { display: block; }
+  .gc-search-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(0,0,0,0.45);
+    margin-bottom: 16px;
+  }
+
+  /* ── Section wrapper ── */
+  .gc-section {
+    max-width: 1152px;
+    margin: 40px auto 0;
+    padding: 0 24px;
+    scroll-margin-top: 60px;
+  }
+  .gc-section__heading {
+    font-family: Montserrat, sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: #fff;
+    border-left: 3px solid currentColor;
+    padding-left: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .gc-section__heading a {
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid transparent;
+    transition: color 0.15s;
+  }
+  .gc-section__heading a:hover { color: currentColor; border-bottom-color: currentColor; }
+
+  /* ── Product grid ── */
+  .gc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+  }
+
+  /* ── Product tile ── */
+  .gc-tile {
+    background: #fff;
+    border: 1px solid rgba(74,74,74,0.12);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+  }
+  .gc-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+  }
+  .gc-tile__img-wrap {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #f5f5f5;
+  }
+  .gc-tile__img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s;
+  }
+  .gc-tile:hover .gc-tile__img-wrap img { transform: scale(1.04); }
+  .gc-tile__body {
+    padding: 7px 8px 8px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .gc-tile__name {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #111;
+    line-height: 1.35;
+    margin: 0 0 2px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .gc-tile__code {
+    font-size: 9.5px;
+    color: rgba(0,0,0,0.40);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0 0 5px;
+  }
+  .gc-tile__price {
+    font-size: 11px;
+    font-weight: 700;
+    color: #111;
+    margin: auto 0 6px;
+  }
+  .gc-tile__sold-out {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(0,0,0,0.35);
+    margin: auto 0 6px;
+  }
+  .gc-tile__atc {
+    display: block;
+    width: 100%;
+    background: #D43790;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: background 0.15s;
+    text-align: center;
+    text-decoration: none;
+  }
+  .gc-tile__atc:hover { background: #b02d7a; color: #fff; }
+  .gc-tile__atc:disabled {
+    background: rgba(0,0,0,0.12);
+    color: rgba(0,0,0,0.35);
+    cursor: default;
+  }
+  .gc-tile__badge {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    background: #D43790;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-radius: 6px;
+    padding: 2px 6px;
+  }
+  .gc-tile__badge--sold-out {
+    background: rgba(0,0,0,0.45);
+    color: #fff;
+  }
+
+  /* ── View all link ── */
+  .gc-view-all {
+    text-align: center;
+    margin: 20px 0 8px;
+  }
+  .gc-view-all a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 999px;
+    padding: 8px 20px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .gc-view-all a:hover {
+    color: #D43790;
+    border-color: #D43790;
+  }
+
+  /* ── Search result empty state ── */
+  .gc-empty {
+    border: 1px solid rgba(74,74,74,0.18);
+    border-radius: 16px;
+    background: #fff;
+    padding: 48px 24px;
+    text-align: center;
+    color: rgba(0,0,0,0.45);
+    font-size: 14px;
+  }
+
+  /* ── No products placeholder ── */
+  .gc-no-products {
+    grid-column: 1 / -1;
+    padding: 24px;
+    text-align: center;
+    color: rgba(255,255,255,0.35);
+    font-size: 12px;
+  }
+
+  /* ── Page-level dark background ── */
+  .gc-catalogue {
+    background: #1A1A1A;
+    padding-bottom: 64px;
+  }
+
+  @media (max-width: 640px) {
+    .gc-hero { padding: 40px 16px; }
+    .gc-section { padding: 0 12px; }
+    .gc-search-wrap { padding: 0 12px; }
+    .gc-search-wrap svg { left: 24px; }
+    .gc-search-clear { right: 24px; }
+    .gc-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  }
+</style>
+
+<div class="gc-catalogue" id="gc-catalogue-root">
+
+  {%- comment -%} ── DARK HERO ── {%- endcomment -%}
+  <div class="gc-hero">
+    <div class="gc-hero__inner">
+      <h1>{{ hero_title }}</h1>
+      <p>{{ hero_subtitle }}</p>
+    </div>
+  </div>
+
+  {%- comment -%} ── STICKY CHAPTER NAV ── {%- endcomment -%}
+  <nav class="gc-chapnav" aria-label="Catalogue chapters">
+    <div class="gc-chapnav__inner">
+      <a href="#gc-section-new"         class="gc-chapnav__btn" style="color:rgba(255,255,255,0.45)" data-color="#D43790"  data-anchor="gc-section-new">2026 NEW! ✦</a>
+      <a href="#gc-section-colours"     class="gc-chapnav__btn" style="color:rgba(255,255,255,0.45)" data-color="#c084fc"  data-anchor="gc-section-colours">Colours</a>
+      <a href="#gc-section-essentials"  class="gc-chapnav__btn" style="color:rgba(255,255,255,0.45)" data-color="#67e8f9"  data-anchor="gc-section-essentials">Bases &amp; Tops</a>
+      <a href="#gc-section-builders"    class="gc-chapnav__btn" style="color:rgba(255,255,255,0.45)" data-color="#86efac"  data-anchor="gc-section-builders">Builder Gel</a>
+      <a href="#gc-section-tools"       class="gc-chapnav__btn" style="color:rgba(255,255,255,0.45)" data-color="#fcd34d"  data-anchor="gc-section-tools">Tools</a>
+      <a href="#gc-section-nail-art"    class="gc-chapnav__btn" style="color:rgba(255,255,255,0.45)" data-color="#f9a8d4"  data-anchor="gc-section-nail-art">Nail Art</a>
+      <a href="#gc-section-consumables" class="gc-chapnav__btn" style="color:rgba(255,255,255,0.45)" data-color="#fb923c"  data-anchor="gc-section-consumables">Consumables</a>
+      <a href="#gc-section-nail-care"   class="gc-chapnav__btn" style="color:rgba(255,255,255,0.45)" data-color="#6ee7b7"  data-anchor="gc-section-nail-care">Nail Care</a>
+    </div>
+  </nav>
+
+  {%- comment -%} ── SEARCH BAR ── {%- endcomment -%}
+  <div class="gc-search-wrap">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd"/></svg>
+    <input
+      id="gc-search-input"
+      class="gc-search-input"
+      type="text"
+      placeholder="Search by name, code or category..."
+      autocomplete="off"
+      aria-label="Search catalogue"
+    />
+    <button class="gc-search-clear" id="gc-search-clear" aria-label="Clear search">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" width="12" height="12"><path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z"/></svg>
+    </button>
+  </div>
+
+  {%- comment -%} ── LIVE SEARCH RESULTS (JavaScript-rendered) ── {%- endcomment -%}
+  <div class="gc-search-results" id="gc-search-results">
+    <p class="gc-search-label" id="gc-search-label"></p>
+    <div class="gc-grid" id="gc-search-grid"></div>
+  </div>
+
+  {%- comment -%} ── CATALOGUE SECTIONS ── {%- endcomment -%}
+  <div id="gc-sections-body">
+
+    {%- comment -%} 01 — NEW PRODUCTS {%- endcomment -%}
+    {%- assign c_new = collections[col_new] -%}
+    {%- if c_new != blank and c_new.products.size > 0 -%}
+    <section id="gc-section-new" class="gc-section">
+      <div class="gc-section__heading" style="color:#D43790;">
+        <span>2026 NEW! ✦</span>
+        <a href="{{ c_new.url }}" style="color:rgba(255,255,255,0.40);">View all →</a>
+      </div>
+      <div class="gc-grid">
+        {%- for product in c_new.products limit: products_per_section -%}
+          {%- render 'gc-product-tile', product: product -%}
+        {%- endfor -%}
+      </div>
+      {%- if c_new.products.size > products_per_section -%}
+      <div class="gc-view-all"><a href="{{ c_new.url }}">View all ({{ c_new.products.size }}) →</a></div>
+      {%- endif -%}
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} 02 — COLOURS {%- endcomment -%}
+    {%- assign c_col = collections[col_colours] -%}
+    {%- if c_col != blank and c_col.products.size > 0 -%}
+    <section id="gc-section-colours" class="gc-section">
+      <div class="gc-section__heading" style="color:#c084fc;">
+        <span>Colours — Gel Polish</span>
+        <a href="{{ c_col.url }}" style="color:rgba(255,255,255,0.40);">View all →</a>
+      </div>
+      <div class="gc-grid">
+        {%- for product in c_col.products limit: products_per_section -%}
+          {%- render 'gc-product-tile', product: product -%}
+        {%- endfor -%}
+      </div>
+      {%- if c_col.products.size > products_per_section -%}
+      <div class="gc-view-all"><a href="{{ c_col.url }}">View all ({{ c_col.products.size }}) →</a></div>
+      {%- endif -%}
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} 03 — BASES & TOPS {%- endcomment -%}
+    {%- assign c_ess = collections[col_essentials] -%}
+    {%- if c_ess != blank and c_ess.products.size > 0 -%}
+    <section id="gc-section-essentials" class="gc-section">
+      <div class="gc-section__heading" style="color:#67e8f9;">
+        <span>Bases &amp; Top Coats</span>
+        <a href="{{ c_ess.url }}" style="color:rgba(255,255,255,0.40);">View all →</a>
+      </div>
+      <div class="gc-grid">
+        {%- for product in c_ess.products limit: products_per_section -%}
+          {%- render 'gc-product-tile', product: product -%}
+        {%- endfor -%}
+      </div>
+      {%- if c_ess.products.size > products_per_section -%}
+      <div class="gc-view-all"><a href="{{ c_ess.url }}">View all ({{ c_ess.products.size }}) →</a></div>
+      {%- endif -%}
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} 04 — BUILDER GEL {%- endcomment -%}
+    {%- assign c_bld = collections[col_builders] -%}
+    {%- if c_bld != blank and c_bld.products.size > 0 -%}
+    <section id="gc-section-builders" class="gc-section">
+      <div class="gc-section__heading" style="color:#86efac;">
+        <span>Builder Gel Systems</span>
+        <a href="{{ c_bld.url }}" style="color:rgba(255,255,255,0.40);">View all →</a>
+      </div>
+      <div class="gc-grid">
+        {%- for product in c_bld.products limit: products_per_section -%}
+          {%- render 'gc-product-tile', product: product -%}
+        {%- endfor -%}
+      </div>
+      {%- if c_bld.products.size > products_per_section -%}
+      <div class="gc-view-all"><a href="{{ c_bld.url }}">View all ({{ c_bld.products.size }}) →</a></div>
+      {%- endif -%}
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} 05 — TOOLS {%- endcomment -%}
+    {%- assign c_tls = collections[col_tools] -%}
+    {%- if c_tls != blank and c_tls.products.size > 0 -%}
+    <section id="gc-section-tools" class="gc-section">
+      <div class="gc-section__heading" style="color:#fcd34d;">
+        <span>Tools &amp; Equipment</span>
+        <a href="{{ c_tls.url }}" style="color:rgba(255,255,255,0.40);">View all →</a>
+      </div>
+      <div class="gc-grid">
+        {%- for product in c_tls.products limit: products_per_section -%}
+          {%- render 'gc-product-tile', product: product -%}
+        {%- endfor -%}
+      </div>
+      {%- if c_tls.products.size > products_per_section -%}
+      <div class="gc-view-all"><a href="{{ c_tls.url }}">View all ({{ c_tls.products.size }}) →</a></div>
+      {%- endif -%}
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} 06 — NAIL ART {%- endcomment -%}
+    {%- assign c_na = collections[col_nail_art] -%}
+    {%- if c_na != blank and c_na.products.size > 0 -%}
+    <section id="gc-section-nail-art" class="gc-section">
+      <div class="gc-section__heading" style="color:#f9a8d4;">
+        <span>Nail Art</span>
+        <a href="{{ c_na.url }}" style="color:rgba(255,255,255,0.40);">View all →</a>
+      </div>
+      <div class="gc-grid">
+        {%- for product in c_na.products limit: products_per_section -%}
+          {%- render 'gc-product-tile', product: product -%}
+        {%- endfor -%}
+      </div>
+      {%- if c_na.products.size > products_per_section -%}
+      <div class="gc-view-all"><a href="{{ c_na.url }}">View all ({{ c_na.products.size }}) →</a></div>
+      {%- endif -%}
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} 07 — CONSUMABLES {%- endcomment -%}
+    {%- assign c_con = collections[col_consumables] -%}
+    {%- if c_con != blank and c_con.products.size > 0 -%}
+    <section id="gc-section-consumables" class="gc-section">
+      <div class="gc-section__heading" style="color:#fb923c;">
+        <span>Consumables</span>
+        <a href="{{ c_con.url }}" style="color:rgba(255,255,255,0.40);">View all →</a>
+      </div>
+      <div class="gc-grid">
+        {%- for product in c_con.products limit: products_per_section -%}
+          {%- render 'gc-product-tile', product: product -%}
+        {%- endfor -%}
+      </div>
+      {%- if c_con.products.size > products_per_section -%}
+      <div class="gc-view-all"><a href="{{ c_con.url }}">View all ({{ c_con.products.size }}) →</a></div>
+      {%- endif -%}
+    </section>
+    {%- endif -%}
+
+    {%- comment -%} 08 — NAIL CARE {%- endcomment -%}
+    {%- assign c_nc = collections[col_nail_care] -%}
+    {%- if c_nc != blank and c_nc.products.size > 0 -%}
+    <section id="gc-section-nail-care" class="gc-section">
+      <div class="gc-section__heading" style="color:#6ee7b7;">
+        <span>Nail, Hand &amp; Foot Care</span>
+        <a href="{{ c_nc.url }}" style="color:rgba(255,255,255,0.40);">View all →</a>
+      </div>
+      <div class="gc-grid">
+        {%- for product in c_nc.products limit: products_per_section -%}
+          {%- render 'gc-product-tile', product: product -%}
+        {%- endfor -%}
+      </div>
+      {%- if c_nc.products.size > products_per_section -%}
+      <div class="gc-view-all"><a href="{{ c_nc.url }}">View all ({{ c_nc.products.size }}) →</a></div>
+      {%- endif -%}
+    </section>
+    {%- endif -%}
+
+  </div>{%- comment -%} /#gc-sections-body {%- endcomment -%}
+</div>{%- comment -%} /#gc-catalogue-root {%- endcomment -%}
+
+<script>
+(function () {
+  /* ── Chapter nav: active highlight + scroll spy ── */
+  const navBtns = document.querySelectorAll('.gc-chapnav__btn');
+
+  navBtns.forEach(function (btn) {
+    var color = btn.getAttribute('data-color');
+    btn.addEventListener('mouseenter', function () {
+      if (!btn.classList.contains('is-active')) btn.style.color = color;
+    });
+    btn.addEventListener('mouseleave', function () {
+      if (!btn.classList.contains('is-active')) btn.style.color = 'rgba(255,255,255,0.45)';
+    });
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      var anchor = btn.getAttribute('data-anchor');
+      var target = document.getElementById(anchor);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  /* Scroll spy */
+  var sectionIds = [
+    'gc-section-new','gc-section-colours','gc-section-essentials',
+    'gc-section-builders','gc-section-tools','gc-section-nail-art',
+    'gc-section-consumables','gc-section-nail-care'
+  ];
+
+  function setActive(id) {
+    navBtns.forEach(function (btn) {
+      var isActive = btn.getAttribute('data-anchor') === id;
+      btn.classList.toggle('is-active', isActive);
+      var color = btn.getAttribute('data-color');
+      btn.style.color = isActive ? color : 'rgba(255,255,255,0.45)';
+    });
+  }
+
+  var observer = new IntersectionObserver(function (entries) {
+    var visible = entries.filter(function (e) { return e.isIntersecting; });
+    if (!visible.length) return;
+    visible.sort(function (a, b) { return a.boundingClientRect.top - b.boundingClientRect.top; });
+    setActive(visible[0].target.id);
+  }, { rootMargin: '-10% 0px -60% 0px', threshold: 0 });
+
+  sectionIds.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+
+  /* ── Search ── */
+  var searchInput  = document.getElementById('gc-search-input');
+  var searchClear  = document.getElementById('gc-search-clear');
+  var searchResults = document.getElementById('gc-search-results');
+  var searchGrid   = document.getElementById('gc-search-grid');
+  var searchLabel  = document.getElementById('gc-search-label');
+  var sectionsBody = document.getElementById('gc-sections-body');
+
+  /* ── Search via Shopify Predictive Search API (no inline product data) ── */
+  function buildTile(p) {
+    var imgUrl  = p.featured_image && p.featured_image.url ? p.featured_image.url : '';
+    var img = imgUrl
+      ? '<div class="gc-tile__img-wrap"><img src="' + imgUrl + '&width=300" alt="' + p.title.replace(/"/g, '&quot;') + '" loading="lazy"></div>'
+      : '<div class="gc-tile__img-wrap" style="background:#2a2a2a;display:flex;align-items:center;justify-content:center;"><span style="color:rgba(255,255,255,0.15);font-size:11px;">No image</span></div>';
+
+    var available = p.available_for_sale !== false;
+    var badge  = !available ? '<span class="gc-tile__badge gc-tile__badge--sold-out">Esaurito</span>' : '';
+    var sku    = (p.variants && p.variants[0] && p.variants[0].sku)
+                   ? '<p class="gc-tile__code">' + p.variants[0].sku + '</p>' : '';
+    var priceVal = p.price ? (parseFloat(p.price) / 100).toFixed(2) : null;
+    var price  = available && priceVal
+      ? '<p class="gc-tile__price">€' + priceVal + '</p>'
+      : '<p class="gc-tile__sold-out">Sold Out</p>';
+    var vid    = p.variants && p.variants[0] ? p.variants[0].id : '';
+    var atcBtn = available && vid
+      ? '<button class="gc-tile__atc" onclick="gcAddToCart(' + vid + ',this)" type="button">+ Add</button>'
+      : '<button class="gc-tile__atc" disabled type="button">Sold Out</button>';
+
+    return '<article class="gc-tile">'
+      + badge
+      + '<a href="' + p.url + '" style="display:contents;">' + img + '</a>'
+      + '<div class="gc-tile__body">'
+      + '<a href="' + p.url + '" style="text-decoration:none;color:inherit;">'
+      + '<p class="gc-tile__name">' + p.title + '</p>'
+      + '</a>'
+      + sku + price + atcBtn
+      + '</div></article>';
+  }
+
+  var debounceTimer;
+  searchInput.addEventListener('input', function () {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(function () {
+      var q = searchInput.value.trim();
+      searchClear.classList.toggle('is-visible', q.length > 0);
+      if (!q) {
+        searchResults.classList.remove('is-visible');
+        sectionsBody.style.display = '';
+        return;
+      }
+      sectionsBody.style.display = 'none';
+      searchResults.classList.add('is-visible');
+      searchLabel.textContent = 'Searching…';
+      searchGrid.innerHTML = '';
+
+      fetch('/search/suggest.json?q=' + encodeURIComponent(q) + '&resources[type]=product&resources[limit]=50')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var hits = (data.resources && data.resources.results && data.resources.results.products) || [];
+          searchLabel.textContent = hits.length === 0
+            ? 'No results for "' + q + '"'
+            : hits.length + ' result' + (hits.length === 1 ? '' : 's') + ' for "' + q + '"';
+          searchGrid.innerHTML = hits.length === 0
+            ? '<div class="gc-empty">No products matched your search. Try a different name or code.</div>'
+            : hits.map(buildTile).join('');
+        })
+        .catch(function () {
+          searchLabel.textContent = 'Search error. Please try again.';
+        });
+    }, 320);
+  });
+
+  searchClear.addEventListener('click', function () {
+    searchInput.value = '';
+    searchClear.classList.remove('is-visible');
+    searchResults.classList.remove('is-visible');
+    sectionsBody.style.display = '';
+    searchInput.focus();
+  });
+})();
+
+/* ── AJAX Add to Cart ── */
+window.gcAddToCart = function (variantId, btn) {
+  btn.disabled = true;
+  btn.textContent = '...';
+  fetch('/cart/add.js', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ id: variantId, quantity: 1 })
+  })
+  .then(function (r) { return r.json(); })
+  .then(function () {
+    btn.textContent = '✓ Added';
+    btn.style.background = '#16a34a';
+    setTimeout(function () {
+      btn.textContent = '+ Add';
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 1800);
+    /* Refresh Shopify cart bubble if theme exposes it */
+    document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
+    fetch('/cart.js').then(function(r){ return r.json(); }).then(function(cart){
+      var countEls = document.querySelectorAll('[data-cart-count], .cart-count, .header__cart-count');
+      countEls.forEach(function(el){ el.textContent = cart.item_count; });
+    });
+  })
+  .catch(function () {
+    btn.textContent = 'Error';
+    btn.style.background = '#dc2626';
+    setTimeout(function () {
+      btn.textContent = '+ Add';
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 2000);
+  });
+};
+</script>
+
+{% schema %}
+{
+  "name": "GEL.IT.UP Catalogo",
+  "tag": "div",
+  "class": "gc-section-wrapper",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero"
+    },
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Hero title",
+      "default": "Gel Polish & Professional Nail Systems"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_subtitle",
+      "label": "Hero subtitle",
+      "default": "1,000+ shades of gel polish, builder gel, base coats, top coats and accessories. HEMA-free & TPO-free formulations, EU certified. The complete professional nail range."
+    },
+    {
+      "type": "header",
+      "content": "Collections"
+    },
+    {
+      "type": "text",
+      "id": "collection_new",
+      "label": "Collection handle: New",
+      "default": "new-products",
+      "info": "Enter the collection handle (e.g. new-products)"
+    },
+    {
+      "type": "text",
+      "id": "collection_colours",
+      "label": "Collection handle: Colours",
+      "default": "gel-polish"
+    },
+    {
+      "type": "text",
+      "id": "collection_essentials",
+      "label": "Collection handle: Bases & Tops",
+      "default": "bases-tops"
+    },
+    {
+      "type": "text",
+      "id": "collection_builders",
+      "label": "Collection handle: Builder Gel",
+      "default": "builder-gel"
+    },
+    {
+      "type": "text",
+      "id": "collection_tools",
+      "label": "Collection handle: Tools",
+      "default": "tools"
+    },
+    {
+      "type": "text",
+      "id": "collection_nail_art",
+      "label": "Collection handle: Nail Art",
+      "default": "nail-art"
+    },
+    {
+      "type": "text",
+      "id": "collection_consumables",
+      "label": "Collection handle: Consumables",
+      "default": "consumables"
+    },
+    {
+      "type": "text",
+      "id": "collection_nail_care",
+      "label": "Collection handle: Nail Care",
+      "default": "nail-care"
+    },
+    {
+      "type": "header",
+      "content": "Grid"
+    },
+    {
+      "type": "range",
+      "id": "products_per_section",
+      "label": "Products per section (preview)",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "default": 20,
+      "info": "Shows this many products per section. A 'View all' link appears if there are more."
+    }
+  ],
+  "presets": [
+    {
+      "name": "GEL.IT.UP Catalogo"
+    }
+  ]
+}
+{% endschema %}

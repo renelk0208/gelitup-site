@@ -1,0 +1,410 @@
+{% comment %}
+  GEL.IT.UP Italy — Custom footer section
+  4-column layout: Brand | Contact | Menu | Connect
+{% endcomment %}
+
+<style>
+  /* Ensure section wrapper stretches full-width inside Whisper theme's flex body */
+  .giup-footer-section {
+    width: 100%;
+    align-self: stretch;
+  }
+
+  .giup-footer {
+    width: 100%;
+    background-color: #1a1a1a;
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    padding: 60px 0 0;
+  }
+
+  .giup-footer__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr;
+    gap: 48px;
+  }
+
+  .giup-footer__col-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #D43790;
+    margin: 0 0 20px;
+  }
+
+  /* Column 1 — Brand */
+  .giup-footer__logo {
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .giup-footer__logo img {
+    height: 48px;
+    width: auto;
+  }
+
+  .giup-footer__brand-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 6px;
+  }
+
+  .giup-footer__brand-tagline {
+    font-size: 12px;
+    color: #aaaaaa;
+    line-height: 1.5;
+    margin: 0 0 24px;
+  }
+
+  /* Newsletter */
+  .giup-footer__newsletter-form {
+    display: flex;
+    gap: 0;
+    margin-top: 16px;
+  }
+
+  .giup-footer__newsletter-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #444;
+    border-right: none;
+    background: #2a2a2a;
+    color: #ffffff;
+    font-size: 13px;
+    border-radius: 4px 0 0 4px;
+    outline: none;
+  }
+
+  .giup-footer__newsletter-input::placeholder {
+    color: #888;
+  }
+
+  .giup-footer__newsletter-btn {
+    padding: 10px 18px;
+    background: #D43790;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    border-radius: 0 4px 4px 0;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+
+  .giup-footer__newsletter-btn:hover {
+    background: #BF3182;
+  }
+
+  /* Column 2 — Contact */
+  .giup-footer__contact-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .giup-footer__contact-list li {
+    font-size: 13px;
+    color: #cccccc;
+    line-height: 1.4;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .giup-footer__contact-list li svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    fill: #D43790;
+  }
+
+  .giup-footer__contact-list a {
+    color: #cccccc;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .giup-footer__contact-list a:hover {
+    color: #D43790;
+  }
+
+  /* Column 3 — Menu */
+  .giup-footer__nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .giup-footer__nav-list a {
+    font-size: 13px;
+    color: #cccccc;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .giup-footer__nav-list a:hover {
+    color: #D43790;
+  }
+
+  /* Column 4 — Connect */
+  .giup-footer__social-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .giup-footer__social-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: #cccccc;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .giup-footer__social-link:hover {
+    color: #D43790;
+  }
+
+  .giup-footer__social-link svg {
+    flex-shrink: 0;
+    fill: currentColor;
+  }
+
+  /* Bottom bar */
+  .giup-footer__bottom {
+    margin-top: 48px;
+    border-top: 1px solid #333;
+    padding: 20px 24px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .giup-footer__copyright {
+    font-size: 12px;
+    color: #888888;
+  }
+
+  .giup-footer__bottom-icons {
+    display: flex;
+    gap: 16px;
+  }
+
+  .giup-footer__bottom-icons a {
+    color: #888888;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+  }
+
+  .giup-footer__bottom-icons a:hover {
+    color: #D43790;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .giup-footer__inner {
+      grid-template-columns: 1fr 1fr;
+      gap: 36px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .giup-footer__inner {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+
+    .giup-footer__bottom {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
+
+<div class="giup-footer">
+  <div class="giup-footer__inner">
+
+    {%- comment -%}— Column 1: Brand + Newsletter —{%- endcomment -%}
+    <div class="giup-footer__col giup-footer__col--brand">
+      <a class="giup-footer__logo" href="/" aria-label="GEL.IT.UP Italy – Home">
+        {%- if settings.logo != blank -%}
+          <img src="{{ settings.logo | image_url: width: 200 }}"
+               alt="{{ settings.logo.alt | default: 'GEL.IT.UP Italy' }}"
+               width="160" height="48" loading="lazy">
+        {%- else -%}
+          <span style="font-size:22px;font-weight:800;color:#ffffff;letter-spacing:0.05em;">GEL.IT.UP</span>
+        {%- endif -%}
+      </a>
+      <p class="giup-footer__brand-name">GEL.IT.UP by GIUP® Professional</p>
+      <p class="giup-footer__brand-tagline">La casa del colore professionale per unghie.<br>Distribuzione professionale globale.</p>
+
+      <p class="giup-footer__col-title">Newsletter</p>
+      <p style="font-size:12px;color:#aaaaaa;margin:0 0 12px;">Offerte esclusive e consigli professionali.</p>
+      {% form 'customer', id: 'footer-newsletter-form' %}
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        <div class="giup-footer__newsletter-form">
+          <input class="giup-footer__newsletter-input"
+                 type="email"
+                 name="contact[email]"
+                 placeholder="Indirizzo email"
+                 required>
+          <button type="submit" class="giup-footer__newsletter-btn">Iscriviti</button>
+        </div>
+      {% endform %}
+    </div>
+
+    {%- comment -%}— Column 2: Contact —{%- endcomment -%}
+    <div class="giup-footer__col giup-footer__col--contact">
+      <p class="giup-footer__col-title">Contatti</p>
+      <ul class="giup-footer__contact-list">
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+            <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+          </svg>
+          <a href="mailto:info@gelitup.it">info@gelitup.it</a>
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+            <path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.24.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+          </svg>
+          <a href="tel:+39392979019">+39 392 979 0192</a>
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+          </svg>
+          <span>Italy</span>
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+            <path d="M17.498 14.382c-.301-.15-1.767-.867-2.04-.966-.273-.101-.473-.15-.673.15-.197.295-.771.964-.944 1.162-.175.195-.349.21-.646.075-.3-.15-1.263-.465-2.403-1.485-.888-.795-1.484-1.77-1.66-2.07-.174-.3-.019-.465.13-.615.136-.135.301-.345.451-.523.146-.181.194-.301.297-.496.1-.21.049-.375-.025-.524-.075-.15-.672-1.62-.922-2.206-.24-.584-.487-.51-.672-.51-.172-.015-.371-.015-.571-.015-.2 0-.523.074-.797.359-.273.3-1.045 1.02-1.045 2.475s1.07 2.865 1.219 3.075c.149.195 2.105 3.195 5.1 4.485.714.3 1.27.48 1.704.629.714.227 1.365.195 1.88.121.574-.091 1.767-.721 2.016-1.426.255-.705.255-1.29.18-1.425-.074-.135-.27-.21-.57-.345z"/>
+            <path d="M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.893c0 2.096.549 4.14 1.595 5.945L0 24l6.335-1.652c1.746.943 3.71 1.444 5.71 1.447h.006c6.585 0 11.946-5.336 11.949-11.896 0-3.176-1.24-6.165-3.48-8.45z"/>
+          </svg>
+          <a href="https://wa.me/39392979019" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+        </li>
+      </ul>
+    </div>
+
+    {%- comment -%}— Column 3: Menu —{%- endcomment -%}
+    <div class="giup-footer__col giup-footer__col--menu">
+      <p class="giup-footer__col-title">Menu</p>
+      <ul class="giup-footer__nav-list">
+        <li><a href="/">Home</a></li>
+        <li><a href="/collections">Shop the Collection</a></li>
+        <li><a href="/pages/contact">Contattaci</a></li>
+        <li><a href="/policies/privacy-policy">Privacy Policy</a></li>
+        <li><a href="/policies/terms-of-service">Termini di servizio</a></li>
+        <li><a href="/policies/refund-policy">Resi e rimborsi</a></li>
+      </ul>
+    </div>
+
+    {%- comment -%}— Column 4: Social —{%- endcomment -%}
+    <div class="giup-footer__col giup-footer__col--connect">
+      <p class="giup-footer__col-title">Seguici</p>
+      <div class="giup-footer__social-grid">
+
+        <a class="giup-footer__social-link"
+           href="https://www.instagram.com/gel.it.upitaly"
+           target="_blank" rel="noopener noreferrer"
+           aria-label="Instagram">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+          </svg>
+          @gel.it.upitaly
+        </a>
+
+        <a class="giup-footer__social-link"
+           href="https://www.tiktok.com/@gelitupitaly"
+           target="_blank" rel="noopener noreferrer"
+           aria-label="TikTok">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+            <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9.03a8.16 8.16 0 004.77 1.52V7.12a4.85 4.85 0 01-1-.43z"/>
+          </svg>
+          @gelitupitaly
+        </a>
+
+        <a class="giup-footer__social-link"
+           href="https://www.facebook.com/gelitupitaly"
+           target="_blank" rel="noopener noreferrer"
+           aria-label="Facebook">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          gelitupitaly
+        </a>
+
+        <a class="giup-footer__social-link"
+           href="https://www.youtube.com/@GELITUP"
+           target="_blank" rel="noopener noreferrer"
+           aria-label="YouTube">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+            <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+          </svg>
+          @GELITUP
+        </a>
+
+      </div>
+    </div>
+
+  </div>
+
+  {%- comment -%}— Bottom bar —{%- endcomment -%}
+  <div style="max-width:1200px;margin:48px auto 0;border-top:1px solid #333;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <p style="font-size:12px;color:#888;margin:0;">
+      &copy; {{ 'now' | date: '%Y' }} <a href="/" style="color:#888;text-decoration:none;">GEL.IT.UP Italy</a>
+    </p>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;">
+      <a href="/policies/privacy-policy" style="font-size:12px;color:#888;text-decoration:none;">Privacy Policy</a>
+      <a href="/policies/cookie-policy" style="font-size:12px;color:#888;text-decoration:none;">Cookie Policy</a>
+      <a href="/policies/terms-of-service" style="font-size:12px;color:#888;text-decoration:none;">Termini di servizio</a>
+    </div>
+    <div class="giup-footer__bottom-icons">
+      <a href="https://www.instagram.com/gel.it.upitaly" target="_blank" rel="noopener noreferrer" aria-label="Instagram" style="color:#888;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      </a>
+      <a href="https://www.tiktok.com/@gelitupitaly" target="_blank" rel="noopener noreferrer" aria-label="TikTok" style="color:#888;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9.03a8.16 8.16 0 004.77 1.52V7.12a4.85 4.85 0 01-1-.43z"/></svg>
+      </a>
+      <a href="https://www.facebook.com/gelitupitaly" target="_blank" rel="noopener noreferrer" aria-label="Facebook" style="color:#888;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      </a>
+      <a href="https://www.youtube.com/@GELITUP" target="_blank" rel="noopener noreferrer" aria-label="YouTube" style="color:#888;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+{% schema %}
+{
+  "name": "Footer GEL.IT.UP",
+  "tag": "section",
+  "class": "giup-footer-section",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Footer GEL.IT.UP"
+    }
+  ]
+}
+{% endschema %}

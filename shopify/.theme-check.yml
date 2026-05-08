@@ -1,0 +1,8 @@
+OrphanedSnippet:
+  enabled: false
+
+UnsupportedDocTag:
+  enabled: false
+
+UndefinedObject:
+  enabled: false

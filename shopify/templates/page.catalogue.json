@@ -1,0 +1,27 @@
+{
+  "sections": {
+    "main": {
+      "type": "gelitup-catalogue",
+      "settings": {
+        "hero_title": "Gel Polish & Sistemi Nail Professionali",
+        "hero_subtitle": "Oltre 1.000 sfumature di gel polish, gel builder, basi, top coat e accessori. Formulazioni HEMA-free & TPO-free, certificate EU. Il meglio del nail professionale — tutto in un unico posto.",
+        "collection_new": "new-products",
+        "collection_colours": "gel-polish",
+        "collection_essentials": "bases-tops",
+        "collection_builders": "builder-gel",
+        "collection_tools": "tools",
+        "collection_nail_art": "nail-art",
+        "collection_consumables": "consumables",
+        "collection_nail_care": "nail-care",
+        "products_per_section": 20
+      }
+    },
+    "collection_grid": {
+      "type": "two-level-collection-grid",
+      "blocks": {},
+      "block_order": [],
+      "settings": {}
+    }
+  },
+  "order": ["main", "collection_grid"]
+}
