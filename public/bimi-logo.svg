@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg version="1.2" baseProfile="tiny-ps"
+     xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 500 500"
+     width="500"
+     height="500">
+  <title>GEL.IT.UP</title>
+  <rect width="500" height="500" fill="#000000"/>
+  <!-- Brand icon: hollow ring with dot on top -->
+  <circle cx="250" cy="138" r="64" fill="none" stroke="#ffffff" stroke-width="22"/>
+  <circle cx="250" cy="58" r="15" fill="#ffffff"/>
+  <!-- Brand name -->
+  <text x="250" y="295"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="84"
+        font-weight="bold"
+        fill="#ffffff"
+        text-anchor="middle">GEL.IT.UP</text>
+  <!-- Tagline -->
+  <text x="250" y="348"
+        font-family="'Arial Narrow', Arial, Helvetica, sans-serif"
+        font-size="21"
+        fill="#ffffff"
+        text-anchor="middle"
+        letter-spacing="4">SUPERIOR INNOVATION</text>
+</svg>

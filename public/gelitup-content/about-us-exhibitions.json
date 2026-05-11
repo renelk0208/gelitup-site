@@ -3,17 +3,6 @@
   "introText": "Meet GEL.IT.UP by GIUP\u00ae at the next professional beauty events and discover our seasonal launches live.",
   "events": [
     {
-      "id": "beauty-greece-spring-2026",
-      "name": "Beauty Greece",
-      "location": "M.E.C Paianias, Greece",
-      "startDate": "2026-04-25",
-      "endDate": "2026-04-27",
-      "stand": "STAND 119-123",
-      "notes": "Exhibition #2 \u00b7 GEL.IT.UP Greece",
-      "imageUrl": "/gelitup-media/images/exhibitions/beauty%20greece.png",
-      "link": "https://www.beautygreece.gr/"
-    },
-    {
       "id": "beauty-world-riyadh-2026",
       "name": "Beauty World Riyadh",
       "location": "Riyadh International Convention \u0026 Exhibition Center (RICEC)",

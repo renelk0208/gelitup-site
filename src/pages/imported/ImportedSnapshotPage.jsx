@@ -34,19 +34,7 @@ const ABOUT_US_NEWS_DEFAULT = {
 const ABOUT_US_EXHIBITIONS_DEFAULT = {
   title: 'Upcoming Exhibitions',
   introText: 'Meet GEL.IT.UP by GIUP® at the next professional beauty events and discover our seasonal launches live.',
-  events: [
-    {
-      id: 'beauty-greece-spring-2026',
-      name: 'Beauty Greece',
-      location: 'M.E.C Paianias, Greece',
-      startDate: '2026-04-25',
-      endDate: '2026-04-27',
-      stand: 'STAND 119-123',
-      notes: 'Exhibition #2 · GEL.IT.UP Greece',
-      imageUrl: '/gelitup-media/images/exhibitions/beauty%20greece.png',
-      link: '',
-    },
-  ],
+  events: [],
 }
 
 function parseDateValue(value = '') {

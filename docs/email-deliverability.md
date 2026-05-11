@@ -37,9 +37,7 @@ Recommended starter record:
 
 - Type: TXT
 - Host/Name: `_dmarc`
-- Value: `v=DMARC1; p=none; rua=mailto:postmaster@gelitup.com`
-
-You can later tighten to `p=quarantine` or `p=reject` after monitoring.
+- Value: `v=DMARC1; p=reject; rua=mailto:postmaster@gelitup.com`
 
 ## 5) Validate DNS
 
