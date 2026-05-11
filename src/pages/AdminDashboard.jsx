@@ -123,8 +123,11 @@ function extractTaggedValue(notesValue, tagName) {
 function getResolvedApplicationType(row) {
   const explicit = String(row?.application_type || '').trim().toLowerCase()
   const tagged = extractTaggedValue(row?.notes, 'APPLICATION_TYPE')
+  // DB column wins when it's b2b_order — prevents a stale notes tag from
+  // overriding a conversion that already happened (existing or future clients).
+  if (explicit === 'b2b_order') return 'b2b_order'
   if (tagged === 'distributor' || tagged === 'b2b_order') return tagged
-  if (explicit === 'distributor' || explicit === 'b2b_order') return explicit
+  if (explicit === 'distributor') return explicit
   return 'b2b_order'
 }
 
@@ -306,22 +309,29 @@ function RegistrationsPanel({ onPreviewDistributor }) {
   }
 
   const convertToB2B = async (row) => {
-    if (!window.confirm(`Convert "${row.company_name}" from Distributor to B2B Client?\n\nThis will:\n• Set application_type → b2b_order\n• Set status → approved\n• Set prices_allocated → true`)) return
+    if (!window.confirm(`Convert "${row.company_name}" from Distributor to B2B Client?\n\nThis will:\n• Set application_type → b2b_order\n• Set status → approved\n• Set prices_allocated → true\n• Clear distributor_tier\n• Update [APPLICATION_TYPE] tag in notes`)) return
     setSaving(row.id)
+    // Replace [APPLICATION_TYPE:distributor] tag in notes so it no longer overrides
+    // the application_type column (getResolvedApplicationType checks notes tag first).
+    const updatedNotes = (row.notes || '')
+      .replace(/\[APPLICATION_TYPE:[^\]]*\]/gi, '[APPLICATION_TYPE:b2b_order]')
+      .trimEnd()
+      + '\n[CONVERTED: distributor → b2b_order by admin]'
     const { error: err } = await supabase
       .from(REGISTRATIONS_TABLE)
       .update({
         application_type: 'b2b_order',
         status: 'approved',
         prices_allocated: true,
-        notes: (row.notes ? row.notes + '\n' : '') + '[CONVERTED: distributor → b2b_order by admin]',
+        distributor_tier: null,
+        notes: updatedNotes,
         reviewed_at: new Date().toISOString(),
       })
       .eq('id', row.id)
     setSaving(null)
     if (err) { alert(err.message); return }
     setRows(prev => prev.map(r => r.id === row.id
-      ? { ...r, application_type: 'b2b_order', status: 'approved', prices_allocated: true }
+      ? { ...r, application_type: 'b2b_order', status: 'approved', prices_allocated: true, distributor_tier: null, notes: updatedNotes }
       : r))
   }
 
@@ -516,6 +526,11 @@ function RegistrationsPanel({ onPreviewDistributor }) {
                   </div>
                   <div>
                     <span className="font-semibold text-slate-400">Distributor Tier</span><br />
+                    {resolvedType === 'b2b_order' ? (
+                      <span className="mt-1 inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                        B2B Client — no tier
+                      </span>
+                    ) : (
                     <div className="mt-1 flex items-center gap-2">
                       {row.distributor_tier && (
                         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${
@@ -549,10 +564,15 @@ function RegistrationsPanel({ onPreviewDistributor }) {
                         </button>
                       )}
                     </div>
+                    )}
                   </div>
                   <div>
                     <span className="font-semibold text-slate-400">Distributor Access</span><br />
-                    <span className={`font-semibold ${access.tone}`}>{access.label}</span>
+                    {resolvedType === 'b2b_order' ? (
+                      <span className="font-semibold text-emerald-700">B2B Client — portal access active</span>
+                    ) : (
+                      <span className={`font-semibold ${access.tone}`}>{access.label}</span>
+                    )}
                   </div>
                   <div className="sm:col-span-2">
                     <span className="font-semibold text-slate-400">Address</span><br />

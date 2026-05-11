@@ -15425,7 +15425,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
         const { data: reg } = await supabase
           .from(registrationsTable)
           .select('prices_allocated, distributor_tier, status, application_type, notes')
-          .ilike('email', email)
+          .ilike('contact_email', email)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle()
@@ -15972,7 +15972,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
               </article>
             </div>
 
-            {activeModule === 'overview' && (() => {
+            {activeModule === 'overview' && effectiveTier !== null && (() => {
               const tier = effectiveTier
               const isTierProfessional = tier === 'professional'
               const isTierAuthority = tier === 'authority'
