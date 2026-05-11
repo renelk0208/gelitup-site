@@ -16,24 +16,43 @@
       "order": []
     },
     {
-      "category": "BUILDER GEL",
+      "category": "BUILDER GEL SYSTEMS",
       "subcategory": "3INI BUILDER",
       "groups": [
         {
-          "hero": "3in1cover",
-          "swatches": [
-            "GIUP 3IN1 40COV",
-            "GIUP 3IN1 40P",
-            "GIUP G3N1CC",
-            "GIUP G3N1CIS",
-            "GIUP G3N1CS",
-            "GIUP G3N1LJ",
-            "GIUP G3N1PMA"
-          ]
+          "hero": "3-in-1_builder_gel_clear",
+          "swatches": ["3 in 1 clear"],
+          "mergeAsGallery": true
         },
         {
-          "hero": "3in1pink",
-          "swatches": []
+          "hero": "3-in-1_builder_gel_cover",
+          "swatches": ["3in1cover"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3-in-1_builder_gel_iridescent_shimmer_clear",
+          "swatches": ["3 in 1 shimmer iridescent clear"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3-in-1_builder_gel_marmelade_shimmer_pink",
+          "swatches": ["3 in 1 marmalade shimmer pink"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3-in-1_builder_gel_pink",
+          "swatches": ["3in1pink"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3-in-1_builder_gel_shimmer_cover",
+          "swatches": ["3 in 1 shimmer cover"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3-in-1_builder_gel_shimmer_lilac",
+          "swatches": ["3 in 1 shimmer light lilac"],
+          "mergeAsGallery": true
         }
       ],
       "order": []
@@ -47,6 +66,53 @@
         "flexi long almond",
         "flexi short almond"
       ]
+    },
+    {
+      "category": "BUILDER GEL SYSTEMS",
+      "subcategory": "PREMIUM BUILDER",
+      "groups": [
+        {
+          "hero": "3_in_1_gelitup_premium_builder_gel_blush",
+          "swatches": ["3 in 1 premium builder gel blush"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3_in_1_gelitup_premium_builder_gel_clear",
+          "swatches": ["3 in 1 premium clear"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3_in_1_gelitup_premium_builder_gel_clear_plus",
+          "swatches": ["3 in 1.premium.plus"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3_in_1_gelitup_premium_builder_gel_cover",
+          "swatches": ["3in 1 premium builder gel cover"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3_in_1_gelitup_premium_builder_gel_milky",
+          "swatches": ["3 in 1 premium builder gel milky"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3_in_1_gelitup_premium_builder_gel_nude",
+          "swatches": ["3 in 1 premium builder gel nude"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3_in_1_gelitup_premium_builder_gel_pink",
+          "swatches": ["3 in 1 premium builder gels pink"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3_in_1_gelitup_premium_builder_gel_white",
+          "swatches": ["3 in 1 premium builder gels white"],
+          "mergeAsGallery": true
+        }
+      ],
+      "order": []
     },
     {
       "category": "EQUIPMENT",
