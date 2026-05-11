@@ -68,6 +68,7 @@ const PAYMENT_REVOLUT_URL = import.meta.env.VITE_PAYMENT_REVOLUT_URL || ''
 const PAYMENT_STRIPE_URL = import.meta.env.VITE_PAYMENT_STRIPE_URL || ''
 const PAYMENT_PAYPAL_URL = import.meta.env.VITE_PAYMENT_PAYPAL_URL || ''
 const UPSELL_PRICE_FUNCTION_URL = import.meta.env.VITE_UPSELL_PRICE_FUNCTION_URL || '/.netlify/functions/get-upsell-price'
+const SHOPIFY_SHOP_URL = 'https://gelitup.eu'
 const PROFORMA_COMPANY_NAME = import.meta.env.VITE_PROFORMA_COMPANY_NAME || 'GEL.IT.UP Factory Direct'
 const PROFORMA_VAT_TAX_ID = import.meta.env.VITE_PROFORMA_VAT_TAX_ID || 'VAT/TAX ID: EL999999999'
 const PROFORMA_BANK_DETAILS = import.meta.env.VITE_PROFORMA_BANK_DETAILS || 'BANK: Alpha Bank | IBAN: GR0000000000000000000000000 | SWIFT: CRBAGRAA'
@@ -904,7 +905,7 @@ const navItems = [
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/guestbook', label: 'Guestbook' },
   { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
-  { to: '/full-catalogue', label: 'Our Products', highlight: true },
+  { href: SHOPIFY_SHOP_URL, label: 'Our Products', highlight: true, isExternal: true },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -2151,17 +2152,6 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     ['BRUSH ON BUILDER', 'BUILDER GEL SYSTEMS'],
     ['SYNTHOGEL & POLYGEL', 'BUILDER GEL SYSTEMS'],
   ])
-
-  // 2026 NEW! subfolder → real category + subcategory (for dual-categorization)
-  const new2026SubfolderMap = new Map([
-    ['CLOUD DANCER',            { category: 'COLORS',              subcategory: 'SOLID GEL POLISH' }],
-    ['SUMMER VIBES',            { category: 'COLORS',              subcategory: 'SOLID GEL POLISH' }],
-    ['SHIMMER COLORS',          { category: 'COLORS',              subcategory: 'Shimmer Colors' }],
-    ['SAPPHIRE CAT EYE',        { category: 'COLORS',              subcategory: 'CAT EYE' }],
-    ['MIRROR TOP COAT',         { category: 'TOPS',                subcategory: 'Mirror Top Coat' }],
-    ['5-IN-1 SUPERIOR BASE',    { category: 'BASES',               subcategory: '5-in-1 Superior Base' }],
-    ['BRUSH ON BUILDER (BIAB)', { category: 'BUILDER GEL SYSTEMS', subcategory: 'Brush on Builder' }],
-  ])
   
   const isBlockedImagePath = (imagePath = '') => {
     const normalizedPath = normalizeCatalogueToken(imagePath)
@@ -2254,28 +2244,6 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
 
     categoryBucket.set(subcategory, subcategoryItems)
     grouped.set(category, categoryBucket)
-
-    // Dual-categorize: if this item is from 2026 NEW!, also insert it into its real category
-    if (sourceCategory.toUpperCase() === '2026 NEW!' && segments.length >= 2) {
-      const subfolderKey = (segments[1] || '').toUpperCase()
-      const realMapping = new2026SubfolderMap.get(subfolderKey)
-      if (realMapping) {
-        const dualItem = {
-          imageUrl: imagePath,
-          name: formatCatalogueItemName(afterRoot),
-          // For SOLID GEL POLISH targets let the solidGelColourFamilies JSON lookup handle colorFamily;
-          // for other colour subcategories (e.g. Shimmer Colors, CAT EYE) keep the folder as colorFamily.
-          colorFamily: (realMapping.category === 'COLORS' && realMapping.subcategory !== 'SOLID GEL POLISH')
-            ? segments[1]
-            : undefined,
-        }
-        const realBucket = grouped.get(realMapping.category) || new Map()
-        const realSubItems = realBucket.get(realMapping.subcategory) || []
-        realSubItems.push(dualItem)
-        realBucket.set(realMapping.subcategory, realSubItems)
-        grouped.set(realMapping.category, realBucket)
-      }
-    }
   })
 
   return Array.from(grouped.entries())
@@ -5839,6 +5807,22 @@ function Nav({ onOpenContactModal }) {
             </button>
           )
         }
+        if (item.isExternal) {
+          return (
+            <a
+              key={item.href}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={item.highlight
+                ? 'rounded-lg border border-fuchsia-500/60 px-3 py-2 text-sm font-bold uppercase tracking-[0.06em] !text-white/80 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400'
+                : 'rounded-lg px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] !text-white/75 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500'
+              }
+            >
+              {item.label}
+            </a>
+          )
+        }
         return (
           <NavLink
             key={item.to}
@@ -5875,9 +5859,9 @@ function Nav({ onOpenContactModal }) {
         Distribution Registration
       </NavLink>
 
-      {/* Sign In — compact, for returning users */}
+      {/* Sign In — distributor portal only */}
       <NavLink
-        to="/portal/login"
+        to="/portal/login?portal=distributor"
         className={({ isActive }) =>
           `rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
             isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/80 hover:border-white/50 hover:bg-white/10 hover:!text-white'
@@ -5885,7 +5869,6 @@ function Nav({ onOpenContactModal }) {
         }
       >
         Sign In
-      </NavLink>
     </nav>
   )
 }
@@ -5957,7 +5940,7 @@ function MobileNav({ onOpenContactModal }) {
             Distribution Registration
           </NavLink>
           <NavLink
-            to="/portal/login"
+            to="/portal/login?portal=distributor"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
               `block rounded-lg border border-white/25 px-4 py-3 text-center text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
@@ -5984,6 +5967,21 @@ function MobileNav({ onOpenContactModal }) {
               )
             }
             return (
+              item.isExternal ? (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setOpen(false)}
+                  className={item.highlight
+                    ? 'block rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-4 py-3 text-sm font-bold uppercase tracking-[0.05em] !text-white shadow-[0_0_6px_rgba(212,55,144,0.3)] transition duration-200 hover:bg-fuchsia-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400'
+                    : 'block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] !text-white/75 transition duration-200 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500'
+                  }
+                >
+                  {item.label}
+                </a>
+              ) : (
               <NavLink
                 key={item.to}
                 to={item.to}
@@ -6004,12 +6002,18 @@ function MobileNav({ onOpenContactModal }) {
               >
                 {item.label}
               </NavLink>
+              )
             )
           })}
         </nav>
       </div>
     </>
   )
+}
+
+function ExternalRedirect({ to }) {
+  useEffect(() => { window.location.href = to }, [to])
+  return null
 }
 
 function ScrollToTopOnRouteChange() {
@@ -7121,6 +7125,15 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
   const prefilledEmail = String(loginParams.get('email') || '').trim().toLowerCase()
   const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
   const portalType = loginParams.get('portal') || 'b2b' // 'b2b' | 'distributor'
+
+  // B2B salon ordering has moved to the Shopify store — redirect non-distributor logins
+  useEffect(() => {
+    if (portalType === 'b2b' && !isPasswordResetFlow) {
+      window.location.href = SHOPIFY_SHOP_URL
+    }
+  }, [portalType, isPasswordResetFlow])
+
+  if (portalType === 'b2b' && !isPasswordResetFlow) return null
   // Reliable recovery detection: the PASSWORD_RECOVERY auth event sets pendingRecoverySession
   // (URL-based ?code= detection is unreliable — the SDK consumes the code before React renders)
   const isPasswordResetFlow = pendingRecoverySession
@@ -15425,7 +15438,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
         const { data: reg } = await supabase
           .from(registrationsTable)
           .select('prices_allocated, distributor_tier, status, application_type, notes')
-          .ilike('contact_email', email)
+          .ilike('email', email)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle()
@@ -15972,7 +15985,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
               </article>
             </div>
 
-            {activeModule === 'overview' && effectiveTier !== null && (() => {
+            {activeModule === 'overview' && (() => {
               const tier = effectiveTier
               const isTierProfessional = tier === 'professional'
               const isTierAuthority = tier === 'authority'
@@ -17581,8 +17594,8 @@ function App() {
           <Route path="/products" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
           <Route path="/for-academies" element={<ForAcademiesPage />} />
-          <Route path="/full-catalogue" element={<FullCataloguePage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/full-catalogue" element={<ExternalRedirect to={SHOPIFY_SHOP_URL} />} />
+          <Route path="/checkout" element={<ExternalRedirect to={SHOPIFY_SHOP_URL} />} />
           <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
@@ -17628,7 +17641,7 @@ function App() {
                 <Route path="/portal-client-login" element={<Navigate to="/portal/login" replace />} />
                 <Route path="/portal-admin-login" element={<Navigate to="/portal/admin-login" replace />} />
                 <Route path="/portal/register" element={<PortalRegister onRegister={handlePortalRegister} />} />
-                <Route path="/portal/buy" element={<BuyerRegister />} />
+                <Route path="/portal/buy" element={<ExternalRedirect to={SHOPIFY_SHOP_URL} />} />
                 <Route path="/portal/forgot-password" element={<PortalForgotPassword />} />
                 <Route
                   path="/portal/dashboard/:module"
@@ -17751,11 +17764,11 @@ function App() {
             <div className="mt-2 space-y-1.5">
               <NavLink to="/" className="block transition duration-300 hover:text-fuchsia-300">Home</NavLink>
               <NavLink to="/about-us" className="block transition duration-300 hover:text-fuchsia-300">About Us</NavLink>
-              <NavLink to="/full-catalogue" className="block transition duration-300 hover:text-fuchsia-300">Catalogue</NavLink>
+              <a href={SHOPIFY_SHOP_URL} target="_blank" rel="noopener noreferrer" className="block transition duration-300 hover:text-fuchsia-300">Shop</a>
               <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
               <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Become Distributor</NavLink>
               <NavLink to="/guestbook" className="block transition duration-300 hover:text-fuchsia-300">Guestbook</NavLink>
-              <NavLink to="/portal/register" className="block transition duration-300 hover:text-fuchsia-300">Client Registration</NavLink>
+              <NavLink to="/portal/login?portal=distributor" className="block transition duration-300 hover:text-fuchsia-300">Distributor Login</NavLink>
             </div>
           </div>
 
