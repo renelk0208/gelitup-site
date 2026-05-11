@@ -72,6 +72,16 @@
       "subcategory": "PREMIUM BUILDER",
       "groups": [
         {
+          "hero": "3_in_1_premium_builder_gel_shimmer_nude",
+          "swatches": ["3 in 1 premium builder gel pearly nude"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3_in_1_premium_builder_gel_shimmer_pink",
+          "swatches": ["3 in 1 premium builder gel pearly pink"],
+          "mergeAsGallery": true
+        },
+        {
           "hero": "3_in_1_gelitup_premium_builder_gel_blush",
           "swatches": ["3 in 1 premium builder gel blush"],
           "mergeAsGallery": true
