@@ -1981,7 +1981,7 @@ function formatCatalogueItemName(rawPath = '') {
 
 function isCategoryHeroAssetPath(rawPath = '') {
   const fileName = String(rawPath || '').split('/').pop() || ''
-  return /hero[.\-]image/i.test(fileName) || /banner/i.test(fileName)
+  return /h[eo]{2}r[.\-]image/i.test(fileName) || /banner/i.test(fileName)
 }
 
 function normalizeCatalogueToken(value = '') {
@@ -3029,16 +3029,12 @@ function FullCataloguePage() {
   }, [quickCart])
 
   // Sync quickCart to Supabase draft_carts so admin can see abandoned carts
+  // NOTE: we intentionally do NOT delete the draft when quickCart empties —
+  // accidental clears would erase the backup. Deletion only on confirmed clear/submit.
   useEffect(() => {
     if (!isLoggedIn || !supabase) return
     const units = Object.values(quickCart).reduce((s, q) => s + Number(q || 0), 0)
-    if (units === 0) {
-      // Remove draft if cart is empty
-      supabase.auth.getUser().then(({ data }) => {
-        if (data?.user?.id) supabase.from('b2b_draft_carts').delete().eq('user_id', data.user.id).eq('source', 'catalogue').then(() => {})
-      })
-      return
-    }
+    if (units === 0) return // don't erase the Supabase draft on empty cart
     const timer = setTimeout(() => {
       supabase.auth.getUser().then(({ data }) => {
         if (!data?.user?.id) return
@@ -9841,15 +9837,15 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   }, [selectedCodes, itemQtys, packageCartItems])
 
   // Sync portal cart to Supabase draft_carts so admin can see abandoned carts
+  // NOTE: we intentionally do NOT delete the draft when the cart hits zero here —
+  // that would erase the backup if the user accidentally clears the order.
+  // Deletion only happens in the confirmed clear handler and on successful submit.
   useEffect(() => {
     if (!supabase) return
     const uid = cartUserIdRef.current
     if (!uid) return
     const totalUnitsForDraft = selectedCodes.reduce((s, c) => s + (itemQtys[c] || 1), 0) + packageCartItems.reduce((s, i) => s + (i.qty || 0), 0)
-    if (totalUnitsForDraft === 0) {
-      supabase.from('b2b_draft_carts').delete().eq('user_id', uid).eq('source', 'portal').then(() => {})
-      return
-    }
+    if (totalUnitsForDraft === 0) return // don't erase the Supabase draft on empty cart
     const timer = setTimeout(() => {
       supabase.auth.getUser().then(({ data }) => {
         if (!data?.user?.id) return
@@ -13791,7 +13787,12 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             {(selectedCodes.length > 0 || packageCartItems.length > 0) && (
               <>
                 <span className="text-[10px] text-emerald-600 font-medium">✓ Draft saved</span>
-                <button onClick={() => { setSelectedCodes([]); setItemQtys({}); setPackageCartItems([]); setGeneratedPackageTier('') }} className="text-xs text-slate-400 hover:text-rose-500">Clear</button>
+                <button onClick={() => {
+                  if (!window.confirm('Clear your entire order? This cannot be undone.')) return
+                  setSelectedCodes([]); setItemQtys({}); setPackageCartItems([]); setGeneratedPackageTier('')
+                  // Only delete the Supabase draft on an explicitly confirmed clear
+                  if (supabase && cartUserIdRef.current) supabase.from('b2b_draft_carts').delete().eq('user_id', cartUserIdRef.current).eq('source', 'portal').then(() => {})
+                }} className="text-xs text-slate-400 hover:text-rose-500">Clear order</button>
               </>
             )}
             <button onClick={() => navigate('/portal/dashboard/products')} className="btn-cta-rose rounded px-3 py-1 text-xs font-semibold">
