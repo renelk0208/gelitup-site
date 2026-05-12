@@ -1980,7 +1980,7 @@ function formatCatalogueItemName(rawPath = '') {
 
 function isCategoryHeroAssetPath(rawPath = '') {
   const fileName = String(rawPath || '').split('/').pop() || ''
-  return /hero\.image/i.test(fileName)
+  return /hero[.\-]image/i.test(fileName) || /banner/i.test(fileName)
 }
 
 function normalizeCatalogueToken(value = '') {
@@ -13885,11 +13885,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                           )}
                           {/* info */}
                           <div className="px-1.5 pt-1 pb-0.5">
-                            <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{product.name}</p>
+                            <p className="line-clamp-2 text-xs leading-tight text-slate-800">{product.name}</p>
                             {product.price != null && (
                             pricesAllocated
-                              ? <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{(Number(product.price) * tierPriceMultiplier).toFixed(2)}</p>
-                              : <p className="text-[10px] text-slate-400">POA</p>
+                              ? <p className="text-xs font-bold" style={{ color: '#c8386e' }}>€{(Number(product.price) * tierPriceMultiplier).toFixed(2)}</p>
+                              : <p className="text-xs text-slate-400">POA</p>
                           )}
                           </div>
                           {/* action */}
