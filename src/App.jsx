@@ -666,9 +666,10 @@ const FUZZY_PRICE_SKIP = new Set(['COLOR','COLOUR','COAT','CARE','FORM','SIZE'])
 function fuzzyPriceLookup(code, rawName, wordIndex) {
   if (!wordIndex || !wordIndex.length) return null
   for (const cand of [code, rawName].filter(Boolean)) {
-    const qWords = normalizeSkuCode(cand)
-      .split(/\s+/)
-      .filter(w => w.length >= 4 && !FUZZY_PRICE_SKIP.has(w))
+    const allTokens = normalizeSkuCode(cand).split(/\s+/).filter(Boolean)
+    // Significant words: >= 4 chars (not in skip list) + short numeric tokens (size indicators like 5, 7, 9, 11)
+    const qWords = allTokens
+      .filter(w => (w.length >= 4 && !FUZZY_PRICE_SKIP.has(w)) || /^\d+$/.test(w))
       .map(w => w.length >= 6 ? w.replace(/S$/, '') : w) // rough depluralize
     if (qWords.length < 2) continue
     const match = wordIndex.find(({ words }) =>
@@ -2172,6 +2173,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
   // Merge alternate product images — these are extra angles/photos of the same product
   const duplicateImagePaths = new Set([
     '/gelitup-content/product-images/NAIL ART/CUSHION GEL/cushion sponge 2.webp',
+    '/gelitup-content/product-images/TOOLS/PODOCARE & ACCESSORIES/PODODISC_\u0392.webp',
   ])
   duplicateImagePaths.forEach(p => uniqueImagePaths.delete(p))
 
