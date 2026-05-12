@@ -9615,6 +9615,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [products, setProducts] = useState([])
   const [oosKeys, setOosKeys] = useState(new Set())
   const [isLoadingFeed, setIsLoadingFeed] = useState(false)
+  const [justSaved, setJustSaved] = useState(false)
   const [feedMessage, setFeedMessage] = useState('Live product feed not loaded yet.')
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
   const [checkoutMessage, setCheckoutMessage] = useState('')
@@ -11429,9 +11430,12 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           throw new Error('Feed has no valid products')
         }
 
+        // Deduplicate by code — same product can appear in multiple sections via cross-copy
+        const seenCodes = new Set()
+        const deduped = normalized.filter(p => { if (seenCodes.has(p.code)) return false; seenCodes.add(p.code); return true })
         if (isMounted) {
-          setProducts(normalized)
-          setFeedMessage(`Loaded ${normalized.length} live products from ${feedUrl ? 'feed' : 'Supabase catalog'}.`)
+          setProducts(deduped)
+          setFeedMessage(`Loaded ${deduped.length} live products from ${feedUrl ? 'feed' : 'Supabase catalog'}.`)
         }
       }
       catch {
@@ -11456,8 +11460,15 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      const matchesSearch = product.code.toLowerCase().includes(query.toLowerCase())
-        || (product.name || '').toLowerCase().includes(query.toLowerCase())
+      const matchesSearch = (() => {
+        const q = query.trim()
+        if (!q) return true
+        // Use word-boundary matching so "705" doesn't match inside "2607",
+        // and "ice" doesn't match inside "price" or "licorice"
+        const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        const re = new RegExp(`\\b${escaped}`, 'i')
+        return re.test(product.code) || re.test(product.name || '')
+      })()
       const matchesCategory = category === 'All' || product.category === category
       const matchesSelected = !showSelectedOnly || selectedCodes.includes(product.code)
       return matchesSearch && matchesCategory && matchesSelected
@@ -13790,7 +13801,24 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           <div className="flex shrink-0 items-center gap-2">
             {(selectedCodes.length > 0 || packageCartItems.length > 0) && (
               <>
-                <span className="text-[10px] text-emerald-600 font-medium">✓ Draft saved</span>
+                <button onClick={() => {
+                  if (!supabase) return
+                  supabase.auth.getUser().then(({ data }) => {
+                    if (!data?.user?.id) return
+                    const itemsSummary = selectedCodes.map(c => ({ code: c, qty: itemQtys[c] || 1 }))
+                    const pkgSummary = packageCartItems.map(i => ({ sku: i.sku, name: i.name, qty: i.qty, group: i.group }))
+                    supabase.from('b2b_draft_carts').upsert({
+                      user_id: data.user.id,
+                      customer_email: data.user.email,
+                      items: { products: itemsSummary, packages: pkgSummary },
+                      total_units: selectedCodes.reduce((s, c) => s + (itemQtys[c] || 1), 0) + packageCartItems.reduce((s, i) => s + (i.qty || 0), 0),
+                      total_estimated: 0,
+                      source: 'portal',
+                      updated_at: new Date().toISOString(),
+                    }, { onConflict: 'user_id,source' }).then(() => { setJustSaved(true); setTimeout(() => setJustSaved(false), 2500) })
+                  })
+                }} className="text-[10px] font-semibold rounded px-2 py-0.5 border" style={{ borderColor: '#c8386e', color: '#c8386e' }}>💾 Save order</button>
+                {justSaved && <span className="text-[10px] text-emerald-600 font-medium">✓ Saved!</span>}
                 <button onClick={() => {
                   if (!window.confirm('Clear your entire order? This cannot be undone.')) return
                   setSelectedCodes([]); setItemQtys({}); setPackageCartItems([]); setGeneratedPackageTier('')
