@@ -13192,7 +13192,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold text-slate-900">Order Summary</p>
-              <button onClick={() => navigate('/portal/dashboard/catalog')} className="text-[11px] font-semibold text-fuchsia-600 hover:underline">+ Add more products</button>
+              <button onClick={() => { navigate('/portal/dashboard/catalog'); setTimeout(() => document.getElementById('b2b-catalog-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80) }} className="text-[11px] font-semibold text-fuchsia-600 hover:underline">+ Add more products</button>
             </div>
             <div className="mt-2 divide-y divide-slate-100">
               {selectedProducts.map(product => {
@@ -13741,9 +13741,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         }
 
         return (
-        <div className="rounded-xl border border-slate-200 bg-white text-sm overflow-hidden">
+        <div id="b2b-catalog-panel" className="rounded-xl border border-slate-200 bg-white text-sm overflow-hidden">
 
-          {/* order bar */}
+          {/* order bar */
           <div className="flex items-center justify-between gap-2 border-b px-3 py-2" style={{ borderColor: '#f0c4d0' }}>
           <span className="truncate text-xs font-semibold text-slate-700">
             {(selectedCodes.length + packageCartItems.length) > 0
