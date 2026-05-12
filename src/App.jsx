@@ -4439,7 +4439,7 @@ function FullCataloguePage() {
                 id="catalog-search"
                 type="text"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => { setSearchQuery(event.target.value); if (event.target.value) { setActiveCategory(''); setActiveSubcategory(''); } }}
                 placeholder="Search product name, code, or subcategory..."
                 className="w-full rounded-[12px] border border-[#4A4A4A]/35 bg-white px-3 py-2 text-base text-black outline-none ring-fuchsia-500/20 focus:ring"
               />
