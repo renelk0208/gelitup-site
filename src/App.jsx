@@ -2244,6 +2244,17 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
 
     categoryBucket.set(subcategory, subcategoryItems)
     grouped.set(category, categoryBucket)
+
+    // Cross-copy: 2026 NEW! 5-in-1 items also appear under BASES > 5IN1 SUPERIOR BASE
+    // so they show up in both the New Collections section and the regular Bases section
+    const subfolderToken = normalizeCatalogueToken(segments[1] || '')
+    if (sourceCategory === '2026 NEW!' && (subfolderToken.includes('5 IN 1') || subfolderToken.includes('5IN1'))) {
+      const basesBucket = grouped.get('BASES') || new Map()
+      const bases5in1Items = basesBucket.get('5IN1 SUPERIOR BASE') || []
+      bases5in1Items.push({ imageUrl: imagePath, name: formatCatalogueItemName(afterRoot) })
+      basesBucket.set('5IN1 SUPERIOR BASE', bases5in1Items)
+      grouped.set('BASES', basesBucket)
+    }
   })
 
   return Array.from(grouped.entries())
