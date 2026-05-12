@@ -5866,6 +5866,7 @@ function Nav({ onOpenContactModal }) {
         }
       >
         Sign In
+      </NavLink>
     </nav>
   )
 }

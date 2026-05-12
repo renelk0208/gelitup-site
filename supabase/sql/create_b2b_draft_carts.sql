@@ -16,12 +16,14 @@ CREATE TABLE IF NOT EXISTS b2b_draft_carts (
 -- Users can manage their own draft cart row
 ALTER TABLE b2b_draft_carts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can upsert own draft cart" ON b2b_draft_carts;
 CREATE POLICY "Users can upsert own draft cart"
   ON b2b_draft_carts FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
 -- Admins (service role or via b2b_admins check) can read all
+DROP POLICY IF EXISTS "Admins can read all draft carts" ON b2b_draft_carts;
 CREATE POLICY "Admins can read all draft carts"
   ON b2b_draft_carts FOR SELECT
   USING (
