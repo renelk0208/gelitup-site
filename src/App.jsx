@@ -905,7 +905,7 @@ const navItems = [
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/guestbook', label: 'Guestbook' },
   { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
-  { href: SHOPIFY_SHOP_URL, label: 'Our Products', highlight: true, isExternal: true },
+  { to: '/full-catalogue', label: 'Our Products', highlight: true },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -7124,14 +7124,6 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
   const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
   const portalType = loginParams.get('portal') || 'b2b' // 'b2b' | 'distributor'
 
-  // B2B salon ordering has moved to the Shopify store — redirect non-distributor logins
-  useEffect(() => {
-    if (portalType === 'b2b' && !isPasswordResetFlow) {
-      window.location.href = SHOPIFY_SHOP_URL
-    }
-  }, [portalType, isPasswordResetFlow])
-
-  if (portalType === 'b2b' && !isPasswordResetFlow) return null
   // Reliable recovery detection: the PASSWORD_RECOVERY auth event sets pendingRecoverySession
   // (URL-based ?code= detection is unreliable — the SDK consumes the code before React renders)
   const isPasswordResetFlow = pendingRecoverySession
@@ -17593,7 +17585,7 @@ function App() {
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
           <Route path="/for-academies" element={<ForAcademiesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
-          <Route path="/checkout" element={<ExternalRedirect to={SHOPIFY_SHOP_URL} />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
@@ -17639,7 +17631,7 @@ function App() {
                 <Route path="/portal-client-login" element={<Navigate to="/portal/login" replace />} />
                 <Route path="/portal-admin-login" element={<Navigate to="/portal/admin-login" replace />} />
                 <Route path="/portal/register" element={<PortalRegister onRegister={handlePortalRegister} />} />
-                <Route path="/portal/buy" element={<ExternalRedirect to={SHOPIFY_SHOP_URL} />} />
+                <Route path="/portal/buy" element={<BuyerRegister />} />
                 <Route path="/portal/forgot-password" element={<PortalForgotPassword />} />
                 <Route
                   path="/portal/dashboard/:module"
@@ -17762,11 +17754,11 @@ function App() {
             <div className="mt-2 space-y-1.5">
               <NavLink to="/" className="block transition duration-300 hover:text-fuchsia-300">Home</NavLink>
               <NavLink to="/about-us" className="block transition duration-300 hover:text-fuchsia-300">About Us</NavLink>
-              <a href={SHOPIFY_SHOP_URL} target="_blank" rel="noopener noreferrer" className="block transition duration-300 hover:text-fuchsia-300">Shop</a>
+              <NavLink to="/full-catalogue" className="block transition duration-300 hover:text-fuchsia-300">Catalogue</NavLink>
               <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
               <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Become Distributor</NavLink>
               <NavLink to="/guestbook" className="block transition duration-300 hover:text-fuchsia-300">Guestbook</NavLink>
-              <NavLink to="/portal/login?portal=distributor" className="block transition duration-300 hover:text-fuchsia-300">Distributor Login</NavLink>
+              <NavLink to="/portal/register" className="block transition duration-300 hover:text-fuchsia-300">Client Registration</NavLink>
             </div>
           </div>
 
