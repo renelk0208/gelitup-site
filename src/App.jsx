@@ -11430,9 +11430,22 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           throw new Error('Feed has no valid products')
         }
 
-        // Deduplicate by code — same product can appear in multiple sections via cross-copy
-        const seenCodes = new Set()
-        const deduped = normalized.filter(p => { if (seenCodes.has(p.code)) return false; seenCodes.add(p.code); return true })
+        // Deduplicate by normalized code — same product can come from both Supabase table
+        // and image-map (codes differ by dashes vs spaces, e.g. "GIUP-VCE-01" vs "GIUP VCE 01").
+        // Prefer the entry that has an imageUrl; otherwise keep the first seen.
+        const codeMap = new Map() // normalizedCode -> index in deduped array
+        const deduped = []
+        for (const p of normalized) {
+          const norm = String(p.code || '').replace(/[^a-z0-9]/gi, '').toUpperCase()
+          if (codeMap.has(norm)) {
+            const existing = deduped[codeMap.get(norm)]
+            // Upgrade to this entry if it has an image and the existing one doesn't
+            if (!existing.imageUrl && p.imageUrl) deduped[codeMap.get(norm)] = p
+          } else {
+            codeMap.set(norm, deduped.length)
+            deduped.push(p)
+          }
+        }
         if (isMounted) {
           setProducts(deduped)
           setFeedMessage(`Loaded ${deduped.length} live products from ${feedUrl ? 'feed' : 'Supabase catalog'}.`)
