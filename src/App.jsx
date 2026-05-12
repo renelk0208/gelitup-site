@@ -13699,15 +13699,20 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       </div>
 
       {isCatalogView && (() => {
+        const isSearchMode = query.trim().length > 0
         // Derive active category from expandedCategories (single-select)
-        const activeCat = expandedCategories.size > 0
-          ? [...expandedCategories][0]
-          : (groupedFilteredProducts[0]?.[0] ?? '')
-        const activeCatProducts = groupedFilteredProducts.find(([c]) => c === activeCat)?.[1] || []
+        const activeCat = isSearchMode
+          ? 'Search results'
+          : (expandedCategories.size > 0
+              ? [...expandedCategories][0]
+              : (groupedFilteredProducts[0]?.[0] ?? ''))
+        const activeCatProducts = isSearchMode
+          ? filteredProducts
+          : (groupedFilteredProducts.find(([c]) => c === activeCat)?.[1] || [])
         const showAll = expandedShowAll.has(activeCat)
-        const CAT_PAGE_SIZE = 48
-        const isColorsCategory = activeCatProducts[0]?.parentSection === 'COLORS'
-          || activeCat.toUpperCase().includes('COLOR') || activeCat.toUpperCase().includes('COLOUR')
+        const CAT_PAGE_SIZE = isSearchMode ? filteredProducts.length : 48
+        const isColorsCategory = !isSearchMode && (activeCatProducts[0]?.parentSection === 'COLORS'
+          || activeCat.toUpperCase().includes('COLOR') || activeCat.toUpperCase().includes('COLOUR'))
         const familyFilteredProducts = isColorsCategory && b2bColorFamilyFilter !== 'ALL'
           ? activeCatProducts.filter(p => (p.colorFamily || resolveColorFamilyKey(p.name)) === b2bColorFamilyFilter)
           : activeCatProducts
@@ -13841,7 +13846,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                 <>
                   {/* category name + count header */}
                   <div className="sticky top-0 z-10 flex items-center gap-2 border-b bg-white px-3 py-2" style={{ borderColor: '#f0e8f0' }}>
-                    <span className="text-xs font-bold uppercase tracking-wide text-slate-800">{activeCat}</span>
+                    <span className="text-xs font-bold uppercase tracking-wide text-slate-800">{isSearchMode ? `Results for "${query.trim()}"` : activeCat}</span>
                     <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{activeCatProducts.length}</span>
                     {selectedInActiveCat > 0 && (
                       <span className="rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>?{selectedInActiveCat} selected</span>
