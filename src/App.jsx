@@ -13212,14 +13212,14 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                       <p className="text-[10px] text-slate-400">{product.code}</p>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(prev => ({...prev, [product.code]: q})) }} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">-</button>
-                      <input type="number" min="1" value={qty} onChange={(e) => { const v = parseInt(e.target.value, 10); if (v > 0) setItemQtys(prev => ({...prev, [product.code]: v})); else if (e.target.value === '') setItemQtys(prev => ({...prev, [product.code]: ''})) }} onBlur={(e) => { const v = parseInt(e.target.value, 10); if (!v || v <= 0) toggleSelection(product.code) }} className="h-6 w-12 rounded border border-slate-200 text-center text-xs font-semibold text-slate-900 outline-none focus:border-fuchsia-400 focus:ring-1 focus:ring-fuchsia-200 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
-                      <button onClick={() => setItemQtys(prev => ({...prev, [product.code]: qty + 1}))} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">+</button>
+                      <button tabIndex={-1} onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(prev => ({...prev, [product.code]: q})) }} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">-</button>
+                      <input type="number" min="1" value={qty} onChange={(e) => { const v = parseInt(e.target.value, 10); if (v > 0) setItemQtys(prev => ({...prev, [product.code]: v})); else if (e.target.value === '') setItemQtys(prev => ({...prev, [product.code]: ''})) }} onFocus={(e) => e.target.select()} onBlur={(e) => { const v = parseInt(e.target.value, 10); if (!v || v <= 0) toggleSelection(product.code) }} className="h-6 w-12 rounded border border-slate-200 text-center text-xs font-semibold text-slate-900 outline-none focus:border-fuchsia-400 focus:ring-1 focus:ring-fuchsia-200 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
+                      <button tabIndex={-1} onClick={() => setItemQtys(prev => ({...prev, [product.code]: qty + 1}))} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">+</button>
                     </div>
                     <div className="w-16 text-right">
                       {lineTotal != null && pricesAllocated ? <p className="text-xs font-semibold text-fuchsia-700">€{lineTotal.toFixed(2)}</p> : <p className="text-xs text-slate-400">—</p>}
                     </div>
-                    <button onClick={() => toggleSelection(product.code)} className="flex h-6 w-6 items-center justify-center rounded-full text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Remove">—</button>
+                    <button tabIndex={-1} onClick={() => toggleSelection(product.code)} className="flex h-6 w-6 items-center justify-center rounded-full text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Remove">—</button>
                   </div>
                 )
               })}
