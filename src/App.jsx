@@ -9613,6 +9613,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const location = useLocation()
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
+  const [oosKeys, setOosKeys] = useState(new Set())
   const [isLoadingFeed, setIsLoadingFeed] = useState(false)
   const [feedMessage, setFeedMessage] = useState('Live product feed not loaded yet.')
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
@@ -11176,15 +11177,18 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           : await (async () => {
             // Mirror the public catalogue exactly — load from product-image-map.json
             // so every product has the same category, name and image as shown on the site.
-            const [response, orderResponse, hiddenResponse] = await Promise.all([
+            const [response, orderResponse, hiddenResponse, oosResponse] = await Promise.all([
               fetch('/gelitup-content/product-image-map.json'),
               fetch('/gelitup-content/catalog-order.json'),
               fetch('/gelitup-content/hidden-products.json'),
+              fetch('/gelitup-content/out-of-stock.json'),
             ])
             if (!response.ok) throw new Error('Could not load product image map')
             const mapPayload = await response.json()
             const manualOrderPayload = orderResponse.ok ? await orderResponse.json() : { rules: [] }
             const hiddenKeys = hiddenResponse.ok ? await hiddenResponse.json() : []
+            const oosArr = oosResponse.ok ? await oosResponse.json() : []
+            setOosKeys(new Set(Array.isArray(oosArr) ? oosArr.map(k => String(k).trim().toUpperCase()) : []))
             const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
             const sections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(mapPayload, hiddenKeys), manualRuleIndex)
             return sections.flatMap((section) =>
@@ -13896,12 +13900,14 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                     {visibleProducts.map(product => {
                       const selected = selectedCodes.includes(product.code)
                       const qty = itemQtys[product.code] || 1
+                      const isOos = oosKeys.has(String(product.code || '').trim().toUpperCase()) || oosKeys.has(String(product.name || '').trim().toUpperCase())
                       return (
                         <div key={product.code} className="flex min-w-0 flex-col overflow-hidden bg-white" style={selected ? { outline: '2px solid #c8386e', outlineOffset: '-2px' } : {}}>
                           {/* image */}
                           <div className="relative aspect-square w-full cursor-pointer bg-slate-50" onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}>
-                            {product.imageUrl && <img src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />}
-                            {selected && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
+                            {product.imageUrl && <img src={product.imageUrl} alt={product.name} loading="lazy" className={`h-full w-full object-cover${isOos ? ' opacity-50' : ''}`} />}
+                            {selected && !isOos && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
+                            {isOos && <span className="absolute inset-x-0 bottom-0 bg-slate-700/80 py-0.5 text-center text-[9px] font-bold uppercase tracking-wide text-white">Out of Stock</span>}
                           </div>
                           {product.galleryImages?.length > 0 && (
                             <div className="flex gap-0.5 border-t border-slate-100 bg-white px-1 py-1">
@@ -13920,7 +13926,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                           )}
                           </div>
                           {/* action */}
-                          {selected ? (
+                          {isOos ? (
+                            <div className="mt-auto border-t py-1 text-center text-[10px] font-semibold text-slate-400" style={{ borderColor: '#f0e8f0' }}>Unavailable</div>
+                          ) : selected ? (
                             <div className="mt-auto flex items-center justify-center gap-1 border-t px-1 py-1" style={{ borderColor: '#fde8f0' }}>
                               <button tabIndex={-1} onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(p => ({...p, [product.code]: q})) }} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>-</button>
                               <input type="number" min="1" value={qty} onChange={(e) => { const v = parseInt(e.target.value, 10); if (v > 0) setItemQtys(p => ({...p, [product.code]: v})); else if (e.target.value === '') setItemQtys(p => ({...p, [product.code]: ''})) }} onFocus={(e) => e.target.select()} onBlur={(e) => { const v = parseInt(e.target.value, 10); if (!v || v <= 0) toggleSelection(product.code) }} className="h-5 w-10 rounded border text-center text-[10px] font-bold outline-none focus:border-fuchsia-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" style={{ borderColor: '#f0c4d0', color: '#c8386e' }} />
