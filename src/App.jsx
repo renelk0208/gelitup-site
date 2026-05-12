@@ -13776,7 +13776,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         return (
         <div id="b2b-catalog-panel" className="rounded-xl border border-slate-200 bg-white text-sm overflow-hidden">
 
-          {/* order bar */
+          {/* order bar */}
           <div className="flex items-center justify-between gap-2 border-b px-3 py-2" style={{ borderColor: '#f0c4d0' }}>
           <span className="truncate text-xs font-semibold text-slate-700">
             {(selectedCodes.length + packageCartItems.length) > 0
