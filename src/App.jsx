@@ -4493,9 +4493,9 @@ function FullCataloguePage() {
                   <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path fillRule="evenodd" d="M4.25 2A2.25 2.25 0 0 0 2 4.25v2.5A2.25 2.25 0 0 0 4.25 9h2.5A2.25 2.25 0 0 0 9 6.75v-2.5A2.25 2.25 0 0 0 6.75 2h-2.5Zm0 9A2.25 2.25 0 0 0 2 13.25v2.5A2.25 2.25 0 0 0 4.25 18h2.5A2.25 2.25 0 0 0 9 15.75v-2.5A2.25 2.25 0 0 0 6.75 11h-2.5Zm9-9A2.25 2.25 0 0 0 11 4.25v2.5A2.25 2.25 0 0 0 13.25 9h2.5A2.25 2.25 0 0 0 18 6.75v-2.5A2.25 2.25 0 0 0 15.75 2h-2.5Zm0 9A2.25 2.25 0 0 0 11 13.25v2.5A2.25 2.25 0 0 0 13.25 18h2.5A2.25 2.25 0 0 0 18 15.75v-2.5A2.25 2.25 0 0 0 15.75 11h-2.5Z" clipRule="evenodd" /></svg>
                   Grid
                 </button>
-                <button onClick={() => setBulkMode(true)} className={`inline-flex items-center gap-1.5 rounded-r-lg px-3 py-1.5 text-xs font-semibold transition ${bulkMode ? 'bg-fuchsia-600 text-white' : 'text-black/60 hover:bg-black/5'}`} title="List view — quick order mode">
+                <button onClick={() => setBulkMode(true)} className={`inline-flex items-center gap-1.5 rounded-r-lg px-3 py-1.5 text-xs font-semibold transition ${bulkMode ? 'bg-fuchsia-600 text-white' : 'text-black/60 hover:bg-black/5'}`} title="List view">
                   <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path fillRule="evenodd" d="M2 3.75A.75.75 0 0 1 2.75 3h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 3.75Zm0 4.167a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Zm0 4.166a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Zm0 4.167a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z" clipRule="evenodd" /></svg>
-                  Quick Order
+                  List
                 </button>
               </div>
               {quickCartUnits > 0 && (
@@ -4533,19 +4533,21 @@ function FullCataloguePage() {
                   const inCart = quickCart[itemKey] > 0
 
                   if (bulkMode) {
-                    const rowPrice = lookupCataloguePrice(item.name, itemCode)
                     return (
                       <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 rounded-[12px] border border-[#4A4A4A]/30 bg-[#E8E8E8] px-3 py-2 transition duration-300 hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_1px_rgba(212,55,144,0.26)]" data-catalogue-item>
                         <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-black/10 bg-white object-contain opacity-0 transition-opacity duration-300" loading="lazy" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
                         <div className="min-w-0 flex-1">
                           <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                          <p className="break-words text-[11px] font-light text-black/55">{itemCode}{rowPrice != null && <span className="ml-2 font-bold text-fuchsia-700">€{Number(rowPrice).toFixed(2)}</span>}</p>
+                          <p className="break-words text-[11px] font-light text-black/55">{itemCode}</p>
                         </div>
-                        {inCart && <span className="rounded-md bg-fuchsia-100 px-1.5 py-0.5 text-[10px] font-semibold text-fuchsia-700">{quickCart[itemKey]} in basket</span>}
-                        <button onClick={() => updateQty(itemKey, qty - 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>-</button>
-                        <input value={qty} onChange={(event) => updateQty(itemKey, event.target.value)} className={`h-7 w-10 rounded-[10px] border text-center text-xs ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/20 text-black/70'}`} />
-                        <button onClick={() => updateQty(itemKey, qty + 1)} className={`h-7 w-7 rounded-[10px] border text-sm transition duration-300 ${hasChangedQty ? 'border-fuchsia-600 text-fuchsia-600' : 'border-black/25 text-black/70'}`}>+</button>
-                        <button onClick={() => addQuickItem(itemKey)} className={`rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition duration-300 ${pulseItemKey === itemKey ? 'lux-pulse bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`}>Add</button>
+                        <a
+                          href={SHOPIFY_SHOP_URL}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="shrink-0 rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-fuchsia-500"
+                        >
+                          Buy Now
+                        </a>
                       </div>
                     )
                   }
@@ -4569,20 +4571,15 @@ function FullCataloguePage() {
                           <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
                           <p className="break-words text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
                         </div>
-                        <p className="mt-1.5 flex items-center gap-1 text-[10px] text-black/38">
-                          {(() => {
-                            const price = lookupCataloguePrice(item.name, itemCode)
-                            if (price != null) return <span className="text-xs font-bold text-fuchsia-700">€{Number(price).toFixed(2)}</span>
-                            return <span>Price on request</span>
-                          })()}
-                        </p>
                         <div className="mt-auto pt-3">
-                          <div className="flex items-center gap-2">
-                            <button onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
-                            <span className={`w-8 text-center text-xs font-bold ${inCart ? 'text-fuchsia-700' : 'text-black/40'}`}>{quickCart[itemKey] || 0}</span>
-                            <button onClick={() => { addQuickItem(itemKey); }} className="flex h-8 w-8 items-center justify-center rounded-[10px] border border-fuchsia-600 text-sm text-fuchsia-600 transition duration-300 hover:bg-fuchsia-50">+</button>
-                            {inCart && <span className="ml-auto text-[10px] font-semibold text-fuchsia-700">in basket</span>}
-                          </div>
+                          <a
+                            href={SHOPIFY_SHOP_URL}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex w-full items-center justify-center rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
+                          >
+                            Buy Now
+                          </a>
                         </div>
                       </div>
                     </article>
@@ -17594,7 +17591,7 @@ function App() {
           <Route path="/products" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
           <Route path="/for-academies" element={<ForAcademiesPage />} />
-          <Route path="/full-catalogue" element={<ExternalRedirect to={SHOPIFY_SHOP_URL} />} />
+          <Route path="/full-catalogue" element={<FullCataloguePage />} />
           <Route path="/checkout" element={<ExternalRedirect to={SHOPIFY_SHOP_URL} />} />
           <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
