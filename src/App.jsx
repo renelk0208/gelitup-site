@@ -2170,10 +2170,26 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
       .filter((value) => !isBlockedImagePath(value))
   )
 
-  // Merge alternate product images — these are extra angles/photos of the same product
+  // Detect alternate-angle images (filename ending _B or _Β before extension)
+  // and attach them as galleryImages on the primary product instead of creating a duplicate card
+  const galleryMap = new Map() // primaryPath -> [altPath, ...]
+  const altImagePaths = new Set()
+  uniqueImagePaths.forEach(imagePath => {
+    const altMatch = imagePath.match(/^(.+?)_[B\u0392](\.[a-z0-9]+)$/i)
+    if (altMatch) {
+      const primaryPath = altMatch[1] + altMatch[2]
+      if (uniqueImagePaths.has(primaryPath)) {
+        if (!galleryMap.has(primaryPath)) galleryMap.set(primaryPath, [])
+        galleryMap.get(primaryPath).push(imagePath)
+        altImagePaths.add(imagePath)
+      }
+    }
+  })
+  altImagePaths.forEach(p => uniqueImagePaths.delete(p))
+
+  // Remove other known duplicate images (extra angles not following the _B convention)
   const duplicateImagePaths = new Set([
     '/gelitup-content/product-images/NAIL ART/CUSHION GEL/cushion sponge 2.webp',
-    '/gelitup-content/product-images/TOOLS/PODOCARE & ACCESSORIES/PODODISC_\u0392.webp',
   ])
   duplicateImagePaths.forEach(p => uniqueImagePaths.delete(p))
 
@@ -2237,6 +2253,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     subcategoryItems.push({
       imageUrl: imagePath,
       name: formatCatalogueItemName(afterRoot),
+      galleryImages: galleryMap.get(imagePath) || [],
       colorFamily: category === 'COLORS'
         ? segments.length > 3
           ? segments[2]
@@ -13892,7 +13909,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                           )}
                           {/* info */}
                           <div className="px-1.5 pt-1 pb-0.5">
-                            <p className="line-clamp-2 text-xs leading-tight text-slate-800">{product.name}</p>
+                            <p className="line-clamp-2 text-xs leading-tight text-slate-800" title={product.name}>{product.name}</p>
                             {product.price != null && (
                             pricesAllocated
                               ? <p className="text-xs font-bold" style={{ color: '#c8386e' }}>€{(Number(product.price) * tierPriceMultiplier).toFixed(2)}</p>
