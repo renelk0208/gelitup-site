@@ -2190,6 +2190,8 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
   // Remove other known duplicate images (extra angles not following the _B convention)
   const duplicateImagePaths = new Set([
     '/gelitup-content/product-images/NAIL ART/CUSHION GEL/cushion sponge 2.webp',
+    // Soak Off Gel Tips SHORT ALMOND has two files; suppress the oddly-named legacy one
+    '/gelitup-content/product-images/CONSUMABLES/SOAK OFF GEL TIPS/Soak off gel tips  .SHORT ALMOND.webp',
   ])
   duplicateImagePaths.forEach(p => uniqueImagePaths.delete(p))
 
