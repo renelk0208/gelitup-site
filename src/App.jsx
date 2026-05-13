@@ -9827,13 +9827,42 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   useEffect(() => {
     if (!hasSupabaseConfig || !supabase) return
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       const uid = data?.user?.id
       if (!uid) return
       cartUserIdRef.current = uid
       const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${uid}`
+      let saved = null
+      try { saved = JSON.parse(localStorage.getItem(key) || 'null') } catch { /* ignore */ }
+
+      // If localStorage is empty (e.g. cache cleared), restore from Supabase draft
+      if (!saved && supabase) {
+        try {
+          const { data: draft } = await supabase
+            .from('b2b_draft_carts')
+            .select('items, total_units, updated_at')
+            .eq('user_id', uid)
+            .eq('source', 'portal')
+            .maybeSingle()
+          if (draft?.items) {
+            const products = draft.items.products || []
+            const packages = draft.items.packages || []
+            if (products.length || packages.length) {
+              const restoredCodes = products.map(p => p.code).filter(Boolean)
+              const restoredQtys = Object.fromEntries(products.map(p => [p.code, p.qty || 1]))
+              const restoredPkgs = packages
+              if (restoredCodes.length) setSelectedCodes(restoredCodes)
+              if (Object.keys(restoredQtys).length) setItemQtys(restoredQtys)
+              if (restoredPkgs.length) setPackageCartItems(restoredPkgs)
+              // Also write back to localStorage so subsequent loads are fast
+              localStorage.setItem(key, JSON.stringify({ selectedCodes: restoredCodes, itemQtys: restoredQtys, packageCartItems: restoredPkgs, savedAt: Date.now() }))
+              return // restored from Supabase, skip localStorage path
+            }
+          }
+        } catch { /* ignore draft restore errors */ }
+      }
+
       try {
-        const saved = JSON.parse(localStorage.getItem(key) || 'null')
         if (!saved) return
         if (Array.isArray(saved.selectedCodes) && saved.selectedCodes.length) setSelectedCodes(saved.selectedCodes)
         if (saved.itemQtys && typeof saved.itemQtys === 'object') setItemQtys(saved.itemQtys)
