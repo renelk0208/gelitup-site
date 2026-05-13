@@ -9956,22 +9956,25 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
     }
   }, [])
 
-  // Cart persistence — restore cart from localStorage on mount, keyed by user ID
+  // Cart persistence — restore cart from localStorage first, then fall back to Supabase draft carts.
   const cartUserIdRef = useRef(null)
 
-  useEffect(() => {
-    if (!hasSupabaseConfig || !supabase) return
-    supabase.auth.getUser().then(({ data }) => {
-      const uid = data?.user?.id
-      if (!uid) return
-      cartUserIdRef.current = uid
-      const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${uid}`
-      try {
-        const saved = JSON.parse(localStorage.getItem(key) || 'null')
-        if (!saved) return
-        if (Array.isArray(saved.selectedCodes) && saved.selectedCodes.length) setSelectedCodes(saved.selectedCodes)
-        if (saved.itemQtys && typeof saved.itemQtys === 'object') setItemQtys(saved.itemQtys)
-        if (Array.isArray(saved.packageCartItems) && saved.packageCartItems.length) setPackageCartItems(saved.packageCartItems)
+  const restorePortalCart = useCallback(async (user) => {
+    const uid = user?.id || null
+    cartUserIdRef.current = uid
+    if (!uid) return
+
+    const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${uid}`
+    let restored = false
+
+    try {
+      const saved = JSON.parse(localStorage.getItem(key) || 'null')
+      if (saved) {
+        setSelectedCodes(Array.isArray(saved.selectedCodes) ? saved.selectedCodes : [])
+        setItemQtys(saved.itemQtys && typeof saved.itemQtys === 'object' ? saved.itemQtys : {})
+        setPackageCartItems(Array.isArray(saved.packageCartItems) ? saved.packageCartItems : [])
+        restored = true
+
         // Abandoned cart reminder — every 48 h, max 3 times (~1 week), then stop
         const REMINDER_INTERVAL = 48 * 60 * 60 * 1000 // 48 hours
         const MAX_REMINDERS = 3
@@ -9979,9 +9982,9 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
         const lastReminder = saved.lastReminderAt || saved.savedAt
         if (lastReminder && reminderCount < MAX_REMINDERS && Date.now() - lastReminder > REMINDER_INTERVAL) {
           const itemCount = (saved.selectedCodes?.length || 0) + (saved.packageCartItems?.length || 0)
-          const userEmail = String(data?.user?.email || '').trim()
+          const userEmail = String(user?.email || '').trim()
           if (itemCount > 0 && userEmail) {
-            const firstName = String(data?.user?.user_metadata?.contact_name || '').split(' ')[0] || 'there'
+            const firstName = String(user?.user_metadata?.contact_name || '').split(' ')[0] || 'there'
             const newCount = reminderCount + 1
             sendPortalEmailNotification({
               eventType: 'b2b_abandoned_cart',
@@ -10016,9 +10019,77 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
           }
         }
       }
-      catch { /* ignore corrupt storage */ }
+    }
+    catch { /* ignore corrupt storage */ }
+
+    if (restored || !supabase) return
+
+    try {
+      const { data: draftRow } = await supabase
+        .from('b2b_draft_carts')
+        .select('items')
+        .eq('user_id', uid)
+        .eq('source', 'portal')
+        .maybeSingle()
+
+      const draftProducts = Array.isArray(draftRow?.items?.products) ? draftRow.items.products : []
+      const draftPackages = Array.isArray(draftRow?.items?.packages) ? draftRow.items.packages : []
+
+      if (!draftProducts.length && !draftPackages.length) return
+
+      const restoredCodes = draftProducts
+        .map((item) => normalizeSkuCode(item?.code))
+        .filter(Boolean)
+      const restoredQtys = Object.fromEntries(
+        draftProducts
+          .map((item) => [normalizeSkuCode(item?.code), Math.max(1, Number(item?.qty || 1))])
+          .filter(([code]) => Boolean(code)),
+      )
+      const restoredPackages = draftPackages.map((item) => ({
+        ...item,
+        qty: Math.max(1, Number(item?.qty || 1)),
+      }))
+
+      setSelectedCodes(restoredCodes)
+      setItemQtys(restoredQtys)
+      setPackageCartItems(restoredPackages)
+
+      localStorage.setItem(key, JSON.stringify({
+        selectedCodes: restoredCodes,
+        itemQtys: restoredQtys,
+        packageCartItems: restoredPackages,
+        savedAt: Date.now(),
+        lastReminderAt: null,
+        abandonedReminderCount: 0,
+      }))
+    }
+    catch {
+      /* ignore draft cart restore failures */
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    if (!hasSupabaseConfig || !supabase) return
+
+    let active = true
+
+    const hydrate = async (sessionUser = null) => {
+      const authUser = sessionUser || (await supabase.auth.getUser()).data?.user || null
+      if (!active || !authUser) return
+      await restorePortalCart(authUser)
+    }
+
+    void hydrate()
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      void hydrate(session?.user || null)
     })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+    return () => {
+      active = false
+      listener?.subscription?.unsubscribe()
+    }
+  }, [restorePortalCart, supabase])
 
   // Persist cart to localStorage whenever it changes
   useEffect(() => {
