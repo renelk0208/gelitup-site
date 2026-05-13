@@ -1,8 +1,8 @@
 {
   "_meta": {
-    "source": "gelitup-b2b-pricelist-names-zoho-order-form.xlsx",
-    "generated": "2026-04-20T10:45:17.1950370+03:00",
-    "count": 1077
+    "source": "price-list-export.csv",
+    "generated": "2026-05-13T10:03:22.024Z",
+    "count": 1078
   },
   "items": [
     {
@@ -86,8 +86,8 @@
       "price": 7.41
     },
     {
-      "name": "FR07 Glitter Petal",
-      "sku": "FR07 Glitter Petal",
+      "name": "FR07 Glitter Petal -HTF",
+      "sku": "FR07 Glitter Petal -HTF",
       "price": 7.41
     },
     {
@@ -4491,13 +4491,8 @@
       "price": 5.1
     },
     {
-      "name": "Cleanser 200 ml -HTF",
-      "sku": "Cleanser 200 ml -HTF",
-      "price": 4.78
-    },
-    {
-      "name": "Sanitizer 200ml -HTF",
-      "sku": "Sanitizer 200ml -HTF",
+      "name": "All In One Liquid 200 ml -HTF",
+      "sku": "All In One Liquid 200 ml -HTF",
       "price": 4.78
     },
     {
@@ -5192,151 +5187,213 @@
     },
     {
       "name": "2611 Angel Pink -HTF",
-      "price": 7.41,
-      "sku": "2611 Angel Pink -HTF"
+      "sku": "2611 Angel Pink -HTF",
+      "price": 7.41
     },
     {
       "name": "2612 Coral Milk -HTF",
-      "price": 7.41,
-      "sku": "2612 Coral Milk -HTF"
+      "sku": "2612 Coral Milk -HTF",
+      "price": 7.41
     },
     {
       "name": "2613 Rosy Pop -HTF",
-      "price": 7.41,
-      "sku": "2613 Rosy Pop -HTF"
+      "sku": "2613 Rosy Pop -HTF",
+      "price": 7.41
     },
     {
       "name": "2614 Soft Iris -HTF",
-      "price": 7.41,
-      "sku": "2614 Soft Iris -HTF"
+      "sku": "2614 Soft Iris -HTF",
+      "price": 7.41
     },
     {
       "name": "2615 Sky Cream -HTF",
-      "price": 7.41,
-      "sku": "2615 Sky Cream -HTF"
+      "sku": "2615 Sky Cream -HTF",
+      "price": 7.41
     },
     {
       "name": "Sapphire Cat Eye #SCE01 -HTF",
-      "price": 10.80,
-      "sku": "Sapphire Cat Eye #SCE01 -HTF"
+      "sku": "Sapphire Cat Eye #SCE01 -HTF",
+      "price": 10.8
     },
     {
       "name": "Sapphire Cat Eye #SCE02 -HTF",
-      "price": 10.80,
-      "sku": "Sapphire Cat Eye #SCE02 -HTF"
+      "sku": "Sapphire Cat Eye #SCE02 -HTF",
+      "price": 10.8
     },
     {
       "name": "Sapphire Cat Eye #SCE03 -HTF",
-      "price": 10.80,
-      "sku": "Sapphire Cat Eye #SCE03 -HTF"
+      "sku": "Sapphire Cat Eye #SCE03 -HTF",
+      "price": 10.8
     },
     {
       "name": "Sapphire Cat Eye #SCE04 -HTF",
-      "price": 10.80,
-      "sku": "Sapphire Cat Eye #SCE04 -HTF"
+      "sku": "Sapphire Cat Eye #SCE04 -HTF",
+      "price": 10.8
     },
     {
       "name": "Shimmer Collection #SH07 -HTF",
-      "price": 8.90,
-      "sku": "Shimmer Collection #SH07 -HTF"
+      "sku": "Shimmer Collection #SH07 -HTF",
+      "price": 8.9
     },
     {
       "name": "Shimmer Collection #SH08 -HTF",
-      "price": 8.90,
-      "sku": "Shimmer Collection #SH08 -HTF"
+      "sku": "Shimmer Collection #SH08 -HTF",
+      "price": 8.9
     },
     {
       "name": "Shimmer Collection #SH09 -HTF",
-      "price": 8.90,
-      "sku": "Shimmer Collection #SH09 -HTF"
+      "sku": "Shimmer Collection #SH09 -HTF",
+      "price": 8.9
     },
     {
       "name": "Shimmer Collection #SH10 -HTF",
-      "price": 8.90,
-      "sku": "Shimmer Collection #SH10 -HTF"
+      "sku": "Shimmer Collection #SH10 -HTF",
+      "price": 8.9
     },
     {
       "name": "Shimmer Collection #SH11 -HTF",
-      "price": 8.90,
-      "sku": "Shimmer Collection #SH11 -HTF"
+      "sku": "Shimmer Collection #SH11 -HTF",
+      "price": 8.9
     },
     {
       "name": "Shimmer Collection #SH12 -HTF",
-      "price": 8.90,
-      "sku": "Shimmer Collection #SH12 -HTF"
+      "sku": "Shimmer Collection #SH12 -HTF",
+      "price": 8.9
     },
     {
-      "name": "5 in 1 Lemon Serenity Drop",
-      "sku": "5 in 1 Lemon Serenity Drop",
+      "name": "5-in-1 Superior Base 15ml Lemon Serenity -HTF",
+      "sku": "5-in-1 Superior Base 15ml Lemon Serenity -HTF",
       "price": 12.84
     },
     {
-      "name": "5 in 1 Mint Serenity Drop",
-      "sku": "5 in 1 Mint Serenity Drop",
+      "name": "5-in-1 Superior Base 15ml Mint Serenity -HTF",
+      "sku": "5-in-1 Superior Base 15ml Mint Serenity -HTF",
       "price": 12.84
     },
     {
-      "name": "5 in 1 Peach Blue Drop",
-      "sku": "5 in 1 Peach Blue Drop",
+      "name": "5-in-1 Superior Base 15ml Blue Serenity -HTF",
+      "sku": "5-in-1 Superior Base 15ml Blue Serenity -HTF",
       "price": 12.84
     },
     {
-      "name": "5 in 1 Peach Serenity Drop",
-      "sku": "5 in 1 Peach Serenity Drop",
+      "name": "5-in-1 Superior Base 15ml Peach Serenity -HTF",
+      "sku": "5-in-1 Superior Base 15ml Peach Serenity -HTF",
       "price": 12.84
     },
     {
-      "name": "5 in 1 Purple Serenity Drop",
-      "sku": "5 in 1 Purple Serenity Drop",
+      "name": "5-in-1 Superior Base 15ml Purple Serenity -HTF",
+      "sku": "5-in-1 Superior Base 15ml Purple Serenity -HTF",
       "price": 12.84
     },
     {
-      "name": "Mirror Top Coat",
-      "sku": "Mirror Top Coat",
+      "name": "Mirror Powder Top Coat -HTF",
+      "sku": "Mirror Powder Top Coat -HTF",
       "price": 8.25
     },
-    { "name": "GIUP 2B", "sku": "GIUP 2B", "price": 7.41 },
-    { "name": "GIUP 2C", "sku": "GIUP 2C", "price": 7.41 },
-    { "name": "GIUP 2D", "sku": "GIUP 2D", "price": 7.41 },
-    { "name": "GIUP 2E", "sku": "GIUP 2E", "price": 7.41 },
-    { "name": "GIUP 2F", "sku": "GIUP 2F", "price": 7.41 },
-    { "name": "GIUP 2G", "sku": "GIUP 2G", "price": 7.41 },
-    { "name": "GIUP 2H", "sku": "GIUP 2H", "price": 7.41 },
-    { "name": "GIUP 2I", "sku": "GIUP 2I", "price": 7.41 },
-    { "name": "GIUP 7B", "sku": "GIUP 7B", "price": 7.41 },
-    { "name": "GIUP 7C", "sku": "GIUP 7C", "price": 7.41 },
-    { "name": "GIUP 7D", "sku": "GIUP 7D", "price": 7.41 },
-    { "name": "GIUP 8A", "sku": "GIUP 8A", "price": 7.41 },
-    { "name": "GIUP 8C", "sku": "GIUP 8C", "price": 7.41 },
-    { "name": "GIUP 8D", "sku": "GIUP 8D", "price": 7.41 },
-    { "name": "GIUP 8E", "sku": "GIUP 8E", "price": 7.41 },
-    { "name": "GIUP 8F", "sku": "GIUP 8F", "price": 7.41 },
-    { "name": "GIUP 9A", "sku": "GIUP 9A", "price": 7.41 },
-    { "name": "GIUP 9B", "sku": "GIUP 9B", "price": 7.41 },
-    { "name": "1920 -HTF", "sku": "1920 -HTF", "price": 7.41 },
-    { "name": "1922 -HTF", "sku": "1922 -HTF", "price": 7.41 },
-    { "name": "1931 -HTF", "sku": "1931 -HTF", "price": 7.41 },
-    { "name": "2037 -HTF", "sku": "2037 -HTF", "price": 7.41 },
-    { "name": "2044 -HTF", "sku": "2044 -HTF", "price": 7.41 },
-    { "name": "2100 -HTF", "sku": "2100 -HTF", "price": 7.41 },
-    { "name": "2107 -HTF", "sku": "2107 -HTF", "price": 7.41 },
-    { "name": "2128 -HTF", "sku": "2128 -HTF", "price": 7.41 },
-    { "name": "2136 -HTF", "sku": "2136 -HTF", "price": 7.41 },
-    { "name": "2144 -HTF", "sku": "2144 -HTF", "price": 7.41 },
-    { "name": "2207 -HTF", "sku": "2207 -HTF", "price": 7.41 },
-    { "name": "2208 -HTF", "sku": "2208 -HTF", "price": 7.41 },
-    { "name": "2209 -HTF", "sku": "2209 -HTF", "price": 7.41 },
-    { "name": "2210 -HTF", "sku": "2210 -HTF", "price": 7.41 },
-    { "name": "2211 -HTF", "sku": "2211 -HTF", "price": 7.41 },
-    { "name": "2212 -HTF", "sku": "2212 -HTF", "price": 7.41 },
-    { "name": "2213 -HTF", "sku": "2213 -HTF", "price": 7.41 },
-    { "name": "2214 -HTF", "sku": "2214 -HTF", "price": 7.41 },
-    { "name": "2215 -HTF", "sku": "2215 -HTF", "price": 7.41 },
-    { "name": "2216 -HTF", "sku": "2216 -HTF", "price": 7.41 },
-    { "name": "2217 -HTF", "sku": "2217 -HTF", "price": 7.41 },
-    { "name": "2218 -HTF", "sku": "2218 -HTF", "price": 7.41 },
-    { "name": "2219 -HTF", "sku": "2219 -HTF", "price": 7.41 },
-    { "name": "2302 -HTF", "sku": "2302 -HTF", "price": 7.41 },
-    { "name": "2408 -HTF", "sku": "2408 -HTF", "price": 7.41 }
+    {
+      "name": "08C Napoleon Blues -HTF",
+      "sku": "08C Napoleon Blues -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "1920 Sea Shells -HTF",
+      "sku": "1920 Sea Shells -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "1922 No Footprint -HTF",
+      "sku": "1922 No Footprint -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "1931 Binnit -HTF",
+      "sku": "1931 Binnit -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2037 Salty Caramel -HTF",
+      "sku": "2037 Salty Caramel -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2044 Bashful Lilac -HTF",
+      "sku": "2044 Bashful Lilac -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2100 Popsicles -HTF",
+      "sku": "2100 Popsicles -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2107 Dragonfly Dances -HTF",
+      "sku": "2107 Dragonfly Dances -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2128 New Horizons -HTF",
+      "sku": "2128 New Horizons -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2136 Bright Stimulus -HTF",
+      "sku": "2136 Bright Stimulus -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2144 Dark Shine -HTF",
+      "sku": "2144 Dark Shine -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2207 Pink Mexican -HTF",
+      "sku": "2207 Pink Mexican -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2208 Coral Fusion -HTF",
+      "sku": "2208 Coral Fusion -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2209 Taffy Pink -HTF",
+      "sku": "2209 Taffy Pink -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2211 Purple People Eater -HTF",
+      "sku": "2211 Purple People Eater -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2213 Drunken Acorn -HTF",
+      "sku": "2213 Drunken Acorn -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2215 Glass Frog -HTF",
+      "sku": "2215 Glass Frog -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2218 Simmer Down -HTF",
+      "sku": "2218 Simmer Down -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2219 Captain Obvious -HTF",
+      "sku": "2219 Captain Obvious -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2302 Fugly Yellow -HTF",
+      "sku": "2302 Fugly Yellow -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2408 Subtle -HTF",
+      "sku": "2408 Subtle -HTF",
+      "price": 7.41
+    }
   ]
 }
