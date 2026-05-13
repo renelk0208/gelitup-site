@@ -668,6 +668,11 @@ function normalizePriceLookupKey(value) {
     .replace(/\b(\d+)\s*G\b/g, '$1GR')
     // image-map variants sometimes include trailing B/C copies
     .replace(/\s+[BC]\s+(?=\d+GR\b)/g, ' ')
+    // normalize MultiMix filename variants to CSV alias keys
+    .replace(/\bBUBBLEGUM\b/g, 'BUBBLE GUM')
+    .replace(/\bPINK\s+III\b/g, 'PINKIII')
+    .replace(/\bMULTIMIX\s+WHITE\s+60ML\b/g, 'MULTIMIX WHITE COLOR')
+    .replace(/\b(MULTIMIX\s+[A-Z0-9 ]+?)\s+\d+GR\b/g, '$1')
     .replace(/\s+/g, ' ')
     .trim()
 }
@@ -4325,11 +4330,11 @@ function FullCataloguePage() {
               <path fillRule="evenodd" d="M14 8a.75.75 0 0 1-.75.75H4.56l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 1.06L4.56 7.25H13.25A.75.75 0 0 1 14 8Z" clipRule="evenodd" />
             </svg>
             <span>{searchQuery ? 'Back to Search Results' : 'Back to Categories'}</span>
-          </button>
+                          <button
           {searchQuery && (
             <span className="rounded-full border border-fuchsia-300 bg-fuchsia-50 px-3 py-1 text-xs font-semibold text-fuchsia-700">
               Filtered: &ldquo;{searchQuery}&rdquo; &mdash; {filteredItems.length} result{filteredItems.length === 1 ? '' : 's'}
-            </span>
+                            Buy Now
           )}
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -13883,7 +13888,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           <span className="truncate text-xs font-semibold text-slate-700">
             {(selectedCodes.length + packageCartItems.length) > 0
               ? `${selectedCodes.length + packageCartItems.length} items — ${totalUnits} units${orderTotal > 0 ? ` — €${orderTotal.toFixed(2)}` : ''}`
-              : 'Tap a product to add it'}
+              : 'Tap Buy Now on a product'}
           </span>
           <div className="flex shrink-0 items-center gap-2">
             {(selectedCodes.length > 0 || packageCartItems.length > 0) && (
@@ -14025,7 +14030,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                             </div>
                           ) : (
                             <button onClick={() => toggleSelection(product.code)} className="mt-auto border-t py-1 text-center text-[10px] font-semibold" style={{ borderColor: '#f0e8f0', color: '#c8386e' }}>
-                              + Add
+                              Buy Now
                             </button>
                           )}
                         </div>

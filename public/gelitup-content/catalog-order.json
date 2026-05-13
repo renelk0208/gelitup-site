@@ -125,6 +125,160 @@
       "order": []
     },
     {
+      "category": "BUILDER GEL SYSTEMS",
+      "subcategory": "30 ML",
+      "groups": [
+        {
+          "hero": "multimix baby blue color 30g",
+          "swatches": ["multimix baby blue color B 30g", "multimix baby blue color C 30g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix baby pink glitter color 30g",
+          "swatches": ["multimix baby pink glitter color B 30g", "multimix baby pink glitter color C 30g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix blue glitter color 30g",
+          "swatches": ["multimix blue glitter color B 30g", "multimix blue glitter color C 30g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix bubblegum glitter color 30g",
+          "swatches": ["multimix bubblegum glitter color B 30g", "multimix bubblegum glitter color C 30g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix glitsy green color 30g",
+          "swatches": ["multimix glitsy green color B 30g", "multimix glitsy green color C 30g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix light nude color 30g",
+          "swatches": ["multimix light nude color B 30g", "multimix light nude color C 30g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix mint green color 30g",
+          "swatches": ["multimix mint green color B 30g", "multimix mint green color C 30g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix pink III color 30g",
+          "swatches": ["multimix pink III color B 30g", "multimix pink III color C 30g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix super soft pink color 30g",
+          "swatches": ["multimix super soft pink color B 30g", "multimix super soft pink color C 30g"],
+          "mergeAsGallery": true
+        }
+      ],
+      "order": []
+    },
+    {
+      "category": "BUILDER GEL SYSTEMS",
+      "subcategory": "60 ML",
+      "groups": [
+        {
+          "hero": "multimix black color 60g",
+          "swatches": ["multimix black color B 60g", "multimix black color C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix clear color 60g",
+          "swatches": ["multimix clear color B 60g", "multimix clear color C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix cover color 60g",
+          "swatches": ["multimix cover color B 60g", "multimix cover color C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix cover II color 60g",
+          "swatches": ["multimix cover II color B 60g", "multimix cover II color C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix crystal clear color 60g",
+          "swatches": ["multimix crystal clear color B 60g", "multimix crystal clear color C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix glitterpink color 60g",
+          "swatches": ["multimix glitterpink color B 60g", "multimix glitterpink color C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix glitters clear 60g",
+          "swatches": ["multimix glitters clear B 60g", "multimix glitters clear C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix glitters gold 60g",
+          "swatches": ["multimix glitters gold B 60g", "multimix glitters gold C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix glitters nude 60g",
+          "swatches": ["multimix glitters nude B 60g", "multimix glitters nude C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix glitters pink 60g",
+          "swatches": ["multimix glitters pink B 60g", "multimix glitters pink C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix glitters white 60g",
+          "swatches": ["multimix glitters white B 60g", "multimix glitters white C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix light pink color 60g",
+          "swatches": ["multimix light pink color B 60g", "multimix light pink color C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix lilac color 60g",
+          "swatches": ["multimix lilac color B 60g", "multimix lilac color C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix milky white color 60g",
+          "swatches": ["multimix milky white color B 60g", "multimix milky white color C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix nude color 60g",
+          "swatches": ["multimix nude color B 60g", "multimix nude color C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix pink color 60g",
+          "swatches": ["multimix pink color B 60g", "multimix pink color C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix pink II color 60g",
+          "swatches": ["multimix pink II color B 60g", "multimix pink II color C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix super milky color 60g",
+          "swatches": ["multimix super milky color B 60g", "multimix super milky color C 60g"],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "multimix white 60ml 60g",
+          "swatches": ["multimix white color B 60g", "multimix white color C 60g"],
+          "mergeAsGallery": true
+        }
+      ],
+      "order": []
+    },
+    {
       "category": "EQUIPMENT",
       "subcategory": "DUST & AIR",
       "groups": [
