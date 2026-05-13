@@ -4602,6 +4602,7 @@ function FullCataloguePage() {
                         {Object.entries(quickCart).filter(([, q]) => q > 0).map(([key, cartQty]) => {
                           const [name, code] = key.split('::')
                           const price = lookupCataloguePrice(name, code)
+                          if (price == null) return null
                           const lineTotal = price != null ? Number(price) * cartQty : null
                           return (
                             <div key={key} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
@@ -4891,6 +4892,10 @@ function FullCataloguePage() {
             const activeSubItems = activeNewCollection && newSection
               ? (newSection.subcategories.find(s => s.name === activeNewCollection)?.items || [])
               : []
+            const activeSubItemsPriced = activeSubItems.filter((item) => {
+              const itemCode = extractProductCode(item.name)
+              return lookupCataloguePrice(item.name, itemCode) != null
+            })
             return (
               <div id="catalogue-section-new-products" className="scroll-mt-28">
                 {/* NEW PRODUCTS banner with hero image */}
@@ -4967,12 +4972,12 @@ function FullCataloguePage() {
                 )}
                 {activeNewCollection && (
                   <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8">
-                    <p className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-black/50">{activeNewCollection} — {activeSubItems.length} product{activeSubItems.length !== 1 ? 's' : ''}</p>
-                    {activeSubItems.length === 0 ? (
+                    <p className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-black/50">{activeNewCollection} — {activeSubItemsPriced.length} product{activeSubItemsPriced.length !== 1 ? 's' : ''}</p>
+                    {activeSubItemsPriced.length === 0 ? (
                       <p className="text-sm text-black/45">No products found for this collection.</p>
                     ) : (
                       <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}>
-                        {activeSubItems.map((item, idx) => {
+                        {activeSubItemsPriced.map((item, idx) => {
                           const itemCode = extractProductCode(item.name)
                           const itemKey = `${item.name}::${itemCode}`
                           const price = lookupCataloguePrice(item.name, itemCode)
