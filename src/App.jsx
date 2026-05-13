@@ -918,7 +918,7 @@ const navItems = [
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/guestbook', label: 'Guestbook' },
   { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
-  { href: SHOPIFY_SHOP_URL, label: 'Our Products', highlight: true, isExternal: true },
+  { to: '/full-catalogue', label: 'Product Catalogue', highlight: true },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -5868,6 +5868,18 @@ function Nav({ onOpenContactModal }) {
       {/* Divider */}
       <span className="mx-1.5 h-5 w-px bg-white/20" aria-hidden="true" />
 
+      {/* Secondary — Distribution Registration */}
+      <NavLink
+        to="/portal/register"
+        className={({ isActive }) =>
+          `rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+            isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/80 hover:border-white/50 hover:bg-white/10 hover:!text-white'
+          }`
+        }
+      >
+        Distribution Registration
+      </NavLink>
+
       {/* Secondary — B2B Registration */}
       <NavLink
         to="/portal/register?type=b2b"
@@ -5949,6 +5961,19 @@ function MobileNav({ onOpenContactModal }) {
         {/* Nav links */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           {/* Quick-action CTAs at the top */}
+          {/* Secondary — Distribution Registration */}
+          <NavLink
+            to="/portal/register"
+            onClick={() => setOpen(false)}
+            className={({ isActive }) =>
+              `block rounded-lg border border-white/25 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-[0.06em] transition duration-200 ${
+                isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/70 hover:border-white/40 hover:bg-white/10 hover:!text-white'
+              }`
+            }
+          >
+            Distribution Registration
+          </NavLink>
+
           {/* Secondary — B2B Registration */}
           <NavLink
             to="/portal/register?type=b2b"
@@ -6601,11 +6626,11 @@ function HomePage({ onOpenContactModal }) {
                 A decade of mastery · EU regulated · HEMA &amp; TPO-free
               </p>
               <div className="mt-5 flex flex-wrap items-center gap-3">
-                <NavLink to="/portal/register" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_16px_rgba(212,55,144,0.55)] transition duration-300 hover:bg-fuchsia-500">
-                  Register Free &rarr;
+                <NavLink to="/portal/register?type=b2b" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_16px_rgba(212,55,144,0.55)] transition duration-300 hover:bg-fuchsia-500">
+                  B2B Register &rarr;
                 </NavLink>
-                <NavLink to="/become-distributor" className="rounded-lg border-2 border-white/80 bg-white/15 px-5 py-2.5 text-sm font-bold text-white shadow-[0_2px_12px_rgba(0,0,0,0.35)] backdrop-blur-sm transition duration-300 hover:bg-white/25">
-                  Become a Distributor
+                <NavLink to="/portal/login?portal=b2b" className="rounded-lg border-2 border-white/80 bg-white/15 px-5 py-2.5 text-sm font-bold text-white shadow-[0_2px_12px_rgba(0,0,0,0.35)] backdrop-blur-sm transition duration-300 hover:bg-white/25">
+                  B2B Login
                 </NavLink>
               </div>
               {/* Trust bar */}
