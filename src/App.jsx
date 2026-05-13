@@ -5036,7 +5036,7 @@ function FullCataloguePage() {
                               <div className="flex flex-1 flex-col border-t border-black/10 px-2.5 py-2">
                                 <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                                 <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                                <p className="mt-1.5 text-xs font-bold text-fuchsia-700">{price != null ? `€${Number(price).toFixed(2)}` : 'Price on request'}</p>
+                                <p className="mt-1.5 text-xs font-bold text-fuchsia-700">€{Number(price || 0).toFixed(2)}</p>
                                 <div className="mt-auto pt-3">
                                   <div className="flex items-center gap-2">
                                     <button onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
@@ -9739,7 +9739,7 @@ const B2B_SIDEBAR_GROUPS = [
   },
 ]
 
-function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated = false }) {
+function ProductsModule({ moduleView = 'products', tier = null }) {
   // Tier 1 / Professional (local-regional): -63% from B2B price (pay 37%).
   // Tier 2 / Authority (national): -78% from B2B price (pay 22%).
   // Level 2 Country Tier: Authority price + 20% (0.22 × 1.20 = 0.264).
@@ -13207,7 +13207,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             )}
             <div className="p-5">
               <p className="text-sm font-semibold text-slate-900 leading-snug">{upsellModal.product?.name}</p>
-              {upsellModal.product?.price != null && pricesAllocated && (
+              {upsellModal.product?.price != null && (
                 <p className="mt-1 text-sm font-bold text-fuchsia-700">€{(Number(upsellModal.product.price) * tierPriceMultiplier).toFixed(2)}</p>
               )}
               <div className="mt-4 flex gap-2">
@@ -13267,9 +13267,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
               <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Country Distribution Authority</p>
               <p className="mt-0.5 text-base font-bold">★ Authority Partner Portal</p>
             </div>
-            {!pricesAllocated && (
-              <span className="rounded-lg bg-white/20 px-3 py-1 text-xs font-semibold">Pricing pending allocation</span>
-            )}
           </div>
           <p className="mt-2 text-xs leading-relaxed opacity-80">You hold exclusive country-level distribution rights for GEL.IT.UP products. Access the full wholesale catalogue, place orders for your entire country territory, and manage your exclusive distribution agreement below.</p>
         </div>
@@ -13281,9 +13278,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
               <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Level 2 Country Tier</p>
               <p className="mt-0.5 text-base font-bold">Level 2 Country Tier Portal</p>
             </div>
-            {!pricesAllocated && (
-              <span className="rounded-lg bg-white/20 px-3 py-1 text-xs font-semibold">Pricing pending allocation</span>
-            )}
           </div>
           <p className="mt-2 text-xs leading-relaxed opacity-80">You are an approved Level 2 Country Tier distributor of GEL.IT.UP products. Browse the wholesale catalogue at your country tier pricing and place orders below.</p>
         </div>
@@ -13295,17 +13289,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
               <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Regional Professional Distributor</p>
               <p className="mt-0.5 text-base font-bold">Professional Partner Portal</p>
             </div>
-            {!pricesAllocated && (
-              <span className="rounded-lg bg-white/20 px-3 py-1 text-xs font-semibold">Pricing pending allocation</span>
-            )}
           </div>
           <p className="mt-2 text-xs leading-relaxed opacity-80">You are an approved regional distributor of GEL.IT.UP products. Browse the full wholesale catalogue and place orders for your approved distribution region below.</p>
-        </div>
-      )}
-      {!pricesAllocated && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3">
-          <p className="text-xs font-semibold text-amber-800">Wholesale pricing not yet allocated</p>
-          <p className="mt-0.5 text-xs text-amber-700">Your account manager will confirm your wholesale pricing agreement before prices are displayed. You can browse the catalogue and prepare your selection in the meantime.</p>
         </div>
       )}
 
@@ -13326,7 +13311,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ${moduleView === 'profile' ? 'bg-white/30 text-white' : 'bg-slate-400 text-white'}`}>3</span>
             My Details
           </button>
-          {orderTotal > 0 && pricesAllocated && <span className="ml-auto text-xs font-bold text-fuchsia-700">€{orderTotal.toFixed(2)}</span>}
+          {orderTotal > 0 && <span className="ml-auto text-xs font-bold text-fuchsia-700">€{orderTotal.toFixed(2)}</span>}
         </div>
       </div>
 
@@ -13380,14 +13365,14 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                       <button onClick={() => setItemQtys(prev => ({...prev, [product.code]: qty + 1}))} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">+</button>
                     </div>
                     <div className="w-16 text-right">
-                      {lineTotal != null && pricesAllocated ? <p className="text-xs font-semibold text-fuchsia-700">€{lineTotal.toFixed(2)}</p> : <p className="text-xs text-slate-400">—</p>}
+                      {lineTotal != null ? <p className="text-xs font-semibold text-fuchsia-700">€{lineTotal.toFixed(2)}</p> : <p className="text-xs text-slate-400">—</p>}
                     </div>
                     <button onClick={() => toggleSelection(product.code)} className="flex h-6 w-6 items-center justify-center rounded-full text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Remove">—</button>
                   </div>
                 )
               })}
             </div>
-            {orderTotal > 0 && pricesAllocated && (
+            {orderTotal > 0 && (
               <div className="mt-2 border-t border-slate-200 pt-2">
                 <div className="flex justify-between text-sm">
                   <span className="font-semibold text-slate-700">Estimated Total</span>
@@ -14039,10 +14024,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                           <div className="px-1.5 pt-1 pb-0.5">
                             <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{product.name}</p>
                             {product.price != null && (
-                            pricesAllocated
-                              ? <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{(Number(product.price) * tierPriceMultiplier).toFixed(2)}</p>
-                              : <p className="text-[10px] text-slate-400">POA</p>
-                          )}
+                              <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{(Number(product.price) * tierPriceMultiplier).toFixed(2)}</p>
+                            )}
                           </div>
                           {/* action */}
                           {selected ? (
@@ -15554,7 +15537,7 @@ function BuyerPortal({ onLogout, userName, userEmail }) {
   )
 }
 
-function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverride = null }) {
+function PortalDashboard({ onLogout, tierOverride = null }) {
   const location = useLocation()
   const navigate = useNavigate()
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
@@ -16029,12 +16012,6 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     ?? liveRegistration?.distributor_tier
     ?? portalUser?.user_metadata?.distributor_tier
     ?? null
-  // Prices are shown by default for all portal users.
-  // Admin previews can still explicitly override via pricesAllocatedOverride.
-  const effectivePricesAllocated = pricesAllocatedOverride !== null
-    ? pricesAllocatedOverride
-    : true
-
   if (portalUser?.user_metadata?.role === 'buyer') {
     return (
       <BuyerPortal
@@ -16073,7 +16050,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
 
       <div className="space-y-4">
         {activeModule === 'products' || activeModule === 'catalog' || activeModule === 'profile' ? (
-          <ProductsModule moduleView={activeModule} tier={effectiveTier} pricesAllocated={effectivePricesAllocated} />
+          <ProductsModule moduleView={activeModule} tier={effectiveTier} />
         ) : activeModule === 'orders' ? (
           <OrdersModule />
         ) : activeModule === 'support' ? (
@@ -16229,17 +16206,14 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
   // null = admin panel, 'distributor' = distributor preview, 'b2b' = B2B client preview
   const [adminPreviewType, setAdminPreviewType] = useState(null)
   const [adminTierPreview, setAdminTierPreview] = useState(null)
-  const [adminPricesAllocated, setAdminPricesAllocated] = useState(true)
 
   const enterPreview = (type) => {
     setAdminPreviewType(type)
     setAdminTierPreview(null)
-    setAdminPricesAllocated(type === 'b2b') // B2B always has prices; distributor starts with prices off
   }
   const exitPreview = () => {
     setAdminPreviewType(null)
     setAdminTierPreview(null)
-    setAdminPricesAllocated(true)
   }
 
   if (!authReady) {
@@ -16313,19 +16287,6 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
                 </button>
               </>
             )}
-            {/* Price toggle — shown for both portal types */}
-            {adminPreviewType !== null && (
-              <button
-                onClick={() => setAdminPricesAllocated(v => !v)}
-                className={`rounded-full border px-2 py-0.5 text-xs font-semibold transition ${
-                  adminPricesAllocated
-                    ? 'border-emerald-600 bg-emerald-600 text-white'
-                    : 'border-amber-300 bg-white text-amber-800 hover:bg-amber-100'
-                }`}
-              >
-                {adminPricesAllocated ? '✓ Prices On' : '✗ Prices Off'}
-              </button>
-            )}
             {/* Preview switcher buttons */}
             {adminPreviewType === null ? (
               <>
@@ -16374,7 +16335,6 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
           ? <PortalDashboard
               onLogout={onLogout}
               tierOverride={adminPreviewType === 'distributor' ? adminTierPreview : null}
-              pricesAllocatedOverride={adminPricesAllocated}
             />
           : (
             <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#c8386e] border-t-transparent" /></div>}>
@@ -16386,7 +16346,7 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
     )
   }
 
-  return <PortalDashboard onLogout={onLogout} pricesAllocatedOverride={null} />
+  return <PortalDashboard onLogout={onLogout} />
 }
 
 function LegalPageLayout({ title, children }) {
