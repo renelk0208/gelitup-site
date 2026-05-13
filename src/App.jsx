@@ -660,6 +660,18 @@ function normalizeProductName(value) {
     .trim()
 }
 
+function normalizePriceLookupKey(value) {
+  return normalizeSkuCode(value)
+    // common typo in some imported labels
+    .replace(/\bHTE\b/g, 'HTF')
+    // treat "60g" and "60gr" as equivalent for matching
+    .replace(/\b(\d+)\s*G\b/g, '$1GR')
+    // image-map variants sometimes include trailing B/C copies
+    .replace(/\s+[BC]\s+(?=\d+GR\b)/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 // Fuzzy word-overlap price lookup for image-map products whose filename keys
 // don't match price-list names exactly (e.g. "cobweb black" vs "Cobweb Gel Black -HTF").
 // All significant query words (=4 chars, not in skip list) must appear in the price entry.
@@ -3974,8 +3986,12 @@ function FullCataloguePage() {
     if (!cataloguePriceMap) return null
     const byName = cataloguePriceMap.get(normalizeProductName(itemName))
     if (byName?.price != null) return byName.price
+    const byNameNormalized = cataloguePriceMap.get(normalizeProductName(normalizePriceLookupKey(itemName)))
+    if (byNameNormalized?.price != null) return byNameNormalized.price
     const byCode = cataloguePriceMap.get(normalizeSkuCode(itemCode))
     if (byCode?.price != null) return byCode.price
+    const byCodeNormalized = cataloguePriceMap.get(normalizePriceLookupKey(itemCode))
+    if (byCodeNormalized?.price != null) return byCodeNormalized.price
     // Try GIUP-prefixed code variants
     const giupNumMatch = normalizeSkuCode(itemCode).match(/^(?:GIUP\s+)?(\d+[A-Z]?)$/)
     if (giupNumMatch) {
@@ -3999,6 +4015,8 @@ function FullCataloguePage() {
     // Try direct alias lookup by full item name (handles filenames like "MULTIMIX BABY BLUE COLOR")
     const byFullName = cataloguePriceMap.get(normalizeSkuCode(itemName))
     if (byFullName?.price != null) return byFullName.price
+    const byFullNameNormalized = cataloguePriceMap.get(normalizePriceLookupKey(itemName))
+    if (byFullNameNormalized?.price != null) return byFullNameNormalized.price
     // Fuzzy word-overlap fallback
     const fuzzy = fuzzyPriceLookup(itemCode, itemName, catalogueWordIndex)
     if (fuzzy?.price != null) return fuzzy.price
@@ -7904,10 +7922,16 @@ function CheckoutPage() {
     if (!priceMap) return null
     const byName = priceMap.get(normalizeProductName(itemName))
     if (byName?.price != null) return byName.price
+    const byNameNormalized = priceMap.get(normalizeProductName(normalizePriceLookupKey(itemName)))
+    if (byNameNormalized?.price != null) return byNameNormalized.price
     const byCode = priceMap.get(normalizeSkuCode(itemCode))
     if (byCode?.price != null) return byCode.price
+    const byCodeNormalized = priceMap.get(normalizePriceLookupKey(itemCode))
+    if (byCodeNormalized?.price != null) return byCodeNormalized.price
     const byFullName = priceMap.get(normalizeSkuCode(itemName))
     if (byFullName?.price != null) return byFullName.price
+    const byFullNameNormalized = priceMap.get(normalizePriceLookupKey(itemName))
+    if (byFullNameNormalized?.price != null) return byFullNameNormalized.price
     // Strip GIUP prefix and try the bare code (e.g. "GIUP 15" → "15", "GIUP BTO02" → "BTO02")
     const stripped = normalizeSkuCode(itemCode).replace(/^GIUP[-\s]+/, '')
     if (stripped !== normalizeSkuCode(itemCode)) {
@@ -7930,11 +7954,20 @@ function CheckoutPage() {
     const byName = priceMap.get(normalizeProductName(itemName))
     if (byName?.price != null) return byName
 
+    const byNameNormalized = priceMap.get(normalizeProductName(normalizePriceLookupKey(itemName)))
+    if (byNameNormalized?.price != null) return byNameNormalized
+
     const byCode = priceMap.get(normalizeSkuCode(itemCode))
     if (byCode?.price != null) return byCode
 
+    const byCodeNormalized = priceMap.get(normalizePriceLookupKey(itemCode))
+    if (byCodeNormalized?.price != null) return byCodeNormalized
+
     const byFullName = priceMap.get(normalizeSkuCode(itemName))
     if (byFullName?.price != null) return byFullName
+
+    const byFullNameNormalized = priceMap.get(normalizePriceLookupKey(itemName))
+    if (byFullNameNormalized?.price != null) return byFullNameNormalized
 
     const stripped = normalizeSkuCode(itemCode).replace(/^GIUP[-\s]+/, '')
     if (stripped !== normalizeSkuCode(itemCode)) {
