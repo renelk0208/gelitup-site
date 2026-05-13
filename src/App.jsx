@@ -2447,6 +2447,7 @@ function formatSubcategoryHeadingLabel(subcategoryName = '', categoryName = '') 
   const normalizedCat = normalizeCatalogueToken(categoryName)
   if (normalizedSub === 'CAT EYE' && normalizedCat.includes('COLOR')) return 'Cat Eye Gel Polish'
   if (normalizedSub === '5IN1 SUPERIOR BASE') return '5-in-1 Base Coat'
+  if (normalizedSub === 'MIRROR TOP COAT') return 'Mirror Powder Top Coat'
   if (normalizedSub === 'PREMIUM BUILDER') return 'Fiberglass Builder Gel'
   if (normalizedSub === 'BRUSH ON BUILDER') return 'Brush On Builder (BIAB)'
   if (normalizedSub === 'SOLID GEL POLISH') return 'Solid Gel Polish'
@@ -2481,6 +2482,7 @@ function formatSubcategoryDisplayName(subcategoryName = '', categoryName = '') {
   if (normalized === 'THERMO') return 'Thermo'
   if (normalized === 'TUTTI FRUTTI GLASS') return 'Tutti Frutti Glass'
   if (normalized === 'GLASS EFFECT') return 'Glass Effect'
+  if (normalized === 'MIRROR TOP COAT') return 'Mirror Powder Top Coat'
   
   // Builder Gel Systems subcategories
   if (normalized === '3INI BUILDER') return '3-in-1 Builder Gel'
@@ -4630,7 +4632,7 @@ function FullCataloguePage() {
                   if (bulkMode) {
                     return (
                       <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 rounded-[12px] border border-[#4A4A4A]/30 bg-[#E8E8E8] px-3 py-2 transition duration-300 hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_1px_rgba(212,55,144,0.26)]" data-catalogue-item>
-                        <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-black/10 bg-white object-contain opacity-0 transition-opacity duration-300" loading="lazy" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
+                        <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-black/10 bg-white object-contain opacity-0 transition-opacity duration-300" loading="lazy" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.png'; e.currentTarget.classList.replace('opacity-0', 'opacity-100') }} />
                         <div className="min-w-0 flex-1">
                           <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                           <p className="break-words text-[11px] font-light text-black/55">{itemCode}</p>
@@ -4650,7 +4652,7 @@ function FullCataloguePage() {
                   return (
                     <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`flex flex-col overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:bg-[#E8E8E8] md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`} data-catalogue-item>
                       <div className="flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52 md:h-60" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
-                        <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full scale-[1.025] object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
+                        <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full scale-[1.025] object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.png'; e.currentTarget.classList.replace('opacity-0', 'opacity-100') }} />
                       </div>
                       {item.galleryImages?.length > 0 && (
                         <div className="flex gap-1 border-t border-black/10 bg-white px-2 py-1.5">
@@ -4721,9 +4723,7 @@ function FullCataloguePage() {
                                   className="flex h-6 w-6 items-center justify-center rounded-md border border-black/20 text-xs text-black/60 transition hover:border-fuchsia-500 hover:text-fuchsia-600"
                                 >+</button>
                               </div>
-                              {lineTotal != null && (
-                                <span className="w-16 text-right text-xs font-bold text-fuchsia-700">€{lineTotal.toFixed(2)}</span>
-                              )}
+                              <span className="w-16 text-right text-xs font-bold text-fuchsia-700">€{Number(lineTotal || 0).toFixed(2)}</span>
                               <button
                                 onClick={() => setQuickCart((c) => { const n = { ...c }; delete n[key]; return n })}
                                 className="ml-1 text-black/30 transition hover:text-red-500"
@@ -4956,7 +4956,7 @@ function FullCataloguePage() {
                         title={`View in ${item.category} — ${item.subcategory}`}
                       >
                         <div className="flex h-36 w-full items-center justify-center overflow-hidden bg-white p-1.5">
-                          <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => e.currentTarget.closest('article')?.classList.add('!hidden')} />
+                          <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.png'; e.currentTarget.classList.replace('opacity-0', 'opacity-100') }} />
                         </div>
                         <div className="border-t border-black/10 px-2 py-1.5">
                           <p className="truncate text-[10px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
@@ -4980,7 +4980,7 @@ function FullCataloguePage() {
               { key: 'Summer Vibes', label: 'Summer Vibes' },
               { key: 'Sapphire Cat Eye', label: 'Sapphire Cat Eye' },
               { key: 'Shimmer Colors', label: 'Shimmer Colors' },
-              { key: 'Mirror Top Coat', label: 'Mirror Top Coat' },
+              { key: 'Mirror Top Coat', label: 'Mirror Powder Top Coat' },
               { key: 'New Consumables', label: 'New Consumables' },
               { key: '5-in-1 Superior Base', label: '5-in-1 Superior Base' },
             ]
@@ -5076,7 +5076,7 @@ function FullCataloguePage() {
                           return (
                             <article key={idx} className="flex flex-col overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)]" data-catalogue-item>
                               <div className="flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
-                                <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={e => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={e => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
+                                <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={e => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.png'; e.currentTarget.classList.replace('opacity-0', 'opacity-100') }} />
                               </div>
                               <div className="flex flex-1 flex-col border-t border-black/10 px-2.5 py-2">
                                 <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
