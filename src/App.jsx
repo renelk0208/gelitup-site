@@ -5,6 +5,7 @@ import PWABadge from './PWABadge.jsx'
 import ImportedAnyPage from './pages/imported/ImportedAnyPage.jsx'
 import { hasSupabaseConfig, supabase } from './lib/supabaseClient'
 import useB2BIntelligence from './lib/useB2BIntelligence'
+import { PRODUCT_ALIAS_GROUPS } from './data/productAliases.js'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
@@ -651,23 +652,6 @@ function normalizeSkuCode(value) {
   return String(value || '').trim().toUpperCase().replace(/\s+/g, ' ')
 }
 
-// Sort comparator for product codes: numeric-first (by leading number after stripping GIUP prefix),
-// then tiebreak alphabetically (so "GIUP 51" < "GIUP 51A"), then non-numeric codes alphabetically.
-function compareProductCodes(codeA, codeB) {
-  const cA = String(codeA || '').replace(/^GIUP\s*/i, '')
-  const cB = String(codeB || '').replace(/^GIUP\s*/i, '')
-  const nA = cA.match(/^(\d+)/)
-  const nB = cB.match(/^(\d+)/)
-  if (nA && nB) {
-    const diff = parseInt(nA[1], 10) - parseInt(nB[1], 10)
-    if (diff !== 0) return diff
-    return cA.localeCompare(cB, undefined, { sensitivity: 'base', numeric: false })
-  }
-  if (nA) return -1
-  if (nB) return 1
-  return cA.localeCompare(cB, undefined, { sensitivity: 'base' })
-}
-
 function normalizeProductName(value) {
   return normalizeSkuCode(value)
     .replace(/GEL\.?IT\.?UP|GEL\s*IT\s*UP|GIUP/gi, ' ')
@@ -683,11 +667,9 @@ const FUZZY_PRICE_SKIP = new Set(['COLOR','COLOUR','COAT','CARE','FORM','SIZE'])
 function fuzzyPriceLookup(code, rawName, wordIndex) {
   if (!wordIndex || !wordIndex.length) return null
   for (const cand of [code, rawName].filter(Boolean)) {
-    const allTokens = normalizeSkuCode(cand).split(/\s+/).filter(Boolean)
-    // Significant words: >= 4 chars (not in skip list) + multi-digit numeric tokens (size indicators like 15, 40, 100)
-    // Single digits like "3" or "1" from "3 in 1" names are excluded to avoid false negatives.
-    const qWords = allTokens
-      .filter(w => (w.length >= 4 && !FUZZY_PRICE_SKIP.has(w)) || /^\d{2,}$/.test(w))
+    const qWords = normalizeSkuCode(cand)
+      .split(/\s+/)
+      .filter(w => w.length >= 4 && !FUZZY_PRICE_SKIP.has(w))
       .map(w => w.length >= 6 ? w.replace(/S$/, '') : w) // rough depluralize
     if (qWords.length < 2) continue
     const match = wordIndex.find(({ words }) =>
@@ -924,7 +906,7 @@ const navItems = [
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/guestbook', label: 'Guestbook' },
   { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
-  { to: '/full-catalogue', label: 'Our Products', highlight: true },
+  { href: SHOPIFY_SHOP_URL, label: 'Our Products', highlight: true, isExternal: true },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -1223,7 +1205,7 @@ function buildProformaFromCart({
 }) {
   const productMap = new Map(products.map((product) => [normalizeSkuCode(product.code), product]))
 
-  const selectedLines = [...selectedCodes].sort(compareProductCodes).map((code) => {
+  const selectedLines = selectedCodes.map((code) => {
     const normalized = normalizeSkuCode(code)
     const product = productMap.get(normalized)
     // Use the price already resolved during feed loading (full matching logic),
@@ -1999,7 +1981,7 @@ function formatCatalogueItemName(rawPath = '') {
 
 function isCategoryHeroAssetPath(rawPath = '') {
   const fileName = String(rawPath || '').split('/').pop() || ''
-  return /hero[.\-]image/i.test(fileName) || /banner/i.test(fileName)
+  return /hero\.image/i.test(fileName)
 }
 
 function normalizeCatalogueToken(value = '') {
@@ -2188,28 +2170,9 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
       .filter((value) => !isBlockedImagePath(value))
   )
 
-  // Detect alternate-angle images (filename ending _B or _Β before extension)
-  // and attach them as galleryImages on the primary product instead of creating a duplicate card
-  const galleryMap = new Map() // primaryPath -> [altPath, ...]
-  const altImagePaths = new Set()
-  uniqueImagePaths.forEach(imagePath => {
-    const altMatch = imagePath.match(/^(.+?)_[B\u0392](\.[a-z0-9]+)$/i)
-    if (altMatch) {
-      const primaryPath = altMatch[1] + altMatch[2]
-      if (uniqueImagePaths.has(primaryPath)) {
-        if (!galleryMap.has(primaryPath)) galleryMap.set(primaryPath, [])
-        galleryMap.get(primaryPath).push(imagePath)
-        altImagePaths.add(imagePath)
-      }
-    }
-  })
-  altImagePaths.forEach(p => uniqueImagePaths.delete(p))
-
-  // Remove other known duplicate images (extra angles not following the _B convention)
+  // Merge alternate product images — these are extra angles/photos of the same product
   const duplicateImagePaths = new Set([
     '/gelitup-content/product-images/NAIL ART/CUSHION GEL/cushion sponge 2.webp',
-    // Soak Off Gel Tips SHORT ALMOND has two files; suppress the oddly-named legacy one
-    '/gelitup-content/product-images/CONSUMABLES/SOAK OFF GEL TIPS/Soak off gel tips  .SHORT ALMOND.webp',
   ])
   duplicateImagePaths.forEach(p => uniqueImagePaths.delete(p))
 
@@ -2273,7 +2236,6 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     subcategoryItems.push({
       imageUrl: imagePath,
       name: formatCatalogueItemName(afterRoot),
-      galleryImages: galleryMap.get(imagePath) || [],
       colorFamily: category === 'COLORS'
         ? segments.length > 3
           ? segments[2]
@@ -2283,25 +2245,6 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
 
     categoryBucket.set(subcategory, subcategoryItems)
     grouped.set(category, categoryBucket)
-
-    // Cross-copy: 2026 NEW! 5-in-1 items also appear under BASES > 5IN1 SUPERIOR BASE
-    // so they show up in both the New Collections section and the regular Bases section
-    const subfolderToken = normalizeCatalogueToken(segments[1] || '')
-    if (sourceCategory === '2026 NEW!' && (subfolderToken.includes('5 IN 1') || subfolderToken.includes('5IN1'))) {
-      const basesBucket = grouped.get('BASES') || new Map()
-      const bases5in1Items = basesBucket.get('5IN1 SUPERIOR BASE') || []
-      bases5in1Items.push({ imageUrl: imagePath, name: formatCatalogueItemName(afterRoot) })
-      basesBucket.set('5IN1 SUPERIOR BASE', bases5in1Items)
-      grouped.set('BASES', basesBucket)
-    }
-    // Cross-copy: 2026 NEW! Brush on Builder items also appear under BASES > BRUSH ON BUILDER
-    if (sourceCategory === '2026 NEW!' && (subfolderToken.includes('BRUSH ON BUILDER') || subfolderToken.includes('BIAB'))) {
-      const basesBucket = grouped.get('BASES') || new Map()
-      const bobItems = basesBucket.get('BRUSH ON BUILDER') || []
-      bobItems.push({ imageUrl: imagePath, name: formatCatalogueItemName(afterRoot) })
-      basesBucket.set('BRUSH ON BUILDER', bobItems)
-      grouped.set('BASES', basesBucket)
-    }
   })
 
   return Array.from(grouped.entries())
@@ -3055,12 +2998,16 @@ function FullCataloguePage() {
   }, [quickCart])
 
   // Sync quickCart to Supabase draft_carts so admin can see abandoned carts
-  // NOTE: we intentionally do NOT delete the draft when quickCart empties —
-  // accidental clears would erase the backup. Deletion only on confirmed clear/submit.
   useEffect(() => {
     if (!isLoggedIn || !supabase) return
     const units = Object.values(quickCart).reduce((s, q) => s + Number(q || 0), 0)
-    if (units === 0) return // don't erase the Supabase draft on empty cart
+    if (units === 0) {
+      // Remove draft if cart is empty
+      supabase.auth.getUser().then(({ data }) => {
+        if (data?.user?.id) supabase.from('b2b_draft_carts').delete().eq('user_id', data.user.id).eq('source', 'catalogue').then(() => {})
+      })
+      return
+    }
     const timer = setTimeout(() => {
       supabase.auth.getUser().then(({ data }) => {
         if (!data?.user?.id) return
@@ -3259,16 +3206,6 @@ function FullCataloguePage() {
         const pnLookup = t => map.get(normalizeProductName(t))
         const aliasGroups = [
           { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-FBCLR'], target: 'Flexi Base Clear -HTF' },
-          { codes: ['CLASSIC BASE COAT', 'CLASSIC BASE COAT IMAGE'], target: 'Base Coat 15ml -HTF' },
-          // 700-series colour codes (image path GIUP-701.webp → normalised to '701')
-          { codes: ['701'], target: '70-1 Portside -HTF' },
-          { codes: ['702'], target: '70-2 Sea Breeze -HTF' },
-          { codes: ['703'], target: '70-3 Electric Stingray -HTF' },
-          { codes: ['704'], target: '70-4 Cape Of Storms -HTF' },
-          { codes: ['705'], target: '70-5 Hang Ten -HTF' },
-          { codes: ['706'], target: '70-6 Whale Watching -HTF' },
-          { codes: ['707'], target: '70-7 Hang 11 -HTF' },
-          { codes: ['708'], target: '70-8 Blue Bayou -HTF' },
           { codes: ['GIUP SBCCLR', 'GIUP-SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
           { codes: ['GIUP SBCMP', 'GIUP-SBCMP'], target: '5-in-1 Superior Base 15ml Milky Pink -HTF' },
           { codes: ['GIUP SBCPP', 'GIUP-SBCPP'], target: '5-in-1 Superior Base 15ml Pretty Pink -HTF' },
@@ -3283,47 +3220,9 @@ function FullCataloguePage() {
           { codes: ['GIUP SBCMW', 'GIUP-SBCMW'], target: '5-in-1 Superior Base 15ml Milky White -HTF' },
           { codes: ['GIUP SBCN', 'GIUP-SBCN'], target: '5-in-1 Superior Base 15ml Nude -HTF' },
           { codes: ['GIUP SBCSN', 'GIUP-SBCSN'], target: '5-IN-1 Superior Base 15ml Soft Nude -HTF' },
-          // 2026 NEW! 5-in-1 Serenity bases
-          { codes: ['GIUP SBLS', 'GIUP-SBLS'], target: '5-in-1 Superior Base 15ml Lemon Serenity -HTF' },
-          { codes: ['GIUP SBMS', 'GIUP-SBMS'], target: '5-in-1 Superior Base 15ml Mint Serenity -HTF' },
-          { codes: ['GIUP SBBLUE', 'GIUP-SBBLUE', 'GIUP SBBlue', 'GIUP-SBBlue'], target: '5-in-1 Superior Base 15ml Blue Serenity -HTF' },
-          { codes: ['GIUP SBPS', 'GIUP-SBPS'], target: '5-in-1 Superior Base 15ml Peach Serenity -HTF' },
-          { codes: ['GIUP SBPURS', 'GIUP-SBPURS'], target: '5-in-1 Superior Base 15ml Purple Serenity -HTF' },
-          // Brush on Builder (BOB) — acronym codes map to price-list entries
-          { codes: ['GIUP BOBCLR', 'GIUP-BOBCLR', 'BOBCLR'], target: 'Brush on Builder Gel Clear 15ml -HTF' },
-          { codes: ['GIUP BOBCOV', 'GIUP-BOBCOV', 'BOBCOV'], target: 'Brush on Builder Gel Cover 15ml -HTF' },
-          { codes: ['GIUP BOBPNK', 'GIUP-BOBPNK', 'BOBPNK'], target: 'Brush on Builder Gel Pink 15ml -HTF' },
-          { codes: ['GIUP BOBCRM', 'GIUP-BOBCRM', 'BOBCRM'], target: 'Brush on Builder Gel Creamy 15ml -HTF' },
-          { codes: ['GIUP BOBNUD', 'GIUP-BOBNUD', 'BOBNUD'], target: 'Brush on Builder Gel Nude 15ml -HTF' },
-          { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL', 'BOBPURGL'], target: 'Brush on Builder Gel Purple 15ml -HTF' },
-          { codes: ['GIUP BOBDS', 'GIUP-BOBDS', 'BOBDS'], target: 'Brush on Builder Gel Dusty Shimmer 15ml -HTF' },
-          { codes: ['GIUP BOBMILK', 'GIUP-BOBMILK', 'BOBMILK'], target: 'Brush on Builder Gel Milky 15ml -HTF' },
-          { codes: ['GIUP BOBLIL', 'GIUP-BOBLIL', 'BOBLIL'], target: 'Brush on Builder Gel Lilac 15ml -HTF' },
-          { codes: ['GIUP BOBBLPN', 'GIUP-BOBBLPN', 'BOBBLPN'], target: 'Brush on Builder Gel Blush Pink 15ml -HTF' },
-          { codes: ['GIUP BOBSTPN', 'GIUP-BOBSTPN', 'BOBSTPN'], target: 'Brush on Builder Gel Soft Pink 15ml -HTF' },
-          { codes: ['GIUP BOBGLPN', 'GIUP-BOBGLPN', 'BOBGLPN'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
-          { codes: ['GIUP BOBGLMG', 'GIUP-BOBGLMG', 'BOBGLMG'], target: 'Brush on Builder Gel Magenta Glitter 15ml -HTF' },
-          { codes: ['GIUP BOBPRL', 'GIUP-BOBPRL', 'BOBPRL'], target: 'Brush on Builder Gel Milky Glitter 15ml -HTF' },
-          { codes: ['GIUP BOBGLROS', 'GIUP-BOBGLROS', 'BOBGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
-          { codes: ['GIUP BOBGLSLM', 'GIUP-BOBGLSLM', 'BOBGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
-          // 2026 NEW! Brush on Builder
-          { codes: ['GIUP BOB BLUSH SORBET', 'GIUP BOB blush sorbet', 'GIUP-BOB-BLUSH-SORBET'], target: 'Brush on Builder Gel Blush Sorbet 15ml -HTF' },
-          { codes: ['GIUP BOB SKY SPRINKLE', 'GIUP BOB sky sprinkle', 'GIUP-BOB-SKY-SPRINKLE'], target: 'Brush on Builder Gel Sky Sprinkle 15ml -HTF' },
-          { codes: ['GIUP BOB BERRY STARDUST', 'GIUP BOB Berry stardust', 'GIUP-BOB-BERRY-STARDUST'], target: 'Brush on Builder Gel Berry Stardust 15ml -HTF' },
-          // Skinny Liner brushes
-          { codes: ['SKINNY LINER 5 7', 'skinny liner 5 7'], target: 'Skinny Liner brush 5-7' },
-          { codes: ['SKINNY LINER 9 11', 'skinny liner 9 11'], target: 'Skinny Liner brush 9-11' },
-          // Mirror nail art powders
-          { codes: ['MIRROR CLEAR', 'SP8001'], target: 'SP8001 Mirror Clear Powder' },
-          { codes: ['MIRROR X1', 'TR01'], target: 'TR01 Mirror X1 Powder' },
-          { codes: ['MIRROR X2', 'TR02'], target: 'TR02 Mirror X2 Powder' },
-          { codes: ['MIRROR X3', 'TR03'], target: 'TR03 Mirror X3 Powder' },
-          { codes: ['MIRROR X4', 'TR04'], target: 'TR04 Mirror X4 Powder' },
-          { codes: ['MIRROR X5', 'TR05'], target: 'TR05 Mirror X5 Powder' },
-          { codes: ['MIRROR X6', 'TR06'], target: 'TR06 Mirror X6 Powder' },
           { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
           { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
-          { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID', 'SUPERBOND WITHOUT ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
+          { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
           { codes: ['GIUP-SB-WITH-ACID', 'GIUP SB WITH ACID', 'SB WITH ACID'], target: 'Superbond Nail Dehydrator 11ml - with Acid -HTF' },
           { codes: ['ALMOND', 'DUAL FORMS ALMOND'], target: 'DUAL FORMS ALMOND' },
           { codes: ['BALLERINA', 'DUAL FORMS BALLERINA'], target: 'DUAL FORMS BALLERINA' },
@@ -3351,7 +3250,7 @@ function FullCataloguePage() {
           { codes: ['1280x1280_nail_bufer_100', '1280x1280 nail bufer 100'], target: 'Nail Files With Back Glue 100 Packet of 10' },
           { codes: ['1280x1280_nail_bufer_120', '1280x1280 nail bufer 120'], target: 'Nail Files With Back Glue 120 Packet of 10' },
           { codes: ['1280x1280_nail_bufer_180', '1280x1280 nail bufer 180'], target: 'Nail Files With Back Glue 180 Packet of 10' },
-          { codes: ['1280x1280_nail_bufer_metallic', '1280x1280 nail bufer metallic', 'Boat Shape metallic Nail Base', 'Boat-Shape-metallic-Nail-Base', 'BOAT SHAPE METALLIC NAIL BASE'], target: 'GIUP Boat Shape metallic Nail File' },
+          { codes: ['1280x1280_nail_bufer_metallic', '1280x1280 nail bufer metallic', 'Boat Shape metallic Nail Base', 'Boat-Shape-metallic-Nail-Base'], target: 'GIUP Boat Shape metallic Nail File' },
           { codes: ['1280x1280_buffer_100_120', '1280x1280 buffer 100 120', '100_120_file2', '100 120 file2'], target: 'GIUP Boat Shape Nail File 100/120 Purple Sponge' },
           { codes: ['1280x1280_buffer_180_180', '1280x1280 buffer 180 180', '180_180_file2', '180 180 file2'], target: 'Nail Files 180/180 Pink Sponge' },
           { codes: ['buffing block', 'BUFFING BLOCK', '\u0392uffing block', '\u0392uffing_block'], target: 'Nail Files 100/100' },
@@ -3371,17 +3270,16 @@ function FullCataloguePage() {
           { codes: ['3 IN 1 SHIMMER IRIDESCENT CLEAR'], target: '3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF' },
           { codes: ['3 IN 1 SHIMMER LIGHT LILAC'], target: '3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF' },
           { codes: ['3 IN 1 MARMALADE SHIMMER PINK'], target: '3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF' },
-          { codes: ['3 IN 1 PREMIUM CLEAR', '3IN 1 PREMIUM CLEAR', '3 IN 1 PREMIUM BUILDER GEL CLEAR'], target: 'Premium Builder Gel Clear 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM CLEAR', '3IN 1 PREMIUM CLEAR'], target: 'Premium Builder Gel Clear 40gr -HTF' },
           { codes: ['3IN 1 PREMIUM BUILDER GEL COVER', '3 IN 1 PREMIUM BUILDER GEL COVER'], target: 'Premium Builder Gel Cover 40gr -HTF' },
           { codes: ['3 IN 1 PREMIUM BUILDER GEL BLUSH'], target: 'Premium Builder Gel Blush 40gr -HTF' },
           { codes: ['3 IN 1 PREMIUM BUILDER GEL MILKY'], target: 'Premium Builder Gel Milky 40gr -HTF' },
           { codes: ['3 IN 1 PREMIUM BUILDER GEL NUDE'], target: 'Premium Builder Gel Nude 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GEL SHIMMER NUDE'], target: 'Premium Builder Gel Nude II 40gr -HTF' },
           { codes: ['3 IN 1 PREMIUM BUILDER GEL PEARLY NUDE'], target: 'Premium Builder Gel Pearly Nude 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GEL SHIMMER PINK', '3 IN 1 PREMIUM BUILDER GEL PEARLY PINK'], target: 'Premium Builder Gel Pearly Pink 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GELS PINK', '3 IN 1 PREMIUM BUILDER GEL PINK'], target: 'Premium Builder Gel Pink 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GELS WHITE', '3 IN 1 PREMIUM BUILDER GEL WHITE'], target: 'Premium Builder Gel White 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM PLUS', '3 IN 1.PREMIUM.PLUS', '3 IN 1 PREMIUM BUILDER GEL CLEAR PLUS'], target: 'Premium Plus Fiber Glass Builder Gel 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL PEARLY PINK'], target: 'Premium Builder Gel Pearly Pink 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GELS PINK'], target: 'Premium Builder Gel Pink 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GELS WHITE'], target: 'Premium Builder Gel White 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM PLUS', '3 IN 1.PREMIUM.PLUS'], target: 'Premium Plus Fiber Glass Builder Gel 40gr -HTF' },
           { codes: ['GIUP BOBCLR', 'GIUP-BOBCLR'], target: 'Brush on Builder Gel Clear 15ml -HTF' },
           { codes: ['GIUP BOBCOV', 'GIUP-BOBCOV'], target: 'Brush on Builder Gel Cover 15ml -HTF' },
           { codes: ['GIUP BOBPNK', 'GIUP-BOBPNK'], target: 'Brush on Builder Gel Pink 15ml -HTF' },
@@ -3486,25 +3384,6 @@ function FullCataloguePage() {
           { codes: ['MARBLE 16'], target: 'Marble-It by GIUP #16' },
           { codes: ['MARBLE 17'], target: 'Marble-It by GIUP #17' },
           { codes: ['MARBLE 18'], target: 'Marble-It by GIUP #18' },
-          // 3-in-1 / Premium Builder Gel — image filenames don't match price-list names so explicit aliases needed
-          { codes: ['3 IN 1 CLEAR', '3 in 1 clear', '3IN1CLEAR', '3in1clear', '3 IN 1 PREMIUM CLEAR', '3 in 1 premium clear', '3 IN 1 BUILDER GEL CLEAR', '3 in 1 builder gel clear'], target: '3-in-1 Builder Gel Clear 40g -HTF' },
-          { codes: ['3IN1COVER', '3in1cover', '3 IN 1 PREMIUM BUILDER GEL COVER', '3 in 1 premium builder gel cover', '3 IN 1 GELITUP PREMIUM BUILDER GEL COVER', '3 in 1 gelitup premium builder gel cover', '3IN 1 PREMIUM BUILDER GEL COVER', '3in 1 premium builder gel cover'], target: 'Premium Builder Gel Cover 40gr -HTF' },
-          { codes: ['3IN1PINK', '3in1pink', '3 IN 1 PREMIUM BUILDER GELS PINK', '3 in 1 premium builder gels pink', '3 IN 1 GELITUP PREMIUM BUILDER GEL PINK', '3 in 1 gelitup premium builder gel pink'], target: 'Premium Builder Gel Pink 40gr -HTF' },
-          { codes: ['3 IN 1 GELITUP PREMIUM BUILDER GEL CLEAR', '3 in 1 gelitup premium builder gel clear', '3 IN 1 PREMIUM BUILDER GEL CLEAR', '3 in 1 premium builder gel clear'], target: 'Premium Builder Gel Clear 40gr -HTF' },
-          { codes: ['3 IN 1 GELITUP PREMIUM BUILDER GEL BLUSH', '3 in 1 gelitup premium builder gel blush', '3 IN 1 PREMIUM BUILDER GEL BLUSH', '3 in 1 premium builder gel blush'], target: 'Premium Builder Gel Blush 40gr -HTF' },
-          { codes: ['3 IN 1 GELITUP PREMIUM BUILDER GEL MILKY', '3 in 1 gelitup premium builder gel milky', '3 IN 1 PREMIUM BUILDER GEL MILKY', '3 in 1 premium builder gel milky'], target: 'Premium Builder Gel Milky 40gr -HTF' },
-          { codes: ['3 IN 1 GELITUP PREMIUM BUILDER GEL NUDE', '3 in 1 gelitup premium builder gel nude', '3 IN 1 PREMIUM BUILDER GEL NUDE', '3 in 1 premium builder gel nude'], target: 'Premium Builder Gel Nude 40gr -HTF' },
-          { codes: ['3 IN 1 GELITUP PREMIUM BUILDER GEL WHITE', '3 in 1 gelitup premium builder gel white', '3 IN 1 PREMIUM BUILDER GELS WHITE', '3 in 1 premium builder gels white'], target: 'Premium Builder Gel White 40gr -HTF' },
-          { codes: ['3 IN 1 GELITUP PREMIUM BUILDER GEL CLEAR PLUS', '3 in 1 gelitup premium builder gel clear plus', '3 IN 1 PREMIUM PLUS', '3 in 1.premium.plus', '3 IN 1.PREMIUM.PLUS'], target: 'Premium Plus Fiber Glass Builder Gel 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GEL PEARLY NUDE', '3 in 1 premium builder gel pearly nude'], target: 'Premium Builder Gel Pearly Nude 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GEL PEARLY PINK', '3 in 1 premium builder gel pearly pink', '3 IN 1 PREMIUM BUILDER GEL SHIMMER PINK', '3 in 1 premium builder gel shimmer pink'], target: 'Premium Builder Gel Pearly Pink 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GEL SHIMMER NUDE', '3 in 1 premium builder gel shimmer nude'], target: 'Premium Builder Gel Pearly Nude 40gr -HTF' },
-          { codes: ['3 IN 1 SHIMMER COVER', '3 in 1 shimmer cover', '3 IN 1 BUILDER GEL SHIMMER COVER', '3 in 1 builder gel shimmer cover'], target: '3-in-1 Shimmery Builder Gel 40g Cover -HTF' },
-          { codes: ['3 IN 1 SHIMMER IRIDESCENT CLEAR', '3 in 1 shimmer iridescent clear', '3 IN 1 BUILDER GEL IRIDESCENT SHIMMER CLEAR', '3 in 1 builder gel iridescent shimmer clear'], target: '3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF' },
-          { codes: ['3 IN 1 SHIMMER LIGHT LILAC', '3 in 1 shimmer light lilac', '3 IN 1 BUILDER GEL SHIMMER LILAC', '3 in 1 builder gel shimmer lilac'], target: '3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF' },
-          { codes: ['3 IN 1 MARMALADE SHIMMER PINK', '3 in 1 marmalade shimmer pink', '3 IN 1 BUILDER GEL MARMELADE SHIMMER PINK', '3 in 1 builder gel marmelade shimmer pink'], target: '3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF' },
-          { codes: ['3 IN 1 BUILDER GEL COVER', '3 in 1 builder gel cover'], target: '3-in-1 Builder Gel Cover 40g -HTF' },
-          { codes: ['3 IN 1 BUILDER GEL PINK', '3 in 1 builder gel pink'], target: '3-in-1 Builder Gel Pink 40g -HTF' },
           { codes: ['SUGARY GLITTER 01'], target: 'Sugary Glitter pigment 3gr 01 -HTF' },
           { codes: ['SUGARY GLITTER 02'], target: 'Sugary Glitter pigment 3gr 02 -HTF' },
           { codes: ['SUGARY GLITTER 03'], target: 'Sugary Glitter pigment 3gr 03 -HTF' },
@@ -3675,41 +3554,6 @@ function FullCataloguePage() {
           { codes: ['apron', 'APRON'], target: 'Apron Black With Logo' },
           { codes: ['nailsticks clear scaled 1', 'nailsticks_clear-scaled-1'], target: 'Nail sticks clear with ring' },
           { codes: ['cushion sponge', 'cushion sponge 2', 'CUSHION SPONGE'], target: 'Ombre sponge' },
-          // Brush on Builder — new filename-derived normalised names (Brush-On-Builder-biab*.webp)
-          { codes: ['BRUSH ON BUILDER BIABCLR'], target: 'Brush on Builder Gel Clear 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABCOV'], target: 'Brush on Builder Gel Cover 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABPNK'], target: 'Brush on Builder Gel Pink 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABCRM'], target: 'Brush on Builder Gel Creamy 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABNUD'], target: 'Brush on Builder Gel Nude 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABPURGL'], target: 'Brush on Builder Gel Purple 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABDS'], target: 'Brush on Builder Gel Dusty Shimmer 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABMILK'], target: 'Brush on Builder Gel Milky 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABLIL'], target: 'Brush on Builder Gel Lilac 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABBLPN'], target: 'Brush on Builder Gel Blush Pink 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABSTPN'], target: 'Brush on Builder Gel Soft Pink 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABGLPN'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABGLMG'], target: 'Brush on Builder Gel Magenta Glitter 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABPRL'], target: 'Brush on Builder Gel Milky Glitter 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIAB SKY SPRINKLE 1'], target: 'Brush on Builder Gel Sky Sprinkle 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIAB BLUSH SORBET'], target: 'Brush on Builder Gel Blush Sorbet 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIAB BERRY STARDUST'], target: 'Brush on Builder Gel Berry Stardust 15ml -HTF' },
-          // 5-in-1 Superior Base — new filename-derived normalised names (5-in-1-GIUP-SBC*.webp)
-          { codes: ['5 IN 1 SBCBP'], target: '5-in-1 Superior Base 15ml Baby Pink -HTF' },
-          { codes: ['5 IN 1 SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
-          { codes: ['5 IN 1 SBCCP'], target: '5-in-1 Superior Base 15ml Candy Pink -HTF' },
-          { codes: ['5 IN 1 SBCMP'], target: '5-in-1 Superior Base 15ml Milky Pink -HTF' },
-          { codes: ['5 IN 1 SBCPP'], target: '5-in-1 Superior Base 15ml Pretty Pink -HTF' },
-          { codes: ['5 IN 1 SBCSP'], target: '5-in-1 Superior Base 15ml Sweet Pink -HTF' },
-          { codes: ['5 IN 1 SBCGLPI'], target: '5-IN-1 Superior Base 15ml Glittery Pink -HTF' },
-          { codes: ['5 IN 1 SBCGP'], target: '5-in-1 Superior Base 15ml Glittery Peach -HTF' },
-          { codes: ['5 IN 1 SBCIRPI'], target: '5-IN-1 Superior Base 15ml Irridecent Pink -HTF' },
-          { codes: ['5 IN 1 SBCIMF'], target: '5-in-1 Superior Base 15ml Iridescent Milky Flakes -HTF' },
-          { codes: ['5 IN 1 SBCCLI'], target: '5-in-1 Superior Base 15ml Lilac -HTF' },
-          { codes: ['5 IN 1 SBCMW'], target: '5-in-1 Superior Base 15ml Milky White -HTF' },
-          { codes: ['5 IN 1 SBCN'], target: '5-in-1 Superior Base 15ml Nude -HTF' },
-          { codes: ['5 IN 1 SBCSN'], target: '5-IN-1 Superior Base 15ml Soft Nude -HTF' },
         ]
         for (const { codes, target } of aliasGroups) {
           const entry = pnLookup(target)
@@ -4596,7 +4440,7 @@ function FullCataloguePage() {
                 id="catalog-search"
                 type="text"
                 value={searchQuery}
-                onChange={(event) => { setSearchQuery(event.target.value); if (event.target.value) { setActiveCategory(''); setActiveSubcategory(''); } }}
+                onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Search product name, code, or subcategory..."
                 className="w-full rounded-[12px] border border-[#4A4A4A]/35 bg-white px-3 py-2 text-base text-black outline-none ring-fuchsia-500/20 focus:ring"
               />
@@ -4697,7 +4541,14 @@ function FullCataloguePage() {
                           <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                           <p className="break-words text-[11px] font-light text-black/55">{itemCode}</p>
                         </div>
-                        <NavLink to={isLoggedIn ? '/portal/buy' : '/become-distributor'} className="shrink-0 rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-xs font-semibold text-white transition duration-200 hover:bg-fuchsia-700">Buy Now</NavLink>
+                        <a
+                          href={SHOPIFY_SHOP_URL}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="shrink-0 rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-fuchsia-500"
+                        >
+                          Buy Now
+                        </a>
                       </div>
                     )
                   }
@@ -4722,7 +4573,14 @@ function FullCataloguePage() {
                           <p className="break-words text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
                         </div>
                         <div className="mt-auto pt-3">
-                          <NavLink to={isLoggedIn ? '/portal/buy' : '/become-distributor'} className="block w-full rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-center text-xs font-semibold text-white transition duration-200 hover:bg-fuchsia-700">Buy Now</NavLink>
+                          <a
+                            href={SHOPIFY_SHOP_URL}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex w-full items-center justify-center rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
+                          >
+                            Buy Now
+                          </a>
                         </div>
                       </div>
                     </article>
@@ -4741,7 +4599,7 @@ function FullCataloguePage() {
                   <div className="mx-auto max-w-5xl px-4">
                     <div className="rounded-t-xl border border-b-0 border-fuchsia-500/30 bg-white shadow-lg">
                       <div className="max-h-64 space-y-2 overflow-y-auto p-4">
-                        {Object.entries(quickCart).filter(([, q]) => q > 0).sort(([kA], [kB]) => compareProductCodes(kA.split('::')[1] || '', kB.split('::')[1] || '')).map(([key, cartQty]) => {
+                        {Object.entries(quickCart).filter(([, q]) => q > 0).map(([key, cartQty]) => {
                           const [name, code] = key.split('::')
                           const price = lookupCataloguePrice(name, code)
                           const lineTotal = price != null ? Number(price) * cartQty : null
@@ -7267,6 +7125,14 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
   const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
   const portalType = loginParams.get('portal') || 'b2b' // 'b2b' | 'distributor'
 
+  // B2B salon ordering has moved to the Shopify store — redirect non-distributor logins
+  useEffect(() => {
+    if (portalType === 'b2b' && !isPasswordResetFlow) {
+      window.location.href = SHOPIFY_SHOP_URL
+    }
+  }, [portalType, isPasswordResetFlow])
+
+  if (portalType === 'b2b' && !isPasswordResetFlow) return null
   // Reliable recovery detection: the PASSWORD_RECOVERY auth event sets pendingRecoverySession
   // (URL-based ?code= detection is unreliable — the SDK consumes the code before React renders)
   const isPasswordResetFlow = pendingRecoverySession
@@ -8011,6 +7877,17 @@ function CheckoutPage() {
           const words = new Set(normalizeSkuCode(name).split(/\s+/).filter(w => w.length >= 4))
           if (words.size >= 2) wIdx.push({ words, entry })
         }
+        const pnLookup = (target) => map.get(normalizeProductName(target))
+        for (const { codes, target } of PRODUCT_ALIAS_GROUPS) {
+          const entry = pnLookup(target)
+          if (!entry) continue
+          for (const code of codes) {
+            const normalizedCode = normalizeSkuCode(code)
+            if (normalizedCode && !map.has(normalizedCode)) {
+              map.set(normalizedCode, entry)
+            }
+          }
+        }
         if (mounted) { setPriceMap(map); setWordIndex(wIdx) }
       } catch {}
     }
@@ -8024,11 +7901,15 @@ function CheckoutPage() {
     if (byName?.price != null) return byName.price
     const byCode = priceMap.get(normalizeSkuCode(itemCode))
     if (byCode?.price != null) return byCode.price
+    const byFullName = priceMap.get(normalizeSkuCode(itemName))
+    if (byFullName?.price != null) return byFullName.price
     // Strip GIUP prefix and try the bare code (e.g. "GIUP 15" → "15", "GIUP BTO02" → "BTO02")
     const stripped = normalizeSkuCode(itemCode).replace(/^GIUP[-\s]+/, '')
     if (stripped !== normalizeSkuCode(itemCode)) {
       const byStripped = priceMap.get(stripped)
       if (byStripped?.price != null) return byStripped.price
+      const byStripped2 = priceMap.get(stripped.replace(/^0+(\d)/, '$1'))
+      if (byStripped2?.price != null) return byStripped2.price
     }
     // Try the full GIUP code as-is (map may have "GIUP 15" key)
     const byGiup = priceMap.get(normalizeSkuCode(itemCode))
@@ -8038,12 +7919,66 @@ function CheckoutPage() {
     return null
   }, [priceMap, wordIndex])
 
+  const resolvePriceEntry = useCallback((itemName = '', itemCode = '') => {
+    if (!priceMap) return null
+
+    const byName = priceMap.get(normalizeProductName(itemName))
+    if (byName?.price != null) return byName
+
+    const byCode = priceMap.get(normalizeSkuCode(itemCode))
+    if (byCode?.price != null) return byCode
+
+    const byFullName = priceMap.get(normalizeSkuCode(itemName))
+    if (byFullName?.price != null) return byFullName
+
+    const stripped = normalizeSkuCode(itemCode).replace(/^GIUP[-\s]+/, '')
+    if (stripped !== normalizeSkuCode(itemCode)) {
+      const byStripped = priceMap.get(stripped)
+      if (byStripped?.price != null) return byStripped
+      const byStripped2 = priceMap.get(stripped.replace(/^0+(\d)/, '$1'))
+      if (byStripped2?.price != null) return byStripped2
+    }
+
+    const fuzzy = fuzzyPriceLookup(itemCode, itemName, wordIndex)
+    if (fuzzy?.price != null) return fuzzy
+
+    return null
+  }, [priceMap, wordIndex])
+
   const cartEntries = useMemo(() =>
     Object.entries(cart).filter(([, q]) => q > 0).map(([key, qty]) => {
       const [name, code] = key.split('::')
       const price = lookupPrice(name, code)
       return { key, name, code, qty, price, lineTotal: price != null ? Number(price) * qty : null }
-    }).sort((a, b) => compareProductCodes(a.code, b.code)), [cart, lookupPrice])
+    }), [cart, lookupPrice])
+
+  useEffect(() => {
+    if (!priceMap) return
+    setCart((current) => {
+      let changed = false
+      const next = {}
+      for (const [key, qty] of Object.entries(current)) {
+        const quantity = Number(qty || 0)
+        if (quantity <= 0) {
+          changed = true
+          continue
+        }
+        const [name, code = ''] = key.split('::')
+        const resolved = resolvePriceEntry(name, code)
+        if (!resolved || resolved.price == null) {
+          changed = true
+          continue
+        }
+
+        const canonicalName = String(resolved.name || name || '').trim() || String(name || '').trim()
+        const canonicalCode = normalizeSkuCode(code) || normalizeSkuCode(canonicalName) || 'SKU'
+        const canonicalKey = `${canonicalName}::${canonicalCode}`
+        if (canonicalKey !== key) changed = true
+        next[canonicalKey] = Number(next[canonicalKey] || 0) + quantity
+      }
+      return changed ? next : current
+    })
+  }, [priceMap, resolvePriceEntry])
 
   const cartTotal = useMemo(() => cartEntries.reduce((s, e) => s + (e.lineTotal || 0), 0), [cartEntries])
   const cartUnits = useMemo(() => cartEntries.reduce((s, e) => s + e.qty, 0), [cartEntries])
@@ -9728,9 +9663,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const location = useLocation()
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
-  const [oosKeys, setOosKeys] = useState(new Set())
   const [isLoadingFeed, setIsLoadingFeed] = useState(false)
-  const [justSaved, setJustSaved] = useState(false)
   const [feedMessage, setFeedMessage] = useState('Live product feed not loaded yet.')
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
   const [checkoutMessage, setCheckoutMessage] = useState('')
@@ -9749,26 +9682,16 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [packageTier, setPackageTier] = useState('Silver')
   const [draftInvoice, setDraftInvoice] = useState('')
   const [isReordering, setIsReordering] = useState(false)
-  const [dismissedTechnicalUpsell, _setDimTech] = useState(() => localStorage.getItem('giup_ud_tech') === 'true')
-  const setDismissedTechnicalUpsell = (v) => { if (v) localStorage.setItem('giup_ud_tech', 'true'); _setDimTech(v) }
-  const [dismissedMagnetUpsell, _setDimMagnet] = useState(() => localStorage.getItem('giup_ud_magnet') === 'true')
-  const setDismissedMagnetUpsell = (v) => { if (v) localStorage.setItem('giup_ud_magnet', 'true'); _setDimMagnet(v) }
-  const [dismissedSuperbondUpsell, _setDimSB] = useState(() => localStorage.getItem('giup_ud_superbond') === 'true')
-  const setDismissedSuperbondUpsell = (v) => { if (v) localStorage.setItem('giup_ud_superbond', 'true'); _setDimSB(v) }
-  const [dismissedCleanserUpsell, _setDimCleanser] = useState(() => localStorage.getItem('giup_ud_cleanser') === 'true')
-  const setDismissedCleanserUpsell = (v) => { if (v) localStorage.setItem('giup_ud_cleanser', 'true'); _setDimCleanser(v) }
-  const [dismissedSynthoUpsell, _setDimSyntho] = useState(() => localStorage.getItem('giup_ud_syntho') === 'true')
-  const setDismissedSynthoUpsell = (v) => { if (v) localStorage.setItem('giup_ud_syntho', 'true'); _setDimSyntho(v) }
-  const [dismissedTipsBaseUpsell, _setDimTipsBase] = useState(() => localStorage.getItem('giup_ud_tipsbase') === 'true')
-  const setDismissedTipsBaseUpsell = (v) => { if (v) localStorage.setItem('giup_ud_tipsbase', 'true'); _setDimTipsBase(v) }
-  const [dismissedLiquidPolygel5in1Upsell, _setDimLPG] = useState(() => localStorage.getItem('giup_ud_lpg5in1') === 'true')
-  const setDismissedLiquidPolygel5in1Upsell = (v) => { if (v) localStorage.setItem('giup_ud_lpg5in1', 'true'); _setDimLPG(v) }
-  const [dismissedDualFormsUpsell, _setDimDual] = useState(() => localStorage.getItem('giup_ud_dual') === 'true')
-  const setDismissedDualFormsUpsell = (v) => { if (v) localStorage.setItem('giup_ud_dual', 'true'); _setDimDual(v) }
-  const [dismissedBuilderGelSuperbondUpsell, _setDimBuilderSB] = useState(() => localStorage.getItem('giup_ud_buildersb') === 'true')
-  const setDismissedBuilderGelSuperbondUpsell = (v) => { if (v) localStorage.setItem('giup_ud_buildersb', 'true'); _setDimBuilderSB(v) }
+  const [dismissedTechnicalUpsell, setDismissedTechnicalUpsell] = useState(false)
+  const [dismissedMagnetUpsell, setDismissedMagnetUpsell] = useState(false)
+  const [dismissedSuperbondUpsell, setDismissedSuperbondUpsell] = useState(false)
+  const [dismissedCleanserUpsell, setDismissedCleanserUpsell] = useState(false)
+  const [dismissedSynthoUpsell, setDismissedSynthoUpsell] = useState(false)
+  const [dismissedTipsBaseUpsell, setDismissedTipsBaseUpsell] = useState(false)
+  const [dismissedLiquidPolygel5in1Upsell, setDismissedLiquidPolygel5in1Upsell] = useState(false)
+  const [dismissedDualFormsUpsell, setDismissedDualFormsUpsell] = useState(false)
+  const [dismissedBuilderGelSuperbondUpsell, setDismissedBuilderGelSuperbondUpsell] = useState(false)
   const [upsellModal, setUpsellModal] = useState(null)
-  const [upsellModalQty, setUpsellModalQty] = useState(1)
   const [includeProfessionalBasePack, setIncludeProfessionalBasePack] = useState(false)
   const [showAddOnRemovedToast, setShowAddOnRemovedToast] = useState(false)
   const [showOrderConfetti, setShowOrderConfetti] = useState(false)
@@ -9881,42 +9804,13 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   useEffect(() => {
     if (!hasSupabaseConfig || !supabase) return
-    supabase.auth.getUser().then(async ({ data }) => {
+    supabase.auth.getUser().then(({ data }) => {
       const uid = data?.user?.id
       if (!uid) return
       cartUserIdRef.current = uid
       const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${uid}`
-      let saved = null
-      try { saved = JSON.parse(localStorage.getItem(key) || 'null') } catch { /* ignore */ }
-
-      // If localStorage is empty (e.g. cache cleared), restore from Supabase draft
-      if (!saved && supabase) {
-        try {
-          const { data: draft } = await supabase
-            .from('b2b_draft_carts')
-            .select('items, total_units, updated_at')
-            .eq('user_id', uid)
-            .eq('source', 'portal')
-            .maybeSingle()
-          if (draft?.items) {
-            const products = draft.items.products || []
-            const packages = draft.items.packages || []
-            if (products.length || packages.length) {
-              const restoredCodes = products.map(p => p.code).filter(Boolean)
-              const restoredQtys = Object.fromEntries(products.map(p => [p.code, p.qty || 1]))
-              const restoredPkgs = packages
-              if (restoredCodes.length) setSelectedCodes(restoredCodes)
-              if (Object.keys(restoredQtys).length) setItemQtys(restoredQtys)
-              if (restoredPkgs.length) setPackageCartItems(restoredPkgs)
-              // Also write back to localStorage so subsequent loads are fast
-              localStorage.setItem(key, JSON.stringify({ selectedCodes: restoredCodes, itemQtys: restoredQtys, packageCartItems: restoredPkgs, savedAt: Date.now() }))
-              return // restored from Supabase, skip localStorage path
-            }
-          }
-        } catch { /* ignore draft restore errors */ }
-      }
-
       try {
+        const saved = JSON.parse(localStorage.getItem(key) || 'null')
         if (!saved) return
         if (Array.isArray(saved.selectedCodes) && saved.selectedCodes.length) setSelectedCodes(saved.selectedCodes)
         if (saved.itemQtys && typeof saved.itemQtys === 'object') setItemQtys(saved.itemQtys)
@@ -9993,15 +9887,15 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   }, [selectedCodes, itemQtys, packageCartItems])
 
   // Sync portal cart to Supabase draft_carts so admin can see abandoned carts
-  // NOTE: we intentionally do NOT delete the draft when the cart hits zero here —
-  // that would erase the backup if the user accidentally clears the order.
-  // Deletion only happens in the confirmed clear handler and on successful submit.
   useEffect(() => {
     if (!supabase) return
     const uid = cartUserIdRef.current
     if (!uid) return
     const totalUnitsForDraft = selectedCodes.reduce((s, c) => s + (itemQtys[c] || 1), 0) + packageCartItems.reduce((s, i) => s + (i.qty || 0), 0)
-    if (totalUnitsForDraft === 0) return // don't erase the Supabase draft on empty cart
+    if (totalUnitsForDraft === 0) {
+      supabase.from('b2b_draft_carts').delete().eq('user_id', uid).eq('source', 'portal').then(() => {})
+      return
+    }
     const timer = setTimeout(() => {
       supabase.auth.getUser().then(({ data }) => {
         if (!data?.user?.id) return
@@ -10408,12 +10302,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   }, [packageCartItems, selectedCodes])
 
   const hasCleanserInCart = useMemo(() => {
-    const isLiquidCleaner = (t) => t.includes('CLEANSER') || t.includes('ALL IN ONE LIQUID') || t.includes('ALL_IN_ONE_LIQUID')
     if (selectedCodes.some((code) => {
       const t = normalizeCatalogueToken(code)
-      return isLiquidCleaner(t) || isLiquidCleaner(normalizeCatalogueToken(catalogBySku.get(normalizeSkuCode(code))?.name || ''))
+      return t.includes('CLEANSER') || normalizeCatalogueToken(catalogBySku.get(normalizeSkuCode(code))?.name || '').includes('CLEANSER')
     })) return true
-    return packageCartItems.some((item) => isLiquidCleaner(normalizeCatalogueToken(item?.name || item?.code || '')))
+    return packageCartItems.some((item) => normalizeCatalogueToken(item?.name || item?.code || '').includes('CLEANSER'))
   }, [catalogBySku, packageCartItems, selectedCodes])
 
   const shouldShowCleanserUpsell = hasWotcInCart && !hasCleanserInCart
@@ -10501,7 +10394,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   [products, hasSuperbondSignal])
 
   const cleanserUpsellProduct = useMemo(() =>
-    products.find(p => normalizeCatalogueToken(p.name || '').includes('ALL IN ONE LIQUID')),
+    products.find(p => normalizeCatalogueToken(p.name || '').includes('CLEANSER') && p.category === 'LIQUIDS'),
   [products])
 
   const fiveIn1ClearProduct = useMemo(() =>
@@ -10569,10 +10462,45 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     [packagePreviewItems, packagePreviewVisibleCount],
   )
 
-  // Reset qty stepper whenever the upsell modal opens a new product
   useEffect(() => {
-    setUpsellModalQty(1)
-  }, [upsellModal?.product?.code])
+    if (!shouldShowTechnicalUpsellToast) {
+      setDismissedTechnicalUpsell(false)
+    }
+  }, [shouldShowTechnicalUpsellToast])
+
+  useEffect(() => {
+    if (!shouldShowMagnetUpsellToast) {
+      setDismissedMagnetUpsell(false)
+    }
+  }, [shouldShowMagnetUpsellToast])
+
+  useEffect(() => {
+    if (!shouldShowSuperbondUpsell) setDismissedSuperbondUpsell(false)
+  }, [shouldShowSuperbondUpsell])
+
+  useEffect(() => {
+    if (!shouldShowBuilderGelSuperbondUpsell) setDismissedBuilderGelSuperbondUpsell(false)
+  }, [shouldShowBuilderGelSuperbondUpsell])
+
+  useEffect(() => {
+    if (!shouldShowCleanserUpsell) setDismissedCleanserUpsell(false)
+  }, [shouldShowCleanserUpsell])
+
+  useEffect(() => {
+    if (!shouldShowSynthoUpsell) setDismissedSynthoUpsell(false)
+  }, [shouldShowSynthoUpsell])
+
+  useEffect(() => {
+    if (!shouldShowTipsBaseUpsell) setDismissedTipsBaseUpsell(false)
+  }, [shouldShowTipsBaseUpsell])
+
+  useEffect(() => {
+    if (!shouldShowLiquidPolygel5in1Upsell) setDismissedLiquidPolygel5in1Upsell(false)
+  }, [shouldShowLiquidPolygel5in1Upsell])
+
+  useEffect(() => {
+    if (!shouldShowDualFormsUpsell) setDismissedDualFormsUpsell(false)
+  }, [shouldShowDualFormsUpsell])
 
   useEffect(() => {
     let mounted = true
@@ -10710,19 +10638,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['GIUP SBCMW', 'GIUP-SBCMW'], target: '5-in-1 Superior Base 15ml Milky White -HTF' },
           { codes: ['GIUP SBCN', 'GIUP-SBCN'], target: '5-in-1 Superior Base 15ml Nude -HTF' },
           { codes: ['GIUP SBCSN', 'GIUP-SBCSN'], target: '5-IN-1 Superior Base 15ml Soft Nude -HTF' },
-          { codes: ['CLASSIC BASE COAT', 'CLASSIC BASE COAT IMAGE'], target: 'Base Coat 15ml -HTF' },
-          // 700-series colour codes (image path GIUP-701.webp → normalised to '701')
-          { codes: ['701'], target: '70-1 Portside -HTF' },
-          { codes: ['702'], target: '70-2 Sea Breeze -HTF' },
-          { codes: ['703'], target: '70-3 Electric Stingray -HTF' },
-          { codes: ['704'], target: '70-4 Cape Of Storms -HTF' },
-          { codes: ['705'], target: '70-5 Hang Ten -HTF' },
-          { codes: ['706'], target: '70-6 Whale Watching -HTF' },
-          { codes: ['707'], target: '70-7 Hang 11 -HTF' },
-          { codes: ['708'], target: '70-8 Blue Bayou -HTF' },
           { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
           { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
-          { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID', 'SUPERBOND WITHOUT ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
+          { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
           { codes: ['GIUP-SB-WITH-ACID', 'GIUP SB WITH ACID', 'SB WITH ACID'], target: 'Superbond Nail Dehydrator 11ml - with Acid -HTF' },
           // Dual form / nail tip shapes (image map uses bare shape names)
           { codes: ['ALMOND', 'DUAL FORMS ALMOND'], target: 'DUAL FORMS ALMOND' },
@@ -10754,7 +10672,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['1280x1280_nail_bufer_100', '1280x1280 nail bufer 100', 'Nail Files With Back Glue 100 Packet of 10'], target: 'Nail Files With Back Glue 100 Packet of 10' },
           { codes: ['1280x1280_nail_bufer_120', '1280x1280 nail bufer 120', 'Nail Files With Back Glue 120 Packet of 10'], target: 'Nail Files With Back Glue 120 Packet of 10' },
           { codes: ['1280x1280_nail_bufer_180', '1280x1280 nail bufer 180', 'Nail Files With Back Glue 180 Packet of 10'], target: 'Nail Files With Back Glue 180 Packet of 10' },
-          { codes: ['1280x1280_nail_bufer_metallic', '1280x1280 nail bufer metallic', 'Boat Shape metallic Nail Base', 'Boat-Shape-metallic-Nail-Base', 'BOAT SHAPE METALLIC NAIL BASE'], target: 'GIUP Boat Shape metallic Nail File' },
+          { codes: ['1280x1280_nail_bufer_metallic', '1280x1280 nail bufer metallic', 'Boat Shape metallic Nail Base', 'Boat-Shape-metallic-Nail-Base'], target: 'GIUP Boat Shape metallic Nail File' },
           { codes: ['1280x1280_buffer_100_120', '1280x1280 buffer 100 120', '100_120_file2', '100 120 file2', 'Nail Files Buffer 100 180 Purple Sponge', 'Nail Files Buffer 100-180 Purple Sponge'], target: 'GIUP Boat Shape Nail File 100/120 Purple Sponge' },
           { codes: ['1280x1280_buffer_180_180', '1280x1280 buffer 180 180', '180_180_file2', '180 180 file2', 'Nail Files Buffer 180 180 Pink Sponge', 'Nail Files Buffer 180-180 Pink Sponge'], target: 'Nail Files 180/180 Pink Sponge' },
           { codes: ['?uffing_block', '?uffing block', 'buffing block', 'BUFFING BLOCK', '\u0392uffing block', '\u0392uffing_block'], target: 'Nail Files 100/100' },
@@ -10770,25 +10688,24 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['MIRROR X5', 'TR 5', 'TR5'], target: 'TR05 Mirror X5 Powder' },
           { codes: ['MIRROR X6', 'TR 6', 'TR6'], target: 'TR06 Mirror X6 Powder' },
           // 3-in-1 Builder Gel
-          { codes: ['3 IN 1 CLEAR', '3IN1CLEAR', '3 IN 1 BUILDER GEL CLEAR'], target: '3-in-1 Builder Gel Clear 40g -HTF' },
-          { codes: ['3IN1COVER', '3 IN 1 BUILDER GEL COVER'], target: '3-in-1 Builder Gel Cover 40g -HTF' },
-          { codes: ['3IN1PINK', '3 IN 1 BUILDER GEL PINK'], target: '3-in-1 Builder Gel Pink 40g -HTF' },
-          { codes: ['3 IN 1 SHIMMER COVER', '3 IN 1 BUILDER GEL SHIMMER COVER'], target: '3-in-1 Shimmery Builder Gel 40g Cover -HTF' },
-          { codes: ['3 IN 1 SHIMMER IRIDESCENT CLEAR', '3 IN 1 BUILDER GEL IRIDESCENT SHIMMER CLEAR'], target: '3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF' },
-          { codes: ['3 IN 1 SHIMMER LIGHT LILAC', '3 IN 1 BUILDER GEL SHIMMER LILAC'], target: '3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF' },
-          { codes: ['3 IN 1 MARMALADE SHIMMER PINK', '3 IN 1 BUILDER GEL MARMELADE SHIMMER PINK'], target: '3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF' },
+          { codes: ['3 IN 1 CLEAR', '3IN1CLEAR'], target: '3-in-1 Builder Gel Clear 40g -HTF' },
+          { codes: ['3IN1COVER'], target: '3-in-1 Builder Gel Cover 40g -HTF' },
+          { codes: ['3IN1PINK'], target: '3-in-1 Builder Gel Pink 40g -HTF' },
+          { codes: ['3 IN 1 SHIMMER COVER'], target: '3-in-1 Shimmery Builder Gel 40g Cover -HTF' },
+          { codes: ['3 IN 1 SHIMMER IRIDESCENT CLEAR'], target: '3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF' },
+          { codes: ['3 IN 1 SHIMMER LIGHT LILAC'], target: '3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF' },
+          { codes: ['3 IN 1 MARMALADE SHIMMER PINK'], target: '3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF' },
           // Premium Builder Gel
-          { codes: ['3 IN 1 PREMIUM CLEAR', '3IN 1 PREMIUM CLEAR', '3 IN 1 PREMIUM BUILDER GEL CLEAR'], target: 'Premium Builder Gel Clear 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM CLEAR', '3IN 1 PREMIUM CLEAR'], target: 'Premium Builder Gel Clear 40gr -HTF' },
           { codes: ['3IN 1 PREMIUM BUILDER GEL COVER', '3 IN 1 PREMIUM BUILDER GEL COVER'], target: 'Premium Builder Gel Cover 40gr -HTF' },
           { codes: ['3 IN 1 PREMIUM BUILDER GEL BLUSH'], target: 'Premium Builder Gel Blush 40gr -HTF' },
           { codes: ['3 IN 1 PREMIUM BUILDER GEL MILKY'], target: 'Premium Builder Gel Milky 40gr -HTF' },
           { codes: ['3 IN 1 PREMIUM BUILDER GEL NUDE'], target: 'Premium Builder Gel Nude 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GEL SHIMMER NUDE'], target: 'Premium Builder Gel Nude II 40gr -HTF' },
           { codes: ['3 IN 1 PREMIUM BUILDER GEL PEARLY NUDE'], target: 'Premium Builder Gel Pearly Nude 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GEL SHIMMER PINK', '3 IN 1 PREMIUM BUILDER GEL PEARLY PINK'], target: 'Premium Builder Gel Pearly Pink 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GELS PINK', '3 IN 1 PREMIUM BUILDER GEL PINK'], target: 'Premium Builder Gel Pink 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GELS WHITE', '3 IN 1 PREMIUM BUILDER GEL WHITE'], target: 'Premium Builder Gel White 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM PLUS', '3 IN 1.PREMIUM.PLUS', '3 IN 1 PREMIUM BUILDER GEL CLEAR PLUS'], target: 'Premium Plus Fiber Glass Builder Gel 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL PEARLY PINK'], target: 'Premium Builder Gel Pearly Pink 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GELS PINK'], target: 'Premium Builder Gel Pink 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GELS WHITE'], target: 'Premium Builder Gel White 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM PLUS', '3 IN 1.PREMIUM.PLUS'], target: 'Premium Plus Fiber Glass Builder Gel 40gr -HTF' },
           // Brush on Builder (BOB)
           { codes: ['GIUP BOBCLR', 'GIUP-BOBCLR'], target: 'Brush on Builder Gel Clear 15ml -HTF' },
           { codes: ['GIUP BOBCOV', 'GIUP-BOBCOV'], target: 'Brush on Builder Gel Cover 15ml -HTF' },
@@ -11116,41 +11033,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['Dual Forms MEDIUM SQUARE', 'DUAL FORMS MEDIUM SQUARE'], target: 'SOAK OFF GEL TIPS MEDIUM SQUARE' },
           // Nail Art — cushion sponge (ombre blending tool)
           { codes: ['cushion sponge', 'cushion sponge 2', 'CUSHION SPONGE'], target: 'Ombre sponge' },
-          // Brush on Builder — new filename-derived normalised names (Brush-On-Builder-biab*.webp)
-          { codes: ['BRUSH ON BUILDER BIABCLR'], target: 'Brush on Builder Gel Clear 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABCOV'], target: 'Brush on Builder Gel Cover 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABPNK'], target: 'Brush on Builder Gel Pink 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABCRM'], target: 'Brush on Builder Gel Creamy 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABNUD'], target: 'Brush on Builder Gel Nude 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABPURGL'], target: 'Brush on Builder Gel Purple 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABDS'], target: 'Brush on Builder Gel Dusty Shimmer 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABMILK'], target: 'Brush on Builder Gel Milky 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABLIL'], target: 'Brush on Builder Gel Lilac 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABBLPN'], target: 'Brush on Builder Gel Blush Pink 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABSTPN'], target: 'Brush on Builder Gel Soft Pink 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABGLPN'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABGLMG'], target: 'Brush on Builder Gel Magenta Glitter 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABPRL'], target: 'Brush on Builder Gel Milky Glitter 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIABGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIAB SKY SPRINKLE 1'], target: 'Brush on Builder Gel Sky Sprinkle 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIAB BLUSH SORBET'], target: 'Brush on Builder Gel Blush Sorbet 15ml -HTF' },
-          { codes: ['BRUSH ON BUILDER BIAB BERRY STARDUST'], target: 'Brush on Builder Gel Berry Stardust 15ml -HTF' },
-          // 5-in-1 Superior Base — new filename-derived normalised names (5-in-1-GIUP-SBC*.webp)
-          { codes: ['5 IN 1 SBCBP'], target: '5-in-1 Superior Base 15ml Baby Pink -HTF' },
-          { codes: ['5 IN 1 SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
-          { codes: ['5 IN 1 SBCCP'], target: '5-in-1 Superior Base 15ml Candy Pink -HTF' },
-          { codes: ['5 IN 1 SBCMP'], target: '5-in-1 Superior Base 15ml Milky Pink -HTF' },
-          { codes: ['5 IN 1 SBCPP'], target: '5-in-1 Superior Base 15ml Pretty Pink -HTF' },
-          { codes: ['5 IN 1 SBCSP'], target: '5-in-1 Superior Base 15ml Sweet Pink -HTF' },
-          { codes: ['5 IN 1 SBCGLPI'], target: '5-IN-1 Superior Base 15ml Glittery Pink -HTF' },
-          { codes: ['5 IN 1 SBCGP'], target: '5-in-1 Superior Base 15ml Glittery Peach -HTF' },
-          { codes: ['5 IN 1 SBCIRPI'], target: '5-IN-1 Superior Base 15ml Irridecent Pink -HTF' },
-          { codes: ['5 IN 1 SBCIMF'], target: '5-in-1 Superior Base 15ml Iridescent Milky Flakes -HTF' },
-          { codes: ['5 IN 1 SBCCLI'], target: '5-in-1 Superior Base 15ml Lilac -HTF' },
-          { codes: ['5 IN 1 SBCMW'], target: '5-in-1 Superior Base 15ml Milky White -HTF' },
-          { codes: ['5 IN 1 SBCN'], target: '5-in-1 Superior Base 15ml Nude -HTF' },
-          { codes: ['5 IN 1 SBCSN'], target: '5-IN-1 Superior Base 15ml Soft Nude -HTF' },
         ]
         for (const { codes, target } of aliasGroups) {
           const entry = pnLookup(target)
@@ -11344,18 +11226,15 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           : await (async () => {
             // Mirror the public catalogue exactly — load from product-image-map.json
             // so every product has the same category, name and image as shown on the site.
-            const [response, orderResponse, hiddenResponse, oosResponse] = await Promise.all([
+            const [response, orderResponse, hiddenResponse] = await Promise.all([
               fetch('/gelitup-content/product-image-map.json'),
               fetch('/gelitup-content/catalog-order.json'),
               fetch('/gelitup-content/hidden-products.json'),
-              fetch('/gelitup-content/out-of-stock.json'),
             ])
             if (!response.ok) throw new Error('Could not load product image map')
             const mapPayload = await response.json()
             const manualOrderPayload = orderResponse.ok ? await orderResponse.json() : { rules: [] }
             const hiddenKeys = hiddenResponse.ok ? await hiddenResponse.json() : []
-            const oosArr = oosResponse.ok ? await oosResponse.json() : []
-            setOosKeys(new Set(Array.isArray(oosArr) ? oosArr.map(k => String(k).trim().toUpperCase()) : []))
             const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
             const sections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(mapPayload, hiddenKeys), manualRuleIndex)
             return sections.flatMap((section) =>
@@ -11596,25 +11475,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           throw new Error('Feed has no valid products')
         }
 
-        // Deduplicate by normalized code — same product can come from both Supabase table
-        // and image-map (codes differ by dashes vs spaces, e.g. "GIUP-VCE-01" vs "GIUP VCE 01").
-        // Prefer the entry that has an imageUrl; otherwise keep the first seen.
-        const codeMap = new Map() // normalizedCode -> index in deduped array
-        const deduped = []
-        for (const p of normalized) {
-          const norm = String(p.code || '').replace(/[^a-z0-9]/gi, '').toUpperCase()
-          if (codeMap.has(norm)) {
-            const existing = deduped[codeMap.get(norm)]
-            // Upgrade to this entry if it has an image and the existing one doesn't
-            if (!existing.imageUrl && p.imageUrl) deduped[codeMap.get(norm)] = p
-          } else {
-            codeMap.set(norm, deduped.length)
-            deduped.push(p)
-          }
-        }
         if (isMounted) {
-          setProducts(deduped)
-          setFeedMessage(`Loaded ${deduped.length} live products from ${feedUrl ? 'feed' : 'Supabase catalog'}.`)
+          setProducts(normalized)
+          setFeedMessage(`Loaded ${normalized.length} live products from ${feedUrl ? 'feed' : 'Supabase catalog'}.`)
         }
       }
       catch {
@@ -11639,15 +11502,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      const matchesSearch = (() => {
-        const q = query.trim()
-        if (!q) return true
-        // Use word-boundary matching so "705" doesn't match inside "2607",
-        // and "ice" doesn't match inside "price" or "licorice"
-        const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        const re = new RegExp(`\\b${escaped}`, 'i')
-        return re.test(product.code) || re.test(product.name || '')
-      })()
+      const matchesSearch = product.code.toLowerCase().includes(query.toLowerCase())
+        || (product.name || '').toLowerCase().includes(query.toLowerCase())
       const matchesCategory = category === 'All' || product.category === category
       const matchesSelected = !showSelectedOnly || selectedCodes.includes(product.code)
       return matchesSearch && matchesCategory && matchesSelected
@@ -12318,7 +12174,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     }
 
     const packageItemsPayload = packageCartItems.map((item) => `${item.sku} x${item.qty}`)
-    const selectedCodesWithQty = [...selectedCodes].sort(compareProductCodes).map(code => (itemQtys[code] || 1) > 1 ? `${code} x${itemQtys[code]}` : code)
+    const selectedCodesWithQty = selectedCodes.map(code => (itemQtys[code] || 1) > 1 ? `${code} x${itemQtys[code]}` : code)
     const checkoutItems = includeProfessionalBasePack
       ? [...selectedCodesWithQty, ...packageItemsPayload, `${PROFESSIONAL_BASE_PACK.sku} x${PROFESSIONAL_BASE_PACK.qty}`]
       : [...selectedCodesWithQty, ...packageItemsPayload]
@@ -13197,9 +13053,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         {shouldShowCleanserUpsell && !dismissedCleanserUpsell && !isReordering && (
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Complete the Finish</p>
-            <p className="mt-1 text-sm text-emerald-900">Wipe-Off Top Coat requires a liquid to remove the inhibition layer - add the All in One Liquid (available in 200ml and 500ml).</p>
+            <p className="mt-1 text-sm text-emerald-900">Wipe-Off Top Coat requires a cleanser to remove the inhibition layer - add the Cleanser Liquid.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => cleanserUpsellProduct ? setUpsellModal({ product: cleanserUpsellProduct, dismissFn: () => setDismissedCleanserUpsell(true) }) : (setDismissedCleanserUpsell(true), toggleCategory('LIQUIDS'), navigate('/portal/dashboard/catalog'))} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View All in One Liquid</button>
+              <button onClick={() => cleanserUpsellProduct ? setUpsellModal({ product: cleanserUpsellProduct, dismissFn: () => setDismissedCleanserUpsell(true) }) : (setDismissedCleanserUpsell(true), toggleCategory('LIQUIDS'), navigate('/portal/dashboard/catalog'))} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Cleanser</button>
               <button onClick={() => setDismissedCleanserUpsell(true)} className="rounded-lg border border-emerald-300 px-3 py-1.5 text-xs font-semibold text-emerald-800">Dismiss</button>
             </div>
           </div>
@@ -13259,7 +13115,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
       {/* Upsell product popup modal */}
       {upsellModal && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 p-4 sm:items-center" onClick={() => { setUpsellModal(null); setUpsellModalQty(1) }}>
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 p-4 sm:items-center" onClick={() => setUpsellModal(null)}>
           <div className="w-full max-w-xs rounded-2xl bg-white shadow-2xl" onClick={e => e.stopPropagation()}>
             {upsellModal.product?.imageUrl && (
               <img src={upsellModal.product.imageUrl} alt={upsellModal.product.name} className="h-52 w-full rounded-t-2xl object-cover" />
@@ -13267,30 +13123,20 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <div className="p-5">
               <p className="text-sm font-semibold text-slate-900 leading-snug">{upsellModal.product?.name}</p>
               {upsellModal.product?.price != null && pricesAllocated && (
-                <p className="mt-1 text-sm font-bold text-fuchsia-700">€{(Number(upsellModal.product.price) * tierPriceMultiplier * upsellModalQty).toFixed(2)}</p>
+                <p className="mt-1 text-sm font-bold text-fuchsia-700">€{(Number(upsellModal.product.price) * tierPriceMultiplier).toFixed(2)}</p>
               )}
-              <div className="mt-3 flex items-center gap-3">
-                <span className="text-xs text-slate-500">Qty</span>
-                <button onClick={() => setUpsellModalQty(q => Math.max(1, q - 1))} className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-300 text-slate-700 hover:bg-slate-50">−</button>
-                <span className="w-6 text-center text-sm font-semibold text-slate-900">{upsellModalQty}</span>
-                <button onClick={() => setUpsellModalQty(q => q + 1)} className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-300 text-slate-700 hover:bg-slate-50">+</button>
-              </div>
               <div className="mt-4 flex gap-2">
                 <button
                   onClick={() => {
                     const code = upsellModal.product?.code
-                    if (code) {
-                      setSelectedCodes(c => c.includes(code) ? c : [...c, code])
-                      setItemQtys(q => ({ ...q, [code]: upsellModalQty }))
-                    }
+                    if (code) setSelectedCodes(c => c.includes(code) ? c : [...c, code])
                     upsellModal.dismissFn()
                     setUpsellModal(null)
-                    setUpsellModalQty(1)
                   }}
                   className="flex-1 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white"
                 >Add to Order</button>
                 <button
-                  onClick={() => { upsellModal.dismissFn(); setUpsellModal(null); setUpsellModalQty(1) }}
+                  onClick={() => { upsellModal.dismissFn(); setUpsellModal(null) }}
                   className="flex-1 rounded-lg border border-slate-300 py-2.5 text-sm font-semibold text-slate-700"
                 >No Thanks</button>
               </div>
@@ -13424,7 +13270,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold text-slate-900">Order Summary</p>
-              <button onClick={() => { navigate('/portal/dashboard/catalog'); setTimeout(() => document.getElementById('b2b-catalog-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80) }} className="text-[11px] font-semibold text-fuchsia-600 hover:underline">+ Add more products</button>
+              <button onClick={() => navigate('/portal/dashboard/catalog')} className="text-[11px] font-semibold text-fuchsia-600 hover:underline">+ Add more products</button>
             </div>
             <div className="mt-2 divide-y divide-slate-100">
               {selectedProducts.map(product => {
@@ -13444,14 +13290,14 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                       <p className="text-[10px] text-slate-400">{product.code}</p>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button tabIndex={-1} onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(prev => ({...prev, [product.code]: q})) }} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">-</button>
-                      <input type="number" min="1" value={qty} onChange={(e) => { const v = parseInt(e.target.value, 10); if (v > 0) setItemQtys(prev => ({...prev, [product.code]: v})); else if (e.target.value === '') setItemQtys(prev => ({...prev, [product.code]: ''})) }} onFocus={(e) => e.target.select()} onBlur={(e) => { const v = parseInt(e.target.value, 10); if (!v || v <= 0) toggleSelection(product.code) }} className="h-6 w-12 rounded border border-slate-200 text-center text-xs font-semibold text-slate-900 outline-none focus:border-fuchsia-400 focus:ring-1 focus:ring-fuchsia-200 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
-                      <button tabIndex={-1} onClick={() => setItemQtys(prev => ({...prev, [product.code]: qty + 1}))} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">+</button>
+                      <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(prev => ({...prev, [product.code]: q})) }} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">-</button>
+                      <input type="number" min="1" value={qty} onChange={(e) => { const v = parseInt(e.target.value, 10); if (v > 0) setItemQtys(prev => ({...prev, [product.code]: v})); else if (e.target.value === '') setItemQtys(prev => ({...prev, [product.code]: ''})) }} onBlur={(e) => { const v = parseInt(e.target.value, 10); if (!v || v <= 0) toggleSelection(product.code) }} className="h-6 w-12 rounded border border-slate-200 text-center text-xs font-semibold text-slate-900 outline-none focus:border-fuchsia-400 focus:ring-1 focus:ring-fuchsia-200 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
+                      <button onClick={() => setItemQtys(prev => ({...prev, [product.code]: qty + 1}))} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">+</button>
                     </div>
                     <div className="w-16 text-right">
                       {lineTotal != null && pricesAllocated ? <p className="text-xs font-semibold text-fuchsia-700">€{lineTotal.toFixed(2)}</p> : <p className="text-xs text-slate-400">—</p>}
                     </div>
-                    <button tabIndex={-1} onClick={() => toggleSelection(product.code)} className="flex h-6 w-6 items-center justify-center rounded-full text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Remove">—</button>
+                    <button onClick={() => toggleSelection(product.code)} className="flex h-6 w-6 items-center justify-center rounded-full text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Remove">—</button>
                   </div>
                 )
               })}
@@ -13920,20 +13766,15 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       </div>
 
       {isCatalogView && (() => {
-        const isSearchMode = query.trim().length > 0
         // Derive active category from expandedCategories (single-select)
-        const activeCat = isSearchMode
-          ? 'Search results'
-          : (expandedCategories.size > 0
-              ? [...expandedCategories][0]
-              : (groupedFilteredProducts[0]?.[0] ?? ''))
-        const activeCatProducts = isSearchMode
-          ? filteredProducts
-          : (groupedFilteredProducts.find(([c]) => c === activeCat)?.[1] || [])
+        const activeCat = expandedCategories.size > 0
+          ? [...expandedCategories][0]
+          : (groupedFilteredProducts[0]?.[0] ?? '')
+        const activeCatProducts = groupedFilteredProducts.find(([c]) => c === activeCat)?.[1] || []
         const showAll = expandedShowAll.has(activeCat)
-        const CAT_PAGE_SIZE = isSearchMode ? filteredProducts.length : 48
-        const isColorsCategory = !isSearchMode && (activeCatProducts[0]?.parentSection === 'COLORS'
-          || activeCat.toUpperCase().includes('COLOR') || activeCat.toUpperCase().includes('COLOUR'))
+        const CAT_PAGE_SIZE = 48
+        const isColorsCategory = activeCatProducts[0]?.parentSection === 'COLORS'
+          || activeCat.toUpperCase().includes('COLOR') || activeCat.toUpperCase().includes('COLOUR')
         const familyFilteredProducts = isColorsCategory && b2bColorFamilyFilter !== 'ALL'
           ? activeCatProducts.filter(p => (p.colorFamily || resolveColorFamilyKey(p.name)) === b2bColorFamilyFilter)
           : activeCatProducts
@@ -13978,7 +13819,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         }
 
         return (
-        <div id="b2b-catalog-panel" className="rounded-xl border border-slate-200 bg-white text-sm overflow-hidden">
+        <div className="rounded-xl border border-slate-200 bg-white text-sm overflow-hidden">
 
           {/* order bar */}
           <div className="flex items-center justify-between gap-2 border-b px-3 py-2" style={{ borderColor: '#f0c4d0' }}>
@@ -13990,30 +13831,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           <div className="flex shrink-0 items-center gap-2">
             {(selectedCodes.length > 0 || packageCartItems.length > 0) && (
               <>
-                <button onClick={() => {
-                  if (!supabase) return
-                  supabase.auth.getUser().then(({ data }) => {
-                    if (!data?.user?.id) return
-                    const itemsSummary = selectedCodes.map(c => ({ code: c, qty: itemQtys[c] || 1 }))
-                    const pkgSummary = packageCartItems.map(i => ({ sku: i.sku, name: i.name, qty: i.qty, group: i.group }))
-                    supabase.from('b2b_draft_carts').upsert({
-                      user_id: data.user.id,
-                      customer_email: data.user.email,
-                      items: { products: itemsSummary, packages: pkgSummary },
-                      total_units: selectedCodes.reduce((s, c) => s + (itemQtys[c] || 1), 0) + packageCartItems.reduce((s, i) => s + (i.qty || 0), 0),
-                      total_estimated: 0,
-                      source: 'portal',
-                      updated_at: new Date().toISOString(),
-                    }, { onConflict: 'user_id,source' }).then(() => { setJustSaved(true); setTimeout(() => setJustSaved(false), 2500) })
-                  })
-                }} className="text-[10px] font-semibold rounded px-2 py-0.5 border" style={{ borderColor: '#c8386e', color: '#c8386e' }}>💾 Save order</button>
-                {justSaved && <span className="text-[10px] text-emerald-600 font-medium">✓ Saved!</span>}
-                <button onClick={() => {
-                  if (!window.confirm('Clear your entire order? This cannot be undone.')) return
-                  setSelectedCodes([]); setItemQtys({}); setPackageCartItems([]); setGeneratedPackageTier('')
-                  // Only delete the Supabase draft on an explicitly confirmed clear
-                  if (supabase && cartUserIdRef.current) supabase.from('b2b_draft_carts').delete().eq('user_id', cartUserIdRef.current).eq('source', 'portal').then(() => {})
-                }} className="text-xs text-slate-400 hover:text-rose-500">Clear order</button>
+                <span className="text-[10px] text-emerald-600 font-medium">✓ Draft saved</span>
+                <button onClick={() => { setSelectedCodes([]); setItemQtys({}); setPackageCartItems([]); setGeneratedPackageTier('') }} className="text-xs text-slate-400 hover:text-rose-500">Clear</button>
               </>
             )}
             <button onClick={() => navigate('/portal/dashboard/products')} className="btn-cta-rose rounded px-3 py-1 text-xs font-semibold">
@@ -14089,7 +13908,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                 <>
                   {/* category name + count header */}
                   <div className="sticky top-0 z-10 flex items-center gap-2 border-b bg-white px-3 py-2" style={{ borderColor: '#f0e8f0' }}>
-                    <span className="text-xs font-bold uppercase tracking-wide text-slate-800">{isSearchMode ? `Results for "${query.trim()}"` : activeCat}</span>
+                    <span className="text-xs font-bold uppercase tracking-wide text-slate-800">{activeCat}</span>
                     <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{activeCatProducts.length}</span>
                     {selectedInActiveCat > 0 && (
                       <span className="rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>?{selectedInActiveCat} selected</span>
@@ -14117,14 +13936,12 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                     {visibleProducts.map(product => {
                       const selected = selectedCodes.includes(product.code)
                       const qty = itemQtys[product.code] || 1
-                      const isOos = oosKeys.has(String(product.code || '').trim().toUpperCase()) || oosKeys.has(String(product.name || '').trim().toUpperCase())
                       return (
                         <div key={product.code} className="flex min-w-0 flex-col overflow-hidden bg-white" style={selected ? { outline: '2px solid #c8386e', outlineOffset: '-2px' } : {}}>
                           {/* image */}
                           <div className="relative aspect-square w-full cursor-pointer bg-slate-50" onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}>
-                            {product.imageUrl && <img src={product.imageUrl} alt={product.name} loading="lazy" className={`h-full w-full object-cover${isOos ? ' opacity-50' : ''}`} />}
-                            {selected && !isOos && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
-                            {isOos && <span className="absolute inset-x-0 bottom-0 bg-slate-700/80 py-0.5 text-center text-[9px] font-bold uppercase tracking-wide text-white">Out of Stock</span>}
+                            {product.imageUrl && <img src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />}
+                            {selected && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
                           </div>
                           {product.galleryImages?.length > 0 && (
                             <div className="flex gap-0.5 border-t border-slate-100 bg-white px-1 py-1">
@@ -14135,21 +13952,19 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                           )}
                           {/* info */}
                           <div className="px-1.5 pt-1 pb-0.5">
-                            <p className="line-clamp-2 text-xs leading-tight text-slate-800" title={product.name}>{product.name}</p>
+                            <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{product.name}</p>
                             {product.price != null && (
                             pricesAllocated
-                              ? <p className="text-xs font-bold" style={{ color: '#c8386e' }}>€{(Number(product.price) * tierPriceMultiplier).toFixed(2)}</p>
-                              : <p className="text-xs text-slate-400">POA</p>
+                              ? <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{(Number(product.price) * tierPriceMultiplier).toFixed(2)}</p>
+                              : <p className="text-[10px] text-slate-400">POA</p>
                           )}
                           </div>
                           {/* action */}
-                          {isOos ? (
-                            <div className="mt-auto border-t py-1 text-center text-[10px] font-semibold text-slate-400" style={{ borderColor: '#f0e8f0' }}>Unavailable</div>
-                          ) : selected ? (
+                          {selected ? (
                             <div className="mt-auto flex items-center justify-center gap-1 border-t px-1 py-1" style={{ borderColor: '#fde8f0' }}>
-                              <button tabIndex={-1} onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(p => ({...p, [product.code]: q})) }} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>-</button>
-                              <input type="number" min="1" value={qty} onChange={(e) => { const v = parseInt(e.target.value, 10); if (v > 0) setItemQtys(p => ({...p, [product.code]: v})); else if (e.target.value === '') setItemQtys(p => ({...p, [product.code]: ''})) }} onFocus={(e) => e.target.select()} onBlur={(e) => { const v = parseInt(e.target.value, 10); if (!v || v <= 0) toggleSelection(product.code) }} className="h-5 w-10 rounded border text-center text-[10px] font-bold outline-none focus:border-fuchsia-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" style={{ borderColor: '#f0c4d0', color: '#c8386e' }} />
-                              <button tabIndex={-1} onClick={() => setItemQtys(p => ({...p, [product.code]: qty + 1}))} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>+</button>
+                              <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(p => ({...p, [product.code]: q})) }} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>-</button>
+                              <input type="number" min="1" value={qty} onChange={(e) => { const v = parseInt(e.target.value, 10); if (v > 0) setItemQtys(p => ({...p, [product.code]: v})); else if (e.target.value === '') setItemQtys(p => ({...p, [product.code]: ''})) }} onBlur={(e) => { const v = parseInt(e.target.value, 10); if (!v || v <= 0) toggleSelection(product.code) }} className="h-5 w-10 rounded border text-center text-[10px] font-bold outline-none focus:border-fuchsia-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" style={{ borderColor: '#f0c4d0', color: '#c8386e' }} />
+                              <button onClick={() => setItemQtys(p => ({...p, [product.code]: qty + 1}))} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>+</button>
                             </div>
                           ) : (
                             <button onClick={() => toggleSelection(product.code)} className="mt-auto border-t py-1 text-center text-[10px] font-semibold" style={{ borderColor: '#f0e8f0', color: '#c8386e' }}>
@@ -17848,7 +17663,7 @@ function App() {
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
           <Route path="/for-academies" element={<ForAcademiesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/checkout" element={<ExternalRedirect to={SHOPIFY_SHOP_URL} />} />
           <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
@@ -17894,7 +17709,7 @@ function App() {
                 <Route path="/portal-client-login" element={<Navigate to="/portal/login" replace />} />
                 <Route path="/portal-admin-login" element={<Navigate to="/portal/admin-login" replace />} />
                 <Route path="/portal/register" element={<PortalRegister onRegister={handlePortalRegister} />} />
-                <Route path="/portal/buy" element={<BuyerRegister />} />
+                <Route path="/portal/buy" element={<ExternalRedirect to={SHOPIFY_SHOP_URL} />} />
                 <Route path="/portal/forgot-password" element={<PortalForgotPassword />} />
                 <Route
                   path="/portal/dashboard/:module"
@@ -18017,11 +17832,11 @@ function App() {
             <div className="mt-2 space-y-1.5">
               <NavLink to="/" className="block transition duration-300 hover:text-fuchsia-300">Home</NavLink>
               <NavLink to="/about-us" className="block transition duration-300 hover:text-fuchsia-300">About Us</NavLink>
-              <NavLink to="/full-catalogue" className="block transition duration-300 hover:text-fuchsia-300">Catalogue</NavLink>
+              <a href={SHOPIFY_SHOP_URL} target="_blank" rel="noopener noreferrer" className="block transition duration-300 hover:text-fuchsia-300">Shop</a>
               <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
               <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Become Distributor</NavLink>
               <NavLink to="/guestbook" className="block transition duration-300 hover:text-fuchsia-300">Guestbook</NavLink>
-              <NavLink to="/portal/register" className="block transition duration-300 hover:text-fuchsia-300">Client Registration</NavLink>
+              <NavLink to="/portal/login?portal=distributor" className="block transition duration-300 hover:text-fuchsia-300">Distributor Login</NavLink>
             </div>
           </div>
 
