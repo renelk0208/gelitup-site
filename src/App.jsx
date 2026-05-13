@@ -9644,6 +9644,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [dismissedDualFormsUpsell, setDismissedDualFormsUpsell] = useState(false)
   const [dismissedBuilderGelSuperbondUpsell, setDismissedBuilderGelSuperbondUpsell] = useState(false)
   const [upsellModal, setUpsellModal] = useState(null)
+  const [upsellModalQty, setUpsellModalQty] = useState(1)
   const [includeProfessionalBasePack, setIncludeProfessionalBasePack] = useState(false)
   const [showAddOnRemovedToast, setShowAddOnRemovedToast] = useState(false)
   const [showOrderConfetti, setShowOrderConfetti] = useState(false)
@@ -10425,6 +10426,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       setDismissedMagnetUpsell(false)
     }
   }, [shouldShowMagnetUpsellToast])
+
+  // Reset qty stepper whenever the upsell modal opens a new product
+  useEffect(() => {
+    setUpsellModalQty(1)
+  }, [upsellModal?.product?.code])
 
   useEffect(() => {
     if (!shouldShowSuperbondUpsell) setDismissedSuperbondUpsell(false)
@@ -13093,7 +13099,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
       {/* Upsell product popup modal */}
       {upsellModal && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 p-4 sm:items-center" onClick={() => setUpsellModal(null)}>
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 p-4 sm:items-center" onClick={() => { setUpsellModal(null); setUpsellModalQty(1) }}>
           <div className="w-full max-w-xs rounded-2xl bg-white shadow-2xl" onClick={e => e.stopPropagation()}>
             {upsellModal.product?.imageUrl && (
               <img src={upsellModal.product.imageUrl} alt={upsellModal.product.name} className="h-52 w-full rounded-t-2xl object-cover" />
@@ -13101,20 +13107,30 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <div className="p-5">
               <p className="text-sm font-semibold text-slate-900 leading-snug">{upsellModal.product?.name}</p>
               {upsellModal.product?.price != null && pricesAllocated && (
-                <p className="mt-1 text-sm font-bold text-fuchsia-700">€{(Number(upsellModal.product.price) * tierPriceMultiplier).toFixed(2)}</p>
+                <p className="mt-1 text-sm font-bold text-fuchsia-700">€{(Number(upsellModal.product.price) * tierPriceMultiplier * upsellModalQty).toFixed(2)}</p>
               )}
+              <div className="mt-3 flex items-center gap-3">
+                <span className="text-xs text-slate-500">Qty</span>
+                <button onClick={() => setUpsellModalQty(q => Math.max(1, q - 1))} className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-300 text-slate-700 hover:bg-slate-50">−</button>
+                <span className="w-6 text-center text-sm font-semibold text-slate-900">{upsellModalQty}</span>
+                <button onClick={() => setUpsellModalQty(q => q + 1)} className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-300 text-slate-700 hover:bg-slate-50">+</button>
+              </div>
               <div className="mt-4 flex gap-2">
                 <button
                   onClick={() => {
                     const code = upsellModal.product?.code
-                    if (code) setSelectedCodes(c => c.includes(code) ? c : [...c, code])
+                    if (code) {
+                      setSelectedCodes(c => c.includes(code) ? c : [...c, code])
+                      setItemQtys(q => ({ ...q, [code]: upsellModalQty }))
+                    }
                     upsellModal.dismissFn()
                     setUpsellModal(null)
+                    setUpsellModalQty(1)
                   }}
                   className="flex-1 rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white"
                 >Add to Order</button>
                 <button
-                  onClick={() => { upsellModal.dismissFn(); setUpsellModal(null) }}
+                  onClick={() => { upsellModal.dismissFn(); setUpsellModal(null); setUpsellModalQty(1) }}
                   className="flex-1 rounded-lg border border-slate-300 py-2.5 text-sm font-semibold text-slate-700"
                 >No Thanks</button>
               </div>

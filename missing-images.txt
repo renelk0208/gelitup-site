@@ -22,7 +22,6 @@ N026  ->  N026 Whispering Blush -HTF
 2529  ->  2529 Thunderstorm -HTF
 2113S  ->  2113S Vivi Vail -HTF
 BTB01  ->  BTB01 Rosso Corso -HTF
-BTB02  ->  BTB02 Nautilus -HTF
 BTB03  ->  BTB03 Brimstone -HTF
 SS01  ->  SS01 SPIX and SPEX Kaleidascope -HTF
 SS02  ->  SS02 SPIX and SPEX Delphinium -HTF
