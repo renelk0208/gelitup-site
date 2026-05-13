@@ -694,6 +694,28 @@ function normalizePriceLookupKey(value) {
     .trim()
 }
 
+function repairCatalogueImageUrl(value) {
+  const imageUrl = String(value || '').trim()
+  if (!imageUrl) return ''
+
+  if (imageUrl === '/gelitup-content/product-images/MULTIMIX/60 ML/multimix_white_color.webp') {
+    return '/gelitup-content/product-images/MULTIMIX/60 ML/multimix_white_60ml-60g.webp'
+  }
+
+  const multimixMatch = imageUrl.match(/^(.*\/MULTIMIX\/(30 ML|60 ML)\/)([^/]+)\.webp$/i)
+  if (!multimixMatch) return imageUrl
+
+  const [, prefix, sizeFolder, filename] = multimixMatch
+  const expectedSuffix = sizeFolder.toUpperCase() === '30 ML' ? '-30g' : '-60g'
+  const normalizedFilename = filename.toLowerCase()
+
+  if (normalizedFilename.endsWith(expectedSuffix) || /_[bc]-\d+g$/i.test(filename)) {
+    return imageUrl
+  }
+
+  return `${prefix}${filename}${expectedSuffix}.webp`
+}
+
 // Fuzzy word-overlap price lookup for image-map products whose filename keys
 // don't match price-list names exactly (e.g. "cobweb black" vs "Cobweb Gel Black -HTF").
 // All significant query words (=4 chars, not in skip list) must appear in the price entry.
@@ -722,7 +744,7 @@ function normalizeImageMap(payload) {
   const map = new Map()
 
   Object.entries(payload).forEach(([rawKey, rawValue]) => {
-    const imageUrl = typeof rawValue === 'string' ? rawValue.trim() : ''
+    const imageUrl = typeof rawValue === 'string' ? repairCatalogueImageUrl(rawValue) : ''
     if (!imageUrl) return
 
     const normalizedSku = normalizeSkuCode(rawKey)
@@ -2212,7 +2234,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
   const uniqueImagePaths = new Set(
     Object.values(payload)
       .filter((value) => typeof value === 'string')
-      .map((value) => String(value).trim())
+      .map((value) => repairCatalogueImageUrl(value))
       .filter((value) => value.includes('/gelitup-content/product-images/'))
       .filter((value) => !isCategoryHeroAssetPath(value))
       .filter((value) => !isBlockedImagePath(value))
@@ -10556,13 +10578,13 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
 
     for (const key of localMapKeys) {
       const mappedUrl = localImageMap.get(key)
-      if (mappedUrl) return mappedUrl
+      if (mappedUrl) return repairCatalogueImageUrl(mappedUrl)
     }
 
     const bySkuOrCode = catalogBySku.get(normalizeSkuCode(item?.sku))?.imageUrl
       || catalogBySku.get(normalizeSkuCode(item?.code))?.imageUrl
 
-    if (bySkuOrCode) return bySkuOrCode
+    if (bySkuOrCode) return repairCatalogueImageUrl(bySkuOrCode)
 
     const normalizedItemName = normalizeProductName(item?.name)
     const normalizedItemCode = normalizeProductName(item?.code)
@@ -10571,17 +10593,17 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
 
     for (const candidate of candidates) {
       const exact = catalogByName.get(candidate)?.imageUrl
-      if (exact) return exact
+      if (exact) return repairCatalogueImageUrl(exact)
     }
 
     for (const candidate of candidates) {
       const fuzzy = catalogNameEntries.find(([key, product]) =>
         Boolean(product?.imageUrl) && (key.includes(candidate) || candidate.includes(key)),
       )
-      if (fuzzy?.[1]?.imageUrl) return fuzzy[1].imageUrl
+      if (fuzzy?.[1]?.imageUrl) return repairCatalogueImageUrl(fuzzy[1].imageUrl)
     }
 
-    return item?.imageUrl || null
+    return repairCatalogueImageUrl(item?.imageUrl) || null
   }, [catalogByName, catalogBySku, catalogNameEntries, localImageMap])
   const packagePreviewItems = useMemo(
     () => packageCartItems,
@@ -11559,7 +11581,7 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
               || localImageMap.get(normalizeSkuCode(code))
               || localImageMap.get(normalizeProductName(rawName))
               || null
-            const imageUrl = mapImageUrl || item.image_url || item.imageUrl || item?.images?.[0]?.src || null
+            const imageUrl = repairCatalogueImageUrl(mapImageUrl || item.image_url || item.imageUrl || item?.images?.[0]?.src || null)
 
             // Merge price-list data (name override + price)
             // For codes like "GIUP 01" extract the number to match "01 Ice Ice Baby"
@@ -13390,14 +13412,15 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
               {selectedProducts.map(product => {
                 const qty = itemQtys[product.code] || 1
                 const lineTotal = Number(product.price || 0) * tierPriceMultiplier * qty
+                const resolvedImageUrl = resolveCatalogImageUrl(product)
                 return (
                   <div key={product.code} className="flex items-center gap-2 py-2">
                     <div
                       className="h-9 w-9 flex-none cursor-zoom-in overflow-hidden rounded-md border border-slate-100"
                       style={{ backgroundColor: product.preview || '#e2e8f0' }}
-                      onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}
+                      onClick={() => resolvedImageUrl && setLightboxUrl(resolvedImageUrl)}
                     >
-                      {product.imageUrl && <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" />}
+                      {resolvedImageUrl && <img src={resolvedImageUrl} alt={product.name} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.png' }} />}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="break-words text-[11px] font-semibold text-slate-900">{product.name}</p>
@@ -13821,6 +13844,7 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
                                   alt={item.name}
                                   loading="lazy"
                                   className="h-full w-full object-cover"
+                                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.png' }}
                                 />
                                 )
                               : (
@@ -14050,11 +14074,12 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
                     {visibleProducts.map(product => {
                       const selected = selectedCodes.includes(product.code)
                       const qty = itemQtys[product.code] || 1
+                      const resolvedImageUrl = resolveCatalogImageUrl(product)
                       return (
                         <div key={product.code} className="flex min-w-0 flex-col overflow-hidden bg-white" style={selected ? { outline: '2px solid #c8386e', outlineOffset: '-2px' } : {}}>
                           {/* image */}
-                          <div className="relative aspect-square w-full cursor-pointer bg-slate-50" onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}>
-                            {product.imageUrl && <img src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />}
+                          <div className="relative aspect-square w-full cursor-pointer bg-slate-50" onClick={() => resolvedImageUrl && setLightboxUrl(resolvedImageUrl)}>
+                            {resolvedImageUrl && <img src={resolvedImageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.png' }} />}
                             {selected && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
                           </div>
                           {product.galleryImages?.length > 0 && (
