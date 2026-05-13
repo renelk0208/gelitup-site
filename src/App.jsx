@@ -651,6 +651,23 @@ function normalizeSkuCode(value) {
   return String(value || '').trim().toUpperCase().replace(/\s+/g, ' ')
 }
 
+// Sort comparator for product codes: numeric-first (by leading number after stripping GIUP prefix),
+// then tiebreak alphabetically (so "GIUP 51" < "GIUP 51A"), then non-numeric codes alphabetically.
+function compareProductCodes(codeA, codeB) {
+  const cA = String(codeA || '').replace(/^GIUP\s*/i, '')
+  const cB = String(codeB || '').replace(/^GIUP\s*/i, '')
+  const nA = cA.match(/^(\d+)/)
+  const nB = cB.match(/^(\d+)/)
+  if (nA && nB) {
+    const diff = parseInt(nA[1], 10) - parseInt(nB[1], 10)
+    if (diff !== 0) return diff
+    return cA.localeCompare(cB, undefined, { sensitivity: 'base', numeric: false })
+  }
+  if (nA) return -1
+  if (nB) return 1
+  return cA.localeCompare(cB, undefined, { sensitivity: 'base' })
+}
+
 function normalizeProductName(value) {
   return normalizeSkuCode(value)
     .replace(/GEL\.?IT\.?UP|GEL\s*IT\s*UP|GIUP/gi, ' ')
@@ -1206,7 +1223,7 @@ function buildProformaFromCart({
 }) {
   const productMap = new Map(products.map((product) => [normalizeSkuCode(product.code), product]))
 
-  const selectedLines = selectedCodes.map((code) => {
+  const selectedLines = [...selectedCodes].sort(compareProductCodes).map((code) => {
     const normalized = normalizeSkuCode(code)
     const product = productMap.get(normalized)
     // Use the price already resolved during feed loading (full matching logic),
@@ -4690,7 +4707,7 @@ function FullCataloguePage() {
                   <div className="mx-auto max-w-5xl px-4">
                     <div className="rounded-t-xl border border-b-0 border-fuchsia-500/30 bg-white shadow-lg">
                       <div className="max-h-64 space-y-2 overflow-y-auto p-4">
-                        {Object.entries(quickCart).filter(([, q]) => q > 0).sort(([kA], [kB]) => { const cA = kA.split('::')[1] || ''; const cB = kB.split('::')[1] || ''; const nA = cA.replace(/^GIUP\s*/i, '').match(/^(\d+)/); const nB = cB.replace(/^GIUP\s*/i, '').match(/^(\d+)/); if (nA && nB) return parseInt(nA[1], 10) - parseInt(nB[1], 10); if (nA) return -1; if (nB) return 1; return cA.localeCompare(cB, undefined, { sensitivity: 'base' }) }).map(([key, cartQty]) => {
+                        {Object.entries(quickCart).filter(([, q]) => q > 0).sort(([kA], [kB]) => compareProductCodes(kA.split('::')[1] || '', kB.split('::')[1] || '')).map(([key, cartQty]) => {
                           const [name, code] = key.split('::')
                           const price = lookupCataloguePrice(name, code)
                           const lineTotal = price != null ? Number(price) * cartQty : null
@@ -7992,13 +8009,7 @@ function CheckoutPage() {
       const [name, code] = key.split('::')
       const price = lookupPrice(name, code)
       return { key, name, code, qty, price, lineTotal: price != null ? Number(price) * qty : null }
-    }).sort((a, b) => {
-      const numA = (a.code || '').replace(/^GIUP\s*/i, '').match(/^(\d+)/); const numB = (b.code || '').replace(/^GIUP\s*/i, '').match(/^(\d+)/)
-      if (numA && numB) return parseInt(numA[1], 10) - parseInt(numB[1], 10)
-      if (numA) return -1
-      if (numB) return 1
-      return (a.code || '').localeCompare(b.code || '', undefined, { sensitivity: 'base' })
-    }), [cart, lookupPrice])
+    }).sort((a, b) => compareProductCodes(a.code, b.code)), [cart, lookupPrice])
 
   const cartTotal = useMemo(() => cartEntries.reduce((s, e) => s + (e.lineTotal || 0), 0), [cartEntries])
   const cartUnits = useMemo(() => cartEntries.reduce((s, e) => s + e.qty, 0), [cartEntries])
@@ -12258,7 +12269,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     }
 
     const packageItemsPayload = packageCartItems.map((item) => `${item.sku} x${item.qty}`)
-    const selectedCodesWithQty = selectedCodes.map(code => (itemQtys[code] || 1) > 1 ? `${code} x${itemQtys[code]}` : code)
+    const selectedCodesWithQty = [...selectedCodes].sort(compareProductCodes).map(code => (itemQtys[code] || 1) > 1 ? `${code} x${itemQtys[code]}` : code)
     const checkoutItems = includeProfessionalBasePack
       ? [...selectedCodesWithQty, ...packageItemsPayload, `${PROFESSIONAL_BASE_PACK.sku} x${PROFESSIONAL_BASE_PACK.qty}`]
       : [...selectedCodesWithQty, ...packageItemsPayload]
