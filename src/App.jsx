@@ -3259,7 +3259,7 @@ function FullCataloguePage() {
         const pnLookup = t => map.get(normalizeProductName(t))
         const aliasGroups = [
           { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-FBCLR'], target: 'Flexi Base Clear -HTF' },
-          { codes: ['CLASSIC BASE COAT IMAGE'], target: 'Base Coat 15ml -HTF' },
+          { codes: ['CLASSIC BASE COAT', 'CLASSIC BASE COAT IMAGE'], target: 'Base Coat 15ml -HTF' },
           // 700-series colour codes (image path GIUP-701.webp → normalised to '701')
           { codes: ['701'], target: '70-1 Portside -HTF' },
           { codes: ['702'], target: '70-2 Sea Breeze -HTF' },
@@ -3323,7 +3323,7 @@ function FullCataloguePage() {
           { codes: ['MIRROR X6', 'TR06'], target: 'TR06 Mirror X6 Powder' },
           { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
           { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
-          { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
+          { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID', 'SUPERBOND WITHOUT ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
           { codes: ['GIUP-SB-WITH-ACID', 'GIUP SB WITH ACID', 'SB WITH ACID'], target: 'Superbond Nail Dehydrator 11ml - with Acid -HTF' },
           { codes: ['ALMOND', 'DUAL FORMS ALMOND'], target: 'DUAL FORMS ALMOND' },
           { codes: ['BALLERINA', 'DUAL FORMS BALLERINA'], target: 'DUAL FORMS BALLERINA' },
@@ -10739,7 +10739,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['GIUP SBCMW', 'GIUP-SBCMW'], target: '5-in-1 Superior Base 15ml Milky White -HTF' },
           { codes: ['GIUP SBCN', 'GIUP-SBCN'], target: '5-in-1 Superior Base 15ml Nude -HTF' },
           { codes: ['GIUP SBCSN', 'GIUP-SBCSN'], target: '5-IN-1 Superior Base 15ml Soft Nude -HTF' },
-          { codes: ['CLASSIC BASE COAT IMAGE'], target: 'Base Coat 15ml -HTF' },
+          { codes: ['CLASSIC BASE COAT', 'CLASSIC BASE COAT IMAGE'], target: 'Base Coat 15ml -HTF' },
           // 700-series colour codes (image path GIUP-701.webp → normalised to '701')
           { codes: ['701'], target: '70-1 Portside -HTF' },
           { codes: ['702'], target: '70-2 Sea Breeze -HTF' },
@@ -10751,7 +10751,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['708'], target: '70-8 Blue Bayou -HTF' },
           { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
           { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
-          { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
+          { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID', 'SUPERBOND WITHOUT ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
           { codes: ['GIUP-SB-WITH-ACID', 'GIUP SB WITH ACID', 'SB WITH ACID'], target: 'Superbond Nail Dehydrator 11ml - with Acid -HTF' },
           // Dual form / nail tip shapes (image map uses bare shape names)
           { codes: ['ALMOND', 'DUAL FORMS ALMOND'], target: 'DUAL FORMS ALMOND' },
