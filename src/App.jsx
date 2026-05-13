@@ -2007,10 +2007,16 @@ function ForAcademiesPage() {
 function formatCatalogueItemName(rawPath = '') {
   const fileName = rawPath.split('/').pop() || ''
   const withoutExtension = fileName.replace(/\.[a-z0-9]+$/i, '')
-  return withoutExtension
+  const formatted = withoutExtension
     .replace(/[_-]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
+
+  if (normalizeCatalogueToken(formatted) === 'MIRROR TOP COAT') {
+    return 'MIRROR POWDER Top Coat'
+  }
+
+  return formatted
 }
 
 function isCategoryHeroAssetPath(rawPath = '') {
