@@ -667,9 +667,10 @@ function fuzzyPriceLookup(code, rawName, wordIndex) {
   if (!wordIndex || !wordIndex.length) return null
   for (const cand of [code, rawName].filter(Boolean)) {
     const allTokens = normalizeSkuCode(cand).split(/\s+/).filter(Boolean)
-    // Significant words: >= 4 chars (not in skip list) + short numeric tokens (size indicators like 5, 7, 9, 11)
+    // Significant words: >= 4 chars (not in skip list) + multi-digit numeric tokens (size indicators like 15, 40, 100)
+    // Single digits like "3" or "1" from "3 in 1" names are excluded to avoid false negatives.
     const qWords = allTokens
-      .filter(w => (w.length >= 4 && !FUZZY_PRICE_SKIP.has(w)) || /^\d+$/.test(w))
+      .filter(w => (w.length >= 4 && !FUZZY_PRICE_SKIP.has(w)) || /^\d{2,}$/.test(w))
       .map(w => w.length >= 6 ? w.replace(/S$/, '') : w) // rough depluralize
     if (qWords.length < 2) continue
     const match = wordIndex.find(({ words }) =>
@@ -1981,7 +1982,7 @@ function formatCatalogueItemName(rawPath = '') {
 
 function isCategoryHeroAssetPath(rawPath = '') {
   const fileName = String(rawPath || '').split('/').pop() || ''
-  return /h[eo]{2}r[.\-]image/i.test(fileName) || /banner/i.test(fileName)
+  return /hero[.\-]image/i.test(fileName) || /banner/i.test(fileName)
 }
 
 function normalizeCatalogueToken(value = '') {
@@ -2274,6 +2275,14 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
       const bases5in1Items = basesBucket.get('5IN1 SUPERIOR BASE') || []
       bases5in1Items.push({ imageUrl: imagePath, name: formatCatalogueItemName(afterRoot) })
       basesBucket.set('5IN1 SUPERIOR BASE', bases5in1Items)
+      grouped.set('BASES', basesBucket)
+    }
+    // Cross-copy: 2026 NEW! Brush on Builder items also appear under BASES > BRUSH ON BUILDER
+    if (sourceCategory === '2026 NEW!' && (subfolderToken.includes('BRUSH ON BUILDER') || subfolderToken.includes('BIAB'))) {
+      const basesBucket = grouped.get('BASES') || new Map()
+      const bobItems = basesBucket.get('BRUSH ON BUILDER') || []
+      bobItems.push({ imageUrl: imagePath, name: formatCatalogueItemName(afterRoot) })
+      basesBucket.set('BRUSH ON BUILDER', bobItems)
       grouped.set('BASES', basesBucket)
     }
   })
@@ -3247,6 +3256,44 @@ function FullCataloguePage() {
           { codes: ['GIUP SBCMW', 'GIUP-SBCMW'], target: '5-in-1 Superior Base 15ml Milky White -HTF' },
           { codes: ['GIUP SBCN', 'GIUP-SBCN'], target: '5-in-1 Superior Base 15ml Nude -HTF' },
           { codes: ['GIUP SBCSN', 'GIUP-SBCSN'], target: '5-IN-1 Superior Base 15ml Soft Nude -HTF' },
+          // 2026 NEW! 5-in-1 Serenity bases
+          { codes: ['GIUP SBLS', 'GIUP-SBLS'], target: '5-in-1 Superior Base 15ml Lemon Serenity -HTF' },
+          { codes: ['GIUP SBMS', 'GIUP-SBMS'], target: '5-in-1 Superior Base 15ml Mint Serenity -HTF' },
+          { codes: ['GIUP SBBLUE', 'GIUP-SBBLUE', 'GIUP SBBlue', 'GIUP-SBBlue'], target: '5-in-1 Superior Base 15ml Blue Serenity -HTF' },
+          { codes: ['GIUP SBPS', 'GIUP-SBPS'], target: '5-in-1 Superior Base 15ml Peach Serenity -HTF' },
+          { codes: ['GIUP SBPURS', 'GIUP-SBPURS'], target: '5-in-1 Superior Base 15ml Purple Serenity -HTF' },
+          // Brush on Builder (BOB) — acronym codes map to price-list entries
+          { codes: ['GIUP BOBCLR', 'GIUP-BOBCLR', 'BOBCLR'], target: 'Brush on Builder Gel Clear 15ml -HTF' },
+          { codes: ['GIUP BOBCOV', 'GIUP-BOBCOV', 'BOBCOV'], target: 'Brush on Builder Gel Cover 15ml -HTF' },
+          { codes: ['GIUP BOBPNK', 'GIUP-BOBPNK', 'BOBPNK'], target: 'Brush on Builder Gel Pink 15ml -HTF' },
+          { codes: ['GIUP BOBCRM', 'GIUP-BOBCRM', 'BOBCRM'], target: 'Brush on Builder Gel Creamy 15ml -HTF' },
+          { codes: ['GIUP BOBNUD', 'GIUP-BOBNUD', 'BOBNUD'], target: 'Brush on Builder Gel Nude 15ml -HTF' },
+          { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL', 'BOBPURGL'], target: 'Brush on Builder Gel Purple 15ml -HTF' },
+          { codes: ['GIUP BOBDS', 'GIUP-BOBDS', 'BOBDS'], target: 'Brush on Builder Gel Dusty Shimmer 15ml -HTF' },
+          { codes: ['GIUP BOBMILK', 'GIUP-BOBMILK', 'BOBMILK'], target: 'Brush on Builder Gel Milky 15ml -HTF' },
+          { codes: ['GIUP BOBLIL', 'GIUP-BOBLIL', 'BOBLIL'], target: 'Brush on Builder Gel Lilac 15ml -HTF' },
+          { codes: ['GIUP BOBBLPN', 'GIUP-BOBBLPN', 'BOBBLPN'], target: 'Brush on Builder Gel Blush Pink 15ml -HTF' },
+          { codes: ['GIUP BOBSTPN', 'GIUP-BOBSTPN', 'BOBSTPN'], target: 'Brush on Builder Gel Soft Pink 15ml -HTF' },
+          { codes: ['GIUP BOBGLPN', 'GIUP-BOBGLPN', 'BOBGLPN'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
+          { codes: ['GIUP BOBGLMG', 'GIUP-BOBGLMG', 'BOBGLMG'], target: 'Brush on Builder Gel Magenta Glitter 15ml -HTF' },
+          { codes: ['GIUP BOBPRL', 'GIUP-BOBPRL', 'BOBPRL'], target: 'Brush on Builder Gel Milky Glitter 15ml -HTF' },
+          { codes: ['GIUP BOBGLROS', 'GIUP-BOBGLROS', 'BOBGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
+          { codes: ['GIUP BOBGLSLM', 'GIUP-BOBGLSLM', 'BOBGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
+          // 2026 NEW! Brush on Builder
+          { codes: ['GIUP BOB BLUSH SORBET', 'GIUP BOB blush sorbet', 'GIUP-BOB-BLUSH-SORBET'], target: 'Brush on Builder Gel Blush Sorbet 15ml -HTF' },
+          { codes: ['GIUP BOB SKY SPRINKLE', 'GIUP BOB sky sprinkle', 'GIUP-BOB-SKY-SPRINKLE'], target: 'Brush on Builder Gel Sky Sprinkle 15ml -HTF' },
+          { codes: ['GIUP BOB BERRY STARDUST', 'GIUP BOB Berry stardust', 'GIUP-BOB-BERRY-STARDUST'], target: 'Brush on Builder Gel Berry Stardust 15ml -HTF' },
+          // Skinny Liner brushes
+          { codes: ['SKINNY LINER 5 7', 'skinny liner 5 7'], target: 'Skinny Liner brush 5-7' },
+          { codes: ['SKINNY LINER 9 11', 'skinny liner 9 11'], target: 'Skinny Liner brush 9-11' },
+          // Mirror nail art powders
+          { codes: ['MIRROR CLEAR', 'SP8001'], target: 'SP8001 Mirror Clear Powder' },
+          { codes: ['MIRROR X1', 'TR01'], target: 'TR01 Mirror X1 Powder' },
+          { codes: ['MIRROR X2', 'TR02'], target: 'TR02 Mirror X2 Powder' },
+          { codes: ['MIRROR X3', 'TR03'], target: 'TR03 Mirror X3 Powder' },
+          { codes: ['MIRROR X4', 'TR04'], target: 'TR04 Mirror X4 Powder' },
+          { codes: ['MIRROR X5', 'TR05'], target: 'TR05 Mirror X5 Powder' },
+          { codes: ['MIRROR X6', 'TR06'], target: 'TR06 Mirror X6 Powder' },
           { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
           { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
           { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
@@ -3411,6 +3458,23 @@ function FullCataloguePage() {
           { codes: ['MARBLE 16'], target: 'Marble-It by GIUP #16' },
           { codes: ['MARBLE 17'], target: 'Marble-It by GIUP #17' },
           { codes: ['MARBLE 18'], target: 'Marble-It by GIUP #18' },
+          // 3-in-1 / Premium Builder Gel — image filenames don't match price-list names so explicit aliases needed
+          { codes: ['3 IN 1 CLEAR', '3 in 1 clear', '3IN1CLEAR', '3in1clear', '3 IN 1 PREMIUM CLEAR', '3 in 1 premium clear'], target: '3-in-1 Builder Gel Clear 40g -HTF' },
+          { codes: ['3IN1COVER', '3in1cover', '3 IN 1 PREMIUM BUILDER GEL COVER', '3 in 1 premium builder gel cover', '3 IN 1 GELITUP PREMIUM BUILDER GEL COVER', '3 in 1 gelitup premium builder gel cover', '3IN 1 PREMIUM BUILDER GEL COVER', '3in 1 premium builder gel cover'], target: 'Premium Builder Gel Cover 40gr -HTF' },
+          { codes: ['3IN1PINK', '3in1pink', '3 IN 1 PREMIUM BUILDER GELS PINK', '3 in 1 premium builder gels pink', '3 IN 1 GELITUP PREMIUM BUILDER GEL PINK', '3 in 1 gelitup premium builder gel pink'], target: 'Premium Builder Gel Pink 40gr -HTF' },
+          { codes: ['3 IN 1 GELITUP PREMIUM BUILDER GEL CLEAR', '3 in 1 gelitup premium builder gel clear', '3 IN 1 PREMIUM BUILDER GEL CLEAR', '3 in 1 premium builder gel clear'], target: 'Premium Builder Gel Clear 40gr -HTF' },
+          { codes: ['3 IN 1 GELITUP PREMIUM BUILDER GEL BLUSH', '3 in 1 gelitup premium builder gel blush', '3 IN 1 PREMIUM BUILDER GEL BLUSH', '3 in 1 premium builder gel blush'], target: 'Premium Builder Gel Blush 40gr -HTF' },
+          { codes: ['3 IN 1 GELITUP PREMIUM BUILDER GEL MILKY', '3 in 1 gelitup premium builder gel milky', '3 IN 1 PREMIUM BUILDER GEL MILKY', '3 in 1 premium builder gel milky'], target: 'Premium Builder Gel Milky 40gr -HTF' },
+          { codes: ['3 IN 1 GELITUP PREMIUM BUILDER GEL NUDE', '3 in 1 gelitup premium builder gel nude', '3 IN 1 PREMIUM BUILDER GEL NUDE', '3 in 1 premium builder gel nude'], target: 'Premium Builder Gel Nude 40gr -HTF' },
+          { codes: ['3 IN 1 GELITUP PREMIUM BUILDER GEL WHITE', '3 in 1 gelitup premium builder gel white', '3 IN 1 PREMIUM BUILDER GELS WHITE', '3 in 1 premium builder gels white'], target: 'Premium Builder Gel White 40gr -HTF' },
+          { codes: ['3 IN 1 GELITUP PREMIUM BUILDER GEL CLEAR PLUS', '3 in 1 gelitup premium builder gel clear plus', '3 IN 1 PREMIUM PLUS', '3 in 1.premium.plus', '3 IN 1.PREMIUM.PLUS'], target: 'Premium Plus Fiber Glass Builder Gel 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL PEARLY NUDE', '3 in 1 premium builder gel pearly nude'], target: 'Premium Builder Gel Pearly Nude 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL PEARLY PINK', '3 in 1 premium builder gel pearly pink', '3 IN 1 PREMIUM BUILDER GEL SHIMMER PINK', '3 in 1 premium builder gel shimmer pink'], target: 'Premium Builder Gel Pearly Pink 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL SHIMMER NUDE', '3 in 1 premium builder gel shimmer nude'], target: 'Premium Builder Gel Pearly Nude 40gr -HTF' },
+          { codes: ['3 IN 1 SHIMMER COVER', '3 in 1 shimmer cover', '3 IN 1 BUILDER GEL SHIMMER COVER', '3 in 1 builder gel shimmer cover'], target: '3-in-1 Shimmery Builder Gel 40g Cover -HTF' },
+          { codes: ['3 IN 1 SHIMMER IRIDESCENT CLEAR', '3 in 1 shimmer iridescent clear', '3 IN 1 BUILDER GEL IRIDESCENT SHIMMER CLEAR', '3 in 1 builder gel iridescent shimmer clear'], target: '3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF' },
+          { codes: ['3 IN 1 SHIMMER LIGHT LILAC', '3 in 1 shimmer light lilac', '3 IN 1 BUILDER GEL SHIMMER LILAC', '3 in 1 builder gel shimmer lilac'], target: '3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF' },
+          { codes: ['3 IN 1 MARMALADE SHIMMER PINK', '3 in 1 marmalade shimmer pink', '3 IN 1 BUILDER GEL MARMELADE SHIMMER PINK', '3 in 1 builder gel marmelade shimmer pink'], target: '3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF' },
           { codes: ['SUGARY GLITTER 01'], target: 'Sugary Glitter pigment 3gr 01 -HTF' },
           { codes: ['SUGARY GLITTER 02'], target: 'Sugary Glitter pigment 3gr 02 -HTF' },
           { codes: ['SUGARY GLITTER 03'], target: 'Sugary Glitter pigment 3gr 03 -HTF' },
