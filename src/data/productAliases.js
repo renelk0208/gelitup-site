@@ -25,8 +25,9 @@ export const PRODUCT_ALIAS_GROUPS =
   { codes: ['GIUP-SBMS', 'GIUP SBMS', 'SBMS'], target: '5-in-1 Superior Base 15ml Mint Serenity -HTF' },
   { codes: ['GIUP-SBBlue', 'GIUP SBBlue', 'SBBLUE'], target: '5-in-1 Superior Base 15ml Blue Serenity -HTF' },
   { codes: ['GIUP-SBPS', 'GIUP SBPS', 'SBPS'], target: '5-in-1 Superior Base 15ml Peach Serenity -HTF' },
-  // 5-in-1 Liquid rename (formerly all-in-one liquid)
-  { codes: ['ALL IN ONE LIQUID', 'ALL IN ONE LIQUID 200ML', 'ALL IN ONE LIQUID 200 ML', 'ALL-IN-ONE-LIQUID-200ML', '5 IN 1 LIQUID 200ML', '5-IN-1 LIQUID 200 ML -HTF'], target: '5-in-1 Liquid 200 ml -HTF' },
+  // All In One Liquids (separate line from 5-in-1 Superior Base)
+  { codes: ['ALL IN ONE LIQUID', 'ALL IN ONE LIQUID 200ML', 'ALL IN ONE LIQUID 200 ML', 'ALL-IN-ONE-LIQUID-200ML'], target: 'All In One Liquid 200 ml -HTF' },
+  { codes: ['ALL IN ONE LIQUID 500ML', 'ALL IN ONE LIQUID 500 ML', 'ALL-IN-ONE-LIQUID-500ML'], target: 'All In One Liquid 500 ml -HTF' },
   { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
   { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
   { codes: ['GIUPSB', 'GIUP SB', 'GIUP-SB'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },

@@ -1,8 +1,8 @@
 {
   "_meta": {
     "source": "price-list-export.csv",
-    "generated": "2026-05-13T16:15:26.090Z",
-    "count": 1078
+    "generated": "2026-05-13T16:40:01.426Z",
+    "count": 1079
   },
   "items": [
     {
@@ -602,42 +602,42 @@
     },
     {
       "name": "701 Portside -HTF",
-      "sku": "70-1 Portside -HTF",
+      "sku": "701 Portside -HTF",
       "price": 7.41
     },
     {
       "name": "702 Sea Breeze -HTF",
-      "sku": "70-2 Sea Breeze -HTF",
+      "sku": "702 Sea Breeze -HTF",
       "price": 7.41
     },
     {
       "name": "703 Electric Stingray -HTF",
-      "sku": "70-3 Electric Stingray -HTF",
+      "sku": "703 Electric Stingray -HTF",
       "price": 7.41
     },
     {
       "name": "704 Cape Of Storms -HTF",
-      "sku": "70-4 Cape Of Storms -HTF",
+      "sku": "704 Cape Of Storms -HTF",
       "price": 7.41
     },
     {
       "name": "705 Hang Ten -HTF",
-      "sku": "70-5 Hang Ten -HTF",
+      "sku": "705 Hang Ten -HTF",
       "price": 7.41
     },
     {
       "name": "706 Whale Watching -HTF",
-      "sku": "70-6 Whale Watching -HTF",
+      "sku": "706 Whale Watching -HTF",
       "price": 7.41
     },
     {
       "name": "707 Hang 11 -HTF",
-      "sku": "70-7 Hang 11 -HTF",
+      "sku": "707 Hang 11 -HTF",
       "price": 7.41
     },
     {
       "name": "708 Blue Bayou -HTF",
-      "sku": "70-8 Blue Bayou -HTF",
+      "sku": "708 Blue Bayou -HTF",
       "price": 7.41
     },
     {
@@ -4491,9 +4491,14 @@
       "price": 5.1
     },
     {
-      "name": "5-in-1 Liquid 200 ml -HTF",
-      "sku": "5-in-1 Liquid 200 ml -HTF",
-      "price": 4.78
+      "name": "All In One Liquid 200 ml -HTF",
+      "sku": "All In One Liquid 200 ml -HTF",
+      "price": 5.8
+    },
+    {
+      "name": "All In One Liquid 500 ml -HTF",
+      "sku": "All In One Liquid 500 ml -HTF",
+      "price": 14.15
     },
     {
       "name": "Dazzle Me 1gr GP06-Extreme Mirror",
