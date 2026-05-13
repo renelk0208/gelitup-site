@@ -16021,15 +16021,11 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     ?? liveRegistration?.distributor_tier
     ?? portalUser?.user_metadata?.distributor_tier
     ?? null
-  // Prices are shown by default. The ONLY case where prices are hidden is when we have a
-  // confirmed distributor registration with prices_allocated explicitly set to false.
-  // B2B clients, unknown users, and any non-distributor always see prices.
-  const isUnreleasedDistributor = liveRegistration !== null
-    && getApplicationTypeFromRecord(liveRegistration) === 'distributor'
-    && !Boolean(liveRegistration.prices_allocated)
+  // Prices are shown by default for all portal users.
+  // Admin previews can still explicitly override via pricesAllocatedOverride.
   const effectivePricesAllocated = pricesAllocatedOverride !== null
     ? pricesAllocatedOverride
-    : !isUnreleasedDistributor
+    : true
 
   if (portalUser?.user_metadata?.role === 'buyer') {
     return (
