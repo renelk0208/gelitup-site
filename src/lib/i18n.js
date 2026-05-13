@@ -1,10 +1,10 @@
 import { createContext, useContext } from 'react'
 
-/* Detect Italian context: gelitup.eu domain */
+/* Detect Italian context on gelitup.com via language path prefix */
 export function detectLang() {
   if (typeof window === 'undefined') return 'en'
-  const host = window.location.hostname
-  if (host === 'gelitup.eu' || host === 'www.gelitup.eu') return 'it'
+  const path = String(window.location.pathname || '').toLowerCase()
+  if (path === '/it' || path.startsWith('/it/')) return 'it'
   return 'en'
 }
 
