@@ -10319,11 +10319,12 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   }, [packageCartItems, selectedCodes])
 
   const hasCleanserInCart = useMemo(() => {
+    const isLiquidCleaner = (t) => t.includes('CLEANSER') || t.includes('ALL IN ONE LIQUID') || t.includes('ALL_IN_ONE_LIQUID')
     if (selectedCodes.some((code) => {
       const t = normalizeCatalogueToken(code)
-      return t.includes('CLEANSER') || normalizeCatalogueToken(catalogBySku.get(normalizeSkuCode(code))?.name || '').includes('CLEANSER')
+      return isLiquidCleaner(t) || isLiquidCleaner(normalizeCatalogueToken(catalogBySku.get(normalizeSkuCode(code))?.name || ''))
     })) return true
-    return packageCartItems.some((item) => normalizeCatalogueToken(item?.name || item?.code || '').includes('CLEANSER'))
+    return packageCartItems.some((item) => isLiquidCleaner(normalizeCatalogueToken(item?.name || item?.code || '')))
   }, [catalogBySku, packageCartItems, selectedCodes])
 
   const shouldShowCleanserUpsell = hasWotcInCart && !hasCleanserInCart
@@ -10411,7 +10412,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   [products, hasSuperbondSignal])
 
   const cleanserUpsellProduct = useMemo(() =>
-    products.find(p => normalizeCatalogueToken(p.name || '').includes('CLEANSER') && p.category === 'LIQUIDS'),
+    products.find(p => normalizeCatalogueToken(p.name || '').includes('ALL IN ONE LIQUID')),
   [products])
 
   const fiveIn1ClearProduct = useMemo(() =>
@@ -13101,9 +13102,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         {shouldShowCleanserUpsell && !dismissedCleanserUpsell && !isReordering && (
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Complete the Finish</p>
-            <p className="mt-1 text-sm text-emerald-900">Wipe-Off Top Coat requires a cleanser to remove the inhibition layer - add the Cleanser Liquid.</p>
+            <p className="mt-1 text-sm text-emerald-900">Wipe-Off Top Coat requires a liquid to remove the inhibition layer - add the All in One Liquid (available in 200ml and 500ml).</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => cleanserUpsellProduct ? setUpsellModal({ product: cleanserUpsellProduct, dismissFn: () => setDismissedCleanserUpsell(true) }) : (setDismissedCleanserUpsell(true), toggleCategory('LIQUIDS'), navigate('/portal/dashboard/catalog'))} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Cleanser</button>
+              <button onClick={() => cleanserUpsellProduct ? setUpsellModal({ product: cleanserUpsellProduct, dismissFn: () => setDismissedCleanserUpsell(true) }) : (setDismissedCleanserUpsell(true), toggleCategory('LIQUIDS'), navigate('/portal/dashboard/catalog'))} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View All in One Liquid</button>
               <button onClick={() => setDismissedCleanserUpsell(true)} className="rounded-lg border border-emerald-300 px-3 py-1.5 text-xs font-semibold text-emerald-800">Dismiss</button>
             </div>
           </div>
