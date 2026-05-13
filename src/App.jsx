@@ -5868,28 +5868,28 @@ function Nav({ onOpenContactModal }) {
       {/* Divider */}
       <span className="mx-1.5 h-5 w-px bg-white/20" aria-hidden="true" />
 
-      {/* Secondary — Distribution Registration */}
+      {/* Secondary — B2B Registration */}
       <NavLink
-        to="/portal/register"
+        to="/portal/register?type=b2b"
         className={({ isActive }) =>
           `rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
             isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/80 hover:border-white/50 hover:bg-white/10 hover:!text-white'
           }`
         }
       >
-        Distribution Registration
+        B2B Registration
       </NavLink>
 
-      {/* Sign In — distributor portal only */}
+      {/* B2B Sign In */}
       <NavLink
-        to="/portal/login?portal=distributor"
+        to="/portal/login?portal=b2b"
         className={({ isActive }) =>
           `rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
             isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/80 hover:border-white/50 hover:bg-white/10 hover:!text-white'
           }`
         }
       >
-        Sign In
+        B2B Login
       </NavLink>
     </nav>
   )
@@ -5949,9 +5949,9 @@ function MobileNav({ onOpenContactModal }) {
         {/* Nav links */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           {/* Quick-action CTAs at the top */}
-          {/* Secondary — Distribution Registration */}
+          {/* Secondary — B2B Registration */}
           <NavLink
-            to="/portal/register"
+            to="/portal/register?type=b2b"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
               `block rounded-lg border border-white/25 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-[0.06em] transition duration-200 ${
@@ -5959,10 +5959,10 @@ function MobileNav({ onOpenContactModal }) {
               }`
             }
           >
-            Distribution Registration
+            B2B Registration
           </NavLink>
           <NavLink
-            to="/portal/login?portal=distributor"
+            to="/portal/login?portal=b2b"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
               `block rounded-lg border border-white/25 px-4 py-3 text-center text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
@@ -5970,7 +5970,7 @@ function MobileNav({ onOpenContactModal }) {
               }`
             }
           >
-            Sign In
+            B2B Login
           </NavLink>
 
           <div className="my-2 border-t border-white/10" />
@@ -7147,15 +7147,6 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
   const prefilledEmail = String(loginParams.get('email') || '').trim().toLowerCase()
   const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
   const portalType = loginParams.get('portal') || 'b2b' // 'b2b' | 'distributor'
-
-  // B2B salon ordering has moved to the Shopify store — redirect non-distributor logins
-  useEffect(() => {
-    if (portalType === 'b2b' && !isPasswordResetFlow) {
-      window.location.href = SHOPIFY_SHOP_URL
-    }
-  }, [portalType, isPasswordResetFlow])
-
-  if (portalType === 'b2b' && !isPasswordResetFlow) return null
   // Reliable recovery detection: the PASSWORD_RECOVERY auth event sets pendingRecoverySession
   // (URL-based ?code= detection is unreliable — the SDK consumes the code before React renders)
   const isPasswordResetFlow = pendingRecoverySession
@@ -8637,7 +8628,10 @@ function CheckoutPage() {
 }
 
 function PortalRegister({ onRegister }) {
-  const defaultApplicationType = 'distributor'
+  const location = useLocation()
+  const registerParams = useMemo(() => new URLSearchParams(location.search), [location.search])
+  const requestedType = String(registerParams.get('type') || '').toLowerCase()
+  const defaultApplicationType = requestedType === 'b2b' ? 'b2b_order' : 'distributor'
 
   const [application, setApplication] = useState({
     applicationType: defaultApplicationType,
@@ -17874,6 +17868,7 @@ function App() {
               <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
               <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Become Distributor</NavLink>
               <NavLink to="/guestbook" className="block transition duration-300 hover:text-fuchsia-300">Guestbook</NavLink>
+              <NavLink to="/portal/login?portal=b2b" className="block transition duration-300 hover:text-fuchsia-300">B2B Login</NavLink>
               <NavLink to="/portal/login?portal=distributor" className="block transition duration-300 hover:text-fuchsia-300">Distributor Login</NavLink>
             </div>
           </div>
