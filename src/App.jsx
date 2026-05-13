@@ -2028,8 +2028,16 @@ function findCatalogueItemByMatch(items = [], rawMatch = '', used = new Set()) {
   const match = normalizeCatalogueToken(rawMatch)
   if (!match) return null
 
-  return items.find((item) => {
-    if (used.has(item.imageUrl)) return false
+  const available = items.filter((item) => !used.has(item.imageUrl))
+
+  // Match exact normalized names first to avoid selecting "... B" as the hero item.
+  const exactName = available.find((item) => normalizeCatalogueToken(item.name) === match)
+  if (exactName) return exactName
+
+  const exactPath = available.find((item) => normalizeCatalogueToken(item.imageUrl) === match)
+  if (exactPath) return exactPath
+
+  return available.find((item) => {
     const nameToken = normalizeCatalogueToken(item.name)
     const pathToken = normalizeCatalogueToken(item.imageUrl)
     return nameToken.includes(match) || pathToken.includes(match)
