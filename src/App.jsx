@@ -3259,6 +3259,16 @@ function FullCataloguePage() {
         const pnLookup = t => map.get(normalizeProductName(t))
         const aliasGroups = [
           { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-FBCLR'], target: 'Flexi Base Clear -HTF' },
+          { codes: ['CLASSIC BASE COAT IMAGE'], target: 'Base Coat 15ml -HTF' },
+          // 700-series colour codes (image path GIUP-701.webp → normalised to '701')
+          { codes: ['701'], target: '70-1 Portside -HTF' },
+          { codes: ['702'], target: '70-2 Sea Breeze -HTF' },
+          { codes: ['703'], target: '70-3 Electric Stingray -HTF' },
+          { codes: ['704'], target: '70-4 Cape Of Storms -HTF' },
+          { codes: ['705'], target: '70-5 Hang Ten -HTF' },
+          { codes: ['706'], target: '70-6 Whale Watching -HTF' },
+          { codes: ['707'], target: '70-7 Hang 11 -HTF' },
+          { codes: ['708'], target: '70-8 Blue Bayou -HTF' },
           { codes: ['GIUP SBCCLR', 'GIUP-SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
           { codes: ['GIUP SBCMP', 'GIUP-SBCMP'], target: '5-in-1 Superior Base 15ml Milky Pink -HTF' },
           { codes: ['GIUP SBCPP', 'GIUP-SBCPP'], target: '5-in-1 Superior Base 15ml Pretty Pink -HTF' },
@@ -3341,7 +3351,7 @@ function FullCataloguePage() {
           { codes: ['1280x1280_nail_bufer_100', '1280x1280 nail bufer 100'], target: 'Nail Files With Back Glue 100 Packet of 10' },
           { codes: ['1280x1280_nail_bufer_120', '1280x1280 nail bufer 120'], target: 'Nail Files With Back Glue 120 Packet of 10' },
           { codes: ['1280x1280_nail_bufer_180', '1280x1280 nail bufer 180'], target: 'Nail Files With Back Glue 180 Packet of 10' },
-          { codes: ['1280x1280_nail_bufer_metallic', '1280x1280 nail bufer metallic', 'Boat Shape metallic Nail Base', 'Boat-Shape-metallic-Nail-Base'], target: 'GIUP Boat Shape metallic Nail File' },
+          { codes: ['1280x1280_nail_bufer_metallic', '1280x1280 nail bufer metallic', 'Boat Shape metallic Nail Base', 'Boat-Shape-metallic-Nail-Base', 'BOAT SHAPE METALLIC NAIL BASE'], target: 'GIUP Boat Shape metallic Nail File' },
           { codes: ['1280x1280_buffer_100_120', '1280x1280 buffer 100 120', '100_120_file2', '100 120 file2'], target: 'GIUP Boat Shape Nail File 100/120 Purple Sponge' },
           { codes: ['1280x1280_buffer_180_180', '1280x1280 buffer 180 180', '180_180_file2', '180 180 file2'], target: 'Nail Files 180/180 Pink Sponge' },
           { codes: ['buffing block', 'BUFFING BLOCK', '\u0392uffing block', '\u0392uffing_block'], target: 'Nail Files 100/100' },
@@ -3361,16 +3371,17 @@ function FullCataloguePage() {
           { codes: ['3 IN 1 SHIMMER IRIDESCENT CLEAR'], target: '3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF' },
           { codes: ['3 IN 1 SHIMMER LIGHT LILAC'], target: '3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF' },
           { codes: ['3 IN 1 MARMALADE SHIMMER PINK'], target: '3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF' },
-          { codes: ['3 IN 1 PREMIUM CLEAR', '3IN 1 PREMIUM CLEAR'], target: 'Premium Builder Gel Clear 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM CLEAR', '3IN 1 PREMIUM CLEAR', '3 IN 1 PREMIUM BUILDER GEL CLEAR'], target: 'Premium Builder Gel Clear 40gr -HTF' },
           { codes: ['3IN 1 PREMIUM BUILDER GEL COVER', '3 IN 1 PREMIUM BUILDER GEL COVER'], target: 'Premium Builder Gel Cover 40gr -HTF' },
           { codes: ['3 IN 1 PREMIUM BUILDER GEL BLUSH'], target: 'Premium Builder Gel Blush 40gr -HTF' },
           { codes: ['3 IN 1 PREMIUM BUILDER GEL MILKY'], target: 'Premium Builder Gel Milky 40gr -HTF' },
           { codes: ['3 IN 1 PREMIUM BUILDER GEL NUDE'], target: 'Premium Builder Gel Nude 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL SHIMMER NUDE'], target: 'Premium Builder Gel Nude II 40gr -HTF' },
           { codes: ['3 IN 1 PREMIUM BUILDER GEL PEARLY NUDE'], target: 'Premium Builder Gel Pearly Nude 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GEL PEARLY PINK'], target: 'Premium Builder Gel Pearly Pink 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GELS PINK'], target: 'Premium Builder Gel Pink 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GELS WHITE'], target: 'Premium Builder Gel White 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM PLUS', '3 IN 1.PREMIUM.PLUS'], target: 'Premium Plus Fiber Glass Builder Gel 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL SHIMMER PINK', '3 IN 1 PREMIUM BUILDER GEL PEARLY PINK'], target: 'Premium Builder Gel Pearly Pink 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GELS PINK', '3 IN 1 PREMIUM BUILDER GEL PINK'], target: 'Premium Builder Gel Pink 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GELS WHITE', '3 IN 1 PREMIUM BUILDER GEL WHITE'], target: 'Premium Builder Gel White 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM PLUS', '3 IN 1.PREMIUM.PLUS', '3 IN 1 PREMIUM BUILDER GEL CLEAR PLUS'], target: 'Premium Plus Fiber Glass Builder Gel 40gr -HTF' },
           { codes: ['GIUP BOBCLR', 'GIUP-BOBCLR'], target: 'Brush on Builder Gel Clear 15ml -HTF' },
           { codes: ['GIUP BOBCOV', 'GIUP-BOBCOV'], target: 'Brush on Builder Gel Cover 15ml -HTF' },
           { codes: ['GIUP BOBPNK', 'GIUP-BOBPNK'], target: 'Brush on Builder Gel Pink 15ml -HTF' },
@@ -4684,7 +4695,7 @@ function FullCataloguePage() {
                           <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                           <p className="break-words text-[11px] font-light text-black/55">{itemCode}</p>
                         </div>
-                        <NavLink to="/portal/buy" className="shrink-0 rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-xs font-semibold text-white transition duration-200 hover:bg-fuchsia-700">Buy Now</NavLink>
+                        <NavLink to={isLoggedIn ? '/portal/buy' : '/become-distributor'} className="shrink-0 rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-xs font-semibold text-white transition duration-200 hover:bg-fuchsia-700">Buy Now</NavLink>
                       </div>
                     )
                   }
@@ -4709,7 +4720,7 @@ function FullCataloguePage() {
                           <p className="break-words text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
                         </div>
                         <div className="mt-auto pt-3">
-                          <NavLink to="/portal/buy" className="block w-full rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-center text-xs font-semibold text-white transition duration-200 hover:bg-fuchsia-700">Buy Now</NavLink>
+                          <NavLink to={isLoggedIn ? '/portal/buy' : '/become-distributor'} className="block w-full rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-center text-xs font-semibold text-white transition duration-200 hover:bg-fuchsia-700">Buy Now</NavLink>
                         </div>
                       </div>
                     </article>
@@ -10728,6 +10739,16 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['GIUP SBCMW', 'GIUP-SBCMW'], target: '5-in-1 Superior Base 15ml Milky White -HTF' },
           { codes: ['GIUP SBCN', 'GIUP-SBCN'], target: '5-in-1 Superior Base 15ml Nude -HTF' },
           { codes: ['GIUP SBCSN', 'GIUP-SBCSN'], target: '5-IN-1 Superior Base 15ml Soft Nude -HTF' },
+          { codes: ['CLASSIC BASE COAT IMAGE'], target: 'Base Coat 15ml -HTF' },
+          // 700-series colour codes (image path GIUP-701.webp → normalised to '701')
+          { codes: ['701'], target: '70-1 Portside -HTF' },
+          { codes: ['702'], target: '70-2 Sea Breeze -HTF' },
+          { codes: ['703'], target: '70-3 Electric Stingray -HTF' },
+          { codes: ['704'], target: '70-4 Cape Of Storms -HTF' },
+          { codes: ['705'], target: '70-5 Hang Ten -HTF' },
+          { codes: ['706'], target: '70-6 Whale Watching -HTF' },
+          { codes: ['707'], target: '70-7 Hang 11 -HTF' },
+          { codes: ['708'], target: '70-8 Blue Bayou -HTF' },
           { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
           { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
           { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
@@ -10762,7 +10783,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['1280x1280_nail_bufer_100', '1280x1280 nail bufer 100', 'Nail Files With Back Glue 100 Packet of 10'], target: 'Nail Files With Back Glue 100 Packet of 10' },
           { codes: ['1280x1280_nail_bufer_120', '1280x1280 nail bufer 120', 'Nail Files With Back Glue 120 Packet of 10'], target: 'Nail Files With Back Glue 120 Packet of 10' },
           { codes: ['1280x1280_nail_bufer_180', '1280x1280 nail bufer 180', 'Nail Files With Back Glue 180 Packet of 10'], target: 'Nail Files With Back Glue 180 Packet of 10' },
-          { codes: ['1280x1280_nail_bufer_metallic', '1280x1280 nail bufer metallic', 'Boat Shape metallic Nail Base', 'Boat-Shape-metallic-Nail-Base'], target: 'GIUP Boat Shape metallic Nail File' },
+          { codes: ['1280x1280_nail_bufer_metallic', '1280x1280 nail bufer metallic', 'Boat Shape metallic Nail Base', 'Boat-Shape-metallic-Nail-Base', 'BOAT SHAPE METALLIC NAIL BASE'], target: 'GIUP Boat Shape metallic Nail File' },
           { codes: ['1280x1280_buffer_100_120', '1280x1280 buffer 100 120', '100_120_file2', '100 120 file2', 'Nail Files Buffer 100 180 Purple Sponge', 'Nail Files Buffer 100-180 Purple Sponge'], target: 'GIUP Boat Shape Nail File 100/120 Purple Sponge' },
           { codes: ['1280x1280_buffer_180_180', '1280x1280 buffer 180 180', '180_180_file2', '180 180 file2', 'Nail Files Buffer 180 180 Pink Sponge', 'Nail Files Buffer 180-180 Pink Sponge'], target: 'Nail Files 180/180 Pink Sponge' },
           { codes: ['?uffing_block', '?uffing block', 'buffing block', 'BUFFING BLOCK', '\u0392uffing block', '\u0392uffing_block'], target: 'Nail Files 100/100' },
@@ -10786,16 +10807,17 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['3 IN 1 SHIMMER LIGHT LILAC'], target: '3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF' },
           { codes: ['3 IN 1 MARMALADE SHIMMER PINK'], target: '3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF' },
           // Premium Builder Gel
-          { codes: ['3 IN 1 PREMIUM CLEAR', '3IN 1 PREMIUM CLEAR'], target: 'Premium Builder Gel Clear 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM CLEAR', '3IN 1 PREMIUM CLEAR', '3 IN 1 PREMIUM BUILDER GEL CLEAR'], target: 'Premium Builder Gel Clear 40gr -HTF' },
           { codes: ['3IN 1 PREMIUM BUILDER GEL COVER', '3 IN 1 PREMIUM BUILDER GEL COVER'], target: 'Premium Builder Gel Cover 40gr -HTF' },
           { codes: ['3 IN 1 PREMIUM BUILDER GEL BLUSH'], target: 'Premium Builder Gel Blush 40gr -HTF' },
           { codes: ['3 IN 1 PREMIUM BUILDER GEL MILKY'], target: 'Premium Builder Gel Milky 40gr -HTF' },
           { codes: ['3 IN 1 PREMIUM BUILDER GEL NUDE'], target: 'Premium Builder Gel Nude 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL SHIMMER NUDE'], target: 'Premium Builder Gel Nude II 40gr -HTF' },
           { codes: ['3 IN 1 PREMIUM BUILDER GEL PEARLY NUDE'], target: 'Premium Builder Gel Pearly Nude 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GEL PEARLY PINK'], target: 'Premium Builder Gel Pearly Pink 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GELS PINK'], target: 'Premium Builder Gel Pink 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM BUILDER GELS WHITE'], target: 'Premium Builder Gel White 40gr -HTF' },
-          { codes: ['3 IN 1 PREMIUM PLUS', '3 IN 1.PREMIUM.PLUS'], target: 'Premium Plus Fiber Glass Builder Gel 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GEL SHIMMER PINK', '3 IN 1 PREMIUM BUILDER GEL PEARLY PINK'], target: 'Premium Builder Gel Pearly Pink 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GELS PINK', '3 IN 1 PREMIUM BUILDER GEL PINK'], target: 'Premium Builder Gel Pink 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM BUILDER GELS WHITE', '3 IN 1 PREMIUM BUILDER GEL WHITE'], target: 'Premium Builder Gel White 40gr -HTF' },
+          { codes: ['3 IN 1 PREMIUM PLUS', '3 IN 1.PREMIUM.PLUS', '3 IN 1 PREMIUM BUILDER GEL CLEAR PLUS'], target: 'Premium Plus Fiber Glass Builder Gel 40gr -HTF' },
           // Brush on Builder (BOB)
           { codes: ['GIUP BOBCLR', 'GIUP-BOBCLR'], target: 'Brush on Builder Gel Clear 15ml -HTF' },
           { codes: ['GIUP BOBCOV', 'GIUP-BOBCOV'], target: 'Brush on Builder Gel Cover 15ml -HTF' },
