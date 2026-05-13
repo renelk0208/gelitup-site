@@ -4330,11 +4330,11 @@ function FullCataloguePage() {
               <path fillRule="evenodd" d="M14 8a.75.75 0 0 1-.75.75H4.56l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 1.06L4.56 7.25H13.25A.75.75 0 0 1 14 8Z" clipRule="evenodd" />
             </svg>
             <span>{searchQuery ? 'Back to Search Results' : 'Back to Categories'}</span>
-                          <button
+          </button>
           {searchQuery && (
             <span className="rounded-full border border-fuchsia-300 bg-fuchsia-50 px-3 py-1 text-xs font-semibold text-fuchsia-700">
               Filtered: &ldquo;{searchQuery}&rdquo; &mdash; {filteredItems.length} result{filteredItems.length === 1 ? '' : 's'}
-                            Buy Now
+            </span>
           )}
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
