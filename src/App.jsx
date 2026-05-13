@@ -3487,7 +3487,7 @@ function FullCataloguePage() {
           { codes: ['MARBLE 17'], target: 'Marble-It by GIUP #17' },
           { codes: ['MARBLE 18'], target: 'Marble-It by GIUP #18' },
           // 3-in-1 / Premium Builder Gel — image filenames don't match price-list names so explicit aliases needed
-          { codes: ['3 IN 1 CLEAR', '3 in 1 clear', '3IN1CLEAR', '3in1clear', '3 IN 1 PREMIUM CLEAR', '3 in 1 premium clear'], target: '3-in-1 Builder Gel Clear 40g -HTF' },
+          { codes: ['3 IN 1 CLEAR', '3 in 1 clear', '3IN1CLEAR', '3in1clear', '3 IN 1 PREMIUM CLEAR', '3 in 1 premium clear', '3 IN 1 BUILDER GEL CLEAR', '3 in 1 builder gel clear'], target: '3-in-1 Builder Gel Clear 40g -HTF' },
           { codes: ['3IN1COVER', '3in1cover', '3 IN 1 PREMIUM BUILDER GEL COVER', '3 in 1 premium builder gel cover', '3 IN 1 GELITUP PREMIUM BUILDER GEL COVER', '3 in 1 gelitup premium builder gel cover', '3IN 1 PREMIUM BUILDER GEL COVER', '3in 1 premium builder gel cover'], target: 'Premium Builder Gel Cover 40gr -HTF' },
           { codes: ['3IN1PINK', '3in1pink', '3 IN 1 PREMIUM BUILDER GELS PINK', '3 in 1 premium builder gels pink', '3 IN 1 GELITUP PREMIUM BUILDER GEL PINK', '3 in 1 gelitup premium builder gel pink'], target: 'Premium Builder Gel Pink 40gr -HTF' },
           { codes: ['3 IN 1 GELITUP PREMIUM BUILDER GEL CLEAR', '3 in 1 gelitup premium builder gel clear', '3 IN 1 PREMIUM BUILDER GEL CLEAR', '3 in 1 premium builder gel clear'], target: 'Premium Builder Gel Clear 40gr -HTF' },
@@ -3503,6 +3503,8 @@ function FullCataloguePage() {
           { codes: ['3 IN 1 SHIMMER IRIDESCENT CLEAR', '3 in 1 shimmer iridescent clear', '3 IN 1 BUILDER GEL IRIDESCENT SHIMMER CLEAR', '3 in 1 builder gel iridescent shimmer clear'], target: '3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF' },
           { codes: ['3 IN 1 SHIMMER LIGHT LILAC', '3 in 1 shimmer light lilac', '3 IN 1 BUILDER GEL SHIMMER LILAC', '3 in 1 builder gel shimmer lilac'], target: '3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF' },
           { codes: ['3 IN 1 MARMALADE SHIMMER PINK', '3 in 1 marmalade shimmer pink', '3 IN 1 BUILDER GEL MARMELADE SHIMMER PINK', '3 in 1 builder gel marmelade shimmer pink'], target: '3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF' },
+          { codes: ['3 IN 1 BUILDER GEL COVER', '3 in 1 builder gel cover'], target: '3-in-1 Builder Gel Cover 40g -HTF' },
+          { codes: ['3 IN 1 BUILDER GEL PINK', '3 in 1 builder gel pink'], target: '3-in-1 Builder Gel Pink 40g -HTF' },
           { codes: ['SUGARY GLITTER 01'], target: 'Sugary Glitter pigment 3gr 01 -HTF' },
           { codes: ['SUGARY GLITTER 02'], target: 'Sugary Glitter pigment 3gr 02 -HTF' },
           { codes: ['SUGARY GLITTER 03'], target: 'Sugary Glitter pigment 3gr 03 -HTF' },
@@ -9747,15 +9749,24 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [packageTier, setPackageTier] = useState('Silver')
   const [draftInvoice, setDraftInvoice] = useState('')
   const [isReordering, setIsReordering] = useState(false)
-  const [dismissedTechnicalUpsell, setDismissedTechnicalUpsell] = useState(false)
-  const [dismissedMagnetUpsell, setDismissedMagnetUpsell] = useState(false)
-  const [dismissedSuperbondUpsell, setDismissedSuperbondUpsell] = useState(false)
-  const [dismissedCleanserUpsell, setDismissedCleanserUpsell] = useState(false)
-  const [dismissedSynthoUpsell, setDismissedSynthoUpsell] = useState(false)
-  const [dismissedTipsBaseUpsell, setDismissedTipsBaseUpsell] = useState(false)
-  const [dismissedLiquidPolygel5in1Upsell, setDismissedLiquidPolygel5in1Upsell] = useState(false)
-  const [dismissedDualFormsUpsell, setDismissedDualFormsUpsell] = useState(false)
-  const [dismissedBuilderGelSuperbondUpsell, setDismissedBuilderGelSuperbondUpsell] = useState(false)
+  const [dismissedTechnicalUpsell, _setDimTech] = useState(() => localStorage.getItem('giup_ud_tech') === 'true')
+  const setDismissedTechnicalUpsell = (v) => { if (v) localStorage.setItem('giup_ud_tech', 'true'); _setDimTech(v) }
+  const [dismissedMagnetUpsell, _setDimMagnet] = useState(() => localStorage.getItem('giup_ud_magnet') === 'true')
+  const setDismissedMagnetUpsell = (v) => { if (v) localStorage.setItem('giup_ud_magnet', 'true'); _setDimMagnet(v) }
+  const [dismissedSuperbondUpsell, _setDimSB] = useState(() => localStorage.getItem('giup_ud_superbond') === 'true')
+  const setDismissedSuperbondUpsell = (v) => { if (v) localStorage.setItem('giup_ud_superbond', 'true'); _setDimSB(v) }
+  const [dismissedCleanserUpsell, _setDimCleanser] = useState(() => localStorage.getItem('giup_ud_cleanser') === 'true')
+  const setDismissedCleanserUpsell = (v) => { if (v) localStorage.setItem('giup_ud_cleanser', 'true'); _setDimCleanser(v) }
+  const [dismissedSynthoUpsell, _setDimSyntho] = useState(() => localStorage.getItem('giup_ud_syntho') === 'true')
+  const setDismissedSynthoUpsell = (v) => { if (v) localStorage.setItem('giup_ud_syntho', 'true'); _setDimSyntho(v) }
+  const [dismissedTipsBaseUpsell, _setDimTipsBase] = useState(() => localStorage.getItem('giup_ud_tipsbase') === 'true')
+  const setDismissedTipsBaseUpsell = (v) => { if (v) localStorage.setItem('giup_ud_tipsbase', 'true'); _setDimTipsBase(v) }
+  const [dismissedLiquidPolygel5in1Upsell, _setDimLPG] = useState(() => localStorage.getItem('giup_ud_lpg5in1') === 'true')
+  const setDismissedLiquidPolygel5in1Upsell = (v) => { if (v) localStorage.setItem('giup_ud_lpg5in1', 'true'); _setDimLPG(v) }
+  const [dismissedDualFormsUpsell, _setDimDual] = useState(() => localStorage.getItem('giup_ud_dual') === 'true')
+  const setDismissedDualFormsUpsell = (v) => { if (v) localStorage.setItem('giup_ud_dual', 'true'); _setDimDual(v) }
+  const [dismissedBuilderGelSuperbondUpsell, _setDimBuilderSB] = useState(() => localStorage.getItem('giup_ud_buildersb') === 'true')
+  const setDismissedBuilderGelSuperbondUpsell = (v) => { if (v) localStorage.setItem('giup_ud_buildersb', 'true'); _setDimBuilderSB(v) }
   const [upsellModal, setUpsellModal] = useState(null)
   const [upsellModalQty, setUpsellModalQty] = useState(1)
   const [includeProfessionalBasePack, setIncludeProfessionalBasePack] = useState(false)
@@ -10558,50 +10569,10 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     [packagePreviewItems, packagePreviewVisibleCount],
   )
 
-  useEffect(() => {
-    if (!shouldShowTechnicalUpsellToast) {
-      setDismissedTechnicalUpsell(false)
-    }
-  }, [shouldShowTechnicalUpsellToast])
-
-  useEffect(() => {
-    if (!shouldShowMagnetUpsellToast) {
-      setDismissedMagnetUpsell(false)
-    }
-  }, [shouldShowMagnetUpsellToast])
-
   // Reset qty stepper whenever the upsell modal opens a new product
   useEffect(() => {
     setUpsellModalQty(1)
   }, [upsellModal?.product?.code])
-
-  useEffect(() => {
-    if (!shouldShowSuperbondUpsell) setDismissedSuperbondUpsell(false)
-  }, [shouldShowSuperbondUpsell])
-
-  useEffect(() => {
-    if (!shouldShowBuilderGelSuperbondUpsell) setDismissedBuilderGelSuperbondUpsell(false)
-  }, [shouldShowBuilderGelSuperbondUpsell])
-
-  useEffect(() => {
-    if (!shouldShowCleanserUpsell) setDismissedCleanserUpsell(false)
-  }, [shouldShowCleanserUpsell])
-
-  useEffect(() => {
-    if (!shouldShowSynthoUpsell) setDismissedSynthoUpsell(false)
-  }, [shouldShowSynthoUpsell])
-
-  useEffect(() => {
-    if (!shouldShowTipsBaseUpsell) setDismissedTipsBaseUpsell(false)
-  }, [shouldShowTipsBaseUpsell])
-
-  useEffect(() => {
-    if (!shouldShowLiquidPolygel5in1Upsell) setDismissedLiquidPolygel5in1Upsell(false)
-  }, [shouldShowLiquidPolygel5in1Upsell])
-
-  useEffect(() => {
-    if (!shouldShowDualFormsUpsell) setDismissedDualFormsUpsell(false)
-  }, [shouldShowDualFormsUpsell])
 
   useEffect(() => {
     let mounted = true
@@ -10799,13 +10770,13 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['MIRROR X5', 'TR 5', 'TR5'], target: 'TR05 Mirror X5 Powder' },
           { codes: ['MIRROR X6', 'TR 6', 'TR6'], target: 'TR06 Mirror X6 Powder' },
           // 3-in-1 Builder Gel
-          { codes: ['3 IN 1 CLEAR', '3IN1CLEAR'], target: '3-in-1 Builder Gel Clear 40g -HTF' },
-          { codes: ['3IN1COVER'], target: '3-in-1 Builder Gel Cover 40g -HTF' },
-          { codes: ['3IN1PINK'], target: '3-in-1 Builder Gel Pink 40g -HTF' },
-          { codes: ['3 IN 1 SHIMMER COVER'], target: '3-in-1 Shimmery Builder Gel 40g Cover -HTF' },
-          { codes: ['3 IN 1 SHIMMER IRIDESCENT CLEAR'], target: '3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF' },
-          { codes: ['3 IN 1 SHIMMER LIGHT LILAC'], target: '3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF' },
-          { codes: ['3 IN 1 MARMALADE SHIMMER PINK'], target: '3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF' },
+          { codes: ['3 IN 1 CLEAR', '3IN1CLEAR', '3 IN 1 BUILDER GEL CLEAR'], target: '3-in-1 Builder Gel Clear 40g -HTF' },
+          { codes: ['3IN1COVER', '3 IN 1 BUILDER GEL COVER'], target: '3-in-1 Builder Gel Cover 40g -HTF' },
+          { codes: ['3IN1PINK', '3 IN 1 BUILDER GEL PINK'], target: '3-in-1 Builder Gel Pink 40g -HTF' },
+          { codes: ['3 IN 1 SHIMMER COVER', '3 IN 1 BUILDER GEL SHIMMER COVER'], target: '3-in-1 Shimmery Builder Gel 40g Cover -HTF' },
+          { codes: ['3 IN 1 SHIMMER IRIDESCENT CLEAR', '3 IN 1 BUILDER GEL IRIDESCENT SHIMMER CLEAR'], target: '3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF' },
+          { codes: ['3 IN 1 SHIMMER LIGHT LILAC', '3 IN 1 BUILDER GEL SHIMMER LILAC'], target: '3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF' },
+          { codes: ['3 IN 1 MARMALADE SHIMMER PINK', '3 IN 1 BUILDER GEL MARMELADE SHIMMER PINK'], target: '3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF' },
           // Premium Builder Gel
           { codes: ['3 IN 1 PREMIUM CLEAR', '3IN 1 PREMIUM CLEAR', '3 IN 1 PREMIUM BUILDER GEL CLEAR'], target: 'Premium Builder Gel Clear 40gr -HTF' },
           { codes: ['3IN 1 PREMIUM BUILDER GEL COVER', '3 IN 1 PREMIUM BUILDER GEL COVER'], target: 'Premium Builder Gel Cover 40gr -HTF' },
