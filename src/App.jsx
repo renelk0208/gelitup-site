@@ -3662,6 +3662,41 @@ function FullCataloguePage() {
           { codes: ['apron', 'APRON'], target: 'Apron Black With Logo' },
           { codes: ['nailsticks clear scaled 1', 'nailsticks_clear-scaled-1'], target: 'Nail sticks clear with ring' },
           { codes: ['cushion sponge', 'cushion sponge 2', 'CUSHION SPONGE'], target: 'Ombre sponge' },
+          // Brush on Builder — new filename-derived normalised names (Brush-On-Builder-biab*.webp)
+          { codes: ['BRUSH ON BUILDER BIABCLR'], target: 'Brush on Builder Gel Clear 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABCOV'], target: 'Brush on Builder Gel Cover 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABPNK'], target: 'Brush on Builder Gel Pink 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABCRM'], target: 'Brush on Builder Gel Creamy 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABNUD'], target: 'Brush on Builder Gel Nude 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABPURGL'], target: 'Brush on Builder Gel Purple 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABDS'], target: 'Brush on Builder Gel Dusty Shimmer 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABMILK'], target: 'Brush on Builder Gel Milky 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABLIL'], target: 'Brush on Builder Gel Lilac 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABBLPN'], target: 'Brush on Builder Gel Blush Pink 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABSTPN'], target: 'Brush on Builder Gel Soft Pink 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABGLPN'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABGLMG'], target: 'Brush on Builder Gel Magenta Glitter 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABPRL'], target: 'Brush on Builder Gel Milky Glitter 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIAB SKY SPRINKLE 1'], target: 'Brush on Builder Gel Sky Sprinkle 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIAB BLUSH SORBET'], target: 'Brush on Builder Gel Blush Sorbet 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIAB BERRY STARDUST'], target: 'Brush on Builder Gel Berry Stardust 15ml -HTF' },
+          // 5-in-1 Superior Base — new filename-derived normalised names (5-in-1-GIUP-SBC*.webp)
+          { codes: ['5 IN 1 SBCBP'], target: '5-in-1 Superior Base 15ml Baby Pink -HTF' },
+          { codes: ['5 IN 1 SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
+          { codes: ['5 IN 1 SBCCP'], target: '5-in-1 Superior Base 15ml Candy Pink -HTF' },
+          { codes: ['5 IN 1 SBCMP'], target: '5-in-1 Superior Base 15ml Milky Pink -HTF' },
+          { codes: ['5 IN 1 SBCPP'], target: '5-in-1 Superior Base 15ml Pretty Pink -HTF' },
+          { codes: ['5 IN 1 SBCSP'], target: '5-in-1 Superior Base 15ml Sweet Pink -HTF' },
+          { codes: ['5 IN 1 SBCGLPI'], target: '5-IN-1 Superior Base 15ml Glittery Pink -HTF' },
+          { codes: ['5 IN 1 SBCGP'], target: '5-in-1 Superior Base 15ml Glittery Peach -HTF' },
+          { codes: ['5 IN 1 SBCIRPI'], target: '5-IN-1 Superior Base 15ml Irridecent Pink -HTF' },
+          { codes: ['5 IN 1 SBCIMF'], target: '5-in-1 Superior Base 15ml Iridescent Milky Flakes -HTF' },
+          { codes: ['5 IN 1 SBCCLI'], target: '5-in-1 Superior Base 15ml Lilac -HTF' },
+          { codes: ['5 IN 1 SBCMW'], target: '5-in-1 Superior Base 15ml Milky White -HTF' },
+          { codes: ['5 IN 1 SBCN'], target: '5-in-1 Superior Base 15ml Nude -HTF' },
+          { codes: ['5 IN 1 SBCSN'], target: '5-IN-1 Superior Base 15ml Soft Nude -HTF' },
         ]
         for (const { codes, target } of aliasGroups) {
           const entry = pnLookup(target)
@@ -4649,14 +4684,7 @@ function FullCataloguePage() {
                           <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                           <p className="break-words text-[11px] font-light text-black/55">{itemCode}</p>
                         </div>
-                        <a
-                          href={SHOPIFY_SHOP_URL}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="shrink-0 rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-fuchsia-500"
-                        >
-                          Buy Now
-                        </a>
+
                       </div>
                     )
                   }
@@ -4680,16 +4708,7 @@ function FullCataloguePage() {
                           <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
                           <p className="break-words text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
                         </div>
-                        <div className="mt-auto pt-3">
-                          <a
-                            href={SHOPIFY_SHOP_URL}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex w-full items-center justify-center rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
-                          >
-                            Buy Now
-                          </a>
-                        </div>
+
                       </div>
                     </article>
                   )
@@ -11102,6 +11121,41 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['Dual Forms MEDIUM SQUARE', 'DUAL FORMS MEDIUM SQUARE'], target: 'SOAK OFF GEL TIPS MEDIUM SQUARE' },
           // Nail Art — cushion sponge (ombre blending tool)
           { codes: ['cushion sponge', 'cushion sponge 2', 'CUSHION SPONGE'], target: 'Ombre sponge' },
+          // Brush on Builder — new filename-derived normalised names (Brush-On-Builder-biab*.webp)
+          { codes: ['BRUSH ON BUILDER BIABCLR'], target: 'Brush on Builder Gel Clear 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABCOV'], target: 'Brush on Builder Gel Cover 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABPNK'], target: 'Brush on Builder Gel Pink 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABCRM'], target: 'Brush on Builder Gel Creamy 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABNUD'], target: 'Brush on Builder Gel Nude 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABPURGL'], target: 'Brush on Builder Gel Purple 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABDS'], target: 'Brush on Builder Gel Dusty Shimmer 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABMILK'], target: 'Brush on Builder Gel Milky 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABLIL'], target: 'Brush on Builder Gel Lilac 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABBLPN'], target: 'Brush on Builder Gel Blush Pink 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABSTPN'], target: 'Brush on Builder Gel Soft Pink 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABGLPN'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABGLMG'], target: 'Brush on Builder Gel Magenta Glitter 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABPRL'], target: 'Brush on Builder Gel Milky Glitter 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIABGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIAB SKY SPRINKLE 1'], target: 'Brush on Builder Gel Sky Sprinkle 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIAB BLUSH SORBET'], target: 'Brush on Builder Gel Blush Sorbet 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIAB BERRY STARDUST'], target: 'Brush on Builder Gel Berry Stardust 15ml -HTF' },
+          // 5-in-1 Superior Base — new filename-derived normalised names (5-in-1-GIUP-SBC*.webp)
+          { codes: ['5 IN 1 SBCBP'], target: '5-in-1 Superior Base 15ml Baby Pink -HTF' },
+          { codes: ['5 IN 1 SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
+          { codes: ['5 IN 1 SBCCP'], target: '5-in-1 Superior Base 15ml Candy Pink -HTF' },
+          { codes: ['5 IN 1 SBCMP'], target: '5-in-1 Superior Base 15ml Milky Pink -HTF' },
+          { codes: ['5 IN 1 SBCPP'], target: '5-in-1 Superior Base 15ml Pretty Pink -HTF' },
+          { codes: ['5 IN 1 SBCSP'], target: '5-in-1 Superior Base 15ml Sweet Pink -HTF' },
+          { codes: ['5 IN 1 SBCGLPI'], target: '5-IN-1 Superior Base 15ml Glittery Pink -HTF' },
+          { codes: ['5 IN 1 SBCGP'], target: '5-in-1 Superior Base 15ml Glittery Peach -HTF' },
+          { codes: ['5 IN 1 SBCIRPI'], target: '5-IN-1 Superior Base 15ml Irridecent Pink -HTF' },
+          { codes: ['5 IN 1 SBCIMF'], target: '5-in-1 Superior Base 15ml Iridescent Milky Flakes -HTF' },
+          { codes: ['5 IN 1 SBCCLI'], target: '5-in-1 Superior Base 15ml Lilac -HTF' },
+          { codes: ['5 IN 1 SBCMW'], target: '5-in-1 Superior Base 15ml Milky White -HTF' },
+          { codes: ['5 IN 1 SBCN'], target: '5-in-1 Superior Base 15ml Nude -HTF' },
+          { codes: ['5 IN 1 SBCSN'], target: '5-IN-1 Superior Base 15ml Soft Nude -HTF' },
         ]
         for (const { codes, target } of aliasGroups) {
           const entry = pnLookup(target)
