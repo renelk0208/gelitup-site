@@ -4690,7 +4690,7 @@ function FullCataloguePage() {
                   <div className="mx-auto max-w-5xl px-4">
                     <div className="rounded-t-xl border border-b-0 border-fuchsia-500/30 bg-white shadow-lg">
                       <div className="max-h-64 space-y-2 overflow-y-auto p-4">
-                        {Object.entries(quickCart).filter(([, q]) => q > 0).map(([key, cartQty]) => {
+                        {Object.entries(quickCart).filter(([, q]) => q > 0).sort(([kA], [kB]) => { const cA = kA.split('::')[1] || ''; const cB = kB.split('::')[1] || ''; return cA.localeCompare(cB, undefined, { numeric: true, sensitivity: 'base' }) }).map(([key, cartQty]) => {
                           const [name, code] = key.split('::')
                           const price = lookupCataloguePrice(name, code)
                           const lineTotal = price != null ? Number(price) * cartQty : null
@@ -7992,7 +7992,7 @@ function CheckoutPage() {
       const [name, code] = key.split('::')
       const price = lookupPrice(name, code)
       return { key, name, code, qty, price, lineTotal: price != null ? Number(price) * qty : null }
-    }), [cart, lookupPrice])
+    }).sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: 'base' })), [cart, lookupPrice])
 
   const cartTotal = useMemo(() => cartEntries.reduce((s, e) => s + (e.lineTotal || 0), 0), [cartEntries])
   const cartUnits = useMemo(() => cartEntries.reduce((s, e) => s + e.qty, 0), [cartEntries])
