@@ -4647,6 +4647,7 @@ function FullCataloguePage() {
                 {virtualItems.map(({ item, itemIndex }) => {
                   const itemCode = extractProductCode(item.name)
                   const itemKey = `${item.name}::${itemCode}`
+                  const price = lookupCataloguePrice(item.name, itemCode)
                   const qty = getQty(itemKey)
                   const hasChangedQty = qty !== 1
                   const inCart = quickCart[itemKey] > 0
@@ -4658,6 +4659,7 @@ function FullCataloguePage() {
                         <div className="min-w-0 flex-1">
                           <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                           <p className="break-words text-[11px] font-light text-black/55">{itemCode}</p>
+                          <p className="mt-0.5 text-xs font-bold text-fuchsia-700">€{Number(price || 0).toFixed(2)}</p>
                         </div>
                         <a
                           href={SHOPIFY_SHOP_URL}
@@ -4686,6 +4688,7 @@ function FullCataloguePage() {
                       <div className="flex flex-1 flex-col border-t border-black/10 px-2.5 py-2">
                         <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                         <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
+                        <p className="mt-1.5 text-xs font-bold text-fuchsia-700">€{Number(price || 0).toFixed(2)}</p>
                         <div className="mt-2 flex items-center gap-1">
                           <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
                           <p className="break-words text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
@@ -4970,6 +4973,7 @@ function FullCataloguePage() {
                 <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}>
                   {globalSearchResults.slice(0, 240).map((item, idx) => {
                     const itemCode = extractProductCode(item.name)
+                    const price = lookupCataloguePrice(item.name, itemCode)
                     return (
                       <article
                         key={idx}
@@ -4983,6 +4987,7 @@ function FullCataloguePage() {
                         <div className="border-t border-black/10 px-2 py-1.5">
                           <p className="truncate text-[10px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                           <p className="line-clamp-2 text-[11px] font-semibold uppercase leading-tight tracking-[0.02em] text-black">{item.name}</p>
+                          <p className="mt-1 text-[11px] font-bold text-fuchsia-700">€{Number(price || 0).toFixed(2)}</p>
                           <p className="mt-1 truncate text-[10px] text-fuchsia-600">{formatSubcategoryDisplayName(item.subcategory, item.category)}</p>
                         </div>
                       </article>
