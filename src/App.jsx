@@ -683,6 +683,8 @@ function normalizePriceLookupKey(value) {
     .replace(/\b3\s+IN\s+1\s+PREMIUM\s+BUILDER\s+GEL\s+CLEAR\b/g, '3 IN 1 PREMIUM CLEAR')
     .replace(/\b3\s+IN\s+1\s+PREMIUM\s+BUILDER\s+GEL\s+PINK\b/g, '3 IN 1 PREMIUM BUILDER GELS PINK')
     .replace(/\b3\s+IN\s+1\s+PREMIUM\s+BUILDER\s+GEL\s+WHITE\b/g, '3 IN 1 PREMIUM BUILDER GELS WHITE')
+    // 2026 NEW 5-in-1 filenames use "5-in-1-GIUP-SB..." tokens
+    .replace(/\b5\s+IN\s+1\s+GIUP\s+(SB[A-Z0-9]+)\b/g, 'GIUP $1')
     // normalize MultiMix filename variants to CSV alias keys
     .replace(/\bBUBBLEGUM\b/g, 'BUBBLE GUM')
     .replace(/\bPINK\s+III\b/g, 'PINKIII')
@@ -2273,7 +2275,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
 
     const rawFolder = (segments[segments.length - 2] || '').toUpperCase()
     const solidGelFlatFolders = { NUDE: 'Nude', FRENCH: 'French', PASTEL: 'Pastel', RONE: 'GIUP1' }
-    subcategoryItems.push({
+    const catalogueItem = {
       imageUrl: imagePath,
       name: formatCatalogueItemName(afterRoot),
       colorFamily: category === 'COLORS'
@@ -2281,10 +2283,49 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
           ? segments[2]
           : solidGelFlatFolders[rawFolder] || undefined
         : undefined,
-    })
+    }
+
+    subcategoryItems.push(catalogueItem)
 
     categoryBucket.set(subcategory, subcategoryItems)
     grouped.set(category, categoryBucket)
+
+    // 2026 NEW Brush on Builder products should also live in the main
+    // Builder Gel Systems > BRUSH ON BUILDER category.
+    if (sourceCategory === '2026 NEW!' && normalizeCatalogueToken(subcategory).includes('BRUSH ON BUILDER')) {
+      const mirrorCategory = 'BUILDER GEL SYSTEMS'
+      const mirrorSubcategory = 'BRUSH ON BUILDER'
+      const mirrorCategoryBucket = grouped.get(mirrorCategory) || new Map()
+      const mirrorItems = mirrorCategoryBucket.get(mirrorSubcategory) || []
+
+      if (!mirrorItems.some((item) => item.imageUrl === imagePath)) {
+        mirrorItems.push(catalogueItem)
+      }
+
+      mirrorCategoryBucket.set(mirrorSubcategory, mirrorItems)
+      grouped.set(mirrorCategory, mirrorCategoryBucket)
+    }
+
+    // 2026 NEW Mirror Top Coat should be visible in New, Top Coats,
+    // and Nail Art > Mirror Powders.
+    if (sourceCategory === '2026 NEW!' && normalizeCatalogueToken(subcategory).includes('MIRROR TOP COAT')) {
+      const mirrorTargets = [
+        { category: 'TOPS', subcategory: 'EFFECT TOPS' },
+        { category: 'NAIL ART', subcategory: 'MIRROR POWDERS' },
+      ]
+
+      mirrorTargets.forEach(({ category: targetCategory, subcategory: targetSubcategory }) => {
+        const targetCategoryBucket = grouped.get(targetCategory) || new Map()
+        const targetItems = targetCategoryBucket.get(targetSubcategory) || []
+
+        if (!targetItems.some((item) => item.imageUrl === imagePath)) {
+          targetItems.push(catalogueItem)
+        }
+
+        targetCategoryBucket.set(targetSubcategory, targetItems)
+        grouped.set(targetCategory, targetCategoryBucket)
+      })
+    }
   })
 
   return Array.from(grouped.entries())
@@ -3245,6 +3286,7 @@ function FullCataloguePage() {
         // Hard-wire acronym codes that can't be auto-derived from price-list names
         const pnLookup = t => map.get(normalizeProductName(t))
         const aliasGroups = [
+          ...PRODUCT_ALIAS_GROUPS,
           { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-FBCLR'], target: 'Flexi Base Clear -HTF' },
           { codes: ['GIUP SBCCLR', 'GIUP-SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
           { codes: ['GIUP SBCMP', 'GIUP-SBCMP'], target: '5-in-1 Superior Base 15ml Milky Pink -HTF' },
@@ -4933,15 +4975,12 @@ function FullCataloguePage() {
               { key: 'Sapphire Cat Eye', label: 'Sapphire Cat Eye' },
               { key: 'Shimmer Colors', label: 'Shimmer Colors' },
               { key: 'Mirror Top Coat', label: 'Mirror Top Coat' },
+              { key: 'New Consumables', label: 'New Consumables' },
               { key: '5-in-1 Superior Base', label: '5-in-1 Superior Base' },
             ]
             const activeSubItems = activeNewCollection && newSection
               ? (newSection.subcategories.find(s => s.name === activeNewCollection)?.items || [])
               : []
-            const activeSubItemsPriced = activeSubItems.filter((item) => {
-              const itemCode = extractProductCode(item.name)
-              return lookupCataloguePrice(item.name, itemCode) != null
-            })
             return (
               <div id="catalogue-section-new-products" className="scroll-mt-28">
                 {/* NEW PRODUCTS banner with hero image */}
@@ -5018,12 +5057,12 @@ function FullCataloguePage() {
                 )}
                 {activeNewCollection && (
                   <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8">
-                    <p className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-black/50">{activeNewCollection} — {activeSubItemsPriced.length} product{activeSubItemsPriced.length !== 1 ? 's' : ''}</p>
-                    {activeSubItemsPriced.length === 0 ? (
+                    <p className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-black/50">{activeNewCollection} — {activeSubItems.length} product{activeSubItems.length !== 1 ? 's' : ''}</p>
+                    {activeSubItems.length === 0 ? (
                       <p className="text-sm text-black/45">No products found for this collection.</p>
                     ) : (
                       <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}>
-                        {activeSubItemsPriced.map((item, idx) => {
+                        {activeSubItems.map((item, idx) => {
                           const itemCode = extractProductCode(item.name)
                           const itemKey = `${item.name}::${itemCode}`
                           const price = lookupCataloguePrice(item.name, itemCode)
@@ -10707,6 +10746,7 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
         // Hard-wire acronym codes that can't be auto-derived from price-list names
         const pnLookup = t => map.get(normalizeProductName(t))
         const aliasGroups = [
+          ...PRODUCT_ALIAS_GROUPS,
           { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-FBCLR'], target: 'Flexi Base Clear -HTF' },
           // 5-in-1 Superior Base coloureds (SBC*)
           { codes: ['GIUP SBCCLR', 'GIUP-SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
