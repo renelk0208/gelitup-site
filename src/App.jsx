@@ -11265,7 +11265,13 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
         ]
         for (const { codes, target } of aliasGroups) {
           const entry = pnLookup(target)
-          if (entry) { for (const c of codes) { if (!map.has(c)) map.set(c, entry) } }
+          if (!entry) continue
+          for (const c of codes) {
+            const normalizedCode = normalizeSkuCode(c)
+            if (normalizedCode && !map.has(normalizedCode)) {
+              map.set(normalizedCode, entry)
+            }
+          }
         }
         if (mounted) {
           setPriceMap(map)
@@ -11335,6 +11341,73 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
       window.clearTimeout(timeoutId)
     }
   }, [showOrderConfetti])
+
+  const resolvePortalPriceEntry = useCallback((itemName = '', itemCode = '', itemSku = '') => {
+    if (!priceMap) return null
+
+    const bySku = priceMap.get(normalizeSkuCode(itemSku))
+    if (bySku?.price != null) return bySku
+
+    const bySkuNormalized = priceMap.get(normalizePriceLookupKey(itemSku))
+    if (bySkuNormalized?.price != null) return bySkuNormalized
+
+    const byName = priceMap.get(normalizeProductName(itemName))
+    if (byName?.price != null) return byName
+
+    const byNameNormalized = priceMap.get(normalizeProductName(normalizePriceLookupKey(itemName)))
+    if (byNameNormalized?.price != null) return byNameNormalized
+
+    const byCode = priceMap.get(normalizeSkuCode(itemCode))
+    if (byCode?.price != null) return byCode
+
+    const byCodeNormalized = priceMap.get(normalizePriceLookupKey(itemCode))
+    if (byCodeNormalized?.price != null) return byCodeNormalized
+
+    const byFullName = priceMap.get(normalizeSkuCode(itemName))
+    if (byFullName?.price != null) return byFullName
+
+    const byFullNameNormalized = priceMap.get(normalizePriceLookupKey(itemName))
+    if (byFullNameNormalized?.price != null) return byFullNameNormalized
+
+    const stripped = normalizeSkuCode(itemCode).replace(/^GIUP[-\s]+/, '')
+    if (stripped && stripped !== normalizeSkuCode(itemCode)) {
+      const byStripped = priceMap.get(stripped)
+      if (byStripped?.price != null) return byStripped
+      const byStripped2 = priceMap.get(stripped.replace(/^0+(\d)/, '$1'))
+      if (byStripped2?.price != null) return byStripped2
+    }
+
+    const giupNumMatch = normalizeSkuCode(itemCode).match(/^(?:GIUP\s+)?(\d+[A-Z]?)$/)
+    if (giupNumMatch) {
+      const e = priceMap.get(giupNumMatch[1].padStart(2, '0')) || priceMap.get(giupNumMatch[1])
+      if (e?.price != null) return e
+    }
+
+    const giupSeriesMatch = normalizeSkuCode(itemCode).match(/^(?:GIUP[-\s]+)?([A-Z]+)(\d+[A-Z]?)$/)
+    if (giupSeriesMatch) {
+      const s = giupSeriesMatch[1]
+      const n = giupSeriesMatch[2]
+      const e = priceMap.get(`${s} ${n}`)
+        || priceMap.get(`${s} ${n.padStart(2, '0')}`)
+        || priceMap.get(`${s}${n}`)
+        || priceMap.get(`${s}${n.padStart(2, '0')}`)
+        || priceMap.get(`${s} ${n.replace(/^0+(\d)/, '$1')}`)
+      if (e?.price != null) return e
+    }
+
+    const giupLooseSeriesMatch = !giupSeriesMatch && normalizeSkuCode(itemCode).match(/^(?:GIUP[-\s]+)?([A-Z]{2,5})(\d{1,3})(?=[A-Z])/) 
+    if (giupLooseSeriesMatch) {
+      const s = giupLooseSeriesMatch[1]
+      const n = giupLooseSeriesMatch[2]
+      const e = priceMap.get(`${s} ${n}`) || priceMap.get(`${s} ${n.padStart(2, '0')}`)
+      if (e?.price != null) return e
+    }
+
+    const fuzzy = fuzzyPriceLookup(itemCode, itemName, priceWordIndex)
+    if (fuzzy?.price != null) return fuzzy
+
+    return null
+  }, [priceMap, priceWordIndex])
 
   useEffect(() => {
     setPackagePreviewVisibleCount(15)
@@ -11660,27 +11733,7 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
             const imageUrl = repairCatalogueImageUrl(mapImageUrl || item.image_url || item.imageUrl || item?.images?.[0]?.src || null)
 
             // Merge price-list data (name override + price)
-            // For codes like "GIUP 01" extract the number to match "01 Ice Ice Baby"
-            const giupNumMatch = normalizeSkuCode(code).match(/^(?:GIUP\s+)?(\d+[A-Z]?)$/)
-            // For codes like "GIUP NYP01" extract "NYP 01" to match "New York Party #NYP01"
-            const giupSeriesCodeMatch = normalizeSkuCode(code).match(/^(?:GIUP[-\s]+)?([A-Z]+)(\d+[A-Z]?)$/)
-            // For codes like "GIUP SS01Kaleidascope" where colour name is appended after the series+num
-            const giupLooseSeriesMatch = !giupSeriesCodeMatch && normalizeSkuCode(code).match(/^(?:GIUP[-\s]+)?([A-Z]{2,5})(\d{1,3})(?=[A-Z])/)
-            const priceEntry = priceMap.get(normalizeSkuCode(sku))
-              || priceMap.get(normalizeSkuCode(code))
-              || priceMap.get(normalizeProductName(rawName))
-              || (giupNumMatch ? priceMap.get(giupNumMatch[1].padStart(2, '0')) || priceMap.get(giupNumMatch[1]) : null)
-              || (giupSeriesCodeMatch ? (
-                  priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2]}`)
-                  || priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2].padStart(2, '0')}`)
-                  // strip leading zeros: R010 ? R10 (matches GEL.IT.UP 1 R10 11ml in price list)
-                  || priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2].replace(/^0+(\d)/, '$1')}`)
-                ) : null)
-              || (giupLooseSeriesMatch ? (
-                  priceMap.get(`${giupLooseSeriesMatch[1]} ${giupLooseSeriesMatch[2]}`)
-                  || priceMap.get(`${giupLooseSeriesMatch[1]} ${giupLooseSeriesMatch[2].padStart(2, '0')}`)
-                ) : null)
-              || fuzzyPriceLookup(code, rawName, priceWordIndex)
+            const priceEntry = resolvePortalPriceEntry(rawName, code, sku)
             const name = priceEntry?.name || rawName
             const price = priceEntry?.price ?? null
 
@@ -11727,7 +11780,7 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
     return () => {
       isMounted = false
     }
-  }, [localImageMap, priceMap, priceWordIndex, productsTable])
+  }, [localImageMap, priceMap, priceWordIndex, productsTable, resolvePortalPriceEntry])
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
