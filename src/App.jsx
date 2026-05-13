@@ -4684,7 +4684,7 @@ function FullCataloguePage() {
                           <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                           <p className="break-words text-[11px] font-light text-black/55">{itemCode}</p>
                         </div>
-
+                        <NavLink to="/portal/buy" className="shrink-0 rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-xs font-semibold text-white transition duration-200 hover:bg-fuchsia-700">Buy Now</NavLink>
                       </div>
                     )
                   }
@@ -4708,7 +4708,9 @@ function FullCataloguePage() {
                           <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
                           <p className="break-words text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
                         </div>
-
+                        <div className="mt-auto pt-3">
+                          <NavLink to="/portal/buy" className="block w-full rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-center text-xs font-semibold text-white transition duration-200 hover:bg-fuchsia-700">Buy Now</NavLink>
+                        </div>
                       </div>
                     </article>
                   )
