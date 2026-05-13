@@ -4696,13 +4696,13 @@ function FullCataloguePage() {
                         {Object.entries(quickCart).filter(([, q]) => q > 0).map(([key, cartQty]) => {
                           const [name, code] = key.split('::')
                           const price = lookupCataloguePrice(name, code)
-                          if (price == null) return null
-                          const lineTotal = price != null ? Number(price) * cartQty : null
+                          const safePrice = Number(price || 0)
+                          const lineTotal = safePrice * cartQty
                           return (
                             <div key={key} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
                               <div className="min-w-0 flex-1">
                                 <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{name}</p>
-                                <p className="text-[11px] text-black/45">{code}{price != null && <span className="ml-2 text-fuchsia-700">€{Number(price).toFixed(2)} ea.</span>}</p>
+                                <p className="text-[11px] text-black/45">{code}<span className="ml-2 text-fuchsia-700">€{safePrice.toFixed(2)} ea.</span></p>
                               </div>
                               <div className="flex items-center gap-1">
                                 <button
@@ -4763,7 +4763,7 @@ function FullCataloguePage() {
                                     className="inline-flex items-center gap-1 rounded-lg border border-fuchsia-300/60 bg-fuchsia-50 px-2 py-1 text-[11px] font-semibold text-fuchsia-700 transition hover:bg-fuchsia-100"
                                   >
                                     <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" /></svg>
-                                    {u.label}{price != null && <span className="text-black/40">€{price.toFixed(2)}</span>}
+                                    {u.label}<span className="text-black/40">€{Number(price || 0).toFixed(2)}</span>
                                   </button>
                                 )
                               })}
@@ -8076,7 +8076,7 @@ function CheckoutPage() {
     Object.entries(cart).filter(([, q]) => q > 0).map(([key, qty]) => {
       const [name, code] = key.split('::')
       const price = lookupPrice(name, code)
-      return { key, name, code, qty, price, lineTotal: price != null ? Number(price) * qty : null }
+      return { key, name, code, qty, price, lineTotal: Number(price || 0) * qty }
     }), [cart, lookupPrice])
 
   useEffect(() => {
@@ -8646,7 +8646,7 @@ function CheckoutPage() {
                 <div key={e.key} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-semibold uppercase text-slate-800">{e.name}</p>
-                    <p className="text-[11px] text-slate-500">{e.code}{e.price != null && <span className="ml-1 text-fuchsia-700">€{e.price.toFixed(2)}</span>}</p>
+                    <p className="text-[11px] text-slate-500">{e.code}<span className="ml-1 text-fuchsia-700">€{Number(e.price || 0).toFixed(2)}</span></p>
                   </div>
                   <div className="flex items-center gap-1">
                     <button type="button" onClick={() => {
@@ -8656,7 +8656,7 @@ function CheckoutPage() {
                     <span className="w-6 text-center text-xs font-bold text-slate-800">{e.qty}</span>
                     <button type="button" onClick={() => setCart(c => ({ ...c, [e.key]: (c[e.key] || 0) + 1 }))} className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-300 text-xs text-slate-600 hover:border-fuchsia-500">+</button>
                   </div>
-                  {e.lineTotal != null && <span className="w-14 text-right text-xs font-bold text-fuchsia-700">€{e.lineTotal.toFixed(2)}</span>}
+                  <span className="w-14 text-right text-xs font-bold text-fuchsia-700">€{Number(e.lineTotal || 0).toFixed(2)}</span>
                   <button type="button" onClick={() => setCart(c => { const n = { ...c }; delete n[e.key]; return n })} className="ml-1 text-slate-400 hover:text-red-500" title="Remove">
                     <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5"><path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" /></svg>
                   </button>
@@ -8700,7 +8700,7 @@ function CheckoutPage() {
                       <div key={u.code} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-semibold text-slate-800">{u.label}</p>
-                          {price != null && <p className="text-[11px] text-fuchsia-700">€{price.toFixed(2)}</p>}
+                          <p className="text-[11px] text-fuchsia-700">€{Number(price || 0).toFixed(2)}</p>
                         </div>
                         <button
                           type="button"
@@ -13253,9 +13253,7 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
             )}
             <div className="p-5">
               <p className="text-sm font-semibold text-slate-900 leading-snug">{upsellModal.product?.name}</p>
-              {upsellModal.product?.price != null && (
-                <p className="mt-1 text-sm font-bold text-fuchsia-700">€{(Number(upsellModal.product.price) * tierPriceMultiplier).toFixed(2)}</p>
-              )}
+              <p className="mt-1 text-sm font-bold text-fuchsia-700">€{(Number(upsellModal.product?.price || 0) * tierPriceMultiplier).toFixed(2)}</p>
               <div className="mt-4 flex gap-2">
                 <button
                   onClick={() => {
@@ -13391,7 +13389,7 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
             <div className="mt-2 divide-y divide-slate-100">
               {selectedProducts.map(product => {
                 const qty = itemQtys[product.code] || 1
-                const lineTotal = product.price != null ? Number(product.price) * tierPriceMultiplier * qty : null
+                const lineTotal = Number(product.price || 0) * tierPriceMultiplier * qty
                 return (
                   <div key={product.code} className="flex items-center gap-2 py-2">
                     <div
@@ -13411,7 +13409,7 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
                       <button onClick={() => setItemQtys(prev => ({...prev, [product.code]: qty + 1}))} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">+</button>
                     </div>
                     <div className="w-16 text-right">
-                      {lineTotal != null ? <p className="text-xs font-semibold text-fuchsia-700">€{lineTotal.toFixed(2)}</p> : <p className="text-xs text-slate-400">—</p>}
+                      <p className="text-xs font-semibold text-fuchsia-700">€{lineTotal.toFixed(2)}</p>
                     </div>
                     <button onClick={() => toggleSelection(product.code)} className="flex h-6 w-6 items-center justify-center rounded-full text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Remove">—</button>
                   </div>
@@ -14069,9 +14067,7 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
                           {/* info */}
                           <div className="px-1.5 pt-1 pb-0.5">
                             <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{product.name}</p>
-                            {product.price != null && (
-                              <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{(Number(product.price) * tierPriceMultiplier).toFixed(2)}</p>
-                            )}
+                            <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{(Number(product.price || 0) * tierPriceMultiplier).toFixed(2)}</p>
                           </div>
                           {/* action */}
                           {selected ? (
