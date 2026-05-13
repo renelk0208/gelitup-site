@@ -668,6 +668,21 @@ function normalizePriceLookupKey(value) {
     .replace(/\b(\d+)\s*G\b/g, '$1GR')
     // image-map variants sometimes include trailing B/C copies
     .replace(/\s+[BC]\s+(?=\d+GR\b)/g, ' ')
+    // 3-in-1 builder image variants (second image suffix)
+    .replace(/\s+B$/g, '')
+    // normalize 3-in-1 builder/premium image-map names to alias keys
+    .replace(/\b3\s+IN\s+1\s+BUILDER\s+GEL\s+/g, '3 IN 1 ')
+    .replace(/\b3\s+IN\s+1\s+GELITUP\s+PREMIUM\s+BUILDER\s+GEL\s+/g, '3 IN 1 PREMIUM BUILDER GEL ')
+    .replace(/\b3\s+IN\s+1\s+IRIDESCENT\s+SHIMMER\b/g, '3 IN 1 SHIMMER IRIDESCENT')
+    .replace(/\b3\s+IN\s+1\s+COVER\b/g, '3IN1COVER')
+    .replace(/\b3\s+IN\s+1\s+PINK\b/g, '3IN1PINK')
+    .replace(/\b3\s+IN\s+1\s+SHIMMER\s+LILAC\b/g, '3 IN 1 SHIMMER LIGHT LILAC')
+    .replace(/\b3\s+IN\s+1\s+PREMIUM\s+BUILDER\s+GEL\s+SHIMMER\s+NUDE\b/g, '3 IN 1 PREMIUM BUILDER GEL PEARLY NUDE')
+    .replace(/\b3\s+IN\s+1\s+PREMIUM\s+BUILDER\s+GEL\s+SHIMMER\s+PINK\b/g, '3 IN 1 PREMIUM BUILDER GEL PEARLY PINK')
+    .replace(/\b3\s+IN\s+1\s+PREMIUM\s+BUILDER\s+GEL\s+CLEAR\s+PLUS\b/g, '3 IN 1 PREMIUM PLUS')
+    .replace(/\b3\s+IN\s+1\s+PREMIUM\s+BUILDER\s+GEL\s+CLEAR\b/g, '3 IN 1 PREMIUM CLEAR')
+    .replace(/\b3\s+IN\s+1\s+PREMIUM\s+BUILDER\s+GEL\s+PINK\b/g, '3 IN 1 PREMIUM BUILDER GELS PINK')
+    .replace(/\b3\s+IN\s+1\s+PREMIUM\s+BUILDER\s+GEL\s+WHITE\b/g, '3 IN 1 PREMIUM BUILDER GELS WHITE')
     // normalize MultiMix filename variants to CSV alias keys
     .replace(/\bBUBBLEGUM\b/g, 'BUBBLE GUM')
     .replace(/\bPINK\s+III\b/g, 'PINKIII')
