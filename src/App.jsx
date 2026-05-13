@@ -5901,7 +5901,7 @@ function Nav({ onOpenContactModal }) {
           }`
         }
       >
-        B2B Login
+        Sign In
       </NavLink>
     </nav>
   )
@@ -5995,7 +5995,7 @@ function MobileNav({ onOpenContactModal }) {
               }`
             }
           >
-            B2B Login
+            Sign In
           </NavLink>
 
           <div className="my-2 border-t border-white/10" />
@@ -6630,7 +6630,7 @@ function HomePage({ onOpenContactModal }) {
                   B2B Register &rarr;
                 </NavLink>
                 <NavLink to="/portal/login?portal=b2b" className="rounded-lg border-2 border-white/80 bg-white/15 px-5 py-2.5 text-sm font-bold text-white shadow-[0_2px_12px_rgba(0,0,0,0.35)] backdrop-blur-sm transition duration-300 hover:bg-white/25">
-                  B2B Login
+                  Sign In
                 </NavLink>
               </div>
               {/* Trust bar */}
@@ -17893,7 +17893,7 @@ function App() {
               <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
               <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Become Distributor</NavLink>
               <NavLink to="/guestbook" className="block transition duration-300 hover:text-fuchsia-300">Guestbook</NavLink>
-              <NavLink to="/portal/login?portal=b2b" className="block transition duration-300 hover:text-fuchsia-300">B2B Login</NavLink>
+              <NavLink to="/portal/login?portal=b2b" className="block transition duration-300 hover:text-fuchsia-300">Sign In</NavLink>
               <NavLink to="/portal/login?portal=distributor" className="block transition duration-300 hover:text-fuchsia-300">Distributor Login</NavLink>
             </div>
           </div>
