@@ -1974,6 +1974,7 @@ function formatCatalogueItemName(rawPath = '') {
   const withoutExtension = fileName.replace(/\.[a-z0-9]+$/i, '')
   return withoutExtension
     .replace(/[_-]+/g, ' ')
+    .replace(/\bIRRODESCENT\b/gi, 'IRRIDESCENT')
     .replace(/\s+/g, ' ')
     .trim()
 }
@@ -3295,6 +3296,8 @@ function FullCataloguePage() {
           { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL'], target: 'Brush on Builder Gel Purple Glitter 15ml -HTF' },
           { codes: ['GIUP BOBGLROS', 'GIUP-BOBGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
           { codes: ['GIUP BOBGLSLM', 'GIUP-BOBGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIAB GLITTER PINK'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIAB IRRIDESCENT PINK', 'BRUSH ON BUILDER BIAB IRRODESCENT PINK'], target: 'Brush on Builder Gel Blush Pink 15ml -HTF' },
           { codes: ['GIUP-BOB-Berry-stardust', 'GIUP-BOB-berry-stardust', 'GIUP BOB BERRY STARDUST', 'BOB BERRY STARDUST'], target: 'Brush on Builder Gel Berry Stardust 15ml -HTF' },
           { codes: ['GIUP-BOB-blush-sorbet', 'GIUP BOB BLUSH SORBET', 'BOB BLUSH SORBET'], target: 'Brush on Builder Gel Blush Sorbet 15ml -HTF' },
           { codes: ['GIUP-BOB-sky-sprinkle', 'GIUP-BOB-sky-sprinkle (1)', 'GIUP BOB SKY SPRINKLE', 'GIUP BOB SKY SPRINKLE 1', 'BOB SKY SPRINKLE'], target: 'Brush on Builder Gel Sky Sprinkle 15ml -HTF' },
@@ -10679,6 +10682,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL'], target: 'Brush on Builder Gel Purple Glitter 15ml -HTF' },
           { codes: ['GIUP BOBGLROS', 'GIUP-BOBGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
           { codes: ['GIUP BOBGLSLM', 'GIUP-BOBGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIAB GLITTER PINK'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
+          { codes: ['BRUSH ON BUILDER BIAB IRRIDESCENT PINK', 'BRUSH ON BUILDER BIAB IRRODESCENT PINK'], target: 'Brush on Builder Gel Blush Pink 15ml -HTF' },
           { codes: ['GIUP-BOB-Berry-stardust', 'GIUP-BOB-berry-stardust', 'GIUP BOB BERRY STARDUST', 'BOB BERRY STARDUST'], target: 'Brush on Builder Gel Berry Stardust 15ml -HTF' },
           { codes: ['GIUP-BOB-blush-sorbet', 'GIUP BOB BLUSH SORBET', 'BOB BLUSH SORBET'], target: 'Brush on Builder Gel Blush Sorbet 15ml -HTF' },
           { codes: ['GIUP-BOB-sky-sprinkle', 'GIUP-BOB-sky-sprinkle (1)', 'GIUP BOB SKY SPRINKLE', 'GIUP BOB SKY SPRINKLE 1', 'BOB SKY SPRINKLE'], target: 'Brush on Builder Gel Sky Sprinkle 15ml -HTF' },
