@@ -2081,6 +2081,57 @@ function getAlternateGalleryBaseImagePath(imagePath = '') {
   return basePath !== normalizedPath ? basePath : ''
 }
 
+function isAlternateGalleryImagePath(imagePath = '') {
+  return /_B\.[a-z0-9]+$/i.test(String(imagePath || '').trim())
+}
+
+function stripAlternateGallerySuffix(name = '') {
+  return String(name || '').replace(/\s+B$/i, '').trim()
+}
+
+function mergeAlternateGalleryItems(items = []) {
+  if (!Array.isArray(items) || items.length === 0) return items
+
+  const merged = items.map((item) => ({
+    ...item,
+    galleryImages: Array.isArray(item.galleryImages) ? [...item.galleryImages] : [],
+  }))
+  const primaryIndexByName = new Map()
+
+  merged.forEach((item, index) => {
+    if (isAlternateGalleryImagePath(item.imageUrl)) return
+    const normalizedName = normalizeCatalogueToken(stripAlternateGallerySuffix(item.name))
+    if (!normalizedName || primaryIndexByName.has(normalizedName)) return
+    primaryIndexByName.set(normalizedName, index)
+  })
+
+  const result = []
+  merged.forEach((item) => {
+    if (!isAlternateGalleryImagePath(item.imageUrl)) {
+      result.push(item)
+      return
+    }
+
+    const normalizedName = normalizeCatalogueToken(stripAlternateGallerySuffix(item.name))
+    const primaryIndex = normalizedName ? primaryIndexByName.get(normalizedName) : undefined
+    const primaryItem = primaryIndex === undefined ? null : merged[primaryIndex]
+
+    if (!primaryItem || primaryItem.imageUrl === item.imageUrl) {
+      result.push(item)
+      return
+    }
+
+    const galleryImages = [...primaryItem.galleryImages]
+    if (!galleryImages.includes(item.imageUrl)) galleryImages.push(item.imageUrl)
+    item.galleryImages.forEach((imageUrl) => {
+      if (!galleryImages.includes(imageUrl) && imageUrl !== primaryItem.imageUrl) galleryImages.push(imageUrl)
+    })
+    primaryItem.galleryImages = galleryImages
+  })
+
+  return result
+}
+
 function applyManualCatalogueOrder(items = [], rule = null) {
   if (!rule || !Array.isArray(items) || items.length === 0) {
     return sortCatalogueItems(items)
@@ -2272,7 +2323,10 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
       subcategories: Array.from(subcategoryMap.entries())
         .map(([name, items]) => ({
           name,
-          items: applyManualCatalogueOrder(items, manualRuleIndex.get(`${category}::${name}`) || null),
+          items: applyManualCatalogueOrder(
+            mergeAlternateGalleryItems(items),
+            manualRuleIndex.get(`${category}::${name}`) || null,
+          ),
         }))
         .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base', numeric: true })),
     }))
