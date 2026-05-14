@@ -802,6 +802,19 @@ function normalizeAdminNameToken(value) {
     .trim()
 }
 
+function buildBrushOnBuilderBiabAlias(value) {
+  const normalized = normalizeAdminNameToken(value)
+    .replace(/\b15ML\b/g, ' ')
+    .replace(/\bHTF\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  const match = normalized.match(/^BRUSH ON BUILDER GEL (.+)$/)
+  if (!match) return ''
+
+  return `BRUSH ON BUILDER BIAB ${match[1].trim()}`
+}
+
 function extractOrderItemSkuToken(value = '') {
   const text = String(value || '').trim()
   if (!text) return ''
@@ -968,6 +981,12 @@ function buildOrderPriceLookupMap(items = []) {
     setIfMissing(normalizeAdminSkuToken(name), entry)
     setIfMissing(normalizeAdminNameToken(name), entry)
 
+    const bobBiabAlias = buildBrushOnBuilderBiabAlias(name)
+    if (bobBiabAlias) {
+      setIfMissing(bobBiabAlias, entry)
+      setIfMissing(`${bobBiabAlias} 1`, entry)
+    }
+
     const numberPrefix = String(name || '').trim().match(/^(\d+[A-Z]?)\s/)
     if (numberPrefix) {
       const n = numberPrefix[1]
@@ -1120,6 +1139,8 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) 
     simplifyProductNameForIndex(name),
     // Strip 3–5 digit shade numbers from name: "LINE IT UP 0002 WHITE" → "LINE IT UP WHITE"
     nameNorm.replace(/\b\d{3,5}\b/g, '').replace(/\s+/g, ' ').trim(),
+    // Strip duplicate suffixes from display names: "... SKY SPRINKLE (1)" → "... SKY SPRINKLE"
+    nameNorm.replace(/\s+\d+$/, '').trim(),
   ].filter(Boolean)
 
   // Deduplicate while preserving order
