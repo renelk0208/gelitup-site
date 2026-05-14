@@ -4995,16 +4995,20 @@ function FullCataloguePage() {
           {(() => {
             const newSection = sections.find(s => s.category === '2026 NEW!')
             const NEW_COLS = [
-              { key: 'Cloud Dancer', label: 'Cloud Dancer Collection' },
-              { key: 'Summer Vibes', label: 'Summer Vibes' },
-              { key: 'Sapphire Cat Eye', label: 'Sapphire Cat Eye' },
-              { key: 'Shimmer Colors', label: 'Shimmer Colors' },
-              { key: 'Brush on Builder (BIAB)', label: 'Brush on Builder (BIAB)' },
-              { key: 'Mirror Powder Top Coat', label: 'Mirror Powder Top Coat' },
-              { key: '5-in-1 Superior Base', label: '5-in-1 Superior Base' },
+              { key: 'Cloud Dancer', label: 'Cloud Dancer Collection', category: '2026 NEW!', subcategory: 'Cloud Dancer' },
+              { key: 'Summer Vibes', label: 'Summer Vibes', category: '2026 NEW!', subcategory: 'Summer Vibes' },
+              { key: 'Sapphire Cat Eye', label: 'Sapphire Cat Eye', category: '2026 NEW!', subcategory: 'Sapphire Cat Eye' },
+              { key: 'Shimmer Colors', label: 'Shimmer Colors', category: '2026 NEW!', subcategory: 'Shimmer Colors' },
+              { key: 'Brush on Builder (BIAB)', label: 'Brush on Builder (BIAB)', category: 'BUILDER GEL SYSTEMS', subcategory: 'Brush on Builder' },
+              { key: 'Mirror Powder Top Coat', label: 'Mirror Powder Top Coat', category: '2026 NEW!', subcategory: 'Mirror Powder Top Coat' },
+              { key: '5-in-1 Superior Base', label: '5-in-1 Superior Base', category: '2026 NEW!', subcategory: '5-in-1 Superior Base' },
             ]
-            const activeSubItems = activeNewCollection && newSection
-              ? (newSection.subcategories.find(s => s.name === activeNewCollection)?.items || [])
+            const activeCollectionConfig = NEW_COLS.find(col => col.key === activeNewCollection) || null
+            const activeCollectionSection = activeCollectionConfig
+              ? sections.find(section => normalizeCatalogueToken(section.category) === normalizeCatalogueToken(activeCollectionConfig.category))
+              : null
+            const activeSubItems = activeCollectionConfig && activeCollectionSection
+              ? (activeCollectionSection.subcategories.find(s => normalizeCatalogueToken(s.name) === normalizeCatalogueToken(activeCollectionConfig.subcategory))?.items || [])
               : []
             return (
               <div id="catalogue-section-new-products" className="scroll-mt-28">
