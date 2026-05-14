@@ -1088,13 +1088,20 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) 
     if (!key) continue
     const override = SKU_OVERRIDE_MAP[key]
     if (override) {
+      const canonicalLookup =
+        priceLookupMap?.get(normalizeAdminSkuToken(override.name || '')) ||
+        priceLookupMap?.get(normalizeAdminNameToken(override.name || ''))
+      const derivedSku =
+        normalizeAdminSkuToken(item?.sku || '') ||
+        normalizeAdminSkuToken(canonicalLookup?.sku || '') ||
+        normalizeAdminSkuToken(override.name || '')
       const baseUnitPrice = override.price != null
         ? Math.ceil(override.price * 1.2 * 10) / 10
         : null
       return {
         unitPrice: baseUnitPrice != null ? Math.round(baseUnitPrice * tierMultiplier * 100) / 100 : null,
         resolvedName: override.name || null,
-        resolvedSku: normalizeAdminSkuToken(item?.sku || ''),
+        resolvedSku: derivedSku || null,
       }
     }
   }
