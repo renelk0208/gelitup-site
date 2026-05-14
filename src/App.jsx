@@ -5,7 +5,6 @@ import PWABadge from './PWABadge.jsx'
 import ImportedAnyPage from './pages/imported/ImportedAnyPage.jsx'
 import { hasSupabaseConfig, supabase } from './lib/supabaseClient'
 import useB2BIntelligence from './lib/useB2BIntelligence'
-import { PRODUCT_ALIAS_GROUPS } from './data/productAliases.js'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
@@ -69,7 +68,7 @@ const PAYMENT_REVOLUT_URL = import.meta.env.VITE_PAYMENT_REVOLUT_URL || ''
 const PAYMENT_STRIPE_URL = import.meta.env.VITE_PAYMENT_STRIPE_URL || ''
 const PAYMENT_PAYPAL_URL = import.meta.env.VITE_PAYMENT_PAYPAL_URL || ''
 const UPSELL_PRICE_FUNCTION_URL = import.meta.env.VITE_UPSELL_PRICE_FUNCTION_URL || '/.netlify/functions/get-upsell-price'
-const SHOPIFY_SHOP_URL = 'https://gelitup.com'
+const SHOPIFY_SHOP_URL = 'https://gelitup.eu'
 const PROFORMA_COMPANY_NAME = import.meta.env.VITE_PROFORMA_COMPANY_NAME || 'GEL.IT.UP Factory Direct'
 const PROFORMA_VAT_TAX_ID = import.meta.env.VITE_PROFORMA_VAT_TAX_ID || 'VAT/TAX ID: EL999999999'
 const PROFORMA_BANK_DETAILS = import.meta.env.VITE_PROFORMA_BANK_DETAILS || 'BANK: Alpha Bank | IBAN: GR0000000000000000000000000 | SWIFT: CRBAGRAA'
@@ -660,91 +659,6 @@ function normalizeProductName(value) {
     .trim()
 }
 
-function normalizePriceLookupKey(value) {
-  return normalizeSkuCode(value)
-    // common typo in some imported labels
-    .replace(/\bHTE\b/g, 'HTF')
-    // treat "60g" and "60gr" as equivalent for matching
-    .replace(/\b(\d+)\s*G\b/g, '$1GR')
-    // image-map variants sometimes include trailing B/C copies
-    .replace(/\s+[BC]\s+(?=\d+GR\b)/g, ' ')
-    // 3-in-1 builder image variants (second image suffix)
-    .replace(/\s+B$/g, '')
-    // normalize 3-in-1 builder/premium image-map names to alias keys
-    .replace(/\b3\s+IN\s+1\s+BUILDER\s+GEL\s+/g, '3 IN 1 ')
-    .replace(/\b3\s+IN\s+1\s+GELITUP\s+PREMIUM\s+BUILDER\s+GEL\s+/g, '3 IN 1 PREMIUM BUILDER GEL ')
-    .replace(/\b3\s+IN\s+1\s+IRIDESCENT\s+SHIMMER\b/g, '3 IN 1 SHIMMER IRIDESCENT')
-    .replace(/\b3\s+IN\s+1\s+COVER\b/g, '3IN1COVER')
-    .replace(/\b3\s+IN\s+1\s+PINK\b/g, '3IN1PINK')
-    .replace(/\b3\s+IN\s+1\s+SHIMMER\s+LILAC\b/g, '3 IN 1 SHIMMER LIGHT LILAC')
-    .replace(/\b3\s+IN\s+1\s+PREMIUM\s+BUILDER\s+GEL\s+SHIMMER\s+NUDE\b/g, '3 IN 1 PREMIUM BUILDER GEL PEARLY NUDE')
-    .replace(/\b3\s+IN\s+1\s+PREMIUM\s+BUILDER\s+GEL\s+SHIMMER\s+PINK\b/g, '3 IN 1 PREMIUM BUILDER GEL PEARLY PINK')
-    .replace(/\b3\s+IN\s+1\s+PREMIUM\s+BUILDER\s+GEL\s+CLEAR\s+PLUS\b/g, '3 IN 1 PREMIUM PLUS')
-    .replace(/\b3\s+IN\s+1\s+PREMIUM\s+BUILDER\s+GEL\s+CLEAR\b/g, '3 IN 1 PREMIUM CLEAR')
-    .replace(/\b3\s+IN\s+1\s+PREMIUM\s+BUILDER\s+GEL\s+PINK\b/g, '3 IN 1 PREMIUM BUILDER GELS PINK')
-    .replace(/\b3\s+IN\s+1\s+PREMIUM\s+BUILDER\s+GEL\s+WHITE\b/g, '3 IN 1 PREMIUM BUILDER GELS WHITE')
-    // 2026 NEW 5-in-1 filenames use "5-in-1-GIUP-SB..." tokens
-    .replace(/\b5\s+IN\s+1\s+GIUP\s+(SB[A-Z0-9]+)\b/g, 'GIUP $1')
-    // normalize MultiMix filename variants to CSV alias keys
-    .replace(/\bBUBBLEGUM\b/g, 'BUBBLE GUM')
-    .replace(/\bPINK\s+III\b/g, 'PINKIII')
-    .replace(/\bMULTIMIX\s+WHITE\s+60ML\b/g, 'MULTIMIX WHITE COLOR')
-    .replace(/\b(MULTIMIX\s+[A-Z0-9 ]+?)\s+\d+GR\b/g, '$1')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
-const BRUSH_ON_BUILDER_PRICE_ALIASES = {
-  COV: 'Brush on Builder Gel Cover 15ml -HTF',
-  CRM: 'Brush on Builder Gel Creamy 15ml -HTF',
-  DS: 'Brush on Builder Gel Dusty Shimmer 15ml -HTF',
-  GLMG: 'Brush on Builder Gel Magenta Glitter 15ml -HTF',
-  GLPN: 'Brush on Builder Gel Glittery Pink 15ml -HTF',
-  GLROS: 'Brush on Builder Gel Rose Glitter 15ml -HTF',
-  GLSLM: 'Brush on Builder Gel Salmon Glitter 15ml -HTF',
-  MILK: 'Brush on Builder Gel Milky 15ml -HTF',
-  MILKY: 'Brush on Builder Gel Milky 15ml -HTF',
-  NUD: 'Brush on Builder Gel Nude 15ml -HTF',
-  PNK: 'Brush on Builder Gel Pink 15ml -HTF',
-  PRL: 'Brush on Builder Gel Purple 15ml -HTF',
-  PURGL: 'Brush on Builder Gel Milky Glitter 15ml -HTF',
-  STPN: 'Brush on Builder Gel Soft Pink 15ml -HTF',
-  BLPN: 'Brush on Builder Gel Blush Pink 15ml -HTF',
-  BLUSH: 'Brush on Builder Gel Blush Pink 15ml -HTF',
-}
-
-function getBrushOnBuilderPriceAliases(value) {
-  const source = normalizeSkuCode(value)
-  const match = source.match(/\b(?:BIAB|BOB)[\s_-]*([A-Z0-9]{2,})\b/)
-  if (!match) return []
-
-  const suffix = match[1]
-  const priceName = BRUSH_ON_BUILDER_PRICE_ALIASES[suffix]
-  return priceName ? [priceName] : []
-}
-
-function repairCatalogueImageUrl(value) {
-  const imageUrl = String(value || '').trim()
-  if (!imageUrl) return ''
-
-  if (imageUrl === '/gelitup-content/product-images/MULTIMIX/60 ML/multimix_white_color.webp') {
-    return '/gelitup-content/product-images/MULTIMIX/60 ML/multimix_white_60ml-60g.webp'
-  }
-
-  const multimixMatch = imageUrl.match(/^(.*\/MULTIMIX\/(30 ML|60 ML)\/)([^/]+)\.webp$/i)
-  if (!multimixMatch) return imageUrl
-
-  const [, prefix, sizeFolder, filename] = multimixMatch
-  const expectedSuffix = sizeFolder.toUpperCase() === '30 ML' ? '-30g' : '-60g'
-  const normalizedFilename = filename.toLowerCase()
-
-  if (normalizedFilename.endsWith(expectedSuffix) || /_[bc]-\d+g$/i.test(filename)) {
-    return imageUrl
-  }
-
-  return `${prefix}${filename}${expectedSuffix}.webp`
-}
-
 // Fuzzy word-overlap price lookup for image-map products whose filename keys
 // don't match price-list names exactly (e.g. "cobweb black" vs "Cobweb Gel Black -HTF").
 // All significant query words (=4 chars, not in skip list) must appear in the price entry.
@@ -765,46 +679,6 @@ function fuzzyPriceLookup(code, rawName, wordIndex) {
   return null
 }
 
-const EMBEDDED_PRICE_TOKEN_STOP = new Set([
-  'GIUP', 'GEL', 'GELITUP', 'COLOR', 'COLOUR', 'CLEAR', 'COVER', 'PINK', 'WHITE',
-  'BASE', 'BUILDER', 'DUAL', 'FORMS', 'SOAK', 'OFF', 'NAIL', 'FILES', 'WITH',
-  'BACK', 'GLUE', 'PACKET', 'OF', 'MULTIMIX', 'CUTICLE', 'OIL', 'BRUSH', 'ON',
-])
-
-function lookupPriceEntryByEmbeddedCode(priceMap, ...values) {
-  if (!priceMap) return null
-
-  const candidates = new Set()
-
-  for (const value of values) {
-    const normalized = normalizePriceLookupKey(value)
-    if (!normalized) continue
-
-    const words = normalized.split(/\s+/).filter(Boolean)
-    for (let i = 0; i < words.length; i++) {
-      const token = words[i].replace(/[^A-Z0-9]/g, '')
-      if (!token || EMBEDDED_PRICE_TOKEN_STOP.has(token)) continue
-
-      if (/^(SB[A-Z0-9]{2,}|BIAB[A-Z0-9]{2,}|NW[A-Z0-9]{2,}|[A-Z]{2,5}\d{1,3}[A-Z]{0,2})$/.test(token)) {
-        candidates.add(token)
-        candidates.add(`GIUP ${token}`)
-      }
-
-      if (i > 0 && words[i - 1] === 'SB' && token === 'AC') {
-        candidates.add('SB AC')
-        candidates.add('GIUP SB AC')
-      }
-    }
-  }
-
-  for (const key of candidates) {
-    const entry = priceMap.get(key)
-    if (entry?.price != null) return entry
-  }
-
-  return null
-}
-
 function normalizeImageMap(payload) {
   if (!payload || typeof payload !== 'object') {
     return new Map()
@@ -813,7 +687,7 @@ function normalizeImageMap(payload) {
   const map = new Map()
 
   Object.entries(payload).forEach(([rawKey, rawValue]) => {
-    const imageUrl = typeof rawValue === 'string' ? repairCatalogueImageUrl(rawValue) : ''
+    const imageUrl = typeof rawValue === 'string' ? rawValue.trim() : ''
     if (!imageUrl) return
 
     const normalizedSku = normalizeSkuCode(rawKey)
@@ -1031,7 +905,7 @@ const navItems = [
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/guestbook', label: 'Guestbook' },
   { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
-  { to: '/full-catalogue', label: 'Product Catalogue', highlight: true },
+  { href: SHOPIFY_SHOP_URL, label: 'Our Products', highlight: true, isExternal: true },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
@@ -2098,16 +1972,10 @@ function ForAcademiesPage() {
 function formatCatalogueItemName(rawPath = '') {
   const fileName = rawPath.split('/').pop() || ''
   const withoutExtension = fileName.replace(/\.[a-z0-9]+$/i, '')
-  const formatted = withoutExtension
+  return withoutExtension
     .replace(/[_-]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
-
-  if (normalizeCatalogueToken(formatted) === 'MIRROR TOP COAT') {
-    return 'MIRROR POWDER Top Coat'
-  }
-
-  return formatted
 }
 
 function isCategoryHeroAssetPath(rawPath = '') {
@@ -2127,16 +1995,8 @@ function findCatalogueItemByMatch(items = [], rawMatch = '', used = new Set()) {
   const match = normalizeCatalogueToken(rawMatch)
   if (!match) return null
 
-  const available = items.filter((item) => !used.has(item.imageUrl))
-
-  // Match exact normalized names first to avoid selecting "... B" as the hero item.
-  const exactName = available.find((item) => normalizeCatalogueToken(item.name) === match)
-  if (exactName) return exactName
-
-  const exactPath = available.find((item) => normalizeCatalogueToken(item.imageUrl) === match)
-  if (exactPath) return exactPath
-
-  return available.find((item) => {
+  return items.find((item) => {
+    if (used.has(item.imageUrl)) return false
     const nameToken = normalizeCatalogueToken(item.name)
     const pathToken = normalizeCatalogueToken(item.imageUrl)
     return nameToken.includes(match) || pathToken.includes(match)
@@ -2272,67 +2132,7 @@ function applyHiddenProductsFilter(payload, hiddenKeys = []) {
   return filtered
 }
 
-function parseProductStatusCsv(csvText = '') {
-  const discontinuedKeys = new Set()
-  if (!csvText || typeof csvText !== 'string') return { discontinuedKeys }
-
-  const lines = csvText.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-  if (lines.length <= 1) return { discontinuedKeys }
-
-  for (const line of lines.slice(1)) {
-    const parts = line.split(',')
-    if (parts.length < 2) continue
-    const code = String(parts[0] || '').trim()
-    const name = String(parts[1] || '').trim()
-    const status = String(parts[parts.length - 1] || '').trim().toLowerCase()
-    if (status !== 'discontinued') continue
-    if (code) discontinuedKeys.add(code)
-    if (name) discontinuedKeys.add(name)
-  }
-
-  return { discontinuedKeys }
-}
-
-function createVisibilityMatcher(keys = []) {
-  const raw = new Set((keys || []).map((k) => String(k).trim()).filter(Boolean))
-  const sku = new Set(Array.from(raw).map((k) => normalizeSkuCode(k)).filter(Boolean))
-  const name = new Set(Array.from(raw).map((k) => normalizeProductName(k)).filter(Boolean))
-  const pathTokens = Array.from(raw).map((k) => normalizeCatalogueToken(k)).filter(Boolean)
-
-  return {
-    raw,
-    matches(value = '') {
-      const text = String(value || '').trim()
-      if (!text) return false
-      const normalizedSku = normalizeSkuCode(text)
-      const normalizedName = normalizeProductName(text)
-      const normalizedPath = normalizeCatalogueToken(text)
-      return raw.has(text)
-        || (normalizedSku && sku.has(normalizedSku))
-        || (normalizedName && name.has(normalizedName))
-        || pathTokens.some((token) => normalizedPath.includes(token))
-    },
-  }
-}
-
-function applyProductVisibilityFilter(payload, hiddenKeys = [], outOfStockKeys = [], discontinuedKeys = []) {
-  const blockedMatcher = createVisibilityMatcher([
-    ...(hiddenKeys || []).map((k) => String(k).trim()).filter(Boolean),
-    ...(discontinuedKeys || []).map((k) => String(k).trim()).filter(Boolean),
-  ])
-
-  if (blockedMatcher.raw.size === 0) return payload
-
-  const filtered = {}
-  for (const [key, value] of Object.entries(payload || {})) {
-    const isBlocked = blockedMatcher.matches(key) || blockedMatcher.matches(value)
-
-    if (!isBlocked) filtered[key] = value
-  }
-  return filtered
-}
-
-function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map(), outOfStockKeys = []) {
+function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()) {
   if (!payload || typeof payload !== 'object') return []
 
   const blockedCategoryTokens = new Set(['CRACK', 'THERMO', 'CREME DE LA CREME'])
@@ -2363,21 +2163,11 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
   const uniqueImagePaths = new Set(
     Object.values(payload)
       .filter((value) => typeof value === 'string')
-      .map((value) => repairCatalogueImageUrl(value))
+      .map((value) => String(value).trim())
       .filter((value) => value.includes('/gelitup-content/product-images/'))
       .filter((value) => !isCategoryHeroAssetPath(value))
       .filter((value) => !isBlockedImagePath(value))
   )
-
-  const outOfStockMatcher = createVisibilityMatcher(outOfStockKeys)
-  const outOfStockImagePaths = new Set()
-  for (const [rawKey, rawValue] of Object.entries(payload || {})) {
-    const repairedValue = typeof rawValue === 'string' ? repairCatalogueImageUrl(rawValue) : ''
-    if (!repairedValue || !repairedValue.includes('/gelitup-content/product-images/')) continue
-    if (outOfStockMatcher.matches(rawKey) || outOfStockMatcher.matches(repairedValue)) {
-      outOfStockImagePaths.add(repairedValue)
-    }
-  }
 
   // Merge alternate product images — these are extra angles/photos of the same product
   const duplicateImagePaths = new Set([
@@ -2442,59 +2232,18 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
 
     const rawFolder = (segments[segments.length - 2] || '').toUpperCase()
     const solidGelFlatFolders = { NUDE: 'Nude', FRENCH: 'French', PASTEL: 'Pastel', RONE: 'GIUP1' }
-    const displayName = formatCatalogueItemName(afterRoot)
-    const catalogueItem = {
+    subcategoryItems.push({
       imageUrl: imagePath,
-      name: displayName,
-      isOutOfStock: outOfStockImagePaths.has(imagePath) || outOfStockMatcher.matches(displayName),
+      name: formatCatalogueItemName(afterRoot),
       colorFamily: category === 'COLORS'
         ? segments.length > 3
           ? segments[2]
           : solidGelFlatFolders[rawFolder] || undefined
         : undefined,
-    }
-
-    subcategoryItems.push(catalogueItem)
+    })
 
     categoryBucket.set(subcategory, subcategoryItems)
     grouped.set(category, categoryBucket)
-
-    // 2026 NEW Brush on Builder products should also live in the main
-    // Builder Gel Systems > BRUSH ON BUILDER category.
-    if (sourceCategory === '2026 NEW!' && normalizeCatalogueToken(subcategory).includes('BRUSH ON BUILDER')) {
-      const mirrorCategory = 'BUILDER GEL SYSTEMS'
-      const mirrorSubcategory = 'BRUSH ON BUILDER'
-      const mirrorCategoryBucket = grouped.get(mirrorCategory) || new Map()
-      const mirrorItems = mirrorCategoryBucket.get(mirrorSubcategory) || []
-
-      if (!mirrorItems.some((item) => item.imageUrl === imagePath)) {
-        mirrorItems.push(catalogueItem)
-      }
-
-      mirrorCategoryBucket.set(mirrorSubcategory, mirrorItems)
-      grouped.set(mirrorCategory, mirrorCategoryBucket)
-    }
-
-    // 2026 NEW Mirror Top Coat should be visible in New, Top Coats,
-    // and Nail Art > Mirror Powders.
-    if (sourceCategory === '2026 NEW!' && normalizeCatalogueToken(subcategory).includes('MIRROR TOP COAT')) {
-      const mirrorTargets = [
-        { category: 'TOPS', subcategory: 'EFFECT TOPS' },
-        { category: 'NAIL ART', subcategory: 'MIRROR POWDERS' },
-      ]
-
-      mirrorTargets.forEach(({ category: targetCategory, subcategory: targetSubcategory }) => {
-        const targetCategoryBucket = grouped.get(targetCategory) || new Map()
-        const targetItems = targetCategoryBucket.get(targetSubcategory) || []
-
-        if (!targetItems.some((item) => item.imageUrl === imagePath)) {
-          targetItems.push(catalogueItem)
-        }
-
-        targetCategoryBucket.set(targetSubcategory, targetItems)
-        grouped.set(targetCategory, targetCategoryBucket)
-      })
-    }
   })
 
   return Array.from(grouped.entries())
@@ -2610,7 +2359,6 @@ function formatSubcategoryHeadingLabel(subcategoryName = '', categoryName = '') 
   const normalizedCat = normalizeCatalogueToken(categoryName)
   if (normalizedSub === 'CAT EYE' && normalizedCat.includes('COLOR')) return 'Cat Eye Gel Polish'
   if (normalizedSub === '5IN1 SUPERIOR BASE') return '5-in-1 Base Coat'
-  if (normalizedSub === 'MIRROR TOP COAT') return 'Mirror Powder Top Coat'
   if (normalizedSub === 'PREMIUM BUILDER') return 'Fiberglass Builder Gel'
   if (normalizedSub === 'BRUSH ON BUILDER') return 'Brush On Builder (BIAB)'
   if (normalizedSub === 'SOLID GEL POLISH') return 'Solid Gel Polish'
@@ -2645,7 +2393,6 @@ function formatSubcategoryDisplayName(subcategoryName = '', categoryName = '') {
   if (normalized === 'THERMO') return 'Thermo'
   if (normalized === 'TUTTI FRUTTI GLASS') return 'Tutti Frutti Glass'
   if (normalized === 'GLASS EFFECT') return 'Glass Effect'
-  if (normalized === 'MIRROR TOP COAT') return 'Mirror Powder Top Coat'
   
   // Builder Gel Systems subcategories
   if (normalized === '3INI BUILDER') return '3-in-1 Builder Gel'
@@ -3344,13 +3091,11 @@ function FullCataloguePage() {
       setErrorMessage('')
 
       try {
-        const [mapResponse, orderResponse, colourFamiliesResponse, hiddenResponse, outOfStockResponse, statusResponse] = await Promise.all([
+        const [mapResponse, orderResponse, colourFamiliesResponse, hiddenResponse] = await Promise.all([
           fetch('/gelitup-content/product-image-map.json'),
           fetch('/gelitup-content/catalog-order.json'),
           fetch('/gelitup-content/solid-gel-colour-families.json'),
           fetch('/gelitup-content/hidden-products.json'),
-          fetch('/gelitup-content/out-of-stock.json'),
-          fetch('/gelitup-content/product-status.csv'),
         ])
 
         if (!mapResponse.ok) {
@@ -3363,17 +3108,10 @@ function FullCataloguePage() {
           ? await colourFamiliesResponse.json()
           : {}
         const hiddenKeys = hiddenResponse.ok ? await hiddenResponse.json() : []
-        const outOfStockKeys = outOfStockResponse.ok ? await outOfStockResponse.json() : []
-        const statusPayload = statusResponse.ok ? await statusResponse.text() : ''
-        const { discontinuedKeys } = parseProductStatusCsv(statusPayload)
         const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
         if (!mounted) return
 
-        const nextSections = buildCatalogueSectionsFromImageMap(
-          applyProductVisibilityFilter(payload, hiddenKeys, outOfStockKeys, Array.from(discontinuedKeys)),
-          manualRuleIndex,
-          outOfStockKeys,
-        )
+        const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(payload, hiddenKeys), manualRuleIndex)
         setSections(nextSections)
         setSolidGelColourFamilies(colourFamiliesPayload)
         setHeroCandidateIndexByCategory({})
@@ -3466,7 +3204,6 @@ function FullCataloguePage() {
         // Hard-wire acronym codes that can't be auto-derived from price-list names
         const pnLookup = t => map.get(normalizeProductName(t))
         const aliasGroups = [
-          ...PRODUCT_ALIAS_GROUPS,
           { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-FBCLR'], target: 'Flexi Base Clear -HTF' },
           { codes: ['GIUP SBCCLR', 'GIUP-SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
           { codes: ['GIUP SBCMP', 'GIUP-SBCMP'], target: '5-in-1 Superior Base 15ml Milky Pink -HTF' },
@@ -3819,7 +3556,13 @@ function FullCataloguePage() {
         ]
         for (const { codes, target } of aliasGroups) {
           const entry = pnLookup(target)
-          if (entry) { for (const c of codes) { if (!map.has(c)) map.set(c, entry) } }
+          if (entry) {
+            for (const c of codes) {
+              const normalizedCode = normalizeSkuCode(c)
+              if (normalizedCode && !map.has(normalizedCode)) map.set(normalizedCode, entry)
+              if (!map.has(c)) map.set(c, entry)
+            }
+          }
         }
         if (mounted) {
           setCataloguePriceMap(map)
@@ -4228,20 +3971,25 @@ function FullCataloguePage() {
 
   const extractProductCode = useCallback((name = '') => {
     const cleaned = String(name || '').trim()
-    const codeMatch = cleaned.match(/[A-Z]{2,8}\s*-?\s*\d+[A-Z0-9-]*/i)
-    return codeMatch ? codeMatch[0].toUpperCase() : 'SKU'
+    const giupCodeMatch = cleaned.match(/\bGIUP[\s._-]*([A-Z0-9]{2,12})\b/i)
+    if (giupCodeMatch) {
+      return normalizeSkuCode(`GIUP ${giupCodeMatch[1]}`)
+    }
+
+    const compactCodeMatch = cleaned.match(/\b[A-Z]{2,8}\d{1,4}[A-Z0-9-]*\b/i)
+    if (compactCodeMatch) {
+      return compactCodeMatch[0].toUpperCase()
+    }
+
+    return normalizeSkuCode(cleaned) || 'SKU'
   }, [])
 
   const lookupCataloguePrice = useCallback((itemName = '', itemCode = '') => {
     if (!cataloguePriceMap) return null
     const byName = cataloguePriceMap.get(normalizeProductName(itemName))
     if (byName?.price != null) return byName.price
-    const byNameNormalized = cataloguePriceMap.get(normalizeProductName(normalizePriceLookupKey(itemName)))
-    if (byNameNormalized?.price != null) return byNameNormalized.price
     const byCode = cataloguePriceMap.get(normalizeSkuCode(itemCode))
     if (byCode?.price != null) return byCode.price
-    const byCodeNormalized = cataloguePriceMap.get(normalizePriceLookupKey(itemCode))
-    if (byCodeNormalized?.price != null) return byCodeNormalized.price
     // Try GIUP-prefixed code variants
     const giupNumMatch = normalizeSkuCode(itemCode).match(/^(?:GIUP\s+)?(\d+[A-Z]?)$/)
     if (giupNumMatch) {
@@ -4265,8 +4013,6 @@ function FullCataloguePage() {
     // Try direct alias lookup by full item name (handles filenames like "MULTIMIX BABY BLUE COLOR")
     const byFullName = cataloguePriceMap.get(normalizeSkuCode(itemName))
     if (byFullName?.price != null) return byFullName.price
-    const byFullNameNormalized = cataloguePriceMap.get(normalizePriceLookupKey(itemName))
-    if (byFullNameNormalized?.price != null) return byFullNameNormalized.price
     // Fuzzy word-overlap fallback
     const fuzzy = fuzzyPriceLookup(itemCode, itemName, catalogueWordIndex)
     if (fuzzy?.price != null) return fuzzy.price
@@ -4797,31 +4543,25 @@ function FullCataloguePage() {
                 {virtualItems.map(({ item, itemIndex }) => {
                   const itemCode = extractProductCode(item.name)
                   const itemKey = `${item.name}::${itemCode}`
-                  const price = lookupCataloguePrice(item.name, itemCode)
                   const qty = getQty(itemKey)
                   const hasChangedQty = qty !== 1
                   const inCart = quickCart[itemKey] > 0
-                  const isOutOfStock = Boolean(item.isOutOfStock)
 
                   if (bulkMode) {
                     return (
                       <div key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className="flex items-center gap-2 rounded-[12px] border border-[#4A4A4A]/30 bg-[#E8E8E8] px-3 py-2 transition duration-300 hover:border-fuchsia-500/70 hover:bg-[#E8E8E8] hover:shadow-[0_0_0_1px_rgba(212,55,144,0.26)]" data-catalogue-item>
-                        <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-black/10 bg-white object-contain opacity-0 transition-opacity duration-300" loading="lazy" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.png'; e.currentTarget.classList.replace('opacity-0', 'opacity-100') }} />
+                        <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-black/10 bg-white object-contain opacity-0 transition-opacity duration-300" loading="lazy" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
                         <div className="min-w-0 flex-1">
                           <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                          {isOutOfStock && <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-rose-700">Out of stock</p>}
                           <p className="break-words text-[11px] font-light text-black/55">{itemCode}</p>
-                          <p className="mt-0.5 text-xs font-bold text-fuchsia-700">€{Number(price || 0).toFixed(2)}</p>
                         </div>
                         <a
                           href={SHOPIFY_SHOP_URL}
                           target="_blank"
                           rel="noreferrer"
-                          onClick={isOutOfStock ? (event) => event.preventDefault() : undefined}
-                          aria-disabled={isOutOfStock}
-                          className={`shrink-0 rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition ${isOutOfStock ? 'cursor-not-allowed bg-slate-400' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`}
+                          className="shrink-0 rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-fuchsia-500"
                         >
-                          {isOutOfStock ? 'Out of Stock' : 'Buy Now'}
+                          Buy Now
                         </a>
                       </div>
                     )
@@ -4830,7 +4570,7 @@ function FullCataloguePage() {
                   return (
                     <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`flex flex-col overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:bg-[#E8E8E8] md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`} data-catalogue-item>
                       <div className="flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52 md:h-60" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
-                        <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full scale-[1.025] object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.png'; e.currentTarget.classList.replace('opacity-0', 'opacity-100') }} />
+                        <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full scale-[1.025] object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
                       </div>
                       {item.galleryImages?.length > 0 && (
                         <div className="flex gap-1 border-t border-black/10 bg-white px-2 py-1.5">
@@ -4842,8 +4582,6 @@ function FullCataloguePage() {
                       <div className="flex flex-1 flex-col border-t border-black/10 px-2.5 py-2">
                         <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                         <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                        {isOutOfStock && <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-rose-700">Out of stock</p>}
-                        <p className="mt-1.5 text-xs font-bold text-fuchsia-700">€{Number(price || 0).toFixed(2)}</p>
                         <div className="mt-2 flex items-center gap-1">
                           <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
                           <p className="break-words text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
@@ -4853,11 +4591,9 @@ function FullCataloguePage() {
                             href={SHOPIFY_SHOP_URL}
                             target="_blank"
                             rel="noreferrer"
-                            onClick={isOutOfStock ? (event) => event.preventDefault() : undefined}
-                            aria-disabled={isOutOfStock}
-                            className={`flex w-full items-center justify-center rounded-[10px] py-2 text-xs font-semibold text-white transition ${isOutOfStock ? 'cursor-not-allowed bg-slate-400' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`}
+                            className="flex w-full items-center justify-center rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
                           >
-                            {isOutOfStock ? 'Out of Stock' : 'Buy Now'}
+                            Buy Now
                           </a>
                         </div>
                       </div>
@@ -4880,13 +4616,12 @@ function FullCataloguePage() {
                         {Object.entries(quickCart).filter(([, q]) => q > 0).map(([key, cartQty]) => {
                           const [name, code] = key.split('::')
                           const price = lookupCataloguePrice(name, code)
-                          const safePrice = Number(price || 0)
-                          const lineTotal = safePrice * cartQty
+                          const lineTotal = price != null ? Number(price) * cartQty : null
                           return (
                             <div key={key} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
                               <div className="min-w-0 flex-1">
                                 <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{name}</p>
-                                <p className="text-[11px] text-black/45">{code}<span className="ml-2 text-fuchsia-700">€{safePrice.toFixed(2)} ea.</span></p>
+                                <p className="text-[11px] text-black/45">{code}{price != null && <span className="ml-2 text-fuchsia-700">€{Number(price).toFixed(2)} ea.</span>}</p>
                               </div>
                               <div className="flex items-center gap-1">
                                 <button
@@ -4905,7 +4640,9 @@ function FullCataloguePage() {
                                   className="flex h-6 w-6 items-center justify-center rounded-md border border-black/20 text-xs text-black/60 transition hover:border-fuchsia-500 hover:text-fuchsia-600"
                                 >+</button>
                               </div>
-                              <span className="w-16 text-right text-xs font-bold text-fuchsia-700">€{Number(lineTotal || 0).toFixed(2)}</span>
+                              {lineTotal != null && (
+                                <span className="w-16 text-right text-xs font-bold text-fuchsia-700">€{lineTotal.toFixed(2)}</span>
+                              )}
                               <button
                                 onClick={() => setQuickCart((c) => { const n = { ...c }; delete n[key]; return n })}
                                 className="ml-1 text-black/30 transition hover:text-red-500"
@@ -4945,7 +4682,7 @@ function FullCataloguePage() {
                                     className="inline-flex items-center gap-1 rounded-lg border border-fuchsia-300/60 bg-fuchsia-50 px-2 py-1 text-[11px] font-semibold text-fuchsia-700 transition hover:bg-fuchsia-100"
                                   >
                                     <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" /></svg>
-                                    {u.label}<span className="text-black/40">€{Number(price || 0).toFixed(2)}</span>
+                                    {u.label}{price != null && <span className="text-black/40">€{price.toFixed(2)}</span>}
                                   </button>
                                 )
                               })}
@@ -5130,8 +4867,6 @@ function FullCataloguePage() {
                 <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}>
                   {globalSearchResults.slice(0, 240).map((item, idx) => {
                     const itemCode = extractProductCode(item.name)
-                    const price = lookupCataloguePrice(item.name, itemCode)
-                    const isOutOfStock = Boolean(item.isOutOfStock)
                     return (
                       <article
                         key={idx}
@@ -5140,13 +4875,11 @@ function FullCataloguePage() {
                         title={`View in ${item.category} — ${item.subcategory}`}
                       >
                         <div className="flex h-36 w-full items-center justify-center overflow-hidden bg-white p-1.5">
-                          <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.png'; e.currentTarget.classList.replace('opacity-0', 'opacity-100') }} />
+                          <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => e.currentTarget.closest('article')?.classList.add('!hidden')} />
                         </div>
                         <div className="border-t border-black/10 px-2 py-1.5">
                           <p className="truncate text-[10px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                           <p className="line-clamp-2 text-[11px] font-semibold uppercase leading-tight tracking-[0.02em] text-black">{item.name}</p>
-                          {isOutOfStock && <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-rose-700">Out of stock</p>}
-                          <p className="mt-1 text-[11px] font-bold text-fuchsia-700">€{Number(price || 0).toFixed(2)}</p>
                           <p className="mt-1 truncate text-[10px] text-fuchsia-600">{formatSubcategoryDisplayName(item.subcategory, item.category)}</p>
                         </div>
                       </article>
@@ -5166,8 +4899,7 @@ function FullCataloguePage() {
               { key: 'Summer Vibes', label: 'Summer Vibes' },
               { key: 'Sapphire Cat Eye', label: 'Sapphire Cat Eye' },
               { key: 'Shimmer Colors', label: 'Shimmer Colors' },
-              { key: 'Mirror Top Coat', label: 'Mirror Powder Top Coat' },
-              { key: 'New Consumables', label: 'New Consumables' },
+              { key: 'Mirror Top Coat', label: 'Mirror Top Coat' },
               { key: '5-in-1 Superior Base', label: '5-in-1 Superior Base' },
             ]
             const activeSubItems = activeNewCollection && newSection
@@ -5259,22 +4991,20 @@ function FullCataloguePage() {
                           const itemKey = `${item.name}::${itemCode}`
                           const price = lookupCataloguePrice(item.name, itemCode)
                           const inCart = (quickCart[itemKey] || 0) > 0
-                          const isOutOfStock = Boolean(item.isOutOfStock)
                           return (
                             <article key={idx} className="flex flex-col overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)]" data-catalogue-item>
                               <div className="flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
-                                <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={e => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.png'; e.currentTarget.classList.replace('opacity-0', 'opacity-100') }} />
+                                <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={e => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={e => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
                               </div>
                               <div className="flex flex-1 flex-col border-t border-black/10 px-2.5 py-2">
                                 <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                                 <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                                {isOutOfStock && <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-rose-700">Out of stock</p>}
-                                <p className="mt-1.5 text-xs font-bold text-fuchsia-700">€{Number(price || 0).toFixed(2)}</p>
+                                <p className="mt-1.5 text-xs font-bold text-fuchsia-700">{price != null ? `€${Number(price).toFixed(2)}` : 'Price on request'}</p>
                                 <div className="mt-auto pt-3">
                                   <div className="flex items-center gap-2">
                                     <button onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
                                     <span className={`w-8 text-center text-xs font-bold ${inCart ? 'text-fuchsia-700' : 'text-black/40'}`}>{quickCart[itemKey] || 0}</span>
-                                    <button onClick={() => addQuickItem(itemKey)} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${isOutOfStock ? 'cursor-not-allowed border-slate-300 text-slate-400' : 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50'} ${pulseItemKey === itemKey ? 'lux-pulse' : ''}`} disabled={isOutOfStock}>+</button>
+                                    <button onClick={() => addQuickItem(itemKey)} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border border-fuchsia-600 text-sm text-fuchsia-600 transition duration-300 hover:bg-fuchsia-50 ${pulseItemKey === itemKey ? 'lux-pulse' : ''}`}>+</button>
                                     {inCart && <span className="ml-auto text-[10px] font-semibold text-fuchsia-700">in basket</span>}
                                   </div>
                                 </div>
@@ -5861,12 +5591,10 @@ function MissingImagesReport() {
       setErrorMessage('')
 
       try {
-        const [response, orderResponse, hiddenResponse, outOfStockResponse, statusResponse] = await Promise.all([
+        const [response, orderResponse, hiddenResponse] = await Promise.all([
           fetch('/gelitup-content/product-image-map.json'),
           fetch('/gelitup-content/catalog-order.json'),
           fetch('/gelitup-content/hidden-products.json'),
-          fetch('/gelitup-content/out-of-stock.json'),
-          fetch('/gelitup-content/product-status.csv'),
         ])
         if (!response.ok) {
           throw new Error(`Catalogue map unavailable (${response.status})`)
@@ -5875,17 +5603,10 @@ function MissingImagesReport() {
         const payload = await response.json()
         const manualOrderPayload = orderResponse.ok ? await orderResponse.json() : { rules: [] }
         const hiddenKeys = hiddenResponse.ok ? await hiddenResponse.json() : []
-        const outOfStockKeys = outOfStockResponse.ok ? await outOfStockResponse.json() : []
-        const statusPayload = statusResponse.ok ? await statusResponse.text() : ''
-        const { discontinuedKeys } = parseProductStatusCsv(statusPayload)
         const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
         if (!mounted) return
 
-        const nextSections = buildCatalogueSectionsFromImageMap(
-          applyProductVisibilityFilter(payload, hiddenKeys, outOfStockKeys, Array.from(discontinuedKeys)),
-          manualRuleIndex,
-          outOfStockKeys,
-        )
+        const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(payload, hiddenKeys), manualRuleIndex)
         setSections(nextSections)
       }
       catch (error) {
@@ -6150,21 +5871,9 @@ function Nav({ onOpenContactModal }) {
         Distribution Registration
       </NavLink>
 
-      {/* Secondary — B2B Registration */}
+      {/* Sign In — distributor portal only */}
       <NavLink
-        to="/portal/register?type=b2b"
-        className={({ isActive }) =>
-          `rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
-            isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/80 hover:border-white/50 hover:bg-white/10 hover:!text-white'
-          }`
-        }
-      >
-        B2B Registration
-      </NavLink>
-
-      {/* B2B Sign In */}
-      <NavLink
-        to="/portal/login?portal=b2b"
+        to="/portal/login?portal=distributor"
         className={({ isActive }) =>
           `rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
             isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/80 hover:border-white/50 hover:bg-white/10 hover:!text-white'
@@ -6243,21 +5952,8 @@ function MobileNav({ onOpenContactModal }) {
           >
             Distribution Registration
           </NavLink>
-
-          {/* Secondary — B2B Registration */}
           <NavLink
-            to="/portal/register?type=b2b"
-            onClick={() => setOpen(false)}
-            className={({ isActive }) =>
-              `block rounded-lg border border-white/25 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-[0.06em] transition duration-200 ${
-                isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/70 hover:border-white/40 hover:bg-white/10 hover:!text-white'
-              }`
-            }
-          >
-            B2B Registration
-          </NavLink>
-          <NavLink
-            to="/portal/login?portal=b2b"
+            to="/portal/login?portal=distributor"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
               `block rounded-lg border border-white/25 px-4 py-3 text-center text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
@@ -6896,11 +6592,11 @@ function HomePage({ onOpenContactModal }) {
                 A decade of mastery · EU regulated · HEMA &amp; TPO-free
               </p>
               <div className="mt-5 flex flex-wrap items-center gap-3">
-                <NavLink to="/portal/register?type=b2b" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_16px_rgba(212,55,144,0.55)] transition duration-300 hover:bg-fuchsia-500">
-                  B2B Register &rarr;
+                <NavLink to="/portal/register" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_16px_rgba(212,55,144,0.55)] transition duration-300 hover:bg-fuchsia-500">
+                  Register Free &rarr;
                 </NavLink>
-                <NavLink to="/portal/login?portal=b2b" className="rounded-lg border-2 border-white/80 bg-white/15 px-5 py-2.5 text-sm font-bold text-white shadow-[0_2px_12px_rgba(0,0,0,0.35)] backdrop-blur-sm transition duration-300 hover:bg-white/25">
-                  Sign In
+                <NavLink to="/become-distributor" className="rounded-lg border-2 border-white/80 bg-white/15 px-5 py-2.5 text-sm font-bold text-white shadow-[0_2px_12px_rgba(0,0,0,0.35)] backdrop-blur-sm transition duration-300 hover:bg-white/25">
+                  Become a Distributor
                 </NavLink>
               </div>
               {/* Trust bar */}
@@ -7442,6 +7138,15 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
   const prefilledEmail = String(loginParams.get('email') || '').trim().toLowerCase()
   const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
   const portalType = loginParams.get('portal') || 'b2b' // 'b2b' | 'distributor'
+
+  // B2B salon ordering has moved to the Shopify store — redirect non-distributor logins
+  useEffect(() => {
+    if (portalType === 'b2b' && !isPasswordResetFlow) {
+      window.location.href = SHOPIFY_SHOP_URL
+    }
+  }, [portalType, isPasswordResetFlow])
+
+  if (portalType === 'b2b' && !isPasswordResetFlow) return null
   // Reliable recovery detection: the PASSWORD_RECOVERY auth event sets pendingRecoverySession
   // (URL-based ?code= detection is unreliable — the SDK consumes the code before React renders)
   const isPasswordResetFlow = pendingRecoverySession
@@ -8186,17 +7891,6 @@ function CheckoutPage() {
           const words = new Set(normalizeSkuCode(name).split(/\s+/).filter(w => w.length >= 4))
           if (words.size >= 2) wIdx.push({ words, entry })
         }
-        const pnLookup = (target) => map.get(normalizeProductName(target))
-        for (const { codes, target } of PRODUCT_ALIAS_GROUPS) {
-          const entry = pnLookup(target)
-          if (!entry) continue
-          for (const code of codes) {
-            const normalizedCode = normalizeSkuCode(code)
-            if (normalizedCode && !map.has(normalizedCode)) {
-              map.set(normalizedCode, entry)
-            }
-          }
-        }
         if (mounted) { setPriceMap(map); setWordIndex(wIdx) }
       } catch {}
     }
@@ -8208,83 +7902,19 @@ function CheckoutPage() {
     if (!priceMap) return null
     const byName = priceMap.get(normalizeProductName(itemName))
     if (byName?.price != null) return byName.price
-    const byNameNormalized = priceMap.get(normalizeProductName(normalizePriceLookupKey(itemName)))
-    if (byNameNormalized?.price != null) return byNameNormalized.price
     const byCode = priceMap.get(normalizeSkuCode(itemCode))
     if (byCode?.price != null) return byCode.price
-    const byCodeNormalized = priceMap.get(normalizePriceLookupKey(itemCode))
-    if (byCodeNormalized?.price != null) return byCodeNormalized.price
-    const byFullName = priceMap.get(normalizeSkuCode(itemName))
-    if (byFullName?.price != null) return byFullName.price
-    const byFullNameNormalized = priceMap.get(normalizePriceLookupKey(itemName))
-    if (byFullNameNormalized?.price != null) return byFullNameNormalized.price
     // Strip GIUP prefix and try the bare code (e.g. "GIUP 15" → "15", "GIUP BTO02" → "BTO02")
     const stripped = normalizeSkuCode(itemCode).replace(/^GIUP[-\s]+/, '')
     if (stripped !== normalizeSkuCode(itemCode)) {
       const byStripped = priceMap.get(stripped)
       if (byStripped?.price != null) return byStripped.price
-      const byStripped2 = priceMap.get(stripped.replace(/^0+(\d)/, '$1'))
-      if (byStripped2?.price != null) return byStripped2.price
     }
     // Try the full GIUP code as-is (map may have "GIUP 15" key)
     const byGiup = priceMap.get(normalizeSkuCode(itemCode))
     if (byGiup?.price != null) return byGiup.price
-    const byEmbeddedCode = lookupPriceEntryByEmbeddedCode(priceMap, itemCode, itemName)
-    if (byEmbeddedCode?.price != null) return byEmbeddedCode.price
     const fuzzy = fuzzyPriceLookup(itemCode, itemName, wordIndex)
     if (fuzzy?.price != null) return fuzzy.price
-    return null
-  }, [priceMap, wordIndex])
-
-  const resolvePriceEntry = useCallback((itemName = '', itemCode = '') => {
-    if (!priceMap) return null
-
-    const byName = priceMap.get(normalizeProductName(itemName))
-    if (byName?.price != null) return byName
-
-    const byNameNormalized = priceMap.get(normalizeProductName(normalizePriceLookupKey(itemName)))
-    if (byNameNormalized?.price != null) return byNameNormalized
-
-    const byCode = priceMap.get(normalizeSkuCode(itemCode))
-    if (byCode?.price != null) return byCode
-
-    const byCodeNormalized = priceMap.get(normalizePriceLookupKey(itemCode))
-    if (byCodeNormalized?.price != null) return byCodeNormalized
-
-    // Some Brush On Builder entries arrive as BIAB* codes (e.g. BIABBLPN).
-    // Map BIAB suffixes to the canonical BOB aliases used in the price map.
-    const biabSource = normalizeSkuCode(`${itemCode} ${itemName}`)
-    const biabMatch = biabSource.match(/\bBIAB([A-Z0-9]{2,})\b/)
-    if (biabMatch) {
-      const suffix = biabMatch[1]
-      const biabCandidates = [`GIUP BOB${suffix}`, `GIUP-BOB${suffix}`, `BOB${suffix}`]
-      for (const candidate of biabCandidates) {
-        const byBiabAlias = priceMap.get(normalizeSkuCode(candidate))
-          || priceMap.get(normalizePriceLookupKey(candidate))
-        if (byBiabAlias?.price != null) return byBiabAlias
-      }
-    }
-
-    const byFullName = priceMap.get(normalizeSkuCode(itemName))
-    if (byFullName?.price != null) return byFullName
-
-    const byFullNameNormalized = priceMap.get(normalizePriceLookupKey(itemName))
-    if (byFullNameNormalized?.price != null) return byFullNameNormalized
-
-    const stripped = normalizeSkuCode(itemCode).replace(/^GIUP[-\s]+/, '')
-    if (stripped !== normalizeSkuCode(itemCode)) {
-      const byStripped = priceMap.get(stripped)
-      if (byStripped?.price != null) return byStripped
-      const byStripped2 = priceMap.get(stripped.replace(/^0+(\d)/, '$1'))
-      if (byStripped2?.price != null) return byStripped2
-    }
-
-    const byEmbeddedCode = lookupPriceEntryByEmbeddedCode(priceMap, itemCode, itemName)
-    if (byEmbeddedCode?.price != null) return byEmbeddedCode
-
-    const fuzzy = fuzzyPriceLookup(itemCode, itemName, wordIndex)
-    if (fuzzy?.price != null) return fuzzy
-
     return null
   }, [priceMap, wordIndex])
 
@@ -8292,36 +7922,8 @@ function CheckoutPage() {
     Object.entries(cart).filter(([, q]) => q > 0).map(([key, qty]) => {
       const [name, code] = key.split('::')
       const price = lookupPrice(name, code)
-      return { key, name, code, qty, price, lineTotal: Number(price || 0) * qty }
+      return { key, name, code, qty, price, lineTotal: price != null ? Number(price) * qty : null }
     }), [cart, lookupPrice])
-
-  useEffect(() => {
-    if (!priceMap) return
-    setCart((current) => {
-      let changed = false
-      const next = {}
-      for (const [key, qty] of Object.entries(current)) {
-        const quantity = Number(qty || 0)
-        if (quantity <= 0) {
-          changed = true
-          continue
-        }
-        const [name, code = ''] = key.split('::')
-        const resolved = resolvePriceEntry(name, code)
-        if (!resolved || resolved.price == null) {
-          changed = true
-          continue
-        }
-
-        const canonicalName = String(resolved.name || name || '').trim() || String(name || '').trim()
-        const canonicalCode = normalizeSkuCode(code) || normalizeSkuCode(canonicalName) || 'SKU'
-        const canonicalKey = `${canonicalName}::${canonicalCode}`
-        if (canonicalKey !== key) changed = true
-        next[canonicalKey] = Number(next[canonicalKey] || 0) + quantity
-      }
-      return changed ? next : current
-    })
-  }, [priceMap, resolvePriceEntry])
 
   const cartTotal = useMemo(() => cartEntries.reduce((s, e) => s + (e.lineTotal || 0), 0), [cartEntries])
   const cartUnits = useMemo(() => cartEntries.reduce((s, e) => s + e.qty, 0), [cartEntries])
@@ -8862,7 +8464,7 @@ function CheckoutPage() {
                 <div key={e.key} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-semibold uppercase text-slate-800">{e.name}</p>
-                    <p className="text-[11px] text-slate-500">{e.code}<span className="ml-1 text-fuchsia-700">€{Number(e.price || 0).toFixed(2)}</span></p>
+                    <p className="text-[11px] text-slate-500">{e.code}{e.price != null && <span className="ml-1 text-fuchsia-700">€{e.price.toFixed(2)}</span>}</p>
                   </div>
                   <div className="flex items-center gap-1">
                     <button type="button" onClick={() => {
@@ -8872,7 +8474,7 @@ function CheckoutPage() {
                     <span className="w-6 text-center text-xs font-bold text-slate-800">{e.qty}</span>
                     <button type="button" onClick={() => setCart(c => ({ ...c, [e.key]: (c[e.key] || 0) + 1 }))} className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-300 text-xs text-slate-600 hover:border-fuchsia-500">+</button>
                   </div>
-                  <span className="w-14 text-right text-xs font-bold text-fuchsia-700">€{Number(e.lineTotal || 0).toFixed(2)}</span>
+                  {e.lineTotal != null && <span className="w-14 text-right text-xs font-bold text-fuchsia-700">€{e.lineTotal.toFixed(2)}</span>}
                   <button type="button" onClick={() => setCart(c => { const n = { ...c }; delete n[e.key]; return n })} className="ml-1 text-slate-400 hover:text-red-500" title="Remove">
                     <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5"><path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" /></svg>
                   </button>
@@ -8916,7 +8518,7 @@ function CheckoutPage() {
                       <div key={u.code} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-semibold text-slate-800">{u.label}</p>
-                          <p className="text-[11px] text-fuchsia-700">€{Number(price || 0).toFixed(2)}</p>
+                          {price != null && <p className="text-[11px] text-fuchsia-700">€{price.toFixed(2)}</p>}
                         </div>
                         <button
                           type="button"
@@ -8942,10 +8544,7 @@ function CheckoutPage() {
 }
 
 function PortalRegister({ onRegister }) {
-  const location = useLocation()
-  const registerParams = useMemo(() => new URLSearchParams(location.search), [location.search])
-  const requestedType = String(registerParams.get('type') || '').toLowerCase()
-  const defaultApplicationType = requestedType === 'b2b' ? 'b2b_order' : 'distributor'
+  const defaultApplicationType = 'distributor'
 
   const [application, setApplication] = useState({
     applicationType: defaultApplicationType,
@@ -9988,7 +9587,7 @@ const B2B_SIDEBAR_GROUPS = [
   },
   {
     label: 'Builder Systems',
-    cats: ['BUILDER GEL SYSTEMS', '3-in-1 Builder Gel', '3-in-1 Premium Builder Gel', 'Multimix Polygel', 'Brush On Builder (BIAB)', 'BRUSH ON BUILDER', 'Liquid Polygel', 'Acrylics'],
+    cats: ['BUILDER GEL SYSTEMS', '3-in-1 Builder Gel', '3-in-1 Premium Builder Gel', 'Multimix Polygel', 'Brush On Builder (BIAB)', 'Liquid Polygel', 'Acrylics'],
   },
   {
     label: 'Tools & Equipment',
@@ -10000,7 +9599,7 @@ const B2B_SIDEBAR_GROUPS = [
   },
 ]
 
-function ProductsModule({ moduleView = 'products', tier = null }) {
+function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated = false }) {
   // Tier 1 / Professional (local-regional): -63% from B2B price (pay 37%).
   // Tier 2 / Authority (national): -78% from B2B price (pay 22%).
   // Level 2 Country Tier: Authority price + 20% (0.22 × 1.20 = 0.264).
@@ -10145,25 +9744,22 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
     }
   }, [])
 
-  // Cart persistence — restore cart from localStorage first, then fall back to Supabase draft carts.
+  // Cart persistence — restore cart from localStorage on mount, keyed by user ID
   const cartUserIdRef = useRef(null)
 
-  const restorePortalCart = useCallback(async (user) => {
-    const uid = user?.id || null
-    cartUserIdRef.current = uid
-    if (!uid) return
-
-    const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${uid}`
-    let restored = false
-
-    try {
-      const saved = JSON.parse(localStorage.getItem(key) || 'null')
-      if (saved) {
-        setSelectedCodes(Array.isArray(saved.selectedCodes) ? saved.selectedCodes : [])
-        setItemQtys(saved.itemQtys && typeof saved.itemQtys === 'object' ? saved.itemQtys : {})
-        setPackageCartItems(Array.isArray(saved.packageCartItems) ? saved.packageCartItems : [])
-        restored = true
-
+  useEffect(() => {
+    if (!hasSupabaseConfig || !supabase) return
+    supabase.auth.getUser().then(({ data }) => {
+      const uid = data?.user?.id
+      if (!uid) return
+      cartUserIdRef.current = uid
+      const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${uid}`
+      try {
+        const saved = JSON.parse(localStorage.getItem(key) || 'null')
+        if (!saved) return
+        if (Array.isArray(saved.selectedCodes) && saved.selectedCodes.length) setSelectedCodes(saved.selectedCodes)
+        if (saved.itemQtys && typeof saved.itemQtys === 'object') setItemQtys(saved.itemQtys)
+        if (Array.isArray(saved.packageCartItems) && saved.packageCartItems.length) setPackageCartItems(saved.packageCartItems)
         // Abandoned cart reminder — every 48 h, max 3 times (~1 week), then stop
         const REMINDER_INTERVAL = 48 * 60 * 60 * 1000 // 48 hours
         const MAX_REMINDERS = 3
@@ -10171,9 +9767,9 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
         const lastReminder = saved.lastReminderAt || saved.savedAt
         if (lastReminder && reminderCount < MAX_REMINDERS && Date.now() - lastReminder > REMINDER_INTERVAL) {
           const itemCount = (saved.selectedCodes?.length || 0) + (saved.packageCartItems?.length || 0)
-          const userEmail = String(user?.email || '').trim()
+          const userEmail = String(data?.user?.email || '').trim()
           if (itemCount > 0 && userEmail) {
-            const firstName = String(user?.user_metadata?.contact_name || '').split(' ')[0] || 'there'
+            const firstName = String(data?.user?.user_metadata?.contact_name || '').split(' ')[0] || 'there'
             const newCount = reminderCount + 1
             sendPortalEmailNotification({
               eventType: 'b2b_abandoned_cart',
@@ -10208,77 +9804,9 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
           }
         }
       }
-    }
-    catch { /* ignore corrupt storage */ }
-
-    if (restored || !supabase) return
-
-    try {
-      const { data: draftRow } = await supabase
-        .from('b2b_draft_carts')
-        .select('items')
-        .eq('user_id', uid)
-        .eq('source', 'portal')
-        .maybeSingle()
-
-      const draftProducts = Array.isArray(draftRow?.items?.products) ? draftRow.items.products : []
-      const draftPackages = Array.isArray(draftRow?.items?.packages) ? draftRow.items.packages : []
-
-      if (!draftProducts.length && !draftPackages.length) return
-
-      const restoredCodes = draftProducts
-        .map((item) => normalizeSkuCode(item?.code))
-        .filter(Boolean)
-      const restoredQtys = Object.fromEntries(
-        draftProducts
-          .map((item) => [normalizeSkuCode(item?.code), Math.max(1, Number(item?.qty || 1))])
-          .filter(([code]) => Boolean(code)),
-      )
-      const restoredPackages = draftPackages.map((item) => ({
-        ...item,
-        qty: Math.max(1, Number(item?.qty || 1)),
-      }))
-
-      setSelectedCodes(restoredCodes)
-      setItemQtys(restoredQtys)
-      setPackageCartItems(restoredPackages)
-
-      localStorage.setItem(key, JSON.stringify({
-        selectedCodes: restoredCodes,
-        itemQtys: restoredQtys,
-        packageCartItems: restoredPackages,
-        savedAt: Date.now(),
-        lastReminderAt: null,
-        abandonedReminderCount: 0,
-      }))
-    }
-    catch {
-      /* ignore draft cart restore failures */
-    }
-  }, [supabase])
-
-  useEffect(() => {
-    if (!hasSupabaseConfig || !supabase) return
-
-    let active = true
-
-    const hydrate = async (sessionUser = null) => {
-      const authUser = sessionUser || (await supabase.auth.getUser()).data?.user || null
-      if (!active || !authUser) return
-      await restorePortalCart(authUser)
-    }
-
-    void hydrate()
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      void hydrate(session?.user || null)
+      catch { /* ignore corrupt storage */ }
     })
-
-    return () => {
-      active = false
-      listener?.subscription?.unsubscribe()
-    }
-  }, [restorePortalCart, supabase])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Persist cart to localStorage whenever it changes
   useEffect(() => {
@@ -10843,13 +10371,13 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
 
     for (const key of localMapKeys) {
       const mappedUrl = localImageMap.get(key)
-      if (mappedUrl) return repairCatalogueImageUrl(mappedUrl)
+      if (mappedUrl) return mappedUrl
     }
 
     const bySkuOrCode = catalogBySku.get(normalizeSkuCode(item?.sku))?.imageUrl
       || catalogBySku.get(normalizeSkuCode(item?.code))?.imageUrl
 
-    if (bySkuOrCode) return repairCatalogueImageUrl(bySkuOrCode)
+    if (bySkuOrCode) return bySkuOrCode
 
     const normalizedItemName = normalizeProductName(item?.name)
     const normalizedItemCode = normalizeProductName(item?.code)
@@ -10858,17 +10386,17 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
 
     for (const candidate of candidates) {
       const exact = catalogByName.get(candidate)?.imageUrl
-      if (exact) return repairCatalogueImageUrl(exact)
+      if (exact) return exact
     }
 
     for (const candidate of candidates) {
       const fuzzy = catalogNameEntries.find(([key, product]) =>
         Boolean(product?.imageUrl) && (key.includes(candidate) || candidate.includes(key)),
       )
-      if (fuzzy?.[1]?.imageUrl) return repairCatalogueImageUrl(fuzzy[1].imageUrl)
+      if (fuzzy?.[1]?.imageUrl) return fuzzy[1].imageUrl
     }
 
-    return repairCatalogueImageUrl(item?.imageUrl) || null
+    return item?.imageUrl || null
   }, [catalogByName, catalogBySku, catalogNameEntries, localImageMap])
   const packagePreviewItems = useMemo(
     () => packageCartItems,
@@ -11039,7 +10567,6 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
         // Hard-wire acronym codes that can't be auto-derived from price-list names
         const pnLookup = t => map.get(normalizeProductName(t))
         const aliasGroups = [
-          ...PRODUCT_ALIAS_GROUPS,
           { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-FBCLR'], target: 'Flexi Base Clear -HTF' },
           // 5-in-1 Superior Base coloureds (SBC*)
           { codes: ['GIUP SBCCLR', 'GIUP-SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
@@ -11454,11 +10981,11 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
         ]
         for (const { codes, target } of aliasGroups) {
           const entry = pnLookup(target)
-          if (!entry) continue
-          for (const c of codes) {
-            const normalizedCode = normalizeSkuCode(c)
-            if (normalizedCode && !map.has(normalizedCode)) {
-              map.set(normalizedCode, entry)
+          if (entry) {
+            for (const c of codes) {
+              const normalizedCode = normalizeSkuCode(c)
+              if (normalizedCode && !map.has(normalizedCode)) map.set(normalizedCode, entry)
+              if (!map.has(c)) map.set(c, entry)
             }
           }
         }
@@ -11530,85 +11057,6 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
       window.clearTimeout(timeoutId)
     }
   }, [showOrderConfetti])
-
-  const resolvePortalPriceEntry = useCallback((itemName = '', itemCode = '', itemSku = '') => {
-    if (!priceMap) return null
-
-    const bySku = priceMap.get(normalizeSkuCode(itemSku))
-    if (bySku?.price != null) return bySku
-
-    const bySkuNormalized = priceMap.get(normalizePriceLookupKey(itemSku))
-    if (bySkuNormalized?.price != null) return bySkuNormalized
-
-    const byName = priceMap.get(normalizeProductName(itemName))
-    if (byName?.price != null) return byName
-
-    const byNameNormalized = priceMap.get(normalizeProductName(normalizePriceLookupKey(itemName)))
-    if (byNameNormalized?.price != null) return byNameNormalized
-
-    const byCode = priceMap.get(normalizeSkuCode(itemCode))
-    if (byCode?.price != null) return byCode
-
-    const byCodeNormalized = priceMap.get(normalizePriceLookupKey(itemCode))
-    if (byCodeNormalized?.price != null) return byCodeNormalized
-
-    // Some Brush On Builder entries arrive as BIAB/BOB variants:
-    // BIABBLPN, BIAB-BLPN, BIAB BLPN, BOBGLMG, GIUP-BOBGLMG, etc.
-    // Normalize these to canonical BOB aliases used in the price map.
-    for (const aliasName of getBrushOnBuilderPriceAliases(`${itemSku} ${itemCode} ${itemName}`)) {
-      const byBiabAlias = priceMap.get(normalizeSkuCode(aliasName))
-        || priceMap.get(normalizePriceLookupKey(aliasName))
-      if (byBiabAlias?.price != null) return byBiabAlias
-    }
-
-    const byFullName = priceMap.get(normalizeSkuCode(itemName))
-    if (byFullName?.price != null) return byFullName
-
-    const byFullNameNormalized = priceMap.get(normalizePriceLookupKey(itemName))
-    if (byFullNameNormalized?.price != null) return byFullNameNormalized
-
-    const stripped = normalizeSkuCode(itemCode).replace(/^GIUP[-\s]+/, '')
-    if (stripped && stripped !== normalizeSkuCode(itemCode)) {
-      const byStripped = priceMap.get(stripped)
-      if (byStripped?.price != null) return byStripped
-      const byStripped2 = priceMap.get(stripped.replace(/^0+(\d)/, '$1'))
-      if (byStripped2?.price != null) return byStripped2
-    }
-
-    const giupNumMatch = normalizeSkuCode(itemCode).match(/^(?:GIUP\s+)?(\d+[A-Z]?)$/)
-    if (giupNumMatch) {
-      const e = priceMap.get(giupNumMatch[1].padStart(2, '0')) || priceMap.get(giupNumMatch[1])
-      if (e?.price != null) return e
-    }
-
-    const giupSeriesMatch = normalizeSkuCode(itemCode).match(/^(?:GIUP[-\s]+)?([A-Z]+)(\d+[A-Z]?)$/)
-    if (giupSeriesMatch) {
-      const s = giupSeriesMatch[1]
-      const n = giupSeriesMatch[2]
-      const e = priceMap.get(`${s} ${n}`)
-        || priceMap.get(`${s} ${n.padStart(2, '0')}`)
-        || priceMap.get(`${s}${n}`)
-        || priceMap.get(`${s}${n.padStart(2, '0')}`)
-        || priceMap.get(`${s} ${n.replace(/^0+(\d)/, '$1')}`)
-      if (e?.price != null) return e
-    }
-
-    const giupLooseSeriesMatch = !giupSeriesMatch && normalizeSkuCode(itemCode).match(/^(?:GIUP[-\s]+)?([A-Z]{2,5})(\d{1,3})(?=[A-Z])/) 
-    if (giupLooseSeriesMatch) {
-      const s = giupLooseSeriesMatch[1]
-      const n = giupLooseSeriesMatch[2]
-      const e = priceMap.get(`${s} ${n}`) || priceMap.get(`${s} ${n.padStart(2, '0')}`)
-      if (e?.price != null) return e
-    }
-
-    const byEmbeddedCode = lookupPriceEntryByEmbeddedCode(priceMap, itemSku, itemCode, itemName)
-    if (byEmbeddedCode?.price != null) return byEmbeddedCode
-
-    const fuzzy = fuzzyPriceLookup(itemCode, itemName, priceWordIndex)
-    if (fuzzy?.price != null) return fuzzy
-
-    return null
-  }, [priceMap, priceWordIndex])
 
   useEffect(() => {
     setPackagePreviewVisibleCount(15)
@@ -11729,26 +11177,17 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
           : await (async () => {
             // Mirror the public catalogue exactly — load from product-image-map.json
             // so every product has the same category, name and image as shown on the site.
-            const [response, orderResponse, hiddenResponse, outOfStockResponse, statusResponse] = await Promise.all([
+            const [response, orderResponse, hiddenResponse] = await Promise.all([
               fetch('/gelitup-content/product-image-map.json'),
               fetch('/gelitup-content/catalog-order.json'),
               fetch('/gelitup-content/hidden-products.json'),
-              fetch('/gelitup-content/out-of-stock.json'),
-              fetch('/gelitup-content/product-status.csv'),
             ])
             if (!response.ok) throw new Error('Could not load product image map')
             const mapPayload = await response.json()
             const manualOrderPayload = orderResponse.ok ? await orderResponse.json() : { rules: [] }
             const hiddenKeys = hiddenResponse.ok ? await hiddenResponse.json() : []
-            const outOfStockKeys = outOfStockResponse.ok ? await outOfStockResponse.json() : []
-            const statusPayload = statusResponse.ok ? await statusResponse.text() : ''
-            const { discontinuedKeys } = parseProductStatusCsv(statusPayload)
             const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
-            const sections = buildCatalogueSectionsFromImageMap(
-              applyProductVisibilityFilter(mapPayload, hiddenKeys, outOfStockKeys, Array.from(discontinuedKeys)),
-              manualRuleIndex,
-              outOfStockKeys,
-            )
+            const sections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(mapPayload, hiddenKeys), manualRuleIndex)
             return sections.flatMap((section) =>
               section.subcategories.flatMap((sub) =>
                 sub.items.map((item) => ({
@@ -11775,7 +11214,6 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
                   code: item.name,
                   sku: item.name,
                   name: item.name,
-                  isOutOfStock: Boolean(item.isOutOfStock),
                   imageUrl: item.imageUrl,
                   galleryImages: item.galleryImages || [],
                   preview: null,
@@ -11816,8 +11254,7 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
               'BASE': 'BASES', 'FLEXI BASE': 'BASES',
               // Brush on Builder belongs under Builder Systems
               'BRUSH ON BUILDER': 'BUILDER GEL SYSTEMS', 'BRUSH-ON BUILDER': 'BUILDER GEL SYSTEMS',
-              'BRUSH ON BUILDER (BIAB)': 'BUILDER GEL SYSTEMS',
-              'BIAB': 'BUILDER GEL SYSTEMS',
+              'BRUSH ON BUILDER (BIAB)': 'BUILDER GEL SYSTEMS', 'BIAB': 'BUILDER GEL SYSTEMS',
               // Tops
               'TOP COAT': 'TOPS', 'TOP COATS': 'TOPS',
               'CLASSIC TOP COATS': 'TOPS', 'EFFECT TOPS': 'TOPS',
@@ -11943,12 +11380,32 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
               || localImageMap.get(normalizeSkuCode(code))
               || localImageMap.get(normalizeProductName(rawName))
               || null
-            const imageUrl = repairCatalogueImageUrl(mapImageUrl || item.image_url || item.imageUrl || item?.images?.[0]?.src || null)
+            const imageUrl = mapImageUrl || item.image_url || item.imageUrl || item?.images?.[0]?.src || null
 
             // Merge price-list data (name override + price)
-            const priceEntry = resolvePortalPriceEntry(rawName, code, sku)
+            // For codes like "GIUP 01" extract the number to match "01 Ice Ice Baby"
+            const giupNumMatch = normalizeSkuCode(code).match(/^(?:GIUP\s+)?(\d+[A-Z]?)$/)
+            // For codes like "GIUP NYP01" extract "NYP 01" to match "New York Party #NYP01"
+            const giupSeriesCodeMatch = normalizeSkuCode(code).match(/^(?:GIUP[-\s]+)?([A-Z]+)(\d+[A-Z]?)$/)
+            // For codes like "GIUP SS01Kaleidascope" where colour name is appended after the series+num
+            const giupLooseSeriesMatch = !giupSeriesCodeMatch && normalizeSkuCode(code).match(/^(?:GIUP[-\s]+)?([A-Z]{2,5})(\d{1,3})(?=[A-Z])/)
+            const priceEntry = priceMap.get(normalizeSkuCode(sku))
+              || priceMap.get(normalizeSkuCode(code))
+              || priceMap.get(normalizeProductName(rawName))
+              || (giupNumMatch ? priceMap.get(giupNumMatch[1].padStart(2, '0')) || priceMap.get(giupNumMatch[1]) : null)
+              || (giupSeriesCodeMatch ? (
+                  priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2]}`)
+                  || priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2].padStart(2, '0')}`)
+                  // strip leading zeros: R010 ? R10 (matches GEL.IT.UP 1 R10 11ml in price list)
+                  || priceMap.get(`${giupSeriesCodeMatch[1]} ${giupSeriesCodeMatch[2].replace(/^0+(\d)/, '$1')}`)
+                ) : null)
+              || (giupLooseSeriesMatch ? (
+                  priceMap.get(`${giupLooseSeriesMatch[1]} ${giupLooseSeriesMatch[2]}`)
+                  || priceMap.get(`${giupLooseSeriesMatch[1]} ${giupLooseSeriesMatch[2].padStart(2, '0')}`)
+                ) : null)
+              || fuzzyPriceLookup(code, rawName, priceWordIndex)
             const name = priceEntry?.name || rawName
-            const price = priceEntry?.price ?? proformaLookupPrice(priceMap, code, rawName) ?? null
+            const price = priceEntry?.price ?? null
 
             return {
               code,
@@ -11966,63 +11423,13 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
           })
           .filter((item) => Boolean(item.code))
 
-        // De-duplicate Brush On Builder variants that can arrive from multiple
-        // map aliases/paths (e.g. BIAB* + BOB*), keeping the most reliable entry.
-        const deduped = (() => {
-          const byKey = new Map()
-
-          const getBrushOnBuilderKey = (item = {}) => {
-            const token = normalizeSkuCode(`${item.code || ''} ${item.sku || ''} ${item.name || ''}`)
-            const suffixMatch = token.match(/\b(?:BIAB|BOB)[\s_-]*([A-Z0-9]{2,})\b/)
-            if (suffixMatch) return `BRUSH_ON_BUILDER::${suffixMatch[1]}`
-
-            if (token.includes('BRUSH ON BUILDER')) {
-              const compact = normalizeProductName(item.name || item.code || item.sku || '')
-                .replace(/^brush on builder\s*/i, '')
-              return `BRUSH_ON_BUILDER::${compact || 'GENERIC'}`
-            }
-
-            return null
-          }
-
-          const scoreItem = (item = {}) => {
-            const pathToken = normalizeCatalogueToken(item.imageUrl || '')
-            const hasPrice = Number.isFinite(Number(item.price)) && Number(item.price) > 0
-
-            let score = 0
-            if (hasPrice) score += 8
-            if (pathToken.includes('/BASES/BRUSH ON BUILDER/')) score += 5
-            if (pathToken.includes('/2026 NEW!/BRUSH ON BUILDER (BIAB)/')) score += 4
-            if (pathToken.includes('/BUILDER GEL/BRUSH ON BUILDER/')) score += 2
-            if (item.imageUrl) score += 1
-            return score
-          }
-
-          for (const item of normalized) {
-            const brushKey = getBrushOnBuilderKey(item)
-            const key = brushKey || `${normalizeSkuCode(item.category)}::${normalizeSkuCode(item.code || item.sku || item.name)}`
-
-            const existing = byKey.get(key)
-            if (!existing) {
-              byKey.set(key, item)
-              continue
-            }
-
-            if (scoreItem(item) > scoreItem(existing)) {
-              byKey.set(key, item)
-            }
-          }
-
-          return Array.from(byKey.values())
-        })()
-
-        if (!deduped.length) {
+        if (!normalized.length) {
           throw new Error('Feed has no valid products')
         }
 
         if (isMounted) {
-          setProducts(deduped)
-          setFeedMessage(`Loaded ${deduped.length} live products from ${feedUrl ? 'feed' : 'Supabase catalog'}.`)
+          setProducts(normalized)
+          setFeedMessage(`Loaded ${normalized.length} live products from ${feedUrl ? 'feed' : 'Supabase catalog'}.`)
         }
       }
       catch {
@@ -12043,7 +11450,7 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
     return () => {
       isMounted = false
     }
-  }, [localImageMap, priceMap, priceWordIndex, productsTable, resolvePortalPriceEntry])
+  }, [localImageMap, priceMap, priceWordIndex, productsTable])
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -12102,19 +11509,6 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
     })
   }, [selectedCodes, products])
 
-  const resolvePortalUnitBasePrice = useCallback((item = null) => {
-    const direct = Number(item?.price)
-    if (Number.isFinite(direct) && direct > 0) return direct
-
-    const resolved = resolvePortalPriceEntry(item?.name || '', item?.code || '', item?.sku || '')
-    if (resolved?.price != null) return Number(resolved.price)
-
-    const fallback = proformaLookupPrice(priceMap, item?.code || item?.sku || '', item?.name || '')
-    if (fallback != null) return Number(fallback)
-
-    return 0
-  }, [priceMap, resolvePortalPriceEntry])
-
   // Colour family breakdown for selected products
   const colourFamilyBreakdown = useMemo(() => {
     const counts = {}
@@ -12129,10 +11523,10 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
   }, [selectedProducts])
 
   const orderTotal = useMemo(() => {
-    const itemsTotal = selectedProducts.reduce((s, p) => s + (resolvePortalUnitBasePrice(p) * tierPriceMultiplier * (itemQtys[p.code] || 1)), 0)
-    const pkgTotal = packageCartItems.reduce((s, item) => s + (resolvePortalUnitBasePrice(item) * tierPriceMultiplier * item.qty), 0)
+    const itemsTotal = selectedProducts.reduce((s, p) => s + (p.price != null ? Number(p.price) * tierPriceMultiplier * (itemQtys[p.code] || 1) : 0), 0)
+    const pkgTotal = packageCartItems.reduce((s, item) => s + (item.price != null ? Number(item.price) * tierPriceMultiplier * item.qty : 0), 0)
     return itemsTotal + pkgTotal
-  }, [selectedProducts, packageCartItems, itemQtys, tierPriceMultiplier, resolvePortalUnitBasePrice])
+  }, [selectedProducts, packageCartItems, itemQtys, tierPriceMultiplier])
 
   // Single-select: one category visible at a time in sidebar layout
   const toggleCategory = (cat) => {
@@ -13680,7 +13074,9 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
             )}
             <div className="p-5">
               <p className="text-sm font-semibold text-slate-900 leading-snug">{upsellModal.product?.name}</p>
-              <p className="mt-1 text-sm font-bold text-fuchsia-700">€{(resolvePortalUnitBasePrice(upsellModal.product) * tierPriceMultiplier).toFixed(2)}</p>
+              {upsellModal.product?.price != null && pricesAllocated && (
+                <p className="mt-1 text-sm font-bold text-fuchsia-700">€{(Number(upsellModal.product.price) * tierPriceMultiplier).toFixed(2)}</p>
+              )}
               <div className="mt-4 flex gap-2">
                 <button
                   onClick={() => {
@@ -13738,6 +13134,9 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
               <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Country Distribution Authority</p>
               <p className="mt-0.5 text-base font-bold">★ Authority Partner Portal</p>
             </div>
+            {!pricesAllocated && (
+              <span className="rounded-lg bg-white/20 px-3 py-1 text-xs font-semibold">Pricing pending allocation</span>
+            )}
           </div>
           <p className="mt-2 text-xs leading-relaxed opacity-80">You hold exclusive country-level distribution rights for GEL.IT.UP products. Access the full wholesale catalogue, place orders for your entire country territory, and manage your exclusive distribution agreement below.</p>
         </div>
@@ -13749,6 +13148,9 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
               <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Level 2 Country Tier</p>
               <p className="mt-0.5 text-base font-bold">Level 2 Country Tier Portal</p>
             </div>
+            {!pricesAllocated && (
+              <span className="rounded-lg bg-white/20 px-3 py-1 text-xs font-semibold">Pricing pending allocation</span>
+            )}
           </div>
           <p className="mt-2 text-xs leading-relaxed opacity-80">You are an approved Level 2 Country Tier distributor of GEL.IT.UP products. Browse the wholesale catalogue at your country tier pricing and place orders below.</p>
         </div>
@@ -13760,8 +13162,17 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
               <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Regional Professional Distributor</p>
               <p className="mt-0.5 text-base font-bold">Professional Partner Portal</p>
             </div>
+            {!pricesAllocated && (
+              <span className="rounded-lg bg-white/20 px-3 py-1 text-xs font-semibold">Pricing pending allocation</span>
+            )}
           </div>
           <p className="mt-2 text-xs leading-relaxed opacity-80">You are an approved regional distributor of GEL.IT.UP products. Browse the full wholesale catalogue and place orders for your approved distribution region below.</p>
+        </div>
+      )}
+      {!pricesAllocated && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3">
+          <p className="text-xs font-semibold text-amber-800">Wholesale pricing not yet allocated</p>
+          <p className="mt-0.5 text-xs text-amber-700">Your account manager will confirm your wholesale pricing agreement before prices are displayed. You can browse the catalogue and prepare your selection in the meantime.</p>
         </div>
       )}
 
@@ -13782,7 +13193,7 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
             <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ${moduleView === 'profile' ? 'bg-white/30 text-white' : 'bg-slate-400 text-white'}`}>3</span>
             My Details
           </button>
-          {orderTotal > 0 && <span className="ml-auto text-xs font-bold text-fuchsia-700">€{orderTotal.toFixed(2)}</span>}
+          {orderTotal > 0 && pricesAllocated && <span className="ml-auto text-xs font-bold text-fuchsia-700">€{orderTotal.toFixed(2)}</span>}
         </div>
       </div>
 
@@ -13811,33 +13222,23 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
           <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold text-slate-900">Order Summary</p>
-              <button onClick={() => {
-                navigate('/portal/dashboard/catalog')
-                requestAnimationFrame(() => {
-                  requestAnimationFrame(() => {
-                    const el = document.getElementById(CATALOGUE_RESULTS_ANCHOR_ID)
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                  })
-                })
-              }} className="text-[11px] font-semibold text-fuchsia-600 hover:underline">+ Add more products</button>
+              <button onClick={() => navigate('/portal/dashboard/catalog')} className="text-[11px] font-semibold text-fuchsia-600 hover:underline">+ Add more products</button>
             </div>
             <div className="mt-2 divide-y divide-slate-100">
               {selectedProducts.map(product => {
                 const qty = itemQtys[product.code] || 1
-                const lineTotal = resolvePortalUnitBasePrice(product) * tierPriceMultiplier * qty
-                const resolvedImageUrl = resolveCatalogImageUrl(product)
+                const lineTotal = product.price != null ? Number(product.price) * tierPriceMultiplier * qty : null
                 return (
                   <div key={product.code} className="flex items-center gap-2 py-2">
                     <div
                       className="h-9 w-9 flex-none cursor-zoom-in overflow-hidden rounded-md border border-slate-100"
                       style={{ backgroundColor: product.preview || '#e2e8f0' }}
-                      onClick={() => resolvedImageUrl && setLightboxUrl(resolvedImageUrl)}
+                      onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}
                     >
-                      {resolvedImageUrl && <img src={resolvedImageUrl} alt={product.name} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.png' }} />}
+                      {product.imageUrl && <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" />}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="break-words text-[11px] font-semibold text-slate-900">{product.name}</p>
-                      {product.isOutOfStock && <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-rose-700">Out of stock</p>}
                       <p className="text-[10px] text-slate-400">{product.code}</p>
                     </div>
                     <div className="flex items-center gap-1">
@@ -13846,14 +13247,14 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
                       <button onClick={() => setItemQtys(prev => ({...prev, [product.code]: qty + 1}))} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">+</button>
                     </div>
                     <div className="w-16 text-right">
-                      <p className="text-xs font-semibold text-fuchsia-700">€{lineTotal.toFixed(2)}</p>
+                      {lineTotal != null && pricesAllocated ? <p className="text-xs font-semibold text-fuchsia-700">€{lineTotal.toFixed(2)}</p> : <p className="text-xs text-slate-400">—</p>}
                     </div>
                     <button onClick={() => toggleSelection(product.code)} className="flex h-6 w-6 items-center justify-center rounded-full text-slate-300 hover:bg-rose-50 hover:text-rose-500" aria-label="Remove">—</button>
                   </div>
                 )
               })}
             </div>
-            {orderTotal > 0 && (
+            {orderTotal > 0 && pricesAllocated && (
               <div className="mt-2 border-t border-slate-200 pt-2">
                 <div className="flex justify-between text-sm">
                   <span className="font-semibold text-slate-700">Estimated Total</span>
@@ -14258,7 +13659,6 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
                                   alt={item.name}
                                   loading="lazy"
                                   className="h-full w-full object-cover"
-                                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.png' }}
                                 />
                                 )
                               : (
@@ -14378,7 +13778,7 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
           <span className="truncate text-xs font-semibold text-slate-700">
             {(selectedCodes.length + packageCartItems.length) > 0
               ? `${selectedCodes.length + packageCartItems.length} items — ${totalUnits} units${orderTotal > 0 ? ` — €${orderTotal.toFixed(2)}` : ''}`
-              : 'Tap Buy Now on a product'}
+              : 'Tap a product to add it'}
           </span>
           <div className="flex shrink-0 items-center gap-2">
             {(selectedCodes.length > 0 || packageCartItems.length > 0) && (
@@ -14488,14 +13888,11 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
                     {visibleProducts.map(product => {
                       const selected = selectedCodes.includes(product.code)
                       const qty = itemQtys[product.code] || 1
-                      const resolvedImageUrl = resolveCatalogImageUrl(product)
-                      const isOutOfStock = Boolean(product.isOutOfStock)
-                      const displayPrice = resolvePortalUnitBasePrice(product)
                       return (
                         <div key={product.code} className="flex min-w-0 flex-col overflow-hidden bg-white" style={selected ? { outline: '2px solid #c8386e', outlineOffset: '-2px' } : {}}>
                           {/* image */}
-                          <div className="relative aspect-square w-full cursor-pointer bg-slate-50" onClick={() => resolvedImageUrl && setLightboxUrl(resolvedImageUrl)}>
-                            {resolvedImageUrl && <img src={resolvedImageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.png' }} />}
+                          <div className="relative aspect-square w-full cursor-pointer bg-slate-50" onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}>
+                            {product.imageUrl && <img src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />}
                             {selected && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
                           </div>
                           {product.galleryImages?.length > 0 && (
@@ -14508,8 +13905,11 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
                           {/* info */}
                           <div className="px-1.5 pt-1 pb-0.5">
                             <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{product.name}</p>
-                            {isOutOfStock && <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-rose-700">Out of stock</p>}
-                            <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{(displayPrice * tierPriceMultiplier).toFixed(2)}</p>
+                            {product.price != null && (
+                            pricesAllocated
+                              ? <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{(Number(product.price) * tierPriceMultiplier).toFixed(2)}</p>
+                              : <p className="text-[10px] text-slate-400">POA</p>
+                          )}
                           </div>
                           {/* action */}
                           {selected ? (
@@ -14519,8 +13919,8 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
                               <button onClick={() => setItemQtys(p => ({...p, [product.code]: qty + 1}))} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>+</button>
                             </div>
                           ) : (
-                            <button onClick={() => { if (!isOutOfStock) toggleSelection(product.code) }} className={`mt-auto border-t py-1 text-center text-[10px] font-semibold ${isOutOfStock ? 'cursor-not-allowed text-slate-400' : ''}`} style={{ borderColor: '#f0e8f0', color: isOutOfStock ? '#94a3b8' : '#c8386e' }} disabled={isOutOfStock}>
-                              {isOutOfStock ? 'Out of Stock' : 'Buy Now'}
+                            <button onClick={() => toggleSelection(product.code)} className="mt-auto border-t py-1 text-center text-[10px] font-semibold" style={{ borderColor: '#f0e8f0', color: '#c8386e' }}>
+                              + Add
                             </button>
                           )}
                         </div>
@@ -16021,7 +15421,7 @@ function BuyerPortal({ onLogout, userName, userEmail }) {
   )
 }
 
-function PortalDashboard({ onLogout, tierOverride = null }) {
+function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverride = null }) {
   const location = useLocation()
   const navigate = useNavigate()
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
@@ -16496,6 +15896,16 @@ function PortalDashboard({ onLogout, tierOverride = null }) {
     ?? liveRegistration?.distributor_tier
     ?? portalUser?.user_metadata?.distributor_tier
     ?? null
+  // Prices are shown by default. The ONLY case where prices are hidden is when we have a
+  // confirmed distributor registration with prices_allocated explicitly set to false.
+  // B2B clients, unknown users, and any non-distributor always see prices.
+  const isUnreleasedDistributor = liveRegistration !== null
+    && getApplicationTypeFromRecord(liveRegistration) === 'distributor'
+    && !Boolean(liveRegistration.prices_allocated)
+  const effectivePricesAllocated = pricesAllocatedOverride !== null
+    ? pricesAllocatedOverride
+    : !isUnreleasedDistributor
+
   if (portalUser?.user_metadata?.role === 'buyer') {
     return (
       <BuyerPortal
@@ -16534,7 +15944,7 @@ function PortalDashboard({ onLogout, tierOverride = null }) {
 
       <div className="space-y-4">
         {activeModule === 'products' || activeModule === 'catalog' || activeModule === 'profile' ? (
-          <ProductsModule moduleView={activeModule} tier={effectiveTier} />
+          <ProductsModule moduleView={activeModule} tier={effectiveTier} pricesAllocated={effectivePricesAllocated} />
         ) : activeModule === 'orders' ? (
           <OrdersModule />
         ) : activeModule === 'support' ? (
@@ -16690,14 +16100,17 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
   // null = admin panel, 'distributor' = distributor preview, 'b2b' = B2B client preview
   const [adminPreviewType, setAdminPreviewType] = useState(null)
   const [adminTierPreview, setAdminTierPreview] = useState(null)
+  const [adminPricesAllocated, setAdminPricesAllocated] = useState(true)
 
   const enterPreview = (type) => {
     setAdminPreviewType(type)
     setAdminTierPreview(null)
+    setAdminPricesAllocated(type === 'b2b') // B2B always has prices; distributor starts with prices off
   }
   const exitPreview = () => {
     setAdminPreviewType(null)
     setAdminTierPreview(null)
+    setAdminPricesAllocated(true)
   }
 
   if (!authReady) {
@@ -16771,6 +16184,19 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
                 </button>
               </>
             )}
+            {/* Price toggle — shown for both portal types */}
+            {adminPreviewType !== null && (
+              <button
+                onClick={() => setAdminPricesAllocated(v => !v)}
+                className={`rounded-full border px-2 py-0.5 text-xs font-semibold transition ${
+                  adminPricesAllocated
+                    ? 'border-emerald-600 bg-emerald-600 text-white'
+                    : 'border-amber-300 bg-white text-amber-800 hover:bg-amber-100'
+                }`}
+              >
+                {adminPricesAllocated ? '✓ Prices On' : '✗ Prices Off'}
+              </button>
+            )}
             {/* Preview switcher buttons */}
             {adminPreviewType === null ? (
               <>
@@ -16819,6 +16245,7 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
           ? <PortalDashboard
               onLogout={onLogout}
               tierOverride={adminPreviewType === 'distributor' ? adminTierPreview : null}
+              pricesAllocatedOverride={adminPricesAllocated}
             />
           : (
             <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#c8386e] border-t-transparent" /></div>}>
@@ -16830,7 +16257,7 @@ function ProtectedPortal({ isAuthenticated, onLogout, authReady, isAdmin }) {
     )
   }
 
-  return <PortalDashboard onLogout={onLogout} />
+  return <PortalDashboard onLogout={onLogout} pricesAllocatedOverride={null} />
 }
 
 function LegalPageLayout({ title, children }) {
@@ -18361,7 +17788,6 @@ function App() {
               <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
               <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Become Distributor</NavLink>
               <NavLink to="/guestbook" className="block transition duration-300 hover:text-fuchsia-300">Guestbook</NavLink>
-              <NavLink to="/portal/login?portal=b2b" className="block transition duration-300 hover:text-fuchsia-300">Sign In</NavLink>
               <NavLink to="/portal/login?portal=distributor" className="block transition duration-300 hover:text-fuchsia-300">Distributor Login</NavLink>
             </div>
           </div>

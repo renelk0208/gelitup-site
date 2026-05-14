@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { PRODUCT_ALIAS_GROUPS } from '../src/data/productAliases.js'
 
 const root = process.cwd()
 const failMessages = []
@@ -30,30 +31,9 @@ function normalizeSkuCode(value) {
   return String(value || '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim()
 }
 
-function extractArrayLiteral(text, marker) {
-  const startIdx = text.indexOf(marker)
-  if (startIdx === -1) return null
-
-  const bracketStart = text.indexOf('[', startIdx)
-  if (bracketStart === -1) return null
-
-  let depth = 0
-  for (let index = bracketStart; index < text.length; index += 1) {
-    if (text[index] === '[') depth += 1
-    else if (text[index] === ']') {
-      depth -= 1
-      if (depth === 0) return text.slice(bracketStart, index + 1)
-    }
-  }
-
-  return null
-}
-
 function validateSourceInvariants() {
   const appPath = path.join(root, 'src', 'App.jsx')
   const appText = fs.readFileSync(appPath, 'utf8')
-  const aliasPath = path.join(root, 'src', 'data', 'productAliases.js')
-  const aliasText = fs.readFileSync(aliasPath, 'utf8')
 
   assertRegex(
     appText,
@@ -79,24 +59,6 @@ function validateSourceInvariants() {
     "Missing BIAB -> BUILDER GEL SYSTEMS remap in B2B_CAT_REMAP.",
   )
 
-  assertRegex(
-    appText,
-    /resolvePortalPriceEntry[\s\S]*?(?:BIAB\(\[A-Z0-9\]\{2,\}\)|\?:BIAB\|BOB|BIAB\|BOB)/,
-    'Missing BIAB/BOB code fallback in resolvePortalPriceEntry.',
-  )
-
-  assertRegex(
-    appText,
-    /resolvePortalPriceEntry[\s\S]*?(?:getBrushOnBuilderPriceAliases|BRUSH_ON_BUILDER_PRICE_ALIASES)/,
-    'Missing explicit Brush On Builder BIAB price aliases in resolvePortalPriceEntry.',
-  )
-
-  const aliasArrayText = extractArrayLiteral(aliasText, 'export const PRODUCT_ALIAS_GROUPS')
-  if (!aliasArrayText) {
-    fail('Could not parse PRODUCT_ALIAS_GROUPS from src/data/productAliases.js.')
-    return
-  }
-
   // Validate the shared alias source itself against the price list so we catch
   // future drift before it reaches the app or exports.
   const pricePath = path.join(root, 'public', 'gelitup-content', 'b2b-price-list.json')
@@ -106,8 +68,7 @@ function validateSourceInvariants() {
     priceItems.map((item) => normalizeSkuCode(item?.name || item?.sku || '')).filter(Boolean),
   )
 
-  // eslint-disable-next-line no-new-func
-  const aliasGroups = new Function(`return (${aliasArrayText})`)()
+  const aliasGroups = Array.isArray(PRODUCT_ALIAS_GROUPS) ? PRODUCT_ALIAS_GROUPS : []
   const codeToTargets = new Map()
 
   for (const group of Array.isArray(aliasGroups) ? aliasGroups : []) {

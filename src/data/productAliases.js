@@ -1,8 +1,10 @@
 // Single source of truth for all product code → price-list-name mappings.
 // Used by PRODUCT_ALIAS_GROUPS (CheckoutPage), FullCataloguePage, ProductsModule,
 // and AdminDashboard. Add new aliases here — all consumers update automatically.
-export const PRODUCT_ALIAS_GROUPS =
-[
+import { GENERATED_PRODUCT_ALIAS_GROUPS } from './productAliases.generated.js'
+import { GENERATED_MISSING_PRODUCT_ALIAS_GROUPS } from './productAliases.missing.generated.js'
+
+export const PRODUCT_ALIAS_GROUPS = [
   { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-FBCLR'], target: 'Flexi Base Clear -HTF' },
   { codes: ['CLASSIC BASE COAT IMAGE', 'CLASSIC BASE COAT', 'CLASSICBC', 'Base Coat 15ml'], target: 'Base Coat 15ml -HTF' },
   // 5-in-1 Superior Base coloureds (SBC*)
@@ -112,7 +114,7 @@ export const PRODUCT_ALIAS_GROUPS =
   { codes: ['GIUP BOBSTPN', 'GIUP-BOBSTPN'], target: 'Brush on Builder Gel Soft Pink 15ml -HTF' },
   { codes: ['GIUP BOBGLPN', 'GIUP-BOBGLPN'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
   { codes: ['GIUP BOBGLMG', 'GIUP-BOBGLMG'], target: 'Brush on Builder Gel Magenta Glitter 15ml -HTF' },
-  { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL'], target: 'Brush on Builder Gel Milky Glitter 15ml -HTF' },
+  { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL'], target: 'Brush on Builder Gel Purple Glitter 15ml -HTF' },
   { codes: ['GIUP BOBGLROS', 'GIUP-BOBGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
   { codes: ['GIUP BOBGLSLM', 'GIUP-BOBGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
   { codes: ['GIUP-BOB-blush-sorbet', 'GIUP BOB BLUSH SORBET', 'BOB BLUSH SORBET'], target: 'Brush on Builder Gel Blush Sorbet 15ml -HTF' },
@@ -545,4 +547,6 @@ export const PRODUCT_ALIAS_GROUPS =
   { codes: ['GIUP R38', 'R38', 'GIUP R038', 'R038'], target: 'GEL.IT.UP 1 R38 11ml -HTF' },
   { codes: ['GIUP R39', 'R39', 'GIUP R039', 'R039'], target: 'GEL.IT.UP 1 R39 11ml -HTF' },
   { codes: ['GIUP R40', 'R40', 'GIUP R040', 'R040'], target: 'GEL.IT.UP 1 R40 11ml -HTF' },
-]
+    ...GENERATED_PRODUCT_ALIAS_GROUPS,
+    ...GENERATED_MISSING_PRODUCT_ALIAS_GROUPS,
+  ]

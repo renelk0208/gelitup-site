@@ -16,6 +16,24 @@ import { readFileSync } from 'fs'
 // ---------- helpers (mirror App.jsx) ----------
 
 const FUZZY_PRICE_SKIP = new Set(['COLOR', 'COLOUR', 'COAT', 'CARE', 'FORM', 'SIZE', 'NAIL'])
+const DISCONTINUED_CODES = new Set([
+  'GIUP C01',
+  'GIUP C02',
+  'GIUP C03',
+  'GIUP C04',
+  'GIUP C05',
+  'GIUP C06',
+  'GIUP C07',
+  'GIUP C08',
+  'C01',
+  'C02',
+  'C03',
+  'C04',
+  'C05',
+  'C06',
+  'C07',
+  'C08',
+])
 
 function normalizeSkuCode(v) {
   return String(v || '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim()
@@ -34,6 +52,14 @@ function formatCatalogueItemName(rawPath) {
 }
 function extractProductCode(name) {
   const cleaned = String(name || '').trim()
+  const giupCodeMatch = cleaned.match(/\bGIUP[\s._-]*([A-Z0-9]{2,12})\b/i)
+  if (giupCodeMatch) {
+    return normalizeSkuCode(`GIUP ${giupCodeMatch[1]}`)
+  }
+
+  const compactCodeMatch = cleaned.match(/\b[A-Z]{2,8}\d{1,4}[A-Z0-9-]*\b/i)
+  if (compactCodeMatch) return compactCodeMatch[0].toUpperCase()
+
   const m = cleaned.match(/[A-Z]{2,8}\s*-?\s*\d+[A-Z0-9-]*/i)
   if (m) return m[0].toUpperCase()
   return normalizeSkuCode(cleaned).replace(/[^A-Z0-9]+/g, ' ').trim() || 'ITEM'
@@ -104,6 +130,8 @@ for (const { codes, target } of aliasGroups) {
   const entry = pnLookup(target)
   if (entry) {
     for (const c of codes) {
+      const normalizedCode = normalizeSkuCode(c)
+      if (normalizedCode && !map.has(normalizedCode)) map.set(normalizedCode, entry)
       if (!map.has(c)) map.set(c, entry)
     }
   }
@@ -202,6 +230,10 @@ for (const p of allItems) {
 const missing = []
 const found = []
 for (const { name, code, imgPath } of products) {
+  const normalizedCode = normalizeSkuCode(code)
+  if (DISCONTINUED_CODES.has(normalizedCode)) {
+    continue
+  }
   const hit = lookupPrice(name, code)
   if (!hit || hit.price == null) {
     missing.push({ name, code, imgPath })

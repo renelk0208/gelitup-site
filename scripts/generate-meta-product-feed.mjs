@@ -14,6 +14,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
+import { PRODUCT_ALIAS_GROUPS } from '../src/data/productAliases.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
@@ -112,6 +113,51 @@ function buildVisibilitySet(values) {
   return set
 }
 
+function buildAliasIndexes() {
+  const codeToTarget = new Map()
+  const targetToCodes = new Map()
+
+  for (const group of Array.isArray(PRODUCT_ALIAS_GROUPS) ? PRODUCT_ALIAS_GROUPS : []) {
+    const target = String(group?.target || '').trim()
+    if (!target) continue
+    const codes = Array.isArray(group?.codes) ? group.codes : []
+    for (const code of codes) {
+      const normalizedCode = normalizeSkuCode(code)
+      if (!normalizedCode) continue
+      codeToTarget.set(normalizedCode, target)
+      const codeSet = targetToCodes.get(target) || new Set()
+      codeSet.add(code)
+      targetToCodes.set(target, codeSet)
+    }
+  }
+
+  return { codeToTarget, targetToCodes }
+}
+
+function expandVisibilityValues(values, aliasIndexes) {
+  const expanded = new Set()
+  const { codeToTarget, targetToCodes } = aliasIndexes
+
+  for (const raw of values || []) {
+    const value = String(raw || '').trim()
+    if (!value) continue
+    expanded.add(value)
+
+    const normalized = normalizeSkuCode(value)
+    const aliasTarget = codeToTarget.get(normalized)
+    if (aliasTarget) {
+      expanded.add(aliasTarget)
+    }
+
+    const targetCodes = targetToCodes.get(value)
+    if (targetCodes) {
+      for (const code of targetCodes) expanded.add(code)
+    }
+  }
+
+  return [...expanded]
+}
+
 function inVisibilitySet(set, sku, name) {
   const rawSku = String(sku || '').trim()
   const rawName = String(name || '').trim()
@@ -136,9 +182,10 @@ for (const [rawKey, rawValue] of Object.entries(imageMap)) {
   if (nName && !normalizedImageMap.has(nName)) normalizedImageMap.set(nName, url)
 }
 
-const hiddenSet = buildVisibilitySet(hiddenProducts)
-const outOfStockSet = buildVisibilitySet(outOfStockProducts)
-const discontinuedSet = buildVisibilitySet(Array.from(parseProductStatusCsv(productStatusCsv)))
+const aliasIndexes = buildAliasIndexes()
+const hiddenSet = buildVisibilitySet(expandVisibilityValues(hiddenProducts, aliasIndexes))
+const outOfStockSet = buildVisibilitySet(expandVisibilityValues(outOfStockProducts, aliasIndexes))
+const discontinuedSet = buildVisibilitySet(expandVisibilityValues(Array.from(parseProductStatusCsv(productStatusCsv)), aliasIndexes))
 
 // Also index by GIUP + number aliases (the app uses buildColorAliases)
 for (const [rawKey, rawValue] of Object.entries(imageMap)) {

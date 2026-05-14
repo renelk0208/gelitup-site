@@ -958,7 +958,11 @@ function buildOrderPriceLookupMap(items = []) {
     if (!Number.isFinite(numeric) || numeric <= 0) return
 
     const unitPrice = Math.ceil(numeric * 1.2 * 10) / 10
-    const entry = { name: String(name || '').trim(), unitPrice }
+    const entry = {
+      name: String(name || '').trim(),
+      sku: normalizeAdminSkuToken(sku || name || ''),
+      unitPrice,
+    }
 
     setIfMissing(normalizeAdminSkuToken(sku), entry)
     setIfMissing(normalizeAdminSkuToken(name), entry)
@@ -970,6 +974,23 @@ function buildOrderPriceLookupMap(items = []) {
       setIfMissing(normalizeAdminSkuToken(n), entry)
       setIfMissing(normalizeAdminSkuToken(n.replace(/^0+(\d)/, '$1')), entry)
       setIfMissing(normalizeAdminSkuToken(n.padStart(2, '0')), entry)
+      setIfMissing(normalizeAdminSkuToken(`GIUP ${n}`), entry)
+      setIfMissing(normalizeAdminSkuToken(`GIUP ${n.replace(/^0+(\d)/, '$1')}`), entry)
+      setIfMissing(normalizeAdminSkuToken(`GIUP ${n.padStart(2, '0')}`), entry)
+    }
+
+    // Index embedded alphanumeric series tokens so GIUP-prefixed order SKUs
+    // like "GIUP C01" or "GIUP ODA01" resolve from names containing #C01/#ODA01.
+    const embeddedSeriesMatches = [...normalizeAdminSkuToken(name).matchAll(/\b([A-Z]{1,5})(\d{1,4}[A-Z]?)\b/g)]
+    for (const match of embeddedSeriesMatches) {
+      const series = match[1]
+      const num = match[2]
+      const compact = `${series}${num}`
+      const spaced = `${series} ${num}`
+      setIfMissing(normalizeAdminSkuToken(compact), entry)
+      setIfMissing(normalizeAdminSkuToken(spaced), entry)
+      setIfMissing(normalizeAdminSkuToken(`GIUP ${compact}`), entry)
+      setIfMissing(normalizeAdminSkuToken(`GIUP ${spaced}`), entry)
     }
 
     // Also index by the extracted short SKU token from the full product name.
@@ -1054,7 +1075,9 @@ function resolveOrderItemUnitPrice(item, priceLookupMap, tierMultiplier = 1.0) {
 // from the price list. Returns { unitPrice, resolvedName } where resolvedName is the
 // full price-list name when a match is found, or null when no match.
 function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) {
-  if (!priceLookupMap && (!item?.sku && !item?.name)) return { unitPrice: null, resolvedName: null }
+  if (!priceLookupMap && (!item?.sku && !item?.name)) {
+    return { unitPrice: null, resolvedName: null, resolvedSku: null }
+  }
 
   const sku = normalizeAdminSkuToken(item?.sku)
   const name = String(item?.name || '').trim()
@@ -1071,11 +1094,14 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) 
       return {
         unitPrice: baseUnitPrice != null ? Math.round(baseUnitPrice * tierMultiplier * 100) / 100 : null,
         resolvedName: override.name || null,
+        resolvedSku: normalizeAdminSkuToken(item?.sku || ''),
       }
     }
   }
 
-  if (!priceLookupMap || !priceLookupMap.size) return { unitPrice: null, resolvedName: null }
+  if (!priceLookupMap || !priceLookupMap.size) {
+    return { unitPrice: null, resolvedName: null, resolvedSku: null }
+  }
 
   const candidates = [
     sku,
@@ -1099,6 +1125,7 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) 
       return {
         unitPrice: Math.round(hit.unitPrice * tierMultiplier * 100) / 100,
         resolvedName: hit.name || null,
+        resolvedSku: hit.sku || null,
       }
     }
   }
@@ -1111,11 +1138,12 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) 
       return {
         unitPrice: Math.round(hit.unitPrice * tierMultiplier * 100) / 100,
         resolvedName: hit.name || null,
+        resolvedSku: hit.sku || null,
       }
     }
   }
 
-  return { unitPrice: null, resolvedName: null }
+  return { unitPrice: null, resolvedName: null, resolvedSku: null }
 }
 
 function buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier = 1.0) {
@@ -1128,11 +1156,12 @@ function buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier =
 
   let orderTotal = 0
   const lines = parsedItems.map((item, index) => {
-    const { unitPrice, resolvedName } = resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier)
+    const { unitPrice, resolvedName, resolvedSku } = resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier)
     const lineTotal = unitPrice != null ? unitPrice * item.qty : null
     if (lineTotal != null) orderTotal += lineTotal
     // Use canonical Zoho product name (includes -HTF etc.) when available; fall back to stored name
     const exportName = resolvedName || item.name || `Item ${index + 1}`
+    const exportSku = normalizeAdminSkuToken(item.sku || '') || normalizeAdminSkuToken(resolvedSku || '')
 
     return [
       csvEsc(orderId),
@@ -1141,7 +1170,7 @@ function buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier =
       csvEsc(consignee),
       csvEsc(shippingAddress),
       csvEsc(row?.distributor_tier || 'b2b'),
-      csvEsc(item.sku || ''),
+      csvEsc(exportSku),
       csvEsc(exportName),
       csvEsc(item.qty),
       csvEsc(unitPrice != null ? unitPrice.toFixed(2) : ''),
@@ -1732,10 +1761,11 @@ function OrdersPanel() {
                             {items.map((item, i) => {
                               const parsed = parseOrderItemEntry(item, i)
                               const rawSku = typeof item === 'object' && item !== null ? (item.sku || item.code || '') : ''
-                              const displaySku = (rawSku || parsed.sku || '').replace(/\s+IMAGE$/i, '')
-                              const skuMissing = !displaySku
                               const rowTierMultiplier = getTierMultiplier(row.distributor_tier)
-                              const unitPrice = resolveOrderItemUnitPrice(parsed, priceLookupMap, rowTierMultiplier)
+                              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, rowTierMultiplier)
+                              const unitPrice = resolved.unitPrice
+                              const displaySku = normalizeAdminSkuToken(rawSku || parsed.sku || resolved.resolvedSku || '').replace(/\s+IMAGE$/i, '')
+                              const skuMissing = !displaySku
                               const lineTotal = unitPrice != null ? unitPrice * parsed.qty : null
                               return (
                                 <li key={i} className={`flex items-center justify-between px-3 py-2 ${unitPrice == null ? 'bg-amber-50' : ''}`}>
