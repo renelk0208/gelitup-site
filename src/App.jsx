@@ -68,7 +68,6 @@ const PAYMENT_REVOLUT_URL = import.meta.env.VITE_PAYMENT_REVOLUT_URL || ''
 const PAYMENT_STRIPE_URL = import.meta.env.VITE_PAYMENT_STRIPE_URL || ''
 const PAYMENT_PAYPAL_URL = import.meta.env.VITE_PAYMENT_PAYPAL_URL || ''
 const UPSELL_PRICE_FUNCTION_URL = import.meta.env.VITE_UPSELL_PRICE_FUNCTION_URL || '/.netlify/functions/get-upsell-price'
-const SHOPIFY_SHOP_URL = 'https://gelitup.eu'
 const PROFORMA_COMPANY_NAME = import.meta.env.VITE_PROFORMA_COMPANY_NAME || 'GEL.IT.UP Factory Direct'
 const PROFORMA_VAT_TAX_ID = import.meta.env.VITE_PROFORMA_VAT_TAX_ID || 'VAT/TAX ID: EL999999999'
 const PROFORMA_BANK_DETAILS = import.meta.env.VITE_PROFORMA_BANK_DETAILS || 'BANK: Alpha Bank | IBAN: GR0000000000000000000000000 | SWIFT: CRBAGRAA'
@@ -4657,14 +4656,12 @@ function FullCataloguePage() {
                             {itemPrice != null && <span className="ml-2 text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</span>}
                           </p>
                         </div>
-                        <a
-                          href={SHOPIFY_SHOP_URL}
-                          target="_blank"
-                          rel="noreferrer"
+                        <NavLink
+                          to="/checkout"
                           className="shrink-0 rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-fuchsia-500"
                         >
                           Buy Now
-                        </a>
+                        </NavLink>
                       </div>
                     )
                   }
@@ -4692,14 +4689,12 @@ function FullCataloguePage() {
                           <p className="mt-1.5 text-xs font-bold text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</p>
                         )}
                         <div className="mt-auto pt-3">
-                          <a
-                            href={SHOPIFY_SHOP_URL}
-                            target="_blank"
-                            rel="noreferrer"
+                          <NavLink
+                            to="/checkout"
                             className="flex w-full items-center justify-center rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
                           >
                             Buy Now
-                          </a>
+                          </NavLink>
                         </div>
                       </div>
                     </article>
@@ -7250,14 +7245,6 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
     || Boolean(loginParams.get('code'))
     || /type=recovery/.test(window.location.hash)
 
-  // B2B salon ordering has moved to the Shopify store — redirect non-distributor logins
-  useEffect(() => {
-    if (portalType === 'b2b' && !isPasswordResetFlow) {
-      window.location.href = SHOPIFY_SHOP_URL
-    }
-  }, [portalType, isPasswordResetFlow])
-
-  if (portalType === 'b2b' && !isPasswordResetFlow) return null
   const showDebugTrace = loginParams.get('debug') === '1'
   const [email, setEmail] = useState(prefilledEmail || localStorage.getItem('portalRememberedEmail') || '')
   const [password, setPassword] = useState(() => {
@@ -17736,7 +17723,7 @@ function App() {
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
           <Route path="/for-academies" element={<ForAcademiesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
-          <Route path="/checkout" element={<ExternalRedirect to={SHOPIFY_SHOP_URL} />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
@@ -17782,7 +17769,7 @@ function App() {
                 <Route path="/portal-client-login" element={<Navigate to="/portal/login" replace />} />
                 <Route path="/portal-admin-login" element={<Navigate to="/portal/admin-login" replace />} />
                 <Route path="/portal/register" element={<PortalRegister onRegister={handlePortalRegister} />} />
-                <Route path="/portal/buy" element={<ExternalRedirect to={SHOPIFY_SHOP_URL} />} />
+                <Route path="/portal/buy" element={<Navigate to="/checkout" replace />} />
                 <Route path="/portal/forgot-password" element={<PortalForgotPassword />} />
                 <Route
                   path="/portal/dashboard/:module"
@@ -17905,7 +17892,7 @@ function App() {
             <div className="mt-2 space-y-1.5">
               <NavLink to="/" className="block transition duration-300 hover:text-fuchsia-300">Home</NavLink>
               <NavLink to="/about-us" className="block transition duration-300 hover:text-fuchsia-300">About Us</NavLink>
-              <a href={SHOPIFY_SHOP_URL} target="_blank" rel="noopener noreferrer" className="block transition duration-300 hover:text-fuchsia-300">Shop</a>
+              <NavLink to="/full-catalogue" className="block transition duration-300 hover:text-fuchsia-300">Shop</NavLink>
               <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
               <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Become Distributor</NavLink>
               <NavLink to="/guestbook" className="block transition duration-300 hover:text-fuchsia-300">Guestbook</NavLink>
