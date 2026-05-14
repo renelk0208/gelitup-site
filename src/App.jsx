@@ -653,9 +653,164 @@ function normalizeSkuCode(value) {
 function normalizeProductName(value) {
   return normalizeSkuCode(value)
     .replace(/GEL\.?IT\.?UP|GEL\s*IT\s*UP|GIUP/gi, ' ')
+    .replace(/(\d)(ML|GR|G)\b/gi, '$1 $2')
+    .replace(/\b(HTF|HTE|HEMA\s*FREE|HEMAFREE)\b/gi, ' ')
+    .replace(/\bGR\b/gi, 'G')
     .replace(/[^A-Z0-9]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+function deriveSpreadsheetSynonymKeys(name) {
+  const normalized = normalizeProductName(name)
+  if (!normalized) return []
+
+  const keys = new Set()
+  const add = (...values) => {
+    values.forEach((value) => {
+      const key = normalizeSkuCode(value)
+      if (key) keys.add(key)
+    })
+  }
+
+  const classicBuilderMatch = normalized.match(/^3 IN 1 BUILDER GEL\s+(.+?)\s+40 G$/)
+  if (classicBuilderMatch) {
+    const shade = classicBuilderMatch[1]
+    add(`3 IN 1 ${shade}`, `3IN1${shade.replace(/\s+/g, '')}`, `3 IN 1 BUILDER GEL ${shade}`)
+  }
+
+  const shimmeryBuilderMatch = normalized.match(/^3 IN 1 SHIMMERY BUILDER GEL\s+40 G\s+(.+)$/)
+  if (shimmeryBuilderMatch) {
+    const shade = shimmeryBuilderMatch[1]
+    const legacyShadeMap = {
+      'CLEAR IRIDESCENT': 'IRIDESCENT SHIMMER CLEAR',
+      'COVER': 'SHIMMER COVER',
+      'LIGHT LILAC': 'SHIMMER LILAC',
+      'PINK MARMALADE': 'MARMELADE SHIMMER PINK',
+    }
+    const legacyShade = legacyShadeMap[shade]
+    if (legacyShade) {
+      add(`3 IN 1 BUILDER GEL ${legacyShade}`, `3 IN 1 BUILDER GEL ${legacyShade} B`)
+    }
+  }
+
+  const premiumBuilderMatch = normalized.match(/^PREMIUM BUILDER GEL\s+(.+?)\s+40 GR$/)
+  if (premiumBuilderMatch) {
+    const shade = premiumBuilderMatch[1]
+    add(`3 IN 1 GELITUP PREMIUM BUILDER GEL ${shade}`, `3 IN 1 GELITUP PREMIUM BUILDER GEL ${shade} B`)
+    if (shade === 'PEARLY NUDE') {
+      add('3 IN 1 PREMIUM BUILDER GEL SHIMMER NUDE', '3 IN 1 PREMIUM BUILDER GEL SHIMMER NUDE B')
+    }
+    if (shade === 'PEARLY PINK') {
+      add('3 IN 1 PREMIUM BUILDER GEL SHIMMER PINK', '3 IN 1 PREMIUM BUILDER GEL SHIMMER PINK B')
+    }
+  }
+
+  if (normalized === 'PREMIUM PLUS FIBER GLASS BUILDER GEL 40 GR') {
+    add(
+      '3 IN 1 GELITUP PREMIUM BUILDER GEL CLEAR PLUS',
+      '3 IN 1 GELITUP PREMIUM BUILDER GEL CLEAR PLUS B',
+      '3 IN 1 PREMIUM PLUS',
+      '3 IN 1.PREMIUM.PLUS',
+    )
+  }
+
+  const brushOnBuilderMatch = normalized.match(/^BRUSH ON BUILDER GEL\s+(.+?)\s+15 ML$/)
+  if (brushOnBuilderMatch) {
+    const shade = brushOnBuilderMatch[1]
+    add(`BRUSH ON BUILDER BIAB ${shade}`)
+    if (shade === 'BLUSH PINK') {
+      add('BRUSH ON BUILDER BIAB IRRIDESCENT PINK', 'BRUSH ON BUILDER BIAB IRRODESCENT PINK')
+    }
+    if (shade === 'GLITTERY PINK') {
+      add('BRUSH ON BUILDER BIAB GLITTER PINK')
+    }
+  }
+
+  if (normalized === 'SUPERBOND NAIL DEHYDRATOR 11 ML ACID FREE') {
+    add('SUPERBOND WITHOUT ACID', 'SUPERBOND.WITHOUT.ACID')
+  }
+
+  if (normalized === 'SUPERBOND NAIL DEHYDRATOR 11 ML WITH ACID') {
+    add('SUPERBOND WITH ACID', 'SUPERBOND.WITH.ACID')
+  }
+
+  if (normalized === 'BASE COAT 15 ML') {
+    add('CLASSIC BASE COAT')
+  }
+
+  if (normalized === 'ACRYLIC COMPETE POWDER COVER 35 G') {
+    add('ACRYLICS COVER')
+  }
+
+  if (normalized === 'ACRYLIC COMPETE POWDER EXTREME WHITE 35 G') {
+    add('ACRYLICS EXTREME WHITE')
+  }
+
+  if (normalized === 'ACRYLIC COMPETE POWDER PINK 35 G') {
+    add('ACRYLICS PINK')
+  }
+
+  if (normalized === 'ACRYLIC CLASSIC POWDER WHITE 35 G' || normalized === 'ACRYLIC COMPETE POWDER MILKY WHITE 35 G') {
+    add('ACRYLICS WHITE')
+  }
+
+  if (/^2113\b/.test(normalized)) {
+    add('SFT 2113')
+  }
+
+  const autumn2021Match = normalized.match(/^AUTUMN 2021 OTA(\d{2})$/)
+  if (autumn2021Match) {
+    add(`GIUP ODA${autumn2021Match[1]}`)
+  }
+
+  const btbMatch = normalized.match(/^BTB(\d{2})\b/)
+  if (btbMatch) {
+    add(`GIUP B2B${btbMatch[1]}`)
+  }
+
+  const multimixMatch = normalized.match(/^MULTIMIX SYNTHOGEL (30|60) G (.+)$/)
+  if (multimixMatch) {
+    const size = multimixMatch[1]
+    const shade = multimixMatch[2]
+    const multimixAliasMap = {
+      '30:BABY BLUE': ['MULTIMIX BABY BLUE COLOR'],
+      '30:BABY PINK GLITTER': ['MULTIMIX BABY PINK GLITTER COLOR'],
+      '30:BLUE GLITTER': ['MULTIMIX BLUE GLITTER COLOR'],
+      '30:BUBBLE GUM GLITTER': ['MULTIMIX BUBBLE GUM GLITTER COLOR', 'MULTIMIX BUBBLEGUM GLITTER COLOR'],
+      '30:CLEAR': ['MULTIMIX CLEAR COLOR'],
+      '30:GLITSY GREEN': ['MULTIMIX GLITSY GREEN COLOR'],
+      '30:LIGHT NUDE': ['MULTIMIX LIGHT NUDE COLOR'],
+      '30:MINTY GREEN': ['MULTIMIX MINT GREEN COLOR'],
+      '30:PINK III': ['MULTIMIX PINKIII COLOR'],
+      '30:SUPER SOFT PINK': ['MULTIMIX SUPER SOFT PINK COLOR'],
+      '60:BLACK': ['MULTIMIX BLACK COLOR'],
+      '60:CLEAR': ['MULTIMIX CLEAR COLOR'],
+      '60:CLEAR GLITTER': ['MULTIMIX GLITTERS CLEAR'],
+      '60:COVER': ['MULTIMIX COVER COLOR'],
+      '60:COVER II': ['MULTIMIX COVER II COLOR'],
+      '60:CRYSTAL CLEAR': ['MULTIMIX CRYSTAL CLEAR COLOR'],
+      '60:GLITTER GOLD': ['MULTIMIX GLITTERS GOLD'],
+      '60:GLITTER NUDE': ['MULTIMIX GLITTERS NUDE'],
+      '60:GLITTER PINK': ['MULTIMIX GLITTERS PINK', 'MULTIMIX GLITTERPINK COLOR'],
+      '60:GLITTER PINK II': ['MULTIMIX PINK II COLOR'],
+      '60:GLITTER WHITE': ['MULTIMIX GLITTERS WHITE'],
+      '60:LIGHT LILAC': ['MULTIMIX LILAC COLOR'],
+      '60:LIGHT PINK': ['MULTIMIX LIGHT PINK COLOR'],
+      '60:MILKY WHITE': ['MULTIMIX MILKY WHITE COLOR'],
+      '60:NUDE': ['MULTIMIX NUDE COLOR'],
+      '60:PINK': ['MULTIMIX PINK COLOR'],
+      '60:PINK II': ['MULTIMIX PINK II COLOR'],
+      '60:SUPER MILKY': ['MULTIMIX SUPER MILKY COLOR'],
+      '60:WHITE': ['MULTIMIX WHITE COLOR', 'MULTIMIX WHITE 60ML 60G'],
+    }
+    const aliases = multimixAliasMap[`${size}:${shade}`] || []
+    aliases.forEach((alias) => {
+      add(alias, `${alias} ${size}G`, `${alias} ${size} G`, `${alias} B ${size}G`, `${alias} B ${size} G`, `${alias} C ${size}G`, `${alias} C ${size} G`)
+    })
+  }
+
+  return [...keys]
 }
 
 // Fuzzy word-overlap price lookup for image-map products whose filename keys
@@ -3380,6 +3535,7 @@ function FullCataloguePage() {
             const s = tm[1].toUpperCase(), n = tm[2]
             keys.push(`${s} ${n}`, `${s} ${n.padStart(2, '0')}`, `${s}${n}`, `${s}${n.padStart(2, '0')}`)
           }
+          keys.push(...deriveSpreadsheetSynonymKeys(cleanName))
           for (const k of keys) {
             if (k && !map.has(k)) map.set(k, entry)
           }
@@ -3506,6 +3662,15 @@ function FullCataloguePage() {
           { codes: ['SCE02', '2026-NEW-SCE02', '2026 NEW SCE02', 'SAPPHIRE CAT EYE SCE02', 'SAPPHIRE CAT EYE #SCE02'], target: 'Sapphire Cat Eye #SCE02 -HTF' },
           { codes: ['SCE03', '2026-NEW-SCE03', '2026 NEW SCE03', 'SAPPHIRE CAT EYE SCE03', 'SAPPHIRE CAT EYE #SCE03'], target: 'Sapphire Cat Eye #SCE03 -HTF' },
           { codes: ['SCE04', '2026-NEW-SCE04', '2026 NEW SCE04', 'SAPPHIRE CAT EYE SCE04', 'SAPPHIRE CAT EYE #SCE04'], target: 'Sapphire Cat Eye #SCE04 -HTF' },
+          { codes: ['GIUP SBLS', 'GIUP-SBLS', '5 IN 1 GIUP SBLS', '5-IN-1-GIUP-SBLS', '2026-NEW-5in1-Lemon-Serenity'], target: '5-in-1 Superior Base 15ml Lemon Serenity -HTF' },
+          { codes: ['GIUP SBMS', 'GIUP-SBMS', '5 IN 1 GIUP SBMS', '5-IN-1-GIUP-SBMS', '2026-NEW-5in1-Mint-Serenity'], target: '5-in-1 Superior Base 15ml Mint Serenity -HTF' },
+          { codes: ['GIUP SBBLUE', 'GIUP-SBBLUE', '5 IN 1 GIUP SBBLUE', '5-IN-1-GIUP-SBBLUE', '2026-NEW-5in1-Peach-Blue', '2026 NEW 5IN1 PEACH BLUE'], target: '5-in-1 Superior Base 15ml Blue Serenity -HTF' },
+          { codes: ['GIUP SBBlue', 'GIUP-SBBlue', '5 IN 1 GIUP SBBlue', '5-IN-1-GIUP-SBBlue'], target: '5-in-1 Superior Base 15ml Blue Serenity -HTF' },
+          { codes: ['GIUP SBPS', 'GIUP-SBPS', '5 IN 1 GIUP SBPS', '5-IN-1-GIUP-SBPS', '2026-NEW-5in1-Peach-Serenity'], target: '5-in-1 Superior Base 15ml Peach Serenity -HTF' },
+          { codes: ['GIUP SBPURS', 'GIUP-SBPURS', '5 IN 1 GIUP SBPURS', '5-IN-1-GIUP-SBPURS', '2026-NEW-5in1-Purple-Serenity'], target: '5-in-1 Superior Base 15ml Purple Serenity -HTF' },
+          { codes: ['ALL IN ONE LIQUID 200ML', 'ALL IN ONE LIQUID 200 ML', 'LIQUID 200ML', '2026-NEW-New-Consumables-200'], target: 'All In One Liquid 200 ml -HTF' },
+          { codes: ['ALL IN ONE LIQUID 500ML', 'ALL IN ONE LIQUID 500 ML', 'LIQUID 500ML', '2026-NEW-New-Consumables-500'], target: 'All In One Liquid 500 ml -HTF' },
+          { codes: ['MIRROR TOP COAT', '2026-NEW-Mirror-Top-Coat', '2026-NEW-Mirror-Powder-Top-Coat'], target: 'Mirror Powder Top Coat -HTF' },
           { codes: ['MULTIMIX BABY BLUE COLOR'], target: 'MultiMix Synthogel 30gr Baby Blue -HTF' },
           { codes: ['MULTIMIX BABY PINK GLITTER COLOR'], target: 'MultiMix Synthogel 30gr Baby Pink Glitter -HTF' },
           { codes: ['MULTIMIX BLUE GLITTER COLOR'], target: 'MultiMix Synthogel 30g Blue Glitter -HTF' },
@@ -3770,7 +3935,9 @@ function FullCataloguePage() {
           if (entry) {
             for (const c of codes) {
               const normalizedCode = normalizeSkuCode(c)
+              const normalizedName = normalizeProductName(c)
               if (normalizedCode && !map.has(normalizedCode)) map.set(normalizedCode, entry)
+              if (normalizedName && !map.has(normalizedName)) map.set(normalizedName, entry)
               if (!map.has(c)) map.set(c, entry)
             }
           }
@@ -8094,6 +8261,7 @@ function CheckoutPage() {
             // Also add GIUP-prefixed variant so "GIUP BTO02" lookups resolve
             keys.push(`GIUP ${shortCodeMatch[1]}`)
           }
+          keys.push(...deriveSpreadsheetSynonymKeys(cleanName))
           for (const k of keys) { if (k && !map.has(k)) map.set(k, entry) }
           const words = new Set(normalizeSkuCode(name).split(/\s+/).filter(w => w.length >= 4))
           if (words.size >= 2) wIdx.push({ words, entry })
@@ -10936,6 +11104,15 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['SCE02', '2026-NEW-SCE02', '2026 NEW SCE02', 'SAPPHIRE CAT EYE SCE02', 'SAPPHIRE CAT EYE #SCE02'], target: 'Sapphire Cat Eye #SCE02 -HTF' },
           { codes: ['SCE03', '2026-NEW-SCE03', '2026 NEW SCE03', 'SAPPHIRE CAT EYE SCE03', 'SAPPHIRE CAT EYE #SCE03'], target: 'Sapphire Cat Eye #SCE03 -HTF' },
           { codes: ['SCE04', '2026-NEW-SCE04', '2026 NEW SCE04', 'SAPPHIRE CAT EYE SCE04', 'SAPPHIRE CAT EYE #SCE04'], target: 'Sapphire Cat Eye #SCE04 -HTF' },
+          { codes: ['GIUP SBLS', 'GIUP-SBLS', '5 IN 1 GIUP SBLS', '5-IN-1-GIUP-SBLS', '2026-NEW-5in1-Lemon-Serenity'], target: '5-in-1 Superior Base 15ml Lemon Serenity -HTF' },
+          { codes: ['GIUP SBMS', 'GIUP-SBMS', '5 IN 1 GIUP SBMS', '5-IN-1-GIUP-SBMS', '2026-NEW-5in1-Mint-Serenity'], target: '5-in-1 Superior Base 15ml Mint Serenity -HTF' },
+          { codes: ['GIUP SBBLUE', 'GIUP-SBBLUE', '5 IN 1 GIUP SBBLUE', '5-IN-1-GIUP-SBBLUE', '2026-NEW-5in1-Peach-Blue'], target: '5-in-1 Superior Base 15ml Blue Serenity -HTF' },
+          { codes: ['GIUP SBBlue', 'GIUP-SBBlue', '5 IN 1 GIUP SBBlue', '5-IN-1-GIUP-SBBlue'], target: '5-in-1 Superior Base 15ml Blue Serenity -HTF' },
+          { codes: ['GIUP SBPS', 'GIUP-SBPS', '5 IN 1 GIUP SBPS', '5-IN-1-GIUP-SBPS', '2026-NEW-5in1-Peach-Serenity'], target: '5-in-1 Superior Base 15ml Peach Serenity -HTF' },
+          { codes: ['GIUP SBPURS', 'GIUP-SBPURS', '5 IN 1 GIUP SBPURS', '5-IN-1-GIUP-SBPURS', '2026-NEW-5in1-Purple-Serenity'], target: '5-in-1 Superior Base 15ml Purple Serenity -HTF' },
+          { codes: ['ALL IN ONE LIQUID 200ML', 'ALL IN ONE LIQUID 200 ML', 'LIQUID 200ML', '2026-NEW-New-Consumables-200'], target: 'All In One Liquid 200 ml -HTF' },
+          { codes: ['ALL IN ONE LIQUID 500ML', 'ALL IN ONE LIQUID 500 ML', 'LIQUID 500ML', '2026-NEW-New-Consumables-500'], target: 'All In One Liquid 500 ml -HTF' },
+          { codes: ['MIRROR TOP COAT', '2026-NEW-Mirror-Top-Coat', '2026-NEW-Mirror-Powder-Top-Coat'], target: 'Mirror Powder Top Coat -HTF' },
           // MultiMix Synthogel 30g
           { codes: ['MULTIMIX BABY BLUE COLOR'], target: 'MultiMix Synthogel 30gr Baby Blue -HTF' },
           { codes: ['MULTIMIX BABY PINK GLITTER COLOR'], target: 'MultiMix Synthogel 30gr Baby Pink Glitter -HTF' },
@@ -11252,7 +11429,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           if (entry) {
             for (const c of codes) {
               const normalizedCode = normalizeSkuCode(c)
+              const normalizedName = normalizeProductName(c)
               if (normalizedCode && !map.has(normalizedCode)) map.set(normalizedCode, entry)
+              if (normalizedName && !map.has(normalizedName)) map.set(normalizedName, entry)
               if (!map.has(c)) map.set(c, entry)
             }
           }

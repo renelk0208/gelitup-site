@@ -4,6 +4,7 @@ import { readFileSync } from 'fs'
 const imageMap = JSON.parse(readFileSync('public/gelitup-content/product-image-map.json', 'utf8'))
 const priceList = JSON.parse(readFileSync('public/gelitup-content/b2b-price-list.json', 'utf8'))
 const hidden = JSON.parse(readFileSync('public/gelitup-content/hidden-products.json', 'utf8'))
+const productStatusCsv = readFileSync('public/gelitup-content/product-status.csv', 'utf8')
 
 const hiddenSet = new Set(hidden.map(k => k.trim().toUpperCase()))
 
@@ -11,10 +12,148 @@ const hiddenSet = new Set(hidden.map(k => k.trim().toUpperCase()))
 const normalizeSkuCode = v => String(v || '').trim().toUpperCase().replace(/\s+/g, ' ')
 const normalizeProductName = v => normalizeSkuCode(v)
   .replace(/GEL\.?IT\.?UP|GEL\s*IT\s*UP|GIUP/gi, ' ')
+  .replace(/(\d)(ML|GR|G)\b/gi, '$1 $2')
+  .replace(/\b(HTF|HTE|HEMA\s*FREE|HEMAFREE)\b/gi, ' ')
+  .replace(/\bGR\b/gi, 'G')
   .replace(/[^A-Z0-9]+/g, ' ')
   .replace(/\s+/g, ' ')
   .trim()
+const deriveSpreadsheetSynonymKeys = name => {
+  const normalized = normalizeProductName(name)
+  if (!normalized) return []
+
+  const keys = new Set()
+  const add = (...values) => values.forEach(value => {
+    const key = normalizeSkuCode(value)
+    if (key) keys.add(key)
+  })
+
+  const classicBuilderMatch = normalized.match(/^3 IN 1 BUILDER GEL\s+(.+?)\s+40 G$/)
+  if (classicBuilderMatch) {
+    const shade = classicBuilderMatch[1]
+    add(`3 IN 1 ${shade}`, `3IN1${shade.replace(/\s+/g, '')}`, `3 IN 1 BUILDER GEL ${shade}`)
+  }
+
+  const shimmeryBuilderMatch = normalized.match(/^3 IN 1 SHIMMERY BUILDER GEL\s+40 G\s+(.+)$/)
+  if (shimmeryBuilderMatch) {
+    const shade = shimmeryBuilderMatch[1]
+    const legacyShadeMap = {
+      'CLEAR IRIDESCENT': 'IRIDESCENT SHIMMER CLEAR',
+      'COVER': 'SHIMMER COVER',
+      'LIGHT LILAC': 'SHIMMER LILAC',
+      'PINK MARMALADE': 'MARMELADE SHIMMER PINK',
+    }
+    const legacyShade = legacyShadeMap[shade]
+    if (legacyShade) {
+      add(`3 IN 1 BUILDER GEL ${legacyShade}`, `3 IN 1 BUILDER GEL ${legacyShade} B`)
+    }
+  }
+
+  const premiumBuilderMatch = normalized.match(/^PREMIUM BUILDER GEL\s+(.+?)\s+40 GR$/)
+  if (premiumBuilderMatch) {
+    const shade = premiumBuilderMatch[1]
+    add(`3 IN 1 GELITUP PREMIUM BUILDER GEL ${shade}`, `3 IN 1 GELITUP PREMIUM BUILDER GEL ${shade} B`)
+    if (shade === 'PEARLY NUDE') add('3 IN 1 PREMIUM BUILDER GEL SHIMMER NUDE', '3 IN 1 PREMIUM BUILDER GEL SHIMMER NUDE B')
+    if (shade === 'PEARLY PINK') add('3 IN 1 PREMIUM BUILDER GEL SHIMMER PINK', '3 IN 1 PREMIUM BUILDER GEL SHIMMER PINK B')
+  }
+
+  if (normalized === 'PREMIUM PLUS FIBER GLASS BUILDER GEL 40 GR') {
+    add('3 IN 1 GELITUP PREMIUM BUILDER GEL CLEAR PLUS', '3 IN 1 GELITUP PREMIUM BUILDER GEL CLEAR PLUS B', '3 IN 1 PREMIUM PLUS', '3 IN 1.PREMIUM.PLUS')
+  }
+
+  const brushOnBuilderMatch = normalized.match(/^BRUSH ON BUILDER GEL\s+(.+?)\s+15 ML$/)
+  if (brushOnBuilderMatch) {
+    const shade = brushOnBuilderMatch[1]
+    add(`BRUSH ON BUILDER BIAB ${shade}`)
+    if (shade === 'BLUSH PINK') add('BRUSH ON BUILDER BIAB IRRIDESCENT PINK', 'BRUSH ON BUILDER BIAB IRRODESCENT PINK')
+    if (shade === 'GLITTERY PINK') add('BRUSH ON BUILDER BIAB GLITTER PINK')
+  }
+
+  if (normalized === 'SUPERBOND NAIL DEHYDRATOR 11 ML ACID FREE') add('SUPERBOND WITHOUT ACID', 'SUPERBOND.WITHOUT.ACID')
+  if (normalized === 'SUPERBOND NAIL DEHYDRATOR 11 ML WITH ACID') add('SUPERBOND WITH ACID', 'SUPERBOND.WITH.ACID')
+  if (normalized === 'BASE COAT 15 ML') add('CLASSIC BASE COAT')
+  if (normalized === 'ACRYLIC COMPETE POWDER COVER 35 G') add('ACRYLICS COVER')
+  if (normalized === 'ACRYLIC COMPETE POWDER EXTREME WHITE 35 G') add('ACRYLICS EXTREME WHITE')
+  if (normalized === 'ACRYLIC COMPETE POWDER PINK 35 G') add('ACRYLICS PINK')
+  if (normalized === 'ACRYLIC CLASSIC POWDER WHITE 35 G' || normalized === 'ACRYLIC COMPETE POWDER MILKY WHITE 35 G') add('ACRYLICS WHITE')
+  if (/^2113\b/.test(normalized)) add('SFT 2113')
+
+  const autumn2021Match = normalized.match(/^AUTUMN 2021 OTA(\d{2})$/)
+  if (autumn2021Match) add(`GIUP ODA${autumn2021Match[1]}`)
+
+  const btbMatch = normalized.match(/^BTB(\d{2})\b/)
+  if (btbMatch) add(`GIUP B2B${btbMatch[1]}`)
+
+  const multimixMatch = normalized.match(/^MULTIMIX SYNTHOGEL (30|60) G (.+)$/)
+  if (multimixMatch) {
+    const size = multimixMatch[1]
+    const shade = multimixMatch[2]
+    const multimixAliasMap = {
+      '30:BABY BLUE': ['MULTIMIX BABY BLUE COLOR'],
+      '30:BABY PINK GLITTER': ['MULTIMIX BABY PINK GLITTER COLOR'],
+      '30:BLUE GLITTER': ['MULTIMIX BLUE GLITTER COLOR'],
+      '30:BUBBLE GUM GLITTER': ['MULTIMIX BUBBLE GUM GLITTER COLOR', 'MULTIMIX BUBBLEGUM GLITTER COLOR'],
+      '30:CLEAR': ['MULTIMIX CLEAR COLOR'],
+      '30:GLITSY GREEN': ['MULTIMIX GLITSY GREEN COLOR'],
+      '30:LIGHT NUDE': ['MULTIMIX LIGHT NUDE COLOR'],
+      '30:MINTY GREEN': ['MULTIMIX MINT GREEN COLOR'],
+      '30:PINK III': ['MULTIMIX PINKIII COLOR'],
+      '30:SUPER SOFT PINK': ['MULTIMIX SUPER SOFT PINK COLOR'],
+      '60:BLACK': ['MULTIMIX BLACK COLOR'],
+      '60:CLEAR': ['MULTIMIX CLEAR COLOR'],
+      '60:CLEAR GLITTER': ['MULTIMIX GLITTERS CLEAR'],
+      '60:COVER': ['MULTIMIX COVER COLOR'],
+      '60:COVER II': ['MULTIMIX COVER II COLOR'],
+      '60:CRYSTAL CLEAR': ['MULTIMIX CRYSTAL CLEAR COLOR'],
+      '60:GLITTER GOLD': ['MULTIMIX GLITTERS GOLD'],
+      '60:GLITTER NUDE': ['MULTIMIX GLITTERS NUDE'],
+      '60:GLITTER PINK': ['MULTIMIX GLITTERS PINK', 'MULTIMIX GLITTERPINK COLOR'],
+      '60:GLITTER PINK II': ['MULTIMIX PINK II COLOR'],
+      '60:GLITTER WHITE': ['MULTIMIX GLITTERS WHITE'],
+      '60:LIGHT LILAC': ['MULTIMIX LILAC COLOR'],
+      '60:LIGHT PINK': ['MULTIMIX LIGHT PINK COLOR'],
+      '60:MILKY WHITE': ['MULTIMIX MILKY WHITE COLOR'],
+      '60:NUDE': ['MULTIMIX NUDE COLOR'],
+      '60:PINK': ['MULTIMIX PINK COLOR'],
+      '60:PINK II': ['MULTIMIX PINK II COLOR'],
+      '60:SUPER MILKY': ['MULTIMIX SUPER MILKY COLOR'],
+      '60:WHITE': ['MULTIMIX WHITE COLOR', 'MULTIMIX WHITE 60ML 60G'],
+    }
+    const aliases = multimixAliasMap[`${size}:${shade}`] || []
+    aliases.forEach(alias => {
+      add(alias, `${alias} ${size}G`, `${alias} ${size} G`, `${alias} B ${size}G`, `${alias} B ${size} G`, `${alias} C ${size}G`, `${alias} C ${size} G`)
+    })
+  }
+
+  return [...keys]
+}
 const stripSuffix = s => String(s || '').replace(/\s*[-—]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '').trim()
+const parseProductStatusCsv = csvText => {
+  const discontinued = new Set()
+  if (!csvText) return discontinued
+  const lines = String(csvText).split(/\r?\n/).filter(Boolean)
+  if (lines.length <= 1) return discontinued
+
+  for (const line of lines.slice(1)) {
+    const parts = line.split(',')
+    if (parts.length < 4) continue
+    const code = String(parts[0] || '').trim()
+    const name = String(parts[1] || '').trim()
+    const status = String(parts[3] || '').trim().toLowerCase()
+    if (status !== 'discontinued') continue
+    if (code) {
+      discontinued.add(normalizeSkuCode(code))
+      discontinued.add(normalizeProductName(code))
+    }
+    if (name) {
+      discontinued.add(normalizeSkuCode(name))
+      discontinued.add(normalizeProductName(name))
+    }
+  }
+
+  return discontinued
+}
+const discontinuedSet = parseProductStatusCsv(productStatusCsv)
 
 // formatCatalogueItemName: filename → name
 const formatCatalogueItemName = (rawPath = '') => {
@@ -24,8 +163,18 @@ const formatCatalogueItemName = (rawPath = '') => {
 
 // extractProductCode: name → code (regex from App.jsx)
 const extractProductCode = (name = '') => {
-  const codeMatch = String(name || '').trim().match(/[A-Z]{2,8}\s*-?\s*\d+[A-Z0-9-]*/i)
-  return codeMatch ? codeMatch[0].toUpperCase() : 'SKU'
+  const cleaned = String(name || '').trim()
+  const giupCodeMatch = cleaned.match(/\bGIUP[\s._-]*([A-Z0-9]{2,12})\b/i)
+  if (giupCodeMatch) {
+    return normalizeSkuCode(`GIUP ${giupCodeMatch[1]}`)
+  }
+
+  const compactCodeMatch = cleaned.match(/\b[A-Z]{2,8}\d{1,4}[A-Z0-9-]*\b/i)
+  if (compactCodeMatch) {
+    return compactCodeMatch[0].toUpperCase()
+  }
+
+  return normalizeSkuCode(cleaned) || 'SKU'
 }
 
 // Build cataloguePriceMap (simplified — no alias groups, but full key logic)
@@ -58,6 +207,7 @@ for (const { name, sku, price } of priceList.items) {
     const s = tm[1].toUpperCase(), n = tm[2]
     keys.push(`${s} ${n}`, `${s} ${n.padStart(2, '0')}`, `${s}${n}`, `${s}${n.padStart(2, '0')}`)
   }
+  keys.push(...deriveSpreadsheetSynonymKeys(cleanName))
   for (const k of keys) {
     if (k && !map.has(k)) map.set(k, entry)
   }
@@ -67,6 +217,14 @@ for (const { name, sku, price } of priceList.items) {
 // We add all alias code strings to a separate "aliased" set so we know they're handled
 const aliasedCodes = new Set([
   'GIUP SBLS','GIUP SBMS','GIUP SBBLUE','GIUP SBBlue','GIUP SBPS','GIUP SBPURS',
+  '5 IN 1 GIUP SBLS','5-IN-1-GIUP-SBLS','2026-NEW-5IN1-LEMON-SERENITY',
+  '5 IN 1 GIUP SBMS','5-IN-1-GIUP-SBMS','2026-NEW-5IN1-MINT-SERENITY',
+  '5 IN 1 GIUP SBBLUE','5-IN-1-GIUP-SBBLUE','GIUP-SBBLUE','2026-NEW-5IN1-PEACH-BLUE',
+  '5 IN 1 GIUP SBPS','5-IN-1-GIUP-SBPS','2026-NEW-5IN1-PEACH-SERENITY',
+  '5 IN 1 GIUP SBPURS','5-IN-1-GIUP-SBPURS','2026-NEW-5IN1-PURPLE-SERENITY',
+  'ALL IN ONE LIQUID 200ML','ALL IN ONE LIQUID 200 ML','LIQUID 200ML','2026-NEW-NEW-CONSUMABLES-200',
+  'ALL IN ONE LIQUID 500ML','ALL IN ONE LIQUID 500 ML','LIQUID 500ML','2026-NEW-NEW-CONSUMABLES-500',
+  'MIRROR TOP COAT','2026-NEW-MIRROR-TOP-COAT','2026-NEW-MIRROR-POWDER-TOP-COAT',
   'GIUP BOBCLR','GIUP BOBCOV','GIUP BOBPNK','GIUP BOBCRM','GIUP BOBNUD','GIUP BOBPURGL',
   'GIUP BOBDS','GIUP BOBMILK','GIUP BOBLIL','GIUP BOBBLPN','GIUP BOBSTPN','GIUP BOBGLPN',
   'GIUP BOBGLMG','GIUP BOBPRL','GIUP BOBGLROS','GIUP BOBGLSLM',
@@ -98,6 +256,17 @@ const aliasedCodes = new Set([
   'BRUSH ON BUILDER BIABGLMG','BRUSH ON BUILDER BIABPRL','BRUSH ON BUILDER BIABGLROS',
   'BRUSH ON BUILDER BIABGLSLM','BRUSH ON BUILDER BIAB SKY SPRINKLE (1)',
   'BRUSH ON BUILDER BIAB BLUSH SORBET','BRUSH ON BUILDER BIAB BERRY STARDUST',
+  '3 IN 1 GELITUP PREMIUM BUILDER GEL BLUSH','3 IN 1 GELITUP PREMIUM BUILDER GEL BLUSH B',
+  '3 IN 1 GELITUP PREMIUM BUILDER GEL CLEAR','3 IN 1 GELITUP PREMIUM BUILDER GEL CLEAR B',
+  '3 IN 1 GELITUP PREMIUM BUILDER GEL CLEAR PLUS','3 IN 1 GELITUP PREMIUM BUILDER GEL CLEAR PLUS B',
+  '3 IN 1 GELITUP PREMIUM BUILDER GEL COVER','3 IN 1 GELITUP PREMIUM BUILDER GEL COVER B',
+  '3 IN 1 GELITUP PREMIUM BUILDER GEL MILKY','3 IN 1 GELITUP PREMIUM BUILDER GEL MILKY B',
+  '3 IN 1 GELITUP PREMIUM BUILDER GEL NUDE','3 IN 1 GELITUP PREMIUM BUILDER GEL NUDE B',
+  '3 IN 1 GELITUP PREMIUM BUILDER GEL PINK','3 IN 1 GELITUP PREMIUM BUILDER GEL PINK B',
+  '3 IN 1 GELITUP PREMIUM BUILDER GEL WHITE','3 IN 1 GELITUP PREMIUM BUILDER GEL WHITE B',
+  '3 IN 1 PREMIUM BUILDER GEL SHIMMER NUDE','3 IN 1 PREMIUM BUILDER GEL SHIMMER NUDE B',
+  '3 IN 1 PREMIUM BUILDER GEL SHIMMER PINK','3 IN 1 PREMIUM BUILDER GEL SHIMMER PINK B',
+  '3 IN 1.PREMIUM.PLUS',
   // 5-in-1 SBC new filenames
   '5 IN 1 GIUP SBCBP','5 IN 1 GIUP SBCCLR','5 IN 1 GIUP SBCCP','5 IN 1 GIUP SBCMP',
   '5 IN 1 GIUP SBCPP','5 IN 1 GIUP SBCSP','5 IN 1 GIUP SBCGLPI','5 IN 1 GIUP SBCGP',
@@ -147,6 +316,17 @@ const aliasedCodes = new Set([
   // hand & foot care aliases from App.jsx
   'CUTICLE REMOVER 5ML','GIUP SB NO ACID','GIUP SB WITH ACID','SANITIZER','CLEANSER','NAIL WIPES',
   'NAIL FORMS 5','DUAL FORMS ALMOND','DUAL FORMS LONG COFFIN','DUAL FORMS MEDIUM SQUARE',
+  'MULTIMIX BLACK COLOR 60G','MULTIMIX BLACK COLOR B 60G','MULTIMIX BLACK COLOR C 60G',
+  'NAIL FILES BUFFER 100 180 PURPLE SPONGE','NAIL FILES BUFFER 180 180 PINK SPONGE','BOAT SHAPE METALLIC NAIL BASE',
+  'DUAL FORMS MODERNS SQUARE','DUAL FORMS STANDARD','FLEXI SHORT SQUARE','FUAL FORMS SQUARE',
+  'Î’UFFING BLOCK','ΒUFFING BLOCK','NAIL FILE 100 1001',
+  '01. CUTICLE SCISSOR, CURVED 10,5 19 B','01. HEAD CUTTER, PLAIN HANDLE, HALF BLADE B',
+  '02. CORNER NIPPER, EXTRA SLIM (FLAME SHAPED)','03. CUTICLE SCISSOR, CURVED 10 18 B','04. CUTICLE SPRING SCISSOR, CURVED B',
+  'STAMP LAMP 2',
+])
+const normalizedAliasedCodes = new Set([
+  ...aliasedCodes,
+  ...[...aliasedCodes].map(code => normalizeProductName(code)).filter(Boolean),
 ])
 
 // lookupCataloguePrice simulation
@@ -176,7 +356,12 @@ function lookupCataloguePrice(itemName, itemCode) {
   const byFullName = map.get(normalizeSkuCode(itemName))
   if (byFullName) return byFullName.price
   // Check aliasedCodes
-  if (aliasedCodes.has(normalizeSkuCode(itemName)) || aliasedCodes.has(normalizeSkuCode(itemCode))) return 1 // aliased = has price
+  if (
+    normalizedAliasedCodes.has(normalizeSkuCode(itemName))
+    || normalizedAliasedCodes.has(normalizeSkuCode(itemCode))
+    || normalizedAliasedCodes.has(normalizeProductName(itemName))
+    || normalizedAliasedCodes.has(normalizeProductName(itemCode))
+  ) return 1 // aliased = has price
   // fuzzy: at least 2 significant words match any price entry (multi-digit numbers only, not lone digits)
   const SKIP = new Set(['COLOR','COLOUR','COAT','CARE','FORM','SIZE'])
   const qWords = normalizeSkuCode(itemName).split(/\s+/).filter(w => (w.length >= 4 && !SKIP.has(w)) || /^\d{2,}$/.test(w))
@@ -196,6 +381,7 @@ for (const [key, imgPath] of Object.entries(imageMap)) {
   if (typeof imgPath !== 'string') continue
   if (!imgPath.includes('/gelitup-content/product-images/')) continue
   if (hiddenSet.has(key.trim().toUpperCase())) continue
+  if (/hero(?:[._ -]?image)?|banner/i.test(key) || /hero(?:[._ -]?image)?|banner/i.test(imgPath.split('/').pop() || '')) continue
   if (seen.has(imgPath)) continue
   seen.add(imgPath)
 
@@ -206,6 +392,14 @@ for (const [key, imgPath] of Object.entries(imageMap)) {
 
   const itemName = formatCatalogueItemName(afterRoot)
   const itemCode = extractProductCode(itemName)
+  if (
+    discontinuedSet.has(normalizeSkuCode(key))
+    || discontinuedSet.has(normalizeProductName(key))
+    || discontinuedSet.has(normalizeSkuCode(itemCode))
+    || discontinuedSet.has(normalizeProductName(itemCode))
+    || discontinuedSet.has(normalizeSkuCode(itemName))
+    || discontinuedSet.has(normalizeProductName(itemName))
+  ) continue
 
   const price = lookupCataloguePrice(itemName, itemCode)
   if (price == null) {
