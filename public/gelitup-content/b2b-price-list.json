@@ -2,7 +2,8 @@
   "_meta": {
     "source": "price-list-export.csv",
     "generated": "2026-05-13T16:40:01.426Z",
-    "count": 1079
+    "count": 1070,
+    "deduplication_date": "2026-05-14T07:29:10.569273"
   },
   "items": [
     {
@@ -5266,31 +5267,6 @@
       "price": 8.9
     },
     {
-      "name": "5-in-1 Superior Base 15ml Lemon Serenity -HTF",
-      "sku": "5-in-1 Superior Base 15ml Lemon Serenity -HTF",
-      "price": 12.84
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Mint Serenity -HTF",
-      "sku": "5-in-1 Superior Base 15ml Mint Serenity -HTF",
-      "price": 12.84
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Blue Serenity -HTF",
-      "sku": "5-in-1 Superior Base 15ml Blue Serenity -HTF",
-      "price": 12.84
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Peach Serenity -HTF",
-      "sku": "5-in-1 Superior Base 15ml Peach Serenity -HTF",
-      "price": 12.84
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Purple Serenity -HTF",
-      "sku": "5-in-1 Superior Base 15ml Purple Serenity -HTF",
-      "price": 12.84
-    },
-    {
       "name": "Mirror Powder Top Coat -HTF",
       "sku": "Mirror Powder Top Coat -HTF",
       "price": 8.25
@@ -5363,26 +5339,6 @@
     {
       "name": "2209 Taffy Pink -HTF",
       "sku": "2209 Taffy Pink -HTF",
-      "price": 7.41
-    },
-    {
-      "name": "2211 Purple People Eater -HTF",
-      "sku": "2211 Purple People Eater -HTF",
-      "price": 7.41
-    },
-    {
-      "name": "2213 Drunken Acorn -HTF",
-      "sku": "2213 Drunken Acorn -HTF",
-      "price": 7.41
-    },
-    {
-      "name": "2215 Glass Frog -HTF",
-      "sku": "2215 Glass Frog -HTF",
-      "price": 7.41
-    },
-    {
-      "name": "2218 Simmer Down -HTF",
-      "sku": "2218 Simmer Down -HTF",
       "price": 7.41
     },
     {

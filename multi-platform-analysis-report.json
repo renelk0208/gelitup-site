@@ -1,0 +1,315 @@
+{
+  "timestamp": "2026-05-14T07:27:22.200978",
+  "platforms": {
+    "b2b": {
+      "total_products": 1070,
+      "total_csv_products": 1513,
+      "exact_duplicates": 9,
+      "products_with_zero_price": 0,
+      "image_duplicates": 73,
+      "issues": {
+        "duplicates": [
+          {
+            "sku": "5-in-1 Superior Base 15ml Lemon Serenity -HTF",
+            "name": "5-in-1 Superior Base 15ml Lemon Serenity -HTF",
+            "price": 12.84
+          },
+          {
+            "sku": "5-in-1 Superior Base 15ml Mint Serenity -HTF",
+            "name": "5-in-1 Superior Base 15ml Mint Serenity -HTF",
+            "price": 12.84
+          },
+          {
+            "sku": "5-in-1 Superior Base 15ml Blue Serenity -HTF",
+            "name": "5-in-1 Superior Base 15ml Blue Serenity -HTF",
+            "price": 12.84
+          },
+          {
+            "sku": "5-in-1 Superior Base 15ml Peach Serenity -HTF",
+            "name": "5-in-1 Superior Base 15ml Peach Serenity -HTF",
+            "price": 12.84
+          },
+          {
+            "sku": "5-in-1 Superior Base 15ml Purple Serenity -HTF",
+            "name": "5-in-1 Superior Base 15ml Purple Serenity -HTF",
+            "price": 12.84
+          },
+          {
+            "sku": "2211 Purple People Eater -HTF",
+            "name": "2211 Purple People Eater -HTF",
+            "price": 7.41
+          },
+          {
+            "sku": "2213 Drunken Acorn -HTF",
+            "name": "2213 Drunken Acorn -HTF",
+            "price": 7.41
+          },
+          {
+            "sku": "2215 Glass Frog -HTF",
+            "name": "2215 Glass Frog -HTF",
+            "price": 7.41
+          },
+          {
+            "sku": "2218 Simmer Down -HTF",
+            "name": "2218 Simmer Down -HTF",
+            "price": 7.41
+          }
+        ],
+        "zero_price": [],
+        "image_duplicates": [
+          {
+            "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/Nail_Files_Buffer_180-180_Pink_Sponge.webp?v=1777729155",
+            "count": 6,
+            "products": [
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/Nail_Files_Buffer_180-180_Pink_Sponge.webp?v=1777729155",
+                "sku": "",
+                "title": "Wooden File Super thin 100/100 with Logo"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/Nail_Files_Buffer_180-180_Pink_Sponge.webp?v=1777729155",
+                "sku": "",
+                "title": "GIUP Boat Shape Nail File 220/240"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/Nail_Files_Buffer_180-180_Pink_Sponge.webp?v=1777729155",
+                "sku": "",
+                "title": "GIUP Boat Shape metallic Nail File"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/Nail_Files_Buffer_180-180_Pink_Sponge.webp?v=1777729155",
+                "sku": "",
+                "title": ""
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/Nail_Files_Buffer_180-180_Pink_Sponge.webp?v=1777729155",
+                "sku": "",
+                "title": ""
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/Nail_Files_Buffer_180-180_Pink_Sponge.webp?v=1777729155",
+                "sku": "",
+                "title": "GIUP Buffing Block 180/180 Packet of 10"
+              }
+            ]
+          },
+          {
+            "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/Non_Wipe_Top_Coat_15ml_-HTF.webp?v=1777730607",
+            "count": 2,
+            "products": [
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/Non_Wipe_Top_Coat_15ml_-HTF.webp?v=1777730607",
+                "sku": "",
+                "title": "Super Flash Top Coat 11ml -HTF"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/Non_Wipe_Top_Coat_15ml_-HTF.webp?v=1777730607",
+                "sku": "",
+                "title": "Non Wipe Top Coat 15ml -HTF"
+              }
+            ]
+          },
+          {
+            "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_dfe07ee6-dbda-43f4-92d6-1db5933a0374.webp?v=1777740715",
+            "count": 4,
+            "products": [
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_dfe07ee6-dbda-43f4-92d6-1db5933a0374.webp?v=1777740715",
+                "sku": "",
+                "title": "SS01 SPIX and SPEX Kaleidascope -HTF"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_dfe07ee6-dbda-43f4-92d6-1db5933a0374.webp?v=1777740715",
+                "sku": "",
+                "title": "BTB03 Brimstone -HTF"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_dfe07ee6-dbda-43f4-92d6-1db5933a0374.webp?v=1777740715",
+                "sku": "",
+                "title": "BTB02 Nautilus -HTF"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_dfe07ee6-dbda-43f4-92d6-1db5933a0374.webp?v=1777740715",
+                "sku": "",
+                "title": "BTB01 Rosso Corso -HTF"
+              }
+            ]
+          },
+          {
+            "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_343f11bc-c99e-4400-b96c-33e41477e22b.webp?v=1777740678",
+            "count": 2,
+            "products": [
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_343f11bc-c99e-4400-b96c-33e41477e22b.webp?v=1777740678",
+                "sku": "",
+                "title": "Professional Premium Cuticle Nipper, Oval Round Fine Cut – 3mm 2120 New"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_343f11bc-c99e-4400-b96c-33e41477e22b.webp?v=1777740678",
+                "sku": "",
+                "title": ""
+              }
+            ]
+          },
+          {
+            "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_e191bc6b-a565-4a65-9494-eb8ffac2dc8e.webp?v=1777740610",
+            "count": 2,
+            "products": [
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_e191bc6b-a565-4a65-9494-eb8ffac2dc8e.webp?v=1777740610",
+                "sku": "",
+                "title": "Professional Premium Cuticle Nipper, Oval Fine Cut – 3mm 2119 New"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_e191bc6b-a565-4a65-9494-eb8ffac2dc8e.webp?v=1777740610",
+                "sku": "",
+                "title": ""
+              }
+            ]
+          },
+          {
+            "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/06._CUTICLE_NIPPER_FINE_CUT.webp?v=1777733828",
+            "count": 3,
+            "products": [
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/06._CUTICLE_NIPPER_FINE_CUT.webp?v=1777733828",
+                "sku": "",
+                "title": "Professional Premium Cuticle Nipper, Fine Cut – 5mm 2117 New"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/06._CUTICLE_NIPPER_FINE_CUT.webp?v=1777733828",
+                "sku": "",
+                "title": ""
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/06._CUTICLE_NIPPER_FINE_CUT.webp?v=1777733828",
+                "sku": "",
+                "title": "Professional Premium Cuticle Nipper, Fine Cut – 7mm 2117 New"
+              }
+            ]
+          },
+          {
+            "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/3_in_1_premium_builder_gel_nude.webp?v=1777733197",
+            "count": 6,
+            "products": [
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/3_in_1_premium_builder_gel_nude.webp?v=1777733197",
+                "sku": "",
+                "title": "Premium Builder Gel Nude II 40gr -HTF"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/3_in_1_premium_builder_gel_nude.webp?v=1777733197",
+                "sku": "",
+                "title": "COOL CARE Builder Gel 40gr -HTF"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/3_in_1_premium_builder_gel_nude.webp?v=1777733197",
+                "sku": "",
+                "title": "Brush on Builder Gel Milky Glitter 15ml -HTF"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/3_in_1_premium_builder_gel_nude.webp?v=1777733197",
+                "sku": "",
+                "title": "3-in-1 Builder Gel Cover 40g -HTF"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/3_in_1_premium_builder_gel_nude.webp?v=1777733197",
+                "sku": "",
+                "title": "3-in-1 Builder Gel Clear 40g -HTF"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/3_in_1_premium_builder_gel_nude.webp?v=1777733197",
+                "sku": "",
+                "title": "Premium Builder Gel Nude 40gr -HTF"
+              }
+            ]
+          },
+          {
+            "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_d01be224-88ab-4d5c-bd19-75b3e8e376aa.webp?v=1777740616",
+            "count": 2,
+            "products": [
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_d01be224-88ab-4d5c-bd19-75b3e8e376aa.webp?v=1777740616",
+                "sku": "",
+                "title": "Natural nail sticks"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_d01be224-88ab-4d5c-bd19-75b3e8e376aa.webp?v=1777740616",
+                "sku": "",
+                "title": ""
+              }
+            ]
+          },
+          {
+            "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_2aa7d962-013c-4ef1-be56-73465e2c6133.webp?v=1777740606",
+            "count": 2,
+            "products": [
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_2aa7d962-013c-4ef1-be56-73465e2c6133.webp?v=1777740606",
+                "sku": "",
+                "title": "GIUP Boat Shape Nail File 100/120 Purple Sponge"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/download_2aa7d962-013c-4ef1-be56-73465e2c6133.webp?v=1777740606",
+                "sku": "",
+                "title": ""
+              }
+            ]
+          },
+          {
+            "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/GEL_IT_UP_HAND_AND_BODY_CREAM_100ml_CALM_FROST_NEW.webp?v=1777734091",
+            "count": 2,
+            "products": [
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/GEL_IT_UP_HAND_AND_BODY_CREAM_100ml_CALM_FROST_NEW.webp?v=1777734091",
+                "sku": "",
+                "title": "GEL IT UP HAND AND BODY CREAM 1000ml CALM FROST NEW"
+              },
+              {
+                "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/GEL_IT_UP_HAND_AND_BODY_CREAM_100ml_CALM_FROST_NEW.webp?v=1777734091",
+                "sku": "",
+                "title": "GEL IT UP HAND AND BODY CREAM 100ml CALM FROST NEW"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "distribution": {
+      "total_products": 0,
+      "exact_duplicates": 0,
+      "image_duplicates": 0,
+      "issues": {
+        "duplicates": [],
+        "image_duplicates": []
+      }
+    },
+    "shopify": {},
+    "gelitup_com": {
+      "total_products": 0,
+      "exact_duplicates": 0,
+      "products_with_zero_price": 0,
+      "image_duplicates": 0,
+      "issues": {
+        "duplicates": [],
+        "zero_price": [],
+        "image_duplicates": []
+      }
+    }
+  },
+  "cross_platform_issues": {
+    "total_unique_products_across_platforms": 1070
+  },
+  "summary": {
+    "total_platforms_analyzed": 4,
+    "total_exact_duplicates_across_platforms": 9,
+    "total_image_duplicates_across_platforms": 73,
+    "total_products_with_zero_price": 0,
+    "platforms_affected": [
+      "b2b",
+      "distribution",
+      "shopify",
+      "gelitup_com"
+    ]
+  }
+}

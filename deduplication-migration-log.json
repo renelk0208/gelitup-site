@@ -1,0 +1,65 @@
+{
+  "timestamp": "2026-05-14T07:29:10.553212",
+  "actions": [
+    {
+      "type": "duplicate_sku_removed",
+      "platform": "b2b",
+      "sku": "5-in-1 Superior Base 15ml Lemon Serenity -HTF",
+      "reason": "Duplicate entry in price list"
+    },
+    {
+      "type": "duplicate_sku_removed",
+      "platform": "b2b",
+      "sku": "5-in-1 Superior Base 15ml Mint Serenity -HTF",
+      "reason": "Duplicate entry in price list"
+    },
+    {
+      "type": "duplicate_sku_removed",
+      "platform": "b2b",
+      "sku": "5-in-1 Superior Base 15ml Blue Serenity -HTF",
+      "reason": "Duplicate entry in price list"
+    },
+    {
+      "type": "duplicate_sku_removed",
+      "platform": "b2b",
+      "sku": "5-in-1 Superior Base 15ml Peach Serenity -HTF",
+      "reason": "Duplicate entry in price list"
+    },
+    {
+      "type": "duplicate_sku_removed",
+      "platform": "b2b",
+      "sku": "5-in-1 Superior Base 15ml Purple Serenity -HTF",
+      "reason": "Duplicate entry in price list"
+    },
+    {
+      "type": "duplicate_sku_removed",
+      "platform": "b2b",
+      "sku": "2211 Purple People Eater -HTF",
+      "reason": "Duplicate entry in price list"
+    },
+    {
+      "type": "duplicate_sku_removed",
+      "platform": "b2b",
+      "sku": "2213 Drunken Acorn -HTF",
+      "reason": "Duplicate entry in price list"
+    },
+    {
+      "type": "duplicate_sku_removed",
+      "platform": "b2b",
+      "sku": "2215 Glass Frog -HTF",
+      "reason": "Duplicate entry in price list"
+    },
+    {
+      "type": "duplicate_sku_removed",
+      "platform": "b2b",
+      "sku": "2218 Simmer Down -HTF",
+      "reason": "Duplicate entry in price list"
+    }
+  ],
+  "statistics": {
+    "duplicates_removed": 9,
+    "products_consolidated": 17,
+    "files_updated": 1,
+    "warnings": []
+  }
+}
