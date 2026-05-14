@@ -7243,6 +7243,11 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
   const prefilledEmail = String(loginParams.get('email') || '').trim().toLowerCase()
   const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
   const portalType = loginParams.get('portal') || 'b2b' // 'b2b' | 'distributor'
+  // Reliable recovery detection: the PASSWORD_RECOVERY auth event sets pendingRecoverySession
+  // (URL-based ?code= detection is unreliable — the SDK consumes the code before React renders)
+  const isPasswordResetFlow = pendingRecoverySession
+    || Boolean(loginParams.get('code'))
+    || /type=recovery/.test(window.location.hash)
 
   // B2B salon ordering has moved to the Shopify store — redirect non-distributor logins
   useEffect(() => {
@@ -7252,11 +7257,6 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
   }, [portalType, isPasswordResetFlow])
 
   if (portalType === 'b2b' && !isPasswordResetFlow) return null
-  // Reliable recovery detection: the PASSWORD_RECOVERY auth event sets pendingRecoverySession
-  // (URL-based ?code= detection is unreliable — the SDK consumes the code before React renders)
-  const isPasswordResetFlow = pendingRecoverySession
-    || Boolean(loginParams.get('code'))
-    || /type=recovery/.test(window.location.hash)
   const showDebugTrace = loginParams.get('debug') === '1'
   const [email, setEmail] = useState(prefilledEmail || localStorage.getItem('portalRememberedEmail') || '')
   const [password, setPassword] = useState(() => {
