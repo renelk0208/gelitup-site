@@ -2007,6 +2007,63 @@ function scoreCatalogueDisplayKey(rawKey = '', formattedKey = '') {
   return score
 }
 
+function extractCatalogueProductCode(rawKey = '') {
+  const normalized = normalizeSkuCode(rawKey)
+  if (!normalized) return ''
+
+  const leadingNumericMatch = normalized.match(/^(\d{3,4}[A-Z]?)\b/)
+  if (leadingNumericMatch) return leadingNumericMatch[1]
+
+  const prefixedNumericMatch = normalized.match(/\b[A-Z]{2,5}\s+(\d{3,4}[A-Z]?)\b/)
+  if (prefixedNumericMatch) return prefixedNumericMatch[1]
+
+  return ''
+}
+
+function buildCanonicalDisplayNameByProductCode(payload) {
+  const displayNameByCode = new Map()
+  const scoreByCode = new Map()
+
+  Object.entries(payload || {}).forEach(([rawKey, rawValue]) => {
+    const imageUrl = typeof rawValue === 'string' ? rawValue.trim() : ''
+    if (!imageUrl || !imageUrl.includes('/gelitup-content/product-images/')) return
+
+    const productCode = extractCatalogueProductCode(rawKey)
+    if (!productCode) return
+
+    const formattedKey = formatCatalogueDisplayKey(rawKey)
+    const score = scoreCatalogueDisplayKey(rawKey, formattedKey)
+    if (!Number.isFinite(score) || score < 7) return
+
+    const currentScore = scoreByCode.get(productCode) ?? Number.NEGATIVE_INFINITY
+    if (score <= currentScore) return
+
+    scoreByCode.set(productCode, score)
+    displayNameByCode.set(productCode, formattedKey)
+  })
+
+  return displayNameByCode
+}
+
+function buildCanonicalDisplayNameByImagePath(payload, canonicalDisplayNameByProductCode) {
+  const displayNameByImagePath = new Map()
+
+  Object.entries(payload || {}).forEach(([rawKey, rawValue]) => {
+    const imageUrl = typeof rawValue === 'string' ? rawValue.trim() : ''
+    if (!imageUrl || !imageUrl.includes('/gelitup-content/product-images/')) return
+
+    const productCode = extractCatalogueProductCode(rawKey)
+    if (!productCode) return
+
+    const canonicalDisplayName = canonicalDisplayNameByProductCode.get(productCode)
+    if (!canonicalDisplayName) return
+
+    displayNameByImagePath.set(imageUrl, canonicalDisplayName)
+  })
+
+  return displayNameByImagePath
+}
+
 function buildPreferredDisplayNameByImagePath(payload) {
   const displayNameByImagePath = new Map()
   const scoreByImagePath = new Map()
@@ -2247,6 +2304,8 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
 
   const blockedCategoryTokens = new Set(['CRACK', 'THERMO', 'CREME DE LA CREME'])
   const preferredDisplayNameByImagePath = buildPreferredDisplayNameByImagePath(payload)
+  const canonicalDisplayNameByProductCode = buildCanonicalDisplayNameByProductCode(payload)
+  const canonicalDisplayNameByImagePath = buildCanonicalDisplayNameByImagePath(payload, canonicalDisplayNameByProductCode)
   
   // Map certain folders to be subcategories of parent categories
   const categoryRemapping = new Map([
@@ -2355,7 +2414,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     const solidGelFlatFolders = { NUDE: 'Nude', FRENCH: 'French', PASTEL: 'Pastel', RONE: 'GIUP1' }
     subcategoryItems.push({
       imageUrl: imagePath,
-      name: preferredDisplayNameByImagePath.get(imagePath) || formatCatalogueItemName(afterRoot),
+      name: preferredDisplayNameByImagePath.get(imagePath) || canonicalDisplayNameByImagePath.get(imagePath) || formatCatalogueItemName(afterRoot),
       galleryImages: alternateGalleryImageMap.get(imagePath) || [],
       colorFamily: category === 'COLORS'
         ? segments.length > 3
@@ -9776,6 +9835,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [dismissedSuperbondUpsell, setDismissedSuperbondUpsell] = useState(false)
   const [dismissedCleanserUpsell, setDismissedCleanserUpsell] = useState(false)
   const [dismissedSynthoUpsell, setDismissedSynthoUpsell] = useState(false)
+  const [dismissedPrepLiquidUpsell, setDismissedPrepLiquidUpsell] = useState(false)
   const [dismissedTipsBaseUpsell, setDismissedTipsBaseUpsell] = useState(false)
   const [dismissedLiquidPolygel5in1Upsell, setDismissedLiquidPolygel5in1Upsell] = useState(false)
   const [dismissedDualFormsUpsell, setDismissedDualFormsUpsell] = useState(false)
@@ -10384,6 +10444,16 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   const shouldShowBuilderGelSuperbondUpsell = hasBuilderGelInCart && !hasSuperbondInCart
 
+  const hasAllInOneSignal = useCallback((product, code = '') => {
+    const token = normalizeCatalogueToken(product?.name || product?.imageUrl || code)
+    return token.includes('ALL IN ONE LIQUID')
+  }, [])
+
+  const hasAllInOneInCart = useMemo(() => {
+    if (selectedCodes.some((code) => hasAllInOneSignal(catalogBySku.get(normalizeSkuCode(code)), code))) return true
+    return packageCartItems.some((item) => hasAllInOneSignal(item, item?.code || ''))
+  }, [catalogBySku, hasAllInOneSignal, packageCartItems, selectedCodes])
+
   // -- Cleanser upsell — Wipe-Off Top Coat purchased, Cleanser not in cart --
   const hasWotcInCart = useMemo(() => {
     if (selectedCodes.some((code) => normalizeSkuCode(code).includes('WOTC'))) return true
@@ -10398,7 +10468,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     return packageCartItems.some((item) => normalizeCatalogueToken(item?.name || item?.code || '').includes('CLEANSER'))
   }, [catalogBySku, packageCartItems, selectedCodes])
 
-  const shouldShowCleanserUpsell = hasWotcInCart && !hasCleanserInCart
+  const shouldShowCleanserUpsell = hasWotcInCart && !hasAllInOneInCart
 
   // -- Syntho accessories upsell — MultiMix bought, accessories not in cart --
   const hasMultiMixInCart = useMemo(() => {
@@ -10425,7 +10495,20 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     })
   }, [catalogBySku, packageCartItems, selectedCodes])
 
-  const shouldShowSynthoUpsell = hasMultiMixInCart && !hasSynthoAccessoriesInCart
+  const shouldShowSynthoUpsell = hasMultiMixInCart && !hasAllInOneInCart
+
+  const hasNailPrepInCart = useMemo(() => {
+    const isNailPrepProduct = (product, code = '') => {
+      const cat = normalizeCatalogueToken(product?.category || '')
+      const sub = normalizeCatalogueToken(product?.subcategory || '')
+      const img = normalizeCatalogueToken(product?.imageUrl || code)
+      return (cat.includes('NAIL PREPARATION') || sub.includes('NAIL PREPARATION') || img.includes('NAIL PREPARATIONS')) && !hasAllInOneSignal(product, code)
+    }
+    if (selectedCodes.some((code) => isNailPrepProduct(catalogBySku.get(normalizeSkuCode(code)), code))) return true
+    return packageCartItems.some((item) => isNailPrepProduct(item, item?.code || ''))
+  }, [catalogBySku, hasAllInOneSignal, packageCartItems, selectedCodes])
+
+  const shouldShowPrepLiquidUpsell = hasNailPrepInCart && !hasAllInOneInCart && !hasWotcInCart && !hasMultiMixInCart
 
   // -- 5-in-1 Clear Base upsell — Soak-off Gel Tips and Super Flexi Gel Tips
   const hasNailTipsInCart = useMemo(() => {
@@ -10482,8 +10565,12 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     products.find(p => hasSuperbondSignal(p, p.code || '')),
   [products, hasSuperbondSignal])
 
-  const cleanserUpsellProduct = useMemo(() =>
-    products.find(p => normalizeCatalogueToken(p.name || '').includes('CLEANSER') && p.category === 'LIQUIDS'),
+  const allInOne200Product = useMemo(() =>
+    products.find((p) => normalizeCatalogueToken(p.name || p.imageUrl || '').includes('ALL IN ONE LIQUID 200 ML')) || null,
+  [products])
+
+  const allInOne500Product = useMemo(() =>
+    products.find((p) => normalizeCatalogueToken(p.name || p.imageUrl || '').includes('ALL IN ONE LIQUID 500 ML')) || null,
   [products])
 
   const fiveIn1ClearProduct = useMemo(() =>
@@ -10503,6 +10590,16 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       return (t.includes('POLYGEL') || t.includes('SYNTHOGEL')) && p.category === 'BRUSHES'
     }),
   [products])
+
+  const openUpsellProduct = useCallback((product, dismissFn, fallbackCategory = 'LIQUIDS') => {
+    if (product) {
+      setUpsellModal({ product, dismissFn })
+      return
+    }
+    dismissFn()
+    toggleCategory(fallbackCategory)
+    navigate('/portal/dashboard/catalog')
+  }, [navigate, toggleCategory])
 
   const resolveCatalogImageUrl = useCallback((item) => {
     const localMapKeys = [
@@ -10578,6 +10675,10 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   useEffect(() => {
     if (!shouldShowSynthoUpsell) setDismissedSynthoUpsell(false)
   }, [shouldShowSynthoUpsell])
+
+  useEffect(() => {
+    if (!shouldShowPrepLiquidUpsell) setDismissedPrepLiquidUpsell(false)
+  }, [shouldShowPrepLiquidUpsell])
 
   useEffect(() => {
     if (!shouldShowTipsBaseUpsell) setDismissedTipsBaseUpsell(false)
@@ -13164,9 +13265,10 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         {shouldShowCleanserUpsell && !dismissedCleanserUpsell && !isReordering && (
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Complete the Finish</p>
-            <p className="mt-1 text-sm text-emerald-900">Wipe-Off Top Coat requires a cleanser to remove the inhibition layer - add the Cleanser Liquid.</p>
+            <p className="mt-1 text-sm text-emerald-900">Wipe-Off Top Coat requires <strong>All In One Liquid</strong> to remove the inhibition layer. Choose your preferred size.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => cleanserUpsellProduct ? setUpsellModal({ product: cleanserUpsellProduct, dismissFn: () => setDismissedCleanserUpsell(true) }) : (setDismissedCleanserUpsell(true), toggleCategory('LIQUIDS'), navigate('/portal/dashboard/catalog'))} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Cleanser</button>
+              <button onClick={() => openUpsellProduct(allInOne200Product, () => setDismissedCleanserUpsell(true), 'LIQUIDS')} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">200ml</button>
+              <button onClick={() => openUpsellProduct(allInOne500Product, () => setDismissedCleanserUpsell(true), 'LIQUIDS')} className="rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white">500ml</button>
               <button onClick={() => setDismissedCleanserUpsell(true)} className="rounded-lg border border-emerald-300 px-3 py-1.5 text-xs font-semibold text-emerald-800">Dismiss</button>
             </div>
           </div>
@@ -13175,11 +13277,24 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         {shouldShowSynthoUpsell && !dismissedSynthoUpsell && !isReordering && (
           <div className="rounded-xl border border-violet-200 bg-violet-50 p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">MultiMix System</p>
-            <p className="mt-1 text-sm text-violet-900">MultiMix works best with <strong>Polygel Brush &amp; Spatula</strong> and <strong>MultiMix Liquid (Syntholiquid)</strong> — add them to complete the system.</p>
+            <p className="mt-1 text-sm text-violet-900">MultiMix works best with <strong>Polygel Brush &amp; Spatula</strong> and <strong>All In One Liquid</strong> — choose 200ml or 500ml to complete the system.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button onClick={() => polygelbBrushProduct ? setUpsellModal({ product: polygelbBrushProduct, dismissFn: () => setDismissedSynthoUpsell(true) }) : (setDismissedSynthoUpsell(true), toggleCategory('BRUSHES'), navigate('/portal/dashboard/catalog'))} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Polygel Brush</button>
-              <button onClick={() => synthoLiquidProduct ? setUpsellModal({ product: synthoLiquidProduct, dismissFn: () => setDismissedSynthoUpsell(true) }) : (setDismissedSynthoUpsell(true), toggleCategory('MULTIMIX'), navigate('/portal/dashboard/catalog'))} className="rounded-lg bg-violet-700 px-3 py-1.5 text-xs font-semibold text-white">View MultiMix Liquid</button>
+              <button onClick={() => openUpsellProduct(polygelbBrushProduct, () => setDismissedSynthoUpsell(true), 'BRUSHES')} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">View Polygel Brush</button>
+              <button onClick={() => openUpsellProduct(allInOne200Product, () => setDismissedSynthoUpsell(true), 'LIQUIDS')} className="rounded-lg bg-violet-700 px-3 py-1.5 text-xs font-semibold text-white">All In One 200ml</button>
+              <button onClick={() => openUpsellProduct(allInOne500Product, () => setDismissedSynthoUpsell(true), 'LIQUIDS')} className="rounded-lg bg-violet-900 px-3 py-1.5 text-xs font-semibold text-white">All In One 500ml</button>
               <button onClick={() => setDismissedSynthoUpsell(true)} className="rounded-lg border border-violet-300 px-3 py-1.5 text-xs font-semibold text-violet-800">Dismiss</button>
+            </div>
+          </div>
+        )}
+
+        {shouldShowPrepLiquidUpsell && !dismissedPrepLiquidUpsell && !isReordering && (
+          <div className="rounded-xl border border-cyan-200 bg-cyan-50 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-cyan-700">Prep Essential</p>
+            <p className="mt-1 text-sm text-cyan-900">Nail preparation works best when you also have <strong>All In One Liquid</strong> on hand. Choose 200ml or 500ml.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button onClick={() => openUpsellProduct(allInOne200Product, () => setDismissedPrepLiquidUpsell(true), 'LIQUIDS')} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white">200ml</button>
+              <button onClick={() => openUpsellProduct(allInOne500Product, () => setDismissedPrepLiquidUpsell(true), 'LIQUIDS')} className="rounded-lg bg-cyan-700 px-3 py-1.5 text-xs font-semibold text-white">500ml</button>
+              <button onClick={() => setDismissedPrepLiquidUpsell(true)} className="rounded-lg border border-cyan-300 px-3 py-1.5 text-xs font-semibold text-cyan-800">Dismiss</button>
             </div>
           </div>
         )}
