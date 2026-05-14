@@ -56,8 +56,8 @@ function validateSourceInvariants() {
 
   assertRegex(
     appText,
-    /resolvePortalPriceEntry[\s\S]*?BIAB\(\[A-Z0-9\]\{2,\}\)/,
-    'Missing BIAB code fallback in resolvePortalPriceEntry.',
+    /resolvePortalPriceEntry[\s\S]*?(?:BIAB\(\[A-Z0-9\]\{2,\}\)|\?:BIAB\|BOB|BIAB\|BOB)/,
+    'Missing BIAB/BOB code fallback in resolvePortalPriceEntry.',
   )
 
   assertRegex(

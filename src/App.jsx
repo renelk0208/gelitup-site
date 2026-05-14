@@ -11523,13 +11523,20 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
     const byCodeNormalized = priceMap.get(normalizePriceLookupKey(itemCode))
     if (byCodeNormalized?.price != null) return byCodeNormalized
 
-    // Some Brush On Builder entries arrive as BIAB* codes (e.g. BIABBLPN).
-    // Map BIAB suffixes to the canonical BOB aliases used in the price map.
+    // Some Brush On Builder entries arrive as BIAB/BOB variants:
+    // BIABBLPN, BIAB-BLPN, BIAB BLPN, BOBGLMG, GIUP-BOBGLMG, etc.
+    // Normalize these to canonical BOB aliases used in the price map.
     const biabSource = normalizeSkuCode(`${itemSku} ${itemCode} ${itemName}`)
-    const biabMatch = biabSource.match(/\bBIAB([A-Z0-9]{2,})\b/)
+    const biabMatch = biabSource.match(/\b(?:BIAB|BOB)[\s_-]*([A-Z0-9]{2,})\b/)
     if (biabMatch) {
       const suffix = biabMatch[1]
-      const biabCandidates = [`GIUP BOB${suffix}`, `GIUP-BOB${suffix}`, `BOB${suffix}`]
+      const biabCandidates = [
+        `GIUP BOB${suffix}`,
+        `GIUP-BOB${suffix}`,
+        `GIUP BOB ${suffix}`,
+        `BOB${suffix}`,
+        `BOB ${suffix}`,
+      ]
       for (const candidate of biabCandidates) {
         const byBiabAlias = priceMap.get(normalizeSkuCode(candidate))
           || priceMap.get(normalizePriceLookupKey(candidate))
@@ -11942,13 +11949,63 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
           })
           .filter((item) => Boolean(item.code))
 
-        if (!normalized.length) {
+        // De-duplicate Brush On Builder variants that can arrive from multiple
+        // map aliases/paths (e.g. BIAB* + BOB*), keeping the most reliable entry.
+        const deduped = (() => {
+          const byKey = new Map()
+
+          const getBrushOnBuilderKey = (item = {}) => {
+            const token = normalizeSkuCode(`${item.code || ''} ${item.sku || ''} ${item.name || ''}`)
+            const suffixMatch = token.match(/\b(?:BIAB|BOB)[\s_-]*([A-Z0-9]{2,})\b/)
+            if (suffixMatch) return `BRUSH_ON_BUILDER::${suffixMatch[1]}`
+
+            if (token.includes('BRUSH ON BUILDER')) {
+              const compact = normalizeProductName(item.name || item.code || item.sku || '')
+                .replace(/^brush on builder\s*/i, '')
+              return `BRUSH_ON_BUILDER::${compact || 'GENERIC'}`
+            }
+
+            return null
+          }
+
+          const scoreItem = (item = {}) => {
+            const pathToken = normalizeCatalogueToken(item.imageUrl || '')
+            const hasPrice = Number.isFinite(Number(item.price)) && Number(item.price) > 0
+
+            let score = 0
+            if (hasPrice) score += 8
+            if (pathToken.includes('/BASES/BRUSH ON BUILDER/')) score += 5
+            if (pathToken.includes('/2026 NEW!/BRUSH ON BUILDER (BIAB)/')) score += 4
+            if (pathToken.includes('/BUILDER GEL/BRUSH ON BUILDER/')) score += 2
+            if (item.imageUrl) score += 1
+            return score
+          }
+
+          for (const item of normalized) {
+            const brushKey = getBrushOnBuilderKey(item)
+            const key = brushKey || `${normalizeSkuCode(item.category)}::${normalizeSkuCode(item.code || item.sku || item.name)}`
+
+            const existing = byKey.get(key)
+            if (!existing) {
+              byKey.set(key, item)
+              continue
+            }
+
+            if (scoreItem(item) > scoreItem(existing)) {
+              byKey.set(key, item)
+            }
+          }
+
+          return Array.from(byKey.values())
+        })()
+
+        if (!deduped.length) {
           throw new Error('Feed has no valid products')
         }
 
         if (isMounted) {
-          setProducts(normalized)
-          setFeedMessage(`Loaded ${normalized.length} live products from ${feedUrl ? 'feed' : 'Supabase catalog'}.`)
+          setProducts(deduped)
+          setFeedMessage(`Loaded ${deduped.length} live products from ${feedUrl ? 'feed' : 'Supabase catalog'}.`)
         }
       }
       catch {
