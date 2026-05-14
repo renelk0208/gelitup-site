@@ -2073,6 +2073,14 @@ function buildManualRuleIndex(payload) {
   return index
 }
 
+function getAlternateGalleryBaseImagePath(imagePath = '') {
+  const normalizedPath = String(imagePath || '').trim()
+  if (!normalizedPath) return ''
+
+  const basePath = normalizedPath.replace(/_B(\.[a-z0-9]+)$/i, '$1')
+  return basePath !== normalizedPath ? basePath : ''
+}
+
 function applyManualCatalogueOrder(items = [], rule = null) {
   if (!rule || !Array.isArray(items) || items.length === 0) {
     return sortCatalogueItems(items)
@@ -2091,12 +2099,12 @@ function applyManualCatalogueOrder(items = [], rule = null) {
       const swatches = Array.isArray(group?.swatches) ? group.swatches : []
       if (group?.mergeAsGallery) {
         // Merge swatch images into hero as galleryImages — suppress them as separate tiles
-        const galleryImages = []
+        const galleryImages = [...(Array.isArray(heroItem.galleryImages) ? heroItem.galleryImages : [])]
         swatches.forEach((swatchName) => {
           const swatchItem = findCatalogueItemByMatch(items, swatchName, used)
           if (!swatchItem) return
           used.add(swatchItem.imageUrl)
-          galleryImages.push(swatchItem.imageUrl)
+          if (!galleryImages.includes(swatchItem.imageUrl)) galleryImages.push(swatchItem.imageUrl)
         })
         ordered.push({ ...heroItem, galleryImages })
       } else {
@@ -2170,6 +2178,16 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
       .filter((value) => !isBlockedImagePath(value))
   )
 
+  const alternateGalleryImageMap = new Map()
+  Array.from(uniqueImagePaths).forEach((imagePath) => {
+    const baseImagePath = getAlternateGalleryBaseImagePath(imagePath)
+    if (!baseImagePath || !uniqueImagePaths.has(baseImagePath)) return
+    const galleryImages = alternateGalleryImageMap.get(baseImagePath) || []
+    if (!galleryImages.includes(imagePath)) galleryImages.push(imagePath)
+    alternateGalleryImageMap.set(baseImagePath, galleryImages)
+    uniqueImagePaths.delete(imagePath)
+  })
+
   // Merge alternate product images — these are extra angles/photos of the same product
   const duplicateImagePaths = new Set([
     '/gelitup-content/product-images/NAIL ART/CUSHION GEL/cushion sponge 2.webp',
@@ -2236,6 +2254,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     subcategoryItems.push({
       imageUrl: imagePath,
       name: formatCatalogueItemName(afterRoot),
+      galleryImages: alternateGalleryImageMap.get(imagePath) || [],
       colorFamily: category === 'COLORS'
         ? segments.length > 3
           ? segments[2]
