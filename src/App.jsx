@@ -1275,14 +1275,6 @@ const PROFORMA_HEADER = {
 }
 const EUR_CURRENCY_CODE = 'EUR'
 const FACTORY_PRICE_BOOK_EUR = {
-  colorDefault: 8.9,
-  technicalBySku: {
-    SUPERBOND: 12.5,
-    '5IN1_CLR': 14,
-    NW_TOP: 13,
-    '3IN1_CLR': 16.5,
-    SYN_MWH: 17,
-  },
   professionalPackDiscountPct: 15,
 }
 
@@ -1295,19 +1287,9 @@ function currencyFormatter(amount, currencyCode = EUR_CURRENCY_CODE) {
   }).format(Number(amount || 0))
 }
 
-function getUnitPriceEurForSku(sku) {
-  const normalizedSku = normalizeSkuCode(sku)
-  if (!normalizedSku) return FACTORY_PRICE_BOOK_EUR.colorDefault
-
-  if (FACTORY_PRICE_BOOK_EUR.technicalBySku[normalizedSku]) {
-    return FACTORY_PRICE_BOOK_EUR.technicalBySku[normalizedSku]
-  }
-
-  if (normalizedSku.includes('GIUP-COL') || /^\d{1,4}[A-Z]?$/.test(normalizedSku)) {
-    return FACTORY_PRICE_BOOK_EUR.colorDefault
-  }
-
-  return FACTORY_PRICE_BOOK_EUR.colorDefault
+function formatOptionalCurrency(amount, currencyCode = EUR_CURRENCY_CODE) {
+  if (amount == null || Number.isNaN(Number(amount))) return '-'
+  return currencyFormatter(amount, currencyCode)
 }
 
 function proformaLookupPrice(priceMap, code, productName) {
@@ -1361,10 +1343,10 @@ function buildProformaFromCart({
   const selectedLines = selectedCodes.map((code) => {
     const normalized = normalizeSkuCode(code)
     const product = productMap.get(normalized)
-    // Use the price already resolved during feed loading (full matching logic),
-    // then try priceMap lookup, then hardcoded fallback as last resort.
-    const basePriceEur = product?.price ?? proformaLookupPrice(priceMap, code, product?.name) ?? getUnitPriceEurForSku(normalized)
-    const unitPriceEur = Number((basePriceEur * tierPriceMultiplier).toFixed(2))
+    const basePriceEur = product?.price ?? proformaLookupPrice(priceMap, code, product?.name) ?? null
+    const unitPriceEur = basePriceEur != null
+      ? Number((basePriceEur * tierPriceMultiplier).toFixed(2))
+      : null
     const qty = Number(itemQtys?.[code] || itemQtys?.[normalized] || 1)
 
     return {
@@ -1373,14 +1355,16 @@ function buildProformaFromCart({
       qty,
       unitPriceEur,
       discountPct: 0,
-      subtotalEur: Number((qty * unitPriceEur).toFixed(2)),
+      subtotalEur: unitPriceEur != null ? Number((qty * unitPriceEur).toFixed(2)) : null,
     }
   })
 
   const packageLines = packageCartItems.map((item) => {
     const product = productMap.get(normalizeSkuCode(item.sku))
-    const basePriceEur = product?.price ?? item.price ?? proformaLookupPrice(priceMap, item.sku, item.name) ?? getUnitPriceEurForSku(item.sku)
-    const unitPriceEur = Number((basePriceEur * tierPriceMultiplier).toFixed(2))
+    const basePriceEur = product?.price ?? item.price ?? proformaLookupPrice(priceMap, item.sku, item.name) ?? null
+    const unitPriceEur = basePriceEur != null
+      ? Number((basePriceEur * tierPriceMultiplier).toFixed(2))
+      : null
     const qty = Number(item.qty || 0)
     return {
       sku: item.sku,
@@ -1388,15 +1372,18 @@ function buildProformaFromCart({
       qty,
       unitPriceEur,
       discountPct: 0,
-      subtotalEur: Number((qty * unitPriceEur).toFixed(2)),
+      subtotalEur: unitPriceEur != null ? Number((qty * unitPriceEur).toFixed(2)) : null,
     }
   })
 
   const addOnLines = includeProfessionalBasePack
     ? (() => {
-      const listUnitPriceEur = FACTORY_PRICE_BOOK_EUR.technicalBySku['5IN1_CLR'] || 14
+      const addOnProduct = productMap.get(normalizeSkuCode(PROFESSIONAL_BASE_PACK.sku))
+      const listUnitPriceEur = addOnProduct?.price ?? proformaLookupPrice(priceMap, PROFESSIONAL_BASE_PACK.sku, addOnProduct?.name || PROFESSIONAL_BASE_PACK.description) ?? null
       const discountPct = FACTORY_PRICE_BOOK_EUR.professionalPackDiscountPct
-      const discountedUnitPriceEur = Number((listUnitPriceEur * (1 - (discountPct / 100)) * tierPriceMultiplier).toFixed(2))
+      const discountedUnitPriceEur = listUnitPriceEur != null
+        ? Number((listUnitPriceEur * (1 - (discountPct / 100)) * tierPriceMultiplier).toFixed(2))
+        : null
       const qty = PROFESSIONAL_BASE_PACK.qty
       return [{
         sku: PROFESSIONAL_BASE_PACK.sku,
@@ -1404,13 +1391,13 @@ function buildProformaFromCart({
         qty,
         unitPriceEur: discountedUnitPriceEur,
         discountPct,
-        subtotalEur: Number((qty * discountedUnitPriceEur).toFixed(2)),
+        subtotalEur: discountedUnitPriceEur != null ? Number((qty * discountedUnitPriceEur).toFixed(2)) : null,
       }]
     })()
     : []
 
   const lines = [...selectedLines, ...packageLines, ...addOnLines]
-  const subtotalEur = Number(lines.reduce((sum, line) => sum + line.subtotalEur, 0).toFixed(2))
+  const subtotalEur = Number(lines.reduce((sum, line) => sum + (line.subtotalEur || 0), 0).toFixed(2))
   const country = userProfile?.country || '-'
   const vatTreatment = resolveVatTreatment(country)
   const vatInfo = getVatTreatmentLabel(vatTreatment, country)
@@ -2166,8 +2153,34 @@ function extractCatalogueProductCode(rawKey = '') {
   const normalized = normalizeSkuCode(rawKey)
   if (!normalized) return ''
 
+  const explicitSeriesCodeMatch = normalized.match(/\b(SCE\d{1,3}[A-Z]?|VCE\d{1,3}[A-Z]?|GCE\d{1,3}[A-Z]?|DCE\d{1,3}[A-Z]?|RQCE\d{1,3}[A-Z]?|TFG\d{1,3}[A-Z]?|BTO\d{1,3}[A-Z]?|BTB\d{1,3}[A-Z]?|OTA\d{1,3}[A-Z]?|JNF\d{1,3}[A-Z]?|NYP\d{1,3}[A-Z]?|AD\d{1,3}[A-Z]?|MC\d{1,3}[A-Z]?|SH\d{1,3}[A-Z]?)\b/i)
+  if (explicitSeriesCodeMatch) return explicitSeriesCodeMatch[1].toUpperCase()
+
+  const giupNumericMatch = normalized.match(/\bGIUP\s+(\d{3,4}[A-Z]?)\b/i)
+  if (giupNumericMatch) return giupNumericMatch[1]
+
+  const brushOnBuilderNameMatch = normalized.match(/\bBRUSH\s+ON\s+BUILDER(?:\s+GEL|\s+BIAB)?\s+(.+)$/i)
+  if (brushOnBuilderNameMatch) {
+    const shade = brushOnBuilderNameMatch[1]
+      .replace(/\b15\s*ML\b/gi, '')
+      .replace(/\bHTF\b/gi, '')
+      .replace(/\b1\b$/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+    if (shade) return `BOB ${shade}`
+  }
+
+  const bobCodeMatch = normalized.match(/\bBOB\s+(.+)$/i)
+  if (bobCodeMatch) {
+    const shade = bobCodeMatch[1]
+      .replace(/\b1\b$/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+    if (shade) return `BOB ${shade}`
+  }
+
   const leadingNumericMatch = normalized.match(/^(\d{3,4}[A-Z]?)\b/)
-  if (leadingNumericMatch) return leadingNumericMatch[1]
+  if (leadingNumericMatch && leadingNumericMatch[1] !== '2026') return leadingNumericMatch[1]
 
   const prefixedNumericMatch = normalized.match(/\b[A-Z]{2,5}\s+(\d{3,4}[A-Z]?)\b/)
   if (prefixedNumericMatch) return prefixedNumericMatch[1]
@@ -2239,6 +2252,42 @@ function buildPreferredDisplayNameByImagePath(payload) {
   })
 
   return displayNameByImagePath
+}
+
+function scoreCatalogueSourceKey(rawKey = '') {
+  const normalized = normalizeSkuCode(rawKey)
+  if (!normalized) return Number.NEGATIVE_INFINITY
+
+  let score = 0
+  if (/^2026-NEW-/i.test(rawKey)) score += 12
+  if (/^GIUP[-\t _]/i.test(rawKey)) score += 10
+  if (/\b(?:SCE|VCE|GCE|DCE|RQCE|TFG|BTO|BTB|BOB|CMU|CDC|CDCL|FR|OTA|JNF|NYP|AD|MC|SH)\d+[A-Z0-9-]*\b/i.test(normalized)) score += 10
+  if (/\bBOB\b/i.test(normalized)) score += 8
+  if (/\bSCE\d+\b/i.test(normalized)) score += 8
+  if (!/\s/.test(rawKey)) score += 2
+  if (/[_.-]/.test(rawKey)) score += 1
+  return score
+}
+
+function buildPreferredSourceKeyByImagePath(payload) {
+  const sourceKeyByImagePath = new Map()
+  const scoreByImagePath = new Map()
+
+  Object.entries(payload || {}).forEach(([rawKey, rawValue]) => {
+    const imageUrl = typeof rawValue === 'string' ? rawValue.trim() : ''
+    if (!imageUrl || !imageUrl.includes('/gelitup-content/product-images/')) return
+
+    const score = scoreCatalogueSourceKey(rawKey)
+    if (!Number.isFinite(score)) return
+
+    const currentScore = scoreByImagePath.get(imageUrl) ?? Number.NEGATIVE_INFINITY
+    if (score <= currentScore) return
+
+    scoreByImagePath.set(imageUrl, score)
+    sourceKeyByImagePath.set(imageUrl, rawKey)
+  })
+
+  return sourceKeyByImagePath
 }
 
 function isCategoryHeroAssetPath(rawPath = '') {
@@ -2459,6 +2508,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
 
   const blockedCategoryTokens = new Set(['CRACK', 'THERMO', 'CREME DE LA CREME'])
   const preferredDisplayNameByImagePath = buildPreferredDisplayNameByImagePath(payload)
+  const preferredSourceKeyByImagePath = buildPreferredSourceKeyByImagePath(payload)
   const canonicalDisplayNameByProductCode = buildCanonicalDisplayNameByProductCode(payload)
   const canonicalDisplayNameByImagePath = buildCanonicalDisplayNameByImagePath(payload, canonicalDisplayNameByProductCode)
   
@@ -2569,6 +2619,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     const solidGelFlatFolders = { NUDE: 'Nude', FRENCH: 'French', PASTEL: 'Pastel', RONE: 'GIUP1' }
     subcategoryItems.push({
       imageUrl: imagePath,
+      code: preferredSourceKeyByImagePath.get(imagePath) || formatCatalogueItemName(afterRoot),
       name: preferredDisplayNameByImagePath.get(imagePath) || canonicalDisplayNameByImagePath.get(imagePath) || formatCatalogueItemName(afterRoot),
       galleryImages: alternateGalleryImageMap.get(imagePath) || [],
       colorFamily: category === 'COLORS'
@@ -3650,7 +3701,7 @@ function FullCataloguePage() {
           { codes: ['GIUP BOBSTPN', 'GIUP-BOBSTPN'], target: 'Brush on Builder Gel Soft Pink 15ml -HTF' },
           { codes: ['GIUP BOBGLPN', 'GIUP-BOBGLPN'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
           { codes: ['GIUP BOBGLMG', 'GIUP-BOBGLMG'], target: 'Brush on Builder Gel Magenta Glitter 15ml -HTF' },
-          { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL'], target: 'Brush on Builder Gel Purple Glitter 15ml -HTF' },
+          { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL'], target: 'Brush on Builder Gel Purple 15ml -HTF' },
           { codes: ['GIUP BOBGLROS', 'GIUP-BOBGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
           { codes: ['GIUP BOBGLSLM', 'GIUP-BOBGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
           { codes: ['BRUSH ON BUILDER BIAB GLITTER PINK'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
@@ -4366,15 +4417,23 @@ function FullCataloguePage() {
     if (!cataloguePriceMap) return null
     const byName = cataloguePriceMap.get(normalizeProductName(itemName))
     if (byName?.price != null) return byName.price
-    const byCode = cataloguePriceMap.get(normalizeSkuCode(itemCode))
-    if (byCode?.price != null) return byCode.price
+    const normalizedItemCode = normalizeSkuCode(itemCode)
+    const codeCandidates = [normalizedItemCode]
+    if (/^2026\s+NEW\s+/.test(normalizedItemCode)) {
+      codeCandidates.push(normalizedItemCode.replace(/^2026\s+NEW\s+/, '').trim())
+    }
+    for (const candidate of codeCandidates) {
+      const byCode = cataloguePriceMap.get(candidate)
+      if (byCode?.price != null) return byCode.price
+    }
     // Try GIUP-prefixed code variants
-    const giupNumMatch = normalizeSkuCode(itemCode).match(/^(?:GIUP\s+)?(\d+[A-Z]?)$/)
+    const giupNumMatch = codeCandidates.find(Boolean)?.match(/^(?:GIUP\s+)?(\d+[A-Z]?)$/)
     if (giupNumMatch) {
       const e = cataloguePriceMap.get(giupNumMatch[1].padStart(2, '0')) || cataloguePriceMap.get(giupNumMatch[1])
       if (e?.price != null) return e.price
     }
-    const giupSeriesMatch = normalizeSkuCode(itemCode).match(/^(?:GIUP[-\s]+)?([A-Z]+)(\d+[A-Z]?)$/)
+    const seriesCodeCandidate = codeCandidates.find((candidate) => /^(?:GIUP[-\s]+)?([A-Z]+)(\d+[A-Z]?)$/.test(candidate)) || normalizedItemCode
+    const giupSeriesMatch = seriesCodeCandidate.match(/^(?:GIUP[-\s]+)?([A-Z]+)(\d+[A-Z]?)$/)
     if (giupSeriesMatch) {
       const s = giupSeriesMatch[1], n = giupSeriesMatch[2]
       const e = cataloguePriceMap.get(`${s} ${n}`) || cataloguePriceMap.get(`${s} ${n.padStart(2, '0')}`) || cataloguePriceMap.get(`${s}${n}`) || cataloguePriceMap.get(`${s}${n.padStart(2, '0')}`)
@@ -4382,7 +4441,7 @@ function FullCataloguePage() {
       if (e?.price != null) return e.price
     }
     // Loose series match: GIUP SS01Kaleidascope → SS 01
-    const giupLooseSeriesMatch = !giupSeriesMatch && normalizeSkuCode(itemCode).match(/^(?:GIUP[-\s]+)?([A-Z]{2,5})(\d{1,3})(?=[A-Z])/)
+    const giupLooseSeriesMatch = !giupSeriesMatch && seriesCodeCandidate.match(/^(?:GIUP[-\s]+)?([A-Z]{2,5})(\d{1,3})(?=[A-Z])/)
     if (giupLooseSeriesMatch) {
       const s = giupLooseSeriesMatch[1], n = giupLooseSeriesMatch[2]
       const e = cataloguePriceMap.get(`${s} ${n}`) || cataloguePriceMap.get(`${s} ${n.padStart(2, '0')}`)
@@ -4919,7 +4978,7 @@ function FullCataloguePage() {
                 style={bulkMode ? undefined : { gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))` }}
               >
                 {virtualItems.map(({ item, itemIndex }) => {
-                  const itemCode = extractProductCode(item.name)
+                  const itemCode = item.code || extractProductCode(item.name)
                   const itemPrice = lookupCataloguePrice(item.name, itemCode)
                   const itemKey = `${item.name}::${itemCode}`
                   const qty = getQty(itemKey)
@@ -5247,7 +5306,7 @@ function FullCataloguePage() {
               ) : (
                 <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}>
                   {globalSearchResults.slice(0, 240).map((item, idx) => {
-                    const itemCode = extractProductCode(item.name)
+                    const itemCode = item.code || extractProductCode(item.name)
                     return (
                       <article
                         key={idx}
@@ -5369,7 +5428,7 @@ function FullCataloguePage() {
                     ) : (
                       <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}>
                         {activeSubItems.map((item, idx) => {
-                          const itemCode = extractProductCode(item.name)
+                          const itemCode = item.code || extractProductCode(item.name)
                           const itemKey = `${item.name}::${itemCode}`
                           const price = lookupCataloguePrice(item.name, itemCode)
                           const inCart = (quickCart[itemKey] || 0) > 0
@@ -11092,7 +11151,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['GIUP BOBSTPN', 'GIUP-BOBSTPN'], target: 'Brush on Builder Gel Soft Pink 15ml -HTF' },
           { codes: ['GIUP BOBGLPN', 'GIUP-BOBGLPN'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
           { codes: ['GIUP BOBGLMG', 'GIUP-BOBGLMG'], target: 'Brush on Builder Gel Magenta Glitter 15ml -HTF' },
-          { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL'], target: 'Brush on Builder Gel Purple Glitter 15ml -HTF' },
+          { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL'], target: 'Brush on Builder Gel Purple 15ml -HTF' },
           { codes: ['GIUP BOBGLROS', 'GIUP-BOBGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
           { codes: ['GIUP BOBGLSLM', 'GIUP-BOBGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
           { codes: ['BRUSH ON BUILDER BIAB GLITTER PINK'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
@@ -11658,8 +11717,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                   parentSection: section.category,  // track which top-level section this belongs to
                   _skipRemap: true,                 // categories are already correct — skip B2B_CAT_REMAP
                   colorFamily: item.colorFamily || null, // actual folder name e.g. 'Red', 'Blue', 'Coral Orange'
-                  code: item.name,
-                  sku: item.name,
+                  code: item.code || item.name,
+                  sku: item.code || item.name,
                   name: item.name,
                   imageUrl: item.imageUrl,
                   galleryImages: item.galleryImages || [],
@@ -12275,9 +12334,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         line.sku,
         line.description,
         line.qty,
-        currencyFormatter(line.unitPriceEur),
+        formatOptionalCurrency(line.unitPriceEur),
         line.discountPct ? `${line.discountPct}%` : '-',
-        currencyFormatter(line.subtotalEur),
+        formatOptionalCurrency(line.subtotalEur),
       ])),
       columnStyles: {
         0: { cellWidth: 26 },
@@ -12726,7 +12785,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     // Build a SKU → unit price map from the proforma so Zoho uses portal prices,
     // not Zoho's own stored list prices, which are almost always different.
     const itemRates = Object.fromEntries(
-      proformaInvoice.lines.map(line => [normalizeSkuCode(line.sku), line.unitPriceEur]),
+      proformaInvoice.lines
+        .filter((line) => line.unitPriceEur != null)
+        .map(line => [normalizeSkuCode(line.sku), line.unitPriceEur]),
     )
 
     const zohoSyncResult = await sendZohoOrderSync({
@@ -12772,8 +12833,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         <td style="${tdStyle}">${escapeHtml(line.sku)}</td>
         <td style="${tdStyle}">${escapeHtml(line.description)}</td>
         <td style="${tdRStyle}">${line.qty}</td>
-        <td style="${tdRStyle}">${line.unitPriceEur.toFixed(2)}</td>
-        <td style="${tdRStyle}">${line.subtotalEur.toFixed(2)}</td>
+        <td style="${tdRStyle}">${line.unitPriceEur != null ? line.unitPriceEur.toFixed(2) : '-'}</td>
+        <td style="${tdRStyle}">${line.subtotalEur != null ? line.subtotalEur.toFixed(2) : '-'}</td>
       </tr>`).join('')
     const orderTableHtml = `
       <table style="border-collapse:collapse;width:100%;font-size:13px;font-family:Arial,sans-serif">
@@ -12846,8 +12907,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         csvEsc(line.sku),
         csvEsc(line.description),
         csvEsc(line.qty),
-        csvEsc(line.unitPriceEur.toFixed(2)),
-        csvEsc(line.subtotalEur.toFixed(2)),
+        csvEsc(line.unitPriceEur != null ? line.unitPriceEur.toFixed(2) : ''),
+        csvEsc(line.subtotalEur != null ? line.subtotalEur.toFixed(2) : ''),
         // Totals only on the last item row
         i === proformaInvoice.lines.length - 1 ? csvEsc(proformaInvoice.subtotalEur.toFixed(2)) : '""',
         i === proformaInvoice.lines.length - 1 ? csvEsc(proformaInvoice.vatPct) : '""',

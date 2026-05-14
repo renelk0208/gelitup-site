@@ -446,7 +446,7 @@ async function main() {
     { codes: ['GIUP BOBSTPN', 'GIUP-BOBSTPN', 'BOBSTPN'], target: 'Brush on Builder Gel Soft Pink 15ml -HTF' },
     { codes: ['GIUP BOBGLPN', 'GIUP-BOBGLPN', 'BOBGLPN'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
     { codes: ['GIUP BOBGLMG', 'GIUP-BOBGLMG', 'BOBGLMG'], target: 'Brush on Builder Gel Magenta Glitter 15ml -HTF' },
-    { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL', 'BOBPURGL'], target: 'Brush on Builder Gel Purple Glitter 15ml -HTF' },
+    { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL', 'BOBPURGL'], target: 'Brush on Builder Gel Purple 15ml -HTF' },
     { codes: ['GIUP BOBGLROS', 'GIUP-BOBGLROS', 'BOBGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
     { codes: ['GIUP BOBGLSLM', 'GIUP-BOBGLSLM', 'BOBGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
     // MultiMix Synthogel 30g

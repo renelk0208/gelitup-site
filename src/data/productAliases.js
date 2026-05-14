@@ -114,7 +114,7 @@ export const PRODUCT_ALIAS_GROUPS = [
   { codes: ['GIUP BOBSTPN', 'GIUP-BOBSTPN'], target: 'Brush on Builder Gel Soft Pink 15ml -HTF' },
   { codes: ['GIUP BOBGLPN', 'GIUP-BOBGLPN'], target: 'Brush on Builder Gel Glittery Pink 15ml -HTF' },
   { codes: ['GIUP BOBGLMG', 'GIUP-BOBGLMG'], target: 'Brush on Builder Gel Magenta Glitter 15ml -HTF' },
-  { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL'], target: 'Brush on Builder Gel Purple Glitter 15ml -HTF' },
+  { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL'], target: 'Brush on Builder Gel Purple 15ml -HTF' },
   { codes: ['GIUP BOBGLROS', 'GIUP-BOBGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
   { codes: ['GIUP BOBGLSLM', 'GIUP-BOBGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
   { codes: ['GIUP-BOB-blush-sorbet', 'GIUP BOB BLUSH SORBET', 'BOB BLUSH SORBET'], target: 'Brush on Builder Gel Blush Sorbet 15ml -HTF' },
