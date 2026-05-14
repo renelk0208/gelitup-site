@@ -1974,6 +1974,7 @@ function formatCatalogueItemName(rawPath = '') {
   const withoutExtension = fileName.replace(/\.[a-z0-9]+$/i, '')
   return withoutExtension
     .replace(/[_-]+/g, ' ')
+    .replace(/\bMIRROR TOP COAT\b/gi, 'Mirror Powder Top Coat')
     .replace(/\bIRRODESCENT\b/gi, 'IRRIDESCENT')
     .replace(/\s+/g, ' ')
     .trim()
@@ -5004,7 +5005,7 @@ function FullCataloguePage() {
               { key: 'Sapphire Cat Eye', label: 'Sapphire Cat Eye' },
               { key: 'Shimmer Colors', label: 'Shimmer Colors' },
               { key: 'Brush on Builder (BIAB)', label: 'Brush on Builder (BIAB)' },
-              { key: 'Mirror Top Coat', label: 'Mirror Top Coat' },
+              { key: 'Mirror Powder Top Coat', label: 'Mirror Powder Top Coat' },
               { key: '5-in-1 Superior Base', label: '5-in-1 Superior Base' },
             ]
             const activeSubItems = activeNewCollection && newSection
