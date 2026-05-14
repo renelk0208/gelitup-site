@@ -1979,6 +1979,56 @@ function formatCatalogueItemName(rawPath = '') {
     .trim()
 }
 
+function formatCatalogueDisplayKey(rawKey = '') {
+  return String(rawKey || '')
+    .replace(/\.[a-z0-9]+$/i, '')
+    .replace(/[_.-]+/g, ' ')
+    .replace(/\bMIRROR TOP COAT\b/gi, 'Mirror Powder Top Coat')
+    .replace(/\bIRRODESCENT\b/gi, 'IRRIDESCENT')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function scoreCatalogueDisplayKey(rawKey = '', formattedKey = '') {
+  const normalized = normalizeCatalogueToken(formattedKey)
+  if (!normalized) return Number.NEGATIVE_INFINITY
+  if (isLikelySwatchName(formattedKey)) return Number.NEGATIVE_INFINITY
+  if (/^(2026 NEW|NAIL PREP)\b/.test(normalized)) return Number.NEGATIVE_INFINITY
+
+  let score = 0
+  if (/\bHTF\b/i.test(rawKey)) score += 10
+  if (/\b\d+\s*ML\b/i.test(formattedKey)) score += 4
+  if (/\s/.test(formattedKey)) score += 2
+  if (!/[_.]/.test(rawKey)) score += 2
+  if (!/^GIUP(?:\s|[-])/i.test(rawKey)) score += 2
+  if (!/^2026-NEW/i.test(rawKey)) score += 2
+  if (formattedKey.length >= 12) score += 1
+
+  return score
+}
+
+function buildPreferredDisplayNameByImagePath(payload) {
+  const displayNameByImagePath = new Map()
+  const scoreByImagePath = new Map()
+
+  Object.entries(payload || {}).forEach(([rawKey, rawValue]) => {
+    const imageUrl = typeof rawValue === 'string' ? rawValue.trim() : ''
+    if (!imageUrl || !imageUrl.includes('/gelitup-content/product-images/')) return
+
+    const formattedKey = formatCatalogueDisplayKey(rawKey)
+    const score = scoreCatalogueDisplayKey(rawKey, formattedKey)
+    if (!Number.isFinite(score) || score < 7) return
+
+    const currentScore = scoreByImagePath.get(imageUrl) ?? Number.NEGATIVE_INFINITY
+    if (score <= currentScore) return
+
+    scoreByImagePath.set(imageUrl, score)
+    displayNameByImagePath.set(imageUrl, formattedKey)
+  })
+
+  return displayNameByImagePath
+}
+
 function isCategoryHeroAssetPath(rawPath = '') {
   const fileName = String(rawPath || '').split('/').pop() || ''
   return /hero\.image/i.test(fileName)
@@ -2196,6 +2246,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
   if (!payload || typeof payload !== 'object') return []
 
   const blockedCategoryTokens = new Set(['CRACK', 'THERMO', 'CREME DE LA CREME'])
+  const preferredDisplayNameByImagePath = buildPreferredDisplayNameByImagePath(payload)
   
   // Map certain folders to be subcategories of parent categories
   const categoryRemapping = new Map([
@@ -2304,7 +2355,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     const solidGelFlatFolders = { NUDE: 'Nude', FRENCH: 'French', PASTEL: 'Pastel', RONE: 'GIUP1' }
     subcategoryItems.push({
       imageUrl: imagePath,
-      name: formatCatalogueItemName(afterRoot),
+      name: preferredDisplayNameByImagePath.get(imagePath) || formatCatalogueItemName(afterRoot),
       galleryImages: alternateGalleryImageMap.get(imagePath) || [],
       colorFamily: category === 'COLORS'
         ? segments.length > 3
