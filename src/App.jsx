@@ -8222,6 +8222,20 @@ function CheckoutPage() {
     const byCodeNormalized = priceMap.get(normalizePriceLookupKey(itemCode))
     if (byCodeNormalized?.price != null) return byCodeNormalized
 
+    // Some Brush On Builder entries arrive as BIAB* codes (e.g. BIABBLPN).
+    // Map BIAB suffixes to the canonical BOB aliases used in the price map.
+    const biabSource = normalizeSkuCode(`${itemCode} ${itemName}`)
+    const biabMatch = biabSource.match(/\bBIAB([A-Z0-9]{2,})\b/)
+    if (biabMatch) {
+      const suffix = biabMatch[1]
+      const biabCandidates = [`GIUP BOB${suffix}`, `GIUP-BOB${suffix}`, `BOB${suffix}`]
+      for (const candidate of biabCandidates) {
+        const byBiabAlias = priceMap.get(normalizeSkuCode(candidate))
+          || priceMap.get(normalizePriceLookupKey(candidate))
+        if (byBiabAlias?.price != null) return byBiabAlias
+      }
+    }
+
     const byFullName = priceMap.get(normalizeSkuCode(itemName))
     if (byFullName?.price != null) return byFullName
 
@@ -9945,7 +9959,7 @@ const B2B_SIDEBAR_GROUPS = [
   },
   {
     label: 'Builder Systems',
-    cats: ['BUILDER GEL SYSTEMS', '3-in-1 Builder Gel', '3-in-1 Premium Builder Gel', 'Multimix Polygel', 'Brush On Builder (BIAB)', 'Liquid Polygel', 'Acrylics'],
+    cats: ['BUILDER GEL SYSTEMS', '3-in-1 Builder Gel', '3-in-1 Premium Builder Gel', 'Multimix Polygel', 'Brush On Builder (BIAB)', 'BRUSH ON BUILDER', 'Liquid Polygel', 'Acrylics'],
   },
   {
     label: 'Tools & Equipment',
@@ -11509,6 +11523,20 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
     const byCodeNormalized = priceMap.get(normalizePriceLookupKey(itemCode))
     if (byCodeNormalized?.price != null) return byCodeNormalized
 
+    // Some Brush On Builder entries arrive as BIAB* codes (e.g. BIABBLPN).
+    // Map BIAB suffixes to the canonical BOB aliases used in the price map.
+    const biabSource = normalizeSkuCode(`${itemSku} ${itemCode} ${itemName}`)
+    const biabMatch = biabSource.match(/\bBIAB([A-Z0-9]{2,})\b/)
+    if (biabMatch) {
+      const suffix = biabMatch[1]
+      const biabCandidates = [`GIUP BOB${suffix}`, `GIUP-BOB${suffix}`, `BOB${suffix}`]
+      for (const candidate of biabCandidates) {
+        const byBiabAlias = priceMap.get(normalizeSkuCode(candidate))
+          || priceMap.get(normalizePriceLookupKey(candidate))
+        if (byBiabAlias?.price != null) return byBiabAlias
+      }
+    }
+
     const byFullName = priceMap.get(normalizeSkuCode(itemName))
     if (byFullName?.price != null) return byFullName
 
@@ -11764,6 +11792,8 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
               'BASE': 'BASES', 'FLEXI BASE': 'BASES',
               // Brush on Builder belongs under Builder Systems
               'BRUSH ON BUILDER': 'BUILDER GEL SYSTEMS', 'BRUSH-ON BUILDER': 'BUILDER GEL SYSTEMS',
+              'BRUSH ON BUILDER (BIAB)': 'BUILDER GEL SYSTEMS',
+              'BIAB': 'BUILDER GEL SYSTEMS',
               // Tops
               'TOP COAT': 'TOPS', 'TOP COATS': 'TOPS',
               'CLASSIC TOP COATS': 'TOPS', 'EFFECT TOPS': 'TOPS',
@@ -13707,7 +13737,15 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
           <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold text-slate-900">Order Summary</p>
-              <button onClick={() => navigate('/portal/dashboard/catalog')} className="text-[11px] font-semibold text-fuchsia-600 hover:underline">+ Add more products</button>
+              <button onClick={() => {
+                navigate('/portal/dashboard/catalog')
+                requestAnimationFrame(() => {
+                  requestAnimationFrame(() => {
+                    const el = document.getElementById(CATALOGUE_RESULTS_ANCHOR_ID)
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  })
+                })
+              }} className="text-[11px] font-semibold text-fuchsia-600 hover:underline">+ Add more products</button>
             </div>
             <div className="mt-2 divide-y divide-slate-100">
               {selectedProducts.map(product => {
