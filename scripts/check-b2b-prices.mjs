@@ -4,11 +4,13 @@
  * in product-image-map.json for a resolvable price.
  *
  * Products are derived from the image map keys/paths exactly as App.jsx does,
- * and the aliasGroups are parsed live from App.jsx so they never go stale.
+ * and the shared PRODUCT_ALIAS_GROUPS source file is imported directly so it
+ * stays in sync with the app.
  *
  * Usage: node scripts/check-b2b-prices.mjs
  */
 
+import { PRODUCT_ALIAS_GROUPS } from '../src/data/productAliases.js'
 import { readFileSync } from 'fs'
 
 // ---------- helpers (mirror App.jsx) ----------
@@ -93,22 +95,9 @@ for (const { name, sku, price } of plItems) {
   wordIndex.push({ words: new Set(normalizeSkuCode(name).split(/\s+/)), entry })
 }
 
-// ---------- parse aliasGroups from App.jsx ----------
+// ---------- parse shared alias groups ----------
 
-const appSrc = readFileSync('src/App.jsx', 'utf8')
-const startIdx = appSrc.indexOf('const aliasGroups = [')
-if (startIdx === -1) throw new Error('aliasGroups not found in App.jsx')
-const bracketStart = appSrc.indexOf('[', startIdx)
-let depth = 0, i = bracketStart, endIdx = -1
-while (i < appSrc.length) {
-  if (appSrc[i] === '[') depth++
-  else if (appSrc[i] === ']') { depth--; if (depth === 0) { endIdx = i; break } }
-  i++
-}
-if (endIdx === -1) throw new Error('Could not find end of aliasGroups in App.jsx')
-const aliasGroupsText = appSrc.slice(bracketStart, endIdx + 1).replace(/\/\/[^\n]*/g, '')
-// eslint-disable-next-line no-new-func
-const aliasGroups = new Function(`return (${aliasGroupsText})`)()
+const aliasGroups = Array.isArray(PRODUCT_ALIAS_GROUPS) ? PRODUCT_ALIAS_GROUPS : []
 
 const pnLookup = t => map.get(normalizeProductName(t))
 for (const { codes, target } of aliasGroups) {
@@ -119,7 +108,7 @@ for (const { codes, target } of aliasGroups) {
     }
   }
 }
-console.log(`Loaded ${aliasGroups.length} aliasGroups from App.jsx`)
+console.log(`Loaded ${aliasGroups.length} aliasGroups from src/data/productAliases.js`)
 
 // ---------- fuzzy fallback ----------
 

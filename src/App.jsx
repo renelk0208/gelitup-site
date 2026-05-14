@@ -694,6 +694,35 @@ function normalizePriceLookupKey(value) {
     .trim()
 }
 
+const BRUSH_ON_BUILDER_PRICE_ALIASES = {
+  COV: 'Brush on Builder Gel Cover 15ml -HTF',
+  CRM: 'Brush on Builder Gel Creamy 15ml -HTF',
+  DS: 'Brush on Builder Gel Dusty Shimmer 15ml -HTF',
+  GLMG: 'Brush on Builder Gel Magenta Glitter 15ml -HTF',
+  GLPN: 'Brush on Builder Gel Glittery Pink 15ml -HTF',
+  GLROS: 'Brush on Builder Gel Rose Glitter 15ml -HTF',
+  GLSLM: 'Brush on Builder Gel Salmon Glitter 15ml -HTF',
+  MILK: 'Brush on Builder Gel Milky 15ml -HTF',
+  MILKY: 'Brush on Builder Gel Milky 15ml -HTF',
+  NUD: 'Brush on Builder Gel Nude 15ml -HTF',
+  PNK: 'Brush on Builder Gel Pink 15ml -HTF',
+  PRL: 'Brush on Builder Gel Purple 15ml -HTF',
+  PURGL: 'Brush on Builder Gel Milky Glitter 15ml -HTF',
+  STPN: 'Brush on Builder Gel Soft Pink 15ml -HTF',
+  BLPN: 'Brush on Builder Gel Blush Pink 15ml -HTF',
+  BLUSH: 'Brush on Builder Gel Blush Pink 15ml -HTF',
+}
+
+function getBrushOnBuilderPriceAliases(value) {
+  const source = normalizeSkuCode(value)
+  const match = source.match(/\b(?:BIAB|BOB)[\s_-]*([A-Z0-9]{2,})\b/)
+  if (!match) return []
+
+  const suffix = match[1]
+  const priceName = BRUSH_ON_BUILDER_PRICE_ALIASES[suffix]
+  return priceName ? [priceName] : []
+}
+
 function repairCatalogueImageUrl(value) {
   const imageUrl = String(value || '').trim()
   if (!imageUrl) return ''
@@ -11526,22 +11555,10 @@ function ProductsModule({ moduleView = 'products', tier = null }) {
     // Some Brush On Builder entries arrive as BIAB/BOB variants:
     // BIABBLPN, BIAB-BLPN, BIAB BLPN, BOBGLMG, GIUP-BOBGLMG, etc.
     // Normalize these to canonical BOB aliases used in the price map.
-    const biabSource = normalizeSkuCode(`${itemSku} ${itemCode} ${itemName}`)
-    const biabMatch = biabSource.match(/\b(?:BIAB|BOB)[\s_-]*([A-Z0-9]{2,})\b/)
-    if (biabMatch) {
-      const suffix = biabMatch[1]
-      const biabCandidates = [
-        `GIUP BOB${suffix}`,
-        `GIUP-BOB${suffix}`,
-        `GIUP BOB ${suffix}`,
-        `BOB${suffix}`,
-        `BOB ${suffix}`,
-      ]
-      for (const candidate of biabCandidates) {
-        const byBiabAlias = priceMap.get(normalizeSkuCode(candidate))
-          || priceMap.get(normalizePriceLookupKey(candidate))
-        if (byBiabAlias?.price != null) return byBiabAlias
-      }
+    for (const aliasName of getBrushOnBuilderPriceAliases(`${itemSku} ${itemCode} ${itemName}`)) {
+      const byBiabAlias = priceMap.get(normalizeSkuCode(aliasName))
+        || priceMap.get(normalizePriceLookupKey(aliasName))
+      if (byBiabAlias?.price != null) return byBiabAlias
     }
 
     const byFullName = priceMap.get(normalizeSkuCode(itemName))

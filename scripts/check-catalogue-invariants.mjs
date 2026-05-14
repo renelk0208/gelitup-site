@@ -26,9 +26,34 @@ function assertIncludes(text, needle, message) {
   if (!text.includes(needle)) fail(message)
 }
 
+function normalizeSkuCode(value) {
+  return String(value || '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim()
+}
+
+function extractArrayLiteral(text, marker) {
+  const startIdx = text.indexOf(marker)
+  if (startIdx === -1) return null
+
+  const bracketStart = text.indexOf('[', startIdx)
+  if (bracketStart === -1) return null
+
+  let depth = 0
+  for (let index = bracketStart; index < text.length; index += 1) {
+    if (text[index] === '[') depth += 1
+    else if (text[index] === ']') {
+      depth -= 1
+      if (depth === 0) return text.slice(bracketStart, index + 1)
+    }
+  }
+
+  return null
+}
+
 function validateSourceInvariants() {
   const appPath = path.join(root, 'src', 'App.jsx')
   const appText = fs.readFileSync(appPath, 'utf8')
+  const aliasPath = path.join(root, 'src', 'data', 'productAliases.js')
+  const aliasText = fs.readFileSync(aliasPath, 'utf8')
 
   assertRegex(
     appText,
@@ -62,9 +87,52 @@ function validateSourceInvariants() {
 
   assertRegex(
     appText,
-    /resolvePortalPriceEntry[\s\S]*?GIUP BOB\$\{suffix\}/,
-    'Missing BIAB -> BOB alias conversion candidates in resolvePortalPriceEntry.',
+    /resolvePortalPriceEntry[\s\S]*?(?:getBrushOnBuilderPriceAliases|BRUSH_ON_BUILDER_PRICE_ALIASES)/,
+    'Missing explicit Brush On Builder BIAB price aliases in resolvePortalPriceEntry.',
   )
+
+  const aliasArrayText = extractArrayLiteral(aliasText, 'export const PRODUCT_ALIAS_GROUPS')
+  if (!aliasArrayText) {
+    fail('Could not parse PRODUCT_ALIAS_GROUPS from src/data/productAliases.js.')
+    return
+  }
+
+  // Validate the shared alias source itself against the price list so we catch
+  // future drift before it reaches the app or exports.
+  const pricePath = path.join(root, 'public', 'gelitup-content', 'b2b-price-list.json')
+  const pricePayload = readJson(pricePath)
+  const priceItems = Array.isArray(pricePayload?.items) ? pricePayload.items : []
+  const priceTargets = new Set(
+    priceItems.map((item) => normalizeSkuCode(item?.name || item?.sku || '')).filter(Boolean),
+  )
+
+  // eslint-disable-next-line no-new-func
+  const aliasGroups = new Function(`return (${aliasArrayText})`)()
+  const codeToTargets = new Map()
+
+  for (const group of Array.isArray(aliasGroups) ? aliasGroups : []) {
+    const codes = Array.isArray(group?.codes) ? group.codes : []
+    const target = normalizeSkuCode(group?.target || '')
+    if (!codes.length || !target) continue
+
+    if (/BRUSH ON BUILDER/i.test(group.target || '') && !priceTargets.has(target)) {
+      fail(`Brush On Builder alias target missing from price list: ${group.target}`)
+    }
+
+    for (const code of codes) {
+      const normalizedCode = normalizeSkuCode(code)
+      if (!normalizedCode) continue
+      const existingTargets = codeToTargets.get(normalizedCode) || new Set()
+      existingTargets.add(target)
+      codeToTargets.set(normalizedCode, existingTargets)
+    }
+  }
+
+  for (const [code, targets] of codeToTargets.entries()) {
+    if (targets.size > 1) {
+      fail(`Alias code maps to multiple targets in src/data/productAliases.js: ${code} -> ${[...targets].join(', ')}`)
+    }
+  }
 }
 
 function extractTopCategoryFromImagePath(imagePath) {
