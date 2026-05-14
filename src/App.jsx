@@ -905,7 +905,7 @@ const navItems = [
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/guestbook', label: 'Guestbook' },
   { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
-  { href: SHOPIFY_SHOP_URL, label: 'Our Products', highlight: true, isExternal: true },
+  { to: '/full-catalogue', label: 'Our Products', highlight: true },
 ]
 
 const SILVER_MAINTENANCE_SKUS = [
