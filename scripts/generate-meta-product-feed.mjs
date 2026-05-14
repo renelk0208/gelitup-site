@@ -26,6 +26,9 @@ const outDir = process.argv.includes('--out')
 /* ── Load data ──────────────────────────────────────────────────────────────── */
 const priceList = JSON.parse(readFileSync(resolve(ROOT, 'public/gelitup-content/b2b-price-list.json'), 'utf8'))
 const imageMap  = JSON.parse(readFileSync(resolve(ROOT, 'public/gelitup-content/product-image-map.json'), 'utf8'))
+const hiddenProducts = JSON.parse(readFileSync(resolve(ROOT, 'public/gelitup-content/hidden-products.json'), 'utf8'))
+const outOfStockProducts = JSON.parse(readFileSync(resolve(ROOT, 'public/gelitup-content/out-of-stock.json'), 'utf8'))
+const productStatusCsv = readFileSync(resolve(ROOT, 'public/gelitup-content/product-status.csv'), 'utf8')
 
 const SITE = 'https://gelitup.com'
 const BRAND = 'GEL.IT.UP'
@@ -76,6 +79,52 @@ function normalizeProductName(value) {
     .trim()
 }
 
+function parseProductStatusCsv(csvText) {
+  const discontinued = new Set()
+  if (!csvText) return discontinued
+
+  const lines = csvText.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+  if (lines.length <= 1) return discontinued
+
+  for (const line of lines.slice(1)) {
+    const parts = line.split(',')
+    if (parts.length < 2) continue
+    const code = String(parts[0] || '').trim()
+    const name = String(parts[1] || '').trim()
+    const status = String(parts[parts.length - 1] || '').trim().toLowerCase()
+    if (status !== 'discontinued') continue
+    if (code) discontinued.add(code)
+    if (name) discontinued.add(name)
+  }
+
+  return discontinued
+}
+
+function buildVisibilitySet(values) {
+  const set = new Set()
+  for (const value of values || []) {
+    const raw = String(value || '').trim()
+    if (!raw) continue
+    set.add(raw)
+    set.add(normalizeSkuCode(raw))
+    set.add(normalizeProductName(raw))
+  }
+  return set
+}
+
+function inVisibilitySet(set, sku, name) {
+  const rawSku = String(sku || '').trim()
+  const rawName = String(name || '').trim()
+  return (
+    set.has(rawSku)
+    || set.has(rawName)
+    || set.has(normalizeSkuCode(rawSku))
+    || set.has(normalizeSkuCode(rawName))
+    || set.has(normalizeProductName(rawSku))
+    || set.has(normalizeProductName(rawName))
+  )
+}
+
 /* ── Build a normalized image lookup (same as App.jsx normalizeImageMap) ───── */
 const normalizedImageMap = new Map()
 for (const [rawKey, rawValue] of Object.entries(imageMap)) {
@@ -86,6 +135,10 @@ for (const [rawKey, rawValue] of Object.entries(imageMap)) {
   if (nSku && !normalizedImageMap.has(nSku)) normalizedImageMap.set(nSku, url)
   if (nName && !normalizedImageMap.has(nName)) normalizedImageMap.set(nName, url)
 }
+
+const hiddenSet = buildVisibilitySet(hiddenProducts)
+const outOfStockSet = buildVisibilitySet(outOfStockProducts)
+const discontinuedSet = buildVisibilitySet(Array.from(parseProductStatusCsv(productStatusCsv)))
 
 // Also index by GIUP + number aliases (the app uses buildColorAliases)
 for (const [rawKey, rawValue] of Object.entries(imageMap)) {
@@ -205,6 +258,9 @@ const items = []
 let skipped = 0
 
 for (const product of priceList.items) {
+  if (inVisibilitySet(hiddenSet, product.sku, product.name)) continue
+  if (inVisibilitySet(discontinuedSet, product.sku, product.name)) continue
+
   const img = findImage(product.name)
   if (!img) { skipped++; continue } // Meta requires an image
 
@@ -221,7 +277,7 @@ for (const product of priceList.items) {
       <g:image_link>${esc(imageUrl)}</g:image_link>
       <g:brand>${BRAND}</g:brand>
       <g:condition>new</g:condition>
-      <g:availability>in stock</g:availability>
+      <g:availability>${inVisibilitySet(outOfStockSet, product.sku, product.name) ? 'out of stock' : 'in stock'}</g:availability>
       <g:price>${price} ${CURRENCY}</g:price>
       <g:product_type>${esc(category)}</g:product_type>
       <g:google_product_category>Health &amp; Beauty &gt; Personal Care &gt; Cosmetics &gt; Nail Care</g:google_product_category>
