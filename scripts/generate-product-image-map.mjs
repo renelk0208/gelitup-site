@@ -5,6 +5,7 @@ const projectRoot = process.cwd()
 const imageDir = path.join(projectRoot, 'public', 'gelitup-content', 'product-images')
 const mapFilePath = path.join(projectRoot, 'public', 'gelitup-content', 'product-image-map.json')
 const supportedExtensions = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif'])
+const brushOnBuilderCanonicalRoot = '/gelitup-content/product-images/BUILDER GEL/BRUSH ON BUILDER/'
 
 function normalizeSpaces(value) {
   return String(value || '')
@@ -99,15 +100,24 @@ async function main() {
   const map = { ...existingMap }
   const imageFiles = await walkImages(imageDir)
   const currentImagePaths = new Set(imageFiles.map((image) => image.publicPath))
+  const preferredBrushPaths = new Map()
   let generatedKeys = 0
   let repairedKeys = 0
 
+  for (const image of imageFiles) {
+    if (image.publicPath.startsWith(brushOnBuilderCanonicalRoot)) {
+      preferredBrushPaths.set(image.baseName, image.publicPath)
+    }
+  }
+
   imageFiles.forEach((image) => {
     const keys = deriveKeys(image.baseName)
+    const preferredBrushPath = preferredBrushPaths.get(image.baseName)
+    const isBrushOnBuilderImage = /brush on builder/i.test(image.publicPath)
 
     keys.forEach((key) => {
       if (!map[key]) {
-        map[key] = image.publicPath
+        map[key] = preferredBrushPath || image.publicPath
         generatedKeys += 1
         return
       }
@@ -116,8 +126,14 @@ async function main() {
       const isLocalImagePath = existingValue.startsWith('/gelitup-content/product-images/')
       const localPathMissing = isLocalImagePath && !currentImagePaths.has(existingValue)
 
+      if (preferredBrushPath && isBrushOnBuilderImage && existingValue !== preferredBrushPath) {
+        map[key] = preferredBrushPath
+        repairedKeys += 1
+        return
+      }
+
       if (localPathMissing) {
-        map[key] = image.publicPath
+        map[key] = preferredBrushPath || image.publicPath
         repairedKeys += 1
       }
     })

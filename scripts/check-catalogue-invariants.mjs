@@ -173,6 +173,7 @@ function validateImageMapInvariants() {
 
   const discoveredTopCategories = new Set()
   let brushOnBuilderPathCount = 0
+  const brushCanonicalRoot = '/GELITUP-CONTENT/PRODUCT-IMAGES/BUILDER GEL/BRUSH ON BUILDER/'
 
   for (const value of Object.values(payload)) {
     if (typeof value !== 'string') continue
@@ -183,7 +184,10 @@ function validateImageMapInvariants() {
     const normalized = value.toUpperCase()
     if (normalized.includes('/BRUSH ON BUILDER/')) {
       brushOnBuilderPathCount += 1
-      if (!(top === 'BASES' || top === 'BUILDER GEL' || top === 'BUILDER GEL SYSTEMS' || top === '2026 NEW!')) {
+      if (!normalized.includes(brushCanonicalRoot)) {
+        fail(`Brush On Builder path must use the canonical BUILDER GEL folder: ${value}`)
+      }
+      if (!(top === 'BUILDER GEL' || top === 'BUILDER GEL SYSTEMS')) {
         fail(`Brush On Builder path found under unexpected top category '${top}': ${value}`)
       }
     }
