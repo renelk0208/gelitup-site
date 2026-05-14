@@ -3295,6 +3295,9 @@ function FullCataloguePage() {
           { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL'], target: 'Brush on Builder Gel Milky Glitter 15ml -HTF' },
           { codes: ['GIUP BOBGLROS', 'GIUP-BOBGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
           { codes: ['GIUP BOBGLSLM', 'GIUP-BOBGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
+          { codes: ['GIUP-BOB-Berry-stardust', 'GIUP-BOB-berry-stardust', 'GIUP BOB BERRY STARDUST', 'BOB BERRY STARDUST'], target: 'Brush on Builder Gel Berry Stardust 15ml -HTF' },
+          { codes: ['GIUP-BOB-blush-sorbet', 'GIUP BOB BLUSH SORBET', 'BOB BLUSH SORBET'], target: 'Brush on Builder Gel Blush Sorbet 15ml -HTF' },
+          { codes: ['GIUP-BOB-sky-sprinkle', 'GIUP-BOB-sky-sprinkle (1)', 'GIUP BOB SKY SPRINKLE', 'GIUP BOB SKY SPRINKLE 1', 'BOB SKY SPRINKLE'], target: 'Brush on Builder Gel Sky Sprinkle 15ml -HTF' },
           { codes: ['MULTIMIX BABY BLUE COLOR'], target: 'MultiMix Synthogel 30gr Baby Blue -HTF' },
           { codes: ['MULTIMIX BABY PINK GLITTER COLOR'], target: 'MultiMix Synthogel 30gr Baby Pink Glitter -HTF' },
           { codes: ['MULTIMIX BLUE GLITTER COLOR'], target: 'MultiMix Synthogel 30g Blue Glitter -HTF' },
@@ -4542,6 +4545,7 @@ function FullCataloguePage() {
               >
                 {virtualItems.map(({ item, itemIndex }) => {
                   const itemCode = extractProductCode(item.name)
+                  const itemPrice = lookupCataloguePrice(item.name, itemCode)
                   const itemKey = `${item.name}::${itemCode}`
                   const qty = getQty(itemKey)
                   const hasChangedQty = qty !== 1
@@ -4553,7 +4557,10 @@ function FullCataloguePage() {
                         <img src={item.imageUrl} alt={item.name} className="h-10 w-10 rounded-[10px] border border-black/10 bg-white object-contain opacity-0 transition-opacity duration-300" loading="lazy" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
                         <div className="min-w-0 flex-1">
                           <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                          <p className="break-words text-[11px] font-light text-black/55">{itemCode}</p>
+                          <p className="break-words text-[11px] font-light text-black/55">
+                            {itemCode}
+                            {itemPrice != null && <span className="ml-2 text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</span>}
+                          </p>
                         </div>
                         <a
                           href={SHOPIFY_SHOP_URL}
@@ -4586,6 +4593,9 @@ function FullCataloguePage() {
                           <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
                           <p className="break-words text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
                         </div>
+                        {itemPrice != null && (
+                          <p className="mt-1.5 text-xs font-bold text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</p>
+                        )}
                         <div className="mt-auto pt-3">
                           <a
                             href={SHOPIFY_SHOP_URL}
@@ -4899,6 +4909,7 @@ function FullCataloguePage() {
               { key: 'Summer Vibes', label: 'Summer Vibes' },
               { key: 'Sapphire Cat Eye', label: 'Sapphire Cat Eye' },
               { key: 'Shimmer Colors', label: 'Shimmer Colors' },
+              { key: 'Brush on Builder (BIAB)', label: 'Brush on Builder (BIAB)' },
               { key: 'Mirror Top Coat', label: 'Mirror Top Coat' },
               { key: '5-in-1 Superior Base', label: '5-in-1 Superior Base' },
             ]
@@ -10668,6 +10679,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['GIUP BOBPURGL', 'GIUP-BOBPURGL'], target: 'Brush on Builder Gel Milky Glitter 15ml -HTF' },
           { codes: ['GIUP BOBGLROS', 'GIUP-BOBGLROS'], target: 'Brush on Builder Gel Rose Glitter 15ml -HTF' },
           { codes: ['GIUP BOBGLSLM', 'GIUP-BOBGLSLM'], target: 'Brush on Builder Gel Salmon Glitter 15ml -HTF' },
+          { codes: ['GIUP-BOB-Berry-stardust', 'GIUP-BOB-berry-stardust', 'GIUP BOB BERRY STARDUST', 'BOB BERRY STARDUST'], target: 'Brush on Builder Gel Berry Stardust 15ml -HTF' },
+          { codes: ['GIUP-BOB-blush-sorbet', 'GIUP BOB BLUSH SORBET', 'BOB BLUSH SORBET'], target: 'Brush on Builder Gel Blush Sorbet 15ml -HTF' },
+          { codes: ['GIUP-BOB-sky-sprinkle', 'GIUP-BOB-sky-sprinkle (1)', 'GIUP BOB SKY SPRINKLE', 'GIUP BOB SKY SPRINKLE 1', 'BOB SKY SPRINKLE'], target: 'Brush on Builder Gel Sky Sprinkle 15ml -HTF' },
           // MultiMix Synthogel 30g
           { codes: ['MULTIMIX BABY BLUE COLOR'], target: 'MultiMix Synthogel 30gr Baby Blue -HTF' },
           { codes: ['MULTIMIX BABY PINK GLITTER COLOR'], target: 'MultiMix Synthogel 30gr Baby Pink Glitter -HTF' },
