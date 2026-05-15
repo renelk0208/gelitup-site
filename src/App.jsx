@@ -17400,8 +17400,8 @@ function App() {
     // If the user arrived via a Supabase password-reset email link (isRecoveryFlow=true),
     // the SDK has already exchanged the code for a recovery session — call updateUser directly.
     if (isRecoveryFlow) {
-      const { data: recoveryUserData } = await supabase.auth.getUser()
-      const recoveryEmail = String(recoveryUserData?.user?.email || normalizedEmail).trim().toLowerCase()
+      const { data: userData } = await supabase.auth.getUser()
+      const recoveryEmail = String(userData?.user?.email || normalizedEmail).trim().toLowerCase()
       const { error: updateError } = await supabase.auth.updateUser({ password })
       if (updateError) {
         if (/not exist|invalid|expired/i.test(updateError.message || '')) {
