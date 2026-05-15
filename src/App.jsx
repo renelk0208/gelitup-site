@@ -228,6 +228,17 @@ const DISTRIBUTOR_DIRECTORY = [
     ],
   },
   {
+    country: 'Italy',
+    distributors: [
+      {
+        name: 'GEL.IT.UP Italy',
+        address: 'Via Molise 6, Cagliari, SARDEGNA, 09127, Italy',
+        phone: '+39 333 996 6826',
+        email: 'topformyou.cagliari@gmail.com',
+      },
+    ],
+  },
+  {
     country: 'United States',
     distributors: [
       {
@@ -246,6 +257,7 @@ const DISTRIBUTOR_COUNTRY_COORDINATES = {
   Bulgaria: [42.7339, 25.4858],
   France: [46.2276, 2.2137],
   Greece: [39.0742, 21.8243],
+  Italy: [39.2238, 9.1217],
   'Kingdom of Saudi Arabia': [23.8859, 45.0792],
   Qatar: [25.3548, 51.1839],
   'United States': [39.8283, -98.5795],
@@ -259,6 +271,7 @@ const DISTRIBUTOR_COUNTRY_POINTS = DISTRIBUTOR_DIRECTORY
     return {
       country,
       coordinates,
+      distributors: item.distributors || [],
     }
   })
   .filter(Boolean)
@@ -518,6 +531,7 @@ function isDistributorSubmission(record) {
 const defaultClientProfile = {
   customerType: 'company',
   customerName: '',
+  contactPersonName: '',
   vatNumber: '',
   shippingType: 'road',
   contactPhone: '',
@@ -9935,7 +9949,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
       const metaProfile = {
         customerType: userMeta.customer_type || userMeta.account_type || '',
-        customerName: userMeta.company_name || userMeta.full_name || '',
+        customerName: userMeta.company_name || '',
+        contactPersonName: userMeta.full_name || userMeta.contact_name || '',
         vatNumber: userMeta.vat_number || userMeta.vies_vat || '',
         shippingType: userMeta.shipping_type || '',
         contactPhone: userMeta.contact_phone || userMeta.phone || '',
@@ -12407,6 +12422,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           ...userMeta,
           customer_type: clientProfile.customerType,
           company_name: clientProfile.customerName,
+          full_name: clientProfile.contactPersonName,
+          contact_name: clientProfile.contactPersonName,
           vat_number: clientProfile.vatNumber,
           contact_phone: clientProfile.contactPhone,
           contact_email: clientProfile.contactEmail,
@@ -13060,6 +13077,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <label className="text-xs text-slate-700">{clientProfile.customerType === 'company' ? 'Company Name' : 'Client Name'} <span className="text-rose-600">*</span>
               <input type="text" value={clientProfile.customerName} onChange={(e) => setClientField('customerName', e.target.value)} className={getClientInputClass('customerName')} placeholder={clientProfile.customerType === 'company' ? 'Company name' : 'Client name'} />
             </label>
+            {clientProfile.customerType === 'company' && (
+              <label className="text-xs text-slate-700">Contact Person Name <span className="text-rose-600">*</span>
+                <input type="text" value={clientProfile.contactPersonName} onChange={(e) => setClientField('contactPersonName', e.target.value)} className={getClientInputClass('contactPersonName')} placeholder="e.g. Maria Rossi" />
+              </label>
+            )}
             <label className="text-xs text-slate-700">VAT Number <span className="text-rose-600">*</span>
               <div className="mt-1 flex gap-1.5">
                 <input type="text" value={clientProfile.vatNumber} onChange={(e) => setClientField('vatNumber', e.target.value.toUpperCase())} className={`flex-1 rounded-lg border px-3 py-2 text-xs text-slate-700 ${hasClientFieldError('vatNumber') ? 'border-rose-400 bg-rose-50' : 'border-slate-300 bg-white'}`} placeholder={COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry] ? `${COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry]}123456789` : 'VAT / Tax ID'} />
@@ -13189,6 +13211,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                   await supabase.auth.updateUser({
                     data: {
                       company_name: clientProfile.customerName,
+                      full_name: clientProfile.contactPersonName,
+                      contact_name: clientProfile.contactPersonName,
                       customer_type: clientProfile.customerType,
                       vat_number: clientProfile.vatNumber,
                       contact_phone: clientProfile.contactPhone,
