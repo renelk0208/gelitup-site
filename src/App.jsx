@@ -9857,6 +9857,13 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [expandedCategories, setExpandedCategories] = useState(new Set(['SOLID GEL POLISH']))
   const [expandedShowAll, setExpandedShowAll] = useState(new Set())
   const [b2bColorFamilyFilter, setB2bColorFamilyFilter] = useState('ALL')
+
+  // Declared here (before useCallback deps that reference it) to avoid TDZ in production builds
+  const toggleCategory = (cat) => {
+    setExpandedCategories(new Set([cat]))
+    setB2bColorFamilyFilter('ALL')
+  }
+
   const [itemQtys, setItemQtys] = useState({})
   const [lightboxUrl, setLightboxUrl] = useState(null)
   const [packageTier, setPackageTier] = useState('Silver')
@@ -11834,12 +11841,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     const pkgTotal = packageCartItems.reduce((s, item) => s + (item.price != null ? Number(item.price) * tierPriceMultiplier * item.qty : 0), 0)
     return itemsTotal + pkgTotal
   }, [selectedProducts, packageCartItems, itemQtys, tierPriceMultiplier])
-
-  // Single-select: one category visible at a time in sidebar layout
-  const toggleCategory = (cat) => {
-    setExpandedCategories(new Set([cat]))
-    setB2bColorFamilyFilter('ALL')
-  }
 
   const toggleSelection = (code) => {
     setSelectedCodes((current) =>
