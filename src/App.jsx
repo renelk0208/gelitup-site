@@ -1,5 +1,5 @@
 import { Component, Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import appLogo from '/gelitup_logo.png'
 import PWABadge from './PWABadge.jsx'
 import { PRODUCT_ALIAS_GROUPS } from './data/productAliases.js'
@@ -3317,6 +3317,47 @@ function FullCataloguePage() {
       })
     })
   }, [isLoading, location?.state?.scrollTo])
+
+  // If a ?category= query param is present (e.g. from a social media or ad link),
+  // scroll to the matching catalogue section after the catalogue finishes loading.
+  const [searchParams] = useSearchParams()
+  useEffect(() => {
+    const catSlug = (searchParams.get('category') || '').toLowerCase().trim()
+    if (!catSlug || isLoading) return
+    const SLUG_TO_ANCHOR = {
+      'gel-polish':      'catalogue-section-colours',
+      'gel-polishes':    'catalogue-section-colours',
+      'colours':         'catalogue-section-colours',
+      'colors':          'catalogue-section-colours',
+      'color':           'catalogue-section-colours',
+      'colour':          'catalogue-section-colours',
+      'builder-gel':     'catalogue-section-builders',
+      'builder-gels':    'catalogue-section-builders',
+      'builders':        'catalogue-section-builders',
+      'builder':         'catalogue-section-builders',
+      'essentials':      'catalogue-section-essentials',
+      'base-top-coats':  'catalogue-section-essentials',
+      'bases':           'catalogue-section-essentials',
+      'tools':           'catalogue-section-tools',
+      'nail-art':        'catalogue-section-nail-art',
+      'nail-arts':       'catalogue-section-nail-art',
+      'consumables':     'catalogue-section-consumables',
+      'nail-care':       'catalogue-section-nail-hand-foot',
+      'nail-hand-foot':  'catalogue-section-nail-hand-foot',
+      'new':             'catalogue-section-new-products',
+      'new-products':    'catalogue-section-new-products',
+      'new-arrivals':    'catalogue-section-new-products',
+    }
+    const anchor = SLUG_TO_ANCHOR[catSlug]
+    if (!anchor) return
+    if (anchor === 'catalogue-section-new-products') setShowNewCollections(true)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const el = document.getElementById(anchor)
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    })
+  }, [isLoading, searchParams])
 
   // Load B2B price list for public price display
   useEffect(() => {
@@ -17987,6 +18028,15 @@ function App() {
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
+          {/* Vanity routes for social media & advertising — each lands on the right catalogue section */}
+          <Route path="/gel-polish"     element={<Navigate to="/full-catalogue?category=gel-polish"    replace />} />
+          <Route path="/builder-gel"    element={<Navigate to="/full-catalogue?category=builder-gel"   replace />} />
+          <Route path="/nail-art"       element={<Navigate to="/full-catalogue?category=nail-art"      replace />} />
+          <Route path="/essentials"     element={<Navigate to="/full-catalogue?category=essentials"    replace />} />
+          <Route path="/new-products"   element={<Navigate to="/full-catalogue?category=new-products"  replace />} />
+          <Route path="/new-arrivals"   element={<Navigate to="/full-catalogue?category=new-arrivals"  replace />} />
+          <Route path="/nail-care"      element={<Navigate to="/full-catalogue?category=nail-care"     replace />} />
+          <Route path="/tools"          element={<Navigate to="/full-catalogue?category=tools"         replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/guestbook" element={<GuestbookPage />} />
           <Route path="/inspiration" element={<InspirationPage />} />
