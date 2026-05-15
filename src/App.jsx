@@ -402,13 +402,20 @@ const COUNTRY_VAT_TREATMENT = {
   Jordan: 'export_exempt',
 }
 
-/** Fire-and-forget: record a login problem in Supabase so admins can see who needs help. */
+/** Fire-and-forget: record a login problem in Supabase and send a real-time email alert to admin. */
 function logLoginIssue(email, issueType, message) {
   if (!hasSupabaseConfig || !supabase || !email) return
-  supabase
-    .from('b2b_login_issues')
-    .insert({ email: String(email).toLowerCase().trim(), issue_type: issueType, message: String(message || '').slice(0, 500) })
-    .then(() => {}).catch(() => {})
+  const payload = { email: String(email).toLowerCase().trim(), issue_type: issueType, message: String(message || '').slice(0, 500) }
+
+  // Write to Supabase (visible in the admin Login Issues tab)
+  supabase.from('b2b_login_issues').insert(payload).then(() => {}).catch(() => {})
+
+  // Send real-time email to admin via Netlify function
+  fetch('/.netlify/functions/notify-admin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: payload.email, issueType, message: payload.message }),
+  }).catch(() => {})
 }
 
 function resolveVatTreatment(country) {
