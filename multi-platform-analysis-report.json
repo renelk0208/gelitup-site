@@ -1,14 +1,60 @@
 {
-  "timestamp": "2026-05-14T07:47:41.377873",
+  "timestamp": "2026-05-14T16:20:36.399987",
   "platforms": {
     "b2b": {
       "total_products": 1070,
       "total_csv_products": 1513,
-      "exact_duplicates": 0,
+      "exact_duplicates": 9,
       "products_with_zero_price": 0,
       "image_duplicates": 73,
       "issues": {
-        "duplicates": [],
+        "duplicates": [
+          {
+            "sku": "5-in-1 Superior Base 15ml Lemon Serenity -HTF",
+            "name": "5-in-1 Superior Base 15ml Lemon Serenity -HTF",
+            "price": 12.84
+          },
+          {
+            "sku": "5-in-1 Superior Base 15ml Mint Serenity -HTF",
+            "name": "5-in-1 Superior Base 15ml Mint Serenity -HTF",
+            "price": 12.84
+          },
+          {
+            "sku": "5-in-1 Superior Base 15ml Blue Serenity -HTF",
+            "name": "5-in-1 Superior Base 15ml Blue Serenity -HTF",
+            "price": 12.84
+          },
+          {
+            "sku": "5-in-1 Superior Base 15ml Peach Serenity -HTF",
+            "name": "5-in-1 Superior Base 15ml Peach Serenity -HTF",
+            "price": 12.84
+          },
+          {
+            "sku": "5-in-1 Superior Base 15ml Purple Serenity -HTF",
+            "name": "5-in-1 Superior Base 15ml Purple Serenity -HTF",
+            "price": 12.84
+          },
+          {
+            "sku": "2211 Purple People Eater -HTF",
+            "name": "2211 Purple People Eater -HTF",
+            "price": 7.41
+          },
+          {
+            "sku": "2213 Drunken Acorn -HTF",
+            "name": "2213 Drunken Acorn -HTF",
+            "price": 7.41
+          },
+          {
+            "sku": "2215 Glass Frog -HTF",
+            "name": "2215 Glass Frog -HTF",
+            "price": 7.41
+          },
+          {
+            "sku": "2218 Simmer Down -HTF",
+            "name": "2218 Simmer Down -HTF",
+            "price": 7.41
+          }
+        ],
         "zero_price": [],
         "image_duplicates": [
           {
@@ -159,7 +205,7 @@
               {
                 "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/3_in_1_premium_builder_gel_nude.webp?v=1777733197",
                 "sku": "",
-                "title": "Brush on Builder Gel Milky Glitter 15ml -HTF"
+                "title": "Brush on Builder Gel Purple Glitter 15ml -HTF"
               },
               {
                 "image": "https://cdn.shopify.com/s/files/1/0947/5545/5242/files/3_in_1_premium_builder_gel_nude.webp?v=1777733197",
@@ -256,7 +302,7 @@
   },
   "summary": {
     "total_platforms_analyzed": 4,
-    "total_exact_duplicates_across_platforms": 0,
+    "total_exact_duplicates_across_platforms": 9,
     "total_image_duplicates_across_platforms": 73,
     "total_products_with_zero_price": 0,
     "platforms_affected": [

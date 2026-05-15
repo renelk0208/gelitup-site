@@ -2,6 +2,7 @@ import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useS
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import appLogo from '/gelitup_logo.png'
 import PWABadge from './PWABadge.jsx'
+import { PRODUCT_ALIAS_GROUPS } from './data/productAliases.js'
 import ImportedAnyPage from './pages/imported/ImportedAnyPage.jsx'
 import { hasSupabaseConfig, supabase } from './lib/supabaseClient'
 import useB2BIntelligence from './lib/useB2BIntelligence'
@@ -322,12 +323,12 @@ const COUNTRY_VAT_PREFIX = {
 }
 
 // VAT treatment per buyer country (from the seller's perspective: Bulgaria/Greece = EU seller)
-// 'reverse_charge'  — EU B2B: 0% VAT, buyer accounts via reverse charge (Art. 44 Directive 2006/112/EC)
-// 'export_exempt'   — non-EU export: 0% VAT, zero-rated supply
-// 'domestic_bg'     — Domestic Bulgaria: 20% VAT
-// 'domestic_gr'     — Domestic Greece: 24% VAT
+// 'reverse_charge' - EU B2B: 0% VAT, buyer accounts via reverse charge (Art. 44 Directive 2006/112/EC)
+// 'export_exempt' - non-EU export: 0% VAT, zero-rated supply
+// 'domestic_bg' - Domestic Bulgaria: 20% VAT
+// 'domestic_gr' - Domestic Greece: 24% VAT
 const COUNTRY_VAT_TREATMENT = {
-  // EU Member States → reverse charge
+  // EU Member States -> reverse charge
   Austria: 'reverse_charge',
   Belgium: 'reverse_charge',
   Bulgaria: 'reverse_charge',
@@ -355,7 +356,7 @@ const COUNTRY_VAT_TREATMENT = {
   Slovenia: 'reverse_charge',
   Spain: 'reverse_charge',
   Sweden: 'reverse_charge',
-  // Non-EU → export exempt
+  // Non-EU -> export exempt
   'United Kingdom': 'export_exempt',
   Norway: 'export_exempt',
   Switzerland: 'export_exempt',
@@ -395,23 +396,23 @@ function resolveVatTreatment(country) {
 function getVatTreatmentLabel(treatment, country) {
   switch (treatment) {
     case 'reverse_charge':
-      return { pct: 0, label: '0% — VAT Reverse Charge (EU B2B, Art. 44 Directive 2006/112/EC)', note: 'The customer is liable to account for VAT in their country of establishment.' }
+      return { pct: 0, label: '0% - VAT Reverse Charge (EU B2B, Art. 44 Directive 2006/112/EC)', note: 'The customer is liable to account for VAT in their country of establishment.' }
     case 'domestic_bg':
-      return { pct: 0, label: '0% — VAT Reverse Charge (EU B2B)', note: 'B2B cross-border supply. The customer is liable to account for VAT in their country of establishment.' }
+      return { pct: 0, label: '0% - VAT Reverse Charge (EU B2B)', note: 'B2B cross-border supply. The customer is liable to account for VAT in their country of establishment.' }
     case 'domestic_gr':
-      return { pct: 0, label: '0% — VAT Reverse Charge (EU B2B)', note: 'B2B cross-border supply. The customer is liable to account for VAT in their country of establishment.' }
+      return { pct: 0, label: '0% - VAT Reverse Charge (EU B2B)', note: 'B2B cross-border supply. The customer is liable to account for VAT in their country of establishment.' }
     case 'export_exempt':
     default:
-      return { pct: 0, label: '0% — Zero-rated Export (outside EU)', note: `Goods exported outside the EU. VAT exempt under export provisions. Buyer may be subject to local import duties in ${country || 'their country'}.` }
+      return { pct: 0, label: '0% - Zero-rated Export (outside EU)', note: `Goods exported outside the EU. VAT exempt under export provisions. Buyer may be subject to local import duties in ${country || 'their country'}.` }
   }
 }
 
 // Returns null if valid, or an error string if the VAT prefix is wrong for the country
 function validateVatPrefix(vatNumber, country) {
   const prefix = COUNTRY_VAT_PREFIX[country]
-  if (!prefix) return null // no known prefix rule for this country
+  if (!prefix) return null
   const vat = String(vatNumber || '').trim().toUpperCase().replace(/[\s\-\.]/g, '')
-  if (!vat) return null // empty handled by required check
+  if (!vat) return null
   if (!vat.startsWith(prefix.toUpperCase())) {
     return `VAT number for ${country} must start with ${prefix} (e.g. ${prefix}123456789)`
   }
@@ -813,409 +814,22 @@ function deriveSpreadsheetSynonymKeys(name) {
   return [...keys]
 }
 
-// Fuzzy word-overlap price lookup for image-map products whose filename keys
-// don't match price-list names exactly (e.g. "cobweb black" vs "Cobweb Gel Black -HTF").
-// All significant query words (=4 chars, not in skip list) must appear in the price entry.
-const FUZZY_PRICE_SKIP = new Set(['COLOR','COLOUR','COAT','CARE','FORM','SIZE','BIAB'])
-function fuzzyPriceLookup(code, rawName, wordIndex) {
-  if (!wordIndex || !wordIndex.length) return null
-  for (const cand of [code, rawName].filter(Boolean)) {
-    const qWords = normalizeSkuCode(cand)
-      .split(/\s+/)
-      .filter(w => w.length >= 4 && !FUZZY_PRICE_SKIP.has(w))
-      .map(w => w.length >= 6 ? w.replace(/S$/, '') : w) // rough depluralize
-    if (qWords.length < 2) continue
-    const match = wordIndex.find(({ words }) =>
-      qWords.every(w => words.has(w) || words.has(w + 'S'))
-    )
-    if (match) return match.entry
-  }
-  return null
-}
+function applyProductAliasGroupsToPriceMap(map, normalizeTarget, aliasGroups = PRODUCT_ALIAS_GROUPS) {
+  const lookupEntry = (target) => map.get(normalizeTarget(target))
 
-function normalizeImageMap(payload) {
-  if (!payload || typeof payload !== 'object') {
-    return new Map()
-  }
+  for (const { codes, target } of aliasGroups) {
+    const entry = lookupEntry(target)
+    if (!entry) continue
 
-  const map = new Map()
-
-  Object.entries(payload).forEach(([rawKey, rawValue]) => {
-    const imageUrl = typeof rawValue === 'string' ? rawValue.trim() : ''
-    if (!imageUrl) return
-
-    const normalizedSku = normalizeSkuCode(rawKey)
-    const normalizedName = normalizeProductName(rawKey)
-
-    if (normalizedSku && !map.has(normalizedSku)) map.set(normalizedSku, imageUrl)
-    if (normalizedName && !map.has(normalizedName)) map.set(normalizedName, imageUrl)
-  })
-
-  return map
-}
-
-function buildColorAliases(value) {
-  const normalized = normalizeSkuCode(value)
-  if (!normalized) return []
-
-  const aliases = new Set([normalized])
-  const numericMatch = normalized.match(/^(\d{1,4})([A-Z]?)$/)
-
-  if (numericMatch) {
-    const digits = numericMatch[1]
-    const suffix = numericMatch[2] || ''
-    const parsedNumber = Number.parseInt(digits, 10)
-
-    if (Number.isFinite(parsedNumber)) {
-      const unpadded = String(parsedNumber)
-      aliases.add(`${unpadded}${suffix}`)
-      aliases.add(`${unpadded.padStart(2, '0')}${suffix}`)
-      aliases.add(`${unpadded.padStart(3, '0')}${suffix}`)
-      aliases.add(`${unpadded.padStart(4, '0')}${suffix}`)
-    }
-  }
-
-  return Array.from(aliases)
-}
-
-async function sendPortalEmailNotification(payload) {
-  if (!EMAIL_WEBHOOK_URL) {
-    return { ok: false, skipped: true, message: 'Email webhook is not configured.' }
-  }
-
-  try {
-    const headers = {
-      'Content-Type': 'application/json',
-    }
-
-    if (EMAIL_WEBHOOK_ANON_KEY) {
-      headers.apikey = EMAIL_WEBHOOK_ANON_KEY
-      headers.Authorization = `Bearer ${EMAIL_WEBHOOK_ANON_KEY}`
-    }
-
-    const response = await fetch(EMAIL_WEBHOOK_URL, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        from: payload.from || EMAIL_FROM,
-        replyTo: payload.replyTo || EMAIL_REPLY_TO,
-        to: payload.to,
-        subject: payload.subject,
-        html: payload.html,
-        ...(payload.attachments?.length ? { attachments: payload.attachments } : {}),
-      }),
-    })
-
-    let responseMessage = ''
-    const responseType = response.headers.get('content-type') || ''
-
-    if (responseType.includes('application/json')) {
-      const responseJson = await response.json().catch(() => null)
-      responseMessage = responseJson?.error || responseJson?.message || ''
-    }
-    else {
-      responseMessage = await response.text().catch(() => '')
-    }
-
-    if (!response.ok) {
-      return {
-        ok: false,
-        skipped: false,
-        message: responseMessage || `Email webhook returned ${response.status}`,
-      }
-    }
-
-    return { ok: true, skipped: false }
-  }
-  catch (error) {
-    return {
-      ok: false,
-      skipped: false,
-      message: error instanceof Error ? error.message : 'Unknown email webhook error',
+    for (const code of codes) {
+      const normalizedCode = normalizeSkuCode(code)
+      const normalizedName = normalizeProductName(code)
+      if (normalizedCode && !map.has(normalizedCode)) map.set(normalizedCode, entry)
+      if (normalizedName && !map.has(normalizedName)) map.set(normalizedName, entry)
+      if (!map.has(code)) map.set(code, entry)
     }
   }
 }
-
-async function sendZohoOrderSync(payload) {
-  if (!ZOHO_SYNC_ENABLED) {
-    return { ok: false, skipped: true, message: 'Zoho sync is disabled by configuration.', salesorder_id: null }
-  }
-
-  if (!ZOHO_SYNC_WEBHOOK_URL) {
-    return { ok: false, skipped: true, message: 'Zoho sync webhook is not configured.', salesorder_id: null }
-  }
-
-  try {
-    const controller = new AbortController()
-    const timeoutId = window.setTimeout(() => {
-      controller.abort()
-    }, Number.isFinite(ZOHO_SYNC_TIMEOUT_MS) ? ZOHO_SYNC_TIMEOUT_MS : 12000)
-
-    const headers = {
-      'Content-Type': 'application/json',
-    }
-
-    if (ZOHO_SYNC_AUTH_TOKEN) {
-      headers.Authorization = `Bearer ${ZOHO_SYNC_AUTH_TOKEN}`
-    }
-
-    const response = await fetch(ZOHO_SYNC_WEBHOOK_URL, {
-      method: 'POST',
-      headers,
-      signal: controller.signal,
-      body: JSON.stringify({
-        ...payload,
-        zohoTarget: ZOHO_SYNC_TARGET,
-        emittedAt: new Date().toISOString(),
-      }),
-    })
-    window.clearTimeout(timeoutId)
-
-    let responseMessage = ''
-    let responseJson = null
-    const responseType = response.headers.get('content-type') || ''
-
-    if (responseType.includes('application/json')) {
-      responseJson = await response.json().catch(() => null)
-      responseMessage = responseJson?.message || responseJson?.error || ''
-    }
-    else {
-      responseMessage = await response.text().catch(() => '')
-    }
-
-    if (!response.ok) {
-      const extraDetail = responseJson?.unmappedSkus?.length
-        ? ` Unmapped SKUs: ${responseJson.unmappedSkus.slice(0, 5).join(', ')}${responseJson.unmappedSkus.length > 5 ? ` (+${responseJson.unmappedSkus.length - 5} more)` : ''}`
-        : (responseJson?.itemMapSize != null ? ` (itemMapSize=${responseJson.itemMapSize})` : '')
-      return {
-        ok: false,
-        skipped: false,
-        message: (responseMessage || `Zoho sync webhook returned ${response.status}`) + extraDetail,
-        salesorder_id: null,
-      }
-    }
-
-    return {
-      ok: true,
-      skipped: false,
-      message: responseMessage || `Zoho sync completed via ${ZOHO_SYNC_TARGET}.`,
-      salesorder_id: responseJson?.salesorder_id ?? null,
-    }
-  }
-  catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      return {
-        ok: false,
-        skipped: false,
-        message: `Zoho sync timed out after ${Number.isFinite(ZOHO_SYNC_TIMEOUT_MS) ? ZOHO_SYNC_TIMEOUT_MS : 12000}ms`,
-        salesorder_id: null,
-      }
-    }
-
-    return {
-      ok: false,
-      skipped: false,
-      message: error instanceof Error ? error.message : 'Unknown Zoho sync error',
-      salesorder_id: null,
-    }
-  }
-}
-
-function isExistingUserSignUpResult(signUpResult) {
-  const user = signUpResult?.data?.user || null
-  if (!user) return false
-
-  const identities = Array.isArray(user.identities) ? user.identities : []
-  const hasNoIdentity = identities.length === 0
-
-  return hasNoIdentity
-}
-
-function hasActiveSignUpSession(signUpResult) {
-  return Boolean(signUpResult?.data?.session)
-}
-
-function createFallbackProducts(count = 120) {
-  return Array.from({ length: count }, (_, index) => {
-    const code = `GIUP-PD-${String(index + 1).padStart(4, '0')}`
-    const hue = (index * 17) % 360
-    const category = PRODUCT_CATEGORIES[index % PRODUCT_CATEGORIES.length]
-
-    return {
-      code,
-      sku: code,
-      name: `GEL.IT.UP Product ${String(index + 1).padStart(4, '0')}`,
-      description: 'Sample catalog product description.',
-      category,
-      preview: `hsl(${hue} 82% 56%)`,
-      imageUrl: null,
-    }
-  })
-}
-
-const navItems = [
-  { to: '/about-us', label: 'About us' },
-  { to: '/for-academies', label: 'Academies' },
-  { to: '/distributor-packages', label: 'Distribution' },
-  { to: '/guestbook', label: 'Guestbook' },
-  { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
-  { to: '/full-catalogue', label: 'Our Products', highlight: true },
-]
-
-const SILVER_MAINTENANCE_SKUS = [
-  'GIUP-MNT-SB01 — Superbond Primer',
-  'GIUP-MNT-5C01 — 5-in-1 Clear Builder',
-  'GIUP-MNT-NW01 — Non-Wipe Top Coat',
-]
-
-const SILVER_CORE_30_COLORS = [
-  'GIUP-COL-01 — Ice Ice Baby',
-  'GIUP-COL-102 — Marsh Mallow',
-  'GIUP-COL-05 — Snow Queen',
-  'GIUP-COL-04 — Milkyway',
-  'GIUP-COL-09 — Coco Nude',
-  'GIUP-COL-08 — Ivory',
-  'GIUP-COL-010 — Bridal Bliss',
-  'GIUP-COL-07B — Liberte',
-  'GIUP-COL-2511 — Skin Shock',
-  'GIUP-COL-100A — She Bangs',
-  'GIUP-COL-02 — Cotton Candy',
-  'GIUP-COL-06 — Ballerina',
-  'GIUP-COL-11 — Pinky Promise',
-  'GIUP-COL-1801 — Sweet Pea',
-  'GIUP-COL-051A — Raspberry Ripple',
-  'GIUP-COL-1803 — Don’t Pout',
-  'GIUP-COL-023 — Classic Red',
-  'GIUP-COL-025 — Cherry Bomb',
-  'GIUP-COL-015 — Total Eclipse',
-  'GIUP-COL-1802 — Grey Matter',
-  'GIUP-COL-019 — Slate',
-  'GIUP-COL-152 — Frisco',
-  'GIUP-COL-120 — Wisteria Lane',
-  'GIUP-COL-07 — Lavender Dreams',
-  'GIUP-COL-2020 — Soft n Sweet',
-  'GIUP-COL-2037 — Salty Caramel',
-  'GIUP-COL-2026 — Whaat? Pistachio?',
-  'GIUP-COL-2113J — Blue Flashing Star',
-  'GIUP-COL-GCE01 — Glass Cat Eye Clear',
-  'GIUP-COL-F01 — Foil Gel Adhesive',
-]
-
-const GOLD_BUILDER_SKUS = [
-  'GIUP-BLD-3IN1-PK01 — 3-in-1 Builder Gel Pink Soft',
-  'GIUP-BLD-3IN1-PK02 — 3-in-1 Builder Gel Pink Medium',
-  'GIUP-BLD-3IN1-PK03 — 3-in-1 Builder Gel Pink Hard',
-  'GIUP-BLD-3IN1-CV01 — 3-in-1 Builder Gel Cover Light',
-  'GIUP-BLD-3IN1-CV02 — 3-in-1 Builder Gel Cover Medium',
-  'GIUP-BLD-3IN1-CV03 — 3-in-1 Builder Gel Cover Deep',
-]
-
-const GOLD_MODERN_30_COLORS = [
-  'GIUP-COL-2032 — Salt Water Toffee',
-  'GIUP-COL-2035 — Scuubie',
-  'GIUP-COL-2039 — Coral Reef',
-  'GIUP-COL-2038 — Hibiscus',
-  'GIUP-COL-030 — Sunset',
-  'GIUP-COL-2029 — Show Me The Moneee',
-  'GIUP-COL-2516 — Berry Obsession',
-  'GIUP-COL-2519 — Merlot Veil',
-  'GIUP-COL-2512 — Ember Rose',
-  'GIUP-COL-2521 — Chopco Veil',
-  'GIUP-COL-1927 — Forestation',
-  'GIUP-COL-2027 — Emerald Coast',
-  'GIUP-COL-1926 — Eco-Savvy',
-  'GIUP-COL-2526 — Double Leopardy',
-  'GIUP-COL-2034 — Smurf\'s Baby',
-  'GIUP-COL-2033 — Baby Shark',
-  'GIUP-COL-2113R — Midnight Hera',
-  'GIUP-COL-2113G — Golden Hour',
-  'GIUP-COL-GCE02 — Glass Cat Eye Rose',
-  'GIUP-COL-GCE05 — Glass Cat Eye Ocean',
-  'GIUP-COL-112 — Vintage Rose',
-  'GIUP-COL-2518 — Vintage Whisper',
-  'GIUP-COL-061 — Deep Sangria',
-  'GIUP-COL-088 — Midnight Sky',
-  'GIUP-COL-141 — Peachy Keen',
-  'GIUP-COL-ST01 — Spider Gel Black',
-  'GIUP-COL-ST02 — Spider Gel White',
-  'GIUP-COL-2022 — Lemon Squeeze',
-  'GIUP-COL-2023 — Minty Fresh',
-  'GIUP-COL-2025 — Lilac Love',
-]
-
-const PLATINUM_SYNTHOGEL_SKUS = [
-  'GIUP-SYN-BS01 — Synthogel Base',
-  'GIUP-SYN-CL01 — Synthogel Clear',
-  'GIUP-SYN-PK01 — Synthogel Pink',
-  'GIUP-SYN-CV01 — Synthogel Cover',
-  'GIUP-SYN-WH01 — Synthogel White',
-  'GIUP-SYN-MX01 — Synthogel Multimix',
-  'GIUP-SYN-TG01 — Synthogel Top Gloss',
-  'GIUP-SYN-LQ01 — Synthogel Brush Liquid',
-]
-
-const PLATINUM_SPECIAL_EFFECTS_60 = [
-  'GIUP-COL-2113B — Pink Flashing Star',
-  'GIUP-COL-2113S — Silver Flashing Star',
-  'GIUP-COL-GCE08 — Glass Cat Eye Emerald',
-  'GIUP-COL-GCE10 — Glass Cat Eye Amethyst',
-  'GIUP-COL-N01 — Neon Yellow',
-  'GIUP-COL-N05 — Electric Orange',
-  'GIUP-COL-N08 — Shocking Pink',
-  'GIUP-COL-1301 — Mermaid Tail',
-  'GIUP-COL-1305 — Golden Dust',
-  'GIUP-COL-1310 — Starry Night',
-  'GIUP-COL-1502 — Holographic Silver',
-  'GIUP-COL-2041 — Ibiza Blue',
-  'GIUP-COL-2045 — Sunset Strip',
-  'GIUP-COL-118 — Tiffany Blue',
-  'GIUP-COL-145 — Apricot Sorbet',
-  'GIUP-COL-160 — Matcha Latte',
-  'GIUP-COL-054 — Crimson Tide',
-  'GIUP-COL-058 — Bordeaux Wine',
-  'GIUP-COL-062 — Plum Pudding',
-  'GIUP-COL-068 — Vampire Red',
-  'GIUP-COL-2530 — Velvet Sand',
-  'GIUP-COL-2535 — Desert Rose',
-  'GIUP-COL-1930 — Earth Mother',
-  'GIUP-COL-1935 — Clay Canyon',
-  'GIUP-COL-2050 — Electric Lime',
-  'GIUP-COL-2055 — Ultraviolet',
-  'GIUP-COL-STF03 — Shimmer Top Silver',
-  'GIUP-COL-STF04 — Shimmer Top Gold',
-  'GIUP-COL-M01 — Metallic Silver Paint',
-  'GIUP-COL-M02 — Metallic Gold Paint',
-  'GIUP-COL-2540 — Midnight Chrome',
-  'GIUP-COL-2545 — Bronze Age',
-  'GIUP-COL-2550 — Antique Copper',
-  'GIUP-COL-110 — Smoked Mauve',
-  'GIUP-COL-115 — Dusty Cedar',
-  'GIUP-COL-125 — Misty Lilac',
-  'GIUP-COL-135 — Sage Wisdom',
-  'GIUP-COL-170 — Oyster Shell',
-  'GIUP-COL-175 — Pearly White',
-  'GIUP-COL-075 — Royal Purple',
-  'GIUP-COL-082 — Cobalt Crush',
-  'GIUP-COL-095 — Forest Fern',
-  'GIUP-COL-105 — Concrete Jungle',
-  'GIUP-COL-111 — Black Cherry',
-  'GIUP-COL-122 — Mulberry',
-  'GIUP-COL-185 — Spiced Chai',
-  'GIUP-COL-195 — Pumpkin Spice',
-  'GIUP-COL-205 — Deep Teal',
-  'GIUP-COL-215 — Midnight Navy',
-  'GIUP-COL-225 — Charcoal Spark',
-  'GIUP-COL-235 — Rose Gold Foil',
-  'GIUP-COL-245 — Copper Flare',
-  'GIUP-COL-GCE12 — Glass Cat Eye Galaxy',
-  'GIUP-COL-2113W — White Flashing Star',
-  'GIUP-COL-2113P — Purple Flashing Star',
-  'GIUP-COL-ST03 — Spider Gel Gold',
-  'GIUP-COL-ST04 — Spider Gel Silver',
-  'GIUP-COL-B01 — Blooming Gel',
-  'GIUP-COL-401 — Mattest Matte',
-  'GIUP-COL-501 — Super Glossy Wipe',
-]
 
 const HERO_PRODUCT_COPY = [
   {
@@ -1771,8 +1385,8 @@ function DistributorPackagesPage() {
           <NavLink to="/full-catalogue" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
             Our Products
           </NavLink>
-          <NavLink to="/become-distributor" className="btn-cta-ghost-white inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Apply for Partnership
+          <NavLink to="/distributors" className="btn-cta-ghost-white inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
+            Distributor Registration
           </NavLink>
         </div>
       </div>
@@ -1825,8 +1439,8 @@ function DistributorPackagesPage() {
           </div>
         </div>
         <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
-          <NavLink to="/become-distributor" className="btn-cta-dark inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Request Sales Tier Pricing ?
+          <NavLink to="/distributors" className="btn-cta-dark inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
+            Request Sales Tier Pricing
           </NavLink>
         </div>
       </article>
@@ -1862,7 +1476,7 @@ function DistributorPackagesPage() {
           </div>
         </div>
         <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
-          <NavLink to="/become-distributor" className="btn-cta-dark inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
+          <NavLink to="/distributors" className="btn-cta-dark inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
             Request Professional Tier Pricing →
           </NavLink>
         </div>
@@ -1902,8 +1516,8 @@ function DistributorPackagesPage() {
           </div>
         </div>
         <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
-          <NavLink to="/become-distributor" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Request Authority Tier Pricing ?
+          <NavLink to="/distributors" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
+            Request Authority Tier Pricing
           </NavLink>
         </div>
       </article>
@@ -1952,10 +1566,19 @@ function ForAcademiesPage() {
                 <NavLink to="/portal/register" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
                   Register Your Academy
                 </NavLink>
+                <NavLink to="/portal/login" className="inline-flex rounded-lg border border-white/35 px-5 py-2.5 text-sm font-bold text-white/85 transition duration-300 hover:bg-white/10 hover:text-white">
+                  Sign In
+                </NavLink>
                 <NavLink to="/full-catalogue" className="btn-cta-ghost-white inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
                   Our Products
                 </NavLink>
               </div>
+              <p className="mt-3 text-xs font-medium text-white/75">
+                Already registered?{' '}
+                <NavLink to="/portal/login" className="font-semibold text-white hover:underline">
+                  Sign in to your B2B portal
+                </NavLink>
+              </p>
             </div>
           </div>
         </div>
@@ -2098,10 +1721,18 @@ function ForAcademiesPage() {
                 </li>
               ))}
             </ul>
+            <p className="mt-4 text-sm text-white/80">
+              Already registered?{' '}
+              <NavLink to="/portal/login" className="font-semibold text-white hover:underline">
+                Sign in here
+              </NavLink>
+            </p>
           </div>
-          <NavLink to="/portal/register" className="shrink-0 self-start rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#D43790] shadow-[0_2px_12px_rgba(0,0,0,0.18)] transition duration-300 hover:bg-fuchsia-50">
-            Register Free &rarr;
-          </NavLink>
+          <div className="shrink-0 self-start">
+            <NavLink to="/portal/register" className="inline-flex rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#D43790] shadow-[0_2px_12px_rgba(0,0,0,0.18)] transition duration-300 hover:bg-fuchsia-50">
+              Register Free &rarr;
+            </NavLink>
+          </div>
         </div>
       </div>
 
@@ -3981,18 +3612,7 @@ function FullCataloguePage() {
           { codes: ['nailsticks clear scaled 1', 'nailsticks_clear-scaled-1'], target: 'Nail sticks clear with ring' },
           { codes: ['cushion sponge', 'cushion sponge 2', 'CUSHION SPONGE'], target: 'Ombre sponge' },
         ]
-        for (const { codes, target } of aliasGroups) {
-          const entry = pnLookup(target)
-          if (entry) {
-            for (const c of codes) {
-              const normalizedCode = normalizeSkuCode(c)
-              const normalizedName = normalizeProductName(c)
-              if (normalizedCode && !map.has(normalizedCode)) map.set(normalizedCode, entry)
-              if (normalizedName && !map.has(normalizedName)) map.set(normalizedName, entry)
-              if (!map.has(c)) map.set(c, entry)
-            }
-          }
-        }
+        applyProductAliasGroupsToPriceMap(map, normalizeProductName, aliasGroups)
         if (mounted) {
           setCataloguePriceMap(map)
           setCatalogueWordIndex(wordIndex)
@@ -6300,7 +5920,7 @@ function Nav({ onOpenContactModal }) {
       {/* Divider */}
       <span className="mx-1.5 h-5 w-px bg-white/20" aria-hidden="true" />
 
-      {/* Secondary — Distribution Registration */}
+        {/* Secondary — B2B registration */}
       <NavLink
         to="/portal/register"
         className={({ isActive }) =>
@@ -6309,12 +5929,12 @@ function Nav({ onOpenContactModal }) {
           }`
         }
       >
-        Distribution Registration
+          Register
       </NavLink>
 
-      {/* Sign In — distributor portal only */}
+        {/* Sign In — existing B2B clients */}
       <NavLink
-        to="/portal/login?portal=distributor"
+          to="/portal/login"
         className={({ isActive }) =>
           `rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
             isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/80 hover:border-white/50 hover:bg-white/10 hover:!text-white'
@@ -6381,7 +6001,7 @@ function MobileNav({ onOpenContactModal }) {
         {/* Nav links */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           {/* Quick-action CTAs at the top */}
-          {/* Secondary — Distribution Registration */}
+          {/* Secondary — B2B registration */}
           <NavLink
             to="/portal/register"
             onClick={() => setOpen(false)}
@@ -6391,10 +6011,10 @@ function MobileNav({ onOpenContactModal }) {
               }`
             }
           >
-            Distribution Registration
+            Register
           </NavLink>
           <NavLink
-            to="/portal/login?portal=distributor"
+            to="/portal/login"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
               `block rounded-lg border border-white/25 px-4 py-3 text-center text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
@@ -7036,10 +6656,20 @@ function HomePage({ onOpenContactModal }) {
                 <NavLink to="/portal/register" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_16px_rgba(212,55,144,0.55)] transition duration-300 hover:bg-fuchsia-500">
                   Register Free &rarr;
                 </NavLink>
-                <NavLink to="/become-distributor" className="rounded-lg border-2 border-white/80 bg-white/15 px-5 py-2.5 text-sm font-bold text-white shadow-[0_2px_12px_rgba(0,0,0,0.35)] backdrop-blur-sm transition duration-300 hover:bg-white/25">
-                  Become a Distributor
+                <NavLink to="/portal/login" className="rounded-lg border border-white/40 bg-white/10 px-5 py-2.5 text-sm font-bold text-white transition duration-300 hover:bg-white/20">
+                  Sign In
+                </NavLink>
+                <NavLink to="/distributors" className="rounded-lg border-2 border-white/80 bg-white/15 px-5 py-2.5 text-sm font-bold text-white shadow-[0_2px_12px_rgba(0,0,0,0.35)] backdrop-blur-sm transition duration-300 hover:bg-white/25">
+                  Distribution Network
                 </NavLink>
               </div>
+              <p className="mt-3 text-xs font-medium text-white/70">
+                Existing clients can{' '}
+                <NavLink to="/portal/login" className="font-semibold text-white hover:underline">
+                  sign in here
+                </NavLink>
+                {' '}for pricing and ordering.
+              </p>
               {/* Trust bar */}
               <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5">
                 {['1,000+ shades', 'HEMA-free', 'EU certified', '30+ countries'].map((badge) => (
@@ -7256,10 +6886,18 @@ function HomePage({ onOpenContactModal }) {
                 </li>
               ))}
             </ul>
+            <p className="mt-4 text-sm text-white/80">
+              Already registered?{' '}
+              <NavLink to="/portal/login" className="font-semibold text-white hover:underline">
+                Sign in here
+              </NavLink>
+            </p>
           </div>
-          <NavLink to="/portal/register" className="shrink-0 self-start rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#D43790] shadow-[0_2px_12px_rgba(0,0,0,0.18)] transition duration-300 hover:bg-fuchsia-50">
-            Register Free &rarr;
-          </NavLink>
+          <div className="shrink-0 self-start">
+            <NavLink to="/portal/register" className="inline-flex rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#D43790] shadow-[0_2px_12px_rgba(0,0,0,0.18)] transition duration-300 hover:bg-fuchsia-50">
+              Register Free &rarr;
+            </NavLink>
+          </div>
         </div>
       </div>
 
@@ -7330,11 +6968,11 @@ function PortalAccessNotice({ onOpenContactModal }) {
         Access is enabled only after distribution contract approval.
       </p>
       <p className="mt-3 text-sm text-slate-600">
-        For new applications, use the distributor registration form.
+        For new applications, go to the distribution page to start the distributor registration flow.
       </p>
       <div className="mt-5 flex flex-wrap gap-3">
-        <NavLink to="/become-distributor" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
-          Distributor Registration
+        <NavLink to="/distributors" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+          Go to Distribution Page
         </NavLink>
         <NavLink to="/portal/buy" className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition duration-300 hover:bg-slate-100">
           Buy Now
@@ -7436,10 +7074,10 @@ function PortalLanding() {
             Sign In to Portal
           </NavLink>
           <NavLink
-            to="/become-distributor"
+            to="/distributors"
             className="rounded-lg border border-white/40 px-5 py-2.5 text-sm font-semibold text-white transition duration-200 hover:bg-white/10"
           >
-            Apply as Distributor
+            Distributor Network
           </NavLink>
         </div>
       </div>
@@ -7478,13 +7116,13 @@ function PortalLanding() {
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Not registered yet?</p>
         <p className="mt-2 text-sm text-slate-600">
-          Apply for a trade account to access wholesale pricing, the online ordering system, and dedicated distributor support.
+          Explore the distributor programme and start your registration from the dedicated distribution page.
         </p>
         <NavLink
-          to="/become-distributor"
+          to="/distributors"
           className="mt-4 inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-200 hover:bg-fuchsia-700"
         >
-          Start Your Application
+          Go to Distribution Page
         </NavLink>
       </div>
     </section>
@@ -7519,6 +7157,9 @@ function DistributorsPage() {
           Live Coverage Data. Verified Network. Legitimate B2B Database.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
+          <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#c8386e] px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-[#b52f61]">
+            Distributor Registration
+          </NavLink>
           {DISTRIBUTOR_COUNTRY_POINTS.map((item) => (
             <button
               key={item.country}
@@ -7563,7 +7204,7 @@ function DistributorsPage() {
         <p className="mt-2 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>Client onboarding for verified trade partners is handled through the official B2B registration workflow.</p>
         <div className="mt-4">
           <NavLink to="/become-distributor" className="btn-cta-rose inline-flex rounded-lg px-4 py-2 text-sm font-semibold transition duration-300">
-            Open Client Registration
+            Start Distributor Registration
           </NavLink>
         </div>
       </div>
@@ -7627,7 +7268,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           {isCreatePasswordMode
             ? <>Returning client?{' '}<NavLink to={prefilledEmail ? `/portal/login?portal=${portalType}&email=${encodeURIComponent(prefilledEmail)}` : `/portal/login?portal=${portalType}`} className="font-semibold text-slate-800 hover:underline">Sign in</NavLink></>
             : portalType === 'distributor'
-              ? <>No account?{' '}<NavLink to="/become-distributor" className="font-semibold text-slate-800 hover:underline">Apply here</NavLink></>
+                ? <>No account?{' '}<NavLink to="/distributors" className="font-semibold text-slate-800 hover:underline">Start on the distribution page</NavLink></>
               : <>New client?{' '}<NavLink to="/portal/register" className="font-semibold text-slate-800 hover:underline">Register</NavLink></>
           }
         </p>
@@ -9984,8 +9625,8 @@ function PortalForgotPassword() {
               <div className="mt-5 space-y-2 text-xs text-slate-600">
                 <p>
                   Need distributor access?{' '}
-                  <NavLink to="/become-distributor" className="font-semibold text-slate-900 hover:underline">
-                    Apply now
+                  <NavLink to="/distributors" className="font-semibold text-slate-900 hover:underline">
+                    Start on the distribution page
                   </NavLink>
                 </p>
                 <p>
@@ -14594,7 +14235,6 @@ function SupportModule() {
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="text-xs text-slate-700">Subject
               <input
-                type="text"
                 value={inquiryForm.subject}
                 onChange={(e) => setInquiryForm((f) => ({ ...f, subject: e.target.value }))}
                 placeholder="e.g. Delivery question"
@@ -14602,28 +14242,27 @@ function SupportModule() {
               />
             </label>
             <label className="text-xs text-slate-700">Order Reference (optional)
-              {recentOrders.length > 0
-                ? (
-                    <select
-                      value={inquiryForm.orderRef}
-                      onChange={(e) => setInquiryForm((f) => ({ ...f, orderRef: e.target.value }))}
-                      className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800"
-                    >
-                      <option value="">No specific order</option>
-                      {recentOrders.map((o) => (
-                        <option key={o.id} value={`#${o.id}`}>Order #{o.id} — {new Date(o.created_at).toLocaleDateString()} — {o.total_units} units</option>
-                      ))}
-                    </select>
-                  )
-                : (
-                    <input
-                      type="text"
-                      value={inquiryForm.orderRef}
-                      onChange={(e) => setInquiryForm((f) => ({ ...f, orderRef: e.target.value }))}
-                      placeholder="Order #..."
-                      className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800"
-                    />
-                  )}
+              {recentOrders.length > 0 ? (
+                <select
+                  value={inquiryForm.orderRef}
+                  onChange={(e) => setInquiryForm((f) => ({ ...f, orderRef: e.target.value }))}
+                  className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800"
+                >
+                  <option value="">Select an order</option>
+                  {recentOrders.map((o) => (
+                    <option key={o.id} value={`#${o.id}`}>
+                      Order #{o.id} - {new Date(o.created_at).toLocaleDateString()} - {o.total_units} units
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  value={inquiryForm.orderRef}
+                  onChange={(e) => setInquiryForm((f) => ({ ...f, orderRef: e.target.value }))}
+                  placeholder="Order #..."
+                  className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800"
+                />
+              )}
             </label>
           </div>
           <label className="block text-xs text-slate-700">Message
@@ -14632,21 +14271,21 @@ function SupportModule() {
               onChange={(e) => setInquiryForm((f) => ({ ...f, message: e.target.value }))}
               rows={4}
               placeholder="Describe your question or issue..."
-              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 resize-none"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800"
             />
           </label>
           {inquiryStatus === 'sent' && (
-            <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">Message sent — we'll be in touch within 1 business day.</p>
+            <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">Message sent - we'll be in touch within 1 business day.</p>
           )}
           {inquiryStatus === 'error' && (
-            <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">Failed to send — please email us directly at {B2B_EMAIL}.</p>
+            <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">Failed to send - please email us directly at {B2B_EMAIL}.</p>
           )}
           <button
             onClick={sendInquiry}
             disabled={!inquiryForm.message.trim() || inquiryStatus === 'sending'}
             className="rounded-lg bg-fuchsia-600 px-4 py-2 text-xs font-semibold text-white hover:bg-fuchsia-700 disabled:opacity-50"
           >
-            {inquiryStatus === 'sending' ? 'Sending…' : 'Send Message'}
+            {inquiryStatus === 'sending' ? 'Sending...' : 'Send Message'}
           </button>
         </div>
       </div>
@@ -18308,7 +17947,7 @@ function App() {
               <NavLink to="/about-us" className="block transition duration-300 hover:text-fuchsia-300">About Us</NavLink>
               <NavLink to="/full-catalogue" className="block transition duration-300 hover:text-fuchsia-300">Shop</NavLink>
               <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
-              <NavLink to="/become-distributor" className="block transition duration-300 hover:text-fuchsia-300">Become Distributor</NavLink>
+              <NavLink to="/distributors" className="block transition duration-300 hover:text-fuchsia-300">Distributor Registration</NavLink>
               <NavLink to="/guestbook" className="block transition duration-300 hover:text-fuchsia-300">Guestbook</NavLink>
               <NavLink to="/portal/login?portal=distributor" className="block transition duration-300 hover:text-fuchsia-300">Distributor Login</NavLink>
             </div>
