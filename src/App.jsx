@@ -402,6 +402,15 @@ const COUNTRY_VAT_TREATMENT = {
   Jordan: 'export_exempt',
 }
 
+/** Fire-and-forget: record a login problem in Supabase so admins can see who needs help. */
+function logLoginIssue(email, issueType, message) {
+  if (!hasSupabaseConfig || !supabase || !email) return
+  supabase
+    .from('b2b_login_issues')
+    .insert({ email: String(email).toLowerCase().trim(), issue_type: issueType, message: String(message || '').slice(0, 500) })
+    .then(() => {}).catch(() => {})
+}
+
 function resolveVatTreatment(country) {
   return COUNTRY_VAT_TREATMENT[country] || 'export_exempt'
 }
@@ -7535,6 +7544,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           } catch {
             setIsSubmitting(false)
             sessionStorage.removeItem('portalTabActive')
+            logLoginIssue(email, 'unexpected_error', 'Login threw an unexpected error.')
             setErrorMessage('An unexpected error occurred. Please try again.')
             return
           }
@@ -17014,6 +17024,7 @@ function App() {
 
         if (isDistributorRegistration && requireApproval && status !== 'approved') {
           if (status === 'rejected') {
+            logLoginIssue(normalizedEmail, 'rejected', 'Login attempt — application was rejected.')
             return {
               ok: false,
               message: 'Your B2B application was rejected. Contact distribution support for next steps.',
@@ -17023,6 +17034,7 @@ function App() {
           }
 
           if (status === 'submitted') {
+            logLoginIssue(normalizedEmail, 'login_blocked', 'Login attempt — order/application submitted but not yet approved.')
             return {
               ok: false,
               message: 'Your order request is stored and under processing. Portal sign-in requires an approved distributor application.',
@@ -17031,6 +17043,7 @@ function App() {
             }
           }
 
+          logLoginIssue(normalizedEmail, 'pending_approval', 'Login attempt — application pending approval.')
           return {
             ok: false,
             message: 'Your B2B application is pending approval. Access is enabled after manual review.',
@@ -17147,6 +17160,7 @@ function App() {
           await supabase.auth.signOut()
 
           if (status === 'rejected') {
+            logLoginIssue(normalizedEmail, 'rejected', 'Login attempt after sign-in — application was rejected.')
             return {
               ok: false,
               message: 'Your B2B application was rejected. Contact distribution support for next steps.',
@@ -17155,6 +17169,7 @@ function App() {
           }
 
           if (status === 'pending') {
+            logLoginIssue(normalizedEmail, 'pending_approval', 'Login attempt after sign-in — application pending approval.')
             return {
               ok: false,
               message: 'Your B2B application is pending approval. Access is enabled after manual review.',
@@ -17163,6 +17178,7 @@ function App() {
           }
 
           if (status === 'submitted') {
+            logLoginIssue(normalizedEmail, 'login_blocked', 'Login attempt after sign-in — order submitted but not yet approved.')
             return {
               ok: false,
               message: 'Your order request is stored and under processing. Portal sign-in requires an approved distributor application.',
@@ -17170,6 +17186,7 @@ function App() {
             }
           }
 
+          logLoginIssue(normalizedEmail, 'login_blocked', 'Login attempt after sign-in — no approved application found.')
           return {
             ok: false,
             message: 'No approved B2B application found for this email.',

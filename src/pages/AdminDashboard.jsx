@@ -2800,10 +2800,210 @@ function DraftCartsPanel() {
   )
 }
 
+// ─── Login Issues panel ───────────────────────────────────────────────────────
+
+const LOGIN_ISSUES_TABLE = 'b2b_login_issues'
+
+const ISSUE_LABELS = {
+  pending_approval:  { label: 'Pending Approval',  color: 'bg-amber-100 text-amber-800' },
+  rejected:          { label: 'Rejected',           color: 'bg-rose-100 text-rose-800' },
+  login_blocked:     { label: 'Login Blocked',      color: 'bg-orange-100 text-orange-800' },
+  bad_password:      { label: 'Wrong Password',     color: 'bg-slate-100 text-slate-700' },
+  unexpected_error:  { label: 'Technical Error',    color: 'bg-purple-100 text-purple-800' },
+}
+
+function issueTypeBadge(issueType) {
+  const meta = ISSUE_LABELS[issueType] || { label: issueType, color: 'bg-slate-100 text-slate-600' }
+  return (
+    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${meta.color}`}>
+      {meta.label}
+    </span>
+  )
+}
+
+function LoginIssuesPanel() {
+  const [issues, setIssues] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [showResolved, setShowResolved] = useState(false)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    const query = supabase
+      .from(LOGIN_ISSUES_TABLE)
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(200)
+    if (!showResolved) query.eq('resolved', false)
+    const { data, error: err } = await query
+    if (err) { setError(err.message); setLoading(false); return }
+    setIssues(data || [])
+    setLoading(false)
+  }, [showResolved])
+
+  useEffect(() => { load() }, [load])
+
+  const resolve = async (id) => {
+    await supabase
+      .from(LOGIN_ISSUES_TABLE)
+      .update({ resolved: true, resolved_at: new Date().toISOString() })
+      .eq('id', id)
+    setIssues(prev => prev.filter(i => i.id !== id))
+  }
+
+  const resolveAll = async () => {
+    const unresolved = issues.filter(i => !i.resolved)
+    if (!unresolved.length) return
+    await supabase
+      .from(LOGIN_ISSUES_TABLE)
+      .update({ resolved: true, resolved_at: new Date().toISOString() })
+      .in('id', unresolved.map(i => i.id))
+    setIssues([])
+  }
+
+  const deleteIssue = async (id) => {
+    await supabase.from(LOGIN_ISSUES_TABLE).delete().eq('id', id)
+    setIssues(prev => prev.filter(i => i.id !== id))
+  }
+
+  const SUPPORT_WA = import.meta.env.VITE_SUPPORT_WHATSAPP_NUMBER || '+306940715234'
+
+  const contactWhatsApp = (email) => {
+    const num = SUPPORT_WA.replace(/[^\d]/g, '')
+    const msg = encodeURIComponent(`Hi, we noticed you had trouble signing in to the GEL.IT.UP portal (${email}). How can we help?`)
+    window.open(`https://wa.me/${num}?text=${msg}`, '_blank', 'noreferrer')
+  }
+
+  const copyEmail = (email) => {
+    navigator.clipboard.writeText(email).catch(() => {})
+  }
+
+  if (loading) {
+    return <p className="text-sm text-slate-500 py-4">Loading login issues…</p>
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+        Could not load login issues: {error}
+        <br />
+        <span className="text-xs text-rose-500 mt-1 block">Run <code>supabase/sql/create_b2b_login_issues.sql</code> in the Supabase SQL Editor first.</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-semibold text-slate-900">Login Issues</h3>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Clients who tried to sign in but were blocked. Reach out to help them.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowResolved(v => !v)}
+            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+          >
+            {showResolved ? 'Hide Resolved' : 'Show Resolved'}
+          </button>
+          {issues.some(i => !i.resolved) && (
+            <button
+              onClick={resolveAll}
+              className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+            >
+              Resolve All
+            </button>
+          )}
+          <button onClick={load} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {issues.length === 0 ? (
+        <div className="rounded-xl border border-slate-100 bg-slate-50 py-10 text-center text-sm text-slate-400">
+          {showResolved ? 'No login issues recorded.' : 'No unresolved login issues — all clear!'}
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <table className="min-w-full text-sm">
+            <thead className="border-b border-slate-100 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+              <tr>
+                <th className="px-4 py-2.5 text-left">Email</th>
+                <th className="px-4 py-2.5 text-left">Issue</th>
+                <th className="px-4 py-2.5 text-left">Message</th>
+                <th className="px-4 py-2.5 text-left">Time</th>
+                <th className="px-4 py-2.5 text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {issues.map(issue => (
+                <tr key={issue.id} className={issue.resolved ? 'opacity-50' : ''}>
+                  <td className="px-4 py-3 font-medium text-slate-800">
+                    <button
+                      onClick={() => copyEmail(issue.email)}
+                      title="Click to copy"
+                      className="hover:underline text-left"
+                    >
+                      {issue.email}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3">{issueTypeBadge(issue.issue_type)}</td>
+                  <td className="px-4 py-3 text-slate-500 max-w-xs truncate" title={issue.message}>{issue.message}</td>
+                  <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{fmtDate(issue.created_at)}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-1.5 flex-wrap">
+                      <button
+                        onClick={() => contactWhatsApp(issue.email)}
+                        className="rounded-md bg-green-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-green-700"
+                      >
+                        WhatsApp
+                      </button>
+                      {!issue.resolved && (
+                        <button
+                          onClick={() => resolve(issue.id)}
+                          className="rounded-md bg-slate-800 px-2.5 py-1 text-xs font-semibold text-white hover:bg-slate-700"
+                        >
+                          Resolve
+                        </button>
+                      )}
+                      <button
+                        onClick={() => deleteIssue(issue.id)}
+                        className="rounded-md border border-rose-200 px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Admin Dashboard shell ────────────────────────────────────────────────────
 
 export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
   const [tab, setTab] = useState('registrations')
+  const [loginIssueCount, setLoginIssueCount] = useState(0)
+
+  // Load unresolved login issue count on mount for the badge
+  useEffect(() => {
+    if (!supabase) return
+    supabase
+      .from(LOGIN_ISSUES_TABLE)
+      .select('id', { count: 'exact', head: true })
+      .eq('resolved', false)
+      .then(({ count }) => setLoginIssueCount(count || 0))
+      .catch(() => {})
+  }, [])
 
   return (
     <section className="space-y-4">
@@ -2859,6 +3059,17 @@ export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
           >
             Draft Carts
           </button>
+          <button
+            onClick={() => setTab('login-issues')}
+            className={`relative rounded-full px-4 py-1.5 text-sm font-semibold transition ${tab === 'login-issues' ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+          >
+            Login Issues
+            {loginIssueCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white ring-2 ring-white">
+                {loginIssueCount > 9 ? '9+' : loginIssueCount}
+              </span>
+            )}
+          </button>
         </div>
       </div>
 
@@ -2869,6 +3080,7 @@ export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
         {tab === 'pricing' && <TierPricingPanel />}
         {tab === 'guestbook' && <GuestbookPanel />}
         {tab === 'draft-carts' && <DraftCartsPanel />}
+        {tab === 'login-issues' && <LoginIssuesPanel />}
       </div>
     </section>
   )
