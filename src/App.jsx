@@ -5863,6 +5863,15 @@ function NotFoundPage() {
   )
 }
 
+const navItems = [
+  { to: '/about-us', label: 'About us' },
+  { to: '/for-academies', label: 'Academies' },
+  { to: '/distributor-packages', label: 'Distribution' },
+  { to: '/guestbook', label: 'Guestbook' },
+  { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
+  { to: '/full-catalogue', label: 'Our Products', highlight: true },
+]
+
 function Nav({ onOpenContactModal }) {
   return (
     <nav className="hidden gap-1 md:flex items-center">
