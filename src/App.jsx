@@ -7448,6 +7448,12 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
     setDebugTrace('')
   }, [isCreatePasswordMode, location.search])
 
+  useEffect(() => {
+    if (location.state?.checkInbox) {
+      setInfoMessage('confirm-email')
+    }
+  }, [location.state?.checkInbox])
+
   return (
     <section className="mx-auto max-w-sm">
       {/* Header */}
@@ -7523,7 +7529,15 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           try { localStorage.setItem('portalRememberedPassword', btoa(password)) } catch { /* ignore */ }
           localStorage.removeItem('portalSessionOnly')
 
-          const result = await onLogin(email, password)
+          let result
+          try {
+            result = await onLogin(email, password)
+          } catch {
+            setIsSubmitting(false)
+            sessionStorage.removeItem('portalTabActive')
+            setErrorMessage('An unexpected error occurred. Please try again.')
+            return
+          }
           setIsSubmitting(false)
 
           if (result.debugTrace) {
@@ -7914,33 +7928,9 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
 
 function BuyerRegister() {
   const navigate = useNavigate()
-  const [form, setForm] = useState({ email: '', password: '', confirmPassword: '', companyName: '', vatNumber: '' })
+  const [form, setForm] = useState({ email: '', password: '', confirmPassword: '', companyName: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [viesResult, setViesResult] = useState(null)
-  const [viesLoading, setViesLoading] = useState(false)
-  const [viesError, setViesError] = useState('')
-
-  const verifyVat = useCallback(async () => {
-    const vat = String(form.vatNumber || '').trim().toUpperCase().replace(/[\s\-\.]/g, '')
-    if (vat.length < 4) { setViesError('Enter a full VAT number to verify'); return }
-    setViesLoading(true)
-    setViesError('')
-    setViesResult(null)
-    try {
-      const res = await fetch('/.netlify/functions/validate-vat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vatNumber: vat }),
-      })
-      const data = await res.json()
-      if (!res.ok) { setViesError(data.error || 'VIES check failed'); return }
-      setViesResult(data)
-      if (!data.valid) setViesError('VAT number not found in VIES — please check and try again')
-      else if (data.name && !form.companyName) setForm(f => ({ ...f, companyName: data.name }))
-    } catch { setViesError('Unable to reach VAT validation service') }
-    finally { setViesLoading(false) }
-  }, [form.vatNumber, form.companyName])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -7950,9 +7940,6 @@ function BuyerRegister() {
     if (!email || !password) { setError('Email and password are required.'); return }
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return }
     if (password !== form.confirmPassword) { setError('Passwords do not match.'); return }
-    const vat = form.vatNumber.trim()
-    if (!vat) { setError('A valid VAT number is required to place B2B orders.'); return }
-    if (!viesResult?.valid) { setError('Please verify your VAT number before continuing.'); return }
 
     setIsSubmitting(true)
     try {
@@ -7964,11 +7951,9 @@ function BuyerRegister() {
         options: {
           data: {
             company_name: form.companyName.trim(),
-            vat_number: vat,
-            vies_vat: vat,
             account_type: 'b2b_buyer',
           },
-          emailRedirectTo: `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(email)}`,
+          emailRedirectTo: `${window.location.origin}/portal/login?email=${encodeURIComponent(email)}`,
         },
       })
 
@@ -7990,8 +7975,15 @@ function BuyerRegister() {
         return
       }
 
+      // Supabase silently returns user:null for an already-confirmed email (no error)
+      if (!signUpData?.user) {
+        setError('An account with this email already exists. Please sign in or use Forgot Password.')
+        setIsSubmitting(false)
+        return
+      }
+
       // Email confirmation required — show check inbox message
-      navigate('/portal/login', { state: { checkInbox: email, returnTo: '/full-catalogue' } })
+      navigate(`/portal/login?email=${encodeURIComponent(email)}`, { state: { checkInbox: true } })
     } catch (err) {
       setError('An unexpected error occurred. Please try again.')
     } finally {
@@ -8005,7 +7997,7 @@ function BuyerRegister() {
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-400">GEL.IT.UP by GIUP®</p>
         <h2 className="heading-on-dark mt-3 text-3xl font-bold">Create Your Account</h2>
         <p className="mt-3 text-sm text-slate-300">
-          Register with your VAT number to access B2B pricing and place orders immediately. No approval needed.
+          Register to access B2B pricing and place orders immediately. No approval needed.
         </p>
         <ul className="mt-6 space-y-3 hidden md:block">
           <li className="flex items-start gap-2.5 text-sm text-slate-300">
@@ -8022,7 +8014,7 @@ function BuyerRegister() {
           </li>
           <li className="flex items-start gap-2.5 text-sm text-slate-300">
             <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-            Valid EU VAT number required
+            Open to all professional buyers worldwide
           </li>
         </ul>
         <p className="mt-8 text-xs text-slate-400">
@@ -8044,25 +8036,6 @@ function BuyerRegister() {
             Email Address <span className="text-rose-500">*</span>
             <input type="email" required autoComplete="email" value={form.email} onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))} placeholder="you@company.com" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
           </label>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700">
-              VAT Number <span className="text-rose-500">*</span>
-              <div className="mt-1 flex gap-2">
-                <input type="text" required value={form.vatNumber} onChange={(e) => { setForm(f => ({ ...f, vatNumber: e.target.value })); setViesResult(null) }} placeholder="EU123456789" className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
-                <button type="button" onClick={verifyVat} disabled={viesLoading} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50">
-                  {viesLoading ? 'Checking…' : 'Verify'}
-                </button>
-              </div>
-            </label>
-            {viesResult?.valid && (
-              <p className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-700">
-                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-[10px]">✓</span>
-                VAT verified{viesResult.name ? ` — ${viesResult.name}` : ''}
-              </p>
-            )}
-            {viesError && <p className="mt-1.5 text-xs text-rose-600">{viesError}</p>}
-          </div>
 
           <label className="block text-sm font-medium text-slate-700">
             Company Name
