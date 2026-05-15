@@ -955,6 +955,29 @@ function proformaLookupPrice(priceMap, code, productName) {
   return null
 }
 
+// Word-overlap fuzzy fallback — used when direct code/name lookups in a priceMap fail
+function fuzzyPriceLookup(itemCode = '', itemName = '', wordIndex = []) {
+  if (!Array.isArray(wordIndex) || wordIndex.length === 0) return null
+  const queryWords = new Set([
+    ...normalizeSkuCode(itemCode).split(/\s+/),
+    ...normalizeSkuCode(itemName).split(/\s+/),
+  ].filter(w => w.length >= 3))
+  if (queryWords.size === 0) return null
+  let bestEntry = null
+  let bestScore = 0
+  for (const { words, entry } of wordIndex) {
+    let overlap = 0
+    for (const w of queryWords) {
+      if (words.has(w)) overlap++
+    }
+    if (overlap >= 2 && overlap > bestScore) {
+      bestScore = overlap
+      bestEntry = entry
+    }
+  }
+  return bestEntry
+}
+
 function buildProformaFromCart({
   orderId,
   userProfile,
