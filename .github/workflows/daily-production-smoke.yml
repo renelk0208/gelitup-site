@@ -1,0 +1,37 @@
+name: Daily Production Smoke
+
+on:
+  schedule:
+    # 07:00 SAST (UTC+2) = 05:00 UTC every morning
+    - cron: '0 5 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run public route smoke checks
+        env:
+          SMOKE_BASE_URL: ${{ secrets.SMOKE_BASE_URL }}
+        run: node scripts/predeploy-smoke.mjs ${{ secrets.SMOKE_BASE_URL || 'https://gelitup.com' }}
+
+      - name: Run browser smoke check (public + distributor portal)
+        env:
+          SMOKE_BASE_URL: ${{ secrets.SMOKE_BASE_URL }}
+          SMOKE_DISTRIBUTOR_EMAIL: ${{ secrets.SMOKE_DISTRIBUTOR_EMAIL }}
+          SMOKE_DISTRIBUTOR_PASSWORD: ${{ secrets.SMOKE_DISTRIBUTOR_PASSWORD }}
+        run: node scripts/smoke-e2e.mjs
