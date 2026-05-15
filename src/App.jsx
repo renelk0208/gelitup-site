@@ -16901,8 +16901,11 @@ function App() {
         // User arrived via a password-reset email link — flag recovery mode and send to
         // the create-password form.  The ?code= is already consumed by the SDK so we
         // cannot rely on URL params; this event is the only reliable signal.
+        const recoveryEmail = String(session?.user?.email || '').trim().toLowerCase()
         setPendingRecoverySession(true)
-        navigate('/portal/login?mode=create-password')
+        navigate(recoveryEmail
+          ? `/portal/login?mode=create-password&email=${encodeURIComponent(recoveryEmail)}`
+          : '/portal/login?mode=create-password')
         setAuthReady(true)
         return
       }
@@ -17382,10 +17385,6 @@ function App() {
     const normalizedEmail = String(email || '').trim().toLowerCase()
     const isInternalBypassEmail = PORTAL_INTERNAL_BYPASS_EMAILS.has(normalizedEmail)
 
-    if (!normalizedEmail) {
-      return { ok: false, message: 'Business email is required.' }
-    }
-
     if (!password || password.length < 8) {
       return { ok: false, message: 'Password must be at least 8 characters.' }
     }
@@ -17401,12 +17400,17 @@ function App() {
     // If the user arrived via a Supabase password-reset email link (isRecoveryFlow=true),
     // the SDK has already exchanged the code for a recovery session — call updateUser directly.
     if (isRecoveryFlow) {
+      const { data: recoveryUserData } = await supabase.auth.getUser()
+      const recoveryEmail = String(recoveryUserData?.user?.email || normalizedEmail).trim().toLowerCase()
       const { error: updateError } = await supabase.auth.updateUser({ password })
       if (updateError) {
         if (/not exist|invalid|expired/i.test(updateError.message || '')) {
           return { ok: false, message: 'Your reset link has expired. Please request a new password reset email.' }
         }
         return { ok: false, message: updateError.message || 'Password update failed.' }
+      }
+      if (recoveryEmail) {
+        localStorage.setItem('portalRememberedEmail', recoveryEmail)
       }
       setIsPortalAuthenticated(true)
       return {
@@ -17415,6 +17419,10 @@ function App() {
         navigateToDashboard: true,
         debugTrace: 'create-password -> recovery-updateUser',
       }
+    }
+
+    if (!normalizedEmail) {
+      return { ok: false, message: 'Business email is required.' }
     }
 
     // Check if user already has an active session — this happens when they clicked
