@@ -29,11 +29,15 @@ jobs:
           SMOKE_BASE_URL: ${{ secrets.SMOKE_BASE_URL }}
         run: node scripts/predeploy-smoke.mjs ${{ secrets.SMOKE_BASE_URL || 'https://gelitup.com' }}
 
-      - name: Run browser smoke check (public + distributor portal)
+      - name: Run browser smoke check (public + registration + B2B portal + distributor portal)
         env:
           SMOKE_BASE_URL: ${{ secrets.SMOKE_BASE_URL }}
           SMOKE_DISTRIBUTOR_EMAIL: ${{ secrets.SMOKE_DISTRIBUTOR_EMAIL }}
           SMOKE_DISTRIBUTOR_PASSWORD: ${{ secrets.SMOKE_DISTRIBUTOR_PASSWORD }}
+          SMOKE_B2B_EMAIL: ${{ secrets.SMOKE_B2B_EMAIL }}
+          SMOKE_B2B_PASSWORD: ${{ secrets.SMOKE_B2B_PASSWORD }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node scripts/smoke-e2e.mjs
 
       - name: Send failure alert email
