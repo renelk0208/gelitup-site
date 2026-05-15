@@ -35,3 +35,23 @@ jobs:
           SMOKE_DISTRIBUTOR_EMAIL: ${{ secrets.SMOKE_DISTRIBUTOR_EMAIL }}
           SMOKE_DISTRIBUTOR_PASSWORD: ${{ secrets.SMOKE_DISTRIBUTOR_PASSWORD }}
         run: node scripts/smoke-e2e.mjs
+
+      - name: Send failure alert email
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.NOTIFY_SMTP_SERVER }}
+          server_port: ${{ secrets.NOTIFY_SMTP_PORT }}
+          username: ${{ secrets.NOTIFY_SMTP_USERNAME }}
+          password: ${{ secrets.NOTIFY_SMTP_PASSWORD }}
+          subject: "⚠️ GEL.IT.UP daily smoke check FAILED"
+          to: rene@gelitup.com
+          from: GEL.IT.UP Monitor <${{ secrets.NOTIFY_SMTP_USERNAME }}>
+          body: |
+            The daily production smoke check for gelitup.com has FAILED.
+
+            Time: ${{ github.run_id }}
+            View full logs and error details:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Check the logs to see which page or route failed.
