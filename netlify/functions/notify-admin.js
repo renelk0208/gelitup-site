@@ -168,6 +168,50 @@ async function triggerWorkflow(email, issueType, issueLabel, message, issueUrl, 
   return { ok: true }
 }
 
+// ─── 4. Client acknowledgement email ─────────────────────────────────────────
+// Sent automatically to the client when their login is blocked due to pending
+// approval — so they know their application was received and is being processed.
+async function sendClientAck(email, issueType, now) {
+  if (!SMTP_SERVER || !SMTP_USER || !SMTP_PASS) return { skipped: 'smtp_not_configured' }
+  if (!['pending_approval', 'login_blocked'].includes(issueType)) return { skipped: 'not_applicable' }
+
+  const transporter = nodemailer.createTransport({
+    host: SMTP_SERVER,
+    port: SMTP_PORT,
+    secure: SMTP_PORT === 465,
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
+  })
+
+  await transporter.sendMail({
+    from:    `GEL.IT.UP Portal <${SMTP_USER}>`,
+    to:      email,
+    subject: `Your GEL.IT.UP B2B application — we're on it`,
+    text: [
+      `Hi,`,
+      ``,
+      `We noticed you tried to sign in to the GEL.IT.UP B2B portal but couldn't access your account.`,
+      ``,
+      `Your application is currently under review. We aim to process all applications within 1 hour — you'll receive a confirmation email as soon as your account is activated.`,
+      ``,
+      `If you have any questions in the meantime, reply to this email or reach us at distribution@gelitup.com.`,
+      ``,
+      `The GEL.IT.UP Team`,
+    ].join('\n'),
+    html: `
+      <div style="font-family:sans-serif;font-size:14px;color:#333;max-width:480px">
+        <p>Hi,</p>
+        <p>We noticed you tried to sign in to the <strong>GEL.IT.UP B2B portal</strong> but couldn't access your account.</p>
+        <p>Your application is currently under review. We aim to process all applications <strong>within 1 hour</strong> — you'll receive a confirmation email as soon as your account is activated.</p>
+        <p>If you have any questions in the meantime, simply reply to this email or reach us at <a href="mailto:distribution@gelitup.com">distribution@gelitup.com</a>.</p>
+        <p style="margin-top:20px">The GEL.IT.UP Team</p>
+        <p style="margin-top:16px;font-size:12px;color:#aaa">GEL.IT.UP by GIUP® — gelitup.com</p>
+      </div>
+    `,
+  })
+
+  return { ok: true }
+}
+
 // ─── Handler ──────────────────────────────────────────────────────────────────
 export const handler = async (event) => {
   const headers = { 'Content-Type': 'application/json' }
@@ -194,14 +238,18 @@ export const handler = async (event) => {
   const issueLabel = ISSUE_LABELS[issueType] || issueType
   const now = new Date().toUTCString()
 
-  // Email + GitHub Issue fire in parallel
-  const [emailResult, issueResult] = await Promise.allSettled([
+  // Email to admin + GitHub Issue + client ack fire in parallel
+  const [emailResult, issueResult, clientAckResult] = await Promise.allSettled([
     sendEmail(email, issueLabel, message, now),
     createGitHubIssue(email, issueType, issueLabel, message, now),
+    sendClientAck(email, issueType, now),
   ])
 
   if (emailResult.status === 'rejected') {
     console.error('[notify-admin] email error:', emailResult.reason?.message)
+  }
+  if (clientAckResult.status === 'rejected') {
+    console.error('[notify-admin] client ack error:', clientAckResult.reason?.message)
   }
 
   // Extract issue details for the workflow dispatch
@@ -219,10 +267,11 @@ export const handler = async (event) => {
     statusCode: 200,
     headers,
     body: JSON.stringify({
-      ok:       true,
-      email:    emailResult.status === 'fulfilled'  ? emailResult.value  : { error: emailResult.reason?.message },
-      issue:    issueResult.status === 'fulfilled'  ? issueResult.value  : { error: issueResult.reason?.message },
-      workflow: workflowResult || { skipped: true },
+      ok:        true,
+      email:     emailResult.status === 'fulfilled'     ? emailResult.value     : { error: emailResult.reason?.message },
+      issue:     issueResult.status === 'fulfilled'     ? issueResult.value     : { error: issueResult.reason?.message },
+      clientAck: clientAckResult.status === 'fulfilled' ? clientAckResult.value : { error: clientAckResult.reason?.message },
+      workflow:  workflowResult || { skipped: true },
     }),
   }
 }

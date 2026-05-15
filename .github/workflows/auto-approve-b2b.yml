@@ -1,0 +1,57 @@
+name: Auto-Approve B2B Applications
+
+# Runs every 15 minutes. Any B2B client application that has been waiting in
+# 'pending' or 'submitted' status for more than 1 hour is automatically
+# approved and the client receives a welcome email with their portal login link.
+#
+# NOTE: Distributor applications are NOT auto-approved — they require manual
+# tier assignment by an admin.
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}   # allow manual trigger for testing
+
+jobs:
+  auto-approve:
+    name: Auto-approve waiting B2B applications
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run auto-approve script
+        env:
+          SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NOTIFY_SMTP_SERVER:        ${{ secrets.NOTIFY_SMTP_SERVER }}
+          NOTIFY_SMTP_PORT:          ${{ secrets.NOTIFY_SMTP_PORT }}
+          NOTIFY_SMTP_USERNAME:      ${{ secrets.NOTIFY_SMTP_USERNAME }}
+          NOTIFY_SMTP_PASSWORD:      ${{ secrets.NOTIFY_SMTP_PASSWORD }}
+          PORTAL_URL:                https://gelitup.com/portal/login
+        run: node scripts/auto-approve-b2b.mjs
+
+      - name: Alert on failure
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.NOTIFY_SMTP_SERVER }}
+          server_port:    ${{ secrets.NOTIFY_SMTP_PORT }}
+          username:       ${{ secrets.NOTIFY_SMTP_USERNAME }}
+          password:       ${{ secrets.NOTIFY_SMTP_PASSWORD }}
+          subject:        "⚠️ GEL.IT.UP auto-approve B2B job FAILED"
+          to:             rene@gelitup.com
+          from:           "GEL.IT.UP Monitor <${{ secrets.NOTIFY_SMTP_USERNAME }}>"
+          body: |
+            The auto-approve B2B Applications job failed.
+
+            View logs:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
