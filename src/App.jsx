@@ -1,4 +1,4 @@
-import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Component, Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import appLogo from '/gelitup_logo.png'
 import PWABadge from './PWABadge.jsx'
@@ -1760,6 +1760,96 @@ function formatCatalogueDisplayKey(rawKey = '') {
     .replace(/\bIRRODESCENT\b/gi, 'IRRIDESCENT')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+function formatPortalDateTime(value) {
+  if (!value) return 'Date unavailable'
+
+  const parsedDate = new Date(value)
+  return Number.isNaN(parsedDate.getTime()) ? String(value) : parsedDate.toLocaleString()
+}
+
+function normalizePortalOrderItems(rawItems) {
+  if (Array.isArray(rawItems)) {
+    return rawItems
+      .map((item) => {
+        if (typeof item === 'string') return item.trim()
+        if (item && typeof item === 'object') {
+          return [item.name, item.sku, item.code]
+            .map((value) => String(value || '').trim())
+            .find(Boolean) || ''
+        }
+        return ''
+      })
+      .filter(Boolean)
+  }
+
+  if (typeof rawItems === 'string') {
+    try {
+      return normalizePortalOrderItems(JSON.parse(rawItems))
+    }
+    catch {
+      return rawItems
+        .split(',')
+        .map((item) => String(item || '').trim())
+        .filter(Boolean)
+    }
+  }
+
+  return []
+}
+
+function normalizePortalOrderRow(order) {
+  if (!order || typeof order !== 'object') return null
+
+  const normalizedItems = normalizePortalOrderItems(order.items)
+  const numericUnits = Number(order.total_units)
+
+  return {
+    ...order,
+    items: normalizedItems,
+    total_units: Number.isFinite(numericUnits) ? numericUnits : normalizedItems.length,
+  }
+}
+
+class PortalModuleErrorBoundary extends Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false, errorMessage: '' }
+  }
+
+  static getDerivedStateFromError(error) {
+    return {
+      hasError: true,
+      errorMessage: error instanceof Error ? error.message : 'Unexpected portal error',
+    }
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('[PortalModuleErrorBoundary]', error, errorInfo)
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.resetKey !== this.props.resetKey && this.state.hasError) {
+      this.setState({ hasError: false, errorMessage: '' })
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <section className="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-700">
+          <p className="font-semibold">{this.props.moduleLabel || 'Portal section'} could not be loaded.</p>
+          <p className="mt-1">The page did not render correctly, but the portal session is still active.</p>
+          {this.state.errorMessage && (
+            <p className="mt-2 text-xs text-rose-600">Error: {this.state.errorMessage}</p>
+          )}
+        </section>
+      )
+    }
+
+    return this.props.children
+  }
 }
 
 function scoreCatalogueDisplayKey(rawKey = '', formattedKey = '') {
@@ -14505,7 +14595,7 @@ function OrdersModule() {
         return
       }
 
-      setOrders(data || [])
+      setOrders((data || []).map(normalizePortalOrderRow).filter(Boolean))
       setIsLoading(false)
     }
 
@@ -14536,7 +14626,7 @@ function OrdersModule() {
         },
         (payload) => {
           setOrders((prev) =>
-            prev.map((o) => (o.id === payload.new.id ? { ...o, ...payload.new } : o)),
+            prev.map((o) => (o.id === payload.new.id ? normalizePortalOrderRow({ ...o, ...payload.new }) : o)).filter(Boolean),
           )
         },
       )
@@ -14553,7 +14643,7 @@ function OrdersModule() {
         <p className="mt-1 text-sm text-slate-600">Your full order history. Expand any order to see line items, or request a cancellation before it ships.</p>
       </div>
 
-      {orders.some((o) => o.payment_status === 'invoice_ready') && (
+      {orders.some((o) => o?.payment_status === 'invoice_ready') && (
         <div className="rounded-2xl border-2 border-fuchsia-400/50 bg-fuchsia-50 p-4 sm:p-6">
           <h3 className="bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-lg font-semibold text-transparent">
             Action Required — Invoice Ready
@@ -14562,7 +14652,7 @@ function OrdersModule() {
             The following orders have been confirmed. Complete payment to proceed with fulfilment.
           </p>
           <div className="mt-4 space-y-4">
-            {orders.filter((o) => o.payment_status === 'invoice_ready').map((order) => (
+            {orders.filter((o) => o?.payment_status === 'invoice_ready').map((order) => (
               <div key={order.id} className="rounded-xl border border-fuchsia-200 bg-white p-4">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
@@ -14623,7 +14713,7 @@ function OrdersModule() {
           <div className="space-y-3">
             {orders.map((order) => {
               const isExpanded = expandedOrderId === order.id
-              const itemLines = Array.isArray(order.items) ? order.items.filter(i => typeof i === 'string') : []
+              const itemLines = normalizePortalOrderItems(order.items)
               const cancelRequested = cancelRequestedIds.has(order.id) || String(order.status || '').toLowerCase() === 'cancellation_requested'
               const isCancelling = cancellingId === order.id
               const isConfirming = cancelConfirmId === order.id
@@ -14633,7 +14723,7 @@ function OrdersModule() {
                   <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                       <span className="font-bold text-slate-900">#{order.id}</span>
-                      <span className="text-slate-500">{new Date(order.created_at).toLocaleString()}</span>
+                      <span className="text-slate-500">{formatPortalDateTime(order.created_at)}</span>
                       <span className="text-slate-700">{order.total_units} units</span>
                       {cancelRequested
                         ? <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">Cancellation Requested</span>
@@ -16174,154 +16264,157 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
       </aside>
 
       <div className="space-y-4">
-        {activeModule === 'products' || activeModule === 'catalog' || activeModule === 'profile' ? (
-          <ProductsModule moduleView={activeModule} tier={effectiveTier} pricesAllocated={effectivePricesAllocated} />
-        ) : activeModule === 'orders' ? (
-          <OrdersModule />
-        ) : activeModule === 'support' ? (
-          <SupportModule />
-        ) : (
-          <>
-            <div className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h2 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-2xl font-semibold text-transparent">{modules.find((module) => module.key === activeModule)?.label}</h2>
-              <p className="mt-2 text-sm text-slate-600">Trade account workspace optimized for desktop and mobile management.</p>
-            </div>
-
-            {activeModule === 'overview' && durabilityUpsell.isLoading && (
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
-                Analyzing your order history...
+        <PortalModuleErrorBoundary
+          resetKey={activeModule}
+          moduleLabel={modules.find((module) => module.key === activeModule)?.label || 'Portal section'}
+        >
+          {activeModule === 'products' || activeModule === 'catalog' || activeModule === 'profile' ? (
+            <ProductsModule moduleView={activeModule} tier={effectiveTier} pricesAllocated={effectivePricesAllocated} />
+          ) : activeModule === 'orders' ? (
+            <OrdersModule />
+          ) : activeModule === 'support' ? (
+            <SupportModule />
+          ) : (
+            <>
+              <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                <h2 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-2xl font-semibold text-transparent">{modules.find((module) => module.key === activeModule)?.label}</h2>
+                <p className="mt-2 text-sm text-slate-600">Trade account workspace optimized for desktop and mobile management.</p>
               </div>
-            )}
 
-            {activeModule === 'overview' && durabilityUpsell.shouldShow && (
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Durability Recommendation</p>
-                <p className="mt-2 text-sm text-amber-900">
-                  Maximize your color durability: 85% of top salons pair these shades with the 5-in-1 Superior Base system.
-                  Add a 6-pack to your order for a 10% volume discount?
-                </p>
-                <NavLink
-                  to="/portal/dashboard/products"
-                  className="mt-3 inline-flex rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white"
-                >
-                  Add Base System Products
-                </NavLink>
+              {activeModule === 'overview' && durabilityUpsell.isLoading && (
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
+                  Analyzing your order history...
+                </div>
+              )}
+
+              {activeModule === 'overview' && durabilityUpsell.shouldShow && (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Durability Recommendation</p>
+                  <p className="mt-2 text-sm text-amber-900">
+                    Maximize your color durability: 85% of top salons pair these shades with the 5-in-1 Superior Base system.
+                    Add a 6-pack to your order for a 10% volume discount?
+                  </p>
+                  <NavLink
+                    to="/portal/dashboard/products"
+                    className="mt-3 inline-flex rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white"
+                  >
+                    Add Base System Products
+                  </NavLink>
+                </div>
+              )}
+
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <article className="rounded-xl border border-slate-200 bg-white p-4">
+                  <p className="text-xs text-slate-500">Open Orders</p>
+                  <p className="mt-1 text-2xl font-bold text-slate-900">
+                    {orderStats.openOrders === null ? '—' : orderStats.openOrders}
+                  </p>
+                </article>
+                <article className="rounded-xl border border-slate-200 bg-white p-4">
+                  <p className="text-xs text-slate-500">In Transit</p>
+                  <p className="mt-1 text-2xl font-bold text-slate-900">
+                    {orderStats.inTransit === null ? '—' : orderStats.inTransit}
+                  </p>
+                </article>
+                <article className="rounded-xl border border-slate-200 bg-white p-4">
+                  <p className="text-xs text-slate-500">Total Orders</p>
+                  <p className="mt-1 text-2xl font-bold text-slate-900">
+                    {orderStats.totalOrders === null ? '—' : orderStats.totalOrders}
+                  </p>
+                </article>
+                <article className="rounded-xl border border-slate-200 bg-white p-4">
+                  <p className="text-xs text-slate-500">Last Order</p>
+                  <p className="mt-1 text-lg font-bold text-slate-900">
+                    {orderStats.lastOrderDate ?? '—'}
+                  </p>
+                </article>
               </div>
-            )}
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <article className="rounded-xl border border-slate-200 bg-white p-4">
-                <p className="text-xs text-slate-500">Open Orders</p>
-                <p className="mt-1 text-2xl font-bold text-slate-900">
-                  {orderStats.openOrders === null ? '—' : orderStats.openOrders}
-                </p>
-              </article>
-              <article className="rounded-xl border border-slate-200 bg-white p-4">
-                <p className="text-xs text-slate-500">In Transit</p>
-                <p className="mt-1 text-2xl font-bold text-slate-900">
-                  {orderStats.inTransit === null ? '—' : orderStats.inTransit}
-                </p>
-              </article>
-              <article className="rounded-xl border border-slate-200 bg-white p-4">
-                <p className="text-xs text-slate-500">Total Orders</p>
-                <p className="mt-1 text-2xl font-bold text-slate-900">
-                  {orderStats.totalOrders === null ? '—' : orderStats.totalOrders}
-                </p>
-              </article>
-              <article className="rounded-xl border border-slate-200 bg-white p-4">
-                <p className="text-xs text-slate-500">Last Order</p>
-                <p className="mt-1 text-lg font-bold text-slate-900">
-                  {orderStats.lastOrderDate ?? '—'}
-                </p>
-              </article>
-            </div>
-
-            {activeModule === 'overview' && (() => {
-              const tier = effectiveTier
-              const isTierProfessional = tier === 'professional'
-              const isTierAuthority = tier === 'authority'
-              return (
-                <div className={`rounded-2xl border p-4 sm:p-5 ${
-                  isTierAuthority ? 'border-violet-300 bg-violet-50' :
-                  isTierProfessional ? 'border-fuchsia-200 bg-fuchsia-50' :
-                  'border-slate-200 bg-white'
-                }`}>
-                  <div className="flex items-center gap-3">
-                    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
-                      isTierAuthority ? 'bg-violet-700 text-white' :
-                      isTierProfessional ? 'bg-fuchsia-600 text-white' :
-                      'bg-slate-200 text-slate-600'
-                    }`}>
-                      {isTierAuthority ? '★ Authority Distributor' : isTierProfessional ? 'Professional Distributor' : 'Distributor'}
-                    </span>
-                    <span className="text-xs text-slate-500">
-                      {isTierAuthority ? 'Country Distribution Rights' : isTierProfessional ? 'Regional Distribution' : ''}
-                    </span>
+              {activeModule === 'overview' && (() => {
+                const tier = effectiveTier
+                const isTierProfessional = tier === 'professional'
+                const isTierAuthority = tier === 'authority'
+                return (
+                  <div className={`rounded-2xl border p-4 sm:p-5 ${
+                    isTierAuthority ? 'border-violet-300 bg-violet-50' :
+                    isTierProfessional ? 'border-fuchsia-200 bg-fuchsia-50' :
+                    'border-slate-200 bg-white'
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
+                        isTierAuthority ? 'bg-violet-700 text-white' :
+                        isTierProfessional ? 'bg-fuchsia-600 text-white' :
+                        'bg-slate-200 text-slate-600'
+                      }`}>
+                        {isTierAuthority ? '★ Authority Distributor' : isTierProfessional ? 'Professional Distributor' : 'Distributor'}
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        {isTierAuthority ? 'Country Distribution Rights' : isTierProfessional ? 'Regional Distribution' : ''}
+                      </span>
+                    </div>
+                    {isTierAuthority && (
+                      <div className="mt-3 text-sm text-violet-900">
+                        <p className="font-semibold">Your Account: Country Distribution</p>
+                        <p className="mt-1 text-xs text-violet-700">You hold exclusive country-level distribution rights. Your dedicated account manager and full regulatory pack are available below.</p>
+                      </div>
+                    )}
+                    {isTierProfessional && (
+                      <div className="mt-3 text-sm text-fuchsia-900">
+                        <p className="font-semibold">Your Account: Regional Distribution</p>
+                        <p className="mt-1 text-xs text-fuchsia-700">You are an approved regional distributor. Browse the full catalogue and place wholesale orders below.</p>
+                      </div>
+                    )}
+                    {!tier && (
+                      <p className="mt-2 text-xs text-slate-500">Distribution tier not set — contact your account manager.</p>
+                    )}
                   </div>
-                  {isTierAuthority && (
-                    <div className="mt-3 text-sm text-violet-900">
-                      <p className="font-semibold">Your Account: Country Distribution</p>
-                      <p className="mt-1 text-xs text-violet-700">You hold exclusive country-level distribution rights. Your dedicated account manager and full regulatory pack are available below.</p>
-                    </div>
-                  )}
-                  {isTierProfessional && (
-                    <div className="mt-3 text-sm text-fuchsia-900">
-                      <p className="font-semibold">Your Account: Regional Distribution</p>
-                      <p className="mt-1 text-xs text-fuchsia-700">You are an approved regional distributor. Browse the full catalogue and place wholesale orders below.</p>
-                    </div>
-                  )}
-                  {!tier && (
-                    <p className="mt-2 text-xs text-slate-500">Distribution tier not set — contact your account manager.</p>
-                  )}
+                )
+              })()}
+
+              {activeModule === 'overview' && (
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">DIST_PERFORMANCE_01</p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                    <article className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <p className="text-xs text-slate-500">Top Selling Color in Your Region</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-900">{performanceWidget.topSellingColor}</p>
+                    </article>
+                    <article className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <p className="text-xs text-slate-500">Available Credit Limit</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-900">N/A</p>
+                    </article>
+                    <article className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <p className="text-xs text-slate-500">Quick Restock</p>
+                      <p className="mt-1 text-xs text-slate-600">Add {DEFAULT_PACKAGE_ITEM_QTY}x of all Pod_1 colors to cart in one click.</p>
+                      <button
+                        onClick={() => navigate('/portal/dashboard/products?quickRestock=pod_1')}
+                        className="mt-2 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white"
+                      >
+                        Trigger Pod_1 Restock
+                      </button>
+                    </article>
+                  </div>
                 </div>
-              )
-            })()}
+              )}
 
-            {activeModule === 'overview' && (
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">DIST_PERFORMANCE_01</p>
-                <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                  <article className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                    <p className="text-xs text-slate-500">Top Selling Color in Your Region</p>
-                    <p className="mt-1 text-sm font-semibold text-slate-900">{performanceWidget.topSellingColor}</p>
-                  </article>
-                  <article className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                    <p className="text-xs text-slate-500">Available Credit Limit</p>
-                    <p className="mt-1 text-sm font-semibold text-slate-900">N/A</p>
-                  </article>
-                  <article className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                    <p className="text-xs text-slate-500">Quick Restock</p>
-                    <p className="mt-1 text-xs text-slate-600">Add {DEFAULT_PACKAGE_ITEM_QTY}x of all Pod_1 colors to cart in one click.</p>
-                    <button
-                      onClick={() => navigate('/portal/dashboard/products?quickRestock=pod_1')}
-                      className="mt-2 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white"
-                    >
-                      Trigger Pod_1 Restock
-                    </button>
-                  </article>
+              {activeModule === 'overview' && (
+                <div className="rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-4 sm:p-5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-700">B2B Regulatory Docs</p>
+                  <p className="mt-2 text-sm text-fuchsia-900">Generate the inspector-ready certificate including HEMA-Free, TPO-Free, and CI 77820-Free declarations. The document will open in a new tab — review it before printing or saving.</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void printComplianceCertificate()
+                    }}
+                    className="mt-3 inline-flex rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
+                  >
+                    View Compliance Certificate
+                  </button>
                 </div>
-              </div>
-            )}
-
-            {activeModule === 'overview' && (
-              <div className="rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-4 sm:p-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-700">B2B Regulatory Docs</p>
-                <p className="mt-2 text-sm text-fuchsia-900">Generate the inspector-ready certificate including HEMA-Free, TPO-Free, and CI 77820-Free declarations. The document will open in a new tab — review it before printing or saving.</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    void printComplianceCertificate()
-                  }}
-                  className="mt-3 inline-flex rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
-                >
-                  View Compliance Certificate
-                </button>
-              </div>
-            )}
-
-
-          </>
-        )}
+              )}
+            </>
+          )}
+        </PortalModuleErrorBoundary>
       </div>
     </section>
   )
