@@ -5873,6 +5873,13 @@ const navItems = [
 ]
 
 function Nav({ onOpenContactModal }) {
+  const [registerMenuOpen, setRegisterMenuOpen] = useState(false)
+  const location = useLocation()
+
+  useEffect(() => {
+    setRegisterMenuOpen(false)
+  }, [location.pathname])
+
   return (
     <nav className="hidden gap-1 md:flex items-center">
       {/* Content links */}
@@ -5929,21 +5936,43 @@ function Nav({ onOpenContactModal }) {
       {/* Divider */}
       <span className="mx-1.5 h-5 w-px bg-white/20" aria-hidden="true" />
 
-        {/* Secondary — B2B registration */}
-      <NavLink
-        to="/portal/register"
-        className={({ isActive }) =>
-          `rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
-            isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/80 hover:border-white/50 hover:bg-white/10 hover:!text-white'
-          }`
-        }
-      >
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setRegisterMenuOpen((current) => !current)}
+          aria-expanded={registerMenuOpen}
+          aria-haspopup="menu"
+          className="inline-flex items-center gap-2 rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] !text-white/80 transition duration-300 hover:border-white/50 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
+        >
           Register
-      </NavLink>
+          <svg viewBox="0 0 20 20" fill="none" className={`h-4 w-4 transition-transform duration-200 ${registerMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true">
+            <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
 
-        {/* Sign In — existing B2B clients */}
+        {registerMenuOpen && (
+          <div className="absolute right-0 top-[calc(100%+0.55rem)] z-50 w-64 rounded-2xl border border-white/15 bg-[#111111] p-2 shadow-[0_18px_48px_rgba(0,0,0,0.38)] backdrop-blur-xl">
+            <NavLink
+              to="/portal/register"
+              className="block rounded-xl px-3 py-3 transition duration-200 hover:bg-white/10"
+            >
+              <span className="block text-xs font-semibold uppercase tracking-[0.12em] text-fuchsia-300">B2B</span>
+              <span className="mt-1 block text-sm font-semibold text-white">Client Registration</span>
+            </NavLink>
+            <NavLink
+              to="/distributors"
+              className="block rounded-xl px-3 py-3 transition duration-200 hover:bg-white/10"
+            >
+              <span className="block text-xs font-semibold uppercase tracking-[0.12em] text-fuchsia-300">Distribution</span>
+              <span className="mt-1 block text-sm font-semibold text-white">Distributor Registration</span>
+            </NavLink>
+          </div>
+        )}
+      </div>
+
+      {/* Sign In — existing B2B clients */}
       <NavLink
-          to="/portal/login"
+        to="/portal/login"
         className={({ isActive }) =>
           `rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
             isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/80 hover:border-white/50 hover:bg-white/10 hover:!text-white'
@@ -5958,9 +5987,13 @@ function Nav({ onOpenContactModal }) {
 
 function MobileNav({ onOpenContactModal }) {
   const [open, setOpen] = useState(false)
+  const [registerMenuOpen, setRegisterMenuOpen] = useState(false)
   const location = useLocation()
 
-  useEffect(() => { setOpen(false) }, [location.pathname])
+  useEffect(() => {
+    setOpen(false)
+    setRegisterMenuOpen(false)
+  }, [location.pathname])
 
   return (
     <>
@@ -6010,18 +6043,41 @@ function MobileNav({ onOpenContactModal }) {
         {/* Nav links */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           {/* Quick-action CTAs at the top */}
-          {/* Secondary — B2B registration */}
-          <NavLink
-            to="/portal/register"
-            onClick={() => setOpen(false)}
-            className={({ isActive }) =>
-              `block rounded-lg border border-white/25 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-[0.06em] transition duration-200 ${
-                isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/70 hover:border-white/40 hover:bg-white/10 hover:!text-white'
-              }`
-            }
-          >
-            Register
-          </NavLink>
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-2">
+            <button
+              type="button"
+              onClick={() => setRegisterMenuOpen((current) => !current)}
+              aria-expanded={registerMenuOpen}
+              className="flex w-full items-center justify-between rounded-lg px-2 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-white/75 transition duration-200 hover:bg-white/10 hover:text-white"
+            >
+              <span>Register</span>
+              <svg viewBox="0 0 20 20" fill="none" className={`h-4 w-4 transition-transform duration-200 ${registerMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true">
+                <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+
+            {registerMenuOpen && (
+              <div className="mt-2 grid gap-2">
+                <NavLink
+                  to="/portal/register"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg border border-white/20 px-3 py-2.5 transition duration-200 hover:border-white/35 hover:bg-white/10"
+                >
+                  <span className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-fuchsia-300">B2B</span>
+                  <span className="mt-1 block text-sm font-semibold text-white">Client Registration</span>
+                </NavLink>
+                <NavLink
+                  to="/distributors"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg border border-white/20 px-3 py-2.5 transition duration-200 hover:border-white/35 hover:bg-white/10"
+                >
+                  <span className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-fuchsia-300">Distribution</span>
+                  <span className="mt-1 block text-sm font-semibold text-white">Distributor Registration</span>
+                </NavLink>
+              </div>
+            )}
+          </div>
+
           <NavLink
             to="/portal/login"
             onClick={() => setOpen(false)}
@@ -7165,16 +7221,21 @@ function DistributorsPage() {
         <p className="mt-3 max-w-3xl text-sm font-semibold uppercase tracking-[0.08em] sm:text-base" style={{ color: 'rgba(255,255,255,0.75)' }}>
           Live Coverage Data. Verified Network. Legitimate B2B Database.
         </p>
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
           <NavLink to="/become-distributor" className="inline-flex rounded-lg bg-[#c8386e] px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-[#b52f61]">
             Distributor Registration
           </NavLink>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'rgba(255,255,255,0.58)' }}>
+            Select an official market
+          </p>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-1.5 sm:gap-2">
           {DISTRIBUTOR_COUNTRY_POINTS.map((item) => (
             <button
               key={item.country}
               type="button"
               onClick={() => setSelectedCountry(item.country)}
-              className="rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] transition"
+              className="rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] transition sm:px-2.5 sm:text-[11px]"
               style={selectedCountry === item.country
                 ? { backgroundColor: '#c8386e', color: '#ffffff', border: '1px solid #c8386e' }
                 : { backgroundColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.20)' }}
@@ -7195,7 +7256,7 @@ function DistributorsPage() {
             View source
           </a>
         </p>
-        <div className="mt-3 overflow-hidden rounded-xl bg-white" style={{ border: '1px solid #f0c4d0' }}>
+        <div className="mt-3 overflow-hidden rounded-[22px] bg-white shadow-[0_24px_60px_rgba(200,56,110,0.12)]" style={{ border: '1px solid rgba(200,56,110,0.18)' }}>
           <Suspense fallback={<div className="h-[320px] w-full animate-pulse sm:h-[420px]" style={{ backgroundColor: '#fdf0f4' }} />}>
             <DistributorMap
               center={mapCenter}
