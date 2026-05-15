@@ -6668,8 +6668,8 @@ function HomePage({ onOpenContactModal }) {
                 <NavLink to="/portal/login" className="rounded-lg border border-white/40 bg-white/10 px-5 py-2.5 text-sm font-bold text-white transition duration-300 hover:bg-white/20">
                   Sign In
                 </NavLink>
-                <NavLink to="/distributors" className="rounded-lg border-2 border-white/80 bg-white/15 px-5 py-2.5 text-sm font-bold text-white shadow-[0_2px_12px_rgba(0,0,0,0.35)] backdrop-blur-sm transition duration-300 hover:bg-white/25">
-                  Distribution Network
+                <NavLink to="/distributor-packages" className="rounded-lg border-2 border-white/80 bg-white/15 px-5 py-2.5 text-sm font-bold text-white shadow-[0_2px_12px_rgba(0,0,0,0.35)] backdrop-blur-sm transition duration-300 hover:bg-white/25">
+                  Distribution Tiers
                 </NavLink>
               </div>
               <p className="mt-3 text-xs font-medium text-white/70">
@@ -7839,7 +7839,7 @@ function BuyerRegister() {
         </ul>
         <p className="mt-8 text-xs text-slate-400">
           Looking for wholesale distribution?{' '}
-          <NavLink to="/portal/register" className="font-semibold text-fuchsia-400 hover:underline">Apply as a distributor</NavLink>
+          <NavLink to="/become-distributor" className="font-semibold text-fuchsia-400 hover:underline">Apply as a distributor</NavLink>
         </p>
       </div>
 
@@ -17830,7 +17830,7 @@ function App() {
                 <Route path="/admin-login" element={<Navigate to="/portal/admin-login" replace />} />
                 <Route path="/portal-client-login" element={<Navigate to="/portal/login" replace />} />
                 <Route path="/portal-admin-login" element={<Navigate to="/portal/admin-login" replace />} />
-                <Route path="/portal/register" element={<PortalRegister onRegister={handlePortalRegister} />} />
+                <Route path="/portal/register" element={<BuyerRegister />} />
                 <Route path="/portal/buy" element={<Navigate to="/checkout" replace />} />
                 <Route path="/portal/forgot-password" element={<PortalForgotPassword />} />
                 <Route
