@@ -3479,7 +3479,7 @@ function FullCataloguePage() {
           { codes: ['1280x1280_nail_bufer_metallic', '1280x1280 nail bufer metallic', 'Boat Shape metallic Nail Base', 'Boat-Shape-metallic-Nail-Base'], target: 'GIUP Boat Shape metallic Nail File' },
           { codes: ['1280x1280_buffer_100_120', '1280x1280 buffer 100 120', '100_120_file2', '100 120 file2'], target: 'GIUP Boat Shape Nail File 100/120 Purple Sponge' },
           { codes: ['1280x1280_buffer_180_180', '1280x1280 buffer 180 180', '180_180_file2', '180 180 file2'], target: 'Nail Files 180/180 Pink Sponge' },
-          { codes: ['buffing block', 'BUFFING BLOCK', '\u0392uffing block', '\u0392uffing_block'], target: 'Nail Files 100/100' },
+          { codes: ['buffing block', 'BUFFING BLOCK', '\u0392uffing block', '\u0392uffing_block'], target: 'GIUP Buffing Block 180/180 Packet of 10' },
           { codes: ['nail file 100 1001', 'nail-file 100-1001'], target: 'Nail Files 100/100' },
           { codes: ['nail_forms_5', 'nail forms 5', 'NAIL FORMS 5', 'NAIL FORMS'], target: 'GEL.IT.UP by GIUP® Nail Forms' },
           { codes: ['MIRROR CLEAR', 'SP 8001', 'SP8001'], target: 'SP8001 Mirror Clear Powder' },
@@ -11090,7 +11090,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['1280x1280_nail_bufer_metallic', '1280x1280 nail bufer metallic', 'Boat Shape metallic Nail Base', 'Boat-Shape-metallic-Nail-Base'], target: 'GIUP Boat Shape metallic Nail File' },
           { codes: ['1280x1280_buffer_100_120', '1280x1280 buffer 100 120', '100_120_file2', '100 120 file2', 'Nail Files Buffer 100 180 Purple Sponge', 'Nail Files Buffer 100-180 Purple Sponge'], target: 'GIUP Boat Shape Nail File 100/120 Purple Sponge' },
           { codes: ['1280x1280_buffer_180_180', '1280x1280 buffer 180 180', '180_180_file2', '180 180 file2', 'Nail Files Buffer 180 180 Pink Sponge', 'Nail Files Buffer 180-180 Pink Sponge'], target: 'Nail Files 180/180 Pink Sponge' },
-          { codes: ['?uffing_block', '?uffing block', 'buffing block', 'BUFFING BLOCK', '\u0392uffing block', '\u0392uffing_block'], target: 'Nail Files 100/100' },
+          { codes: ['?uffing_block', '?uffing block', 'buffing block', 'BUFFING BLOCK', '\u0392uffing block', '\u0392uffing_block'], target: 'GIUP Buffing Block 180/180 Packet of 10' },
           { codes: ['nail file 100 1001', 'nail-file 100-1001'], target: 'Nail Files 100/100' },
           // Nail Forms
           { codes: ['nail_forms_5', 'nail forms 5', 'NAIL FORMS 5', 'NAIL FORMS'], target: 'GEL.IT.UP by GIUP® Nail Forms' },
@@ -11470,7 +11470,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           // Consumables
           { codes: ['apron', 'APRON'], target: 'Apron Black With Logo' },
           { codes: ['nailsticks clear scaled 1', 'nailsticks_clear-scaled-1', 'NAILSTICKS CLEAR SCALED 1'], target: 'Nail sticks clear with ring' },
-          { codes: ['\u0392uffing block', '\u0392uffing_block'], target: 'Nail Files 100/100' },
+          { codes: ['\u0392uffing block', '\u0392uffing_block'], target: 'GIUP Buffing Block 180/180 Packet of 10' },
           { codes: ['Fual Forms SQUARE', 'FUAL FORMS SQUARE', 'fual forms square'], target: 'DUAL FORMS SQUARE' },
           { codes: ['Dual Forms LONG COFFIN', 'DUAL FORMS LONG COFFIN'], target: 'SOAK OFF GEL TIPS LONG COFFIN' },
           { codes: ['Dual Forms MEDIUM SQUARE', 'DUAL FORMS MEDIUM SQUARE'], target: 'SOAK OFF GEL TIPS MEDIUM SQUARE' },
