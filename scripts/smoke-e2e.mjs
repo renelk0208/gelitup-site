@@ -247,6 +247,27 @@ async function checkSupabaseAuthConfig() {
     fail(`Supabase b2b_registrations check error: ${err.message}`)
   }
 
+  // Check b2b_login_issues table is reachable and flag a flood of unresolved errors
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/b2b_login_issues?select=id,issue_type,created_at&resolved=eq.false&order=created_at.desc&limit=20`, {
+      headers: { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}` },
+    })
+    if (!res.ok) {
+      fail(`Supabase b2b_login_issues: HTTP ${res.status} — table may be missing (run supabase/sql/create_b2b_login_issues.sql)`)
+    } else {
+      const rows = await res.json()
+      pass(`Supabase b2b_login_issues: reachable (${rows.length} unresolved issue(s))`)
+      const unexpectedErrors = rows.filter(r => r.issue_type === 'unexpected_error')
+      if (unexpectedErrors.length >= 5) {
+        fail(`Supabase b2b_login_issues: ${unexpectedErrors.length} unresolved unexpected_error entries — login flow may be broken`)
+      } else if (unexpectedErrors.length > 0) {
+        note(`Supabase b2b_login_issues: ${unexpectedErrors.length} unresolved unexpected_error entries`)
+      }
+    }
+  } catch (err) {
+    fail(`Supabase b2b_login_issues check error: ${err.message}`)
+  }
+
   // Check auth users table is reachable (verifies auth is up)
   try {
     const res = await fetch(`${supabaseUrl}/rest/v1/rpc/version`, {

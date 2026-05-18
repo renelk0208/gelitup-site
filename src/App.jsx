@@ -418,6 +418,25 @@ function logLoginIssue(email, issueType, message) {
   }).catch(() => {})
 }
 
+/**
+ * Returns true if a Supabase signUp result indicates the email already belongs
+ * to an existing account.  When email obfuscation is enabled Supabase returns a
+ * user object with an empty `identities` array rather than an error.
+ */
+function isExistingUserSignUpResult(signUpResult) {
+  const user = signUpResult?.data?.user
+  if (!user) return false
+  return Array.isArray(user.identities) && user.identities.length === 0
+}
+
+/**
+ * Returns true if the Supabase signUp response includes an active session,
+ * meaning the user was signed in immediately (email confirmation disabled).
+ */
+function hasActiveSignUpSession(signUpResult) {
+  return Boolean(signUpResult?.data?.session)
+}
+
 function resolveVatTreatment(country) {
   return COUNTRY_VAT_TREATMENT[country] || 'export_exempt'
 }
@@ -8933,6 +8952,27 @@ function PortalRegister({ onRegister }) {
     }))
     if (fieldName === 'vatNumber') setRegViesResult(null)
   }
+
+  // Auto-detect visitor country on mount (Cloudflare geo via Netlify function)
+  useEffect(() => {
+    fetch('/.netlify/functions/geo')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data?.countryName) {
+          setApplication((current) => {
+            // Only pre-fill if the user hasn't already selected a country
+            if (current.invoiceCountry) return current
+            return {
+              ...current,
+              invoiceCountry: data.countryName,
+              shippingCountry: data.countryName,
+              phone: withCountryDialCode(current.phone, data.countryName),
+            }
+          })
+        }
+      })
+      .catch(() => {/* non-critical — silently ignore */})
+  }, [])
 
   return (
     <section className="mx-auto grid max-w-4xl rounded-2xl border border-slate-200 bg-white md:grid-cols-2 md:overflow-hidden">

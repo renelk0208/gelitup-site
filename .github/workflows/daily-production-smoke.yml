@@ -54,7 +54,7 @@ jobs:
           body: |
             The daily production smoke check for gelitup.com has FAILED.
 
-            Time: ${{ github.run_id }}
+            Run: ${{ github.run_id }}
             View full logs and error details:
             https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 

@@ -2862,6 +2862,14 @@ function LoginIssuesPanel() {
     setIssues([])
   }
 
+  const unresolve = async (id) => {
+    await supabase
+      .from(LOGIN_ISSUES_TABLE)
+      .update({ resolved: false, resolved_at: null })
+      .eq('id', id)
+    setIssues(prev => prev.map(i => i.id === id ? { ...i, resolved: false, resolved_at: null } : i))
+  }
+
   const deleteIssue = async (id) => {
     await supabase.from(LOGIN_ISSUES_TABLE).delete().eq('id', id)
     setIssues(prev => prev.filter(i => i.id !== id))
@@ -2968,6 +2976,14 @@ function LoginIssuesPanel() {
                           className="rounded-md bg-slate-800 px-2.5 py-1 text-xs font-semibold text-white hover:bg-slate-700"
                         >
                           Resolve
+                        </button>
+                      )}
+                      {issue.resolved && (
+                        <button
+                          onClick={() => unresolve(issue.id)}
+                          className="rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-100"
+                        >
+                          Unresolve
                         </button>
                       )}
                       <button
