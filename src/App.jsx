@@ -54,6 +54,7 @@ const SUPPORT_VIBER_URL = import.meta.env.VITE_SUPPORT_VIBER_URL
 const PORTAL_INTERNAL_BYPASS_EMAILS = new Set(
   [
     'distributors@gelitup.com',
+    'rene@gelitup.com',
     ...String(import.meta.env.VITE_PORTAL_INTERNAL_BYPASS_EMAILS || '')
       .split(',')
       .map((entry) => entry.trim().toLowerCase())
@@ -7674,7 +7675,9 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           } catch {
             setIsSubmitting(false)
             sessionStorage.removeItem('portalTabActive')
-            logLoginIssue(email, 'unexpected_error', 'Login threw an unexpected error.')
+            if (!PORTAL_INTERNAL_BYPASS_EMAILS.has(String(email || '').trim().toLowerCase())) {
+              logLoginIssue(email, 'unexpected_error', 'Login threw an unexpected error.')
+            }
             setErrorMessage('An unexpected error occurred. Please try again.')
             return
           }
