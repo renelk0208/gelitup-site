@@ -6,6 +6,7 @@ import { PRODUCT_ALIAS_GROUPS } from './data/productAliases.js'
 import ImportedAnyPage from './pages/imported/ImportedAnyPage.jsx'
 import { hasSupabaseConfig, supabase } from './lib/supabaseClient'
 import useB2BIntelligence from './lib/useB2BIntelligence'
+import { useLang, getTranslations, setLang, SUPPORTED_LANGS } from './lib/i18n'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
@@ -6066,6 +6067,61 @@ function NotFoundPage() {
   )
 }
 
+const LANG_LABELS = {
+  en: 'English', it: 'Italiano', el: 'Ελληνικά', fr: 'Français', de: 'Deutsch',
+  es: 'Español', bg: 'Български', pl: 'Polski', ro: 'Română', pt: 'Português', hu: 'Magyar',
+}
+
+function LangSwitcher() {
+  const lang = useLang()
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    function onClickOutside(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [])
+
+  const allLangs = [...SUPPORTED_LANGS, 'it']
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-semibold uppercase tracking-[0.08em] !text-white/70 transition hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
+        aria-label="Change language"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+        </svg>
+        {lang.toUpperCase()}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-[calc(100%+0.4rem)] z-50 w-44 rounded-xl border border-white/15 bg-[#111111] p-1.5 shadow-[0_12px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl">
+          {allLangs.map((code) => (
+            <button
+              key={code}
+              type="button"
+              onClick={() => { setOpen(false); setLang(code) }}
+              className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left transition hover:bg-white/10 ${
+                lang === code ? 'font-semibold text-fuchsia-300' : 'text-white/80'
+              }`}
+            >
+              <span className="w-7 text-xs font-bold uppercase opacity-60">{code}</span>
+              <span className="text-xs">{LANG_LABELS[code]}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const navItems = [
   { to: '/about-us', label: 'About us' },
   { to: '/for-academies', label: 'Academies' },
@@ -6172,6 +6228,8 @@ function Nav({ onOpenContactModal }) {
           </div>
         )}
       </div>
+
+      <LangSwitcher />
 
       {/* Sign In — existing B2B clients */}
       <NavLink
@@ -7489,6 +7547,8 @@ function DistributorsPage() {
 function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false, onRecoverySessionConsumed }) {
   const navigate = useNavigate()
   const location = useLocation()
+  const lang = useLang()
+  const T = getTranslations(lang)
   const loginParams = useMemo(() => new URLSearchParams(location.search), [location.search])
   const prefilledEmail = String(loginParams.get('email') || '').trim().toLowerCase()
   const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
@@ -7536,7 +7596,10 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
       <div className="rounded-t-2xl bg-[#111111] px-8 py-7 text-center">
         <p className="text-[10px] font-bold uppercase tracking-[0.25em]" style={{color:'rgba(255,255,255,0.5)'}}>GEL.IT.UP by GIUP®</p>
         <h2 className="mt-2 text-xl font-extrabold uppercase tracking-[0.08em]" style={{color:'#ffffff'}}>
-          {isCreatePasswordMode ? 'Create Password' : portalType === 'distributor' ? 'Distributor Portal' : 'B2B Portal'}
+          {isCreatePasswordMode
+            ? (T?.portal?.create_password ?? 'Create Password')
+            : portalType === 'distributor' ? 'Distributor Portal'
+            : (T?.portal?.login_title ?? 'B2B Portal')}
         </h2>
       </div>
 
@@ -7545,10 +7608,10 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
         {/* Mode/register sub-link */}
         <p className="mb-5 text-center text-xs text-slate-500">
           {isCreatePasswordMode
-            ? <>Returning client?{' '}<NavLink to={prefilledEmail ? `/portal/login?portal=${portalType}&email=${encodeURIComponent(prefilledEmail)}` : `/portal/login?portal=${portalType}`} className="font-semibold text-slate-800 hover:underline">Sign in</NavLink></>
+            ? <>{T?.portal?.already_account ?? 'Returning client?'}{' '}<NavLink to={prefilledEmail ? `/portal/login?portal=${portalType}&email=${encodeURIComponent(prefilledEmail)}` : `/portal/login?portal=${portalType}`} className="font-semibold text-slate-800 hover:underline">{T?.portal?.login_btn ?? 'Sign in'}</NavLink></>
             : portalType === 'distributor'
-                ? <>No account?{' '}<NavLink to="/distributors" className="font-semibold text-slate-800 hover:underline">Start on the distribution page</NavLink></>
-              : <>New client?{' '}<NavLink to="/portal/register" className="font-semibold text-slate-800 hover:underline">Register</NavLink></>
+                ? <>{T?.portal?.no_account ?? 'No account?'}{' '}<NavLink to="/distributors" className="font-semibold text-slate-800 hover:underline">Start on the distribution page</NavLink></>
+              : <>{T?.portal?.no_account ?? 'New client?'}{' '}<NavLink to="/portal/register" className="font-semibold text-slate-800 hover:underline">{T?.portal?.register_btn ?? 'Register'}</NavLink></>
           }
         </p>
 
@@ -7624,14 +7687,23 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           if (!result.ok) {
             // Revert session flags on login failure
             sessionStorage.removeItem('portalTabActive')
-            setErrorMessage(result.message || 'Unable to sign in.')
+            const status = result.applicationStatus || ''
+            const errMsg = T?.portal
+              ? (status === 'rejected' ? T.portal.err_rejected
+                : status === 'pending' ? T.portal.err_pending
+                : status === 'submitted' ? T.portal.err_submitted
+                : /invalid.*cred|wrong.*pass|bad.*pass|incorrect/i.test(result.message || '')
+                  ? T.portal.err_bad_password
+                  : T.portal.err_generic)
+              : (result.message || 'Unable to sign in.')
+            setErrorMessage(errMsg)
             return
           }
 
           navigate('/portal/dashboard/overview')
         }}>
           <label className="block text-sm font-medium text-slate-700">
-            Email
+            {T?.portal?.email ?? 'Email'}
             <input
               id="portal-login-email"
               name="email"
@@ -7650,7 +7722,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
             />
           </label>
           <label className="block text-sm font-medium text-slate-700">
-            {isCreatePasswordMode ? 'Create Password' : 'Password'}
+            {isCreatePasswordMode ? (T?.portal?.create_password ?? 'Create Password') : (T?.portal?.password ?? 'Password')}
             <div className="relative mt-1">
               <input
                 id="portal-login-password"
@@ -7689,7 +7761,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
 
           {isCreatePasswordMode && (
             <label className="block text-sm font-medium text-slate-700">
-              Confirm Password
+              {T?.portal?.confirm_password ?? 'Confirm Password'}
               <div className="relative mt-1">
                 <input
                   id="portal-login-confirm-password"
@@ -7728,7 +7800,9 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           )}
 
           <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-[#111111] px-4 py-3 text-sm font-bold text-white transition hover:bg-black disabled:opacity-60">
-            {isSubmitting ? (isCreatePasswordMode ? 'Creating password...' : 'Signing in...') : (isCreatePasswordMode ? 'Create Password & Continue' : 'Sign In')}
+            {isSubmitting
+              ? (isCreatePasswordMode ? (T?.portal?.creating_pw ?? 'Creating password...') : (T?.portal?.signing_in ?? 'Signing in...'))
+              : (isCreatePasswordMode ? (T?.portal?.create_pw_continue ?? 'Create Password & Continue') : (T?.portal?.login_btn ?? 'Sign In'))}
           </button>
 
           {!isCreatePasswordMode && (
@@ -7737,7 +7811,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
                 to={email ? `/portal/forgot-password?email=${encodeURIComponent(email)}` : '/portal/forgot-password'}
                 className="hover:text-slate-800 hover:underline"
               >
-                Forgot password?
+                {T?.portal?.forgot_password ?? 'Forgot password?'}
               </NavLink>
             </p>
           )}
