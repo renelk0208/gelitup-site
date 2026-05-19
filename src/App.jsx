@@ -13165,19 +13165,19 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                     <p className="text-sm font-semibold text-amber-800">Orders below €{MIN_ORDER_EUR.toFixed(2)} NET require admin approval. Your order (€{orderTotal.toFixed(2)}) will be reviewed before processing.</p>
                   </div>
                 )}
-                <p className="text-xs font-bold uppercase tracking-widest text-slate-400">How It Works</p>
-                <ol className="mt-4 space-y-4">
-                  <li className="flex items-start gap-3">
-                    <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-sm font-bold text-fuchsia-700">1</span>
-                    <p className="pt-1 text-sm text-slate-700"><strong className="text-slate-900">Submit your order</strong> — your cart is sent directly to our distribution team.</p>
+                <p className="text-sm font-bold uppercase tracking-widest text-fuchsia-500">How It Works</p>
+                <ol className="mt-5 space-y-5">
+                  <li className="flex items-start gap-4">
+                    <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-base font-bold text-fuchsia-700">1</span>
+                    <p className="pt-2 text-base leading-relaxed text-slate-700"><strong className="text-slate-900">Submit your order</strong> — your cart is sent directly to our distribution team.</p>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-sm font-bold text-fuchsia-700">2</span>
-                    <p className="pt-1 text-sm text-slate-700"><strong className="text-slate-900">We confirm &amp; invoice</strong> — a pro-forma invoice is emailed within 1–2 business days.</p>
+                  <li className="flex items-start gap-4">
+                    <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-base font-bold text-fuchsia-700">2</span>
+                    <p className="pt-2 text-base leading-relaxed text-slate-700"><strong className="text-slate-900">We confirm &amp; invoice</strong> — a pro-forma invoice is emailed within 1–2 business days.</p>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-sm font-bold text-fuchsia-700">3</span>
-                    <p className="pt-1 text-sm text-slate-700"><strong className="text-slate-900">Pay &amp; receive</strong> — once payment is received, your order is packed and dispatched.</p>
+                  <li className="flex items-start gap-4">
+                    <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-base font-bold text-fuchsia-700">3</span>
+                    <p className="pt-2 text-base leading-relaxed text-slate-700"><strong className="text-slate-900">Pay &amp; receive</strong> — once payment is received, your order is packed and dispatched.</p>
                   </li>
                 </ol>
               </div>
@@ -13617,19 +13617,19 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                   <p className="text-sm font-semibold text-amber-800">Orders below €{MIN_ORDER_EUR.toFixed(2)} NET require admin approval. Your order (€{orderTotal.toFixed(2)}) will be reviewed before processing.</p>
                 </div>
               )}
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">How It Works</p>
-              <ol className="mt-4 space-y-4">
-                <li className="flex items-start gap-3">
-                  <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-sm font-bold text-fuchsia-700">1</span>
-                  <p className="pt-1 text-sm text-slate-700"><strong className="text-slate-900">Submit your order</strong> — your cart is sent directly to our distribution team.</p>
+              <p className="text-sm font-bold uppercase tracking-widest text-fuchsia-500">How It Works</p>
+              <ol className="mt-5 space-y-5">
+                <li className="flex items-start gap-4">
+                  <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-base font-bold text-fuchsia-700">1</span>
+                  <p className="pt-2 text-base leading-relaxed text-slate-700"><strong className="text-slate-900">Submit your order</strong> — your cart is sent directly to our distribution team.</p>
                 </li>
-                <li className="flex items-start gap-3">
-                  <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-sm font-bold text-fuchsia-700">2</span>
-                  <p className="pt-1 text-sm text-slate-700"><strong className="text-slate-900">We confirm &amp; invoice</strong> — a pro-forma invoice is emailed within 1–2 business days. Stock availability is confirmed at this stage.</p>
+                <li className="flex items-start gap-4">
+                  <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-base font-bold text-fuchsia-700">2</span>
+                  <p className="pt-2 text-base leading-relaxed text-slate-700"><strong className="text-slate-900">We confirm &amp; invoice</strong> — a pro-forma invoice is emailed within 1–2 business days. Stock availability is confirmed at this stage.</p>
                 </li>
-                <li className="flex items-start gap-3">
-                  <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-sm font-bold text-fuchsia-700">3</span>
-                  <p className="pt-1 text-sm text-slate-700"><strong className="text-slate-900">Pay &amp; receive</strong> — once payment is received, your order is packed and dispatched.</p>
+                <li className="flex items-start gap-4">
+                  <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-base font-bold text-fuchsia-700">3</span>
+                  <p className="pt-2 text-base leading-relaxed text-slate-700"><strong className="text-slate-900">Pay &amp; receive</strong> — once payment is received, your order is packed and dispatched.</p>
                 </li>
               </ol>
             </div>
