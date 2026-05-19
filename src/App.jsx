@@ -71,6 +71,28 @@ const PAYMENT_BANK_DETAILS = import.meta.env.VITE_PAYMENT_BANK_DETAILS || ''
 const PAYMENT_REVOLUT_URL = import.meta.env.VITE_PAYMENT_REVOLUT_URL || ''
 const PAYMENT_STRIPE_URL = import.meta.env.VITE_PAYMENT_STRIPE_URL || ''
 const PAYMENT_PAYPAL_URL = import.meta.env.VITE_PAYMENT_PAYPAL_URL || ''
+
+// Shared helper — creates a Stripe Checkout Session and redirects to Stripe's hosted payment page.
+// Covers cards, Google Pay, and Apple Pay in a single step.
+async function redirectToStripeCheckout({ orderId, amountEur, email, setLoading, setError }) {
+  setLoading(true)
+  setError('')
+  try {
+    const res = await fetch('/.netlify/functions/create-stripe-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: String(orderId), amountEur: Number(amountEur), email: String(email) }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error(data.error || 'Payment session failed')
+    if (!data.url) throw new Error('No checkout URL returned')
+    window.location.href = data.url
+  } catch (err) {
+    setError(err.message || 'Unable to start payment. Please try again.')
+    setLoading(false)
+  }
+}
+
 const UPSELL_PRICE_FUNCTION_URL = import.meta.env.VITE_UPSELL_PRICE_FUNCTION_URL || '/.netlify/functions/get-upsell-price'
 const PROFORMA_COMPANY_NAME = import.meta.env.VITE_PROFORMA_COMPANY_NAME || 'GEL.IT.UP Factory Direct'
 const PROFORMA_VAT_TAX_ID = import.meta.env.VITE_PROFORMA_VAT_TAX_ID || 'VAT/TAX ID: EL999999999'
@@ -7923,6 +7945,8 @@ function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [orderConfirmed, setOrderConfirmed] = useState(null)
+  const [paymentLoading, setPaymentLoading] = useState(false)
+  const [paymentError, setPaymentError] = useState('')
 
   const updateField = (field, value) => setForm(f => ({ ...f, [field]: value }))
 
@@ -8265,8 +8289,9 @@ function CheckoutPage() {
           <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
             <h2 style="color:#1a1a1a">Thank you for your order!</h2>
             <p>Hi ${escapeHtml(`${form.firstName.trim()} ${form.lastName.trim()}` || form.companyName.trim())},</p>
-            <p>We've received your order <strong>#${insertedOrder?.id ?? '-'}</strong> and our team will process it shortly.</p>
+            <p>We've received your order <strong>#${insertedOrder?.id ?? '-'}</strong>. Please complete your payment using the options on the confirmation page.</p>
             <p><strong>Order Total:</strong> €${cartTotal.toFixed(2)} (${cartUnits} items)</p>
+            <p style="color:#555">Your invoice will be issued by email once your order is processed (usually within 1 business day). Should any item be unavailable, we will arrange a refund or account credit.</p>
             ${form.createAccount ? '<p>You can now log in with your email and password to track your orders.</p>' : '<p>If you would like to track future orders, you can create an account at checkout next time.</p>'}
             <p style="margin-top:24px;color:#666;font-size:12px">GEL.IT.UP by GIUP® — Professional Gel Polish</p>
           </div>
@@ -8276,7 +8301,7 @@ function CheckoutPage() {
       // 8. Clear cart and show confirmation
       setCart({})
       localStorage.removeItem(QUICK_CART_STORAGE_KEY)
-      setOrderConfirmed({ id: insertedOrder?.id ?? 'confirmed', accountCreated: form.createAccount })
+      setOrderConfirmed({ id: insertedOrder?.id ?? 'confirmed', accountCreated: form.createAccount, total: cartTotal, email: form.email.trim().toLowerCase() })
 
     } catch (err) {
       setError('An unexpected error occurred. Please try again or contact us.')
@@ -8307,6 +8332,33 @@ function CheckoutPage() {
             </NavLink>
           </div>
         </div>
+        {orderConfirmed.total > 0 && (
+          <div className="mt-4 rounded-xl border border-slate-200 bg-white p-5 text-left">
+            <p className="mb-1 text-sm font-semibold text-slate-800">Complete Your Payment</p>
+            <p className="text-xs text-slate-500">Order total: <strong className="text-slate-700">€{orderConfirmed.total.toFixed(2)}</strong> — choose your preferred payment method. Your invoice will be issued once your order is processed.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => redirectToStripeCheckout({ orderId: orderConfirmed.id, amountEur: orderConfirmed.total, email: orderConfirmed.email, setLoading: setPaymentLoading, setError: setPaymentError })}
+                disabled={paymentLoading}
+                className="rounded-lg bg-[#635bff] px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-60"
+              >
+                {paymentLoading ? 'Redirecting…' : 'Pay with Stripe / Google Pay'}
+              </button>
+              {PAYMENT_REVOLUT_URL && (
+                <a href={`${PAYMENT_REVOLUT_URL.replace(/\/$/, '')}/${orderConfirmed.total.toFixed(2)}/EUR`} target="_blank" rel="noreferrer" className="rounded-lg bg-[#191c1f] px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90">
+                  Pay via Revolut
+                </a>
+              )}
+              {PAYMENT_PAYPAL_URL && (
+                <a href={`${PAYMENT_PAYPAL_URL.replace(/\/$/, '')}/${orderConfirmed.total.toFixed(2)}`} target="_blank" rel="noreferrer" className="rounded-lg bg-[#0070ba] px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90">
+                  Pay via PayPal
+                </a>
+              )}
+            </div>
+            {paymentError && <p className="mt-2 text-xs text-rose-600">{paymentError}</p>}
+          </div>
+        )}
       </section>
     )
   }
@@ -14412,6 +14464,8 @@ function OrdersModule() {
       ? 'Live orders are unavailable because Supabase is not configured.'
       : '',
   )
+  const [paymentLoadingId, setPaymentLoadingId] = useState(null)
+  const [paymentError, setPaymentError] = useState('')
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
 
   const isCancellable = (order) => {
@@ -14597,28 +14651,37 @@ function OrdersModule() {
                     <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{PAYMENT_BANK_DETAILS}</p>
                   </div>
                 )}
-                {(PAYMENT_REVOLUT_URL || PAYMENT_STRIPE_URL || PAYMENT_PAYPAL_URL) && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {PAYMENT_REVOLUT_URL && (
-                      <a href={PAYMENT_REVOLUT_URL} target="_blank" rel="noreferrer"
-                        className="rounded-lg bg-[#1a1a2e] px-4 py-2 text-xs font-semibold text-white hover:opacity-90">
-                        Pay via Revolut
-                      </a>
-                    )}
-                    {PAYMENT_STRIPE_URL && (
-                      <a href={PAYMENT_STRIPE_URL} target="_blank" rel="noreferrer"
-                        className="rounded-lg bg-[#635bff] px-4 py-2 text-xs font-semibold text-white hover:opacity-90">
-                        Pay via Stripe
-                      </a>
-                    )}
-                    {PAYMENT_PAYPAL_URL && (
-                      <a href={PAYMENT_PAYPAL_URL} target="_blank" rel="noreferrer"
-                        className="rounded-lg bg-[#0070ba] px-4 py-2 text-xs font-semibold text-white hover:opacity-90">
-                        Pay via PayPal
-                      </a>
-                    )}
-                  </div>
-                )}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {order.zoho_invoice_total != null && (
+                    <button
+                      type="button"
+                      onClick={() => redirectToStripeCheckout({ orderId: order.id, amountEur: Number(order.zoho_invoice_total), email: userEmail, setLoading: (v) => setPaymentLoadingId(v ? order.id : null), setError: setPaymentError })}
+                      disabled={paymentLoadingId === order.id}
+                      className="rounded-lg bg-[#635bff] px-4 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-60"
+                    >
+                      {paymentLoadingId === order.id ? 'Redirecting…' : 'Pay with Stripe / Google Pay'}
+                    </button>
+                  )}
+                  {PAYMENT_REVOLUT_URL && order.zoho_invoice_total != null && (
+                    <a
+                      href={`${PAYMENT_REVOLUT_URL.replace(/\/$/, '')}/${Number(order.zoho_invoice_total).toFixed(2)}/EUR`}
+                      target="_blank" rel="noreferrer"
+                      className="rounded-lg bg-[#191c1f] px-4 py-2 text-xs font-semibold text-white hover:opacity-90"
+                    >
+                      Pay via Revolut
+                    </a>
+                  )}
+                  {PAYMENT_PAYPAL_URL && order.zoho_invoice_total != null && (
+                    <a
+                      href={`${PAYMENT_PAYPAL_URL.replace(/\/$/, '')}/${Number(order.zoho_invoice_total).toFixed(2)}`}
+                      target="_blank" rel="noreferrer"
+                      className="rounded-lg bg-[#0070ba] px-4 py-2 text-xs font-semibold text-white hover:opacity-90"
+                    >
+                      Pay via PayPal
+                    </a>
+                  )}
+                </div>
+                {paymentError && <p className="mt-1 text-xs text-rose-600">{paymentError}</p>}
               </div>
             ))}
           </div>
