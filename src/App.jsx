@@ -15752,6 +15752,10 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     totalOrders: null,
     lastOrderDate: null,
   })
+  const [welcomeStep, setWelcomeStep] = useState(() => {
+    try { return localStorage.getItem('gelitup.b2b.portal.welcome.v1') ? -1 : 0 } catch { return -1 }
+  })
+  const [guideRect, setGuideRect] = useState(null)
 
   useEffect(() => {
     if (!hasSupabaseConfig || !supabase) return
@@ -16198,6 +16202,21 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     }
   }, [activeModule, ordersTable])
 
+  useEffect(() => {
+    if (welcomeStep < 1) { setGuideRect(null); return }
+    const guideSteps = [
+      null,
+      { targetId: 'portal-nav-catalog' },
+      { targetId: 'portal-nav-profile' },
+    ]
+    const step = guideSteps[welcomeStep]
+    if (!step?.targetId) return
+    const el = document.getElementById(step.targetId)
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    setGuideRect({ top: rect.top, left: rect.left, width: rect.width, height: rect.height })
+  }, [welcomeStep])
+
   // Prefer live registration data (always fresh) over stale user_metadata
   const effectiveTier = tierOverride
     ?? liveRegistration?.distributor_tier
@@ -16223,6 +16242,32 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     )
   }
 
+  const GUIDE_STEPS = [
+    null,
+    { targetId: 'portal-nav-catalog', title: 'Start Shopping Here', body: 'Browse 1,000+ gel polishes, builder gels, base coats and accessories. Add items to your order from here.' },
+    { targetId: 'portal-nav-profile', title: 'Your Details', body: 'Enter your billing and shipping address here — it will auto-fill when you go to checkout.' },
+  ]
+
+  const tooltipW = 264
+  const tooltipFitsRight = guideRect ? guideRect.left + guideRect.width + 20 + tooltipW < window.innerWidth : false
+  const tooltipLeft = guideRect ? (tooltipFitsRight ? guideRect.left + guideRect.width + 20 : Math.max(8, guideRect.left - tooltipW - 12)) : 0
+  const tooltipTop = guideRect ? (tooltipFitsRight ? Math.max(8, guideRect.top + guideRect.height / 2 - 90) : guideRect.top + guideRect.height + 10) : 0
+  const arrowTop = guideRect && tooltipFitsRight ? (guideRect.top + guideRect.height / 2) - tooltipTop - 7 : null
+
+  function dismissWelcome() {
+    try { localStorage.setItem('gelitup.b2b.portal.welcome.v1', '1') } catch {}
+    setWelcomeStep(-1)
+    setGuideRect(null)
+  }
+
+  function advanceGuide() {
+    if (welcomeStep >= GUIDE_STEPS.length - 1) {
+      dismissWelcome()
+    } else {
+      setWelcomeStep(s => s + 1)
+    }
+  }
+
   return (
     <section className="grid gap-4 lg:grid-cols-[240px,1fr]">
       <aside className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -16230,10 +16275,11 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
         <nav className="space-y-1">
           {modules.map((module) => (
             <NavLink
+              id={`portal-nav-${module.key}`}
               key={module.key}
               to={`/portal/dashboard/${module.key}`}
               className={({ isActive }) =>
-                `block rounded-lg px-3 py-2 text-sm font-medium ${
+                `relative block rounded-lg px-3 py-2 text-sm font-medium ${
                   isActive
                     ? 'bg-fuchsia-600 text-white'
                     : 'text-slate-700 hover:bg-slate-100'
@@ -16402,6 +16448,98 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
           )}
         </PortalModuleErrorBoundary>
       </div>
+
+      {/* ===== B2B Welcome Guide ===== */}
+      {welcomeStep === 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-8 text-center shadow-2xl">
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-fuchsia-100">
+              <svg className="h-7 w-7 text-fuchsia-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900">Welcome to your<br />B2B Portal</h2>
+            <p className="mt-3 text-sm leading-relaxed text-slate-500">Let us show you around in 2 quick steps so you can start ordering right away.</p>
+            <div className="mt-6 flex flex-col gap-2">
+              <button
+                onClick={advanceGuide}
+                className="w-full rounded-xl bg-fuchsia-600 py-2.5 text-sm font-semibold text-white transition hover:bg-fuchsia-700"
+              >
+                Show me around →
+              </button>
+              <button
+                onClick={dismissWelcome}
+                className="w-full rounded-xl py-2.5 text-sm font-medium text-slate-400 transition hover:text-slate-600"
+              >
+                Skip
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {welcomeStep >= 1 && guideRect && GUIDE_STEPS[welcomeStep] && (
+        <div className="fixed inset-0 z-50" style={{ pointerEvents: 'none' }}>
+          {/* Semi-transparent backdrop — click anywhere to advance */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            style={{ pointerEvents: 'auto' }}
+            onClick={advanceGuide}
+            role="presentation"
+          />
+          {/* Spotlight ring around the target nav item */}
+          <div
+            className="absolute rounded-lg ring-2 ring-fuchsia-500 ring-offset-2 ring-offset-transparent"
+            style={{
+              top: guideRect.top - 3,
+              left: guideRect.left - 3,
+              width: guideRect.width + 6,
+              height: guideRect.height + 6,
+              pointerEvents: 'none',
+            }}
+          />
+          {/* Tooltip card */}
+          <div
+            className="absolute rounded-2xl bg-white p-4 shadow-2xl"
+            style={{ top: tooltipTop, left: tooltipLeft, width: tooltipW, pointerEvents: 'auto' }}
+          >
+            {/* Arrow pointing toward the highlighted nav item (left side, desktop) */}
+            {tooltipFitsRight && arrowTop !== null && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: -7,
+                  top: Math.max(12, arrowTop),
+                  width: 0,
+                  height: 0,
+                  borderTop: '7px solid transparent',
+                  borderBottom: '7px solid transparent',
+                  borderRight: '7px solid white',
+                }}
+              />
+            )}
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-fuchsia-600">
+              Step {welcomeStep} of {GUIDE_STEPS.length - 1}
+            </p>
+            <p className="mt-1 text-sm font-bold text-slate-900">{GUIDE_STEPS[welcomeStep].title}</p>
+            <p className="mt-1 text-xs leading-relaxed text-slate-500">{GUIDE_STEPS[welcomeStep].body}</p>
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={advanceGuide}
+                className="flex-1 rounded-lg bg-fuchsia-600 py-1.5 text-xs font-semibold text-white transition hover:bg-fuchsia-700"
+              >
+                {welcomeStep >= GUIDE_STEPS.length - 1 ? "Let's go! 🎉" : 'Next →'}
+              </button>
+              <button
+                onClick={dismissWelcome}
+                className="rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-medium text-slate-400 transition hover:bg-slate-50"
+              >
+                Skip
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
