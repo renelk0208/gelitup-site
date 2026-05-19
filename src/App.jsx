@@ -2938,9 +2938,10 @@ function FullCataloguePage() {
     return () => { window.removeEventListener('storage', check); window.removeEventListener('focus', check) }
   }, [])
 
-  // Persist quickCart to localStorage on every change
+  // Persist quickCart to localStorage on every change and broadcast to other components
   useEffect(() => {
     try { localStorage.setItem(QUICK_CART_STORAGE_KEY, JSON.stringify(quickCart)) } catch {}
+    window.dispatchEvent(new Event('gelitup:cart-change'))
   }, [quickCart])
 
   // Sync quickCart to Supabase draft_carts so admin can see abandoned carts
@@ -17031,6 +17032,18 @@ function App() {
   const [announcementDismissed, setAnnouncementDismissed] = useState(() => sessionStorage.getItem('gelitup.announce.v1') === 'dismissed')
   const handleDismissAnnouncement = useCallback(() => { sessionStorage.setItem('gelitup.announce.v1', 'dismissed'); setAnnouncementDismissed(true) }, [])
 
+  // Global cart count — reactive across all pages via custom event from FullCataloguePage
+  const [appCartCount, setAppCartCount] = useState(() => {
+    try { const c = JSON.parse(localStorage.getItem(QUICK_CART_STORAGE_KEY) || '{}'); return Object.values(c).filter(q => Number(q) > 0).length } catch { return 0 }
+  })
+  useEffect(() => {
+    const onCartChange = () => {
+      try { const c = JSON.parse(localStorage.getItem(QUICK_CART_STORAGE_KEY) || '{}'); setAppCartCount(Object.values(c).filter(q => Number(q) > 0).length) } catch { /* ignore */ }
+    }
+    window.addEventListener('gelitup:cart-change', onCartChange)
+    return () => window.removeEventListener('gelitup:cart-change', onCartChange)
+  }, [])
+
   // Returning-basket prompt — shown once per session if visitor has saved cart items
   const [savedCartPrompt, setSavedCartPrompt] = useState(false)
   const [savedCartCount, setSavedCartCount] = useState(0)
@@ -18382,6 +18395,18 @@ function App() {
       </main>
 
       {/* Returning-basket prompt — appears 1.5s after landing if visitor has saved items */}
+      {/* Global floating cart button — visible on every page except the catalogue (which has its own bar) and checkout */}
+      {appCartCount > 0 && !location.pathname.startsWith('/full-catalogue') && !location.pathname.startsWith('/checkout') && (
+        <NavLink
+          to="/full-catalogue"
+          className="fixed bottom-6 left-4 z-[64] flex items-center gap-2 rounded-full bg-fuchsia-600 pl-3 pr-4 py-2.5 shadow-xl ring-2 ring-white transition hover:bg-fuchsia-500"
+          title="View your basket"
+        >
+          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 shrink-0 text-white" aria-hidden="true"><path d="M1 1.75A.75.75 0 0 1 1.75 1h1.628a1.75 1.75 0 0 1 1.734 1.51L5.18 3H17.25a.75.75 0 0 1 .727.936l-1.875 7.5A.75.75 0 0 1 15.375 12h-8.75a.75.75 0 0 1-.727-.564L4.023 3.756 3.81 2.5H1.75A.75.75 0 0 1 1 1.75ZM7.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM15.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" /></svg>
+          <span className="text-xs font-bold text-white">{appCartCount} item{appCartCount !== 1 ? 's' : ''} in basket</span>
+        </NavLink>
+      )}
+
       {savedCartPrompt && !isPortalRoute && (
         <div className="fixed bottom-6 right-4 z-[65] w-72 overflow-hidden rounded-2xl border border-fuchsia-100 bg-white shadow-2xl ring-1 ring-black/5 sm:w-80">
           <div className="h-1 bg-gradient-to-r from-fuchsia-500 to-rose-400" />
