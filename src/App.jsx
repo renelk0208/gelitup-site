@@ -2912,6 +2912,7 @@ function FullCataloguePage() {
   })
   const [showBasketDetail, setShowBasketDetail] = useState(false)
   const [pulseItemKey, setPulseItemKey] = useState('')
+  const [outOfStockNames, setOutOfStockNames] = useState(new Set())
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('portalAuth') === 'true')
 
   // Upsell essentials — popular items customers often forget
@@ -3033,11 +3034,12 @@ function FullCataloguePage() {
       setErrorMessage('')
 
       try {
-        const [mapResponse, orderResponse, colourFamiliesResponse, hiddenResponse] = await Promise.all([
+        const [mapResponse, orderResponse, colourFamiliesResponse, hiddenResponse, oosResponse] = await Promise.all([
           fetch('/gelitup-content/product-image-map.json'),
           fetch('/gelitup-content/catalog-order.json'),
           fetch('/gelitup-content/solid-gel-colour-families.json'),
           fetch('/gelitup-content/hidden-products.json'),
+          fetch('/gelitup-content/out-of-stock.json'),
         ])
 
         if (!mapResponse.ok) {
@@ -3050,11 +3052,13 @@ function FullCataloguePage() {
           ? await colourFamiliesResponse.json()
           : {}
         const hiddenKeys = hiddenResponse.ok ? await hiddenResponse.json() : []
+        const oosNames = oosResponse.ok ? await oosResponse.json() : []
         const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
         if (!mounted) return
 
         const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(payload, hiddenKeys), manualRuleIndex)
         setSections(nextSections)
+        setOutOfStockNames(new Set(Array.isArray(oosNames) ? oosNames.map(n => String(n).trim()) : []))
         setSolidGelColourFamilies(colourFamiliesPayload)
         setHeroCandidateIndexByCategory({})
         setActiveCategory('')
@@ -4566,6 +4570,7 @@ function FullCataloguePage() {
                   const qty = getQty(itemKey)
                   const hasChangedQty = qty !== 1
                   const inCart = quickCart[itemKey] > 0
+                  const isOOS = outOfStockNames.has(item.name)
 
                   if (bulkMode) {
                     return (
@@ -4581,9 +4586,10 @@ function FullCataloguePage() {
                         <button
                           type="button"
                           onClick={() => addQuickItem(itemKey)}
-                          className={`shrink-0 rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition ${inCart ? 'bg-fuchsia-700 hover:bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'} ${pulseItemKey === itemKey ? 'scale-95' : ''}`}
+                          disabled={isOOS}
+                          className={`shrink-0 rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition ${isOOS ? 'cursor-not-allowed bg-slate-300' : inCart ? 'bg-fuchsia-700 hover:bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'} ${pulseItemKey === itemKey ? 'scale-95' : ''}`}
                         >
-                          {inCart ? `+1 (${quickCart[itemKey]})` : '+ Add'}
+                          {isOOS ? 'Out of Stock' : inCart ? `+1 (${quickCart[itemKey]})` : '+ Add'}
                         </button>
                       </div>
                     )
@@ -4591,8 +4597,13 @@ function FullCataloguePage() {
 
                   return (
                     <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`flex flex-col overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:bg-[#E8E8E8] md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`} data-catalogue-item>
-                      <div className="flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52 md:h-60" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
-                        <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full scale-[1.025] object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
+                      <div className="relative flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52 md:h-60" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
+                        <img src={item.imageUrl} alt={item.name} loading="lazy" className={`h-full w-full scale-[1.025] object-cover opacity-0 transition-opacity duration-300 ${isOOS ? 'brightness-75' : ''}`} onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
+                        {isOOS && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="rounded-full bg-black/60 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-white/90">Out of Stock</span>
+                          </div>
+                        )}
                       </div>
                       {item.galleryImages?.length > 0 && (
                         <div className="flex gap-1 border-t border-black/10 bg-white px-2 py-1.5">
@@ -4612,7 +4623,11 @@ function FullCataloguePage() {
                           <p className="mt-1.5 text-xs font-bold text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</p>
                         )}
                         <div className="mt-auto pt-3">
-                          {inCart ? (
+                          {isOOS ? (
+                            <div className="flex w-full items-center justify-center rounded-[10px] bg-slate-200 py-2 text-xs font-semibold text-slate-500">
+                              Out of Stock
+                            </div>
+                          ) : inCart ? (
                             <div className="flex items-center gap-1.5">
                               <button type="button" onClick={() => setQuickCart(c => { const q = Number(c[itemKey] || 0); if (q <= 1) { const n = { ...c }; delete n[itemKey]; return n } return { ...c, [itemKey]: q - 1 } })} className="flex h-8 w-8 items-center justify-center rounded-lg border border-fuchsia-300 text-sm text-fuchsia-600 transition hover:bg-fuchsia-50">−</button>
                               <span className="flex-1 text-center text-[11px] font-bold text-fuchsia-700">{quickCart[itemKey]}× added</span>
