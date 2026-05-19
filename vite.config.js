@@ -38,6 +38,8 @@ export default defineConfig({
       cleanupOutdatedCaches: true,
       clientsClaim: true,
       skipWaiting: true,
+      // Prevent service worker intercepting static/SEO files as SPA navigation
+      navigateFallbackDenylist: [/\.xml$/, /\.txt$/, /\.json$/, /\.csv$/, /^\/api\//],
       runtimeCaching: [
         {
           urlPattern: /\/gelitup-media\/.+\.(?:png|jpg|jpeg|webp|gif|svg)$/i,
