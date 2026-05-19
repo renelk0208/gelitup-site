@@ -16943,6 +16943,22 @@ function App() {
         }
 
         if (canSignInNow) {
+          sendPortalEmailNotification({
+            eventType: 'b2b_login_notification',
+            to: normalizedEmail,
+            subject: 'New sign-in to your GEL.IT.UP account',
+            html: `
+              <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+                <h2 style="color:#1a1a1a">New account sign-in</h2>
+                <p>Hi,</p>
+                <p>We noticed a new sign-in to your <strong>GEL.IT.UP by GIUP®</strong> B2B account.</p>
+                <p><strong>Time:</strong> ${new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg', dateStyle: 'full', timeStyle: 'short' })} (SAST)</p>
+                <p>If this was you, no action is needed.</p>
+                <p>If you did <strong>not</strong> sign in, please contact us immediately at <a href="mailto:info@gelitup.com">info@gelitup.com</a> so we can secure your account.</p>
+                <p style="margin-top:24px;color:#666;font-size:12px">GEL.IT.UP by GIUP® — Professional Gel Polish<br>This is an automated security notification.</p>
+              </div>
+            `,
+          }).catch(() => {})
           setIsPortalAuthenticated(true)
           return {
             ok: true,
@@ -17088,6 +17104,22 @@ function App() {
         }
       }
 
+      sendPortalEmailNotification({
+        eventType: 'b2b_login_notification',
+        to: normalizedEmail,
+        subject: 'New sign-in to your GEL.IT.UP account',
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+            <h2 style="color:#1a1a1a">New account sign-in</h2>
+            <p>Hi,</p>
+            <p>We noticed a new sign-in to your <strong>GEL.IT.UP by GIUP®</strong> B2B account.</p>
+            <p><strong>Time:</strong> ${new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg', dateStyle: 'full', timeStyle: 'short' })} (SAST)</p>
+            <p>If this was you, no action is needed.</p>
+            <p>If you did <strong>not</strong> sign in, please contact us immediately at <a href="mailto:info@gelitup.com">info@gelitup.com</a> so we can secure your account.</p>
+            <p style="margin-top:24px;color:#666;font-size:12px">GEL.IT.UP by GIUP® — Professional Gel Polish<br>This is an automated security notification.</p>
+          </div>
+        `,
+      }).catch(() => {})
       setIsPortalAuthenticated(true)
       return { ok: true, applicationStatus: 'approved', debugTrace: 'login-success -> approved' }
     }
