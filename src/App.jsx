@@ -2525,6 +2525,23 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     }
   })
 
+  // Copy 2026 NEW! 5-in-1 Superior Base items (Serenity/Blue variants) into the main BASES section
+  // so all 5-in-1 variants appear together under Bases & Tops
+  const newProductsMap = grouped.get('2026 NEW!')
+  if (newProductsMap) {
+    const newSerenityItems = newProductsMap.get('5-in-1 Superior Base') || []
+    if (newSerenityItems.length > 0) {
+      const basesMap = grouped.get('BASES') || new Map()
+      const existing5in1 = basesMap.get('5IN1 SUPERIOR BASE') || []
+      const existingUrls = new Set(existing5in1.map(i => i.imageUrl))
+      newSerenityItems.forEach(item => {
+        if (!existingUrls.has(item.imageUrl)) existing5in1.push({ ...item })
+      })
+      basesMap.set('5IN1 SUPERIOR BASE', existing5in1)
+      grouped.set('BASES', basesMap)
+    }
+  }
+
   return Array.from(grouped.entries())
     .map(([category, subcategoryMap]) => ({
       category,
