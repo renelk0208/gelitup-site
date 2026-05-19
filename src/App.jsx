@@ -13405,7 +13405,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold text-slate-900">Order Summary</p>
-              <button onClick={() => { navigate('/portal/dashboard/catalog'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-[11px] font-semibold text-fuchsia-600 hover:underline">+ Add more products</button>
+              <button onClick={() => { navigate('/portal/dashboard/catalog'); setTimeout(() => { document.getElementById('portal-catalog-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }, 120) }} className="text-[11px] font-semibold text-fuchsia-600 hover:underline">+ Add more products</button>
             </div>
             <div className="mt-2 divide-y divide-slate-100">
               {selectedProducts.map(product => {
@@ -13425,7 +13425,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                       <p className="text-[10px] text-slate-400">{product.code}</p>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(prev => ({...prev, [product.code]: q})) }} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">-</button>
+                      <button onClick={() => setItemQtys(prev => { const q = (prev[product.code] || 1) - 1; if (q <= 0) { toggleSelection(product.code); return prev; } return {...prev, [product.code]: q} })} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">-</button>
                       <input type="number" min="1" value={qty} onChange={(e) => { const v = parseInt(e.target.value, 10); if (v > 0) setItemQtys(prev => ({...prev, [product.code]: v})); else if (e.target.value === '') setItemQtys(prev => ({...prev, [product.code]: ''})) }} onBlur={(e) => { const v = parseInt(e.target.value, 10); if (!v || v <= 0) toggleSelection(product.code) }} className="h-6 w-12 rounded border border-slate-200 text-center text-xs font-semibold text-slate-900 outline-none focus:border-fuchsia-400 focus:ring-1 focus:ring-fuchsia-200 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
                       <button onClick={() => setItemQtys(prev => ({...prev, [product.code]: (prev[product.code] || 1) + 1}))} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">+</button>
                     </div>
@@ -13954,7 +13954,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         }
 
         return (
-        <div className="rounded-xl border border-slate-200 bg-white text-sm overflow-hidden">
+        <div id="portal-catalog-grid" className="rounded-xl border border-slate-200 bg-white text-sm overflow-hidden">
 
           {/* order bar */}
           <div className="flex items-center justify-between gap-2 border-b px-3 py-2" style={{ borderColor: '#f0c4d0' }}>
@@ -14097,7 +14097,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                           {/* action */}
                           {selected ? (
                             <div className="mt-auto flex items-center justify-center gap-1 border-t px-1 py-1" style={{ borderColor: '#fde8f0' }}>
-                              <button onClick={() => { const q = qty - 1; if (q <= 0) toggleSelection(product.code); else setItemQtys(p => ({...p, [product.code]: q})) }} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>-</button>
+                              <button onClick={() => setItemQtys(p => { const q = (p[product.code] || 1) - 1; if (q <= 0) { toggleSelection(product.code); return p; } return {...p, [product.code]: q} })} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>-</button>
                               <input type="number" min="1" value={qty} onChange={(e) => { const v = parseInt(e.target.value, 10); if (v > 0) setItemQtys(p => ({...p, [product.code]: v})); else if (e.target.value === '') setItemQtys(p => ({...p, [product.code]: ''})) }} onBlur={(e) => { const v = parseInt(e.target.value, 10); if (!v || v <= 0) toggleSelection(product.code) }} className="h-5 w-10 rounded border text-center text-[10px] font-bold outline-none focus:border-fuchsia-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" style={{ borderColor: '#f0c4d0', color: '#c8386e' }} />
                               <button onClick={() => setItemQtys(p => ({...p, [product.code]: (p[product.code] || 1) + 1}))} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>+</button>
                             </div>
