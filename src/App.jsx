@@ -4915,20 +4915,51 @@ function FullCataloguePage() {
                 <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}>
                   {globalSearchResults.slice(0, 240).map((item, idx) => {
                     const itemCode = item.code || extractProductCode(item.name)
+                    const itemKey = `${item.name}::${itemCode}`
+                    const itemPrice = lookupCataloguePrice(item.name, itemCode)
+                    const inCart = quickCart[itemKey] > 0
+                    const isOOS = outOfStockNames.has(item.name)
                     return (
                       <article
                         key={idx}
-                        className="cursor-pointer overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 hover:border-fuchsia-500/70 hover:shadow-md"
+                        className="flex flex-col cursor-pointer overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 hover:border-fuchsia-500/70 hover:shadow-md"
                         onClick={() => openCatalogueCategory(item.category, item.subcategory, { keepSearch: true })}
                         title={`View in ${item.category} — ${item.subcategory}`}
                       >
-                        <div className="flex h-36 w-full items-center justify-center overflow-hidden bg-white p-1.5">
-                          <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => e.currentTarget.closest('article')?.classList.add('!hidden')} />
+                        <div className="relative flex h-36 w-full items-center justify-center overflow-hidden bg-white p-1.5">
+                          <img src={item.imageUrl} alt={item.name} loading="lazy" className={`h-full w-full object-cover opacity-0 transition-opacity duration-300 ${isOOS ? 'brightness-75' : ''}`} onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => e.currentTarget.closest('article')?.classList.add('!hidden')} />
+                          {isOOS && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white/90">Out of Stock</span>
+                            </div>
+                          )}
                         </div>
-                        <div className="border-t border-black/10 px-2 py-1.5">
+                        <div className="flex flex-1 flex-col border-t border-black/10 px-2 py-1.5">
                           <p className="truncate text-[10px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                           <p className="line-clamp-2 text-[11px] font-semibold uppercase leading-tight tracking-[0.02em] text-black">{item.name}</p>
                           <p className="mt-1 truncate text-[10px] text-fuchsia-600">{formatSubcategoryDisplayName(item.subcategory, item.category)}</p>
+                          {itemPrice != null && (
+                            <p className="mt-1 text-[11px] font-bold text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</p>
+                          )}
+                          <div className="mt-auto pt-2" onClick={(e) => e.stopPropagation()}>
+                            {isOOS ? (
+                              <div className="flex w-full items-center justify-center rounded-[8px] bg-slate-200 py-1.5 text-[10px] font-semibold text-slate-500">Out of Stock</div>
+                            ) : inCart ? (
+                              <div className="flex items-center gap-1">
+                                <button type="button" onClick={() => setQuickCart(c => { const q = Number(c[itemKey] || 0); if (q <= 1) { const n = { ...c }; delete n[itemKey]; return n } return { ...c, [itemKey]: q - 1 } })} className="flex h-7 w-7 items-center justify-center rounded-md border border-fuchsia-300 text-xs text-fuchsia-600 transition hover:bg-fuchsia-50">−</button>
+                                <span className="flex-1 text-center text-[10px] font-bold text-fuchsia-700">{quickCart[itemKey]}×</span>
+                                <button type="button" onClick={() => addQuickItem(itemKey)} className="flex h-7 w-7 items-center justify-center rounded-md border border-fuchsia-300 text-xs text-fuchsia-600 transition hover:bg-fuchsia-50">+</button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => addQuickItem(itemKey)}
+                                className={`flex w-full items-center justify-center gap-1 rounded-[8px] bg-fuchsia-600 py-1.5 text-[10px] font-semibold text-white transition hover:bg-fuchsia-500 ${pulseItemKey === itemKey ? 'scale-95' : ''}`}
+                              >
+                                + Add
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </article>
                     )
