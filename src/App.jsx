@@ -17027,6 +17027,26 @@ function App() {
   const [announcementDismissed, setAnnouncementDismissed] = useState(() => sessionStorage.getItem('gelitup.announce.v1') === 'dismissed')
   const handleDismissAnnouncement = useCallback(() => { sessionStorage.setItem('gelitup.announce.v1', 'dismissed'); setAnnouncementDismissed(true) }, [])
 
+  // Returning-basket prompt — shown once per session if visitor has saved cart items
+  const [savedCartPrompt, setSavedCartPrompt] = useState(false)
+  const [savedCartCount, setSavedCartCount] = useState(0)
+  const dismissSavedCartPrompt = useCallback(() => setSavedCartPrompt(false), [])
+  const clearSavedCart = useCallback(() => { try { localStorage.removeItem(QUICK_CART_STORAGE_KEY) } catch { /* ignore */ } setSavedCartPrompt(false) }, [])
+  useEffect(() => {
+    if (sessionStorage.getItem('gelitup.basket-prompt.v1') === 'shown') return
+    try {
+      const cart = JSON.parse(localStorage.getItem(QUICK_CART_STORAGE_KEY) || '{}')
+      const count = Object.values(cart).filter(q => Number(q) > 0).length
+      if (count === 0) return
+      const timer = setTimeout(() => {
+        setSavedCartCount(count)
+        setSavedCartPrompt(true)
+        sessionStorage.setItem('gelitup.basket-prompt.v1', 'shown')
+      }, 1500)
+      return () => clearTimeout(timer)
+    } catch { /* ignore */ }
+  }, [])
+
   useEffect(() => {
     const onWindowScroll = () => setShowBackToTop(window.scrollY > 400)
     window.addEventListener('scroll', onWindowScroll, { passive: true })
@@ -18356,6 +18376,43 @@ function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
+
+      {/* Returning-basket prompt — appears 1.5s after landing if visitor has saved items */}
+      {savedCartPrompt && !isPortalRoute && (
+        <div className="fixed bottom-6 right-4 z-[65] w-72 overflow-hidden rounded-2xl border border-fuchsia-100 bg-white shadow-2xl ring-1 ring-black/5 sm:w-80">
+          <div className="h-1 bg-gradient-to-r from-fuchsia-500 to-rose-400" />
+          <div className="p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-fuchsia-50">
+                <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-fuchsia-600" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z" /></svg>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-black">Still interested?</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-black/55">You left <span className="font-semibold text-fuchsia-700">{savedCartCount} item{savedCartCount !== 1 ? 's' : ''}</span> in your basket from last time.</p>
+              </div>
+              <button type="button" onClick={dismissSavedCartPrompt} className="shrink-0 rounded-lg p-1 text-black/30 transition hover:bg-black/5 hover:text-black/60" aria-label="Dismiss">
+                <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true"><path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" /></svg>
+              </button>
+            </div>
+            <div className="mt-3 flex gap-2">
+              <NavLink
+                to="/catalogue"
+                onClick={dismissSavedCartPrompt}
+                className="flex-1 rounded-xl bg-fuchsia-600 py-2.5 text-center text-xs font-bold tracking-wide text-white transition hover:bg-fuchsia-500"
+              >
+                Resume Shopping →
+              </NavLink>
+              <button
+                type="button"
+                onClick={clearSavedCart}
+                className="rounded-xl border border-black/10 px-3 py-2.5 text-[11px] text-black/45 transition hover:border-red-300 hover:text-red-500"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Exit-intent popup for visitors with items in cart */}
       {showExitIntent && (
