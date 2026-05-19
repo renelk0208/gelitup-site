@@ -4592,7 +4592,7 @@ function FullCataloguePage() {
                           type="button"
                           onClick={() => addQuickItem(itemKey)}
                           disabled={isOOS}
-                          className={`shrink-0 rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition ${isOOS ? 'cursor-not-allowed bg-slate-300' : inCart ? 'bg-fuchsia-700 hover:bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'} ${pulseItemKey === itemKey ? 'scale-95' : ''}`}
+                          className={`shrink-0 rounded-[10px] px-3 py-1.5 text-[11px] font-semibold transition ${isOOS ? 'cursor-not-allowed border border-rose-200 bg-rose-50 text-rose-500' : `text-white ${inCart ? 'bg-fuchsia-700 hover:bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`} ${pulseItemKey === itemKey ? 'scale-95' : ''}`}
                         >
                           {isOOS ? 'Out of Stock' : inCart ? `+1 (${quickCart[itemKey]})` : '+ Add'}
                         </button>
@@ -4603,10 +4603,10 @@ function FullCataloguePage() {
                   return (
                     <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`flex flex-col overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:bg-[#E8E8E8] md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`} data-catalogue-item>
                       <div className="relative flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52 md:h-60" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
-                        <img src={item.imageUrl} alt={item.name} loading="lazy" className={`h-full w-full scale-[1.025] object-cover opacity-0 transition-opacity duration-300 ${isOOS ? 'brightness-75' : ''}`} onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
+                        <img src={item.imageUrl} alt={item.name} loading="lazy" className={`h-full w-full scale-[1.025] object-cover opacity-0 transition-opacity duration-300 ${isOOS ? 'brightness-50 grayscale' : ''}`} onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
                         {isOOS && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="rounded-full bg-black/60 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-white/90">Out of Stock</span>
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                            <span className="rounded-full bg-rose-600/90 px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-white shadow-lg">Out of Stock</span>
                           </div>
                         )}
                       </div>
@@ -4629,7 +4629,8 @@ function FullCataloguePage() {
                         )}
                         <div className="mt-auto pt-3">
                           {isOOS ? (
-                            <div className="flex w-full items-center justify-center rounded-[10px] bg-slate-200 py-2 text-xs font-semibold text-slate-500">
+                            <div className="flex w-full items-center justify-center gap-1.5 rounded-[10px] border border-rose-200 bg-rose-50 py-2 text-xs font-semibold text-rose-600">
+                              <svg viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5 shrink-0" aria-hidden="true"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm-.75 4a.75.75 0 0 1 1.5 0v3.25a.75.75 0 0 1-1.5 0V5Zm.75 6.5a.875.875 0 1 1 0-1.75.875.875 0 0 1 0 1.75Z" /></svg>
                               Out of Stock
                             </div>
                           ) : inCart ? (
@@ -4935,7 +4936,7 @@ function FullCataloguePage() {
                           <img src={item.imageUrl} alt={item.name} loading="lazy" className={`h-full w-full object-cover opacity-0 transition-opacity duration-300 ${isOOS ? 'brightness-75' : ''}`} onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => e.currentTarget.closest('article')?.classList.add('!hidden')} />
                           {isOOS && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white/90">Out of Stock</span>
+                              <span className="rounded-full bg-rose-600/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white shadow">Out of Stock</span>
                             </div>
                           )}
                         </div>
@@ -4948,7 +4949,7 @@ function FullCataloguePage() {
                           )}
                           <div className="mt-auto pt-2" onClick={(e) => e.stopPropagation()}>
                             {isOOS ? (
-                              <div className="flex w-full items-center justify-center rounded-[8px] bg-slate-200 py-1.5 text-[10px] font-semibold text-slate-500">Out of Stock</div>
+                              <div className="flex w-full items-center justify-center rounded-[8px] border border-rose-200 bg-rose-50 py-1.5 text-[10px] font-semibold text-rose-600">Out of Stock</div>
                             ) : inCart ? (
                               <div className="flex items-center gap-1">
                                 <button type="button" onClick={() => setQuickCart(c => { const q = Number(c[itemKey] || 0); if (q <= 1) { const n = { ...c }; delete n[itemKey]; return n } return { ...c, [itemKey]: q - 1 } })} className="flex h-7 w-7 items-center justify-center rounded-md border border-fuchsia-300 text-xs text-fuchsia-600 transition hover:bg-fuchsia-50">−</button>
