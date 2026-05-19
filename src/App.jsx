@@ -18259,16 +18259,16 @@ function App() {
             >
               <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
             </button>
-            <div className="bg-gradient-to-br from-fuchsia-600 to-purple-700 px-8 py-10 text-center">
+            <div className="border-b border-white/10 px-8 py-10 text-center">
               <p className="text-4xl">🛒✨</p>
               <h2 className="mt-3 text-2xl font-extrabold text-white">Wait — your cart is calling!</h2>
-              <p className="mt-2 text-sm text-white/80">You've picked some gorgeous products. Don't let them slip away!</p>
+              <p className="mt-2 text-sm text-white/60">You've picked some gorgeous products. Don't let them slip away!</p>
             </div>
             <div className="space-y-3 px-8 py-6">
               <NavLink
                 to="/portal/register"
                 onClick={() => setShowExitIntent(false)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-fuchsia-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-fuchsia-500"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-rose-500"
               >
                 Register to save my cart →
               </NavLink>
