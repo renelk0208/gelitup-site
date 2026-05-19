@@ -3040,7 +3040,7 @@ function FullCataloguePage() {
       }
     }
 
-    void loadCatal0ogue()
+    void loadCatalogue()
 
     return () => {
       mounted = false
