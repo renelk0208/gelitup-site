@@ -9822,37 +9822,59 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   useEffect(() => {
     if (!hasSupabaseConfig || !supabase) return
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       const uid = data?.user?.id
       if (!uid) return
       cartUserIdRef.current = uid
       const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${uid}`
-      try {
-        const saved = JSON.parse(localStorage.getItem(key) || 'null')
+      let saved = null
+      try { saved = JSON.parse(localStorage.getItem(key) || 'null') } catch { /* ignore */ }
+
+      // If localStorage is empty (e.g. incognito tab, new device, cleared data),
+      // fall back to the Supabase draft cart so the order is never lost.
+      if (!saved || (!saved.selectedCodes?.length && !saved.packageCartItems?.length)) {
+        try {
+          const { data: dbCart } = await supabase
+            .from('b2b_draft_carts')
+            .select('items')
+            .eq('user_id', uid)
+            .eq('source', 'portal')
+            .maybeSingle()
+          if (dbCart?.items) {
+            const items = dbCart.items
+            const codes = (items.products || []).map(p => p.code).filter(Boolean)
+            const qtys = (items.products || []).reduce((acc, p) => { if (p.code) acc[p.code] = p.qty || 1; return acc }, {})
+            if (codes.length) { setSelectedCodes(codes); setItemQtys(qtys) }
+            if (Array.isArray(items.packages) && items.packages.length) setPackageCartItems(items.packages)
+            return
+          }
+        } catch { /* ignore, cart simply stays empty */ }
         if (!saved) return
-        if (Array.isArray(saved.selectedCodes) && saved.selectedCodes.length) setSelectedCodes(saved.selectedCodes)
-        if (saved.itemQtys && typeof saved.itemQtys === 'object') setItemQtys(saved.itemQtys)
-        if (Array.isArray(saved.packageCartItems) && saved.packageCartItems.length) setPackageCartItems(saved.packageCartItems)
-        // Abandoned cart reminder — every 48 h, max 3 times (~1 week), then stop
-        const REMINDER_INTERVAL = 48 * 60 * 60 * 1000 // 48 hours
-        const MAX_REMINDERS = 3
-        const reminderCount = saved.abandonedReminderCount || 0
-        const lastReminder = saved.lastReminderAt || saved.savedAt
-        if (lastReminder && reminderCount < MAX_REMINDERS && Date.now() - lastReminder > REMINDER_INTERVAL) {
-          const itemCount = (saved.selectedCodes?.length || 0) + (saved.packageCartItems?.length || 0)
-          const userEmail = String(data?.user?.email || '').trim()
-          if (itemCount > 0 && userEmail) {
-            const firstName = String(data?.user?.user_metadata?.contact_name || '').split(' ')[0] || 'there'
-            const newCount = reminderCount + 1
-            sendPortalEmailNotification({
-              eventType: 'b2b_abandoned_cart',
-              to: userEmail,
-              subject: newCount === 1
-                ? `Psst… your cart is calling you, ${firstName}! 🛒`
-                : newCount === 2
-                  ? `Still thinking it over, ${firstName}? Your cart misses you 💅`
-                  : `Last call, ${firstName} — your colours are waiting! ✨`,
-              html: `
+      }
+
+      if (Array.isArray(saved.selectedCodes) && saved.selectedCodes.length) setSelectedCodes(saved.selectedCodes)
+      if (saved.itemQtys && typeof saved.itemQtys === 'object') setItemQtys(saved.itemQtys)
+      if (Array.isArray(saved.packageCartItems) && saved.packageCartItems.length) setPackageCartItems(saved.packageCartItems)
+      // Abandoned cart reminder — every 48 h, max 3 times (~1 week), then stop
+      const REMINDER_INTERVAL = 48 * 60 * 60 * 1000 // 48 hours
+      const MAX_REMINDERS = 3
+      const reminderCount = saved.abandonedReminderCount || 0
+      const lastReminder = saved.lastReminderAt || saved.savedAt
+      if (lastReminder && reminderCount < MAX_REMINDERS && Date.now() - lastReminder > REMINDER_INTERVAL) {
+        const itemCount = (saved.selectedCodes?.length || 0) + (saved.packageCartItems?.length || 0)
+        const userEmail = String(data?.user?.email || '').trim()
+        if (itemCount > 0 && userEmail) {
+          const firstName = String(data?.user?.user_metadata?.contact_name || '').split(' ')[0] || 'there'
+          const newCount = reminderCount + 1
+          sendPortalEmailNotification({
+            eventType: 'b2b_abandoned_cart',
+            to: userEmail,
+            subject: newCount === 1
+              ? `Psst… your cart is calling you, ${firstName}! 🛒`
+              : newCount === 2
+                ? `Still thinking it over, ${firstName}? Your cart misses you 💅`
+                : `Last call, ${firstName} — your colours are waiting! ✨`,
+            html: `
 <div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;max-width:540px;margin:0 auto;background:#111;border-radius:16px;overflow:hidden;">
   <div style="background:linear-gradient(135deg,#D43790,#9333ea);padding:32px 28px;text-align:center;">
     <p style="margin:0;font-size:28px;">🛒✨</p>
@@ -9871,13 +9893,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     <p style="margin:0;font-size:11px;color:#666;">GEL.IT.UP by GIUP® · Professional Nail Colour</p>
   </div>
 </div>`,
-            }).catch(() => {})
-            // Update reminder tracking so we don't exceed 3 nudges
-            localStorage.setItem(key, JSON.stringify({ ...saved, lastReminderAt: Date.now(), abandonedReminderCount: newCount }))
-          }
+          }).catch(() => {})
+          // Update reminder tracking so we don't exceed 3 nudges
+          localStorage.setItem(key, JSON.stringify({ ...saved, lastReminderAt: Date.now(), abandonedReminderCount: newCount }))
         }
       }
-      catch { /* ignore corrupt storage */ }
     })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
