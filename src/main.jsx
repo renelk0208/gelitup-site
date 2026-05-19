@@ -11,6 +11,14 @@ document.addEventListener('contextmenu', (e) => {
   if (e.target.tagName === 'IMG') e.preventDefault()
 }, true)
 
+// Auto-reload when a new service worker takes control so clients always get
+// the latest version immediately after a deploy without needing to close tabs.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload()
+  })
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
