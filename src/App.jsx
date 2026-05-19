@@ -93,6 +93,40 @@ async function redirectToStripeCheckout({ orderId, amountEur, email, setLoading,
   }
 }
 
+// Zoho sync is not yet enabled. This stub allows the order flow to complete without blocking.
+async function sendZohoOrderSync(_payload) {
+  return { ok: false, skipped: true, message: 'Zoho sync not yet enabled.' }
+}
+
+// Sends a portal email notification via the configured webhook (VITE_EMAIL_WEBHOOK_URL).
+// Returns { ok, skipped, message } and never throws.
+async function sendPortalEmailNotification({ eventType, to, subject, html, attachments, orderId, customerEmail, totalUnits, items, invoice, shipping, totalValueEurBase } = {}) {
+  if (!EMAIL_WEBHOOK_URL) {
+    return { ok: false, skipped: true, message: 'Email webhook not configured (VITE_EMAIL_WEBHOOK_URL).' }
+  }
+  try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 15000)
+    const res = await fetch(EMAIL_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(EMAIL_WEBHOOK_ANON_KEY ? { Authorization: `Bearer ${EMAIL_WEBHOOK_ANON_KEY}` } : {}),
+      },
+      body: JSON.stringify({ eventType, to, subject, html, attachments, orderId, customerEmail, totalUnits, items, invoice, shipping, totalValueEurBase, from: EMAIL_FROM, replyTo: EMAIL_REPLY_TO }),
+      signal: controller.signal,
+    })
+    clearTimeout(timeoutId)
+    if (!res.ok) {
+      const errorText = await res.text().catch(() => '')
+      return { ok: false, skipped: false, message: `HTTP ${res.status}: ${errorText.slice(0, 200)}` }
+    }
+    return { ok: true, skipped: false, message: '' }
+  } catch (err) {
+    return { ok: false, skipped: false, message: err?.message || 'Unknown error' }
+  }
+}
+
 const UPSELL_PRICE_FUNCTION_URL = import.meta.env.VITE_UPSELL_PRICE_FUNCTION_URL || '/.netlify/functions/get-upsell-price'
 const PROFORMA_COMPANY_NAME = import.meta.env.VITE_PROFORMA_COMPANY_NAME || 'GEL.IT.UP Factory Direct'
 const PROFORMA_VAT_TAX_ID = import.meta.env.VITE_PROFORMA_VAT_TAX_ID || 'VAT/TAX ID: EL999999999'
