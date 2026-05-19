@@ -686,16 +686,39 @@ function setPageSEO({ title, description, canonical } = {}) {
   const DEFAULT_DESCRIPTION = 'Professional gel polish with 1,000+ shades, builder gel systems, base coats and top coats. HEMA-free, TPO-free, EU certified. Available wholesale to professional nail technicians worldwide.'
   const DEFAULT_CANONICAL = 'https://gelitup.com/'
 
-  if (title) document.title = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`
+  const resolvedTitle = title
+    ? (title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`)
+    : DEFAULT_TITLE
+
+  document.title = resolvedTitle
+
   const metaDesc = document.querySelector('meta[name="description"]')
-  if (metaDesc && description) metaDesc.setAttribute('content', description)
+  if (metaDesc) metaDesc.setAttribute('content', description || DEFAULT_DESCRIPTION)
+
   const canonicalLink = document.querySelector('link[rel="canonical"]')
-  if (canonicalLink && canonical) canonicalLink.setAttribute('href', canonical)
+  if (canonicalLink) canonicalLink.setAttribute('href', canonical || DEFAULT_CANONICAL)
+
+  // Keep Open Graph in sync for social sharing of inner pages
+  const ogTitle = document.querySelector('meta[property="og:title"]')
+  if (ogTitle) ogTitle.setAttribute('content', resolvedTitle)
+  const ogDesc = document.querySelector('meta[property="og:description"]')
+  if (ogDesc) ogDesc.setAttribute('content', description || DEFAULT_DESCRIPTION)
+  const ogUrl = document.querySelector('meta[property="og:url"]')
+  if (ogUrl) ogUrl.setAttribute('content', canonical || DEFAULT_CANONICAL)
+  const twTitle = document.querySelector('meta[name="twitter:title"]')
+  if (twTitle) twTitle.setAttribute('content', resolvedTitle)
+  const twDesc = document.querySelector('meta[name="twitter:description"]')
+  if (twDesc) twDesc.setAttribute('content', description || DEFAULT_DESCRIPTION)
 
   return () => {
     document.title = DEFAULT_TITLE
     if (metaDesc) metaDesc.setAttribute('content', DEFAULT_DESCRIPTION)
     if (canonicalLink) canonicalLink.setAttribute('href', DEFAULT_CANONICAL)
+    if (ogTitle) ogTitle.setAttribute('content', DEFAULT_TITLE)
+    if (ogDesc) ogDesc.setAttribute('content', DEFAULT_DESCRIPTION)
+    if (ogUrl) ogUrl.setAttribute('content', DEFAULT_CANONICAL)
+    if (twTitle) twTitle.setAttribute('content', DEFAULT_TITLE)
+    if (twDesc) twDesc.setAttribute('content', DEFAULT_DESCRIPTION)
   }
 }
 
@@ -2961,7 +2984,7 @@ function FullCataloguePage() {
       }
     }
 
-    void loadCatalogue()
+    void loadCatal0ogue()
 
     return () => {
       mounted = false

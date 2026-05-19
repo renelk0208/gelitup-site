@@ -4,6 +4,7 @@
   <!-- Homepage -->
   <url>
     <loc>https://gelitup.com/</loc>
+    <lastmod>2026-05-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -11,6 +12,7 @@
   <!-- Full Product Catalogue — primary keyword-led category page -->
   <url>
     <loc>https://gelitup.com/full-catalogue</loc>
+    <lastmod>2026-05-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -18,6 +20,7 @@
   <!-- Distributor information page -->
   <url>
     <loc>https://gelitup.com/distributor-packages</loc>
+    <lastmod>2026-05-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -25,6 +28,7 @@
   <!-- Become a distributor (public registration) -->
   <url>
     <loc>https://gelitup.com/become-distributor</loc>
+    <lastmod>2026-05-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -32,6 +36,7 @@
   <!-- Distributor map -->
   <url>
     <loc>https://gelitup.com/distributors</loc>
+    <lastmod>2026-05-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -39,6 +44,7 @@
   <!-- For Academies -->
   <url>
     <loc>https://gelitup.com/for-academies</loc>
+    <lastmod>2026-05-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -46,6 +52,7 @@
   <!-- About Us -->
   <url>
     <loc>https://gelitup.com/pages/about-us</loc>
+    <lastmod>2026-05-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -53,6 +60,7 @@
   <!-- Contact Us -->
   <url>
     <loc>https://gelitup.com/pages/contact-us</loc>
+    <lastmod>2026-05-19</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -60,16 +68,19 @@
   <!-- Legal pages -->
   <url>
     <loc>https://gelitup.com/privacy-policy</loc>
+    <lastmod>2026-05-19</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://gelitup.com/cookie-policy</loc>
+    <lastmod>2026-05-19</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://gelitup.com/terms-and-conditions</loc>
+    <lastmod>2026-05-19</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
