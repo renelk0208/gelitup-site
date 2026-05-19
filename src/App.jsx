@@ -9663,6 +9663,22 @@ const B2B_SIDEBAR_GROUPS = [
   },
 ]
 
+// Build a normalised Map<string, imageUrl> from the product-image-map.json payload.
+// Keys are stored under both normalizeSkuCode and normalizeProductName variants
+// so lookups succeed regardless of spacing or GIUP prefix style.
+function normalizeImageMap(payload) {
+  const map = new Map()
+  if (!payload || typeof payload !== 'object') return map
+  for (const [key, value] of Object.entries(payload)) {
+    if (!key || !value) continue
+    const sk = normalizeSkuCode(key)
+    const pn = normalizeProductName(key)
+    if (sk) map.set(sk, value)
+    if (pn && pn !== sk) map.set(pn, value)
+  }
+  return map
+}
+
 function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated = false }) {
   // Tier 1 / Professional (local-regional): -63% from B2B price (pay 37%).
   // Tier 2 / Authority (national): -78% from B2B price (pay 22%).
@@ -11669,9 +11685,21 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const selectedProducts = useMemo(() => {
     return selectedCodes.map((code) => {
       const found = products.find((p) => p.code === code)
-      return found || { code, sku: code, name: code, category: 'Unknown', preview: '#e2e8f0', imageUrl: null }
+      if (found) return found
+      // Products still loading — enrich fallback from already-loaded maps so the
+      // order summary shows images and prices immediately rather than grey boxes.
+      const skNorm = normalizeSkuCode(code)
+      const pnNorm = normalizeProductName(code)
+      const imageUrl = localImageMap.get(skNorm) || localImageMap.get(pnNorm) || null
+      const giupNum = (skNorm.match(/^(?:GIUP\s+)?(\d+[A-Z]?)$/) || [])[1]
+      const priceEntry = priceMap.get(skNorm)
+        || priceMap.get(pnNorm)
+        || (giupNum ? priceMap.get(giupNum.padStart(2, '0')) || priceMap.get(giupNum) : null)
+      const price = priceEntry?.price ?? null
+      const name = priceEntry?.name || code
+      return { code, sku: code, name, category: 'Unknown', preview: '#e2e8f0', imageUrl, price }
     })
-  }, [selectedCodes, products])
+  }, [selectedCodes, products, localImageMap, priceMap])
 
   // Colour family breakdown for selected products
   const colourFamilyBreakdown = useMemo(() => {
