@@ -2511,7 +2511,11 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     if (/mirror.powder.top.coat|mirror.top.coat/i.test(imagePath) && category !== 'NAIL ART') {
       const nailArtBucket = grouped.get('NAIL ART') || new Map()
       const mirrorItems = nailArtBucket.get('MIRROR POWDERS') || []
-      if (!mirrorItems.some(i => i.imageUrl === imagePath)) {
+      const candidateName = (preferredDisplayNameByImagePath.get(imagePath) || canonicalDisplayNameByImagePath.get(imagePath) || formatCatalogueItemName(afterRoot)).toUpperCase()
+      const alreadyPresent = mirrorItems.some(i =>
+        i.imageUrl === imagePath || i.name.toUpperCase() === candidateName
+      )
+      if (!alreadyPresent) {
         mirrorItems.push({
           imageUrl: imagePath,
           code: preferredSourceKeyByImagePath.get(imagePath) || formatCatalogueItemName(afterRoot),
