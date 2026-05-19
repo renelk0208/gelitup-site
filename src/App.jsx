@@ -4544,12 +4544,13 @@ function FullCataloguePage() {
                             {itemPrice != null && <span className="ml-2 text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</span>}
                           </p>
                         </div>
-                        <NavLink
-                          to="/checkout"
-                          className="shrink-0 rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-fuchsia-500"
+                        <button
+                          type="button"
+                          onClick={() => addQuickItem(itemKey)}
+                          className={`shrink-0 rounded-[10px] px-3 py-1.5 text-[11px] font-semibold text-white transition ${inCart ? 'bg-fuchsia-700 hover:bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'} ${pulseItemKey === itemKey ? 'scale-95' : ''}`}
                         >
-                          Buy Now
-                        </NavLink>
+                          {inCart ? `+1 (${quickCart[itemKey]})` : '+ Add'}
+                        </button>
                       </div>
                     )
                   }
@@ -4577,12 +4578,21 @@ function FullCataloguePage() {
                           <p className="mt-1.5 text-xs font-bold text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</p>
                         )}
                         <div className="mt-auto pt-3">
-                          <NavLink
-                            to="/checkout"
-                            className="flex w-full items-center justify-center rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
-                          >
-                            Buy Now
-                          </NavLink>
+                          {inCart ? (
+                            <div className="flex items-center gap-1.5">
+                              <button type="button" onClick={() => setQuickCart(c => { const q = Number(c[itemKey] || 0); if (q <= 1) { const n = { ...c }; delete n[itemKey]; return n } return { ...c, [itemKey]: q - 1 } })} className="flex h-8 w-8 items-center justify-center rounded-lg border border-fuchsia-300 text-sm text-fuchsia-600 transition hover:bg-fuchsia-50">−</button>
+                              <span className="flex-1 text-center text-[11px] font-bold text-fuchsia-700">{quickCart[itemKey]}× added</span>
+                              <button type="button" onClick={() => addQuickItem(itemKey)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-fuchsia-300 text-sm text-fuchsia-600 transition hover:bg-fuchsia-50">+</button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => addQuickItem(itemKey)}
+                              className={`flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500 ${pulseItemKey === itemKey ? 'scale-95' : ''}`}
+                            >
+                              + Add to Cart
+                            </button>
+                          )}
                         </div>
                       </div>
                     </article>
@@ -4697,7 +4707,7 @@ function FullCataloguePage() {
                       <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
                         <div className="h-full rounded-full bg-fuchsia-600 transition-all duration-500" style={{ width: `${quickProgress}%` }} />
                       </div>
-                      <p className="mt-0.5 text-[10px] text-black/50">{quickProgress < 100 ? `€${(MIN_ORDER_EUR - quickCartTotal).toFixed(2)} more to reach €${MIN_ORDER_EUR} minimum order` : 'Minimum order reached!'}</p>
+                      <p className="mt-0.5 text-[10px] text-black/50">{quickProgress < 100 ? `€${(MIN_ORDER_EUR - quickCartTotal).toFixed(2)} more to reach €${MIN_ORDER_EUR} minimum · 🚚 Free EU Shipping` : '✓ Minimum reached · 🚚 Free EU Shipping included!'}</p>
                     </button>
                     <button
                       onClick={() => setShowBasketDetail((v) => !v)}
@@ -4723,6 +4733,7 @@ function FullCataloguePage() {
               </div>
             )}
 
+            {quickCartUnits > 0 && <div className="h-20" />}
             <div className="mt-2 flex flex-wrap items-center justify-between gap-3 text-xs text-black/55">
               <span>Showing {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''}</span>
               <NavLink
