@@ -8703,6 +8703,8 @@ function CheckoutPage() {
 }
 
 function PortalRegister({ onRegister }) {
+  const lang = useLang()
+  const R = (getTranslations(lang) || {}).register || {}
   const defaultApplicationType = 'distributor'
 
   const [application, setApplication] = useState({
@@ -8816,50 +8818,50 @@ function PortalRegister({ onRegister }) {
       <div className="bg-[#111111] p-5 sm:p-6 md:p-8 text-white">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-400">GEL.IT.UP by GIUP®</p>
         <h2 className="heading-on-dark mt-3 text-3xl font-bold">
-          {isDistributorFlow ? 'Distribution Application' : 'Trade Registration'}
+          {isDistributorFlow ? (R.dist_title || 'Distribution Application') : (R.b2b_title || 'Trade Registration')}
         </h2>
         <p className="mt-3 text-sm text-slate-300">
           {isDistributorFlow
-            ? 'Apply to become a GEL.IT.UP distributor. Your application will be reviewed and you will be notified by email once approved.'
-            : 'Register your B2B account. No approval needed — you can set your password and log in immediately.'}
+            ? (R.dist_desc || 'Apply to become a GEL.IT.UP distributor. Your application will be reviewed and you will be notified by email once approved.')
+            : (R.b2b_desc || 'Register your B2B account. No approval needed — you can set your password and log in immediately.')}
         </p>
         <ul className="mt-6 space-y-3 hidden md:block">
           {isDistributorFlow ? (
             <>
               <li className="flex items-start gap-2.5 text-sm text-slate-300">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                Exclusive regional or country distribution rights
+                {R.dist_b1 || 'Exclusive regional or country distribution rights'}
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-300">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                Full catalogue access with distributor pricing
+                {R.dist_b2 || 'Full catalogue access with distributor pricing'}
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-300">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                Co-marketing tools, training &amp; ongoing support
+                {R.dist_b3 || 'Co-marketing tools, training & ongoing support'}
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-300">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                Review within 1–2 business days
+                {R.dist_b4 || 'Review within 1–2 business days'}
               </li>
             </>
           ) : (
             <>
               <li className="flex items-start gap-2.5 text-sm text-slate-300">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                Instant access — no waiting for approval
+                {R.b2b_b1 || 'Instant access — no waiting for approval'}
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-300">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                Wholesale pricing on 200+ HEMA-free products
+                {R.b2b_b2 || 'Wholesale pricing on 200+ HEMA-free products'}
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-300">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                Place orders and track shipments from your dashboard
+                {R.b2b_b3 || 'Place orders and track shipments from your dashboard'}
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-300">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                EU-certified, dermatologist-tested formulas
+                {R.b2b_b4 || 'EU-certified, dermatologist-tested formulas'}
               </li>
             </>
           )}
@@ -8868,7 +8870,7 @@ function PortalRegister({ onRegister }) {
 
       <div className="p-5 sm:p-6 md:p-8">
         <h3 className="text-xl font-semibold text-slate-900">
-          Distributor Application
+          {R.form_header || 'Distributor Application'}
         </h3>
 
         {false && (
@@ -8993,34 +8995,34 @@ function PortalRegister({ onRegister }) {
             {isB2BOrderFlow ? (
               <>
                 <label className="block text-sm font-medium text-slate-700">
-                  First Name
+                  {R.first_name || 'First Name'}
                   <input type="text" required autoComplete="given-name" value={application.firstName || ''} onChange={(e) => setField('firstName', e.target.value)} placeholder="Jane" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
-                  Surname
+                  {R.surname || 'Surname'}
                   <input type="text" required autoComplete="family-name" value={application.lastName || ''} onChange={(e) => setField('lastName', e.target.value)} placeholder="Smith" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
-                  Email Address
+                  {R.email || 'Email Address'}
                   <input type="email" required autoComplete="email" value={application.contactEmail} onChange={(e) => setField('contactEmail', e.target.value)} placeholder="jane@salon.com" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
-                  Contact Number
+                  {R.phone || 'Contact Number'}
                   <input type="tel" required autoComplete="tel" value={application.phone} onChange={(e) => setField('phone', e.target.value)} placeholder="+30 210 0000000" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-                  Franchise / Salon Name
+                  {R.salon_name || 'Franchise / Salon Name'}
                   <input type="text" required value={application.salonName || ''} onChange={(e) => setField('salonName', e.target.value)} placeholder="e.g. Glow Nails Studio" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-                  Business Type
+                  {R.biz_type || 'Business Type'}
                   <select required value={application.businessType} onChange={(e) => setField('businessType', e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring">
-                    <option value="">Select type</option>
-                    <option value="Salon">Nail Salon</option>
-                    <option value="Nail Technician">Nail Technician / Freelancer</option>
-                    <option value="Academy">Nail Academy / School</option>
-                    <option value="Wholesaler">Wholesaler / Reseller</option>
-                    <option value="Other">Other</option>
+                    <option value="">{R.select_type || 'Select type'}</option>
+                    <option value="Salon">{R.opt_salon || 'Nail Salon'}</option>
+                    <option value="Nail Technician">{R.opt_nail_tech || 'Nail Technician / Freelancer'}</option>
+                    <option value="Academy">{R.opt_academy || 'Nail Academy / School'}</option>
+                    <option value="Wholesaler">{R.opt_wholesaler || 'Wholesaler / Reseller'}</option>
+                    <option value="Other">{R.opt_other || 'Other'}</option>
                   </select>
                 </label>
               </>
@@ -9050,7 +9052,7 @@ function PortalRegister({ onRegister }) {
             )}
 
             <label className="block text-sm font-medium text-slate-700">
-              {isDistributorFlow ? 'Client Type' : 'Order Account'}
+              {isDistributorFlow ? (R.client_type || 'Client Type') : (R.order_account || 'Order Account')}
               <select
                 required
                 value={application.customerType}
@@ -9060,21 +9062,21 @@ function PortalRegister({ onRegister }) {
                 {isDistributorFlow
                   ? (
                     <>
-                      <option value="company">Company</option>
-                      <option value="client">Client</option>
+                      <option value="company">{R.opt_company || 'Company'}</option>
+                      <option value="client">{R.opt_client || 'Client'}</option>
                     </>
                   )
                   : (
                     <>
-                      <option value="company">Business</option>
-                      <option value="personal">Personal</option>
+                      <option value="company">{R.opt_business || 'Business'}</option>
+                      <option value="personal">{R.opt_personal || 'Personal'}</option>
                     </>
                   )}
               </select>
             </label>
 
             <label className="block text-sm font-medium text-slate-700">
-              {(application.customerType === 'company' || isDistributorFlow) ? 'Company Name' : 'Full Name'}
+              {(application.customerType === 'company' || isDistributorFlow) ? (R.company_name || 'Company Name') : (R.full_name || 'Full Name')}
               <input
                 type="text"
                 required
@@ -9085,7 +9087,7 @@ function PortalRegister({ onRegister }) {
               />
             </label>
             <label className="block text-sm font-medium text-slate-700">
-              VAT Number
+              {R.vat || 'VAT Number'}
               <input
                 type="text"
                 required={isDistributorFlow || isBusinessOrderProfile}
@@ -9096,7 +9098,7 @@ function PortalRegister({ onRegister }) {
               />
             </label>
             <label className="block text-sm font-medium text-slate-700">
-              Contact Name
+              {R.contact_name || 'Contact Name'}
               <input
                 type="text"
                 required
@@ -9107,7 +9109,7 @@ function PortalRegister({ onRegister }) {
               />
             </label>
             <label className="block text-sm font-medium text-slate-700">
-              Contact Email
+              {R.contact_email || 'Contact Email'}
               <input
                 type="email"
                 required
@@ -9118,7 +9120,7 @@ function PortalRegister({ onRegister }) {
               />
             </label>
             <label className="block text-sm font-medium text-slate-700">
-              Phone
+              {R.phone || 'Phone'}
               <input
                 type="tel"
                 required
@@ -9130,7 +9132,7 @@ function PortalRegister({ onRegister }) {
               />
             </label>
             <label className="block text-sm font-medium text-slate-700">
-              Website
+              {R.website || 'Website'}
               <input
                 type="text"
                 inputMode="url"
@@ -9142,7 +9144,7 @@ function PortalRegister({ onRegister }) {
             </label>
             {/* Country — always shown */}
             <label className="block text-sm font-medium text-slate-700">
-              Country
+              {R.country || 'Country'}
               <select
                 required
                 value={application.invoiceCountry}
@@ -9157,7 +9159,7 @@ function PortalRegister({ onRegister }) {
                 }}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
               >
-                <option value="">Select country</option>
+                <option value="">{R.select_country || 'Select country'}</option>
                 {COUNTRY_OPTIONS.map((country) => (
                   <option key={country} value={country}>{country}</option>
                 ))}
@@ -9168,21 +9170,21 @@ function PortalRegister({ onRegister }) {
             {isDistributorFlow && (
               <>
                 <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-                  Shipping Type
+                  {R.shipping_type || 'Shipping Type'}
                   <select
                     required
                     value={application.shippingType}
                     onChange={(event) => setField('shippingType', event.target.value)}
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
                   >
-                    <option value="road">Road</option>
-                    <option value="air">Air</option>
-                    <option value="self_arranged">Self-arranged</option>
+                    <option value="road">{R.opt_road || 'Road'}</option>
+                    <option value="air">{R.opt_air || 'Air'}</option>
+                    <option value="self_arranged">{R.opt_self || 'Self-arranged'}</option>
                   </select>
                 </label>
 
                 <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-                  Invoice Address Line 1
+                  {R.inv_addr1 || 'Invoice Address Line 1'}
                   <input
                     type="text"
                     required
@@ -9194,7 +9196,7 @@ function PortalRegister({ onRegister }) {
                 </label>
 
                 <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-                  Invoice Address Line 2 (optional)
+                  {R.inv_addr2 || 'Invoice Address Line 2 (optional)'}
                   <input
                     type="text"
                     value={application.invoiceAddressLine2}
@@ -9205,7 +9207,7 @@ function PortalRegister({ onRegister }) {
                 </label>
 
                 <label className="block text-sm font-medium text-slate-700">
-                  Invoice Area / City
+                  {R.inv_city || 'Invoice Area / City'}
                   <input
                     type="text"
                     required
@@ -9217,7 +9219,7 @@ function PortalRegister({ onRegister }) {
                 </label>
 
                 <label className="block text-sm font-medium text-slate-700">
-                  Invoice Region / State
+                  {R.inv_region || 'Invoice Region / State'}
                   <input
                     type="text"
                     required
@@ -9229,7 +9231,7 @@ function PortalRegister({ onRegister }) {
                 </label>
 
                 <label className="block text-sm font-medium text-slate-700">
-                  Invoice Postal Code
+                  {R.inv_postal || 'Invoice Postal Code'}
                   <input
                     type="text"
                     required
@@ -9248,14 +9250,14 @@ function PortalRegister({ onRegister }) {
                       onChange={(event) => setField('shippingSameAsInvoice', event.target.checked)}
                       className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20"
                     />
-                    Shipping details same as invoice
+                    {R.ship_same || 'Shipping details same as invoice'}
                   </span>
                 </label>
 
                 {!application.shippingSameAsInvoice && (
                   <>
                     <label className="block text-sm font-medium text-slate-700">
-                      Shipping Contact Name
+                      {R.ship_name || 'Shipping Contact Name'}
                       <input
                         type="text"
                         required={!application.shippingSameAsInvoice}
@@ -9266,7 +9268,7 @@ function PortalRegister({ onRegister }) {
                       />
                     </label>
                     <label className="block text-sm font-medium text-slate-700">
-                      Shipping Phone
+                      {R.ship_phone || 'Shipping Phone'}
                       <input
                         type="text"
                         required={!application.shippingSameAsInvoice}
@@ -9277,7 +9279,7 @@ function PortalRegister({ onRegister }) {
                       />
                     </label>
                     <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-                      Shipping Address Line 1
+                      {R.ship_addr1 || 'Shipping Address Line 1'}
                       <input
                         type="text"
                         required={!application.shippingSameAsInvoice}
@@ -9288,7 +9290,7 @@ function PortalRegister({ onRegister }) {
                       />
                     </label>
                     <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-                      Shipping Address Line 2 (optional)
+                      {R.ship_addr2 || 'Shipping Address Line 2 (optional)'}
                       <input
                         type="text"
                         value={application.shippingAddressLine2}
@@ -9298,7 +9300,7 @@ function PortalRegister({ onRegister }) {
                       />
                     </label>
                     <label className="block text-sm font-medium text-slate-700">
-                      Shipping Area / City
+                      {R.ship_city || 'Shipping Area / City'}
                       <input
                         type="text"
                         required={!application.shippingSameAsInvoice}
@@ -9309,7 +9311,7 @@ function PortalRegister({ onRegister }) {
                       />
                     </label>
                     <label className="block text-sm font-medium text-slate-700">
-                      Shipping Region / State
+                      {R.ship_region || 'Shipping Region / State'}
                       <input
                         type="text"
                         required={!application.shippingSameAsInvoice}
@@ -9320,7 +9322,7 @@ function PortalRegister({ onRegister }) {
                       />
                     </label>
                     <label className="block text-sm font-medium text-slate-700">
-                      Shipping Postal Code
+                      {R.ship_postal || 'Shipping Postal Code'}
                       <input
                         type="text"
                         required={!application.shippingSameAsInvoice}
@@ -9331,7 +9333,7 @@ function PortalRegister({ onRegister }) {
                       />
                     </label>
                     <label className="block text-sm font-medium text-slate-700">
-                      Shipping Country
+                      {R.ship_country || 'Shipping Country'}
                       <select
                         required={!application.shippingSameAsInvoice}
                         value={application.shippingCountry}
@@ -9345,7 +9347,7 @@ function PortalRegister({ onRegister }) {
                         }}
                         className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring"
                       >
-                        <option value="">Select country</option>
+                        <option value="">{R.select_country || 'Select country'}</option>
                         {COUNTRY_OPTIONS.map((country) => (
                           <option key={country} value={country}>{country}</option>
                         ))}
@@ -9357,25 +9359,25 @@ function PortalRegister({ onRegister }) {
             )}
 
             <label className="block text-sm font-medium text-slate-700">
-              Business Type
+              {R.biz_type || 'Business Type'}
               <select
                 required={isDistributorFlow}
                 value={application.businessType}
                 onChange={(event) => setField('businessType', event.target.value)}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
               >
-                <option value="">Select type</option>
-                <option value="Distributor">Distributor</option>
-                <option value="Salon">Salon</option>
-                <option value="Wholesaler">Wholesaler</option>
-                <option value="Academy">Academy</option>
+                <option value="">{R.select_type || 'Select type'}</option>
+                <option value="Distributor">{R.opt_distributor || 'Distributor'}</option>
+                <option value="Salon">{R.opt_salon || 'Salon'}</option>
+                <option value="Wholesaler">{R.opt_wholesaler || 'Wholesaler'}</option>
+                <option value="Academy">{R.opt_academy || 'Academy'}</option>
               </select>
             </label>
 
             {isDistributorFlow && (
               <>
                 <label className="block text-sm font-medium text-slate-700">
-                  Years in Business
+                  {R.years_biz || 'Years in Business'}
                   <input
                     type="text"
                     required
@@ -9386,7 +9388,7 @@ function PortalRegister({ onRegister }) {
                   />
                 </label>
                 <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-                  Distribution Country Interests
+                  {R.dist_interests || 'Distribution Country Interests'}
                   <input
                     type="text"
                     required
@@ -9400,7 +9402,7 @@ function PortalRegister({ onRegister }) {
             )}
 
             <label className="block text-sm font-medium text-slate-700 md:col-span-2">
-              Notes
+              {R.notes || 'Notes'}
               <textarea
                 rows={3}
                 value={application.notes}
@@ -9421,22 +9423,22 @@ function PortalRegister({ onRegister }) {
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-slate-900"
             />
             <span className="text-xs leading-relaxed text-slate-600">
-              I agree that the information I provide in this form will be stored and processed by GEL.IT.UP by GIUP® for the purpose of evaluating my application and managing the business relationship. This data will not be shared with third parties without consent.
+              {R.consent || 'I agree that the information I provide in this form will be stored and processed by GEL.IT.UP by GIUP® for the purpose of evaluating my application and managing the business relationship. This data will not be shared with third parties without consent.'}
             </span>
           </label>
 
           <button type="submit" disabled={isSubmitting || !consentGiven} className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
-            {isSubmitting ? 'Submitting...' : 'Submit Application'}
+            {isSubmitting ? (R.submitting || 'Submitting...') : (R.submit || 'Submit Application')}
           </button>
         </form>
 
-        {errorMessage && <p className="mt-2 text-xs text-rose-600">{errorMessage}</p>}
+        {errorMessage && <p className="mt-2 text-xs text-rose-600">{errorMessage || R.err_submit}</p>}
 
         <div className="mt-5 border-t border-slate-100 pt-4 flex items-center justify-between gap-4 flex-wrap">
           <span className="text-xs text-slate-500">
-            Already have an account?{' '}
+            {R.already_account || 'Already have an account?'}{' '}
             <NavLink to="/portal/login" className="font-semibold text-slate-700 hover:underline">
-              Sign in
+              {R.sign_in || 'Sign in'}
             </NavLink>
           </span>
           <a
@@ -9449,7 +9451,7 @@ function PortalRegister({ onRegister }) {
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.570-.347z" />
               <path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.522 5.836L.057 23.928a.5.5 0 00.608.593l6.358-1.43A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-4.985-1.356l-.357-.213-3.704.833.886-3.576-.233-.369A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z" />
             </svg>
-            Need help?
+            {R.need_help || 'Need help?'}
           </a>
         </div>
       </div>
@@ -9490,25 +9492,24 @@ function PortalRegister({ onRegister }) {
               {submittedProfile.isDistributor ? (
                 <>
                   <p className="text-sm leading-relaxed text-slate-700">
-                    Your distributor application has been submitted to our team. Once reviewed and approved, you will receive an email with
-                    a direct link to set your portal password and gain full access to:
+                    {R.success_dist_body || 'Your distributor application has been submitted to our team. Once reviewed and approved, you will receive an email with a direct link to set your portal password and gain full access to:'}
                   </p>
                   <ul className="mt-4 space-y-2 text-sm text-slate-700">
                     <li className="flex items-start gap-2">
                       <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-100 text-fuchsia-600 text-xs font-bold">✓</span>
-                      The full B2B product catalogue with distributor pricing
+                      {R.success_dist_b1 || 'The full B2B product catalogue with distributor pricing'}
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-100 text-fuchsia-600 text-xs font-bold">✓</span>
-                      Online wholesale ordering and proforma invoice generation
+                      {R.success_dist_b2 || 'Online wholesale ordering and proforma invoice generation'}
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-100 text-fuchsia-600 text-xs font-bold">✓</span>
-                      Order tracking, compliance certificates, and distributor support
+                      {R.success_dist_b3 || 'Order tracking, compliance certificates, and distributor support'}
                     </li>
                   </ul>
                   <p className="mt-4 text-xs text-slate-500">
-                    Review usually takes <strong>1–2 business days</strong>. Check your inbox and spam folder.
+                    {R.success_dist_footer || 'Review usually takes 1–2 business days. Check your inbox and spam folder.'}
                   </p>
                   {successMessage && successMessage.toLowerCase().includes('email') && successMessage.toLowerCase().includes('fail') && (
                     <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
@@ -9523,14 +9524,13 @@ function PortalRegister({ onRegister }) {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                     <div>
-                      <p className="text-sm font-semibold text-emerald-800">Check your inbox</p>
+                      <p className="text-sm font-semibold text-emerald-800">{R.success_b2b_check || 'Check your inbox'}</p>
                       <p className="mt-0.5 text-xs text-emerald-700">
-                        We've sent a confirmation link to <strong>{submittedProfile.email}</strong>.
-                        Click it to set your password — the whole process takes under 2 minutes.
+                        {R.success_b2b_link || 'We\'ve sent a confirmation link to your email. Click it to set your password — the whole process takes under 2 minutes.'}
                       </p>
                     </div>
                   </div>
-                  <p className="mt-3 text-xs text-slate-500">Can't find it? Check your spam folder. Questions? <a href={`mailto:${B2B_EMAIL}`} className="font-semibold text-fuchsia-600 hover:underline">{B2B_EMAIL}</a></p>
+                  <p className="mt-3 text-xs text-slate-500">{R.success_b2b_spam || 'Can\'t find it? Check your spam folder.'} <a href={`mailto:${B2B_EMAIL}`} className="font-semibold text-fuchsia-600 hover:underline">{B2B_EMAIL}</a></p>
                 </>
               )}
 
@@ -9540,7 +9540,7 @@ function PortalRegister({ onRegister }) {
                     to={submittedProfile.email ? `/portal/login?email=${encodeURIComponent(submittedProfile.email)}` : '/portal/login'}
                     className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
                   >
-                    Already confirmed? Sign in
+                    {R.btn_confirmed_signin || 'Already confirmed? Sign in'}
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
                       <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -9550,7 +9550,7 @@ function PortalRegister({ onRegister }) {
                     to="/portal/login"
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-fuchsia-800 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-fuchsia-200 transition hover:opacity-90"
                   >
-                    Already approved? Sign in
+                    {R.btn_approved_signin || 'Already approved? Sign in'}
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
                       <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -9598,7 +9598,7 @@ function PortalRegister({ onRegister }) {
                   }}
                   className="w-full rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
                 >
-                  Back to Registration
+                  {R.btn_return || 'Back to Registration'}
                 </button>
               </div>
             </div>
@@ -16924,6 +16924,9 @@ function App() {
   const [showChatPanel, setShowChatPanel] = useState(false)
   const [showExitIntent, setShowExitIntent] = useState(false)
   const exitIntentShownRef = useRef(false)
+  const lang = useLang()
+  const EI = (getTranslations(lang) || {}).exit_intent || {}
+  const Ck = (getTranslations(lang) || {}).cookies || {}
 
   const handleAcceptCookies = useCallback(() => {
     localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, 'accepted')
@@ -18261,8 +18264,8 @@ function App() {
             </button>
             <div className="border-b border-white/10 px-8 py-10 text-center">
               <p className="text-4xl">🛒✨</p>
-              <h2 className="mt-3 text-2xl font-extrabold text-white">Wait — your cart is calling!</h2>
-              <p className="mt-2 text-sm text-white/60">You've picked some gorgeous products. Don't let them slip away!</p>
+              <h2 className="mt-3 text-2xl font-extrabold text-white">{EI.heading || "Wait — your cart is calling!"}</h2>
+              <p className="mt-2 text-sm text-white/60">{EI.body || "You've picked some gorgeous products. Don't let them slip away!"}</p>
             </div>
             <div className="space-y-3 px-8 py-6">
               <NavLink
@@ -18270,21 +18273,21 @@ function App() {
                 onClick={() => setShowExitIntent(false)}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-rose-500"
               >
-                Register to save my cart →
+                {EI.register || 'Register to save my cart →'}
               </NavLink>
               <NavLink
                 to="/portal/login"
                 onClick={() => setShowExitIntent(false)}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/10"
               >
-                I already have an account
+                {EI.login || 'I already have an account'}
               </NavLink>
               <button
                 type="button"
                 onClick={() => setShowExitIntent(false)}
                 className="w-full pt-1 text-center text-xs text-white/40 transition hover:text-white/60"
               >
-                No thanks, I'll keep browsing
+                {EI.dismiss || "No thanks, I'll keep browsing"}
               </button>
             </div>
           </div>
@@ -18295,16 +18298,16 @@ function App() {
         <div className="fixed bottom-4 left-0 right-0 z-40 px-3 md:px-6">
           <div className="mx-auto flex max-w-6xl flex-col gap-3 rounded-xl border border-white/20 bg-black/90 p-3 text-white shadow-sm backdrop-blur-[10px] sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-white/80">
-              We use cookies to improve your experience. By continuing, you agree to our cookie use.
+              {Ck.message || 'We use cookies to improve your experience. By continuing, you agree to our cookie use.'}
               {' '}
-              <NavLink to="/cookie-policy" className="font-semibold text-fuchsia-300 underline">Read Cookie Policy</NavLink>
+              <NavLink to="/cookie-policy" className="font-semibold text-fuchsia-300 underline">{Ck.policy_link || 'Read Cookie Policy'}</NavLink>
             </p>
             <button
               type="button"
               onClick={handleAcceptCookies}
               className="rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
             >
-              Accept Cookies
+              {Ck.accept || 'Accept Cookies'}
             </button>
           </div>
         </div>
