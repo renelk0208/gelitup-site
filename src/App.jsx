@@ -10254,7 +10254,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   )
 
   const getClientInputClass = useCallback(
-    (field) => `mt-1 w-full rounded-lg border px-3 py-2 text-xs text-slate-700 ${hasClientFieldError(field) ? 'border-rose-400 bg-rose-50' : 'border-slate-300 bg-white'}`,
+    (field) => `mt-1 w-full rounded-xl border px-4 py-3 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-200 ${hasClientFieldError(field) ? 'border-rose-400 bg-rose-50 focus:border-rose-400' : 'border-slate-300 bg-white focus:border-fuchsia-400'}`,
     [hasClientFieldError],
   )
 
@@ -13031,17 +13031,17 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     return (
       <div className="space-y-4">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-fuchsia-600">Step 3 of 3</p>
-              <h3 className="mt-0.5 bg-gradient-to-r from-fuchsia-500 to-fuchsia-800 bg-clip-text text-lg font-semibold text-transparent">My Information</h3>
-              <p className="mt-1 text-xs text-slate-500">Saved for future orders — fill in once, reuse every time.</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-fuchsia-600">Step 3 of 3</p>
+              <h3 className="mt-1 text-2xl font-bold text-slate-900">Billing &amp; Shipping</h3>
+              <p className="mt-1 text-sm text-slate-500">Saved to your account — fill in once, reuse every time.</p>
             </div>
-            <button onClick={() => navigate('/portal/dashboard/products')} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
-              ← Back to My Order
+            <button onClick={() => navigate('/portal/dashboard/products')} className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+              ← Back to Order
             </button>
           </div>
-          <p className="text-[11px] text-slate-500">Required fields are marked with <span className="font-semibold text-rose-600">*</span></p>
+          <p className="mb-5 text-sm text-slate-500">Fields marked <span className="font-semibold text-rose-600">*</span> are required.</p>
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
             <label className="text-xs text-slate-700">Type <span className="text-rose-600">*</span>
               <select value={clientProfile.customerType} onChange={(e) => setClientField('customerType', e.target.value)} className={getClientInputClass('customerType')}>
@@ -13112,13 +13112,13 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
               <input type="text" value={clientProfile.invoicePostalCode} onChange={(e) => setClientField('invoicePostalCode', e.target.value)} placeholder="Postal code" className={getClientInputClass('invoicePostalCode')} />
             </label>
           </div>
-          <label className="mt-3 flex items-center gap-2 text-xs text-slate-700">
+          <label className="mt-4 flex items-center gap-2.5 text-sm text-slate-700">
             <input type="checkbox" checked={clientProfile.shippingSameAsInvoice} onChange={(e) => setClientField('shippingSameAsInvoice', e.target.checked)} />
             Shipping address is same as invoice address
           </label>
           {!clientProfile.shippingSameAsInvoice && (
             <>
-              <p className="mt-3 text-xs font-semibold text-slate-900">Shipping Address</p>
+              <p className="mt-4 text-sm font-bold text-slate-800">Shipping Address</p>
               <div className="mt-2 grid gap-2 sm:grid-cols-2">
                 <label className="text-xs text-slate-700">Shipping contact name <span className="text-rose-600">*</span>
                   <input type="text" value={clientProfile.shippingName} onChange={(e) => setClientField('shippingName', e.target.value)} placeholder="Shipping contact name" className={getClientInputClass('shippingName')} />
@@ -13151,35 +13151,47 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             </>
           )}
           {showClientValidation && clientValidation.hasMissing && (
-            <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">Please complete all required fields marked with *.</p>
+            <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">Please complete all required fields marked with *.</p>
           )}
 
           {/* Order terms reminder */}
           {(() => {
-            const _dest = (clientProfile.shippingCountry || clientProfile.invoiceCountry || '').trim()
-            const _zone = _dest ? SHIPPING_ZONES.find((z) => z.countries.includes(_dest)) : null
             const _belowMin = orderTotal > 0 && orderTotal < MIN_ORDER_EUR
             return (
-              <div className={`mt-4 rounded-xl border p-3 ${_belowMin ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-slate-50'}`}>
+              <div className={`mt-4 rounded-2xl border p-5 ${_belowMin ? 'border-amber-300 bg-amber-50' : 'border-slate-100 bg-white'}`}>
                 {_belowMin && (
-                  <div className="mb-2 flex items-center gap-2 rounded-lg border border-amber-400 bg-amber-100 px-3 py-2">
-                    <svg className="h-4 w-4 flex-none text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
-                    <p className="text-xs font-semibold text-amber-800">Orders below €{MIN_ORDER_EUR.toFixed(2)} NET require admin approval. Your order (€{orderTotal.toFixed(2)}) will be submitted for review.</p>
+                  <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-100 px-4 py-3">
+                    <svg className="mt-0.5 h-5 w-5 flex-none text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
+                    <p className="text-sm font-semibold text-amber-800">Orders below €{MIN_ORDER_EUR.toFixed(2)} NET require admin approval. Your order (€{orderTotal.toFixed(2)}) will be reviewed before processing.</p>
                   </div>
                 )}
-                <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
-                <ul className="mt-1.5 space-y-2 text-xs text-slate-700">
-                  <li className="flex items-start gap-2"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by Thermitek Ltd.</span></li>
-                  <li className="flex items-start gap-2"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
-                </ul>
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-400">How It Works</p>
+                <ol className="mt-4 space-y-4">
+                  <li className="flex items-start gap-3">
+                    <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-sm font-bold text-fuchsia-700">1</span>
+                    <p className="pt-1 text-sm text-slate-700"><strong className="text-slate-900">Submit your order</strong> — your cart is sent directly to our distribution team.</p>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-sm font-bold text-fuchsia-700">2</span>
+                    <p className="pt-1 text-sm text-slate-700"><strong className="text-slate-900">We confirm &amp; invoice</strong> — a pro-forma invoice is emailed within 1–2 business days.</p>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-sm font-bold text-fuchsia-700">3</span>
+                    <p className="pt-1 text-sm text-slate-700"><strong className="text-slate-900">Pay &amp; receive</strong> — once payment is received, your order is packed and dispatched.</p>
+                  </li>
+                </ol>
               </div>
             )
           })()}
 
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <button onClick={submitOrder} disabled={isSubmittingOrder} className={`${actionButtonPrimaryClass} disabled:cursor-not-allowed disabled:border-fuchsia-300 disabled:bg-fuchsia-300`}>
-              {isSubmittingOrder ? 'Submitting...' : `Place Order (${totalUnits} units)`}
+          <div className="mt-8 space-y-3 border-t border-slate-100 pt-6">
+            <button onClick={submitOrder} disabled={isSubmittingOrder} className="flex w-full items-center justify-center rounded-2xl bg-fuchsia-600 py-4 text-base font-bold text-white shadow-lg transition hover:bg-fuchsia-700 disabled:cursor-not-allowed disabled:bg-fuchsia-300">
+              {isSubmittingOrder
+                ? <span className="flex items-center gap-2"><svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>Submitting…</span>
+                : `Place Order · ${totalUnits} unit${totalUnits === 1 ? '' : 's'} →`
+              }
             </button>
+            <div className="flex flex-wrap gap-2">
             <button
               type="button"
               disabled={profileSaveStatus === 'saving'}
@@ -13220,18 +13232,19 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                   setProfileSaveStatus('error')
                 }
               }}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
             >
               {profileSaveStatus === 'saving' ? 'Saving…' : '💾 Save to My Account'}
             </button>
-            <button onClick={() => navigate('/portal/dashboard/products')} className={actionButtonSecondaryClass}>
-              ← Back to Review
+            <button onClick={() => navigate('/portal/dashboard/products')} className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+              ← Back to Order
             </button>
+            </div>
           </div>
-          {profileSaveStatus === 'saved' && <p className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">Profile saved to your account — it will pre-fill automatically next time.</p>}
-          {profileSaveStatus === 'error' && <p className="mt-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">Could not save — your details are still stored locally in this browser.</p>}
-          {checkoutMessage && <p className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">{checkoutMessage}</p>}
-          {checkoutError && <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{checkoutError}</p>}
+          {profileSaveStatus === 'saved' && <p className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">Profile saved — details will pre-fill automatically next time.</p>}
+          {profileSaveStatus === 'error' && <p className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">Could not save — your details are still stored locally in this browser.</p>}
+          {checkoutMessage && <p className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">{checkoutMessage}</p>}
+          {checkoutError && <p className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{checkoutError}</p>}
         </div>
       </div>
     )
@@ -13595,45 +13608,59 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
         {/* -- ORDER TERMS NOTICE -- */}
         {(() => {
-          const _dest = (clientProfile.shippingCountry || clientProfile.invoiceCountry || '').trim()
-          const _zone = _dest ? SHIPPING_ZONES.find((z) => z.countries.includes(_dest)) : null
           const _belowMin = orderTotal > 0 && orderTotal < MIN_ORDER_EUR
           return (
-            <div className={`mt-3 rounded-xl border p-3 ${_belowMin ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-slate-50'}`}>
+            <div className={`mt-4 rounded-2xl border p-5 ${_belowMin ? 'border-amber-300 bg-amber-50' : 'border-slate-100 bg-white'}`}>
               {_belowMin && (
-                <div className="mb-2 flex items-center gap-2 rounded-lg border border-amber-400 bg-amber-100 px-3 py-2">
-                  <svg className="h-4 w-4 flex-none text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
-                  <p className="text-xs font-semibold text-amber-800">Orders below €{MIN_ORDER_EUR.toFixed(2)} NET require admin approval. Your order (€{orderTotal.toFixed(2)}) will be submitted for review.</p>
+                <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-100 px-4 py-3">
+                  <svg className="mt-0.5 h-5 w-5 flex-none text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
+                  <p className="text-sm font-semibold text-amber-800">Orders below €{MIN_ORDER_EUR.toFixed(2)} NET require admin approval. Your order (€{orderTotal.toFixed(2)}) will be reviewed before processing.</p>
                 </div>
               )}
-              <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Order Conditions</p>
-              <ul className="mt-1.5 space-y-2 text-xs text-slate-700">
-                <li className="flex items-start gap-2"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Payment:</strong> Full payment is due upon receipt of invoice issued by Thermitek Ltd.</span></li>
-                <li className="flex items-start gap-2"><span className="mt-0.5 flex-none text-fuchsia-500">•</span><span><strong>Stock:</strong> Some items may be out of stock. You will be notified immediately of any unavailable items before fulfillment.</span></li>
-              </ul>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">How It Works</p>
+              <ol className="mt-4 space-y-4">
+                <li className="flex items-start gap-3">
+                  <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-sm font-bold text-fuchsia-700">1</span>
+                  <p className="pt-1 text-sm text-slate-700"><strong className="text-slate-900">Submit your order</strong> — your cart is sent directly to our distribution team.</p>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-sm font-bold text-fuchsia-700">2</span>
+                  <p className="pt-1 text-sm text-slate-700"><strong className="text-slate-900">We confirm &amp; invoice</strong> — a pro-forma invoice is emailed within 1–2 business days. Stock availability is confirmed at this stage.</p>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-sm font-bold text-fuchsia-700">3</span>
+                  <p className="pt-1 text-sm text-slate-700"><strong className="text-slate-900">Pay &amp; receive</strong> — once payment is received, your order is packed and dispatched.</p>
+                </li>
+              </ol>
             </div>
           )
         })()}
 
         {/* -- YOUR DETAILS STATUS -- */}
-        <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <p className="text-xs font-semibold text-slate-900">Your Details</p>
-              <p className="mt-0.5 text-[11px] text-slate-500">Required for order submission.</p>
+        <div className={`mt-4 rounded-2xl border p-5 shadow-sm transition ${clientValidation.hasMissing ? 'border-rose-200 bg-rose-50' : 'border-emerald-200 bg-white'}`}>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-base font-bold text-slate-900">Billing &amp; Shipping Details</p>
+              {clientValidation.hasMissing
+                ? <p className="mt-1 text-sm text-rose-600">Incomplete — required before you can place your order.</p>
+                : <>
+                    <p className="mt-1 text-sm font-semibold text-emerald-600">✓ Ready</p>
+                    <div className="mt-1.5 space-y-0.5 text-sm text-slate-500">
+                      <p>{clientProfile.customerName}{clientProfile.contactEmail ? ` · ${clientProfile.contactEmail}` : ''}</p>
+                      <p>{invoiceAddressComposed}</p>
+                    </div>
+                  </>
+              }
             </div>
-            {clientValidation.hasMissing
-              ? <button onClick={() => navigate('/portal/dashboard/profile')} className="rounded-lg border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100">Complete details ?</button>
-              : <button onClick={() => navigate('/portal/dashboard/profile')} className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-200">Ready — edit</button>
-            }
+            <button
+              onClick={() => navigate('/portal/dashboard/profile')}
+              className={clientValidation.hasMissing
+                ? 'shrink-0 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-fuchsia-700'
+                : 'shrink-0 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50'}
+            >
+              {clientValidation.hasMissing ? 'Complete Details →' : 'Edit Details'}
+            </button>
           </div>
-          {clientValidation.hasMissing && <p className="mt-2 text-[11px] text-rose-600">Billing &amp; shipping details incomplete — needed to process your order.</p>}
-          {!clientValidation.hasMissing && (
-            <div className="mt-2 space-y-0.5 text-[11px] text-slate-500">
-              <p>{clientProfile.customerName}{clientProfile.contactEmail ? ` — ${clientProfile.contactEmail}` : ''}</p>
-              <p>{invoiceAddressComposed}</p>
-            </div>
-          )}
         </div>
         <div className="mt-3 hidden">
           <p className="text-xs font-semibold text-slate-900 hidden">Client details (saved for next orders)</p>
@@ -13816,55 +13843,61 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             </p>
           )}
         </div>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        <div className="mt-4 space-y-3">
           <button
             onClick={() => clientValidation.hasMissing ? navigate('/portal/dashboard/profile') : submitOrder()}
             disabled={isSubmittingOrder}
-            className={`${actionButtonPrimaryClass} disabled:cursor-not-allowed disabled:border-fuchsia-300 disabled:bg-fuchsia-300`}
+            className="flex w-full items-center justify-center rounded-2xl bg-fuchsia-600 py-4 text-base font-bold text-white shadow-lg transition hover:bg-fuchsia-700 disabled:cursor-not-allowed disabled:bg-fuchsia-300"
           >
-            {isSubmittingOrder ? 'Submitting...' : clientValidation.hasMissing ? 'Complete Details ?' : `Place Order (${totalUnits} units)`}
+            {isSubmittingOrder
+              ? <span className="flex items-center gap-2"><svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>Submitting…</span>
+              : clientValidation.hasMissing
+                ? 'Complete Details to Place Order →'
+                : `Place Order · ${totalUnits} unit${totalUnits === 1 ? '' : 's'} →`
+            }
           </button>
-          <a
-            href={checkoutHref}
-            onClick={(event) => {
-              if (!selectedCodes.length && !packageCartItems.length && !includeProfessionalBasePack) {
-                event.preventDefault()
-                return
-              }
-              // Clear cart after mailto order is sent
-              setSelectedCodes([])
-              setItemQtys({})
-              setPackageCartItems([])
-              setGeneratedPackageTier('')
-              setIncludeProfessionalBasePack(false)
-              if (cartUserIdRef.current) {
-                localStorage.removeItem(`${B2B_CART_STORAGE_KEY_PREFIX}_${cartUserIdRef.current}`)
-              }
-            }}
-            className={actionButtonSecondaryClass}
-          >
-            Send to Order Inbox
-          </a>
-          <button
-            onClick={copyCodes}
-            className={actionButtonSecondaryClass}
-          >
-            Copy list
-          </button>
-          <button
-            onClick={() => {
-              setSelectedCodes([])
-              setItemQtys({})
-              setPackageCartItems([])
-              setGeneratedPackageTier('')
-              setIncludeProfessionalBasePack(false)
-              setLastPackingList(null)
-              setLastProformaInvoice(null)
-            }}
-            className={actionButtonSecondaryClass}
-          >
-            Clear list
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={checkoutHref}
+              onClick={(event) => {
+                if (!selectedCodes.length && !packageCartItems.length && !includeProfessionalBasePack) {
+                  event.preventDefault()
+                  return
+                }
+                setSelectedCodes([])
+                setItemQtys({})
+                setPackageCartItems([])
+                setGeneratedPackageTier('')
+                setIncludeProfessionalBasePack(false)
+                if (cartUserIdRef.current) {
+                  localStorage.removeItem(`${B2B_CART_STORAGE_KEY_PREFIX}_${cartUserIdRef.current}`)
+                }
+              }}
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Send to Order Inbox
+            </a>
+            <button
+              onClick={copyCodes}
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Copy SKU List
+            </button>
+            <button
+              onClick={() => {
+                setSelectedCodes([])
+                setItemQtys({})
+                setPackageCartItems([])
+                setGeneratedPackageTier('')
+                setIncludeProfessionalBasePack(false)
+                setLastPackingList(null)
+                setLastProformaInvoice(null)
+              }}
+              className="rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50"
+            >
+              Clear Cart
+            </button>
+          </div>
         </div>
 
         {/* Packing list hidden until product dimensions are complete
