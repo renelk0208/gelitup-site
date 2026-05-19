@@ -2487,6 +2487,12 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
       subcategory = segments[1] || 'General'
     }
 
+    // Mirror Powder Top Coat is stored under TOPS/ but belongs alongside Mirror Powders in Nail Art
+    if (/mirror.powder.top.coat|mirror.top.coat/i.test(imagePath)) {
+      category = 'NAIL ART'
+      subcategory = 'MIRROR POWDERS'
+    }
+
     const categoryBucket = grouped.get(category) || new Map()
     const subcategoryItems = categoryBucket.get(subcategory) || []
 
