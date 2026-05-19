@@ -7476,10 +7476,10 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           </button>
 
           {!isCreatePasswordMode && (
-            <p className="text-center text-xs text-slate-500">
+            <p className="text-center text-sm">
               <NavLink
                 to={email ? `/portal/forgot-password?email=${encodeURIComponent(email)}` : '/portal/forgot-password'}
-                className="hover:text-slate-800 hover:underline"
+                className="font-medium text-fuchsia-700 hover:text-fuchsia-900 hover:underline"
               >
                 {T?.portal?.forgot_password ?? 'Forgot password?'}
               </NavLink>
@@ -8516,6 +8516,13 @@ function CheckoutPage() {
             </label>
           </div>
 
+          {!isSubmitting && (cartTotal < MIN_ORDER_EUR || !form.agreeTerms) && (
+            <p className="text-center text-xs text-amber-700">
+              {cartTotal < MIN_ORDER_EUR
+                ? `Add €${(MIN_ORDER_EUR - cartTotal).toFixed(2)} more to reach the €${MIN_ORDER_EUR} minimum order`
+                : 'Please agree to the terms and conditions to continue'}
+            </p>
+          )}
           <button type="submit" disabled={isSubmitting || cartTotal < MIN_ORDER_EUR || !form.agreeTerms} className="w-full rounded-xl bg-fuchsia-600 px-6 py-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500 disabled:opacity-50">
             {isSubmitting ? 'Placing Order…' : `Place Order — €${cartTotal.toFixed(2)}`}
           </button>
@@ -14178,8 +14185,13 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
           {!isLoadingFeed && !filteredProducts.length && (
             <div className="m-3 rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-              <p>Product feed unavailable.</p>
-              <button onClick={() => window.location.reload()} className="mt-1 font-semibold underline">Retry</button>
+              {products.length === 0
+                ? <>
+                    <p>Product feed unavailable.</p>
+                    <button onClick={() => window.location.reload()} className="mt-1 font-semibold underline">Retry</button>
+                  </>
+                : <p>No products match your current filters. Try adjusting your search or category.</p>
+              }
             </div>
           )}
         </div>
