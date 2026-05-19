@@ -55,6 +55,87 @@
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
 
+# Legacy Shopify URL redirects — send old store paths to current React pages
+# These clean up Google's index of old URLs from the previous Shopify store
+
+[[redirects]]
+  from = "/*/products/*"
+  to = "/full-catalogue"
+  status = 301
+
+[[redirects]]
+  from = "/*/collections/*"
+  to = "/full-catalogue"
+  status = 301
+
+[[redirects]]
+  from = "/products/*"
+  to = "/full-catalogue"
+  status = 301
+
+[[redirects]]
+  from = "/collections/*"
+  to = "/full-catalogue"
+  status = 301
+
+[[redirects]]
+  from = "/*/pages/contact*"
+  to = "/pages/contact-us"
+  status = 301
+
+[[redirects]]
+  from = "/*/pages/about*"
+  to = "/pages/about-us"
+  status = 301
+
+[[redirects]]
+  from = "/*/contact"
+  to = "/pages/contact-us"
+  status = 301
+
+[[redirects]]
+  from = "/*/contact/"
+  to = "/pages/contact-us"
+  status = 301
+
+# Only redirect the bare Shopify versions — NOT /pages/contact-us or /pages/about-us
+# (those are valid React routes and must not be redirected)
+[[redirects]]
+  from = "/pages/contact"
+  to = "/pages/contact-us"
+  status = 301
+
+[[redirects]]
+  from = "/pages/about"
+  to = "/pages/about-us"
+  status = 301
+
+[[redirects]]
+  from = "/blogs/*"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/*/blogs/*"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/cart"
+  to = "/full-catalogue"
+  status = 301
+
+[[redirects]]
+  from = "/cart/*"
+  to = "/full-catalogue"
+  status = 301
+
+[[redirects]]
+  from = "/checkout"
+  to = "/full-catalogue"
+  status = 301
+
+# SPA catch-all — must remain last
 [[redirects]]
   from = "/*"
   to = "/index.html"
