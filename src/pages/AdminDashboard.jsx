@@ -2354,18 +2354,45 @@ function AdminsPanel() {
 
 const GUESTBOOK_TABLE = 'guestbook'
 
+const RLS_HINT_GUESTBOOK = `-- Run once in Supabase SQL Editor to enable guestbook moderation:
+create policy "Admins can read all guestbook entries"
+  on public.guestbook for select to authenticated
+  using (exists (
+    select 1 from public.b2b_admins where email = auth.email()
+  ));
+
+create policy "Admins can update guestbook entries"
+  on public.guestbook for update to authenticated
+  using (exists (
+    select 1 from public.b2b_admins where email = auth.email()
+  ));
+
+create policy "Admins can delete guestbook entries"
+  on public.guestbook for delete to authenticated
+  using (exists (
+    select 1 from public.b2b_admins where email = auth.email()
+  ));
+
+-- Allow public visitors to read only approved entries:
+create policy "Public can read approved guestbook entries"
+  on public.guestbook for select to anon
+  using (approved = true);`
+
 function GuestbookPanel() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(null)
   const [filter, setFilter] = useState('pending') // 'pending' | 'approved' | 'featured' | 'all'
 
   const load = useCallback(async () => {
     setLoading(true)
+    setLoadError(null)
     let query = supabase.from(GUESTBOOK_TABLE).select('*').order('created_at', { ascending: false }).limit(100)
     if (filter === 'pending') query = query.eq('approved', false)
     else if (filter === 'approved') query = query.eq('approved', true)
     else if (filter === 'featured') query = query.eq('featured', true)
-    const { data } = await query
+    const { data, error } = await query
+    if (error) setLoadError(error.message)
     setRows(data || [])
     setLoading(false)
   }, [filter])
@@ -2406,7 +2433,18 @@ function GuestbookPanel() {
 
       {loading && <p className="text-sm text-slate-500">Loading…</p>}
 
-      {!loading && rows.length === 0 && (
+      {!loading && loadError && (
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs">
+          <p className="font-semibold text-rose-700">Supabase query error — RLS policies may be missing.</p>
+          <p className="mt-1 text-rose-600">{loadError}</p>
+          <details className="mt-2">
+            <summary className="cursor-pointer font-medium text-rose-700">Show required SQL policies</summary>
+            <pre className="mt-2 overflow-x-auto whitespace-pre-wrap rounded bg-rose-100 p-2 text-[10px] text-rose-800">{RLS_HINT_GUESTBOOK}</pre>
+          </details>
+        </div>
+      )}
+
+      {!loading && !loadError && rows.length === 0 && (
         <p className="text-sm text-slate-500">{filter === 'pending' ? 'No pending messages.' : 'No messages found.'}</p>
       )}
 

@@ -27,7 +27,9 @@
     "guardrails:catalogue": "node scripts/check-catalogue-invariants.mjs",
     "import:price-list": "node scripts/import-price-list.mjs",
     "generate:order-template": "node scripts/generate-client-order-template.mjs",
-    "convert:order-to-zoho": "node scripts/convert-order-to-zoho-csv.mjs"
+    "convert:order-to-zoho": "node scripts/convert-order-to-zoho-csv.mjs",
+    "export:product-info-excel": "node scripts/export-product-info-excel.mjs",
+    "import:product-info-excel": "node scripts/import-product-info-excel.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0",
@@ -52,6 +54,7 @@
     "eslint": "^9.39.3",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.23",
+    "exceljs": "^4.4.0",
     "globals": "^16.4.0",
     "playwright": "^1.60.0",
     "postcss": "^8.5.6",
