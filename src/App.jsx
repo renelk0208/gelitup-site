@@ -2487,12 +2487,6 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
       subcategory = segments[1] || 'General'
     }
 
-    // Mirror Powder Top Coat is stored under TOPS/ but belongs alongside Mirror Powders in Nail Art
-    if (/mirror.powder.top.coat|mirror.top.coat/i.test(imagePath)) {
-      category = 'NAIL ART'
-      subcategory = 'MIRROR POWDERS'
-    }
-
     const categoryBucket = grouped.get(category) || new Map()
     const subcategoryItems = categoryBucket.get(subcategory) || []
 
@@ -2512,6 +2506,23 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
 
     categoryBucket.set(subcategory, subcategoryItems)
     grouped.set(category, categoryBucket)
+
+    // Mirror Powder Top Coat also appears in Nail Art / Mirror Powders (in addition to Tops)
+    if (/mirror.powder.top.coat|mirror.top.coat/i.test(imagePath) && category !== 'NAIL ART') {
+      const nailArtBucket = grouped.get('NAIL ART') || new Map()
+      const mirrorItems = nailArtBucket.get('MIRROR POWDERS') || []
+      if (!mirrorItems.some(i => i.imageUrl === imagePath)) {
+        mirrorItems.push({
+          imageUrl: imagePath,
+          code: preferredSourceKeyByImagePath.get(imagePath) || formatCatalogueItemName(afterRoot),
+          name: preferredDisplayNameByImagePath.get(imagePath) || canonicalDisplayNameByImagePath.get(imagePath) || formatCatalogueItemName(afterRoot),
+          galleryImages: alternateGalleryImageMap.get(imagePath) || [],
+          colorFamily: undefined,
+        })
+      }
+      nailArtBucket.set('MIRROR POWDERS', mirrorItems)
+      grouped.set('NAIL ART', nailArtBucket)
+    }
   })
 
   return Array.from(grouped.entries())
