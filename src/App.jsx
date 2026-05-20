@@ -2916,6 +2916,8 @@ function FullCataloguePage() {
   })
   const [showBasketDetail, setShowBasketDetail] = useState(false)
   const [pulseItemKey, setPulseItemKey] = useState('')
+  const [shippingToastVisible, setShippingToastVisible] = useState(false)
+  const shippingToastTimerRef = useRef(null)
   const [outOfStockNames, setOutOfStockNames] = useState(new Set())
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('portalAuth') === 'true')
 
@@ -3983,11 +3985,16 @@ function FullCataloguePage() {
     window.setTimeout(() => {
       setPulseItemKey('')
     }, 320)
+    if (quickCartUnits === 0) {
+      setShippingToastVisible(true)
+      if (shippingToastTimerRef.current) clearTimeout(shippingToastTimerRef.current)
+      shippingToastTimerRef.current = window.setTimeout(() => setShippingToastVisible(false), 5500)
+    }
     setQuickCart((current) => ({
       ...current,
       [itemKey]: Number(current[itemKey] || 0) + qty,
     }))
-  }, [itemQuantities])
+  }, [itemQuantities, quickCartUnits])
 
   const extractProductCode = useCallback((name = '') => {
     const cleaned = String(name || '').trim()
@@ -4658,9 +4665,38 @@ function FullCataloguePage() {
               <div style={{ height: bottomSpacerHeight }} />
             </div>
 
+            {/* FREE SHIPPING TOAST — slides in from the right on first add */}
+            {shippingToastVisible && (
+              <div
+                className="pointer-events-none fixed right-4 top-20 z-[70] w-[calc(100vw-2rem)] max-w-xs sm:right-6 sm:top-[76px]"
+                style={{ animation: 'gelitup-toast-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both' }}
+              >
+                <div className="relative overflow-hidden rounded-2xl border border-[#D43790]/20 bg-white shadow-[0_8px_48px_rgba(212,55,144,0.18)]">
+                  <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#D43790] to-[#9B2C5E]" />
+                  <div className="flex items-center gap-3 pl-5 pr-3 py-3.5">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#D43790]/10 text-xl">
+                      🚚
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[13px] font-black uppercase tracking-[0.08em] text-[#1A1A1A]">Free Shipping · EU</p>
+                      <p className="mt-0.5 text-[11px] font-medium text-[#4A4A4A]">On all orders over <span className="font-bold text-[#D43790]">€{MIN_ORDER_EUR}</span></p>
+                    </div>
+                    <button
+                      type="button"
+                      className="pointer-events-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[#4A4A4A]/50 transition hover:bg-black/5 hover:text-[#1A1A1A]"
+                      onClick={() => { setShippingToastVisible(false); if (shippingToastTimerRef.current) clearTimeout(shippingToastTimerRef.current) }}
+                      aria-label="Dismiss"
+                    >
+                      <svg viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true"><path d="M4.22 4.22a.75.75 0 0 1 1.06 0L8 6.94l2.72-2.72a.75.75 0 1 1 1.06 1.06L9.06 8l2.72 2.72a.75.75 0 1 1-1.06 1.06L8 9.06l-2.72 2.72a.75.75 0 0 1-1.06-1.06L6.94 8 4.22 5.28a.75.75 0 0 1 0-1.06Z" /></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* STICKY BASKET BAR — fixed to bottom of viewport */}
             {quickCartUnits > 0 && (
-              <div className="fixed inset-x-0 bottom-0 z-50">
+              <div className="fixed inset-x-0 bottom-0 z-50" style={{ animation: 'gelitup-cart-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both' }}>
                 {/* Expandable detail panel — slides up above the bar */}
                 {showBasketDetail && (
                   <div className="mx-auto max-w-5xl px-4">
