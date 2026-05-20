@@ -4436,13 +4436,24 @@ function FullCataloguePage() {
               const infoAccent = getCategoryAccent(activeCategory)
               const infoRgb = infoAccent.shadowRgb
 
+              // Render text with **bold** markers → <strong>
+              const renderRichText = (text) => {
+                const parts = String(text).split(/(\*\*[^*]+\*\*)/g)
+                if (parts.length === 1) return text
+                return parts.map((part, i) =>
+                  part.startsWith('**') && part.endsWith('**')
+                    ? <strong key={i}>{part.slice(2, -2)}</strong>
+                    : part
+                )
+              }
+
               return (
                 <div className="mt-4 rounded-[12px] p-4 sm:p-5" style={{ border: `1px solid rgba(${infoRgb},0.35)`, background: `rgba(${infoRgb},0.09)` }}>
                   <h3 className="text-base font-bold uppercase tracking-[0.06em] sm:text-lg" style={{ color: infoAccent.bg }}>{formatSubcategoryHeadingLabel(activeSubcategory, activeCategory)}</h3>
                   {metadata.paragraphs?.length > 0 && (
                     <div className="mt-3 space-y-2">
                       {metadata.paragraphs.map((para, idx) => (
-                        <p key={idx} className="text-sm leading-relaxed text-gray-700">{para}</p>
+                        <p key={idx} className="text-sm leading-relaxed text-gray-700">{renderRichText(para)}</p>
                       ))}
                     </div>
                   )}
@@ -4451,7 +4462,7 @@ function FullCataloguePage() {
                       {nonApplicationItems.map((item, idx) => (
                         <li key={idx} className="flex gap-2 text-sm text-gray-700">
                           <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full" style={{ backgroundColor: infoAccent.bg }} />
-                          <span>{item}</span>
+                          <span>{renderRichText(item)}</span>
                         </li>
                       ))}
                     </ul>
@@ -4463,7 +4474,7 @@ function FullCataloguePage() {
                         {applicationItems.map((item, idx) => (
                           <li key={`application-${idx}`} className="flex gap-2 text-sm text-gray-700">
                             <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full" style={{ backgroundColor: infoAccent.bg }} />
-                            <span>{item}</span>
+                            <span>{renderRichText(item)}</span>
                           </li>
                         ))}
                       </ul>
@@ -4476,7 +4487,7 @@ function FullCataloguePage() {
                         {dualFormsItems.map((item, idx) => (
                           <li key={`dual-forms-${idx}`} className="flex gap-2 text-sm text-gray-700">
                             <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full" style={{ backgroundColor: infoAccent.bg }} />
-                            <span>{item}</span>
+                            <span>{renderRichText(item)}</span>
                           </li>
                         ))}
                       </ul>

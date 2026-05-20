@@ -48,6 +48,29 @@ for (const col of required) {
   }
 }
 
+/**
+ * Extract cell content preserving bold runs as **text**.
+ * Handles:
+ *  - Rich text cells (type 6): bold runs wrapped in **...**
+ *  - Plain cells with cell-level bold font: whole text wrapped in **...**
+ *  - All other plain cells: plain string
+ */
+function extractContent(cell) {
+  // Rich text (partial bold within cell)
+  if (cell.type === 6 && Array.isArray(cell.value?.richText)) {
+    return cell.value.richText
+      .map(run => {
+        const text = String(run.text ?? '');
+        return run.font?.bold ? `**${text}**` : text;
+      })
+      .join('');
+  }
+  // Plain cell with cell-level bold font → wrap whole value
+  const raw = String(cell.value ?? '').trim();
+  if (cell.font?.bold && raw) return `**${raw}**`;
+  return raw;
+}
+
 const result = {};
 
 sheet.eachRow((row, rowNumber) => {
@@ -55,7 +78,7 @@ sheet.eachRow((row, rowNumber) => {
 
   const key     = String(row.getCell(colIndex['key']).value     ?? '').trim();
   const type    = String(row.getCell(colIndex['type']).value    ?? '').trim().toLowerCase();
-  const content = String(row.getCell(colIndex['content']).value ?? '').trim();
+  const content = extractContent(row.getCell(colIndex['content'])).trim();
 
   if (!key) return;        // skip rows without a key
   if (!content) return;    // skip empty content
