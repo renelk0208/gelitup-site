@@ -16,12 +16,19 @@
       "A reinforced base for thin and brittle nails.",
       "A shaping gel for targeted nail correction.",
       "An adhesive base for rhinestones and 3D nail decorations.",
-      "A gel for slight nail extension and natural nail strengthening."
+      "A gel for slight nail extension and natural nail strengthening.",
+      "Important Application Note – Tinted (colour/glitter) 5-in-1 Superior Base\n\nWhen working with a tinted 5-in-1 Superior Base, always apply a thin layer of 5-in-1 Superior Clear first and cure.\n\nThe clear base layer creates the correct adhesion between the natural nail and the product. Tinted base products contain pigments, and these pigments can reduce direct bonding performance on the natural nail.\n\nIf the tinted 5-in-1 Superior Base is applied directly onto the natural nail without the clear layer underneath, lifting may occur.\n\nFor best results and long-lasting wear, the clear layer is an essential first step before applying any tinted 5-in-1 Superior Base.",
+      "Application - Nail preparation",
+      "Application - When applying 5-in-1 Superior Clear as a gel polish base, apply one thin layer and cure: 60–90s48W UV/LED.",
+      "Application - Proceed with your preferred gel polish color. Cure: 60–90s48W UV/LED",
+      "Reinforcing the natural nail 5-in-1 Superior Base",
+      "Application - Always apply one thin layer of 5-in-1 Superior Clear and Cure: 60–90s48W UV/LED.",
+      "Application - Apply one thin layer of the clear  5-in-1 Superior without curing.  Add a slightly larger amount of product with your brush and work using the drop technique."
     ]
   },
   "BASES::FLEXI BASE": {
     "paragraphs": [
-      "Flexi Base is a base coat suitable for sensitive and damaged nails that break easily. The flexibility it provides enhances the strength of the natural nail, offering greater protection against potential breakage."
+      "Flexi Base is a base coat suitable for sensitive and damaged nails that break easily. The flexibility it provides enhances the strength of the natural nail, offering greater protection against potential breakage. Cure: 60–90s48W UV/LED."
     ],
     "listItems": []
   },
@@ -37,7 +44,7 @@
       "Application — Adhesion: Apply Superbond Primer and air-dry for 30 seconds.",
       "Application — Foundation: Apply a thin slip layer over nail/form (do not cure).",
       "Application — Building: Place a larger bead centrally and guide to edges/apex as it self-levels.",
-      "Application — Cure: 60–90s LED (120s UV).",
+      "Application — Cure: 60–90s48W UV/LED",
       "Application — Refinement & Finish: Wipe inhibition layer, file shape, then final gloss layer or proceed with GEL.IT.UP by GIUP® color.",
       "Dual Forms Application — Prep and prime as standard, then apply a thin slip layer of 3-in-1 Premium Builder Gel.",
       "Dual Forms Application — Select the correct dual form size, place a controlled bead in the form, and spread evenly to avoid trapped air.",
@@ -56,7 +63,7 @@
       "Application — Adhesion: Apply Superbond Primer and air-dry for 30 seconds.",
       "Application — Foundation: Apply a thin slip layer over nail/form (do not cure).",
       "Application — Building: Place a larger bead centrally and guide to edges/apex as it self-levels.",
-      "Application — Cure: 60–90s LED (120s UV).",
+      "Application — Cure: 60–90s 48W UV/LED",
       "Application — Refinement & Finish: Wipe inhibition layer, file shape, then final gloss layer or proceed with GEL.IT.UP by GIUP® color.",
       "Dual Forms Application — Prep and prime as standard, then apply a thin slip layer of 3-in-1 Premium Builder Gel.",
       "Dual Forms Application — Select the correct dual form size, place a controlled bead in the form, and spread evenly to avoid trapped air.",
@@ -141,11 +148,11 @@
       "Applied like standard gel polish and activated with a magnet tool before curing, cat eye gel polish requires no specialist training. Results are consistent, dramatic, and long-lasting."
     ],
     "listItems": [
-      "Step 1 — Apply base coat and cure.",
-      "Step 2 — Apply one thin flood coat of cat eye gel polish (do not cure).",
-      "Step 3 — Hold the magnet over the nail surface for 5–10 seconds to activate the magnetic cat eye effect.",
-      "Step 4 — Cure immediately once the desired effect is achieved.",
-      "Step 5 — Apply top coat and cure to seal."
+      "Application — Apply base coat and cure: 60–90s48W UV/LED",
+      "Application — Apply one thin flood coat of cat eye gel polish (do not cure).",
+      "Application — Hold the magnet over the nail surface for 5–10 seconds to activate the magnetic cat eye effect.",
+      "Application — Cure immediately once the desired effect is achieved.",
+      "Application — Apply top coat and cure to seal - Cure: 60–90s48W UV/LED"
     ]
   },
   "TOPS::ALL": {
@@ -157,15 +164,15 @@
   "TOPS::CLASSIC TOP COATS": {
     "paragraphs": [
       "The GEL.IT.UP professional top coat range delivers flawless finish options for every service type — from high-gloss sealing to rubber-based correction and specialty effects. Each top coat is designed to protect gel polish colour, prevent lifting, and extend wear.",
-      "Non Wipe Top Coat — A top coat of exceptional durability and shine, with no inhibition layer. Thanks to its superior formula, it does not yellow or alter the colour, providing outstanding gloss and a long-lasting, flawless finish.",
-      "Perfect Shape Non-Wipe Top Coat — Its rubber-based formula provides even coverage that corrects imperfections, delivering shine, durability, and long-lasting wear. Due to its elasticity, it helps prevent scratches. Ideal for beginners as its thick consistency does not run into the cuticle area.",
-      "Milky Non-Wipe Top Coat — Delivers a rich milky tone over gel polish, enhancing both light and dark shades. The perfect top coat finish for ombré and baby boomer designs."
+      "Non Wipe Top Coat — A top coat of exceptional durability and shine, with no inhibition layer. Thanks to its superior formula, it does not yellow or alter the colour, providing outstanding gloss and a long-lasting, flawless finish. Cure: 60–90s48W UV/LED",
+      "Perfect Shape Non-Wipe Top Coat — Its rubber-based formula provides even coverage that corrects imperfections, delivering shine, durability, and long-lasting wear. Due to its elasticity, it helps prevent scratches. Ideal for beginners as its thick consistency does not run into the cuticle area. Cure: 60–90s48W UV/LED",
+      "Milky Non-Wipe Top Coat — Delivers a rich milky tone over gel polish, enhancing both light and dark shades. The perfect top coat finish for ombré and baby boomer designs. Cure: 60–90s48W UV/LED"
     ],
     "listItems": []
   },
   "TOPS::EFFECT TOPS": {
     "paragraphs": [
-      "The Diamond Top Coat range is the ultimate trend. It delivers the high-gloss finish of a top coat combined with the unique sparkle of flakes. You can apply it over any color of your choice.",
+      "The Diamond Top Coat range is the ultimate trend. It delivers the high-gloss finish of a top coat combined with the unique sparkle of flakes. You can apply it over any color of your choice. Cure: 60–90s48W UV/LED",
       "It has no sticky layer."
     ],
     "listItems": []
@@ -173,9 +180,20 @@
   "TOPS::SPOT MY TOPS": {
     "paragraphs": [
       "Create the ultimate trend easily and quickly with FAN12 Rainbow Dreams — an effects top coat featuring the high-gloss finish of a top coat combined with the unique sparkle of microscopic iridescent particles.",
-      "You can apply it over any color of your choice."
+      "You can apply it over any color of your choice. Cure: 60–90s48W UV/LED"
     ],
     "listItems": []
+  },
+  "TOPS::MIRROR POWDER TOP COAT": {
+    "paragraphs": [],
+    "listItems": [
+      "Proper Application of Mirror Powder Non-Wipe Top Coat",
+      "Application - Properly prepare the natural nail.",
+      "Application - Apply your preferred gel polish color, or proceed with a natural nail overlay or nail extension.",
+      "Application - Apply the Mirror Powder Non-Wipe Top Coat and cure: 60–90s48W UV/LED",
+      "Application - After curing, apply your preferred mirror powder. Remove all excess powder carefully and dust off thoroughly to ensure the surface is completely clean. Seal the design with a regular Non-Wipe Top Coat.",
+      "Application - Should you your client not like the powder result, you can remove the applied powder with All-in-One Liquid before sealing with the final top coat and apply a different mirror powder instead. The adhesion will still remain excellent."
+    ]
   },
   "BRUSHES::ACRYLIC BRUSHES": {
     "paragraphs": [
