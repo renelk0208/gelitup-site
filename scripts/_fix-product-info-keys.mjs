@@ -103,7 +103,7 @@ json['BASES::5IN1 SUPERIOR BASE'] = {
         'Application \u2014 Prepare your nails for a dry manicure.',
         'Application \u2014 Apply Superbond and let it dry on its own for a few seconds.',
         'Apply the 5-in-1 Superior Base. Cure: 60\u201390s 48W UV/LED Lamp.',
-        'Afer curing, for even greater durability, apply one more thin layer of 5-in-1 Superior Base Coat and cure again for Cure: 60\u201390s 48W UV/LED Lamp'
+        'After curing, for even greater durability, apply one more thin layer of 5-in-1 Superior Base Coat and cure again for Cure: 60–90s 48W UV/LED Lamp'
       ]
     },
     {
@@ -130,6 +130,24 @@ json['BASES::5IN1 SUPERIOR BASE'] = {
   ]
 }
 console.log('Restructured: BASES::5IN1 SUPERIOR BASE with sections (Excel sequence)')
+
+// 8. Fix typos from Excel source
+const typoFixes = [
+  [/\bApplciation\s*-\s*/g, 'Application — '],
+  [/\bA long lastng\b/g, 'A long-lasting'],
+]
+for (const key of Object.keys(json)) {
+  const entry = json[key]
+  if (!entry) continue
+  const fixStr = (s) => typoFixes.reduce((v, [re, rep]) => v.replace(re, rep), s).replace(/\\n/g, ' ').replace(/\n/g, ' ')
+  if (Array.isArray(entry.paragraphs)) entry.paragraphs = entry.paragraphs.map(fixStr)
+  if (Array.isArray(entry.listItems)) entry.listItems = entry.listItems.map(fixStr)
+  if (Array.isArray(entry.sections)) entry.sections = entry.sections.map(s => ({
+    ...s,
+    items: Array.isArray(s.items) ? s.items.map(fixStr) : s.items
+  }))
+}
+console.log('Applied typo fixes')
 
 const updated = boldCure(json)
 writeFileSync('src/data/product-info.json', JSON.stringify(updated, null, 2) + '\n', 'utf8')
