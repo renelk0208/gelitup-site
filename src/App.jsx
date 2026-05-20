@@ -5696,6 +5696,130 @@ function FullCataloguePage() {
       )}
 
       {/* BUY NOW POPUP — removed: registration-first flow */}
+
+      {/* FREE SHIPPING TOAST — global, visible on all catalogue sections */}
+      {shippingToastVisible && (
+        <div
+          className="pointer-events-none fixed right-4 top-20 z-[70] w-[calc(100vw-2rem)] max-w-xs sm:right-6 sm:top-[76px]"
+          style={{ animation: 'gelitup-toast-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both' }}
+        >
+          <div className="relative overflow-hidden rounded-2xl border border-[#D43790]/20 bg-white shadow-[0_8px_48px_rgba(212,55,144,0.18)]">
+            <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#D43790] to-[#9B2C5E]" />
+            <div className="flex items-center gap-3 pl-5 pr-3 py-3.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#D43790]/10 text-xl">
+                🚚
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-black uppercase tracking-[0.08em] text-[#1A1A1A]">Free Shipping · EU</p>
+                <p className="mt-0.5 text-[11px] font-medium text-[#4A4A4A]">On all orders over <span className="font-bold text-[#D43790]">€{MIN_ORDER_EUR}</span></p>
+              </div>
+              <button
+                type="button"
+                className="pointer-events-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[#4A4A4A]/50 transition hover:bg-black/5 hover:text-[#1A1A1A]"
+                onClick={() => { setShippingToastVisible(false); if (shippingToastTimerRef.current) clearTimeout(shippingToastTimerRef.current) }}
+                aria-label="Dismiss"
+              >
+                <svg viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true"><path d="M4.22 4.22a.75.75 0 0 1 1.06 0L8 6.94l2.72-2.72a.75.75 0 1 1 1.06 1.06L9.06 8l2.72 2.72a.75.75 0 1 1-1.06 1.06L8 9.06l-2.72 2.72a.75.75 0 0 1-1.06-1.06L6.94 8 4.22 5.28a.75.75 0 0 1 0-1.06Z" /></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* GLOBAL STICKY BASKET BAR — visible on all catalogue sections including 2026 NEW! */}
+      {quickCartUnits > 0 && (
+        <div className="fixed inset-x-0 bottom-0 z-50" style={{ animation: 'gelitup-cart-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both' }}>
+          {showBasketDetail && (
+            <div className="mx-auto max-w-5xl px-4">
+              <div className="rounded-t-xl border border-b-0 border-fuchsia-500/30 bg-white shadow-lg">
+                <div className="max-h-64 space-y-2 overflow-y-auto p-4">
+                  {Object.entries(quickCart).filter(([, q]) => q > 0).map(([key, cartQty]) => {
+                    const [name, code] = key.split('::')
+                    const price = lookupCataloguePrice(name, code)
+                    const lineTotal = price != null ? Number(price) * cartQty : null
+                    return (
+                      <div key={key} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{name}</p>
+                          <p className="text-[11px] text-black/45">{code}{price != null && <span className="ml-2 text-fuchsia-700">€{Number(price).toFixed(2)} ea.</span>}</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => {
+                              if (cartQty <= 1) {
+                                setQuickCart((c) => { const n = { ...c }; delete n[key]; return n })
+                              } else {
+                                setQuickCart((c) => ({ ...c, [key]: c[key] - 1 }))
+                              }
+                            }}
+                            className="flex h-6 w-6 items-center justify-center rounded-md border border-black/20 text-xs text-black/60 transition hover:border-fuchsia-500 hover:text-fuchsia-600"
+                          >−</button>
+                          <span className="w-8 text-center text-xs font-bold text-black">{cartQty}</span>
+                          <button
+                            onClick={() => setQuickCart((c) => ({ ...c, [key]: (c[key] || 0) + 1 }))}
+                            className="flex h-6 w-6 items-center justify-center rounded-md border border-black/20 text-xs text-black/60 transition hover:border-fuchsia-500 hover:text-fuchsia-600"
+                          >+</button>
+                        </div>
+                        {lineTotal != null && (
+                          <span className="w-16 text-right text-xs font-bold text-fuchsia-700">€{lineTotal.toFixed(2)}</span>
+                        )}
+                        <button
+                          onClick={() => setQuickCart((c) => { const n = { ...c }; delete n[key]; return n })}
+                          className="ml-1 text-black/30 transition hover:text-red-500"
+                          title="Remove"
+                        >
+                          <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true"><path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" /></svg>
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+                <div className="flex items-center justify-between border-t border-black/10 px-4 py-3">
+                  <span className="text-sm font-bold text-black">Total</span>
+                  <span className="text-lg font-bold text-fuchsia-700">€{quickCartTotal.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="border-t border-fuchsia-500/30 bg-gradient-to-r from-fuchsia-50 to-white shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
+            <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
+              <button
+                onClick={() => setShowBasketDetail((v) => !v)}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-fuchsia-600 text-white transition hover:bg-fuchsia-500"
+                title={showBasketDetail ? 'Hide basket' : 'View basket'}
+              >
+                <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path d="M1 1.75A.75.75 0 0 1 1.75 1h1.628a1.75 1.75 0 0 1 1.734 1.51L5.18 3H17.25a.75.75 0 0 1 .727.936l-1.875 7.5A.75.75 0 0 1 15.375 12h-8.75a.75.75 0 0 1-.727-.564L4.023 3.756 3.81 2.5H1.75A.75.75 0 0 1 1 1.75ZM7.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM15.5 15a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" /></svg>
+              </button>
+              <button onClick={() => setShowBasketDetail((v) => !v)} className="min-w-0 flex-1 text-left">
+                <p className="text-sm font-bold text-black">{quickCartUnits} item{quickCartUnits !== 1 ? 's' : ''} in your basket — €{quickCartTotal.toFixed(2)}</p>
+                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
+                  <div className="h-full rounded-full bg-fuchsia-600 transition-all duration-500" style={{ width: `${quickProgress}%` }} />
+                </div>
+                <p className="mt-0.5 text-[10px] text-black/50">{quickProgress < 100 ? `€${(MIN_ORDER_EUR - quickCartTotal).toFixed(2)} more to reach €${MIN_ORDER_EUR} minimum · 🚚 Free EU Shipping` : '✓ Minimum reached · 🚚 Free EU Shipping included!'}</p>
+              </button>
+              <button
+                onClick={() => setShowBasketDetail((v) => !v)}
+                className="hidden text-xs font-semibold text-fuchsia-700 transition hover:text-fuchsia-500 sm:block"
+              >
+                {showBasketDetail ? 'Hide' : 'View'}
+              </button>
+              <NavLink
+                to="/checkout"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
+              >
+                Checkout
+              </NavLink>
+              <button
+                onClick={() => { setQuickCart({}); setItemQuantities({}); setShowBasketDetail(false) }}
+                className="shrink-0 text-xs text-black/40 transition hover:text-red-500"
+                title="Clear basket"
+              >
+                <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.519.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clipRule="evenodd" /></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
