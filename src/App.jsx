@@ -18460,7 +18460,7 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={<HomePage />}
+            element={<FullCataloguePage />}
           />
           <Route path="/home" element={<HomePage />} />
           <Route
