@@ -4457,6 +4457,28 @@ function FullCataloguePage() {
                       ))}
                     </div>
                   )}
+                  {metadata.sections?.length > 0 && metadata.sections.map((section, sIdx) => (
+                    <div key={`section-${sIdx}`} className="mt-3">
+                      {section.header && (
+                        <p className="text-sm font-semibold text-gray-800">{renderRichText(section.header)}</p>
+                      )}
+                      {section.items?.length > 0 && (
+                        <ul className="mt-1.5 space-y-1.5">
+                          {section.items.map((item, iIdx) => {
+                            const text = /^Application\s*[—\-]\s*/i.test(String(item))
+                              ? String(item).replace(/^Application\s*[—\-]\s*/i, '').trim()
+                              : String(item)
+                            return (
+                              <li key={iIdx} className="flex gap-2 text-sm text-gray-700">
+                                <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full" style={{ backgroundColor: infoAccent.bg }} />
+                                <span>{renderRichText(text)}</span>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
                   {nonApplicationItems.length > 0 && (
                     <ul className="mt-3 space-y-1.5">
                       {nonApplicationItems.map((item, idx) => (
