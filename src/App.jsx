@@ -3072,7 +3072,8 @@ function FullCataloguePage() {
 
         const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(payload, hiddenKeys), manualRuleIndex)
         setSections(nextSections)
-        setOutOfStockNames(new Set(Array.isArray(oosNames) ? oosNames.map(n => String(n).trim()) : []))
+        const _normOos = n => String(n).replace(/[_.-]+/g, ' ').replace(/\s+/g, ' ').trim()
+        setOutOfStockNames(new Set(Array.isArray(oosNames) ? oosNames.map(_normOos) : []))
         setProductSizes(sizesPayload && typeof sizesPayload === 'object' ? sizesPayload : {})
         setSolidGelColourFamilies(colourFamiliesPayload)
         setHeroCandidateIndexByCategory({})
