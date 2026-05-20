@@ -4079,7 +4079,7 @@ function FullCataloguePage() {
   // Chapter 02a: Bases, Tops & Nail Preparations
   const chapterEssentialsCategories = ['BASES', 'TOPS', 'NAIL PREPARATIONS']
   // Chapter 02b: Builder Systems
-  const chapterBuildersCategories = ['BUILDER GEL SYSTEMS', 'MULTIMIX']
+  const chapterBuildersCategories = ['BUILDER GEL SYSTEMS']
   // Keep combined alias for scroll-target logic
   const chapter02Categories = [...chapterEssentialsCategories, ...chapterBuildersCategories]
   const chapter03Categories = ['TOOLS', 'EQUIPMENT', 'BRUSHES']
