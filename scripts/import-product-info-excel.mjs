@@ -56,9 +56,10 @@ for (const col of required) {
  *  - All other plain cells: plain string
  */
 function extractContent(cell) {
-  // Rich text (partial bold within cell)
-  if (cell.type === 6 && Array.isArray(cell.value?.richText)) {
-    return cell.value.richText
+  // Rich text: type 6 (formula result) or type 8 (inline rich text)
+  const richText = cell.value?.richText ?? (cell.type === 6 ? cell.value?.result?.richText : null)
+  if (Array.isArray(richText)) {
+    return richText
       .map(run => {
         const text = String(run.text ?? '');
         return run.font?.bold ? `**${text}**` : text;
