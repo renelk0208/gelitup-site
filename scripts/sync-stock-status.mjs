@@ -34,8 +34,10 @@ ws.eachRow((row, rn) => {
   const ml = vals[5] != null ? String(vals[5]).trim() : ''
   const gr = vals[6] != null ? String(vals[6]).trim() : ''
 
-  if (ml && ml !== '0') productSizes[name] = `${ml}ml`
-  else if (gr && gr !== '0') productSizes[name] = `${gr}gr`
+  // Normalize key to match formatCatalogueDisplayKey output (replaces [_.-] with space)
+  const normalizedName = name.replace(/[_.-]+/g, ' ').replace(/\s+/g, ' ').trim()
+  if (ml && ml !== '0') productSizes[normalizedName] = `${ml}ml`
+  else if (gr && gr !== '0') productSizes[normalizedName] = `${gr}gr`
 })
 
 writeFileSync(
