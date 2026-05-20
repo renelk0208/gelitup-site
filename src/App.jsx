@@ -3074,7 +3074,16 @@ function FullCataloguePage() {
         setSections(nextSections)
         const _normOos = n => String(n).replace(/[_.-]+/g, ' ').replace(/\s+/g, ' ').trim()
         setOutOfStockNames(new Set(Array.isArray(oosNames) ? oosNames.map(_normOos) : []))
-        setProductSizes(sizesPayload && typeof sizesPayload === 'object' ? sizesPayload : {})
+        const _normSizeKey = k => String(k).replace(/[_.-]+/g, ' ').replace(/\s+/g, ' ').trim()
+        const _enrichedSizes = { ...(sizesPayload || {}) }
+        if (sizesPayload && payload) {
+          Object.entries(payload).forEach(([k, v]) => {
+            if (typeof v !== 'string' || !v.includes('/gelitup-content/product-images/') || _enrichedSizes[v]) return
+            const sz = sizesPayload[_normSizeKey(k)]
+            if (sz) _enrichedSizes[v] = sz
+          })
+        }
+        setProductSizes(_enrichedSizes)
         setSolidGelColourFamilies(colourFamiliesPayload)
         setHeroCandidateIndexByCategory({})
         setActiveCategory('')
@@ -4626,7 +4635,8 @@ function FullCataloguePage() {
                   const inCart = quickCart[itemKey] > 0
                   const isOOS = outOfStockNames.has(item.name)
                   const _sizeMatch = item.imageUrl.match(/\b(\d+(?:\.\d+)?)\s*(ml|gr)\b/i)
-                  const itemSize = productSizes[item.name] || (_sizeMatch ? _sizeMatch[1] + _sizeMatch[2].toLowerCase() : null)
+                  const itemSize = productSizes[item.name] || productSizes[item.imageUrl] || (_sizeMatch ? _sizeMatch[1] + _sizeMatch[2].toLowerCase() : null)
+                  const _sizeInName = itemSize && new RegExp(`\\b${itemSize}\\b`, 'i').test(item.name)
 
                   if (bulkMode) {
                     return (
@@ -4637,7 +4647,7 @@ function FullCataloguePage() {
                           <p className="break-words text-[11px] font-light text-black/55">
                             {itemCode}
                             {itemPrice != null && <span className="ml-2 text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</span>}
-                            {itemSize && <span className="ml-2 rounded bg-black/10 px-1.5 py-0.5 text-[10px] font-medium text-black/50">{itemSize}</span>}
+                            {itemSize && !_sizeInName && <span className="ml-2 rounded bg-black/10 px-1.5 py-0.5 text-[10px] font-medium text-black/50">{itemSize}</span>}
                           </p>
                         </div>
                         <button
@@ -4680,7 +4690,7 @@ function FullCataloguePage() {
                           {itemPrice != null && (
                             <p className="text-xs font-bold text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</p>
                           )}
-                          {itemSize && (
+                          {itemSize && !_sizeInName && (
                             <span className="rounded bg-black/8 px-1.5 py-0.5 text-[10px] font-medium text-black/45">{itemSize}</span>
                           )}
                         </div>
