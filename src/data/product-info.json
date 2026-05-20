@@ -12,13 +12,15 @@
       "Application - Then, apply the base coat of your choice. Cure: 60–90s48W UV/LED"
     ]
   },
-  "BASES:: CLASSIC BASE COAT": {
+  "BASES::CLASSIC BASE COAT": {
     "paragraphs": [
       "A long lastng Base Coat for perfect results"
     ],
     "listItems": [
       "Application - Prepare your nails for a dry manicure.",
-      "Application - Apply Superbond and let it dry on its own for a few seconds."
+      "Application - Apply Superbond and let it dry on its own for a few seconds.",
+      "Application - Apply thin, even coats and make sure to seal the nail tps properly, without coming into contact with the cuticles. Cure: 60–90s48W UV/LED",
+      "Application - Continue to apply your colour and finish with top coat"
     ]
   },
   "BASES::5IN1 SUPERIOR BASE": {
@@ -32,7 +34,8 @@
       "A shaping gel for targeted nail correction.",
       "An adhesive base for rhinestones and 3D nail decorations.",
       "A gel for slight nail extension and natural nail strengthening.",
-      "Application - Nail preparation",
+      "Application - Prepare your nails for a dry manicure.",
+      "Application - Apply Superbond and let it dry on its own for a few seconds.",
       "Application - When applying 5-in-1 Superior Clear as a gel polish base, apply one thin layer and cure: 60–90s48W UV/LED.",
       "Application - Proceed with your preferred gel polish color. Cure: 60–90s48W UV/LED"
     ]
@@ -41,7 +44,12 @@
     "paragraphs": [
       "Flexi Base is a base coat suitable for sensitive and damaged nails that break easily. The flexibility it provides enhances the strength of the natural nail, offering greater protection against potential breakage. Cure: 60–90s48W UV/LED."
     ],
-    "listItems": []
+    "listItems": [
+      "Application - Prepare your nails for a dry manicure.",
+      "Application - Apply Superbond and let it dry on its own for a few seconds.",
+      "Application - Apply thin, even coats and make sure to seal the nail tps properly, without coming into contact with the cuticles. Cure: 60–90s48W UV/LED",
+      "Application - Continue to apply your colour and finish with top coat"
+    ]
   },
   "BUILDER GEL SYSTEMS::3INI BUILDER": {
     "paragraphs": [
