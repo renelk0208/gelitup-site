@@ -4623,7 +4623,8 @@ function FullCataloguePage() {
                   const hasChangedQty = qty !== 1
                   const inCart = quickCart[itemKey] > 0
                   const isOOS = outOfStockNames.has(item.name)
-                  const itemSize = productSizes[item.name] || null
+                  const _sizeMatch = item.imageUrl.match(/\b(\d+(?:\.\d+)?)\s*(ml|gr)\b/i)
+                  const itemSize = _sizeMatch ? _sizeMatch[1] + _sizeMatch[2].toLowerCase() : null
 
                   if (bulkMode) {
                     return (
