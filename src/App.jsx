@@ -2919,6 +2919,7 @@ function FullCataloguePage() {
   const [shippingToastVisible, setShippingToastVisible] = useState(false)
   const shippingToastTimerRef = useRef(null)
   const [outOfStockNames, setOutOfStockNames] = useState(new Set())
+  const [productSizes, setProductSizes] = useState({})
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('portalAuth') === 'true')
 
   // Upsell essentials — popular items customers often forget
@@ -3044,12 +3045,13 @@ function FullCataloguePage() {
       setErrorMessage('')
 
       try {
-        const [mapResponse, orderResponse, colourFamiliesResponse, hiddenResponse, oosResponse] = await Promise.all([
+        const [mapResponse, orderResponse, colourFamiliesResponse, hiddenResponse, oosResponse, sizesResponse] = await Promise.all([
           fetch('/gelitup-content/product-image-map.json'),
           fetch('/gelitup-content/catalog-order.json'),
           fetch('/gelitup-content/solid-gel-colour-families.json'),
           fetch('/gelitup-content/hidden-products.json'),
           fetch('/gelitup-content/out-of-stock.json'),
+          fetch('/gelitup-content/product-sizes.json'),
         ])
 
         if (!mapResponse.ok) {
@@ -3063,12 +3065,14 @@ function FullCataloguePage() {
           : {}
         const hiddenKeys = hiddenResponse.ok ? await hiddenResponse.json() : []
         const oosNames = oosResponse.ok ? await oosResponse.json() : []
+        const sizesPayload = sizesResponse.ok ? await sizesResponse.json() : {}
         const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
         if (!mounted) return
 
         const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(payload, hiddenKeys), manualRuleIndex)
         setSections(nextSections)
         setOutOfStockNames(new Set(Array.isArray(oosNames) ? oosNames.map(n => String(n).trim()) : []))
+        setProductSizes(sizesPayload && typeof sizesPayload === 'object' ? sizesPayload : {})
         setSolidGelColourFamilies(colourFamiliesPayload)
         setHeroCandidateIndexByCategory({})
         setActiveCategory('')
@@ -4619,6 +4623,7 @@ function FullCataloguePage() {
                   const hasChangedQty = qty !== 1
                   const inCart = quickCart[itemKey] > 0
                   const isOOS = outOfStockNames.has(item.name)
+                  const itemSize = productSizes[item.name] || null
 
                   if (bulkMode) {
                     return (
@@ -4629,6 +4634,7 @@ function FullCataloguePage() {
                           <p className="break-words text-[11px] font-light text-black/55">
                             {itemCode}
                             {itemPrice != null && <span className="ml-2 text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</span>}
+                            {itemSize && <span className="ml-2 rounded bg-black/10 px-1.5 py-0.5 text-[10px] font-medium text-black/50">{itemSize}</span>}
                           </p>
                         </div>
                         <button
@@ -4667,9 +4673,14 @@ function FullCataloguePage() {
                           <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
                           <p className="break-words text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
                         </div>
-                        {itemPrice != null && (
-                          <p className="mt-1.5 text-xs font-bold text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</p>
-                        )}
+                        <div className="mt-1.5 flex items-center gap-2">
+                          {itemPrice != null && (
+                            <p className="text-xs font-bold text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</p>
+                          )}
+                          {itemSize && (
+                            <span className="rounded bg-black/8 px-1.5 py-0.5 text-[10px] font-medium text-black/45">{itemSize}</span>
+                          )}
+                        </div>
                         <div className="mt-auto pt-3">
                           {isOOS ? (
                             <div className="flex w-full items-center justify-center gap-1.5 rounded-[10px] border border-rose-200 bg-rose-50 py-2 text-xs font-semibold text-rose-600">
