@@ -2927,8 +2927,11 @@ function FullCataloguePage() {
     { name: 'Non Wipe Top Coat 15ml', code: 'GIUP NWT', label: 'Non-Wipe Top Coat' },
     { name: 'Satin Matt RS Top 15 ml', code: 'GIUP SATMAT', label: 'Satin Matt Top' },
     { name: 'Superbond Nail Dehydrator 11ml - Acid Free', code: 'GIUP SB', label: 'Superbond Primer' },
-    { name: 'Cleanser 200 ml', code: 'GIUP CLEANSER', label: 'Cleanser 200ml' },
+    { name: 'All In One Liquid 200 ml -HTF', code: 'ALL IN ONE LIQUID 200ML', label: 'All-in-One Liquid 200ml' },
+    { name: 'All In One Liquid 500 ml -HTF', code: 'ALL IN ONE LIQUID 500ML', label: 'All-in-One Liquid 500ml' },
     { name: 'Perky Peach Cuticle Oil 5ml', code: 'GIUP PPCO5', label: 'Cuticle Oil 5ml' },
+    { name: 'Cross Magnet Black', code: 'Cross Magnet Black', label: 'Cat Eye Magnet (Black)', condition: 'catEye' },
+    { name: 'Cross Magnet Pink', code: 'Cross Magnet Pink', label: 'Cat Eye Magnet (Pink)', condition: 'catEye' },
   ], [])
 
   // Listen for auth changes (login/logout from other tabs or after registration)
@@ -4749,9 +4752,12 @@ function FullCataloguePage() {
                       </div>
                       {/* Upsell suggestions */}
                       {(() => {
+                        const cartKeys = Object.keys(quickCart)
+                        const hasCatEyeInCart = cartKeys.some(k => /cat.?eye/i.test(k) || /\b(vce|dce|gce|sce|rqce)\d/i.test(k))
                         const notInCart = CATALOGUE_UPSELLS.filter(u => {
+                          if (u.condition === 'catEye' && !hasCatEyeInCart) return false
                           const uKey = `${u.name}::${u.code}`
-                          return !quickCart[uKey] && !Object.keys(quickCart).some(k => k.toLowerCase().includes(u.code.replace('GIUP ', '').toLowerCase()))
+                          return !quickCart[uKey] && !cartKeys.some(k => k.toLowerCase().includes(u.code.replace('GIUP ', '').toLowerCase()))
                         })
                         if (notInCart.length === 0) return null
                         return (
@@ -8208,14 +8214,17 @@ function CheckoutPage() {
   const [priceMap, setPriceMap] = useState(null)
   const [wordIndex, setWordIndex] = useState([])
 
-  // Static upsell essentials — popular items customers often forget
+  // Static upsell essentials — popular items customers often forget (Cleanser discontinued → All-in-One Liquid)
   const CHECKOUT_UPSELLS = useMemo(() => [
     { name: '5-in-1 Superior Base 15ml Clear', code: 'GIUP 5IN1CLR', label: '5-in-1 Base (Clear)' },
     { name: 'Non Wipe Top Coat 15ml', code: 'GIUP NWT', label: 'Non-Wipe Top Coat' },
     { name: 'Satin Matt RS Top 15 ml', code: 'GIUP SATMAT', label: 'Satin Matt Top' },
     { name: 'Superbond Nail Dehydrator 11ml - Acid Free', code: 'GIUP SB', label: 'Superbond Primer' },
-    { name: 'Cleanser 200 ml', code: 'GIUP CLEANSER', label: 'Cleanser 200ml' },
+    { name: 'All In One Liquid 200 ml -HTF', code: 'ALL IN ONE LIQUID 200ML', label: 'All-in-One Liquid 200ml' },
+    { name: 'All In One Liquid 500 ml -HTF', code: 'ALL IN ONE LIQUID 500ML', label: 'All-in-One Liquid 500ml' },
     { name: 'Perky Peach Cuticle Oil 5ml', code: 'GIUP PPCO5', label: 'Cuticle Oil 5ml' },
+    { name: 'Cross Magnet Black', code: 'Cross Magnet Black', label: 'Cat Eye Magnet (Black)', condition: 'catEye' },
+    { name: 'Cross Magnet Pink', code: 'Cross Magnet Pink', label: 'Cat Eye Magnet (Pink)', condition: 'catEye' },
   ], [])
 
   // Customer details form
@@ -8409,7 +8418,9 @@ function CheckoutPage() {
 
       if (signUpError) {
         const msg = signUpError.message || ''
-        if (/already registered|already been registered/i.test(msg)) {
+        if (!form.createAccount) {
+          // Guest checkout — signUp is purely for silent record-keeping; any error is non-blocking
+        } else if (/already registered|already been registered/i.test(msg)) {
           // Account exists — try to proceed without blocking (order still goes through)
           // They'll get an email to set/reset password
         } else {
@@ -8859,6 +8870,29 @@ function CheckoutPage() {
             </label>
           </div>
 
+          {/* PAYMENT OPTIONS */}
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-3">
+            <p className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500">Payment Options</p>
+            <p className="text-sm text-slate-600">We'll send you a proforma invoice after your order is confirmed. Payment is due before dispatch.</p>
+            <div className="flex flex-wrap gap-2">
+              {PAYMENT_BANK_DETAILS && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">🏦 Bank Transfer / EFT</span>
+              )}
+              {PAYMENT_REVOLUT_URL && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">💳 Revolut</span>
+              )}
+              {PAYMENT_PAYPAL_URL && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">🅿️ PayPal</span>
+              )}
+              {PAYMENT_STRIPE_URL && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">💳 Card (Stripe)</span>
+              )}
+              {!PAYMENT_BANK_DETAILS && !PAYMENT_REVOLUT_URL && !PAYMENT_PAYPAL_URL && !PAYMENT_STRIPE_URL && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">🏦 Bank Transfer / EFT &bull; 💳 Revolut &bull; 🅿️ PayPal</span>
+              )}
+            </div>
+          </div>
+
           {!isSubmitting && (cartTotal < MIN_ORDER_EUR || !form.agreeTerms) && (
             <p className="text-center text-xs text-amber-700">
               {cartTotal < MIN_ORDER_EUR
@@ -8917,9 +8951,12 @@ function CheckoutPage() {
 
               {/* UPSELL SUGGESTIONS — inside sticky card so nothing scrolls behind */}
               {(() => {
+                const checkoutCartKeys = Object.keys(cart)
+                const checkoutHasCatEye = checkoutCartKeys.some(k => /cat.?eye/i.test(k) || /\b(vce|dce|gce|sce|rqce)\d/i.test(k))
                 const upsellsNotInCart = CHECKOUT_UPSELLS.filter(u => {
+                  if (u.condition === 'catEye' && !checkoutHasCatEye) return false
                   const uKey = `${u.name}::${u.code}`
-                  return !cart[uKey] && !Object.keys(cart).some(k => k.toLowerCase().includes(u.code.replace('GIUP ', '').toLowerCase()))
+                  return !cart[uKey] && !checkoutCartKeys.some(k => k.toLowerCase().includes(u.code.replace('GIUP ', '').toLowerCase()))
                 })
                 if (upsellsNotInCart.length === 0) return null
                 return (
