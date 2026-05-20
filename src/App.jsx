@@ -2882,23 +2882,23 @@ const SPRING_SUMMER_LOOKBOOK_DEFAULT = {
 }
 
 const CATEGORY_LAB_SPECS = {
-  'COLORS': { pigmentDots: 3, cure: '60s LED — 120s UV', llab: true },
-  'BUILDER GEL SYSTEMS': { pigmentDots: null, cure: '60s LED — 120s UV', llab: true },
-  'BASES': { pigmentDots: null, cure: '60s LED — 120s UV', llab: true },
-  'MULTIMIX': { pigmentDots: null, cure: '60s LED — 120s UV', llab: true },
-  'TOPS': { pigmentDots: null, cure: '60s LED — 120s UV', llab: true },
-  'LINE-IT-UP': { pigmentDots: 2, cure: '60s LED — 120s UV', llab: true },
+  'COLORS': { pigmentDots: 3, cure: null, llab: true },
+  'BUILDER GEL SYSTEMS': { pigmentDots: null, cure: null, llab: true },
+  'BASES': { pigmentDots: null, cure: null, llab: true },
+  'MULTIMIX': { pigmentDots: null, cure: null, llab: true },
+  'TOPS': { pigmentDots: null, cure: null, llab: true },
+  'LINE-IT-UP': { pigmentDots: 2, cure: null, llab: true },
   'TOOLS': { pigmentDots: null, cure: null, llab: true },
   'EQUIPMENT': { pigmentDots: null, cure: null, llab: true },
   'BRUSHES': { pigmentDots: null, cure: null, llab: true },
-  'NAIL ART': { pigmentDots: 2, cure: '60s LED — 120s UV', llab: true },
+  'NAIL ART': { pigmentDots: 2, cure: null, llab: true },
   'CONSUMABLES': { pigmentDots: null, cure: null, llab: true },
   'NAIL HAND & FOOT CARE': { pigmentDots: null, cure: null, llab: true },
   'NAIL PREPARATIONS': { pigmentDots: null, cure: null, llab: true },
   'LIQUIDS': { pigmentDots: null, cure: null, llab: true },
-  'BY THE OCEAN': { pigmentDots: 3, cure: '60s LED — 120s UV', llab: true },
+  'BY THE OCEAN': { pigmentDots: 3, cure: null, llab: true },
 }
-const DEFAULT_LAB_SPECS = { pigmentDots: null, cure: '60s LED — 120s UV', llab: true }
+const DEFAULT_LAB_SPECS = { pigmentDots: null, cure: null, llab: true }
 
 function FullCataloguePage() {
   const location = useLocation()
