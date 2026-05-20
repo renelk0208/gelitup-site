@@ -2263,12 +2263,12 @@ function getAlternateGalleryBaseImagePath(imagePath = '') {
   const normalizedPath = String(imagePath || '').trim()
   if (!normalizedPath) return ''
 
-  const basePath = normalizedPath.replace(/_B(\.[a-z0-9]+)$/i, '$1')
+  const basePath = normalizedPath.replace(/_[BC](-[a-z0-9]+)?(\.[a-z0-9]+)$/i, '$1$2')
   return basePath !== normalizedPath ? basePath : ''
 }
 
 function isAlternateGalleryImagePath(imagePath = '') {
-  return /_B\.[a-z0-9]+$/i.test(String(imagePath || '').trim())
+  return /_[BC](-[a-z0-9]+)?\.[a-z0-9]+$/i.test(String(imagePath || '').trim())
 }
 
 function stripAlternateGallerySuffix(name = '') {
