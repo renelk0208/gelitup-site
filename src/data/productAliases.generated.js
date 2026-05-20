@@ -599,7 +599,6 @@ export const GENERATED_PRODUCT_ALIAS_GROUPS = [
   { codes: ["DOWNLOAD F5D898CF 909D 4320 9037 CC5054D48CB6"], target: "MultiMix Synthogel 60gr Clear Glitter -HTF" },
   { codes: ["DOWNLOAD 3C327CAA 3064 42AE 9CEE 116961079AFF"], target: "MultiMix Synthogel 60gr Cover II -HTF" },
   { codes: ["DOWNLOAD BEBA9395 E4FB 4180 A514 89EA864332ED"], target: "MultiMix Synthogel 60gr Glitter Gold -HTF" },
-  { codes: ["MULTI LIQUID"], target: "MultiMix Syntholiquid 100ml -HTF" },
   { codes: ["DOWNLOAD 686089AB F423 4187 AB9F E3DC4F00F7DB"], target: "N011 Berry Me Softly -HTF" },
   { codes: ["DOWNLOAD D2A2AD27 734B 4F25 9997 B4EEA6EF6A88"], target: "N017 Pale Petal -HTF" },
   { codes: ["DOWNLOAD 06F6C7CF 149F 4C70 BE2A E1D2B5B8765C"], target: "N018 Chic -HTF" },

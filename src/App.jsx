@@ -4634,7 +4634,8 @@ function FullCataloguePage() {
                   const hasChangedQty = qty !== 1
                   const inCart = quickCart[itemKey] > 0
                   const isOOS = outOfStockNames.has(item.name)
-                  const _sizeMatch = item.imageUrl.match(/\b(\d+(?:\.\d+)?)\s*(ml|gr)\b/i)
+                  const _sizeFilename = item.imageUrl.split('/').pop() || ''
+                  const _sizeMatch = _sizeFilename.match(/\b(\d+(?:\.\d+)?)\s*(ml|gr|g)\b/i)
                   const itemSize = productSizes[item.name] || productSizes[item.imageUrl] || (_sizeMatch ? _sizeMatch[1] + _sizeMatch[2].toLowerCase() : null)
                   const _sizeInName = itemSize && new RegExp(`\\b${itemSize}\\b`, 'i').test(item.name)
 
@@ -10859,11 +10860,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     if (selectedCodes.some((code) => {
       const product = catalogBySku.get(normalizeSkuCode(code))
       const t = normalizeCatalogueToken(product?.name || product?.imageUrl || code)
-      return t.includes('POLYGEL') || t.includes('SYNTHOGEL') || t.includes('MULTI LIQUID') || t.includes('SYNTHOLIQUID') || isDualForm(t)
+      return t.includes('POLYGEL') || t.includes('SYNTHOGEL') || t.includes('SYNTHOLIQUID') || isDualForm(t)
     })) return true
     return packageCartItems.some((item) => {
       const t = normalizeCatalogueToken(item?.name || item?.imageUrl || item?.subcategory || '')
-      return t.includes('POLYGEL') || t.includes('SYNTHOGEL') || t.includes('MULTI LIQUID') || isDualForm(t)
+      return t.includes('POLYGEL') || t.includes('SYNTHOGEL') || isDualForm(t)
     })
   }, [catalogBySku, packageCartItems, selectedCodes])
 
@@ -10947,13 +10948,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   const fiveIn1ClearProduct = useMemo(() =>
     products.find(p => normalizeSkuCode(p.code || p.sku || '').includes('SBCCLR')),
-  [products])
-
-  const synthoLiquidProduct = useMemo(() =>
-    products.find(p => {
-      const t = normalizeCatalogueToken(p.name || p.imageUrl || '')
-      return t.includes('SYNTHOLIQUID') || t.includes('MULTI LIQUID') || t.includes('SYNTHOGEL LIQUID')
-    }),
   [products])
 
   const polygelbBrushProduct = useMemo(() =>
