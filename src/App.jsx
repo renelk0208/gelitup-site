@@ -2894,6 +2894,7 @@ const CATEGORY_LAB_SPECS = {
   'NAIL ART': { pigmentDots: 2, cure: '60s LED — 120s UV', llab: true },
   'CONSUMABLES': { pigmentDots: null, cure: null, llab: true },
   'NAIL HAND & FOOT CARE': { pigmentDots: null, cure: null, llab: true },
+  'NAIL PREPARATIONS': { pigmentDots: null, cure: null, llab: true },
   'LIQUIDS': { pigmentDots: null, cure: null, llab: true },
   'BY THE OCEAN': { pigmentDots: 3, cure: '60s LED — 120s UV', llab: true },
 }
