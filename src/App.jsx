@@ -4710,7 +4710,7 @@ function FullCataloguePage() {
                             <div key={key} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
                               <div className="min-w-0 flex-1">
                                 <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{name}</p>
-                                <p className="text-[11px] text-black/45">{code}{price != null && <span className="ml-2 text-fuchsia-700">€{Number(price).toFixed(2)} ea.</span>}</p>
+                                <p className="truncate text-[11px] text-black/45">{code}{price != null && <span className="ml-2 text-fuchsia-700">€{Number(price).toFixed(2)} ea.</span>}</p>
                               </div>
                               <div className="flex items-center gap-1">
                                 <button
@@ -5741,7 +5741,7 @@ function FullCataloguePage() {
                       <div key={key} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{name}</p>
-                          <p className="text-[11px] text-black/45">{code}{price != null && <span className="ml-2 text-fuchsia-700">€{Number(price).toFixed(2)} ea.</span>}</p>
+                          <p className="truncate text-[11px] text-black/45">{code}{price != null && <span className="ml-2 text-fuchsia-700">€{Number(price).toFixed(2)} ea.</span>}</p>
                         </div>
                         <div className="flex items-center gap-1">
                           <button
@@ -8880,7 +8880,7 @@ function CheckoutPage() {
                 <div key={e.key} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-semibold uppercase text-slate-800">{e.name}</p>
-                    <p className="text-[11px] text-slate-500">{e.code}{e.price != null && <span className="ml-1 text-fuchsia-700">€{e.price.toFixed(2)}</span>}</p>
+                    <p className="truncate text-[11px] text-slate-500">{e.code}{e.price != null && <span className="ml-1 text-fuchsia-700">€{e.price.toFixed(2)}</span>}</p>
                   </div>
                   <div className="flex items-center gap-1">
                     <button type="button" onClick={() => {
@@ -8914,45 +8914,45 @@ function CheckoutPage() {
                   <strong>No payment is taken at checkout.</strong> A pro forma invoice will be issued by Thermitek Ltd after your order is confirmed. <strong>Payment is due upon receipt of the pro forma invoice.</strong>
                 </p>
               </div>
+
+              {/* UPSELL SUGGESTIONS — inside sticky card so nothing scrolls behind */}
+              {(() => {
+                const upsellsNotInCart = CHECKOUT_UPSELLS.filter(u => {
+                  const uKey = `${u.name}::${u.code}`
+                  return !cart[uKey] && !Object.keys(cart).some(k => k.toLowerCase().includes(u.code.replace('GIUP ', '').toLowerCase()))
+                })
+                if (upsellsNotInCart.length === 0) return null
+                return (
+                  <div className="mt-4 border-t border-slate-100 pt-4">
+                    <h4 className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500">You might also need</h4>
+                    <div className="mt-2 space-y-2">
+                      {upsellsNotInCart.map(u => {
+                        const price = lookupPrice(u.name, u.code)
+                        return (
+                          <div key={u.code} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-semibold text-slate-800">{u.label}</p>
+                              {price != null && <p className="text-[11px] text-fuchsia-700">€{price.toFixed(2)}</p>}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const uKey = `${u.name}::${u.code}`
+                                setCart(c => ({ ...c, [uKey]: (c[uKey] || 0) + 1 }))
+                              }}
+                              className="shrink-0 rounded-lg bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-fuchsia-500"
+                            >
+                              + Add
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })()}
             </div>
           </div>
-
-          {/* UPSELL SUGGESTIONS */}
-          {(() => {
-            const upsellsNotInCart = CHECKOUT_UPSELLS.filter(u => {
-              const uKey = `${u.name}::${u.code}`
-              return !cart[uKey] && !Object.keys(cart).some(k => k.toLowerCase().includes(u.code.replace('GIUP ', '').toLowerCase()))
-            })
-            if (upsellsNotInCart.length === 0) return null
-            return (
-              <div className="mt-4 rounded-xl border border-slate-200 bg-white p-5">
-                <h4 className="text-xs font-bold uppercase tracking-[0.08em] text-slate-700">You might also need</h4>
-                <div className="mt-3 space-y-2">
-                  {upsellsNotInCart.map(u => {
-                    const price = lookupPrice(u.name, u.code)
-                    return (
-                      <div key={u.code} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-semibold text-slate-800">{u.label}</p>
-                          {price != null && <p className="text-[11px] text-fuchsia-700">€{price.toFixed(2)}</p>}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const uKey = `${u.name}::${u.code}`
-                            setCart(c => ({ ...c, [uKey]: (c[uKey] || 0) + 1 }))
-                          }}
-                          className="shrink-0 rounded-lg bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-fuchsia-500"
-                        >
-                          + Add
-                        </button>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          })()}
         </div>
       </div>
     </section>
