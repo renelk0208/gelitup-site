@@ -1250,6 +1250,9 @@ function OrdersPanel() {
   // editing state
   const [editing, setEditing] = useState(null) // order id being edited
   const [editDraft, setEditDraft] = useState({})
+  // refund state
+  const [refundModal, setRefundModal] = useState({ orderId: null, piInput: '', amountInput: '', emailInput: '', loading: false, error: '', result: null })
+  const _resetRefundModal = () => setRefundModal({ orderId: null, piInput: '', amountInput: '', emailInput: '', loading: false, error: '', result: null })
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -1344,6 +1347,59 @@ function OrdersPanel() {
 
   const markShipped = async (id) => {
     await updateOrder(id, { status: 'shipped' })
+  }
+
+  const issueRefund = async () => {
+    const { orderId, piInput, amountInput, emailInput } = refundModal
+    if (!piInput.trim().startsWith('pi_')) {
+      setRefundModal(m => ({ ...m, error: 'Enter a valid Payment Intent ID (starts with pi_)' }))
+      return
+    }
+    setRefundModal(m => ({ ...m, loading: true, error: '', result: null }))
+    const row = rows.find(r => r.id === orderId)
+    const body = { paymentIntentId: piInput.trim() }
+    if (amountInput) body.amountEur = Number(amountInput)
+    const resolvedEmail = emailInput.trim() || row?.customer_email || ''
+    if (resolvedEmail) body.email = resolvedEmail
+    try {
+      const res = await fetch('/.netlify/functions/stripe-refund', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setRefundModal(m => ({ ...m, loading: false, error: data.error || 'Refund failed' }))
+        return
+      }
+      await updateOrder(orderId, { stripe_refund_id: data.refundId, status: 'refunded' })
+      _resetRefundModal()
+    } catch (err) {
+      setRefundModal(m => ({ ...m, loading: false, error: err.message || 'Network error' }))
+    }
+  }
+
+  const cancelRefund = async (row) => {
+    if (!row.stripe_refund_id) return
+    if (!window.confirm(`Cancel Stripe refund ${row.stripe_refund_id} for order #${row.id}?\n\nNote: only pending refunds can be cancelled. Succeeded refunds cannot be reversed.`)) return
+    setSaving(row.id)
+    try {
+      const res = await fetch('/.netlify/functions/stripe-cancel-refund', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refundId: row.stripe_refund_id }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        alert(`Could not cancel refund: ${data.error || 'Unknown error'}`)
+        setSaving(null)
+        return
+      }
+      await updateOrder(row.id, { stripe_refund_id: null })
+    } catch (err) {
+      alert(`Network error: ${err.message}`)
+    }
+    setSaving(null)
   }
 
   const togglePaymentConfirmed = async (id, currentValue) => {
@@ -2160,6 +2216,94 @@ function OrdersPanel() {
                           className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
                         >
                           🗑 Delete
+                        </button>
+                        {!row.stripe_refund_id && (
+                          <button
+                            onClick={() => setRefundModal({ orderId: row.id, piInput: row.stripe_payment_intent || '', amountInput: '', emailInput: row.customer_email || '', loading: false, error: '', result: null })}
+                            className="rounded-lg border border-fuchsia-200 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50"
+                          >
+                            💳 Stripe Refund
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── Stripe Refund status ── */}
+                  {!isEditing && row.stripe_refund_id && (
+                    <div className="rounded-xl border border-rose-200 bg-rose-50 p-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <p className="text-xs font-semibold text-rose-700">💳 Stripe Refund Issued</p>
+                          <p className="mt-0.5 break-all font-mono text-[11px] text-slate-600">{row.stripe_refund_id}</p>
+                        </div>
+                        <button
+                          onClick={() => cancelRefund(row)}
+                          disabled={saving === row.id}
+                          className="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-50"
+                        >
+                          {saving === row.id ? 'Cancelling…' : '✕ Cancel Refund'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── Stripe Refund form ── */}
+                  {!isEditing && refundModal.orderId === row.id && (
+                    <div className="rounded-xl border border-fuchsia-200 bg-fuchsia-50 p-3 space-y-3">
+                      <p className="text-xs font-semibold text-fuchsia-700">💳 Issue Stripe Refund — Order #{row.id}</p>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <div className="sm:col-span-2">
+                          <label className="mb-1 block text-xs font-medium text-slate-600">Payment Intent ID <span className="text-rose-500">*</span></label>
+                          <input
+                            type="text"
+                            value={refundModal.piInput}
+                            onChange={e => setRefundModal(m => ({ ...m, piInput: e.target.value, error: '' }))}
+                            placeholder="pi_3..."
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-fuchsia-200"
+                          />
+                          <p className="mt-0.5 text-[10px] text-slate-400">Find in Stripe Dashboard → Payments → click the payment</p>
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-medium text-slate-600">Amount EUR <span className="text-slate-400">(blank = full refund)</span></label>
+                          <input
+                            type="number"
+                            min="0.01"
+                            step="0.01"
+                            value={refundModal.amountInput}
+                            onChange={e => setRefundModal(m => ({ ...m, amountInput: e.target.value }))}
+                            placeholder="e.g. 25.00"
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-fuchsia-200"
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-medium text-slate-600">Customer Email <span className="text-slate-400">(for refund instructions)</span></label>
+                          <input
+                            type="email"
+                            value={refundModal.emailInput}
+                            onChange={e => setRefundModal(m => ({ ...m, emailInput: e.target.value }))}
+                            placeholder="customer@example.com"
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-fuchsia-200"
+                          />
+                        </div>
+                      </div>
+                      {refundModal.error && (
+                        <p className="rounded-lg bg-rose-100 px-3 py-2 text-xs text-rose-700">{refundModal.error}</p>
+                      )}
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={issueRefund}
+                          disabled={refundModal.loading}
+                          className="rounded-lg bg-fuchsia-600 px-4 py-2 text-xs font-semibold text-white hover:bg-fuchsia-700 disabled:opacity-50"
+                        >
+                          {refundModal.loading ? 'Processing…' : '💳 Issue Refund'}
+                        </button>
+                        <button
+                          onClick={_resetRefundModal}
+                          disabled={refundModal.loading}
+                          className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                        >
+                          Cancel
                         </button>
                       </div>
                     </div>

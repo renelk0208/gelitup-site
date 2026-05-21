@@ -71,6 +71,23 @@ const PAYMENT_BANK_DETAILS = import.meta.env.VITE_PAYMENT_BANK_DETAILS || ''
 const PAYMENT_REVOLUT_URL = import.meta.env.VITE_PAYMENT_REVOLUT_URL || ''
 const PAYMENT_STRIPE_URL = import.meta.env.VITE_PAYMENT_STRIPE_URL || ''
 const PAYMENT_PAYPAL_URL = import.meta.env.VITE_PAYMENT_PAYPAL_URL || ''
+// PayPal processing fee passed on to the client.
+// Rate: 3.4% + €0.35 (PayPal EU standard). Gross-up so that after PayPal deducts
+// their fee, we still receive the original invoice amount.
+const PAYPAL_RATE = Number(import.meta.env.VITE_PAYPAL_FEE_RATE || '0.034')
+const PAYPAL_FIXED = Number(import.meta.env.VITE_PAYPAL_FEE_FIXED || '0.35')
+function calcPaypalTotal(amount) {
+  const gross = (amount + PAYPAL_FIXED) / (1 - PAYPAL_RATE)
+  // Always round UP so PayPal's deduction never leaves us short
+  let grossRounded = Math.ceil(gross * 100) / 100
+  // Simulate PayPal's own rounding of their fee; if we'd still be short, add 1 cent
+  const simulatedFee = Math.round((grossRounded * PAYPAL_RATE + PAYPAL_FIXED) * 100) / 100
+  if (grossRounded - simulatedFee < amount) {
+    grossRounded = Math.round((grossRounded + 0.01) * 100) / 100
+  }
+  const fee = Math.round((grossRounded - amount) * 100) / 100
+  return { gross: grossRounded, fee }
+}
 
 // Shared helper — creates a Stripe Checkout Session and redirects to Stripe's hosted payment page.
 // Covers cards, Google Pay, and Apple Pay in a single step.
@@ -8708,11 +8725,17 @@ function CheckoutPage() {
                   Pay via Revolut
                 </a>
               )}
-              {PAYMENT_PAYPAL_URL && (
-                <a href={`${PAYMENT_PAYPAL_URL.replace(/\/$/, '')}/${orderConfirmed.total.toFixed(2)}`} target="_blank" rel="noreferrer" className="rounded-lg bg-[#0070ba] px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90">
-                  Pay via PayPal
-                </a>
-              )}
+              {PAYMENT_PAYPAL_URL && (() => {
+                const { gross, fee } = calcPaypalTotal(orderConfirmed.total)
+                return (
+                  <div className="flex flex-col items-start gap-0.5">
+                    <a href={`${PAYMENT_PAYPAL_URL.replace(/\/$/, '')}/${gross.toFixed(2)}`} target="_blank" rel="noreferrer" className="rounded-lg bg-[#0070ba] px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90">
+                      Pay via PayPal
+                    </a>
+                    <span className="text-[10px] text-slate-400">Incl. PayPal fee: €{fee.toFixed(2)} &mdash; total €{gross.toFixed(2)}</span>
+                  </div>
+                )
+              })()}
             </div>
             {paymentError && <p className="mt-2 text-xs text-rose-600">{paymentError}</p>}
           </div>
@@ -15081,15 +15104,21 @@ function OrdersModule() {
                       Pay via Revolut
                     </a>
                   )}
-                  {PAYMENT_PAYPAL_URL && order.zoho_invoice_total != null && (
-                    <a
-                      href={`${PAYMENT_PAYPAL_URL.replace(/\/$/, '')}/${Number(order.zoho_invoice_total).toFixed(2)}`}
-                      target="_blank" rel="noreferrer"
-                      className="rounded-lg bg-[#0070ba] px-4 py-2 text-xs font-semibold text-white hover:opacity-90"
-                    >
-                      Pay via PayPal
-                    </a>
-                  )}
+                  {PAYMENT_PAYPAL_URL && order.zoho_invoice_total != null && (() => {
+                    const { gross, fee } = calcPaypalTotal(Number(order.zoho_invoice_total))
+                    return (
+                      <div className="flex flex-col items-start gap-0.5">
+                        <a
+                          href={`${PAYMENT_PAYPAL_URL.replace(/\/$/, '')}/${gross.toFixed(2)}`}
+                          target="_blank" rel="noreferrer"
+                          className="rounded-lg bg-[#0070ba] px-4 py-2 text-xs font-semibold text-white hover:opacity-90"
+                        >
+                          Pay via PayPal
+                        </a>
+                        <span className="text-[10px] text-slate-400">Incl. PayPal fee: €{fee.toFixed(2)} &mdash; total €{gross.toFixed(2)}</span>
+                      </div>
+                    )
+                  })()}
                 </div>
                 {paymentError && <p className="mt-1 text-xs text-rose-600">{paymentError}</p>}
               </div>
