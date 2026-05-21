@@ -14,7 +14,7 @@ const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
 const GuestbookPage = lazy(() => import('./pages/GuestbookPage.jsx'))
 const InspirationPage = lazy(() => import('./pages/InspirationPage.jsx'))
 
-const B2B_EMAIL = 'info@gelitup.com'
+const B2B_EMAIL = import.meta.env.VITE_B2B_EMAIL || 'info@gelitup.com'
 const PRODUCT_CATEGORIES = ['Solid Colours', 'Builder Gels', 'Base & Top', 'Nail Care', 'Accessories']
 const DEFAULT_PRODUCTS_TABLE = 'b2b_products'
 const DEFAULT_ORDERS_TABLE = 'b2b_orders'
@@ -46,12 +46,13 @@ const EMAIL_FROM = import.meta.env.VITE_EMAIL_FROM || 'info@gelitup.com'
 const EMAIL_REPLY_TO = import.meta.env.VITE_EMAIL_REPLY_TO || B2B_EMAIL
 const ORDER_INBOX_EMAIL = import.meta.env.VITE_B2B_ORDER_INBOX || B2B_EMAIL
 const ORDER_BACKUP_INBOX_EMAIL = import.meta.env.VITE_B2B_ORDER_BACKUP_INBOX || 'info@gelitup.com'
-const CONTACT_INBOX_EMAIL = 'info@gelitup.com'
+const CONTACT_INBOX_EMAIL = import.meta.env.VITE_CONTACT_INBOX_EMAIL || 'info@gelitup.com'
 const SUPPORT_WHATSAPP_NUMBER = import.meta.env.VITE_SUPPORT_WHATSAPP_NUMBER || '+306940715234'
 const SUPPORT_WHATSAPP_URL = import.meta.env.VITE_SUPPORT_WHATSAPP_URL
   || `https://wa.me/${String(SUPPORT_WHATSAPP_NUMBER).replace(/[^\d]/g, '')}`
 const SUPPORT_VIBER_URL = import.meta.env.VITE_SUPPORT_VIBER_URL
   || `viber://chat?number=${String(SUPPORT_WHATSAPP_NUMBER).replace(/[^\d+]/g, '')}`
+const CONTACT_EMAIL_ONLY = readBooleanEnvFlag(import.meta.env.VITE_CONTACT_EMAIL_ONLY, false)
 const PORTAL_INTERNAL_BYPASS_EMAILS = new Set(
   [
     'distributors@gelitup.com',
@@ -9867,7 +9868,7 @@ function PortalRegister({ onRegister }) {
               {R.sign_in || 'Sign in'}
             </NavLink>
           </span>
-          <a
+          {!CONTACT_EMAIL_ONLY && <a
             href={SUPPORT_WHATSAPP_URL}
             target="_blank"
             rel="noreferrer"
@@ -9878,7 +9879,7 @@ function PortalRegister({ onRegister }) {
               <path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.522 5.836L.057 23.928a.5.5 0 00.608.593l6.358-1.43A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-4.985-1.356l-.357-.213-3.704.833.886-3.576-.233-.369A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z" />
             </svg>
             {R.need_help || 'Need help?'}
-          </a>
+          </a>}
         </div>
       </div>
 
@@ -14819,24 +14820,28 @@ function SupportModule() {
         <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-lg font-semibold text-transparent">Support & Contact</h3>
         <p className="mt-1 text-sm text-slate-500">Reach us through your preferred channel. WhatsApp is the fastest for urgent matters.</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          <a
-            href={`tel:${String(PROFORMA_LEEUKOPF_PHONE || '').replace(/\s+/g, '')}`}
-            className="flex flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50 p-4 hover:border-fuchsia-200 hover:bg-fuchsia-50 transition"
-          >
-            <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Phone</span>
-            <span className="text-sm font-semibold text-slate-900">{PROFORMA_LEEUKOPF_PHONE || '—'}</span>
-            <span className="text-xs text-slate-500">Mon–Fri 9:00–17:00 EET</span>
-          </a>
-          <a
-            href={SUPPORT_WHATSAPP_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="flex flex-col gap-1 rounded-xl border border-green-200 bg-green-50 p-4 hover:bg-green-100 transition"
-          >
-            <span className="text-xs font-semibold uppercase tracking-wide text-green-600">WhatsApp</span>
-            <span className="text-sm font-semibold text-slate-900">Chat with Us</span>
-            <span className="text-xs text-slate-500">Fastest response — usually under 2 hours</span>
-          </a>
+          {!CONTACT_EMAIL_ONLY && (
+            <a
+              href={`tel:${String(PROFORMA_LEEUKOPF_PHONE || '').replace(/\s+/g, '')}`}
+              className="flex flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50 p-4 hover:border-fuchsia-200 hover:bg-fuchsia-50 transition"
+            >
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Phone</span>
+              <span className="text-sm font-semibold text-slate-900">{PROFORMA_LEEUKOPF_PHONE || '—'}</span>
+              <span className="text-xs text-slate-500">Mon–Fri 9:00–17:00 EET</span>
+            </a>
+          )}
+          {!CONTACT_EMAIL_ONLY && (
+            <a
+              href={SUPPORT_WHATSAPP_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="flex flex-col gap-1 rounded-xl border border-green-200 bg-green-50 p-4 hover:bg-green-100 transition"
+            >
+              <span className="text-xs font-semibold uppercase tracking-wide text-green-600">WhatsApp</span>
+              <span className="text-sm font-semibold text-slate-900">Chat with Us</span>
+              <span className="text-xs text-slate-500">Fastest response — usually under 2 hours</span>
+            </a>
+          )}
           <a
             href={`mailto:${B2B_EMAIL}`}
             className="flex flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50 p-4 hover:border-fuchsia-200 hover:bg-fuchsia-50 transition"
@@ -18851,26 +18856,28 @@ function App() {
 
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Contact</p>
-            <a href={`tel:${String(PROFORMA_LEEUKOPF_PHONE || '').replace(/[\s()]/g, '')}`} className="mt-2 block transition hover:text-fuchsia-300">{PROFORMA_LEEUKOPF_PHONE}</a>
-            <a href="mailto:info@gelitup.com" className="mt-2 inline-flex items-center gap-2 transition hover:text-fuchsia-300">
+            {!CONTACT_EMAIL_ONLY && <a href={`tel:${String(PROFORMA_LEEUKOPF_PHONE || '').replace(/[\s()]/g, '')}`} className="mt-2 block transition hover:text-fuchsia-300">{PROFORMA_LEEUKOPF_PHONE}</a>}
+            <a href={`mailto:${B2B_EMAIL}`} className="mt-2 inline-flex items-center gap-2 transition hover:text-fuchsia-300">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4 shrink-0">
                 <rect x="3.5" y="5.5" width="17" height="13" rx="2" stroke="currentColor" strokeWidth="1.8" />
                 <path d="M4 6.5l8 5.5 8-5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              info@gelitup.com
+              {B2B_EMAIL}
             </a>
-            <a
-              href={SUPPORT_WHATSAPP_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-2 inline-flex items-center gap-1.5 text-green-400 transition hover:text-green-300"
-            >
-              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.570-.347z"/>
-                <path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.522 5.836L.057 23.928a.5.5 0 00.608.593l6.358-1.43A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-4.985-1.356l-.357-.213-3.704.833.886-3.576-.233-.369A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
-              </svg>
-              WhatsApp Support
-            </a>
+            {!CONTACT_EMAIL_ONLY && (
+              <a
+                href={SUPPORT_WHATSAPP_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-2 inline-flex items-center gap-1.5 text-green-400 transition hover:text-green-300"
+              >
+                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.570-.347z"/>
+                  <path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.522 5.836L.057 23.928a.5.5 0 00.608.593l6.358-1.43A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-4.985-1.356l-.357-.213-3.704.833.886-3.576-.233-.369A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
+                </svg>
+                WhatsApp Support
+              </a>
+            )}
           </div>
 
           <div>
@@ -18924,7 +18931,7 @@ function App() {
       {/* Floating chat widget + back-to-top */}
       <div className="fixed z-50 flex flex-col items-end gap-2" style={{ bottom: 'calc(24px + env(safe-area-inset-bottom, 0px))', right: 'calc(12px + env(safe-area-inset-right, 0px))' }}>
         {/* Expandable chat panel */}
-        {showChatPanel && (
+        {!CONTACT_EMAIL_ONLY && showChatPanel && (
           <div className="mb-1 w-64 rounded-2xl border border-white/10 bg-[#1a1a1a] shadow-2xl">
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
               <p className="text-sm font-semibold text-white">Chat with us</p>
@@ -18972,8 +18979,8 @@ function App() {
             </div>
           </div>
         )}
-        {/* WhatsApp direct link — always visible */}
-        <a
+        {/* WhatsApp direct link — hidden when CONTACT_EMAIL_ONLY */}
+        {!CONTACT_EMAIL_ONLY && <a
           href={SUPPORT_WHATSAPP_URL}
           target="_blank"
           rel="noreferrer"
@@ -18987,9 +18994,9 @@ function App() {
             <span className="text-sm font-bold text-white">WhatsApp</span>
             <span className="text-[10px] font-medium text-[#25D366]">click to chat</span>
           </span>
-        </a>
+        </a>}
         {/* Toggle Viber/other channels */}
-        <button
+        {!CONTACT_EMAIL_ONLY && <button
           type="button"
           aria-label={showChatPanel ? 'Close chat options' : 'More chat options'}
           onClick={() => setShowChatPanel(p => !p)}
@@ -18999,7 +19006,7 @@ function App() {
             ? <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-white/70" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
             : <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-white/70" stroke="currentColor" strokeWidth="2"><path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
           }
-        </button>
+        </button>}
         <button
           type="button"
           aria-label="Back to top"
