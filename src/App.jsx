@@ -8398,11 +8398,13 @@ function CheckoutPage() {
   }, [priceMap, wordIndex])
 
   const cartEntries = useMemo(() =>
-    Object.entries(cart).filter(([, q]) => q > 0).map(([key, qty]) => {
-      const [name, code] = key.split('::')
-      const price = lookupPrice(name, code)
-      return { key, name, code, qty, price, lineTotal: price != null ? Number(price) * qty : null }
-    }), [cart, lookupPrice])
+    Object.entries(cart)
+      .filter(([key, q]) => q > 0 && !/hero\.image/i.test(key))
+      .map(([key, qty]) => {
+        const [name, code] = key.split('::')
+        const price = lookupPrice(name, code)
+        return { key, name, code, qty, price, lineTotal: price != null ? Number(price) * qty : null }
+      }), [cart, lookupPrice])
 
   const cartTotal = useMemo(() => cartEntries.reduce((s, e) => s + (e.lineTotal || 0), 0), [cartEntries])
   const cartUnits = useMemo(() => cartEntries.reduce((s, e) => s + e.qty, 0), [cartEntries])
@@ -8731,41 +8733,51 @@ function CheckoutPage() {
           <div className="mt-4 rounded-xl border border-slate-200 bg-white p-5 text-left">
             <p className="mb-1 text-sm font-semibold text-slate-800">Complete Your Payment</p>
             <p className="text-xs text-slate-500">Order total: <strong className="text-slate-700">€{orderConfirmed.total.toFixed(2)}</strong> — choose your preferred payment method. Your invoice will be issued once your order is processed.</p>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {(() => {
                 const { gross: stripeGross, fee: stripeFee } = calcStripeTotal(orderConfirmed.total)
                 return (
-                  <div className="flex flex-col items-start gap-0.5">
-                    <button
-                      type="button"
-                      onClick={() => redirectToStripeCheckout({ orderId: orderConfirmed.id, amountEur: stripeGross, email: orderConfirmed.email, setLoading: setPaymentLoading, setError: setPaymentError })}
-                      disabled={paymentLoading}
-                      className="rounded-lg bg-[#635bff] px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-60"
-                    >
-                      {paymentLoading ? 'Redirecting…' : 'Pay with Stripe / Google Pay'}
-                    </button>
-                    <span className="text-[10px] text-slate-400">Incl. Stripe fee: €{stripeFee.toFixed(2)} &mdash; total €{stripeGross.toFixed(2)}</span>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => redirectToStripeCheckout({ orderId: orderConfirmed.id, amountEur: stripeGross, email: orderConfirmed.email, setLoading: setPaymentLoading, setError: setPaymentError })}
+                    disabled={paymentLoading}
+                    className="flex flex-col items-center gap-1.5 rounded-xl bg-[#635bff] px-5 py-4 text-white transition hover:bg-[#4f46e5] disabled:opacity-60"
+                  >
+                    <span className="text-sm font-bold">{paymentLoading ? 'Redirecting…' : '💳 Card / Google Pay / Apple Pay'}</span>
+                    <span className="text-[11px] opacity-80">Visa · Mastercard · Google Pay · Apple Pay</span>
+                    <span className="mt-1 rounded-full bg-white/20 px-3 py-0.5 text-[11px] font-semibold">€{stripeGross.toFixed(2)} incl. €{stripeFee.toFixed(2)} fee</span>
+                  </button>
                 )
               })()}
-              {PAYMENT_REVOLUT_URL && (
-                <a href={`${PAYMENT_REVOLUT_URL.replace(/\/$/, '')}/${orderConfirmed.total.toFixed(2)}/EUR`} target="_blank" rel="noreferrer" className="rounded-lg bg-[#191c1f] px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90">
-                  Pay via Revolut
-                </a>
-              )}
               {PAYMENT_PAYPAL_URL && (() => {
                 const { gross, fee } = calcPaypalTotal(orderConfirmed.total)
                 return (
-                  <div className="flex flex-col items-start gap-0.5">
-                    <a href={`${PAYMENT_PAYPAL_URL.replace(/\/$/, '')}/${gross.toFixed(2)}`} target="_blank" rel="noreferrer" className="rounded-lg bg-[#0070ba] px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90">
-                      Pay via PayPal
-                    </a>
-                    <span className="text-[10px] text-slate-400">Incl. PayPal fee: €{fee.toFixed(2)} &mdash; total €{gross.toFixed(2)}</span>
-                  </div>
+                  <a
+                    href={`${PAYMENT_PAYPAL_URL.replace(/\/$/, '')}/${gross.toFixed(2)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex flex-col items-center gap-1.5 rounded-xl bg-[#FFC43A] px-5 py-4 text-[#003087] transition hover:bg-[#f0b529]"
+                  >
+                    <span className="text-sm font-bold">🅿️ Pay with PayPal</span>
+                    <span className="text-[11px] opacity-70">PayPal balance · linked card</span>
+                    <span className="mt-1 rounded-full bg-black/10 px-3 py-0.5 text-[11px] font-semibold">€{gross.toFixed(2)} incl. €{fee.toFixed(2)} fee</span>
+                  </a>
                 )
               })()}
+              {PAYMENT_REVOLUT_URL && (
+                <a
+                  href={`${PAYMENT_REVOLUT_URL.replace(/\/$/, '')}/${orderConfirmed.total.toFixed(2)}/EUR`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex flex-col items-center gap-1.5 rounded-xl bg-[#191c1f] px-5 py-4 text-white transition hover:bg-[#2d3136]"
+                >
+                  <span className="text-sm font-bold">⚡ Pay via Revolut</span>
+                  <span className="text-[11px] opacity-60">No extra fee</span>
+                  <span className="mt-1 rounded-full bg-white/10 px-3 py-0.5 text-[11px] font-semibold">€{orderConfirmed.total.toFixed(2)}</span>
+                </a>
+              )}
             </div>
-            {paymentError && <p className="mt-2 text-xs text-rose-600">{paymentError}</p>}
+            {paymentError && <p className="mt-3 text-xs text-rose-600">{paymentError}</p>}
           </div>
         )}
       </section>
