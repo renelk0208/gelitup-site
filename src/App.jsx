@@ -4646,9 +4646,8 @@ function FullCataloguePage() {
                         <div className="min-w-0 flex-1">
                           <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                           <p className="break-words text-[11px] font-light text-black/55">
-                            {itemCode}
-                            {itemPrice != null && <span className="ml-2 text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</span>}
-                            {itemSize && !_sizeInName && <span className="ml-2 rounded bg-black/10 px-1.5 py-0.5 text-[10px] font-medium text-black/50">{itemSize}</span>}
+                            {itemPrice != null && <span className="text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</span>}
+                            {itemSize && <span className="ml-2 rounded bg-black/10 px-1.5 py-0.5 text-[10px] font-medium text-black/50">{itemSize}</span>}
                           </p>
                         </div>
                         <button
@@ -4681,7 +4680,6 @@ function FullCataloguePage() {
                         </div>
                       )}
                       <div className="flex flex-1 flex-col border-t border-black/10 px-2.5 py-2">
-                        <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                         <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                         <div className="mt-2 flex items-center gap-1">
                           <span className="h-3.5 w-3.5 rounded-full border border-black/15 bg-fuchsia-500" aria-hidden="true" />
@@ -4691,7 +4689,7 @@ function FullCataloguePage() {
                           {itemPrice != null && (
                             <p className="text-xs font-bold text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</p>
                           )}
-                          {itemSize && !_sizeInName && (
+                          {itemSize && (
                             <span className="rounded bg-black/8 px-1.5 py-0.5 text-[10px] font-medium text-black/45">{itemSize}</span>
                           )}
                         </div>
