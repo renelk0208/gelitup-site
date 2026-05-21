@@ -4945,7 +4945,7 @@ function FullCataloguePage() {
             Gel Polish &amp; Professional Nail Systems
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-white/90 sm:text-lg" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-            The complete professional nail range — gel polish, builder gel, base coats, top coats, and accessories. HEMA &amp; TPO-Free formulations, <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-300 hover:underline">Cruelty-Free certified</a>, and engineered for professional excellence. Browse every shade, system, and tool in the Gel It Up collection.
+            The complete professional nail range — gel polish, builder gel, base coats, top coats, and accessories. HEMA &amp; TPO-Free formulations, <a href="https://www.crueltyfreeinternational.org/approved-brands/listing/gel-it-up/" target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-300 hover:underline">Leaping Bunny Approved</a>, and engineered for professional excellence. Browse every shade, system, and tool in the Gel It Up collection.
           </p>
         </div>
       </div>
@@ -7143,8 +7143,8 @@ function HomePage({ onOpenContactModal }) {
                 <circle cx="12" cy="14" r="5" />
               </svg>
             </div>
-            <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="mt-3 block text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790] hover:underline">CRUELTY-FREE</a>
-            <p className="mt-2 text-sm leading-relaxed text-white">Ethics without compromise. We are 100% <a href="https://www.crueltyfreeinternational.org/approved-brands/" target="_blank" rel="noreferrer" className="font-semibold text-[#D43790] hover:underline">Leaping Bunny Approved</a>—the global gold standard for cruelty-free cosmetics.</p>
+            <a href="https://www.crueltyfreeinternational.org/approved-brands/listing/gel-it-up/" target="_blank" rel="noreferrer" className="mt-3 block text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790] hover:underline">CRUELTY-FREE</a>
+            <p className="mt-2 text-sm leading-relaxed text-white">Ethics without compromise. We are 100% <a href="https://www.crueltyfreeinternational.org/approved-brands/listing/gel-it-up/" target="_blank" rel="noreferrer" className="font-semibold text-[#D43790] hover:underline">Leaping Bunny Approved</a>—the global gold standard for cruelty-free cosmetics.</p>
           </article>
         </div>
 
