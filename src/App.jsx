@@ -4652,9 +4652,10 @@ function FullCataloguePage() {
                   const inCart = quickCart[itemKey] > 0
                   const isOOS = outOfStockNames.has(item.name)
                   const _sizeFilename = item.imageUrl.split('/').pop() || ''
-                  const _sizeMatch = _sizeFilename.match(/\b(\d+(?:\.\d+)?)\s*(ml|gr|g)\b/i)
+                  const _sizeMatchFile = _sizeFilename.match(/\b(\d+(?:\.\d+)?)\s*(ml|gr|g)\b/i)
+                  const _sizeMatchName = item.name.match(/\b(\d+(?:\.\d+)?)\s*(ml|gr|g)\b/i)
+                  const _sizeMatch = _sizeMatchFile || _sizeMatchName
                   const itemSize = productSizes[item.name] || productSizes[item.imageUrl] || (_sizeMatch ? _sizeMatch[1] + _sizeMatch[2].toLowerCase() : null)
-                  const _sizeInName = itemSize && new RegExp(`\\b${itemSize}\\b`, 'i').test(item.name)
 
                   if (bulkMode) {
                     return (
