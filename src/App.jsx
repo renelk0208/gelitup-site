@@ -2734,8 +2734,8 @@ function formatSubcategoryDisplayName(subcategoryName = '', categoryName = '') {
   if (normalized === 'PREMIUM BUILDER') return '3-in-1 Premium Builder Gel'
   if (normalized === 'LIQUID POLYGEL') return 'Liquid Polygel'
   if (normalized === 'COMPETE') return 'Compete Acrylic'
-  if (normalized === 'MULTIMIX' || normalized === '30 ML') return 'Multimix 30g'
-  if (normalized === '60 ML') return 'Multimix 60g'
+  if (normalized === 'MULTIMIX' || normalized === '30 ML' || normalized === '30GR' || normalized === '30G') return 'Multimix 30g'
+  if (normalized === '60 ML' || normalized === '60GR' || normalized === '60G') return 'Multimix 60g'
   if (normalized === 'CDC' || normalized === 'CREME DE LA CREME') return 'Crème De La Crème'
   
   // Bases subcategories
@@ -8565,24 +8565,28 @@ function CheckoutPage() {
 
       const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
 
-      let { data: insertedOrder, error: insertError } = await supabase
+      // Insert without .select() to avoid PostgREST RETURNING clause which
+      // requires a SELECT policy (anon users have none). Order ID is not
+      // returned; a timestamp-based reference is used for display instead.
+      const { error: insertError } = await supabase
         .from(ordersTable)
         .insert([payload])
-        .select('id, created_at')
-        .single()
 
       const missingCols = insertError?.message?.includes('consignee_name') || insertError?.message?.includes('consignee_phone') || insertError?.message?.includes('shipping_address')
       if (missingCols) {
-        const retry = await supabase.from(ordersTable).insert([{ customer_email: email, items: checkoutItems, total_units: cartUnits, source: 'catalogue_checkout', module: 'products', status: 'received' }]).select('id, created_at').single()
-        insertedOrder = retry.data
-        insertError = retry.error
-      }
-
-      if (insertError) {
+        const { error: retryError } = await supabase.from(ordersTable).insert([{ customer_email: email, items: checkoutItems, total_units: cartUnits, source: 'catalogue_checkout', module: 'products', status: 'received' }])
+        if (retryError) {
+          setError(`Order failed: ${retryError.message}`)
+          setIsSubmitting(false)
+          return
+        }
+      } else if (insertError) {
         setError(`Order failed: ${insertError.message}`)
         setIsSubmitting(false)
         return
       }
+
+      const insertedOrder = { id: Date.now() }
 
       // 4. Build item rates for Zoho
       const itemRates = {}
@@ -8987,10 +8991,8 @@ function CheckoutPage() {
               {PAYMENT_PAYPAL_URL && (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">🅿️ PayPal</span>
               )}
-              {PAYMENT_STRIPE_URL && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">💳 Card (Stripe)</span>
-              )}
-              {!PAYMENT_BANK_DETAILS && !PAYMENT_REVOLUT_URL && !PAYMENT_PAYPAL_URL && !PAYMENT_STRIPE_URL && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">💳 Card / Google Pay (Stripe)</span>
+              {!PAYMENT_BANK_DETAILS && !PAYMENT_REVOLUT_URL && !PAYMENT_PAYPAL_URL && (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">🏦 Bank Transfer / EFT &bull; 💳 Revolut &bull; 🅿️ PayPal</span>
               )}
             </div>

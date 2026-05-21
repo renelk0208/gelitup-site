@@ -46,8 +46,8 @@ export async function handler(event) {
   }
 
   const amountCents = Math.round(amountEur * 100)
-  const successUrl = `${SITE_ORIGIN}/portal/dashboard?payment=success&order=${encodeURIComponent(orderId)}`
-  const cancelUrl = `${SITE_ORIGIN}/portal/dashboard`
+  const successUrl = `${SITE_ORIGIN}/?payment=success&order=${encodeURIComponent(orderId)}`
+  const cancelUrl = `${SITE_ORIGIN}/`
 
   // Build Stripe API request using application/x-www-form-urlencoded (no SDK needed)
   const params = new URLSearchParams()
