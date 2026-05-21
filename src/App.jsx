@@ -5772,14 +5772,13 @@ function FullCataloguePage() {
             <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
               {[
                 'Apple Pay',
-                'Bank Transfer',
                 'Google Pay',
                 'Mastercard',
                 'PayPal',
                 'Revolut',
                 'Visa',
               ].map(method => (
-                <span key={method} className="rounded-md border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/50">
+                <span key={method} className="rounded-md border border-[#D43790]/30 bg-[#D43790]/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#D43790]">
                   {method}
                 </span>
               ))}
@@ -8569,6 +8568,7 @@ function CheckoutPage() {
       const escapeHtml = (value) => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;')
 
       // 3. Insert order to Supabase
+      const orderRef = `${new Date().getFullYear().toString().slice(-2)}-${Math.floor(Math.random() * 7000 + 2000)}`
       const payload = {
         customer_email: email,
         items: checkoutItems,
@@ -8576,6 +8576,7 @@ function CheckoutPage() {
         source: 'catalogue_checkout',
         module: 'products',
         status: 'received',
+        order_ref: orderRef,
         consignee_name: shipping.name || null,
         consignee_phone: shipping.phone || null,
         shipping_address: shipping.address || null,
@@ -8604,7 +8605,7 @@ function CheckoutPage() {
         return
       }
 
-      const insertedOrder = { id: Date.now() }
+      const insertedOrder = { id: orderRef }
 
       // 4. Build item rates for Zoho
       const itemRates = {}
@@ -9012,14 +9013,13 @@ function CheckoutPage() {
             <div className="flex flex-wrap gap-2">
               {[
                 'Apple Pay',
-                'Bank Transfer',
                 'Google Pay',
                 'Mastercard',
                 'PayPal',
                 'Revolut',
                 'Visa',
               ].map(method => (
-                <span key={method} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+                <span key={method} className="rounded-md border border-[#D43790]/30 bg-[#D43790]/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#D43790]">
                   {method}
                 </span>
               ))}
