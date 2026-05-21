@@ -5768,6 +5768,21 @@ function FullCataloguePage() {
             <p className="mt-2 text-xs tracking-[0.06em] text-white/55">
               Formulated in strict compliance with EU Cosmetics Regulation (EC) No 1223/2009 — CPNP Notified
             </p>
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+              {[
+                'Apple Pay',
+                'Bank Transfer',
+                'Google Pay',
+                'Mastercard',
+                'PayPal',
+                'Revolut',
+                'Visa',
+              ].map(method => (
+                <span key={method} className="rounded-md border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/50">
+                  {method}
+                </span>
+              ))}
+            </div>
           </div>
 
         </>
@@ -8994,19 +9009,19 @@ function CheckoutPage() {
             <p className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500">Payment Options</p>
             <p className="text-sm text-slate-600">We'll send you a proforma invoice after your order is confirmed. Payment is due before dispatch.</p>
             <div className="flex flex-wrap gap-2">
-              {PAYMENT_BANK_DETAILS && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">🏦 Bank Transfer / EFT</span>
-              )}
-              {PAYMENT_REVOLUT_URL && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">💳 Revolut</span>
-              )}
-              {PAYMENT_PAYPAL_URL && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">🅿️ PayPal</span>
-              )}
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">💳 Card / Google Pay (Stripe)</span>
-              {!PAYMENT_BANK_DETAILS && !PAYMENT_REVOLUT_URL && !PAYMENT_PAYPAL_URL && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">🏦 Bank Transfer / EFT &bull; 💳 Revolut &bull; 🅿️ PayPal</span>
-              )}
+              {[
+                'Apple Pay',
+                'Bank Transfer',
+                'Google Pay',
+                'Mastercard',
+                'PayPal',
+                'Revolut',
+                'Visa',
+              ].map(method => (
+                <span key={method} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+                  {method}
+                </span>
+              ))}
             </div>
           </div>
 
