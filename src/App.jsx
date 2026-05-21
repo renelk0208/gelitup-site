@@ -7762,11 +7762,11 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           let result
           try {
             result = await onLogin(email, password)
-          } catch {
+          } catch (err) {
             setIsSubmitting(false)
             sessionStorage.removeItem('portalTabActive')
             if (!PORTAL_INTERNAL_BYPASS_EMAILS.has(String(email || '').trim().toLowerCase())) {
-              logLoginIssue(email, 'unexpected_error', 'Login threw an unexpected error.')
+              logLoginIssue(email, 'unexpected_error', `Login threw an unexpected error: ${err?.message || 'unknown'}`)
             }
             setErrorMessage('An unexpected error occurred. Please try again.')
             return
@@ -17683,6 +17683,17 @@ function App() {
             message: 'Your B2B application is pending approval. Access is enabled after manual review.',
             applicationStatus: 'pending',
             debugTrace: 'login-invalid-credentials -> distributor-pending',
+          }
+        }
+
+        // Guard: never auto-provision an account for an email with no registration at all.
+        // Unknown visitors get a clean "please register" message instead of crashing.
+        if (!latestRegistration) {
+          return {
+            ok: false,
+            message: 'No B2B account found for this email. Please register first.',
+            applicationStatus: 'not_registered',
+            debugTrace: 'login-invalid-credentials -> no-registration-found',
           }
         }
 
