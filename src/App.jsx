@@ -76,6 +76,21 @@ const PAYMENT_PAYPAL_URL = import.meta.env.VITE_PAYMENT_PAYPAL_URL || ''
 // their fee, we still receive the original invoice amount.
 const PAYPAL_RATE = Number(import.meta.env.VITE_PAYPAL_FEE_RATE || '0.034')
 const PAYPAL_FIXED = Number(import.meta.env.VITE_PAYPAL_FEE_FIXED || '0.35')
+// Stripe fee gross-up — worst-case International rate (3.25% + €0.25).
+// Override via VITE_STRIPE_FEE_RATE / VITE_STRIPE_FEE_FIXED env vars.
+const STRIPE_RATE = Number(import.meta.env.VITE_STRIPE_FEE_RATE || '0.0325')
+const STRIPE_FIXED = Number(import.meta.env.VITE_STRIPE_FEE_FIXED || '0.25')
+function calcStripeTotal(amount) {
+  const gross = (amount + STRIPE_FIXED) / (1 - STRIPE_RATE)
+  let grossRounded = Math.ceil(gross * 100) / 100
+  const simulatedFee = Math.round((grossRounded * STRIPE_RATE + STRIPE_FIXED) * 100) / 100
+  if (grossRounded - simulatedFee < amount) {
+    grossRounded = Math.round((grossRounded + 0.01) * 100) / 100
+  }
+  const fee = Math.round((grossRounded - amount) * 100) / 100
+  return { gross: grossRounded, fee }
+}
+
 function calcPaypalTotal(amount) {
   const gross = (amount + PAYPAL_FIXED) / (1 - PAYPAL_RATE)
   // Always round UP so PayPal's deduction never leaves us short
@@ -8713,14 +8728,22 @@ function CheckoutPage() {
             <p className="mb-1 text-sm font-semibold text-slate-800">Complete Your Payment</p>
             <p className="text-xs text-slate-500">Order total: <strong className="text-slate-700">€{orderConfirmed.total.toFixed(2)}</strong> — choose your preferred payment method. Your invoice will be issued once your order is processed.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => redirectToStripeCheckout({ orderId: orderConfirmed.id, amountEur: orderConfirmed.total, email: orderConfirmed.email, setLoading: setPaymentLoading, setError: setPaymentError })}
-                disabled={paymentLoading}
-                className="rounded-lg bg-[#635bff] px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-60"
-              >
-                {paymentLoading ? 'Redirecting…' : 'Pay with Stripe / Google Pay'}
-              </button>
+              {(() => {
+                const { gross: stripeGross, fee: stripeFee } = calcStripeTotal(orderConfirmed.total)
+                return (
+                  <div className="flex flex-col items-start gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() => redirectToStripeCheckout({ orderId: orderConfirmed.id, amountEur: stripeGross, email: orderConfirmed.email, setLoading: setPaymentLoading, setError: setPaymentError })}
+                      disabled={paymentLoading}
+                      className="rounded-lg bg-[#635bff] px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-60"
+                    >
+                      {paymentLoading ? 'Redirecting…' : 'Pay with Stripe / Google Pay'}
+                    </button>
+                    <span className="text-[10px] text-slate-400">Incl. Stripe fee: €{stripeFee.toFixed(2)} &mdash; total €{stripeGross.toFixed(2)}</span>
+                  </div>
+                )
+              })()}
               {PAYMENT_REVOLUT_URL && (
                 <a href={`${PAYMENT_REVOLUT_URL.replace(/\/$/, '')}/${orderConfirmed.total.toFixed(2)}/EUR`} target="_blank" rel="noreferrer" className="rounded-lg bg-[#191c1f] px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90">
                   Pay via Revolut
@@ -15086,16 +15109,22 @@ function OrdersModule() {
                   </div>
                 )}
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {order.zoho_invoice_total != null && (
-                    <button
-                      type="button"
-                      onClick={() => redirectToStripeCheckout({ orderId: order.id, amountEur: Number(order.zoho_invoice_total), email: userEmail, setLoading: (v) => setPaymentLoadingId(v ? order.id : null), setError: setPaymentError })}
-                      disabled={paymentLoadingId === order.id}
-                      className="rounded-lg bg-[#635bff] px-4 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-60"
-                    >
-                      {paymentLoadingId === order.id ? 'Redirecting…' : 'Pay with Stripe / Google Pay'}
-                    </button>
-                  )}
+                  {order.zoho_invoice_total != null && (() => {
+                    const { gross: stripeGross, fee: stripeFee } = calcStripeTotal(Number(order.zoho_invoice_total))
+                    return (
+                      <div className="flex flex-col items-start gap-0.5">
+                        <button
+                          type="button"
+                          onClick={() => redirectToStripeCheckout({ orderId: order.id, amountEur: stripeGross, email: userEmail, setLoading: (v) => setPaymentLoadingId(v ? order.id : null), setError: setPaymentError })}
+                          disabled={paymentLoadingId === order.id}
+                          className="rounded-lg bg-[#635bff] px-4 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-60"
+                        >
+                          {paymentLoadingId === order.id ? 'Redirecting…' : 'Pay with Stripe / Google Pay'}
+                        </button>
+                        <span className="text-[10px] text-slate-400">Incl. Stripe fee: €{stripeFee.toFixed(2)} &mdash; total €{stripeGross.toFixed(2)}</span>
+                      </div>
+                    )
+                  })()}
                   {PAYMENT_REVOLUT_URL && order.zoho_invoice_total != null && (
                     <a
                       href={`${PAYMENT_REVOLUT_URL.replace(/\/$/, '')}/${Number(order.zoho_invoice_total).toFixed(2)}/EUR`}
