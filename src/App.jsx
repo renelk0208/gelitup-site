@@ -4530,7 +4530,7 @@ function FullCataloguePage() {
                       role="button"
                       aria-label={isCopied ? 'Copied!' : 'Copy link'}
                       title={isCopied ? 'Copied!' : shareUrl}
-                      className="hidden group-hover:inline-flex items-center opacity-60 hover:opacity-100 transition-opacity"
+                      className="inline-flex items-center opacity-30 group-hover:opacity-80 hover:!opacity-100 transition-opacity"
                       onClick={(e) => {
                         e.stopPropagation()
                         navigator.clipboard.writeText(shareUrl).catch(() => {})
