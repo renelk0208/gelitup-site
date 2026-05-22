@@ -2933,6 +2933,31 @@ const CATEGORY_LAB_SPECS = {
 }
 const DEFAULT_LAB_SPECS = { pigmentDots: null, cure: null, llab: true }
 
+// Vanity paths for subcategories — used by the copy-link button on pills
+// Only entries with a dedicated <Route> in the router should appear here
+const SUBCAT_VANITY_PATH = {
+  'CAT EYE':            '/cat-eye',
+  'SHIMMER COLORS':     '/shimmer',
+  'GLITTERS':           '/glitters',
+  'JELLY':              '/jelly',
+  'METALLIC COLLECTION':'/metallic',
+  'PEARL':              '/pearl',
+  'GLASS EFFECT':       '/glass-effect',
+  'SPIX & SPEX':        '/spix',
+  'SNOWFLAKE':          '/snowflake',
+  'BY THE OCEAN':       '/by-the-ocean',
+  'BRUSH ON BUILDER':   '/bob',
+  '3INI BUILDER':       '/3in1',
+  'PREMIUM BUILDER':    '/premium-builder',
+  'LIQUID POLYGEL':     '/liquid-polygel',
+  'MULTIMIX':           '/multimix',
+  'MIRROR POWDERS':     '/mirror-powder',
+  'COBWEB':             '/cobweb',
+  'LINE-IT-UP':         '/line-it-up',
+  'MARBLE INK':         '/marble-ink',
+  'AQUARELLE PALETTE':  '/aquarelle',
+}
+
 function FullCataloguePage() {
   const location = useLocation()
   const [sections, setSections] = useState([])
@@ -4506,7 +4531,8 @@ function FullCataloguePage() {
               const isActive = activeSubcategory === subcategory
               const isSGP = normalizeCatalogueToken(subcategory) === 'SOLID GEL POLISH'
               const subSlug = subcategory.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-              const shareUrl = `https://gelitup.com/full-catalogue?subcategory=${subSlug}`
+              const vanityPath = SUBCAT_VANITY_PATH[subcategory.toUpperCase()]
+              const shareUrl = vanityPath ? `https://gelitup.com${vanityPath}` : `https://gelitup.com/full-catalogue?subcategory=${subSlug}`
               const isCopied = copiedSubcat === subcategory
               return (
                 <button
