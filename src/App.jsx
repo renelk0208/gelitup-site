@@ -4237,6 +4237,67 @@ function FullCataloguePage() {
     })
   }, [scrollToCatalogueResults])
 
+  // Handle ?subcategory= deep-link — e.g. gelitup.com/cat-eye resolves here via a vanity route
+  useEffect(() => {
+    const subSlug = (searchParams.get('subcategory') || '').toLowerCase().trim()
+    if (!subSlug || isLoading) return
+    // Maps URL slug → [categoryName, subcategoryName] using exact folder names from product-images/
+    const SUBSLUG_MAP = {
+      // ── Gel Polish (COLORS) ──────────────────────────────────────────────────
+      'cat-eye':               ['COLORS', 'CAT EYE'],
+      'cateye':                ['COLORS', 'CAT EYE'],
+      'shimmer':               ['COLORS', 'SHIMMER COLORS'],
+      'shimmer-colors':        ['COLORS', 'SHIMMER COLORS'],
+      'glitter':               ['COLORS', 'GLITTERS'],
+      'glitters':              ['COLORS', 'GLITTERS'],
+      'jelly':                 ['COLORS', 'JELLY'],
+      'metallic':              ['COLORS', 'METALLIC COLLECTION'],
+      'metallic-collection':   ['COLORS', 'METALLIC COLLECTION'],
+      'pearl':                 ['COLORS', 'PEARL'],
+      'glass-effect':          ['COLORS', 'GLASS EFFECT'],
+      'glass':                 ['COLORS', 'GLASS EFFECT'],
+      'tutti-frutti':          ['COLORS', 'TUTTI FRUTTI GLASS'],
+      'tutti-frutti-glass':    ['COLORS', 'TUTTI FRUTTI GLASS'],
+      'spix':                  ['COLORS', 'SPIX & SPEX'],
+      'spex':                  ['COLORS', 'SPIX & SPEX'],
+      'spix-spex':             ['COLORS', 'SPIX & SPEX'],
+      'new-york':              ['COLORS', 'NEW YORK'],
+      'snowflake':             ['COLORS', 'SNOWFLAKE'],
+      'pma':                   ['COLORS', 'PMA'],
+      'solid-gel-polish':      ['COLORS', 'SOLID GEL POLISH'],
+      'solid':                 ['COLORS', 'SOLID GEL POLISH'],
+      'by-the-ocean':          ['COLORS', 'BY THE OCEAN'],
+      // ── Builder Gel Systems ───────────────────────────────────────────────────
+      '3in1':                  ['BUILDER GEL SYSTEMS', '3INI BUILDER'],
+      '3-in-1':                ['BUILDER GEL SYSTEMS', '3INI BUILDER'],
+      '3ini':                  ['BUILDER GEL SYSTEMS', '3INI BUILDER'],
+      'bob':                   ['BUILDER GEL SYSTEMS', 'BRUSH ON BUILDER'],
+      'brush-on-builder':      ['BUILDER GEL SYSTEMS', 'BRUSH ON BUILDER'],
+      'liquid-polygel':        ['BUILDER GEL SYSTEMS', 'LIQUID POLYGEL'],
+      'polygel':               ['BUILDER GEL SYSTEMS', 'LIQUID POLYGEL'],
+      'premium-builder':       ['BUILDER GEL SYSTEMS', 'PREMIUM BUILDER'],
+      'premium':               ['BUILDER GEL SYSTEMS', 'PREMIUM BUILDER'],
+      'multimix':              ['BUILDER GEL SYSTEMS', 'MULTIMIX'],
+      // ── Nail Art ─────────────────────────────────────────────────────────────
+      'mirror-powder':         ['NAIL ART', 'MIRROR POWDERS'],
+      'mirror-powders':        ['NAIL ART', 'MIRROR POWDERS'],
+      'cobweb':                ['NAIL ART', 'COBWEB'],
+      'line-it-up':            ['NAIL ART', 'LINE-IT-UP'],
+      'lineitup':              ['NAIL ART', 'LINE-IT-UP'],
+      'aquarelle':             ['NAIL ART', 'AQUARELLE PALETTE'],
+      'aquarelle-palette':     ['NAIL ART', 'AQUARELLE PALETTE'],
+      'blossom':               ['NAIL ART', 'BLOSSOM'],
+      'cushion-gel':           ['NAIL ART', 'CUSHION GEL'],
+      'cushion':               ['NAIL ART', 'CUSHION GEL'],
+      'marble-ink':            ['NAIL ART', 'MARBLE INK'],
+      'marble':                ['NAIL ART', 'MARBLE INK'],
+      'stickers':              ['NAIL ART', 'STICKERS'],
+    }
+    const match = SUBSLUG_MAP[subSlug]
+    if (!match) return
+    openCatalogueCategory(match[0], match[1])
+  }, [isLoading, searchParams, openCatalogueCategory])
+
   const getCategoryCoverImage = useCallback((categoryName = '', fallbackImageUrl = '') => {
     const candidates = buildCategoryHeroImageCandidates(categoryName, fallbackImageUrl)
     const candidateIndex = Math.max(0, Number(heroCandidateIndexByCategory[categoryName] || 0))
@@ -18671,14 +18732,36 @@ function App() {
           <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           {/* Vanity routes for social media & advertising — each lands on the right catalogue section */}
-          <Route path="/gel-polish"     element={<Navigate to="/full-catalogue?category=gel-polish"    replace />} />
-          <Route path="/builder-gel"    element={<Navigate to="/full-catalogue?category=builder-gel"   replace />} />
-          <Route path="/nail-art"       element={<Navigate to="/full-catalogue?category=nail-art"      replace />} />
-          <Route path="/essentials"     element={<Navigate to="/full-catalogue?category=essentials"    replace />} />
-          <Route path="/new-products"   element={<Navigate to="/full-catalogue?category=new-products"  replace />} />
-          <Route path="/new-arrivals"   element={<Navigate to="/full-catalogue?category=new-arrivals"  replace />} />
-          <Route path="/nail-care"      element={<Navigate to="/full-catalogue?category=nail-care"     replace />} />
-          <Route path="/tools"          element={<Navigate to="/full-catalogue?category=tools"         replace />} />
+          <Route path="/gel-polish"        element={<Navigate to="/full-catalogue?category=gel-polish"           replace />} />
+          <Route path="/builder-gel"       element={<Navigate to="/full-catalogue?category=builder-gel"          replace />} />
+          <Route path="/nail-art"          element={<Navigate to="/full-catalogue?category=nail-art"             replace />} />
+          <Route path="/essentials"        element={<Navigate to="/full-catalogue?category=essentials"           replace />} />
+          <Route path="/new-products"      element={<Navigate to="/full-catalogue?category=new-products"         replace />} />
+          <Route path="/new-arrivals"      element={<Navigate to="/full-catalogue?category=new-arrivals"         replace />} />
+          <Route path="/nail-care"         element={<Navigate to="/full-catalogue?category=nail-care"            replace />} />
+          <Route path="/tools"             element={<Navigate to="/full-catalogue?category=tools"                replace />} />
+          {/* Subcategory vanity routes — land directly on a specific subcategory */}
+          <Route path="/cat-eye"           element={<Navigate to="/full-catalogue?subcategory=cat-eye"           replace />} />
+          <Route path="/shimmer"           element={<Navigate to="/full-catalogue?subcategory=shimmer"           replace />} />
+          <Route path="/glitters"          element={<Navigate to="/full-catalogue?subcategory=glitters"          replace />} />
+          <Route path="/jelly"             element={<Navigate to="/full-catalogue?subcategory=jelly"             replace />} />
+          <Route path="/metallic"          element={<Navigate to="/full-catalogue?subcategory=metallic"          replace />} />
+          <Route path="/pearl"             element={<Navigate to="/full-catalogue?subcategory=pearl"             replace />} />
+          <Route path="/glass-effect"      element={<Navigate to="/full-catalogue?subcategory=glass-effect"      replace />} />
+          <Route path="/spix"              element={<Navigate to="/full-catalogue?subcategory=spix"              replace />} />
+          <Route path="/snowflake"         element={<Navigate to="/full-catalogue?subcategory=snowflake"         replace />} />
+          <Route path="/by-the-ocean"      element={<Navigate to="/full-catalogue?subcategory=by-the-ocean"      replace />} />
+          <Route path="/bob"               element={<Navigate to="/full-catalogue?subcategory=bob"               replace />} />
+          <Route path="/brush-on-builder"  element={<Navigate to="/full-catalogue?subcategory=brush-on-builder"  replace />} />
+          <Route path="/3in1"              element={<Navigate to="/full-catalogue?subcategory=3in1"              replace />} />
+          <Route path="/premium-builder"   element={<Navigate to="/full-catalogue?subcategory=premium-builder"   replace />} />
+          <Route path="/liquid-polygel"    element={<Navigate to="/full-catalogue?subcategory=liquid-polygel"    replace />} />
+          <Route path="/multimix"          element={<Navigate to="/full-catalogue?subcategory=multimix"          replace />} />
+          <Route path="/mirror-powder"     element={<Navigate to="/full-catalogue?subcategory=mirror-powder"     replace />} />
+          <Route path="/cobweb"            element={<Navigate to="/full-catalogue?subcategory=cobweb"            replace />} />
+          <Route path="/line-it-up"        element={<Navigate to="/full-catalogue?subcategory=line-it-up"        replace />} />
+          <Route path="/marble-ink"        element={<Navigate to="/full-catalogue?subcategory=marble-ink"        replace />} />
+          <Route path="/aquarelle"         element={<Navigate to="/full-catalogue?subcategory=aquarelle"         replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/guestbook" element={<GuestbookPage />} />
           <Route path="/inspiration" element={<InspirationPage />} />
