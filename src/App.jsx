@@ -3028,6 +3028,7 @@ function FullCataloguePage() {
   const [lightboxUrl, setLightboxUrl] = useState(null)
   const [activeNewCollection, setActiveNewCollection] = useState('')
   const [showNewCollections, setShowNewCollections] = useState(false)
+  const [copiedSubcat, setCopiedSubcat] = useState('')
   useEffect(() => {
     if (!lightboxUrl) return
     const handler = (e) => { if (e.key === 'Escape') { setLightboxUrl(null) } }
@@ -4294,9 +4295,17 @@ function FullCataloguePage() {
       'stickers':              ['NAIL ART', 'STICKERS'],
     }
     const match = SUBSLUG_MAP[subSlug]
-    if (!match) return
-    openCatalogueCategory(match[0], match[1])
-  }, [isLoading, searchParams, openCatalogueCategory])
+    if (match) { openCatalogueCategory(match[0], match[1]); return }
+    // Fallback: convert the slug back to a name and scan live sections
+    const nameGuess = subSlug.replace(/-/g, ' ').toUpperCase()
+    for (const section of sections) {
+      const found = section.subcategories.find((sub) => {
+        const norm = sub.name.toUpperCase().replace(/[^A-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim()
+        return norm === nameGuess
+      })
+      if (found) { openCatalogueCategory(section.category, found.name); return }
+    }
+  }, [isLoading, searchParams, openCatalogueCategory, sections])
 
   const getCategoryCoverImage = useCallback((categoryName = '', fallbackImageUrl = '') => {
     const candidates = buildCategoryHeroImageCandidates(categoryName, fallbackImageUrl)
@@ -4496,11 +4505,14 @@ function FullCataloguePage() {
             return subcategoryOptions.map((subcategory) => {
               const isActive = activeSubcategory === subcategory
               const isSGP = normalizeCatalogueToken(subcategory) === 'SOLID GEL POLISH'
+              const subSlug = subcategory.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+              const shareUrl = `https://gelitup.com/full-catalogue?subcategory=${subSlug}`
+              const isCopied = copiedSubcat === subcategory
               return (
                 <button
                   key={`subcategory-${subcategory}`}
                   onClick={() => { setActiveSubcategory(subcategory); setActiveCatEyeVariant('ALL'); setActiveColorFamily('ALL'); scrollToCategoryDetail() }}
-                  className="relative rounded-full border px-4 py-2 text-xs font-semibold tracking-wide transition duration-200"
+                  className="group relative rounded-full border px-4 py-2 text-xs font-semibold tracking-wide transition duration-200"
                   style={
                     isActive
                       ? { background: accent.bg, color: accent.text, borderColor: accent.bg, boxShadow: `0 0 0 3px rgba(${accent.shadowRgb},0.22)` }
@@ -4512,7 +4524,26 @@ function FullCataloguePage() {
                   {isSGP && !isActive && (
                     <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full ring-2 ring-white" style={{ background: accent.bg }} />
                   )}
-                  {formatSubcategoryDisplayName(subcategory, activeCategory)}
+                  <span className="flex items-center gap-1.5">
+                    {formatSubcategoryDisplayName(subcategory, activeCategory)}
+                    <span
+                      role="button"
+                      aria-label={isCopied ? 'Copied!' : 'Copy link'}
+                      title={isCopied ? 'Copied!' : shareUrl}
+                      className="hidden group-hover:inline-flex items-center opacity-60 hover:opacity-100 transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        navigator.clipboard.writeText(shareUrl).catch(() => {})
+                        setCopiedSubcat(subcategory)
+                        setTimeout(() => setCopiedSubcat(''), 2000)
+                      }}
+                    >
+                      {isCopied
+                        ? <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3 w-3 text-green-600"><path fillRule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clipRule="evenodd" /></svg>
+                        : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3 w-3"><path fillRule="evenodd" d="M11.986 3H12a2 2 0 0 1 2 2v6a2 2 0 0 1-1.5 1.937V13.5A1.5 1.5 0 0 1 11 15H3.5A1.5 1.5 0 0 1 2 13.5v-9A1.5 1.5 0 0 1 3.5 3h1.563A2 2 0 0 1 7 1.5h2a2 2 0 0 1 1.986 1.5Zm-7.48 2.25a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Z" clipRule="evenodd" /></svg>
+                      }
+                    </span>
+                  </span>
                 </button>
               )
             })
