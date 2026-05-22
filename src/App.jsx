@@ -2934,28 +2934,50 @@ const CATEGORY_LAB_SPECS = {
 const DEFAULT_LAB_SPECS = { pigmentDots: null, cure: null, llab: true }
 
 // Vanity paths for subcategories — used by the copy-link button on pills
-// Only entries with a dedicated <Route> in the router should appear here
+// Every subcategory with a dedicated <Route> in the router is listed here
 const SUBCAT_VANITY_PATH = {
-  'CAT EYE':            '/cat-eye',
-  'SHIMMER COLORS':     '/shimmer',
-  'GLITTERS':           '/glitters',
-  'JELLY':              '/jelly',
-  'METALLIC COLLECTION':'/metallic',
-  'PEARL':              '/pearl',
-  'GLASS EFFECT':       '/glass-effect',
-  'SPIX & SPEX':        '/spix',
-  'SNOWFLAKE':          '/snowflake',
-  'BY THE OCEAN':       '/by-the-ocean',
-  'BRUSH ON BUILDER':   '/bob',
-  '3INI BUILDER':       '/3in1',
-  'PREMIUM BUILDER':    '/premium-builder',
-  'LIQUID POLYGEL':     '/liquid-polygel',
-  'MULTIMIX':           '/multimix',
-  'MIRROR POWDERS':     '/mirror-powder',
-  'COBWEB':             '/cobweb',
-  'LINE-IT-UP':         '/line-it-up',
-  'MARBLE INK':         '/marble-ink',
-  'AQUARELLE PALETTE':  '/aquarelle',
+  // ── Gel Polish (COLORS) ──────────────────────────────────────────────────
+  'CAT EYE':                 '/cat-eye',
+  'SHIMMER COLORS':          '/shimmer',
+  'GLITTERS':                '/glitters',
+  'JELLY':                   '/jelly',
+  'METALLIC COLLECTION':     '/metallic',
+  'PEARL':                   '/pearl',
+  'GLASS EFFECT':            '/glass-effect',
+  'SPIX & SPEX':             '/spix',
+  'SNOWFLAKE':               '/snowflake',
+  'BY THE OCEAN':            '/by-the-ocean',
+  'SOLID GEL POLISH':        '/solid-gel-polish',
+  'NEW YORK':                '/new-york',
+  'TUTTI FRUTTI GLASS':      '/tutti-frutti',
+  'PMA':                     '/pma',
+  // ── Builder Gel Systems ───────────────────────────────────────────────────
+  'BRUSH ON BUILDER':        '/bob',
+  '3INI BUILDER':            '/3in1',
+  'PREMIUM BUILDER':         '/premium-builder',
+  'LIQUID POLYGEL':          '/liquid-polygel',
+  'MULTIMIX':                '/multimix',
+  // ── Nail Art ─────────────────────────────────────────────────────────────
+  'MIRROR POWDERS':          '/mirror-powder',
+  'COBWEB':                  '/cobweb',
+  'LINE-IT-UP':              '/line-it-up',
+  'MARBLE INK':              '/marble-ink',
+  'AQUARELLE PALETTE':       '/aquarelle',
+  'BLOSSOM':                 '/blossom',
+  'CUSHION GEL':             '/cushion-gel',
+  'STICKERS':                '/stickers',
+  'GLITTER EFFECTS POWEDER': '/glitter-effects',
+  // ── Bases ────────────────────────────────────────────────────────────────
+  '5IN1 SUPERIOR BASE':      '/5in1-base',
+  'CLASSIC BASE COAT':       '/classic-base',
+  'FLEXI BASE':              '/flexi-base',
+  'SUPERBOND':               '/superbond',
+  // ── Tops ─────────────────────────────────────────────────────────────────
+  'CLASSIC TOP COATS':       '/classic-tops',
+  'EFFECT TOPS':             '/effect-tops',
+  'MIRROR POWDER TOP COAT':  '/mirror-top-coat',
+  'SHIMMER TOP':             '/shimmer-top',
+  'SPOT MY TOPS':            '/spot-my-tops',
 }
 
 function FullCataloguePage() {
@@ -4318,6 +4340,25 @@ function FullCataloguePage() {
       'marble-ink':            ['NAIL ART', 'MARBLE INK'],
       'marble':                ['NAIL ART', 'MARBLE INK'],
       'stickers':              ['NAIL ART', 'STICKERS'],
+      'glitter-effects':       ['NAIL ART', 'GLITTER EFFECTS POWEDER'],
+      // ── Gel Polish extras ────────────────────────────────────────────────
+      'solid-gel-polish':      ['COLORS', 'SOLID GEL POLISH'],
+      'solid':                 ['COLORS', 'SOLID GEL POLISH'],
+      'new-york':              ['COLORS', 'NEW YORK'],
+      'tutti-frutti':          ['COLORS', 'TUTTI FRUTTI GLASS'],
+      'tutti-frutti-glass':    ['COLORS', 'TUTTI FRUTTI GLASS'],
+      'pma':                   ['COLORS', 'PMA'],
+      // ── Bases ────────────────────────────────────────────────────────────
+      '5in1-base':             ['BASES', '5IN1 SUPERIOR BASE'],
+      'classic-base':          ['BASES', 'CLASSIC BASE COAT'],
+      'flexi-base':            ['BASES', 'FLEXI BASE'],
+      'superbond':             ['BASES', 'SUPERBOND'],
+      // ── Tops ─────────────────────────────────────────────────────────────
+      'classic-tops':          ['TOPS', 'Classic Top Coats'],
+      'effect-tops':           ['TOPS', 'Effect Tops'],
+      'mirror-top-coat':       ['TOPS', 'Mirror Powder Top Coat'],
+      'shimmer-top':           ['TOPS', 'SHIMMER TOP'],
+      'spot-my-tops':          ['TOPS', 'Spot My Tops'],
     }
     const match = SUBSLUG_MAP[subSlug]
     if (match) { openCatalogueCategory(match[0], match[1]); return }
@@ -18819,6 +18860,27 @@ function App() {
           <Route path="/line-it-up"        element={<Navigate to="/full-catalogue?subcategory=line-it-up"        replace />} />
           <Route path="/marble-ink"        element={<Navigate to="/full-catalogue?subcategory=marble-ink"        replace />} />
           <Route path="/aquarelle"         element={<Navigate to="/full-catalogue?subcategory=aquarelle"         replace />} />
+          {/* Remaining gel polish subcategories */}
+          <Route path="/solid-gel-polish"  element={<Navigate to="/full-catalogue?subcategory=solid-gel-polish"  replace />} />
+          <Route path="/new-york"          element={<Navigate to="/full-catalogue?subcategory=new-york"          replace />} />
+          <Route path="/tutti-frutti"      element={<Navigate to="/full-catalogue?subcategory=tutti-frutti"      replace />} />
+          <Route path="/pma"               element={<Navigate to="/full-catalogue?subcategory=pma"               replace />} />
+          {/* Remaining nail art subcategories */}
+          <Route path="/blossom"           element={<Navigate to="/full-catalogue?subcategory=blossom"           replace />} />
+          <Route path="/cushion-gel"       element={<Navigate to="/full-catalogue?subcategory=cushion-gel"       replace />} />
+          <Route path="/stickers"          element={<Navigate to="/full-catalogue?subcategory=stickers"          replace />} />
+          <Route path="/glitter-effects"   element={<Navigate to="/full-catalogue?subcategory=glitter-effects"   replace />} />
+          {/* Bases subcategories */}
+          <Route path="/5in1-base"         element={<Navigate to="/full-catalogue?subcategory=5in1-base"         replace />} />
+          <Route path="/classic-base"      element={<Navigate to="/full-catalogue?subcategory=classic-base"      replace />} />
+          <Route path="/flexi-base"        element={<Navigate to="/full-catalogue?subcategory=flexi-base"        replace />} />
+          <Route path="/superbond"         element={<Navigate to="/full-catalogue?subcategory=superbond"         replace />} />
+          {/* Tops subcategories */}
+          <Route path="/classic-tops"      element={<Navigate to="/full-catalogue?subcategory=classic-tops"      replace />} />
+          <Route path="/effect-tops"       element={<Navigate to="/full-catalogue?subcategory=effect-tops"       replace />} />
+          <Route path="/mirror-top-coat"   element={<Navigate to="/full-catalogue?subcategory=mirror-top-coat"   replace />} />
+          <Route path="/shimmer-top"       element={<Navigate to="/full-catalogue?subcategory=shimmer-top"       replace />} />
+          <Route path="/spot-my-tops"      element={<Navigate to="/full-catalogue?subcategory=spot-my-tops"      replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/guestbook" element={<GuestbookPage />} />
           <Route path="/inspiration" element={<InspirationPage />} />
