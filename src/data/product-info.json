@@ -110,7 +110,10 @@
     "listItems": []
   },
   "BUILDER GEL SYSTEMS::30GR": {
-    "videoId": "hxNx8Z4d41Q",
+    "videos": [
+      { "id": "hxNx8Z4d41Q", "label": "Application" },
+      { "id": "3ILgQflTT2E", "label": "Watch Video" }
+    ],
     "paragraphs": [
       "Its high-quality formula combines the advantages of acrylic and gel, making it extremely durable. It offers the strength of acrylic with the ease of use of builder gels.",
       "It can be used for natural nail reinforcement as well as for extensions. It does not run during application, is odorless, and does not cause a burning sensation during curing.",
