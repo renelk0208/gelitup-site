@@ -4668,14 +4668,30 @@ function FullCataloguePage() {
                       ))}
                     </div>
                   )}
-                  {metadata.videoId && (
-                    <button
-                      className="mt-3 flex items-center gap-2 rounded-[10px] px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90"
-                      style={{ backgroundColor: infoAccent.bg }}
-                      onClick={() => setVideoModal(metadata.videoId)}
-                    >
-                      <span>▶</span> Watch Video
-                    </button>
+                  {(metadata.videos?.length > 0 || metadata.videoId) && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {metadata.videos?.length > 0
+                        ? metadata.videos.map((v, vIdx) => (
+                            <button
+                              key={vIdx}
+                              className="flex items-center gap-2 rounded-[10px] px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90"
+                              style={{ backgroundColor: infoAccent.bg }}
+                              onClick={() => setVideoModal(v.id)}
+                            >
+                              <span>▶</span> {v.label}
+                            </button>
+                          ))
+                        : (
+                            <button
+                              className="flex items-center gap-2 rounded-[10px] px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90"
+                              style={{ backgroundColor: infoAccent.bg }}
+                              onClick={() => setVideoModal(metadata.videoId)}
+                            >
+                              <span>▶</span> Watch Video
+                            </button>
+                          )
+                      }
+                    </div>
                   )}
                   {metadata.sections?.length > 0 && metadata.sections.map((section, sIdx) => (
                     <div key={`section-${sIdx}`} className="mt-3">
