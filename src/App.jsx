@@ -5385,8 +5385,15 @@ function FullCataloguePage() {
                           const inCart = (quickCart[itemKey] || 0) > 0
                           return (
                             <article key={idx} className="flex flex-col overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)]" data-catalogue-item>
-                              <div className="flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
+                              <div className="relative flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
                                 <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={e => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={e => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
+                                {videoMap[item.name] && (
+                                  <button
+                                    className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white shadow-lg transition hover:bg-black/80"
+                                    title="Watch video"
+                                    onClick={(e) => { e.stopPropagation(); setVideoModal(videoMap[item.name]) }}
+                                  >▶</button>
+                                )}
                               </div>
                               <div className="flex flex-1 flex-col border-t border-black/10 px-2.5 py-2">
                                 <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
