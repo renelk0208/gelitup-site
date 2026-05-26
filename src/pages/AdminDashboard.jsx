@@ -1518,7 +1518,7 @@ function OrdersPanel() {
     const { csv, orderTotal } = buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier)
     const csvBase64 = encodeCsvToBase64(csv)
     const toEmail = ORDER_INBOX_EMAIL || 'distribution@gelitup.com'
-    const subject = `B2B Order #${row.id || '-'} CSV Export`
+    const subject = `B2B Order ${row.order_ref || '#' + (row.id || '-')} CSV Export`
     const html = `
       <p style="font-family:Arial,sans-serif;font-size:13px;color:#1f2937;margin:0 0 8px">Order <strong>#${String(row.id || '-')}</strong> CSV export attached for Zoho import.</p>
       <p style="font-family:Arial,sans-serif;font-size:12px;color:#6b7280;margin:0">Customer: ${String(row.customer_email || '-')}<br/>Units: ${String(row.total_units || 0)}<br/>Estimated total: ${orderTotal > 0 ? `EUR ${orderTotal.toFixed(2)}` : 'Not available'}</p>
@@ -1691,6 +1691,7 @@ function OrdersPanel() {
               const items = Array.isArray(r.items) ? r.items : []
               return {
                 'Order ID': r.id,
+                'Order Ref': r.order_ref || '',
                 'Date': r.created_at ? new Date(r.created_at).toLocaleDateString() : '',
                 'Status': r.status,
                 'Customer Email': r.customer_email || '',
@@ -1778,6 +1779,9 @@ function OrdersPanel() {
               >
                 {statusBadge(row.status)}
                 <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">{row.customer_email || '—'}</span>
+                {row.order_ref && (
+                  <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">{row.order_ref}</span>
+                )}
                 {hasMissingPrices && (
                   <span className="shrink-0 inline-flex items-center gap-1 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">
                     ⚠ {missingPriceItems.length} no price
@@ -1797,6 +1801,7 @@ function OrdersPanel() {
                   {!isEditing && (
                     <>
                       <div className="grid gap-3 text-xs text-slate-700 sm:grid-cols-2">
+                        <div><span className="font-semibold text-slate-400">Order Ref</span><br />{row.order_ref || '—'}</div>
                         <div><span className="font-semibold text-slate-400">Customer</span><br />{row.customer_email || '—'}</div>
                         <div>
                           <span className="font-semibold text-slate-400">Pricing Tier</span><br />

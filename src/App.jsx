@@ -8821,7 +8821,7 @@ function CheckoutPage() {
 
       const missingCols = insertError?.message?.includes('consignee_name') || insertError?.message?.includes('consignee_phone') || insertError?.message?.includes('shipping_address')
       if (missingCols) {
-        const { error: retryError } = await supabase.from(ordersTable).insert([{ customer_email: email, items: checkoutItems, total_units: cartUnits, source: 'catalogue_checkout', module: 'products', status: 'received' }])
+        const { error: retryError } = await supabase.from(ordersTable).insert([{ customer_email: email, items: checkoutItems, total_units: cartUnits, source: 'catalogue_checkout', module: 'products', status: 'received', order_ref: orderRef }])
         if (retryError) {
           setError(`Order failed: ${retryError.message}`)
           setIsSubmitting(false)
