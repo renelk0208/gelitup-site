@@ -3073,12 +3073,14 @@ function FullCataloguePage() {
   const [expandedLookbookGroup, setExpandedLookbookGroup] = useState(0)
   const [selectedLookbookPageByGroup, setSelectedLookbookPageByGroup] = useState({})
   const [lightboxUrl, setLightboxUrl] = useState(null)
+  const [videoMap, setVideoMap] = useState({})
+  const [videoModal, setVideoModal] = useState(null) // YouTube video ID
   const [activeNewCollection, setActiveNewCollection] = useState('')
   const [showNewCollections, setShowNewCollections] = useState(false)
   const [copiedSubcat, setCopiedSubcat] = useState('')
   useEffect(() => {
-    if (!lightboxUrl) return
-    const handler = (e) => { if (e.key === 'Escape') { setLightboxUrl(null) } }
+    if (!lightboxUrl && !videoModal) return
+    const handler = (e) => { if (e.key === 'Escape') { setLightboxUrl(null); setVideoModal(null) } }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [lightboxUrl])
@@ -3127,13 +3129,14 @@ function FullCataloguePage() {
       setErrorMessage('')
 
       try {
-        const [mapResponse, orderResponse, colourFamiliesResponse, hiddenResponse, oosResponse, sizesResponse] = await Promise.all([
+        const [mapResponse, orderResponse, colourFamiliesResponse, hiddenResponse, oosResponse, sizesResponse, videoMapResponse] = await Promise.all([
           fetch('/gelitup-content/product-image-map.json'),
           fetch('/gelitup-content/catalog-order.json'),
           fetch('/gelitup-content/solid-gel-colour-families.json'),
           fetch('/gelitup-content/hidden-products.json'),
           fetch('/gelitup-content/out-of-stock.json'),
           fetch('/gelitup-content/product-sizes.json'),
+          fetch('/gelitup-content/product-video-map.json'),
         ])
 
         if (!mapResponse.ok) {
@@ -3153,6 +3156,7 @@ function FullCataloguePage() {
 
         const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(payload, hiddenKeys), manualRuleIndex)
         setSections(nextSections)
+        if (videoMapResponse.ok) { try { setVideoMap(await videoMapResponse.json()) } catch {} }
         const _normOos = n => String(n).replace(/[_.-]+/g, ' ').replace(/\s+/g, ' ').trim()
         setOutOfStockNames(new Set(Array.isArray(oosNames) ? oosNames.map(_normOos) : []))
         const _normSizeKey = k => String(k).replace(/[_.-]+/g, ' ').replace(/\s+/g, ' ').trim()
@@ -4859,6 +4863,17 @@ function FullCataloguePage() {
                     <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`flex flex-col overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:bg-[#E8E8E8] md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`} data-catalogue-item>
                       <div className="relative flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52 md:h-60" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
                         <img src={item.imageUrl} alt={item.name} loading="lazy" className={`h-full w-full scale-[1.025] object-cover opacity-0 transition-opacity duration-300 ${isOOS ? 'brightness-50 grayscale' : ''}`} onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
+                        {videoMap[item.name] && (
+                          <button
+                            type="button"
+                            title="Watch video"
+                            onClick={(e) => { e.stopPropagation(); setVideoModal(videoMap[item.name]) }}
+                            className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white shadow-lg transition hover:bg-fuchsia-600"
+                            aria-label="Watch product video"
+                          >
+                            <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+                          </button>
+                        )}
                         {isOOS && (
                           <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                             <span className="rounded-full bg-rose-600/90 px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-white shadow-lg">Out of Stock</span>
@@ -5945,6 +5960,28 @@ function FullCataloguePage() {
           </div>
 
         </>
+      )}
+
+      {/* VIDEO MODAL */}
+      {videoModal && (
+        <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/90 p-4" onClick={() => setVideoModal(null)}>
+          <div className="relative w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="overflow-hidden rounded-2xl shadow-2xl" style={{ aspectRatio: '9/16' }}>
+              <iframe
+                src={`https://www.youtube.com/embed/${videoModal}?autoplay=1&rel=0`}
+                title="Product video"
+                allow="autoplay; fullscreen"
+                allowFullScreen
+                className="h-full w-full border-0"
+              />
+            </div>
+            <button
+              onClick={() => setVideoModal(null)}
+              className="absolute -right-3 -top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-800 shadow-lg transition hover:bg-slate-100"
+              aria-label="Close video"
+            ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+          </div>
+        </div>
       )}
 
       {/* LIGHTBOX OVERLAY */}
