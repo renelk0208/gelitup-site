@@ -96,6 +96,55 @@ sheet.eachRow((row, rowNumber) => {
   }
 });
 
+// ── Post-processing ──────────────────────────────────────────────────────────
+
+// 1. Preserve existing videoId / videos fields so manual video assignments
+//    are not lost every time the xlsx is re-imported.
+let existing = {};
+try { existing = JSON.parse(readFileSync(jsonPath, 'utf8')); } catch {}
+
+for (const key of Object.keys(result)) {
+  const old = existing[key];
+  if (old?.videoId) result[key].videoId = old.videoId;
+  if (old?.videos)  result[key].videos  = old.videos;
+}
+
+// 2. Key normalisations — xlsx uses human-readable names that differ from
+//    the image-folder-derived subcategory tokens used at runtime.
+const KEY_RENAMES = {
+  'EQUIPMENT::AIR BRUSH': 'EQUIPMENT::AIRBRUSH',
+};
+for (const [from, to] of Object.entries(KEY_RENAMES)) {
+  if (result[from] && !result[to]) {
+    result[to] = result[from];
+    delete result[from];
+  }
+}
+
+// 3. Derived entries — subcategory aliases whose descriptions mirror a parent
+//    key but have their own video assignments. Keyed by image folder structure
+//    (e.g. MULTIMIX/30gr → subcategory token 30GR), not present in the xlsx.
+const DERIVED_ENTRIES = [
+  {
+    source: 'BUILDER GEL SYSTEMS::MULTIMIX',
+    targets: ['BUILDER GEL SYSTEMS::30GR', 'BUILDER GEL SYSTEMS::60GR'],
+  },
+];
+for (const { source, targets } of DERIVED_ENTRIES) {
+  if (!result[source]) continue;
+  for (const target of targets) {
+    const oldVideo = existing[target];
+    result[target] = {
+      ...(oldVideo?.videos  ? { videos:  oldVideo.videos  } : {}),
+      ...(oldVideo?.videoId ? { videoId: oldVideo.videoId } : {}),
+      paragraphs: result[source].paragraphs,
+      listItems:  result[source].listItems,
+    };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 const json = JSON.stringify(result, null, 2);
 writeFileSync(jsonPath, json, 'utf8');
 
