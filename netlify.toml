@@ -135,14 +135,6 @@
   to = "/full-catalogue"
   status = 301
 
-# TEMPORARY — redirect gelitup.com to gelitup.eu while .com SSL cert is renewing
-# Remove this block once gelitup.com is fully restored
-[[redirects]]
-  from = "https://gelitup.com/*"
-  to = "https://gelitup.eu/:splat"
-  status = 302
-  force = true
-
 # SPA catch-all — must remain last
 [[redirects]]
   from = "/*"
