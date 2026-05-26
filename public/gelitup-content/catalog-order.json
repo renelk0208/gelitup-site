@@ -21,37 +21,51 @@
       "groups": [
         {
           "hero": "3-in-1_builder_gel_clear",
-          "swatches": ["3 in 1 builder gel clear B"],
+          "swatches": [
+            "3 in 1 builder gel clear B"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "3-in-1_builder_gel_cover",
-          "swatches": ["3 in 1 builder gel cover B"],
+          "swatches": [
+            "3 in 1 builder gel cover B"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "3-in-1_builder_gel_iridescent_shimmer_clear",
-          "swatches": ["3 in 1 builder gel iridescent shimmer clear B"],
+          "swatches": [
+            "3 in 1 builder gel iridescent shimmer clear B"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "3-in-1_builder_gel_marmelade_shimmer_pink",
-          "swatches": ["3 in 1 builder gel marmelade shimmer pink B"],
+          "swatches": [
+            "3 in 1 builder gel marmelade shimmer pink B"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "3-in-1_builder_gel_pink",
-          "swatches": ["3 in 1 builder gel pink B"],
+          "swatches": [
+            "3 in 1 builder gel pink B"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "3-in-1_builder_gel_shimmer_cover",
-          "swatches": ["3 in 1 builder gel shimmer cover B"],
+          "swatches": [
+            "3 in 1 builder gel shimmer cover B"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "3-in-1_builder_gel_shimmer_lilac",
-          "swatches": ["3 in 1 builder gel shimmer lilac B"],
+          "swatches": [
+            "3 in 1 builder gel shimmer lilac B"
+          ],
           "mergeAsGallery": true
         }
       ],
@@ -73,52 +87,72 @@
       "groups": [
         {
           "hero": "3_in_1_premium_builder_gel_shimmer_nude",
-          "swatches": ["3 in 1 premium builder gel shimmer nude B"],
+          "swatches": [
+            "3 in 1 premium builder gel shimmer nude B"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "3_in_1_premium_builder_gel_shimmer_pink",
-          "swatches": ["3 in 1 premium builder gel shimmer pink B"],
+          "swatches": [
+            "3 in 1 premium builder gel shimmer pink B"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "3_in_1_gelitup_premium_builder_gel_blush",
-          "swatches": ["3 in 1 gelitup premium builder gel blush B"],
+          "swatches": [
+            "3 in 1 gelitup premium builder gel blush B"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "3_in_1_gelitup_premium_builder_gel_clear",
-          "swatches": ["3 in 1 gelitup premium builder gel clear B"],
+          "swatches": [
+            "3 in 1 gelitup premium builder gel clear B"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "3_in_1_gelitup_premium_builder_gel_clear_plus",
-          "swatches": ["3 in 1 gelitup premium builder gel clear plus B"],
+          "swatches": [
+            "3 in 1 gelitup premium builder gel clear plus B"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "3_in_1_gelitup_premium_builder_gel_cover",
-          "swatches": ["3 in 1 gelitup premium builder gel cover B"],
+          "swatches": [
+            "3 in 1 gelitup premium builder gel cover B"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "3_in_1_gelitup_premium_builder_gel_milky",
-          "swatches": ["3 in 1 gelitup premium builder gel milky B"],
+          "swatches": [
+            "3 in 1 gelitup premium builder gel milky B"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "3_in_1_gelitup_premium_builder_gel_nude",
-          "swatches": ["3 in 1 gelitup premium builder gel nude B"],
+          "swatches": [
+            "3 in 1 gelitup premium builder gel nude B"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "3_in_1_gelitup_premium_builder_gel_pink",
-          "swatches": ["3 in 1 gelitup premium builder gel pink B"],
+          "swatches": [
+            "3 in 1 gelitup premium builder gel pink B"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "3_in_1_gelitup_premium_builder_gel_white",
-          "swatches": ["3 in 1 gelitup premium builder gel white B"],
+          "swatches": [
+            "3 in 1 gelitup premium builder gel white B"
+          ],
           "mergeAsGallery": true
         }
       ],
@@ -130,47 +164,74 @@
       "groups": [
         {
           "hero": "multimix baby blue color 30g",
-          "swatches": ["multimix baby blue color B 30g", "multimix baby blue color C 30g"],
+          "swatches": [
+            "multimix baby blue color B 30g",
+            "multimix baby blue color C 30g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix baby pink glitter color 30g",
-          "swatches": ["multimix baby pink glitter color B 30g", "multimix baby pink glitter color C 30g"],
+          "swatches": [
+            "multimix baby pink glitter color B 30g",
+            "multimix baby pink glitter color C 30g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix blue glitter color 30g",
-          "swatches": ["multimix blue glitter color B 30g", "multimix blue glitter color C 30g"],
+          "swatches": [
+            "multimix blue glitter color B 30g",
+            "multimix blue glitter color C 30g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix bubblegum glitter color 30g",
-          "swatches": ["multimix bubblegum glitter color B 30g", "multimix bubblegum glitter color C 30g"],
+          "swatches": [
+            "multimix bubblegum glitter color B 30g",
+            "multimix bubblegum glitter color C 30g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix glitsy green color 30g",
-          "swatches": ["multimix glitsy green color B 30g", "multimix glitsy green color C 30g"],
+          "swatches": [
+            "multimix glitsy green color B 30g",
+            "multimix glitsy green color C 30g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix light nude color 30g",
-          "swatches": ["multimix light nude color B 30g", "multimix light nude color C 30g"],
+          "swatches": [
+            "multimix light nude color B 30g",
+            "multimix light nude color C 30g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix mint green color 30g",
-          "swatches": ["multimix mint green color B 30g", "multimix mint green color C 30g"],
+          "swatches": [
+            "multimix mint green color B 30g",
+            "multimix mint green color C 30g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix pink III color 30g",
-          "swatches": ["multimix pink III color B 30g", "multimix pink III color C 30g"],
+          "swatches": [
+            "multimix pink III color B 30g",
+            "multimix pink III color C 30g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix super soft pink color 30g",
-          "swatches": ["multimix super soft pink color B 30g", "multimix super soft pink color C 30g"],
+          "swatches": [
+            "multimix super soft pink color B 30g",
+            "multimix super soft pink color C 30g"
+          ],
           "mergeAsGallery": true
         }
       ],
@@ -182,97 +243,154 @@
       "groups": [
         {
           "hero": "multimix black color 60g",
-          "swatches": ["multimix black color B 60g", "multimix black color C 60g"],
+          "swatches": [
+            "multimix black color B 60g",
+            "multimix black color C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix clear color 60g",
-          "swatches": ["multimix clear color B 60g", "multimix clear color C 60g"],
+          "swatches": [
+            "multimix clear color B 60g",
+            "multimix clear color C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix cover color 60g",
-          "swatches": ["multimix cover color B 60g", "multimix cover color C 60g"],
+          "swatches": [
+            "multimix cover color B 60g",
+            "multimix cover color C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix cover II color 60g",
-          "swatches": ["multimix cover II color B 60g", "multimix cover II color C 60g"],
+          "swatches": [
+            "multimix cover II color B 60g",
+            "multimix cover II color C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix crystal clear color 60g",
-          "swatches": ["multimix crystal clear color B 60g", "multimix crystal clear color C 60g"],
+          "swatches": [
+            "multimix crystal clear color B 60g",
+            "multimix crystal clear color C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix glitterpink color 60g",
-          "swatches": ["multimix glitterpink color B 60g", "multimix glitterpink color C 60g"],
+          "swatches": [
+            "multimix glitterpink color B 60g",
+            "multimix glitterpink color C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix glitters clear 60g",
-          "swatches": ["multimix glitters clear B 60g", "multimix glitters clear C 60g"],
+          "swatches": [
+            "multimix glitters clear B 60g",
+            "multimix glitters clear C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix glitters gold 60g",
-          "swatches": ["multimix glitters gold B 60g", "multimix glitters gold C 60g"],
+          "swatches": [
+            "multimix glitters gold B 60g",
+            "multimix glitters gold C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix glitters nude 60g",
-          "swatches": ["multimix glitters nude B 60g", "multimix glitters nude C 60g"],
+          "swatches": [
+            "multimix glitters nude B 60g",
+            "multimix glitters nude C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix glitters pink 60g",
-          "swatches": ["multimix glitters pink B 60g", "multimix glitters pink C 60g"],
+          "swatches": [
+            "multimix glitters pink B 60g",
+            "multimix glitters pink C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix glitters white 60g",
-          "swatches": ["multimix glitters white B 60g", "multimix glitters white C 60g"],
+          "swatches": [
+            "multimix glitters white B 60g",
+            "multimix glitters white C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix light pink color 60g",
-          "swatches": ["multimix light pink color B 60g", "multimix light pink color C 60g"],
+          "swatches": [
+            "multimix light pink color B 60g",
+            "multimix light pink color C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix lilac color 60g",
-          "swatches": ["multimix lilac color B 60g", "multimix lilac color C 60g"],
+          "swatches": [
+            "multimix lilac color B 60g",
+            "multimix lilac color C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix milky white color 60g",
-          "swatches": ["multimix milky white color B 60g", "multimix milky white color C 60g"],
+          "swatches": [
+            "multimix milky white color B 60g",
+            "multimix milky white color C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix nude color 60g",
-          "swatches": ["multimix nude color B 60g", "multimix nude color C 60g"],
+          "swatches": [
+            "multimix nude color B 60g",
+            "multimix nude color C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix pink color 60g",
-          "swatches": ["multimix pink color B 60g", "multimix pink color C 60g"],
+          "swatches": [
+            "multimix pink color B 60g",
+            "multimix pink color C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix pink II color 60g",
-          "swatches": ["multimix pink II color B 60g", "multimix pink II color C 60g"],
+          "swatches": [
+            "multimix pink II color B 60g",
+            "multimix pink II color C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix super milky color 60g",
-          "swatches": ["multimix super milky color B 60g", "multimix super milky color C 60g"],
+          "swatches": [
+            "multimix super milky color B 60g",
+            "multimix super milky color C 60g"
+          ],
           "mergeAsGallery": true
         },
         {
           "hero": "multimix white 60ml 60g",
-          "swatches": ["multimix white color B 60g", "multimix white color C 60g"],
+          "swatches": [
+            "multimix white color B 60g",
+            "multimix white color C 60g"
+          ],
           "mergeAsGallery": true
         }
       ],
@@ -280,7 +398,21 @@
     },
     {
       "category": "EQUIPMENT",
-      "subcategory": "DUST & AIR",
+      "subcategory": "AIRBRUSH",
+      "groups": [
+        {
+          "hero": "airbrush 1",
+          "swatches": [
+            "airbrush 2"
+          ],
+          "mergeAsGallery": true
+        }
+      ],
+      "order": []
+    },
+    {
+      "category": "EQUIPMENT",
+      "subcategory": "DUST COLLECTOR",
       "groups": [
         {
           "hero": "DUST COLLECTOR",
