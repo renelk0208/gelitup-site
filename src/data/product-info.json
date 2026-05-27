@@ -306,34 +306,6 @@
       "Ideal for photoshoots — eliminates imperfections without the need for Photoshop"
     ]
   },
-  "EQUIPMENT::DUST COLLECTOR": {
-    "paragraphs": [
-      "Dust Collector — 55 Watts. Professional-grade nail dust extraction for a clean, safe workstation.",
-      "**Built-in Dust Collector**"
-    ],
-    "listItems": [
-      "2 Powerful Motors",
-      "High Performance",
-      "Low Noise",
-      "Easy to place on any workstation",
-      "Removable filter for easy cleaning",
-      "55 Watt",
-      "2 powerful motors",
-      "High suction power",
-      "Low noise",
-      "Easy installation on all desks"
-    ]
-  },
-  "EQUIPMENT::LAMPS & CURING": {
-    "paragraphs": [
-      "Portable Rechargeable LED Stamp Lamp — High-quality rechargeable lamp ideal for curing decorative elements and bonding Soft Gel Tips. Adjustable height, flexible neck for optimal ergonomics, and USB-C charging cable included.",
-      "LED Heli Light — Professional-grade illumination for nail artists and beauty environments. Three rectangular LED panels deliver uniform, shadow-free brightness in crisp 6500K cool white light. Easy to install with a 40,000-hour lifespan."
-    ],
-    "listItems": [
-      "Portable Stamp Lamp: Timer 30s — Power 3W — Runtime 2hr — Charge time 1.5hr — Weight 150g",
-      "Heli Light: Power 45W — Light temp 6500K — Voltage 170–265V — Frequency 50–60Hz"
-    ]
-  },
   "NAIL ART::CUSHION GEL": {
     "paragraphs": [
       "Removable filter for easy cleaning",
@@ -378,7 +350,7 @@
     ],
     "listItems": []
   },
-  "EQUIPMENT::AIRBRUSH": {
+  "TOOLS EQUIPMENT::AIRBRUSH": {
     "paragraphs": [
       "**Introduction to the World of Airbrushing What is an airbrush? An airbrush is a small spray gun that applies colour in a controlled way using compressed air.**",
       "**The main parts of an airbrush are:**"
@@ -403,6 +375,35 @@
       "Cleaning - Clean the airbrush thoroughly.",
       "Cleaning - Remove and clean the needle.",
       "Cleaning - Make sure all product residue is removed."
+    ]
+  },
+  "TOOLS EQUIPMENT::DUST COLLECTOR": {
+    "videoId": "zx_p1PmM1k8",
+    "paragraphs": [
+      "Dust Collector — 55 Watts. Professional-grade nail dust extraction for a clean, safe workstation.",
+      "**Built-in Dust Collector**"
+    ],
+    "listItems": [
+      "2 Powerful Motors",
+      "High Performance",
+      "Low Noise",
+      "Easy to place on any workstation",
+      "Removable filter for easy cleaning",
+      "55 Watt",
+      "2 powerful motors",
+      "High suction power",
+      "Low noise",
+      "Easy installation on all desks"
+    ]
+  },
+  "TOOLS EQUIPMENT::LAMPS CURING": {
+    "paragraphs": [
+      "Portable Rechargeable LED Stamp Lamp — High-quality rechargeable lamp ideal for curing decorative elements and bonding Soft Gel Tips. Adjustable height, flexible neck for optimal ergonomics, and USB-C charging cable included.",
+      "LED Heli Light — Professional-grade illumination for nail artists and beauty environments. Three rectangular LED panels deliver uniform, shadow-free brightness in crisp 6500K cool white light. Easy to install with a 40,000-hour lifespan."
+    ],
+    "listItems": [
+      "Portable Stamp Lamp: Timer 30s — Power 3W — Runtime 2hr — Charge time 1.5hr — Weight 150g",
+      "Heli Light: Power 45W — Light temp 6500K — Voltage 170–265V — Frequency 50–60Hz"
     ]
   },
   "BUILDER GEL SYSTEMS::30GR": {
@@ -448,49 +449,6 @@
       "Application — Use a brush with All-In-One Liquid (lightly) to pat and smooth; product remains workable until cured.",
       "Application — Cure: 60–90s 48W UV/LED",
       "Application —  Wipe sticky layer, file to shape, and finish with GEL.IT.UP by GIUP® color or top coat."
-    ]
-  },
-  "TOOLS EQUIPMENT::EQUIPMENT": {
-    "paragraphs": [
-      "**Introduction to the World of Airbrushing What is an airbrush? An airbrush is a small spray gun that applies colour in a controlled way using compressed air.**",
-      "**The main parts of an airbrush are:**",
-      "Dust Collector — 55 Watts. Professional-grade nail dust extraction for a clean, safe workstation.",
-      "**Built-in Dust Collector**",
-      "Portable Rechargeable LED Stamp Lamp — High-quality rechargeable lamp ideal for curing decorative elements and bonding Soft Gel Tips. Adjustable height, flexible neck for optimal ergonomics, and USB-C charging cable included.",
-      "LED Heli Light — Professional-grade illumination for nail artists and beauty environments. Three rectangular LED panels deliver uniform, shadow-free brightness in crisp 6500K cool white light. Easy to install with a 40,000-hour lifespan."
-    ],
-    "listItems": [
-      "Pen",
-      "Colour Cup",
-      "Needle",
-      "Nozzle",
-      "Spray Tip",
-      "Needle Seal",
-      "Base Unit",
-      "Usage - Place the required amount of colour into the colour cup. When activated, compressed air pulls the needle back, allowing the colour to spray through the nozzle in a controlled flow.",
-      "Application - Acrylic colour has one major disadvantage for nail technicians: the drying effect.",
-      "Application - When the nozzle is not large enough for the colour to flow correctly, the passing air can dry the colour.",
-      "Application - This can result in spending more time cleaning the airbrush than actually spraying.",
-      "Application - Specially diluted GEL.IT.UP colours reduce this issue.",
-      "These allow for Faster colour changes, easier cleaning and quicker workflow",
-      "Cleaning your Airbrush",
-      "Cleaning - The airbrush should be cleaned with:  Special airbrush cleaner or All-in-One Liqiud",
-      "Cleaning - At the end of the working day, after all appointments are completed:",
-      "Cleaning - Clean the airbrush thoroughly.",
-      "Cleaning - Remove and clean the needle.",
-      "Cleaning - Make sure all product residue is removed.",
-      "2 Powerful Motors",
-      "High Performance",
-      "Low Noise",
-      "Easy to place on any workstation",
-      "Removable filter for easy cleaning",
-      "55 Watt",
-      "2 powerful motors",
-      "High suction power",
-      "Low noise",
-      "Easy installation on all desks",
-      "Portable Stamp Lamp: Timer 30s — Power 3W — Runtime 2hr — Charge time 1.5hr — Weight 150g",
-      "Heli Light: Power 45W — Light temp 6500K — Voltage 170–265V — Frequency 50–60Hz"
     ]
   },
   "TOOLS EQUIPMENT::BRUSHES": {

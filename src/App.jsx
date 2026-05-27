@@ -2434,9 +2434,12 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     ['CREME DE LA CREME', 'BUILDER GEL SYSTEMS'],
     ['BRUSH ON BUILDER', 'BUILDER GEL SYSTEMS'],
     ['SYNTHOGEL & POLYGEL', 'BUILDER GEL SYSTEMS'],
-    // Tools & Equipment — merge three top-level folders into one category with fixed subcategory pills
+    // Tools & Equipment — merge three top-level folders into one category.
+    // TOOLS and BRUSHES use a fixed subcategory so all their sub-folders collapse
+    // into one pill each. EQUIPMENT does NOT fix a subcategory — its sub-folders
+    // (AIRBRUSH, DUST COLLECTOR, LAMPS & CURING) become individual subcategory pills.
     ['TOOLS',     { category: 'TOOLS & EQUIPMENT', subcategory: 'TOOLS' }],
-    ['EQUIPMENT', { category: 'TOOLS & EQUIPMENT', subcategory: 'EQUIPMENT' }],
+    ['EQUIPMENT', { category: 'TOOLS & EQUIPMENT' }],
     ['BRUSHES',   { category: 'TOOLS & EQUIPMENT', subcategory: 'BRUSHES' }],
   ])
   

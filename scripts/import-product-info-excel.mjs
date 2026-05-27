@@ -111,8 +111,21 @@ for (const key of Object.keys(result)) {
 
 // 2. Key normalisations — xlsx uses human-readable names that differ from
 //    the image-folder-derived subcategory tokens used at runtime.
+//
+//    After the TOOLS/EQUIPMENT/BRUSHES merge into 'TOOLS & EQUIPMENT', the
+//    lookup key is built from normalizeCatalogueToken on both category and
+//    subcategory.  normalizeCatalogueToken('TOOLS & EQUIPMENT') → 'TOOLS EQUIPMENT'
+//    normalizeCatalogueToken('LAMPS & CURING') → 'LAMPS CURING'  (& stripped)
+//
+//    EQUIPMENT sub-folders (AIRBRUSH, DUST COLLECTOR, LAMPS & CURING) become
+//    individual subcategory pills, so each needs its own key in normalized form.
+//    BRUSHES sub-folders collapse into one BRUSHES pill (fixed subcategory),
+//    so a single combined key is built via DERIVED_ENTRIES below.
 const KEY_RENAMES = {
-  'EQUIPMENT::AIR BRUSH': 'EQUIPMENT::AIRBRUSH',
+  'EQUIPMENT::AIR BRUSH':     'EQUIPMENT::AIRBRUSH',           // xlsx name → canonical name
+  'EQUIPMENT::AIRBRUSH':      'TOOLS EQUIPMENT::AIRBRUSH',     // canonical → merged-category lookup key
+  'EQUIPMENT::DUST COLLECTOR':'TOOLS EQUIPMENT::DUST COLLECTOR',
+  'EQUIPMENT::LAMPS & CURING':'TOOLS EQUIPMENT::LAMPS CURING', // & normalizes away in lookup
 };
 for (const [from, to] of Object.entries(KEY_RENAMES)) {
   if (result[from] && !result[to]) {
@@ -124,6 +137,10 @@ for (const [from, to] of Object.entries(KEY_RENAMES)) {
 // 3. Derived entries — subcategory aliases whose descriptions mirror a parent
 //    key but have their own video assignments. Keyed by image folder structure
 //    (e.g. MULTIMIX/30gr → subcategory token 30GR), not present in the xlsx.
+//
+//    BRUSHES: all brush sub-folders (ACRYLIC BRUSHES, GEL BRUSHES, etc.) are
+//    collapsed into a single BRUSHES pill under 'TOOLS & EQUIPMENT', so their
+//    descriptions are combined into one key.
 const DERIVED_ENTRIES = [
   {
     source: 'BUILDER GEL SYSTEMS::MULTIMIX',
@@ -143,46 +160,34 @@ for (const { source, targets } of DERIVED_ENTRIES) {
   }
 }
 
-// 4. TOOLS & EQUIPMENT category merge — the three image folders (TOOLS,
-//    EQUIPMENT, BRUSHES) are now merged into one category 'TOOLS & EQUIPMENT'
-//    with subcategory pills TOOLS / EQUIPMENT / BRUSHES.
-//    normalizeCatalogueToken('TOOLS & EQUIPMENT') → 'TOOLS EQUIPMENT', so
-//    the lookup key must be stored in that form.
-//
-//    Build combined overview descriptions by joining all per-sub-subcategory
-//    entries from the xlsx.
-const mergeIntoKey = (targetKey, sourceKeys) => {
+// 4. BRUSHES combined description — all brush sub-folder descriptions merged
+//    into one entry for the single BRUSHES pill under 'TOOLS & EQUIPMENT'.
+//    normalizeCatalogueToken('BRUSHES') → 'BRUSHES', so key is 'TOOLS EQUIPMENT::BRUSHES'.
+{
+  const brushSources = [
+    'BRUSHES::ACRYLIC BRUSHES',
+    'BRUSHES::GEL BRUSHES',
+    'BRUSHES::SYNTHOGEL & POLYGEL',
+    'BRUSHES::NAIL ART BRUSHES',
+  ];
   const paragraphs = [];
   const listItems  = [];
-  for (const k of sourceKeys) {
+  for (const k of brushSources) {
     if (result[k]) {
       paragraphs.push(...result[k].paragraphs);
       listItems.push(...result[k].listItems);
     }
   }
   if (paragraphs.length || listItems.length) {
-    const oldVideo = existing[targetKey];
-    result[targetKey] = {
+    const oldVideo = existing['TOOLS EQUIPMENT::BRUSHES'];
+    result['TOOLS EQUIPMENT::BRUSHES'] = {
       ...(oldVideo?.videos  ? { videos:  oldVideo.videos  } : {}),
       ...(oldVideo?.videoId ? { videoId: oldVideo.videoId } : {}),
       paragraphs,
       listItems,
     };
   }
-};
-
-// Keys must be in normalized form (& stripped) so the lookup matches at runtime.
-mergeIntoKey('TOOLS EQUIPMENT::EQUIPMENT', [
-  'EQUIPMENT::AIRBRUSH',
-  'EQUIPMENT::DUST COLLECTOR',
-  'EQUIPMENT::LAMPS & CURING',
-]);
-mergeIntoKey('TOOLS EQUIPMENT::BRUSHES', [
-  'BRUSHES::ACRYLIC BRUSHES',
-  'BRUSHES::GEL BRUSHES',
-  'BRUSHES::SYNTHOGEL & POLYGEL',
-  'BRUSHES::NAIL ART BRUSHES',
-]);
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 
