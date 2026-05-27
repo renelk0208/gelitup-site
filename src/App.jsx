@@ -2434,6 +2434,10 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     ['CREME DE LA CREME', 'BUILDER GEL SYSTEMS'],
     ['BRUSH ON BUILDER', 'BUILDER GEL SYSTEMS'],
     ['SYNTHOGEL & POLYGEL', 'BUILDER GEL SYSTEMS'],
+    // Tools & Equipment — merge three top-level folders into one category with fixed subcategory pills
+    ['TOOLS',     { category: 'TOOLS & EQUIPMENT', subcategory: 'TOOLS' }],
+    ['EQUIPMENT', { category: 'TOOLS & EQUIPMENT', subcategory: 'EQUIPMENT' }],
+    ['BRUSHES',   { category: 'TOOLS & EQUIPMENT', subcategory: 'BRUSHES' }],
   ])
   
   const isBlockedImagePath = (imagePath = '') => {
@@ -2479,8 +2483,15 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     // Apply category remapping (e.g., BY THE OCEAN ? COLORS)
     const remappedCategory = categoryRemapping.get(category)
     let isRemapped = !!remappedCategory
+    let fixedSubcategory = null
     if (remappedCategory) {
-      category = remappedCategory
+      if (typeof remappedCategory === 'string') {
+        category = remappedCategory
+      } else {
+        // Object form: { category, subcategory } — subcategory is fixed regardless of folder depth
+        category = remappedCategory.category
+        fixedSubcategory = remappedCategory.subcategory
+      }
     }
 
     // Path-based override: BASES/BRUSH ON BUILDER/* → BUILDER GEL SYSTEMS
@@ -2492,14 +2503,17 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
     
     // Determine subcategory based on folder structure
     let subcategory
-    if (isRemapped) {
+    if (fixedSubcategory) {
+      // Fixed subcategory override — all items in this folder share one subcategory pill
+      subcategory = fixedSubcategory
+    } else if (isRemapped) {
       if (segments.length > 2) {
         // For remapped categories with real subfolders, use the path between root and filename
-        // e.g., BUILDER GEL/3INI BUILDER/item.jpg ? "3INI BUILDER"
+        // e.g., BUILDER GEL/3INI BUILDER/item.jpg → "3INI BUILDER"
         subcategory = segments.slice(1, -1).join(' / ') || sourceCategory
       } else {
         // For remapped categories with files directly under root, keep root as subcategory
-        // e.g., CREME DE LA CREME/item.jpg ? "CREME DE LA CREME"
+        // e.g., CREME DE LA CREME/item.jpg → "CREME DE LA CREME"
         subcategory = sourceCategory
       }
     } else if (category === 'COLORS' && segments.length > 3) {
