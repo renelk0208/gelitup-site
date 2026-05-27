@@ -143,6 +143,47 @@ for (const { source, targets } of DERIVED_ENTRIES) {
   }
 }
 
+// 4. TOOLS & EQUIPMENT category merge — the three image folders (TOOLS,
+//    EQUIPMENT, BRUSHES) are now merged into one category 'TOOLS & EQUIPMENT'
+//    with subcategory pills TOOLS / EQUIPMENT / BRUSHES.
+//    normalizeCatalogueToken('TOOLS & EQUIPMENT') → 'TOOLS EQUIPMENT', so
+//    the lookup key must be stored in that form.
+//
+//    Build combined overview descriptions by joining all per-sub-subcategory
+//    entries from the xlsx.
+const mergeIntoKey = (targetKey, sourceKeys) => {
+  const paragraphs = [];
+  const listItems  = [];
+  for (const k of sourceKeys) {
+    if (result[k]) {
+      paragraphs.push(...result[k].paragraphs);
+      listItems.push(...result[k].listItems);
+    }
+  }
+  if (paragraphs.length || listItems.length) {
+    const oldVideo = existing[targetKey];
+    result[targetKey] = {
+      ...(oldVideo?.videos  ? { videos:  oldVideo.videos  } : {}),
+      ...(oldVideo?.videoId ? { videoId: oldVideo.videoId } : {}),
+      paragraphs,
+      listItems,
+    };
+  }
+};
+
+// Keys must be in normalized form (& stripped) so the lookup matches at runtime.
+mergeIntoKey('TOOLS EQUIPMENT::EQUIPMENT', [
+  'EQUIPMENT::AIRBRUSH',
+  'EQUIPMENT::DUST COLLECTOR',
+  'EQUIPMENT::LAMPS & CURING',
+]);
+mergeIntoKey('TOOLS EQUIPMENT::BRUSHES', [
+  'BRUSHES::ACRYLIC BRUSHES',
+  'BRUSHES::GEL BRUSHES',
+  'BRUSHES::SYNTHOGEL & POLYGEL',
+  'BRUSHES::NAIL ART BRUSHES',
+]);
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 const json = JSON.stringify(result, null, 2);
