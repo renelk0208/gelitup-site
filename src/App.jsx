@@ -4196,7 +4196,7 @@ function FullCataloguePage() {
   const chapterBuildersCategories = ['BUILDER GEL SYSTEMS']
   // Keep combined alias for scroll-target logic
   const chapter02Categories = [...chapterEssentialsCategories, ...chapterBuildersCategories]
-  const chapter03Categories = ['TOOLS', 'EQUIPMENT', 'BRUSHES']
+  const chapter03Categories = ['TOOLS & EQUIPMENT']
   const chapter04Categories = ['NAIL ART', 'CONSUMABLES', 'NAIL HAND & FOOT CARE']
   const chapterNailArtCategories = ['NAIL ART']
   const chapterConsumablesCategories = ['CONSUMABLES']
@@ -4284,7 +4284,7 @@ function FullCataloguePage() {
       sectionKey = 'essentials'
     } else if (['BUILDER GEL SYSTEMS', 'MULTIMIX'].some((c) => normalizeCatalogueToken(c) === normalized)) {
       sectionKey = 'builders'
-    } else if (['TOOLS', 'EQUIPMENT', 'BRUSHES'].some((c) => normalizeCatalogueToken(c) === normalized)) {
+    } else if (['TOOLS & EQUIPMENT'].some((c) => normalizeCatalogueToken(c) === normalized)) {
       sectionKey = 'tools'
     } else {
       sectionKey = 'consumables'
@@ -4485,7 +4485,7 @@ function FullCataloguePage() {
         key: 'TOOLS_EQUIPMENT',
         label: 'TOOLS & EQUIPMENT',
         sectionTokens: ['TOOL', 'EQUIP', 'BRUSH'],
-        preferredCategories: ['TOOLS', 'EQUIPMENT', 'BRUSHES'],
+        preferredCategories: ['TOOLS & EQUIPMENT'],
         subcategories: [
           { label: 'Professional Brushes', subcategoryTokens: ['BRUSH'] },
           { label: 'Implements (Nippers/Scissors)', subcategoryTokens: ['NIPPER', 'SCISSOR'] },
@@ -5681,7 +5681,7 @@ function FullCataloguePage() {
                   </p>
                   <div className="mt-6">
                     <button
-                      onClick={() => openCatalogueCategory('TOOLS', 'ALL')}
+                      onClick={() => openCatalogueCategory('TOOLS & EQUIPMENT', 'ALL')}
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
                       style={{ background: 'rgba(74,53,112,0.85)' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'rgba(95,70,140,0.95)'}
@@ -10440,7 +10440,7 @@ const B2B_SIDEBAR_GROUPS = [
   },
   {
     label: 'Tools & Equipment',
-    cats: ['TOOLS', 'EQUIPMENT', 'BRUSHES'],
+    cats: ['TOOLS & EQUIPMENT'],
   },
   {
     label: 'Professional Range',
