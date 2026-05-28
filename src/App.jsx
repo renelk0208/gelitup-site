@@ -3969,6 +3969,14 @@ function FullCataloguePage() {
   }, [activeCategory, activeSubcategory])
 
   useEffect(() => {
+    if (!activeCategory) return
+    requestAnimationFrame(() => {
+      const el = document.getElementById('catalogue-category-detail')
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }, [activeCategory])
+
+  useEffect(() => {
     const updateLayout = () => {
       const width = window.innerWidth
       if (bulkMode) {
