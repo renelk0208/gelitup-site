@@ -3006,6 +3006,7 @@ function FullCataloguePage() {
   const [activeColorFamily, setActiveColorFamily] = useState('ALL')
   const [activeCatEyeVariant, setActiveCatEyeVariant] = useState('ALL')
   const [searchQuery, setSearchQuery] = useState('')
+  const [scrollToCategoryTrigger, setScrollToCategoryTrigger] = useState(0)
   const [bulkMode, setBulkMode] = useState(false)
   const [heroCandidateIndexByCategory, setHeroCandidateIndexByCategory] = useState({})
   const [itemQuantities, setItemQuantities] = useState({})
@@ -3969,12 +3970,14 @@ function FullCataloguePage() {
   }, [activeCategory, activeSubcategory])
 
   useEffect(() => {
-    if (!activeCategory) return
+    if (!scrollToCategoryTrigger) return
     requestAnimationFrame(() => {
-      const el = document.getElementById('catalogue-category-detail')
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      requestAnimationFrame(() => {
+        const el = document.getElementById('catalogue-category-detail')
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
     })
-  }, [activeCategory])
+  }, [scrollToCategoryTrigger])
 
   useEffect(() => {
     const updateLayout = () => {
@@ -4303,15 +4306,7 @@ function FullCataloguePage() {
     if (sectionKey) {
       setExpandedSections((prev) => ({ ...prev, [sectionKey]: true }))
     }
-    // Scroll to the category detail panel (subcategory tabs visible first)
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          const el = document.getElementById('catalogue-category-detail')
-          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        })
-      })
-    })
+    setScrollToCategoryTrigger((n) => n + 1)
   }, [scrollToCatalogueResults])
 
   // Handle ?subcategory= deep-link — e.g. gelitup.com/cat-eye resolves here via a vanity route
