@@ -24,6 +24,7 @@
     "smoke:prod": "node scripts/predeploy-smoke.mjs https://gelitup.com",
     "smoke:e2e": "node scripts/smoke-e2e.mjs",
     "smoke:e2e:prod": "cross-env SMOKE_BASE_URL=https://gelitup.com node scripts/smoke-e2e.mjs",
+    "audit:prices": "node scripts/audit-prices.mjs",
     "guardrails:catalogue": "node scripts/check-catalogue-invariants.mjs",
     "import:price-list": "node scripts/import-price-list.mjs",
     "generate:order-template": "node scripts/generate-client-order-template.mjs",

@@ -36,6 +36,7 @@ export const GENERATED_MISSING_PRODUCT_ALIAS_GROUPS = [
 	{ codes: ['BRUSH ON BUILDER BIABSTPN'], target: 'Brush on Builder Gel Soft Pink 15ml -HTF' },
 	{ codes: ['SUPERBOND WITHOUT ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
 	{ codes: ['MULTIMIX BUBBLEGUM GLITTER COLOR B 30G', 'MULTIMIX BUBBLEGUM GLITTER COLOR C 30G'], target: 'MultiMix Synthogel 30gr Bubble Gum Glitter -HTF' },
+	{ codes: ['MULTIMIX PINKIII COLOR B 30G', 'MULTIMIX PINKIII COLOR C 30G', 'MULTIMIX PINK III COLOR B 30G', 'MULTIMIX PINK III COLOR C 30G', 'MULTIMIX PINK III COLOR B 30 G', 'MULTIMIX PINK III COLOR C 30 G'], target: 'MultiMix Synthogel 30gr Pink III -HTF' },
 	{ codes: ['MULTIMIX GLITTERPINK COLOR B 60G', 'MULTIMIX GLITTERPINK COLOR C 60G'], target: 'MultiMix Synthogel 60gr Glitter Pink -HTF' },
 	{ codes: ['MULTIMIX MINT GREEN COLOR B 30G', 'MULTIMIX MINT GREEN COLOR C 30G'], target: 'MultiMix Synthogel 30gr Minty Green -HTF' },
 ]

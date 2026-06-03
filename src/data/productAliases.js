@@ -83,9 +83,9 @@ export const PRODUCT_ALIAS_GROUPS = [
   { codes: ['MIRROR X5', 'TR 5', 'TR5'], target: 'TR05 Mirror X5 Powder' },
   { codes: ['MIRROR X6', 'TR 6', 'TR6'], target: 'TR06 Mirror X6 Powder' },
   // 3-in-1 Builder Gel
-  { codes: ['3 IN 1 CLEAR', '3IN1CLEAR'], target: '3-in-1 Builder Gel Clear 40g -HTF' },
-  { codes: ['3IN1COVER'], target: '3-in-1 Builder Gel Cover 40g -HTF' },
-  { codes: ['3IN1PINK'], target: '3-in-1 Builder Gel Pink 40g -HTF' },
+  { codes: ['3 IN 1 CLEAR', '3IN1CLEAR', '3 IN 1 BUILDER GEL CLEAR', '3 IN 1 BUILDER GEL CLEAR B', '3-in-1_builder_gel_clear_B', '3 in 1 builder gel clear B'], target: '3-in-1 Builder Gel Clear 40g -HTF' },
+  { codes: ['3IN1COVER', '3 IN 1 BUILDER GEL COVER', '3 IN 1 BUILDER GEL COVER B', '3-in-1_builder_gel_cover_B', '3 in 1 builder gel cover B'], target: '3-in-1 Builder Gel Cover 40g -HTF' },
+  { codes: ['3IN1PINK', '3 IN 1 BUILDER GEL PINK', '3 IN 1 BUILDER GEL PINK B', '3-in-1_builder_gel_pink_B', '3 in 1 builder gel pink B'], target: '3-in-1 Builder Gel Pink 40g -HTF' },
   { codes: ['3 IN 1 SHIMMER COVER'], target: '3-in-1 Shimmery Builder Gel 40g Cover -HTF' },
   { codes: ['3 IN 1 SHIMMER IRIDESCENT CLEAR'], target: '3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF' },
   { codes: ['3 IN 1 SHIMMER LIGHT LILAC'], target: '3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF' },
@@ -248,7 +248,10 @@ export const PRODUCT_ALIAS_GROUPS = [
   // Nail Art Brushes
   { codes: ['aquarelle brush', 'aquarelle_brush', 'AQUARELLE BRUSH', 'AQUARELLE_BRUSH'], target: 'Aquarela Brush Rose Gold' },
   { codes: ['french curved brush', 'french_curved_brush', 'FRENCH CURVED BRUSH', 'FRENCH_CURVED_BRUSH'], target: 'French Nail Brush Rose Gold' },
+  { codes: ['skinny liner 5 7', 'skinny-liner-5-7', 'SKINNY LINER 5 7', 'SKINNY LINER 5-7'], target: 'Skinny Liner brush 5-7' },
+  { codes: ['skinny liner 9 11', 'skinny-liner-9-11', 'SKINNY LINER 9 11', 'SKINNY LINER 9-11'], target: 'Skinny Liner brush 9-11' },
   // Acrylic & Gel brush "no{N}" names from WooCommerce/Supabase don't match Zoho "#N ..." names
+  { codes: ['ACRYLIC BRUSH NO8', 'acrylic brush no8', 'acrylic_brush_no8'], target: '#8 Acrylic brush Rose Gold' },
   { codes: ['ACRYLIC BRUSH NO10', 'acrylic brush no10'], target: '#10 Acrylic Application Brush Rose Gold' },
   { codes: ['ACRYLIC BRUSH NO12', 'acrylic brush no12'], target: '#12 Acrylic Brush Rose Gold' },
   { codes: ['GEL BRUSH NO6', 'gel brush no6'], target: '#6 Gel Brush Rose Gold' },
