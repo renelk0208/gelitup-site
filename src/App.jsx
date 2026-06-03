@@ -6763,6 +6763,11 @@ function ScrollToTopOnRouteChange() {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
   }, [location.pathname])
 
+  // fires after React renders each route — signals prerenderer to capture the HTML
+  useEffect(() => {
+    document.dispatchEvent(new Event('gelitup-prerender-ready'))
+  }, [location.pathname])
+
   return null
 }
 
