@@ -5,6 +5,7 @@ import PWABadge from './PWABadge.jsx'
 import { PRODUCT_ALIAS_GROUPS } from './data/productAliases.js'
 import PRODUCT_INFORMATION_BY_SUBCATEGORY from './data/product-info.json'
 import ImportedAnyPage from './pages/imported/ImportedAnyPage.jsx'
+import SchemaOrg from './components/SchemaOrg'
 import { hasSupabaseConfig, supabase } from './lib/supabaseClient'
 import useB2BIntelligence from './lib/useB2BIntelligence'
 import { useLang, getTranslations, setLang, SUPPORTED_LANGS } from './lib/i18n'
@@ -18868,6 +18869,7 @@ function App() {
   return (
     <div className="lux-theme min-h-screen pb-8">
       <ScrollToTopOnRouteChange />
+      <SchemaOrg />
       {!announcementDismissed && !isPortalRoute && (
         <div className="relative bg-fuchsia-600 px-4 py-2 text-center text-xs font-semibold text-white">
           🚚 Free Shipping on all EU wholesale orders &nbsp;·&nbsp; Minimum order €{MIN_ORDER_EUR}
