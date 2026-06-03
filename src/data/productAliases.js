@@ -6,10 +6,9 @@ import { GENERATED_MISSING_PRODUCT_ALIAS_GROUPS } from './productAliases.missing
 
 export const PRODUCT_ALIAS_GROUPS = [
   { codes: ['FBCLR', 'GIUP FBCLR', 'GIUP-FBCLR'], target: 'Flexi Base Clear -HTF' },
-  { codes: ['multimix_pink_III_color', 'multimix pink III color', 'MULTIMIX PINK III COLOR'], target: 'MultiMix Synthogel 30gr Pink III -HTF' },
   { codes: ['CLASSIC BASE COAT IMAGE', 'CLASSIC BASE COAT', 'CLASSICBC', 'Base Coat 15ml'], target: 'Base Coat 15ml -HTF' },
   // 5-in-1 Superior Base coloureds (SBC*)
-  { codes: ['GIUP SBCCLR', 'GIUP-SBCCLR', 'GIUP 5IN1CLR', 'GIUP-5IN1CLR', '5IN1CLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
+  { codes: ['GIUP SBCCLR', 'GIUP-SBCCLR'], target: '5-in-1 Superior Base 15ml Clear -HTF' },
   { codes: ['GIUP SBCMP', 'GIUP-SBCMP'], target: '5-in-1 Superior Base 15ml Milky Pink -HTF' },
   { codes: ['GIUP SBCPP', 'GIUP-SBCPP'], target: '5-in-1 Superior Base 15ml Pretty Pink -HTF' },
   { codes: ['GIUP SBCBP', 'GIUP-SBCBP'], target: '5-in-1 Superior Base 15ml Baby Pink -HTF' },
