@@ -771,7 +771,7 @@ function getSilverFreeGuaranteeText(referenceDate = new Date()) {
  */
 function setPageSEO({ title, description, canonical } = {}) {
   const SITE_NAME = 'GEL.IT.UP by GIUP®'
-  const DEFAULT_TITLE = `${SITE_NAME} | Professional Gel Polish, Builder Gel & Nail Systems`
+  const DEFAULT_TITLE = `${SITE_NAME} | Gel Polish, Builder Gel & Nail Systems`
   const DEFAULT_DESCRIPTION = 'Professional gel polish with 1,000+ shades, builder gel systems, base coats and top coats. HEMA-free, TPO-free, EU certified. Available wholesale to professional nail technicians worldwide.'
   const DEFAULT_CANONICAL = 'https://gelitup.com/'
 

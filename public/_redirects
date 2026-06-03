@@ -1,0 +1,5 @@
+# Subdomain proxy — consolidates shop-main.gelitup.com under gelitup.com/shop/
+/shop/*  https://shop-main.gelitup.com/:splat  200
+
+# SPA fallback — must be last
+/*  /index.html  200
