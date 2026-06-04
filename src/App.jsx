@@ -18930,7 +18930,7 @@ function App() {
       <ScrollToTopOnRouteChange />
       <SchemaOrg />
       <PageLoader />
-      <ClarityScript projectId="YOUR_CLARITY_PROJECT_ID" />
+      <ClarityScript />
       {!announcementDismissed && !isPortalRoute && (
         <div className="relative bg-fuchsia-600 px-4 py-2 text-center text-xs font-semibold text-white">
           🎵 <a href="https://www.tiktok.com/@gelitupinternational" target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-white/90">@GELITUP on TikTok</a> &nbsp;·&nbsp; 🚚 Free Shipping on all EU wholesale orders &nbsp;·&nbsp; Minimum order €{MIN_ORDER_EUR}
