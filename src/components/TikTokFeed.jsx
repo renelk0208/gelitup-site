@@ -14,7 +14,7 @@ export default function TikTokFeed() {
   }, [])
 
   return (
-    <section className="mt-10">
+    <section>
       <div className={ELFSIGHT_APP_ID} data-elfsight-app-lazy />
     </section>
   )

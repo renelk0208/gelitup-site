@@ -38,10 +38,8 @@ export default function InstagramFeed() {
   }, [])
 
   return (
-    <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#F5F5F5] py-8">
-      <div className="mx-auto max-w-6xl px-4 sm:px-8">
-        <div className="elfsight-app-42ee70be-f926-412b-b52f-47a51f35a691" data-elfsight-app-lazy />
-      </div>
+    <div>
+      <div className="elfsight-app-42ee70be-f926-412b-b52f-47a51f35a691" data-elfsight-app-lazy />
     </div>
   )
 }
