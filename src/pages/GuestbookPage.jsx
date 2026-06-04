@@ -130,6 +130,16 @@ export default function GuestbookPage() {
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(true)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [countryFilter, setCountryFilter] = useState('all')
+
+  const FILTER_COUNTRIES = [
+    { code: 'all', label: 'All', flag: '🌍' },
+    { code: 'Greece', label: 'Greece', flag: '🇬🇷' },
+    { code: 'Bulgaria', label: 'Bulgaria', flag: '🇧🇬' },
+    { code: 'France', label: 'France', flag: '🇫🇷' },
+    { code: 'Romania', label: 'Romania', flag: '🇷🇴' },
+    { code: 'Italy', label: 'Italy', flag: '🇮🇹' },
+  ]
 
   // Form state
   const [name, setName] = useState('')
@@ -206,8 +216,11 @@ export default function GuestbookPage() {
     }
   }
 
-  const visibleEntries = entries.slice(0, visibleCount)
-  const hasMore = visibleCount < entries.length
+  const filteredEntries = countryFilter === 'all'
+    ? entries
+    : entries.filter((e) => (e.country || '').toLowerCase() === countryFilter.toLowerCase())
+  const visibleEntries = filteredEntries.slice(0, visibleCount)
+  const hasMore = visibleCount < filteredEntries.length
 
   return (
     <section className="space-y-6">
@@ -411,6 +424,27 @@ export default function GuestbookPage() {
 
         {!loading && entries.length > 0 && (
           <>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {FILTER_COUNTRIES.map((c) => (
+                <button
+                  key={c.code}
+                  type="button"
+                  onClick={() => { setCountryFilter(c.code); setVisibleCount(PAGE_SIZE) }}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '20px',
+                    border: `1px solid ${countryFilter === c.code ? '#D43790' : '#ddd'}`,
+                    background: countryFilter === c.code ? '#D43790' : '#fff',
+                    color: countryFilter === c.code ? '#fff' : '#555',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    fontWeight: countryFilter === c.code ? 600 : 400,
+                  }}
+                >
+                  {c.flag} {c.label}
+                </button>
+              ))}
+            </div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               {visibleEntries.map((entry) => (
                 <EntryCard key={entry.id} entry={entry} featured={entry.featured} />

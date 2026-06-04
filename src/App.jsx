@@ -17,6 +17,9 @@ import SocialProof from './components/SocialProof'
 import InstagramFeed from './components/InstagramFeed'
 import InspirationTeaser from './components/InspirationTeaser'
 import ProductImage from './components/ProductImage'
+import TestimonialStrip from './components/TestimonialStrip'
+import TikTokFeed from './components/TikTokFeed'
+import ClarityScript from './components/ClarityScript'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
@@ -1614,6 +1617,7 @@ function DistributorPackagesPage() {
         <div className="px-6 py-4" style={{ backgroundColor: '#374151' }}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.60)' }}>Entry Tier</p>
           <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#ffffff' }}>SALES — The Foundation</h2>
+          <p className="mt-1 text-xs font-semibold" style={{ color: '#f9a8d4' }}>Starting from €500 minimum order</p>
           <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.60)' }}>Build your presence. A focused product range and essential tools designed for professionals entering the market and developing their client network.</p>
         </div>
         <div>
@@ -1646,6 +1650,7 @@ function DistributorPackagesPage() {
         <div className="px-6 py-4" style={{ backgroundColor: '#1a1a1a' }}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#c8386e' }}>Growth Tier</p>
           <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#ffffff' }}>PROFESSIONAL — The Expanded Spectrum</h2>
+          <p className="mt-1 text-xs font-semibold" style={{ color: '#f9a8d4' }}>Starting from €1,500 minimum order</p>
           <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.60)' }}>Scale intelligently. A broader product range, physical brand presence, and deeper marketing tools designed for distributors ready to dominate their region.</p>
         </div>
         <div>
@@ -1683,6 +1688,7 @@ function DistributorPackagesPage() {
         <div className="px-6 py-4" style={{ backgroundColor: '#c8386e' }}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.75)' }}>Elite Tier</p>
           <h2 className="mt-0.5 text-xl font-black sm:text-2xl" style={{ color: '#ffffff' }}>AUTHORITY — The Full Master Collection</h2>
+          <p className="mt-1 text-xs font-semibold" style={{ color: '#fce7f3' }}>Contact us for pricing</p>
           <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.82)' }}>Total market ownership. Every product, every shade, every support tool — with your territory backed by GEL.IT.UP advertising, live training, and white-glove regulatory handling.</p>
         </div>
         <div>
@@ -1892,6 +1898,29 @@ function ForAcademiesPage() {
             <div key={q} className="px-6 py-4">
               <p className="text-sm font-semibold text-[#1a1a1a]">{q}</p>
               <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* STARTER KIT */}
+      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#D43790]">What's Included</p>
+          <h2 className="mt-0.5 text-xl font-bold text-slate-900">Academy Starter Kit</h2>
+        </div>
+        <div className="divide-y divide-slate-100">
+          {[
+            { label: 'Minimum intake qty', value: 'Contact us' },
+            { label: 'Student kit options', value: 'Available on request' },
+            { label: 'Compliance docs', value: 'SDS, CPNP, EC 1223/2009' },
+            { label: 'HEMA-free certified', value: '✓ All products' },
+            { label: 'Application guides', value: '✓ Included' },
+            { label: 'Pricing', value: 'Academy wholesale rates' },
+          ].map((item) => (
+            <div key={item.label} className="flex items-center justify-between gap-4 px-6 py-3">
+              <span className="text-sm text-slate-500">{item.label}</span>
+              <span className="text-sm font-semibold text-slate-900 text-right">{item.value}</span>
             </div>
           ))}
         </div>
@@ -7495,6 +7524,8 @@ function HomePage({ onOpenContactModal }) {
       </div>
 
       <InstagramFeedStrip />
+      <TikTokFeed />
+      <TestimonialStrip />
 
       <InfoCard id="products" title="Our Products">
         <p>
@@ -8526,7 +8557,13 @@ function BuyerRegister() {
             Open to all professional buyers worldwide
           </li>
         </ul>
-        <p className="mt-8 text-xs text-slate-400">
+        <p className="mt-4 text-xs text-slate-400">
+          Want to try before committing?{' '}
+          <a href="mailto:info@gelitup.com?subject=Sample Pack Request" className="font-semibold text-fuchsia-400 hover:underline">
+            Request a sample pack →
+          </a>
+        </p>
+        <p className="mt-4 text-xs text-slate-400">
           Looking for wholesale distribution?{' '}
           <NavLink to="/become-distributor" className="font-semibold text-fuchsia-400 hover:underline">Apply as a distributor</NavLink>
         </p>
@@ -8562,6 +8599,7 @@ function BuyerRegister() {
           </label>
 
           <SocialProof variant="register" />
+          <TestimonialStrip compact />
 
           <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-fuchsia-600 px-4 py-3 text-sm font-bold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500 disabled:opacity-50">
             {isSubmitting ? 'Creating Account…' : 'Create Account & Start Ordering'}
@@ -9129,9 +9167,9 @@ function CheckoutPage() {
               </label>
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-slate-700">
-                  VAT Number <span className="text-rose-500">*</span>
+                  VAT Number <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-normal text-slate-500">optional</span>
                   <div className="mt-1 flex gap-2">
-                    <input type="text" required value={form.vatNumber} onChange={e => { updateField('vatNumber', e.target.value); setViesResult(null) }} placeholder="EU123456789" className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
+                    <input type="text" value={form.vatNumber} onChange={e => { updateField('vatNumber', e.target.value); setViesResult(null) }} placeholder="EU123456789" className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
                     <button type="button" onClick={verifyVat} disabled={viesLoading} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50">
                       {viesLoading ? 'Checking…' : 'Verify'}
                     </button>
@@ -18892,9 +18930,10 @@ function App() {
       <ScrollToTopOnRouteChange />
       <SchemaOrg />
       <PageLoader />
+      <ClarityScript projectId="YOUR_CLARITY_PROJECT_ID" />
       {!announcementDismissed && !isPortalRoute && (
         <div className="relative bg-fuchsia-600 px-4 py-2 text-center text-xs font-semibold text-white">
-          🚚 Free Shipping on all EU wholesale orders &nbsp;·&nbsp; Minimum order €{MIN_ORDER_EUR}
+          🎵 <a href="https://www.tiktok.com/@gelitupinternational" target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-white/90">@GELITUP on TikTok</a> &nbsp;·&nbsp; 🚚 Free Shipping on all EU wholesale orders &nbsp;·&nbsp; Minimum order €{MIN_ORDER_EUR}
           <button
             type="button"
             onClick={handleDismissAnnouncement}
