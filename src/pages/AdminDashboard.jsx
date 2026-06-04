@@ -1250,9 +1250,6 @@ function OrdersPanel() {
   // editing state
   const [editing, setEditing] = useState(null) // order id being edited
   const [editDraft, setEditDraft] = useState({})
-  // refund state
-  const [refundModal, setRefundModal] = useState({ orderId: null, piInput: '', amountInput: '', emailInput: '', loading: false, error: '', result: null })
-  const _resetRefundModal = () => setRefundModal({ orderId: null, piInput: '', amountInput: '', emailInput: '', loading: false, error: '', result: null })
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -1347,59 +1344,6 @@ function OrdersPanel() {
 
   const markShipped = async (id) => {
     await updateOrder(id, { status: 'shipped' })
-  }
-
-  const issueRefund = async () => {
-    const { orderId, piInput, amountInput, emailInput } = refundModal
-    if (!piInput.trim().startsWith('pi_')) {
-      setRefundModal(m => ({ ...m, error: 'Enter a valid Payment Intent ID (starts with pi_)' }))
-      return
-    }
-    setRefundModal(m => ({ ...m, loading: true, error: '', result: null }))
-    const row = rows.find(r => r.id === orderId)
-    const body = { paymentIntentId: piInput.trim() }
-    if (amountInput) body.amountEur = Number(amountInput)
-    const resolvedEmail = emailInput.trim() || row?.customer_email || ''
-    if (resolvedEmail) body.email = resolvedEmail
-    try {
-      const res = await fetch('/.netlify/functions/stripe-refund', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setRefundModal(m => ({ ...m, loading: false, error: data.error || 'Refund failed' }))
-        return
-      }
-      await updateOrder(orderId, { stripe_refund_id: data.refundId, status: 'refunded' })
-      _resetRefundModal()
-    } catch (err) {
-      setRefundModal(m => ({ ...m, loading: false, error: err.message || 'Network error' }))
-    }
-  }
-
-  const cancelRefund = async (row) => {
-    if (!row.stripe_refund_id) return
-    if (!window.confirm(`Cancel Stripe refund ${row.stripe_refund_id} for order #${row.id}?\n\nNote: only pending refunds can be cancelled. Succeeded refunds cannot be reversed.`)) return
-    setSaving(row.id)
-    try {
-      const res = await fetch('/.netlify/functions/stripe-cancel-refund', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refundId: row.stripe_refund_id }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        alert(`Could not cancel refund: ${data.error || 'Unknown error'}`)
-        setSaving(null)
-        return
-      }
-      await updateOrder(row.id, { stripe_refund_id: null })
-    } catch (err) {
-      alert(`Network error: ${err.message}`)
-    }
-    setSaving(null)
   }
 
   const togglePaymentConfirmed = async (id, currentValue) => {
@@ -1518,7 +1462,7 @@ function OrdersPanel() {
     const { csv, orderTotal } = buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier)
     const csvBase64 = encodeCsvToBase64(csv)
     const toEmail = ORDER_INBOX_EMAIL || 'distribution@gelitup.com'
-    const subject = `B2B Order ${row.order_ref || '#' + (row.id || '-')} CSV Export`
+    const subject = `B2B Order #${row.id || '-'} CSV Export`
     const html = `
       <p style="font-family:Arial,sans-serif;font-size:13px;color:#1f2937;margin:0 0 8px">Order <strong>#${String(row.id || '-')}</strong> CSV export attached for Zoho import.</p>
       <p style="font-family:Arial,sans-serif;font-size:12px;color:#6b7280;margin:0">Customer: ${String(row.customer_email || '-')}<br/>Units: ${String(row.total_units || 0)}<br/>Estimated total: ${orderTotal > 0 ? `EUR ${orderTotal.toFixed(2)}` : 'Not available'}</p>
@@ -1691,7 +1635,6 @@ function OrdersPanel() {
               const items = Array.isArray(r.items) ? r.items : []
               return {
                 'Order ID': r.id,
-                'Order Ref': r.order_ref || '',
                 'Date': r.created_at ? new Date(r.created_at).toLocaleDateString() : '',
                 'Status': r.status,
                 'Customer Email': r.customer_email || '',
@@ -1779,9 +1722,6 @@ function OrdersPanel() {
               >
                 {statusBadge(row.status)}
                 <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">{row.customer_email || '—'}</span>
-                {row.order_ref && (
-                  <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">{row.order_ref}</span>
-                )}
                 {hasMissingPrices && (
                   <span className="shrink-0 inline-flex items-center gap-1 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">
                     ⚠ {missingPriceItems.length} no price
@@ -1801,7 +1741,6 @@ function OrdersPanel() {
                   {!isEditing && (
                     <>
                       <div className="grid gap-3 text-xs text-slate-700 sm:grid-cols-2">
-                        <div><span className="font-semibold text-slate-400">Order Ref</span><br />{row.order_ref || '—'}</div>
                         <div><span className="font-semibold text-slate-400">Customer</span><br />{row.customer_email || '—'}</div>
                         <div>
                           <span className="font-semibold text-slate-400">Pricing Tier</span><br />
@@ -2222,94 +2161,6 @@ function OrdersPanel() {
                         >
                           🗑 Delete
                         </button>
-                        {!row.stripe_refund_id && (
-                          <button
-                            onClick={() => setRefundModal({ orderId: row.id, piInput: row.stripe_payment_intent || '', amountInput: '', emailInput: row.customer_email || '', loading: false, error: '', result: null })}
-                            className="rounded-lg border border-fuchsia-200 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50"
-                          >
-                            💳 Stripe Refund
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* ── Stripe Refund status ── */}
-                  {!isEditing && row.stripe_refund_id && (
-                    <div className="rounded-xl border border-rose-200 bg-rose-50 p-3">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div>
-                          <p className="text-xs font-semibold text-rose-700">💳 Stripe Refund Issued</p>
-                          <p className="mt-0.5 break-all font-mono text-[11px] text-slate-600">{row.stripe_refund_id}</p>
-                        </div>
-                        <button
-                          onClick={() => cancelRefund(row)}
-                          disabled={saving === row.id}
-                          className="rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-50"
-                        >
-                          {saving === row.id ? 'Cancelling…' : '✕ Cancel Refund'}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* ── Stripe Refund form ── */}
-                  {!isEditing && refundModal.orderId === row.id && (
-                    <div className="rounded-xl border border-fuchsia-200 bg-fuchsia-50 p-3 space-y-3">
-                      <p className="text-xs font-semibold text-fuchsia-700">💳 Issue Stripe Refund — Order #{row.id}</p>
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <div className="sm:col-span-2">
-                          <label className="mb-1 block text-xs font-medium text-slate-600">Payment Intent ID <span className="text-rose-500">*</span></label>
-                          <input
-                            type="text"
-                            value={refundModal.piInput}
-                            onChange={e => setRefundModal(m => ({ ...m, piInput: e.target.value, error: '' }))}
-                            placeholder="pi_3..."
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-fuchsia-200"
-                          />
-                          <p className="mt-0.5 text-[10px] text-slate-400">Find in Stripe Dashboard → Payments → click the payment</p>
-                        </div>
-                        <div>
-                          <label className="mb-1 block text-xs font-medium text-slate-600">Amount EUR <span className="text-slate-400">(blank = full refund)</span></label>
-                          <input
-                            type="number"
-                            min="0.01"
-                            step="0.01"
-                            value={refundModal.amountInput}
-                            onChange={e => setRefundModal(m => ({ ...m, amountInput: e.target.value }))}
-                            placeholder="e.g. 25.00"
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-fuchsia-200"
-                          />
-                        </div>
-                        <div>
-                          <label className="mb-1 block text-xs font-medium text-slate-600">Customer Email <span className="text-slate-400">(for refund instructions)</span></label>
-                          <input
-                            type="email"
-                            value={refundModal.emailInput}
-                            onChange={e => setRefundModal(m => ({ ...m, emailInput: e.target.value }))}
-                            placeholder="customer@example.com"
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-fuchsia-200"
-                          />
-                        </div>
-                      </div>
-                      {refundModal.error && (
-                        <p className="rounded-lg bg-rose-100 px-3 py-2 text-xs text-rose-700">{refundModal.error}</p>
-                      )}
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          onClick={issueRefund}
-                          disabled={refundModal.loading}
-                          className="rounded-lg bg-fuchsia-600 px-4 py-2 text-xs font-semibold text-white hover:bg-fuchsia-700 disabled:opacity-50"
-                        >
-                          {refundModal.loading ? 'Processing…' : '💳 Issue Refund'}
-                        </button>
-                        <button
-                          onClick={_resetRefundModal}
-                          disabled={refundModal.loading}
-                          className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
-                        >
-                          Cancel
-                        </button>
                       </div>
                     </div>
                   )}
@@ -2503,45 +2354,18 @@ function AdminsPanel() {
 
 const GUESTBOOK_TABLE = 'guestbook'
 
-const RLS_HINT_GUESTBOOK = `-- Run once in Supabase SQL Editor to enable guestbook moderation:
-create policy "Admins can read all guestbook entries"
-  on public.guestbook for select to authenticated
-  using (exists (
-    select 1 from public.b2b_admins where email = auth.email()
-  ));
-
-create policy "Admins can update guestbook entries"
-  on public.guestbook for update to authenticated
-  using (exists (
-    select 1 from public.b2b_admins where email = auth.email()
-  ));
-
-create policy "Admins can delete guestbook entries"
-  on public.guestbook for delete to authenticated
-  using (exists (
-    select 1 from public.b2b_admins where email = auth.email()
-  ));
-
--- Allow public visitors to read only approved entries:
-create policy "Public can read approved guestbook entries"
-  on public.guestbook for select to anon
-  using (approved = true);`
-
 function GuestbookPanel() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
-  const [loadError, setLoadError] = useState(null)
   const [filter, setFilter] = useState('pending') // 'pending' | 'approved' | 'featured' | 'all'
 
   const load = useCallback(async () => {
     setLoading(true)
-    setLoadError(null)
     let query = supabase.from(GUESTBOOK_TABLE).select('*').order('created_at', { ascending: false }).limit(100)
     if (filter === 'pending') query = query.eq('approved', false)
     else if (filter === 'approved') query = query.eq('approved', true)
     else if (filter === 'featured') query = query.eq('featured', true)
-    const { data, error } = await query
-    if (error) setLoadError(error.message)
+    const { data } = await query
     setRows(data || [])
     setLoading(false)
   }, [filter])
@@ -2582,18 +2406,7 @@ function GuestbookPanel() {
 
       {loading && <p className="text-sm text-slate-500">Loading…</p>}
 
-      {!loading && loadError && (
-        <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs">
-          <p className="font-semibold text-rose-700">Supabase query error — RLS policies may be missing.</p>
-          <p className="mt-1 text-rose-600">{loadError}</p>
-          <details className="mt-2">
-            <summary className="cursor-pointer font-medium text-rose-700">Show required SQL policies</summary>
-            <pre className="mt-2 overflow-x-auto whitespace-pre-wrap rounded bg-rose-100 p-2 text-[10px] text-rose-800">{RLS_HINT_GUESTBOOK}</pre>
-          </details>
-        </div>
-      )}
-
-      {!loading && !loadError && rows.length === 0 && (
+      {!loading && rows.length === 0 && (
         <p className="text-sm text-slate-500">{filter === 'pending' ? 'No pending messages.' : 'No messages found.'}</p>
       )}
 
@@ -2987,226 +2800,10 @@ function DraftCartsPanel() {
   )
 }
 
-// ─── Login Issues panel ───────────────────────────────────────────────────────
-
-const LOGIN_ISSUES_TABLE = 'b2b_login_issues'
-
-const ISSUE_LABELS = {
-  pending_approval:  { label: 'Pending Approval',  color: 'bg-amber-100 text-amber-800' },
-  rejected:          { label: 'Rejected',           color: 'bg-rose-100 text-rose-800' },
-  login_blocked:     { label: 'Login Blocked',      color: 'bg-orange-100 text-orange-800' },
-  bad_password:      { label: 'Wrong Password',     color: 'bg-slate-100 text-slate-700' },
-  unexpected_error:  { label: 'Technical Error',    color: 'bg-purple-100 text-purple-800' },
-}
-
-function issueTypeBadge(issueType) {
-  const meta = ISSUE_LABELS[issueType] || { label: issueType, color: 'bg-slate-100 text-slate-600' }
-  return (
-    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${meta.color}`}>
-      {meta.label}
-    </span>
-  )
-}
-
-function LoginIssuesPanel() {
-  const [issues, setIssues] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [showResolved, setShowResolved] = useState(false)
-
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError('')
-    const query = supabase
-      .from(LOGIN_ISSUES_TABLE)
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(200)
-    if (!showResolved) query.eq('resolved', false)
-    const { data, error: err } = await query
-    if (err) { setError(err.message); setLoading(false); return }
-    setIssues(data || [])
-    setLoading(false)
-  }, [showResolved])
-
-  useEffect(() => { load() }, [load])
-
-  const resolve = async (id) => {
-    await supabase
-      .from(LOGIN_ISSUES_TABLE)
-      .update({ resolved: true, resolved_at: new Date().toISOString() })
-      .eq('id', id)
-    setIssues(prev => prev.filter(i => i.id !== id))
-  }
-
-  const resolveAll = async () => {
-    const unresolved = issues.filter(i => !i.resolved)
-    if (!unresolved.length) return
-    await supabase
-      .from(LOGIN_ISSUES_TABLE)
-      .update({ resolved: true, resolved_at: new Date().toISOString() })
-      .in('id', unresolved.map(i => i.id))
-    setIssues([])
-  }
-
-  const unresolve = async (id) => {
-    await supabase
-      .from(LOGIN_ISSUES_TABLE)
-      .update({ resolved: false, resolved_at: null })
-      .eq('id', id)
-    setIssues(prev => prev.map(i => i.id === id ? { ...i, resolved: false, resolved_at: null } : i))
-  }
-
-  const deleteIssue = async (id) => {
-    await supabase.from(LOGIN_ISSUES_TABLE).delete().eq('id', id)
-    setIssues(prev => prev.filter(i => i.id !== id))
-  }
-
-  const SUPPORT_WA = import.meta.env.VITE_SUPPORT_WHATSAPP_NUMBER || '+306940715234'
-
-  const contactWhatsApp = (email) => {
-    const num = SUPPORT_WA.replace(/[^\d]/g, '')
-    const msg = encodeURIComponent(`Hi, we noticed you had trouble signing in to the GEL.IT.UP portal (${email}). How can we help?`)
-    window.open(`https://wa.me/${num}?text=${msg}`, '_blank', 'noreferrer')
-  }
-
-  const copyEmail = (email) => {
-    navigator.clipboard.writeText(email).catch(() => {})
-  }
-
-  if (loading) {
-    return <p className="text-sm text-slate-500 py-4">Loading login issues…</p>
-  }
-
-  if (error) {
-    return (
-      <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
-        Could not load login issues: {error}
-        <br />
-        <span className="text-xs text-rose-500 mt-1 block">Run <code>supabase/sql/create_b2b_login_issues.sql</code> in the Supabase SQL Editor first.</span>
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="font-semibold text-slate-900">Login Issues</h3>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Clients who tried to sign in but were blocked. Reach out to help them.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowResolved(v => !v)}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-          >
-            {showResolved ? 'Hide Resolved' : 'Show Resolved'}
-          </button>
-          {issues.some(i => !i.resolved) && (
-            <button
-              onClick={resolveAll}
-              className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
-            >
-              Resolve All
-            </button>
-          )}
-          <button onClick={load} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">
-            Refresh
-          </button>
-        </div>
-      </div>
-
-      {issues.length === 0 ? (
-        <div className="rounded-xl border border-slate-100 bg-slate-50 py-10 text-center text-sm text-slate-400">
-          {showResolved ? 'No login issues recorded.' : 'No unresolved login issues — all clear!'}
-        </div>
-      ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
-          <table className="min-w-full text-sm">
-            <thead className="border-b border-slate-100 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-              <tr>
-                <th className="px-4 py-2.5 text-left">Email</th>
-                <th className="px-4 py-2.5 text-left">Issue</th>
-                <th className="px-4 py-2.5 text-left">Message</th>
-                <th className="px-4 py-2.5 text-left">Time</th>
-                <th className="px-4 py-2.5 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {issues.map(issue => (
-                <tr key={issue.id} className={issue.resolved ? 'opacity-50' : ''}>
-                  <td className="px-4 py-3 font-medium text-slate-800">
-                    <button
-                      onClick={() => copyEmail(issue.email)}
-                      title="Click to copy"
-                      className="hover:underline text-left"
-                    >
-                      {issue.email}
-                    </button>
-                  </td>
-                  <td className="px-4 py-3">{issueTypeBadge(issue.issue_type)}</td>
-                  <td className="px-4 py-3 text-slate-500 max-w-xs truncate" title={issue.message}>{issue.message}</td>
-                  <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{fmtDate(issue.created_at)}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-1.5 flex-wrap">
-                      <button
-                        onClick={() => contactWhatsApp(issue.email)}
-                        className="rounded-md bg-green-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-green-700"
-                      >
-                        WhatsApp
-                      </button>
-                      {!issue.resolved && (
-                        <button
-                          onClick={() => resolve(issue.id)}
-                          className="rounded-md bg-slate-800 px-2.5 py-1 text-xs font-semibold text-white hover:bg-slate-700"
-                        >
-                          Resolve
-                        </button>
-                      )}
-                      {issue.resolved && (
-                        <button
-                          onClick={() => unresolve(issue.id)}
-                          className="rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-100"
-                        >
-                          Unresolve
-                        </button>
-                      )}
-                      <button
-                        onClick={() => deleteIssue(issue.id)}
-                        className="rounded-md border border-rose-200 px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  )
-}
-
 // ─── Admin Dashboard shell ────────────────────────────────────────────────────
 
 export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
   const [tab, setTab] = useState('registrations')
-  const [loginIssueCount, setLoginIssueCount] = useState(0)
-
-  // Load unresolved login issue count on mount for the badge
-  useEffect(() => {
-    if (!supabase) return
-    supabase
-      .from(LOGIN_ISSUES_TABLE)
-      .select('id', { count: 'exact', head: true })
-      .eq('resolved', false)
-      .then(({ count }) => setLoginIssueCount(count || 0))
-      .catch(() => {})
-  }, [])
 
   return (
     <section className="space-y-4">
@@ -3262,17 +2859,6 @@ export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
           >
             Draft Carts
           </button>
-          <button
-            onClick={() => setTab('login-issues')}
-            className={`relative rounded-full px-4 py-1.5 text-sm font-semibold transition ${tab === 'login-issues' ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-          >
-            Login Issues
-            {loginIssueCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white ring-2 ring-white">
-                {loginIssueCount > 9 ? '9+' : loginIssueCount}
-              </span>
-            )}
-          </button>
         </div>
       </div>
 
@@ -3283,7 +2869,6 @@ export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
         {tab === 'pricing' && <TierPricingPanel />}
         {tab === 'guestbook' && <GuestbookPanel />}
         {tab === 'draft-carts' && <DraftCartsPanel />}
-        {tab === 'login-issues' && <LoginIssuesPanel />}
       </div>
     </section>
   )
