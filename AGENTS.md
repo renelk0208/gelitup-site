@@ -33,3 +33,8 @@ For sensitive files: list every intended change with file path and a one-line su
 - Keep commit messages specific to the user request.
 - Avoid bundling diagnostics/report artifacts with product logic changes unless requested.
 - Never amend published commits or force-push without explicit user approval.
+
+## Deployment
+- When the user says "commit and push" or "push", always push to `main` so Netlify deploys immediately.
+- If the current worktree cannot check out `main` (because it is checked out in another worktree), use `git push origin <current-branch>:main` to push directly.
+- Do not ask whether to merge to main — always merge to main unless the user explicitly says otherwise.
