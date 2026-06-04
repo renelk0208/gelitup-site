@@ -1,4 +1,4 @@
-import { Component, Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+﻿import { Component, Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import appLogo from '/gelitup_logo.png'
 import PWABadge from './PWABadge.jsx'
@@ -16,6 +16,7 @@ import HeroCTA from './components/HeroCTA'
 import SocialProof from './components/SocialProof'
 import InstagramFeed from './components/InstagramFeed'
 import InspirationTeaser from './components/InspirationTeaser'
+import AcademyFAQ from './components/AcademyFAQ'
 import ProductImage from './components/ProductImage'
 import TestimonialStrip from './components/TestimonialStrip'
 import TikTokFeed from './components/TikTokFeed'
@@ -1876,40 +1877,7 @@ function ForAcademiesPage() {
       </div>
 
       {/* FAQ */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        <div className="border-b border-slate-200 px-6 py-4">
-          <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-[#1a1a1a]">Frequently Asked Questions</h2>
-        </div>
-        <div className="divide-y divide-slate-100">
-          {[
-            {
-              q: 'Can we order a sample kit before committing to a full order?',
-              a: 'Yes. Registered academy accounts can request sample packs before placing bulk orders. Contact us via WhatsApp or through your B2B dashboard to arrange a sample selection.',
-            },
-            {
-              q: 'Are your products safe for repeated daily use in a training environment?',
-              a: 'Yes. All products in current production are HEMA-free and TPO-free — the two most common sensitisers in gel products. We supply SDS documentation for all products on request.',
-            },
-            {
-              q: 'Do your products comply with EU cosmetics regulations?',
-              a: 'Yes. Every formula is CPNP Notified under EC 1223/2009 and fully compliant for sale and professional use across all EU member states.',
-            },
-            {
-              q: 'What are the minimum order quantities for academy accounts?',
-              a: 'No minimum order quantity is required for registered B2B accounts. Volume pricing tiers apply to larger orders, which your account manager can discuss with you directly.',
-            },
-            {
-              q: 'Can we incorporate GEL.IT.UP products into our course curriculum?',
-              a: 'Absolutely. We can provide product information, application guides, and technical details to support your course materials. Get in touch after registering your academy account.',
-            },
-          ].map(({ q, a }) => (
-            <div key={q} className="px-6 py-4">
-              <p className="text-sm font-semibold text-[#1a1a1a]">{q}</p>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{a}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <AcademyFAQ />
 
       {/* STARTER KIT */}
       <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
