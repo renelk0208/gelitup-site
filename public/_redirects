@@ -1,3 +1,5 @@
+/portal/sign-in   /portal/login     301
+
 # Subdomain proxy — consolidates shop-main.gelitup.com under gelitup.com/shop/
 /shop/*  https://shop-main.gelitup.com/:splat  200
 

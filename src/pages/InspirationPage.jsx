@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { inspirationCategories } from '../data/inspirationData'
+import InstagramFeed from '../components/InstagramFeed'
 
 /* ── Lightbox: full-screen image viewer with prev / next ─────────────── */
 function Lightbox({ images, index, onClose, onPrev, onNext }) {
@@ -232,6 +233,7 @@ export default function InspirationPage() {
           </section>
         </>
       )}
+      <InstagramFeed />
     </div>
   )
 }

@@ -14,6 +14,9 @@ import MinimumOrderNudge from './components/MinimumOrderNudge'
 import HowItWorks from './components/HowItWorks'
 import HeroCTA from './components/HeroCTA'
 import SocialProof from './components/SocialProof'
+import InstagramFeed from './components/InstagramFeed'
+import InspirationTeaser from './components/InspirationTeaser'
+import ProductImage from './components/ProductImage'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
@@ -7631,6 +7634,7 @@ function HomePage({ onOpenContactModal }) {
       </div>
 
       <HowItWorks variant="section" />
+      <InspirationTeaser />
       <GoogleReviewsStrip />
 
     </section>
@@ -9270,6 +9274,7 @@ function CheckoutPage() {
           </div>
 
           {/* PAYMENT OPTIONS */}
+          <HowItWorks variant="banner" />
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-3">
             <p className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500">Payment Options</p>
             <p className="text-sm text-slate-600">We'll send you a proforma invoice after your order is confirmed. Payment is due before dispatch.</p>
@@ -14260,7 +14265,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                       style={{ backgroundColor: product.preview || '#e2e8f0' }}
                       onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}
                     >
-                      {product.imageUrl && <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" />}
+                      <ProductImage src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="break-words text-[11px] font-semibold text-slate-900">{product.name}</p>
@@ -14937,7 +14942,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                         <div key={product.code} className="flex min-w-0 flex-col overflow-hidden bg-white" style={selected ? { outline: '2px solid #c8386e', outlineOffset: '-2px' } : {}}>
                           {/* image */}
                           <div className="relative aspect-square w-full cursor-pointer bg-slate-50" onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}>
-                            {product.imageUrl && <img src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />}
+                            <ProductImage src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
                             {selected && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
                           </div>
                           {product.galleryImages?.length > 0 && (
@@ -19207,6 +19212,7 @@ function App() {
             <div className="mt-2 space-y-1.5">
               <NavLink to="/" className="block transition duration-300 hover:text-fuchsia-300">Home</NavLink>
               <NavLink to="/about-us" className="block transition duration-300 hover:text-fuchsia-300">About Us</NavLink>
+              <NavLink to="/inspiration" className="block transition duration-300 hover:text-fuchsia-300">Inspiration</NavLink>
               <NavLink to="/full-catalogue" className="block transition duration-300 hover:text-fuchsia-300">Shop</NavLink>
               <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
               <NavLink to="/distributors" className="block transition duration-300 hover:text-fuchsia-300">Distributor Registration</NavLink>

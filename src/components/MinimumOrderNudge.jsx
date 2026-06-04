@@ -29,7 +29,7 @@ export default function MinimumOrderNudge({
 
   return (
     <div style={{
-      border: '1px solid #e8003c',
+      border: '1px solid #D43790',
       borderRadius: '8px',
       padding: '16px 18px',
       marginBottom: '16px',
@@ -37,7 +37,7 @@ export default function MinimumOrderNudge({
     }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e8003c" strokeWidth="2" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D43790" strokeWidth="2" aria-hidden="true">
           <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
           <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
         </svg>
@@ -57,7 +57,7 @@ export default function MinimumOrderNudge({
         <div style={{
           height: '100%',
           width: `${percentFilled}%`,
-          background: '#e8003c',
+          background: '#D43790',
           borderRadius: '3px',
           transition: 'width 0.3s ease',
         }} />
@@ -77,7 +77,7 @@ export default function MinimumOrderNudge({
           display: 'inline-flex',
           alignItems: 'center',
           gap: '6px',
-          background: '#e8003c',
+          background: '#D43790',
           color: '#fff',
           fontSize: '13px',
           fontWeight: 600,

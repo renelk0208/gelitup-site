@@ -72,7 +72,7 @@ export default function HowItWorks({ variant = 'banner' }) {
         background: '#fafafa',
       }}>
         <p style={{ fontWeight: 600, fontSize: '13px', margin: '0 0 10px 0', color: '#1a1a1a', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e8003c" strokeWidth="2.2" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D43790" strokeWidth="2.2" aria-hidden="true">
             <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
           </svg>
           How ordering works
@@ -96,7 +96,7 @@ export default function HowItWorks({ variant = 'banner' }) {
       <div style={{ maxWidth: '960px', margin: '0 auto', padding: '0 24px' }}>
 
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <p style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#e8003c', marginBottom: '8px' }}>
+          <p style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#D43790', marginBottom: '8px' }}>
             Simple wholesale ordering
           </p>
           <h2 style={{ fontSize: '28px', fontWeight: 700, margin: '0 0 12px 0', color: '#1a1a1a' }}>
@@ -133,7 +133,7 @@ export default function HowItWorks({ variant = 'banner' }) {
                 height: '22px',
                 borderRadius: '50%',
                 background: '#fff0f3',
-                color: '#e8003c',
+                color: '#D43790',
                 fontSize: '11px',
                 fontWeight: 700,
                 display: 'flex',
@@ -144,7 +144,7 @@ export default function HowItWorks({ variant = 'banner' }) {
               </div>
 
               {/* Icon */}
-              <div style={{ color: '#e8003c' }}>
+              <div style={{ color: '#D43790' }}>
                 {step.icon}
               </div>
 
