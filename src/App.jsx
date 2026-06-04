@@ -12,6 +12,8 @@ import { useLang, getTranslations, setLang, SUPPORTED_LANGS } from './lib/i18n'
 import PageLoader from './components/PageLoader'
 import MinimumOrderNudge from './components/MinimumOrderNudge'
 import HowItWorks from './components/HowItWorks'
+import HeroCTA from './components/HeroCTA'
+import SocialProof from './components/SocialProof'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
@@ -5170,6 +5172,7 @@ function FullCataloguePage() {
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-white/90 sm:text-lg" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
             The complete professional nail range — gel polish, builder gel, base coats, top coats, and accessories. HEMA &amp; TPO-Free formulations, <a href="https://www.crueltyfreeinternational.org/approved-brands/listing/gel-it-up/" target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-300 hover:underline">Leaping Bunny Approved</a>, and engineered for professional excellence. Browse every shade, system, and tool in the Gel It Up collection.
           </p>
+          <HeroCTA />
         </div>
       </div>
 
@@ -8554,6 +8557,8 @@ function BuyerRegister() {
             <input type="password" required autoComplete="new-password" value={form.confirmPassword} onChange={(e) => setForm(f => ({ ...f, confirmPassword: e.target.value }))} placeholder="Re-enter password" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
           </label>
 
+          <SocialProof variant="register" />
+
           <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-fuchsia-600 px-4 py-3 text-sm font-bold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500 disabled:opacity-50">
             {isSubmitting ? 'Creating Account…' : 'Create Account & Start Ordering'}
           </button>
@@ -10111,6 +10116,8 @@ function PortalRegister({ onRegister }) {
               {R.consent || 'I agree that the information I provide in this form will be stored and processed by GEL.IT.UP by GIUP® for the purpose of evaluating my application and managing the business relationship. This data will not be shared with third parties without consent.'}
             </span>
           </label>
+
+          <SocialProof variant="register" />
 
           <button type="submit" disabled={isSubmitting || !consentGiven} className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
             {isSubmitting ? (R.submitting || 'Submitting...') : (R.submit || 'Submit Application')}
@@ -19023,6 +19030,7 @@ function App() {
                 />
                 <Route path="/admin-login" element={<Navigate to="/portal/admin-login" replace />} />
                 <Route path="/portal-client-login" element={<Navigate to="/portal/login" replace />} />
+                <Route path="/portal/sign-in" element={<Navigate to="/portal/login" replace />} />
                 <Route path="/portal-admin-login" element={<Navigate to="/portal/admin-login" replace />} />
                 <Route path="/portal/register" element={<BuyerRegister />} />
                 <Route path="/portal/buy" element={<Navigate to="/checkout" replace />} />

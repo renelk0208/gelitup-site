@@ -59,12 +59,15 @@ function CategoryCard({ category, onClick }) {
       onClick={() => onClick(category)}
       className="group overflow-hidden rounded-3xl bg-neutral-100 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
     >
-      <div className="aspect-[4/5] overflow-hidden">
+      <div className="aspect-[4/5] overflow-hidden bg-gradient-to-br from-fuchsia-900 to-neutral-900">
         <img
           src={category.cover}
           alt={category.label}
           loading="lazy"
           className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none'
+          }}
         />
       </div>
       <div className="px-4 py-3">

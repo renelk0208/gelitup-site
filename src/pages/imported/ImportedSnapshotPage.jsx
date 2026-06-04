@@ -709,7 +709,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
               src={ABOUT_US_HERO_IMAGE_URL || manifestoVisual?.displayUrl || '/logo.png'}
               alt="About Us hero visual"
               className="h-full w-full object-cover"
-              loading="lazy"
+              loading="eager"
               onError={(event) => {
                 const currentSrc = event.currentTarget.getAttribute('src') || ''
                 if (currentSrc.includes('about-us-page-hero-image')) {
@@ -808,6 +808,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           {exhibitionsBackdropVideoUrl && (
             <video
               src={exhibitionsBackdropVideoUrl}
+              poster={ABOUT_US_HERO_IMAGE_URL}
               className="absolute inset-0 h-full w-full object-cover"
               muted
               playsInline
