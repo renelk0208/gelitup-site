@@ -9,6 +9,9 @@ import SchemaOrg from './components/SchemaOrg'
 import { hasSupabaseConfig, supabase } from './lib/supabaseClient'
 import useB2BIntelligence from './lib/useB2BIntelligence'
 import { useLang, getTranslations, setLang, SUPPORTED_LANGS } from './lib/i18n'
+import PageLoader from './components/PageLoader'
+import MinimumOrderNudge from './components/MinimumOrderNudge'
+import HowItWorks from './components/HowItWorks'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
@@ -7624,6 +7627,7 @@ function HomePage({ onOpenContactModal }) {
         </NavLink>
       </div>
 
+      <HowItWorks variant="section" />
       <GoogleReviewsStrip />
 
     </section>
@@ -9280,11 +9284,10 @@ function CheckoutPage() {
             </div>
           </div>
 
-          {!isSubmitting && (cartTotal < MIN_ORDER_EUR || !form.agreeTerms) && (
+          <MinimumOrderNudge currentTotal={cartTotal} minimum={MIN_ORDER_EUR} />
+          {!isSubmitting && !form.agreeTerms && cartTotal >= MIN_ORDER_EUR && (
             <p className="text-center text-xs text-amber-700">
-              {cartTotal < MIN_ORDER_EUR
-                ? `Add €${(MIN_ORDER_EUR - cartTotal).toFixed(2)} more to reach the €${MIN_ORDER_EUR} minimum order`
-                : 'Please agree to the terms and conditions to continue'}
+              Please agree to the terms and conditions to continue
             </p>
           )}
           <button type="submit" disabled={isSubmitting || cartTotal < MIN_ORDER_EUR || !form.agreeTerms} className="w-full rounded-xl bg-fuchsia-600 px-6 py-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500 disabled:opacity-50">
@@ -9329,6 +9332,7 @@ function CheckoutPage() {
               <p className="mt-1 text-[10px] text-slate-500">
                 {progress < 100 ? `€${(MIN_ORDER_EUR - cartTotal).toFixed(2)} more to reach €${MIN_ORDER_EUR} minimum` : 'Minimum order reached!'}
               </p>
+              <HowItWorks variant="banner" />
               <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
                 <svg viewBox="0 0 20 20" fill="currentColor" className="mt-0.5 h-4 w-4 shrink-0 text-amber-500"><path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clipRule="evenodd" /></svg>
                 <p className="text-xs font-medium leading-relaxed text-amber-800">
@@ -18875,6 +18879,7 @@ function App() {
     <div className="lux-theme min-h-screen pb-8">
       <ScrollToTopOnRouteChange />
       <SchemaOrg />
+      <PageLoader />
       {!announcementDismissed && !isPortalRoute && (
         <div className="relative bg-fuchsia-600 px-4 py-2 text-center text-xs font-semibold text-white">
           🚚 Free Shipping on all EU wholesale orders &nbsp;·&nbsp; Minimum order €{MIN_ORDER_EUR}

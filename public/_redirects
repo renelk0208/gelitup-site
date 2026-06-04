@@ -1,5 +1,10 @@
 # Subdomain proxy — consolidates shop-main.gelitup.com under gelitup.com/shop/
 /shop/*  https://shop-main.gelitup.com/:splat  200
 
+# Common nav alias redirects
+/colours    /full-catalogue    301
+/colors     /full-catalogue    301
+/register   /portal/register   301
+
 # SPA fallback — must be last
 /*  /index.html  200
