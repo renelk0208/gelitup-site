@@ -3,6 +3,8 @@ import { NavLink } from 'react-router-dom'
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import InspirationTeaser from '../../components/InspirationTeaser'
+import InstagramFeed from '../../components/InstagramFeed'
+import TikTokFeed from '../../components/TikTokFeed'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/gelitup_official/'
 const INSTAGRAM_HANDLE = 'gelitup_official'
@@ -878,6 +880,8 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           </div>
         ) : null}
 
+        <InstagramFeed />
+        <TikTokFeed />
         <InspirationTeaser />
 
         <div className="pb-2 text-center">

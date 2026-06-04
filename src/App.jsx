@@ -1612,6 +1612,11 @@ function DistributorPackagesPage() {
         </div>
       </div>
 
+      {/* TRUST LINE */}
+      <p className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm text-slate-600">
+        Distributor pricing is shared privately after an initial enquiry. All tiers include full EU regulatory documentation and social media brand support.
+      </p>
+
       {/* SALES TIER */}
       <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #374151', backgroundColor: '#ffffff' }}>
         <div className="px-6 py-4" style={{ backgroundColor: '#374151' }}>
@@ -1640,8 +1645,9 @@ function DistributorPackagesPage() {
         </div>
         <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
           <NavLink to="/distributors" className="btn-cta-dark inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Request Sales Tier Pricing
+            Enquire About This Tier
           </NavLink>
+          <p className="mt-2 text-xs" style={{ color: '#6b7280' }}>We typically respond within 24 hours. All enquiries are treated confidentially.</p>
         </div>
       </article>
 
@@ -1678,8 +1684,9 @@ function DistributorPackagesPage() {
         </div>
         <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
           <NavLink to="/distributors" className="btn-cta-dark inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Request Professional Tier Pricing →
+            Enquire About This Tier
           </NavLink>
+          <p className="mt-2 text-xs" style={{ color: '#6b7280' }}>We typically respond within 24 hours. All enquiries are treated confidentially.</p>
         </div>
       </article>
 
@@ -7524,8 +7531,6 @@ function HomePage({ onOpenContactModal }) {
       </div>
 
       <HeroCTA />
-      <InstagramFeed />
-      <TikTokFeed />
       <TestimonialStrip />
 
       <InfoCard id="products" title="Our Products">
@@ -7666,6 +7671,8 @@ function HomePage({ onOpenContactModal }) {
       </div>
 
       <HowItWorks variant="section" />
+      <InstagramFeed />
+      <TikTokFeed />
       <InspirationTeaser />
       <GoogleReviewsStrip />
 
@@ -8558,15 +8565,15 @@ function BuyerRegister() {
             Open to all professional buyers worldwide
           </li>
         </ul>
-        <p className="mt-4 text-xs text-slate-400">
+        <p className="mt-4 text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
           Want to try before committing?{' '}
           <a href="mailto:info@gelitup.com?subject=Sample Pack Request" className="font-bold text-white underline hover:text-white/90">
             Request a sample pack →
           </a>
         </p>
-        <p className="mt-4 text-xs text-slate-400">
+        <p className="mt-4 text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
           Looking for wholesale distribution?{' '}
-          <NavLink to="/become-distributor" className="font-semibold text-fuchsia-400 hover:underline">Apply as a distributor</NavLink>
+          <NavLink to="/distributors" style={{ color: '#fff', fontWeight: 700, textDecoration: 'underline' }}>Apply as a distributor</NavLink>
         </p>
       </div>
 
@@ -18934,7 +18941,7 @@ function App() {
       <ClarityScript />
       {!announcementDismissed && !isPortalRoute && (
         <div className="relative bg-fuchsia-600 px-4 py-2 text-center text-xs font-semibold text-white">
-          🎵 <a href="https://www.tiktok.com/@gelitupofficial" target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-white/90">@GELITUP on TikTok</a> &nbsp;·&nbsp; 🚚 Free Shipping on all EU wholesale orders &nbsp;·&nbsp; Minimum order €{MIN_ORDER_EUR}
+          🚚 Free Shipping on all EU wholesale orders &nbsp;·&nbsp; Minimum order €{MIN_ORDER_EUR}
           <button
             type="button"
             onClick={handleDismissAnnouncement}
