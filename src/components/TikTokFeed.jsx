@@ -15,6 +15,16 @@ export default function TikTokFeed() {
 
   return (
     <section>
+      <style>{`
+        .elfsight-app-b92ff608-e961-429a-be31-d7d920cbb12f .eapps-tiktok-feed-header,
+        .elfsight-app-b92ff608-e961-429a-be31-d7d920cbb12f .eapps-tiktok-feed-posts-item-meta,
+        .elfsight-app-b92ff608-e961-429a-be31-d7d920cbb12f .eapps-tiktok-feed-posts-item-text {
+          display: none !important;
+        }
+        .elfsight-app-b92ff608-e961-429a-be31-d7d920cbb12f .eapps-tiktok-feed-posts-item-video {
+          border-radius: 8px !important;
+        }
+      `}</style>
       <div className={ELFSIGHT_APP_ID} data-elfsight-app-lazy />
     </section>
   )
