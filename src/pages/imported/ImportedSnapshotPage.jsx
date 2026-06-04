@@ -705,7 +705,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
     const sortedExhibitionEvents = sortEventsByDate(aboutUsExhibitions.events || [])
 
     return (
-      <section className="space-y-6 bg-white">
+      <section className="space-y-6">
         <div className="mx-auto w-full max-w-6xl overflow-hidden rounded-2xl bg-black">
           <div className="relative h-[58vh] min-h-[320px] w-full sm:h-[66vh] sm:min-h-[400px]">
             <img
@@ -736,7 +736,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[#E8E8E8] bg-white p-5 sm:p-8">
+        <div className="rounded-2xl border border-[#E8E8E8] bg-transparent p-5 sm:p-8">
           <p
             className="text-2xl font-extrabold uppercase leading-tight tracking-[0.15em] text-[#1A1A1A] sm:text-4xl"
             style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
