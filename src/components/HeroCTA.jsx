@@ -23,7 +23,7 @@ export default function HeroCTA() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            background: '#e8003c',
+            background: '#D43790',
             color: '#fff',
             fontSize: '14px',
             fontWeight: 700,

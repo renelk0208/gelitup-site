@@ -37,7 +37,7 @@ export default function SocialProof({ variant = 'hero' }) {
               <strong style={{ color: '#1a1a1a' }}>{s.value}</strong> {s.label}
             </span>
             {i < STATS.length - 1 && (
-              <span key={`dot-${i}`} style={{ color: '#e8003c', fontSize: '10px', lineHeight: 1 }}>·</span>
+              <span key={`dot-${i}`} style={{ color: '#D43790', fontSize: '10px', lineHeight: 1 }}>·</span>
             )}
           </>
         ))}
