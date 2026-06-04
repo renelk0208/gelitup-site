@@ -15,20 +15,6 @@ export default function TikTokFeed() {
 
   return (
     <section className="mt-10">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#D43790]">TikTok</p>
-          <h2 className="mt-0.5 text-xl font-bold text-slate-900">@gelitupofficial</h2>
-        </div>
-        <a
-          href="https://www.tiktok.com/@gelitupofficial"
-          target="_blank"
-          rel="noreferrer"
-          className="shrink-0 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-        >
-          Follow on TikTok ↗
-        </a>
-      </div>
       <div className={ELFSIGHT_APP_ID} data-elfsight-app-lazy />
     </section>
   )
