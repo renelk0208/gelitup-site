@@ -20,6 +20,7 @@ import ProductImage from './components/ProductImage'
 import TestimonialStrip from './components/TestimonialStrip'
 import TikTokFeed from './components/TikTokFeed'
 import ClarityScript from './components/ClarityScript'
+import CatalogueSkeleton from './components/CatalogueSkeleton'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
@@ -4170,6 +4171,10 @@ function FullCataloguePage() {
       ...current,
       [itemKey]: Number(current[itemKey] || 0) + qty,
     }))
+    if (window.gtag) {
+      const [itemName] = itemKey.split('::')
+      window.gtag('event', 'add_to_cart', { currency: 'EUR', items: [{ item_name: itemName, quantity: qty }] })
+    }
   }, [itemQuantities, quickCartUnits])
 
   const extractProductCode = useCallback((name = '') => {
@@ -5201,6 +5206,8 @@ function FullCataloguePage() {
     )
     : null
 
+  if (isLoading && sections.length === 0) return <CatalogueSkeleton />
+
   return (
     <section className="space-y-5">
       <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
@@ -5303,6 +5310,19 @@ function FullCataloguePage() {
               )}
             </div>
           </div>
+
+          {/* REGISTER CTA BANNER — visible to logged-out visitors */}
+          {!isLoggedIn && (
+            <div className="mx-auto max-w-6xl px-4 sm:px-8 pb-2">
+              <div className="flex items-center justify-between gap-4 rounded-xl bg-[#D43790]/10 border border-[#D43790]/30 px-5 py-3">
+                <div>
+                  <p className="text-sm font-bold text-[#D43790]">You're viewing B2B wholesale prices.</p>
+                  <p className="text-xs text-slate-600">Register free to start ordering.</p>
+                </div>
+                <NavLink to="/portal/register" className="shrink-0 rounded-lg bg-[#D43790] px-4 py-2 text-sm font-bold text-white hover:bg-[#BF3182] transition">Register free →</NavLink>
+              </div>
+            </div>
+          )}
 
           {/* GLOBAL SEARCH RESULTS */}
           {searchQuery && !activeCategory && (
@@ -8519,6 +8539,7 @@ function BuyerRegister() {
       // Check if the user session was created immediately (email confirmation disabled)
       if (signUpData?.session) {
         localStorage.setItem('portalAuth', 'true')
+        if (window.gtag) window.gtag('event', 'sign_up', { method: 'email' })
         navigate('/full-catalogue')
         return
       }
@@ -8543,9 +8564,9 @@ function BuyerRegister() {
     <section className="mx-auto grid max-w-4xl rounded-2xl border border-slate-200 bg-white md:grid-cols-2 md:overflow-hidden">
       <div className="bg-[#111111] p-5 sm:p-6 md:p-8 text-white">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-400">GEL.IT.UP by GIUP®</p>
-        <h2 className="heading-on-dark mt-3 text-3xl font-bold">Create Your Account</h2>
+        <h2 className="heading-on-dark mt-3 text-3xl font-bold">Access Wholesale Pricing Today</h2>
         <p className="mt-3 text-sm text-slate-300">
-          Register to access B2B pricing and place orders immediately. No approval needed.
+          Join 1,000+ nail professionals already ordering at B2B prices. Free to join, instant access, no approval needed.
         </p>
         <ul className="mt-6 space-y-3 hidden md:block">
           <li className="flex items-start gap-2.5 text-sm text-slate-300">
@@ -8796,6 +8817,7 @@ function CheckoutPage() {
     if (!hasSupabaseConfig || !supabase) { setError('Order system is not configured. Please contact us.'); return }
 
     setIsSubmitting(true)
+    if (window.gtag) window.gtag('event', 'begin_checkout', { currency: 'EUR', value: cartTotal })
 
     try {
       // 1. Create Supabase account (optional — or silent temp account)
