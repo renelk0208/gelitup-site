@@ -183,12 +183,12 @@ const PROFORMA_LEEUKOPF_COMPANY = import.meta.env.VITE_PROFORMA_LEEUKOPF_COMPANY
 const PROFORMA_LEEUKOPF_ADDRESS = import.meta.env.VITE_PROFORMA_LEEUKOPF_ADDRESS || '8 Racho Dimchev, Sofia, Bulgaria'
 const PROFORMA_LEEUKOPF_PHONE = import.meta.env.VITE_PROFORMA_LEEUKOPF_PHONE || '(+359) 73 891 041'
 const PROFORMA_LEEUKOPF_EMAIL = import.meta.env.VITE_PROFORMA_LEEUKOPF_EMAIL || 'info@gelitup.com'
-const TIKTOK_URL = import.meta.env.VITE_TIKTOK_URL || 'https://www.tiktok.com/@gelitupinternational'
+const TIKTOK_URL = import.meta.env.VITE_TIKTOK_URL || 'https://www.tiktok.com/@gelitupofficial'
 const INSTAGRAM_URL = import.meta.env.VITE_INSTAGRAM_URL || 'https://www.instagram.com/gelitupinternational/'
 const LINKEDIN_URL = import.meta.env.VITE_LINKEDIN_URL || 'https://gr.linkedin.com/company/gel-it-up-by-giup'
 const FACEBOOK_URL = import.meta.env.VITE_FACEBOOK_URL || 'https://www.facebook.com/GEL.IT.UP.Greece/'
 const YOUTUBE_URL = import.meta.env.VITE_YOUTUBE_URL || 'https://www.youtube.com/@GELITUP'
-const TIKTOK_HANDLE = import.meta.env.VITE_TIKTOK_HANDLE || 'GELITUPINTERNATIONAL'
+const TIKTOK_HANDLE = import.meta.env.VITE_TIKTOK_HANDLE || 'gelitupofficial'
 const INSTAGRAM_HANDLE = import.meta.env.VITE_INSTAGRAM_HANDLE || 'gelitupinternational'
 const LINKEDIN_HANDLE = import.meta.env.VITE_LINKEDIN_HANDLE || 'GEL.IT.UP'
 const FACEBOOK_HANDLE = import.meta.env.VITE_FACEBOOK_HANDLE || '@gelitup'
@@ -7523,7 +7523,8 @@ function HomePage({ onOpenContactModal }) {
         </div>
       </div>
 
-      <InstagramFeedStrip />
+      <HeroCTA />
+      <InstagramFeed />
       <TikTokFeed />
       <TestimonialStrip />
 
@@ -8559,7 +8560,7 @@ function BuyerRegister() {
         </ul>
         <p className="mt-4 text-xs text-slate-400">
           Want to try before committing?{' '}
-          <a href="mailto:info@gelitup.com?subject=Sample Pack Request" className="font-semibold text-fuchsia-400 hover:underline">
+          <a href="mailto:info@gelitup.com?subject=Sample Pack Request" className="font-bold text-white underline hover:text-white/90">
             Request a sample pack →
           </a>
         </p>
@@ -18933,7 +18934,7 @@ function App() {
       <ClarityScript />
       {!announcementDismissed && !isPortalRoute && (
         <div className="relative bg-fuchsia-600 px-4 py-2 text-center text-xs font-semibold text-white">
-          🎵 <a href="https://www.tiktok.com/@gelitupinternational" target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-white/90">@GELITUP on TikTok</a> &nbsp;·&nbsp; 🚚 Free Shipping on all EU wholesale orders &nbsp;·&nbsp; Minimum order €{MIN_ORDER_EUR}
+          🎵 <a href="https://www.tiktok.com/@gelitupofficial" target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-white/90">@GELITUP on TikTok</a> &nbsp;·&nbsp; 🚚 Free Shipping on all EU wholesale orders &nbsp;·&nbsp; Minimum order €{MIN_ORDER_EUR}
           <button
             type="button"
             onClick={handleDismissAnnouncement}
