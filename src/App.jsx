@@ -1615,10 +1615,18 @@ function DistributorPackagesPage() {
       </div>
 
       {/* TRUST LINE */}
-      <p className="w-full rounded-xl bg-[#D43790] px-5 py-3 text-center text-sm font-semibold text-white">
-        Distributor pricing is shared privately after an initial enquiry.
-        All tiers include full EU regulatory documentation and social media brand support.
-      </p>
+      <div className="flex items-center justify-between gap-4 rounded-xl overflow-hidden" style={{ backgroundColor: '#1a1a2e' }}>
+        <div className="flex items-stretch gap-4">
+          <div className="w-1 shrink-0 self-stretch" style={{ backgroundColor: '#D43790' }} />
+          <p className="py-3 pr-2 text-sm" style={{ color: 'rgba(255,255,255,0.80)' }}>
+            Distributor pricing is shared privately after an initial enquiry.
+            All tiers include full EU regulatory documentation and social media brand support.
+          </p>
+        </div>
+        <span className="mr-4 shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest" style={{ backgroundColor: '#D43790', color: '#ffffff' }}>
+          Confidential
+        </span>
+      </div>
 
       {/* SALES TIER */}
       <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #374151', backgroundColor: '#ffffff' }}>
