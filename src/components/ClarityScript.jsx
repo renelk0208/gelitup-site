@@ -1,10 +1,21 @@
 import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 
 /**
  * Microsoft Clarity — gelitup.com
  * Project ID: x1qbjkk609
  */
 export default function ClarityScript() {
+  const location = useLocation()
+
+  // Do not load Clarity on portal or admin routes
+  if (
+    location.pathname.startsWith('/portal') ||
+    location.pathname.startsWith('/admin')
+  ) {
+    return null
+  }
+
   useEffect(() => {
     // Delay 2s so Clarity never interferes with React mounting
     const timer = setTimeout(() => {

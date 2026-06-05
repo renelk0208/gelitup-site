@@ -18985,12 +18985,17 @@ function App() {
 
   const isPortalRoute = location.pathname.startsWith('/portal') || location.pathname === '/admin-login'
 
+  // Suppress GA4 tracking on portal/admin routes
+  if (isPortalRoute) {
+    window['ga-disable-G-80CYK4H42D'] = true
+  }
+
   return (
     <div className="lux-theme min-h-screen pb-8">
       <ScrollToTopOnRouteChange />
       <SchemaOrg />
       <PageLoader />
-      <ClarityScript />
+      {!isPortalRoute && <ClarityScript />}
       {!announcementDismissed && !isPortalRoute && (
         <div className="relative bg-fuchsia-600 px-4 py-2 text-center text-xs font-semibold text-white">
           🚚 Free Shipping on all EU wholesale orders &nbsp;·&nbsp; Minimum order €{MIN_ORDER_EUR}
