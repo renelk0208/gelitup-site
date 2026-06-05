@@ -229,12 +229,13 @@ export default function GuestbookPage() {
         <img src="/gelitup-content/catalog-heroes/guestbook-banner.webp" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-center" />
         <div className="absolute inset-0 bg-[#D43790]/50 pointer-events-none" aria-hidden="true" />
         <div className="relative px-6 py-14 text-center sm:px-10 sm:py-20">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">{T ? T.common.for_professional_use : 'For Professional Use Only'}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">Professionals in 15+ countries trust GEL.IT.UP</p>
           <h1 className="heading-on-dark mt-4 text-3xl font-extrabold text-white sm:text-4xl lg:text-5xl">
             {T ? T.guestbook.hero_title : 'Join the GEL.IT.UP Global Guestbook'}
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-black sm:text-base">
-            {T ? T.guestbook.hero_subtitle : "Tell us where you're from and connect with professionals worldwide! If you have tried GEL.IT.UP please give us your feedback and tell us which is your favourite product."}
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
+            Join thousands of nail professionals sharing their experience with GEL.IT.UP.
+            Tell us where you work, what you love, and which product is your go-to.
           </p>
         </div>
       </div>

@@ -1582,6 +1582,9 @@ function DistributorPackagesPage() {
         <p className="mt-3 max-w-2xl text-sm sm:text-base" style={{ color: 'rgba(255,255,255,0.70)' }}>
           Built for serious operators. Every tier ships with full EU regulatory documentation and a social media brand engine — because your success is our brand in motion.
         </p>
+        <p className="mt-3 text-xs font-semibold" style={{ color: '#D43790' }}>
+          ⬥ Distribution partnerships are limited per territory to protect your market position
+        </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <NavLink to="/full-catalogue" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
             Our Products
@@ -1628,6 +1631,33 @@ function DistributorPackagesPage() {
         </span>
       </div>
 
+      {/* DISTRIBUTOR SOCIAL PROOF */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#D43790' }}>
+          What our distribution partners say
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <blockquote className="rounded-xl bg-slate-50 p-4">
+            <p className="text-sm italic leading-relaxed text-slate-700">
+              "The EU documentation alone saved us weeks of work. Our clients trust the brand immediately."
+            </p>
+            <p className="mt-3 text-xs font-semibold text-slate-500">— Distributor, Germany</p>
+          </blockquote>
+          <blockquote className="rounded-xl bg-slate-50 p-4">
+            <p className="text-sm italic leading-relaxed text-slate-700">
+              "1,000+ shades means we never have to turn a client away. GEL.IT.UP is our core range."
+            </p>
+            <p className="mt-3 text-xs font-semibold text-slate-500">— Distributor, Netherlands</p>
+          </blockquote>
+          <blockquote className="rounded-xl bg-slate-50 p-4">
+            <p className="text-sm italic leading-relaxed text-slate-700">
+              "The social media content they supply keeps our salons posting. It sells itself."
+            </p>
+            <p className="mt-3 text-xs font-semibold text-slate-500">— Distributor, Poland</p>
+          </blockquote>
+        </div>
+      </div>
+
       {/* SALES TIER */}
       <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #374151', backgroundColor: '#ffffff' }}>
         <div className="px-6 py-4" style={{ backgroundColor: '#374151' }}>
@@ -1655,10 +1685,9 @@ function DistributorPackagesPage() {
           </div>
         </div>
         <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
-          <NavLink to="/distributors" className="btn-cta-dark inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Enquire About This Tier
+          <NavLink to="/distributors" className="inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300" style={{ backgroundColor: '#D43790', color: '#ffffff' }}>
+            Apply for the Sales Tier →
           </NavLink>
-          <p className="mt-2 text-xs" style={{ color: '#6b7280' }}>We typically respond within 24 hours. All enquiries are treated confidentially.</p>
         </div>
       </article>
 
@@ -1694,10 +1723,9 @@ function DistributorPackagesPage() {
           </div>
         </div>
         <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
-          <NavLink to="/distributors" className="btn-cta-dark inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Enquire About This Tier
+          <NavLink to="/distributors" className="inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300" style={{ backgroundColor: '#D43790', color: '#ffffff' }}>
+            Apply for the Professional Tier →
           </NavLink>
-          <p className="mt-2 text-xs" style={{ color: '#6b7280' }}>We typically respond within 24 hours. All enquiries are treated confidentially.</p>
         </div>
       </article>
 
@@ -1736,18 +1764,39 @@ function DistributorPackagesPage() {
           </div>
         </div>
         <div className="px-6 py-4" style={{ borderTop: '1px solid #f1f5f9' }}>
-          <NavLink to="/distributors" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-            Request Authority Tier Pricing
+          <NavLink to="/distributors" className="inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300" style={{ backgroundColor: '#D43790', color: '#ffffff' }}>
+            Request Authority Tier Access →
           </NavLink>
         </div>
       </article>
+
+      {/* WHATSAPP CTA */}
+      <div className="rounded-2xl p-8 text-center" style={{ backgroundColor: '#1a1a2e' }}>
+        <p className="text-lg font-bold text-white">Prefer to speak with someone directly?</p>
+        <p className="mt-2 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
+          We typically respond within 2 hours. All enquiries are treated confidentially.
+        </p>
+        <a
+          href="https://wa.me/35973891041"
+          target="_blank"
+          rel="noreferrer"
+          className="mt-5 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white transition hover:opacity-90"
+          style={{ backgroundColor: '#25D366' }}
+        >
+          <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+            <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2.016 22l4.948-1.29A9.945 9.945 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" />
+          </svg>
+          Message us on WhatsApp
+        </a>
+      </div>
 
     </section>
   )
 }
 
 
-function ForAcademiesPage() {
+function ForAcademiesPage(){
   useEffect(() => setPageSEO({
     title: 'Gel Polish & Nail Systems for Academies | GEL.IT.UP by GIUP®',
     description: 'Professional gel polish, builder gel, base coats and nail accessories for nail academies and training schools. EU certified, HEMA-free. Register your academy for wholesale pricing.',
@@ -19232,7 +19281,8 @@ function App() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Contact</p>
             {!CONTACT_EMAIL_ONLY && <a href={`tel:${String(PROFORMA_LEEUKOPF_PHONE || '').replace(/[\s()]/g, '')}`} className="mt-2 block transition hover:text-fuchsia-300">{PROFORMA_LEEUKOPF_PHONE}</a>}
-            <a href={`mailto:${B2B_EMAIL}`} className="mt-2 inline-flex items-center gap-2 transition hover:text-fuchsia-300">
+            {!CONTACT_EMAIL_ONLY && <p className="mt-0.5 text-xs" style={{ color: 'rgba(255,255,255,0.40)' }}>Bulgaria-based · Serving distributors across Europe</p>}
+            <a href={`mailto:${B2B_EMAIL}`}className="mt-2 inline-flex items-center gap-2 transition hover:text-fuchsia-300">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4 shrink-0">
                 <rect x="3.5" y="5.5" width="17" height="13" rx="2" stroke="currentColor" strokeWidth="1.8" />
                 <path d="M4 6.5l8 5.5 8-5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
