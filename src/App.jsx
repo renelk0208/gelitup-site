@@ -7376,7 +7376,7 @@ function HomePage({ onOpenContactModal }) {
               </p>
               {/* Trust bar */}
               <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5">
-                {['1,000+ shades', 'HEMA-free', 'EU certified', '30+ countries'].map((badge) => (
+                {['1,000+ shades', 'HEMA-free', 'EU certified', '15+ countries'].map((badge) => (
                   <span key={badge} className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/70">
                     <span className="h-1 w-1 rounded-full bg-fuchsia-400" aria-hidden="true" />
                     {badge}
@@ -7843,7 +7843,7 @@ function DistributorsPage() {
 
   useEffect(() => setPageSEO({
     title: 'Official GEL.IT.UP Distributors Worldwide | GEL.IT.UP by GIUP®',
-    description: 'Find official GEL.IT.UP gel polish and nail system distributors in your country. Verified network covering 30+ countries across Europe and beyond.',
+    description: 'Find official GEL.IT.UP gel polish and nail system distributors in your country. Verified network covering 15+ countries across Europe and beyond.',
     canonical: 'https://gelitup.com/distributors',
   }), [])
 
@@ -18973,6 +18973,8 @@ function App() {
           />
 
           <Route path="/products" element={<Navigate to="/distributor-packages" replace />} />
+          <Route path="/distribution" element={<Navigate to="/distributor-packages" replace />} />
+          <Route path="/about" element={<Navigate to="/pages/about-us" replace />} />
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
           <Route path="/for-academies" element={<ForAcademiesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
