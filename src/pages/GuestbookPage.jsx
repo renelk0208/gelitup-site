@@ -78,7 +78,7 @@ function EntryCard({ entry, featured }) {
   const displayMessage = expanded || !isLong ? message : message.slice(0, TRUNCATE_LENGTH).trimEnd() + '…'
 
   return (
-    <div className={`rounded-2xl border p-5 transition ${featured ? 'border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 via-white to-violet-50 shadow-[0_2px_20px_rgba(212,55,144,0.12)]' : 'border-slate-100 bg-white'}`}>
+    <div className={`rounded-2xl border p-5 shadow-sm transition hover:shadow-md ${featured ? 'border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 via-white to-violet-50 shadow-[0_2px_20px_rgba(212,55,144,0.12)]' : 'border-slate-100 bg-white ring-1 ring-slate-100'}`}>
       <div className="flex items-start gap-3">
         <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${entry.anonymous ? 'bg-slate-400' : colorFor(entry.name)}`}>
           {entry.anonymous ? '🙈' : initials(entry.name)}
@@ -240,12 +240,104 @@ export default function GuestbookPage() {
         </div>
       </div>
 
-      {/* ─── Submit Form ──────────────────────────────────────────────── */}
+      {/* ─── Sample Pack Incentive ────────────────────────────────────── */}
+      <div className="flex flex-col items-center gap-5 rounded-2xl p-7 text-center sm:flex-row sm:text-left" style={{ background: 'linear-gradient(135deg, #D43790 0%, #9333ea 100%)' }}>
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/20 text-4xl">🎁</div>
+        <div className="flex-1">
+          <p className="text-base font-extrabold text-white sm:text-lg">Sign the guestbook, get a sample pack</p>
+          <p className="mt-1 text-sm text-white/80">
+            Leave a comment and you could receive a curated GEL.IT.UP sample pack — on us.
+          </p>
+        </div>
+        <a
+          href="#sign-guestbook"
+          className="shrink-0 rounded-xl bg-white px-5 py-2.5 text-sm font-bold transition hover:bg-white/90"
+          style={{ color: '#D43790' }}
+        >
+          Sign Now →
+        </a>
+      </div>
+
+      {/* ─── All Entries ──────────────────────────────────────────────── */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#D43790' }}>FROM THE GEL.IT.UP COMMUNITY</p>
+        <p className="mt-1 text-xs text-slate-500">Real professionals. Real results. Every entry is verified before publishing.</p>
+
+        {loading && (
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="animate-pulse rounded-2xl border border-slate-100 bg-slate-50 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-slate-200" />
+                  <div className="space-y-1.5">
+                    <div className="h-3.5 w-24 rounded bg-slate-200" />
+                    <div className="h-3 w-16 rounded bg-slate-200" />
+                  </div>
+                </div>
+                <div className="mt-3 space-y-1.5">
+                  <div className="h-3 w-full rounded bg-slate-200" />
+                  <div className="h-3 w-3/4 rounded bg-slate-200" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!loading && entries.length === 0 && (
+          <p className="mt-4 text-sm text-slate-500">{T ? T.guestbook.no_messages : 'No messages yet. Be the first to sign the guestbook!'}</p>
+        )}
+
+        {!loading && entries.length > 0 && (
+          <>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {FILTER_COUNTRIES.map((c) => (
+                <button
+                  key={c.code}
+                  type="button"
+                  onClick={() => { setCountryFilter(c.code); setVisibleCount(PAGE_SIZE) }}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '20px',
+                    border: `1px solid ${countryFilter === c.code ? '#D43790' : '#ddd'}`,
+                    background: countryFilter === c.code ? '#D43790' : '#fff',
+                    color: countryFilter === c.code ? '#fff' : '#555',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    fontWeight: countryFilter === c.code ? 600 : 400,
+                  }}
+                >
+                  {c.flag} {c.label}
+                </button>
+              ))}
+            </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {visibleEntries.map((entry) => (
+                <EntryCard key={entry.id} entry={entry} featured={entry.featured} />
+              ))}
+            </div>
+
+            {hasMore && (
+              <div className="mt-6 text-center">
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                  className="rounded-full border border-slate-200 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                >
+                  {T ? T.guestbook.load_more : 'Load more'}
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* ─── Submit Form ──────────────────────────────────────────────── */}
+      <div id="sign-guestbook" className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-extrabold text-slate-900">{T ? T.guestbook.form_title : '✍️ Sign the Guestbook'}</h2>
-            <p className="mt-1 text-sm text-slate-500">{T ? T.guestbook.form_subtitle : 'Your entry will be visible after review.'}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#D43790' }}>Add your voice</p>
+            <h2 className="mt-1 text-lg font-extrabold text-slate-900">Sign the GEL.IT.UP Guestbook</h2>
+            <p className="mt-1 text-sm text-slate-500">Your entry will appear after a short review. Professionals in 15+ countries have already signed.</p>
           </div>
         </div>
 
@@ -368,102 +460,6 @@ export default function GuestbookPage() {
               {submitting ? (T ? T.guestbook.submitting : 'Submitting…') : (T ? T.guestbook.submit : '✍️ Sign the Guestbook')}
             </button>
           </form>
-        )}
-      </div>
-
-      {/* ─── Rotating Incentive Banner (cycles monthly) ────────────── */}
-      {(() => {
-        const incentives = T
-          ? [
-              { emoji: '📸', text: <>Ogni mese, presentiamo <span className="font-extrabold">3 commenti</span> su Instagram{' '}<a href="https://www.instagram.com/gelitupinternational/" target="_blank" rel="noreferrer" className="font-bold underline transition hover:text-fuchsia-900">@gelitupinternational</a></> },
-              { emoji: '🔁', text: <>I saloni selezionati vengono <span className="font-extrabold">ricondivisi</span> su{' '}<a href="https://www.instagram.com/gelitupinternational/" target="_blank" rel="noreferrer" className="font-bold underline transition hover:text-fuchsia-900">@gelitupinternational</a></> },
-              { emoji: '🎁', text: <>Lascia un commento → possibilità di <span className="font-extrabold">ricevere un campione</span></> },
-            ]
-          : [
-              { emoji: '📸', text: <>Every month, we feature <span className="font-extrabold">3 comments</span> on our Instagram{' '}<a href="https://www.instagram.com/gelitupinternational/" target="_blank" rel="noreferrer" className="font-bold underline transition hover:text-fuchsia-900">@gelitupinternational</a></> },
-              { emoji: '🔁', text: <>Selected salons get <span className="font-extrabold">reposted</span> on{' '}<a href="https://www.instagram.com/gelitupinternational/" target="_blank" rel="noreferrer" className="font-bold underline transition hover:text-fuchsia-900">@gelitupinternational</a></> },
-              { emoji: '🎁', text: <>Leave a comment → chance to <span className="font-extrabold">receive a sample pack</span></> },
-            ]
-        const idx = new Date().getMonth() % incentives.length
-        const { emoji, text } = incentives[idx]
-        return (
-          <div className="rounded-2xl border border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 to-violet-50 px-5 py-4 text-center sm:px-7">
-            <p className="text-sm font-semibold text-fuchsia-700">
-              {emoji} {text}
-            </p>
-          </div>
-        )
-      })()}
-
-      {/* ─── All Entries ──────────────────────────────────────────────── */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
-        <h2 className="text-lg font-extrabold text-slate-900">{T ? T.guestbook.section_title : 'Latest Messages'}</h2>
-
-        {loading && (
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="animate-pulse rounded-2xl border border-slate-100 bg-slate-50 p-5">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-slate-200" />
-                  <div className="space-y-1.5">
-                    <div className="h-3.5 w-24 rounded bg-slate-200" />
-                    <div className="h-3 w-16 rounded bg-slate-200" />
-                  </div>
-                </div>
-                <div className="mt-3 space-y-1.5">
-                  <div className="h-3 w-full rounded bg-slate-200" />
-                  <div className="h-3 w-3/4 rounded bg-slate-200" />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {!loading && entries.length === 0 && (
-          <p className="mt-4 text-sm text-slate-500">{T ? T.guestbook.no_messages : 'No messages yet. Be the first to sign the guestbook!'}</p>
-        )}
-
-        {!loading && entries.length > 0 && (
-          <>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {FILTER_COUNTRIES.map((c) => (
-                <button
-                  key={c.code}
-                  type="button"
-                  onClick={() => { setCountryFilter(c.code); setVisibleCount(PAGE_SIZE) }}
-                  style={{
-                    padding: '6px 14px',
-                    borderRadius: '20px',
-                    border: `1px solid ${countryFilter === c.code ? '#D43790' : '#ddd'}`,
-                    background: countryFilter === c.code ? '#D43790' : '#fff',
-                    color: countryFilter === c.code ? '#fff' : '#555',
-                    fontSize: '13px',
-                    cursor: 'pointer',
-                    fontWeight: countryFilter === c.code ? 600 : 400,
-                  }}
-                >
-                  {c.flag} {c.label}
-                </button>
-              ))}
-            </div>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              {visibleEntries.map((entry) => (
-                <EntryCard key={entry.id} entry={entry} featured={entry.featured} />
-              ))}
-            </div>
-
-            {hasMore && (
-              <div className="mt-6 text-center">
-                <button
-                  type="button"
-                  onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                  className="rounded-full border border-slate-200 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-                >
-                  {T ? T.guestbook.load_more : 'Load more'}
-                </button>
-              </div>
-            )}
-          </>
         )}
       </div>
     </section>

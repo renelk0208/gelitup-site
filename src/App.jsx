@@ -20,6 +20,7 @@ import AcademyFAQ from './components/AcademyFAQ'
 import ProductImage from './components/ProductImage'
 import TestimonialStrip from './components/TestimonialStrip'
 import TikTokFeed from './components/TikTokFeed'
+import GuestbookTeaser from './components/GuestbookTeaser'
 import ClarityScript from './components/ClarityScript'
 import CatalogueSkeleton from './components/CatalogueSkeleton'
 
@@ -1769,6 +1770,8 @@ function DistributorPackagesPage() {
           </NavLink>
         </div>
       </article>
+
+      <GuestbookTeaser />
 
       {/* WHATSAPP CTA */}
       <div className="rounded-2xl p-8 text-center" style={{ backgroundColor: '#1a1a2e' }}>
@@ -7717,6 +7720,7 @@ function HomePage({ onOpenContactModal }) {
       </div>
 
       <HowItWorks variant="section" />
+      <GuestbookTeaser />
       <InstagramFeed />
       <TikTokFeed />
       <InspirationTeaser />
