@@ -1615,9 +1615,13 @@ function DistributorPackagesPage() {
       </div>
 
       {/* TRUST LINE */}
-      <p className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm text-slate-600">
-        Distributor pricing is shared privately after an initial enquiry. All tiers include full EU regulatory documentation and social media brand support.
-      </p>
+      <div className="border border-gray-200 rounded-xl p-4 text-sm text-gray-600">
+        <span>🔒</span>
+        <p>
+          Distributor pricing is shared privately after an initial enquiry.
+          All tiers include full EU regulatory documentation and social media brand support.
+        </p>
+      </div>
 
       {/* SALES TIER */}
       <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #374151', backgroundColor: '#ffffff' }}>
