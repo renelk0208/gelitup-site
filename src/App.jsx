@@ -22,6 +22,7 @@ import TestimonialStrip from './components/TestimonialStrip'
 import TikTokFeed from './components/TikTokFeed'
 import GuestbookTeaser from './components/GuestbookTeaser'
 import ClarityScript from './components/ClarityScript'
+import { cleanProductName } from './utils/productUtils'
 import CatalogueSkeleton from './components/CatalogueSkeleton'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
@@ -9662,6 +9663,19 @@ function PortalRegister({ onRegister }) {
       </div>
 
       <div className="p-5 sm:p-6 md:p-8">
+        {/* Progress indicator */}
+        <div className="mb-5 flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-fuchsia-600 text-xs font-bold text-white">1</span>
+            <span className="text-xs font-semibold text-fuchsia-700">Company Details</span>
+          </div>
+          <div className="h-px flex-1 bg-slate-200" />
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-300 bg-white text-xs font-bold text-slate-500">2</span>
+            <span className="text-xs font-medium text-slate-400">Shipping &amp; Business Info</span>
+          </div>
+        </div>
+
         <h3 className="text-xl font-semibold text-slate-900">
           {R.form_header || 'Distributor Application'}
         </h3>
@@ -10286,26 +10300,23 @@ function PortalRegister({ onRegister }) {
             <div className="bg-white px-8 py-7">
               {submittedProfile.isDistributor ? (
                 <>
-                  <p className="text-sm leading-relaxed text-slate-700">
-                    {R.success_dist_body || 'Your distributor application has been submitted to our team. Once reviewed and approved, you will receive an email with a direct link to set your portal password and gain full access to:'}
-                  </p>
-                  <ul className="mt-4 space-y-2 text-sm text-slate-700">
-                    <li className="flex items-start gap-2">
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-100 text-fuchsia-600 text-xs font-bold">✓</span>
-                      {R.success_dist_b1 || 'The full B2B product catalogue with distributor pricing'}
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-100 text-fuchsia-600 text-xs font-bold">✓</span>
-                      {R.success_dist_b2 || 'Online wholesale ordering and proforma invoice generation'}
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-100 text-fuchsia-600 text-xs font-bold">✓</span>
-                      {R.success_dist_b3 || 'Order tracking, compliance certificates, and distributor support'}
-                    </li>
-                  </ul>
-                  <p className="mt-4 text-xs text-slate-500">
-                    {R.success_dist_footer || 'Review usually takes 1–2 business days. Check your inbox and spam folder.'}
-                  </p>
+                  <p className="text-sm font-semibold text-slate-700">Here's what happens next:</p>
+                  <div className="mt-4 space-y-3">
+                    {[
+                      { n: 1, title: 'Application review', body: 'We review your application within 1–2 business days.' },
+                      { n: 2, title: 'Approval email', body: "You'll receive login credentials and your tier assignment by email." },
+                      { n: 3, title: 'Start ordering', body: 'Log in to your B2B portal and place your first order at distributor pricing.' },
+                    ].map(({ n, title, body }) => (
+                      <div key={n} className="flex items-start gap-3">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-fuchsia-100 text-xs font-bold text-fuchsia-700">{n}</span>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">{title}</p>
+                          <p className="text-xs text-slate-500">{body}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-4 text-xs text-slate-400">Check your inbox and spam folder.</p>
                   {successMessage && successMessage.toLowerCase().includes('email') && successMessage.toLowerCase().includes('fail') && (
                     <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
                       ⚠ {successMessage}
@@ -14345,6 +14356,29 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         </div>
 
 
+        {/* -- MINIMUM ORDER PROGRESS BAR -- */}
+        {pricesAllocated && (() => {
+          const MIN = MIN_ORDER_EUR
+          const pct = Math.min((orderTotal / MIN) * 100, 100)
+          const remaining = Math.max(MIN - orderTotal, 0)
+          return (
+            <div className="rounded-xl border border-slate-200 bg-white p-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500">Order total</span>
+                <span className="font-bold text-slate-900">€{orderTotal.toFixed(2)}</span>
+              </div>
+              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: pct >= 100 ? '#22c55e' : '#D43790' }} />
+              </div>
+              {remaining > 0 ? (
+                <p className="mt-1.5 text-[11px] text-slate-500">Add <span className="font-semibold text-fuchsia-700">€{remaining.toFixed(2)}</span> more to reach free shipping</p>
+              ) : (
+                <p className="mt-1.5 text-[11px] font-semibold text-green-600">✓ Free shipping unlocked</p>
+              )}
+            </div>
+          )
+        })()}
+
         {/* -- ORDER SUMMARY TABLE -- */}
         {selectedProducts.length > 0 && (
           <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
@@ -14366,8 +14400,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                       <ProductImage src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="break-words text-[11px] font-semibold text-slate-900">{product.name}</p>
-                      <p className="text-[10px] text-slate-400">{product.code}</p>
+                      <p className="break-words text-[11px] font-semibold text-slate-900">{cleanProductName(product.name)}</p>
                     </div>
                     <div className="flex items-center gap-1">
                       <button onClick={() => setItemQtys(prev => { const q = (prev[product.code] || 1) - 1; if (q <= 0) { toggleSelection(product.code); return prev; } return {...prev, [product.code]: q} })} className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">-</button>
@@ -14820,7 +14853,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                             {' '}
                             —
                             {' '}
-                            {item.name}
+                            {cleanProductName(item.name)}
                           </span>
                           {!resolvedImageUrl && (
                             <span className="rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
@@ -15052,7 +15085,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                           )}
                           {/* info */}
                           <div className="px-1.5 pt-1 pb-0.5">
-                            <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{product.name}</p>
+                            <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{cleanProductName(product.name)}</p>
                             {product.price != null && (
                             pricesAllocated
                               ? <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{(Number(product.price) * tierPriceMultiplier).toFixed(2)}</p>
@@ -15475,8 +15508,8 @@ function OrdersModule() {
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
-        <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-lg font-semibold text-transparent">My Orders</h3>
-        <p className="mt-1 text-sm text-slate-600">Your full order history. Expand any order to see line items, or request a cancellation before it ships.</p>
+        <h3 className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-lg font-semibold text-transparent">Order History</h3>
+        <p className="mt-1 text-sm text-slate-600">All submitted and completed orders. Expand any order to see line items, or request a cancellation before it ships.</p>
       </div>
 
       {orders.some((o) => o?.payment_status === 'invoice_ready') && (
@@ -16801,9 +16834,9 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
   const modules = useMemo(
     () => [
       { key: 'catalog', label: 'Shop' },
-      { key: 'products', label: 'My Order' },
+      { key: 'products', label: 'Current Order' },
       { key: 'profile', label: 'My Information' },
-      { key: 'orders', label: 'My Orders' },
+      { key: 'orders', label: 'Order History' },
       { key: 'overview', label: 'Overview' },
       { key: 'support', label: 'Support & Tracking' },
     ],
@@ -17144,22 +17177,40 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
       <aside className="rounded-2xl border border-slate-200 bg-white p-4">
         <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Portal Menu</p>
         <nav className="space-y-1">
-          {modules.map((module) => (
-            <NavLink
-              id={`portal-nav-${module.key}`}
-              key={module.key}
-              to={`/portal/dashboard/${module.key}`}
-              className={({ isActive }) =>
-                `relative block rounded-lg px-3 py-2 text-sm font-medium ${
-                  isActive
-                    ? 'bg-fuchsia-600 text-white'
-                    : 'text-slate-700 hover:bg-slate-100'
-                }`
-              }
-            >
-              {module.label}
+          {/* PRIMARY — Shop */}
+          <NavLink
+            id="portal-nav-catalog"
+            to="/portal/dashboard/catalog"
+            className={({ isActive }) =>
+              `relative block rounded-lg px-3 py-2 text-sm font-semibold ${isActive ? 'bg-fuchsia-600 text-white' : 'bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-100'}`
+            }
+          >
+            🛍️ Shop
+          </NavLink>
+
+          {/* SECONDARY GROUP */}
+          <div className="pt-1 space-y-0.5">
+            <NavLink id="portal-nav-products" to="/portal/dashboard/products"
+              className={({ isActive }) => `relative block rounded-lg px-3 py-2 text-sm font-medium ${isActive ? 'bg-fuchsia-600 text-white' : 'text-slate-700 hover:bg-slate-100'}`}>
+              🛒 Current Order
             </NavLink>
-          ))}
+            <NavLink id="portal-nav-overview" to="/portal/dashboard/overview"
+              className={({ isActive }) => `relative block rounded-lg px-3 py-2 text-sm font-medium ${isActive ? 'bg-fuchsia-600 text-white' : 'text-slate-700 hover:bg-slate-100'}`}>
+              📊 Overview
+            </NavLink>
+            <NavLink id="portal-nav-orders" to="/portal/dashboard/orders"
+              className={({ isActive }) => `relative block rounded-lg px-3 py-2 text-sm font-medium ${isActive ? 'bg-fuchsia-600 text-white' : 'text-slate-700 hover:bg-slate-100'}`}>
+              📦 Order History
+            </NavLink>
+            <NavLink id="portal-nav-profile" to="/portal/dashboard/profile"
+              className={({ isActive }) => `relative block rounded-lg px-3 py-2 text-sm font-medium ${isActive ? 'bg-fuchsia-600 text-white' : 'text-slate-700 hover:bg-slate-100'}`}>
+              👤 My Information
+            </NavLink>
+            <NavLink id="portal-nav-support" to="/portal/dashboard/support"
+              className={({ isActive }) => `relative block rounded-lg px-3 py-2 text-sm font-medium ${isActive ? 'bg-fuchsia-600 text-white' : 'text-slate-700 hover:bg-slate-100'}`}>
+              💬 Help & Tracking
+            </NavLink>
+          </div>
         </nav>
         <button onClick={onLogout} className="mt-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-[#4A4A4A]">
           Sign Out
@@ -17233,7 +17284,16 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                 </article>
               </div>
 
-              {activeModule === 'overview' && (() => {
+              {orderStats.totalOrders === 0 && orderStats.openOrders === 0 && (
+                <div className="mt-4 rounded-2xl border border-fuchsia-100 bg-fuchsia-50 p-6 text-center">
+                  <p className="text-3xl">🛍️</p>
+                  <p className="mt-3 text-base font-bold text-slate-900">Ready to place your first order?</p>
+                  <p className="mt-1 text-sm text-slate-500">Browse 1,000+ professional shades and systems at your B2B price.</p>
+                  <NavLink to="/portal/dashboard/catalog" className="mt-4 inline-flex rounded-xl bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-fuchsia-500">
+                    Browse the Catalogue →
+                  </NavLink>
+                </div>
+              )}
                 const tier = effectiveTier
                 const isTierProfessional = tier === 'professional'
                 const isTierAuthority = tier === 'authority'
@@ -17268,7 +17328,21 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                       </div>
                     )}
                     {!tier && (
-                      <p className="mt-2 text-xs text-slate-500">Distribution tier not set — contact your account manager.</p>
+                      <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                        <div className="flex items-start gap-3">
+                          <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide bg-slate-200 text-slate-600 shrink-0">
+                            Distributor
+                          </span>
+                          <div>
+                            <p className="text-sm font-semibold text-amber-900">Your tier is being confirmed</p>
+                            <p className="mt-0.5 text-xs text-amber-700">Our team will assign your tier within 24 hours. You can browse and build your order in the meantime.</p>
+                          </div>
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <a href="https://wa.me/35973891041" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-[#25D366] px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90">WhatsApp</a>
+                          <a href="mailto:info@gelitup.com?subject=Tier Assignment - New Account" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">✉️ Email</a>
+                        </div>
+                      </div>
                     )}
                   </div>
                 )
@@ -17284,7 +17358,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                     </article>
                     <article className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                       <p className="text-xs text-slate-500">Available Credit Limit</p>
-                      <p className="mt-1 text-sm font-semibold text-slate-900">N/A</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-400 italic">Set on account approval</p>
                     </article>
                     <article className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                       <p className="text-xs text-slate-500">Quick Restock</p>
