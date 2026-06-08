@@ -17284,16 +17284,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                 </article>
               </div>
 
-              {orderStats.totalOrders === 0 && orderStats.openOrders === 0 && (
-                <div className="mt-4 rounded-2xl border border-fuchsia-100 bg-fuchsia-50 p-6 text-center">
-                  <p className="text-3xl">🛍️</p>
-                  <p className="mt-3 text-base font-bold text-slate-900">Ready to place your first order?</p>
-                  <p className="mt-1 text-sm text-slate-500">Browse 1,000+ professional shades and systems at your B2B price.</p>
-                  <NavLink to="/portal/dashboard/catalog" className="mt-4 inline-flex rounded-xl bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-fuchsia-500">
-                    Browse the Catalogue →
-                  </NavLink>
-                </div>
-              )}
+              {activeModule === 'overview' && (() => {
                 const tier = effectiveTier
                 const isTierProfessional = tier === 'professional'
                 const isTierAuthority = tier === 'authority'
@@ -17347,6 +17338,17 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                   </div>
                 )
               })()}
+
+              {activeModule === 'overview' && orderStats.totalOrders === 0 && orderStats.openOrders === 0 && (
+                <div className="mt-0 rounded-2xl border border-fuchsia-100 bg-fuchsia-50 p-6 text-center">
+                  <p className="text-3xl">🛍️</p>
+                  <p className="mt-3 text-base font-bold text-slate-900">Ready to place your first order?</p>
+                  <p className="mt-1 text-sm text-slate-500">Browse 1,000+ professional shades and systems at your B2B price.</p>
+                  <NavLink to="/portal/dashboard/catalog" className="mt-4 inline-flex rounded-xl bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-fuchsia-500">
+                    Browse the Catalogue →
+                  </NavLink>
+                </div>
+              )}
 
               {activeModule === 'overview' && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
