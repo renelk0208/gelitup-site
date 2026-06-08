@@ -941,6 +941,17 @@ const SKU_OVERRIDE_MAP = {
   // base 10.48 → B2B 12.6
   'CLASSICBC':         { name: 'Base Coat 15ml -HTF', price: 10.48 },
   'CLASSIC BASE COAT': { name: 'Base Coat 15ml -HTF', price: 10.48 },
+
+  // ── GIUP-200 Gel Polish (Glitters) ────────────────────────────────────────────────
+  // base 7.41 → B2B 8.9 (same as standard gel polish)
+  'GIUP-200':          { name: 'GIUP-200 Gel Polish -HTF', price: 7.41 },
+  'GIUP 200':          { name: 'GIUP-200 Gel Polish -HTF', price: 7.41 },
+
+  // ── Mirror Powder Top Coat (2026 new listing) ──────────────────────────────────────
+  // base 8.25 → B2B 9.9
+  '2026-NEW-MIRROR-POWDER-TOP-COAT': { name: 'Mirror Powder Top Coat -HTF', price: 8.25 },
+  'MIRROR POWDER TOP COAT':          { name: 'Mirror Powder Top Coat -HTF', price: 8.25 },
+  'MIRRORPOWDERTOPCOAT':             { name: 'Mirror Powder Top Coat -HTF', price: 8.25 },
 }
 // ────────────────────────────────────────────────────────────────────────────────────────────
 
