@@ -937,6 +937,10 @@ const SKU_OVERRIDE_MAP = {
   'MIRRORCLEAR':       { name: 'SP8001 Mirror Clear Powder', price: 5.15 },
   'MIRROR CLEAR':      { name: 'SP8001 Mirror Clear Powder', price: 5.15 },
 
+  // ── Cleanser 200ml (discontinued — price null suppresses warning) ────────────────
+  'CLEANSER':          { name: 'Cleanser 200 ml (discontinued)', price: null },
+  'CLEANSER 200 ML':   { name: 'Cleanser 200 ml (discontinued)', price: null },
+
   // ── Classic Base Coat ──────────────────────────────────────────────────────────────
   // base 10.48 → B2B 12.6
   'CLASSICBC':         { name: 'Base Coat 15ml -HTF', price: 10.48 },
@@ -1127,6 +1131,11 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) 
   const sku = normalizeAdminSkuToken(item?.sku)
   const name = String(item?.name || '').trim()
   const nameNorm = normalizeAdminSkuToken(name)
+
+  // Skip catalog hero/section image filenames — these are image assets, not products.
+  if (/\.hero\.image|hero\.image\b/i.test(name) || /\.hero\.image|hero\.image\b/i.test(sku)) {
+    return { unitPrice: null, resolvedName: `${name} (image — not a product)`, resolvedSku: null, isImageAsset: true }
+  }
 
   // Check manual override map first (items not in b2b-price-list.json)
   for (const key of [sku, nameNorm, normalizeAdminSkuToken(name)]) {
@@ -1736,7 +1745,10 @@ function OrdersPanel() {
           const rowTierMultiplier = getTierMultiplier(row.distributor_tier)
           const missingPriceItems = items
             .map((item, i) => parseOrderItemEntry(item, i))
-            .filter(parsed => resolveOrderItemPriceEntry(parsed, priceLookupMap, rowTierMultiplier).unitPrice == null)
+            .filter(parsed => {
+              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, rowTierMultiplier)
+              return resolved.unitPrice == null && !resolved.isImageAsset
+            })
           const hasMissingPrices = missingPriceItems.length > 0
 
           return (
@@ -1818,22 +1830,25 @@ function OrdersPanel() {
                               const rowTierMultiplier = getTierMultiplier(row.distributor_tier)
                               const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, rowTierMultiplier)
                               const unitPrice = resolved.unitPrice
+                              const isImageAsset = resolved.isImageAsset
                               const displaySku = normalizeAdminSkuToken(rawSku || parsed.sku || resolved.resolvedSku || '').replace(/\s+IMAGE$/i, '')
-                              const skuMissing = !displaySku
+                              const skuMissing = !displaySku && !isImageAsset
                               const lineTotal = unitPrice != null ? unitPrice * parsed.qty : null
                               return (
-                                <li key={i} className={`flex items-center justify-between px-3 py-2 ${unitPrice == null ? 'bg-amber-50' : ''}`}>
+                                <li key={i} className={`flex items-center justify-between px-3 py-2 ${unitPrice == null && !isImageAsset ? 'bg-amber-50' : ''}`}>
                                   <div className="min-w-0">
                                     <p className="truncate text-slate-700">{parsed.name || parsed.rawLabel || 'Unknown product'}</p>
                                     <div className="flex flex-wrap items-center gap-2">
-                                      {skuMissing
-                                        ? <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold bg-orange-100 text-orange-700">⚠ SKU missing — edit to fix</span>
-                                        : <span className="font-mono text-[10px] text-slate-500">{displaySku}</span>
+                                      {isImageAsset
+                                        ? <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-400">image asset — not billable</span>
+                                        : skuMissing
+                                          ? <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold bg-orange-100 text-orange-700">⚠ SKU missing — edit to fix</span>
+                                          : <span className="font-mono text-[10px] text-slate-500">{displaySku}</span>
                                       }
-                                      {unitPrice != null
+                                      {!isImageAsset && (unitPrice != null
                                         ? <span className="text-[10px] text-slate-500">€{unitPrice.toFixed(2)} each</span>
                                         : <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold bg-amber-100 text-amber-700">⚠ no price</span>
-                                      }
+                                      )}
                                     </div>
                                   </div>
                                   <div className="text-right">
