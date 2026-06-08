@@ -937,9 +937,17 @@ const SKU_OVERRIDE_MAP = {
   'MIRRORCLEAR':       { name: 'SP8001 Mirror Clear Powder', price: 5.15 },
   'MIRROR CLEAR':      { name: 'SP8001 Mirror Clear Powder', price: 5.15 },
 
-  // ── Cleanser 200ml (discontinued — price null suppresses warning) ────────────────
-  'CLEANSER':          { name: 'Cleanser 200 ml (discontinued)', price: null },
-  'CLEANSER 200 ML':   { name: 'Cleanser 200 ml (discontinued)', price: null },
+  // ── All In One Liquid (replaces discontinued Cleanser / Sanitizer) ──
+  // base 4.826 → B2B 5.8 (200ml) ; base 11.792 → B2B 14.2 (500ml)
+  'CLEANSER':                { name: 'All In One Liquid 200ml -HTF', price: 4.826 },
+  'CLEANSER 200':            { name: 'All In One Liquid 200ml -HTF', price: 4.826 },
+  'CLEANSER 200ML':          { name: 'All In One Liquid 200ml -HTF', price: 4.826 },
+  'CLEANSER 200 ML':         { name: 'All In One Liquid 200ml -HTF', price: 4.826 },
+  'SANITIZER':               { name: 'All In One Liquid 200ml -HTF', price: 4.826 },
+  'SANITIZER 200ML':         { name: 'All In One Liquid 200ml -HTF', price: 4.826 },
+  'ALL IN ONE LIQUID':       { name: 'All In One Liquid 200ml -HTF', price: 4.826 },
+  'ALL IN ONE LIQUID 200ML': { name: 'All In One Liquid 200ml -HTF', price: 4.826 },
+  'ALL IN ONE LIQUID 500ML': { name: 'All In One Liquid 500ml -HTF', price: 11.792 },
 
   // ── Classic Base Coat ──────────────────────────────────────────────────────────────
   // base 10.48 → B2B 12.6
