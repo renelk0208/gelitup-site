@@ -952,6 +952,16 @@ const SKU_OVERRIDE_MAP = {
   'GIUP-70-8':         { name: 'GIUP-70-8 Gel Polish -HTF', price: 7.41 },
   'GIUP 70 8':         { name: 'GIUP-70-8 Gel Polish -HTF', price: 7.41 },
 
+  // ── Image/marketing assets (product image files added to orders by mistake) ─────────
+  // "5 in 1 hero.image" — image filename accidentally entered as order item. price: null
+  // suppresses the "⚠ no price" warning without generating a false line total.
+  '5 IN 1 HERO.IMAGE': { name: '5-in-1 Superior Base 15ml (image placeholder)', price: null },
+  '5 IN 1 HERO':       { name: '5-in-1 Superior Base 15ml (image placeholder)', price: null },
+  'IN 1':              { name: '5-in-1 Superior Base (image placeholder)', price: null },
+  // "CLASSIC Base Coat Image" — same pattern.
+  'CLASSIC BASE COAT IMAGE': { name: 'Classic Base Coat (image placeholder)', price: null },
+  'CLASSIC BASE IMAGE':      { name: 'Classic Base Coat (image placeholder)', price: null },
+
   // ── Mirror Powder Top Coat (2026 new listing) ──────────────────────────────────────
   // base 8.25 → B2B 9.9
   '2026-NEW-MIRROR-POWDER-TOP-COAT': { name: 'Mirror Powder Top Coat -HTF', price: 8.25 },
