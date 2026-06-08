@@ -947,6 +947,11 @@ const SKU_OVERRIDE_MAP = {
   'GIUP-200':          { name: 'GIUP-200 Gel Polish -HTF', price: 7.41 },
   'GIUP 200':          { name: 'GIUP-200 Gel Polish -HTF', price: 7.41 },
 
+  // ── GIUP-70-8 Gel Polish ───────────────────────────────────────────────────────────
+  // base 7.41 → B2B 8.9 (standard gel polish)
+  'GIUP-70-8':         { name: 'GIUP-70-8 Gel Polish -HTF', price: 7.41 },
+  'GIUP 70 8':         { name: 'GIUP-70-8 Gel Polish -HTF', price: 7.41 },
+
   // ── Mirror Powder Top Coat (2026 new listing) ──────────────────────────────────────
   // base 8.25 → B2B 9.9
   '2026-NEW-MIRROR-POWDER-TOP-COAT': { name: 'Mirror Powder Top Coat -HTF', price: 8.25 },
