@@ -1,12 +1,16 @@
-/portal/sign-in   /portal/login     301
-
 # Subdomain proxy — consolidates shop-main.gelitup.com under gelitup.com/shop/
 /shop/*  https://shop-main.gelitup.com/:splat  200
 
 # Common nav alias redirects
-/colours    /full-catalogue    301
-/colors     /full-catalogue    301
+/colours    /full-catalogue?category=colours    301
+/colors     /full-catalogue?category=colours    301
 /register   /portal/register   301
+/bases-tops         /full-catalogue?category=bases-tops         301
+/builder-systems    /full-catalogue?category=builder-systems    301
+/nail-art           /full-catalogue?category=nail-art           301
+/tools              /full-catalogue?category=tools              301
+/consumables        /full-catalogue?category=consumables        301
+/nail-care          /full-catalogue?category=nail-care          301
 
 # SPA fallback — must be last
 /*  /index.html  200
