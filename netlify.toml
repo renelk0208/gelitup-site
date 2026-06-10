@@ -135,6 +135,52 @@
   to = "/full-catalogue"
   status = 301
 
+# Common nav alias redirects
+[[redirects]]
+  from = "/colours"
+  to = "/full-catalogue?category=colours"
+  status = 301
+
+[[redirects]]
+  from = "/colors"
+  to = "/full-catalogue?category=colours"
+  status = 301
+
+[[redirects]]
+  from = "/register"
+  to = "/portal/register"
+  status = 301
+
+[[redirects]]
+  from = "/bases-tops"
+  to = "/full-catalogue?category=bases-tops"
+  status = 301
+
+[[redirects]]
+  from = "/builder-systems"
+  to = "/full-catalogue?category=builder-systems"
+  status = 301
+
+[[redirects]]
+  from = "/nail-art"
+  to = "/full-catalogue?category=nail-art"
+  status = 301
+
+[[redirects]]
+  from = "/tools"
+  to = "/full-catalogue?category=tools"
+  status = 301
+
+[[redirects]]
+  from = "/consumables"
+  to = "/full-catalogue?category=consumables"
+  status = 301
+
+[[redirects]]
+  from = "/nail-care"
+  to = "/full-catalogue?category=nail-care"
+  status = 301
+
 # SPA catch-all — must remain last
 [[redirects]]
   from = "/*"
