@@ -135,6 +135,13 @@
   to = "/full-catalogue"
   status = 301
 
+# Strip trailing slash from /full-catalogue/ so React Router matches the route
+[[redirects]]
+  from = "/full-catalogue/"
+  to = "/full-catalogue"
+  status = 301
+  force = true
+
 # Common nav alias redirects
 [[redirects]]
   from = "/colours"
