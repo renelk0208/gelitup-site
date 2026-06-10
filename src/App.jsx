@@ -19124,6 +19124,11 @@ function App() {
           <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           {/* Vanity routes for social media & advertising — each lands on the right catalogue section */}
+          <Route path="/colours"           element={<Navigate to="/full-catalogue?category=colours"              replace />} />
+          <Route path="/colors"            element={<Navigate to="/full-catalogue?category=colours"              replace />} />
+          <Route path="/bases-tops"        element={<Navigate to="/full-catalogue?category=bases-tops"           replace />} />
+          <Route path="/builder-systems"   element={<Navigate to="/full-catalogue?category=builder-systems"      replace />} />
+          <Route path="/consumables"       element={<Navigate to="/full-catalogue?category=consumables"          replace />} />
           <Route path="/gel-polish"        element={<Navigate to="/full-catalogue?category=gel-polish"           replace />} />
           <Route path="/builder-gel"       element={<Navigate to="/full-catalogue?category=builder-gel"          replace />} />
           <Route path="/nail-art"          element={<Navigate to="/full-catalogue?category=nail-art"             replace />} />
