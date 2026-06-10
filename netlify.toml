@@ -3,6 +3,10 @@
   publish = "dist"
   functions = "netlify/functions"
 
+# Disable Netlify's built-in trailing-slash redirect so React Router controls routing
+[build.processing.html]
+  pretty_urls = false
+
 [build.environment]
   NODE_VERSION = "20"
   VITE_ENABLE_PORTAL = "true"
