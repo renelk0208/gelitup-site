@@ -124,6 +124,21 @@ function EntryCard({ entry, featured }) {
 /* ══════════════════════════════════════════════════════════════════════════════ */
 export default function GuestbookPage() {
   const lang = useLang()
+  useEffect(() => {
+    const prev = { title: document.title }
+    const metaDesc = document.querySelector('meta[name="description"]')
+    const canon = document.querySelector('link[rel="canonical"]')
+    prev.desc = metaDesc?.getAttribute('content')
+    prev.canon = canon?.getAttribute('href')
+    document.title = 'Guestbook | Nail Technician Reviews | GEL.IT.UP® Professional'
+    metaDesc?.setAttribute('content', 'Read reviews from professional nail technicians, salons and academies who trust GEL.IT.UP® products every day. Join our global wholesale community at gelitup.com.')
+    canon?.setAttribute('href', 'https://gelitup.com/guestbook')
+    return () => {
+      document.title = prev.title
+      if (prev.desc) metaDesc?.setAttribute('content', prev.desc)
+      if (prev.canon) canon?.setAttribute('href', prev.canon)
+    }
+  }, [])
   const T = lang === 'it' ? itTranslations : null
   const starLabels = T ? T.guestbook.star_labels : STAR_LABELS
   const roles = T ? T.guestbook.roles : ROLES
