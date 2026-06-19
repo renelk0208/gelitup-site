@@ -4266,6 +4266,7 @@ function FullCataloguePage() {
     if (window.gtag) {
       const [itemName] = itemKey.split('::')
       window.gtag('event', 'add_to_cart', { currency: 'EUR', items: [{ item_name: itemName, quantity: qty }] })
+      window.gtag('event', 'conversion', { send_to: 'AW-1008159504' })
     }
   }, [itemQuantities, quickCartUnits])
 
@@ -8914,7 +8915,10 @@ function CheckoutPage() {
     if (!hasSupabaseConfig || !supabase) { setError('Order system is not configured. Please contact us.'); return }
 
     setIsSubmitting(true)
-    if (window.gtag) window.gtag('event', 'begin_checkout', { currency: 'EUR', value: cartTotal })
+    if (window.gtag) {
+      window.gtag('event', 'begin_checkout', { currency: 'EUR', value: cartTotal })
+      window.gtag('event', 'conversion', { send_to: 'AW-1008159504' })
+    }
 
     try {
       // 1. Create Supabase account (optional — or silent temp account)
@@ -18113,6 +18117,25 @@ function App() {
     if (portalTarget === 'admin') {
       navigate('/portal/admin-login', { replace: true })
     }
+  }, [navigate, routerLocation.pathname, routerLocation.search])
+
+  // Fire Google Ads + GA4 purchase conversion when Stripe redirects back with ?payment=success
+  useEffect(() => {
+    const params = new URLSearchParams(routerLocation.search)
+    if (params.get('payment') !== 'success') return
+    const orderId = params.get('order') || ''
+    if (sessionStorage.getItem(`gelitup.conv.${orderId}`)) return
+    sessionStorage.setItem(`gelitup.conv.${orderId}`, '1')
+    if (window.gtag) {
+      window.gtag('event', 'purchase', { currency: 'EUR', transaction_id: orderId })
+      window.gtag('event', 'conversion', { send_to: 'AW-1008159504', transaction_id: orderId })
+    }
+    // Clean ?payment=success from the URL without a page reload
+    const clean = new URLSearchParams(params)
+    clean.delete('payment')
+    clean.delete('order')
+    const newSearch = clean.toString()
+    navigate(routerLocation.pathname + (newSearch ? `?${newSearch}` : ''), { replace: true })
   }, [navigate, routerLocation.pathname, routerLocation.search])
 
   const fetchLatestRegistrationByEmail = async (normalizedEmail, selectColumns = '*') => {
