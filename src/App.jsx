@@ -4539,12 +4539,6 @@ function FullCataloguePage() {
       'marble':                ['NAIL ART', 'MARBLE INK'],
       'stickers':              ['NAIL ART', 'STICKERS'],
       'glitter-effects':       ['NAIL ART', 'GLITTER EFFECTS POWEDER'],
-      // ── Gel Polish extras ────────────────────────────────────────────────
-      'solid-gel-polish':      ['COLORS', 'SOLID GEL POLISH'],
-      'solid':                 ['COLORS', 'SOLID GEL POLISH'],
-      'new-york':              ['COLORS', 'NEW YORK'],
-      'tutti-frutti':          ['COLORS', 'TUTTI FRUTTI GLASS'],
-      'tutti-frutti-glass':    ['COLORS', 'TUTTI FRUTTI GLASS'],
       // ── Bases ────────────────────────────────────────────────────────────
       '5in1-base':             ['BASES', '5IN1 SUPERIOR BASE'],
       'classic-base':          ['BASES', 'CLASSIC BASE COAT'],
