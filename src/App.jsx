@@ -30,6 +30,7 @@ const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
 const GuestbookPage = lazy(() => import('./pages/GuestbookPage.jsx'))
 const InspirationPage = lazy(() => import('./pages/InspirationPage.jsx'))
 const GelColoursLandingPage = lazy(() => import('./pages/GelColoursLandingPage.jsx'))
+const WholesaleLandingPage = lazy(() => import('./pages/WholesaleLandingPage.jsx'))
 
 const B2B_EMAIL = import.meta.env.VITE_B2B_EMAIL || 'info@gelitup.com'
 const PRODUCT_CATEGORIES = ['Solid Colours', 'Builder Gels', 'Base & Top', 'Nail Care', 'Accessories']
@@ -54,7 +55,7 @@ const SHIPPING_ZONES = [
   { zone: 6, rateEur: 28.00, maxKg: 5, countries: ['United Kingdom'] },
 ]
 const B2B_PRICE_MULTIPLIER = 1.2
-const EU_COUNTRIES = ['Austria','Belgium','Bulgaria','Croatia','Cyprus','Czech Republic','Denmark','Estonia','Finland','France','Germany','Greece','Hungary','Ireland','Italy','Latvia','Lithuania','Luxembourg','Malta','Netherlands','Poland','Portugal','Romania','Slovakia','Slovenia','Spain','Sweden','United Kingdom']
+const EU_COUNTRIES = ['Austria','Belgium','Bulgaria','Croatia','Cyprus','Czech Republic','Denmark','Estonia','Finland','France','Germany','Greece','Hungary','Ireland','Italy','Latvia','Lithuania','Luxembourg','Malta','Netherlands','Poland','Portugal','Romania','Slovakia','Slovenia','Spain','Sweden']
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL
@@ -395,14 +396,43 @@ const FOOTER_SOCIAL_LINKS = [
   { key: 'youtube', label: 'YouTube', handle: YOUTUBE_HANDLE, href: YOUTUBE_URL },
 ]
 const COUNTRY_OPTIONS = [
+  // Europe — EU
   'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France',
   'Germany', 'Greece', 'Hungary', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands',
   'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
-  'United Kingdom', 'Norway', 'Switzerland', 'Turkey', 'Ukraine',
-  'United States', 'Canada', 'Mexico', 'Brazil', 'Argentina', 'Chile',
-  'United Arab Emirates', 'Saudi Arabia', 'Qatar', 'Israel', 'Egypt', 'South Africa',
-  'India', 'China', 'Japan', 'South Korea', 'Singapore', 'Australia', 'New Zealand',
-]
+  // Europe — non-EU
+  'Albania', 'Andorra', 'Belarus', 'Bosnia and Herzegovina', 'Georgia', 'Iceland', 'Kosovo', 'Liechtenstein',
+  'Moldova', 'Monaco', 'Montenegro', 'North Macedonia', 'Norway', 'San Marino', 'Serbia', 'Switzerland',
+  'Turkey', 'Ukraine', 'United Kingdom', 'Vatican City',
+  // Americas
+  'Antigua and Barbuda', 'Argentina', 'Bahamas', 'Barbados', 'Belize', 'Bolivia', 'Brazil', 'Canada', 'Chile',
+  'Colombia', 'Costa Rica', 'Cuba', 'Dominica', 'Dominican Republic', 'Ecuador', 'El Salvador', 'Grenada',
+  'Guatemala', 'Guyana', 'Haiti', 'Honduras', 'Jamaica', 'Mexico', 'Nicaragua', 'Panama', 'Paraguay', 'Peru',
+  'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines', 'Suriname', 'Trinidad and Tobago',
+  'United States', 'Uruguay', 'Venezuela',
+  // Middle East & North Africa
+  'Algeria', 'Bahrain', 'Egypt', 'Iran', 'Iraq', 'Israel', 'Jordan', 'Kuwait', 'Lebanon', 'Libya',
+  'Morocco', 'Oman', 'Palestine', 'Qatar', 'Saudi Arabia', 'Syria', 'Tunisia', 'United Arab Emirates', 'Yemen',
+  // Sub-Saharan Africa
+  'Angola', 'Benin', 'Botswana', 'Burkina Faso', 'Burundi', 'Cabo Verde', 'Cameroon', 'Central African Republic',
+  'Chad', 'Comoros', 'Congo (Brazzaville)', 'Congo (DRC)', "Côte d'Ivoire", 'Djibouti', 'Equatorial Guinea',
+  'Eritrea', 'Eswatini', 'Ethiopia', 'Gabon', 'Gambia', 'Ghana', 'Guinea', 'Guinea-Bissau', 'Kenya', 'Lesotho',
+  'Liberia', 'Madagascar', 'Malawi', 'Mali', 'Mauritania', 'Mauritius', 'Mozambique', 'Namibia', 'Niger',
+  'Nigeria', 'Rwanda', 'São Tomé and Príncipe', 'Senegal', 'Seychelles', 'Sierra Leone', 'Somalia',
+  'South Africa', 'South Sudan', 'Sudan', 'Tanzania', 'Togo', 'Uganda', 'Zambia', 'Zimbabwe',
+  // Asia — East & Southeast
+  'Brunei', 'Cambodia', 'China', 'Indonesia', 'Japan', 'Laos', 'Malaysia', 'Mongolia', 'Myanmar', 'North Korea',
+  'Philippines', 'Singapore', 'South Korea', 'Taiwan', 'Thailand', 'Timor-Leste', 'Vietnam',
+  // Asia — South
+  'Afghanistan', 'Bangladesh', 'Bhutan', 'India', 'Maldives', 'Nepal', 'Pakistan', 'Sri Lanka',
+  // Asia — Central
+  'Kazakhstan', 'Kyrgyzstan', 'Tajikistan', 'Turkmenistan', 'Uzbekistan',
+  // Caucasus
+  'Armenia', 'Azerbaijan',
+  // Oceania
+  'Australia', 'Fiji', 'Kiribati', 'Marshall Islands', 'Micronesia', 'Nauru', 'New Zealand', 'Palau',
+  'Papua New Guinea', 'Samoa', 'Solomon Islands', 'Tonga', 'Tuvalu', 'Vanuatu',
+].sort()
 
 // VAT number prefix required per country (EU VIES prefixes + common non-EU formats)
 const COUNTRY_VAT_PREFIX = {
@@ -9319,7 +9349,7 @@ function CheckoutPage() {
                 Country / Region <span className="text-rose-500">*</span>
                 <select required value={form.invoiceCountry} onChange={e => updateField('invoiceCountry', e.target.value)} className={inputClass}>
                   <option value="">Select a country…</option>
-                  {EU_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  {COUNTRY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </label>
               <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
@@ -9371,7 +9401,7 @@ function CheckoutPage() {
                   Country / Region <span className="text-rose-500">*</span>
                   <select required value={form.shippingCountry} onChange={e => updateField('shippingCountry', e.target.value)} className={inputClass}>
                     <option value="">Select a country…</option>
-                    {EU_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    {COUNTRY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </label>
                 <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
@@ -19286,6 +19316,7 @@ function App() {
           <Route path="/spot-my-tops"      element={<Navigate to="/full-catalogue?subcategory=spot-my-tops"      replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/gel-colours" element={<GelColoursLandingPage />} />
+          <Route path="/wholesale" element={<WholesaleLandingPage />} />
           <Route path="/guestbook" element={<GuestbookPage />} />
           <Route path="/inspiration" element={<InspirationPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
