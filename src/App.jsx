@@ -3182,6 +3182,7 @@ function FullCataloguePage() {
   const [pulseItemKey, setPulseItemKey] = useState('')
   const [shippingToastVisible, setShippingToastVisible] = useState(false)
   const shippingToastTimerRef = useRef(null)
+  const [cartRestoredToast, setCartRestoredToast] = useState(false)
   const [outOfStockNames, setOutOfStockNames] = useState(new Set())
   const [productSizes, setProductSizes] = useState({})
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('portalAuth') === 'true')
@@ -3199,6 +3200,16 @@ function FullCataloguePage() {
     { name: 'Cross Magnet Pink', code: 'Cross Magnet Pink', label: 'Cat Eye Magnet (Pink)', condition: 'catEye' },
   ], [])
 
+  // Show cart-restored toast once on mount if items exist in saved cart
+  useEffect(() => {
+    const units = Object.values(quickCart).reduce((s, q) => s + Number(q || 0), 0)
+    if (units > 0) {
+      setCartRestoredToast(true)
+      const t = setTimeout(() => setCartRestoredToast(false), 4000)
+      return () => clearTimeout(t)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Listen for auth changes (login/logout from other tabs or after registration)
   useEffect(() => {
     const check = () => setIsLoggedIn(localStorage.getItem('portalAuth') === 'true')
@@ -3214,12 +3225,11 @@ function FullCataloguePage() {
     window.dispatchEvent(new Event('gelitup:cart-change'))
   }, [quickCart])
 
-  // Sync quickCart to Supabase draft_carts so admin can see abandoned carts
+  // Sync quickCart to Supabase draft_carts so admin can see abandoned carts + send recovery emails
   useEffect(() => {
     if (!isLoggedIn || !supabase) return
     const units = Object.values(quickCart).reduce((s, q) => s + Number(q || 0), 0)
     if (units === 0) {
-      // Remove draft if cart is empty
       supabase.auth.getUser().then(({ data }) => {
         if (data?.user?.id) supabase.from('b2b_draft_carts').delete().eq('user_id', data.user.id).eq('source', 'catalogue').then(() => {})
       })
@@ -3228,17 +3238,56 @@ function FullCataloguePage() {
     const timer = setTimeout(() => {
       supabase.auth.getUser().then(({ data }) => {
         if (!data?.user?.id) return
+        const now = new Date().toISOString()
         supabase.from('b2b_draft_carts').upsert({
           user_id: data.user.id,
           customer_email: data.user.email,
           items: quickCart,
           total_units: units,
-          total_estimated: 0, // price lookup not available at this point without full map
+          total_estimated: 0,
           source: 'catalogue',
-          updated_at: new Date().toISOString(),
+          updated_at: now,
         }, { onConflict: 'user_id,source' }).then(() => {})
+
+        // Abandoned cart recovery — send up to 2 reminder emails, 24h apart
+        const reminderKey = `gelitup.catalogue.cart_reminder.v1_${data.user.id}`
+        const REMINDER_INTERVAL = 24 * 60 * 60 * 1000
+        const MAX_REMINDERS = 2
+        try {
+          const saved = JSON.parse(localStorage.getItem(reminderKey) || '{}')
+          const count = saved.count || 0
+          const lastAt = saved.lastAt || 0
+          if (count < MAX_REMINDERS && Date.now() - lastAt > REMINDER_INTERVAL) {
+            const userEmail = String(data.user.email || '').trim()
+            const firstName = String(data.user.user_metadata?.full_name || '').split(' ')[0] || 'there'
+            const newCount = count + 1
+            sendPortalEmailNotification({
+              eventType: 'b2b_abandoned_cart',
+              to: userEmail,
+              subject: newCount === 1
+                ? `${firstName}, your cart is waiting for you 🛒`
+                : `Last nudge — your GEL.IT.UP colours are still here ✨`,
+              html: `
+<div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;max-width:540px;margin:0 auto;background:#111;border-radius:16px;overflow:hidden;">
+  <div style="background:linear-gradient(135deg,#D43790,#9333ea);padding:32px 28px;text-align:center;">
+    <p style="margin:0;font-size:28px;">🛒✨</p>
+    <h1 style="margin:12px 0 0;font-size:22px;font-weight:800;color:#fff;letter-spacing:0.02em;">Your basket misses you, ${firstName}!</h1>
+  </div>
+  <div style="padding:28px;color:#e5e5e5;font-size:14px;line-height:1.7;">
+    <p style="margin:0 0 16px;">You left <strong style="color:#D43790;">${units} item${units === 1 ? '' : 's'}</strong> in your GEL.IT.UP basket and they're ready to ship. 💅</p>
+    <p style="margin:0 0 16px;">Good news — they're still in your cart. Jump back in and complete your order today!</p>
+    <div style="text-align:center;margin:28px 0;">
+      <a href="https://gelitup.com/checkout" style="display:inline-block;background:#D43790;color:#fff;padding:14px 32px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:0.03em;">Complete my order →</a>
+    </div>
+    <p style="margin:0;font-size:12px;color:#888;text-align:center;">GEL.IT.UP by GIUP® — Professional Gel Polish 💖</p>
+  </div>
+</div>`,
+            }).catch(() => {})
+            localStorage.setItem(reminderKey, JSON.stringify({ count: newCount, lastAt: Date.now() }))
+          }
+        } catch { /* ignore */ }
       })
-    }, 2000) // debounce 2s
+    }, 2000)
     return () => clearTimeout(timer)
   }, [quickCart, isLoggedIn])
   const [gridColumns, setGridColumns] = useState(5)
@@ -5143,6 +5192,25 @@ function FullCataloguePage() {
 
               <div style={{ height: bottomSpacerHeight }} />
             </div>
+
+            {/* CART RESTORED TOAST — shown on page load when saved cart items exist */}
+            {cartRestoredToast && (
+              <div
+                className="pointer-events-none fixed left-4 top-20 z-[70] w-[calc(100vw-2rem)] max-w-xs sm:left-6 sm:top-[76px]"
+                style={{ animation: 'gelitup-toast-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both' }}
+              >
+                <div className="relative overflow-hidden rounded-2xl border border-fuchsia-200 bg-white shadow-[0_8px_48px_rgba(212,55,144,0.18)]">
+                  <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-fuchsia-500 to-fuchsia-700" />
+                  <div className="flex items-center gap-3 pl-5 pr-3 py-3.5">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-fuchsia-100 text-xl">🛒</div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[13px] font-black uppercase tracking-[0.08em] text-[#1A1A1A]">Your basket was saved!</p>
+                      <p className="mt-0.5 text-[11px] font-medium text-[#4A4A4A]">Your items are still here — ready to checkout.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* FREE SHIPPING TOAST — slides in from the right on first add */}
             {shippingToastVisible && (
@@ -8162,6 +8230,38 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           }
         </p>
 
+        {!isCreatePasswordMode && !isPasswordResetFlow && hasSupabaseConfig && supabase && portalType !== 'distributor' && (
+          <div className="mb-4 space-y-3">
+            <button
+              type="button"
+              onClick={async () => {
+                setErrorMessage('')
+                try {
+                  const { error: oauthError } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { redirectTo: `${window.location.origin}/portal/dashboard/overview` },
+                  })
+                  if (oauthError) setErrorMessage(oauthError.message || 'Google sign-in failed.')
+                } catch { setErrorMessage('Google sign-in failed. Please try again.') }
+              }}
+              className="flex w-full items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              Sign in with Google
+            </button>
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-slate-200" />
+              <span className="text-xs text-slate-400">or sign in with email</span>
+              <div className="h-px flex-1 bg-slate-200" />
+            </div>
+          </div>
+        )}
+
         <form autoComplete="on" className="space-y-3" onSubmit={async (event) => {
           event.preventDefault()
           setIsSubmitting(true)
@@ -8783,7 +8883,42 @@ function BuyerRegister() {
           <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>
         )}
 
-        <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
+        {hasSupabaseConfig && supabase && (
+          <div className="mt-4 space-y-2">
+            <button
+              type="button"
+              onClick={async () => {
+                setError('')
+                try {
+                  const { error: oauthError } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                      redirectTo: `${window.location.origin}/portal/dashboard/overview`,
+                      queryParams: { access_type: 'offline', prompt: 'consent' },
+                    },
+                  })
+                  if (oauthError) setError(oauthError.message || 'Google sign-in failed.')
+                } catch { setError('Google sign-in failed. Please try again.') }
+              }}
+              className="flex w-full items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              Continue with Google
+            </button>
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-slate-200" />
+              <span className="text-xs text-slate-400">or register with email</span>
+              <div className="h-px flex-1 bg-slate-200" />
+            </div>
+          </div>
+        )}
+
+        <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
           <label className="block text-sm font-medium text-slate-700">
             Email Address <span className="text-rose-500">*</span>
             <input type="email" required autoComplete="email" value={form.email} onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))} placeholder="you@company.com" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-fuchsia-500/20 focus:ring" />
@@ -8828,6 +8963,29 @@ function CheckoutPage() {
   })
   const [priceMap, setPriceMap] = useState(null)
   const [wordIndex, setWordIndex] = useState([])
+
+  // Pre-fill form from logged-in session
+  useEffect(() => {
+    if (!supabase) return
+    supabase.auth.getUser().then(({ data }) => {
+      const user = data?.user
+      if (!user) return
+      const meta = user.user_metadata || {}
+      setForm(f => ({
+        ...f,
+        email: f.email || user.email || '',
+        companyName: f.companyName || meta.company_name || '',
+        firstName: f.firstName || (meta.full_name || '').split(' ')[0] || '',
+        lastName: f.lastName || (meta.full_name || '').split(' ').slice(1).join(' ') || '',
+        invoiceCountry: f.invoiceCountry || meta.invoice_country || '',
+        invoiceAddressLine1: f.invoiceAddressLine1 || meta.invoice_address_line1 || '',
+        invoiceAddressLine2: f.invoiceAddressLine2 || meta.invoice_address_line2 || '',
+        invoiceArea: f.invoiceArea || meta.invoice_area || '',
+        invoiceRegion: f.invoiceRegion || meta.invoice_region || '',
+        invoicePostalCode: f.invoicePostalCode || meta.invoice_postal_code || '',
+      }))
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Static upsell essentials — popular items customers often forget (Cleanser discontinued → All-in-One Liquid)
   const CHECKOUT_UPSELLS = useMemo(() => [
@@ -9344,11 +9502,14 @@ function CheckoutPage() {
       <div className="flex items-baseline justify-between">
         <h1 className="text-2xl font-bold text-slate-900">Checkout</h1>
         <p className="text-sm text-slate-500">
-          Returning customer?{' '}
-          <NavLink to="/portal/login" className="font-semibold text-fuchsia-700 hover:underline">Login</NavLink>
+          Have an account?{' '}
+          <NavLink to="/portal/login" className="font-semibold text-fuchsia-700 hover:underline">Sign in to pre-fill</NavLink>
         </p>
       </div>
-      <p className="mt-1 text-sm text-slate-500">All orders include a VAT invoice. Review your order and complete your details to place it.</p>
+      <div className="mt-2 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5">
+        <span className="text-emerald-600 text-sm">✓</span>
+        <p className="text-sm text-emerald-800"><strong>No account needed</strong> — just fill in your details and place your order. You can create an account at the end if you want to.</p>
+      </div>
 
       {error && (
         <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>
