@@ -4346,7 +4346,7 @@ function FullCataloguePage() {
     if (window.gtag) {
       const [itemName] = itemKey.split('::')
       window.gtag('event', 'add_to_cart', { currency: 'EUR', items: [{ item_name: itemName, quantity: qty }] })
-      window.gtag('event', 'conversion', { send_to: 'AW-1008159504' })
+      window.gtag('event', 'conversion', { send_to: 'AW-1008159504/m23ACI_9w6oaEJCW3eAD', value: 1.0, currency: 'EUR' })
     }
   }, [itemQuantities, quickCartUnits])
 
@@ -9156,7 +9156,7 @@ function CheckoutPage() {
     setIsSubmitting(true)
     if (window.gtag) {
       window.gtag('event', 'begin_checkout', { currency: 'EUR', value: cartTotal })
-      window.gtag('event', 'conversion', { send_to: 'AW-1008159504' })
+      window.gtag('event', 'conversion', { send_to: 'AW-1008159504/huwrCJTYhIIDEJCW3eAD', value: cartTotal, currency: 'EUR' })
     }
 
     try {
@@ -18426,7 +18426,7 @@ function App() {
     sessionStorage.setItem(`gelitup.conv.${orderId}`, '1')
     if (window.gtag) {
       window.gtag('event', 'purchase', { currency: 'EUR', transaction_id: orderId })
-      window.gtag('event', 'conversion', { send_to: 'AW-1008159504', transaction_id: orderId })
+      window.gtag('event', 'conversion', { send_to: 'AW-1008159504/8692CPf3leEBEJCW3eAD', transaction_id: orderId, currency: 'EUR' })
     }
     // Clean ?payment=success from the URL without a page reload
     const clean = new URLSearchParams(params)
