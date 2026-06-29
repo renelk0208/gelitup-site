@@ -5288,12 +5288,18 @@ function FullCataloguePage() {
                     >
                       {showBasketDetail ? 'Hide' : 'View'}
                     </button>
-                    <NavLink
-                      to="/checkout"
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
-                    >
-                      Checkout
-                    </NavLink>
+                    {quickProgress >= 100 ? (
+                      <NavLink
+                        to="/checkout"
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
+                      >
+                        Checkout
+                      </NavLink>
+                    ) : (
+                      <span className="inline-flex shrink-0 cursor-not-allowed items-center gap-1.5 rounded-xl bg-slate-300 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500" title={`Add €${(MIN_ORDER_EUR - quickCartTotal).toFixed(2)} more to checkout`}>
+                        Checkout
+                      </span>
+                    )}
                     <button
                       onClick={() => { setQuickCart({}); setItemQuantities({}); setShowBasketDetail(false) }}
                       className="shrink-0 text-xs text-black/40 transition hover:text-red-500"
@@ -6344,12 +6350,18 @@ function FullCataloguePage() {
               >
                 {showBasketDetail ? 'Hide' : 'View'}
               </button>
-              <NavLink
-                to="/checkout"
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
-              >
-                Checkout
-              </NavLink>
+              {quickProgress >= 100 ? (
+                <NavLink
+                  to="/checkout"
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
+                >
+                  Checkout
+                </NavLink>
+              ) : (
+                <span className="inline-flex shrink-0 cursor-not-allowed items-center gap-1.5 rounded-xl bg-slate-300 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500" title={`Add €${(MIN_ORDER_EUR - quickCartTotal).toFixed(2)} more to checkout`}>
+                  Checkout
+                </span>
+              )}
               <button
                 onClick={() => { setQuickCart({}); setItemQuantities({}); setShowBasketDetail(false) }}
                 className="shrink-0 text-xs text-black/40 transition hover:text-red-500"
@@ -8104,6 +8116,8 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
   const [debugTrace, setDebugTrace] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [magicLinkSent, setMagicLinkSent] = useState(false)
+  const [magicLinkLoading, setMagicLinkLoading] = useState(false)
 
   useEffect(() => {
     if (prefilledEmail) {
@@ -8356,6 +8370,39 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           <p className="mt-3 text-xs text-amber-600">
             Demo auth mode active. Add Supabase env vars in `.env` to enable production authentication.
           </p>
+        )}
+
+        {!isCreatePasswordMode && !isPasswordResetFlow && hasSupabaseConfig && (
+          <div className="mt-4 border-t border-slate-100 pt-4">
+            {magicLinkSent ? (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-center">
+                <p className="text-sm font-bold text-emerald-800">Magic link sent!</p>
+                <p className="mt-1 text-xs text-emerald-700">Check your inbox for <strong>{email}</strong> and click the link to sign in.</p>
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={!email || magicLinkLoading}
+                onClick={async () => {
+                  if (!email) { setErrorMessage('Enter your email above first.'); return }
+                  setMagicLinkLoading(true)
+                  setErrorMessage('')
+                  try {
+                    const { error: otpError } = await supabase.auth.signInWithOtp({
+                      email,
+                      options: { emailRedirectTo: `${window.location.origin}/portal/dashboard/overview` },
+                    })
+                    if (otpError) { setErrorMessage(otpError.message || 'Could not send magic link.') }
+                    else { setMagicLinkSent(true) }
+                  } catch { setErrorMessage('Could not send magic link. Please try again.') }
+                  finally { setMagicLinkLoading(false) }
+                }}
+                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+              >
+                {magicLinkLoading ? 'Sending…' : 'Send me a sign-in link instead'}
+              </button>
+            )}
+          </div>
         )}
 
         {errorMessage && <p className="mt-3 text-xs text-rose-600">{errorMessage}</p>}
@@ -8663,7 +8710,14 @@ function BuyerRegister() {
       if (signUpData?.session) {
         localStorage.setItem('portalAuth', 'true')
         if (window.gtag) window.gtag('event', 'sign_up', { method: 'email' })
-        navigate('/full-catalogue')
+        try {
+          const savedCart = localStorage.getItem(QUICK_CART_STORAGE_KEY)
+          const cartObj = savedCart ? JSON.parse(savedCart) : {}
+          const hasItems = Object.values(cartObj).some(q => q > 0)
+          navigate(hasItems ? '/checkout' : '/full-catalogue')
+        } catch {
+          navigate('/full-catalogue')
+        }
         return
       }
 
@@ -8918,8 +8972,7 @@ function CheckoutPage() {
     const email = form.email.trim().toLowerCase()
     if (!email) { setError('Email is required.'); return }
     const vat = form.vatNumber.trim()
-    if (!vat) { setError('A valid VAT number is required for B2B orders.'); return }
-    if (!viesResult?.valid) { setError('Please verify your VAT number before placing your order.'); return }
+    if (vat && !viesResult?.valid) { setError('Please verify your VAT number using the "Verify" button, or clear the field to continue without one.'); return }
     if (!form.companyName.trim()) { setError('Company name is required.'); return }
     if (!form.firstName.trim()) { setError('First name is required.'); return }
     if (!form.lastName.trim()) { setError('Last name is required.'); return }
@@ -8954,8 +9007,8 @@ function CheckoutPage() {
         options: {
           data: {
             company_name: form.companyName.trim(),
-            vat_number: vat,
-            vies_vat: vat,
+            vat_number: vat || null,
+            vies_vat: vat || null,
             account_type: 'b2b_buyer',
             full_name: `${form.firstName.trim()} ${form.lastName.trim()}`,
             contact_phone: form.phone.trim(),
@@ -9018,7 +9071,7 @@ function CheckoutPage() {
       }
       const invoice = {
         name: form.companyName.trim(),
-        vatNumber: vat,
+        vatNumber: vat || null,
         address: invoiceAddress,
         country: form.invoiceCountry.trim(),
         contactEmail: email,
