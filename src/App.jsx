@@ -8841,37 +8841,37 @@ function BuyerRegister() {
     <section className="mx-auto grid max-w-4xl rounded-2xl border border-slate-200 bg-white md:grid-cols-2 md:overflow-hidden">
       <div className="bg-[#111111] p-5 sm:p-6 md:p-8 text-white">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-fuchsia-400">GEL.IT.UP by GIUP®</p>
-        <h2 className="heading-on-dark mt-3 text-3xl font-bold">Access Wholesale Pricing Today</h2>
-        <p className="mt-3 text-sm text-slate-300">
+        <h2 className="heading-on-dark mt-3 text-3xl font-bold text-white">Access Wholesale Pricing Today</h2>
+        <p className="mt-3 text-sm text-white/80">
           Join 1,000+ nail professionals already ordering at B2B prices. Free to join, instant access, no approval needed.
         </p>
         <ul className="mt-6 space-y-3 hidden md:block">
-          <li className="flex items-start gap-2.5 text-sm text-slate-300">
-            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
+          <li className="flex items-start gap-2.5 text-sm font-medium text-white">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500 text-white text-xs">✓</span>
             Instant account — no waiting for approval
           </li>
-          <li className="flex items-start gap-2.5 text-sm text-slate-300">
-            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
+          <li className="flex items-start gap-2.5 text-sm font-medium text-white">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500 text-white text-xs">✓</span>
             1,000+ professional shades at B2B pricing
           </li>
-          <li className="flex items-start gap-2.5 text-sm text-slate-300">
-            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
+          <li className="flex items-start gap-2.5 text-sm font-medium text-white">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500 text-white text-xs">✓</span>
             EU-certified, HEMA &amp; TPO-free formulas
           </li>
-          <li className="flex items-start gap-2.5 text-sm text-slate-300">
-            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
+          <li className="flex items-start gap-2.5 text-sm font-medium text-white">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500 text-white text-xs">✓</span>
             Open to all professional buyers worldwide
           </li>
         </ul>
-        <p className="mt-4 text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
+        <p className="mt-6 text-xs text-white/70">
           Want to try before committing?{' '}
-          <a href="mailto:info@gelitup.com?subject=Sample Pack Request" className="font-bold text-white underline hover:text-white/90">
+          <a href="mailto:info@gelitup.com?subject=Sample Pack Request" className="font-bold text-white underline hover:text-fuchsia-300">
             Request a sample pack →
           </a>
         </p>
-        <p className="mt-4 text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
+        <p className="mt-3 text-xs text-white/70">
           Looking for wholesale distribution?{' '}
-          <NavLink to="/distributors" style={{ color: '#fff', fontWeight: 700, textDecoration: 'underline' }}>Apply as a distributor</NavLink>
+          <NavLink to="/distributors" className="font-bold text-white underline hover:text-fuchsia-300">Apply as a distributor</NavLink>
         </p>
       </div>
 
