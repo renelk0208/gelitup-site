@@ -58,9 +58,25 @@ const BOT_PATTERNS = [
   /sqlmap/i,
 ]
 
-// Countries generating suspicious zero-engagement traffic
-// SG: 60% of sessions, 0.99% engagement rate — clearly bot traffic
-const BLOCKED_GEO = new Set(['SG'])
+// Countries generating suspicious zero-engagement traffic.
+// Southeast Asia is the world's largest hub for click farms, scraper bots,
+// and data-centre traffic. None of these are target markets for this business.
+// SG: 60% of all sessions at 0.99% engagement — primary bot source
+// VN, TH, MY, ID, PH, MM, KH, LA, BN: same data-centre ecosystem
+const BLOCKED_GEO = new Set([
+  'SG', // Singapore  — 60% of sessions, 0.99% engagement
+  'VN', // Vietnam
+  'TH', // Thailand
+  'MY', // Malaysia
+  'ID', // Indonesia
+  'PH', // Philippines
+  'MM', // Myanmar
+  'KH', // Cambodia
+  'LA', // Laos
+  'BN', // Brunei
+  'TW', // Taiwan   — frequent scraper/bot origin
+  'HK', // Hong Kong — frequent scraper/bot origin
+])
 
 export default async (request, context) => {
   // Skip protection for Netlify function calls and static assets
