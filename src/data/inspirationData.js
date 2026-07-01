@@ -117,11 +117,19 @@ export const inspirationCategories = [
   },
   {
     key: '3-in-1-builder-gels',
-    label: '3‑in‑1 Builder Gels',
+    label: 'Builder Gels',
     folder: '3-in-1-builder-gels',
-    description: 'Strong, self-levelling builder gels for structure and overlay.',
-    cover: enc(`${BASE}/3-in-1-builder-gels/3-in-1-builder-gel (1).webp`),
-    images: Array.from({ length: 6 }, (_, i) => enc(`${BASE}/3-in-1-builder-gels/3-in-1-builder-gel (${i + 1}).webp`)),
+    description: 'Classic 3-in-1 builder gel in a wide range of natural, nude and colour shades - one formula to build, shape and finish.',
+    cover: enc(`${BASE}/3-in-1-builder-gels/builder-gels-category.jpg`),
+    images: [enc(`${BASE}/3-in-1-builder-gels/builder-gels-category.jpg`)],
+  },
+  {
+    key: '3-in-1-effects-builder-gels',
+    label: 'Effects Builder Gels',
+    folder: '3-in-1-builder-gels',
+    description: 'Builder gels with built-in visual effects - shimmer, glitter and iridescent finishes in a single formula.',
+    cover: enc(`${BASE}/3-in-1-builder-gels/effects-builder-gels-category.webp`),
+    images: [enc(`${BASE}/3-in-1-builder-gels/effects-builder-gels-category.webp`)],
   },
   {
     key: 'biab',
