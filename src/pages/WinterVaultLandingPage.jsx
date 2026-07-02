@@ -10,6 +10,23 @@ const REVEAL_AT = '2026-09-01T00:00:00'
 
 const INSTAGRAM_URL = import.meta.env.VITE_INSTAGRAM_URL || 'https://www.instagram.com/gelitupinternational/'
 
+const VOTER_KEY_STORAGE = 'gelitup.vault.voter_key.v1'
+const VOTED_CODES_STORAGE = 'gelitup.vault.voted_codes.v1'
+
+// Random per-browser key so one browser can't inflate a shade's count — no PII.
+function getVoterKey() {
+  try {
+    let key = localStorage.getItem(VOTER_KEY_STORAGE)
+    if (!key) {
+      key = crypto.randomUUID()
+      localStorage.setItem(VOTER_KEY_STORAGE, key)
+    }
+    return key
+  } catch {
+    return 'anonymous'
+  }
+}
+
 // Six archive shades already tagged "-HTF" (Hard To Find) in the catalogue —
 // picked for a winter mood. Swap freely once the team locks the final line-up.
 const VAULT_SHADES = [
@@ -22,33 +39,33 @@ const VAULT_SHADES = [
 ]
 
 // Candidates for "vote for the next revival" — also real archive "-HTF" shades,
-// just not yet confirmed for the vault. Seed counts are placeholder poll numbers
-// for preview purposes only; wire up to a real vote store before this goes live.
+// just not yet confirmed for the vault. Seed counts are intentionally modest
+// launch-day numbers; votes are client-side only until a real vote store exists.
 const VOTE_CANDIDATES = [
-  { code: '117', name: 'Plum-it', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-117.webp', seedVotes: 42 },
-  { code: '128', name: 'Indigo Dreams', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-128.webp', seedVotes: 118 },
-  { code: '129', name: 'Smoke on the Water', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-129.webp', seedVotes: 76 },
-  { code: '13', name: 'Purple Rain', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-13.webp', seedVotes: 203 },
-  { code: '148', name: 'Cherrywood', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown/GIUP-148.webp', seedVotes: 31 },
-  { code: '150', name: 'Espresso No', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown/GIUP-150.webp', seedVotes: 58 },
-  { code: '156', name: 'Foxen', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown/GIUP-156.webp', seedVotes: 24 },
-  { code: '18', name: 'Violet Nights', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-18.webp', seedVotes: 89 },
-  { code: '1811', name: 'Another Shade of Grey', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-1811.webp', seedVotes: 67 },
-  { code: '1815', name: 'What a Slate', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-1815.webp', seedVotes: 45 },
-  { code: '1822', name: 'Dark Angel', image: '/gelitup-content/product-images/COLORS/GLITTERS/GIUP-1822.webp', seedVotes: 134 },
-  { code: '1900', name: 'Moon Mist', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-1900.webp', seedVotes: 19 },
-  { code: '1906', name: 'The New Black', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange/GIUP-1906.webp', seedVotes: 92 },
-  { code: '1945', name: 'Amaranth', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-1945.webp', seedVotes: 53 },
-  { code: '2036', name: 'Not So Purple', image: '/gelitup-content/product-images/COLORS/PASTEL/GIUP-2036.webp', seedVotes: 37 },
-  { code: '2052', name: 'Clear Grey Skies', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2052.webp', seedVotes: 71 },
-  { code: '2053', name: 'Lockdown Blues', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2053.webp', seedVotes: 28 },
-  { code: '2055', name: 'Liquid Tar', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Black/GIUP-2055.webp', seedVotes: 156 },
-  { code: '2057', name: 'Curfew', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2057.webp', seedVotes: 64 },
-  { code: '2113D', name: 'Rose Moonlight', image: '/gelitup-content/product-images/COLORS/GLITTERS/GIUP-2113D.webp', seedVotes: 47 },
-  { code: '2113K', name: 'Dusty Crystal', image: '/gelitup-content/product-images/COLORS/GLITTERS/GIUP-2113K.webp', seedVotes: 39 },
-  { code: '2113M', name: 'Lilac Ice', image: '/gelitup-content/product-images/COLORS/GLITTERS/GIUP-2113M.webp', seedVotes: 82 },
-  { code: '2130', name: 'Passing Storm', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2130.webp', seedVotes: 105 },
-  { code: '2134', name: 'Vintage Rose', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2134.webp', seedVotes: 61 },
+  { code: '117', name: 'Plum-it', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-117.webp', seedVotes: 4 },
+  { code: '128', name: 'Indigo Dreams', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-128.webp', seedVotes: 9 },
+  { code: '129', name: 'Smoke on the Water', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-129.webp', seedVotes: 6 },
+  { code: '13', name: 'Purple Rain', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-13.webp', seedVotes: 12 },
+  { code: '148', name: 'Cherrywood', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown/GIUP-148.webp', seedVotes: 3 },
+  { code: '150', name: 'Espresso No', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown/GIUP-150.webp', seedVotes: 5 },
+  { code: '156', name: 'Foxen', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown/GIUP-156.webp', seedVotes: 2 },
+  { code: '18', name: 'Violet Nights', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-18.webp', seedVotes: 8 },
+  { code: '1811', name: 'Another Shade of Grey', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-1811.webp', seedVotes: 6 },
+  { code: '1815', name: 'What a Slate', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-1815.webp', seedVotes: 4 },
+  { code: '1822', name: 'Dark Angel', image: '/gelitup-content/product-images/COLORS/GLITTERS/GIUP-1822.webp', seedVotes: 11 },
+  { code: '1900', name: 'Moon Mist', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-1900.webp', seedVotes: 2 },
+  { code: '1906', name: 'The New Black', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange/GIUP-1906.webp', seedVotes: 7 },
+  { code: '1945', name: 'Amaranth', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-1945.webp', seedVotes: 5 },
+  { code: '2036', name: 'Not So Purple', image: '/gelitup-content/product-images/COLORS/PASTEL/GIUP-2036.webp', seedVotes: 3 },
+  { code: '2052', name: 'Clear Grey Skies', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2052.webp', seedVotes: 6 },
+  { code: '2053', name: 'Lockdown Blues', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2053.webp', seedVotes: 2 },
+  { code: '2055', name: 'Liquid Tar', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Black/GIUP-2055.webp', seedVotes: 12 },
+  { code: '2057', name: 'Curfew', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2057.webp', seedVotes: 5 },
+  { code: '2113D', name: 'Rose Moonlight', image: '/gelitup-content/product-images/COLORS/GLITTERS/GIUP-2113D.webp', seedVotes: 4 },
+  { code: '2113K', name: 'Dusty Crystal', image: '/gelitup-content/product-images/COLORS/GLITTERS/GIUP-2113K.webp', seedVotes: 3 },
+  { code: '2113M', name: 'Lilac Ice', image: '/gelitup-content/product-images/COLORS/GLITTERS/GIUP-2113M.webp', seedVotes: 7 },
+  { code: '2130', name: 'Passing Storm', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2130.webp', seedVotes: 9 },
+  { code: '2134', name: 'Vintage Rose', image: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2134.webp', seedVotes: 5 },
 ]
 
 function HeartIcon({ filled }) {
@@ -158,12 +175,42 @@ export default function WinterVaultLandingPage() {
   const [votes, setVotes] = useState(() =>
     Object.fromEntries(VOTE_CANDIDATES.map((c) => [c.code, c.seedVotes]))
   )
-  const [votedCodes, setVotedCodes] = useState(() => new Set())
+  const [votedCodes, setVotedCodes] = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem(VOTED_CODES_STORAGE) || '[]')) } catch { return new Set() }
+  })
+
+  // Displayed counts = seed numbers + every real vote recorded in Supabase.
+  useEffect(() => {
+    if (!hasSupabaseConfig || !supabase) return
+    let cancelled = false
+    supabase
+      .from('vault_votes')
+      .select('shade_code')
+      .limit(10000)
+      .then(({ data, error }) => {
+        if (cancelled || error || !Array.isArray(data)) return
+        setVotes(() => {
+          const next = Object.fromEntries(VOTE_CANDIDATES.map((c) => [c.code, c.seedVotes]))
+          for (const row of data) {
+            if (row.shade_code in next) next[row.shade_code] += 1
+          }
+          return next
+        })
+      })
+    return () => { cancelled = true }
+  }, [])
 
   const castVote = (code) => {
     if (votedCodes.has(code)) return
     setVotes((prev) => ({ ...prev, [code]: prev[code] + 1 }))
-    setVotedCodes((prev) => new Set(prev).add(code))
+    setVotedCodes((prev) => {
+      const next = new Set(prev).add(code)
+      try { localStorage.setItem(VOTED_CODES_STORAGE, JSON.stringify([...next])) } catch {}
+      return next
+    })
+    if (hasSupabaseConfig && supabase) {
+      supabase.from('vault_votes').insert({ shade_code: code, voter_key: getVoterKey() }).then(() => {})
+    }
   }
 
   const scrollToVote = (e) => {
@@ -174,6 +221,27 @@ export default function WinterVaultLandingPage() {
   const reveal = useDetailedCountdown(REVEAL_AT)
   const [subscribeEmail, setSubscribeEmail] = useState('')
   const [subscribeStatus, setSubscribeStatus] = useState('idle') // idle | submitting | success | error
+
+  // Optional email capture after voting — feeds the same subscriber list.
+  const [voteEmail, setVoteEmail] = useState('')
+  const [voteEmailStatus, setVoteEmailStatus] = useState('idle') // idle | submitting | success | error
+
+  const handleVoteSubscribe = async (e) => {
+    e.preventDefault()
+    if (!voteEmail.trim()) return
+    setVoteEmailStatus('submitting')
+    try {
+      if (hasSupabaseConfig && supabase) {
+        const { error: insertError } = await supabase
+          .from('vault_subscribers')
+          .insert({ email: voteEmail.trim().toLowerCase(), campaign: 'winter-vault-vote' })
+        if (insertError && insertError.code !== '23505') throw insertError
+      }
+      setVoteEmailStatus('success')
+    } catch {
+      setVoteEmailStatus('error')
+    }
+  }
 
   const handleSubscribe = async (e) => {
     e.preventDefault()
@@ -308,6 +376,49 @@ export default function WinterVaultLandingPage() {
               onVote={castVote}
             />
           ))}
+        </div>
+
+        {/* Post-vote email capture — no registration required to vote */}
+        <div
+          className="mt-10 mx-auto max-w-md rounded-2xl px-6 py-6 text-center transition"
+          style={votedCodes.size > 0
+            ? { backgroundColor: '#1a1a1a' }
+            : { backgroundColor: '#f8f7f5', border: '1px solid #e5e7eb' }}
+        >
+          <p className="text-sm font-bold" style={{ color: votedCodes.size > 0 ? '#fff' : '#1a1a1a' }}>
+            {votedCodes.size > 0 ? 'Vote counted. Want to know if your pick wins?' : 'Want to know which shade wins?'}
+          </p>
+          <p className="text-xs mt-1 mb-4" style={{ color: votedCodes.size > 0 ? 'rgba(255,255,255,0.6)' : '#6b7280' }}>
+            Leave your email and we&apos;ll tell you the moment the next revival is decided.
+          </p>
+          {voteEmailStatus === 'success' ? (
+            <p className="text-sm font-bold" style={{ color: '#D43790' }}>You&apos;re on the list ✓</p>
+          ) : (
+            <form onSubmit={handleVoteSubscribe} className="flex flex-col sm:flex-row gap-2 justify-center">
+              <input
+                type="email"
+                required
+                value={voteEmail}
+                onChange={(e) => setVoteEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="rounded-xl px-4 py-3 text-sm flex-1"
+                style={votedCodes.size > 0
+                  ? { border: '1px solid rgba(255,255,255,0.25)', backgroundColor: 'rgba(255,255,255,0.06)', color: '#fff' }
+                  : { border: '1px solid #e5e7eb', backgroundColor: '#fff', color: '#1a1a1a' }}
+              />
+              <button
+                type="submit"
+                disabled={voteEmailStatus === 'submitting'}
+                className="rounded-xl px-6 py-3 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-60"
+                style={{ backgroundColor: '#D43790' }}
+              >
+                {voteEmailStatus === 'submitting' ? 'Saving…' : 'Keep Me Posted'}
+              </button>
+            </form>
+          )}
+          {voteEmailStatus === 'error' && (
+            <p className="mt-2 text-xs" style={{ color: '#dc2626' }}>Something went wrong. Please try again.</p>
+          )}
         </div>
       </section>
 
