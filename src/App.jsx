@@ -30,6 +30,7 @@ const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
 const GuestbookPage = lazy(() => import('./pages/GuestbookPage.jsx'))
 const InspirationPage = lazy(() => import('./pages/InspirationPage.jsx'))
 const GelColoursLandingPage = lazy(() => import('./pages/GelColoursLandingPage.jsx'))
+const WinterVaultLandingPage = lazy(() => import('./pages/WinterVaultLandingPage.jsx'))
 const WholesaleLandingPage = lazy(() => import('./pages/WholesaleLandingPage.jsx'))
 
 const B2B_EMAIL = import.meta.env.VITE_B2B_EMAIL || 'info@gelitup.com'
@@ -19583,6 +19584,7 @@ function App() {
           <Route path="/spot-my-tops"      element={<Navigate to="/full-catalogue?subcategory=spot-my-tops"      replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/gel-colours" element={<GelColoursLandingPage />} />
+          <Route path="/winter-vault" element={<WinterVaultLandingPage />} />
           <Route path="/wholesale" element={<WholesaleLandingPage />} />
           <Route path="/guestbook" element={<GuestbookPage />} />
           <Route path="/inspiration" element={<InspirationPage />} />
