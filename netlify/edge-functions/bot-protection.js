@@ -78,6 +78,17 @@ const BLOCKED_GEO = new Set([
   'HK', // Hong Kong — frequent scraper/bot origin
 ])
 
+// Referral-spam domains — bot networks that crawl the site to plant their
+// domain in Analytics referral reports. Real visitors never arrive from these.
+const SPAM_REFERRERS = [
+  /trafficheap\.cc/i,
+  /semalt\./i,
+  /buttons-for-website\./i,
+  /best-seo-offer\./i,
+  /darodar\./i,
+  /ilovevitaly\./i,
+]
+
 export default async (request, context) => {
   // Skip protection for Netlify function calls and static assets
   const url = new URL(request.url)
@@ -103,6 +114,13 @@ export default async (request, context) => {
 
   // Block known bad bot user agents
   if (BOT_PATTERNS.some((p) => p.test(ua))) {
+    return new Response('Forbidden', { status: 403 })
+  }
+
+  // Block referral-spam networks (e.g. trafficheap.cc) so they never
+  // reach the page or register a session in Analytics
+  const referer = request.headers.get('referer') || ''
+  if (referer && SPAM_REFERRERS.some((p) => p.test(referer))) {
     return new Response('Forbidden', { status: 403 })
   }
 
