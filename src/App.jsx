@@ -2702,6 +2702,26 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
       basesMap.set('5IN1 SUPERIOR BASE', existing5in1)
       grouped.set('BASES', basesMap)
     }
+
+    const builderSystemsMap = grouped.get('BUILDER GEL SYSTEMS') || new Map()
+    const glitterBuilderItems = Array.from(builderSystemsMap.entries())
+      .filter(([subcategoryName]) => normalizeCatalogueToken(subcategoryName).includes('GLITTER 3 IN 1 BUILDER GEL'))
+      .flatMap(([, items]) => items)
+
+    if (glitterBuilderItems.length > 0) {
+      const summerVibesItems = newProductsMap.get('Summer Vibes') || []
+      const existingUrls = new Set(summerVibesItems.map((item) => item.imageUrl))
+
+      glitterBuilderItems.forEach((item) => {
+        if (!existingUrls.has(item.imageUrl)) {
+          summerVibesItems.push({ ...item })
+          existingUrls.add(item.imageUrl)
+        }
+      })
+
+      newProductsMap.set('Summer Vibes', summerVibesItems)
+      grouped.set('2026 NEW!', newProductsMap)
+    }
   }
 
   return Array.from(grouped.entries())
