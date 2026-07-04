@@ -34,6 +34,20 @@
           "mergeAsGallery": true
         },
         {
+          "hero": "3-in-1_builder_gel_pink",
+          "swatches": [
+            "3 in 1 builder gel pink B"
+          ],
+          "mergeAsGallery": true
+        }
+      ],
+      "order": []
+    },
+    {
+      "category": "BUILDER GEL SYSTEMS",
+      "subcategory": "GLITTER 3-IN-1 BUILDER GELS",
+      "groups": [
+        {
           "hero": "3-in-1_builder_gel_iridescent_shimmer_clear",
           "swatches": [
             "3 in 1 builder gel iridescent shimmer clear B"
@@ -44,13 +58,6 @@
           "hero": "3-in-1_builder_gel_marmelade_shimmer_pink",
           "swatches": [
             "3 in 1 builder gel marmelade shimmer pink B"
-          ],
-          "mergeAsGallery": true
-        },
-        {
-          "hero": "3-in-1_builder_gel_pink",
-          "swatches": [
-            "3 in 1 builder gel pink B"
           ],
           "mergeAsGallery": true
         },
@@ -66,6 +73,46 @@
           "swatches": [
             "3 in 1 builder gel shimmer lilac B"
           ],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3-in-1_builder_gel_glitter_copper_sunshine",
+          "swatches": [],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3-in-1_builder_gel_glitter_cosmic_dust",
+          "swatches": [],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3-in-1_builder_gel_glitter_deep_sea_galaxy",
+          "swatches": [],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3-in-1_builder_gel_glitter_electric_orchid",
+          "swatches": [],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3-in-1_builder_gel_glitter_rose_stardust",
+          "swatches": [],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3-in-1_builder_gel_glitter_stardust_plum",
+          "swatches": [],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3-in-1_builder_gel_glitter_supernova_indigo",
+          "swatches": [],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3-in-1_builder_gel_glitter_warm_sand_glow",
+          "swatches": [],
           "mergeAsGallery": true
         }
       ],
@@ -103,6 +150,13 @@
           "hero": "3_in_1_gelitup_premium_builder_gel_blush",
           "swatches": [
             "3 in 1 gelitup premium builder gel blush B"
+          ],
+          "mergeAsGallery": true
+        },
+        {
+          "hero": "3-in-1_gelitup_premium_builder_gel_blue_20g",
+          "swatches": [
+            "3 in 1 gelitup premium builder gel blue B"
           ],
           "mergeAsGallery": true
         },
