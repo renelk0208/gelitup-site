@@ -3163,17 +3163,9 @@ const SUBCATEGORY_SEO = {
   },
 }
 
-// Winter Vault campaign teaser on the catalogue — mirrors VAULT_SHADES + VAULT_CLOSES_AT
-// in src/pages/WinterVaultLandingPage.jsx; keep in sync when the line-up or dates change.
-const WINTER_VAULT_TEASER_SWATCHES = [
-  '/gelitup-content/product-images/COLORS/FRENCH/GIUP-05.webp',
-  '/gelitup-content/product-images/COLORS/GLITTERS/GIUP-1819.webp',
-  '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-1938.webp',
-  '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2046.webp',
-  '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2061.webp',
-  '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2135.webp',
-]
-const WINTER_VAULT_CLOSES_AT = '2026-08-09T23:59:59'
+// Winter Vault teaser on the catalogue — mirrors REVEAL_AT in
+// src/pages/WinterVaultLandingPage.jsx; keep in sync when the date changes.
+const WINTER_VAULT_REVEAL_AT = '2026-09-01T00:00:00'
 
 function FullCataloguePage() {
   const location = useLocation()
@@ -5530,7 +5522,7 @@ function FullCataloguePage() {
 
           {/* WINTER VAULT CAMPAIGN TEASER */}
           {(() => {
-            const daysLeft = Math.max(0, Math.ceil((new Date(WINTER_VAULT_CLOSES_AT).getTime() - Date.now()) / 86400000))
+            const daysToReveal = Math.max(0, Math.ceil((new Date(WINTER_VAULT_REVEAL_AT).getTime() - Date.now()) / 86400000))
             return (
               <div className="mx-auto max-w-6xl px-4 sm:px-8 pb-2">
                 <NavLink
@@ -5542,33 +5534,19 @@ function FullCataloguePage() {
                   <div className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-[0.3em]" style={{ color: '#D43790' }}>
-                        The Winter Vault — open for a limited run
+                        The Winter Vault
                       </p>
                       <p className="mt-1.5 text-lg font-black leading-snug text-white sm:text-xl">
-                        Six shades escaped the archive.{' '}
-                        {daysLeft > 0 ? `${daysLeft} days before they're locked away again.` : 'The vault is closing.'}
+                        Something new is locked away.{' '}
+                        {daysToReveal > 0 ? `The vault opens in ${daysToReveal} days.` : 'The vault is open.'}
                       </p>
                       <p className="mt-1 text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                        Hard to find. Found again. Plus 24 more waiting in the dark — your vote decides what comes back next.
+                        Brand new products, sealed until 1 September. Leave your email and be the first inside.
                       </p>
                     </div>
-                    <div className="flex shrink-0 items-center gap-4 sm:flex-col sm:items-end sm:gap-3">
-                      <div className="flex -space-x-2.5">
-                        {WINTER_VAULT_TEASER_SWATCHES.map((img, i) => (
-                          <img
-                            key={img}
-                            src={img}
-                            alt=""
-                            loading="lazy"
-                            className="h-10 w-10 rounded-full border-2 object-cover transition duration-300 group-hover:-translate-y-1"
-                            style={{ borderColor: '#1A1A1A', transitionDelay: `${i * 40}ms` }}
-                          />
-                        ))}
-                      </div>
-                      <span className="rounded-lg px-5 py-2.5 text-sm font-bold text-white transition group-hover:opacity-90" style={{ backgroundColor: '#D43790' }}>
-                        Enter the Vault →
-                      </span>
-                    </div>
+                    <span className="shrink-0 self-start sm:self-auto rounded-lg px-5 py-2.5 text-sm font-bold text-white transition group-hover:opacity-90" style={{ backgroundColor: '#D43790' }}>
+                      Enter the Vault →
+                    </span>
                   </div>
                 </NavLink>
               </div>
