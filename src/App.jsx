@@ -134,65 +134,81 @@ function calcPaypalTotal(amount) {
   return { gross: grossRounded, fee }
 }
 
+// Uniform 24px-tall card tiles with accurate brand marks — compact payment acceptance row.
+const PAYMENT_TILE_CLASS = 'inline-flex h-6 items-center justify-center gap-1 rounded-[4px] border border-black/10 bg-white px-2 shadow-sm'
+
 function PaymentMethodBadge({ method }) {
   if (method.key === 'apple-pay') {
     return (
-      <span className="flex min-w-[88px] items-center justify-center gap-1 rounded-md border border-black/8 bg-white px-2.5 py-1.5 text-[10px] font-medium text-black shadow-[0_1px_4px_rgba(15,23,42,0.08)]">
-        <span className="text-[11px] leading-none">Apple</span>
-        <span className="text-[11px] font-bold leading-none">Pay</span>
+      <span className={PAYMENT_TILE_CLASS} aria-label="Apple Pay">
+        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="#000" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.417 2.2-1.11 2.99-.84.95-2.17 1.68-3.32 1.59-.14-1.13.41-2.31 1.06-3.05.73-.83 2-1.46 3.06-1.53.02.06.31 0 .31 0zM20.9 17.02c-.55 1.27-.82 1.83-1.53 2.95-.99 1.57-2.39 3.53-4.12 3.54-1.54.02-1.93-1-4.02-.99-2.09.01-2.52.98-4.06.99-1.73.01-3.05-1.77-4.04-3.34C-1.31 15.9-1.6 9.5 1.32 6.1c.99-1.18 2.56-1.93 4.04-1.93 1.51 0 2.46 1 3.71 1 1.21 0 1.95-1 3.7-1 1.32 0 2.72.72 3.72 1.96-3.27 1.79-2.74 6.46.41 7.89z" /></svg>
+        <span className="text-[11px] font-semibold leading-none text-black">Pay</span>
       </span>
     )
   }
 
   if (method.key === 'google-pay') {
     return (
-      <span className="flex min-w-[82px] items-center justify-center gap-1 rounded-md border border-black/8 bg-white px-2.5 py-1.5 text-[10px] font-medium text-slate-900 shadow-[0_1px_4px_rgba(15,23,42,0.08)]">
-        <span className="font-black text-[11px] text-[#4285F4]">G</span>
-        <span>Pay</span>
+      <span className={PAYMENT_TILE_CLASS} aria-label="Google Pay">
+        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden="true">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+          <path d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84z" fill="#FBBC05" />
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z" fill="#EA4335" />
+        </svg>
+        <span className="text-[11px] font-medium leading-none text-[#5f6368]">Pay</span>
       </span>
     )
   }
 
   if (method.key === 'klarna') {
     return (
-      <span className="flex min-w-[82px] items-center justify-center rounded-md border border-[#ffc4d6] bg-[#ff5f96] px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.03em] text-white shadow-[0_1px_4px_rgba(15,23,42,0.08)]">
-        Klarna
+      <span className="inline-flex h-6 items-center justify-center rounded-[4px] bg-[#FFB3C7] px-2 shadow-sm" aria-label="Klarna">
+        <span className="text-[11px] font-bold leading-none text-black">Klarna</span>
       </span>
     )
   }
 
   if (method.key === 'mastercard') {
     return (
-      <span className="flex min-w-[98px] items-center justify-center gap-1.5 rounded-md border border-black/8 bg-white px-2.5 py-1.5 text-[10px] font-medium text-slate-900 shadow-[0_1px_4px_rgba(15,23,42,0.08)]">
-        <span className="relative flex h-3.5 w-5.5 items-center">
-          <span className="absolute left-0 h-3.5 w-3.5 rounded-full bg-[#EB001B]" />
-          <span className="absolute left-2 h-3.5 w-3.5 rounded-full bg-[#F79E1B] opacity-95" />
+      <span className={PAYMENT_TILE_CLASS} aria-label="Mastercard">
+        <span className="relative inline-flex h-4 w-6 items-center" aria-hidden="true">
+          <span className="absolute left-0.5 h-4 w-4 rounded-full bg-[#EB001B]" />
+          <span className="absolute right-0.5 h-4 w-4 rounded-full bg-[#F79E1B] mix-blend-multiply" />
         </span>
-        <span>Mastercard</span>
       </span>
     )
   }
 
   if (method.key === 'paypal') {
     return (
-      <span className="flex min-w-[86px] items-center justify-center gap-1 rounded-md border border-black/8 bg-white px-2.5 py-1.5 text-[10px] font-semibold text-[#003087] shadow-[0_1px_4px_rgba(15,23,42,0.08)]">
-        <span className="text-[#009CDE]">P</span>
-        <span>PayPal</span>
+      <span className={PAYMENT_TILE_CLASS} aria-label="PayPal">
+        <span className="text-[11px] font-bold italic leading-none">
+          <span className="text-[#003087]">Pay</span><span className="text-[#009CDE]">Pal</span>
+        </span>
       </span>
     )
   }
 
   if (method.key === 'revolut') {
     return (
-      <span className="flex min-w-[84px] items-center justify-center rounded-md border border-white/10 bg-[#191c23] px-2.5 py-1.5 text-[10px] font-semibold text-white shadow-[0_1px_4px_rgba(15,23,42,0.12)]">
-        Revolut
+      <span className={PAYMENT_TILE_CLASS} aria-label="Revolut">
+        <span className="text-[11px] font-bold leading-none tracking-tight text-[#0a1c3e]">Revolut</span>
+      </span>
+    )
+  }
+
+  if (method.key === 'visa') {
+    return (
+      <span className={PAYMENT_TILE_CLASS} aria-label="Visa">
+        <span className="text-[13px] font-bold italic leading-none tracking-tight text-[#1434CB]" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>VISA</span>
       </span>
     )
   }
 
   return (
-    <span className="flex min-w-[68px] items-center justify-center rounded-md border border-[#2a63e2] bg-[#1A56DB] px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-white shadow-[0_1px_4px_rgba(15,23,42,0.12)]">
-      {method.label}
+    <span className={PAYMENT_TILE_CLASS} aria-label={method.label}>
+      <span className="text-[11px] font-semibold leading-none text-slate-800">{method.label}</span>
     </span>
   )
 }
@@ -9522,7 +9538,7 @@ function CheckoutPage() {
           <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
             <h2 style="color:#1a1a1a">Thank you for your order!</h2>
             <p>Hi ${escapeHtml(`${form.firstName.trim()} ${form.lastName.trim()}` || form.companyName.trim())},</p>
-            <p>We've received your order <strong>#${insertedOrder?.id ?? '-'}</strong>. Please complete your payment using the options on the confirmation page.</p>
+            <p>We've received your order <strong>#${insertedOrder?.id ?? '-'}</strong>. You can pay online via the confirmation page, or wait for the pro forma invoice we'll email you and pay by bank transfer.</p>
             <p><strong>Order Total:</strong> €${cartTotal.toFixed(2)} (${cartUnits} items)</p>
             <p style="color:#555">Your invoice will be issued by email once your order is processed (usually within 1 business day). Should any item be unavailable, we will arrange a refund or account credit.</p>
             ${form.createAccount ? '<p>You can now log in with your email and password to track your orders.</p>' : '<p>If you would like to track future orders, you can create an account at checkout next time.</p>'}
@@ -9567,8 +9583,8 @@ function CheckoutPage() {
         </div>
         {orderConfirmed.total > 0 && (
           <div className="mt-4 rounded-xl border border-slate-200 bg-white p-5 text-left">
-            <p className="mb-1 text-sm font-semibold text-slate-800">Complete Your Payment</p>
-            <p className="text-xs text-slate-500">Order total: <strong className="text-slate-700">€{orderConfirmed.total.toFixed(2)}</strong> — choose your preferred payment method. Your invoice will be issued once your order is processed.</p>
+            <p className="mb-1 text-sm font-semibold text-slate-800">Pay Now or Pay by Invoice</p>
+            <p className="text-xs text-slate-500">Order total: <strong className="text-slate-700">€{orderConfirmed.total.toFixed(2)}</strong> — pay online now (card and PayPal totals include the processing fee), or simply wait for the pro forma invoice we'll email you and pay by bank transfer at no extra fee.</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {(() => {
                 const { gross: stripeGross, fee: stripeFee } = calcStripeTotal(orderConfirmed.total)
@@ -9886,7 +9902,7 @@ function CheckoutPage() {
           <HowItWorks variant="banner" />
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-3">
             <p className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500">Payment Options</p>
-            <p className="text-sm text-slate-600">We'll send you a proforma invoice after your order is confirmed. Payment is due before dispatch.</p>
+            <p className="text-sm text-slate-600">After placing your order, pay online right away — or wait for the pro forma invoice we email you and pay by bank transfer. Payment is due before dispatch.</p>
             <PaymentTrustStrip tone="light" />
           </div>
 
@@ -9942,7 +9958,7 @@ function CheckoutPage() {
               <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
                 <svg viewBox="0 0 20 20" fill="currentColor" className="mt-0.5 h-4 w-4 shrink-0 text-amber-500"><path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clipRule="evenodd" /></svg>
                 <p className="text-xs font-medium leading-relaxed text-amber-800">
-                  <strong>No payment is taken at checkout.</strong> A pro forma invoice will be issued by Thermitek Ltd after your order is confirmed. <strong>Payment is due upon receipt of the pro forma invoice.</strong>
+                  <strong>No payment is taken at checkout.</strong> After confirming, pay online right away or await the pro forma invoice issued by Thermitek Ltd. <strong>Payment is due before dispatch.</strong>
                 </p>
               </div>
 
