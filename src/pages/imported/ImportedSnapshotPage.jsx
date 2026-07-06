@@ -679,7 +679,6 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
   const heroMedia = previewMedia[0] || null
   const galleryMedia = previewMedia.slice(1, 7)
   const quickLinks = (activePage?.links || []).slice(0, 8)
-  const manifestoVisual = heroMedia || galleryMedia[0] || null
 
   if (isLoading) {
     return <p className="text-sm text-slate-600">Loading page baseline...</p>
