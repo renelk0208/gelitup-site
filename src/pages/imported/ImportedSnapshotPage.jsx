@@ -10,7 +10,6 @@ import HomeHeroCarousel from '../../components/HomeHeroCarousel'
 const INSTAGRAM_URL = 'https://www.instagram.com/gelitup_official/'
 const INSTAGRAM_HANDLE = 'gelitup_official'
 const ABOUT_US_HERO_IMAGE_URL = '/gelitup-media/images/about-us-hero-image.webp'
-const ABOUT_US_HERO_IMAGE_FALLBACK_URL = '/gelitup-media/images/about-us-hero-image.webp'
 const EXHIBITIONS_BACKDROP_VIDEO_URL = '/gelitup-media/videos/exhibition%20video.mp4'
 const ABOUT_US_LIVE_FALLBACK_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
 const ABOUT_US_CONTENT_CACHE_BUSTER = '2026-04-15-1'
@@ -708,35 +707,6 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
     return (
       <section className="space-y-6">
         <HomeHeroCarousel />
-        <div className="mx-auto w-full max-w-6xl overflow-hidden rounded-2xl bg-black">
-          <div className="relative h-[58vh] min-h-[320px] w-full sm:h-[66vh] sm:min-h-[400px]">
-            <img
-              src={ABOUT_US_HERO_IMAGE_URL || manifestoVisual?.displayUrl || '/logo.png'}
-              alt="About Us hero visual"
-              className="h-full w-full object-cover"
-              loading="eager"
-              onError={(event) => {
-                const currentSrc = event.currentTarget.getAttribute('src') || ''
-                if (currentSrc.includes('about-us-page-hero-image')) {
-                  event.currentTarget.src = ABOUT_US_HERO_IMAGE_FALLBACK_URL
-                  return
-                }
-                event.currentTarget.src = manifestoVisual?.displayUrl || '/logo.png'
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-            <div className="absolute inset-0 flex flex-col justify-end px-6 pb-8 sm:px-10 sm:pb-10">
-              <div className="max-w-xl">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-300">
-                  GEL.IT.UP by GIUP®
-                </p>
-                <h1 className="text-3xl font-bold leading-[1.25] tracking-tight text-white sm:text-4xl lg:text-5xl">
-                  About Us
-                </h1>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <div className="rounded-2xl border border-[#E8E8E8] bg-transparent p-5 sm:p-8">
           <p
