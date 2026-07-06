@@ -13,7 +13,6 @@ import PageLoader from './components/PageLoader'
 import MinimumOrderNudge from './components/MinimumOrderNudge'
 import HowItWorks from './components/HowItWorks'
 import HeroCTA from './components/HeroCTA'
-import HomeHeroCarousel from './components/HomeHeroCarousel'
 import SocialProof from './components/SocialProof'
 import InstagramFeed from './components/InstagramFeed'
 import InspirationTeaser from './components/InspirationTeaser'
@@ -5540,7 +5539,6 @@ function FullCataloguePage() {
 
   return (
     <section className="space-y-5">
-      <HomeHeroCarousel />
       <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
         <div className="mx-auto max-w-6xl">
           <h1 className="heading-on-dark text-4xl font-extrabold uppercase tracking-[0.15em] text-white sm:text-5xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 /**
  * HomeHeroCarousel
@@ -25,7 +26,7 @@ const BANNERS = [
     title: 'Professional Nails. Perfected.',
     sub: 'TPO & HEMA-free gel systems, made in the EU.',
     cta: 'Shop New In',
-    anchor: 'catalogue-section-new-products',
+    to: '/full-catalogue?category=new-products',
   },
   {
     img: `${IMG_BASE}/gel-polish-category-hero.jpg`,
@@ -33,7 +34,7 @@ const BANNERS = [
     title: '1,000+ Gel Colours',
     sub: 'Every shade, undertone and finish.',
     cta: 'Shop Colours',
-    anchor: 'catalogue-section-colours',
+    to: '/full-catalogue?category=colours',
   },
   {
     img: `${IMG_BASE}/top-bases-catalog-hero-image.webp`,
@@ -41,7 +42,7 @@ const BANNERS = [
     title: 'Bases & Tops',
     sub: 'Good starts to good finishes.',
     cta: 'Shop Bases & Tops',
-    anchor: 'catalogue-section-essentials',
+    to: '/full-catalogue?category=essentials',
   },
   {
     img: `${IMG_BASE}/builder-gel-systems.hero.image.webp`,
@@ -49,7 +50,7 @@ const BANNERS = [
     title: 'Builder Gel Systems',
     sub: 'Strength, structure, flawless shape.',
     cta: 'Shop Builder Gels',
-    anchor: 'catalogue-section-builders',
+    to: '/full-catalogue?category=builders',
   },
   {
     img: `${IMG_BASE}/nail-art.hero.image.webp`,
@@ -57,7 +58,7 @@ const BANNERS = [
     title: 'Nail Art',
     sub: 'Tools for limitless creativity.',
     cta: 'Shop Nail Art',
-    anchor: 'catalogue-section-nail-art',
+    to: '/full-catalogue?category=nail-art',
   },
   {
     img: `${IMG_BASE}/equipment-and-tools-catalog-hero.jpg`,
@@ -65,7 +66,7 @@ const BANNERS = [
     title: 'Equipment & Tools',
     sub: 'Precision gear for every service.',
     cta: 'Shop Equipment',
-    anchor: 'catalogue-section-tools',
+    to: '/full-catalogue?category=tools',
   },
   {
     img: `${IMG_BASE}/consumables-catalog-hero.jpg`,
@@ -73,7 +74,7 @@ const BANNERS = [
     title: 'Salon Consumables',
     sub: 'Everyday essentials, pro quality.',
     cta: 'Shop Consumables',
-    anchor: 'catalogue-section-consumables',
+    to: '/full-catalogue?category=consumables',
   },
   {
     img: `${IMG_BASE}/Hand-nail-and-foot-care-catalog-hero-image.webp`,
@@ -81,7 +82,7 @@ const BANNERS = [
     title: 'Hand, Nail & Foot Care',
     sub: 'After care is essential for hands and feet.',
     cta: 'Shop Care',
-    anchor: 'catalogue-section-nail-hand-foot',
+    to: '/full-catalogue?category=nail-hand-foot',
   },
   {
     img: `${IMG_BASE}/nail-preparations.hero.image.jpg`,
@@ -89,24 +90,20 @@ const BANNERS = [
     title: 'Nail Prep',
     sub: 'The foundation of a lasting set.',
     cta: 'Shop Nail Prep',
-    anchor: 'catalogue-section-essentials',
+    to: '/full-catalogue?category=essentials',
   },
   {
     img: `${IMG_BASE}/academy-hero-image.webp`,
     kicker: 'Learn With Us',
     title: 'GEL.IT.UP Academy',
     sub: 'Learn from the professionals.',
-    cta: 'Explore the Range',
-    anchor: 'catalogue-section-new-products',
+    cta: 'Explore Academies',
+    to: '/for-academies',
   },
 ]
 
-function scrollToAnchor(anchor) {
-  const el = typeof document !== 'undefined' ? document.getElementById(anchor) : null
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-}
-
 export default function HomeHeroCarousel() {
+  const navigate = useNavigate()
   const [index, setIndex] = useState(0)
   const reduced = useMemo(
     () => typeof window !== 'undefined' && window.matchMedia
@@ -149,7 +146,7 @@ export default function HomeHeroCarousel() {
           <div className="mt-6">
             <button
               type="button"
-              onClick={() => scrollToAnchor(slide.anchor)}
+              onClick={() => navigate(slide.to)}
               className="inline-flex items-center gap-2 rounded-lg bg-[#D43790] px-6 py-2.5 text-sm font-bold text-white transition hover:bg-[#BF3182]"
             >
               {slide.cta}
