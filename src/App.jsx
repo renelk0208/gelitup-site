@@ -100,6 +100,16 @@ const PAYPAL_FIXED = Number(import.meta.env.VITE_PAYPAL_FEE_FIXED || '0.35')
 // Override via VITE_STRIPE_FEE_RATE / VITE_STRIPE_FEE_FIXED env vars.
 const STRIPE_RATE = Number(import.meta.env.VITE_STRIPE_FEE_RATE || '0.0325')
 const STRIPE_FIXED = Number(import.meta.env.VITE_STRIPE_FEE_FIXED || '0.25')
+const PAYMENT_TRUST_METHODS = [
+  { key: 'apple-pay', label: 'Apple Pay' },
+  { key: 'google-pay', label: 'Google Pay' },
+  { key: 'klarna', label: 'Klarna' },
+  { key: 'mastercard', label: 'Mastercard' },
+  { key: 'paypal', label: 'PayPal' },
+  { key: 'revolut', label: 'Revolut' },
+  { key: 'visa', label: 'Visa' },
+]
+
 function calcStripeTotal(amount) {
   const gross = (amount + STRIPE_FIXED) / (1 - STRIPE_RATE)
   let grossRounded = Math.ceil(gross * 100) / 100
@@ -122,6 +132,93 @@ function calcPaypalTotal(amount) {
   }
   const fee = Math.round((grossRounded - amount) * 100) / 100
   return { gross: grossRounded, fee }
+}
+
+function PaymentMethodBadge({ method }) {
+  if (method.key === 'apple-pay') {
+    return (
+      <span className="flex min-w-[88px] items-center justify-center gap-1 rounded-md border border-black/8 bg-white px-2.5 py-1.5 text-[10px] font-medium text-black shadow-[0_1px_4px_rgba(15,23,42,0.08)]">
+        <span className="text-[11px] leading-none">Apple</span>
+        <span className="text-[11px] font-bold leading-none">Pay</span>
+      </span>
+    )
+  }
+
+  if (method.key === 'google-pay') {
+    return (
+      <span className="flex min-w-[82px] items-center justify-center gap-1 rounded-md border border-black/8 bg-white px-2.5 py-1.5 text-[10px] font-medium text-slate-900 shadow-[0_1px_4px_rgba(15,23,42,0.08)]">
+        <span className="font-black text-[11px] text-[#4285F4]">G</span>
+        <span>Pay</span>
+      </span>
+    )
+  }
+
+  if (method.key === 'klarna') {
+    return (
+      <span className="flex min-w-[82px] items-center justify-center rounded-md border border-[#ffc4d6] bg-[#ff5f96] px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.03em] text-white shadow-[0_1px_4px_rgba(15,23,42,0.08)]">
+        Klarna
+      </span>
+    )
+  }
+
+  if (method.key === 'mastercard') {
+    return (
+      <span className="flex min-w-[98px] items-center justify-center gap-1.5 rounded-md border border-black/8 bg-white px-2.5 py-1.5 text-[10px] font-medium text-slate-900 shadow-[0_1px_4px_rgba(15,23,42,0.08)]">
+        <span className="relative flex h-3.5 w-5.5 items-center">
+          <span className="absolute left-0 h-3.5 w-3.5 rounded-full bg-[#EB001B]" />
+          <span className="absolute left-2 h-3.5 w-3.5 rounded-full bg-[#F79E1B] opacity-95" />
+        </span>
+        <span>Mastercard</span>
+      </span>
+    )
+  }
+
+  if (method.key === 'paypal') {
+    return (
+      <span className="flex min-w-[86px] items-center justify-center gap-1 rounded-md border border-black/8 bg-white px-2.5 py-1.5 text-[10px] font-semibold text-[#003087] shadow-[0_1px_4px_rgba(15,23,42,0.08)]">
+        <span className="text-[#009CDE]">P</span>
+        <span>PayPal</span>
+      </span>
+    )
+  }
+
+  if (method.key === 'revolut') {
+    return (
+      <span className="flex min-w-[84px] items-center justify-center rounded-md border border-white/10 bg-[#191c23] px-2.5 py-1.5 text-[10px] font-semibold text-white shadow-[0_1px_4px_rgba(15,23,42,0.12)]">
+        Revolut
+      </span>
+    )
+  }
+
+  return (
+    <span className="flex min-w-[68px] items-center justify-center rounded-md border border-[#2a63e2] bg-[#1A56DB] px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-white shadow-[0_1px_4px_rgba(15,23,42,0.12)]">
+      {method.label}
+    </span>
+  )
+}
+
+function PaymentTrustStrip({ tone = 'dark' }) {
+  const wrapClassName = tone === 'dark'
+    ? 'rounded-xl border border-white/10 bg-white/5 px-3 py-3'
+    : 'rounded-xl border border-slate-200 bg-white px-3 py-3'
+  const eyebrowClassName = tone === 'dark'
+    ? 'text-[10px] font-bold uppercase tracking-[0.14em] text-white/60'
+    : 'text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500'
+  const copyClassName = tone === 'dark'
+    ? 'mt-1 text-xs text-white/75'
+    : 'mt-1 text-xs text-slate-600'
+
+  return (
+    <div className={wrapClassName}>
+      <p className={eyebrowClassName}>Trusted payment methods</p>
+      <p className={copyClassName}>All invoices and online payments are issued in EUR (€).</p>
+      <div className="mt-2.5 flex flex-wrap items-center justify-center gap-1.5">
+        {PAYMENT_TRUST_METHODS.map((method) => (
+          <PaymentMethodBadge key={method.key} method={method} />
+        ))}
+      </div>
+    </div>
+  )
 }
 
 // Shared helper — creates a Stripe Checkout Session and redirects to Stripe's hosted payment page.
@@ -6310,19 +6407,8 @@ function FullCataloguePage() {
             <p className="mt-2 text-xs tracking-[0.06em] text-white/55">
               Formulated in strict compliance with EU Cosmetics Regulation (EC) No 1223/2009 — CPNP Notified
             </p>
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-              {[
-                'Apple Pay',
-                'Google Pay',
-                'Mastercard',
-                'PayPal',
-                'Revolut',
-                'Visa',
-              ].map(method => (
-                <span key={method} className="rounded-md border border-[#D43790]/30 bg-[#D43790]/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#D43790]">
-                  {method}
-                </span>
-              ))}
+            <div className="mt-5 max-w-4xl mx-auto">
+              <PaymentTrustStrip tone="dark" />
             </div>
           </div>
 
@@ -9801,20 +9887,7 @@ function CheckoutPage() {
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-3">
             <p className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500">Payment Options</p>
             <p className="text-sm text-slate-600">We'll send you a proforma invoice after your order is confirmed. Payment is due before dispatch.</p>
-            <div className="flex flex-wrap gap-2">
-              {[
-                'Apple Pay',
-                'Google Pay',
-                'Mastercard',
-                'PayPal',
-                'Revolut',
-                'Visa',
-              ].map(method => (
-                <span key={method} className="rounded-md border border-[#D43790]/30 bg-[#D43790]/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#D43790]">
-                  {method}
-                </span>
-              ))}
-            </div>
+            <PaymentTrustStrip />
           </div>
 
           <MinimumOrderNudge currentTotal={cartTotal} minimum={MIN_ORDER_EUR} />
