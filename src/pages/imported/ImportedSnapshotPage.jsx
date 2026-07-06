@@ -851,9 +851,9 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           </div>
         ) : null}
 
+        <InspirationTeaser />
         <InstagramFeed />
         <TikTokFeed />
-        <InspirationTeaser />
 
         <div className="pb-2 text-center">
           <NavLink
