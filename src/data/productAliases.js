@@ -35,7 +35,10 @@ export const PRODUCT_ALIAS_GROUPS = [
   { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
   { codes: ['GIUPSB', 'GIUP SB', 'GIUP-SB'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
   { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
-  { codes: ['GIUP-SB-WITH-ACID', 'GIUP SB WITH ACID', 'SB WITH ACID'], target: 'Superbond Nail Dehydrator 11ml - with Acid -HTF' },
+  { codes: ['GIUP-SB-WITH-ACID', 'GIUP SB WITH ACID', 'SB WITH ACID', 'superbond.with.acid', 'SUPERBOND WITH ACID'], target: 'Superbond Nail Dehydrator 11ml - with Acid -HTF' },
+  { codes: ['NAIL-PREP-Almond-Cuticle-Scrub-Remover-100ml', 'NAIL PREP ALMOND CUTICLE SCRUB REMOVER 100ML'], target: 'Almond Cuticle Scrub Remover 100ml -HTF' },
+  { codes: ['NAIL-PREP-Almond-Cuticle-Scrub-Remover-5ml', 'NAIL PREP ALMOND CUTICLE SCRUB REMOVER 5ML'], target: 'Almond Cuticle Scrub Remover 5ml -HTF' },
+  { codes: ['multimix pink III color 30g', 'multimix_pink_III_color-30g', 'MULTIMIX PINK III COLOR 30G'], target: 'MultiMix Synthogel 30gr Pink III -HTF' },
   // Dual form / nail tip shapes (image map uses bare shape names)
   { codes: ['ALMOND', 'DUAL FORMS ALMOND'], target: 'DUAL FORMS ALMOND' },
   { codes: ['BALLERINA', 'DUAL FORMS BALLERINA'], target: 'DUAL FORMS BALLERINA' },

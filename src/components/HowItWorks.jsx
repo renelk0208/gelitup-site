@@ -45,8 +45,8 @@ const STEPS = [
         <line x1="2" y1="10" x2="22" y2="10"/>
       </svg>
     ),
-    title: 'Receive pro forma invoice',
-    desc: "We email a pro forma invoice once your order is confirmed. Pay by card, PayPal, or Revolut — whichever suits you.",
+    title: 'Pay online or by invoice',
+    desc: "Pay right away by card, PayPal, or Revolut — or wait for the pro forma invoice we email once your order is confirmed.",
   },
   {
     icon: (
@@ -80,8 +80,8 @@ export default function HowItWorks({ variant = 'banner' }) {
         <ol style={{ margin: 0, padding: '0 0 0 16px', fontSize: '13px', color: '#444', lineHeight: 1.7 }}>
           <li>Add products and complete your details</li>
           <li>Place order — <strong>no payment taken yet</strong></li>
-          <li>We email you a pro forma invoice</li>
-          <li>Pay the invoice → we ship immediately</li>
+          <li>Pay online right away, or wait for our pro forma invoice and pay by transfer</li>
+          <li>Payment received → we ship immediately</li>
         </ol>
         <p style={{ margin: '10px 0 0 0', fontSize: '12px', color: '#888' }}>
           Accepted: Apple Pay · Google Pay · Mastercard · PayPal · Revolut · Visa

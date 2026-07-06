@@ -18,7 +18,7 @@ export default function HeroCTA() {
       {/* Primary CTA buttons */}
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
         <Link
-          to="/distributor-packages"
+          to="/full-catalogue"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -33,11 +33,11 @@ export default function HeroCTA() {
             letterSpacing: '0.02em',
           }}
         >
-          Get B2B Pricing →
+          Shop the Catalogue →
         </Link>
 
         <Link
-          to="/full-catalogue"
+          to="/distributor-packages"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -52,7 +52,7 @@ export default function HeroCTA() {
             textDecoration: 'none',
           }}
         >
-          Shop the Catalogue
+          Get B2B Pricing
         </Link>
       </div>
 
