@@ -6941,11 +6941,11 @@ function Nav({ onOpenContactModal }) {
               item.highlight
                 ? `rounded-lg border px-3 py-2 text-sm font-bold uppercase tracking-[0.06em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 ${
                     isActive
-                      ? 'border-fuchsia-400 bg-fuchsia-600 !text-white shadow-[0_0_12px_rgba(212,55,144,0.55)]'
+                      ? 'border-[#D43790] bg-[#D43790] !text-white shadow-[0_0_12px_rgba(212,55,144,0.55)]'
                       : 'border-fuchsia-500/60 !text-white/80 hover:bg-white/10 hover:!text-white'
                   }`
                 : `rounded-lg px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
-                    isActive ? 'bg-white/15 !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
+                    isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
                   }`
             }
           >
@@ -7152,12 +7152,12 @@ function MobileNav({ onOpenContactModal }) {
                   item.highlight
                     ? `block rounded-lg border px-4 py-3 text-sm font-bold uppercase tracking-[0.05em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 ${
                         isActive
-                          ? 'border-fuchsia-400 bg-fuchsia-600 !text-white shadow-[0_0_12px_rgba(212,55,144,0.4)]'
+                          ? 'border-[#D43790] bg-[#D43790] !text-white shadow-[0_0_12px_rgba(212,55,144,0.4)]'
                           : 'border-fuchsia-500 bg-fuchsia-600 !text-white shadow-[0_0_6px_rgba(212,55,144,0.3)] hover:bg-fuchsia-500'
                       }`
                     : `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
                         isActive
-                          ? 'bg-fuchsia-600 !text-white shadow-[0_0_0_1px_rgba(217,70,239,0.4)]'
+                          ? 'bg-[#D43790] !text-white shadow-[0_0_0_1px_rgba(212,55,144,0.5)]'
                           : '!text-white/75 hover:bg-white/10 hover:!text-white'
                       }`
                 }
