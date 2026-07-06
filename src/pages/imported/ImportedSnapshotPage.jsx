@@ -8,7 +8,7 @@ import TikTokFeed from '../../components/TikTokFeed'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/gelitup_official/'
 const INSTAGRAM_HANDLE = 'gelitup_official'
-const ABOUT_US_HERO_IMAGE_URL = '/gelitup-content/catalog-heroes/about-us-page-hero-image.jpg'
+const ABOUT_US_HERO_IMAGE_URL = '/gelitup-media/images/about-us-hero-image.webp'
 const ABOUT_US_HERO_IMAGE_FALLBACK_URL = '/gelitup-media/images/about-us-hero-image.webp'
 const EXHIBITIONS_BACKDROP_VIDEO_URL = '/gelitup-media/videos/exhibition%20video.mp4'
 const ABOUT_US_LIVE_FALLBACK_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
