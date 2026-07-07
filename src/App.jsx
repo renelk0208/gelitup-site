@@ -32,6 +32,7 @@ const InspirationPage = lazy(() => import('./pages/InspirationPage.jsx'))
 const GelColoursLandingPage = lazy(() => import('./pages/GelColoursLandingPage.jsx'))
 const WinterVaultLandingPage = lazy(() => import('./pages/WinterVaultLandingPage.jsx'))
 const WholesaleLandingPage = lazy(() => import('./pages/WholesaleLandingPage.jsx'))
+const AcademySampleKitPage = lazy(() => import('./pages/AcademySampleKitPage.jsx'))
 
 const B2B_EMAIL = import.meta.env.VITE_B2B_EMAIL || 'info@gelitup.com'
 const PRODUCT_CATEGORIES = ['Solid Colours', 'Builder Gels', 'Base & Top', 'Nail Care', 'Accessories']
@@ -1981,11 +1982,11 @@ function ForAcademiesPage(){
                 EU-certified, HEMA-free, and structured for training volume. From intake consumables to student kits — professional products your students can trust from day one.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <NavLink to="/portal/register" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
-                  Register Your Academy
+                <NavLink to="/academy-kit" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
+                  Claim Free Sample Kit
                 </NavLink>
-                <NavLink to="/portal/login" className="inline-flex rounded-lg border border-white/35 px-5 py-2.5 text-sm font-bold text-white/85 transition duration-300 hover:bg-white/10 hover:text-white">
-                  Sign In
+                <NavLink to="/portal/register" className="inline-flex rounded-lg border border-white/35 px-5 py-2.5 text-sm font-bold text-white/85 transition duration-300 hover:bg-white/10 hover:text-white">
+                  Register Your Academy
                 </NavLink>
                 <NavLink to="/full-catalogue" className="btn-cta-ghost-white inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
                   Our Products
@@ -3790,6 +3791,13 @@ function FullCataloguePage() {
           { codes: ['GIUP-BOB-Berry-stardust', 'GIUP-BOB-berry-stardust', 'GIUP BOB BERRY STARDUST', 'BOB BERRY STARDUST', '2026-NEW-BOB-Berry-Stardust', '2026 NEW BOB BERRY STARDUST', 'BRUSH ON BUILDER BIAB BERRY STARDUST'], target: 'Brush on Builder Gel Berry Stardust 15ml -HTF' },
           { codes: ['GIUP-BOB-blush-sorbet', 'GIUP BOB BLUSH SORBET', 'BOB BLUSH SORBET', '2026-NEW-BOB-Blush-Sorbet', '2026 NEW BOB BLUSH SORBET', 'BRUSH ON BUILDER BIAB BLUSH SORBET'], target: 'Brush on Builder Gel Blush Sorbet 15ml -HTF' },
           { codes: ['GIUP-BOB-sky-sprinkle', 'GIUP-BOB-sky-sprinkle (1)', 'GIUP BOB SKY SPRINKLE', 'GIUP BOB SKY SPRINKLE 1', 'BOB SKY SPRINKLE', '2026-NEW-BOB-Sky-Sprinkle', '2026 NEW BOB SKY SPRINKLE', 'BRUSH ON BUILDER BIAB SKY SPRINKLE'], target: 'Brush on Builder Gel Sky Sprinkle 15ml -HTF' },
+          { codes: ['NCE01', '2026-NEW-NCE01', '2026 NEW NCE01', 'NEON CAT EYE NCE01', 'NEON CAT EYE #NCE01'], target: 'Neon Cat Eye #NCE01 -HTF' },
+          { codes: ['NCE02', '2026-NEW-NCE02', '2026 NEW NCE02', 'NEON CAT EYE NCE02', 'NEON CAT EYE #NCE02'], target: 'Neon Cat Eye #NCE02 -HTF' },
+          { codes: ['NCE03', '2026-NEW-NCE03', '2026 NEW NCE03', 'NEON CAT EYE NCE03', 'NEON CAT EYE #NCE03'], target: 'Neon Cat Eye #NCE03 -HTF' },
+          { codes: ['NCE04', '2026-NEW-NCE04', '2026 NEW NCE04', 'NEON CAT EYE NCE04', 'NEON CAT EYE #NCE04'], target: 'Neon Cat Eye #NCE04 -HTF' },
+          { codes: ['NCE05', '2026-NEW-NCE05', '2026 NEW NCE05', 'NEON CAT EYE NCE05', 'NEON CAT EYE #NCE05'], target: 'Neon Cat Eye #NCE05 -HTF' },
+          { codes: ['NCE06', '2026-NEW-NCE06', '2026 NEW NCE06', 'NEON CAT EYE NCE06', 'NEON CAT EYE #NCE06'], target: 'Neon Cat Eye #NCE06 -HTF' },
+          { codes: ['NCE07', '2026-NEW-NCE07', '2026 NEW NCE07', 'NEON CAT EYE NCE07', 'NEON CAT EYE #NCE07'], target: 'Neon Cat Eye #NCE07 -HTF' },
           { codes: ['SCE01', '2026-NEW-SCE01', '2026 NEW SCE01', 'SAPPHIRE CAT EYE SCE01', 'SAPPHIRE CAT EYE #SCE01'], target: 'Sapphire Cat Eye #SCE01 -HTF' },
           { codes: ['SCE02', '2026-NEW-SCE02', '2026 NEW SCE02', 'SAPPHIRE CAT EYE SCE02', 'SAPPHIRE CAT EYE #SCE02'], target: 'Sapphire Cat Eye #SCE02 -HTF' },
           { codes: ['SCE03', '2026-NEW-SCE03', '2026 NEW SCE03', 'SAPPHIRE CAT EYE SCE03', 'SAPPHIRE CAT EYE #SCE03'], target: 'Sapphire Cat Eye #SCE03 -HTF' },
@@ -12268,6 +12276,13 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           { codes: ['GIUP-BOB-Berry-stardust', 'GIUP-BOB-berry-stardust', 'GIUP BOB BERRY STARDUST', 'BOB BERRY STARDUST', '2026-NEW-BOB-Berry-Stardust', '2026 NEW BOB BERRY STARDUST', 'BRUSH ON BUILDER BIAB BERRY STARDUST'], target: 'Brush on Builder Gel Berry Stardust 15ml -HTF' },
           { codes: ['GIUP-BOB-blush-sorbet', 'GIUP BOB BLUSH SORBET', 'BOB BLUSH SORBET', '2026-NEW-BOB-Blush-Sorbet', '2026 NEW BOB BLUSH SORBET', 'BRUSH ON BUILDER BIAB BLUSH SORBET'], target: 'Brush on Builder Gel Blush Sorbet 15ml -HTF' },
           { codes: ['GIUP-BOB-sky-sprinkle', 'GIUP-BOB-sky-sprinkle (1)', 'GIUP BOB SKY SPRINKLE', 'GIUP BOB SKY SPRINKLE 1', 'BOB SKY SPRINKLE', '2026-NEW-BOB-Sky-Sprinkle', '2026 NEW BOB SKY SPRINKLE', 'BRUSH ON BUILDER BIAB SKY SPRINKLE'], target: 'Brush on Builder Gel Sky Sprinkle 15ml -HTF' },
+          { codes: ['NCE01', '2026-NEW-NCE01', '2026 NEW NCE01', 'NEON CAT EYE NCE01', 'NEON CAT EYE #NCE01'], target: 'Neon Cat Eye #NCE01 -HTF' },
+          { codes: ['NCE02', '2026-NEW-NCE02', '2026 NEW NCE02', 'NEON CAT EYE NCE02', 'NEON CAT EYE #NCE02'], target: 'Neon Cat Eye #NCE02 -HTF' },
+          { codes: ['NCE03', '2026-NEW-NCE03', '2026 NEW NCE03', 'NEON CAT EYE NCE03', 'NEON CAT EYE #NCE03'], target: 'Neon Cat Eye #NCE03 -HTF' },
+          { codes: ['NCE04', '2026-NEW-NCE04', '2026 NEW NCE04', 'NEON CAT EYE NCE04', 'NEON CAT EYE #NCE04'], target: 'Neon Cat Eye #NCE04 -HTF' },
+          { codes: ['NCE05', '2026-NEW-NCE05', '2026 NEW NCE05', 'NEON CAT EYE NCE05', 'NEON CAT EYE #NCE05'], target: 'Neon Cat Eye #NCE05 -HTF' },
+          { codes: ['NCE06', '2026-NEW-NCE06', '2026 NEW NCE06', 'NEON CAT EYE NCE06', 'NEON CAT EYE #NCE06'], target: 'Neon Cat Eye #NCE06 -HTF' },
+          { codes: ['NCE07', '2026-NEW-NCE07', '2026 NEW NCE07', 'NEON CAT EYE NCE07', 'NEON CAT EYE #NCE07'], target: 'Neon Cat Eye #NCE07 -HTF' },
           { codes: ['SCE01', '2026-NEW-SCE01', '2026 NEW SCE01', 'SAPPHIRE CAT EYE SCE01', 'SAPPHIRE CAT EYE #SCE01'], target: 'Sapphire Cat Eye #SCE01 -HTF' },
           { codes: ['SCE02', '2026-NEW-SCE02', '2026 NEW SCE02', 'SAPPHIRE CAT EYE SCE02', 'SAPPHIRE CAT EYE #SCE02'], target: 'Sapphire Cat Eye #SCE02 -HTF' },
           { codes: ['SCE03', '2026-NEW-SCE03', '2026 NEW SCE03', 'SAPPHIRE CAT EYE SCE03', 'SAPPHIRE CAT EYE #SCE03'], target: 'Sapphire Cat Eye #SCE03 -HTF' },
@@ -19736,6 +19751,8 @@ function App() {
           <Route path="/gel-colours" element={<GelColoursLandingPage />} />
           <Route path="/winter-vault" element={<WinterVaultLandingPage />} />
           <Route path="/wholesale" element={<WholesaleLandingPage />} />
+          <Route path="/academy-kit" element={<AcademySampleKitPage />} />
+          <Route path="/sample-kit" element={<Navigate to="/academy-kit" replace />} />
           <Route path="/guestbook" element={<GuestbookPage />} />
           <Route path="/inspiration" element={<InspirationPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
