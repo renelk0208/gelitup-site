@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Academy Campaign — Social Media Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Oswald:wght@500;700&family=Caveat:wght@600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #333; font-family: 'Montserrat', sans-serif; }
+  .board { width: 1080px; height: 1080px; position: relative; overflow: hidden; margin: 0 auto 40px; }
+  .label { width: 1080px; margin: 0 auto 8px; color: #aaa; font: 600 14px 'Montserrat', sans-serif; letter-spacing: 0.15em; }
+
+  /* ── A: The Chalkboard (TPO lesson) ── */
+  .a { background: #26302b; padding: 60px; border: 28px solid #6b4a2f; }
+  .a-inner { height: 100%; border: 2px solid rgba(255,255,255,0.15); display: flex; flex-direction: column; justify-content: space-between; padding: 70px 64px; }
+  .a-date { font-family: 'Caveat', cursive; font-size: 40px; color: rgba(255,255,255,0.55); }
+  .a-lesson { font-family: 'Caveat', cursive; font-weight: 600; font-size: 56px; color: rgba(255,255,255,0.8); }
+  .a-big { font-family: 'Caveat', cursive; font-weight: 700; font-size: 118px; line-height: 1.02; color: #fff; }
+  .a-big .pink { color: #ff7ec2; }
+  .a-under { width: 420px; height: 6px; background: rgba(255,126,194,0.8); border-radius: 3px; margin-top: 8px; transform: rotate(-0.5deg); }
+  .a-note { font-family: 'Caveat', cursive; font-size: 44px; color: rgba(255,255,255,0.75); margin-top: 26px; }
+  .a-bottom { display: flex; align-items: center; justify-content: space-between; }
+  .a-chip { background: #D43790; color: #fff; font-size: 22px; font-weight: 700; letter-spacing: 0.15em; padding: 16px 34px; border-radius: 12px; font-family: 'Montserrat', sans-serif; }
+  .a-brand { font-size: 20px; letter-spacing: 0.3em; font-weight: 700; color: rgba(255,255,255,0.85); }
+
+  /* ── B: Supplier Report Card ── */
+  .b { background: #F5F1EA; display: flex; align-items: center; justify-content: center; }
+  .b-card { background: #fffdf8; width: 780px; padding: 64px 70px; box-shadow: 0 24px 50px rgba(0,0,0,0.18); transform: rotate(-1deg); position: relative; }
+  .b-head { text-align: center; border-bottom: 3px solid #1a1a1a; padding-bottom: 22px; }
+  .b-head h2 { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 52px; letter-spacing: 0.12em; color: #1a1a1a; }
+  .b-head p { font-size: 20px; letter-spacing: 0.25em; font-weight: 600; color: #6b5d45; margin-top: 8px; }
+  .b-row { display: flex; justify-content: space-between; align-items: center; font-size: 28px; color: #1a1a1a; padding: 20px 0; border-bottom: 1px solid #d9d2c4; }
+  .b-row .grade { font-family: 'Caveat', cursive; font-weight: 700; font-size: 46px; color: #c0392b; }
+  .b-stamp { position: absolute; bottom: 100px; right: -30px; border: 6px solid #c0392b; color: #c0392b; font-family: 'Caveat', cursive; font-weight: 700; font-size: 74px; padding: 6px 34px; transform: rotate(-12deg); border-radius: 14px; background: rgba(255,255,255,0.7); }
+  .b-foot { text-align: center; margin-top: 30px; font-size: 19px; font-weight: 700; letter-spacing: 0.2em; color: #1a1a1a; }
+  .b-foot .pink { color: #D43790; }
+  .b-band { position: absolute; bottom: 0; left: 0; width: 100%; background: #1a1a1a; text-align: center; padding: 24px 0; }
+  .b-band p { color: #fff; font-weight: 700; font-size: 26px; letter-spacing: 0.15em; }
+  .b-band .pink { color: #D43790; }
+
+  /* ── C: Big type (students buy what they train on) ── */
+  .c { background: #1a1a1a; padding: 80px; display: flex; flex-direction: column; justify-content: space-between; }
+  .c-type { font-weight: 900; font-size: 108px; line-height: 1.0; color: #fff; letter-spacing: -0.01em; }
+  .c-type .pink { color: #D43790; }
+  .c-sub { font-size: 30px; font-weight: 600; color: rgba(255,255,255,0.75); line-height: 1.4; max-width: 720px; }
+  .c-polaroid { position: absolute; right: 70px; bottom: 240px; background: #fff; padding: 16px 16px 50px; transform: rotate(5deg); box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+  .c-polaroid img { width: 270px; height: 270px; object-fit: cover; display: block; }
+  .c-polaroid p { font-family: 'Caveat', cursive; font-size: 30px; color: #1a1a1a; text-align: center; margin-top: 12px; }
+  .c-bottom { display: flex; align-items: center; gap: 24px; }
+  .c-chip { background: #D43790; color: #fff; font-size: 21px; font-weight: 700; letter-spacing: 0.15em; padding: 15px 32px; border-radius: 10px; }
+  .c-brand { font-size: 19px; letter-spacing: 0.3em; font-weight: 700; color: rgba(255,255,255,0.7); }
+
+  /* ── D: Certificate of Smart Supply ── */
+  .d { background: #F5F1EA; padding: 56px; }
+  .d-frame { border: 3px double #1a1a1a; height: 100%; padding: 10px; }
+  .d-frame-inner { border: 1px solid #1a1a1a; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 66px 70px; text-align: center; }
+  .d-eyebrow { font-size: 20px; letter-spacing: 0.45em; font-weight: 600; color: #1a1a1a; }
+  .d-title { font-family: 'Playfair Display', serif; font-size: 76px; font-weight: 700; color: #1a1a1a; line-height: 1.08; }
+  .d-body { font-family: 'Playfair Display', serif; font-style: italic; font-size: 34px; color: #2b2b2b; line-height: 1.5; max-width: 780px; }
+  .d-body b { font-style: normal; color: #D43790; }
+  .d-sigrow { display: flex; align-items: flex-end; justify-content: space-between; width: 100%; }
+  .d-sig { text-align: center; }
+  .d-sig .line { width: 260px; border-top: 2px solid #1a1a1a; margin-bottom: 10px; }
+  .d-sig p { font-size: 17px; letter-spacing: 0.2em; font-weight: 600; color: #1a1a1a; }
+  .d-seal { width: 150px; height: 150px; border-radius: 50%; background: #D43790; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; font-size: 17px; letter-spacing: 0.12em; box-shadow: 0 10px 24px rgba(212,55,144,0.4); text-align: center; line-height: 1.5; transform: rotate(-8deg); }
+  .d-foot { font-size: 18px; letter-spacing: 0.3em; font-weight: 700; color: #D43790; }
+
+  /* ── E: New Intake Checklist ── */
+  .e { background: #fff; padding: 80px; display: flex; flex-direction: column; justify-content: space-between; }
+  .e-eyebrow { font-size: 22px; letter-spacing: 0.35em; font-weight: 600; color: #D43790; }
+  .e-title { font-weight: 900; font-size: 76px; color: #1a1a1a; line-height: 1.05; margin-top: 12px; }
+  .e-list { margin-top: 20px; }
+  .e-item { display: flex; align-items: center; gap: 26px; padding: 21px 0; border-bottom: 1px solid #e5e7eb; }
+  .e-check { width: 52px; height: 52px; border-radius: 12px; background: #D43790; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; flex-shrink: 0; }
+  .e-item p { font-size: 30px; color: #1a1a1a; font-weight: 600; }
+  .e-item p span { color: #9ca3af; font-weight: 400; }
+  .e-bottom { display: flex; align-items: center; justify-content: space-between; }
+  .e-chip { background: #1a1a1a; color: #fff; font-size: 21px; font-weight: 700; letter-spacing: 0.15em; padding: 16px 34px; border-radius: 12px; }
+  .e-brand { font-size: 19px; letter-spacing: 0.3em; font-weight: 700; color: #D43790; }
+
+  /* ── F: The Academy Receipt ── */
+  .f { background: #D43790; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 38px; }
+  .f-receipt { background: #fff; width: 640px; padding: 54px 52px; transform: rotate(1.5deg); box-shadow: 0 30px 60px rgba(0,0,0,0.3); font-family: 'IBM Plex Mono', monospace; color: #1a1a1a; }
+  .f-receipt h2 { font-size: 29px; font-weight: 600; text-align: center; letter-spacing: 0.05em; }
+  .f-receipt .sm { font-size: 18px; text-align: center; margin-top: 6px; }
+  .f-rule { border-top: 3px dashed #1a1a1a; margin: 24px 0; }
+  .f-row { display: flex; justify-content: space-between; font-size: 22px; margin: 13px 0; }
+  .f-row .ok { font-weight: 600; }
+  .f-total { font-size: 22px; font-weight: 600; display: flex; justify-content: space-between; }
+  .f-barcode { margin: 28px auto 0; width: 70%; height: 52px; background: repeating-linear-gradient(90deg, #1a1a1a 0 4px, transparent 4px 7px, #1a1a1a 7px 9px, transparent 9px 14px); }
+  .f-tag { color: #fff; font-weight: 900; font-size: 42px; letter-spacing: 0.04em; }
+</style>
+</head>
+<body>
+
+<p class="label">A — THE CHALKBOARD (TPO compliance hook)</p>
+<div class="board a" id="c1">
+  <div class="a-inner">
+    <div style="display:flex;justify-content:space-between;">
+      <p class="a-lesson">Today's lesson:</p>
+      <p class="a-date">EU regulation, 2025</p>
+    </div>
+    <div>
+      <p class="a-big">TPO is <span class="pink">banned</span> in the EU.</p>
+      <div class="a-under"></div>
+      <p class="a-note">Is your classroom gel still compliant?<br>Homework: check your labels.</p>
+    </div>
+    <div class="a-bottom">
+      <p class="a-brand">GEL.IT.UP® — TPO-FREE · HEMA-FREE</p>
+      <div class="a-chip">GELITUP.COM/ACADEMY-KIT</div>
+    </div>
+  </div>
+</div>
+
+<p class="label">B — SUPPLIER REPORT CARD</p>
+<div class="board b" id="c2">
+  <div class="b-card">
+    <div class="b-head">
+      <h2>SUPPLIER REPORT CARD</h2>
+      <p>SUBJECT: YOUR GEL BRAND</p>
+    </div>
+    <div class="b-row"><p>HEMA-free formulas</p><p class="grade">A+</p></div>
+    <div class="b-row"><p>TPO-free (EU compliant)</p><p class="grade">A+</p></div>
+    <div class="b-row"><p>SDS &amp; CPNP documentation</p><p class="grade">A+</p></div>
+    <div class="b-row"><p>Minimum order quantity</p><p class="grade">none</p></div>
+    <div class="b-row"><p>EU shipping</p><p class="grade">free</p></div>
+    <div class="b-row" style="border-bottom:none;"><p>Samples before you commit</p><p class="grade">yes!</p></div>
+    <p class="b-foot">DOES <span class="pink">YOUR</span> SUPPLIER PASS?</p>
+    <div class="b-stamp">Top of class</div>
+  </div>
+  <div class="b-band"><p>GEL.IT.UP® · WHOLESALE FOR ACADEMIES · <span class="pink">GELITUP.COM/ACADEMY-KIT</span></p></div>
+</div>
+
+<p class="label">C — BIG TYPE (students buy what they train on)</p>
+<div class="board c" id="c3">
+  <p class="c-type">YOUR STUDENTS<br>WILL BUY WHAT<br>THEY <span class="pink">TRAINED</span><br><span class="pink">ON.</span></p>
+  <div class="c-polaroid">
+    <img src="/gelitup-content/catalog-heroes/academy-hero-image.webp" alt="Academy training">
+    <p>class of 2026 ♡</p>
+  </div>
+  <p class="c-sub">For years. Make it a professional brand they can actually order — trade account from day one, no minimums.</p>
+  <div class="c-bottom">
+    <div class="c-chip">PARTNER YOUR ACADEMY</div>
+    <p class="c-brand">GEL.IT.UP® BY GIUP®</p>
+  </div>
+</div>
+
+<p class="label">D — CERTIFICATE OF SMART SUPPLY</p>
+<div class="board d" id="c4">
+  <div class="d-frame"><div class="d-frame-inner">
+    <p class="d-eyebrow">GEL.IT.UP® HEREBY AWARDS THIS</p>
+    <h2 class="d-title">Certificate<br>of Smart Supply</h2>
+    <p class="d-body">presented to every academy that equips its students with <b>EU-certified</b>, <b>HEMA-free</b>, <b>TPO-free</b> professional gel — because they teach the standard, not just the technique.</p>
+    <div class="d-sigrow">
+      <div class="d-sig"><div class="line"></div><p>YOUR ACADEMY</p></div>
+      <div class="d-seal">CPNP<br>NOTIFIED<br>EC 1223/2009</div>
+      <div class="d-sig"><div class="line"></div><p>GEL.IT.UP® BY GIUP®</p></div>
+    </div>
+    <p class="d-foot">CLAIM YOURS · GELITUP.COM/ACADEMY-KIT</p>
+  </div></div>
+</div>
+
+<p class="label">E — NEW INTAKE CHECKLIST</p>
+<div class="board e" id="c5">
+  <div>
+    <p class="e-eyebrow">FOR NAIL ACADEMIES &amp; TRAINING SCHOOLS</p>
+    <h2 class="e-title">New intake<br>starting?</h2>
+  </div>
+  <div class="e-list">
+    <div class="e-item"><div class="e-check">✓</div><p>Builder gels &amp; systems <span>— training volume, consistent batches</span></p></div>
+    <div class="e-item"><div class="e-check">✓</div><p>1,000+ shades <span>— nail art modules covered</span></p></div>
+    <div class="e-item"><div class="e-check">✓</div><p>Student starter kits <span>— they keep ordering after graduation</span></p></div>
+    <div class="e-item"><div class="e-check">✓</div><p>SDS &amp; compliance pack <span>— for your records, free</span></p></div>
+    <div class="e-item" style="border-bottom:none;"><div class="e-check">✓</div><p>One supplier, one invoice <span>— free EU shipping, no MOQ</span></p></div>
+  </div>
+  <div class="e-bottom">
+    <div class="e-chip">RESTOCK IN ONE ORDER</div>
+    <p class="e-brand">GEL.IT.UP®</p>
+  </div>
+</div>
+
+<p class="label">F — THE ACADEMY RECEIPT</p>
+<div class="board f" id="c6">
+  <div class="f-receipt">
+    <h2>GEL.IT.UP®</h2>
+    <p class="sm">ACADEMY STARTER ORDER</p>
+    <p class="sm">*** WHOLESALE ***</p>
+    <div class="f-rule"></div>
+    <div class="f-row"><p>BUILDER GEL SYSTEM</p><p class="ok">TRADE PRICE</p></div>
+    <div class="f-row"><p>BASE + TOP COATS</p><p class="ok">TRADE PRICE</p></div>
+    <div class="f-row"><p>CLASSROOM SHADE SET</p><p class="ok">TRADE PRICE</p></div>
+    <div class="f-row"><p>SDS + COMPLIANCE PACK</p><p class="ok">FREE</p></div>
+    <div class="f-row"><p>SAMPLES FIRST</p><p class="ok">FREE</p></div>
+    <div class="f-row"><p>EU SHIPPING</p><p class="ok">FREE</p></div>
+    <div class="f-row"><p>MINIMUM ORDER</p><p class="ok">NONE</p></div>
+    <div class="f-rule"></div>
+    <div class="f-total"><p>TOTAL COMMITMENT:</p><p>ONE CLASS</p></div>
+    <p class="sm" style="margin-top:22px;">JUDGE US ON YOUR STUDENTS' RESULTS</p>
+    <div class="f-barcode"></div>
+    <p class="sm" style="margin-top:14px;">GELITUP.COM/ACADEMY-KIT</p>
+  </div>
+  <p class="f-tag">TRY US ON ONE CLASS.</p>
+</div>
+
+</body>
+</html>
