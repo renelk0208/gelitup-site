@@ -2890,7 +2890,6 @@ const COLOR_FAMILY_FILTERS = [
   { key: 'BLUE', label: 'Blue', swatchClass: 'bg-blue-500' },
   { key: 'BROWN', label: 'Brown', swatchClass: 'bg-amber-700' },
   { key: 'CORAL ORANGE', label: 'Coral Orange', swatchClass: 'bg-orange-400' },
-  { key: 'FRENCH', label: 'French', swatchClass: 'bg-pink-100 border border-pink-200' },
   { key: 'GIUP1', label: 'GIUP1', swatchClass: 'bg-fuchsia-200 border border-fuchsia-300' },
   { key: 'GREEN', label: 'Green', swatchClass: 'bg-emerald-500' },
   { key: 'GREY', label: 'Grey', swatchClass: 'bg-slate-500' },
