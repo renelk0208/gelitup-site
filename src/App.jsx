@@ -49,6 +49,20 @@ function readBooleanEnvFlag(value, fallbackValue = false) {
 
 const PORTAL_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_PORTAL, false)
 const MIN_ORDER_EUR = 100
+// ── SUMMER MADNESS storefront promotion ───────────────────────────────────
+// Site-wide discount applied on top of list prices; the price data files are
+// left untouched. Auto-expires after the end date below. NOTE: the end date is
+// for internal reference ONLY and must never be surfaced to customers.
+const CATALOGUE_DISCOUNT_PCT = 20
+const CATALOGUE_DISCOUNT_LABEL = 'SUMMER MADNESS -20%'
+const CATALOGUE_DISCOUNT_ENDS = new Date('2026-08-20T23:59:59+03:00')
+function isCatalogueDiscountActive() {
+  return CATALOGUE_DISCOUNT_PCT > 0 && Date.now() <= CATALOGUE_DISCOUNT_ENDS.getTime()
+}
+function applyCatalogueDiscount(priceEur) {
+  if (priceEur == null || !isCatalogueDiscountActive()) return priceEur
+  return Number((Number(priceEur) * (1 - CATALOGUE_DISCOUNT_PCT / 100)).toFixed(2))
+}
 const SHIPPING_ZONES = [
   { zone: 2, rateEur: 0, maxKg: 5, countries: ['Austria', 'Germany', 'Hungary'] },
   { zone: 3, rateEur: 0, maxKg: 5, countries: ['Belgium', 'Italy', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'France', 'Croatia', 'Czech Republic'] },
@@ -4511,7 +4525,7 @@ function FullCataloguePage() {
     return normalizeSkuCode(cleaned) || 'SKU'
   }, [])
 
-  const lookupCataloguePrice = useCallback((itemName = '', itemCode = '') => {
+  const resolveCatalogueListPrice = useCallback((itemName = '', itemCode = '') => {
     if (!cataloguePriceMap) return null
     const byName = cataloguePriceMap.get(normalizeProductName(itemName))
     if (byName?.price != null) return byName.price
@@ -4553,6 +4567,13 @@ function FullCataloguePage() {
     if (fuzzy?.price != null) return fuzzy.price
     return null
   }, [cataloguePriceMap, catalogueWordIndex])
+
+  // Effective catalogue price = list price with the SUMMER MADNESS discount applied.
+  // Every card, cart total and checkout uses this so displayed and charged prices match.
+  const lookupCataloguePrice = useCallback(
+    (itemName = '', itemCode = '') => applyCatalogueDiscount(resolveCatalogueListPrice(itemName, itemCode)),
+    [resolveCatalogueListPrice],
+  )
 
   const quickCartTotal = useMemo(() => {
     let total = 0
@@ -5232,6 +5253,8 @@ function FullCataloguePage() {
                 {virtualItems.map(({ item, itemIndex }) => {
                   const itemCode = item.code || extractProductCode(item.name)
                   const itemPrice = lookupCataloguePrice(item.name, itemCode)
+                  const itemListPrice = resolveCatalogueListPrice(item.name, itemCode)
+                  const itemDiscounted = isCatalogueDiscountActive() && itemPrice != null && itemListPrice != null && itemPrice < itemListPrice
                   const itemKey = `${item.name}::${itemCode}`
                   const qty = getQty(itemKey)
                   const hasChangedQty = qty !== 1
@@ -5250,7 +5273,9 @@ function FullCataloguePage() {
                         <div className="min-w-0 flex-1">
                           <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                           <p className="break-words text-[11px] font-light text-black/55">
-                            {itemPrice != null && <span className="text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</span>}
+                            {itemPrice != null && (itemDiscounted
+                              ? <span><span className="mr-1 text-black/35 line-through">€{Number(itemListPrice).toFixed(2)}</span><span className="text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</span></span>
+                              : <span className="text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</span>)}
                             {itemSize && <span className="ml-2 rounded bg-black/10 px-1.5 py-0.5 text-[10px] font-medium text-black/50">{itemSize}</span>}
                           </p>
                         </div>
@@ -5269,6 +5294,9 @@ function FullCataloguePage() {
                   return (
                     <article key={`${activeSection?.category}-${item.subcategory}-${item.imageUrl}`} className={`flex flex-col overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:bg-[#E8E8E8] md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)] ${getTileVariant(itemIndex)}`} data-catalogue-item>
                       <div className="relative flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52 md:h-60" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
+                        {itemDiscounted && (
+                          <span className="absolute left-2 top-2 z-10 rounded-full bg-[#D43790] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-md">-{CATALOGUE_DISCOUNT_PCT}%</span>
+                        )}
                         <img src={item.imageUrl} alt={item.name} loading="lazy" className={`h-full w-full scale-[1.025] object-cover opacity-0 transition-opacity duration-300 ${isOOS ? 'brightness-50 grayscale' : ''}`} onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
                         {videoMap[item.name] && (
                           <button
@@ -5302,7 +5330,14 @@ function FullCataloguePage() {
                         </div>
                         <div className="mt-1.5 flex items-center gap-2">
                           {itemPrice != null && (
-                            <p className="text-xs font-bold text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</p>
+                            itemDiscounted ? (
+                              <span className="flex items-baseline gap-1.5">
+                                <span className="text-[11px] font-medium text-black/40 line-through">€{Number(itemListPrice).toFixed(2)}</span>
+                                <span className="text-xs font-bold text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</span>
+                              </span>
+                            ) : (
+                              <p className="text-xs font-bold text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</p>
+                            )
                           )}
                           {itemSize && (
                             <span className="rounded bg-black/8 px-1.5 py-0.5 text-[10px] font-medium text-black/45">{itemSize}</span>
@@ -5710,6 +5745,8 @@ function FullCataloguePage() {
                     const itemCode = item.code || extractProductCode(item.name)
                     const itemKey = `${item.name}::${itemCode}`
                     const itemPrice = lookupCataloguePrice(item.name, itemCode)
+                    const itemListPrice = resolveCatalogueListPrice(item.name, itemCode)
+                    const itemDiscounted = isCatalogueDiscountActive() && itemPrice != null && itemListPrice != null && itemPrice < itemListPrice
                     const inCart = quickCart[itemKey] > 0
                     const isOOS = outOfStockNames.has(item.name)
                     return (
@@ -5720,6 +5757,9 @@ function FullCataloguePage() {
                         title={`View in ${item.category} — ${item.subcategory}`}
                       >
                         <div className="relative flex h-36 w-full items-center justify-center overflow-hidden bg-white p-1.5">
+                          {itemDiscounted && (
+                            <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-[#D43790] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white shadow-md">-{CATALOGUE_DISCOUNT_PCT}%</span>
+                          )}
                           <img src={item.imageUrl} alt={item.name} loading="lazy" className={`h-full w-full object-cover opacity-0 transition-opacity duration-300 ${isOOS ? 'brightness-75' : ''}`} onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={(e) => e.currentTarget.closest('article')?.classList.add('!hidden')} />
                           {isOOS && (
                             <div className="absolute inset-0 flex items-center justify-center">
@@ -5732,7 +5772,14 @@ function FullCataloguePage() {
                           <p className="line-clamp-2 text-[11px] font-semibold uppercase leading-tight tracking-[0.02em] text-black">{item.name}</p>
                           <p className="mt-1 truncate text-[10px] text-fuchsia-600">{formatSubcategoryDisplayName(item.subcategory, item.category)}</p>
                           {itemPrice != null && (
-                            <p className="mt-1 text-[11px] font-bold text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</p>
+                            itemDiscounted ? (
+                              <p className="mt-1 flex items-baseline gap-1">
+                                <span className="text-[10px] font-medium text-black/40 line-through">€{Number(itemListPrice).toFixed(2)}</span>
+                                <span className="text-[11px] font-bold text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</span>
+                              </p>
+                            ) : (
+                              <p className="mt-1 text-[11px] font-bold text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</p>
+                            )
                           )}
                           <div className="mt-auto pt-2" onClick={(e) => e.stopPropagation()}>
                             {isOOS ? (
@@ -5770,6 +5817,7 @@ function FullCataloguePage() {
               { key: 'Cloud Dancer', label: 'Cloud Dancer Collection' },
               { key: 'Summer Vibes', label: 'Summer Vibes' },
               { key: 'Sapphire Cat Eye', label: 'Sapphire Cat Eye' },
+              { key: 'Neon Cat Eye', label: 'Neon Cat Eye' },
               { key: 'Shimmer Colors', label: 'Shimmer Colors' },
               { key: 'Brush on Builder (BIAB)', label: 'Brush on Builder (BIAB)' },
               { key: 'Mirror Powder Top Coat', label: 'Mirror Powder Top Coat' },
@@ -5863,10 +5911,15 @@ function FullCataloguePage() {
                           const itemCode = item.code || extractProductCode(item.name)
                           const itemKey = `${item.name}::${itemCode}`
                           const price = lookupCataloguePrice(item.name, itemCode)
+                          const listPrice = resolveCatalogueListPrice(item.name, itemCode)
+                          const isDiscounted = isCatalogueDiscountActive() && price != null && listPrice != null && price < listPrice
                           const inCart = (quickCart[itemKey] || 0) > 0
                           return (
                             <article key={idx} className="flex flex-col overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)]" data-catalogue-item>
                               <div className="relative flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
+                                {isDiscounted && (
+                                  <span className="absolute left-2 top-2 z-10 rounded-full bg-[#D43790] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-md">-{CATALOGUE_DISCOUNT_PCT}%</span>
+                                )}
                                 <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={e => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={e => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
                                 {videoMap[item.name] && (
                                   <button
@@ -5879,7 +5932,18 @@ function FullCataloguePage() {
                               <div className="flex flex-1 flex-col border-t border-black/10 px-2.5 py-2">
                                 <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                                 <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                                <p className="mt-1.5 text-xs font-bold text-fuchsia-700">{price != null ? `€${Number(price).toFixed(2)}` : 'Price on request'}</p>
+                                {price != null ? (
+                                  isDiscounted ? (
+                                    <p className="mt-1.5 flex items-baseline gap-1.5">
+                                      <span className="text-[11px] font-medium text-black/40 line-through">€{Number(listPrice).toFixed(2)}</span>
+                                      <span className="text-xs font-bold text-fuchsia-700">€{Number(price).toFixed(2)}</span>
+                                    </p>
+                                  ) : (
+                                    <p className="mt-1.5 text-xs font-bold text-fuchsia-700">€{Number(price).toFixed(2)}</p>
+                                  )
+                                ) : (
+                                  <p className="mt-1.5 text-xs font-bold text-fuchsia-700">Price on request</p>
+                                )}
                                 <div className="mt-auto pt-3">
                                   <div className="flex items-center gap-2">
                                     <button onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
@@ -9232,7 +9296,7 @@ function CheckoutPage() {
     return () => { mounted = false }
   }, [])
 
-  const lookupPrice = useCallback((itemName = '', itemCode = '') => {
+  const resolveCheckoutListPrice = useCallback((itemName = '', itemCode = '') => {
     if (!priceMap) return null
     const byName = priceMap.get(normalizeProductName(itemName))
     if (byName?.price != null) return byName.price
@@ -9252,16 +9316,26 @@ function CheckoutPage() {
     return null
   }, [priceMap, wordIndex])
 
+  // Effective checkout price = list price with the SUMMER MADNESS discount applied.
+  const lookupPrice = useCallback(
+    (itemName = '', itemCode = '') => applyCatalogueDiscount(resolveCheckoutListPrice(itemName, itemCode)),
+    [resolveCheckoutListPrice],
+  )
+
   const cartEntries = useMemo(() =>
     Object.entries(cart)
       .filter(([key, q]) => q > 0 && !/hero\.image/i.test(key))
       .map(([key, qty]) => {
         const [name, code] = key.split('::')
         const price = lookupPrice(name, code)
-        return { key, name, code, qty, price, lineTotal: price != null ? Number(price) * qty : null }
-      }), [cart, lookupPrice])
+        const listPrice = resolveCheckoutListPrice(name, code)
+        return { key, name, code, qty, price, listPrice, lineTotal: price != null ? Number(price) * qty : null, listLineTotal: listPrice != null ? Number(listPrice) * qty : null }
+      }), [cart, lookupPrice, resolveCheckoutListPrice])
 
   const cartTotal = useMemo(() => cartEntries.reduce((s, e) => s + (e.lineTotal || 0), 0), [cartEntries])
+  const listSubtotal = useMemo(() => cartEntries.reduce((s, e) => s + (e.listLineTotal || 0), 0), [cartEntries])
+  const discountSavings = Number((listSubtotal - cartTotal).toFixed(2))
+  const discountActive = isCatalogueDiscountActive() && discountSavings > 0
   const cartUnits = useMemo(() => cartEntries.reduce((s, e) => s + e.qty, 0), [cartEntries])
   const progress = Math.min(100, Math.round((cartTotal / MIN_ORDER_EUR) * 100))
 
@@ -9532,6 +9606,7 @@ function CheckoutPage() {
             </tr></thead>
             <tbody>${orderTableRows}
               <tr><td colspan="4" style="${tdStyle};text-align:right;font-weight:bold">TOTAL (EUR)</td><td style="${tdRStyle};font-weight:bold">${cartTotal.toFixed(2)}</td></tr>
+              ${discountActive ? `<tr><td colspan="5" style="${tdStyle};text-align:right;color:#9B1268">${escapeHtml(CATALOGUE_DISCOUNT_LABEL)} already applied — you saved €${discountSavings.toFixed(2)}</td></tr>` : ''}
             </tbody>
           </table>
         `,
@@ -9956,6 +10031,12 @@ function CheckoutPage() {
                 <span className="text-sm font-bold text-slate-800">{cartUnits} item{cartUnits !== 1 ? 's' : ''}</span>
                 <span className="text-lg font-bold text-fuchsia-700">€{cartTotal.toFixed(2)}</span>
               </div>
+              {discountActive && (
+                <div className="mt-1 flex items-center justify-between text-xs">
+                  <span className="font-semibold text-fuchsia-700">{CATALOGUE_DISCOUNT_LABEL}</span>
+                  <span className="font-semibold text-fuchsia-700">− €{discountSavings.toFixed(2)}</span>
+                </div>
+              )}
               <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
                 <div className="h-full rounded-full bg-fuchsia-600 transition-all duration-500" style={{ width: `${progress}%` }} />
               </div>
@@ -19630,6 +19711,11 @@ function App() {
       <SchemaOrg />
       <PageLoader />
       {!isPortalRoute && <ClarityScript />}
+      {isCatalogueDiscountActive() && !isPortalRoute && (
+        <div className="bg-gradient-to-r from-[#7A0E52] via-[#D43790] to-[#7A0E52] px-4 py-2 text-center text-[11px] font-bold uppercase tracking-[0.14em] text-white sm:text-xs">
+          ✦ {CATALOGUE_DISCOUNT_LABEL} — now on all products ✦
+        </div>
+      )}
       {!announcementDismissed && !isPortalRoute && (
         <div className="relative bg-fuchsia-600 px-4 py-2 text-center text-xs font-semibold text-white">
           🚚 Free Shipping on all EU wholesale orders &nbsp;·&nbsp; Minimum order €{MIN_ORDER_EUR}
