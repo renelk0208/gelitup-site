@@ -6,6 +6,7 @@ import { PRODUCT_ALIAS_GROUPS } from './data/productAliases.js'
 import PRODUCT_INFORMATION_BY_SUBCATEGORY from './data/product-info.json'
 import ImportedAnyPage from './pages/imported/ImportedAnyPage.jsx'
 import SchemaOrg from './components/SchemaOrg'
+import StarterKits from './components/StarterKits.jsx'
 import { hasSupabaseConfig, supabase } from './lib/supabaseClient'
 import useB2BIntelligence from './lib/useB2BIntelligence'
 import { useLang, getTranslations, setLang, SUPPORTED_LANGS } from './lib/i18n'
@@ -4592,7 +4593,14 @@ function FullCataloguePage() {
 
   const quickCartTotal = useMemo(() => {
     let total = 0
+    let kitStore = {}
+    try { kitStore = JSON.parse(localStorage.getItem('gelitup.kits.v1') || '{}') } catch { /* ignore */ }
     for (const [key, qty] of Object.entries(quickCart)) {
+      if (key.startsWith('KIT::')) {
+        const kit = kitStore[key.slice(5)]
+        if (kit) total += Number(kit.total || 0) * Number(qty || 0)
+        continue
+      }
       const [name, code] = key.split('::')
       const price = lookupCataloguePrice(name, code)
       if (price != null) total += Number(price) * Number(qty || 0)
@@ -6988,6 +6996,7 @@ function LangSwitcher() {
 
 const navItems = [
   { to: '/full-catalogue', label: 'Our Products', highlight: true },
+  { to: '/starter-kits', label: 'Starter Kits' },
   { to: '/about-us', label: 'About us' },
   { to: '/for-academies', label: 'Academies' },
   { to: '/distributor-packages', label: 'Distribution' },
@@ -9352,15 +9361,23 @@ function CheckoutPage() {
     [resolveCheckoutListPrice],
   )
 
+  // Starter-kit bundles (fixed-price) added from the Starter Kits builder.
+  const kitStore = useMemo(() => { try { return JSON.parse(localStorage.getItem('gelitup.kits.v1') || '{}') } catch { return {} } }, [])
+
   const cartEntries = useMemo(() =>
     Object.entries(cart)
       .filter(([key, q]) => q > 0 && !/hero\.image/i.test(key))
       .map(([key, qty]) => {
+        if (key.startsWith('KIT::')) {
+          const kit = kitStore[key.slice(5)]
+          const price = kit ? Number(kit.total) : null
+          return { key, name: kit?.name || 'Starter Kit', code: 'KIT', qty, price, listPrice: price, lineTotal: price != null ? price * qty : null, listLineTotal: price != null ? price * qty : null, kit: kit || null }
+        }
         const [name, code] = key.split('::')
         const price = lookupPrice(name, code)
         const listPrice = resolveCheckoutListPrice(name, code)
         return { key, name, code, qty, price, listPrice, lineTotal: price != null ? Number(price) * qty : null, listLineTotal: listPrice != null ? Number(listPrice) * qty : null }
-      }), [cart, lookupPrice, resolveCheckoutListPrice])
+      }), [cart, kitStore, lookupPrice, resolveCheckoutListPrice])
 
   const cartTotal = useMemo(() => cartEntries.reduce((s, e) => s + (e.lineTotal || 0), 0), [cartEntries])
   const listSubtotal = useMemo(() => cartEntries.reduce((s, e) => s + (e.listLineTotal || 0), 0), [cartEntries])
@@ -9679,6 +9696,7 @@ function CheckoutPage() {
       // 8. Clear cart and show confirmation
       setCart({})
       localStorage.removeItem(QUICK_CART_STORAGE_KEY)
+      localStorage.removeItem('gelitup.kits.v1')
       setOrderConfirmed({ id: insertedOrder?.id ?? 'confirmed', accountCreated: form.createAccount, total: grandTotal, subtotal: cartTotal, shippingFee, email: form.email.trim().toLowerCase() })
 
     } catch (err) {
@@ -18500,6 +18518,16 @@ function App() {
     return () => window.removeEventListener('gelitup:cart-change', onCartChange)
   }, [])
 
+  // Adds a built Starter Kit (fixed-price bundle) to the shared cart and refreshes the count.
+  const handleAddKit = useCallback((kit) => {
+    try {
+      const cart = JSON.parse(localStorage.getItem(QUICK_CART_STORAGE_KEY) || '{}')
+      cart[`KIT::${kit.lineId}`] = 1
+      localStorage.setItem(QUICK_CART_STORAGE_KEY, JSON.stringify(cart))
+      window.dispatchEvent(new Event('gelitup:cart-change'))
+    } catch { /* ignore */ }
+  }, [])
+
   // Returning-basket prompt — shown once per session if visitor has saved cart items
   const [savedCartPrompt, setSavedCartPrompt] = useState(false)
   const [savedCartCount, setSavedCartCount] = useState(0)
@@ -19812,6 +19840,11 @@ function App() {
           <Route path="/for-academies" element={<ForAcademiesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/starter-kits" element={<StarterKits discount={{ active: isCatalogueDiscountActive(), pct: CATALOGUE_DISCOUNT_PCT }} onAddKit={handleAddKit} />} />
+          <Route path="/starter-kits/:kitId" element={<StarterKits discount={{ active: isCatalogueDiscountActive(), pct: CATALOGUE_DISCOUNT_PCT }} onAddKit={handleAddKit} />} />
+          <Route path="/catalogue/starterkits" element={<Navigate to="/starter-kits" replace />} />
+          <Route path="/starterkits" element={<Navigate to="/starter-kits" replace />} />
+          <Route path="/kits" element={<Navigate to="/starter-kits" replace />} />
           <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           {/* Vanity routes for social media & advertising — each lands on the right catalogue section */}
