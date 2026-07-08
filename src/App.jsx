@@ -5784,11 +5784,9 @@ function FullCataloguePage() {
                     return (
                       <article
                         key={idx}
-                        className="flex flex-col cursor-pointer overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 hover:border-fuchsia-500/70 hover:shadow-md"
-                        onClick={() => openCatalogueCategory(item.category, item.subcategory, { keepSearch: true })}
-                        title={`View in ${item.category} — ${item.subcategory}`}
+                        className="flex flex-col overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 hover:border-fuchsia-500/70 hover:shadow-md"
                       >
-                        <div className="relative flex h-36 w-full items-center justify-center overflow-hidden bg-white p-1.5">
+                        <div className="relative flex h-36 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-1.5" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
                           {itemDiscounted && (
                             <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-[#D43790] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white shadow-md">-{CATALOGUE_DISCOUNT_PCT}%</span>
                           )}
