@@ -5602,7 +5602,7 @@ function FullCataloguePage() {
       {isCatalogueDiscountActive() && (
         <a
           href="#catalogue-section-new-products"
-          className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] block w-screen"
+          className="mx-auto block w-full max-w-4xl overflow-hidden rounded-2xl shadow-sm"
           aria-label="Summer Madness — 20% off all stock. Shop now."
         >
           <img
@@ -18491,9 +18491,6 @@ function App() {
     setHasAcceptedCookies(true)
   }, [])
 
-  const [announcementDismissed, setAnnouncementDismissed] = useState(() => sessionStorage.getItem('gelitup.announce.v1') === 'dismissed')
-  const handleDismissAnnouncement = useCallback(() => { sessionStorage.setItem('gelitup.announce.v1', 'dismissed'); setAnnouncementDismissed(true) }, [])
-
   // Global cart count — reactive across all pages via custom event from FullCataloguePage
   const [appCartCount, setAppCartCount] = useState(() => {
     try { const c = JSON.parse(localStorage.getItem(QUICK_CART_STORAGE_KEY) || '{}'); return Object.values(c).filter(q => Number(q) > 0).length } catch { return 0 }
@@ -19773,24 +19770,6 @@ function App() {
       <SchemaOrg />
       <PageLoader />
       {!isPortalRoute && <ClarityScript />}
-      {isCatalogueDiscountActive() && !isPortalRoute && (
-        <div className="bg-gradient-to-r from-[#7A0E52] via-[#D43790] to-[#7A0E52] px-4 py-2 text-center text-[11px] font-bold uppercase tracking-[0.14em] text-white sm:text-xs">
-          ✦ {CATALOGUE_DISCOUNT_LABEL} — now on all products ✦
-        </div>
-      )}
-      {!announcementDismissed && !isPortalRoute && (
-        <div className="relative bg-fuchsia-600 px-4 py-2 text-center text-xs font-semibold text-white">
-          🚚 Free EU shipping over €{getFreeShippingEur()} &nbsp;·&nbsp; Small orders welcome from €{SMALL_ORDER_MIN_EUR}
-          <button
-            type="button"
-            onClick={handleDismissAnnouncement}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 transition hover:text-white"
-            aria-label="Dismiss announcement"
-          >
-            <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true"><path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" /></svg>
-          </button>
-        </div>
-      )}
       <header className="sticky top-0 z-40 border-b border-white/15 bg-black/80 backdrop-blur-[10px]">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-3 py-2.5 md:px-6 md:py-3">
           <NavLink to="/" className="flex shrink-0 items-center gap-3 group">
