@@ -92,7 +92,7 @@ export default function StarterKits({ discount = { active: false, pct: 0 }, onAd
               key={kit.id}
               type="button"
               onClick={() => navigate(`/starter-kits/${kit.id}`)}
-              className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white text-left transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_50px_-18px_rgba(155,18,104,0.35)]"
+              className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-300 bg-white text-left shadow-sm ring-1 ring-black/[0.02] transition duration-300 hover:-translate-y-1 hover:border-[#9B1268]/50 hover:shadow-[0_18px_50px_-18px_rgba(155,18,104,0.35)]"
             >
               <div className="relative flex h-52 w-full items-center justify-center overflow-hidden bg-[#f7f2f5]">
                 <img
