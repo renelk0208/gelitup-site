@@ -45,8 +45,8 @@ const STEPS = [
         <line x1="2" y1="10" x2="22" y2="10"/>
       </svg>
     ),
-    title: 'Pay online or by invoice',
-    desc: "Pay right away by card, PayPal, or Revolut — or wait for the pro forma invoice we email once your order is confirmed.",
+    title: 'Pay securely online',
+    desc: "Pay right away by card, Google Pay, Apple Pay, PayPal or Revolut. Your VAT invoice follows by email.",
   },
   {
     icon: (
@@ -59,7 +59,7 @@ const STEPS = [
   },
 ]
 
-export default function HowItWorks({ variant = 'banner' }) {
+export default function HowItWorks({ variant = 'banner', freeShippingAt = 100 }) {
 
   // ─── Compact checkout sidebar banner ────────────────────────────────────────
   if (variant === 'banner') {
@@ -79,10 +79,13 @@ export default function HowItWorks({ variant = 'banner' }) {
         </p>
         <ol style={{ margin: 0, padding: '0 0 0 16px', fontSize: '13px', color: '#444', lineHeight: 1.7 }}>
           <li>Add products and complete your details</li>
-          <li>Place order — <strong>no payment taken yet</strong></li>
-          <li>Pay online right away, or wait for our pro forma invoice and pay by transfer</li>
+          <li>Place your order</li>
+          <li>Pay securely online — card, Google Pay, Apple Pay, PayPal or Revolut</li>
           <li>Payment received → we ship immediately</li>
         </ol>
+        <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#666' }}>
+          Orders over €{freeShippingAt} ship <strong>free</strong> across the EU. Smaller orders (from €49) carry a flat €15–22 shipping fee by country.
+        </p>
         <p style={{ margin: '10px 0 0 0', fontSize: '12px', color: '#888' }}>
           Accepted: Apple Pay · Google Pay · Mastercard · PayPal · Revolut · Visa
         </p>
@@ -103,7 +106,7 @@ export default function HowItWorks({ variant = 'banner' }) {
             How it works
           </h2>
           <p style={{ fontSize: '15px', color: '#666', maxWidth: '480px', margin: '0 auto', lineHeight: 1.6 }}>
-            No approval. No surprises at checkout. Order in minutes and pay by invoice.
+            No approval. No surprises at checkout. Order in minutes and pay securely online.
           </p>
         </div>
 
@@ -175,8 +178,8 @@ export default function HowItWorks({ variant = 'banner' }) {
         }}>
           {[
             '✓ No approval needed',
-            '✓ Minimum order €100',
-            '✓ Free EU shipping on all orders',
+            '✓ Small orders welcome from €49',
+            `✓ Free EU shipping over €${freeShippingAt}`,
             '✓ VAT invoice included',
             '✓ Pay by card, PayPal or Revolut',
           ].map((item, i) => (

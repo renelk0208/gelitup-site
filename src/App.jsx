@@ -63,13 +63,29 @@ function applyCatalogueDiscount(priceEur) {
   if (priceEur == null || !isCatalogueDiscountActive()) return priceEur
   return Number((Number(priceEur) * (1 - CATALOGUE_DISCOUNT_PCT / 100)).toFixed(2))
 }
-const SHIPPING_ZONES = [
-  { zone: 2, rateEur: 0, maxKg: 5, countries: ['Austria', 'Germany', 'Hungary'] },
-  { zone: 3, rateEur: 0, maxKg: 5, countries: ['Belgium', 'Italy', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'France', 'Croatia', 'Czech Republic'] },
-  { zone: 4, rateEur: 0, maxKg: 5, countries: ['Denmark', 'Spain', 'Luxembourg'] },
-  { zone: 5, rateEur: 0, maxKg: 5, countries: ['Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Finland', 'Sweden'], note: 'incl. Northern Ireland' },
-  { zone: 6, rateEur: 28.00, maxKg: 5, countries: ['United Kingdom'] },
+// Public catalogue small-order model: orders of €49–99.99 ship at a flat zone fee;
+// €100+ keeps free shipping. Countries with exclusive distributors (Italy, France,
+// Bulgaria, Greece) and any country not listed below keep the €100 minimum.
+const FREE_SHIPPING_EUR = 100
+// While the SUMMER MADNESS sale runs, the free-shipping threshold drops to €80 so
+// discounted baskets keep the same free-shipping reach; reverts automatically.
+const SALE_FREE_SHIPPING_EUR = 80
+function getFreeShippingEur() {
+  return isCatalogueDiscountActive() ? SALE_FREE_SHIPPING_EUR : FREE_SHIPPING_EUR
+}
+const SMALL_ORDER_MIN_EUR = 49
+const SMALL_ORDER_SHIPPING_ZONES = [
+  { feeEur: 15, countries: ['Austria', 'Germany', 'Hungary', 'Belgium', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'Croatia', 'Czech Republic'] },
+  { feeEur: 22, countries: ['Denmark', 'Spain', 'Luxembourg', 'Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Finland', 'Sweden', 'Norway', 'Switzerland', 'United Kingdom'] },
 ]
+function getSmallOrderShippingFee(country) {
+  const name = String(country || '').trim().toLowerCase()
+  if (!name) return null
+  for (const zone of SMALL_ORDER_SHIPPING_ZONES) {
+    if (zone.countries.some(c => c.toLowerCase() === name)) return zone.feeEur
+  }
+  return null
+}
 const B2B_PRICE_MULTIPLIER = 1.2
 const EU_COUNTRIES = ['Austria','Belgium','Bulgaria','Croatia','Cyprus','Czech Republic','Denmark','Estonia','Finland','France','Germany','Greece','Hungary','Ireland','Italy','Latvia','Lithuania','Luxembourg','Malta','Netherlands','Poland','Portugal','Romania','Slovakia','Slovenia','Spain','Sweden']
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
@@ -4585,7 +4601,8 @@ function FullCataloguePage() {
     return total
   }, [quickCart, lookupCataloguePrice])
 
-  const quickProgress = Math.min(100, Math.round((quickCartTotal / MIN_ORDER_EUR) * 100))
+  const quickFreeShipEur = getFreeShippingEur()
+  const quickProgress = Math.min(100, Math.round((quickCartTotal / quickFreeShipEur) * 100))
 
   const getTileVariant = useCallback((index) => {
     const variant = index % 6
@@ -5529,7 +5546,7 @@ function FullCataloguePage() {
                       <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
                         <div className="h-full rounded-full bg-fuchsia-600 transition-all duration-500" style={{ width: `${quickProgress}%` }} />
                       </div>
-                      <p className="mt-0.5 text-[10px] text-black/50">{quickProgress < 100 ? `€${(MIN_ORDER_EUR - quickCartTotal).toFixed(2)} more to reach €${MIN_ORDER_EUR} minimum · 🚚 Free EU Shipping` : '✓ Minimum reached · 🚚 Free EU Shipping included!'}</p>
+                      <p className="mt-0.5 text-[10px] text-black/50">{quickCartTotal < SMALL_ORDER_MIN_EUR ? `€${(SMALL_ORDER_MIN_EUR - quickCartTotal).toFixed(2)} more to unlock checkout (€${SMALL_ORDER_MIN_EUR} min)` : quickProgress < 100 ? `✓ Ready to order · add €${(quickFreeShipEur - quickCartTotal).toFixed(2)} more for 🚚 FREE EU Shipping` : '✓ 🚚 FREE EU Shipping included!'}</p>
                     </button>
                     <button
                       onClick={() => setShowBasketDetail((v) => !v)}
@@ -5537,7 +5554,7 @@ function FullCataloguePage() {
                     >
                       {showBasketDetail ? 'Hide' : 'View'}
                     </button>
-                    {quickProgress >= 100 ? (
+                    {quickCartTotal >= SMALL_ORDER_MIN_EUR ? (
                       <NavLink
                         to="/checkout"
                         className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
@@ -5545,7 +5562,7 @@ function FullCataloguePage() {
                         Checkout
                       </NavLink>
                     ) : (
-                      <span className="inline-flex shrink-0 cursor-not-allowed items-center gap-1.5 rounded-xl bg-slate-300 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500" title={`Add €${(MIN_ORDER_EUR - quickCartTotal).toFixed(2)} more to checkout`}>
+                      <span className="inline-flex shrink-0 cursor-not-allowed items-center gap-1.5 rounded-xl bg-slate-300 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500" title={`Add €${(SMALL_ORDER_MIN_EUR - quickCartTotal).toFixed(2)} more to checkout`}>
                         Checkout
                       </span>
                     )}
@@ -6642,7 +6659,7 @@ function FullCataloguePage() {
                 <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
                   <div className="h-full rounded-full bg-fuchsia-600 transition-all duration-500" style={{ width: `${quickProgress}%` }} />
                 </div>
-                <p className="mt-0.5 text-[10px] text-black/50">{quickProgress < 100 ? `€${(MIN_ORDER_EUR - quickCartTotal).toFixed(2)} more to reach €${MIN_ORDER_EUR} minimum · 🚚 Free EU Shipping` : '✓ Minimum reached · 🚚 Free EU Shipping included!'}</p>
+                <p className="mt-0.5 text-[10px] text-black/50">{quickCartTotal < SMALL_ORDER_MIN_EUR ? `€${(SMALL_ORDER_MIN_EUR - quickCartTotal).toFixed(2)} more to unlock checkout (€${SMALL_ORDER_MIN_EUR} min)` : quickProgress < 100 ? `✓ Ready to order · add €${(quickFreeShipEur - quickCartTotal).toFixed(2)} more for 🚚 FREE EU Shipping` : '✓ 🚚 FREE EU Shipping included!'}</p>
               </button>
               <button
                 onClick={() => setShowBasketDetail((v) => !v)}
@@ -6650,7 +6667,7 @@ function FullCataloguePage() {
               >
                 {showBasketDetail ? 'Hide' : 'View'}
               </button>
-              {quickProgress >= 100 ? (
+              {quickCartTotal >= SMALL_ORDER_MIN_EUR ? (
                 <NavLink
                   to="/checkout"
                   className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
@@ -6658,7 +6675,7 @@ function FullCataloguePage() {
                   Checkout
                 </NavLink>
               ) : (
-                <span className="inline-flex shrink-0 cursor-not-allowed items-center gap-1.5 rounded-xl bg-slate-300 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500" title={`Add €${(MIN_ORDER_EUR - quickCartTotal).toFixed(2)} more to checkout`}>
+                <span className="inline-flex shrink-0 cursor-not-allowed items-center gap-1.5 rounded-xl bg-slate-300 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500" title={`Add €${(SMALL_ORDER_MIN_EUR - quickCartTotal).toFixed(2)} more to checkout`}>
                   Checkout
                 </span>
               )}
@@ -8119,7 +8136,7 @@ function HomePage({ onOpenContactModal }) {
         </NavLink>
       </div>
 
-      <HowItWorks variant="section" />
+      <HowItWorks variant="section" freeShippingAt={getFreeShippingEur()} />
       <GuestbookTeaser />
       <InstagramFeed />
       <TikTokFeed />
@@ -9337,7 +9354,15 @@ function CheckoutPage() {
   const discountSavings = Number((listSubtotal - cartTotal).toFixed(2))
   const discountActive = isCatalogueDiscountActive() && discountSavings > 0
   const cartUnits = useMemo(() => cartEntries.reduce((s, e) => s + e.qty, 0), [cartEntries])
-  const progress = Math.min(100, Math.round((cartTotal / MIN_ORDER_EUR) * 100))
+  const freeShipEur = getFreeShippingEur()
+  const progress = Math.min(100, Math.round((cartTotal / freeShipEur) * 100))
+
+  // Small-order shipping: fee by delivery country below the free-shipping threshold.
+  // null fee = country not eligible (distributor country / unlisted) or not chosen yet.
+  const deliveryCountry = (form.shipToDifferentAddress ? form.shippingCountry : form.invoiceCountry).trim()
+  const smallOrderFee = getSmallOrderShippingFee(deliveryCountry)
+  const shippingFee = cartTotal >= freeShipEur ? 0 : (smallOrderFee ?? 0)
+  const grandTotal = cartTotal + shippingFee
 
   // Persist cart back to localStorage
   useEffect(() => {
@@ -9370,7 +9395,7 @@ function CheckoutPage() {
     setError('')
 
     if (!cartEntries.length) { setError('Your basket is empty.'); return }
-    if (cartTotal < MIN_ORDER_EUR) { setError(`Minimum order is €${MIN_ORDER_EUR}. You need €${(MIN_ORDER_EUR - cartTotal).toFixed(2)} more.`); return }
+    if (cartTotal < SMALL_ORDER_MIN_EUR) { setError(`Minimum order is €${SMALL_ORDER_MIN_EUR}. You need €${(SMALL_ORDER_MIN_EUR - cartTotal).toFixed(2)} more.`); return }
 
     const email = form.email.trim().toLowerCase()
     if (!email) { setError('Email is required.'); return }
@@ -9390,6 +9415,10 @@ function CheckoutPage() {
       if (!form.shippingCountry.trim()) { setError('Shipping country is required.'); return }
       if (!form.shippingPostalCode.trim()) { setError('Shipping postal code is required.'); return }
     }
+    if (cartTotal < freeShipEur && smallOrderFee == null) {
+      setError(`Orders under €${freeShipEur} are not yet available for delivery to ${deliveryCountry || 'your country'}. Please add €${(freeShipEur - cartTotal).toFixed(2)} more to reach the €${freeShipEur} minimum (free EU shipping included).`)
+      return
+    }
     if (form.createAccount && form.password.length < 6) { setError('Password must be at least 6 characters.'); return }
     if (!form.agreeTerms) { setError('You must agree to the terms and conditions to place your order.'); return }
 
@@ -9397,8 +9426,8 @@ function CheckoutPage() {
 
     setIsSubmitting(true)
     if (window.gtag) {
-      window.gtag('event', 'begin_checkout', { currency: 'EUR', value: cartTotal })
-      window.gtag('event', 'conversion', { send_to: 'AW-1008159504/huwrCJTYhIIDEJCW3eAD', value: cartTotal, currency: 'EUR' })
+      window.gtag('event', 'begin_checkout', { currency: 'EUR', value: grandTotal })
+      window.gtag('event', 'conversion', { send_to: 'AW-1008159504/huwrCJTYhIIDEJCW3eAD', value: grandTotal, currency: 'EUR' })
     }
 
     try {
@@ -9471,6 +9500,7 @@ function CheckoutPage() {
         address: shippingAddr,
         country: !form.shipToDifferentAddress ? form.invoiceCountry.trim() : form.shippingCountry.trim(),
         type: 'road',
+        feeEur: shippingFee,
       }
       const invoice = {
         name: form.companyName.trim(),
@@ -9588,7 +9618,7 @@ function CheckoutPage() {
       await sendPortalEmailNotification({
         eventType: 'b2b_order_received',
         to: ORDER_INBOX_EMAIL,
-        subject: `New B2B Order #${insertedOrder?.id ?? 'N/A'} — ${form.companyName.trim()} (${cartUnits} units / €${cartTotal.toFixed(2)})`,
+        subject: `New B2B Order #${insertedOrder?.id ?? 'N/A'} — ${form.companyName.trim()} (${cartUnits} units / €${grandTotal.toFixed(2)})`,
         html: `
           <h2 style="color:#1a1a1a">New B2B Order via Catalogue Checkout</h2>
           <p><strong>Order #:</strong> ${insertedOrder?.id ?? '-'}</p>
@@ -9605,7 +9635,9 @@ function CheckoutPage() {
               <th style="${thStyle}">SKU</th><th style="${thStyle}">Item</th><th style="${thStyle}">Qty</th><th style="${thStyle}">Unit (EUR)</th><th style="${thStyle}">Line Total</th>
             </tr></thead>
             <tbody>${orderTableRows}
-              <tr><td colspan="4" style="${tdStyle};text-align:right;font-weight:bold">TOTAL (EUR)</td><td style="${tdRStyle};font-weight:bold">${cartTotal.toFixed(2)}</td></tr>
+              <tr><td colspan="4" style="${tdStyle};text-align:right">Products subtotal</td><td style="${tdRStyle}">${cartTotal.toFixed(2)}</td></tr>
+              <tr><td colspan="4" style="${tdStyle};text-align:right">Shipping${shippingFee > 0 ? ` (${escapeHtml(shipping.country)})` : ''}</td><td style="${tdRStyle}">${shippingFee > 0 ? shippingFee.toFixed(2) : 'FREE'}</td></tr>
+              <tr><td colspan="4" style="${tdStyle};text-align:right;font-weight:bold">TOTAL (EUR)</td><td style="${tdRStyle};font-weight:bold">${grandTotal.toFixed(2)}</td></tr>
               ${discountActive ? `<tr><td colspan="5" style="${tdStyle};text-align:right;color:#9B1268">${escapeHtml(CATALOGUE_DISCOUNT_LABEL)} already applied — you saved €${discountSavings.toFixed(2)}</td></tr>` : ''}
             </tbody>
           </table>
@@ -9621,9 +9653,10 @@ function CheckoutPage() {
           <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
             <h2 style="color:#1a1a1a">Thank you for your order!</h2>
             <p>Hi ${escapeHtml(`${form.firstName.trim()} ${form.lastName.trim()}` || form.companyName.trim())},</p>
-            <p>We've received your order <strong>#${insertedOrder?.id ?? '-'}</strong>. You can pay online via the confirmation page, or wait for the pro forma invoice we'll email you and pay by bank transfer.</p>
-            <p><strong>Order Total:</strong> €${cartTotal.toFixed(2)} (${cartUnits} items)</p>
-            <p style="color:#555">Your invoice will be issued by email once your order is processed (usually within 1 business day). Should any item be unavailable, we will arrange a refund or account credit.</p>
+            <p>We've received your order <strong>#${insertedOrder?.id ?? '-'}</strong>. Please complete your payment to confirm it — your order ships as soon as payment is received.</p>
+            <p><strong>Order Total:</strong> €${grandTotal.toFixed(2)} (${cartUnits} items${shippingFee > 0 ? ` + €${shippingFee.toFixed(2)} shipping` : ', free shipping'})</p>
+            ${(PAYMENT_PAYPAL_URL || PAYMENT_REVOLUT_URL) ? `<p style="margin:16px 0"><strong>Pay now:</strong>${PAYMENT_REVOLUT_URL ? ` <a href="${PAYMENT_REVOLUT_URL.replace(/\/$/, '')}/${grandTotal.toFixed(2)}/EUR" style="display:inline-block;background:#191c1f;color:#fff;padding:8px 16px;border-radius:8px;text-decoration:none;font-weight:bold;margin-right:8px">Revolut (no fee)</a>` : ''}${PAYMENT_PAYPAL_URL ? ` <a href="${PAYMENT_PAYPAL_URL.replace(/\/$/, '')}/${calcPaypalTotal(grandTotal).gross.toFixed(2)}" style="display:inline-block;background:#FFC43A;color:#003087;padding:8px 16px;border-radius:8px;text-decoration:none;font-weight:bold">PayPal</a>` : ''}</p><p style="color:#555;font-size:12px">Card, Google Pay and Apple Pay are available on your order confirmation page. PayPal totals include the processing fee.</p>` : ''}
+            <p style="color:#555">Your VAT invoice will follow by email once your order is processed. Should any item be unavailable, we will arrange a refund or account credit.</p>
             ${form.createAccount ? '<p>You can now log in with your email and password to track your orders.</p>' : '<p>If you would like to track future orders, you can create an account at checkout next time.</p>'}
             <p style="margin-top:24px;color:#666;font-size:12px">GEL.IT.UP by GIUP® — Professional Gel Polish</p>
           </div>
@@ -9633,7 +9666,7 @@ function CheckoutPage() {
       // 8. Clear cart and show confirmation
       setCart({})
       localStorage.removeItem(QUICK_CART_STORAGE_KEY)
-      setOrderConfirmed({ id: insertedOrder?.id ?? 'confirmed', accountCreated: form.createAccount, total: cartTotal, email: form.email.trim().toLowerCase() })
+      setOrderConfirmed({ id: insertedOrder?.id ?? 'confirmed', accountCreated: form.createAccount, total: grandTotal, subtotal: cartTotal, shippingFee, email: form.email.trim().toLowerCase() })
 
     } catch (err) {
       setError('An unexpected error occurred. Please try again or contact us.')
@@ -9658,16 +9691,14 @@ function CheckoutPage() {
               ? 'You can now sign in to track your orders.'
               : 'Create an account at your next checkout to track future orders.'}
           </p>
-          <div className="mt-6 flex justify-center gap-3">
-            <NavLink to="/full-catalogue" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-fuchsia-500">
-              Continue Shopping
-            </NavLink>
-          </div>
+          {orderConfirmed.total > 0 && (
+            <p className="mt-4 text-sm font-semibold text-emerald-800">One last step — complete your payment below and we'll start packing your order.</p>
+          )}
         </div>
         {orderConfirmed.total > 0 && (
           <div className="mt-4 rounded-xl border border-slate-200 bg-white p-5 text-left">
-            <p className="mb-1 text-sm font-semibold text-slate-800">Pay Now or Pay by Invoice</p>
-            <p className="text-xs text-slate-500">Order total: <strong className="text-slate-700">€{orderConfirmed.total.toFixed(2)}</strong> — pay online now (card and PayPal totals include the processing fee), or simply wait for the pro forma invoice we'll email you and pay by bank transfer at no extra fee.</p>
+            <p className="mb-1 text-sm font-semibold text-slate-800">Complete Your Payment</p>
+            <p className="text-xs text-slate-500">Order total: <strong className="text-slate-700">€{orderConfirmed.total.toFixed(2)}</strong>{orderConfirmed.shippingFee > 0 ? ` (€${orderConfirmed.subtotal.toFixed(2)} products + €${orderConfirmed.shippingFee.toFixed(2)} shipping)` : ''} — choose your method below. Card and PayPal totals include the processing fee; Revolut adds none. Your order ships as soon as payment is received.</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {(() => {
                 const { gross: stripeGross, fee: stripeFee } = calcStripeTotal(orderConfirmed.total)
@@ -9715,6 +9746,11 @@ function CheckoutPage() {
             {paymentError && <p className="mt-3 text-xs text-rose-600">{paymentError}</p>}
           </div>
         )}
+        <div className="mt-6 text-center">
+          <NavLink to="/full-catalogue" className="text-sm font-semibold text-fuchsia-700 transition hover:text-fuchsia-500">
+            ← Continue Shopping
+          </NavLink>
+        </div>
       </section>
     )
   }
@@ -9982,21 +10018,21 @@ function CheckoutPage() {
           </div>
 
           {/* PAYMENT OPTIONS */}
-          <HowItWorks variant="banner" />
+          <HowItWorks variant="banner" freeShippingAt={freeShipEur} />
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-3">
             <p className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500">Payment Options</p>
-            <p className="text-sm text-slate-600">After placing your order, pay online right away — or wait for the pro forma invoice we email you and pay by bank transfer. Payment is due before dispatch.</p>
+            <p className="text-sm text-slate-600">You'll complete payment securely online right after placing your order — all major cards, Google Pay, Apple Pay, PayPal and Revolut.</p>
             <PaymentTrustStrip tone="light" />
           </div>
 
-          <MinimumOrderNudge currentTotal={cartTotal} minimum={MIN_ORDER_EUR} />
-          {!isSubmitting && !form.agreeTerms && cartTotal >= MIN_ORDER_EUR && (
+          <MinimumOrderNudge currentTotal={cartTotal} minimum={SMALL_ORDER_MIN_EUR} freeShippingAt={freeShipEur} shippingFee={smallOrderFee} />
+          {!isSubmitting && !form.agreeTerms && cartTotal >= SMALL_ORDER_MIN_EUR && (
             <p className="text-center text-xs text-amber-700">
               Please agree to the terms and conditions to continue
             </p>
           )}
-          <button type="submit" disabled={isSubmitting || cartTotal < MIN_ORDER_EUR || !form.agreeTerms} className="w-full rounded-xl bg-fuchsia-600 px-6 py-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500 disabled:opacity-50">
-            {isSubmitting ? 'Placing Order…' : `Place Order — €${cartTotal.toFixed(2)}`}
+          <button type="submit" disabled={isSubmitting || cartTotal < SMALL_ORDER_MIN_EUR || !form.agreeTerms} className="w-full rounded-xl bg-fuchsia-600 px-6 py-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500 disabled:opacity-50">
+            {isSubmitting ? 'Placing Order…' : `Place Order — €${grandTotal.toFixed(2)}${shippingFee > 0 ? ' incl. shipping' : ''}`}
           </button>
         </form>
 
@@ -10029,7 +10065,7 @@ function CheckoutPage() {
             <div className="mt-4 border-t border-slate-200 pt-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-bold text-slate-800">{cartUnits} item{cartUnits !== 1 ? 's' : ''}</span>
-                <span className="text-lg font-bold text-fuchsia-700">€{cartTotal.toFixed(2)}</span>
+                <span className="text-sm font-bold text-slate-800">€{(discountActive ? listSubtotal : cartTotal).toFixed(2)}</span>
               </div>
               {discountActive && (
                 <div className="mt-1 flex items-center justify-between text-xs">
@@ -10037,17 +10073,27 @@ function CheckoutPage() {
                   <span className="font-semibold text-fuchsia-700">− €{discountSavings.toFixed(2)}</span>
                 </div>
               )}
+              <div className="mt-1 flex items-center justify-between text-xs">
+                <span className="text-slate-500">Shipping{cartTotal < freeShipEur && deliveryCountry ? ` to ${deliveryCountry}` : ''}</span>
+                <span className="font-semibold text-slate-700">
+                  {cartTotal >= freeShipEur ? 'FREE' : smallOrderFee != null ? `€${smallOrderFee.toFixed(2)}` : deliveryCountry ? `€${freeShipEur} minimum` : 'select country'}
+                </span>
+              </div>
+              <div className="mt-2 flex items-center justify-between border-t border-slate-100 pt-2">
+                <span className="text-sm font-bold text-slate-800">Total</span>
+                <span className="text-lg font-bold text-fuchsia-700">€{grandTotal.toFixed(2)}</span>
+              </div>
               <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
                 <div className="h-full rounded-full bg-fuchsia-600 transition-all duration-500" style={{ width: `${progress}%` }} />
               </div>
               <p className="mt-1 text-[10px] text-slate-500">
-                {progress < 100 ? `€${(MIN_ORDER_EUR - cartTotal).toFixed(2)} more to reach €${MIN_ORDER_EUR} minimum` : 'Minimum order reached!'}
+                {progress < 100 ? `Add €${(freeShipEur - cartTotal).toFixed(2)} more for FREE EU shipping` : '✓ Free EU shipping included!'}
               </p>
-              <HowItWorks variant="banner" />
+              <HowItWorks variant="banner" freeShippingAt={freeShipEur} />
               <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
                 <svg viewBox="0 0 20 20" fill="currentColor" className="mt-0.5 h-4 w-4 shrink-0 text-amber-500"><path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clipRule="evenodd" /></svg>
                 <p className="text-xs font-medium leading-relaxed text-amber-800">
-                  <strong>No payment is taken at checkout.</strong> After confirming, pay online right away or await the pro forma invoice issued by Thermitek Ltd. <strong>Payment is due before dispatch.</strong>
+                  <strong>You'll complete your payment on the next screen</strong> — card, Google Pay, Apple Pay, PayPal or Revolut. Your VAT invoice (issued by Thermitek Ltd) follows by email. <strong>Your order ships as soon as payment is received.</strong>
                 </p>
               </div>
 
@@ -19718,7 +19764,7 @@ function App() {
       )}
       {!announcementDismissed && !isPortalRoute && (
         <div className="relative bg-fuchsia-600 px-4 py-2 text-center text-xs font-semibold text-white">
-          🚚 Free Shipping on all EU wholesale orders &nbsp;·&nbsp; Minimum order €{MIN_ORDER_EUR}
+          🚚 Free EU shipping over €{getFreeShippingEur()} &nbsp;·&nbsp; Small orders welcome from €{SMALL_ORDER_MIN_EUR}
           <button
             type="button"
             onClick={handleDismissAnnouncement}

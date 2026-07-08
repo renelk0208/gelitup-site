@@ -3,29 +3,45 @@ import { Link } from 'react-router-dom'
 /**
  * MinimumOrderNudge
  *
- * Replaces the passive "Add €X more to reach €100 minimum" text
- * with an actionable, friendly block that tells the buyer exactly
- * what to do next — and links them there.
+ * Two-stage nudge for the small-order shipping model:
+ *   below `minimum`        — "Add €X more to place your order" (checkout locked)
+ *   minimum → freeShippingAt — "Add €X more for FREE shipping" (fee applies now)
+ *   at/above freeShippingAt  — renders nothing
  *
  * Props:
- *   currentTotal  — number, e.g. 27.80
- *   minimum       — number, default 100
- *   browseUrl     — string, default '/full-catalogue'
+ *   currentTotal    — number, e.g. 27.80
+ *   minimum         — number, checkout floor (default 49)
+ *   freeShippingAt  — number, free-shipping threshold (default 100)
+ *   shippingFee     — number|null, the fee that applies below freeShippingAt
+ *                     for the buyer's country (null = unknown/not eligible)
+ *   browseUrl       — string, default '/full-catalogue'
  */
 export default function MinimumOrderNudge({
   currentTotal = 0,
-  minimum = 100,
+  minimum = 49,
+  freeShippingAt = 100,
+  shippingFee = null,
   browseUrl = '/full-catalogue',
 }) {
-  const remaining = Math.max(0, minimum - currentTotal).toFixed(2)
-  const percentFilled = Math.min(100, (currentTotal / minimum) * 100)
+  if (currentTotal >= freeShippingAt) return null
+
+  const belowMinimum = currentTotal < minimum
+  const target = belowMinimum ? minimum : freeShippingAt
+  const remaining = Math.max(0, target - currentTotal).toFixed(2)
+  const percentFilled = Math.min(100, (currentTotal / target) * 100)
 
   // How many typical items would fill the gap?
   // Average gel polish ~€4.50 — gives a concrete, actionable number
   const AVG_ITEM_PRICE = 4.5
-  const itemsNeeded = Math.ceil((minimum - currentTotal) / AVG_ITEM_PRICE)
+  const itemsNeeded = Math.ceil((target - currentTotal) / AVG_ITEM_PRICE)
 
-  if (currentTotal >= minimum) return null
+  const headline = belowMinimum
+    ? `Add €${remaining} more to place your order`
+    : `Add €${remaining} more for FREE EU shipping${shippingFee != null ? ` — save the €${shippingFee.toFixed(2)} fee` : ''}`
+
+  const body = belowMinimum
+    ? `GEL.IT.UP has a €${minimum} minimum for wholesale orders. You're ${Math.round(percentFilled)}% there — roughly `
+    : `Orders over €${freeShippingAt} ship free across the EU. You're ${Math.round(percentFilled)}% there — roughly `
 
   return (
     <div style={{
@@ -42,7 +58,7 @@ export default function MinimumOrderNudge({
           <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
         </svg>
         <span style={{ fontWeight: 600, fontSize: '14px', color: '#1a1a1a' }}>
-          Add €{remaining} more to place your order
+          {headline}
         </span>
       </div>
 
@@ -65,9 +81,7 @@ export default function MinimumOrderNudge({
 
       {/* Actionable message */}
       <p style={{ fontSize: '13px', color: '#555', margin: '0 0 12px 0', lineHeight: 1.5 }}>
-        GEL.IT.UP has a €{minimum} minimum for wholesale orders.
-        You're {Math.round(percentFilled)}% there —
-        roughly <strong>{itemsNeeded} more items</strong> like your current selection will unlock your order.
+        {body}<strong>{itemsNeeded} more items</strong> like your current selection will get you there.
       </p>
 
       {/* CTA */}
