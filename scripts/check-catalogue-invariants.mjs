@@ -136,6 +136,49 @@ function validateImageMapInvariants() {
   let brushOnBuilderPathCount = 0
   const brushCanonicalRoot = '/GELITUP-CONTENT/PRODUCT-IMAGES/BUILDER GEL/BRUSH ON BUILDER/'
 
+  // Every image referenced in the map must exist on disk. This catches the
+  // common failure where image folders/files are renamed (or the map is
+  // regenerated/restored) but the map paths drift out of sync — which makes
+  // product tiles silently disappear (the catalogue hides tiles on image error).
+  // The check is CASE-SENSITIVE: Windows/macOS resolve paths case-insensitively,
+  // but Netlify's Linux servers do not, so a casing drift would only 404 in
+  // production. Walking each path segment against the real directory entries
+  // reproduces the Linux behaviour on every OS.
+  const publicDir = path.join(root, 'public')
+  const dirCache = new Map()
+  function readdirCached(dir) {
+    if (!dirCache.has(dir)) {
+      try { dirCache.set(dir, new Set(fs.readdirSync(dir))) }
+      catch { dirCache.set(dir, null) }
+    }
+    return dirCache.get(dir)
+  }
+  function existsCaseSensitive(relative) {
+    const parts = relative.replace(/^\//, '').split('/').filter(Boolean)
+    let dir = publicDir
+    for (const part of parts) {
+      const entries = readdirCached(dir)
+      if (!entries || !entries.has(part)) return false
+      dir = path.join(dir, part)
+    }
+    return true
+  }
+  const missingImageFiles = []
+  for (const value of Object.values(payload)) {
+    if (typeof value !== 'string' || !value.startsWith('/gelitup-content/')) continue
+    let relative = value
+    try { relative = decodeURIComponent(value) } catch { /* keep raw on malformed URI */ }
+    if (!existsCaseSensitive(relative)) missingImageFiles.push(value)
+  }
+  if (missingImageFiles.length) {
+    const sample = missingImageFiles.slice(0, 15)
+    fail(
+      `product-image-map.json references ${missingImageFiles.length} image file(s) that do not exist on disk (case-sensitive):\n` +
+        sample.map((p) => `    ${p}`).join('\n') +
+        (missingImageFiles.length > sample.length ? `\n    …and ${missingImageFiles.length - sample.length} more` : ''),
+    )
+  }
+
   for (const value of Object.values(payload)) {
     if (typeof value !== 'string') continue
     const top = extractTopCategoryFromImagePath(value)
