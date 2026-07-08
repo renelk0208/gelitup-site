@@ -2853,17 +2853,17 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
       .flatMap(([, items]) => items)
 
     if (glitterBuilderItems.length > 0) {
-      const summerVibesItems = newProductsMap.get('Summer Vibes') || []
-      const existingUrls = new Set(summerVibesItems.map((item) => item.imageUrl))
+      const glitterItems = newProductsMap.get('3-in-1 Glitters') || []
+      const existingUrls = new Set(glitterItems.map((item) => item.imageUrl))
 
       glitterBuilderItems.forEach((item) => {
         if (!existingUrls.has(item.imageUrl)) {
-          summerVibesItems.push({ ...item })
+          glitterItems.push({ ...item })
           existingUrls.add(item.imageUrl)
         }
       })
 
-      newProductsMap.set('Summer Vibes', summerVibesItems)
+      newProductsMap.set('3-in-1 Glitters', glitterItems)
       grouped.set('2026 NEW!', newProductsMap)
     }
   }
@@ -5599,6 +5599,21 @@ function FullCataloguePage() {
 
   return (
     <section className="space-y-5">
+      {isCatalogueDiscountActive() && (
+        <a
+          href="#catalogue-section-new-products"
+          className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] block w-screen"
+          aria-label="Summer Madness — 20% off all stock. Shop now."
+        >
+          <img
+            src="/gelitup-media/Summer Madness Sale/summer-madness-sale.jpg"
+            alt="Summer Madness — 20% off all stock. Shop now."
+            className="block h-auto w-full"
+            loading="eager"
+            fetchPriority="high"
+          />
+        </a>
+      )}
       <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
         <div className="mx-auto max-w-6xl">
           <h1 className="heading-on-dark text-4xl font-extrabold uppercase tracking-[0.15em] text-white sm:text-5xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
@@ -5833,6 +5848,7 @@ function FullCataloguePage() {
             const NEW_COLS = [
               { key: 'Cloud Dancer', label: 'Cloud Dancer Collection' },
               { key: 'Summer Vibes', label: 'Summer Vibes' },
+              { key: '3-in-1 Glitters', label: '3-in-1 Glitters' },
               { key: 'Sapphire Cat Eye', label: 'Sapphire Cat Eye' },
               { key: 'Neon Cat Eye', label: 'Neon Cat Eye' },
               { key: 'Shimmer Colors', label: 'Shimmer Colors' },
