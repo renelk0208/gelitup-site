@@ -9687,9 +9687,8 @@ function CheckoutPage() {
           <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
             <h2 style="color:#1a1a1a">Thank you for your order!</h2>
             <p>Hi ${escapeHtml(`${form.firstName.trim()} ${form.lastName.trim()}` || form.companyName.trim())},</p>
-            <p>We've received your order <strong>#${insertedOrder?.id ?? '-'}</strong>. Please complete your payment to confirm it — your order ships as soon as payment is received.</p>
+            <p>Thank you — we've received your order <strong>#${insertedOrder?.id ?? '-'}</strong> and it's now being processed.</p>
             <p><strong>Order Total:</strong> €${grandTotal.toFixed(2)} (${cartUnits} items${shippingFee > 0 ? ` + €${shippingFee.toFixed(2)} shipping` : ', free shipping'})</p>
-            ${(PAYMENT_PAYPAL_URL || PAYMENT_REVOLUT_URL) ? `<p style="margin:16px 0"><strong>Pay now:</strong>${PAYMENT_REVOLUT_URL ? ` <a href="${PAYMENT_REVOLUT_URL.replace(/\/$/, '')}/${grandTotal.toFixed(2)}/EUR" style="display:inline-block;background:#191c1f;color:#fff;padding:8px 16px;border-radius:8px;text-decoration:none;font-weight:bold;margin-right:8px">Revolut (no fee)</a>` : ''}${PAYMENT_PAYPAL_URL ? ` <a href="${PAYMENT_PAYPAL_URL.replace(/\/$/, '')}/${calcPaypalTotal(grandTotal).gross.toFixed(2)}" style="display:inline-block;background:#FFC43A;color:#003087;padding:8px 16px;border-radius:8px;text-decoration:none;font-weight:bold">PayPal</a>` : ''}</p><p style="color:#555;font-size:12px">Card, Google Pay and Apple Pay are available on your order confirmation page. PayPal totals include the processing fee.</p>` : ''}
             <p style="color:#555">Your VAT invoice will follow by email once your order is processed. Should any item be unavailable, we will arrange a refund or account credit.</p>
             ${form.createAccount ? '<p>You can now log in with your email and password to track your orders.</p>' : '<p>If you would like to track future orders, you can create an account at checkout next time.</p>'}
             <p style="margin-top:24px;color:#666;font-size:12px">GEL.IT.UP by GIUP® — Professional Gel Polish</p>
