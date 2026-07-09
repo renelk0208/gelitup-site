@@ -9281,6 +9281,7 @@ function CheckoutPage() {
     subscribeEmails: false,
     smsUpdates: false,
     orderNotes: '',
+    wantsInvoice: false,
     agreeTerms: false,
   })
   const [viesResult, setViesResult] = useState(null)
@@ -9431,7 +9432,10 @@ function CheckoutPage() {
     if (!email) { setError('Email is required.'); return }
     const vat = form.vatNumber.trim()
     if (vat && !viesResult?.valid) { setError('Please verify your VAT number using the "Verify" button, or clear the field to continue without one.'); return }
-    if (!form.companyName.trim()) { setError('Company name is required.'); return }
+    if (form.wantsInvoice) {
+      if (!form.companyName.trim()) { setError('Company name is required for an invoice.'); return }
+      if (!vat) { setError('VAT number is required for an invoice.'); return }
+    }
     if (!form.firstName.trim()) { setError('First name is required.'); return }
     if (!form.lastName.trim()) { setError('Last name is required.'); return }
     if (!form.invoiceAddressLine1.trim()) { setError('Invoice address is required.'); return }
@@ -9898,15 +9902,21 @@ function CheckoutPage() {
                 Last Name <span className="text-rose-500">*</span>
                 <input type="text" required autoComplete="family-name" value={form.lastName} onChange={e => updateField('lastName', e.target.value)} className={inputClass} />
               </label>
+              <div className="sm:col-span-2">
+                <label className="flex items-start gap-2 text-sm font-medium text-slate-700">
+                  <input type="checkbox" checked={form.wantsInvoice} onChange={e => updateField('wantsInvoice', e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-slate-300 text-fuchsia-600 focus:ring-fuchsia-500" />
+                  <span>I need a VAT invoice (business purchase)<span className="block text-xs font-normal text-slate-500">Company name and VAT number are required for an invoice.</span></span>
+                </label>
+              </div>
               <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
-                Company Name <span className="text-rose-500">*</span>
-                <input type="text" required value={form.companyName} onChange={e => updateField('companyName', e.target.value)} placeholder="Your Company Ltd" className={inputClass} />
+                Company Name {form.wantsInvoice ? <span className="text-rose-500">*</span> : <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-normal text-slate-500">optional</span>}
+                <input type="text" required={form.wantsInvoice} value={form.companyName} onChange={e => updateField('companyName', e.target.value)} placeholder="Your Company Ltd" className={inputClass} />
               </label>
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-slate-700">
-                  VAT Number <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-normal text-slate-500">optional</span>
+                  VAT Number {form.wantsInvoice ? <span className="text-rose-500">*</span> : <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-normal text-slate-500">optional</span>}
                   <div className="mt-1 flex gap-2">
-                    <input type="text" value={form.vatNumber} onChange={e => { updateField('vatNumber', e.target.value); setViesResult(null) }} placeholder="EU123456789" className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
+                    <input type="text" required={form.wantsInvoice} value={form.vatNumber} onChange={e => { updateField('vatNumber', e.target.value); setViesResult(null) }} placeholder="EU123456789" className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
                     <button type="button" onClick={verifyVat} disabled={viesLoading} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50">
                       {viesLoading ? 'Checking…' : 'Verify'}
                     </button>
@@ -10128,45 +10138,6 @@ function CheckoutPage() {
                 </p>
               </div>
 
-              {/* UPSELL SUGGESTIONS — inside sticky card so nothing scrolls behind */}
-              {(() => {
-                const checkoutCartKeys = Object.keys(cart)
-                const checkoutHasCatEye = checkoutCartKeys.some(k => /cat.?eye/i.test(k) || /\b(vce|dce|gce|sce|rqce)\d/i.test(k))
-                const upsellsNotInCart = CHECKOUT_UPSELLS.filter(u => {
-                  if (u.condition === 'catEye' && !checkoutHasCatEye) return false
-                  const uKey = `${u.name}::${u.code}`
-                  return !cart[uKey] && !checkoutCartKeys.some(k => k.toLowerCase().includes(u.code.replace('GIUP ', '').toLowerCase()))
-                })
-                if (upsellsNotInCart.length === 0) return null
-                return (
-                  <div className="mt-4 border-t border-slate-100 pt-4">
-                    <h4 className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500">You might also need</h4>
-                    <div className="mt-2 space-y-2">
-                      {upsellsNotInCart.map(u => {
-                        const price = lookupPrice(u.name, u.code)
-                        return (
-                          <div key={u.code} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
-                            <div className="min-w-0 flex-1">
-                              <p className="text-xs font-semibold text-slate-800">{u.label}</p>
-                              {price != null && <p className="text-[11px] text-fuchsia-700">€{price.toFixed(2)}</p>}
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const uKey = `${u.name}::${u.code}`
-                                setCart(c => ({ ...c, [uKey]: (c[uKey] || 0) + 1 }))
-                              }}
-                              className="shrink-0 rounded-lg bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-fuchsia-500"
-                            >
-                              + Add
-                            </button>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )
-              })()}
             </div>
           </div>
         </div>
