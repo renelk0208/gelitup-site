@@ -18490,10 +18490,19 @@ function App() {
   }, [])
 
   // Adds a built Starter Kit (fixed-price bundle) to the shared cart and refreshes the count.
+  // The kit is a single fixed-price unit; any additional items chosen in the builder are
+  // added as their own separate catalogue lines (not folded into the kit price).
   const handleAddKit = useCallback((kit) => {
     try {
       const cart = JSON.parse(localStorage.getItem(QUICK_CART_STORAGE_KEY) || '{}')
       cart[`KIT::${kit.lineId}`] = 1
+      if (Array.isArray(kit.extraLineItems)) {
+        for (const it of kit.extraLineItems) {
+          if (!it || !it.name) continue
+          const key = `${it.name}::${it.sku || ''}`
+          cart[key] = (Number(cart[key]) || 0) + (Number(it.qty) || 1)
+        }
+      }
       localStorage.setItem(QUICK_CART_STORAGE_KEY, JSON.stringify(cart))
       window.dispatchEvent(new Event('gelitup:cart-change'))
     } catch { /* ignore */ }

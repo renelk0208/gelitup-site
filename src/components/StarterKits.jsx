@@ -196,8 +196,14 @@ function KitBuilder({ kit, addOns = [], discount, onAddKit, onBack }) {
   const handleAdd = () => {
     if (!ready) return
     const includedChosen = sections.flatMap((g) => (sel[g.key] || []).slice(0, g.choose))
-    const chooserExtraLines = chooserExtras.map((sku) => { const c = findItem(sku); return { name: c?.name || sku, qty: 1, price: c ? extraPrice(c) : null } })
-    const mapExtraLines = extrasList.map(([sku, q]) => { const c = findItem(sku); return { name: c?.name || sku, qty: q, price: c ? extraPrice(c) : null } })
+    // Additional items (paid extras) become their own separate basket lines — not folded into the kit.
+    const extraQty = {}
+    for (const sku of chooserExtras) extraQty[sku] = (extraQty[sku] || 0) + 1
+    for (const [sku, q] of extrasList) extraQty[sku] = (extraQty[sku] || 0) + q
+    const extraLineItems = Object.entries(extraQty).map(([sku, qty]) => {
+      const c = findItem(sku)
+      return { name: c?.name || sku, sku, qty, price: c ? extraPrice(c) : null }
+    })
     const payload = {
       kitId: kit.id,
       name: kit.name,
@@ -205,16 +211,16 @@ function KitBuilder({ kit, addOns = [], discount, onAddKit, onBack }) {
       chosen: includedChosen.map((sku) => findItem(sku)?.name || sku),
       mustHaves: kit.mustHaves,
       freeGift: kit.freeGift,
-      extras: [...mapExtraLines, ...chooserExtraLines],
-      extrasTotal: Number(combinedExtrasTotal.toFixed(2)),
-      total: Number(grandTotal.toFixed(2)),
+      extras: [],
+      extrasTotal: 0,
+      total: Number(Number(kit.price).toFixed(2)),
     }
     // Persist kit line to the kit store keyed by a unique line id
     const store = readKitStore()
     const lineId = `${kit.id}-${Date.now()}`
     store[lineId] = payload
     writeKitStore(store)
-    if (typeof onAddKit === 'function') onAddKit({ lineId, ...payload })
+    if (typeof onAddKit === 'function') onAddKit({ lineId, ...payload, extraLineItems })
     setAdded(true)
     setShowModal(true)
   }
