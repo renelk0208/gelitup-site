@@ -28,6 +28,20 @@ const KIT_CONFIG = {
 const MUST = ['No Wipe Top Coat', '5-in-1 Superior Base Clear', 'Superbond without Acid'];
 const FREE_GIFT = 'Free 100ml All-In-One Liquid';
 
+// Dual Form tips currently OUT OF STOCK — excluded from every kit. Only Ballerina
+// and Squoval remain available. Keep in sync with out-of-stock.json (B2B).
+const OUT_OF_STOCK = /^dual forms (?!ballerina|squoval)/i;
+
+// Resolve a kit cover image by id, preferring webp then common raster formats.
+// Falls back to the .webp path (UI then falls back to the first colour image).
+function resolveCoverImage(id) {
+  const base = 'public/gelitup-media/starter-kits';
+  for (const ext of ['webp', 'jpg', 'jpeg', 'png']) {
+    if (fs.existsSync(`${base}/${id}.${ext}`)) return `/gelitup-media/starter-kits/${id}.${ext}`;
+  }
+  return `/gelitup-media/starter-kits/${id}.webp`;
+}
+
 // "Complete your kit" upsell strip — shown on every kit builder. Edit freely; each
 // item is added to the basket at its normal website price (charged separately).
 const ADD_ONS = [
@@ -204,7 +218,7 @@ for (const ws of wb.worksheets) {
   if (!cfg) { console.warn('No config for sheet:', ws.name); continue; }
   const items = [];
   ws.eachRow((row) => { const a = row.getCell(1).value; if (a && String(a).trim() && String(a).trim() !== 'Price') items.push(String(a).trim()); });
-  const choose = items.filter((x) => !isMust(x) && !(cfg.exclude && cfg.exclude.test(x)));
+  const choose = items.filter((x) => !isMust(x) && !(cfg.exclude && cfg.exclude.test(x)) && !OUT_OF_STOCK.test(x));
   const colours = choose.map((raw) => {
     const image = resolveImage(raw);
     const listPrice = resolvePrice(raw);
@@ -259,9 +273,9 @@ for (const ws of wb.worksheets) {
     included,
     guides: buildGuides(cfg.infoKeys || []),
     groups,
-    // Cover image: drop a file at /gelitup-media/starter-kits/<id>.webp (or .jpg) to
-    // override. If missing, the UI falls back to the first colour image below.
-    coverImage: `/gelitup-media/starter-kits/${cfg.id}.webp`,
+    // Cover image: drop a file at /gelitup-media/starter-kits/<id>.<ext> (webp/jpg/png)
+    // to override. If missing, the UI falls back to the first colour image below.
+    coverImage: resolveCoverImage(cfg.id),
     colours,
   });
 }

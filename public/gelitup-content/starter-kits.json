@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "generated": "2026-07-08T22:42:15.205Z",
+    "generated": "2026-07-10T05:43:44.013Z",
     "source": "Starter-kit-colour-collection-.xlsx",
     "note": "Data-driven kit config. Regenerate with: node scripts/generate-starter-kits.mjs"
   },
@@ -108,7 +108,7 @@
       ],
       "guides": [],
       "groups": [],
-      "coverImage": "/gelitup-media/starter-kits/beginner.webp",
+      "coverImage": "/gelitup-media/starter-kits/beginner.jpg",
       "colours": [
         {
           "name": "01 Ice Ice Baby",
@@ -1319,7 +1319,7 @@
         }
       ],
       "groups": [],
-      "coverImage": "/gelitup-media/starter-kits/gel-polish.webp",
+      "coverImage": "/gelitup-media/starter-kits/gel-polish.jpg",
       "colours": [
         {
           "name": "01 Ice Ice Baby",
@@ -2548,7 +2548,7 @@
         }
       ],
       "groups": [],
-      "coverImage": "/gelitup-media/starter-kits/biab-polygel.webp",
+      "coverImage": "/gelitup-media/starter-kits/biab-polygel.jpg",
       "colours": [
         {
           "name": "Liquid Polygel #LPG1",
@@ -3787,7 +3787,7 @@
         }
       ],
       "groups": [],
-      "coverImage": "/gelitup-media/starter-kits/premium-builder.webp",
+      "coverImage": "/gelitup-media/starter-kits/premium-builder.jpg",
       "colours": [
         {
           "name": "Premium Builder Gel Clear 40gr",
@@ -5118,65 +5118,10 @@
           "choose": 1,
           "colours": [
             {
-              "name": "DUAL FORMS ALMOND",
-              "sku": "DUAL FORMS ALMOND",
-              "code": null,
-              "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Dual forms ALMOND.webp",
-              "imageB": null,
-              "imageC": null,
-              "listPrice": 6.38,
-              "family": "Other",
-              "description": ""
-            },
-            {
               "name": "DUAL FORMS BALLERINA",
               "sku": "DUAL FORMS BALLERINA",
               "code": null,
               "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Dual Forms BALLERINA.webp",
-              "imageB": null,
-              "imageC": null,
-              "listPrice": 6.38,
-              "family": "Other",
-              "description": ""
-            },
-            {
-              "name": "DUAL FORMS LONG ALMOND",
-              "sku": "DUAL FORMS LONG ALMOND",
-              "code": null,
-              "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Dual forms LONG ALMOND.webp",
-              "imageB": null,
-              "imageC": null,
-              "listPrice": 6.38,
-              "family": "Other",
-              "description": ""
-            },
-            {
-              "name": "DUAL FORMS MODERN SQUARE",
-              "sku": "DUAL FORMS MODERN SQUARE",
-              "code": null,
-              "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Fual Forms SQUARE.webp",
-              "imageB": null,
-              "imageC": null,
-              "listPrice": 6.38,
-              "family": "Other",
-              "description": ""
-            },
-            {
-              "name": "DUAL FORMS RUSSIAN ALMOND",
-              "sku": "DUAL FORMS RUSSIAN ALMOND",
-              "code": null,
-              "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Dual Forms RUSSIAN ALMOND.webp",
-              "imageB": null,
-              "imageC": null,
-              "listPrice": 6.38,
-              "family": "Other",
-              "description": ""
-            },
-            {
-              "name": "DUAL FORMS SQUARE",
-              "sku": "DUAL FORMS SQUARE",
-              "code": null,
-              "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Fual Forms SQUARE.webp",
               "imageB": null,
               "imageC": null,
               "listPrice": 6.38,
@@ -5405,65 +5350,10 @@
       "coverImage": "/gelitup-media/starter-kits/multimix.webp",
       "colours": [
         {
-          "name": "DUAL FORMS ALMOND",
-          "sku": "DUAL FORMS ALMOND",
-          "code": null,
-          "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Dual forms ALMOND.webp",
-          "imageB": null,
-          "imageC": null,
-          "listPrice": 6.38,
-          "family": "Other",
-          "description": ""
-        },
-        {
           "name": "DUAL FORMS BALLERINA",
           "sku": "DUAL FORMS BALLERINA",
           "code": null,
           "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Dual Forms BALLERINA.webp",
-          "imageB": null,
-          "imageC": null,
-          "listPrice": 6.38,
-          "family": "Other",
-          "description": ""
-        },
-        {
-          "name": "DUAL FORMS LONG ALMOND",
-          "sku": "DUAL FORMS LONG ALMOND",
-          "code": null,
-          "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Dual forms LONG ALMOND.webp",
-          "imageB": null,
-          "imageC": null,
-          "listPrice": 6.38,
-          "family": "Other",
-          "description": ""
-        },
-        {
-          "name": "DUAL FORMS MODERN SQUARE",
-          "sku": "DUAL FORMS MODERN SQUARE",
-          "code": null,
-          "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Fual Forms SQUARE.webp",
-          "imageB": null,
-          "imageC": null,
-          "listPrice": 6.38,
-          "family": "Other",
-          "description": ""
-        },
-        {
-          "name": "DUAL FORMS RUSSIAN ALMOND",
-          "sku": "DUAL FORMS RUSSIAN ALMOND",
-          "code": null,
-          "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Dual Forms RUSSIAN ALMOND.webp",
-          "imageB": null,
-          "imageC": null,
-          "listPrice": 6.38,
-          "family": "Other",
-          "description": ""
-        },
-        {
-          "name": "DUAL FORMS SQUARE",
-          "sku": "DUAL FORMS SQUARE",
-          "code": null,
-          "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Fual Forms SQUARE.webp",
           "imageB": null,
           "imageC": null,
           "listPrice": 6.38,
@@ -6901,65 +6791,10 @@
           "choose": 1,
           "colours": [
             {
-              "name": "DUAL FORMS ALMOND",
-              "sku": "DUAL FORMS ALMOND",
-              "code": null,
-              "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Dual forms ALMOND.webp",
-              "imageB": null,
-              "imageC": null,
-              "listPrice": 6.38,
-              "family": "Other",
-              "description": ""
-            },
-            {
               "name": "DUAL FORMS BALLERINA",
               "sku": "DUAL FORMS BALLERINA",
               "code": null,
               "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Dual Forms BALLERINA.webp",
-              "imageB": null,
-              "imageC": null,
-              "listPrice": 6.38,
-              "family": "Other",
-              "description": ""
-            },
-            {
-              "name": "DUAL FORMS LONG ALMOND",
-              "sku": "DUAL FORMS LONG ALMOND",
-              "code": null,
-              "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Dual forms LONG ALMOND.webp",
-              "imageB": null,
-              "imageC": null,
-              "listPrice": 6.38,
-              "family": "Other",
-              "description": ""
-            },
-            {
-              "name": "DUAL FORMS MODERN SQUARE",
-              "sku": "DUAL FORMS MODERN SQUARE",
-              "code": null,
-              "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Fual Forms SQUARE.webp",
-              "imageB": null,
-              "imageC": null,
-              "listPrice": 6.38,
-              "family": "Other",
-              "description": ""
-            },
-            {
-              "name": "DUAL FORMS RUSSIAN ALMOND",
-              "sku": "DUAL FORMS RUSSIAN ALMOND",
-              "code": null,
-              "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Dual Forms RUSSIAN ALMOND.webp",
-              "imageB": null,
-              "imageC": null,
-              "listPrice": 6.38,
-              "family": "Other",
-              "description": ""
-            },
-            {
-              "name": "DUAL FORMS SQUARE",
-              "sku": "DUAL FORMS SQUARE",
-              "code": null,
-              "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Fual Forms SQUARE.webp",
               "imageB": null,
               "imageC": null,
               "listPrice": 6.38,
@@ -8131,68 +7966,13 @@
           ]
         }
       ],
-      "coverImage": "/gelitup-media/starter-kits/full-starter.webp",
+      "coverImage": "/gelitup-media/starter-kits/full-starter.jpg",
       "colours": [
-        {
-          "name": "DUAL FORMS ALMOND",
-          "sku": "DUAL FORMS ALMOND",
-          "code": null,
-          "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Dual forms ALMOND.webp",
-          "imageB": null,
-          "imageC": null,
-          "listPrice": 6.38,
-          "family": "Other",
-          "description": ""
-        },
         {
           "name": "DUAL FORMS BALLERINA",
           "sku": "DUAL FORMS BALLERINA",
           "code": null,
           "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Dual Forms BALLERINA.webp",
-          "imageB": null,
-          "imageC": null,
-          "listPrice": 6.38,
-          "family": "Other",
-          "description": ""
-        },
-        {
-          "name": "DUAL FORMS LONG ALMOND",
-          "sku": "DUAL FORMS LONG ALMOND",
-          "code": null,
-          "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Dual forms LONG ALMOND.webp",
-          "imageB": null,
-          "imageC": null,
-          "listPrice": 6.38,
-          "family": "Other",
-          "description": ""
-        },
-        {
-          "name": "DUAL FORMS MODERN SQUARE",
-          "sku": "DUAL FORMS MODERN SQUARE",
-          "code": null,
-          "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Fual Forms SQUARE.webp",
-          "imageB": null,
-          "imageC": null,
-          "listPrice": 6.38,
-          "family": "Other",
-          "description": ""
-        },
-        {
-          "name": "DUAL FORMS RUSSIAN ALMOND",
-          "sku": "DUAL FORMS RUSSIAN ALMOND",
-          "code": null,
-          "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Dual Forms RUSSIAN ALMOND.webp",
-          "imageB": null,
-          "imageC": null,
-          "listPrice": 6.38,
-          "family": "Other",
-          "description": ""
-        },
-        {
-          "name": "DUAL FORMS SQUARE",
-          "sku": "DUAL FORMS SQUARE",
-          "code": null,
-          "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/Fual Forms SQUARE.webp",
           "imageB": null,
           "imageC": null,
           "listPrice": 6.38,

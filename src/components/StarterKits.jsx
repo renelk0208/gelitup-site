@@ -64,16 +64,17 @@ export default function StarterKits({ discount = { active: false, pct: 0 }, onAd
             <span className="h-px w-8 bg-neutral-200" />
           </div>
           <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {['No Wipe Top Coat', '5-in-1 Superior Base', 'Superbond Primer'].map((item) => (
-              <div key={item} className="flex items-center gap-2.5 rounded-xl bg-[#faf8f6] px-3.5 py-3">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#9B1268]/10 text-[11px] text-[#9B1268]">✓</span>
-                <span className="text-[13px] font-medium leading-tight text-neutral-800">{item}</span>
+            {(kits[0]?.included || []).slice(0, 4).map((item) => (
+              <div key={item.name} className={`flex flex-col items-center gap-2 rounded-xl px-3 py-3 text-center ${item.free ? 'border border-[#D43790]/35 bg-[#D43790]/[0.06]' : 'bg-[#faf8f6]'}`}>
+                <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg bg-white">
+                  {item.image
+                    ? <img src={item.image} alt={item.name} loading="lazy" className="h-full w-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+                    : <span className="text-lg text-[#9B1268]/40">{item.free ? '✦' : '◦'}</span>}
+                  {item.free && <span className="absolute left-1 top-1 rounded-full bg-[#D43790] px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white">Free</span>}
+                </div>
+                <span className="text-[12px] font-medium leading-tight text-neutral-800">{item.name}</span>
               </div>
             ))}
-            <div className="flex items-center gap-2.5 rounded-xl border border-[#D43790]/35 bg-[#D43790]/[0.06] px-3.5 py-3">
-              <span className="shrink-0 rounded-full bg-[#D43790] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">Free</span>
-              <span className="text-[13px] font-medium leading-tight text-neutral-900">100ml All-In-One Liquid</span>
-            </div>
           </div>
         </div>
 
