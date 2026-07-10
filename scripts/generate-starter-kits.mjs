@@ -227,7 +227,7 @@ for (const ws of wb.worksheets) {
   });
   const included = [
     ...MUST.map((m) => ({ name: m, image: MUSTHAVE_IMAGE[m] || resolveImage(m), description: describe(m), listPrice: resolvePrice(m) ?? null })),
-    { name: FREE_GIFT, image: resolveImage('All In One Liquid 100ml -HTF') || resolveImage('All In One Liquid 200ml -HTF'), description: describe(FREE_GIFT), free: true, listPrice: null },
+    { name: FREE_GIFT, image: '/gelitup-media/starter-kits/free-all-in-one-liquid.jpg', description: describe(FREE_GIFT), free: true, listPrice: null },
   ];
   const matchesGroup = (g, c) => (g.pathMatch && c.image && g.pathMatch.test(c.image)) || (g.match && (new RegExp(g.match, 'i').test(c.name) || new RegExp(g.match, 'i').test(c.sku)));
   const groups = (cfg.groups || []).map((g) => ({

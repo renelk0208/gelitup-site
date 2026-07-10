@@ -133,6 +133,9 @@ function KitBuilder({ kit, addOns = [], discount, onAddKit, onBack }) {
   const [extras, setExtras] = useState({})     // sku -> qty (optional extras)
   const [added, setAdded] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [preview, setPreview] = useState(null)     // product opened in the enlarged view
+  const [previewIdx, setPreviewIdx] = useState(0)
+  const openPreview = (item) => { setPreview(item); setPreviewIdx(0) }
 
   // Any purchasable item that can be added as an extra (kit colours + wider range + add-ons).
   const extraCatalog = useMemo(() => [...kit.colours, ...(kit.extraColours || []), ...addOns], [kit.colours, kit.extraColours, addOns])
@@ -312,6 +315,9 @@ function KitBuilder({ kit, addOns = [], discount, onAddKit, onBack }) {
                               title={c.name}
                             >
                               <div className="relative flex h-40 items-center justify-center bg-[#faf8f6] p-2">
+                                <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); openPreview(c) }} className="absolute left-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-neutral-500 shadow-sm transition hover:text-[#9B1268]" title="View larger" aria-label={`View ${c.name} larger`}>
+                                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4"><path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.329 3.329a.75.75 0 1 1-1.061 1.06l-3.328-3.328A7 7 0 0 1 2 9Z" clipRule="evenodd" /><path d="M9 6.75a.75.75 0 0 1 .75.75v.75h.75a.75.75 0 0 1 0 1.5H9.75v.75a.75.75 0 0 1-1.5 0v-.75H7.5a.75.75 0 0 1 0-1.5h.75V7.5A.75.75 0 0 1 9 6.75Z" /></svg>
+                                </button>
                                 {c.image
                                   ? <img src={c.image} alt={c.name} loading="lazy" className="h-full w-full object-contain" onMouseEnter={(e) => { if (views.length < 2) return; let i = 0; clearInterval(e.currentTarget._t); e.currentTarget._t = setInterval(() => { i = (i + 1) % views.length; e.currentTarget.src = views[i] }, 800) }} onMouseLeave={(e) => { clearInterval(e.currentTarget._t); e.currentTarget.src = c.image }} onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
                                   : <span className="text-[10px] text-neutral-400">Image coming soon</span>}
@@ -344,6 +350,9 @@ function KitBuilder({ kit, addOns = [], discount, onAddKit, onBack }) {
                   return (
                     <div key={`x-${c.sku}`} className={`flex flex-col overflow-hidden rounded-xl border bg-white transition ${q > 0 ? 'border-[#9B1268] ring-1 ring-[#9B1268]' : 'border-neutral-200'}`}>
                       <div className="relative flex h-32 items-center justify-center bg-[#faf8f6] p-2">
+                        <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); openPreview(c) }} className="absolute left-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-neutral-500 shadow-sm transition hover:text-[#9B1268]" title="View larger" aria-label={`View ${c.name} larger`}>
+                          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4"><path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.329 3.329a.75.75 0 1 1-1.061 1.06l-3.328-3.328A7 7 0 0 1 2 9Z" clipRule="evenodd" /><path d="M9 6.75a.75.75 0 0 1 .75.75v.75h.75a.75.75 0 0 1 0 1.5H9.75v.75a.75.75 0 0 1-1.5 0v-.75H7.5a.75.75 0 0 1 0-1.5h.75V7.5A.75.75 0 0 1 9 6.75Z" /></svg>
+                        </button>
                         {c.image
                           ? <img src={c.image} alt={c.name} loading="lazy" className="h-full w-full object-contain" onMouseEnter={(e) => { if (views.length < 2) return; let i = 0; clearInterval(e.currentTarget._t); e.currentTarget._t = setInterval(() => { i = (i + 1) % views.length; e.currentTarget.src = views[i] }, 800) }} onMouseLeave={(e) => { clearInterval(e.currentTarget._t); e.currentTarget.src = c.image }} onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
                           : <span className="text-[10px] text-neutral-400">Image coming soon</span>}
@@ -490,6 +499,37 @@ function KitBuilder({ kit, addOns = [], discount, onAddKit, onBack }) {
           </div>
         </div>
       )}
+
+      {preview && (() => {
+        const pv = [preview.image, preview.imageB, preview.imageC].filter(Boolean)
+        const cur = pv[previewIdx] || preview.image
+        return (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+            <div className="absolute inset-0 bg-neutral-900/70 backdrop-blur-sm" onClick={() => setPreview(null)} />
+            <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+              <button type="button" onClick={() => setPreview(null)} className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-neutral-600 shadow transition hover:text-[#9B1268]" aria-label="Close">✕</button>
+              <div className="flex items-center justify-center bg-[#faf8f6] p-6">
+                {cur
+                  ? <img src={cur} alt={preview.name} className="max-h-[60vh] w-full object-contain" />
+                  : <span className="text-[12px] text-neutral-400">Image coming soon</span>}
+              </div>
+              {pv.length > 1 && (
+                <div className="flex justify-center gap-2 border-t border-neutral-100 p-3">
+                  {pv.map((v, i) => (
+                    <button key={i} type="button" onClick={() => setPreviewIdx(i)} className={`h-14 w-14 overflow-hidden rounded-lg border p-1 transition ${i === previewIdx ? 'border-[#9B1268] ring-1 ring-[#9B1268]' : 'border-neutral-200 hover:border-[#9B1268]/40'}`}>
+                      <img src={v} alt="" className="h-full w-full object-contain" />
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className="border-t border-neutral-100 p-4">
+                <p className="text-[14px] font-medium text-neutral-900">{preview.name}</p>
+                {preview.description ? <p className="mt-1 text-[13px] leading-relaxed text-neutral-500">{preview.description}</p> : null}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </section>
   )
 }

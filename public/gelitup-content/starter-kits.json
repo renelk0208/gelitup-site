@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "generated": "2026-07-10T05:43:44.013Z",
+    "generated": "2026-07-10T06:57:59.772Z",
     "source": "Starter-kit-colour-collection-.xlsx",
     "note": "Data-driven kit config. Regenerate with: node scripts/generate-starter-kits.mjs"
   },
@@ -100,7 +100,7 @@
         },
         {
           "name": "Free 100ml All-In-One Liquid",
-          "image": "/gelitup-content/product-images/2026 NEW!/New Consumables/all_in_one_liquid-200ml.webp",
+          "image": "/gelitup-media/starter-kits/free-all-in-one-liquid.jpg",
           "description": "Multi-purpose liquid for cleansing, brush care and slip — included free with every kit.",
           "free": true,
           "listPrice": null
@@ -1294,7 +1294,7 @@
         },
         {
           "name": "Free 100ml All-In-One Liquid",
-          "image": "/gelitup-content/product-images/2026 NEW!/New Consumables/all_in_one_liquid-200ml.webp",
+          "image": "/gelitup-media/starter-kits/free-all-in-one-liquid.jpg",
           "description": "Multi-purpose liquid for cleansing, brush care and slip — included free with every kit.",
           "free": true,
           "listPrice": null
@@ -2503,7 +2503,7 @@
         },
         {
           "name": "Free 100ml All-In-One Liquid",
-          "image": "/gelitup-content/product-images/2026 NEW!/New Consumables/all_in_one_liquid-200ml.webp",
+          "image": "/gelitup-media/starter-kits/free-all-in-one-liquid.jpg",
           "description": "Multi-purpose liquid for cleansing, brush care and slip — included free with every kit.",
           "free": true,
           "listPrice": null
@@ -3756,7 +3756,7 @@
         },
         {
           "name": "Free 100ml All-In-One Liquid",
-          "image": "/gelitup-content/product-images/2026 NEW!/New Consumables/all_in_one_liquid-200ml.webp",
+          "image": "/gelitup-media/starter-kits/free-all-in-one-liquid.jpg",
           "description": "Multi-purpose liquid for cleansing, brush care and slip — included free with every kit.",
           "free": true,
           "listPrice": null
@@ -5050,9 +5050,9 @@
     {
       "id": "multimix",
       "name": "Multimix Synthogel (Polygel) Kit",
-      "price": 54.1,
-      "retailValue": 56.95,
-      "savings": 2.85,
+      "price": 54.75,
+      "retailValue": 57.62,
+      "savings": 2.87,
       "savingsPct": 5,
       "choose": 1,
       "chooseLabel": "Multimix shade",
@@ -5083,7 +5083,7 @@
         },
         {
           "name": "Free 100ml All-In-One Liquid",
-          "image": "/gelitup-content/product-images/2026 NEW!/New Consumables/all_in_one_liquid-200ml.webp",
+          "image": "/gelitup-media/starter-kits/free-all-in-one-liquid.jpg",
           "description": "Multi-purpose liquid for cleansing, brush care and slip — included free with every kit.",
           "free": true,
           "listPrice": null
@@ -5136,6 +5136,28 @@
               "imageB": null,
               "imageC": null,
               "listPrice": 6.38,
+              "family": "Other",
+              "description": ""
+            },
+            {
+              "name": "NAIL EXTENSION DUAL FORMS RUSSIAN ALMOND",
+              "sku": "NAIL EXTENSION DUAL FORMS RUSSIAN ALMOND",
+              "code": null,
+              "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/NAIL-EXTENSION-RUSSIAN ALMOND XL.webp",
+              "imageB": null,
+              "imageC": null,
+              "listPrice": 7.73,
+              "family": "Other",
+              "description": ""
+            },
+            {
+              "name": "NAIL EXTENSION DUAL FORMS SQUARE",
+              "sku": "NAIL EXTENSION DUAL FORMS SQUARE",
+              "code": null,
+              "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/NAIL EXTENSION DUAL FORMS SQUARE.webp",
+              "imageB": null,
+              "imageC": null,
+              "listPrice": 7.73,
               "family": "Other",
               "description": ""
             }
@@ -5347,7 +5369,7 @@
           ]
         }
       ],
-      "coverImage": "/gelitup-media/starter-kits/multimix.webp",
+      "coverImage": "/gelitup-media/starter-kits/multimix.jpg",
       "colours": [
         {
           "name": "DUAL FORMS BALLERINA",
@@ -5368,6 +5390,28 @@
           "imageB": null,
           "imageC": null,
           "listPrice": 6.38,
+          "family": "Other",
+          "description": ""
+        },
+        {
+          "name": "NAIL EXTENSION DUAL FORMS RUSSIAN ALMOND",
+          "sku": "NAIL EXTENSION DUAL FORMS RUSSIAN ALMOND",
+          "code": null,
+          "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/NAIL-EXTENSION-RUSSIAN ALMOND XL.webp",
+          "imageB": null,
+          "imageC": null,
+          "listPrice": 7.73,
+          "family": "Other",
+          "description": ""
+        },
+        {
+          "name": "NAIL EXTENSION DUAL FORMS SQUARE",
+          "sku": "NAIL EXTENSION DUAL FORMS SQUARE",
+          "code": null,
+          "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/NAIL EXTENSION DUAL FORMS SQUARE.webp",
+          "imageB": null,
+          "imageC": null,
+          "listPrice": 7.73,
           "family": "Other",
           "description": ""
         },
@@ -6720,9 +6764,9 @@
     {
       "id": "full-starter",
       "name": "Full Starter Pack",
-      "price": 169.05,
-      "retailValue": 177.97,
-      "savings": 8.92,
+      "price": 169.7,
+      "retailValue": 178.64,
+      "savings": 8.94,
       "savingsPct": 5,
       "choose": 10,
       "chooseLabel": "colours",
@@ -6753,7 +6797,7 @@
         },
         {
           "name": "Free 100ml All-In-One Liquid",
-          "image": "/gelitup-content/product-images/2026 NEW!/New Consumables/all_in_one_liquid-200ml.webp",
+          "image": "/gelitup-media/starter-kits/free-all-in-one-liquid.jpg",
           "description": "Multi-purpose liquid for cleansing, brush care and slip — included free with every kit.",
           "free": true,
           "listPrice": null
@@ -6798,6 +6842,28 @@
               "imageB": null,
               "imageC": null,
               "listPrice": 6.38,
+              "family": "Other",
+              "description": ""
+            },
+            {
+              "name": "NAIL EXTENSION DUAL FORMS RUSSIAN ALMOND",
+              "sku": "NAIL EXTENSION DUAL FORMS RUSSIAN ALMOND",
+              "code": null,
+              "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/NAIL-EXTENSION-RUSSIAN ALMOND XL.webp",
+              "imageB": null,
+              "imageC": null,
+              "listPrice": 7.73,
+              "family": "Other",
+              "description": ""
+            },
+            {
+              "name": "NAIL EXTENSION DUAL FORMS SQUARE",
+              "sku": "NAIL EXTENSION DUAL FORMS SQUARE",
+              "code": null,
+              "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/NAIL EXTENSION DUAL FORMS SQUARE.webp",
+              "imageB": null,
+              "imageC": null,
+              "listPrice": 7.73,
               "family": "Other",
               "description": ""
             },
@@ -7976,6 +8042,28 @@
           "imageB": null,
           "imageC": null,
           "listPrice": 6.38,
+          "family": "Other",
+          "description": ""
+        },
+        {
+          "name": "NAIL EXTENSION DUAL FORMS RUSSIAN ALMOND",
+          "sku": "NAIL EXTENSION DUAL FORMS RUSSIAN ALMOND",
+          "code": null,
+          "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/NAIL-EXTENSION-RUSSIAN ALMOND XL.webp",
+          "imageB": null,
+          "imageC": null,
+          "listPrice": 7.73,
+          "family": "Other",
+          "description": ""
+        },
+        {
+          "name": "NAIL EXTENSION DUAL FORMS SQUARE",
+          "sku": "NAIL EXTENSION DUAL FORMS SQUARE",
+          "code": null,
+          "image": "/gelitup-content/product-images/CONSUMABLES/DUAL FORMS/NAIL EXTENSION DUAL FORMS SQUARE.webp",
+          "imageB": null,
+          "imageC": null,
+          "listPrice": 7.73,
           "family": "Other",
           "description": ""
         },
