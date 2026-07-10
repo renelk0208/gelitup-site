@@ -19,10 +19,10 @@ const OUT = 'public/gelitup-content/starter-kits.json';
 const KIT_CONFIG = {
   'Beginner Colour Kit': { id: 'beginner', name: 'Beginner Colour Kit', price: 59.45, choose: 0, chooseLabel: '', extraFrom: 'gel-polish' },
   'Gel Polish Package': { id: 'gel-polish', name: 'Gel Polish Kit', price: 96.45, choose: 10, chooseLabel: 'gel polish colours', infoKeys: ['COLORS::ALL'] },
-  'BIAB and Lquid Polygel Clear': { id: 'biab-polygel', name: 'BIAB & Liquid Polygel Kit', price: 49.95, choose: 0, chooseLabel: '', extraFrom: 'gel-polish', infoKeys: ['BUILDER GEL SYSTEMS::BRUSH ON BUILDER', 'BUILDER GEL SYSTEMS::LIQUID POLYGEL'] },
+  'BIAB and Lquid Polygel Clear': { id: 'biab-polygel', name: 'BIAB & Liquid Polygel Kit', price: 49.95, choose: 0, chooseLabel: '', extraFrom: 'gel-polish', tagline: 'Clear Brush-on Builder + Clear Liquid Polygel · prep, base & top included', infoKeys: ['BUILDER GEL SYSTEMS::BRUSH ON BUILDER', 'BUILDER GEL SYSTEMS::LIQUID POLYGEL'] },
   'Premium Fibreglass Builder Kit': { id: 'premium-builder', name: 'Premium Fibreglass Builder Kit', price: 49.0, choose: 1, chooseLabel: 'builder gel shade', exclude: /premium builder gel (blue|mint|purple)\b/i, extraFrom: 'gel-polish', infoKeys: ['BUILDER GEL SYSTEMS::PREMIUM BUILDER'] },
-  'Multmix Synthogel': { id: 'multimix', name: 'Multimix Synthogel (Polygel) Kit', price: 55.95, choose: 1, chooseLabel: 'Multimix shade', extraFrom: 'gel-polish', infoKeys: ['BUILDER GEL SYSTEMS::MULTIMIX'], groups: [{ key: 'dualforms', label: 'Choose 1 box of Dual Form tips', choose: 1, match: 'dual' }, { key: 'multimix', label: 'Choose 1 Multimix Synthogel shade', choose: 1, match: 'multimix' }] },
-  'Full Starter': { id: 'full-starter', name: 'Full Starter Pack', price: 167.45, choose: 10, chooseLabel: 'colours', infoKeys: [], groups: [{ key: 'dualforms', label: 'Choose 1 box of Dual Form tips', choose: 1, pathMatch: /DUAL FORMS/i }, { key: 'colours', label: 'Choose your 10 colours', choose: 10, pathMatch: /\/COLORS\//i }] },
+  'Multmix Synthogel': { id: 'multimix', name: 'Multimix Synthogel (Polygel) Kit', price: 55.95, choose: 1, chooseLabel: 'Multimix shade', extraFrom: 'gel-polish', tagline: 'Choose 1 Multimix shade + 1 Dual Forms box · prep, base & top included', infoKeys: ['BUILDER GEL SYSTEMS::MULTIMIX'], groups: [{ key: 'dualforms', label: 'Choose 1 box of Dual Form tips', choose: 1, match: 'dual' }, { key: 'multimix', label: 'Choose 1 Multimix Synthogel shade', choose: 1, match: 'multimix' }] },
+  'Full Starter': { id: 'full-starter', name: 'Full Starter Pack', price: 167.45, choose: 10, chooseLabel: 'colours', tagline: 'Choose 10 colours + 1 Dual Forms box · prep, base & top included', infoKeys: [], groups: [{ key: 'dualforms', label: 'Choose 1 box of Dual Form tips', choose: 1, pathMatch: /DUAL FORMS/i }, { key: 'colours', label: 'Choose your 10 colours', choose: 10, pathMatch: /\/COLORS\//i }] },
 };
 
 const MUST = ['No Wipe Top Coat', '5-in-1 Superior Base Clear', 'Superbond without Acid'];
@@ -268,6 +268,7 @@ for (const ws of wb.worksheets) {
     savingsPct,
     choose: cfg.choose,
     chooseLabel: cfg.chooseLabel,
+    tagline: cfg.tagline || null,
     mustHaves: MUST.slice(),
     freeGift: FREE_GIFT,
     included,

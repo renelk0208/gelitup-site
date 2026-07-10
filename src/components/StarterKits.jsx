@@ -109,7 +109,7 @@ export default function StarterKits({ discount = { active: false, pct: 0 }, onAd
               <div className="flex flex-1 flex-col p-5">
                 <h2 className="text-lg font-medium tracking-tight text-neutral-900">{kit.name}</h2>
                 <p className="mt-1.5 text-[13px] leading-relaxed text-neutral-500">
-                  {kit.choose > 0 ? `Choose ${kit.choose} ${kit.chooseLabel}` : 'Ready-made kit'} &middot; prep, base &amp; top included
+                  {kit.tagline || `${kit.choose > 0 ? `Choose ${kit.choose} ${kit.chooseLabel}` : 'Ready-made kit'} · prep, base & top included`}
                 </p>
                 <div className="mt-auto flex items-end justify-between pt-5">
                   <div className="leading-none">
@@ -240,9 +240,9 @@ function KitBuilder({ kit, addOns = [], discount, onAddKit, onBack }) {
           {/* Always included (with product descriptions) */}
           <div className="mt-6 rounded-2xl border border-neutral-200 bg-[#faf8f6] p-5">
             <div className="flex items-center gap-3">
-              <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#9B1268]">Included</span>
+              <span className="text-[14px] font-bold uppercase tracking-[0.2em] text-[#9B1268]">Included</span>
               <span className="h-px flex-1 bg-neutral-200" />
-              <span className="text-[11px] text-neutral-400">{sections.length === 0 ? "What’s in this kit" : 'no need to add these'}</span>
+              <span className="text-[12px] font-semibold text-neutral-500">{sections.length === 0 ? "What’s in this kit" : 'no need to add these'}</span>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {[...(kit.included || []), ...(sections.length === 0 ? kit.colours : [])].map((item) => (
@@ -341,7 +341,7 @@ function KitBuilder({ kit, addOns = [], discount, onAddKit, onBack }) {
           {/* Optional extras */}
           {showExtraSection && extrasSource.length > 0 && (
             <details className="mt-5 rounded-2xl border border-neutral-200 bg-[#faf8f6] p-5" open={extrasSource.length <= 24}>
-              <summary className="cursor-pointer text-[13px] font-medium tracking-tight text-neutral-900">{kit.extraColours?.length ? 'Add more colours' : 'Add more from this range'} <span className="font-normal text-neutral-400">— at the current website price</span></summary>
+              <summary className="cursor-pointer text-[15px] font-bold tracking-tight text-neutral-900">{kit.extraColours?.length ? 'Add more colours' : 'Add more from this range'} <span className="text-[12px] font-medium text-neutral-500">— at the current website price</span></summary>
               <div className="mt-4 grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))' }}>
                 {extrasSource.map((c) => {
                   const q = extras[c.sku] || 0
