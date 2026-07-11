@@ -104,7 +104,6 @@ export default function StarterKits({ discount = { active: false, pct: 0 }, onAd
                   onError={(e) => { if (fallback && e.currentTarget.src !== fallback) { e.currentTarget.src = fallback; e.currentTarget.className = 'h-full w-full object-contain p-6' } else { e.currentTarget.style.display = 'none' } }}
                 />
                 <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-[#9B1268] backdrop-blur">Kit</span>
-                {kit.savingsPct > 0 && <span className="absolute right-4 top-4 rounded-full bg-[#9B1268] px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white">&minus;{kit.savingsPct}%</span>}
               </div>
               <div className="flex flex-1 flex-col p-5">
                 <h2 className="text-lg font-medium tracking-tight text-neutral-900">{kit.name}</h2>
@@ -113,7 +112,6 @@ export default function StarterKits({ discount = { active: false, pct: 0 }, onAd
                 </p>
                 <div className="mt-auto flex items-end justify-between pt-5">
                   <div className="leading-none">
-                    {kit.savings > 0 && <span className="mb-1 block text-[12px] text-neutral-400 line-through">{fmt(kit.retailValue)}</span>}
                     <span className="text-2xl font-light tracking-tight text-neutral-900">{fmt(kit.price)}</span>
                   </div>
                   <span className="inline-flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.15em] text-[#9B1268] transition-all group-hover:gap-2.5">Build <span aria-hidden>→</span></span>
@@ -436,12 +434,6 @@ function KitBuilder({ kit, addOns = [], discount, onAddKit, onBack }) {
               <span className="text-neutral-600">{kit.name}</span>
               <span className="font-medium text-neutral-900">{fmt(kit.price)}</span>
             </div>
-            {kit.retailValue > kit.price && (
-              <div className="mt-1.5 flex items-center justify-between text-[13px]">
-                <span className="text-neutral-400">Bought separately</span>
-                <span className="text-neutral-400 line-through">{fmt(kit.retailValue)}</span>
-              </div>
-            )}
             {combinedExtrasTotal > 0 && (
               <div className="mt-1.5 flex items-center justify-between text-[13px]">
                 <span className="text-neutral-600">Optional extras</span>
@@ -452,9 +444,6 @@ function KitBuilder({ kit, addOns = [], discount, onAddKit, onBack }) {
               <span className="text-[13px] font-medium uppercase tracking-[0.12em] text-neutral-500">Total</span>
               <span className="text-3xl font-light tracking-tight text-neutral-900">{fmt(grandTotal)}</span>
             </div>
-            {kit.savings > 0 && (
-              <div className="mt-3 flex items-center justify-center gap-2 rounded-lg bg-[#9B1268]/[0.05] py-2 text-[12px] font-medium text-[#9B1268]">Save {fmt(kit.savings)} ({kit.savingsPct}%) vs buying separately</div>
-            )}
             <p className="mt-3 flex items-center gap-2 text-[11px] text-neutral-500"><span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#D43790]" /> Summer Madness price — build now, before the sale ends.</p>
             <p className="mt-2 text-[11px] text-neutral-400">Shipping added at checkout (flat rate by country).</p>
 
