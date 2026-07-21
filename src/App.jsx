@@ -78,7 +78,7 @@ const SMALL_ORDER_MIN_EUR = 49
 const SMALL_ORDER_SHIPPING_ZONES = [
   { feeEur: 15, countries: ['Austria', 'Germany', 'Hungary', 'Belgium', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'Croatia', 'Czech Republic'] },
   { feeEur: 22, countries: ['Denmark', 'Spain', 'Luxembourg', 'Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Finland', 'Sweden', 'Norway', 'Switzerland', 'United Kingdom'] },
-  { feeEur: 35, countries: ['Israel', 'Cyprus', 'Malta', 'Serbia', 'Turkey', 'Ukraine', 'Bosnia and Herzegovina', 'North Macedonia', 'Albania', 'Moldova', 'Georgia'] },
+  { feeEur: 35, countries: ['Israel', 'Serbia', 'Turkey', 'Ukraine', 'Bosnia and Herzegovina', 'North Macedonia', 'Albania', 'Moldova', 'Georgia'] },
 ]
 function getSmallOrderShippingFee(country) {
   const name = String(country || '').trim().toLowerCase()
@@ -9430,6 +9430,13 @@ function CheckoutPage() {
     } catch { setViesError('Unable to reach VAT validation service') }
     finally { setViesLoading(false) }
   }, [form.vatNumber, form.companyName, requiresEuVatVerification])
+  const handleInvoiceCountryChange = useCallback((nextCountry) => {
+    updateField('invoiceCountry', nextCountry)
+    if (!isEUCountry(nextCountry)) {
+      setViesResult(null)
+      setViesError('')
+    }
+  }, [updateField])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -9939,7 +9946,7 @@ function CheckoutPage() {
               </div>
               <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
                 Country / Region <span className="text-rose-500">*</span>
-                <select required value={form.invoiceCountry} onChange={e => { const nextCountry = e.target.value; updateField('invoiceCountry', nextCountry); if (!isEUCountry(nextCountry)) { setViesResult(null); setViesError('') } }} className={inputClass}>
+                <select required value={form.invoiceCountry} onChange={e => handleInvoiceCountryChange(e.target.value)} className={inputClass}>
                   <option value="">Select a country…</option>
                   {COUNTRY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
