@@ -78,6 +78,7 @@ const SMALL_ORDER_MIN_EUR = 49
 const SMALL_ORDER_SHIPPING_ZONES = [
   { feeEur: 15, countries: ['Austria', 'Germany', 'Hungary', 'Belgium', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'Croatia', 'Czech Republic'] },
   { feeEur: 22, countries: ['Denmark', 'Spain', 'Luxembourg', 'Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Finland', 'Sweden', 'Norway', 'Switzerland', 'United Kingdom'] },
+  { feeEur: 35, countries: ['Israel', 'Cyprus', 'Malta', 'Serbia', 'Turkey', 'Ukraine', 'Bosnia and Herzegovina', 'North Macedonia', 'Albania', 'Moldova', 'Georgia'] },
 ]
 function getSmallOrderShippingFee(country) {
   const name = String(country || '').trim().toLowerCase()
@@ -89,6 +90,10 @@ function getSmallOrderShippingFee(country) {
 }
 const B2B_PRICE_MULTIPLIER = 1.2
 const EU_COUNTRIES = ['Austria','Belgium','Bulgaria','Croatia','Cyprus','Czech Republic','Denmark','Estonia','Finland','France','Germany','Greece','Hungary','Ireland','Italy','Latvia','Lithuania','Luxembourg','Malta','Netherlands','Poland','Portugal','Romania','Slovakia','Slovenia','Spain','Sweden']
+const EU_COUNTRY_SET = new Set(EU_COUNTRIES.map((country) => country.toLowerCase()))
+function isEUCountry(country) {
+  return EU_COUNTRY_SET.has(String(country || '').trim().toLowerCase())
+}
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL
@@ -9391,6 +9396,7 @@ function CheckoutPage() {
   // null fee = country not eligible (distributor country / unlisted) or not chosen yet.
   const deliveryCountry = (form.shipToDifferentAddress ? form.shippingCountry : form.invoiceCountry).trim()
   const smallOrderFee = getSmallOrderShippingFee(deliveryCountry)
+  const requiresEuVatVerification = isEUCountry(form.invoiceCountry)
   const shippingFee = cartTotal >= freeShipEur ? 0 : (smallOrderFee ?? 0)
   const grandTotal = cartTotal + shippingFee
 
@@ -9400,6 +9406,11 @@ function CheckoutPage() {
   }, [cart])
 
   const verifyVat = useCallback(async () => {
+    if (!requiresEuVatVerification) {
+      setViesError('')
+      setViesResult(null)
+      return
+    }
     const vat = String(form.vatNumber || '').trim().toUpperCase().replace(/[\s\-\.]/g, '')
     if (vat.length < 4) { setViesError('Enter a full VAT number to verify'); return }
     setViesLoading(true)
@@ -9418,7 +9429,7 @@ function CheckoutPage() {
       else if (data.name && !form.companyName) setForm(f => ({ ...f, companyName: data.name }))
     } catch { setViesError('Unable to reach VAT validation service') }
     finally { setViesLoading(false) }
-  }, [form.vatNumber, form.companyName])
+  }, [form.vatNumber, form.companyName, requiresEuVatVerification])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -9430,9 +9441,10 @@ function CheckoutPage() {
     const email = form.email.trim().toLowerCase()
     if (!email) { setError('Email is required.'); return }
     const vat = form.vatNumber.trim()
+    const vatFieldLabel = requiresEuVatVerification ? 'VAT number' : 'Business / Tax ID'
     if (!form.companyName.trim()) { setError('Company name is required.'); return }
-    if (!vat) { setError('VAT number is required.'); return }
-    if (!viesResult?.valid) { setError('Please verify your VAT number using the "Verify" button.'); return }
+    if (!vat) { setError(`${vatFieldLabel} is required.`); return }
+    if (requiresEuVatVerification && !viesResult?.valid) { setError('Please verify your VAT number using the "Verify" button.'); return }
     if (!form.firstName.trim()) { setError('First name is required.'); return }
     if (!form.lastName.trim()) { setError('Last name is required.'); return }
     if (!form.invoiceAddressLine1.trim()) { setError('Invoice address is required.'); return }
@@ -9471,7 +9483,7 @@ function CheckoutPage() {
           data: {
             company_name: form.companyName.trim(),
             vat_number: vat || null,
-            vies_vat: vat || null,
+            vies_vat: requiresEuVatVerification ? (vat || null) : null,
             account_type: 'b2b_buyer',
             full_name: `${form.firstName.trim()} ${form.lastName.trim()}`,
             contact_phone: form.phone.trim(),
@@ -9904,25 +9916,30 @@ function CheckoutPage() {
               </label>
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-slate-700">
-                  VAT Number <span className="text-rose-500">*</span>
+                  {requiresEuVatVerification ? 'VAT Number' : 'Business / Tax ID'} <span className="text-rose-500">*</span>
                   <div className="mt-1 flex gap-2">
-                    <input type="text" required value={form.vatNumber} onChange={e => { updateField('vatNumber', e.target.value); setViesResult(null) }} placeholder="EU123456789" className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
-                    <button type="button" onClick={verifyVat} disabled={viesLoading} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50">
-                      {viesLoading ? 'Checking…' : 'Verify'}
-                    </button>
+                    <input type="text" required value={form.vatNumber} onChange={e => { updateField('vatNumber', e.target.value); setViesResult(null) }} placeholder={requiresEuVatVerification ? 'EU123456789' : 'Business / Tax ID'} className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
+                    {requiresEuVatVerification && (
+                      <button type="button" onClick={verifyVat} disabled={viesLoading} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50">
+                        {viesLoading ? 'Checking…' : 'Verify'}
+                      </button>
+                    )}
                   </div>
                 </label>
-                {viesResult?.valid && (
+                {!requiresEuVatVerification && (
+                  <p className="mt-1.5 text-xs text-slate-500">For non-EU countries, provide your Business / Tax ID. Our team will review it manually.</p>
+                )}
+                {requiresEuVatVerification && viesResult?.valid && (
                   <p className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-700">
                     <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-[10px]">✓</span>
                     VAT verified{viesResult.name ? ` — ${viesResult.name}` : ''}
                   </p>
                 )}
-                {viesError && <p className="mt-1.5 text-xs text-rose-600">{viesError}</p>}
+                {requiresEuVatVerification && viesError && <p className="mt-1.5 text-xs text-rose-600">{viesError}</p>}
               </div>
               <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
                 Country / Region <span className="text-rose-500">*</span>
-                <select required value={form.invoiceCountry} onChange={e => updateField('invoiceCountry', e.target.value)} className={inputClass}>
+                <select required value={form.invoiceCountry} onChange={e => { const nextCountry = e.target.value; updateField('invoiceCountry', nextCountry); if (!isEUCountry(nextCountry)) { setViesResult(null); setViesError('') } }} className={inputClass}>
                   <option value="">Select a country…</option>
                   {COUNTRY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
@@ -11541,6 +11558,10 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const setClientField = useCallback((key, value) => {
     setClientProfile((current) => ({ ...current, [key]: value }))
     if (key === 'vatNumber') setViesResult(null) // reset VIES result when VAT changes
+    if (key === 'invoiceCountry' && !isEUCountry(value)) {
+      setViesResult(null)
+      setViesError('')
+    }
   }, [])
 
   // VIES VAT validation state
@@ -11549,6 +11570,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [viesError, setViesError] = useState('')
 
   const verifyVat = useCallback(async (vatNumber) => {
+    if (!isEUCountry(clientProfile.invoiceCountry)) {
+      setViesError('')
+      setViesResult(null)
+      return
+    }
     const vat = String(vatNumber || '').trim().toUpperCase().replace(/[\s\-\.]/g, '')
     if (vat.length < 4) { setViesError('Enter a full VAT number to verify'); return }
     setViesLoading(true)
@@ -11566,7 +11592,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       if (!data.valid) setViesError('VAT number not found in VIES — please check and try again')
     } catch { setViesError('Unable to reach VAT validation service') }
     finally { setViesLoading(false) }
-  }, [])
+  }, [clientProfile.invoiceCountry])
 
   const invoiceAddressComposed = useMemo(() => composeAddress({
     line1: clientProfile.invoiceAddressLine1,
@@ -11613,10 +11639,12 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const shippingConsigneePhone = clientProfile.shippingSameAsInvoice
     ? clientProfile.contactPhone
     : clientProfile.shippingPhone
+  const requiresClientEuVatVerification = isEUCountry(clientProfile.invoiceCountry)
 
   const clientValidation = useMemo(() => {
-    const vatPrefixError = validateVatPrefix(clientProfile.vatNumber, clientProfile.invoiceCountry)
-    const vatNotVerified = String(clientProfile.vatNumber || '').trim().length >= 4 && !vatPrefixError && (!viesResult || !viesResult.valid)
+    const vatPrefixError = requiresClientEuVatVerification ? validateVatPrefix(clientProfile.vatNumber, clientProfile.invoiceCountry) : null
+    const vatNotVerified = requiresClientEuVatVerification && String(clientProfile.vatNumber || '').trim().length >= 4 && !vatPrefixError && (!viesResult || !viesResult.valid)
+    const vatFieldLabel = requiresClientEuVatVerification ? 'VAT number' : 'Business / Tax ID'
     const missing = {
       customerType: !String(clientProfile.customerType || '').trim(),
       shippingType: !String(clientProfile.shippingType || '').trim(),
@@ -11642,7 +11670,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       customerType: 'customer type',
       shippingType: 'shipping type',
       customerName: 'company/client name',
-      vatNumber: 'VAT number',
+      vatNumber: vatFieldLabel,
       contactPhone: 'contact number (with country code)',
       contactEmail: 'contact email',
       invoiceAddressLine1: 'invoice address line 1',
@@ -11696,6 +11724,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     clientProfile.shippingSameAsInvoice,
     clientProfile.shippingType,
     clientProfile.vatNumber,
+    requiresClientEuVatVerification,
     invoiceAddressComposed,
     shippingAddressComposed,
     viesResult,
@@ -14514,19 +14543,24 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                 <input type="text" value={clientProfile.contactPersonName} onChange={(e) => setClientField('contactPersonName', e.target.value)} className={getClientInputClass('contactPersonName')} placeholder="e.g. Maria Rossi" />
               </label>
             )}
-            <label className="text-xs text-slate-700">VAT Number <span className="text-rose-600">*</span>
+            <label className="text-xs text-slate-700">{requiresClientEuVatVerification ? 'VAT Number' : 'Business / Tax ID'} <span className="text-rose-600">*</span>
               <div className="mt-1 flex gap-1.5">
-                <input type="text" value={clientProfile.vatNumber} onChange={(e) => setClientField('vatNumber', e.target.value.toUpperCase())} className={`flex-1 rounded-lg border px-3 py-2 text-xs text-slate-700 ${hasClientFieldError('vatNumber') ? 'border-rose-400 bg-rose-50' : 'border-slate-300 bg-white'}`} placeholder={COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry] ? `${COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry]}123456789` : 'VAT / Tax ID'} />
-                <button type="button" disabled={viesLoading || !clientProfile.vatNumber.trim()} onClick={() => verifyVat(clientProfile.vatNumber)} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40">
-                  {viesLoading ? 'Checking…' : 'Verify'}
-                </button>
+                <input type="text" value={clientProfile.vatNumber} onChange={(e) => setClientField('vatNumber', e.target.value.toUpperCase())} className={`flex-1 rounded-lg border px-3 py-2 text-xs text-slate-700 ${hasClientFieldError('vatNumber') ? 'border-rose-400 bg-rose-50' : 'border-slate-300 bg-white'}`} placeholder={requiresClientEuVatVerification && COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry] ? `${COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry]}123456789` : 'Business / Tax ID'} />
+                {requiresClientEuVatVerification && (
+                  <button type="button" disabled={viesLoading || !clientProfile.vatNumber.trim()} onClick={() => verifyVat(clientProfile.vatNumber)} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40">
+                    {viesLoading ? 'Checking…' : 'Verify'}
+                  </button>
+                )}
               </div>
-              {COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry] && (
+              {requiresClientEuVatVerification && COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry] && (
                 <span className="mt-0.5 block text-[10px] text-slate-400">Must start with <strong>{COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry]}</strong> for {clientProfile.invoiceCountry}</span>
               )}
+              {!requiresClientEuVatVerification && (
+                <span className="mt-0.5 block text-[10px] text-slate-400">For non-EU countries, provide your Business / Tax ID. We verify these manually.</span>
+              )}
               {clientValidation.vatPrefixError && <span className="mt-0.5 block text-[10px] text-rose-600">{clientValidation.vatPrefixError}</span>}
-              {viesError && <span className="mt-0.5 block text-[10px] text-rose-600">{viesError}</span>}
-              {viesResult?.valid && (
+              {requiresClientEuVatVerification && viesError && <span className="mt-0.5 block text-[10px] text-rose-600">{viesError}</span>}
+              {requiresClientEuVatVerification && viesResult?.valid && (
                 <div className="mt-1 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1.5">
                   <p className="text-[10px] font-semibold text-emerald-700">✓ Valid — verified via EU VIES</p>
                   {viesResult.name && <p className="text-[10px] text-emerald-600">{viesResult.name}</p>}
@@ -15179,21 +15213,26 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             </label>
 
             <label className="text-xs text-slate-700">
-              VAT Number <span className="text-rose-600">*</span>
+              {requiresClientEuVatVerification ? 'VAT Number' : 'Business / Tax ID'} <span className="text-rose-600">*</span>
               <div className="mt-1 flex gap-1.5">
                 <input
                   type="text"
                   value={clientProfile.vatNumber}
                   onChange={(event) => setClientField('vatNumber', event.target.value.toUpperCase())}
                   className={`flex-1 rounded-lg border px-3 py-2 text-xs text-slate-700 ${hasClientFieldError('vatNumber') ? 'border-rose-400 bg-rose-50' : 'border-slate-300 bg-white'}`}
-                  placeholder="VAT / Tax ID"
+                  placeholder={requiresClientEuVatVerification && COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry] ? `${COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry]}123456789` : 'Business / Tax ID'}
                 />
-                <button type="button" disabled={viesLoading || !clientProfile.vatNumber.trim()} onClick={() => verifyVat(clientProfile.vatNumber)} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40">
-                  {viesLoading ? 'Checking…' : 'Verify'}
-                </button>
+                {requiresClientEuVatVerification && (
+                  <button type="button" disabled={viesLoading || !clientProfile.vatNumber.trim()} onClick={() => verifyVat(clientProfile.vatNumber)} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40">
+                    {viesLoading ? 'Checking…' : 'Verify'}
+                  </button>
+                )}
               </div>
-              {viesError && <span className="mt-0.5 block text-[10px] text-rose-600">{viesError}</span>}
-              {viesResult?.valid && (
+              {!requiresClientEuVatVerification && (
+                <span className="mt-0.5 block text-[10px] text-slate-400">For non-EU countries, provide your Business / Tax ID. We verify these manually.</span>
+              )}
+              {requiresClientEuVatVerification && viesError && <span className="mt-0.5 block text-[10px] text-rose-600">{viesError}</span>}
+              {requiresClientEuVatVerification && viesResult?.valid && (
                 <div className="mt-1 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1.5">
                   <p className="text-[10px] font-semibold text-emerald-700">✓ Valid — verified via EU VIES</p>
                   {viesResult.name && <p className="text-[10px] text-emerald-600">{viesResult.name}</p>}
