@@ -94,6 +94,9 @@ const EU_COUNTRY_SET = new Set(EU_COUNTRIES.map((country) => country.toLowerCase
 function isEUCountry(country) {
   return EU_COUNTRY_SET.has(String(country || '').trim().toLowerCase())
 }
+function shouldClearViesVerification(country) {
+  return !isEUCountry(country)
+}
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL
@@ -9432,7 +9435,7 @@ function CheckoutPage() {
   }, [form.vatNumber, form.companyName, requiresEuVatVerification])
   const handleInvoiceCountryChange = useCallback((nextCountry) => {
     updateField('invoiceCountry', nextCountry)
-    if (!isEUCountry(nextCountry)) {
+    if (shouldClearViesVerification(nextCountry)) {
       setViesResult(null)
       setViesError('')
     }
@@ -11565,7 +11568,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const setClientField = useCallback((key, value) => {
     setClientProfile((current) => ({ ...current, [key]: value }))
     if (key === 'vatNumber') setViesResult(null) // reset VIES result when VAT changes
-    if (key === 'invoiceCountry' && !isEUCountry(value)) {
+    if (key === 'invoiceCountry' && shouldClearViesVerification(value)) {
       setViesResult(null)
       setViesError('')
     }
