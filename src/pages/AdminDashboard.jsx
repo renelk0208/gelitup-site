@@ -948,21 +948,41 @@ const SKU_OVERRIDE_MAP = {
   'ALL IN ONE LIQUID':       { name: 'All In One Liquid 200ml -HTF', price: 4.826 },
   'ALL IN ONE LIQUID 200ML': { name: 'All In One Liquid 200ml -HTF', price: 4.826 },
   'ALL IN ONE LIQUID 500ML': { name: 'All In One Liquid 500ml -HTF', price: 11.792 },
+  // Unnamed "2026 NEW" consumables line stored in orders = All In One Liquid 200ml
+  '2026-NEW-NEW-CONSUMABLES-200': { name: 'All In One Liquid 200ml -HTF', price: 4.826 },
 
   // ── Classic Base Coat ──────────────────────────────────────────────────────────────
   // base 10.48 → B2B 12.6
   'CLASSICBC':         { name: 'Base Coat 15ml -HTF', price: 10.48 },
   'CLASSIC BASE COAT': { name: 'Base Coat 15ml -HTF', price: 10.48 },
 
+  // ── FLEXI Soak Off Nail Tips (not in b2b-price-list.json) ───────────────────────────
+  // base 6.00 → B2B 7.2 — cover space / dash / GIUP-prefixed tile-key variants
+  'FLEXI SHORT SQUARE':      { name: 'FLEXI Soak Off Nail Tips Medium Square -2025', price: 6.00 },
+  'FLEXI-SHORT-SQUARE':      { name: 'FLEXI Soak Off Nail Tips Medium Square -2025', price: 6.00 },
+  'GIUP FLEXI SHORT SQUARE': { name: 'FLEXI Soak Off Nail Tips Medium Square -2025', price: 6.00 },
+  'FLEXI LONG ALMOND':       { name: 'FLEXI Soak Off Nail Tips Long Almond -2025',   price: 6.00 },
+  'FLEXI-LONG-ALMOND':       { name: 'FLEXI Soak Off Nail Tips Long Almond -2025',   price: 6.00 },
+  'GIUP FLEXI LONG ALMOND':  { name: 'FLEXI Soak Off Nail Tips Long Almond -2025',   price: 6.00 },
+  'FLEXI SHORT ALMOND':      { name: 'FLEXI Soak Off Nail Tips Short Almond -2025',  price: 6.00 },
+  'FLEXI-SHORT-ALMOND':      { name: 'FLEXI Soak Off Nail Tips Short Almond -2025',  price: 6.00 },
+  'GIUP FLEXI SHORT ALMOND': { name: 'FLEXI Soak Off Nail Tips Short Almond -2025',  price: 6.00 },
+
   // ── GIUP-200 Gel Polish (Glitters) ────────────────────────────────────────────────
   // base 7.41 → B2B 8.9 (same as standard gel polish)
   'GIUP-200':          { name: 'GIUP-200 Gel Polish -HTF', price: 7.41 },
   'GIUP 200':          { name: 'GIUP-200 Gel Polish -HTF', price: 7.41 },
 
-  // ── GIUP-70-8 Gel Polish ───────────────────────────────────────────────────────────
+  // ── GIUP-70 series + GIUP-71 Gel Polish (Blue solid gel polish) ─────────────────────
   // base 7.41 → B2B 8.9 (standard gel polish)
+  'GIUP-70-1':         { name: 'GIUP-70-1 Gel Polish -HTF', price: 7.41 },
+  'GIUP 70 1':         { name: 'GIUP-70-1 Gel Polish -HTF', price: 7.41 },
+  'GIUP-70-6':         { name: 'GIUP-70-6 Gel Polish -HTF', price: 7.41 },
+  'GIUP 70 6':         { name: 'GIUP-70-6 Gel Polish -HTF', price: 7.41 },
   'GIUP-70-8':         { name: 'GIUP-70-8 Gel Polish -HTF', price: 7.41 },
   'GIUP 70 8':         { name: 'GIUP-70-8 Gel Polish -HTF', price: 7.41 },
+  'GIUP-71':           { name: 'GIUP-71 Gel Polish -HTF', price: 7.41 },
+  'GIUP 71':           { name: 'GIUP-71 Gel Polish -HTF', price: 7.41 },
 
   // ── Image/marketing assets — handled by hero.image regex in resolver, no keys needed ──
 
