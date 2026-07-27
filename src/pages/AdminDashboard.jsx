@@ -9,6 +9,11 @@ const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL || ''
 const ORDER_INBOX_EMAIL = import.meta.env.VITE_B2B_ORDER_INBOX || 'distribution@gelitup.com'
 const FROM_EMAIL = import.meta.env.VITE_EMAIL_FROM || 'GEL.IT.UP Distributors <distributors@gelitup.com>'
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+const AMBASSADOR_TABLE = import.meta.env.VITE_AMBASSADOR_TABLE || 'ambassador_applications'
+// Reuse the working distributors@ sender (guaranteed deliverability), branded for ambassadors.
+const AMBASSADOR_FROM_EMAIL = import.meta.env.VITE_AMBASSADOR_EMAIL_FROM || 'GEL.IT.UP Ambassadors <distributors@gelitup.com>'
+// Statuses that count as "needs review" (form inserts default to 'new').
+const AMBASSADOR_PENDING_STATUSES = ['new', 'pending', 'submitted']
 
 function buildDistributorAccessEmail(row) {
   const tierLabel = titleCaseTierLabel(row?.distributor_tier || '') || 'Distributor'
@@ -2861,10 +2866,245 @@ function DraftCartsPanel() {
   )
 }
 
+// ─── Ambassador applications ──────────────────────────────────────────────────
+
+function ambassadorStatusPill(status) {
+  const s = String(status || '').toLowerCase()
+  if (s === 'approved') return 'bg-emerald-100 text-emerald-700'
+  if (s === 'rejected') return 'bg-rose-100 text-rose-700'
+  return 'bg-amber-100 text-amber-700' // new / pending / submitted
+}
+
+function buildAmbassadorEmail(row, status) {
+  const name = row?.full_name?.trim() || 'there'
+  if (status === 'approved') {
+    return {
+      subject: "You're in! Welcome to the GEL.IT.UP® Ambassador Programme 🎉",
+      html: `<p>Hi ${name},</p>
+<p>Great news — your application to join the <strong>GEL.IT.UP® Ambassador Programme</strong> has been approved!</p>
+<p>Here's what happens next:</p>
+<ul>
+  <li>We'll start featuring your nail work on <strong>@gelitup</strong> to thousands of nail lovers.</li>
+  <li>You'll receive occasional free product drops to create with.</li>
+  <li>Our team will be in touch shortly with your ambassador details and next steps.</li>
+</ul>
+<p>Welcome to the family — we can't wait to see what you create.</p>
+<p>The GEL.IT.UP® Team<br/>hello@gelitup.com</p>`,
+    }
+  }
+  return {
+    subject: 'Update on your GEL.IT.UP® ambassador application',
+    html: `<p>Hi ${name},</p>
+<p>Thank you for applying to become a GEL.IT.UP® ambassador and for sharing your work with us.</p>
+<p>After review, we're not able to move forward with your application at this time. This isn't a reflection of your talent — we receive many applications and can only take on a limited number of ambassadors each round. You're welcome to apply again in the future.</p>
+<p>Wishing you all the best,<br/>The GEL.IT.UP® Team</p>`,
+  }
+}
+
+function AmbassadorApplicationsPanel() {
+  const [rows, setRows] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [filter, setFilter] = useState('pending')
+  const [saving, setSaving] = useState(null)
+  const [emailStatus, setEmailStatus] = useState({}) // { [id]: { state, message } }
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    let query = supabase
+      .from(AMBASSADOR_TABLE)
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(200)
+    if (filter === 'pending') query = query.in('status', AMBASSADOR_PENDING_STATUSES)
+    else if (filter !== 'all') query = query.eq('status', filter)
+    const { data, error: err } = await query
+    setLoading(false)
+    if (err) { setError(err.message); return }
+    setRows(data || [])
+  }, [filter])
+
+  useEffect(() => { load() }, [load])
+
+  const updateStatus = async (row, status) => {
+    const current = String(row?.status || '').toLowerCase()
+    if (current === status) return
+    const label = status === 'approved' ? 'APPROVE' : 'REJECT'
+    if (!window.confirm(`${label} the ambassador application from "${row.full_name}" (@${row.instagram})?\n\nThis will set status to "${status}" and email the applicant.`)) return
+    setSaving(row.id)
+    const { error: err } = await supabase
+      .from(AMBASSADOR_TABLE)
+      .update({ status, reviewed_at: new Date().toISOString() })
+      .eq('id', row.id)
+    setSaving(null)
+    if (err) { alert(err.message); return }
+    setRows(prev => prev.map(r => r.id === row.id ? { ...r, status } : r))
+
+    // Send notification email (mirrors the distributor approval flow).
+    if (row?.email && EMAIL_WEBHOOK_URL) {
+      const { subject, html } = buildAmbassadorEmail(row, status)
+      setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sending', message: '' } }))
+      const headers = { 'Content-Type': 'application/json' }
+      if (SUPABASE_ANON_KEY) {
+        headers['apikey'] = SUPABASE_ANON_KEY
+        headers['Authorization'] = `Bearer ${SUPABASE_ANON_KEY}`
+      }
+      try {
+        const res = await fetch(EMAIL_WEBHOOK_URL, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ to: row.email, subject, html, from: AMBASSADOR_FROM_EMAIL }),
+        })
+        const resJson = await res.json().catch(() => null)
+        if (res.ok) {
+          setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sent', message: `Email sent to ${row.email}` } }))
+        } else {
+          setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: resJson?.error || `HTTP ${res.status}` } }))
+        }
+      } catch (emailErr) {
+        setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: emailErr.message || 'Network error' } }))
+      }
+    } else if (row?.email && !EMAIL_WEBHOOK_URL) {
+      setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: 'VITE_EMAIL_WEBHOOK_URL is not configured — email not sent.' } }))
+    }
+  }
+
+  const deleteApplication = async (row) => {
+    if (String(row?.status || '').toLowerCase() !== 'rejected') {
+      alert('Only rejected applications can be deleted.')
+      return
+    }
+    if (!window.confirm(`Permanently delete rejected application from "${row.full_name}" (${row.email})?\n\nThis cannot be undone.`)) return
+    if (window.prompt('Type DELETE to confirm:') !== 'DELETE') { alert('Delete cancelled.'); return }
+    setSaving(row.id)
+    const { error: err } = await supabase.from(AMBASSADOR_TABLE).delete().eq('id', row.id)
+    setSaving(null)
+    if (err) { alert(err.message); return }
+    setRows(prev => prev.filter(r => r.id !== row.id))
+  }
+
+  const FILTERS = [
+    { key: 'pending', label: 'Pending' },
+    { key: 'approved', label: 'Approved' },
+    { key: 'rejected', label: 'Rejected' },
+    { key: 'all', label: 'All' },
+  ]
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-base font-bold text-slate-900">Ambassador Applications</h2>
+        <div className="flex flex-wrap gap-1.5">
+          {FILTERS.map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${filter === f.key ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading && <p className="text-sm text-slate-500">Loading…</p>}
+      {error && <p className="text-sm text-rose-600">{error}</p>}
+
+      {!loading && !error && rows.length === 0 && (
+        <p className="text-sm text-slate-500">{filter === 'pending' ? 'No applications waiting for review. 🎉' : 'No applications found.'}</p>
+      )}
+
+      {!loading && rows.length > 0 && (
+        <div className="space-y-2">
+          {rows.map((row) => {
+            const es = emailStatus[row.id]
+            const isPending = AMBASSADOR_PENDING_STATUSES.includes(String(row.status || '').toLowerCase())
+            return (
+              <div key={row.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-slate-900">{row.full_name}</p>
+                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ${ambassadorStatusPill(row.status)}`}>
+                        {row.status || 'new'}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-xs text-slate-400">
+                      {row.country && <span>{row.country} · </span>}
+                      {fmtDate(row.created_at)}
+                    </p>
+                    <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-600">
+                      <a href={`https://instagram.com/${row.instagram}`} target="_blank" rel="noreferrer" className="font-medium text-fuchsia-700 hover:underline">@{row.instagram}</a>
+                      {row.tiktok && <a href={`https://tiktok.com/@${row.tiktok}`} target="_blank" rel="noreferrer" className="font-medium text-slate-700 hover:underline">TikTok @{row.tiktok}</a>}
+                      {row.followers && <span>{row.followers} followers</span>}
+                      <a href={`mailto:${row.email}`} className="hover:underline">{row.email}</a>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 flex-col items-end gap-1.5">
+                    <div className="flex gap-1.5">
+                      {row.status !== 'approved' && (
+                        <button
+                          onClick={() => updateStatus(row, 'approved')}
+                          disabled={saving === row.id}
+                          className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-500 disabled:opacity-60"
+                        >
+                          ✓ Approve
+                        </button>
+                      )}
+                      {row.status !== 'rejected' && (
+                        <button
+                          onClick={() => updateStatus(row, 'rejected')}
+                          disabled={saving === row.id}
+                          className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-rose-500 disabled:opacity-60"
+                        >
+                          ✕ Reject
+                        </button>
+                      )}
+                      {row.status === 'rejected' && (
+                        <button
+                          onClick={() => deleteApplication(row)}
+                          disabled={saving === row.id}
+                          className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 disabled:opacity-60"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                    {es && (
+                      <p className={`text-[11px] ${es.state === 'error' ? 'text-rose-600' : es.state === 'sent' ? 'text-emerald-600' : 'text-slate-400'}`}>
+                        {es.state === 'sending' ? 'Sending email…' : es.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                {row.message && (
+                  <p className={`mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-700 ${isPending ? '' : 'opacity-80'}`}>"{row.message}"</p>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Admin Dashboard shell ────────────────────────────────────────────────────
 
 export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
   const [tab, setTab] = useState('registrations')
+  const [ambassadorPending, setAmbassadorPending] = useState(0)
+
+  useEffect(() => {
+    let active = true
+    supabase
+      .from(AMBASSADOR_TABLE)
+      .select('id', { count: 'exact', head: true })
+      .in('status', AMBASSADOR_PENDING_STATUSES)
+      .then(({ count }) => { if (active) setAmbassadorPending(count || 0) })
+    return () => { active = false }
+  }, [tab])
 
   return (
     <section className="space-y-4">
@@ -2909,6 +3149,17 @@ export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
             Tier Pricing
           </button>
           <button
+            onClick={() => setTab('ambassadors')}
+            className={`relative rounded-full px-4 py-1.5 text-sm font-semibold transition ${tab === 'ambassadors' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+          >
+            Ambassadors
+            {ambassadorPending > 0 && (
+              <span className="ml-1.5 inline-flex min-w-[18px] items-center justify-center rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                {ambassadorPending}
+              </span>
+            )}
+          </button>
+          <button
             onClick={() => setTab('guestbook')}
             className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${tab === 'guestbook' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
@@ -2928,6 +3179,7 @@ export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
         {tab === 'orders' && <OrdersPanel />}
         {tab === 'admins' && <AdminsPanel />}
         {tab === 'pricing' && <TierPricingPanel />}
+        {tab === 'ambassadors' && <AmbassadorApplicationsPanel />}
         {tab === 'guestbook' && <GuestbookPanel />}
         {tab === 'draft-carts' && <DraftCartsPanel />}
       </div>
