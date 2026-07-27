@@ -172,6 +172,16 @@ const ROUTE_SEO_MAP = {
     description: 'Explore nail art inspiration from GEL.IT.UP® professionals worldwide. Discover the latest trends in gel polish, builder gel and nail art. Wholesale supplies available at gelitup.com.',
     canonical:   'https://gelitup.com/inspiration',
   },
+  '/ambassadors': {
+    title:       'Become a GEL.IT.UP® Ambassador | Get Featured, Get Perks',
+    description: 'Join the GEL.IT.UP® Ambassador Programme. Get your nail work featured on @gelitup, earn a personal discount code and receive free product drops. Apply in 60 seconds.',
+    canonical:   'https://gelitup.com/ambassadors',
+  },
+  '/ambassador-agreement': {
+    title:       'Ambassador Agreement | GEL.IT.UP® by GIUP®',
+    description: 'The full GEL.IT.UP® Ambassador Agreement — commitments, content permissions and how the partnership works.',
+    canonical:   'https://gelitup.com/ambassador-agreement',
+  },
   '/privacy-policy': {
     title:       'Privacy Policy | GEL.IT.UP® by GIUP®',
     description: 'Read the GEL.IT.UP® privacy policy. How we collect, use and protect your personal data in accordance with EU GDPR regulations.',

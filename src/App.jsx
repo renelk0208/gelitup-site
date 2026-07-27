@@ -16,6 +16,7 @@ import HowItWorks from './components/HowItWorks'
 import HeroCTA from './components/HeroCTA'
 import SocialProof from './components/SocialProof'
 import InstagramFeed from './components/InstagramFeed'
+import AmbassadorCTA from './components/AmbassadorCTA'
 import InspirationTeaser from './components/InspirationTeaser'
 import AcademyFAQ from './components/AcademyFAQ'
 import ProductImage from './components/ProductImage'
@@ -34,6 +35,8 @@ const GelColoursLandingPage = lazy(() => import('./pages/GelColoursLandingPage.j
 const WinterVaultLandingPage = lazy(() => import('./pages/WinterVaultLandingPage.jsx'))
 const WholesaleLandingPage = lazy(() => import('./pages/WholesaleLandingPage.jsx'))
 const AcademySampleKitPage = lazy(() => import('./pages/AcademySampleKitPage.jsx'))
+const AmbassadorPage = lazy(() => import('./pages/AmbassadorPage.jsx'))
+const AmbassadorAgreementPage = lazy(() => import('./pages/AmbassadorAgreementPage.jsx'))
 
 const B2B_EMAIL = import.meta.env.VITE_B2B_EMAIL || 'info@gelitup.com'
 const PRODUCT_CATEGORIES = ['Solid Colours', 'Builder Gels', 'Base & Top', 'Nail Care', 'Accessories']
@@ -6416,112 +6419,6 @@ function FullCataloguePage() {
             )}
           </div>
 
-          {/* ── NEW COLLECTIONS: Sunshine Ready + Shimmer ── */}
-          <div id="catalogue-section-2026-new" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden scroll-mt-28">
-            <img src="/gelitup-media/images/news/Spring Summer/NEWS Carousel Summer 2026/background-image-spring-summer-home-page.webp" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-center" />
-            <div className="absolute inset-0 bg-white/70 pointer-events-none" aria-hidden="true" />
-            <div className="relative mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6 px-4 py-8 sm:px-8">
-
-            {/* SUNSHINE READY */}
-            <div className="flex overflow-hidden rounded-xl border border-[#E0E0E0] bg-white">
-              {/* Text left */}
-              <div className="flex flex-1 flex-col justify-center px-5 py-5 sm:px-6">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Additions — Summer 2026</p>
-                <h2 className="mt-1.5 text-base font-extrabold uppercase leading-tight tracking-[0.06em] text-black sm:text-lg">
-                  Sunshine Ready<br /><span className="text-[#D43790]">The Collection</span>
-                </h2>
-                <div className="mt-2 h-px w-8 bg-[#D43790]/60" />
-                <p className="mt-2 text-xs leading-relaxed text-black/60 line-clamp-3">Summer gel polish shaped by retro femininity, sun-washed colour, and a playful mod spirit.</p>
-                <div className="mt-3">
-                  <button type="button" onClick={() => { document.getElementById('catalogue-section-new-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }} className="inline-block rounded-lg bg-[#D43790] px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]">Shop Collection</button>
-                </div>
-                {displayedLookbookGroups.filter(g => g.id === 'sunshine-ready').slice(0, 1).map((group) => {
-                  const pages = Array.isArray(group?.pages) ? group.pages : []
-                  if (pages.length < 2) return null
-                  const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
-                  return (
-                    <div key={group.id} className="mt-3 flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                      {pages.map((p, idx) => {
-                        const mt = String(p?.mediaType || '').toLowerCase()
-                        const isActive = idx === selectedPageIndex
-                        return (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`shrink-0 overflow-hidden rounded border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-9 w-7 bg-gray-100">{mt === 'video' ? <video src={p.imageUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" /> : <img src={p.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}</div></button>)
-                      })}
-                    </div>
-                  )
-                })}
-              </div>
-              {/* Image right */}
-              {displayedLookbookGroups.filter(g => g.id === 'sunshine-ready').slice(0, 1).map((group) => {
-                const pages = Array.isArray(group?.pages) ? group.pages : []
-                if (!pages.length) return null
-                const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
-                const page = pages[selectedPageIndex]
-                const pageType = String(page?.mediaType || '').toLowerCase()
-                return (
-                  <div key={group.id} className="relative w-[42%] shrink-0 overflow-hidden">
-                    {pageType === 'video'
-                      ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-full object-cover" autoPlay muted playsInline preload="metadata" />
-                      : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-cover cursor-pointer" loading="lazy" onClick={() => document.getElementById('catalogue-section-new-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />}
-                    {pages.length > 1 && (<>
-                      <button type="button" aria-label="Previous page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))} className="absolute left-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
-                      <button type="button" aria-label="Next page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))} className="absolute right-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg></button>
-                    </>)}
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* SHIMMER COLLECTION */}
-            <div className="flex overflow-hidden rounded-xl border border-[#E0E0E0] bg-white">
-              {/* Text left */}
-              <div className="flex flex-1 flex-col justify-center px-5 py-5 sm:px-6">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#D43790]">New Effects — Summer 2026</p>
-                <h2 className="mt-1.5 text-base font-extrabold uppercase leading-tight tracking-[0.06em] text-black sm:text-lg">
-                  Shimmer<br /><span className="text-[#D43790]">Collection</span>
-                </h2>
-                <div className="mt-2 h-px w-8 bg-[#D43790]/60" />
-                <p className="mt-2 text-xs leading-relaxed text-black/60 line-clamp-3">Luminous gel polish shades designed to glow from every angle — pastel shimmer pigment with a glossy finish.</p>
-                <div className="mt-3">
-                  <button type="button" onClick={() => { document.getElementById('catalogue-section-new-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }} className="inline-block rounded-lg bg-[#D43790] px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white transition hover:bg-[#BF3182]">Shop Collection</button>
-                </div>
-                {displayedLookbookGroups.filter(g => g.id === 'shimmer-collection').slice(0, 1).map((group) => {
-                  const pages = Array.isArray(group?.pages) ? group.pages : []
-                  if (pages.length < 2) return null
-                  const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
-                  return (
-                    <div key={group.id} className="mt-3 flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                      {pages.map((p, idx) => {
-                        const mt = String(p?.mediaType || '').toLowerCase()
-                        const isActive = idx === selectedPageIndex
-                        return (<button key={idx} type="button" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: idx }))} className={`shrink-0 overflow-hidden rounded border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-9 w-7 bg-gray-100">{mt === 'video' ? <video src={p.imageUrl} className="h-full w-full object-cover" muted playsInline preload="metadata" /> : <img src={p.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />}</div></button>)
-                      })}
-                    </div>
-                  )
-                })}
-              </div>
-              {/* Image right */}
-              {displayedLookbookGroups.filter(g => g.id === 'shimmer-collection').slice(0, 1).map((group) => {
-                const pages = Array.isArray(group?.pages) ? group.pages : []
-                if (!pages.length) return null
-                const selectedPageIndex = Math.max(0, Math.min(Number(selectedLookbookPageByGroup[group.id] ?? 0), pages.length - 1))
-                const page = pages[selectedPageIndex]
-                const pageType = String(page?.mediaType || '').toLowerCase()
-                return (
-                  <div key={group.id} className="relative w-[42%] shrink-0 overflow-hidden">
-                    {pageType === 'video'
-                      ? <video key={page.imageUrl} src={page.imageUrl} className="h-full w-full object-cover" autoPlay muted playsInline preload="metadata" />
-                      : <img key={page.imageUrl} src={page.imageUrl || group.heroImage} alt={page.title} className="h-full w-full object-cover cursor-pointer" loading="lazy" onClick={() => document.getElementById('catalogue-section-new-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />}
-                    {pages.length > 1 && (<>
-                      <button type="button" aria-label="Previous page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex - 1 + pages.length) % pages.length }))} className="absolute left-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
-                      <button type="button" aria-label="Next page" onClick={() => setSelectedLookbookPageByGroup((prev) => ({ ...prev, [group.id]: (selectedPageIndex + 1) % pages.length }))} className="absolute right-1 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/75"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg></button>
-                    </>)}
-                  </div>
-                )
-              })}
-            </div>
-
-          </div>
-          </div>
 
           </>}
 
@@ -7000,6 +6897,7 @@ const navItems = [
   { to: '/about-us', label: 'About us' },
   { to: '/for-academies', label: 'Academies' },
   { to: '/distributor-packages', label: 'Distribution' },
+  { to: '/ambassadors', label: 'Ambassadors' },
   { to: '/guestbook', label: 'Guestbook' },
   { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
 ]
@@ -8161,6 +8059,7 @@ function HomePage({ onOpenContactModal }) {
       <HowItWorks variant="section" freeShippingAt={getFreeShippingEur()} />
       <GuestbookTeaser />
       <InstagramFeed />
+      <AmbassadorCTA />
       <TikTokFeed />
       <InspirationTeaser />
       <GoogleReviewsStrip />
@@ -19879,6 +19778,12 @@ function App() {
           <Route path="/winter-vault" element={<WinterVaultLandingPage />} />
           <Route path="/wholesale" element={<WholesaleLandingPage />} />
           <Route path="/academy-kit" element={<AcademySampleKitPage />} />
+          <Route path="/ambassadors" element={<AmbassadorPage />} />
+          <Route path="/ambassador" element={<Navigate to="/ambassadors" replace />} />
+          <Route path="/become-ambassador" element={<Navigate to="/ambassadors" replace />} />
+          <Route path="/creators" element={<Navigate to="/ambassadors" replace />} />
+          <Route path="/ambassador-agreement" element={<AmbassadorAgreementPage />} />
+          <Route path="/ambassador-terms" element={<Navigate to="/ambassador-agreement" replace />} />
           <Route path="/sample-kit" element={<Navigate to="/academy-kit" replace />} />
           <Route path="/guestbook" element={<GuestbookPage />} />
           <Route path="/inspiration" element={<InspirationPage />} />
@@ -20102,6 +20007,7 @@ function App() {
               <NavLink to="/full-catalogue" className="block transition duration-300 hover:text-fuchsia-300">Shop</NavLink>
               <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
               <NavLink to="/distributors" className="block transition duration-300 hover:text-fuchsia-300">Distributor Registration</NavLink>
+              <NavLink to="/ambassadors" className="block transition duration-300 hover:text-fuchsia-300">Become an Ambassador</NavLink>
               <NavLink to="/guestbook" className="block transition duration-300 hover:text-fuchsia-300">Guestbook</NavLink>
               <NavLink to="/portal/login?portal=distributor" className="block transition duration-300 hover:text-fuchsia-300">Distributor Login</NavLink>
             </div>

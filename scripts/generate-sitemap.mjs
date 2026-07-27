@@ -24,6 +24,9 @@ const ROUTES = [
   { path: '/become-distributor',         priority: '0.8', changefreq: 'monthly' },
   { path: '/register',                   priority: '0.7', changefreq: 'monthly' },
 
+  // Ambassadors
+  { path: '/ambassadors',                priority: '0.7', changefreq: 'monthly' },
+
   // Academies
   { path: '/for-academies',              priority: '0.7', changefreq: 'monthly' },
   { path: '/academies',                  priority: '0.6', changefreq: 'monthly' },
