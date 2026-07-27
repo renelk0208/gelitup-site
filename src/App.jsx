@@ -19653,10 +19653,8 @@ function App() {
   const isCheckoutRoute = location.pathname.startsWith('/checkout')
   const hasOwnBasketUI = location.pathname === '/' || location.pathname.startsWith('/full-catalogue') || location.pathname.startsWith('/catalogue') || isCheckoutRoute
 
-  // Suppress GA4 tracking on portal/admin routes
-  if (isPortalRoute) {
-    window['ga-disable-G-80CYK4H42D'] = true
-  }
+  // Suppress GA4 tracking on portal/admin routes (and restore it when navigating back out)
+  window['ga-disable-G-80CYK4H42D'] = isPortalRoute
 
   return (
     <div className="lux-theme min-h-screen pb-8">

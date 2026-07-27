@@ -17,8 +17,15 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
+      // Exclude admin/portal pages from analytics "visits" (decided at load time,
+      // before the SPA mounts — this catches direct loads, reloads and auth redirects)
+      window.giupIsPortalRoute = /^\/(portal|admin-login)(\/|$)/.test(location.pathname);
+      window.dataLayer.push({ portal_route: window.giupIsPortalRoute });
+      if (window.giupIsPortalRoute) {
+        window['ga-disable-G-80CYK4H42D'] = true;
+      }
       gtag('config', 'AW-1008159504');
-      gtag('config', 'G-80CYK4H42D');
+      gtag('config', 'G-80CYK4H42D', { send_page_view: !window.giupIsPortalRoute });
     </script>
     <!-- End Google Ads + GA4 -->
 
@@ -95,7 +102,7 @@
       s.parentNode.insertBefore(t,s)}(window, document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');
       fbq('init', '1877478442933298');
-      fbq('track', 'PageView');
+      if (!window.giupIsPortalRoute) fbq('track', 'PageView');
     </script>
     <!-- End Meta Pixel Code -->
 
