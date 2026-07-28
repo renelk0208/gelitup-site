@@ -9191,6 +9191,10 @@ function CheckoutPage() {
   const [orderConfirmed, setOrderConfirmed] = useState(null)
   const [paymentLoading, setPaymentLoading] = useState(false)
   const [paymentError, setPaymentError] = useState('')
+  const [ambassadorCodeInput, setAmbassadorCodeInput] = useState('')
+  const [ambassadorCode, setAmbassadorCode] = useState(null) // { code, name, pct } when applied
+  const [ambassadorApplying, setAmbassadorApplying] = useState(false)
+  const [ambassadorError, setAmbassadorError] = useState('')
   const [checkoutMode, setCheckoutMode] = useState(
     localStorage.getItem('portalAuth') === 'true' ? 'form' : 'choose'
   )
@@ -9292,7 +9296,14 @@ function CheckoutPage() {
   const deliveryCountry = (form.shipToDifferentAddress ? form.shippingCountry : form.invoiceCountry).trim()
   const smallOrderFee = getSmallOrderShippingFee(deliveryCountry)
   const shippingFee = cartTotal >= freeShipEur ? 0 : (smallOrderFee ?? 0)
-  const grandTotal = cartTotal + shippingFee
+  // Ambassador code discount — mutually exclusive with the site sale: the customer
+  // gets whichever discount is larger. Compare the code price (off the list price)
+  // to the already sale-discounted cart total and only apply the extra reduction.
+  const ambassadorDiscountPct = ambassadorCode?.pct || 0
+  const ambassadorDiscountEur = ambassadorDiscountPct > 0
+    ? Math.max(0, Number((cartTotal - listSubtotal * (1 - ambassadorDiscountPct / 100)).toFixed(2)))
+    : 0
+  const grandTotal = Number((cartTotal - ambassadorDiscountEur + shippingFee).toFixed(2))
 
   // Persist cart back to localStorage
   useEffect(() => {
@@ -9319,6 +9330,28 @@ function CheckoutPage() {
     } catch { setViesError('Unable to reach VAT validation service') }
     finally { setViesLoading(false) }
   }, [form.vatNumber, form.companyName])
+
+  // Validate an ambassador discount code via the Supabase RPC and apply it.
+  const applyAmbassadorCode = useCallback(async () => {
+    const raw = String(ambassadorCodeInput || '').trim()
+    setAmbassadorError('')
+    if (!raw) { setAmbassadorError('Enter a code'); return }
+    if (!hasSupabaseConfig || !supabase) { setAmbassadorError('Codes are temporarily unavailable'); return }
+    setAmbassadorApplying(true)
+    try {
+      const { data, error: rpcError } = await supabase.rpc('validate_ambassador_code', { p_code: raw })
+      const row = Array.isArray(data) ? data[0] : data
+      if (rpcError) { setAmbassadorError('Could not validate code. Please try again.'); return }
+      if (!row || row.discount_pct == null) { setAmbassadorCode(null); setAmbassadorError('Invalid or expired code'); return }
+      setAmbassadorCode({ code: row.code, name: row.ambassador_name || '', pct: Number(row.discount_pct) })
+    } catch {
+      setAmbassadorError('Could not validate code. Please try again.')
+    } finally {
+      setAmbassadorApplying(false)
+    }
+  }, [ambassadorCodeInput])
+
+  const removeAmbassadorCode = () => { setAmbassadorCode(null); setAmbassadorCodeInput(''); setAmbassadorError('') }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -9485,6 +9518,19 @@ function CheckoutPage() {
 
       const insertedOrder = { id: orderRef }
 
+      // Record ambassador code redemption (attribution + redemption counter).
+      if (ambassadorCode?.code) {
+        try {
+          await supabase.rpc('redeem_ambassador_code', {
+            p_code: ambassadorCode.code,
+            p_order_ref: orderRef,
+            p_customer_email: email,
+            p_discount_amount: ambassadorDiscountEur,
+            p_order_total: grandTotal,
+          })
+        } catch { /* non-blocking: order already placed */ }
+      }
+
       // 4. Build item rates for Zoho
       const itemRates = {}
       for (const e of cartEntries) {
@@ -9568,6 +9614,7 @@ function CheckoutPage() {
             <tbody>${orderTableRows}
               <tr><td colspan="4" style="${tdStyle};text-align:right">Products subtotal</td><td style="${tdRStyle}">${cartTotal.toFixed(2)}</td></tr>
               <tr><td colspan="4" style="${tdStyle};text-align:right">Shipping${shippingFee > 0 ? ` (${escapeHtml(shipping.country)})` : ''}</td><td style="${tdRStyle}">${shippingFee > 0 ? shippingFee.toFixed(2) : 'FREE'}</td></tr>
+              ${ambassadorDiscountEur > 0 ? `<tr><td colspan="4" style="${tdStyle};text-align:right;color:#9B1268">Ambassador code ${escapeHtml(ambassadorCode?.code || '')} (−${ambassadorDiscountPct}%)</td><td style="${tdRStyle};color:#9B1268">− ${ambassadorDiscountEur.toFixed(2)}</td></tr>` : ''}
               <tr><td colspan="4" style="${tdStyle};text-align:right;font-weight:bold">TOTAL (EUR)</td><td style="${tdRStyle};font-weight:bold">${grandTotal.toFixed(2)}</td></tr>
               ${discountActive ? `<tr><td colspan="5" style="${tdStyle};text-align:right;color:#9B1268">${escapeHtml(CATALOGUE_DISCOUNT_LABEL)} already applied — you saved €${discountSavings.toFixed(2)}</td></tr>` : ''}
             </tbody>
@@ -9586,6 +9633,7 @@ function CheckoutPage() {
             <p>Hi ${escapeHtml(`${form.firstName.trim()} ${form.lastName.trim()}` || form.companyName.trim())},</p>
             <p>Thank you — we've received your order <strong>#${insertedOrder?.id ?? '-'}</strong> and it's now being processed.</p>
             <p><strong>Order Total:</strong> €${grandTotal.toFixed(2)} (${cartUnits} items${shippingFee > 0 ? ` + €${shippingFee.toFixed(2)} shipping` : ', free shipping'})</p>
+            ${ambassadorDiscountEur > 0 ? `<p style="color:#9B1268"><strong>Ambassador code ${escapeHtml(ambassadorCode?.code || '')}</strong> applied — you saved €${ambassadorDiscountEur.toFixed(2)} (−${ambassadorDiscountPct}%).</p>` : ''}
             <p style="color:#555">Your VAT invoice will follow by email once your order is processed. Should any item be unavailable, we will arrange a refund or account credit.</p>
             ${form.createAccount ? '<p>You can now log in with your email and password to track your orders.</p>' : '<p>If you would like to track future orders, you can create an account at checkout next time.</p>'}
             <p style="margin-top:24px;color:#666;font-size:12px">GEL.IT.UP by GIUP® — Professional Gel Polish</p>
@@ -9597,7 +9645,7 @@ function CheckoutPage() {
       setCart({})
       localStorage.removeItem(QUICK_CART_STORAGE_KEY)
       localStorage.removeItem('gelitup.kits.v1')
-      setOrderConfirmed({ id: insertedOrder?.id ?? 'confirmed', accountCreated: form.createAccount, total: grandTotal, subtotal: cartTotal, shippingFee, email: form.email.trim().toLowerCase() })
+      setOrderConfirmed({ id: insertedOrder?.id ?? 'confirmed', accountCreated: form.createAccount, total: grandTotal, subtotal: Number((cartTotal - ambassadorDiscountEur).toFixed(2)), shippingFee, email: form.email.trim().toLowerCase() })
 
     } catch (err) {
       setError('An unexpected error occurred. Please try again or contact us.')
@@ -10004,6 +10052,12 @@ function CheckoutPage() {
                   <span className="font-semibold text-fuchsia-700">− €{discountSavings.toFixed(2)}</span>
                 </div>
               )}
+              {ambassadorCode && ambassadorDiscountEur > 0 && (
+                <div className="mt-1 flex items-center justify-between text-xs">
+                  <span className="font-semibold text-fuchsia-700">Code {ambassadorCode.code} (−{ambassadorDiscountPct}%)</span>
+                  <span className="font-semibold text-fuchsia-700">− €{ambassadorDiscountEur.toFixed(2)}</span>
+                </div>
+              )}
               <div className="mt-1 flex items-center justify-between text-xs">
                 <span className="text-slate-500">Shipping{cartTotal < freeShipEur && deliveryCountry ? ` to ${deliveryCountry}` : ''}</span>
                 <span className="font-semibold text-slate-700">
@@ -10020,6 +10074,37 @@ function CheckoutPage() {
               <p className="mt-1 text-[10px] text-slate-500">
                 {progress < 100 ? `Add €${(freeShipEur - cartTotal).toFixed(2)} more for FREE EU shipping` : '✓ Free EU shipping included!'}
               </p>
+              {/* Ambassador discount code */}
+              <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+                {ambassadorCode ? (
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-xs font-bold text-emerald-700">Code {ambassadorCode.code} applied · −{ambassadorDiscountPct}%</p>
+                      {ambassadorDiscountEur === 0 && <p className="text-[10px] text-slate-500">Your current sale price already matches this code.</p>}
+                      {ambassadorCode.name && <p className="truncate text-[10px] text-slate-500">Ambassador: {ambassadorCode.name}</p>}
+                    </div>
+                    <button type="button" onClick={removeAmbassadorCode} className="shrink-0 text-[11px] font-semibold text-slate-500 underline hover:text-red-500">Remove</button>
+                  </div>
+                ) : (
+                  <>
+                    <label className="text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500">Ambassador discount code</label>
+                    <div className="mt-1.5 flex gap-2">
+                      <input
+                        type="text"
+                        value={ambassadorCodeInput}
+                        onChange={e => setAmbassadorCodeInput(e.target.value.toUpperCase())}
+                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); applyAmbassadorCode() } }}
+                        placeholder="Enter code"
+                        className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm uppercase tracking-wide focus:border-fuchsia-500 focus:outline-none"
+                      />
+                      <button type="button" onClick={applyAmbassadorCode} disabled={ambassadorApplying} className="shrink-0 rounded-lg bg-slate-800 px-4 py-2 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-slate-700 disabled:opacity-50">
+                        {ambassadorApplying ? '…' : 'Apply'}
+                      </button>
+                    </div>
+                    {ambassadorError && <p className="mt-1 text-[11px] font-medium text-red-500">{ambassadorError}</p>}
+                  </>
+                )}
+              </div>
               <HowItWorks variant="banner" freeShippingAt={freeShipEur} />
               <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
                 <svg viewBox="0 0 20 20" fill="currentColor" className="mt-0.5 h-4 w-4 shrink-0 text-amber-500"><path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clipRule="evenodd" /></svg>
