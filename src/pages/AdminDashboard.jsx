@@ -3016,7 +3016,8 @@ function AmbassadorApplicationsPanel() {
   const [msgRow, setMsgRow] = useState(null)
   const [msgSubject, setMsgSubject] = useState('')
   const [msgBody, setMsgBody] = useState('')
-  const [ship, setShip] = useState({}) // { [id]: { shipment_details, tracking_number, tracking_url, admin_comment } }
+  const [ship, setShip] = useState({}) // { [id]: { shipment_details, tracking_number, tracking_url } }
+  const [noteDraft, setNoteDraft] = useState({}) // { [id]: 'new internal note being typed' }
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -3111,12 +3112,26 @@ function AmbassadorApplicationsPanel() {
   const shipVal = (row, field) => (ship[row.id]?.[field] ?? row[field] ?? '')
   const setShipField = (id, field, value) => setShip(prev => ({ ...prev, [id]: { ...prev[id], [field]: value } }))
 
+  // Internal notes log — appends a timestamped entry to admin_comment and clears the input.
+  const addNote = async (row) => {
+    const note = (noteDraft[row.id] || '').trim()
+    if (!note) return
+    const stamp = fmtDate(new Date().toISOString())
+    const entry = `[${stamp}] ${note}`
+    const newLog = row.admin_comment ? `${row.admin_comment}\n${entry}` : entry
+    setSaving(row.id)
+    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: newLog }).eq('id', row.id)
+    if (err) { setSaving(null); alert(err.message); return }
+    patchRow(row.id, { admin_comment: newLog })
+    setNoteDraft(prev => ({ ...prev, [row.id]: '' }))
+    setSaving(null)
+  }
+
   const saveShipment = async (row, alsoEmail) => {
     const draft = {
       shipment_details: shipVal(row, 'shipment_details').trim() || null,
       tracking_number: shipVal(row, 'tracking_number').trim() || null,
       tracking_url: shipVal(row, 'tracking_url').trim() || null,
-      admin_comment: shipVal(row, 'admin_comment').trim() || null,
     }
     setSaving(row.id)
     const { error: err } = await supabase.from(AMBASSADOR_TABLE).update(draft).eq('id', row.id)
@@ -3299,16 +3314,29 @@ function AmbassadorApplicationsPanel() {
                           className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
                         />
                       </div>
-                      <textarea
-                        value={shipVal(row, 'admin_comment')}
-                        onChange={(e) => setShipField(row.id, 'admin_comment', e.target.value)}
-                        placeholder="Internal notes — NOT sent to the ambassador (private)"
-                        rows={2}
-                        className="w-full rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs"
-                      />
                       <div className="flex flex-wrap gap-2">
-                        <button onClick={() => saveShipment(row, false)} disabled={saving === row.id} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Save</button>
+                        <button onClick={() => saveShipment(row, false)} disabled={saving === row.id} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Save box &amp; tracking</button>
                         <button onClick={() => saveShipment(row, true)} disabled={saving === row.id} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
+                      </div>
+
+                      {/* Internal notes log (private, not emailed) */}
+                      <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50 p-2">
+                        <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">Internal notes (private)</p>
+                        {row.admin_comment && (
+                          <div className="mb-1.5 max-h-28 overflow-y-auto whitespace-pre-line rounded bg-white px-2 py-1.5 text-[11px] text-slate-600">
+                            {row.admin_comment}
+                          </div>
+                        )}
+                        <div className="flex gap-2">
+                          <input
+                            value={noteDraft[row.id] || ''}
+                            onChange={(e) => setNoteDraft(prev => ({ ...prev, [row.id]: e.target.value }))}
+                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addNote(row) } }}
+                            placeholder="Add a note…"
+                            className="flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
+                          />
+                          <button onClick={() => addNote(row)} disabled={saving === row.id || !(noteDraft[row.id] || '').trim()} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Add note</button>
+                        </div>
                       </div>
                     </div>
                   </div>
