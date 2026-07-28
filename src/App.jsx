@@ -37,6 +37,7 @@ const WholesaleLandingPage = lazy(() => import('./pages/WholesaleLandingPage.jsx
 const AcademySampleKitPage = lazy(() => import('./pages/AcademySampleKitPage.jsx'))
 const AmbassadorPage = lazy(() => import('./pages/AmbassadorPage.jsx'))
 const AmbassadorAgreementPage = lazy(() => import('./pages/AmbassadorAgreementPage.jsx'))
+const AmbassadorDetailsPage = lazy(() => import('./pages/AmbassadorDetailsPage.jsx'))
 
 const B2B_EMAIL = import.meta.env.VITE_B2B_EMAIL || 'info@gelitup.com'
 const PRODUCT_CATEGORIES = ['Solid Colours', 'Builder Gels', 'Base & Top', 'Nail Care', 'Accessories']
@@ -19782,6 +19783,8 @@ function App() {
           <Route path="/creators" element={<Navigate to="/ambassadors" replace />} />
           <Route path="/ambassador-agreement" element={<AmbassadorAgreementPage />} />
           <Route path="/ambassador-terms" element={<Navigate to="/ambassador-agreement" replace />} />
+          <Route path="/ambassador-details" element={<AmbassadorDetailsPage />} />
+          <Route path="/ambassador-shipping" element={<Navigate to="/ambassador-details" replace />} />
           <Route path="/sample-kit" element={<Navigate to="/academy-kit" replace />} />
           <Route path="/guestbook" element={<GuestbookPage />} />
           <Route path="/inspiration" element={<InspirationPage />} />
