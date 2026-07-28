@@ -13,9 +13,9 @@ const FROM_EMAIL = import.meta.env.VITE_EMAIL_FROM || 'GEL.IT.UP Distributors <d
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 const AMBASSADOR_TABLE = import.meta.env.VITE_AMBASSADOR_TABLE || 'ambassador_applications'
 // Reuse the working distributors@ sender (guaranteed deliverability), branded for ambassadors.
-const AMBASSADOR_FROM_EMAIL = import.meta.env.VITE_AMBASSADOR_EMAIL_FROM || 'GEL.IT.UP Ambassadors <distributors@gelitup.com>'
-// Replies to portal messages land here (Zoho inbox).
+// One address for everything — send from, and receive replies at, info@gelitup.com.
 const AMBASSADOR_REPLY_TO = import.meta.env.VITE_AMBASSADOR_INBOX || 'info@gelitup.com'
+const AMBASSADOR_FROM_EMAIL = import.meta.env.VITE_AMBASSADOR_EMAIL_FROM || 'GEL.IT.UP <info@gelitup.com>'
 // Statuses that count as "needs review" (form inserts default to 'new').
 const AMBASSADOR_PENDING_STATUSES = ['new', 'pending', 'submitted']
 
@@ -2978,8 +2978,7 @@ async function sendAmbassadorEmail({ to, subject, html, attachments, replyTo }) 
     headers.apikey = SUPABASE_ANON_KEY
     headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`
   }
-  const body = { to, subject, html, from: AMBASSADOR_FROM_EMAIL }
-  if (replyTo) body.replyTo = replyTo
+  const body = { to, subject, html, from: AMBASSADOR_FROM_EMAIL, replyTo: replyTo || AMBASSADOR_REPLY_TO }
   if (attachments?.length) body.attachments = attachments
   try {
     const res = await fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers, body: JSON.stringify(body) })
