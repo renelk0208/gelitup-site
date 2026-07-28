@@ -2953,7 +2953,7 @@ function buildAmbassadorDeclineEmail(row, reasonText) {
 function buildAmbassadorShipmentEmail(row, ship) {
   const name = row?.full_name?.trim() || 'there'
   const parts = []
-  if (ship.shipment_details) parts.push(`<p><strong>What's inside:</strong><br/><span style="white-space:pre-line">${escAmb(ship.shipment_details)}</span></p>`)
+  // NOTE: shipment_details ("what's in the box") is internal-only — not included here.
   if (ship.tracking_number) parts.push(`<p><strong>Tracking number:</strong> ${escAmb(ship.tracking_number)}</p>`)
   if (ship.tracking_url) parts.push(`<p><a href="${escAmb(ship.tracking_url)}" style="color:#D43790">Track your parcel →</a></p>`)
   // NOTE: admin_comment is intentionally NOT included — it is an internal-only note.
@@ -3276,13 +3276,14 @@ function AmbassadorApplicationsPanel() {
                 {row.status === 'approved' && (
                   <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50/60 p-3">
                     <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">PR box &amp; follow-up</p>
+                    <p className="mt-0.5 text-[11px] text-slate-500">Only the tracking number &amp; URL are emailed to the ambassador. Box contents and comments stay internal.</p>
                     <div className="mt-2 space-y-2">
                       <textarea
                         value={shipVal(row, 'shipment_details')}
                         onChange={(e) => setShipField(row.id, 'shipment_details', e.target.value)}
-                        placeholder="What's in the box (products, freebies)…"
+                        placeholder="What's in the box (products, freebies) — internal note, NOT sent to the ambassador"
                         rows={2}
-                        className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
+                        className="w-full rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs"
                       />
                       <div className="grid gap-2 sm:grid-cols-2">
                         <input
