@@ -16,7 +16,7 @@ const FOLLOWER_RANGES = [
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL
 const EMAIL_WEBHOOK_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 const EMAIL_FROM = import.meta.env.VITE_AMBASSADOR_EMAIL_FROM || 'GEL.IT.UP Ambassadors <distributors@gelitup.com>'
-const ADMIN_INBOX = import.meta.env.VITE_AMBASSADOR_INBOX || import.meta.env.VITE_B2B_ORDER_INBOX || 'info@gelitup.com'
+const ADMIN_INBOX = import.meta.env.VITE_AMBASSADOR_INBOX || 'info@gelitup.com'
 
 const escapeHtml = (v) => String(v ?? '')
   .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
