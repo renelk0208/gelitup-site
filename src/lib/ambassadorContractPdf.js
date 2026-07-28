@@ -17,7 +17,7 @@ export const CONTRACT_COMPANY = {
   brand: 'Thermitek Ltd — GEL.IT.UP by GIUP®',
   addressLine: '8 Racho Dimchev, Sofia, Bulgaria, 2700   ·   VAT BG202102027',
   contactLine: 'info@gelitup.com   ·   gelitup.com',
-  footer: 'Thermitek Ltd (GEL.IT.UP by GIUP®) · VAT BG202102027 · 8 Racho Dimchev, Sofia, Bulgaria, 2700. This agreement is governed by the laws of Bulgaria.',
+  footer: 'Thermitek Ltd — GEL.IT.UP by GIUP® · VAT BG202102027 · Governed by the laws of Bulgaria.',
 }
 
 const PINK = [212, 55, 144]
@@ -181,9 +181,11 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
     doc.setLineWidth(0.5)
     doc.line(margin, pageH - 34, pageW - margin, pageH - 34)
     doc.setFont('helvetica', 'normal')
-    doc.setFontSize(7)
+    doc.setFontSize(6.5)
     doc.setTextColor(150, 150, 150)
-    doc.text(CONTRACT_COMPANY.footer, margin, pageH - 22)
+    // Constrain the footer so it can never run into the page number on the right.
+    const footerLine = doc.splitTextToSize(CONTRACT_COMPANY.footer, contentW - 60)[0]
+    doc.text(footerLine, margin, pageH - 22)
     doc.text(`Page ${p} of ${pages}`, pageW - margin, pageH - 22, { align: 'right' })
   }
 

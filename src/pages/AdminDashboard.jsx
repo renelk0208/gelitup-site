@@ -3174,7 +3174,15 @@ function AmbassadorApplicationsPanel() {
                       {row.tiktok && <a href={`https://tiktok.com/@${row.tiktok}`} target="_blank" rel="noreferrer" className="font-medium text-slate-700 hover:underline">TikTok @{row.tiktok}</a>}
                       {row.followers && <span>{row.followers} followers</span>}
                       <a href={`mailto:${row.email}`} className="hover:underline">{row.email}</a>
+                      {row.phone && <a href={`tel:${row.phone}`} className="hover:underline">📞 {row.phone}</a>}
+                      {row.facebook && <a href={`https://facebook.com/${row.facebook}`} target="_blank" rel="noreferrer" className="hover:underline">FB {row.facebook}</a>}
                     </div>
+                    {(() => {
+                      const ship = [row.address, [row.city, row.postal_code].filter(Boolean).join(' '), row.country].filter(Boolean).join(', ')
+                      return ship
+                        ? <p className="mt-1 text-xs text-slate-600">📦 <span className="font-medium">{ship}</span></p>
+                        : <p className="mt-1 text-xs text-amber-600">📦 No shipping address on file (applied on the older form — ask them to re-apply)</p>
+                    })()}
                     {row.message && (
                       <p className="mt-2 whitespace-pre-line text-xs italic text-slate-600">“{row.message}”</p>
                     )}
