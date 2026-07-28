@@ -980,10 +980,23 @@ const SKU_OVERRIDE_MAP = {
 
   // ── GIUP-70 series + GIUP-71 Gel Polish (Blue solid gel polish) ─────────────────────
   // base 7.41 → B2B 8.9 (standard gel polish)
+  // Orders store the sub-dashed form "GIUP-70-N" / "GIUP 70 N", but the price list keys
+  // this series by concatenated code ("705 Hang Ten -HTF" → map key "705"), so "70 5" never
+  // matches "705". Every 70-1…70-8 shade needs an explicit override key here.
   'GIUP-70-1':         { name: 'GIUP-70-1 Gel Polish -HTF', price: 7.41 },
   'GIUP 70 1':         { name: 'GIUP-70-1 Gel Polish -HTF', price: 7.41 },
+  'GIUP-70-2':         { name: 'GIUP-70-2 Gel Polish -HTF', price: 7.41 },
+  'GIUP 70 2':         { name: 'GIUP-70-2 Gel Polish -HTF', price: 7.41 },
+  'GIUP-70-3':         { name: 'GIUP-70-3 Gel Polish -HTF', price: 7.41 },
+  'GIUP 70 3':         { name: 'GIUP-70-3 Gel Polish -HTF', price: 7.41 },
+  'GIUP-70-4':         { name: 'GIUP-70-4 Gel Polish -HTF', price: 7.41 },
+  'GIUP 70 4':         { name: 'GIUP-70-4 Gel Polish -HTF', price: 7.41 },
+  'GIUP-70-5':         { name: 'GIUP-70-5 Gel Polish -HTF', price: 7.41 },
+  'GIUP 70 5':         { name: 'GIUP-70-5 Gel Polish -HTF', price: 7.41 },
   'GIUP-70-6':         { name: 'GIUP-70-6 Gel Polish -HTF', price: 7.41 },
   'GIUP 70 6':         { name: 'GIUP-70-6 Gel Polish -HTF', price: 7.41 },
+  'GIUP-70-7':         { name: 'GIUP-70-7 Gel Polish -HTF', price: 7.41 },
+  'GIUP 70 7':         { name: 'GIUP-70-7 Gel Polish -HTF', price: 7.41 },
   'GIUP-70-8':         { name: 'GIUP-70-8 Gel Polish -HTF', price: 7.41 },
   'GIUP 70 8':         { name: 'GIUP-70-8 Gel Polish -HTF', price: 7.41 },
   'GIUP-71':           { name: 'GIUP-71 Gel Polish -HTF', price: 7.41 },
