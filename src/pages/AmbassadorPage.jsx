@@ -116,12 +116,12 @@ export default function AmbassadorPage() {
   const lang = useLang()
 
   useEffect(() => {
-    document.title = 'Become an Ambassador | GEL.IT.UP® by GIUP®'
+    document.title = 'Become an Ambassador | GEL.IT.UP by GIUP®'
     const meta = document.querySelector('meta[name="description"]')
     if (meta) {
       meta.setAttribute(
         'content',
-        'Get your nail work featured on @gelitup, earn a personal discount code and receive free product drops. Apply to become a GEL.IT.UP® ambassador.',
+        'Get your nail work featured on @gelitup, earn a personal discount code and receive free product drops. Apply to become a GEL.IT.UP ambassador.',
       )
     }
   }, [])
@@ -195,7 +195,7 @@ export default function AmbassadorPage() {
       {/* Hero */}
       <section className="px-5 py-16 text-center sm:py-24" style={{ background: 'radial-gradient(120% 120% at 50% 0%, #2a1030 0%, #17111c 55%, #0e0b12 100%)' }}>
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#e879c4]">
-          The GEL.IT.UP® Ambassador Programme
+          The GEL.IT.UP Ambassador Programme
         </p>
         <h1 className="heading-on-dark mx-auto mt-4 max-w-3xl text-4xl font-black leading-[1.05] tracking-tight text-white sm:text-6xl">
           Get your nails<br />on our page.
@@ -254,7 +254,7 @@ export default function AmbassadorPage() {
               Our @gelitup feed
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-sm text-black/60">
-              Every post below is an ambassador or artist creating with GEL.IT.UP®.
+              Every post below is an ambassador or artist creating with GEL.IT.UP.
               Yours could be next.
             </p>
           </div>
@@ -460,7 +460,7 @@ export default function AmbassadorPage() {
                 <span>
                   I have read and agree to the{' '}
                   <NavLink to="/ambassador-agreement" target="_blank" className="font-semibold text-[#e879c4] underline">
-                    GEL.IT.UP® Ambassador Agreement
+                    GEL.IT.UP Ambassador Agreement
                   </NavLink>
                   , and I understand the monthly posting commitment.
                 </span>

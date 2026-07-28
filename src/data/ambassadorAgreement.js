@@ -1,4 +1,4 @@
-// Single source of truth for the GEL.IT.UP® Ambassador Agreement.
+// Single source of truth for the GEL.IT.UP Ambassador Agreement.
 // Rendered both as the summary panel on the application form and as the full
 // /ambassador-agreement page. Bump AGREEMENT_VERSION whenever the terms change
 // so stored consents stay traceable to the exact wording that was agreed.
@@ -14,11 +14,11 @@ export const CONTENT_SUBMISSION_NUMBER = '+30 694 071 5234'
 
 // Short bullets shown inside the form's scrollable agreement panel.
 export const AGREEMENT_SUMMARY = [
-  `Post at least ${POST_MIN_PER_MONTH} pieces of your own content each month (at least one a video/reel) using GEL.IT.UP® and tagging #gelitup and @gelitup.`,
+  `Post at least ${POST_MIN_PER_MONTH} pieces of your own content each month (at least one a video/reel) using GEL.IT.UP and tagging #gelitup and @gelitup.`,
   'Disclose the partnership where advertising rules require it (e.g. #ad / “gifted”).',
   `Send the content you create to our official WhatsApp/Viber number (${CONTENT_SUBMISSION_NUMBER}) so we can save it to our library.`,
   'Use your personal discount code genuinely — for yourself and real clients/followers, never on coupon or reseller sites.',
-  'Let GEL.IT.UP® save, repost, feature and reuse your content — including what you send us and what you tag — across our channels, marketing and other platforms, credited with your social media tags. You keep ownership.',
+  'Let GEL.IT.UP save, repost, feature and reuse your content — including what you send us and what you tag — across our channels, marketing and other platforms, credited with your social media tags. You keep ownership.',
   'Free product drops are gifts to support your content, not a sale, and depend on you keeping up the monthly posts.',
   'Non-exclusive and month-to-month — you can work with others, and either side can end it anytime.',
 ]
@@ -29,13 +29,13 @@ export const AGREEMENT_SECTIONS = [
   {
     heading: 'Welcome',
     points: [
-      'This is a friendly working agreement between you and GEL.IT.UP® (GIUP®) as part of our Ambassador Programme — a collaboration between professionals, not a job. Here’s what we each do.',
+      'This is a friendly working agreement between you and GEL.IT.UP (GIUP®) as part of our Ambassador Programme — a collaboration between professionals, not a job. Here’s what we each do.',
     ],
   },
   {
     heading: 'What you do',
     points: [
-      `Share at least ${POST_MIN_PER_MONTH} pieces of your own content each month using GEL.IT.UP® products, tagging #gelitup and @gelitup — with at least one video/reel.`,
+      `Share at least ${POST_MIN_PER_MONTH} pieces of your own content each month using GEL.IT.UP products, tagging #gelitup and @gelitup — with at least one video/reel.`,
       `Send the content you create to our WhatsApp/Viber (${CONTENT_SUBMISSION_NUMBER}) so we can save and feature it.`,
       'Use your personal discount code just for you and your real clients and followers — not on coupon or reseller sites.',
       'Where the rules ask (e.g. because a product was gifted), simply mark it as a partnership — #ad or “gifted”.',

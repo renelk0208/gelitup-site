@@ -4,12 +4,12 @@ import { AGREEMENT_SECTIONS, AGREEMENT_VERSION } from '../data/ambassadorAgreeme
 
 export default function AmbassadorAgreementPage() {
   useEffect(() => {
-    document.title = 'Ambassador Agreement | GEL.IT.UP® by GIUP®'
+    document.title = 'Ambassador Agreement | GEL.IT.UP by GIUP®'
     const meta = document.querySelector('meta[name="description"]')
     if (meta) {
       meta.setAttribute(
         'content',
-        'The full GEL.IT.UP® Ambassador Agreement — commitments, content permissions and how the partnership works.',
+        'The full GEL.IT.UP Ambassador Agreement — commitments, content permissions and how the partnership works.',
       )
     }
   }, [])
@@ -18,7 +18,7 @@ export default function AmbassadorAgreementPage() {
     <section className="space-y-4">
       <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#D43790]">
-          GEL.IT.UP® by GIUP®
+          GEL.IT.UP by GIUP®
         </p>
         <h1 className="mt-2 text-2xl font-semibold text-slate-900 sm:text-3xl">
           Ambassador Agreement

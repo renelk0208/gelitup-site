@@ -173,13 +173,13 @@ const ROUTE_SEO_MAP = {
     canonical:   'https://gelitup.com/inspiration',
   },
   '/ambassadors': {
-    title:       'Become a GEL.IT.UP® Ambassador | Get Featured, Get Perks',
-    description: 'Join the GEL.IT.UP® Ambassador Programme. Get your nail work featured on @gelitup, earn a personal discount code and receive free product drops. Apply in 60 seconds.',
+    title:       'Become a GEL.IT.UP Ambassador | Get Featured, Get Perks',
+    description: 'Join the GEL.IT.UP Ambassador Programme. Get your nail work featured on @gelitup, earn a personal discount code and receive free product drops. Apply in 60 seconds.',
     canonical:   'https://gelitup.com/ambassadors',
   },
   '/ambassador-agreement': {
-    title:       'Ambassador Agreement | GEL.IT.UP® by GIUP®',
-    description: 'The full GEL.IT.UP® Ambassador Agreement — commitments, content permissions and how the partnership works.',
+    title:       'Ambassador Agreement | GEL.IT.UP by GIUP®',
+    description: 'The full GEL.IT.UP Ambassador Agreement — commitments, content permissions and how the partnership works.',
     canonical:   'https://gelitup.com/ambassador-agreement',
   },
   '/privacy-policy': {

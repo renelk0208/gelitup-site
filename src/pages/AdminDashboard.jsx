@@ -2937,10 +2937,10 @@ function buildAmbassadorDeclineEmail(row, reasonText) {
     ? `<p style="margin-top:14px"><strong>Reason:</strong><br/><span style="white-space:pre-line">${escAmb(reasonText)}</span></p>`
     : ''
   return {
-    subject: 'Update on your GEL.IT.UP® ambassador application',
+    subject: 'Update on your GEL.IT.UP ambassador application',
     html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5">
       <p>Hi ${escAmb(name)},</p>
-      <p>Thank you for applying to become a GEL.IT.UP® ambassador and for sharing your work with us.</p>
+      <p>Thank you for applying to become a GEL.IT.UP ambassador and for sharing your work with us.</p>
       <p>After review, we're not able to move forward with your application at this time.</p>
       ${reasonBlock}
       <p>You're welcome to apply again in the future. Wishing you all the best,<br/>The GEL.IT.UP® Team</p>
@@ -2956,10 +2956,10 @@ function buildAmbassadorShipmentEmail(row, ship) {
   if (ship.tracking_url) parts.push(`<p><a href="${escAmb(ship.tracking_url)}" style="color:#D43790">Track your parcel →</a></p>`)
   if (ship.admin_comment) parts.push(`<p style="white-space:pre-line">${escAmb(ship.admin_comment)}</p>`)
   return {
-    subject: 'Your GEL.IT.UP® PR package is on the way 📦',
+    subject: 'Your GEL.IT.UP PR package is on the way 📦',
     html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5">
       <p>Hi ${escAmb(name)},</p>
-      <p>Great news — your GEL.IT.UP® PR package is on its way! 🎉</p>
+      <p>Great news — your GEL.IT.UP PR package is on its way! 🎉</p>
       ${parts.join('')}
       <p>Tag <strong>@gelitup</strong> and send your looks to our WhatsApp/Viber so we can feature you.</p>
       <p>The GEL.IT.UP® Team</p>

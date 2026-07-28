@@ -1,4 +1,4 @@
-// Generates the GEL.IT.UP® Ambassador Agreement as a professional PDF (English —
+// Generates the GEL.IT.UP Ambassador Agreement as a professional PDF (English —
 // the governing version of the contract). jsPDF is loaded lazily so it never
 // weighs down the main bundle; the PDF is built on demand when a form is
 // submitted or an application is approved.
@@ -14,10 +14,10 @@ import { AGREEMENT_SECTIONS, AGREEMENT_VERSION } from '../data/ambassadorAgreeme
 
 // ── Company letterhead details — edit freely. ──
 export const CONTRACT_COMPANY = {
-  brand: 'Thermitek Ltd — GEL.IT.UP® by GIUP®',
+  brand: 'Thermitek Ltd — GEL.IT.UP by GIUP®',
   addressLine: '8 Racho Dimchev, Sofia, Bulgaria, 2700   ·   VAT BG202102027',
   contactLine: 'info@gelitup.com   ·   gelitup.com',
-  footer: 'Thermitek Ltd (GEL.IT.UP® by GIUP®) · VAT BG202102027 · 8 Racho Dimchev, Sofia, Bulgaria, 2700. This agreement is governed by the laws of Bulgaria.',
+  footer: 'Thermitek Ltd (GEL.IT.UP by GIUP®) · VAT BG202102027 · 8 Racho Dimchev, Sofia, Bulgaria, 2700. This agreement is governed by the laws of Bulgaria.',
 }
 
 const PINK = [212, 55, 144]
