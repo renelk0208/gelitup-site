@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
-const INSTAGRAM_HANDLE = 'gelitup'
-const INSTAGRAM_URL = 'https://www.instagram.com/gelitup/'
+const INSTAGRAM_HANDLE = 'gelitupinternational'
+const INSTAGRAM_URL = 'https://www.instagram.com/gelitupinternational/'
 
 /**
  * InstagramFeed
