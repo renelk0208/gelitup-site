@@ -1,15 +1,68 @@
 import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { supabase, hasSupabaseConfig } from '../lib/supabaseClient'
+import { useLang } from '../lib/i18n'
 import InstagramFeed from '../components/InstagramFeed'
 import { AGREEMENT_SUMMARY, AGREEMENT_VERSION } from '../data/ambassadorAgreement'
+import { buildAmbassadorContractPdf } from '../lib/ambassadorContractPdf'
 
 const FOLLOWER_RANGES = [
+  '500 – 1,000',
   '1,000 – 5,000',
   '5,000 – 10,000',
-  '10,000 – 50,000',
-  '50,000+',
+  '10,000+',
 ]
+
+const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL
+const EMAIL_WEBHOOK_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+const EMAIL_FROM = import.meta.env.VITE_AMBASSADOR_EMAIL_FROM || 'GEL.IT.UP Ambassadors <distributors@gelitup.com>'
+const ADMIN_INBOX = import.meta.env.VITE_AMBASSADOR_INBOX || import.meta.env.VITE_B2B_ORDER_INBOX || 'info@gelitup.com'
+
+const escapeHtml = (v) => String(v ?? '')
+  .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+  .replaceAll('"', '&quot;').replaceAll("'", '&#39;')
+
+// Emails the business inbox a new-application notification with the signed PDF attached.
+// Best-effort: any failure is swallowed so it never blocks the applicant's success screen.
+async function notifyAdminOfApplication(record, pdf) {
+  if (!EMAIL_WEBHOOK_URL) return
+  const rows = [
+    ['Name', record.full_name],
+    ['Email', record.email],
+    ['Instagram', record.instagram ? '@' + record.instagram : '—'],
+    ['TikTok', record.tiktok ? '@' + record.tiktok : '—'],
+    ['Following', record.followers || '—'],
+    ['Professional nail tech', 'Yes'],
+    ['Country', record.country || '—'],
+    ['Language', record.language || '—'],
+    ['Agreement', `${record.agreement_version || ''} (signed)`],
+  ]
+  const html = `
+    <h2 style="font-family:Arial,sans-serif;color:#1a1a1a">New ambassador application</h2>
+    <table style="font-family:Arial,sans-serif;font-size:14px;border-collapse:collapse">
+      ${rows.map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#6b7280">${escapeHtml(k)}</td><td style="padding:4px 0;color:#1a1a1a"><strong>${escapeHtml(v)}</strong></td></tr>`).join('')}
+    </table>
+    ${record.message ? `<p style="font-family:Arial,sans-serif;font-size:14px;color:#374151"><em>“${escapeHtml(record.message)}”</em></p>` : ''}
+    <p style="font-family:Arial,sans-serif;font-size:12px;color:#9ca3af">The applicant's signed agreement (English, governing version) is attached as a PDF.</p>
+  `
+  const headers = { 'Content-Type': 'application/json' }
+  if (EMAIL_WEBHOOK_ANON_KEY) {
+    headers.apikey = EMAIL_WEBHOOK_ANON_KEY
+    headers.Authorization = `Bearer ${EMAIL_WEBHOOK_ANON_KEY}`
+  }
+  const body = {
+    eventType: 'ambassador_application_submitted',
+    to: ADMIN_INBOX,
+    subject: `New ambassador application — ${record.full_name} (@${record.instagram})`,
+    html,
+    from: EMAIL_FROM,
+    replyTo: record.email,
+  }
+  if (pdf?.base64) body.attachments = [{ filename: pdf.filename, content: pdf.base64, contentType: 'application/pdf' }]
+  try {
+    await fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers, body: JSON.stringify(body) })
+  } catch { /* best-effort */ }
+}
 
 // Editable programme perks — tweak the copy freely, the layout adapts.
 const PERKS = [
@@ -32,7 +85,7 @@ const PERKS = [
 
 const STEPS = [
   { n: '1', title: 'Apply', body: 'Fill in the quick form below with your socials.' },
-  { n: '2', title: 'We review', body: 'We check out your work — we welcome creators from 1,000 followers up.' },
+  { n: '2', title: 'We review', body: 'We check out your work — open to professional nail technicians creating with gel.' },
   { n: '3', title: 'Create & get featured', body: 'Post your GEL.IT.UP looks, tag us, and get reposted.' },
 ]
 
@@ -44,15 +97,23 @@ export default function AmbassadorPage() {
   const [form, setForm] = useState({
     fullName: '',
     email: '',
+    phone: '',
     instagram: '',
     tiktok: '',
+    facebook: '',
     followers: '',
+    address: '',
+    city: '',
+    postalCode: '',
     country: '',
     message: '',
   })
+  const [isProfessional, setIsProfessional] = useState('') // '' | 'yes' | 'no'
+  const [showProModal, setShowProModal] = useState(false)
   const [agreed, setAgreed] = useState(false)
   const [status, setStatus] = useState('idle') // idle | submitting | success | error
   const [errorMsg, setErrorMsg] = useState('')
+  const lang = useLang()
 
   useEffect(() => {
     document.title = 'Become an Ambassador | GEL.IT.UP® by GIUP®'
@@ -67,30 +128,57 @@ export default function AmbassadorPage() {
 
   const update = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }))
 
+  const requiredFilled =
+    form.fullName.trim() && form.email.trim() && form.phone.trim() && form.instagram.trim() &&
+    form.followers && form.address.trim() && form.city.trim() && form.postalCode.trim() &&
+    form.country.trim() && agreed && isProfessional === 'yes'
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.fullName.trim() || !form.email.trim() || !form.instagram.trim() || !form.followers || !agreed) return
+    if (isProfessional !== 'yes') { setShowProModal(true); return }
+    if (!requiredFilled) return
     setStatus('submitting')
     setErrorMsg('')
     try {
+      const record = {
+        full_name: form.fullName.trim(),
+        email: form.email.trim().toLowerCase(),
+        phone: form.phone.trim(),
+        instagram: form.instagram.trim().replace(/^@+/, ''),
+        tiktok: form.tiktok.trim().replace(/^@+/, '') || null,
+        facebook: form.facebook.trim().replace(/^@+/, '') || null,
+        followers: form.followers || null,
+        address: form.address.trim(),
+        city: form.city.trim(),
+        postal_code: form.postalCode.trim(),
+        country: form.country.trim(),
+        message: form.message.trim() || null,
+        agreed_terms: true,
+        agreement_version: AGREEMENT_VERSION,
+        language: lang || 'en',
+      }
       if (hasSupabaseConfig && supabase) {
-        const igHandle = form.instagram.trim().replace(/^@+/, '')
-        const { error: insertError } = await supabase
-          .from('ambassador_applications')
-          .insert({
-            full_name: form.fullName.trim(),
-            email: form.email.trim().toLowerCase(),
-            instagram: igHandle,
-            tiktok: form.tiktok.trim().replace(/^@+/, '') || null,
-            followers: form.followers || null,
-            country: form.country.trim() || null,
-            message: form.message.trim() || null,
-            agreed_terms: true,
-            agreement_version: AGREEMENT_VERSION,
-          })
+        const { error: insertError } = await supabase.from('ambassador_applications').insert(record)
         // 23505 = unique violation → they already applied with this handle.
         if (insertError && insertError.code !== '23505') throw insertError
       }
+      // Build the signed PDF + notify the business inbox (best-effort — never blocks success).
+      try {
+        const pdf = await buildAmbassadorContractPdf({
+          fullName: record.full_name,
+          email: record.email,
+          phone: record.phone,
+          instagram: record.instagram,
+          tiktok: record.tiktok,
+          followers: record.followers,
+          address: `${record.address}, ${record.city} ${record.postal_code}, ${record.country}`,
+          country: record.country,
+          isProfessional: true,
+          agreementVersion: record.agreement_version,
+          signedDate: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+        })
+        await notifyAdminOfApplication(record, pdf)
+      } catch { /* notification is best-effort */ }
       setStatus('success')
     } catch (err) {
       setErrorMsg(err?.message || 'Something went wrong.')
@@ -100,6 +188,7 @@ export default function AmbassadorPage() {
 
   const inputClass =
     'w-full rounded-xl border border-white/20 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder-white/40 outline-none transition focus:border-[#D43790] focus:ring-2 focus:ring-[#D43790]/40'
+  const labelClass = 'mb-1.5 block text-xs font-semibold uppercase tracking-[0.1em] text-white/60'
 
   return (
     <div className="-mx-3 -my-4 md:-mx-6 md:-my-10">
@@ -134,7 +223,7 @@ export default function AmbassadorPage() {
           </a>
         </div>
         <p className="mt-6 text-xs font-medium uppercase tracking-[0.14em] text-white/45">
-          1,000+ followers · Free to join
+          For professional nail technicians · Free to join
         </p>
       </section>
 
@@ -246,27 +335,89 @@ export default function AmbassadorPage() {
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.1em] text-white/60">Instagram handle *</label>
-                  <input type="text" required value={form.instagram} onChange={update('instagram')} placeholder="@yourhandle" className={inputClass} />
+                  <label className={labelClass}>Phone number *</label>
+                  <input type="tel" required value={form.phone} onChange={update('phone')} placeholder="+49 170 1234567" className={inputClass} />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.1em] text-white/60">TikTok (optional)</label>
-                  <input type="text" value={form.tiktok} onChange={update('tiktok')} placeholder="@yourhandle" className={inputClass} />
+                  <label className={labelClass}>Instagram handle *</label>
+                  <input type="text" required value={form.instagram} onChange={update('instagram')} placeholder="@yourhandle" className={inputClass} />
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.1em] text-white/60">Instagram following *</label>
-                  <select required value={form.followers} onChange={update('followers')} className={inputClass}>
-                    <option value="" style={{ color: '#000' }}>Select a range…</option>
-                    {FOLLOWER_RANGES.map((r) => (
-                      <option key={r} value={r} style={{ color: '#000' }}>{r}</option>
-                    ))}
-                  </select>
+                  <label className={labelClass}>TikTok (optional)</label>
+                  <input type="text" value={form.tiktok} onChange={update('tiktok')} placeholder="@yourhandle" className={inputClass} />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.1em] text-white/60">Country</label>
-                  <input type="text" value={form.country} onChange={update('country')} placeholder="Germany" className={inputClass} />
+                  <label className={labelClass}>Facebook (optional)</label>
+                  <input type="text" value={form.facebook} onChange={update('facebook')} placeholder="facebook.com/yourpage" className={inputClass} />
+                </div>
+              </div>
+
+              {/* Instagram following — selectable bands */}
+              <div>
+                <label className={labelClass}>Instagram following *</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {FOLLOWER_RANGES.map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, followers: r }))}
+                      className={`rounded-xl border px-2 py-3 text-sm font-medium transition ${
+                        form.followers === r
+                          ? 'border-[#D43790] bg-[#D43790]/20 text-white'
+                          : 'border-white/20 bg-white/[0.04] text-white/70 hover:border-white/40'
+                      }`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Professional gate */}
+              <div>
+                <label className={labelClass}>Are you a professional nail technician? *</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[{ v: 'yes', l: 'Yes' }, { v: 'no', l: 'No' }].map(({ v, l }) => (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => { setIsProfessional(v); if (v === 'no') setShowProModal(true) }}
+                      className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
+                        isProfessional === v
+                          ? (v === 'yes' ? 'border-emerald-400 bg-emerald-400/15 text-white' : 'border-rose-400 bg-rose-400/15 text-white')
+                          : 'border-white/20 bg-white/[0.04] text-white/70 hover:border-white/40'
+                      }`}
+                    >
+                      {l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Shipping details for sample & PR boxes */}
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+                <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-[#e879c4]">Where do we send your sample &amp; PR boxes?</p>
+                <div className="space-y-4">
+                  <div>
+                    <label className={labelClass}>Street address *</label>
+                    <input type="text" required value={form.address} onChange={update('address')} placeholder="Street and number" className={inputClass} />
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className={labelClass}>City *</label>
+                      <input type="text" required value={form.city} onChange={update('city')} placeholder="City" className={inputClass} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Postal code *</label>
+                      <input type="text" required value={form.postalCode} onChange={update('postalCode')} placeholder="12345" className={inputClass} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Country *</label>
+                    <input type="text" required value={form.country} onChange={update('country')} placeholder="Germany" className={inputClass} />
+                  </div>
                 </div>
               </div>
               <div>
@@ -329,7 +480,7 @@ export default function AmbassadorPage() {
 
               <button
                 type="submit"
-                disabled={status === 'submitting' || !agreed}
+                disabled={status === 'submitting' || !requiredFilled}
                 className="w-full rounded-full bg-[#D43790] px-6 py-4 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[0_0_24px_rgba(212,55,144,0.4)] transition duration-300 hover:bg-[#c22f82] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {status === 'submitting' ? 'Sending…' : 'Sign & submit my application'}
@@ -342,6 +493,33 @@ export default function AmbassadorPage() {
           )}
         </div>
       </section>
+
+      {/* Professionals-only popup — shown when "No" is selected */}
+      {showProModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 px-5"
+          onClick={() => setShowProModal(false)}
+        >
+          <div
+            className="max-w-sm rounded-2xl border border-white/10 bg-[#1b1420] p-6 text-center shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-3xl">💅</div>
+            <h3 className="mt-3 text-lg font-black text-white">Professionals only</h3>
+            <p className="mt-2 text-sm text-white/70">
+              We&apos;re sorry, but our ambassador programme requires professional nail
+              technicians who are able to work with professional products.
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowProModal(false)}
+              className="mt-5 rounded-full bg-[#D43790] px-6 py-2.5 text-sm font-bold text-white transition hover:bg-[#c22f82]"
+            >
+              I understand
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

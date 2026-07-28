@@ -12,7 +12,9 @@ create table if not exists public.ambassador_applications (
   followers   text,
   country     text,
   message     text,
-  status      text        not null default 'new'   -- new | reviewing | approved | declined
+  status      text        not null default 'new',  -- new | reviewing | approved | rejected
+  reviewed_at timestamptz,                          -- set by the admin approval workflow
+  reviewed_by text
 );
 
 -- One application per Instagram handle keeps the review list clean.

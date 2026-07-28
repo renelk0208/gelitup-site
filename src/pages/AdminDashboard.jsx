@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import * as XLSX from 'xlsx'
 import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
+import { buildAmbassadorContractPdf } from '../lib/ambassadorContractPdf.js'
+import { CONTRACT_I18N, resolveContractLang } from '../data/ambassadorContractI18n.js'
 
 const REGISTRATIONS_TABLE = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || 'b2b_registrations'
 const ORDERS_TABLE = import.meta.env.VITE_B2B_ORDERS_TABLE || 'b2b_orders'
@@ -2888,29 +2890,113 @@ function ambassadorStatusPill(status) {
   return 'bg-amber-100 text-amber-700' // new / pending / submitted
 }
 
-function buildAmbassadorEmail(row, status) {
+const AMBASSADOR_DECLINE_PRESETS = [
+  'Not a professional nail technician',
+  'Application did not meet our current criteria',
+  'Portfolio / content was insufficient or unclear',
+  'Follower count below our current threshold',
+  'Location not currently served by the programme',
+]
+
+const AMBASSADOR_PR_LINE = {
+  en: 'Your first PR package will be on its way shortly.',
+  ro: 'Primul tău pachet PR va fi trimis în curând.',
+  fr: 'Votre premier colis PR vous sera envoyé sous peu.',
+  de: 'Dein erstes PR-Paket ist bald unterwegs.',
+  es: 'Tu primer paquete PR se enviará muy pronto.',
+  pt: 'O teu primeiro pacote PR será enviado em breve.',
+  pl: 'Twoja pierwsza paczka PR zostanie wkrótce wysłana.',
+  hu: 'Az első PR-csomagod hamarosan úton lesz.',
+  el: 'Το πρώτο σου PR πακέτο θα σταλεί σύντομα.',
+  bg: 'Първият ти PR пакет ще бъде изпратен скоро.',
+}
+
+const escAmb = (v) => String(v ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+
+// Localised welcome + obligations. The full signed contract (English) is attached separately.
+function buildAmbassadorApprovalEmail(row) {
+  const lang = resolveContractLang(row?.language, row?.country)
+  const t = CONTRACT_I18N[lang] || CONTRACT_I18N.en
+  const pr = AMBASSADOR_PR_LINE[lang] || AMBASSADOR_PR_LINE.en
+  const html = `
+    <div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5">
+      <p>${escAmb(t.greeting(row?.full_name?.trim() || ''))}</p>
+      <p>${t.intro}</p>
+      <p style="font-weight:bold;color:#0f766e">📦 ${pr}</p>
+      <h3 style="margin:18px 0 6px">${t.obligationsHeading}</h3>
+      <ul style="padding-left:18px">${t.obligations.map((o) => `<li style="margin:4px 0">${o}</li>`).join('')}</ul>
+      <p style="color:#6b7280;font-size:13px">${t.attachedNote}</p>
+      <p style="white-space:pre-line">${t.signoff}</p>
+    </div>`
+  return { subject: t.subject, html }
+}
+
+function buildAmbassadorDeclineEmail(row, reasonText) {
   const name = row?.full_name?.trim() || 'there'
-  if (status === 'approved') {
-    return {
-      subject: "You're in! Welcome to the GEL.IT.UP® Ambassador Programme 🎉",
-      html: `<p>Hi ${name},</p>
-<p>Great news — your application to join the <strong>GEL.IT.UP® Ambassador Programme</strong> has been approved!</p>
-<p>Here's what happens next:</p>
-<ul>
-  <li>We'll start featuring your nail work on <strong>@gelitup</strong> to thousands of nail lovers.</li>
-  <li>You'll receive occasional free product drops to create with.</li>
-  <li>Our team will be in touch shortly with your ambassador details and next steps.</li>
-</ul>
-<p>Welcome to the family — we can't wait to see what you create.</p>
-<p>The GEL.IT.UP® Team<br/>hello@gelitup.com</p>`,
-    }
-  }
+  const reasonBlock = reasonText
+    ? `<p style="margin-top:14px"><strong>Reason:</strong><br/><span style="white-space:pre-line">${escAmb(reasonText)}</span></p>`
+    : ''
   return {
     subject: 'Update on your GEL.IT.UP® ambassador application',
-    html: `<p>Hi ${name},</p>
-<p>Thank you for applying to become a GEL.IT.UP® ambassador and for sharing your work with us.</p>
-<p>After review, we're not able to move forward with your application at this time. This isn't a reflection of your talent — we receive many applications and can only take on a limited number of ambassadors each round. You're welcome to apply again in the future.</p>
-<p>Wishing you all the best,<br/>The GEL.IT.UP® Team</p>`,
+    html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5">
+      <p>Hi ${escAmb(name)},</p>
+      <p>Thank you for applying to become a GEL.IT.UP® ambassador and for sharing your work with us.</p>
+      <p>After review, we're not able to move forward with your application at this time.</p>
+      ${reasonBlock}
+      <p>You're welcome to apply again in the future. Wishing you all the best,<br/>The GEL.IT.UP® Team</p>
+    </div>`,
+  }
+}
+
+function buildAmbassadorShipmentEmail(row, ship) {
+  const name = row?.full_name?.trim() || 'there'
+  const parts = []
+  if (ship.shipment_details) parts.push(`<p><strong>What's inside:</strong><br/><span style="white-space:pre-line">${escAmb(ship.shipment_details)}</span></p>`)
+  if (ship.tracking_number) parts.push(`<p><strong>Tracking number:</strong> ${escAmb(ship.tracking_number)}</p>`)
+  if (ship.tracking_url) parts.push(`<p><a href="${escAmb(ship.tracking_url)}" style="color:#D43790">Track your parcel →</a></p>`)
+  if (ship.admin_comment) parts.push(`<p style="white-space:pre-line">${escAmb(ship.admin_comment)}</p>`)
+  return {
+    subject: 'Your GEL.IT.UP® PR package is on the way 📦',
+    html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5">
+      <p>Hi ${escAmb(name)},</p>
+      <p>Great news — your GEL.IT.UP® PR package is on its way! 🎉</p>
+      ${parts.join('')}
+      <p>Tag <strong>@gelitup</strong> and send your looks to our WhatsApp/Viber so we can feature you.</p>
+      <p>The GEL.IT.UP® Team</p>
+    </div>`,
+  }
+}
+
+// Sends an email (optionally with a PDF attachment) via the webhook. Returns {ok, error}.
+async function sendAmbassadorEmail({ to, subject, html, attachments }) {
+  if (!EMAIL_WEBHOOK_URL) return { ok: false, error: 'VITE_EMAIL_WEBHOOK_URL is not configured — email not sent.' }
+  const headers = { 'Content-Type': 'application/json' }
+  if (SUPABASE_ANON_KEY) {
+    headers.apikey = SUPABASE_ANON_KEY
+    headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`
+  }
+  const body = { to, subject, html, from: AMBASSADOR_FROM_EMAIL }
+  if (attachments?.length) body.attachments = attachments
+  try {
+    const res = await fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers, body: JSON.stringify(body) })
+    const json = await res.json().catch(() => null)
+    return res.ok ? { ok: true } : { ok: false, error: json?.error || `HTTP ${res.status}` }
+  } catch (err) {
+    return { ok: false, error: err.message || 'Network error' }
+  }
+}
+
+function ambassadorRowToContact(row) {
+  return {
+    fullName: row.full_name,
+    email: row.email,
+    phone: row.phone,
+    instagram: row.instagram,
+    tiktok: row.tiktok,
+    followers: row.followers,
+    address: [row.address, [row.city, row.postal_code].filter(Boolean).join(' '), row.country].filter(Boolean).join(', '),
+    isProfessional: true,
+    signedDate: fmtDate(row.created_at),
   }
 }
 
@@ -2921,6 +3007,10 @@ function AmbassadorApplicationsPanel() {
   const [filter, setFilter] = useState('pending')
   const [saving, setSaving] = useState(null)
   const [emailStatus, setEmailStatus] = useState({}) // { [id]: { state, message } }
+  const [declineRow, setDeclineRow] = useState(null)
+  const [declinePresets, setDeclinePresets] = useState([])
+  const [declineNote, setDeclineNote] = useState('')
+  const [ship, setShip] = useState({}) // { [id]: { shipment_details, tracking_number, tracking_url, admin_comment } }
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -2940,47 +3030,80 @@ function AmbassadorApplicationsPanel() {
 
   useEffect(() => { load() }, [load])
 
-  const updateStatus = async (row, status) => {
-    const current = String(row?.status || '').toLowerCase()
-    if (current === status) return
-    const label = status === 'approved' ? 'APPROVE' : 'REJECT'
-    if (!window.confirm(`${label} the ambassador application from "${row.full_name}" (@${row.instagram})?\n\nThis will set status to "${status}" and email the applicant.`)) return
+  const patchRow = (id, patch) => setRows(prev => prev.map(r => r.id === id ? { ...r, ...patch } : r))
+  const setEmail = (id, state, message) => setEmailStatus(prev => ({ ...prev, [id]: { state, message } }))
+
+  // APPROVE → set status, email the localised welcome + attach the signed contract PDF.
+  const approveRow = async (row) => {
+    if (String(row?.status || '').toLowerCase() === 'approved') return
+    if (!window.confirm(`Approve ${row.full_name} (@${row.instagram})?\n\nThis emails them the welcome message with their signed contract attached, and tells them their PR package is on the way.`)) return
     setSaving(row.id)
     const { error: err } = await supabase
       .from(AMBASSADOR_TABLE)
-      .update({ status, reviewed_at: new Date().toISOString() })
+      .update({ status: 'approved', reviewed_at: new Date().toISOString() })
       .eq('id', row.id)
-    setSaving(null)
-    if (err) { alert(err.message); return }
-    setRows(prev => prev.map(r => r.id === row.id ? { ...r, status } : r))
-
-    // Send notification email (mirrors the distributor approval flow).
-    if (row?.email && EMAIL_WEBHOOK_URL) {
-      const { subject, html } = buildAmbassadorEmail(row, status)
-      setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sending', message: '' } }))
-      const headers = { 'Content-Type': 'application/json' }
-      if (SUPABASE_ANON_KEY) {
-        headers['apikey'] = SUPABASE_ANON_KEY
-        headers['Authorization'] = `Bearer ${SUPABASE_ANON_KEY}`
-      }
-      try {
-        const res = await fetch(EMAIL_WEBHOOK_URL, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ to: row.email, subject, html, from: AMBASSADOR_FROM_EMAIL }),
-        })
-        const resJson = await res.json().catch(() => null)
-        if (res.ok) {
-          setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sent', message: `Email sent to ${row.email}` } }))
-        } else {
-          setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: resJson?.error || `HTTP ${res.status}` } }))
-        }
-      } catch (emailErr) {
-        setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: emailErr.message || 'Network error' } }))
-      }
-    } else if (row?.email && !EMAIL_WEBHOOK_URL) {
-      setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: 'VITE_EMAIL_WEBHOOK_URL is not configured — email not sent.' } }))
+    if (err) { setSaving(null); alert(err.message); return }
+    patchRow(row.id, { status: 'approved' })
+    setEmail(row.id, 'sending', '')
+    try {
+      const { base64, filename } = await buildAmbassadorContractPdf(ambassadorRowToContact(row))
+      const { subject, html } = buildAmbassadorApprovalEmail(row)
+      const attachments = base64 ? [{ filename, content: base64, contentType: 'application/pdf' }] : []
+      const res = await sendAmbassadorEmail({ to: row.email, subject, html, attachments })
+      setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Welcome + contract sent to ${row.email}` : res.error)
+    } catch (e) {
+      setEmail(row.id, 'error', e.message || 'PDF / email failed')
     }
+    setSaving(null)
+  }
+
+  const openDecline = (row) => { setDeclineRow(row); setDeclinePresets([]); setDeclineNote('') }
+
+  // DECLINE → set status + store reason, email the applicant why.
+  const submitDecline = async () => {
+    const row = declineRow
+    if (!row) return
+    const reasonText = [...declinePresets, declineNote.trim()].filter(Boolean).join('\n')
+    if (!reasonText) { alert('Please select at least one reason or add an explanation.'); return }
+    setSaving(row.id)
+    const { error: err } = await supabase
+      .from(AMBASSADOR_TABLE)
+      .update({ status: 'rejected', reviewed_at: new Date().toISOString(), decline_reason: reasonText })
+      .eq('id', row.id)
+    if (err) { setSaving(null); alert(err.message); return }
+    patchRow(row.id, { status: 'rejected', decline_reason: reasonText })
+    setDeclineRow(null)
+    setEmail(row.id, 'sending', '')
+    const { subject, html } = buildAmbassadorDeclineEmail(row, reasonText)
+    const res = await sendAmbassadorEmail({ to: row.email, subject, html })
+    setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Decline email sent to ${row.email}` : res.error)
+    setSaving(null)
+  }
+
+  // Follow-up: PR box details, tracking + comments.
+  const shipVal = (row, field) => (ship[row.id]?.[field] ?? row[field] ?? '')
+  const setShipField = (id, field, value) => setShip(prev => ({ ...prev, [id]: { ...prev[id], [field]: value } }))
+
+  const saveShipment = async (row, alsoEmail) => {
+    const draft = {
+      shipment_details: shipVal(row, 'shipment_details').trim() || null,
+      tracking_number: shipVal(row, 'tracking_number').trim() || null,
+      tracking_url: shipVal(row, 'tracking_url').trim() || null,
+      admin_comment: shipVal(row, 'admin_comment').trim() || null,
+    }
+    setSaving(row.id)
+    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update(draft).eq('id', row.id)
+    if (err) { setSaving(null); alert(err.message); return }
+    patchRow(row.id, draft)
+    if (alsoEmail) {
+      setEmail(row.id, 'sending', '')
+      const { subject, html } = buildAmbassadorShipmentEmail(row, draft)
+      const res = await sendAmbassadorEmail({ to: row.email, subject, html })
+      setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Shipment email sent to ${row.email}` : res.error)
+    } else {
+      setEmail(row.id, 'sent', 'Follow-up details saved')
+    }
+    setSaving(null)
   }
 
   const deleteApplication = async (row) => {
@@ -3032,7 +3155,6 @@ function AmbassadorApplicationsPanel() {
         <div className="space-y-2">
           {rows.map((row) => {
             const es = emailStatus[row.id]
-            const isPending = AMBASSADOR_PENDING_STATUSES.includes(String(row.status || '').toLowerCase())
             return (
               <div key={row.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <div className="flex items-start justify-between gap-3">
@@ -3053,12 +3175,20 @@ function AmbassadorApplicationsPanel() {
                       {row.followers && <span>{row.followers} followers</span>}
                       <a href={`mailto:${row.email}`} className="hover:underline">{row.email}</a>
                     </div>
+                    {row.message && (
+                      <p className="mt-2 whitespace-pre-line text-xs italic text-slate-600">“{row.message}”</p>
+                    )}
+                    <p className="mt-1.5 text-[11px] text-slate-400">
+                      {row.agreed_terms
+                        ? <>✓ Signed the Ambassador Agreement {row.agreement_version ? `(${row.agreement_version})` : ''} on {fmtDate(row.created_at)}</>
+                        : <span className="text-rose-500">⚠ No agreement on record</span>}
+                    </p>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1.5">
                     <div className="flex gap-1.5">
                       {row.status !== 'approved' && (
                         <button
-                          onClick={() => updateStatus(row, 'approved')}
+                          onClick={() => approveRow(row)}
                           disabled={saving === row.id}
                           className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-500 disabled:opacity-60"
                         >
@@ -3067,11 +3197,11 @@ function AmbassadorApplicationsPanel() {
                       )}
                       {row.status !== 'rejected' && (
                         <button
-                          onClick={() => updateStatus(row, 'rejected')}
+                          onClick={() => openDecline(row)}
                           disabled={saving === row.id}
                           className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-rose-500 disabled:opacity-60"
                         >
-                          ✕ Reject
+                          ✕ Decline
                         </button>
                       )}
                       {row.status === 'rejected' && (
@@ -3091,12 +3221,86 @@ function AmbassadorApplicationsPanel() {
                     )}
                   </div>
                 </div>
-                {row.message && (
-                  <p className={`mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-700 ${isPending ? '' : 'opacity-80'}`}>"{row.message}"</p>
+                {row.status === 'rejected' && row.decline_reason && (
+                  <p className="mt-2 whitespace-pre-line rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700">
+                    <strong>Decline reason:</strong>{'\n'}{row.decline_reason}
+                  </p>
+                )}
+                {row.status === 'approved' && (
+                  <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50/60 p-3">
+                    <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">PR box &amp; follow-up</p>
+                    <div className="mt-2 space-y-2">
+                      <textarea
+                        value={shipVal(row, 'shipment_details')}
+                        onChange={(e) => setShipField(row.id, 'shipment_details', e.target.value)}
+                        placeholder="What's in the box (products, freebies)…"
+                        rows={2}
+                        className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
+                      />
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <input
+                          value={shipVal(row, 'tracking_number')}
+                          onChange={(e) => setShipField(row.id, 'tracking_number', e.target.value)}
+                          placeholder="Tracking number"
+                          className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
+                        />
+                        <input
+                          value={shipVal(row, 'tracking_url')}
+                          onChange={(e) => setShipField(row.id, 'tracking_url', e.target.value)}
+                          placeholder="Tracking URL"
+                          className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
+                        />
+                      </div>
+                      <textarea
+                        value={shipVal(row, 'admin_comment')}
+                        onChange={(e) => setShipField(row.id, 'admin_comment', e.target.value)}
+                        placeholder="Comments / personal message to the ambassador…"
+                        rows={2}
+                        className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
+                      />
+                      <div className="flex flex-wrap gap-2">
+                        <button onClick={() => saveShipment(row, false)} disabled={saving === row.id} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Save</button>
+                        <button onClick={() => saveShipment(row, true)} disabled={saving === row.id} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
             )
           })}
+        </div>
+      )}
+
+      {declineRow && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4" onClick={() => setDeclineRow(null)}>
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-bold text-slate-900">Decline {declineRow.full_name}</h3>
+            <p className="mt-1 text-xs text-slate-500">Select the reason(s) — the applicant is emailed this explanation.</p>
+            <div className="mt-3 space-y-1.5">
+              {AMBASSADOR_DECLINE_PRESETS.map((preset) => (
+                <label key={preset} className="flex items-start gap-2 text-sm text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={declinePresets.includes(preset)}
+                    onChange={(e) => setDeclinePresets(prev => e.target.checked ? [...prev, preset] : prev.filter(p => p !== preset))}
+                    className="mt-0.5"
+                  />
+                  <span>{preset}</span>
+                </label>
+              ))}
+            </div>
+            <textarea
+              value={declineNote}
+              onChange={(e) => setDeclineNote(e.target.value)}
+              placeholder="Add a personal explanation (optional)…"
+              rows={3}
+              className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <button onClick={() => setDeclineRow(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+              <button onClick={submitDecline} disabled={saving === declineRow.id} className="rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-60">Decline &amp; email</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -3,75 +3,67 @@
 // /ambassador-agreement page. Bump AGREEMENT_VERSION whenever the terms change
 // so stored consents stay traceable to the exact wording that was agreed.
 
-export const AGREEMENT_VERSION = 'v1-2026-07'
+export const AGREEMENT_VERSION = 'v2-2026-07'
 
 // Minimum content commitment. Change this number to adjust the requirement
 // everywhere it appears (summary, full terms, and helper copy).
 export const POST_MIN_PER_MONTH = 4
 
+// Where ambassadors must send their content for our library.
+export const CONTENT_SUBMISSION_NUMBER = '+30 694 071 5234'
+
 // Short bullets shown inside the form's scrollable agreement panel.
 export const AGREEMENT_SUMMARY = [
   `Post at least ${POST_MIN_PER_MONTH} pieces of your own content each month (at least one a video/reel) using GEL.IT.UP® and tagging #gelitup and @gelitup.`,
   'Disclose the partnership where advertising rules require it (e.g. #ad / “gifted”).',
+  `Send the content you create to our official WhatsApp/Viber number (${CONTENT_SUBMISSION_NUMBER}) so we can save it to our library.`,
   'Use your personal discount code genuinely — for yourself and real clients/followers, never on coupon or reseller sites.',
-  'Let GEL.IT.UP® repost, feature and reuse content you tag us in, across our channels and marketing, with credit. You keep ownership.',
+  'Let GEL.IT.UP® save, repost, feature and reuse your content — including what you send us and what you tag — across our channels, marketing and other platforms, credited with your social media tags. You keep ownership.',
   'Free product drops are gifts to support your content, not a sale, and depend on you keeping up the monthly posts.',
   'Non-exclusive and month-to-month — you can work with others, and either side can end it anytime.',
 ]
 
-// Full agreement, section by section, for the standalone page.
+// Full agreement, section by section. Kept short, warm and plain — a friendly
+// one-page working agreement rather than dense legalese.
 export const AGREEMENT_SECTIONS = [
   {
-    heading: 'Who this is for',
+    heading: 'Welcome',
     points: [
-      'The GEL.IT.UP® Ambassador Programme is for serious nail professionals and artists who genuinely create with our products. It is a working collaboration — not a casual influencer arrangement.',
+      'This is a friendly working agreement between you and GEL.IT.UP® (GIUP®) as part of our Ambassador Programme — a collaboration between professionals, not a job. Here’s what we each do.',
     ],
   },
   {
-    heading: 'Your commitments',
+    heading: 'What you do',
     points: [
-      `Publish a minimum of ${POST_MIN_PER_MONTH} pieces of original content (photos or videos) every calendar month that feature GEL.IT.UP® products, and tag #gelitup and @gelitup. At least one of these must be a video/reel.`,
-      'Genuinely use GEL.IT.UP® products in the work you post.',
-      'Represent the brand honestly and professionally. Where advertising or consumer rules require it — including because you received free product — clearly disclose the partnership (e.g. #ad, #ambassador or “gifted”).',
-      'Use your personal discount code only for yourself and your genuine clients and followers. Do not post it on coupon, deal or reseller sites, or use it to resell for profit.',
-      'Keep your content original and your own. Do not post anything unlawful, offensive, or that infringes anyone else’s rights.',
+      `Share at least ${POST_MIN_PER_MONTH} pieces of your own content each month using GEL.IT.UP® products, tagging #gelitup and @gelitup — with at least one video/reel.`,
+      `Send the content you create to our WhatsApp/Viber (${CONTENT_SUBMISSION_NUMBER}) so we can save and feature it.`,
+      'Use your personal discount code just for you and your real clients and followers — not on coupon or reseller sites.',
+      'Where the rules ask (e.g. because a product was gifted), simply mark it as a partnership — #ad or “gifted”.',
     ],
   },
   {
-    heading: 'Permission to feature your content',
+    heading: 'What we do',
     points: [
-      'You grant GEL.IT.UP® (GIUP®) a non-exclusive, royalty-free, worldwide licence to repost, reproduce, resize/edit for format, feature and reuse any content you tag with @gelitup or #gelitup — across our social channels, website and marketing materials — with credit to your handle.',
-      'You keep full ownership of your content. This permission for already-shared posts continues even after the partnership ends.',
+      'Feature your work on our channels, give you a personal discount code, and send occasional free product drops to create with. Free products are gifts to support your content and depend on you keeping up your monthly posts.',
     ],
   },
   {
-    heading: 'What GEL.IT.UP® provides',
+    heading: 'Using your content',
     points: [
-      'Featuring your tagged work on our channels, including @gelitup.',
-      'A personal discount code for you and to share with your genuine followers.',
-      'Periodic free product drops, sent at our discretion to support your content. Free products are gifts provided for content creation, not a sale, and are conditional on you meeting the monthly posting commitment.',
+      'You let us save, repost, edit for format and reuse the content you send us or tag us in — across our channels, website, marketing and other platforms — always credited with your tags. The work must be your own; you keep ownership, and this stays true for anything already shared even if you later stop.',
     ],
   },
   {
-    heading: 'The relationship',
+    heading: 'The simple stuff',
     points: [
-      'This is a non-exclusive collaboration — you are free to work with other brands.',
-      'Nothing here creates employment, an agency relationship, or any guaranteed payment. You are responsible for any taxes due on benefits you receive.',
-      'The arrangement runs on a rolling month-to-month basis.',
-    ],
-  },
-  {
-    heading: 'Ending the partnership',
-    points: [
-      'Either side may end the partnership at any time, for any reason, by email or direct message.',
-      'If you repeatedly miss the monthly posting minimum, we may pause or end your ambassador status and deactivate your discount code.',
-      'When the partnership ends, you stop using your discount code and any active “ambassador” claims. The permission for content you already shared continues as set out above.',
+      'You’re free to work with other brands — this isn’t employment and there’s no guaranteed payment.',
+      'It runs month to month and either of us can stop anytime. If you stop, your discount code is switched off; permission for content already shared continues.',
     ],
   },
   {
     heading: 'Your signature',
     points: [
-      'By ticking the agreement box and submitting your application, you confirm you have read and agree to this Agreement. Your typed name is your electronic signature, dated on the day you submit.',
+      'By ticking the box and submitting your application, you agree to this. Your typed name is your signature, dated the day you apply.',
     ],
   },
 ]
