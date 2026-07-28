@@ -12,12 +12,12 @@
 
 import { AGREEMENT_SECTIONS, AGREEMENT_VERSION } from '../data/ambassadorAgreement.js'
 
-// ── Company letterhead details — edit freely. Confirm the legal entity / VAT. ──
+// ── Company letterhead details — edit freely. ──
 export const CONTRACT_COMPANY = {
-  brand: 'GEL.IT.UP® by GIUP®',
-  addressLine: '8 Racho Dimchev, Sofia, Bulgaria',
-  contactLine: 'info@gelitup.com   ·   gelitup.com   ·   +359 73 891 041',
-  footer: 'GEL.IT.UP® and GIUP® are registered trademarks. This agreement is governed by the laws of Bulgaria.',
+  brand: 'Thermitek Ltd — GEL.IT.UP® by GIUP®',
+  addressLine: '8 Racho Dimchev, Sofia, Bulgaria, 2700   ·   VAT BG202102027',
+  contactLine: 'info@gelitup.com   ·   gelitup.com',
+  footer: 'Thermitek Ltd (GEL.IT.UP® by GIUP®) · VAT BG202102027 · 8 Racho Dimchev, Sofia, Bulgaria, 2700. This agreement is governed by the laws of Bulgaria.',
 }
 
 const PINK = [212, 55, 144]
