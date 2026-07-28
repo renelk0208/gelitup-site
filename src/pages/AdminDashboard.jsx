@@ -2954,7 +2954,7 @@ function buildAmbassadorShipmentEmail(row, ship) {
   if (ship.shipment_details) parts.push(`<p><strong>What's inside:</strong><br/><span style="white-space:pre-line">${escAmb(ship.shipment_details)}</span></p>`)
   if (ship.tracking_number) parts.push(`<p><strong>Tracking number:</strong> ${escAmb(ship.tracking_number)}</p>`)
   if (ship.tracking_url) parts.push(`<p><a href="${escAmb(ship.tracking_url)}" style="color:#D43790">Track your parcel →</a></p>`)
-  if (ship.admin_comment) parts.push(`<p style="white-space:pre-line">${escAmb(ship.admin_comment)}</p>`)
+  // NOTE: admin_comment is intentionally NOT included — it is an internal-only note.
   return {
     subject: 'Your GEL.IT.UP PR package is on the way 📦',
     html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5">
@@ -3262,9 +3262,9 @@ function AmbassadorApplicationsPanel() {
                       <textarea
                         value={shipVal(row, 'admin_comment')}
                         onChange={(e) => setShipField(row.id, 'admin_comment', e.target.value)}
-                        placeholder="Comments / personal message to the ambassador…"
+                        placeholder="Internal notes — NOT sent to the ambassador (private)"
                         rows={2}
-                        className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
+                        className="w-full rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs"
                       />
                       <div className="flex flex-wrap gap-2">
                         <button onClick={() => saveShipment(row, false)} disabled={saving === row.id} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Save</button>
