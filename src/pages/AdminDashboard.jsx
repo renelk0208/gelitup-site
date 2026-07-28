@@ -3127,6 +3127,32 @@ function AmbassadorApplicationsPanel() {
     setSaving(null)
   }
 
+  const noteLines = (row) => String(row.admin_comment || '').split('\n').filter((l) => l.trim())
+
+  const saveNotes = async (row, lines) => {
+    const newLog = lines.join('\n') || null
+    setSaving(row.id)
+    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: newLog }).eq('id', row.id)
+    if (err) { setSaving(null); alert(err.message); return }
+    patchRow(row.id, { admin_comment: newLog })
+    setSaving(null)
+  }
+
+  const editNote = async (row, idx) => {
+    const lines = noteLines(row)
+    const edited = window.prompt('Edit note:', lines[idx])
+    if (edited === null) return
+    if (!edited.trim()) { lines.splice(idx, 1) } else { lines[idx] = edited.trim() }
+    await saveNotes(row, lines)
+  }
+
+  const deleteNote = async (row, idx) => {
+    if (!window.confirm('Delete this note?')) return
+    const lines = noteLines(row)
+    lines.splice(idx, 1)
+    await saveNotes(row, lines)
+  }
+
   const saveShipment = async (row, alsoEmail) => {
     const draft = {
       shipment_details: shipVal(row, 'shipment_details').trim() || null,
@@ -3322,9 +3348,17 @@ function AmbassadorApplicationsPanel() {
                       {/* Internal notes log (private, not emailed) */}
                       <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50 p-2">
                         <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">Internal notes (private)</p>
-                        {row.admin_comment && (
-                          <div className="mb-1.5 max-h-28 overflow-y-auto whitespace-pre-line rounded bg-white px-2 py-1.5 text-[11px] text-slate-600">
-                            {row.admin_comment}
+                        {noteLines(row).length > 0 && (
+                          <div className="mb-1.5 max-h-32 space-y-1 overflow-y-auto">
+                            {noteLines(row).map((line, idx) => (
+                              <div key={idx} className="flex items-start justify-between gap-2 rounded bg-white px-2 py-1 text-[11px] text-slate-600">
+                                <span className="whitespace-pre-line">{line}</span>
+                                <span className="flex shrink-0 gap-1.5">
+                                  <button type="button" title="Edit" onClick={() => editNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-slate-700 disabled:opacity-50">✎</button>
+                                  <button type="button" title="Delete" onClick={() => deleteNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-rose-600 disabled:opacity-50">🗑</button>
+                                </span>
+                              </div>
+                            ))}
                           </div>
                         )}
                         <div className="flex gap-2">
