@@ -69,7 +69,7 @@ const PERKS = [
   {
     emoji: '📸',
     title: 'Featured on our Instagram',
-    body: 'Your nail work reposted to @gelitup — real exposure to thousands of pros and clients across Europe.',
+    body: 'Your nail work reposted to @gelitupinternational — real exposure to thousands of pros and clients across Europe.',
   },
   {
     emoji: '🏷️',
@@ -121,7 +121,7 @@ export default function AmbassadorPage() {
     if (meta) {
       meta.setAttribute(
         'content',
-        'Get your nail work featured on @gelitup, earn a personal discount code and receive free product drops. Apply to become a GEL.IT.UP ambassador.',
+        'Get your nail work featured on @gelitupinternational, earn a personal discount code and receive free product drops. Apply to become a GEL.IT.UP ambassador.',
       )
     }
   }, [])
@@ -214,12 +214,12 @@ export default function AmbassadorPage() {
             <span aria-hidden="true">→</span>
           </button>
           <a
-            href="https://www.instagram.com/gelitup/"
+            href="https://www.instagram.com/gelitupinternational/"
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-2 rounded-full border border-white/25 px-8 py-4 text-sm font-bold uppercase tracking-[0.06em] text-white/85 transition duration-300 hover:bg-white/10 hover:text-white"
           >
-            See @gelitup
+            See @gelitupinternational
           </a>
         </div>
         <p className="mt-6 text-xs font-medium uppercase tracking-[0.14em] text-white/45">
