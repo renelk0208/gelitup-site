@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import * as XLSX from 'xlsx'
 import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
-import { buildAmbassadorContractPdf } from '../lib/ambassadorContractPdf.js'
+import { buildAmbassadorContractPdf, buildAmbassadorBriefPdf } from '../lib/ambassadorContractPdf.js'
 import { CONTRACT_I18N, resolveContractLang } from '../data/ambassadorContractI18n.js'
 
 const REGISTRATIONS_TABLE = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || 'b2b_registrations'
@@ -2961,8 +2961,9 @@ function buildAmbassadorShipmentEmail(row, ship) {
       <p>Hi ${escAmb(name)},</p>
       <p>Great news — your GEL.IT.UP PR package is on its way! 🎉</p>
       ${parts.join('')}
+      <p>📎 We've attached a short <strong>“About Us”</strong> letter — please have a read before you film, so you know a little about the brand and what to mention.</p>
       <p>Tag <strong>@gelitup</strong> and send your looks to our WhatsApp/Viber so we can feature you.</p>
-      <p>The GEL.IT.UP® Team</p>
+      <p>The GEL.IT.UP Team</p>
     </div>`,
   }
 }
@@ -3098,8 +3099,13 @@ function AmbassadorApplicationsPanel() {
     if (alsoEmail) {
       setEmail(row.id, 'sending', '')
       const { subject, html } = buildAmbassadorShipmentEmail(row, draft)
-      const res = await sendAmbassadorEmail({ to: row.email, subject, html })
-      setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Shipment email sent to ${row.email}` : res.error)
+      let attachments = []
+      try {
+        const brief = await buildAmbassadorBriefPdf(ambassadorRowToContact(row))
+        if (brief.base64) attachments = [{ filename: brief.filename, content: brief.base64, contentType: 'application/pdf' }]
+      } catch { /* send without the letter if PDF build fails */ }
+      const res = await sendAmbassadorEmail({ to: row.email, subject, html, attachments })
+      setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Shipment email + About Us letter sent to ${row.email}` : res.error)
     } else {
       setEmail(row.id, 'sent', 'Follow-up details saved')
     }
