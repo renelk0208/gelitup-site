@@ -14,6 +14,8 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 const AMBASSADOR_TABLE = import.meta.env.VITE_AMBASSADOR_TABLE || 'ambassador_applications'
 // Reuse the working distributors@ sender (guaranteed deliverability), branded for ambassadors.
 const AMBASSADOR_FROM_EMAIL = import.meta.env.VITE_AMBASSADOR_EMAIL_FROM || 'GEL.IT.UP Ambassadors <distributors@gelitup.com>'
+// Replies to portal messages land here (Zoho inbox).
+const AMBASSADOR_REPLY_TO = import.meta.env.VITE_AMBASSADOR_INBOX || 'info@gelitup.com'
 // Statuses that count as "needs review" (form inserts default to 'new').
 const AMBASSADOR_PENDING_STATUSES = ['new', 'pending', 'submitted']
 
@@ -2969,7 +2971,7 @@ function buildAmbassadorShipmentEmail(row, ship) {
 }
 
 // Sends an email (optionally with a PDF attachment) via the webhook. Returns {ok, error}.
-async function sendAmbassadorEmail({ to, subject, html, attachments }) {
+async function sendAmbassadorEmail({ to, subject, html, attachments, replyTo }) {
   if (!EMAIL_WEBHOOK_URL) return { ok: false, error: 'VITE_EMAIL_WEBHOOK_URL is not configured — email not sent.' }
   const headers = { 'Content-Type': 'application/json' }
   if (SUPABASE_ANON_KEY) {
@@ -2977,6 +2979,7 @@ async function sendAmbassadorEmail({ to, subject, html, attachments }) {
     headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`
   }
   const body = { to, subject, html, from: AMBASSADOR_FROM_EMAIL }
+  if (replyTo) body.replyTo = replyTo
   if (attachments?.length) body.attachments = attachments
   try {
     const res = await fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers, body: JSON.stringify(body) })
@@ -3011,6 +3014,9 @@ function AmbassadorApplicationsPanel() {
   const [declineRow, setDeclineRow] = useState(null)
   const [declinePresets, setDeclinePresets] = useState([])
   const [declineNote, setDeclineNote] = useState('')
+  const [msgRow, setMsgRow] = useState(null)
+  const [msgSubject, setMsgSubject] = useState('')
+  const [msgBody, setMsgBody] = useState('')
   const [ship, setShip] = useState({}) // { [id]: { shipment_details, tracking_number, tracking_url, admin_comment } }
 
   const load = useCallback(async () => {
@@ -3055,6 +3061,27 @@ function AmbassadorApplicationsPanel() {
     } catch (e) {
       setEmail(row.id, 'error', e.message || 'PDF / email failed')
     }
+    setSaving(null)
+  }
+
+  const openMessage = (row) => { setMsgRow(row); setMsgSubject('A message from GEL.IT.UP'); setMsgBody('') }
+
+  // Free-form message to the ambassador. Reply-to points at the Zoho inbox so replies come back to you.
+  const sendMessage = async () => {
+    const row = msgRow
+    if (!row) return
+    if (!msgSubject.trim() || !msgBody.trim()) { alert('Add a subject and a message.'); return }
+    setSaving(row.id)
+    const firstName = String(row.full_name || '').split(' ')[0] || 'there'
+    const html = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5">
+      <p>Hi ${escAmb(firstName)},</p>
+      <div style="white-space:pre-line">${escAmb(msgBody.trim())}</div>
+      <p>The GEL.IT.UP Team</p>
+    </div>`
+    setEmail(row.id, 'sending', '')
+    const res = await sendAmbassadorEmail({ to: row.email, subject: msgSubject.trim(), html, replyTo: AMBASSADOR_REPLY_TO })
+    setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Message sent to ${row.email} (replies go to ${AMBASSADOR_REPLY_TO})` : res.error)
+    if (res.ok) setMsgRow(null)
     setSaving(null)
   }
 
@@ -3200,6 +3227,13 @@ function AmbassadorApplicationsPanel() {
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1.5">
                     <div className="flex gap-1.5">
+                      <button
+                        onClick={() => openMessage(row)}
+                        disabled={saving === row.id}
+                        className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 disabled:opacity-60"
+                      >
+                        ✉ Message
+                      </button>
                       {row.status !== 'approved' && (
                         <button
                           onClick={() => approveRow(row)}
@@ -3282,6 +3316,33 @@ function AmbassadorApplicationsPanel() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {msgRow && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4" onClick={() => setMsgRow(null)}>
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-bold text-slate-900">Message {msgRow.full_name}</h3>
+            <p className="mt-1 text-xs text-slate-500">Sends to {msgRow.email}. Their reply comes back to {AMBASSADOR_REPLY_TO}.</p>
+            <input
+              type="text"
+              value={msgSubject}
+              onChange={(e) => setMsgSubject(e.target.value)}
+              placeholder="Subject"
+              className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            />
+            <textarea
+              value={msgBody}
+              onChange={(e) => setMsgBody(e.target.value)}
+              placeholder={`Write your message… (it opens with "Hi ${String(msgRow.full_name || '').split(' ')[0] || 'there'},")`}
+              rows={6}
+              className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <button onClick={() => setMsgRow(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+              <button onClick={sendMessage} disabled={saving === msgRow.id} className="rounded-lg bg-[#D43790] px-3 py-2 text-sm font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Send message</button>
+            </div>
+          </div>
         </div>
       )}
 
