@@ -77,7 +77,7 @@ export default function WinterVaultLandingPage() {
   }
 
   useEffect(() => {
-    document.title = 'The Winter Vault | GEL.IT.UP® by GIUP®'
+    document.title = 'The Winter Vault | GEL.IT.UP by GIUP®'
     const meta = document.querySelector('meta[name="description"]')
     if (meta) meta.setAttribute('content', 'Something new is locked in the vault. It opens 1 September — leave your email and be the first inside.')
   }, [])
@@ -102,7 +102,7 @@ export default function WinterVaultLandingPage() {
       {/* The vault */}
       <section className="flex-1 px-5 py-14 sm:py-20 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.25em]" style={{ color: '#D43790' }}>
-          GEL.IT.UP® by GIUP® — The Winter Vault
+          GEL.IT.UP by GIUP® — The Winter Vault
         </p>
         <h1 className="heading-on-dark mt-4 text-4xl sm:text-6xl font-black leading-tight tracking-tight" style={{ color: '#fff' }}>
           Something new is<br />locked away
@@ -168,7 +168,7 @@ export default function WinterVaultLandingPage() {
 
       {/* Minimal footer */}
       <footer className="px-5 py-5 text-center text-xs" style={{ color: '#9ca3af', backgroundColor: '#111' }}>
-        © {new Date().getFullYear()} GEL.IT.UP® by GIUP® · gelitup.com ·{' '}
+        © {new Date().getFullYear()} GEL.IT.UP by GIUP® · gelitup.com ·{' '}
         <NavLink to="/privacy-policy" className="underline">Privacy</NavLink>
       </footer>
     </div>

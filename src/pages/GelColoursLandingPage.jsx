@@ -49,7 +49,7 @@ const TRUST_BADGES = [
 
 export default function GelColoursLandingPage() {
   useEffect(() => {
-    document.title = 'Professional Gel Colours | GEL.IT.UP® by GIUP®'
+    document.title = 'Professional Gel Colours | GEL.IT.UP by GIUP®'
     const meta = document.querySelector('meta[name="description"]')
     if (meta) meta.setAttribute('content', 'Wholesale professional gel colours for nail technicians, salons and academies. HEMA-free, EU certified, 200+ shades. Order online or register as a distributor.')
   }, [])
@@ -74,7 +74,7 @@ export default function GelColoursLandingPage() {
       {/* Hero */}
       <section className="px-5 py-12 sm:py-20 text-center" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>
         <p className="text-xs font-semibold uppercase tracking-[0.25em]" style={{ color: '#D43790' }}>
-          GEL.IT.UP® by GIUP® — Professional Nail System
+          GEL.IT.UP by GIUP® — Professional Nail System
         </p>
         <h1 className="mt-4 text-4xl sm:text-6xl font-black leading-tight tracking-tight">
           200+ Professional<br />Gel Colours
@@ -195,7 +195,7 @@ export default function GelColoursLandingPage() {
 
       {/* Minimal footer */}
       <footer className="px-5 py-5 text-center text-xs" style={{ color: '#9ca3af', backgroundColor: '#111' }}>
-        © {new Date().getFullYear()} GEL.IT.UP® by GIUP® · gelitup.com ·{' '}
+        © {new Date().getFullYear()} GEL.IT.UP by GIUP® · gelitup.com ·{' '}
         <NavLink to="/privacy-policy" className="underline">Privacy</NavLink>
       </footer>
     </div>

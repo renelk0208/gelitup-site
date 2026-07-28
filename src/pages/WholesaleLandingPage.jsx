@@ -14,7 +14,7 @@ const WHO_ITS_FOR = [
   { icon: '✂️', title: 'Nail Technicians', detail: 'Stock professional-grade gel that performs every service — from basics to advanced nail art.' },
   { icon: '💅', title: 'Nail Salons', detail: 'Keep every chair stocked with consistent, client-approved gel. One supplier, one invoice.' },
   { icon: '🏫', title: 'Nail Academies', detail: 'Supply your students with the brands they\'ll use throughout their career.' },
-  { icon: '🏪', title: 'Wholesalers & Resellers', detail: 'Add GEL.IT.UP® to your range. Competitive margins, reliable stock, EU-ready compliance docs.' },
+  { icon: '🏪', title: 'Wholesalers & Resellers', detail: 'Add GEL.IT.UP to your range. Competitive margins, reliable stock, EU-ready compliance docs.' },
 ]
 
 const STEPS = [
@@ -25,9 +25,9 @@ const STEPS = [
 
 export default function WholesaleLandingPage() {
   useEffect(() => {
-    document.title = 'Nail Supplies Wholesale | GEL.IT.UP® by GIUP®'
+    document.title = 'Nail Supplies Wholesale | GEL.IT.UP by GIUP®'
     const meta = document.querySelector('meta[name="description"]')
-    if (meta) meta.setAttribute('content', 'Wholesale nail technician supplies from GEL.IT.UP®. Gel polish, builder gel, base & top coats. HEMA-free, EU certified. Open a free B2B account and access trade pricing instantly.')
+    if (meta) meta.setAttribute('content', 'Wholesale nail technician supplies from GEL.IT.UP. Gel polish, builder gel, base & top coats. HEMA-free, EU certified. Open a free B2B account and access trade pricing instantly.')
   }, [])
 
   return (
@@ -50,7 +50,7 @@ export default function WholesaleLandingPage() {
       {/* Hero */}
       <section className="px-5 py-14 sm:py-24 text-center" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>
         <p className="text-xs font-semibold uppercase tracking-[0.25em]" style={{ color: '#D43790' }}>
-          GEL.IT.UP® by GIUP® — Wholesale Nail Supplies
+          GEL.IT.UP by GIUP® — Wholesale Nail Supplies
         </p>
         <h1 className="mt-4 text-4xl sm:text-6xl font-black leading-tight tracking-tight">
           Professional Nail<br />Supplies, Wholesale
@@ -103,7 +103,7 @@ export default function WholesaleLandingPage() {
       <section className="px-5 py-14 sm:py-20" style={{ backgroundColor: '#fff', borderTop: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
         <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-black text-center mb-10" style={{ color: '#1a1a1a' }}>
-            Why buy wholesale from GEL.IT.UP®
+            Why buy wholesale from GEL.IT.UP
           </h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {BENEFITS.map((b) => (
@@ -170,7 +170,7 @@ export default function WholesaleLandingPage() {
 
       {/* Footer */}
       <footer className="px-5 py-5 text-center text-xs" style={{ color: '#9ca3af', backgroundColor: '#111' }}>
-        © {new Date().getFullYear()} GEL.IT.UP® by GIUP® · gelitup.com ·{' '}
+        © {new Date().getFullYear()} GEL.IT.UP by GIUP® · gelitup.com ·{' '}
         <NavLink to="/privacy-policy" className="underline">Privacy</NavLink>
       </footer>
     </div>

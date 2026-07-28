@@ -75,9 +75,9 @@ export default function AcademySampleKitPage() {
   const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
-    document.title = 'Free Academy Sample Kit | GEL.IT.UP® for Nail Academies'
+    document.title = 'Free Academy Sample Kit | GEL.IT.UP for Nail Academies'
     const meta = document.querySelector('meta[name="description"]')
-    if (meta) meta.setAttribute('content', 'Claim a free GEL.IT.UP® sample kit for your nail academy. HEMA-free, TPO-free, EU-certified gel samples plus the full compliance pack — shipped free to your school.')
+    if (meta) meta.setAttribute('content', 'Claim a free GEL.IT.UP sample kit for your nail academy. HEMA-free, TPO-free, EU-certified gel samples plus the full compliance pack — shipped free to your school.')
   }, [])
 
   // Pre-fill country from visitor geo (only if it's a campaign market)
@@ -210,7 +210,7 @@ export default function AcademySampleKitPage() {
           {/* Left: the pitch */}
           <div className="text-white">
             <p className="text-xs font-semibold uppercase tracking-[0.25em]" style={{ color: '#D43790' }}>
-              GEL.IT.UP® by GIUP® — For Nail Academies
+              GEL.IT.UP by GIUP® — For Nail Academies
             </p>
             <h1 className="heading-on-dark mt-4 text-4xl sm:text-5xl font-black leading-tight tracking-tight">
               Your free academy<br />sample kit
@@ -375,7 +375,7 @@ export default function AcademySampleKitPage() {
                       className="mt-0.5 h-4 w-4 shrink-0"
                     />
                     <span>
-                      I agree that GEL.IT.UP® may contact me about my sample kit and academy wholesale offers.
+                      I agree that GEL.IT.UP may contact me about my sample kit and academy wholesale offers.
                       See our <NavLink to="/privacy-policy" className="underline">Privacy Policy</NavLink>.
                     </span>
                   </label>
@@ -407,7 +407,7 @@ export default function AcademySampleKitPage() {
 
       {/* Minimal footer */}
       <footer className="px-5 py-5 text-center text-xs" style={{ color: '#9ca3af', backgroundColor: '#111' }}>
-        © {new Date().getFullYear()} GEL.IT.UP® by GIUP® · gelitup.com ·{' '}
+        © {new Date().getFullYear()} GEL.IT.UP by GIUP® · gelitup.com ·{' '}
         <NavLink to="/privacy-policy" className="underline">Privacy</NavLink>
       </footer>
     </div>

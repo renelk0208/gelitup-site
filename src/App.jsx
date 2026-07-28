@@ -1748,8 +1748,8 @@ function isTechnicalSku(code) {
 
 function DistributorPackagesPage() {
   useEffect(() => setPageSEO({
-    title: 'Distributor Packages | Wholesale Partnership Tiers | GEL.IT.UP®',
-    description: 'View GEL.IT.UP® distributor partnership tiers and wholesale packages. Professional nail supply distribution across Europe and worldwide. Apply today at gelitup.com.',
+    title: 'Distributor Packages | Wholesale Partnership Tiers | GEL.IT.UP',
+    description: 'View GEL.IT.UP distributor partnership tiers and wholesale packages. Professional nail supply distribution across Europe and worldwide. Apply today at gelitup.com.',
     canonical: 'https://gelitup.com/distributor-packages',
   }), [])
 
@@ -1983,8 +1983,8 @@ function DistributorPackagesPage() {
 
 function ForAcademiesPage(){
   useEffect(() => setPageSEO({
-    title: 'Nail Academy Supplies Wholesale | GEL.IT.UP® Professional Nail Systems',
-    description: 'Professional nail academy supplies wholesale. GEL.IT.UP® supplies certified gel systems, training materials and branded support to nail academies worldwide. HEMA-free, TPO-free, EU certified.',
+    title: 'Nail Academy Supplies Wholesale | GEL.IT.UP Professional Nail Systems',
+    description: 'Professional nail academy supplies wholesale. GEL.IT.UP supplies certified gel systems, training materials and branded support to nail academies worldwide. HEMA-free, TPO-free, EU certified.',
     canonical: 'https://gelitup.com/for-academies',
   }), [])
 
@@ -3275,58 +3275,58 @@ const SUBCAT_VANITY_PATH = {
 
 const SUBCATEGORY_SEO = {
   'solid-gel-polish': {
-    title: 'Wholesale Gel Polish Supplier | 1,000+ Shades | GEL.IT.UP® Professional',
+    title: 'Wholesale Gel Polish Supplier | 1,000+ Shades | GEL.IT.UP Professional',
     description: 'Over 1,000 shades of professional gel polish available wholesale. HEMA-free, TPO-free, Leaping Bunny Approved. Bulk supply for nail technicians, salons and academies across the EU and worldwide.',
     canonical: 'https://gelitup.com/solid-gel-polish',
   },
   'cat-eye': {
-    title: 'Cat Eye Gel Polish Wholesale | Dreamy Cat Eye Collection | GEL.IT.UP®',
+    title: 'Cat Eye Gel Polish Wholesale | Dreamy Cat Eye Collection | GEL.IT.UP',
     description: 'Professional magnetic cat eye gel polish available wholesale. Multidimensional finish your clients will ask for by name. HEMA-free, TPO-free, Leaping Bunny Approved. Open a wholesale account today.',
     canonical: 'https://gelitup.com/cat-eye',
   },
   'shimmer': {
-    title: 'Shimmer Gel Polish Wholesale | Professional Nail Supplies | GEL.IT.UP®',
+    title: 'Shimmer Gel Polish Wholesale | Professional Nail Supplies | GEL.IT.UP',
     description: 'Professional shimmer gel polish available in bulk wholesale. HEMA-free, TPO-free, Leaping Bunny Approved. For nail technicians, salons and academies. Open a wholesale account at gelitup.com.',
     canonical: 'https://gelitup.com/shimmer',
   },
   'glitters': {
-    title: 'Glitter Gel Polish Wholesale | Professional Nail Supplies | GEL.IT.UP®',
+    title: 'Glitter Gel Polish Wholesale | Professional Nail Supplies | GEL.IT.UP',
     description: 'Wholesale glitter gel polish for professional nail technicians and salons. HEMA-free, TPO-free, Leaping Bunny Approved. 15+ countries served. Open a B2B wholesale account today.',
     canonical: 'https://gelitup.com/glitters',
   },
   'mirror-powder': {
-    title: 'Mirror Powder Wholesale | Chrome Nail Supplies | GEL.IT.UP® Professional',
+    title: 'Mirror Powder Wholesale | Chrome Nail Supplies | GEL.IT.UP Professional',
     description: 'Professional mirror powder and chrome nail supplies available wholesale. HEMA-free, TPO-free, EU certified. For nail technicians, salons and academies. Open a wholesale account at gelitup.com.',
     canonical: 'https://gelitup.com/mirror-powder',
   },
   'by-the-ocean': {
-    title: 'By The Ocean Collection | Wholesale Gel Polish | GEL.IT.UP® Professional',
+    title: 'By The Ocean Collection | Wholesale Gel Polish | GEL.IT.UP Professional',
     description: 'By The Ocean gel polish collection available wholesale for professional nail technicians and salons. HEMA-free, TPO-free, Leaping Bunny Approved. Open a wholesale account today.',
     canonical: 'https://gelitup.com/by-the-ocean',
   },
   'bob': {
-    title: 'BOB Collection | Professional Gel Polish Wholesale | GEL.IT.UP®',
+    title: 'BOB Collection | Professional Gel Polish Wholesale | GEL.IT.UP',
     description: 'The BOB gel polish collection available wholesale for nail technicians and salons. HEMA-free, TPO-free, Leaping Bunny Approved. EU certified. Open a B2B account at gelitup.com.',
     canonical: 'https://gelitup.com/bob',
   },
   'premium-builder': {
-    title: 'Premium Builder Gel Wholesale | HEMA-Free | GEL.IT.UP® Professional',
+    title: 'Premium Builder Gel Wholesale | HEMA-Free | GEL.IT.UP Professional',
     description: '3-in-1 Premium Builder Gel wholesale for nail professionals. Fiberglass-reinforced, single-phase, no base or top coat needed. HEMA-free, TPO-free, Leaping Bunny Approved. Open a wholesale account.',
     canonical: 'https://gelitup.com/premium-builder',
   },
   '3in1': {
-    title: '3-in-1 Builder Gel Wholesale | Professional Nail Systems | GEL.IT.UP®',
+    title: '3-in-1 Builder Gel Wholesale | Professional Nail Systems | GEL.IT.UP',
     description: 'Professional 3-in-1 builder gel available wholesale for nail technicians, salons and academies. HEMA-free, TPO-free, EU certified, Leaping Bunny Approved. Wholesale accounts available worldwide.',
     canonical: 'https://gelitup.com/3in1',
   },
   '5in1-base': {
-    title: '5-in-1 Superior Base Coat Wholesale | HEMA-Free | GEL.IT.UP® Professional',
+    title: '5-in-1 Superior Base Coat Wholesale | HEMA-Free | GEL.IT.UP Professional',
     description: '5-in-1 Superior Base Coat wholesale for nail professionals. Works as base coat, reinforced base, shaping gel, decoration glue and extension gel. HEMA-free, TPO-free, Leaping Bunny Approved.',
     canonical: 'https://gelitup.com/5in1-base',
   },
   'liquid-polygel': {
-    title: 'Polygel Wholesale Supplier | MultiMix Synthogel | GEL.IT.UP® Professional',
-    description: 'Professional polygel wholesale supplier. GEL.IT.UP® MultiMix Synthogel — acrylic strength, gel ease, zero heat spikes, odourless. HEMA-free, TPO-free, Leaping Bunny Approved. Open a wholesale account.',
+    title: 'Polygel Wholesale Supplier | MultiMix Synthogel | GEL.IT.UP Professional',
+    description: 'Professional polygel wholesale supplier. GEL.IT.UP MultiMix Synthogel — acrylic strength, gel ease, zero heat spikes, odourless. HEMA-free, TPO-free, Leaping Bunny Approved. Open a wholesale account.',
     canonical: 'https://gelitup.com/liquid-polygel',
   },
 }
@@ -3653,8 +3653,8 @@ function FullCataloguePage() {
   useEffect(() => {
     const subSlug = (searchParams.get('subcategory') || '').toLowerCase().trim()
     const seo = SUBCATEGORY_SEO[subSlug] || {
-      title: 'Full Product Catalogue | Wholesale Nail Supplies | GEL.IT.UP® by GIUP®',
-      description: 'Browse the complete GEL.IT.UP® wholesale catalogue. 1,000+ gel polish shades, builder gels, base coats, nail art and professional tools. HEMA-free, TPO-free, EU certified.',
+      title: 'Full Product Catalogue | Wholesale Nail Supplies | GEL.IT.UP by GIUP®',
+      description: 'Browse the complete GEL.IT.UP wholesale catalogue. 1,000+ gel polish shades, builder gels, base coats, nail art and professional tools. HEMA-free, TPO-free, EU certified.',
       canonical: 'https://gelitup.com/full-catalogue',
     }
     return setPageSEO(seo)
@@ -7625,7 +7625,7 @@ function HomePage({ onOpenContactModal }) {
   const safeShimmerIndex = HOME_SHIMMER_IMAGES.length ? Math.min(activeShimmerSlide, HOME_SHIMMER_IMAGES.length - 1) : 0
 
   useEffect(() => setPageSEO({
-    title: 'GEL.IT.UP® by GIUP® | Professional Gel Polish, Builder Gel & Nail Systems',
+    title: 'GEL.IT.UP by GIUP® | Professional Gel Polish, Builder Gel & Nail Systems',
     description: 'Wholesale gel polish, builder gel and nail systems for nail technicians, salons and academies. HEMA-free, TPO-free, EU certified, Leaping Bunny Approved. 15+ countries.',
     canonical: 'https://gelitup.com/',
   }), [])
@@ -8243,8 +8243,8 @@ function DistributorsPage() {
   const [selectedCountry, setSelectedCountry] = useState(DISTRIBUTOR_COUNTRY_POINTS[0]?.country ?? '')
 
   useEffect(() => setPageSEO({
-    title: 'Our Distributors | Authorised Wholesale Partners | GEL.IT.UP®',
-    description: 'Find your nearest authorised GEL.IT.UP® distributor. Professional nail supply wholesale partners across 15+ countries in Europe and worldwide.',
+    title: 'Our Distributors | Authorised Wholesale Partners | GEL.IT.UP',
+    description: 'Find your nearest authorised GEL.IT.UP distributor. Professional nail supply wholesale partners across 15+ countries in Europe and worldwide.',
     canonical: 'https://gelitup.com/distributors',
   }), [])
 
@@ -8933,8 +8933,8 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
 function BuyerRegister() {
   const navigate = useNavigate()
   useEffect(() => setPageSEO({
-    title: 'Open a Wholesale Account | GEL.IT.UP® Professional Nail Supplies',
-    description: 'Open a B2B wholesale account with GEL.IT.UP® by GIUP®. Access 1,000+ professional nail products including gel polish, builder gel and nail systems. HEMA-free, TPO-free, EU certified.',
+    title: 'Open a Wholesale Account | GEL.IT.UP Professional Nail Supplies',
+    description: 'Open a B2B wholesale account with GEL.IT.UP by GIUP®. Access 1,000+ professional nail products including gel polish, builder gel and nail systems. HEMA-free, TPO-free, EU certified.',
     canonical: 'https://gelitup.com/register',
   }), [])
   const [form, setForm] = useState({ email: '', password: '', confirmPassword: '', companyName: '' })
@@ -10041,8 +10041,8 @@ function CheckoutPage() {
 function PortalRegister({ onRegister }) {
   const lang = useLang()
   useEffect(() => setPageSEO({
-    title: 'Become a GEL.IT.UP® Distributor | Wholesale Nail Supplies EU & Worldwide',
-    description: 'Apply to become an authorised GEL.IT.UP® distributor. Join our verified wholesale network across 15+ countries. Professional nail supplies, EU certified, HEMA-free, TPO-free.',
+    title: 'Become a GEL.IT.UP Distributor | Wholesale Nail Supplies EU & Worldwide',
+    description: 'Apply to become an authorised GEL.IT.UP distributor. Join our verified wholesale network across 15+ countries. Professional nail supplies, EU certified, HEMA-free, TPO-free.',
     canonical: 'https://gelitup.com/become-distributor',
   }), [])
   const R = (getTranslations(lang) || {}).register || {}

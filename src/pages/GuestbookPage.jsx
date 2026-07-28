@@ -130,8 +130,8 @@ export default function GuestbookPage() {
     const canon = document.querySelector('link[rel="canonical"]')
     prev.desc = metaDesc?.getAttribute('content')
     prev.canon = canon?.getAttribute('href')
-    document.title = 'Guestbook | Nail Technician Reviews | GEL.IT.UP® Professional'
-    metaDesc?.setAttribute('content', 'Read reviews from professional nail technicians, salons and academies who trust GEL.IT.UP® products every day. Join our global wholesale community at gelitup.com.')
+    document.title = 'Guestbook | Nail Technician Reviews | GEL.IT.UP Professional'
+    metaDesc?.setAttribute('content', 'Read reviews from professional nail technicians, salons and academies who trust GEL.IT.UP products every day. Join our global wholesale community at gelitup.com.')
     canon?.setAttribute('href', 'https://gelitup.com/guestbook')
     return () => {
       document.title = prev.title

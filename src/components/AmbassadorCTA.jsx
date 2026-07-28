@@ -16,7 +16,7 @@ export default function AmbassadorCTA({ variant = 'strip' }) {
     <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
-          GEL.IT.UP® Ambassadors
+          GEL.IT.UP Ambassadors
         </p>
         <p className="mt-1 text-lg font-black leading-tight text-white sm:text-xl">
           Want to see <span className="italic">your</span> nails featured here?

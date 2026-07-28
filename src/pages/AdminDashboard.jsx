@@ -2945,7 +2945,7 @@ function buildAmbassadorDeclineEmail(row, reasonText) {
       <p>Thank you for applying to become a GEL.IT.UP ambassador and for sharing your work with us.</p>
       <p>After review, we're not able to move forward with your application at this time.</p>
       ${reasonBlock}
-      <p>You're welcome to apply again in the future. Wishing you all the best,<br/>The GEL.IT.UP® Team</p>
+      <p>You're welcome to apply again in the future. Wishing you all the best,<br/>The GEL.IT.UP Team</p>
     </div>`,
   }
 }
