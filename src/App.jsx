@@ -6912,33 +6912,33 @@ const navItems = [
 // catalogue section); subcategory links use ?subcategory= (selects and scrolls
 // straight to that subcategory). Both are handled by FullCataloguePage.
 const PRODUCT_MENU = [
-  {
-    label: 'Gel Polish / Colours',
-    to: '/full-catalogue?category=colours',
-    children: [
-      { label: 'Solid Gel Polish', to: '/full-catalogue?subcategory=solid-gel-polish' },
-      { label: 'Cat Eye', to: '/full-catalogue?subcategory=cat-eye' },
-      { label: 'Shimmer', to: '/full-catalogue?subcategory=shimmer' },
-      { label: 'Glitters', to: '/full-catalogue?subcategory=glitters' },
-      { label: 'Mirror Powder', to: '/full-catalogue?subcategory=mirror-powder' },
-    ],
-  },
+  { label: 'Base & Top Coats', to: '/full-catalogue?category=essentials' },
   {
     label: 'Builder Gels',
     to: '/full-catalogue?category=builders',
     children: [
-      { label: 'Premium Builder', to: '/full-catalogue?subcategory=premium-builder' },
       { label: '3-in-1', to: '/full-catalogue?subcategory=3in1' },
       { label: '5-in-1 Base', to: '/full-catalogue?subcategory=5in1-base' },
       { label: 'Polygel (MultiMix)', to: '/full-catalogue?subcategory=polygel' },
+      { label: 'Premium Builder', to: '/full-catalogue?subcategory=premium-builder' },
     ],
   },
-  { label: 'Base & Top Coats', to: '/full-catalogue?category=essentials' },
-  { label: 'Nail Art', to: '/full-catalogue?category=nail-art' },
-  { label: 'Tools & Equipment', to: '/full-catalogue?category=tools' },
   { label: 'Consumables', to: '/full-catalogue?category=consumables' },
+  {
+    label: 'Gel Polish / Colours',
+    to: '/full-catalogue?category=colours',
+    children: [
+      { label: 'Cat Eye', to: '/full-catalogue?subcategory=cat-eye' },
+      { label: 'Glitters', to: '/full-catalogue?subcategory=glitters' },
+      { label: 'Mirror Powder', to: '/full-catalogue?subcategory=mirror-powder' },
+      { label: 'Shimmer', to: '/full-catalogue?subcategory=shimmer' },
+      { label: 'Solid Gel Polish', to: '/full-catalogue?subcategory=solid-gel-polish' },
+    ],
+  },
+  { label: 'Nail Art', to: '/full-catalogue?category=nail-art' },
   { label: 'Nail Care (Hand & Foot)', to: '/full-catalogue?category=nail-care' },
   { label: 'New Products', to: '/full-catalogue?category=new-products' },
+  { label: 'Tools & Equipment', to: '/full-catalogue?category=tools' },
 ]
 
 function ProductsMenu() {
