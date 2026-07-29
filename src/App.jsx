@@ -58,12 +58,18 @@ const MIN_ORDER_EUR = 100
 // Site-wide discount applied on top of list prices; the price data files are
 // left untouched. Auto-expires after the end date below. NOTE: the end date is
 // for internal reference ONLY and must never be surfaced to customers.
-const CATALOGUE_DISCOUNT_PCT = 20
+// DISCONTINUED: set to 0 to switch the promotion off everywhere (prices,
+// badges, sale free-shipping threshold, checkout line, starter-kit wording).
+const CATALOGUE_DISCOUNT_PCT = 0
 const CATALOGUE_DISCOUNT_LABEL = 'SUMMER MADNESS -20%'
 const CATALOGUE_DISCOUNT_ENDS = new Date('2026-08-20T23:59:59+03:00')
 function isCatalogueDiscountActive() {
   return CATALOGUE_DISCOUNT_PCT > 0 && Date.now() <= CATALOGUE_DISCOUNT_ENDS.getTime()
 }
+// ── Seasonal storefront banner ─────────────────────────────────────────────
+// Standalone catalogue banner shown independently of any promotion. Toggle off
+// by setting this flag to false.
+const SEASONAL_BANNER_ENABLED = true
 function applyCatalogueDiscount(priceEur) {
   if (priceEur == null || !isCatalogueDiscountActive()) return priceEur
   return Number((Number(priceEur) * (1 - CATALOGUE_DISCOUNT_PCT / 100)).toFixed(2))
@@ -5610,15 +5616,15 @@ function FullCataloguePage() {
 
   return (
     <section className="space-y-5">
-      {isCatalogueDiscountActive() && (
+      {SEASONAL_BANNER_ENABLED && (
         <a
           href="#catalogue-section-new-products"
           className="mx-auto block w-full max-w-4xl overflow-hidden rounded-2xl shadow-sm"
-          aria-label="Summer Madness — 20% off all stock. Shop now."
+          aria-label="Summer vibes — shop the GEL.IT.UP collection."
         >
           <img
-            src="/gelitup-media/Summer Madness Sale/summer-madness-sale.jpg"
-            alt="Summer Madness — 20% off all stock. Shop now."
+            src="/gelitup-media/seasonal banner/summer-vibe-banner.webp"
+            alt="Summer vibes — shop the GEL.IT.UP collection."
             className="block h-auto w-full"
             loading="eager"
             fetchPriority="high"
