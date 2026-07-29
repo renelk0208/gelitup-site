@@ -3208,7 +3208,14 @@ function AmbassadorApplicationsPanel() {
     const entry = `[${stamp}] 📧 Sent to ${to}${who} · “${subject}”${flat ? ` — ${flat}` : ''}`
     const newLog = row.message_log ? `${row.message_log}\n${entry}` : entry
     const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ message_log: newLog }).eq('id', row.id)
-    if (!err) patchRow(row.id, { message_log: newLog })
+    if (!err) { patchRow(row.id, { message_log: newLog }); return }
+    // Fallback: the message_log column may not exist yet (migration not run).
+    // Append the 📧 line to admin_comment instead — the Messages section reads
+    // those legacy lines and the internal notes list filters them out, so the
+    // message still shows for every admin regardless of the migration state.
+    const newComment = row.admin_comment ? `${row.admin_comment}\n${entry}` : entry
+    const { error: err2 } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: newComment }).eq('id', row.id)
+    if (!err2) patchRow(row.id, { admin_comment: newComment })
   }
 
   const saveNotes = async (row, lines) => {
