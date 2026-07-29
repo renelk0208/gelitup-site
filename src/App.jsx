@@ -6899,7 +6899,6 @@ function LangSwitcher() {
 }
 
 const navItems = [
-  { to: '/full-catalogue', label: 'Our Products', highlight: true },
   { to: '/starter-kits', label: 'Starter Kits' },
   { to: '/about-us', label: 'About us' },
   { to: '/for-academies', label: 'Academies' },
@@ -6908,6 +6907,94 @@ const navItems = [
   { to: '/guestbook', label: 'Guestbook' },
   { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
 ]
+
+// "Our Products" mega-menu. Category links use ?category= (scrolls to the
+// catalogue section); subcategory links use ?subcategory= (selects and scrolls
+// straight to that subcategory). Both are handled by FullCataloguePage.
+const PRODUCT_MENU = [
+  {
+    label: 'Gel Polish / Colours',
+    to: '/full-catalogue?category=colours',
+    children: [
+      { label: 'Solid Gel Polish', to: '/full-catalogue?subcategory=solid-gel-polish' },
+      { label: 'Cat Eye', to: '/full-catalogue?subcategory=cat-eye' },
+      { label: 'Shimmer', to: '/full-catalogue?subcategory=shimmer' },
+      { label: 'Glitters', to: '/full-catalogue?subcategory=glitters' },
+      { label: 'Mirror Powder', to: '/full-catalogue?subcategory=mirror-powder' },
+    ],
+  },
+  {
+    label: 'Builder Gels',
+    to: '/full-catalogue?category=builders',
+    children: [
+      { label: 'Premium Builder', to: '/full-catalogue?subcategory=premium-builder' },
+      { label: '3-in-1', to: '/full-catalogue?subcategory=3in1' },
+      { label: '5-in-1 Base', to: '/full-catalogue?subcategory=5in1-base' },
+      { label: 'Polygel (MultiMix)', to: '/full-catalogue?subcategory=polygel' },
+    ],
+  },
+  { label: 'Base & Top Coats', to: '/full-catalogue?category=essentials' },
+  { label: 'Nail Art', to: '/full-catalogue?category=nail-art' },
+  { label: 'Tools & Equipment', to: '/full-catalogue?category=tools' },
+  { label: 'Consumables', to: '/full-catalogue?category=consumables' },
+  { label: 'Nail Care (Hand & Foot)', to: '/full-catalogue?category=nail-care' },
+  { label: 'New Products', to: '/full-catalogue?category=new-products' },
+]
+
+function ProductsMenu() {
+  const [open, setOpen] = useState(false)
+  const location = useLocation()
+
+  // Close when the route (path or query) changes so a picked category/subcategory dismisses it.
+  useEffect(() => { setOpen(false) }, [location.pathname, location.search])
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className="inline-flex items-center gap-2 rounded-lg border border-fuchsia-500/60 px-3 py-2 text-sm font-bold uppercase tracking-[0.06em] !text-white/80 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+      >
+        Our Products
+        <svg viewBox="0 0 20 20" fill="none" className={`h-4 w-4 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} aria-hidden="true">
+          <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-[calc(100%+0.55rem)] z-50 w-[23rem] rounded-2xl border border-white/15 bg-[#111111] p-2 shadow-[0_18px_48px_rgba(0,0,0,0.38)] backdrop-blur-xl">
+          {PRODUCT_MENU.map((cat) => (
+            <div key={cat.label} className="px-1 py-0.5">
+              <NavLink
+                to={cat.to}
+                onClick={() => setOpen(false)}
+                className="block rounded-lg px-3 py-2 text-sm font-semibold text-white transition duration-200 hover:bg-white/10"
+              >
+                {cat.label}
+              </NavLink>
+              {cat.children && (
+                <div className="mt-0.5 grid grid-cols-2 gap-0.5 pb-1 pl-2">
+                  {cat.children.map((sub) => (
+                    <NavLink
+                      key={sub.label}
+                      to={sub.to}
+                      onClick={() => setOpen(false)}
+                      className="block rounded-md px-2 py-1.5 text-xs text-white/70 transition duration-200 hover:bg-white/10 hover:text-white"
+                    >
+                      {sub.label}
+                    </NavLink>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function Nav({ onOpenContactModal }) {
   const [registerMenuOpen, setRegisterMenuOpen] = useState(false)
@@ -6919,6 +7006,9 @@ function Nav({ onOpenContactModal }) {
 
   return (
     <nav className="hidden gap-1 md:flex items-center">
+      {/* Our Products mega-menu */}
+      <ProductsMenu />
+
       {/* Content links */}
       {navItems.filter(item => !item.mobileOnly).map((item) => {
         if (item.isContactAction) {
@@ -7027,11 +7117,13 @@ function Nav({ onOpenContactModal }) {
 function MobileNav({ onOpenContactModal }) {
   const [open, setOpen] = useState(false)
   const [registerMenuOpen, setRegisterMenuOpen] = useState(false)
+  const [productsMenuOpen, setProductsMenuOpen] = useState(false)
   const location = useLocation()
 
   useEffect(() => {
     setOpen(false)
     setRegisterMenuOpen(false)
+    setProductsMenuOpen(false)
   }, [location.pathname])
 
   return (
@@ -7130,6 +7222,51 @@ function MobileNav({ onOpenContactModal }) {
           </NavLink>
 
           <div className="my-2 border-t border-white/10" />
+
+          {/* Our Products — expandable categories & subcategories */}
+          <div className="rounded-xl border border-fuchsia-500/40 bg-fuchsia-600/10 p-2">
+            <button
+              type="button"
+              onClick={() => setProductsMenuOpen((current) => !current)}
+              aria-expanded={productsMenuOpen}
+              className="flex w-full items-center justify-between rounded-lg px-2 py-2.5 text-left text-sm font-bold uppercase tracking-[0.05em] text-white transition duration-200 hover:bg-white/10"
+            >
+              <span>Our Products</span>
+              <svg viewBox="0 0 20 20" fill="none" className={`h-4 w-4 transition-transform duration-200 ${productsMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true">
+                <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+
+            {productsMenuOpen && (
+              <div className="mt-1 space-y-1">
+                {PRODUCT_MENU.map((cat) => (
+                  <div key={cat.label}>
+                    <NavLink
+                      to={cat.to}
+                      onClick={() => setOpen(false)}
+                      className="block rounded-lg px-3 py-2 text-sm font-semibold text-white/90 transition duration-200 hover:bg-white/10 hover:text-white"
+                    >
+                      {cat.label}
+                    </NavLink>
+                    {cat.children && (
+                      <div className="ml-3 grid gap-0.5 border-l border-white/10 pl-2">
+                        {cat.children.map((sub) => (
+                          <NavLink
+                            key={sub.label}
+                            to={sub.to}
+                            onClick={() => setOpen(false)}
+                            className="block rounded-md px-2 py-1.5 text-xs text-white/65 transition duration-200 hover:bg-white/10 hover:text-white"
+                          >
+                            {sub.label}
+                          </NavLink>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {navItems.map((item) => {
             if (item.isContactAction) {
