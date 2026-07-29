@@ -2996,9 +2996,10 @@ function ambassadorRowToContact(row) {
     phone: row.phone,
     instagram: row.instagram,
     tiktok: row.tiktok,
-    followers: row.followers,
     address: [row.address, [row.city, row.postal_code].filter(Boolean).join(' '), row.country].filter(Boolean).join(', '),
-    isProfessional: true,
+    qualifiedTech: row.is_qualified_tech ?? true,
+    workShown: row.work_shown_on_profile ?? true,
+    followersOver500: row.followers_over_500 ?? true,
     signedDate: fmtDate(row.created_at),
   }
 }

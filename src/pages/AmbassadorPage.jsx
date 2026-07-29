@@ -6,11 +6,25 @@ import InstagramFeed from '../components/InstagramFeed'
 import { AGREEMENT_SUMMARY, AGREEMENT_VERSION } from '../data/ambassadorAgreement'
 import { buildAmbassadorContractPdf } from '../lib/ambassadorContractPdf'
 
-const FOLLOWER_RANGES = [
-  '500 – 1,000',
-  '1,000 – 5,000',
-  '5,000 – 10,000',
-  '10,000+',
+// Non-negotiable eligibility gates. Answering "No" to any of these blocks the
+// application and shows the friendly decline modal — the programme is only for
+// qualified nail technicians who show their own work to a real audience.
+const ELIGIBILITY_GATES = [
+  {
+    key: 'qualified',
+    question: 'Are you a qualified nail technician?',
+    help: 'You hold a recognised nail qualification or certification.',
+  },
+  {
+    key: 'workShown',
+    question: 'Is your own nail work shown on your social profiles?',
+    help: 'Your profiles feature nail sets you have created yourself.',
+  },
+  {
+    key: 'followers500',
+    question: 'Do you have more than 500 followers?',
+    help: 'On the profile where you post your nail work.',
+  },
 ]
 
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL
@@ -31,8 +45,9 @@ async function notifyAdminOfApplication(record, pdf) {
     ['Email', record.email],
     ['Instagram', record.instagram ? '@' + record.instagram : '—'],
     ['TikTok', record.tiktok ? '@' + record.tiktok : '—'],
-    ['Following', record.followers || '—'],
-    ['Professional nail tech', 'Yes'],
+    ['Qualified nail tech', 'Yes'],
+    ['Shows own work on profile', 'Yes'],
+    ['500+ followers', 'Yes'],
     ['Country', record.country || '—'],
     ['Language', record.language || '—'],
     ['Agreement', `${record.agreement_version || ''} (signed)`],
@@ -74,12 +89,12 @@ const PERKS = [
   {
     emoji: '🏷️',
     title: 'Your own discount code',
-    body: 'A personal code for money off every order — and one to share with your followers.',
+    body: 'A personal code to share privately with your nail-tech followers — 20% off GEL.IT.UP for the pros you recommend.',
   },
   {
     emoji: '🎁',
-    title: 'Free product drops',
-    body: 'Get sent new colours and launches before anyone else, so you always have something fresh to create with.',
+    title: 'Monthly PR packages',
+    body: 'Get sent new colours and launches — a PR package about once a month, and more often around new drops.',
   },
 ]
 
@@ -101,15 +116,15 @@ export default function AmbassadorPage() {
     instagram: '',
     tiktok: '',
     facebook: '',
-    followers: '',
     address: '',
     city: '',
     postalCode: '',
     country: '',
     message: '',
   })
-  const [isProfessional, setIsProfessional] = useState('') // '' | 'yes' | 'no'
-  const [showProModal, setShowProModal] = useState(false)
+  // One entry per gate in ELIGIBILITY_GATES: '' | 'yes' | 'no'
+  const [eligibility, setEligibility] = useState({ qualified: '', workShown: '', followers500: '' })
+  const [showDeclineModal, setShowDeclineModal] = useState(false)
   const [agreed, setAgreed] = useState(false)
   const [status, setStatus] = useState('idle') // idle | submitting | success | error
   const [errorMsg, setErrorMsg] = useState('')
@@ -128,14 +143,24 @@ export default function AmbassadorPage() {
 
   const update = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }))
 
+  // True only when every non-negotiable gate is answered "yes".
+  const eligible = ELIGIBILITY_GATES.every((g) => eligibility[g.key] === 'yes')
+  // True as soon as any gate has been answered "no" → they can't be accepted.
+  const ineligible = ELIGIBILITY_GATES.some((g) => eligibility[g.key] === 'no')
+
+  const setGate = (key) => (v) => {
+    setEligibility((e) => ({ ...e, [key]: v }))
+    if (v === 'no') setShowDeclineModal(true)
+  }
+
   const requiredFilled =
     form.fullName.trim() && form.email.trim() && form.phone.trim() && form.instagram.trim() &&
-    form.followers && form.address.trim() && form.city.trim() && form.postalCode.trim() &&
-    form.country.trim() && agreed && isProfessional === 'yes'
+    form.address.trim() && form.city.trim() && form.postalCode.trim() &&
+    form.country.trim() && agreed && eligible
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (isProfessional !== 'yes') { setShowProModal(true); return }
+    if (!eligible) { setShowDeclineModal(true); return }
     if (!requiredFilled) return
     setStatus('submitting')
     setErrorMsg('')
@@ -147,12 +172,14 @@ export default function AmbassadorPage() {
         instagram: form.instagram.trim().replace(/^@+/, ''),
         tiktok: form.tiktok.trim().replace(/^@+/, '') || null,
         facebook: form.facebook.trim().replace(/^@+/, '') || null,
-        followers: form.followers || null,
         address: form.address.trim(),
         city: form.city.trim(),
         postal_code: form.postalCode.trim(),
         country: form.country.trim(),
         message: form.message.trim() || null,
+        is_qualified_tech: true,
+        work_shown_on_profile: true,
+        followers_over_500: true,
         agreed_terms: true,
         agreement_version: AGREEMENT_VERSION,
         language: lang || 'en',
@@ -170,10 +197,11 @@ export default function AmbassadorPage() {
           phone: record.phone,
           instagram: record.instagram,
           tiktok: record.tiktok,
-          followers: record.followers,
           address: `${record.address}, ${record.city} ${record.postal_code}, ${record.country}`,
           country: record.country,
-          isProfessional: true,
+          qualifiedTech: true,
+          workShown: true,
+          followersOver500: true,
           agreementVersion: record.agreement_version,
           signedDate: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
         })
@@ -354,46 +382,49 @@ export default function AmbassadorPage() {
                 </div>
               </div>
 
-              {/* Instagram following — selectable bands */}
-              <div>
-                <label className={labelClass}>Instagram following *</label>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {FOLLOWER_RANGES.map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setForm((f) => ({ ...f, followers: r }))}
-                      className={`rounded-xl border px-2 py-3 text-sm font-medium transition ${
-                        form.followers === r
-                          ? 'border-[#D43790] bg-[#D43790]/20 text-white'
-                          : 'border-white/20 bg-white/[0.04] text-white/70 hover:border-white/40'
-                      }`}
-                    >
-                      {r}
-                    </button>
+              {/* Eligibility gates — all three are non-negotiable */}
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+                <p className="mb-1 text-xs font-bold uppercase tracking-[0.14em] text-[#e879c4]">A few essentials first</p>
+                <p className="mb-4 text-xs leading-relaxed text-white/50">
+                  Our ambassadors are qualified nail technicians who share their own work. All three must be a yes.
+                </p>
+                <div className="space-y-4">
+                  {ELIGIBILITY_GATES.map((gate) => (
+                    <div key={gate.key}>
+                      <label className={labelClass}>{gate.question} *</label>
+                      <p className="mb-2 text-xs text-white/40">{gate.help}</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[{ v: 'yes', l: 'Yes' }, { v: 'no', l: 'No' }].map(({ v, l }) => (
+                          <button
+                            key={v}
+                            type="button"
+                            onClick={() => setGate(gate.key)(v)}
+                            className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
+                              eligibility[gate.key] === v
+                                ? (v === 'yes' ? 'border-emerald-400 bg-emerald-400/15 text-white' : 'border-rose-400 bg-rose-400/15 text-white')
+                                : 'border-white/20 bg-white/[0.04] text-white/70 hover:border-white/40'
+                            }`}
+                          >
+                            {l}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
-              </div>
-
-              {/* Professional gate */}
-              <div>
-                <label className={labelClass}>Are you a professional nail technician? *</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[{ v: 'yes', l: 'Yes' }, { v: 'no', l: 'No' }].map(({ v, l }) => (
-                    <button
-                      key={v}
-                      type="button"
-                      onClick={() => { setIsProfessional(v); if (v === 'no') setShowProModal(true) }}
-                      className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
-                        isProfessional === v
-                          ? (v === 'yes' ? 'border-emerald-400 bg-emerald-400/15 text-white' : 'border-rose-400 bg-rose-400/15 text-white')
-                          : 'border-white/20 bg-white/[0.04] text-white/70 hover:border-white/40'
-                      }`}
-                    >
-                      {l}
-                    </button>
-                  ))}
-                </div>
+                {ineligible && (
+                  <p className="mt-4 text-xs leading-relaxed text-rose-300">
+                    Being a GEL.IT.UP ambassador is a serious professional venture, so all three essentials
+                    above are required. Based on your answers we&apos;re not able to accept your application right now.
+                  </p>
+                )}
+                <p className="mt-4 flex gap-2 border-t border-white/10 pt-4 text-xs leading-relaxed text-white/45">
+                  <span aria-hidden="true">🔍</span>
+                  <span>
+                    Every profile is personally reviewed before an application is approved, so we choose the
+                    right people to represent our brand. Please make sure your social profiles are public.
+                  </span>
+                </p>
               </div>
 
               {/* Shipping details for sample & PR boxes */}
@@ -494,25 +525,31 @@ export default function AmbassadorPage() {
         </div>
       </section>
 
-      {/* Professionals-only popup — shown when "No" is selected */}
-      {showProModal && (
+      {/* Eligibility popup — shown when "No" is selected on any essential */}
+      {showDeclineModal && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 px-5"
-          onClick={() => setShowProModal(false)}
+          onClick={() => setShowDeclineModal(false)}
         >
           <div
             className="max-w-sm rounded-2xl border border-white/10 bg-[#1b1420] p-6 text-center shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-3xl">💅</div>
-            <h3 className="mt-3 text-lg font-black text-white">Professionals only</h3>
+            <h3 className="mt-3 text-lg font-black text-white">Not quite a match</h3>
             <p className="mt-2 text-sm text-white/70">
-              We&apos;re sorry, but our ambassador programme requires professional nail
-              technicians who are able to work with professional products.
+              We&apos;re so sorry! Being a GEL.IT.UP ambassador is a serious professional venture,
+              so every ambassador must be a <span className="font-semibold text-white">qualified nail technician</span>,
+              <span className="font-semibold text-white"> showing their own nail work</span> to an audience of
+              <span className="font-semibold text-white"> more than 500 followers</span>.
+            </p>
+            <p className="mt-3 text-sm text-white/70">
+              As that isn&apos;t the case right now, we&apos;re not able to accept your application — but you&apos;re
+              always welcome to apply again once it is. 💕
             </p>
             <button
               type="button"
-              onClick={() => setShowProModal(false)}
+              onClick={() => setShowDeclineModal(false)}
               className="mt-5 rounded-full bg-[#D43790] px-6 py-2.5 text-sm font-bold text-white transition hover:bg-[#c22f82]"
             >
               I understand

@@ -117,8 +117,9 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
     ['Phone', applicant.phone || '—'],
     ['Instagram', applicant.instagram ? `@${applicant.instagram}` : '—'],
     ['TikTok', applicant.tiktok ? `@${applicant.tiktok}` : '—'],
-    ['Instagram following', applicant.followers || '—'],
-    ['Professional nail technician', applicant.isProfessional ? 'Yes' : (applicant.isProfessional === false ? 'No' : '—')],
+    ['Qualified nail technician', applicant.qualifiedTech ? 'Yes' : (applicant.qualifiedTech === false ? 'No' : '—')],
+    ['Shows own work on profile', applicant.workShown ? 'Yes' : (applicant.workShown === false ? 'No' : '—')],
+    ['More than 500 followers', applicant.followersOver500 ? 'Yes' : (applicant.followersOver500 === false ? 'No' : '—')],
     ['Shipping address', applicant.address || '—'],
     ['Signed on', applicant.signedDate || '—'],
   ]
