@@ -11,6 +11,7 @@
 // preview script / non-browser environments).
 
 import { AGREEMENT_SECTIONS, AGREEMENT_VERSION } from '../data/ambassadorAgreement.js'
+import { CONTRACT_I18N, resolveContractLang } from '../data/ambassadorContractI18n.js'
 
 // ── Company letterhead details — edit freely. ──
 export const CONTRACT_COMPANY = {
@@ -53,9 +54,60 @@ async function resolveLogo(logoBase64) {
   return null
 }
 
+// ── Unicode font embedding ──
+// jsPDF's built-in fonts only cover WinAnsi (Latin-1), so Greek, Cyrillic and
+// Latin-Extended characters (Polish, Romanian, Hungarian…) render as garbage.
+// We embed DejaVu Sans (public/fonts) so the contract is readable in every
+// supported language. Cached across calls; falls back to helvetica if the
+// files can't be fetched (e.g. non-browser build/prerender — no PDFs there).
+let _pdfFontCache = null
+
+async function fetchFontBase64(url) {
+  if (typeof fetch !== 'function') return null
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return null
+    const bytes = new Uint8Array(await res.arrayBuffer())
+    let bin = ''
+    const chunk = 0x8000
+    for (let i = 0; i < bytes.length; i += chunk) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk))
+    }
+    return btoa(bin)
+  } catch { return null }
+}
+
+// Registers DejaVu Sans (normal + bold) on the doc and returns the family name
+// to use, or 'helvetica' if the font could not be loaded.
+async function registerUnicodeFont(doc) {
+  try {
+    if (!_pdfFontCache) {
+      const [reg, bold] = await Promise.all([
+        fetchFontBase64('/fonts/DejaVuSans.ttf'),
+        fetchFontBase64('/fonts/DejaVuSans-Bold.ttf'),
+      ])
+      if (!reg) return 'helvetica'
+      _pdfFontCache = { reg, bold }
+    }
+    doc.addFileToVFS('DejaVuSans.ttf', _pdfFontCache.reg)
+    doc.addFont('DejaVuSans.ttf', 'DejaVuSans', 'normal')
+    if (_pdfFontCache.bold) {
+      doc.addFileToVFS('DejaVuSans-Bold.ttf', _pdfFontCache.bold)
+      doc.addFont('DejaVuSans-Bold.ttf', 'DejaVuSans', 'bold')
+    } else {
+      doc.addFont('DejaVuSans.ttf', 'DejaVuSans', 'bold')
+    }
+    return 'DejaVuSans'
+  } catch { return 'helvetica' }
+}
+
 export async function buildAmbassadorContractPdf(applicant = {}) {
   const { jsPDF } = await import('jspdf')
   const doc = new jsPDF({ unit: 'pt', format: 'a4' })
+
+  // Embed a Unicode font so Greek, Cyrillic and Latin-Extended languages
+  // (Polish, Romanian, Hungarian…) render correctly; falls back to helvetica.
+  const FONT = await registerUnicodeFont(doc)
 
   const pageW = doc.internal.pageSize.getWidth()
   const pageH = doc.internal.pageSize.getHeight()
@@ -70,41 +122,98 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
     }
   }
 
-  // ── Letterhead: logo + company details ──
+  // ── Letterhead: logo + company details (reused per page) ──
   const logo = await resolveLogo(applicant.logoBase64)
-  if (logo) {
-    const logoW = 96
-    const logoH = logoW * LOGO_RATIO
-    try {
-      doc.addImage(`data:image/png;base64,${logo}`, 'PNG', (pageW - logoW) / 2, y, logoW, logoH, undefined, 'FAST')
-      y += logoH + 6
-    } catch { /* fall through without logo */ }
-  } else {
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(18)
-    doc.setTextColor(...INK)
-    doc.text(CONTRACT_COMPANY.brand, pageW / 2, y + 14, { align: 'center' })
-    y += 30
+  const renderLetterhead = () => {
+    if (logo) {
+      const logoW = 96
+      const logoH = logoW * LOGO_RATIO
+      try {
+        doc.addImage(`data:image/png;base64,${logo}`, 'PNG', (pageW - logoW) / 2, y, logoW, logoH, undefined, 'FAST')
+        y += logoH + 6
+      } catch { /* fall through without logo */ }
+    } else {
+      doc.setFont(FONT, 'bold')
+      doc.setFontSize(18)
+      doc.setTextColor(...INK)
+      doc.text(CONTRACT_COMPANY.brand, pageW / 2, y + 14, { align: 'center' })
+      y += 30
+    }
+    doc.setFont(FONT, 'normal')
+    doc.setFontSize(8.5)
+    doc.setTextColor(...MUTED)
+    doc.text(CONTRACT_COMPANY.addressLine, pageW / 2, y, { align: 'center' })
+    y += 12
+    doc.text(CONTRACT_COMPANY.contactLine, pageW / 2, y, { align: 'center' })
+    y += 16
+    doc.setDrawColor(...PINK)
+    doc.setLineWidth(1.2)
+    doc.line(margin, y, pageW - margin, y)
+    y += 22
   }
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(8.5)
-  doc.setTextColor(...MUTED)
-  doc.text(CONTRACT_COMPANY.addressLine, pageW / 2, y, { align: 'center' })
-  y += 12
-  doc.text(CONTRACT_COMPANY.contactLine, pageW / 2, y, { align: 'center' })
-  y += 16
-  doc.setDrawColor(...PINK)
-  doc.setLineWidth(1.2)
-  doc.line(margin, y, pageW - margin, y)
-  y += 22
+
+  // ── Courtesy translation in the ambassador's language (English governs) ──
+  const lang = resolveContractLang(applicant.lang, applicant.country)
+  const t = lang !== 'en' ? CONTRACT_I18N[lang] : null
+  if (t) {
+    renderLetterhead()
+    doc.setFont(FONT, 'bold')
+    doc.setFontSize(16)
+    doc.setTextColor(...INK)
+    doc.text('Ambassador Agreement', margin, y)
+    y += 14
+    doc.setFont(FONT, 'normal')
+    doc.setFontSize(8.5)
+    doc.setTextColor(...MUTED)
+    const subtitle = doc.splitTextToSize('Translation for your reference. The English version that follows is the governing version of the agreement.', contentW)
+    doc.text(subtitle, margin, y)
+    y += subtitle.length * 11 + 10
+
+    doc.setFont(FONT, 'normal')
+    doc.setFontSize(9.5)
+    doc.setTextColor(60, 60, 60)
+    const introLines = doc.splitTextToSize(t.intro, contentW)
+    ensureSpace(introLines.length * 12 + 6)
+    doc.text(introLines, margin, y)
+    y += introLines.length * 12 + 10
+
+    doc.setFont(FONT, 'bold')
+    doc.setFontSize(10.5)
+    doc.setTextColor(...INK)
+    ensureSpace(16)
+    doc.text(t.obligationsHeading, margin, y)
+    y += 14
+    doc.setFont(FONT, 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(60, 60, 60)
+    t.obligations.forEach((point) => {
+      const lines = doc.splitTextToSize(`•  ${point}`, contentW - 6)
+      ensureSpace(lines.length * 12 + 4)
+      doc.text(lines, margin + 4, y)
+      y += lines.length * 12 + 3
+    })
+    y += 10
+    doc.setFont(FONT, 'normal')
+    doc.setFontSize(9.5)
+    doc.setTextColor(...INK)
+    const signLines = doc.splitTextToSize(t.signoff, contentW)
+    ensureSpace(signLines.length * 12 + 6)
+    doc.text(signLines, margin, y)
+
+    doc.addPage()
+    y = margin
+  }
+
+  // ── English governing agreement ──
+  renderLetterhead()
 
   // ── Title ──
-  doc.setFont('helvetica', 'bold')
+  doc.setFont(FONT, 'bold')
   doc.setFontSize(16)
   doc.setTextColor(...INK)
   doc.text('Ambassador Agreement', margin, y)
   y += 13
-  doc.setFont('helvetica', 'normal')
+  doc.setFont(FONT, 'normal')
   doc.setFontSize(8.5)
   doc.setTextColor(...MUTED)
   doc.text(`Version ${AGREEMENT_VERSION} — English (governing version)`, margin, y)
@@ -139,10 +248,10 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
   doc.roundedRect(margin, y, contentW, boxH, 6, 6, 'FD')
   let by = y + boxPad + 10
   wrapped.forEach(({ label, lines }) => {
-    doc.setFont('helvetica', 'bold')
+    doc.setFont(FONT, 'bold')
     doc.setTextColor(...MUTED)
     doc.text(String(label).toUpperCase(), margin + boxPad, by)
-    doc.setFont('helvetica', 'normal')
+    doc.setFont(FONT, 'normal')
     doc.setTextColor(...INK)
     doc.text(lines, valueX, by)
     by += lines.length * rowH
@@ -152,12 +261,12 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
   // ── Agreement sections ──
   AGREEMENT_SECTIONS.forEach((section) => {
     ensureSpace(28)
-    doc.setFont('helvetica', 'bold')
+    doc.setFont(FONT, 'bold')
     doc.setFontSize(10.5)
     doc.setTextColor(...INK)
     doc.text(section.heading, margin, y)
     y += 13
-    doc.setFont('helvetica', 'normal')
+    doc.setFont(FONT, 'normal')
     doc.setFontSize(9)
     doc.setTextColor(60, 60, 60)
     section.points.forEach((point) => {
@@ -176,7 +285,7 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
   doc.setLineWidth(0.6)
   doc.line(margin, y, pageW - margin, y)
   y += 16
-  doc.setFont('helvetica', 'normal')
+  doc.setFont(FONT, 'normal')
   doc.setFontSize(8.5)
   doc.setTextColor(...MUTED)
   const confirm = doc.splitTextToSize(
@@ -192,7 +301,7 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
     doc.setDrawColor(235, 235, 235)
     doc.setLineWidth(0.5)
     doc.line(margin, pageH - 34, pageW - margin, pageH - 34)
-    doc.setFont('helvetica', 'normal')
+    doc.setFont(FONT, 'normal')
     doc.setFontSize(6.5)
     doc.setTextColor(150, 150, 150)
     // Constrain the footer so it can never run into the page number on the right.

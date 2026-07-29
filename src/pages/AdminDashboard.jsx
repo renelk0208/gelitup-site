@@ -1440,7 +1440,14 @@ function OrdersPanel() {
     const trackingNumber = (draft.number || '').trim()
     const trackingUrl = (draft.url || '').trim()
     if (!trackingNumber) { alert('Please enter a tracking number before saving tracking details.'); return }
-    await updateOrder(id, { status: 'tracking_placed', tracking_number: trackingNumber, tracking_url: trackingUrl || null })
+    const row = rows.find(r => r.id === id)
+    const ok = await updateOrder(id, { status: 'tracking_placed', tracking_number: trackingNumber, tracking_url: trackingUrl || null })
+    if (ok && row) {
+      const emailResult = await sendTrackingEmail(row, trackingNumber, trackingUrl)
+      if (!emailResult.ok && !emailResult.skipped) {
+        alert(`Tracking saved, but the customer email failed to send: ${emailResult.message}`)
+      }
+    }
   }
 
   const markAcknowledged = async (id) => {
@@ -1618,6 +1625,45 @@ function OrdersPanel() {
     }
   }
 
+  const sendTrackingEmail = async (row, trackingNumber, trackingUrl) => {
+    const toEmail = row?.customer_email
+    if (!toEmail) return { ok: false, skipped: true, message: 'Order has no customer email — tracking email not sent.' }
+    if (!EMAIL_WEBHOOK_URL) return { ok: false, skipped: true, message: 'VITE_EMAIL_WEBHOOK_URL is not configured — tracking email not sent.' }
+
+    const subject = `Your GEL.IT.UP order #${row.id || '-'} has shipped`
+    const trackingLine = trackingUrl
+      ? `<p style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;margin:0 0 8px"><strong>Tracking number:</strong> ${String(trackingNumber)}<br/><a href="${String(trackingUrl)}" style="color:#7c3aed">Track your parcel →</a></p>`
+      : `<p style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;margin:0 0 8px"><strong>Tracking number:</strong> ${String(trackingNumber)}</p>`
+    const html = `
+      <p style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;margin:0 0 8px">Hi ${row?.consignee_name || 'there'},</p>
+      <p style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;margin:0 0 8px">Your order <strong>#${String(row.id || '-')}</strong> is on its way. Here are your tracking details:</p>
+      ${trackingLine}
+      <p style="font-family:Arial,sans-serif;font-size:12px;color:#6b7280;margin:12px 0 0">Questions? Reply to this email or contact us at distribution@gelitup.com.</p>
+    `
+
+    const headers = { 'Content-Type': 'application/json' }
+    if (SUPABASE_ANON_KEY) {
+      headers.apikey = SUPABASE_ANON_KEY
+      headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`
+    }
+
+    try {
+      const response = await fetch(EMAIL_WEBHOOK_URL, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ from: FROM_EMAIL, to: toEmail, subject, html }),
+      })
+      const responsePayload = await response.json().catch(() => null)
+      if (!response.ok) {
+        return { ok: false, message: responsePayload?.error || `HTTP ${response.status}` }
+      }
+      return { ok: true, message: `Tracking email sent to ${toEmail}.` }
+    }
+    catch (err) {
+      return { ok: false, message: err?.message || 'Network error while sending tracking email.' }
+    }
+  }
+
   const emailAllHistoricalOrdersToInbox = async () => {
     const { data: allOrders, error: allOrdersError } = await supabase
       .from(ORDERS_TABLE)
@@ -1684,12 +1730,15 @@ function OrdersPanel() {
     })
   }
 
-  const saveEdit = async (id) => {
+  const saveEdit = async (row) => {
+    const id = row.id
+    const previousStatus = normalizeOrderStatus(row.status)
     const items = editDraft.items
       .filter(it => it.text.trim() || it.sku.trim())
       .map(it => ({ name: it.text.trim(), sku: it.sku.trim(), qty: Math.max(1, Number(it.qty) || 1) }))
     const totalUnits = items.reduce((sum, it) => sum + it.qty, 0)
     const trackingNumber = editDraft.tracking_number.trim()
+    const trackingUrl = editDraft.tracking_url.trim()
     let nextStatus = normalizeOrderStatus(editDraft.status)
     if (trackingNumber && (nextStatus === 'in_progress' || nextStatus === 'payment_received')) {
       nextStatus = 'tracking_placed'
@@ -1697,19 +1746,30 @@ function OrdersPanel() {
     if (!trackingNumber && nextStatus === 'tracking_placed') {
       nextStatus = 'payment_received'
     }
-    const ok = await updateOrder(id, {
+    const nextRow = {
       customer_email: editDraft.customer_email.trim() || null,
       consignee_name: editDraft.consignee_name.trim() || null,
       consignee_phone: editDraft.consignee_phone.trim() || null,
       shipping_address: editDraft.shipping_address.trim() || null,
       tracking_number: trackingNumber || null,
-      tracking_url: editDraft.tracking_url.trim() || null,
+      tracking_url: trackingUrl || null,
       status: nextStatus,
       items,
       total_units: totalUnits,
       distributor_tier: editDraft.distributor_tier.trim() || null,
-    })
-    if (ok) setEditing(null)
+    }
+    const ok = await updateOrder(id, nextRow)
+    if (ok) {
+      setEditing(null)
+      // Only email when this save is what newly moved the order into "tracking_placed" —
+      // avoids re-sending the tracking email on every subsequent unrelated edit.
+      if (nextStatus === 'tracking_placed' && previousStatus !== 'tracking_placed' && trackingNumber) {
+        const emailResult = await sendTrackingEmail({ ...row, ...nextRow }, trackingNumber, trackingUrl)
+        if (!emailResult.ok && !emailResult.skipped) {
+          alert(`Order saved, but the customer email failed to send: ${emailResult.message}`)
+        }
+      }
+    }
   }
 
   const FILTERS = [
@@ -2083,7 +2143,7 @@ function OrdersPanel() {
 
                       <div className="flex flex-wrap gap-2 pt-2">
                         <button
-                          onClick={() => saveEdit(row.id)}
+                          onClick={() => saveEdit(row)}
                           disabled={saving === row.id}
                           className="rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-700 disabled:opacity-50"
                         >{saving === row.id ? 'Saving…' : '✓ Save Changes'}</button>
@@ -3037,6 +3097,8 @@ function ambassadorRowToContact(row) {
     workShown: row.work_shown_on_profile ?? true,
     followersOver500: row.followers_over_500 ?? true,
     signedDate: fmtDate(row.created_at),
+    lang: row.language,
+    country: row.country,
   }
 }
 

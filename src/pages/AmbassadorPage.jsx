@@ -203,6 +203,7 @@ export default function AmbassadorPage() {
           workShown: true,
           followersOver500: true,
           agreementVersion: record.agreement_version,
+          lang: record.language,
           signedDate: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
         })
         await notifyAdminOfApplication(record, pdf)
@@ -456,20 +457,16 @@ export default function AmbassadorPage() {
                 <textarea rows={4} value={form.message} onChange={update('message')} placeholder="Tell us a little about your work…" className={inputClass} />
               </div>
 
-              {/* Mini contract — summary + agree checkbox + name signature */}
+              {/* Initial terms — summary + agree checkbox (full contract is sent on approval) */}
               <div className="rounded-2xl border border-white/15 bg-white/[0.03] p-4 sm:p-5">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#e879c4]">
-                    The Ambassador Agreement
+                    Initial Terms &amp; Conditions
                   </p>
-                  <NavLink
-                    to="/ambassador-agreement"
-                    target="_blank"
-                    className="shrink-0 text-xs font-semibold text-white/60 underline transition hover:text-white"
-                  >
-                    Read full terms
-                  </NavLink>
                 </div>
+                <p className="mt-2 text-[11px] leading-relaxed text-white/45">
+                  These are the initial terms for applying. If your application is approved, we&rsquo;ll email you your full GEL.IT.UP Ambassador Agreement to keep &mdash; in your language where possible, and in English.
+                </p>
                 <div className="mt-3 max-h-44 space-y-2.5 overflow-y-auto pr-2">
                   {AGREEMENT_SUMMARY.map((point, i) => (
                     <p key={i} className="flex gap-2.5 text-xs leading-relaxed text-white/70">
@@ -489,11 +486,7 @@ export default function AmbassadorPage() {
                   className="mt-0.5 h-4 w-4 shrink-0 accent-[#D43790]"
                 />
                 <span>
-                  I have read and agree to the{' '}
-                  <NavLink to="/ambassador-agreement" target="_blank" className="font-semibold text-[#e879c4] underline">
-                    GEL.IT.UP Ambassador Agreement
-                  </NavLink>
-                  , and I understand the monthly posting commitment.
+                  I have read and agree to the initial terms and conditions above, and I understand the monthly posting commitment.
                 </span>
               </label>
 
