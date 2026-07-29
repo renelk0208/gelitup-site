@@ -3179,11 +3179,26 @@ function AmbassadorApplicationsPanel() {
     setSaving(null)
   }
 
-  const noteLines = (row) => String(row.admin_comment || '').split('\n').filter((l) => l.trim())
+  // A sent-message log line is marked with the 📧 glyph. Historically these were
+  // appended into admin_comment; we now keep them out of the editable notes and
+  // surface them (plus the new message_log column) in the Messages section.
+  const isAmbassadorMsgLine = (line) => String(line).includes('📧')
 
-  // Auto-log an outgoing email to the shared notes thread so every admin can
+  const noteLines = (row) => String(row.admin_comment || '').split('\n').filter((l) => l.trim() && !isAmbassadorMsgLine(l))
+
+  // Outbound message trail (separate from internal notes). Merges the dedicated
+  // message_log column with any legacy 📧 lines still living in admin_comment so
+  // every admin sees the full communication history, old and new.
+  const messageLines = (row) => {
+    const historical = String(row.admin_comment || '').split('\n').filter((l) => l.trim() && isAmbassadorMsgLine(l))
+    const fromLog = String(row.message_log || '').split('\n').filter((l) => l.trim())
+    const seen = new Set()
+    return [...historical, ...fromLog].filter((l) => { if (seen.has(l)) return false; seen.add(l); return true })
+  }
+
+  // Auto-log an outgoing email to the shared message trail so every admin can
   // see the interaction (who emailed the ambassador, when, and what was said).
-  // Stored as one line so it plays nicely with the line-based note editor.
+  // Stored as one line, kept apart from the editable internal notes.
   // Best-effort: a logging failure never affects the email already sent.
   const logAmbassadorSend = async (row, { to, subject, body }) => {
     if (!row) return
@@ -3191,13 +3206,16 @@ function AmbassadorApplicationsPanel() {
     const who = currentAdminEmail ? ` by ${currentAdminEmail}` : ''
     const flat = String(body || '').replace(/\s*\n\s*/g, ' ⏎ ').trim()
     const entry = `[${stamp}] 📧 Sent to ${to}${who} · “${subject}”${flat ? ` — ${flat}` : ''}`
-    const newLog = row.admin_comment ? `${row.admin_comment}\n${entry}` : entry
-    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: newLog }).eq('id', row.id)
-    if (!err) patchRow(row.id, { admin_comment: newLog })
+    const newLog = row.message_log ? `${row.message_log}\n${entry}` : entry
+    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ message_log: newLog }).eq('id', row.id)
+    if (!err) patchRow(row.id, { message_log: newLog })
   }
 
   const saveNotes = async (row, lines) => {
-    const newLog = lines.join('\n') || null
+    // Preserve any legacy 📧 message lines so editing/deleting a note never drops
+    // the historical communication trail from admin_comment.
+    const preservedMsgs = String(row.admin_comment || '').split('\n').filter((l) => l.trim() && isAmbassadorMsgLine(l))
+    const newLog = [...preservedMsgs, ...lines].join('\n') || null
     setSaving(row.id)
     const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: newLog }).eq('id', row.id)
     if (err) { setSaving(null); alert(err.message); return }
@@ -3393,6 +3411,17 @@ function AmbassadorApplicationsPanel() {
                   <p className="mt-2 whitespace-pre-line rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700">
                     <strong>Decline reason:</strong>{'\n'}{row.decline_reason}
                   </p>
+                )}
+                {/* Messages sent to the ambassador — shared record, visible to every admin (read-only) */}
+                {messageLines(row).length > 0 && (
+                  <div className="mt-3 rounded-lg border border-sky-200 bg-sky-50/60 p-3">
+                    <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-sky-700">Messages sent to ambassador (visible to all admins)</p>
+                    <div className="max-h-40 space-y-1 overflow-y-auto">
+                      {messageLines(row).map((line, idx) => (
+                        <div key={idx} className="whitespace-pre-line rounded bg-white px-2 py-1 text-[11px] text-slate-600">{line}</div>
+                      ))}
+                    </div>
+                  </div>
                 )}
                 {row.status === 'approved' && (
                   <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50/60 p-3">
