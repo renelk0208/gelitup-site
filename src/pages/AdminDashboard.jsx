@@ -111,6 +111,21 @@ create policy "Admins can update orders"
 
 // ─── Registrations panel ──────────────────────────────────────────────────────
 
+// Turns the HTML body of an outgoing email into readable plain text, so a copy
+// of exactly what was sent can be stored in the shared interaction log without
+// dumping raw markup.
+function htmlToText(html) {
+  return String(html || '')
+    .replace(/<\s*br\s*\/?>/gi, '\n')
+    .replace(/<\/\s*(p|div|li|h[1-6])\s*>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>')
+    .replace(/&#39;/g, "'").replace(/&quot;/gi, '"')
+    .split('\n').map((l) => l.trim()).filter(Boolean).join('\n')
+    .trim()
+}
+
 // Parse admin_comment field: returns array of {text, timestamp, author} objects.
 // Handles both legacy plain-text and new JSON-array format.
 function parseComments(raw) {
@@ -243,6 +258,7 @@ function RegistrationsPanel({ onPreviewDistributor }) {
         const resJson = await res.json().catch(() => null)
         if (res.ok) {
           setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sent', message: `Email sent to ${row.contact_email}` } }))
+          logRegistrationSend(row, { to: row.contact_email, subject, html })
         } else {
           const errMsg = resJson?.error || `HTTP ${res.status}`
           setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: errMsg } }))
@@ -308,6 +324,7 @@ function RegistrationsPanel({ onPreviewDistributor }) {
       const resJson = await res.json().catch(() => null)
       if (res.ok) {
         setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sent', message: `Email resent to ${row.contact_email}` } }))
+        logRegistrationSend(row, { to: row.contact_email, subject, html })
       } else {
         const errMsg = resJson?.error || `HTTP ${res.status}`
         setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: errMsg } }))
@@ -362,6 +379,24 @@ function RegistrationsPanel({ onPreviewDistributor }) {
     setRows(prev => prev.map(r => r.id === id ? { ...r, admin_comment: updatedJson } : r))
     // Clear new-comment input so the save button hides
     setCommentMap(prev => { const next = { ...prev }; delete next[id]; return next })
+  }
+
+  // Auto-append a record of an outgoing client email to the shared comment
+  // thread so every admin can see the interaction — who emailed the client,
+  // when, and exactly what was said. Best-effort: a logging failure never
+  // affects the email that was already sent.
+  const logRegistrationSend = async (row, { to, subject, html }) => {
+    if (!row) return
+    const bodyText = htmlToText(html)
+    const text = `📧 Email sent to ${to} · “${subject}”${bodyText ? `\n\n${bodyText}` : ''}`
+    const existing = parseComments(row?.admin_comment)
+    const entry = { text, timestamp: new Date().toISOString(), author: currentAdminEmail || null, kind: 'sent' }
+    const updatedJson = JSON.stringify([...existing, entry])
+    const { error: err } = await supabase
+      .from(REGISTRATIONS_TABLE)
+      .update({ admin_comment: updatedJson })
+      .eq('id', row.id)
+    if (!err) setRows(prev => prev.map(r => r.id === row.id ? { ...r, admin_comment: updatedJson } : r))
   }
 
   const togglePricesAllocated = async (row) => {
@@ -443,6 +478,7 @@ function RegistrationsPanel({ onPreviewDistributor }) {
         const resJson = await res.json().catch(() => null)
         if (res.ok) {
           setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sent', message: `Distributor access email sent to ${row.contact_email}` } }))
+          logRegistrationSend(row, { to: row.contact_email, subject, html })
         } else {
           const errMsg = resJson?.error || `HTTP ${res.status}`
           setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: errMsg } }))
@@ -3019,6 +3055,18 @@ function AmbassadorApplicationsPanel() {
   const [msgBody, setMsgBody] = useState('')
   const [ship, setShip] = useState({}) // { [id]: { shipment_details, tracking_number, tracking_url } }
   const [noteDraft, setNoteDraft] = useState({}) // { [id]: 'new internal note being typed' }
+  const [currentAdminEmail, setCurrentAdminEmail] = useState('')
+  const [openIds, setOpenIds] = useState(() => new Set()) // which applicant cards are expanded
+
+  const toggleOpen = (id) => setOpenIds((prev) => {
+    const next = new Set(prev)
+    if (next.has(id)) next.delete(id); else next.add(id)
+    return next
+  })
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setCurrentAdminEmail(data?.user?.email || ''))
+  }, [])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -3059,6 +3107,7 @@ function AmbassadorApplicationsPanel() {
       const attachments = base64 ? [{ filename, content: base64, contentType: 'application/pdf' }] : []
       const res = await sendAmbassadorEmail({ to: row.email, subject, html, attachments })
       setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Welcome + contract sent to ${row.email}` : res.error)
+      if (res.ok) logAmbassadorSend(row, { to: row.email, subject, body: htmlToText(html) })
     } catch (e) {
       setEmail(row.id, 'error', e.message || 'PDF / email failed')
     }
@@ -3082,6 +3131,7 @@ function AmbassadorApplicationsPanel() {
     setEmail(row.id, 'sending', '')
     const res = await sendAmbassadorEmail({ to: row.email, subject: msgSubject.trim(), html, replyTo: AMBASSADOR_REPLY_TO })
     setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Message sent to ${row.email} (replies go to ${AMBASSADOR_REPLY_TO})` : res.error)
+    if (res.ok) logAmbassadorSend(row, { to: row.email, subject: msgSubject.trim(), body: msgBody.trim() })
     if (res.ok) setMsgRow(null)
     setSaving(null)
   }
@@ -3106,6 +3156,7 @@ function AmbassadorApplicationsPanel() {
     const { subject, html } = buildAmbassadorDeclineEmail(row, reasonText)
     const res = await sendAmbassadorEmail({ to: row.email, subject, html })
     setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Decline email sent to ${row.email}` : res.error)
+    if (res.ok) logAmbassadorSend(row, { to: row.email, subject, body: `Declined — ${reasonText}` })
     setSaving(null)
   }
 
@@ -3129,6 +3180,21 @@ function AmbassadorApplicationsPanel() {
   }
 
   const noteLines = (row) => String(row.admin_comment || '').split('\n').filter((l) => l.trim())
+
+  // Auto-log an outgoing email to the shared notes thread so every admin can
+  // see the interaction (who emailed the ambassador, when, and what was said).
+  // Stored as one line so it plays nicely with the line-based note editor.
+  // Best-effort: a logging failure never affects the email already sent.
+  const logAmbassadorSend = async (row, { to, subject, body }) => {
+    if (!row) return
+    const stamp = fmtDate(new Date().toISOString())
+    const who = currentAdminEmail ? ` by ${currentAdminEmail}` : ''
+    const flat = String(body || '').replace(/\s*\n\s*/g, ' ⏎ ').trim()
+    const entry = `[${stamp}] 📧 Sent to ${to}${who} · “${subject}”${flat ? ` — ${flat}` : ''}`
+    const newLog = row.admin_comment ? `${row.admin_comment}\n${entry}` : entry
+    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: newLog }).eq('id', row.id)
+    if (!err) patchRow(row.id, { admin_comment: newLog })
+  }
 
   const saveNotes = async (row, lines) => {
     const newLog = lines.join('\n') || null
@@ -3174,6 +3240,7 @@ function AmbassadorApplicationsPanel() {
       } catch { /* send without the letter if PDF build fails */ }
       const res = await sendAmbassadorEmail({ to: row.email, subject, html, attachments })
       setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Shipment email + About Us letter sent to ${row.email}` : res.error)
+      if (res.ok) logAmbassadorSend(row, { to: row.email, subject, body: htmlToText(html) })
     } else {
       setEmail(row.id, 'sent', 'Follow-up details saved')
     }
@@ -3229,21 +3296,33 @@ function AmbassadorApplicationsPanel() {
         <div className="space-y-2">
           {rows.map((row) => {
             const es = emailStatus[row.id]
+            const isOpen = openIds.has(row.id)
             return (
-              <div key={row.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div key={row.id} className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                {/* Collapsible header — click anywhere to open/close */}
+                <button
+                  type="button"
+                  onClick={() => toggleOpen(row.id)}
+                  aria-expanded={isOpen}
+                  className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition hover:bg-slate-100"
+                >
+                  <span aria-hidden="true" className={`shrink-0 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}>▶</span>
+                  <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="truncate text-sm font-semibold text-slate-900">{row.full_name}</span>
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ${ambassadorStatusPill(row.status)}`}>
+                      {row.status || 'new'}
+                    </span>
+                    <span className="text-xs text-fuchsia-700">@{row.instagram}</span>
+                    <span className="text-[11px] text-slate-400">{row.country ? `${row.country} · ` : ''}{fmtDate(row.created_at)}</span>
+                  </span>
+                  <span className="ml-auto shrink-0 text-[11px] font-medium text-slate-400">{isOpen ? 'Close' : 'Open'}</span>
+                </button>
+
+                {isOpen && (
+                <div className="border-t border-slate-200 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-slate-900">{row.full_name}</p>
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ${ambassadorStatusPill(row.status)}`}>
-                        {row.status || 'new'}
-                      </span>
-                    </div>
-                    <p className="mt-0.5 text-xs text-slate-400">
-                      {row.country && <span>{row.country} · </span>}
-                      {fmtDate(row.created_at)}
-                    </p>
-                    <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-600">
+                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-600">
                       <a href={`https://instagram.com/${row.instagram}`} target="_blank" rel="noreferrer" className="font-medium text-fuchsia-700 hover:underline">@{row.instagram}</a>
                       {row.tiktok && <a href={`https://tiktok.com/@${row.tiktok}`} target="_blank" rel="noreferrer" className="font-medium text-slate-700 hover:underline">TikTok @{row.tiktok}</a>}
                       {row.followers && <span>{row.followers} followers</span>}
@@ -3375,6 +3454,8 @@ function AmbassadorApplicationsPanel() {
                       </div>
                     </div>
                   </div>
+                )}
+                </div>
                 )}
               </div>
             )
