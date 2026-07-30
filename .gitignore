@@ -31,3 +31,16 @@ dev-dist
 
 # Local Netlify folder
 .netlify
+
+# Scratch / diagnostic artifacts
+tmp-*.mjs
+tmp-*.js
+build-check.txt
+build-out.txt
+*-out.txt
+
+# Office temp lock files
+~$*
+
+# Local agent config
+.claude/
