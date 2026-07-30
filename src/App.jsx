@@ -359,6 +359,7 @@ const PORTAL_FONT_TTF_URL = import.meta.env.VITE_PORTAL_FONT_TTF_URL || '/fonts/
 const CLIENT_PROFILE_STORAGE_KEY = 'gelitup.portal.client_profile.v1'
 const B2B_CART_STORAGE_KEY_PREFIX = 'gelitup.portal.b2b_cart.v1'
 const QUICK_CART_STORAGE_KEY = 'gelitup.catalogue.quick_cart.v1'
+const CHECKOUT_DETAILS_STORAGE_KEY = 'gelitup.checkout.details.v1'
 const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
@@ -8500,6 +8501,10 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [magicLinkSent, setMagicLinkSent] = useState(false)
   const [magicLinkLoading, setMagicLinkLoading] = useState(false)
+  // "Keep me signed in" — remembers email + password on this device for one-tap re-login.
+  // Defaults on so returning clients (e.g. mobile Safari, where the session can be purged)
+  // don't have to retype credentials every visit. Unchecking clears any stored credentials.
+  const [keepSignedIn, setKeepSignedIn] = useState(() => localStorage.getItem('portalSessionOnly') !== 'true')
 
   useEffect(() => {
     if (prefilledEmail) {
@@ -8625,9 +8630,15 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
 
           // Always persist session and credentials
           sessionStorage.setItem('portalTabActive', 'true')
-          localStorage.setItem('portalRememberedEmail', String(email || '').trim().toLowerCase())
-          try { localStorage.setItem('portalRememberedPassword', btoa(password)) } catch { /* ignore */ }
-          localStorage.removeItem('portalSessionOnly')
+          if (keepSignedIn) {
+            localStorage.setItem('portalRememberedEmail', String(email || '').trim().toLowerCase())
+            try { localStorage.setItem('portalRememberedPassword', btoa(password)) } catch { /* ignore */ }
+            localStorage.removeItem('portalSessionOnly')
+          } else {
+            localStorage.removeItem('portalRememberedEmail')
+            localStorage.removeItem('portalRememberedPassword')
+            localStorage.setItem('portalSessionOnly', 'true')
+          }
 
           let result
           try {
@@ -8759,6 +8770,18 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
                   )}
                 </button>
               </div>
+            </label>
+          )}
+
+          {!isCreatePasswordMode && (
+            <label className="flex items-center gap-2 text-sm text-slate-600">
+              <input
+                type="checkbox"
+                checked={keepSignedIn}
+                onChange={(e) => setKeepSignedIn(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-fuchsia-600 focus:ring-fuchsia-500"
+              />
+              {T?.portal?.keep_signed_in ?? 'Keep me signed in on this device'}
             </label>
           )}
 
@@ -9315,16 +9338,25 @@ function CheckoutPage() {
   ], [])
 
   // Customer details form
-  const [form, setForm] = useState({
-    email: '', companyName: '', vatNumber: '', firstName: '', lastName: '', phone: '',
-    invoiceAddressLine1: '', invoiceAddressLine2: '', invoiceArea: '', invoiceRegion: '', invoiceCountry: '', invoicePostalCode: '',
-    shipToDifferentAddress: false, shippingName: '', shippingPhone: '',
-    shippingAddressLine1: '', shippingAddressLine2: '', shippingArea: '', shippingRegion: '', shippingCountry: '', shippingPostalCode: '',
-    createAccount: false, password: '',
-    subscribeEmails: false,
-    smsUpdates: false,
-    orderNotes: '',
-    agreeTerms: false,
+  const [form, setForm] = useState(() => {
+    const base = {
+      email: '', companyName: '', vatNumber: '', firstName: '', lastName: '', phone: '',
+      invoiceAddressLine1: '', invoiceAddressLine2: '', invoiceArea: '', invoiceRegion: '', invoiceCountry: '', invoicePostalCode: '',
+      shipToDifferentAddress: false, shippingName: '', shippingPhone: '',
+      shippingAddressLine1: '', shippingAddressLine2: '', shippingArea: '', shippingRegion: '', shippingCountry: '', shippingPostalCode: '',
+      createAccount: false, password: '',
+      subscribeEmails: false,
+      smsUpdates: false,
+      orderNotes: '',
+      agreeTerms: false,
+    }
+    // Restore previously-entered details so returning guests don't retype everything.
+    try {
+      const saved = JSON.parse(localStorage.getItem(CHECKOUT_DETAILS_STORAGE_KEY) || '{}')
+      // Never restore password / terms acceptance — those must be re-entered each order.
+      const { password: _pw, agreeTerms: _at, ...safe } = saved || {}
+      return { ...base, ...safe }
+    } catch { return base }
   })
   const [viesResult, setViesResult] = useState(null)
   const [viesLoading, setViesLoading] = useState(false)
@@ -9343,6 +9375,15 @@ function CheckoutPage() {
   )
 
   const updateField = (field, value) => setForm(f => ({ ...f, [field]: value }))
+
+  // Persist entered details (excluding password / terms) so returning customers —
+  // guests included — keep their info even if they leave and come back later.
+  useEffect(() => {
+    try {
+      const { password: _pw, agreeTerms: _at, ...safe } = form
+      localStorage.setItem(CHECKOUT_DETAILS_STORAGE_KEY, JSON.stringify(safe))
+    } catch { /* ignore */ }
+  }, [form])
 
   // Load price list
   useEffect(() => {
@@ -9908,32 +9949,32 @@ function CheckoutPage() {
 
       {/* CHECKOUT GATE — shown to logged-out visitors before the form */}
       {checkoutMode === 'choose' && (
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          {/* Guest path */}
-          <button
-            type="button"
-            onClick={() => setCheckoutMode('form')}
-            className="group flex flex-col items-start rounded-2xl border-2 border-slate-200 bg-white p-6 text-left transition hover:border-fuchsia-400 hover:shadow-md"
-          >
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-fuchsia-100 text-fuchsia-600 transition group-hover:bg-fuchsia-200">
-              <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5"><path d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.465 14.493a1.23 1.23 0 0 0 .41 1.412A9.957 9.957 0 0 0 10 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 0 0-13.074.003Z" /></svg>
+        <div className="mt-6">
+          <div className="rounded-2xl border-2 border-fuchsia-500 bg-white p-6 shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-full bg-fuchsia-100 text-fuchsia-600 sm:flex">
+                <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5"><path d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.465 14.493a1.23 1.23 0 0 0 .41 1.412A9.957 9.957 0 0 0 10 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 0 0-13.074.003Z" /></svg>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-lg font-bold text-slate-900">Checkout — no account needed</h2>
+                <p className="mt-1 text-sm text-slate-500">Just fill in your details and place your order. You can create an account at the end if you'd like — it's optional.</p>
+                <button
+                  type="button"
+                  onClick={() => setCheckoutMode('form')}
+                  className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-fuchsia-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-fuchsia-500 sm:w-auto"
+                >
+                  Continue to Checkout
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4"><path fillRule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clipRule="evenodd" /></svg>
+                </button>
+              </div>
             </div>
-            <h2 className="mt-4 text-lg font-bold text-slate-900">Guest Checkout</h2>
-            <p className="mt-1 text-sm text-slate-500">No account needed. Just fill in your details and place your order.</p>
-            <span className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-bold text-white transition group-hover:bg-fuchsia-500">
-              Continue as Guest
-              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4"><path fillRule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clipRule="evenodd" /></svg>
-            </span>
-          </button>
+          </div>
 
-          {/* Sign in path */}
-          <div className="flex flex-col items-start rounded-2xl border-2 border-slate-200 bg-white p-6">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-600">
-              <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5"><path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-5.5-2.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM10 12a5.99 5.99 0 0 0-4.793 2.39A6.483 6.483 0 0 0 10 16.5a6.483 6.483 0 0 0 4.793-2.11A5.99 5.99 0 0 0 10 12Z" clipRule="evenodd" /></svg>
-            </div>
-            <h2 className="mt-4 text-lg font-bold text-slate-900">Existing Customer</h2>
-            <p className="mt-1 text-sm text-slate-500">Sign in to pre-fill your details and see your order history.</p>
-            <div className="mt-4 flex flex-col gap-2 w-full">
+          {/* Sign in path — secondary, for returning customers who want their saved details */}
+          <div className="mt-4 flex flex-col items-start rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <h2 className="text-sm font-bold text-slate-900">Ordered before?</h2>
+            <p className="mt-1 text-xs text-slate-500">Sign in to auto-fill your details and see your order history (optional).</p>
+            <div className="mt-3 flex flex-col gap-2 w-full sm:max-w-sm">
               <NavLink
                 to="/portal/login"
                 className="inline-flex items-center justify-center gap-1.5 rounded-lg border-2 border-slate-900 px-4 py-2 text-sm font-bold text-slate-900 transition hover:border-fuchsia-600 hover:bg-fuchsia-600 hover:text-white"
