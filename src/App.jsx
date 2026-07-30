@@ -20289,6 +20289,7 @@ function App() {
               <NavLink to="/privacy-policy" className="block transition duration-300 hover:text-fuchsia-300">Privacy Policy</NavLink>
               <NavLink to="/cookie-policy" className="block transition duration-300 hover:text-fuchsia-300">Cookie Policy</NavLink>
               <NavLink to="/terms-and-conditions" className="block transition duration-300 hover:text-fuchsia-300">Terms and Conditions</NavLink>
+              <a href="/gelitup-compliance-certification.html" target="_blank" rel="noreferrer" className="block transition duration-300 hover:text-fuchsia-300">Compliance Certification</a>
             </div>
           </div>
 

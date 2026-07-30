@@ -851,6 +851,35 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           </div>
         ) : null}
 
+        {/* ── Compliance Certification ─────────────────────────────────── */}
+        <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-gradient-to-r from-[#D43790]/10 to-[#1A1A1A]/10 px-4 py-10 sm:px-8 sm:py-12">
+          <div className="mx-auto max-w-6xl">
+            <div className="rounded-2xl border border-[#D43790]/30 bg-black/40 p-6 sm:p-8 backdrop-blur">
+              <div className="flex items-start gap-4 sm:gap-6">
+                <div className="flex-shrink-0">
+                  <svg className="h-8 w-8 text-[#D43790] sm:h-10 sm:w-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-extrabold uppercase tracking-[0.08em] text-white sm:text-2xl">Full Compliance Documentation</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/90 sm:text-base">
+                    EU-certified, HEMA-free and TPO-free products with complete compliance documentation for packaging, safety data sheets, and regulatory certifications.
+                  </p>
+                  <a
+                    href="/gelitup-compliance-certification.html"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-4 inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]"
+                  >
+                    View Compliance Details →
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <InspirationTeaser />
         <InstagramFeed />
         <TikTokFeed />
