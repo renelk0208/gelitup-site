@@ -79,6 +79,71 @@ async function notifyAdminOfApplication(record, pdf) {
   } catch { /* best-effort */ }
 }
 
+// Countries served by a local GEL.IT.UP partner — applicants apply via the partner's
+// Instagram instead of the main programme. Country is a free-text field, so `match` covers
+// common spellings + ISO codes. Add a new entry here to onboard another country.
+const PARTNER_COUNTRIES = [
+  {
+    key: 'greece',
+    name: 'GEL.IT.UP Greece',
+    handle: '@gelitup',
+    instagramUrl: 'https://instagram.com/gelitup',
+    flag: '🇬🇷',
+    match: (c) =>
+      ['gr', 'grc'].includes(c) || c.includes('greece') || c.includes('hellas') ||
+      c.includes('griechenland') || c.includes('grecia') || c.includes('grèce') ||
+      c.includes('grece') || c.includes('ελλαδ') || c.includes('ελλάδ'),
+  },
+  {
+    key: 'italy',
+    name: 'GEL.IT.UP Italy',
+    handle: '@gel.it.upitaly',
+    instagramUrl: 'https://instagram.com/gel.it.upitaly',
+    flag: '🇮🇹',
+    match: (c) =>
+      ['it', 'ita'].includes(c) || c.includes('italy') || c.includes('italia') ||
+      c.includes('italien') || c.includes('italie'),
+  },
+]
+
+// Returns the partner-country config for a free-text country string, or null.
+function matchPartnerCountry(country) {
+  const c = String(country || '').trim().toLowerCase()
+  if (!c) return null
+  return PARTNER_COUNTRIES.find((p) => p.match(c)) || null
+}
+
+// Thanks the applicant for applying and redirects them to the local partner on Instagram.
+// Best-effort: any failure is swallowed so it never blocks the applicant's success screen.
+async function sendPartnerRedirectEmail(record, partner) {
+  if (!EMAIL_WEBHOOK_URL || !record?.email || !partner) return
+  const firstName = String(record.full_name || '').trim().split(' ')[0] || 'there'
+  const html = `
+    <div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.6">
+      <p>Hi ${escapeHtml(firstName)},</p>
+      <p>Thank you so much for applying to the GEL.IT.UP Ambassador Programme — we love that you want to create with us.</p>
+      <p>Applications from your country are handled by <strong>${escapeHtml(partner.name)}</strong>. To make your application, please get in touch with them directly on Instagram at <a href="${partner.instagramUrl}" style="color:#D43790;font-weight:bold">${escapeHtml(partner.handle)}</a> — that's where you'll need to apply.</p>
+      <p>If you need anything else, just email us at <a href="mailto:info@gelitup.com" style="color:#D43790;font-weight:bold">info@gelitup.com</a>.</p>
+      <p>Warm wishes,<br/>The GEL.IT.UP Team</p>
+    </div>`
+  const headers = { 'Content-Type': 'application/json' }
+  if (EMAIL_WEBHOOK_ANON_KEY) {
+    headers.apikey = EMAIL_WEBHOOK_ANON_KEY
+    headers.Authorization = `Bearer ${EMAIL_WEBHOOK_ANON_KEY}`
+  }
+  const body = {
+    eventType: 'ambassador_application_partner_redirect',
+    to: record.email,
+    subject: `Your GEL.IT.UP ambassador application — please apply via ${partner.name}`,
+    html,
+    from: EMAIL_FROM,
+    replyTo: ADMIN_INBOX,
+  }
+  try {
+    await fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers, body: JSON.stringify(body) })
+  } catch { /* best-effort */ }
+}
+
 // Editable programme perks — tweak the copy freely, the layout adapts.
 const PERKS = [
   {
@@ -126,7 +191,8 @@ export default function AmbassadorPage() {
   const [eligibility, setEligibility] = useState({ qualified: '', workShown: '', followers500: '' })
   const [showDeclineModal, setShowDeclineModal] = useState(false)
   const [agreed, setAgreed] = useState(false)
-  const [status, setStatus] = useState('idle') // idle | submitting | success | error
+  const [status, setStatus] = useState('idle') // idle | submitting | success | partner | error
+  const [partnerCountry, setPartnerCountry] = useState(null) // partner config when country is served locally
   const [errorMsg, setErrorMsg] = useState('')
   const lang = useLang()
 
@@ -208,7 +274,16 @@ export default function AmbassadorPage() {
         })
         await notifyAdminOfApplication(record, pdf)
       } catch { /* notification is best-effort */ }
-      setStatus('success')
+      // Countries with a local GEL.IT.UP partner are served via that partner's Instagram. We
+      // still save + notify admin above, and additionally email the applicant to apply there.
+      const partner = matchPartnerCountry(record.country)
+      if (partner) {
+        try { await sendPartnerRedirectEmail(record, partner) } catch { /* best-effort */ }
+        setPartnerCountry(partner)
+        setStatus('partner')
+      } else {
+        setStatus('success')
+      }
     } catch (err) {
       setErrorMsg(err?.message || 'Something went wrong.')
       setStatus('error')
@@ -335,7 +410,29 @@ export default function AmbassadorPage() {
             Takes under a minute. We&apos;ll be in touch by email if it&apos;s a match.
           </p>
 
-          {status === 'success' ? (
+          {status === 'partner' && partnerCountry ? (
+            <div className="mt-8 rounded-2xl border border-[#D43790]/40 bg-white/[0.04] p-8 text-center">
+              <div className="text-4xl">{partnerCountry.flag}</div>
+              <h3 className="mt-4 text-xl font-black text-white">Thank you for applying!</h3>
+              <p className="mt-2 text-sm text-white/70">
+                Thanks {form.fullName.split(' ')[0] || 'so much'} — applications from your country are handled by{' '}
+                <span className="font-semibold text-[#e879c4]">{partnerCountry.name}</span>. Please make your application by
+                contacting them on Instagram at <span className="font-semibold text-[#e879c4]">{partnerCountry.handle}</span>.
+              </p>
+              <p className="mt-2 text-sm text-white/70">
+                If you need anything else, email us at{' '}
+                <a href="mailto:info@gelitup.com" className="font-semibold text-[#e879c4] hover:underline">info@gelitup.com</a>.
+              </p>
+              <a
+                href={partnerCountry.instagramUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-6 inline-flex rounded-full bg-[#D43790] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#c22f82]"
+              >
+                Message {partnerCountry.handle} on Instagram
+              </a>
+            </div>
+          ) : status === 'success' ? (
             <div className="mt-8 rounded-2xl border border-[#D43790]/40 bg-white/[0.04] p-8 text-center">
               <div className="text-4xl">🎉</div>
               <h3 className="mt-4 text-xl font-black text-white">You&apos;re in the running!</h3>
