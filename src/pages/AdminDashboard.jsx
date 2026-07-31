@@ -969,13 +969,13 @@ const SKU_OVERRIDE_MAP = {
   'MMLNC':             { name: 'Multimix Synthogel 30g Light Nude -HTF',       price: 12.19 },
 
   // ── White Satin Cuticle Oil range (store brand → canonical price list name) ──────────
-  // All 100ml variants at base 7.2 → B2B 8.7
-  'WSCOILM':                           { name: 'Chilled Melon Cuticle Oil 100ml -HTF',   price: 7.2 },
-  'WHITE SATIN CUTICLE OIL MELON':     { name: 'Chilled Melon Cuticle Oil 100ml -HTF',   price: 7.2 },
-  'WSCOILP':                           { name: 'Perky Peach Cuticle Oil 100ml -HTF',     price: 7.2 },
-  'WHITE SATIN CUTICLE OIL PEACH':     { name: 'Perky Peach Cuticle Oil 100ml -HTF',     price: 7.2 },
-  'WSCOILC':                           { name: 'Cooling Coconut Cuticle Oil 100ml -HTF', price: 7.2 },
-  'WHITE SATIN CUTICLE OIL COCONUT OIL': { name: 'Cooling Coconut Cuticle Oil 100ml -HTF', price: 7.2 },
+  // All 100ml variants at base 11.9 → B2B 14.3
+  'WSCOILM':                           { name: 'Chilled Melon Cuticle Oil 100ml -HTF',   price: 11.9 },
+  'WHITE SATIN CUTICLE OIL MELON':     { name: 'Chilled Melon Cuticle Oil 100ml -HTF',   price: 11.9 },
+  'WSCOILP':                           { name: 'Perky Peach Cuticle Oil 100ml -HTF',     price: 11.9 },
+  'WHITE SATIN CUTICLE OIL PEACH':     { name: 'Perky Peach Cuticle Oil 100ml -HTF',     price: 11.9 },
+  'WSCOILC':                           { name: 'Cooling Coconut Cuticle Oil 100ml -HTF', price: 11.9 },
+  'WHITE SATIN CUTICLE OIL COCONUT OIL': { name: 'Cooling Coconut Cuticle Oil 100ml -HTF', price: 11.9 },
 
   // ── Mirror Clear Powder ────────────────────────────────────────────────────────────
   // base 5.15 → B2B 6.2
