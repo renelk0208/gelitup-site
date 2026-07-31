@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import * as XLSX from 'xlsx'
 import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
-import { CONTRACT_I18N, resolveContractLang } from '../data/ambassadorContractI18n.js'
 import ambassadorContractAttachmentUrl from '../lib/ambassadrocontract/GELITUP-Ambassador-Agreement.pdf?url'
 import ambassadorLetterAttachmentUrl from '../lib/ambassadorletter/Gelitup Ambassador Letter.pdf?url'
+import ambassadorActivationTemplateHtml from '../lib/ambassadorletter/AmbassadorAccountActivation.html?raw'
 
 const REGISTRATIONS_TABLE = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || 'b2b_registrations'
 const ORDERS_TABLE = import.meta.env.VITE_B2B_ORDERS_TABLE || 'b2b_orders'
@@ -2999,41 +2999,22 @@ const AMBASSADOR_DECLINE_PRESETS = [
   'Location not currently served by the programme',
 ]
 
-const AMBASSADOR_PR_LINE = {
-  en: 'Your first PR package will be on its way shortly.',
-  ro: 'Primul tău pachet PR va fi trimis în curând.',
-  fr: 'Votre premier colis PR vous sera envoyé sous peu.',
-  de: 'Dein erstes PR-Paket ist bald unterwegs.',
-  es: 'Tu primer paquete PR se enviará muy pronto.',
-  pt: 'O teu primeiro pacote PR será enviado em breve.',
-  pl: 'Twoja pierwsza paczka PR zostanie wkrótce wysłana.',
-  hu: 'Az első PR-csomagod hamarosan úton lesz.',
-  el: 'Το πρώτο σου PR πακέτο θα σταλεί σύντομα.',
-  bg: 'Първият ти PR пакет ще бъде изпратен скоро.',
-}
-
 const escAmb = (v) => String(v ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
 
-// Localised welcome + obligations. The full signed contract (English) is attached separately.
-function buildAmbassadorApprovalEmail(row) {
-  const lang = resolveContractLang(row?.language, row?.country)
-  const t = CONTRACT_I18N[lang] || CONTRACT_I18N.en
-  const pr = AMBASSADOR_PR_LINE[lang] || AMBASSADOR_PR_LINE.en
-  const codeLine = row?.discount_code
-    ? `<p style="font-weight:bold;color:#D43790">🎟 Your personal discount code is <span style="font-size:16px">${escAmb(row.discount_code)}</span></p>`
-    : ''
-  const html = `
-    <div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5">
-      <p>${escAmb(t.greeting(row?.full_name?.trim() || ''))}</p>
-      <p>${t.intro}</p>
-      ${codeLine}
-      <p style="font-weight:bold;color:#0f766e">📦 ${pr}</p>
-      <h3 style="margin:18px 0 6px">${t.obligationsHeading}</h3>
-      <ul style="padding-left:18px">${t.obligations.map((o) => `<li style="margin:4px 0">${o}</li>`).join('')}</ul>
-      <p style="color:#6b7280;font-size:13px">${t.attachedNote}</p>
-      <p style="white-space:pre-line">${t.signoff}</p>
-    </div>`
-  return { subject: t.subject, html }
+function buildAmbassadorApprovalEmail({ fullName, discountCode, setPasswordLink }) {
+  const html = ambassadorActivationTemplateHtml
+    .replaceAll('[Name]', escAmb(fullName))
+    .replaceAll('[CODE]', escAmb(discountCode))
+    .replaceAll('[SET_PASSWORD_LINK]', escAmb(setPasswordLink))
+
+  if (/\[(Name|CODE|SET_PASSWORD_LINK)\]/.test(html)) {
+    throw new Error('Approval email blocked: unresolved placeholders remain in template.')
+  }
+
+  return {
+    subject: 'Welcome to the GEL.IT.UP Ambassador Programme — activate your account',
+    html,
+  }
 }
 
 function buildAmbassadorDeclineEmail(row, reasonText) {
@@ -3214,6 +3195,7 @@ function AmbassadorApplicationsPanel() {
     try {
       const updatedRow = { ...row, status: 'approved', reviewed_at: reviewedAt, discount_code: discountCode }
       const fullName = String(updatedRow?.full_name || '').trim()
+      const setPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(String(updatedRow?.email || '').trim().toLowerCase())}`
       if (!fullName) {
         setEmail(row.id, 'error', 'Approval email blocked: ambassador name is missing.')
         setSaving(null)
@@ -3224,8 +3206,17 @@ function AmbassadorApplicationsPanel() {
         setSaving(null)
         return
       }
+      if (!String(updatedRow?.email || '').trim()) {
+        setEmail(row.id, 'error', 'Approval email blocked: ambassador email is missing.')
+        setSaving(null)
+        return
+      }
       const contractAttachment = await buildPdfAttachment(AMBASSADOR_CONTRACT_ATTACHMENT_URL, 'GELITUP-Ambassador-Agreement.pdf')
-      const { subject, html } = buildAmbassadorApprovalEmail(updatedRow)
+      const { subject, html } = buildAmbassadorApprovalEmail({
+        fullName,
+        discountCode,
+        setPasswordLink,
+      })
       const attachments = [contractAttachment]
       const res = await sendAmbassadorEmail({ to: updatedRow.email, subject, html, attachments })
       setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Welcome + contract sent to ${updatedRow.email}` : res.error)
