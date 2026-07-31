@@ -17606,6 +17606,13 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     totalOrders: null,
     lastOrderDate: null,
   })
+  const [ambassadorPortalInfo, setAmbassadorPortalInfo] = useState({
+    isLoading: false,
+    code: '',
+    availableEur: 0,
+    commissionPct: 0,
+    error: '',
+  })
   const [welcomeStep, setWelcomeStep] = useState(() => {
     try { return localStorage.getItem('gelitup.b2b.portal.welcome.v1') ? -1 : 0 } catch { return -1 }
   })
@@ -17623,13 +17630,59 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
         const { data: reg } = await supabase
           .from(registrationsTable)
           .select('prices_allocated, distributor_tier, status, application_type, notes')
-          .ilike('email', email)
+          .ilike('contact_email', email)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle()
         if (reg) setLiveRegistration(reg)
       }
     })
+  }, [])
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadAmbassadorPortalInfo = async () => {
+      if (!hasSupabaseConfig || !supabase) return
+
+      setAmbassadorPortalInfo((prev) => ({ ...prev, isLoading: true, error: '' }))
+      const { data, error } = await supabase.rpc('get_my_ambassador_wallet')
+      if (!isMounted) return
+
+      if (error) {
+        setAmbassadorPortalInfo({
+          isLoading: false,
+          code: '',
+          availableEur: 0,
+          commissionPct: 0,
+          error: 'Ambassador details unavailable right now.',
+        })
+        return
+      }
+
+      const row = Array.isArray(data) ? data[0] : data
+      if (!row) {
+        setAmbassadorPortalInfo({
+          isLoading: false,
+          code: '',
+          availableEur: 0,
+          commissionPct: 0,
+          error: '',
+        })
+        return
+      }
+
+      setAmbassadorPortalInfo({
+        isLoading: false,
+        code: String(row.code || ''),
+        availableEur: Number(row.available_eur || 0),
+        commissionPct: Number(row.commission_pct || 0),
+        error: '',
+      })
+    }
+
+    void loadAmbassadorPortalInfo()
+    return () => { isMounted = false }
   }, [])
 
   const printComplianceCertificate = useCallback(async () => {
@@ -18233,6 +18286,32 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                   </p>
                 </article>
               </div>
+
+              {activeModule === 'overview' && (ambassadorPortalInfo.isLoading || ambassadorPortalInfo.code || ambassadorPortalInfo.error) && (
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Ambassador details</p>
+                  {ambassadorPortalInfo.isLoading ? (
+                    <p className="mt-2 text-sm text-emerald-800">Loading your ambassador code and credit…</p>
+                  ) : ambassadorPortalInfo.code ? (
+                    <div className="mt-2 grid gap-3 sm:grid-cols-3">
+                      <div className="rounded-lg border border-emerald-200 bg-white p-3">
+                        <p className="text-[11px] text-slate-500">Discount Code</p>
+                        <p className="mt-1 font-mono text-base font-bold text-emerald-700">{ambassadorPortalInfo.code}</p>
+                      </div>
+                      <div className="rounded-lg border border-emerald-200 bg-white p-3">
+                        <p className="text-[11px] text-slate-500">Available Credit</p>
+                        <p className="mt-1 text-base font-bold text-emerald-700">€{ambassadorPortalInfo.availableEur.toFixed(2)}</p>
+                      </div>
+                      <div className="rounded-lg border border-emerald-200 bg-white p-3">
+                        <p className="text-[11px] text-slate-500">Commission Rate</p>
+                        <p className="mt-1 text-base font-bold text-emerald-700">{ambassadorPortalInfo.commissionPct}%</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-sm text-slate-600">{ambassadorPortalInfo.error}</p>
+                  )}
+                </div>
+              )}
 
               {activeModule === 'overview' && (() => {
                 const tier = effectiveTier

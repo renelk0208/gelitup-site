@@ -3094,6 +3094,40 @@ async function sendAmbassadorEmail({ to, subject, html, attachments, replyTo }) 
   }
 }
 
+async function ensureAmbassadorPortalAccount(row) {
+  const email = String(row?.email || '').trim().toLowerCase()
+  if (!email) {
+    throw new Error('Approval blocked: ambassador email is missing.')
+  }
+
+  const tempPass = `${crypto.randomUUID()}-Amb!${Date.now()}`
+  const fullName = String(row?.full_name || '').trim()
+  const companyName = fullName ? `${fullName} (Ambassador)` : 'GEL.IT.UP Ambassador'
+  const firstName = fullName.split(' ')[0] || ''
+  const lastName = fullName.split(' ').slice(1).join(' ')
+
+  const { error } = await supabase.auth.signUp({
+    email,
+    password: tempPass,
+    options: {
+      emailRedirectTo: `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(email)}`,
+      data: {
+        role: 'buyer',
+        account_type: 'b2b_buyer',
+        full_name: fullName || email,
+        first_name: firstName,
+        last_name: lastName,
+        company_name: companyName,
+        contact_email: email,
+      },
+    },
+  })
+
+  if (error && !/already registered|already been registered|user already registered/i.test(String(error.message || ''))) {
+    throw new Error(`Could not create ambassador portal account: ${error.message}`)
+  }
+}
+
 function AmbassadorApplicationsPanel() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
@@ -3131,9 +3165,14 @@ function AmbassadorApplicationsPanel() {
       .replace(/[^a-z0-9]/gi, '')
       .toLowerCase()
     const normalizeHandle = (value) => String(value || '').replace(/^@+/, '').trim().toLowerCase()
+    const firstNameKey = (value) => normalizeLookupKey(String(value || '').trim().split(/\s+/)[0] || '')
     const extractInstagramFromNotes = (notes) => {
       const m = String(notes || '').match(/instagram:\s*(@?[a-z0-9._]+)/i)
       return m ? normalizeHandle(m[1]) : ''
+    }
+    const extractCodeStem = (code) => {
+      const stem = String(code || '').toUpperCase().replace(/\d+.*$/, '')
+      return normalizeLookupKey(stem)
     }
     let query = supabase
       .from(AMBASSADOR_TABLE)
@@ -3155,20 +3194,31 @@ function AmbassadorApplicationsPanel() {
       const byEmail = new Map()
       const byName = new Map()
       const byInstagram = new Map()
+      const byFirstName = new Map()
       for (const c of codeRows) {
         const emailKey = normalizeLookupKey(c?.ambassador_email)
         const nameKey = normalizeLookupKey(c?.ambassador_name)
+        const firstKey = firstNameKey(c?.ambassador_name)
         const igKey = extractInstagramFromNotes(c?.notes)
+        const codeStemKey = extractCodeStem(c?.code)
         if (emailKey && !byEmail.has(emailKey)) byEmail.set(emailKey, c.code)
         if (nameKey && !byName.has(nameKey)) byName.set(nameKey, c.code)
         if (igKey && !byInstagram.has(igKey)) byInstagram.set(igKey, c.code)
+        if (firstKey && !byFirstName.has(firstKey)) byFirstName.set(firstKey, c.code)
+        if (codeStemKey && !byFirstName.has(codeStemKey)) byFirstName.set(codeStemKey, c.code)
       }
       nextRows = nextRows.map((row) => {
         if (row.discount_code) return row
         const emailKey = normalizeLookupKey(row?.email)
         const nameKey = normalizeLookupKey(row?.full_name)
         const igKey = normalizeHandle(row?.instagram)
-        const fallbackCode = byEmail.get(emailKey) || byName.get(nameKey) || byInstagram.get(igKey) || null
+        const firstKey = firstNameKey(row?.full_name)
+        const fallbackCode =
+          byEmail.get(emailKey)
+          || byName.get(nameKey)
+          || byInstagram.get(igKey)
+          || byFirstName.get(firstKey)
+          || null
         return fallbackCode ? { ...row, discount_code: fallbackCode } : row
       })
     }
@@ -3211,6 +3261,7 @@ function AmbassadorApplicationsPanel() {
         setSaving(null)
         return
       }
+      await ensureAmbassadorPortalAccount(updatedRow)
       const contractAttachment = await buildPdfAttachment(AMBASSADOR_CONTRACT_ATTACHMENT_URL, 'GELITUP-Ambassador-Agreement.pdf')
       const { subject, html } = buildAmbassadorApprovalEmail({
         fullName,
