@@ -3016,10 +3016,14 @@ function buildAmbassadorApprovalEmail(row) {
   const lang = resolveContractLang(row?.language, row?.country)
   const t = CONTRACT_I18N[lang] || CONTRACT_I18N.en
   const pr = AMBASSADOR_PR_LINE[lang] || AMBASSADOR_PR_LINE.en
+  const codeLine = row?.discount_code
+    ? `<p style="font-weight:bold;color:#D43790">🎟 Your personal discount code is <span style="font-size:16px">${escAmb(row.discount_code)}</span></p>`
+    : ''
   const html = `
     <div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5">
       <p>${escAmb(t.greeting(row?.full_name?.trim() || ''))}</p>
       <p>${t.intro}</p>
+      ${codeLine}
       <p style="font-weight:bold;color:#0f766e">📦 ${pr}</p>
       <h3 style="margin:18px 0 6px">${t.obligationsHeading}</h3>
       <ul style="padding-left:18px">${t.obligations.map((o) => `<li style="margin:4px 0">${o}</li>`).join('')}</ul>
@@ -3143,7 +3147,30 @@ function AmbassadorApplicationsPanel() {
     const { data, error: err } = await query
     setLoading(false)
     if (err) { setError(err.message); return }
-    setRows(data || [])
+    let nextRows = data || []
+    const { data: codeRows, error: codeErr } = await supabase
+      .from('ambassador_codes')
+      .select('code, ambassador_name, ambassador_email')
+      .eq('active', true)
+      .limit(500)
+    if (!codeErr && Array.isArray(codeRows) && codeRows.length > 0) {
+      const byEmail = new Map()
+      const byName = new Map()
+      for (const c of codeRows) {
+        const emailKey = String(c?.ambassador_email || '').trim().toLowerCase()
+        const nameKey = String(c?.ambassador_name || '').trim().toLowerCase()
+        if (emailKey && !byEmail.has(emailKey)) byEmail.set(emailKey, c.code)
+        if (nameKey && !byName.has(nameKey)) byName.set(nameKey, c.code)
+      }
+      nextRows = nextRows.map((row) => {
+        if (row.discount_code) return row
+        const emailKey = String(row?.email || '').trim().toLowerCase()
+        const nameKey = String(row?.full_name || '').trim().toLowerCase()
+        const fallbackCode = byEmail.get(emailKey) || byName.get(nameKey) || null
+        return fallbackCode ? { ...row, discount_code: fallbackCode } : row
+      })
+    }
+    setRows(nextRows)
   }, [filter])
 
   useEffect(() => { load() }, [load])
@@ -3156,20 +3183,21 @@ function AmbassadorApplicationsPanel() {
     if (String(row?.status || '').toLowerCase() === 'approved') return
     if (!window.confirm(`Approve ${row.full_name} (@${row.instagram})?\n\nThis emails them the welcome message with their signed contract attached, and tells them their PR package is on the way.`)) return
     setSaving(row.id)
-    const { error: err } = await supabase
-      .from(AMBASSADOR_TABLE)
-      .update({ status: 'approved', reviewed_at: new Date().toISOString() })
-      .eq('id', row.id)
+    const { data, error: err } = await supabase.rpc('approve_ambassador_application', { p_application_id: row.id })
     if (err) { setSaving(null); alert(err.message); return }
-    patchRow(row.id, { status: 'approved' })
+    const approved = Array.isArray(data) ? data[0] : data
+    const reviewedAt = approved?.reviewed_at || new Date().toISOString()
+    const discountCode = approved?.discount_code || row.discount_code || null
+    patchRow(row.id, { status: 'approved', reviewed_at: reviewedAt, discount_code: discountCode })
     setEmail(row.id, 'sending', '')
     try {
-      const { base64, filename } = await buildAmbassadorContractPdf(ambassadorRowToContact(row))
-      const { subject, html } = buildAmbassadorApprovalEmail(row)
+      const updatedRow = { ...row, status: 'approved', reviewed_at: reviewedAt, discount_code: discountCode }
+      const { base64, filename } = await buildAmbassadorContractPdf(ambassadorRowToContact(updatedRow))
+      const { subject, html } = buildAmbassadorApprovalEmail(updatedRow)
       const attachments = base64 ? [{ filename, content: base64, contentType: 'application/pdf' }] : []
-      const res = await sendAmbassadorEmail({ to: row.email, subject, html, attachments })
-      setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Welcome + contract sent to ${row.email}` : res.error)
-      if (res.ok) logAmbassadorSend(row, { to: row.email, subject, body: htmlToText(html) })
+      const res = await sendAmbassadorEmail({ to: updatedRow.email, subject, html, attachments })
+      setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Welcome + contract sent to ${updatedRow.email}` : res.error)
+      if (res.ok) logAmbassadorSend(updatedRow, { to: updatedRow.email, subject, body: htmlToText(html) })
     } catch (e) {
       setEmail(row.id, 'error', e.message || 'PDF / email failed')
     }
@@ -3425,6 +3453,11 @@ function AmbassadorApplicationsPanel() {
                     })()}
                     {row.message && (
                       <p className="mt-2 whitespace-pre-line text-xs italic text-slate-600">“{row.message}”</p>
+                    )}
+                    {row.discount_code && (
+                      <p className="mt-1 text-xs font-semibold text-fuchsia-700">
+                        Discount code: <span className="font-mono">{row.discount_code}</span>
+                      </p>
                     )}
                     <p className="mt-1.5 text-[11px] text-slate-400">
                       {row.agreed_terms

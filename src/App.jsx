@@ -9370,6 +9370,10 @@ function CheckoutPage() {
   const [ambassadorCode, setAmbassadorCode] = useState(null) // { code, name, pct } when applied
   const [ambassadorApplying, setAmbassadorApplying] = useState(false)
   const [ambassadorError, setAmbassadorError] = useState('')
+  const [walletInfo, setWalletInfo] = useState(null) // { code, name, availableEur, earnedEur, spentEur, commissionPct }
+  const [walletLoading, setWalletLoading] = useState(false)
+  const [walletError, setWalletError] = useState('')
+  const [useWalletCredit, setUseWalletCredit] = useState(false)
   const [checkoutMode, setCheckoutMode] = useState(
     localStorage.getItem('portalAuth') === 'true' ? 'form' : 'choose'
   )
@@ -9487,7 +9491,13 @@ function CheckoutPage() {
   const ambassadorDiscountEur = ambassadorDiscountPct > 0
     ? Math.max(0, Number((cartTotal - listSubtotal * (1 - ambassadorDiscountPct / 100)).toFixed(2)))
     : 0
-  const grandTotal = Number((cartTotal - ambassadorDiscountEur + shippingFee).toFixed(2))
+  const productsSubtotalAfterCode = Number((cartTotal - ambassadorDiscountEur).toFixed(2))
+  const walletAvailableEur = Number(walletInfo?.availableEur || 0)
+  const walletAppliedEur = useWalletCredit
+    ? Number(Math.min(walletAvailableEur, productsSubtotalAfterCode).toFixed(2))
+    : 0
+  const productsSubtotalAfterWallet = Number((productsSubtotalAfterCode - walletAppliedEur).toFixed(2))
+  const grandTotal = Number((productsSubtotalAfterWallet + shippingFee).toFixed(2))
 
   // Persist cart back to localStorage
   useEffect(() => {
@@ -9537,6 +9547,59 @@ function CheckoutPage() {
 
   const removeAmbassadorCode = () => { setAmbassadorCode(null); setAmbassadorCodeInput(''); setAmbassadorError('') }
 
+  const loadAmbassadorWallet = useCallback(async () => {
+    if (!hasSupabaseConfig || !supabase) {
+      setWalletInfo(null)
+      setUseWalletCredit(false)
+      return
+    }
+
+    setWalletLoading(true)
+    setWalletError('')
+    try {
+      const { data: userData, error: userError } = await supabase.auth.getUser()
+      if (userError || !userData?.user) {
+        setWalletInfo(null)
+        setUseWalletCredit(false)
+        return
+      }
+
+      const { data, error: walletRpcError } = await supabase.rpc('get_my_ambassador_wallet')
+      if (walletRpcError) {
+        setWalletInfo(null)
+        setUseWalletCredit(false)
+        setWalletError('Could not load ambassador credit right now.')
+        return
+      }
+
+      const row = Array.isArray(data) ? data[0] : data
+      if (!row) {
+        setWalletInfo(null)
+        setUseWalletCredit(false)
+        return
+      }
+
+      setWalletInfo({
+        code: row.code || '',
+        name: row.ambassador_name || '',
+        availableEur: Number(row.available_eur || 0),
+        earnedEur: Number(row.earned_eur || 0),
+        spentEur: Number(row.spent_eur || 0),
+        commissionPct: Number(row.commission_pct || 0),
+      })
+    } catch {
+      setWalletInfo(null)
+      setUseWalletCredit(false)
+      setWalletError('Could not load ambassador credit right now.')
+    } finally {
+      setWalletLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    void loadAmbassadorWallet()
+  }, [loadAmbassadorWallet])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
@@ -9577,6 +9640,9 @@ function CheckoutPage() {
       window.gtag('event', 'begin_checkout', { currency: 'EUR', value: grandTotal })
       window.gtag('event', 'conversion', { send_to: 'AW-1008159504/huwrCJTYhIIDEJCW3eAD', value: grandTotal, currency: 'EUR' })
     }
+
+    let walletSpendOrderRef = null
+    let rollbackWalletSpend = false
 
     try {
       // 1. Create Supabase account (optional — or silent temp account)
@@ -9664,6 +9730,7 @@ function CheckoutPage() {
 
       // 3. Insert order to Supabase
       const orderRef = `${new Date().getFullYear().toString().slice(-2)}-${Math.floor(Math.random() * 7000 + 2000)}`
+      walletSpendOrderRef = orderRef
       const payload = {
         customer_email: email,
         items: checkoutItems,
@@ -9679,6 +9746,20 @@ function CheckoutPage() {
 
       const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
 
+      if (walletAppliedEur > 0) {
+        const { error: walletSpendError } = await supabase.rpc('spend_my_ambassador_wallet', {
+          p_order_ref: orderRef,
+          p_customer_email: email,
+          p_amount: walletAppliedEur,
+        })
+        if (walletSpendError) {
+          setError(`Ambassador credit could not be applied: ${walletSpendError.message}`)
+          setIsSubmitting(false)
+          return
+        }
+        rollbackWalletSpend = true
+      }
+
       // Insert without .select() to avoid PostgREST RETURNING clause which
       // requires a SELECT policy (anon users have none). Order ID is not
       // returned; a timestamp-based reference is used for display instead.
@@ -9690,16 +9771,23 @@ function CheckoutPage() {
       if (missingCols) {
         const { error: retryError } = await supabase.from(ordersTable).insert([{ customer_email: email, items: checkoutItems, total_units: cartUnits, source: 'catalogue_checkout', module: 'products', status: 'received', order_ref: orderRef }])
         if (retryError) {
+          if (rollbackWalletSpend) {
+            await supabase.rpc('rollback_my_ambassador_wallet_spend', { p_order_ref: orderRef })
+          }
           setError(`Order failed: ${retryError.message}`)
           setIsSubmitting(false)
           return
         }
       } else if (insertError) {
+        if (rollbackWalletSpend) {
+          await supabase.rpc('rollback_my_ambassador_wallet_spend', { p_order_ref: orderRef })
+        }
         setError(`Order failed: ${insertError.message}`)
         setIsSubmitting(false)
         return
       }
 
+      rollbackWalletSpend = false
       const insertedOrder = { id: orderRef }
 
       // Record ambassador code redemption (attribution + redemption counter).
@@ -9710,7 +9798,7 @@ function CheckoutPage() {
             p_order_ref: orderRef,
             p_customer_email: email,
             p_discount_amount: ambassadorDiscountEur,
-            p_order_total: grandTotal,
+            p_order_total: productsSubtotalAfterWallet,
           })
         } catch { /* non-blocking: order already placed */ }
       }
@@ -9735,7 +9823,7 @@ function CheckoutPage() {
         orderInboxEmail: ORDER_INBOX_EMAIL,
         invoice,
         shipping,
-        totalValueEurBase: cartTotal,
+        totalValueEurBase: productsSubtotalAfterWallet,
       })
 
       // 6. Email notification
@@ -9797,8 +9885,9 @@ function CheckoutPage() {
             </tr></thead>
             <tbody>${orderTableRows}
               <tr><td colspan="4" style="${tdStyle};text-align:right">Products subtotal</td><td style="${tdRStyle}">${cartTotal.toFixed(2)}</td></tr>
-              <tr><td colspan="4" style="${tdStyle};text-align:right">Shipping${shippingFee > 0 ? ` (${escapeHtml(shipping.country)})` : ''}</td><td style="${tdRStyle}">${shippingFee > 0 ? shippingFee.toFixed(2) : 'FREE'}</td></tr>
               ${ambassadorDiscountEur > 0 ? `<tr><td colspan="4" style="${tdStyle};text-align:right;color:#9B1268">Ambassador code ${escapeHtml(ambassadorCode?.code || '')} (−${ambassadorDiscountPct}%)</td><td style="${tdRStyle};color:#9B1268">− ${ambassadorDiscountEur.toFixed(2)}</td></tr>` : ''}
+              ${walletAppliedEur > 0 ? `<tr><td colspan="4" style="${tdStyle};text-align:right;color:#047857">Ambassador wallet credit</td><td style="${tdRStyle};color:#047857">− ${walletAppliedEur.toFixed(2)}</td></tr>` : ''}
+              <tr><td colspan="4" style="${tdStyle};text-align:right">Shipping${shippingFee > 0 ? ` (${escapeHtml(shipping.country)})` : ''}</td><td style="${tdRStyle}">${shippingFee > 0 ? shippingFee.toFixed(2) : 'FREE'}</td></tr>
               <tr><td colspan="4" style="${tdStyle};text-align:right;font-weight:bold">TOTAL (EUR)</td><td style="${tdRStyle};font-weight:bold">${grandTotal.toFixed(2)}</td></tr>
               ${discountActive ? `<tr><td colspan="5" style="${tdStyle};text-align:right;color:#9B1268">${escapeHtml(CATALOGUE_DISCOUNT_LABEL)} already applied — you saved €${discountSavings.toFixed(2)}</td></tr>` : ''}
             </tbody>
@@ -9818,6 +9907,7 @@ function CheckoutPage() {
             <p>Thank you — we've received your order <strong>#${insertedOrder?.id ?? '-'}</strong> and it's now being processed.</p>
             <p><strong>Order Total:</strong> €${grandTotal.toFixed(2)} (${cartUnits} items${shippingFee > 0 ? ` + €${shippingFee.toFixed(2)} shipping` : ', free shipping'})</p>
             ${ambassadorDiscountEur > 0 ? `<p style="color:#9B1268"><strong>Ambassador code ${escapeHtml(ambassadorCode?.code || '')}</strong> applied — you saved €${ambassadorDiscountEur.toFixed(2)} (−${ambassadorDiscountPct}%).</p>` : ''}
+            ${walletAppliedEur > 0 ? `<p style="color:#047857"><strong>Ambassador wallet credit</strong> applied — €${walletAppliedEur.toFixed(2)} used.</p>` : ''}
             <p style="color:#555">Your VAT invoice will follow by email once your order is processed. Should any item be unavailable, we will arrange a refund or account credit.</p>
             ${form.createAccount ? '<p>You can now log in with your email and password to track your orders.</p>' : '<p>If you would like to track future orders, you can create an account at checkout next time.</p>'}
             <p style="margin-top:24px;color:#666;font-size:12px">GEL.IT.UP by GIUP® — Professional Gel Polish</p>
@@ -9829,9 +9919,17 @@ function CheckoutPage() {
       setCart({})
       localStorage.removeItem(QUICK_CART_STORAGE_KEY)
       localStorage.removeItem('gelitup.kits.v1')
-      setOrderConfirmed({ id: insertedOrder?.id ?? 'confirmed', accountCreated: form.createAccount, total: grandTotal, subtotal: Number((cartTotal - ambassadorDiscountEur).toFixed(2)), shippingFee, email: form.email.trim().toLowerCase() })
+      setOrderConfirmed({ id: insertedOrder?.id ?? 'confirmed', accountCreated: form.createAccount, total: grandTotal, subtotal: productsSubtotalAfterWallet, shippingFee, email: form.email.trim().toLowerCase() })
+      await loadAmbassadorWallet()
 
     } catch (err) {
+      if (rollbackWalletSpend && walletSpendOrderRef) {
+        const { error: rollbackError } = await supabase.rpc('rollback_my_ambassador_wallet_spend', { p_order_ref: walletSpendOrderRef })
+        if (rollbackError) {
+          setError(`Order failed and wallet rollback also failed: ${rollbackError.message}. Please contact support.`)
+          return
+        }
+      }
       setError('An unexpected error occurred. Please try again or contact us.')
     } finally {
       setIsSubmitting(false)
@@ -10242,6 +10340,12 @@ function CheckoutPage() {
                   <span className="font-semibold text-fuchsia-700">− €{ambassadorDiscountEur.toFixed(2)}</span>
                 </div>
               )}
+              {walletAppliedEur > 0 && (
+                <div className="mt-1 flex items-center justify-between text-xs">
+                  <span className="font-semibold text-emerald-700">Ambassador wallet credit</span>
+                  <span className="font-semibold text-emerald-700">− €{walletAppliedEur.toFixed(2)}</span>
+                </div>
+              )}
               <div className="mt-1 flex items-center justify-between text-xs">
                 <span className="text-slate-500">Shipping{cartTotal < freeShipEur && deliveryCountry ? ` to ${deliveryCountry}` : ''}</span>
                 <span className="font-semibold text-slate-700">
@@ -10288,6 +10392,29 @@ function CheckoutPage() {
                     {ambassadorError && <p className="mt-1 text-[11px] font-medium text-red-500">{ambassadorError}</p>}
                   </>
                 )}
+              </div>
+              <div className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-emerald-700">Ambassador wallet credit</p>
+                {walletLoading ? (
+                  <p className="mt-1 text-[11px] text-emerald-700">Loading your credit…</p>
+                ) : walletInfo ? (
+                  <>
+                    <p className="mt-1 text-[11px] text-emerald-800">
+                      Available: <strong>€{walletAvailableEur.toFixed(2)}</strong>
+                    </p>
+                    <label className="mt-2 flex items-center gap-2 text-[11px] text-emerald-800">
+                      <input
+                        type="checkbox"
+                        checked={useWalletCredit}
+                        onChange={(e) => setUseWalletCredit(e.target.checked)}
+                      />
+                      Use up to €{Math.min(walletAvailableEur, productsSubtotalAfterCode).toFixed(2)} on this order (before shipping)
+                    </label>
+                  </>
+                ) : (
+                  <p className="mt-1 text-[11px] text-slate-600">Sign in as an ambassador account to use earned credit.</p>
+                )}
+                {walletError && <p className="mt-1 text-[11px] font-medium text-red-500">{walletError}</p>}
               </div>
               <HowItWorks variant="banner" freeShippingAt={freeShipEur} />
               <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
