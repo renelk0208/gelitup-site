@@ -3137,6 +3137,16 @@ function AmbassadorApplicationsPanel() {
   const load = useCallback(async () => {
     setLoading(true)
     setError('')
+    const normalizeLookupKey = (value) => String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/gi, '')
+      .toLowerCase()
+    const normalizeHandle = (value) => String(value || '').replace(/^@+/, '').trim().toLowerCase()
+    const extractInstagramFromNotes = (notes) => {
+      const m = String(notes || '').match(/instagram:\s*(@?[a-z0-9._]+)/i)
+      return m ? normalizeHandle(m[1]) : ''
+    }
     let query = supabase
       .from(AMBASSADOR_TABLE)
       .select('*')
@@ -3150,23 +3160,27 @@ function AmbassadorApplicationsPanel() {
     let nextRows = data || []
     const { data: codeRows, error: codeErr } = await supabase
       .from('ambassador_codes')
-      .select('code, ambassador_name, ambassador_email')
+      .select('code, ambassador_name, ambassador_email, notes')
       .eq('active', true)
       .limit(500)
     if (!codeErr && Array.isArray(codeRows) && codeRows.length > 0) {
       const byEmail = new Map()
       const byName = new Map()
+      const byInstagram = new Map()
       for (const c of codeRows) {
-        const emailKey = String(c?.ambassador_email || '').trim().toLowerCase()
-        const nameKey = String(c?.ambassador_name || '').trim().toLowerCase()
+        const emailKey = normalizeLookupKey(c?.ambassador_email)
+        const nameKey = normalizeLookupKey(c?.ambassador_name)
+        const igKey = extractInstagramFromNotes(c?.notes)
         if (emailKey && !byEmail.has(emailKey)) byEmail.set(emailKey, c.code)
         if (nameKey && !byName.has(nameKey)) byName.set(nameKey, c.code)
+        if (igKey && !byInstagram.has(igKey)) byInstagram.set(igKey, c.code)
       }
       nextRows = nextRows.map((row) => {
         if (row.discount_code) return row
-        const emailKey = String(row?.email || '').trim().toLowerCase()
-        const nameKey = String(row?.full_name || '').trim().toLowerCase()
-        const fallbackCode = byEmail.get(emailKey) || byName.get(nameKey) || null
+        const emailKey = normalizeLookupKey(row?.email)
+        const nameKey = normalizeLookupKey(row?.full_name)
+        const igKey = normalizeHandle(row?.instagram)
+        const fallbackCode = byEmail.get(emailKey) || byName.get(nameKey) || byInstagram.get(igKey) || null
         return fallbackCode ? { ...row, discount_code: fallbackCode } : row
       })
     }
@@ -3454,11 +3468,12 @@ function AmbassadorApplicationsPanel() {
                     {row.message && (
                       <p className="mt-2 whitespace-pre-line text-xs italic text-slate-600">“{row.message}”</p>
                     )}
-                    {row.discount_code && (
-                      <p className="mt-1 text-xs font-semibold text-fuchsia-700">
-                        Discount code: <span className="font-mono">{row.discount_code}</span>
-                      </p>
-                    )}
+                    <p className="mt-1 text-xs font-semibold text-fuchsia-700">
+                      Discount code:{' '}
+                      {row.discount_code
+                        ? <span className="font-mono">{row.discount_code}</span>
+                        : <span className="text-amber-700">Not assigned yet</span>}
+                    </p>
                     <p className="mt-1.5 text-[11px] text-slate-400">
                       {row.agreed_terms
                         ? <>✓ Signed the Ambassador Agreement {row.agreement_version ? `(${row.agreement_version})` : ''} on {fmtDate(row.created_at)}</>
@@ -3555,6 +3570,20 @@ function AmbassadorApplicationsPanel() {
                         <button onClick={() => saveShipment(row, false)} disabled={saving === row.id} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Save box &amp; tracking</button>
                         <button onClick={() => saveShipment(row, true)} disabled={saving === row.id} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
                       </div>
+                      {(() => {
+                        const previewDraft = {
+                          tracking_number: shipVal(row, 'tracking_number'),
+                          tracking_url: shipVal(row, 'tracking_url'),
+                        }
+                        const preview = buildAmbassadorShipmentEmail(row, previewDraft)
+                        return (
+                          <div className="rounded-lg border border-sky-200 bg-white p-2.5">
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-sky-700">Shipment email preview</p>
+                            <p className="mt-1 text-[11px] text-slate-600"><strong>Subject:</strong> {preview.subject}</p>
+                            <div className="mt-1 rounded border border-slate-200 bg-slate-50 p-2 text-[11px] text-slate-700" dangerouslySetInnerHTML={{ __html: preview.html }} />
+                          </div>
+                        )
+                      })()}
 
                       {/* Internal notes log (private, not emailed) */}
                       <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50 p-2">
