@@ -192,6 +192,11 @@
   status = 301
   force = true
 
+[[redirects]]
+  from = "/compliance-certification"
+  to = "/gelitup-compliance-certification.html"
+  status = 301
+
 # SPA catch-all — must remain last
 [[redirects]]
   from = "/*"

@@ -11,7 +11,6 @@
 /tools              /full-catalogue?category=tools              301
 /consumables        /full-catalogue?category=consumables        301
 /nail-care          /full-catalogue?category=nail-care          301
-/compliance-certification   /gelitup-compliance-certification.html   301
 
 # SPA fallback — must be last
 /*  /index.html  200
