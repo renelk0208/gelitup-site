@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import * as XLSX from 'xlsx'
 import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
-import { buildAmbassadorContractPdf, buildAmbassadorBriefPdf } from '../lib/ambassadorContractPdf.js'
 import { CONTRACT_I18N, resolveContractLang } from '../data/ambassadorContractI18n.js'
+import ambassadorContractAttachmentUrl from '../lib/ambassadrocontract/GELITUP-Ambassador-Agreement.pdf?url'
+import ambassadorLetterAttachmentUrl from '../lib/ambassadorletter/Gelitup Ambassador Letter.pdf?url'
 
 const REGISTRATIONS_TABLE = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || 'b2b_registrations'
 const ORDERS_TABLE = import.meta.env.VITE_B2B_ORDERS_TABLE || 'b2b_orders'
@@ -18,6 +19,8 @@ const AMBASSADOR_REPLY_TO = import.meta.env.VITE_AMBASSADOR_INBOX || 'info@gelit
 const AMBASSADOR_FROM_EMAIL = import.meta.env.VITE_AMBASSADOR_EMAIL_FROM || 'GEL.IT.UP <info@gelitup.com>'
 // Statuses that count as "needs review" (form inserts default to 'new').
 const AMBASSADOR_PENDING_STATUSES = ['new', 'pending', 'submitted']
+const AMBASSADOR_CONTRACT_ATTACHMENT_URL = ambassadorContractAttachmentUrl
+const AMBASSADOR_LETTER_ATTACHMENT_URL = ambassadorLetterAttachmentUrl
 
 function buildDistributorAccessEmail(row) {
   const tierLabel = titleCaseTierLabel(row?.distributor_tier || '') || 'Distributor'
@@ -3052,10 +3055,12 @@ function buildAmbassadorDeclineEmail(row, reasonText) {
 
 function buildAmbassadorShipmentEmail(row, ship) {
   const name = row?.full_name?.trim() || 'there'
+  const discountCode = String(row?.discount_code || '').trim()
   const parts = []
   // NOTE: shipment_details ("what's in the box") is internal-only — not included here.
   if (ship.tracking_number) parts.push(`<p><strong>Tracking number:</strong> ${escAmb(ship.tracking_number)}</p>`)
   if (ship.tracking_url) parts.push(`<p><a href="${escAmb(ship.tracking_url)}" style="color:#D43790">Track your parcel →</a></p>`)
+  if (discountCode) parts.push(`<p><strong>Your ambassador code:</strong> <span style="font-size:15px;color:#D43790">${escAmb(discountCode)}</span></p>`)
   // NOTE: admin_comment is intentionally NOT included — it is an internal-only note.
   return {
     subject: 'Your GEL.IT.UP PR package is on the way 📦',
@@ -3067,6 +3072,25 @@ function buildAmbassadorShipmentEmail(row, ship) {
       <p>Tag <strong>@gelitup</strong> and send your looks to our WhatsApp/Viber so we can feature you.</p>
       <p>The GEL.IT.UP Team</p>
     </div>`,
+  }
+}
+
+async function buildPdfAttachment(pdfUrl, fallbackFilename) {
+  const response = await fetch(pdfUrl)
+  if (!response.ok) {
+    throw new Error(`Could not load PDF attachment (${response.status})`)
+  }
+  const bytes = new Uint8Array(await response.arrayBuffer())
+  let binary = ''
+  const chunk = 0x8000
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk))
+  }
+  const rawName = pdfUrl.split('/').pop() || fallbackFilename || 'attachment.pdf'
+  return {
+    filename: decodeURIComponent(rawName),
+    content: btoa(binary),
+    contentType: 'application/pdf',
   }
 }
 
@@ -3086,23 +3110,6 @@ async function sendAmbassadorEmail({ to, subject, html, attachments, replyTo }) 
     return res.ok ? { ok: true } : { ok: false, error: json?.error || `HTTP ${res.status}` }
   } catch (err) {
     return { ok: false, error: err.message || 'Network error' }
-  }
-}
-
-function ambassadorRowToContact(row) {
-  return {
-    fullName: row.full_name,
-    email: row.email,
-    phone: row.phone,
-    instagram: row.instagram,
-    tiktok: row.tiktok,
-    address: [row.address, [row.city, row.postal_code].filter(Boolean).join(' '), row.country].filter(Boolean).join(', '),
-    qualifiedTech: row.is_qualified_tech ?? true,
-    workShown: row.work_shown_on_profile ?? true,
-    followersOver500: row.followers_over_500 ?? true,
-    signedDate: fmtDate(row.created_at),
-    lang: row.language,
-    country: row.country,
   }
 }
 
@@ -3206,9 +3213,20 @@ function AmbassadorApplicationsPanel() {
     setEmail(row.id, 'sending', '')
     try {
       const updatedRow = { ...row, status: 'approved', reviewed_at: reviewedAt, discount_code: discountCode }
-      const { base64, filename } = await buildAmbassadorContractPdf(ambassadorRowToContact(updatedRow))
+      const fullName = String(updatedRow?.full_name || '').trim()
+      if (!fullName) {
+        setEmail(row.id, 'error', 'Approval email blocked: ambassador name is missing.')
+        setSaving(null)
+        return
+      }
+      if (!discountCode) {
+        setEmail(row.id, 'error', 'Approval email blocked: discount code is missing.')
+        setSaving(null)
+        return
+      }
+      const contractAttachment = await buildPdfAttachment(AMBASSADOR_CONTRACT_ATTACHMENT_URL, 'GELITUP-Ambassador-Agreement.pdf')
       const { subject, html } = buildAmbassadorApprovalEmail(updatedRow)
-      const attachments = base64 ? [{ filename, content: base64, contentType: 'application/pdf' }] : []
+      const attachments = [contractAttachment]
       const res = await sendAmbassadorEmail({ to: updatedRow.email, subject, html, attachments })
       setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Welcome + contract sent to ${updatedRow.email}` : res.error)
       if (res.ok) logAmbassadorSend(updatedRow, { to: updatedRow.email, subject, body: htmlToText(html) })
@@ -3360,16 +3378,33 @@ function AmbassadorApplicationsPanel() {
     if (err) { setSaving(null); alert(err.message); return }
     patchRow(row.id, draft)
     if (alsoEmail) {
+      const updatedRow = { ...row, ...draft }
+      const fullName = String(updatedRow?.full_name || '').trim()
+      const discountCode = String(updatedRow?.discount_code || '').trim()
+      if (!fullName) {
+        setSaving(null)
+        setEmail(row.id, 'error', 'Shipment email blocked: ambassador name is missing.')
+        return
+      }
+      if (!discountCode) {
+        setSaving(null)
+        setEmail(row.id, 'error', 'Shipment email blocked: discount code is missing.')
+        return
+      }
       setEmail(row.id, 'sending', '')
-      const { subject, html } = buildAmbassadorShipmentEmail(row, draft)
+      const { subject, html } = buildAmbassadorShipmentEmail(updatedRow, draft)
       let attachments = []
       try {
-        const brief = await buildAmbassadorBriefPdf(ambassadorRowToContact(row))
-        if (brief.base64) attachments = [{ filename: brief.filename, content: brief.base64, contentType: 'application/pdf' }]
-      } catch { /* send without the letter if PDF build fails */ }
+        const letterAttachment = await buildPdfAttachment(AMBASSADOR_LETTER_ATTACHMENT_URL, 'Gelitup Ambassador Letter.pdf')
+        attachments = [letterAttachment]
+      } catch (e) {
+        setSaving(null)
+        setEmail(row.id, 'error', e.message || 'Could not attach About Us letter PDF.')
+        return
+      }
       const res = await sendAmbassadorEmail({ to: row.email, subject, html, attachments })
       setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Shipment email + About Us letter sent to ${row.email}` : res.error)
-      if (res.ok) logAmbassadorSend(row, { to: row.email, subject, body: htmlToText(html) })
+      if (res.ok) logAmbassadorSend(updatedRow, { to: row.email, subject, body: htmlToText(html) })
     } else {
       setEmail(row.id, 'sent', 'Follow-up details saved')
     }
