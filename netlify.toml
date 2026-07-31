@@ -194,8 +194,8 @@
 
 [[redirects]]
   from = "/compliance-certification"
-  to = "/gelitup-compliance-certification.html"
-  status = 301
+  to = "/compliance-certification.html"
+  status = 200
 
 # SPA catch-all — must remain last
 [[redirects]]
