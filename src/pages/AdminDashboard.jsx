@@ -3165,6 +3165,9 @@ function AmbassadorApplicationsPanel() {
       .replace(/[^a-z0-9]/gi, '')
       .toLowerCase()
     const normalizeHandle = (value) => String(value || '').replace(/^@+/, '').trim().toLowerCase()
+    const getRowEmail = (row) => String(row?.email || row?.contact_email || '').trim().toLowerCase()
+    const getRowName = (row) => String(row?.full_name || row?.contact_name || '').trim()
+    const getRowInstagram = (row) => String(row?.instagram || row?.instagram_handle || '').trim()
     const firstNameKey = (value) => normalizeLookupKey(String(value || '').trim().split(/\s+/)[0] || '')
     const extractInstagramFromNotes = (notes) => {
       const m = String(notes || '').match(/instagram:\s*(@?[a-z0-9._]+)/i)
@@ -3184,11 +3187,16 @@ function AmbassadorApplicationsPanel() {
     const { data, error: err } = await query
     setLoading(false)
     if (err) { setError(err.message); return }
-    let nextRows = data || []
+    let nextRows = (data || []).map((row) => ({
+      ...row,
+      email: getRowEmail(row),
+      full_name: getRowName(row),
+      instagram: getRowInstagram(row),
+    }))
     const { data: codeRows, error: codeErr } = await supabase
       .from('ambassador_codes')
       .select('code, ambassador_name, ambassador_email, notes')
-      .eq('active', true)
+      .or('active.eq.true,active.is.null')
       .limit(500)
     if (!codeErr && Array.isArray(codeRows) && codeRows.length > 0) {
       const byEmail = new Map()
@@ -3209,10 +3217,10 @@ function AmbassadorApplicationsPanel() {
       }
       nextRows = nextRows.map((row) => {
         if (row.discount_code) return row
-        const emailKey = normalizeLookupKey(row?.email)
-        const nameKey = normalizeLookupKey(row?.full_name)
-        const igKey = normalizeHandle(row?.instagram)
-        const firstKey = firstNameKey(row?.full_name)
+        const emailKey = normalizeLookupKey(getRowEmail(row))
+        const nameKey = normalizeLookupKey(getRowName(row))
+        const igKey = normalizeHandle(getRowInstagram(row))
+        const firstKey = firstNameKey(getRowName(row))
         const fallbackCode =
           byEmail.get(emailKey)
           || byName.get(nameKey)
