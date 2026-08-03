@@ -3193,23 +3193,26 @@ function AmbassadorApplicationsPanel() {
       full_name: getRowName(row),
       instagram: getRowInstagram(row),
     }))
+    const emailLocalKey = (value) => normalizeLookupKey(String(value || '').split('@')[0] || '')
     const { data: codeRows, error: codeErr } = await supabase
       .from('ambassador_codes')
-      .select('code, ambassador_name, ambassador_email, notes')
-      .or('active.eq.true,active.is.null')
-      .limit(500)
+      .select('code, ambassador_name, ambassador_email, notes, active')
+      .limit(1000)
     if (!codeErr && Array.isArray(codeRows) && codeRows.length > 0) {
       const byEmail = new Map()
+      const byEmailLocal = new Map()
       const byName = new Map()
       const byInstagram = new Map()
       const byFirstName = new Map()
       for (const c of codeRows) {
         const emailKey = normalizeLookupKey(c?.ambassador_email)
+        const emailLocal = emailLocalKey(c?.ambassador_email)
         const nameKey = normalizeLookupKey(c?.ambassador_name)
         const firstKey = firstNameKey(c?.ambassador_name)
         const igKey = extractInstagramFromNotes(c?.notes)
         const codeStemKey = extractCodeStem(c?.code)
         if (emailKey && !byEmail.has(emailKey)) byEmail.set(emailKey, c.code)
+        if (emailLocal && !byEmailLocal.has(emailLocal)) byEmailLocal.set(emailLocal, c.code)
         if (nameKey && !byName.has(nameKey)) byName.set(nameKey, c.code)
         if (igKey && !byInstagram.has(igKey)) byInstagram.set(igKey, c.code)
         if (firstKey && !byFirstName.has(firstKey)) byFirstName.set(firstKey, c.code)
@@ -3218,17 +3221,21 @@ function AmbassadorApplicationsPanel() {
       nextRows = nextRows.map((row) => {
         if (row.discount_code) return row
         const emailKey = normalizeLookupKey(getRowEmail(row))
+        const rowEmailLocal = emailLocalKey(getRowEmail(row))
         const nameKey = normalizeLookupKey(getRowName(row))
         const igKey = normalizeHandle(getRowInstagram(row))
         const firstKey = firstNameKey(getRowName(row))
         const fallbackCode =
           byEmail.get(emailKey)
+          || byEmailLocal.get(rowEmailLocal)
           || byName.get(nameKey)
           || byInstagram.get(igKey)
           || byFirstName.get(firstKey)
           || null
         return fallbackCode ? { ...row, discount_code: fallbackCode } : row
       })
+    } else if (codeErr) {
+      setError((prev) => prev || `Could not load ambassador discount codes: ${codeErr.message}`)
     }
     setRows(nextRows)
   }, [filter])
