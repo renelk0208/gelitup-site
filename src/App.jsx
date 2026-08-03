@@ -17578,6 +17578,12 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     totalRedeemedEur: 0,
     nextTierAt: 1000,
     nextTierPct: 15,
+    shipmentDetails: '',
+    trackingNumber: '',
+    trackingUrl: '',
+    shipmentUpdatedAt: '',
+    shipmentStatus: '',
+    shipmentError: '',
     error: '',
   })
   const [ambassadorCodeCopied, setAmbassadorCodeCopied] = useState(false)
@@ -17627,6 +17633,12 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
           totalRedeemedEur: 0,
           nextTierAt: 1000,
           nextTierPct: 15,
+          shipmentDetails: '',
+          trackingNumber: '',
+          trackingUrl: '',
+          shipmentUpdatedAt: '',
+          shipmentStatus: '',
+          shipmentError: '',
           error: 'Ambassador details unavailable right now.',
           checkedOnce: true,
         })
@@ -17644,10 +17656,65 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
           totalRedeemedEur: 0,
           nextTierAt: 1000,
           nextTierPct: 15,
+          shipmentDetails: '',
+          trackingNumber: '',
+          trackingUrl: '',
+          shipmentUpdatedAt: '',
+          shipmentStatus: '',
+          shipmentError: '',
           error: '',
           checkedOnce: true,
         })
         return
+      }
+
+      let shipmentDetails = ''
+      let trackingNumber = ''
+      let trackingUrl = ''
+      let shipmentUpdatedAt = ''
+      let shipmentStatus = ''
+      let shipmentError = ''
+      const { data: authData } = await supabase.auth.getUser()
+      const portalEmail = String(authData?.user?.email || '').trim().toLowerCase()
+
+      const applyShipmentRow = (shipmentRow) => {
+        shipmentDetails = String(shipmentRow?.shipment_details || '').trim()
+        trackingNumber = String(shipmentRow?.tracking_number || '').trim()
+        trackingUrl = String(shipmentRow?.tracking_url || '').trim()
+        shipmentUpdatedAt = String(shipmentRow?.updated_at || '').trim()
+        shipmentStatus = String(shipmentRow?.status || '').trim()
+      }
+
+      if (String(row.code || '').trim()) {
+        const { data: shipmentByCode, error: shipmentByCodeError } = await supabase
+          .from('ambassador_applications')
+          .select('shipment_details, tracking_number, tracking_url, updated_at, status')
+          .eq('status', 'approved')
+          .eq('discount_code', String(row.code).trim())
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        if (shipmentByCodeError) {
+          shipmentError = shipmentByCodeError.message
+        } else if (shipmentByCode) {
+          applyShipmentRow(shipmentByCode)
+        }
+      }
+
+      if (!trackingNumber && !shipmentDetails && portalEmail) {
+        const { data: shipmentByEmail, error: shipmentByEmailError } = await supabase
+          .from('ambassador_applications')
+          .select('shipment_details, tracking_number, tracking_url, updated_at, status')
+          .eq('status', 'approved')
+          .ilike('email', portalEmail)
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        if (shipmentByEmailError) {
+          shipmentError = shipmentError || shipmentByEmailError.message
+        } else if (shipmentByEmail) {
+          applyShipmentRow(shipmentByEmail)
+        }
       }
 
       setAmbassadorPortalInfo({
@@ -17659,6 +17726,12 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
         totalRedeemedEur: Number(row.total_redeemed_eur || 0),
         nextTierAt: row.next_tier_at != null ? Number(row.next_tier_at) : null,
         nextTierPct: row.next_tier_pct != null ? Number(row.next_tier_pct) : null,
+        shipmentDetails,
+        trackingNumber,
+        trackingUrl,
+        shipmentUpdatedAt,
+        shipmentStatus,
+        shipmentError,
         error: '',
         checkedOnce: true,
       })
@@ -18336,6 +18409,33 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                       <p className="mt-3 text-[11px] text-emerald-700">
                         💡 <strong>Tip:</strong> Share your code on Instagram, TikTok or WhatsApp — every order placed with your code earns you credit!
                       </p>
+                      <div className="mt-3 rounded-xl border border-emerald-200 bg-white p-4">
+                        <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">My shipment</p>
+                        {ambassadorPortalInfo.trackingNumber || ambassadorPortalInfo.trackingUrl || ambassadorPortalInfo.shipmentDetails ? (
+                          <div className="mt-2 space-y-1.5 text-[12px] text-slate-700">
+                            {ambassadorPortalInfo.shipmentStatus && (
+                              <p><strong>Status:</strong> <span className="capitalize">{ambassadorPortalInfo.shipmentStatus.replaceAll('_', ' ')}</span></p>
+                            )}
+                            {ambassadorPortalInfo.shipmentUpdatedAt && (
+                              <p><strong>Last updated:</strong> {new Date(ambassadorPortalInfo.shipmentUpdatedAt).toLocaleString()}</p>
+                            )}
+                            {ambassadorPortalInfo.shipmentDetails && (
+                              <p className="whitespace-pre-line"><strong>What's in your package:</strong> {ambassadorPortalInfo.shipmentDetails}</p>
+                            )}
+                            {ambassadorPortalInfo.trackingNumber && (
+                              <p><strong>Tracking number:</strong> {ambassadorPortalInfo.trackingNumber}</p>
+                            )}
+                            {ambassadorPortalInfo.trackingUrl && (
+                              <p><a href={ambassadorPortalInfo.trackingUrl} target="_blank" rel="noreferrer" className="font-semibold text-emerald-700 hover:underline">Track your parcel →</a></p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-[12px] text-slate-500">No shipment details yet. Once your package is sent, tracking will appear here.</p>
+                        )}
+                        {ambassadorPortalInfo.shipmentError && (
+                          <p className="mt-2 text-[11px] text-amber-700">Shipment details are temporarily unavailable.</p>
+                        )}
+                      </div>
                       {/* Progress journey */}
                       {(() => {
                         const total = ambassadorPortalInfo.totalRedeemedEur

@@ -3587,6 +3587,37 @@ function AmbassadorApplicationsPanel() {
                     <strong>Decline reason:</strong>{'\n'}{row.decline_reason}
                   </p>
                 )}
+                {row.status === 'rejected' && (
+                  <div className="mt-3 rounded-lg border border-rose-200 bg-rose-50/60 p-3">
+                    <p className="text-xs font-bold uppercase tracking-wide text-rose-700">Reconsideration notes (private)</p>
+                    <p className="mt-0.5 text-[11px] text-slate-500">Internal-only notes for future review. These are never emailed to the ambassador.</p>
+                    <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-2">
+                      {noteLines(row).length > 0 && (
+                        <div className="mb-1.5 max-h-32 space-y-1 overflow-y-auto">
+                          {noteLines(row).map((line, idx) => (
+                            <div key={idx} className="flex items-start justify-between gap-2 rounded bg-white px-2 py-1 text-[11px] text-slate-600">
+                              <span className="whitespace-pre-line">{line}</span>
+                              <span className="flex shrink-0 gap-1.5">
+                                <button type="button" title="Edit" onClick={() => editNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-slate-700 disabled:opacity-50">✎</button>
+                                <button type="button" title="Delete" onClick={() => deleteNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-rose-600 disabled:opacity-50">🗑</button>
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <input
+                          value={noteDraft[row.id] || ''}
+                          onChange={(e) => setNoteDraft(prev => ({ ...prev, [row.id]: e.target.value }))}
+                          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addNote(row) } }}
+                          placeholder="Add future reconsideration note..."
+                          className="flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
+                        />
+                        <button onClick={() => addNote(row)} disabled={saving === row.id || !(noteDraft[row.id] || '').trim()} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Add note</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {/* Messages sent to the ambassador — shared record, visible to every admin (read-only) */}
                 {messageLines(row).length > 0 && (
                   <div className="mt-3 rounded-lg border border-sky-200 bg-sky-50/60 p-3">
