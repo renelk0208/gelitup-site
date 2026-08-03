@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ambassador Portal Preview — GEL.IT.UP®</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-100 p-4 sm:p-8">
+
+  <!-- Top bar -->
+  <div class="mx-auto max-w-3xl">
+    <div class="mb-4 flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm border border-slate-200">
+      <span class="text-lg font-bold tracking-tight text-slate-900">GEL.IT.UP<sup>®</sup> Portal</span>
+      <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">Ambassador Account</span>
+    </div>
+
+    <!-- Nav tabs (decorative) -->
+    <div class="mb-4 flex gap-1 rounded-xl bg-white p-1.5 shadow-sm border border-slate-200">
+      <button class="flex-1 rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white">Overview</button>
+      <button class="flex-1 rounded-lg px-3 py-2 text-xs font-medium text-slate-500 hover:bg-slate-50">Orders</button>
+      <button class="flex-1 rounded-lg px-3 py-2 text-xs font-medium text-slate-500 hover:bg-slate-50">Catalogue</button>
+      <button class="flex-1 rounded-lg px-3 py-2 text-xs font-medium text-slate-500 hover:bg-slate-50">Account</button>
+    </div>
+
+    <!-- Stats row -->
+    <div class="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div class="rounded-xl border border-slate-200 bg-white p-4">
+        <p class="text-xs text-slate-500">Total Spent</p>
+        <p class="mt-1 text-lg font-bold text-slate-900">€347.20</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-white p-4">
+        <p class="text-xs text-slate-500">Total Orders</p>
+        <p class="mt-1 text-lg font-bold text-slate-900">4</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-white p-4">
+        <p class="text-xs text-slate-500">Avg Order</p>
+        <p class="mt-1 text-lg font-bold text-slate-900">€86.80</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-white p-4">
+        <p class="text-xs text-slate-500">Last Order</p>
+        <p class="mt-1 text-lg font-bold text-slate-900">28 Jul 2026</p>
+      </div>
+    </div>
+
+    <!-- ★ AMBASSADOR CARD ★ -->
+    <div class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">🌟</span>
+        <p class="text-sm font-bold uppercase tracking-wide text-emerald-800">GEL.IT.UP® Ambassador</p>
+      </div>
+
+      <!-- Stats row (4 col) -->
+      <div class="mt-3 grid gap-3 grid-cols-2 sm:grid-cols-4">
+
+        <!-- Discount code + copy -->
+        <div class="rounded-xl border border-emerald-200 bg-white p-3">
+          <p class="text-[11px] text-slate-500">Your Discount Code</p>
+          <div class="mt-1 flex items-center gap-2">
+            <p class="font-mono text-lg font-bold text-emerald-700">STELA20</p>
+            <button
+              onclick="navigator.clipboard.writeText('STELA20').then(() => { this.textContent = '✓ Copied!'; setTimeout(() => this.textContent = 'Copy', 2000) })"
+              class="ml-auto shrink-0 rounded-md bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700 transition hover:bg-emerald-200 cursor-pointer"
+            >Copy</button>
+          </div>
+          <p class="mt-1 text-[10px] text-slate-400">Clients enter this at checkout</p>
+        </div>
+
+        <!-- Client discount tier with progress -->
+        <div class="rounded-xl border border-emerald-200 bg-white p-3">
+          <p class="text-[11px] text-slate-500">Client Discount</p>
+          <p class="mt-1 text-lg font-bold text-emerald-700">10% off</p>
+          <div class="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-emerald-100">
+            <div class="h-full rounded-full bg-emerald-500" style="width: 34%"></div>
+          </div>
+          <p class="mt-1 text-[10px] text-slate-400">€340 / €1,000 → unlocks 15%</p>
+        </div>
+
+        <!-- Available credit -->
+        <div class="rounded-xl border border-emerald-200 bg-white p-3">
+          <p class="text-[11px] text-slate-500">Available Credit</p>
+          <p class="mt-1 text-lg font-bold text-emerald-700">€12.40</p>
+          <p class="mt-0.5 text-[10px] text-slate-400">Auto-applied at your checkout</p>
+        </div>
+
+        <!-- Commission rate -->
+        <div class="rounded-xl border border-emerald-200 bg-white p-3">
+          <p class="text-[11px] text-slate-500">Your Commission</p>
+          <p class="mt-1 text-lg font-bold text-emerald-700">20%</p>
+          <p class="mt-0.5 text-[10px] text-slate-400">Earned per client order</p>
+        </div>
+      </div>
+
+      <!-- How it works -->
+      <div class="mt-4 rounded-xl border border-emerald-200 bg-white p-3">
+        <p class="text-[11px] font-bold uppercase tracking-wide text-emerald-700">How it works</p>
+        <div class="mt-2 grid gap-3 sm:grid-cols-3">
+          <div class="flex gap-2">
+            <span class="mt-0.5 shrink-0 text-base">📲</span>
+            <p class="text-[11px] text-slate-600"><strong>Share your code</strong><br />Give <span class="font-mono font-bold text-emerald-700">STELA20</span> to your clients — they enter it at checkout</p>
+          </div>
+          <div class="flex gap-2">
+            <span class="mt-0.5 shrink-0 text-base">💸</span>
+            <p class="text-[11px] text-slate-600"><strong>Clients save 10%</strong><br />Grows to 15% at €1k and 20% at €2k total orders</p>
+          </div>
+          <div class="flex gap-2">
+            <span class="mt-0.5 shrink-0 text-base">💳</span>
+            <p class="text-[11px] text-slate-600"><strong>You earn credit</strong><br />Added to your wallet and deducted from your next order at checkout</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="mt-3 text-[11px] text-emerald-700">
+        💡 <strong>Tip:</strong> Share your code on Instagram, TikTok or WhatsApp — every order placed with your code earns you credit!
+      </p>
+
+      <!-- Progress journey -->
+      <div class="mt-3 rounded-xl border border-emerald-200 bg-white p-4">
+        <div class="flex items-center justify-between">
+          <p class="text-[11px] font-bold uppercase tracking-wide text-emerald-700">Your journey</p>
+          <p class="text-[11px] text-slate-500">€340 total client orders</p>
+        </div>
+        <!-- Track -->
+        <div class="relative mt-4 mb-8">
+          <!-- Background rail -->
+          <div class="h-3 w-full overflow-hidden rounded-full bg-slate-100">
+            <div class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600" style="width: 17%"></div>
+          </div>
+          <!-- Milestone: Starter -->
+          <div class="absolute top-0 -translate-x-1/2" style="left:0%">
+            <div class="flex h-3 w-3 items-center justify-center rounded-full border-2 border-emerald-600 bg-emerald-500"></div>
+            <div class="mt-2 text-center" style="min-width:52px">
+              <p class="text-base leading-none">🌱</p>
+              <p class="mt-0.5 text-[10px] font-bold text-emerald-700">10%</p>
+              <p class="text-[9px] text-emerald-600">Starter</p>
+              <p class="text-[9px] font-bold text-emerald-600">◀ Now</p>
+            </div>
+          </div>
+          <!-- Milestone: Rising -->
+          <div class="absolute top-0 -translate-x-1/2" style="left:50%">
+            <div class="flex h-3 w-3 items-center justify-center rounded-full border-2 border-slate-300 bg-white"></div>
+            <div class="mt-2 text-center" style="min-width:52px">
+              <p class="text-base leading-none">🌟</p>
+              <p class="mt-0.5 text-[10px] font-bold text-slate-400">15%</p>
+              <p class="text-[9px] text-slate-400">Rising</p>
+              <p class="text-[9px] text-slate-300">€1,000</p>
+            </div>
+          </div>
+          <!-- Milestone: Elite -->
+          <div class="absolute top-0 -translate-x-full" style="left:100%">
+            <div class="flex h-3 w-3 items-center justify-center rounded-full border-2 border-slate-300 bg-white"></div>
+            <div class="mt-2 text-center" style="min-width:52px">
+              <p class="text-base leading-none">🏆</p>
+              <p class="mt-0.5 text-[10px] font-bold text-slate-400">20%</p>
+              <p class="text-[9px] text-slate-400">Elite</p>
+              <p class="text-[9px] text-slate-300">€2,000</p>
+            </div>
+          </div>
+          <!-- Thumb -->
+          <div class="absolute top-1/2 -translate-x-1/2 -translate-y-1/2" style="left:17%">
+            <div class="h-5 w-5 rounded-full border-2 border-white bg-emerald-600 shadow-md"></div>
+          </div>
+        </div>
+        <!-- Next milestone callout -->
+        <div class="mt-1 rounded-lg bg-emerald-50 px-3 py-2 text-center">
+          <p class="text-xs text-emerald-800"><strong>€660 more</strong> in client orders unlocks <strong>15% discount</strong> for your clients 🚀</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tier card (decorative) -->
+    <div class="rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-4 sm:p-5">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center rounded-full bg-fuchsia-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Professional Distributor</span>
+      </div>
+      <p class="mt-2 text-xs text-slate-500">You have access to Professional pricing across the full catalogue.</p>
+    </div>
+
+    <p class="mt-6 text-center text-[11px] text-slate-400">This is a preview only — <a href="/portal/login" class="underline">log in</a> to see your live data</p>
+  </div>
+
+</body>
+</html>

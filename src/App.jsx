@@ -17574,6 +17574,10 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     code: '',
     availableEur: 0,
     commissionPct: 0,
+    discountPct: 10,
+    totalRedeemedEur: 0,
+    nextTierAt: 1000,
+    nextTierPct: 15,
     error: '',
   })
   const [ambassadorCodeCopied, setAmbassadorCodeCopied] = useState(false)
@@ -17619,6 +17623,10 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
           code: '',
           availableEur: 0,
           commissionPct: 0,
+          discountPct: 10,
+          totalRedeemedEur: 0,
+          nextTierAt: 1000,
+          nextTierPct: 15,
           error: 'Ambassador details unavailable right now.',
           checkedOnce: true,
         })
@@ -17632,6 +17640,10 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
           code: '',
           availableEur: 0,
           commissionPct: 0,
+          discountPct: 10,
+          totalRedeemedEur: 0,
+          nextTierAt: 1000,
+          nextTierPct: 15,
           error: '',
           checkedOnce: true,
         })
@@ -17643,6 +17655,10 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
         code: String(row.code || ''),
         availableEur: Number(row.available_eur || 0),
         commissionPct: Number(row.commission_pct || 0),
+        discountPct: Number(row.discount_pct || 10),
+        totalRedeemedEur: Number(row.total_redeemed_eur || 0),
+        nextTierAt: row.next_tier_at != null ? Number(row.next_tier_at) : null,
+        nextTierPct: row.next_tier_pct != null ? Number(row.next_tier_pct) : null,
         error: '',
         checkedOnce: true,
       })
@@ -18265,7 +18281,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                   ) : ambassadorPortalInfo.code ? (
                     <>
                       {/* Stats row */}
-                      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                      <div className="mt-3 grid gap-3 sm:grid-cols-4">
                         {/* Discount code + copy */}
                         <div className="rounded-xl border border-emerald-200 bg-white p-3">
                           <p className="text-[11px] text-slate-500">Your Discount Code</p>
@@ -18284,12 +18300,25 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                               {ambassadorCodeCopied ? '✓ Copied!' : 'Copy'}
                             </button>
                           </div>
+                          <p className="mt-1 text-[10px] text-slate-400">Clients enter this at checkout</p>
                         </div>
-                        {/* Available credit */}
+                        {/* Client discount tier */}
                         <div className="rounded-xl border border-emerald-200 bg-white p-3">
-                          <p className="text-[11px] text-slate-500">Available Credit</p>
-                          <p className="mt-1 text-lg font-bold text-emerald-700">€{ambassadorPortalInfo.availableEur.toFixed(2)}</p>
-                          <p className="mt-0.5 text-[10px] text-slate-400">Auto-applied at your checkout</p>
+                          <p className="text-[11px] text-slate-500">Client Discount</p>
+                          <p className="mt-1 text-lg font-bold text-emerald-700">{ambassadorPortalInfo.discountPct}% off</p>
+                          {ambassadorPortalInfo.nextTierAt != null ? (
+                            <>
+                              <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-emerald-100">
+                                <div
+                                  className="h-full rounded-full bg-emerald-500 transition-all"
+                                  style={{ width: `${Math.min(100, (ambassadorPortalInfo.totalRedeemedEur / ambassadorPortalInfo.nextTierAt) * 100).toFixed(1)}%` }}
+                                />
+                              </div>
+                              <p className="mt-1 text-[10px] text-slate-400">€{ambassadorPortalInfo.totalRedeemedEur.toFixed(0)} / €{ambassadorPortalInfo.nextTierAt} → unlocks {ambassadorPortalInfo.nextTierPct}%</p>
+                            </>
+                          ) : (
+                            <p className="mt-0.5 text-[10px] text-emerald-600 font-semibold">🏆 Max tier reached!</p>
+                          )}
                         </div>
                         {/* Commission rate */}
                         <div className="rounded-xl border border-emerald-200 bg-white p-3">
@@ -18308,7 +18337,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                           </div>
                           <div className="flex gap-2">
                             <span className="mt-0.5 shrink-0 text-base" aria-hidden="true">💸</span>
-                            <p className="text-[11px] text-slate-600"><strong>Clients save {ambassadorPortalInfo.commissionPct}%</strong><br />The discount is applied automatically to their order total</p>
+                            <p className="text-[11px] text-slate-600"><strong>Clients save {ambassadorPortalInfo.discountPct}%</strong><br />The discount is applied automatically to their order total</p>
                           </div>
                           <div className="flex gap-2">
                             <span className="mt-0.5 shrink-0 text-base" aria-hidden="true">💳</span>
@@ -18319,6 +18348,73 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                       <p className="mt-3 text-[11px] text-emerald-700">
                         💡 <strong>Tip:</strong> Share your code on Instagram, TikTok or WhatsApp — every order placed with your code earns you credit!
                       </p>
+                      {/* Progress journey */}
+                      {(() => {
+                        const total = ambassadorPortalInfo.totalRedeemedEur
+                        const progressPct = Math.min(100, (total / 2000) * 100)
+                        const tiers = [
+                          { label: 'Starter', pct: 10, at: 0, icon: '🌱' },
+                          { label: 'Rising', pct: 15, at: 1000, icon: '🌟' },
+                          { label: 'Elite', pct: 20, at: 2000, icon: '🏆' },
+                        ]
+                        const currentTierIdx = total >= 2000 ? 2 : total >= 1000 ? 1 : 0
+                        return (
+                          <div className="mt-3 rounded-xl border border-emerald-200 bg-white p-4">
+                            <div className="flex items-center justify-between">
+                              <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">Your journey</p>
+                              <p className="text-[11px] text-slate-500">€{total.toFixed(0)} total client orders</p>
+                            </div>
+                            {/* Track */}
+                            <div className="relative mt-4 mb-7">
+                              {/* Background rail */}
+                              <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
+                                {/* Filled portion */}
+                                <div
+                                  className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-700"
+                                  style={{ width: `${progressPct}%` }}
+                                />
+                              </div>
+                              {/* Milestone dots */}
+                              {tiers.map((tier, idx) => {
+                                const pos = (tier.at / 2000) * 100
+                                const reached = total >= tier.at
+                                const isCurrent = idx === currentTierIdx
+                                return (
+                                  <div key={tier.at} className="absolute top-0 -translate-x-1/2" style={{ left: `${pos}%` }}>
+                                    <div className={`flex h-3 w-3 items-center justify-center rounded-full border-2 ${reached ? 'border-emerald-600 bg-emerald-500' : 'border-slate-300 bg-white'}`} />
+                                    <div className="mt-2 -translate-x-1/3 text-center" style={{ minWidth: '52px' }}>
+                                      <p className="text-base leading-none">{tier.icon}</p>
+                                      <p className={`mt-0.5 text-[10px] font-bold ${isCurrent ? 'text-emerald-700' : reached ? 'text-emerald-600' : 'text-slate-400'}`}>{tier.pct}%</p>
+                                      <p className={`text-[9px] ${isCurrent ? 'text-emerald-600' : 'text-slate-400'}`}>{tier.label}</p>
+                                      {tier.at > 0 && <p className={`text-[9px] ${reached ? 'text-emerald-500' : 'text-slate-300'}`}>€{tier.at.toLocaleString()}</p>}
+                                      {isCurrent && <p className="text-[9px] font-bold text-emerald-600">◀ Now</p>}
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                              {/* Thumb marker */}
+                              {progressPct > 0 && progressPct < 100 && (
+                                <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ left: `${progressPct}%` }}>
+                                  <div className="h-5 w-5 rounded-full border-2 border-white bg-emerald-600 shadow-md shadow-emerald-200" />
+                                </div>
+                              )}
+                            </div>
+                            {/* Next milestone callout */}
+                            {ambassadorPortalInfo.nextTierAt != null && (
+                              <div className="mt-1 rounded-lg bg-emerald-50 px-3 py-2 text-center">
+                                <p className="text-xs text-emerald-800">
+                                  <strong>€{Math.max(0, ambassadorPortalInfo.nextTierAt - total).toFixed(0)} more</strong> in client orders unlocks <strong>{ambassadorPortalInfo.nextTierPct}% discount</strong> for your clients 🚀
+                                </p>
+                              </div>
+                            )}
+                            {ambassadorPortalInfo.nextTierAt == null && (
+                              <div className="mt-1 rounded-lg bg-emerald-100 px-3 py-2 text-center">
+                                <p className="text-xs font-bold text-emerald-800">🏆 Elite tier reached — maximum 20% client discount!</p>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })()}
                     </>
                   ) : ambassadorPortalInfo.error ? (
                     <p className="mt-2 text-sm text-slate-500">{ambassadorPortalInfo.error}</p>
