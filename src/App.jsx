@@ -8481,6 +8481,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
   const prefilledEmail = String(loginParams.get('email') || '').trim().toLowerCase()
   const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
   const portalType = loginParams.get('portal') || 'b2b' // 'b2b' | 'distributor'
+  const returnTo = loginParams.get('returnTo') || null // where to go after successful login
   // Reliable recovery detection: the PASSWORD_RECOVERY auth event sets pendingRecoverySession
   // (URL-based ?code= detection is unreliable — the SDK consumes the code before React renders)
   const isPasswordResetFlow = pendingRecoverySession
@@ -8617,7 +8618,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
 
             if (result.navigateToDashboard) {
               onRecoverySessionConsumed?.()
-              navigate('/portal/dashboard/overview')
+              navigate(returnTo || '/portal/dashboard/overview')
             } else if (result.infoMessage === 'confirm-email') {
               // Supabase sent a confirmation email — show check-inbox screen
               setInfoMessage('confirm-email')
@@ -8674,7 +8675,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
             return
           }
 
-          navigate('/portal/dashboard/overview')
+          navigate(returnTo || '/portal/dashboard/overview')
         }}>
           <label className="block text-sm font-medium text-slate-700">
             {T?.portal?.email ?? 'Email'}
@@ -9378,7 +9379,39 @@ function CheckoutPage() {
     localStorage.getItem('portalAuth') === 'true' ? 'form' : 'choose'
   )
 
+  // Auto-skip the choose screen if the user already has an active Supabase session
+  useEffect(() => {
+    if (!hasSupabaseConfig || !supabase) return
+    supabase.auth.getSession().then(({ data }) => {
+      if (data?.session?.user) {
+        localStorage.setItem('portalAuth', 'true')
+        setCheckoutMode('form')
+      }
+    })
+  }, [])
+
   const updateField = (field, value) => setForm(f => ({ ...f, [field]: value }))
+
+  // Tracks whether the user has attempted to submit — used to show inline field errors
+  const [hasTriedSubmit, setHasTriedSubmit] = useState(false)
+
+  // Live checklist of what's still blocking submission — shown above the Place Order button
+  const checkoutIssues = useMemo(() => {
+    const issues = []
+    if (!form.firstName.trim()) issues.push('First name is required')
+    if (!form.lastName.trim()) issues.push('Last name is required')
+    if (!form.companyName.trim()) issues.push('Company name is required')
+    if (!form.email.trim()) issues.push('Email address is required')
+    if (!form.vatNumber.trim()) issues.push('VAT number is required')
+    else if (!viesResult?.valid) issues.push('Click the Verify button to validate your VAT number')
+    if (!form.invoiceAddressLine1.trim()) issues.push('Street address is required')
+    if (!form.invoiceArea.trim()) issues.push('Town / city is required')
+    if (!form.invoiceCountry.trim()) issues.push('Country is required')
+    if (!form.invoicePostalCode.trim()) issues.push('Postcode is required')
+    if (!form.agreeTerms) issues.push('Please tick the terms & conditions checkbox')
+    if (form.createAccount && form.password.length < 6) issues.push('Password must be at least 6 characters')
+    return issues
+  }, [form, viesResult])
 
   // Persist entered details (excluding password / terms) so returning customers —
   // guests included — keep their info even if they leave and come back later.
@@ -9602,23 +9635,24 @@ function CheckoutPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setHasTriedSubmit(true)
     setError('')
 
     if (!cartEntries.length) { setError('Your basket is empty.'); return }
     if (cartTotal < SMALL_ORDER_MIN_EUR) { setError(`Minimum order is €${SMALL_ORDER_MIN_EUR}. You need €${(SMALL_ORDER_MIN_EUR - cartTotal).toFixed(2)} more.`); return }
 
     const email = form.email.trim().toLowerCase()
-    if (!email) { setError('Email is required.'); return }
+    if (!email) { setError('Email is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
     const vat = form.vatNumber.trim()
-    if (!form.companyName.trim()) { setError('Company name is required.'); return }
-    if (!vat) { setError('VAT number is required.'); return }
-    if (!viesResult?.valid) { setError('Please verify your VAT number using the "Verify" button.'); return }
-    if (!form.firstName.trim()) { setError('First name is required.'); return }
-    if (!form.lastName.trim()) { setError('Last name is required.'); return }
-    if (!form.invoiceAddressLine1.trim()) { setError('Invoice address is required.'); return }
-    if (!form.invoiceArea.trim()) { setError('Invoice city is required.'); return }
-    if (!form.invoiceCountry.trim()) { setError('Invoice country is required.'); return }
-    if (!form.invoicePostalCode.trim()) { setError('Invoice postal code is required.'); return }
+    if (!form.companyName.trim()) { setError('Company name is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (!vat) { setError('VAT number is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (!viesResult?.valid) { setError('Please verify your VAT number — enter it then click the Verify button.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (!form.firstName.trim()) { setError('First name is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (!form.lastName.trim()) { setError('Last name is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (!form.invoiceAddressLine1.trim()) { setError('Invoice address is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (!form.invoiceArea.trim()) { setError('Invoice city is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (!form.invoiceCountry.trim()) { setError('Invoice country is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (!form.invoicePostalCode.trim()) { setError('Invoice postal code is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
 
     if (form.shipToDifferentAddress) {
       if (!form.shippingAddressLine1.trim()) { setError('Shipping address is required.'); return }
@@ -10074,33 +10108,11 @@ function CheckoutPage() {
             <p className="mt-1 text-xs text-slate-500">Sign in to auto-fill your details and see your order history (optional).</p>
             <div className="mt-3 flex flex-col gap-2 w-full sm:max-w-sm">
               <NavLink
-                to="/portal/login"
+                to="/portal/login?returnTo=/checkout"
                 className="inline-flex items-center justify-center gap-1.5 rounded-lg border-2 border-slate-900 px-4 py-2 text-sm font-bold text-slate-900 transition hover:border-fuchsia-600 hover:bg-fuchsia-600 hover:text-white"
               >
                 Sign In
               </NavLink>
-              {hasSupabaseConfig && supabase && (
-                <button
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      await supabase.auth.signInWithOAuth({
-                        provider: 'google',
-                        options: { redirectTo: `${window.location.origin}/checkout` },
-                      })
-                    } catch { /* ignore */ }
-                  }}
-                  className="flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                  </svg>
-                  Continue with Google
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -10136,12 +10148,17 @@ function CheckoutPage() {
                 <label className="block text-sm font-medium text-slate-700">
                   VAT Number <span className="text-rose-500">*</span>
                   <div className="mt-1 flex gap-2">
-                    <input type="text" required value={form.vatNumber} onChange={e => { updateField('vatNumber', e.target.value); setViesResult(null) }} placeholder="EU123456789" className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
+                    <input type="text" required value={form.vatNumber} onChange={e => { updateField('vatNumber', e.target.value); setViesResult(null) }} placeholder={COUNTRY_VAT_PREFIX[form.invoiceCountry] ? `${COUNTRY_VAT_PREFIX[form.invoiceCountry]}123456789` : 'EU123456789'} className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
                     <button type="button" onClick={verifyVat} disabled={viesLoading} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50">
                       {viesLoading ? 'Checking…' : 'Verify'}
                     </button>
                   </div>
                 </label>
+                {COUNTRY_VAT_PREFIX[form.invoiceCountry] && !viesResult?.valid && (
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    For <strong>{form.invoiceCountry}</strong>, your VAT number must start with <strong className="text-slate-600">{COUNTRY_VAT_PREFIX[form.invoiceCountry]}</strong> — e.g. <span className="font-mono">{COUNTRY_VAT_PREFIX[form.invoiceCountry]}123456789</span>
+                  </p>
+                )}
                 {viesResult?.valid && (
                   <p className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-700">
                     <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-[10px]">✓</span>
@@ -10287,12 +10304,23 @@ function CheckoutPage() {
           </div>
 
           <MinimumOrderNudge currentTotal={cartTotal} minimum={SMALL_ORDER_MIN_EUR} freeShippingAt={freeShipEur} shippingFee={smallOrderFee} />
-          {!isSubmitting && !form.agreeTerms && cartTotal >= SMALL_ORDER_MIN_EUR && (
-            <p className="text-center text-xs text-amber-700">
-              Please agree to the terms and conditions to continue
-            </p>
+
+          {/* "Almost there" checklist — always visible above the button so clients know what to fix */}
+          {checkoutIssues.length > 0 && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <p className="text-xs font-bold uppercase tracking-wide text-amber-700">Almost there — complete these to place your order:</p>
+              <ul className="mt-2 space-y-1">
+                {checkoutIssues.map((issue, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs text-amber-800">
+                    <span className="mt-0.5 shrink-0 text-amber-500">✗</span>
+                    {issue}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
-          <button type="submit" disabled={isSubmitting || cartTotal < SMALL_ORDER_MIN_EUR || !form.agreeTerms} className="w-full rounded-xl bg-fuchsia-600 px-6 py-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500 disabled:opacity-50">
+
+          <button type="submit" disabled={isSubmitting || cartTotal < SMALL_ORDER_MIN_EUR} className="w-full rounded-xl bg-fuchsia-600 px-6 py-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500 disabled:opacity-50">
             {isSubmitting ? 'Placing Order…' : `Place Order — €${grandTotal.toFixed(2)}${shippingFee > 0 ? ' incl. shipping' : ''}`}
           </button>
         </form>
