@@ -1,18 +1,15 @@
--- Ambassador tiered discount system.
--- Discount clients receive is based on total client order value via the code:
---   < €1,000  → 10%
---   ≥ €1,000  → 15%
---   ≥ €2,000  → 20%
--- Commission ambassadors earn stays at 20% regardless of tier.
+-- Ambassador program with fixed customer discount.
+-- Clients always receive 20% off with ambassador codes.
+-- Ambassador journey milestones still track progress at €1,000 and €2,000.
+-- Commission ambassadors earn stays at 20% regardless of milestone.
 -- Safe to run multiple times.
 
--- Step 1: Reset all existing codes to the base 10% discount.
+-- Step 1: Ensure all existing ambassador codes are 20% for clients.
 UPDATE public.ambassador_codes
-SET discount_pct = 10
+SET discount_pct = 20
 WHERE active = true OR active IS NULL;
 
--- Step 2: Update approve_ambassador_application to create new codes at 10%.
--- (The INSERT in that function had discount_pct = 20 — fixed below.)
+-- Step 2: Update approve_ambassador_application to create new codes at 20%.
 CREATE OR REPLACE FUNCTION public.approve_ambassador_application(
   p_application_id bigint
 )
@@ -69,7 +66,7 @@ BEGIN
       v_code,
       v_row.full_name,
       v_row.email,
-      10,   -- base tier; auto-upgrades to 15% at €1k and 20% at €2k
+      20,   -- clients always receive 20%
       20,
       true,
       concat('Auto-created from approved ambassador application #', v_row.id)
@@ -99,8 +96,7 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.approve_ambassador_application(bigint) TO authenticated;
 
--- Step 3: Replace validate_ambassador_code so discount is calculated from
--- the total client order value via the code (tiered dynamically).
+-- Step 3: Validate ambassador code with fixed 20% customer discount.
 CREATE OR REPLACE FUNCTION public.validate_ambassador_code(p_code text)
 RETURNS TABLE (
   code            text,
@@ -111,26 +107,12 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
-DECLARE
-  v_total_eur numeric;
-  v_discount  numeric;
 BEGIN
-  SELECT coalesce(SUM(r.order_total_eur), 0)
-    INTO v_total_eur
-  FROM public.ambassador_redemptions r
-  WHERE upper(r.code) = upper(p_code);
-
-  v_discount := CASE
-    WHEN v_total_eur >= 2000 THEN 20
-    WHEN v_total_eur >= 1000 THEN 15
-    ELSE 10
-  END;
-
   RETURN QUERY
   SELECT
     c.code,
     c.ambassador_name,
-    v_discount
+    20::numeric
   FROM public.ambassador_codes c
   WHERE upper(c.code) = upper(p_code)
     AND c.active = true
@@ -140,7 +122,8 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.validate_ambassador_code(text) TO anon, authenticated;
 
--- Step 4: Replace get_my_ambassador_wallet to also return tier info.
+-- Step 4: Replace get_my_ambassador_wallet with fixed client discount and
+-- milestone progress fields for the ambassador slider.
 CREATE OR REPLACE FUNCTION public.get_my_ambassador_wallet()
 RETURNS TABLE (
   code              text,
@@ -221,12 +204,7 @@ BEGIN
     ROUND(e.total, 2)                            AS earned_eur,
     ROUND(s.total, 2)                            AS spent_eur,
     m.commission_pct,
-    -- Current tiered discount
-    CASE
-      WHEN rd.total >= 2000 THEN 20
-      WHEN rd.total >= 1000 THEN 15
-      ELSE 10
-    END::numeric                                 AS discount_pct,
+    20::numeric                                   AS discount_pct,
     ROUND(rd.total, 2)                           AS total_redeemed_eur,
     -- Next tier threshold (null if already at max)
     CASE

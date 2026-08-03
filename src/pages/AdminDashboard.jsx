@@ -2,9 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import * as XLSX from 'xlsx'
 import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
-import ambassadorContractAttachmentUrl from '../lib/ambassadrocontract/GELITUP-Ambassador-Agreement.pdf?url'
 import ambassadorLetterAttachmentUrl from '../lib/ambassadorletter/Gelitup Ambassador Letter.pdf?url'
-import ambassadorActivationTemplateHtml from '../lib/ambassadorletter/AmbassadorAccountActivation.html?raw'
 
 const REGISTRATIONS_TABLE = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || 'b2b_registrations'
 const ORDERS_TABLE = import.meta.env.VITE_B2B_ORDERS_TABLE || 'b2b_orders'
@@ -19,8 +17,9 @@ const AMBASSADOR_REPLY_TO = import.meta.env.VITE_AMBASSADOR_INBOX || 'info@gelit
 const AMBASSADOR_FROM_EMAIL = import.meta.env.VITE_AMBASSADOR_EMAIL_FROM || 'GEL.IT.UP <info@gelitup.com>'
 // Statuses that count as "needs review" (form inserts default to 'new').
 const AMBASSADOR_PENDING_STATUSES = ['new', 'pending', 'submitted']
-const AMBASSADOR_CONTRACT_ATTACHMENT_URL = ambassadorContractAttachmentUrl
 const AMBASSADOR_LETTER_ATTACHMENT_URL = ambassadorLetterAttachmentUrl
+const ADMIN_TAB_STORAGE_KEY = 'gelitup.admin.activeTab.v1'
+const ADMIN_TAB_KEYS = new Set(['registrations', 'orders', 'admins', 'pricing', 'ambassadors', 'guestbook', 'draft-carts'])
 
 function buildDistributorAccessEmail(row) {
   const tierLabel = titleCaseTierLabel(row?.distributor_tier || '') || 'Distributor'
@@ -3001,22 +3000,6 @@ const AMBASSADOR_DECLINE_PRESETS = [
 
 const escAmb = (v) => String(v ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
 
-function buildAmbassadorApprovalEmail({ fullName, discountCode, setPasswordLink }) {
-  const html = ambassadorActivationTemplateHtml
-    .replaceAll('[Name]', escAmb(fullName))
-    .replaceAll('[CODE]', escAmb(discountCode))
-    .replaceAll('[SET_PASSWORD_LINK]', escAmb(setPasswordLink))
-
-  if (/\[(Name|CODE|SET_PASSWORD_LINK)\]/.test(html)) {
-    throw new Error('Approval email blocked: unresolved placeholders remain in template.')
-  }
-
-  return {
-    subject: 'Welcome to the GEL.IT.UP Ambassador Programme — activate your account',
-    html,
-  }
-}
-
 function buildAmbassadorDeclineEmail(row, reasonText) {
   const name = row?.full_name?.trim() || 'there'
   const reasonBlock = reasonText
@@ -3034,7 +3017,7 @@ function buildAmbassadorDeclineEmail(row, reasonText) {
   }
 }
 
-function buildAmbassadorShipmentEmail(row, ship) {
+function buildAmbassadorShipmentEmail(row, ship, setPasswordLink) {
   const name = row?.full_name?.trim() || 'there'
   const discountCode = String(row?.discount_code || '').trim()
   const parts = []
@@ -3042,6 +3025,7 @@ function buildAmbassadorShipmentEmail(row, ship) {
   if (ship.tracking_number) parts.push(`<p><strong>Tracking number:</strong> ${escAmb(ship.tracking_number)}</p>`)
   if (ship.tracking_url) parts.push(`<p><a href="${escAmb(ship.tracking_url)}" style="color:#D43790">Track your parcel →</a></p>`)
   if (discountCode) parts.push(`<p><strong>Your ambassador code:</strong> <span style="font-size:15px;color:#D43790">${escAmb(discountCode)}</span></p>`)
+  if (setPasswordLink) parts.push(`<p><a href="${escAmb(setPasswordLink)}" style="display:inline-block;background:#111827;color:#ffffff;padding:10px 16px;border-radius:9999px;text-decoration:none;font-weight:700">Set password & access your ambassador portal</a></p>`)
   // NOTE: admin_comment is intentionally NOT included — it is an internal-only note.
   return {
     subject: 'Your GEL.IT.UP PR package is on the way 📦',
@@ -3245,10 +3229,11 @@ function AmbassadorApplicationsPanel() {
   const patchRow = (id, patch) => setRows(prev => prev.map(r => r.id === id ? { ...r, ...patch } : r))
   const setEmail = (id, state, message) => setEmailStatus(prev => ({ ...prev, [id]: { state, message } }))
 
-  // APPROVE → set status, email the localised welcome + attach the signed contract PDF.
+  // APPROVE → set status + allocate/attach code. No ambassador email here.
+  // First outward notification is sent later together with shipment details.
   const approveRow = async (row) => {
     if (String(row?.status || '').toLowerCase() === 'approved') return
-    if (!window.confirm(`Approve ${row.full_name} (@${row.instagram})?\n\nThis emails them the welcome message with their signed contract attached, and tells them their PR package is on the way.`)) return
+    if (!window.confirm(`Approve ${row.full_name} (@${row.instagram})?\n\nThis allocates/links their ambassador code now, but does NOT notify them yet. They will be notified when shipping details are sent.`)) return
     setSaving(row.id)
     const { data, error: err } = await supabase.rpc('approve_ambassador_application', { p_application_id: row.id })
     if (err) { setSaving(null); alert(err.message); return }
@@ -3256,40 +3241,7 @@ function AmbassadorApplicationsPanel() {
     const reviewedAt = approved?.reviewed_at || new Date().toISOString()
     const discountCode = approved?.discount_code || row.discount_code || null
     patchRow(row.id, { status: 'approved', reviewed_at: reviewedAt, discount_code: discountCode })
-    setEmail(row.id, 'sending', '')
-    try {
-      const updatedRow = { ...row, status: 'approved', reviewed_at: reviewedAt, discount_code: discountCode }
-      const fullName = String(updatedRow?.full_name || '').trim()
-      const setPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(String(updatedRow?.email || '').trim().toLowerCase())}`
-      if (!fullName) {
-        setEmail(row.id, 'error', 'Approval email blocked: ambassador name is missing.')
-        setSaving(null)
-        return
-      }
-      if (!discountCode) {
-        setEmail(row.id, 'error', 'Approval email blocked: discount code is missing.')
-        setSaving(null)
-        return
-      }
-      if (!String(updatedRow?.email || '').trim()) {
-        setEmail(row.id, 'error', 'Approval email blocked: ambassador email is missing.')
-        setSaving(null)
-        return
-      }
-      await ensureAmbassadorPortalAccount(updatedRow)
-      const contractAttachment = await buildPdfAttachment(AMBASSADOR_CONTRACT_ATTACHMENT_URL, 'GELITUP-Ambassador-Agreement.pdf')
-      const { subject, html } = buildAmbassadorApprovalEmail({
-        fullName,
-        discountCode,
-        setPasswordLink,
-      })
-      const attachments = [contractAttachment]
-      const res = await sendAmbassadorEmail({ to: updatedRow.email, subject, html, attachments })
-      setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Welcome + contract sent to ${updatedRow.email}` : res.error)
-      if (res.ok) logAmbassadorSend(updatedRow, { to: updatedRow.email, subject, body: htmlToText(html) })
-    } catch (e) {
-      setEmail(row.id, 'error', e.message || 'PDF / email failed')
-    }
+    setEmail(row.id, 'sent', 'Approved and code allocated. Awaiting shipment details before notifying ambassador.')
     setSaving(null)
   }
 
@@ -3438,6 +3390,8 @@ function AmbassadorApplicationsPanel() {
       const updatedRow = { ...row, ...draft }
       const fullName = String(updatedRow?.full_name || '').trim()
       const discountCode = String(updatedRow?.discount_code || '').trim()
+      const normalizedEmail = String(updatedRow?.email || '').trim().toLowerCase()
+      const setPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(normalizedEmail)}`
       if (!fullName) {
         setSaving(null)
         setEmail(row.id, 'error', 'Shipment email blocked: ambassador name is missing.')
@@ -3448,8 +3402,20 @@ function AmbassadorApplicationsPanel() {
         setEmail(row.id, 'error', 'Shipment email blocked: discount code is missing.')
         return
       }
+      if (!normalizedEmail) {
+        setSaving(null)
+        setEmail(row.id, 'error', 'Shipment email blocked: ambassador email is missing.')
+        return
+      }
       setEmail(row.id, 'sending', '')
-      const { subject, html } = buildAmbassadorShipmentEmail(updatedRow, draft)
+      try {
+        await ensureAmbassadorPortalAccount(updatedRow)
+      } catch (e) {
+        setSaving(null)
+        setEmail(row.id, 'error', e.message || 'Could not provision ambassador portal account.')
+        return
+      }
+      const { subject, html } = buildAmbassadorShipmentEmail(updatedRow, draft, setPasswordLink)
       let attachments = []
       try {
         const letterAttachment = await buildPdfAttachment(AMBASSADOR_LETTER_ATTACHMENT_URL, 'Gelitup Ambassador Letter.pdf')
@@ -3781,8 +3747,19 @@ function AmbassadorApplicationsPanel() {
 // ─── Admin Dashboard shell ────────────────────────────────────────────────────
 
 export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
-  const [tab, setTab] = useState('registrations')
+  const [tab, setTab] = useState(() => {
+    try {
+      const saved = localStorage.getItem(ADMIN_TAB_STORAGE_KEY)
+      return ADMIN_TAB_KEYS.has(saved) ? saved : 'registrations'
+    } catch {
+      return 'registrations'
+    }
+  })
   const [ambassadorPending, setAmbassadorPending] = useState(0)
+
+  useEffect(() => {
+    try { localStorage.setItem(ADMIN_TAB_STORAGE_KEY, tab) } catch {}
+  }, [tab])
 
   useEffect(() => {
     let active = true

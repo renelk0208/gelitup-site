@@ -17574,7 +17574,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     code: '',
     availableEur: 0,
     commissionPct: 0,
-    discountPct: 10,
+    discountPct: 20,
     totalRedeemedEur: 0,
     nextTierAt: 1000,
     nextTierPct: 15,
@@ -17623,7 +17623,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
           code: '',
           availableEur: 0,
           commissionPct: 0,
-          discountPct: 10,
+          discountPct: 20,
           totalRedeemedEur: 0,
           nextTierAt: 1000,
           nextTierPct: 15,
@@ -17640,7 +17640,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
           code: '',
           availableEur: 0,
           commissionPct: 0,
-          discountPct: 10,
+          discountPct: 20,
           totalRedeemedEur: 0,
           nextTierAt: 1000,
           nextTierPct: 15,
@@ -17655,7 +17655,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
         code: String(row.code || ''),
         availableEur: Number(row.available_eur || 0),
         commissionPct: Number(row.commission_pct || 0),
-        discountPct: Number(row.discount_pct || 10),
+        discountPct: Number(row.discount_pct || 20),
         totalRedeemedEur: Number(row.total_redeemed_eur || 0),
         nextTierAt: row.next_tier_at != null ? Number(row.next_tier_at) : null,
         nextTierPct: row.next_tier_pct != null ? Number(row.next_tier_pct) : null,
@@ -18302,23 +18302,11 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                           </div>
                           <p className="mt-1 text-[10px] text-slate-400">Clients enter this at checkout</p>
                         </div>
-                        {/* Client discount tier */}
+                        {/* Client discount */}
                         <div className="rounded-xl border border-emerald-200 bg-white p-3">
                           <p className="text-[11px] text-slate-500">Client Discount</p>
-                          <p className="mt-1 text-lg font-bold text-emerald-700">{ambassadorPortalInfo.discountPct}% off</p>
-                          {ambassadorPortalInfo.nextTierAt != null ? (
-                            <>
-                              <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-emerald-100">
-                                <div
-                                  className="h-full rounded-full bg-emerald-500 transition-all"
-                                  style={{ width: `${Math.min(100, (ambassadorPortalInfo.totalRedeemedEur / ambassadorPortalInfo.nextTierAt) * 100).toFixed(1)}%` }}
-                                />
-                              </div>
-                              <p className="mt-1 text-[10px] text-slate-400">€{ambassadorPortalInfo.totalRedeemedEur.toFixed(0)} / €{ambassadorPortalInfo.nextTierAt} → unlocks {ambassadorPortalInfo.nextTierPct}%</p>
-                            </>
-                          ) : (
-                            <p className="mt-0.5 text-[10px] text-emerald-600 font-semibold">🏆 Max tier reached!</p>
-                          )}
+                          <p className="mt-1 text-lg font-bold text-emerald-700">20% off</p>
+                          <p className="mt-0.5 text-[10px] text-slate-400">Fixed ambassador code discount for clients at checkout</p>
                         </div>
                         {/* Commission rate */}
                         <div className="rounded-xl border border-emerald-200 bg-white p-3">
@@ -18337,7 +18325,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                           </div>
                           <div className="flex gap-2">
                             <span className="mt-0.5 shrink-0 text-base" aria-hidden="true">💸</span>
-                            <p className="text-[11px] text-slate-600"><strong>Clients save {ambassadorPortalInfo.discountPct}%</strong><br />The discount is applied automatically to their order total</p>
+                            <p className="text-[11px] text-slate-600"><strong>Clients save 20%</strong><br />The discount is applied automatically to their order total</p>
                           </div>
                           <div className="flex gap-2">
                             <span className="mt-0.5 shrink-0 text-base" aria-hidden="true">💳</span>
@@ -18403,13 +18391,13 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                             {ambassadorPortalInfo.nextTierAt != null && (
                               <div className="mt-1 rounded-lg bg-emerald-50 px-3 py-2 text-center">
                                 <p className="text-xs text-emerald-800">
-                                  <strong>€{Math.max(0, ambassadorPortalInfo.nextTierAt - total).toFixed(0)} more</strong> in client orders unlocks <strong>{ambassadorPortalInfo.nextTierPct}% discount</strong> for your clients 🚀
+                                  <strong>€{Math.max(0, ambassadorPortalInfo.nextTierAt - total).toFixed(0)} more</strong> in client orders unlocks your <strong>next milestone</strong> 🚀
                                 </p>
                               </div>
                             )}
                             {ambassadorPortalInfo.nextTierAt == null && (
                               <div className="mt-1 rounded-lg bg-emerald-100 px-3 py-2 text-center">
-                                <p className="text-xs font-bold text-emerald-800">🏆 Elite tier reached — maximum 20% client discount!</p>
+                                <p className="text-xs font-bold text-emerald-800">🏆 Elite milestone reached — amazing progress!</p>
                               </div>
                             )}
                           </div>
