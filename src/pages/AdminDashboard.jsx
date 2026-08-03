@@ -2001,6 +2001,26 @@ function OrdersPanel() {
                               )
                             })}
                           </ul>
+                          {(() => {
+                            const rowTierMultiplier = getTierMultiplier(row.distributor_tier)
+                            let total = 0
+                            let unpriced = 0
+                            items.forEach((item, i) => {
+                              const parsed = parseOrderItemEntry(item, i)
+                              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, rowTierMultiplier)
+                              if (resolved.isImageAsset) return
+                              if (resolved.unitPrice != null) total += resolved.unitPrice * parsed.qty
+                              else unpriced += 1
+                            })
+                            return (
+                              <div className="mt-2 flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-xs">
+                                <span className="font-semibold text-slate-500">
+                                  Order total{unpriced > 0 && <span className="ml-2 font-normal text-amber-600">({unpriced} item{unpriced === 1 ? '' : 's'} without price not included)</span>}
+                                </span>
+                                <span className="text-sm font-bold text-slate-900">€{total.toFixed(2)}</span>
+                              </div>
+                            )
+                          })()}
                         </div>
                       )}
 

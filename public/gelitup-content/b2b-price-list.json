@@ -3688,17 +3688,17 @@
     {
       "name": "FLEXI Soak Off Nail Tips Long Almond -2025",
       "sku": "FLEXI Soak Off Nail Tips Long Almond -2025",
-      "price": 6.00
+      "price": 6.0
     },
     {
       "name": "FLEXI Soak Off Nail Tips Short Almond -2025",
       "sku": "FLEXI Soak Off Nail Tips Short Almond -2025",
-      "price": 6.00
+      "price": 6.0
     },
     {
       "name": "FLEXI Soak Off Nail Tips Medium Square -2025",
       "sku": "FLEXI Soak Off Nail Tips Medium Square -2025",
-      "price": 6.00
+      "price": 6.0
     },
     {
       "name": "FR01 EgalitÃ© -HTF",
@@ -4799,6 +4799,11 @@
       "name": "Nail Clips Dual Form Single",
       "sku": "Nail Clips Dual Form Single",
       "price": 0.75
+    },
+    {
+      "name": "Nail Clips Dual Form Pack of 5 -HTF",
+      "sku": "Nail Clips Dual Form Pack of 5 -HTF",
+      "price": 3.5
     },
     {
       "name": "NAIL EXTENSION DUAL FORMS RUSSIAN ALMOND",
