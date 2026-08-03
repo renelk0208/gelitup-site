@@ -9337,8 +9337,9 @@ function CheckoutPage() {
     if (!form.lastName.trim()) issues.push('Last name is required')
     if (!form.companyName.trim()) issues.push('Company name is required')
     if (!form.email.trim()) issues.push('Email address is required')
-    if (!form.vatNumber.trim()) issues.push('VAT number is required')
-    else if (!viesResult?.valid) issues.push('Click the Verify button to validate your VAT number')
+    const vatOptionalCountry = form.invoiceCountry.trim() === 'Sri Lanka'
+    if (!form.vatNumber.trim()) { if (!vatOptionalCountry) issues.push('VAT number is required') }
+    else if (!viesResult?.valid && !vatOptionalCountry) issues.push('Click the Verify button to validate your VAT number')
     if (!form.invoiceAddressLine1.trim()) issues.push('Street address is required')
     if (!form.invoiceArea.trim()) issues.push('Town / city is required')
     if (!form.invoiceCountry.trim()) issues.push('Country is required')
@@ -9580,8 +9581,9 @@ function CheckoutPage() {
     if (!email) { setError('Email is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
     const vat = form.vatNumber.trim()
     if (!form.companyName.trim()) { setError('Company name is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
-    if (!vat) { setError('VAT number is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
-    if (!viesResult?.valid) { setError('Please verify your VAT number — enter it then click the Verify button.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    const vatOptionalForCountry = form.invoiceCountry.trim() === 'Sri Lanka'
+    if (!vat && !vatOptionalForCountry) { setError('VAT number is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (vat && !viesResult?.valid && !vatOptionalForCountry) { setError('Please verify your VAT number — enter it then click the Verify button.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
     if (!form.firstName.trim()) { setError('First name is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
     if (!form.lastName.trim()) { setError('Last name is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
     if (!form.invoiceAddressLine1.trim()) { setError('Invoice address is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
@@ -10112,9 +10114,9 @@ function CheckoutPage() {
               </label>
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-slate-700">
-                  VAT Number <span className="text-rose-500">*</span>
+                  VAT Number {form.invoiceCountry !== 'Sri Lanka' && <span className="text-rose-500">*</span>}
                   <div className="mt-1 flex gap-2">
-                    <input type="text" required value={form.vatNumber} onChange={e => { updateField('vatNumber', e.target.value); setViesResult(null) }} placeholder={COUNTRY_VAT_PREFIX[form.invoiceCountry] ? `${COUNTRY_VAT_PREFIX[form.invoiceCountry]}123456789` : 'EU123456789'} className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
+                    <input type="text" required={form.invoiceCountry !== 'Sri Lanka'} value={form.vatNumber} onChange={e => { updateField('vatNumber', e.target.value); setViesResult(null) }} placeholder={COUNTRY_VAT_PREFIX[form.invoiceCountry] ? `${COUNTRY_VAT_PREFIX[form.invoiceCountry]}123456789` : 'EU123456789'} className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
                     <button type="button" onClick={verifyVat} disabled={viesLoading} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50">
                       {viesLoading ? 'Checking…' : 'Verify'}
                     </button>
