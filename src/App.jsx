@@ -10834,7 +10834,7 @@ function PortalRegister({ onRegister }) {
               {R.vat || 'VAT Number'}
               <input
                 type="text"
-                required={isDistributorFlow || isBusinessOrderProfile}
+                required={application.invoiceCountry === 'Sri Lanka' ? false : (isDistributorFlow || isBusinessOrderProfile)}
                 value={application.vatNumber}
                 onChange={(event) => setField('vatNumber', event.target.value.toUpperCase())}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
@@ -20016,7 +20016,7 @@ function App() {
         )
       }
 
-      if (isDistributorApplication) {
+      if (isDistributorApplication && invoiceCountry !== 'Sri Lanka') {
         requiredFields.push(['VAT number', application.vatNumber])
       }
 
