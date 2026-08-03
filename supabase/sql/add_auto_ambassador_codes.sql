@@ -60,6 +60,8 @@ as $$
 declare
   v_row public.ambassador_applications%rowtype;
   v_code text;
+  v_reviewed_at timestamptz;
+  v_status text;
 begin
   select *
     into v_row
@@ -70,6 +72,9 @@ begin
   if not found then
     raise exception 'Ambassador application not found';
   end if;
+
+  -- Pre-read reviewed_at into a variable to avoid ambiguity with RETURNS TABLE column
+  v_reviewed_at := v_row.reviewed_at;
 
   v_code := nullif(trim(coalesce(v_row.discount_code, '')), '');
   if v_code is null then
@@ -125,21 +130,19 @@ begin
      where upper(c.code) = upper(v_code);
   end if;
 
+  -- All SET values use v_ variables to avoid ambiguity with RETURNS TABLE column names
   update public.ambassador_applications
      set status = 'approved',
-         reviewed_at = coalesce(reviewed_at, now()),
-         reviewed_by = coalesce(reviewed_by, auth.email()),
+         reviewed_at = coalesce(v_reviewed_at, now()),
+         reviewed_by = coalesce(v_row.reviewed_by, auth.email()),
          discount_code = v_code,
-         discount_code_created_at = coalesce(discount_code_created_at, now())
+         discount_code_created_at = coalesce(v_row.discount_code_created_at, now())
    where id = p_application_id;
 
-  return query
-  select
-    v_code,
-    reviewed_at,
-    status
-  from public.ambassador_applications
-  where id = p_application_id;
+  v_reviewed_at := coalesce(v_reviewed_at, now());
+  v_status := 'approved';
+
+  return query select v_code, v_reviewed_at, v_status;
 end;
 $$;
 
