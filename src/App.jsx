@@ -9884,7 +9884,38 @@ function CheckoutPage() {
         `,
       })
 
-      // 8. Clear cart and show confirmation
+      // 8. Fire GA4/Google Ads purchase conversion once per submitted order.
+      const purchaseEventId = String(insertedOrder?.id || orderRef || '').trim()
+      const purchaseValue = Number(grandTotal.toFixed(2))
+      if (purchaseEventId && window.gtag) {
+        const purchaseGuardKey = `gelitup.purchase.${purchaseEventId}`
+        let shouldTrackPurchase = true
+        try {
+          if (sessionStorage.getItem(purchaseGuardKey)) shouldTrackPurchase = false
+          else sessionStorage.setItem(purchaseGuardKey, '1')
+        } catch {}
+        if (shouldTrackPurchase) {
+          window.gtag('event', 'purchase', {
+            transaction_id: purchaseEventId,
+            currency: 'EUR',
+            value: purchaseValue,
+            items: cartEntries.map((line) => ({
+              item_id: String(line.code || '').trim(),
+              item_name: String(line.name || line.code || '').trim(),
+              price: Number((line.price ?? 0).toFixed(2)),
+              quantity: Number(line.qty || 1),
+            })),
+          })
+          window.gtag('event', 'conversion', {
+            send_to: 'AW-1008159504/8692CPf3leEBEJCW3eAD',
+            transaction_id: purchaseEventId,
+            value: purchaseValue,
+            currency: 'EUR',
+          })
+        }
+      }
+
+      // 9. Clear cart and show confirmation
       setCart({})
       localStorage.removeItem(QUICK_CART_STORAGE_KEY)
       localStorage.removeItem('gelitup.kits.v1')
@@ -14315,6 +14346,37 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       shipping,
       totalValueEurBase: proformaInvoice.grandTotalEur,
     })
+
+    // Fire GA4/Google Ads purchase conversion once per submitted portal order.
+    const portalPurchaseId = String(insertedOrder?.id || '').trim()
+    const portalPurchaseValue = Number(proformaInvoice.grandTotalEur || 0)
+    if (portalPurchaseId && window.gtag) {
+      const portalPurchaseGuardKey = `gelitup.purchase.${portalPurchaseId}`
+      let shouldTrackPortalPurchase = true
+      try {
+        if (sessionStorage.getItem(portalPurchaseGuardKey)) shouldTrackPortalPurchase = false
+        else sessionStorage.setItem(portalPurchaseGuardKey, '1')
+      } catch {}
+      if (shouldTrackPortalPurchase) {
+        window.gtag('event', 'purchase', {
+          transaction_id: portalPurchaseId,
+          currency: 'EUR',
+          value: Number(portalPurchaseValue.toFixed(2)),
+          items: proformaInvoice.lines.map((line) => ({
+            item_id: String(line.sku || '').trim(),
+            item_name: String(line.description || line.sku || '').trim(),
+            price: Number((line.unitPriceEur ?? 0).toFixed(2)),
+            quantity: Number(line.qty || 1),
+          })),
+        })
+        window.gtag('event', 'conversion', {
+          send_to: 'AW-1008159504/8692CPf3leEBEJCW3eAD',
+          transaction_id: portalPurchaseId,
+          value: Number(portalPurchaseValue.toFixed(2)),
+          currency: 'EUR',
+        })
+      }
+    }
 
     const shippingBlockHtml = `
       <p style="margin:2px 0"><strong>Shipping Type:</strong> ${escapeHtml(shipping.type || '-')}</p>
@@ -19287,13 +19349,16 @@ function App() {
     }
   }, [navigate, routerLocation.pathname, routerLocation.search])
 
-  // Fire Google Ads + GA4 purchase conversion when Stripe redirects back with ?payment=success
+  // Fallback purchase/conversion tracking when redirected back from Stripe.
+  // Primary purchase tracking fires on successful order submission paths.
   useEffect(() => {
     const params = new URLSearchParams(routerLocation.search)
     if (params.get('payment') !== 'success') return
     const orderId = params.get('order') || ''
-    if (sessionStorage.getItem(`gelitup.conv.${orderId}`)) return
-    sessionStorage.setItem(`gelitup.conv.${orderId}`, '1')
+    if (!orderId) return
+    const purchaseGuardKey = `gelitup.purchase.${orderId}`
+    if (sessionStorage.getItem(purchaseGuardKey)) return
+    sessionStorage.setItem(purchaseGuardKey, '1')
     if (window.gtag) {
       window.gtag('event', 'purchase', { currency: 'EUR', transaction_id: orderId })
       window.gtag('event', 'conversion', { send_to: 'AW-1008159504/8692CPf3leEBEJCW3eAD', transaction_id: orderId, currency: 'EUR' })
