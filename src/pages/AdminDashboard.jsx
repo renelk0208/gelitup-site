@@ -1759,6 +1759,21 @@ function OrdersPanel() {
     })
   }
 
+  const openOrderInPortal = (row) => {
+    try {
+      localStorage.setItem('giup_order_edit_handoff', JSON.stringify({
+        orderId: row.id,
+        customerEmail: row.customer_email || '',
+        items: Array.isArray(row.items) ? row.items : [],
+        savedAt: Date.now(),
+      }))
+      window.open('/portal/dashboard/products', '_blank')
+    }
+    catch {
+      window.alert('Could not open order in portal — localStorage unavailable.')
+    }
+  }
+
   const saveEdit = async (row) => {
     const id = row.id
     const previousStatus = normalizeOrderStatus(row.status)
@@ -2409,29 +2424,10 @@ function OrdersPanel() {
                       <p className="mb-2 text-xs font-semibold text-slate-400">Actions</p>
                       <div className="flex flex-wrap gap-2">
                         <button
-                          onClick={() => startEdit(row)}
+                          onClick={() => openOrderInPortal(row)}
                           className="rounded-lg border border-amber-200 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-50"
                         >
-                          ✎ Edit Order
-                        </button>
-                        <button
-                          onClick={() => {
-                            try {
-                              localStorage.setItem('giup_order_edit_handoff', JSON.stringify({
-                                orderId: row.id,
-                                customerEmail: row.customer_email || '',
-                                items: Array.isArray(row.items) ? row.items : [],
-                                savedAt: Date.now(),
-                              }))
-                              window.open('/portal/dashboard/products', '_blank')
-                            }
-                            catch {
-                              window.alert('Could not open order in portal — localStorage unavailable.')
-                            }
-                          }}
-                          className="rounded-lg border border-fuchsia-200 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50"
-                        >
-                          🛒 Edit in Portal
+                          ✎ Edit Order (Portal)
                         </button>
                         {isShipped && (
                           <button
