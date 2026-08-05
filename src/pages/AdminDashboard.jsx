@@ -1836,7 +1836,7 @@ function OrdersPanel() {
         items: Array.isArray(row.items) ? row.items : [],
         savedAt: Date.now(),
       }))
-      window.open('/portal/dashboard/products', '_blank')
+      window.open('/portal/dashboard/catalog', '_blank')
     }
     catch {
       window.alert('Could not open order in portal — localStorage unavailable.')

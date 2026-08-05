@@ -11721,7 +11721,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   // Apply admin order-edit handoff: preload the cart with an existing order's items
   useEffect(() => {
     if (appliedOrderEditRef.current) return
-    if (location.pathname !== '/portal/dashboard/products' && location.pathname !== '/portal/products') return
+    if (location.pathname !== '/portal/dashboard/catalog' && location.pathname !== '/portal/catalog') return
     if (!products.length) return
     const handoff = readOrderEditHandoff()
     if (!handoff) return
