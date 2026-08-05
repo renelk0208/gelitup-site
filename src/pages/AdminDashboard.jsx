@@ -2394,6 +2394,25 @@ function OrdersPanel() {
                         >
                           ✎ Edit Order
                         </button>
+                        <button
+                          onClick={() => {
+                            try {
+                              localStorage.setItem('giup_order_edit_handoff', JSON.stringify({
+                                orderId: row.id,
+                                customerEmail: row.customer_email || '',
+                                items: Array.isArray(row.items) ? row.items : [],
+                                savedAt: Date.now(),
+                              }))
+                              window.open('/portal/dashboard/products', '_blank')
+                            }
+                            catch {
+                              window.alert('Could not open order in portal — localStorage unavailable.')
+                            }
+                          }}
+                          className="rounded-lg border border-fuchsia-200 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50"
+                        >
+                          🛒 Edit in Portal
+                        </button>
                         {isShipped && (
                           <button
                             onClick={() => updateOrder(row.id, { status: 'completed' })}

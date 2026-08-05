@@ -11540,6 +11540,27 @@ function normalizeImageMap(payload) {
   return map
 }
 
+// Admin → portal order-edit handoff: AdminDashboard writes an order's items here so the
+// distributor portal can reopen the order in the full catalogue with the cart preloaded.
+const ORDER_EDIT_HANDOFF_KEY = 'giup_order_edit_handoff'
+
+function readOrderEditHandoff() {
+  try {
+    const raw = localStorage.getItem(ORDER_EDIT_HANDOFF_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    if (!parsed?.orderId || !Array.isArray(parsed.items)) return null
+    if (!parsed.savedAt || Date.now() - parsed.savedAt > 24 * 60 * 60 * 1000) {
+      localStorage.removeItem(ORDER_EDIT_HANDOFF_KEY)
+      return null
+    }
+    return parsed
+  }
+  catch {
+    return null
+  }
+}
+
 function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated = false }) {
   // Tier 1 / Professional (local-regional): -63% from B2B price (pay 37%).
   // Tier 2 / Authority (national): -78% from B2B price (pay 22%).
@@ -11611,6 +11632,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     }
   })
   const [packageCartItems, setPackageCartItems] = useState([])
+  // Order-edit mode: { id, email, unmatched } when an admin reopened an existing order in the portal
+  const [editingOrder, setEditingOrder] = useState(null)
+  const appliedOrderEditRef = useRef(false)
   const [podCatalog, setPodCatalog] = useState({ pod_1: [], pod_2: [], pod_3: [], pod_4: [] })
   const [localImageMap, setLocalImageMap] = useState(() => new Map())
   // priceMap: normalised-key ? { name, price }  (loaded from b2b-price-list.json)
@@ -11694,6 +11718,82 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     }
   }, [])
 
+  // Apply admin order-edit handoff: preload the cart with an existing order's items
+  useEffect(() => {
+    if (appliedOrderEditRef.current) return
+    if (!products.length) return
+    const handoff = readOrderEditHandoff()
+    if (!handoff) return
+    appliedOrderEditRef.current = true
+
+    // Lookup maps: normalized code/sku/name → product code
+    const codeLookup = new Map()
+    const nameLookup = new Map()
+    for (const p of products) {
+      if (p.code) codeLookup.set(normalizeSkuCode(p.code), p.code)
+      if (p.sku) { const k = normalizeSkuCode(p.sku); if (!codeLookup.has(k)) codeLookup.set(k, p.code) }
+      if (p.name) { const k = normalizeProductName(p.name); if (!nameLookup.has(k)) nameLookup.set(k, p.code) }
+    }
+    // Alias codes resolve via their target price-list name
+    const aliasLookup = new Map()
+    for (const group of PRODUCT_ALIAS_GROUPS) {
+      const targetCode = nameLookup.get(normalizeProductName(group.target))
+      if (!targetCode) continue
+      for (const alias of group.codes) aliasLookup.set(normalizeSkuCode(alias), targetCode)
+    }
+
+    const codes = []
+    const qtys = {}
+    const unmatched = []
+    for (const rawItem of handoff.items) {
+      let token = ''
+      let qty = 1
+      if (rawItem && typeof rawItem === 'object') {
+        token = String(rawItem.sku || rawItem.code || rawItem.name || '').trim()
+        qty = Math.max(1, parseInt(rawItem.qty, 10) || 1)
+        if (!token) token = String(rawItem.name || '').trim()
+      }
+      else {
+        const str = String(rawItem || '').trim()
+        const m = str.match(/^(.*?)\s*[x×]\s*(\d+)$/i)
+        token = (m ? m[1] : str).trim()
+        qty = m ? Math.max(1, parseInt(m[2], 10) || 1) : 1
+      }
+      if (!token) continue
+      const normCode = normalizeSkuCode(token)
+      const matchedCode = codeLookup.get(normCode)
+        || aliasLookup.get(normCode)
+        || nameLookup.get(normalizeProductName(token))
+        || (rawItem && typeof rawItem === 'object' && rawItem.name ? nameLookup.get(normalizeProductName(rawItem.name)) : null)
+      if (matchedCode) {
+        if (!codes.includes(matchedCode)) codes.push(matchedCode)
+        qtys[matchedCode] = (qtys[matchedCode] || 0) + qty
+      }
+      else {
+        unmatched.push(rawItem)
+      }
+    }
+
+    setSelectedCodes(codes)
+    setItemQtys(qtys)
+    setPackageCartItems([])
+    setIncludeProfessionalBasePack(false)
+    setEditingOrder({
+      id: handoff.orderId,
+      email: handoff.customerEmail || '',
+      unmatched,
+    })
+  }, [products]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const cancelOrderEdit = () => {
+    try { localStorage.removeItem(ORDER_EDIT_HANDOFF_KEY) } catch { /* ignore */ }
+    setEditingOrder(null)
+    setSelectedCodes([])
+    setItemQtys({})
+    setPackageCartItems([])
+    setIncludeProfessionalBasePack(false)
+  }
+
   // Cart persistence — restore cart from localStorage on mount, keyed by user ID
   const cartUserIdRef = useRef(null)
 
@@ -11703,6 +11803,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       const uid = data?.user?.id
       if (!uid) return
       cartUserIdRef.current = uid
+      if (readOrderEditHandoff()) return // order-edit mode preloads the cart itself
       const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${uid}`
       let saved = null
       try { saved = JSON.parse(localStorage.getItem(key) || 'null') } catch { /* ignore */ }
@@ -11780,6 +11881,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   // Persist cart to localStorage whenever it changes
   useEffect(() => {
+    if (editingOrder) return // don't overwrite the user's own saved cart while editing an order
     const uid = cartUserIdRef.current
     if (!uid) return
     const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${uid}`
@@ -11804,6 +11906,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   // Sync portal cart to Supabase draft_carts so admin can see abandoned carts
   useEffect(() => {
     if (!supabase) return
+    if (editingOrder) return // order-edit carts are not abandoned drafts
     const uid = cartUserIdRef.current
     if (!uid) return
     const totalUnitsForDraft = selectedCodes.reduce((s, c) => s + (itemQtys[c] || 1), 0) + packageCartItems.reduce((s, i) => s + (i.qty || 0), 0)
@@ -14121,6 +14224,44 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       return
     }
 
+    // ── Order-edit mode: update the existing order instead of creating a new one ──
+    if (editingOrder) {
+      setIsSubmittingOrder(true)
+      setCheckoutError('')
+      setCheckoutMessage('')
+      const packageItemsPayload = packageCartItems.map((item) => `${item.sku} x${item.qty}`)
+      const selectedCodesWithQty = selectedCodes.map(code => (itemQtys[code] || 1) > 1 ? `${code} x${itemQtys[code]}` : code)
+      // Keep any order items that couldn't be shown in the catalogue so they aren't lost
+      const updatedItems = [...selectedCodesWithQty, ...packageItemsPayload, ...(editingOrder.unmatched || [])]
+      const unmatchedUnits = (editingOrder.unmatched || []).reduce((s, it) => {
+        if (it && typeof it === 'object') return s + (parseInt(it.qty, 10) || 1)
+        const m = String(it || '').match(/[x×]\s*(\d+)\s*$/i)
+        return s + (m ? parseInt(m[1], 10) || 1 : 1)
+      }, 0)
+      const updatedUnits = selectedCodes.reduce((s, c) => s + (itemQtys[c] || 1), 0)
+        + packageCartItems.reduce((s, i) => s + (i.qty || 0), 0)
+        + unmatchedUnits
+      const { error: updateError } = await supabase
+        .from(ordersTable)
+        .update({ items: updatedItems, total_units: updatedUnits })
+        .eq('id', editingOrder.id)
+      if (updateError) {
+        setCheckoutError(`Order update failed: ${updateError.message}`)
+        setIsSubmittingOrder(false)
+        return
+      }
+      const finishedOrderId = editingOrder.id
+      try { localStorage.removeItem(ORDER_EDIT_HANDOFF_KEY) } catch { /* ignore */ }
+      setEditingOrder(null)
+      setSelectedCodes([])
+      setItemQtys({})
+      setPackageCartItems([])
+      setIncludeProfessionalBasePack(false)
+      setCheckoutMessage(`Order #${finishedOrderId} updated — ${updatedUnits} unit${updatedUnits === 1 ? '' : 's'} saved. No new order was created.`)
+      setIsSubmittingOrder(false)
+      return
+    }
+
     setShowClientValidation(true)
     const missingProfileFields = [...clientValidation.missingLabels]
 
@@ -14964,7 +15105,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <button onClick={submitOrder} disabled={isSubmittingOrder} className="flex w-full items-center justify-center rounded-2xl bg-fuchsia-600 py-4 text-base font-bold text-white shadow-lg transition hover:bg-fuchsia-700 disabled:cursor-not-allowed disabled:bg-fuchsia-300">
               {isSubmittingOrder
                 ? <span className="flex items-center gap-2"><svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>Submitting…</span>
-                : `Place Order · ${totalUnits} unit${totalUnits === 1 ? '' : 's'} →`
+                : editingOrder
+                  ? `Update Order #${editingOrder.id} · ${totalUnits} unit${totalUnits === 1 ? '' : 's'} →`
+                  : `Place Order · ${totalUnits} unit${totalUnits === 1 ? '' : 's'} →`
               }
             </button>
             <div className="flex flex-wrap gap-2">
@@ -15028,6 +15171,25 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   return (
     <div className="space-y-4">
+      {/* Order-edit mode banner */}
+      {editingOrder && (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-amber-900">✏️ Editing order #{editingOrder.id}{editingOrder.email ? ` — ${editingOrder.email}` : ''}</p>
+              <p className="mt-1 text-xs text-amber-800">The order's items are loaded into the cart below. Add or remove products, then submit — this will <strong>update the existing order</strong>, not create a new one.</p>
+              {editingOrder.unmatched?.length > 0 && (
+                <p className="mt-1 text-xs text-amber-700">
+                  {editingOrder.unmatched.length} item{editingOrder.unmatched.length === 1 ? '' : 's'} couldn't be shown in the catalogue but will be kept on the order: {editingOrder.unmatched.map(it => (it && typeof it === 'object') ? `${it.name || it.sku}${it.qty > 1 ? ` x${it.qty}` : ''}` : String(it)).join(', ')}
+                </p>
+              )}
+            </div>
+            <button type="button" onClick={cancelOrderEdit} className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100">
+              ✕ Cancel edit
+            </button>
+          </div>
+        </div>
+      )}
       {/* Lightbox modal */}
       {lightboxUrl && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 p-4" onClick={() => setLightboxUrl(null)}>
