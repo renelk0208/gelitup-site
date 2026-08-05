@@ -16,6 +16,7 @@ const AMBASSADOR_TABLE = import.meta.env.VITE_AMBASSADOR_TABLE || 'ambassador_ap
 // One address for everything — send from, and receive replies at, info@gelitup.com.
 const AMBASSADOR_REPLY_TO = import.meta.env.VITE_AMBASSADOR_INBOX || 'info@gelitup.com'
 const AMBASSADOR_FROM_EMAIL = import.meta.env.VITE_AMBASSADOR_EMAIL_FROM || 'GEL.IT.UP <info@gelitup.com>'
+const AMBASSADOR_REMINDER_EMAIL = 'info@gelitup.com'
 // Statuses that count as "needs review" (form inserts default to 'new').
 const AMBASSADOR_PENDING_STATUSES = ['new', 'pending', 'submitted']
 const AMBASSADOR_LETTER_ATTACHMENT_URL = ambassadorLetterAttachmentUrl
@@ -31,6 +32,31 @@ function buildDistributorAccessEmail(row) {
   return {
     subject: 'Your Distributor Tier Is Active - Portal Login Ready',
     html: `<p>Dear ${row?.contact_name || 'Partner'},</p><p>Your account for <strong>${row?.company_name || 'your company'}</strong> has been confirmed as a <strong>Distributor</strong>.</p><p>Your assigned tier: <strong>${tierLabel}</strong>.</p><p>To activate your access, first create or refresh your password using the secure link below.</p><p><a href="${createPasswordLink}" style="background:#7c3aed;color:#fff;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:700;display:inline-block;">Set Password & Access Portal</a></p><p style="margin-top:12px;">After setting your password, sign in here: <a href="${portalLink}">${portalLink}</a></p><p>If you have questions, contact us at distribution@gelitup.com.</p><p>The GEL.IT.UP Distribution Team</p>`,
+  }
+  const openReminderDraft = (row, sentAtIso, sentAtLabel) => {
+    const dueIso = sentAtIso ? addOneMonth(sentAtIso) : null
+    const dueLabel = dueIso ? fmtDate(dueIso) : 'in 1 month'
+    const subject = `Reminder: Send next GEL.IT.UP sample kit to ${row?.full_name || row?.email || 'ambassador'}`
+    const body = [
+      `Ambassador: ${row?.full_name || '-'}`,
+      `Email: ${row?.email || '-'}`,
+      `Instagram: @${row?.instagram || '-'}`,
+      `Last shipment email sent: ${sentAtLabel || (sentAtIso ? fmtDateTime(sentAtIso) : 'Unknown')}`,
+      `Next sample kit due: ${dueLabel}`,
+      '',
+      'Please prepare and send the next sample kit follow-up.',
+    ].join('\n')
+    const href = `mailto:${encodeURIComponent(AMBASSADOR_REMINDER_EMAIL)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    window.open(href, '_blank')
+  }
+  const startNextPackageFlow = (row) => {
+    persistShipmentEmailLock((prev) => {
+      const next = { ...prev }
+      delete next[row.id]
+      return next
+    })
+    setNextPackageMode((prev) => ({ ...prev, [row.id]: true }))
+    setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: true }))
   }
 }
 
@@ -85,6 +111,22 @@ function addOneMonth(iso) {
   const next = new Date(source)
   next.setMonth(next.getMonth() + 1)
   return next.toISOString()
+}
+
+function parseDateLabelToIso(label) {
+  const parsed = new Date(String(label || '').trim())
+  if (Number.isNaN(parsed.getTime())) return null
+  return parsed.toISOString()
+}
+
+function hashKey(value) {
+  const text = String(value || '')
+  let hash = 0
+  for (let i = 0; i < text.length; i += 1) {
+    hash = (hash << 5) - hash + text.charCodeAt(i)
+    hash |= 0
+  }
+  return Math.abs(hash)
 }
 
 function triggerFileDownload(blob, filename) {
@@ -206,6 +248,14 @@ function ensureApplicationTypeTag(notesValue, typeValue) {
   const cleaned = notes.replace(/\[APPLICATION_TYPE:[^\]]+\]/gi, '').trim()
   const prefix = cleaned ? `${cleaned}\n` : ''
   return `${prefix}[APPLICATION_TYPE:${typeValue}]`
+}
+
+function ensureTaggedValue(notesValue, tagName, tagValue) {
+  const notes = String(notesValue || '')
+  const cleaned = notes.replace(new RegExp(`\\[${tagName}:[^\\]]+\\]`, 'gi'), '').trim()
+  if (!tagValue) return cleaned || null
+  const prefix = cleaned ? `${cleaned}\n` : ''
+  return `${prefix}[${tagName}:${tagValue}]`
 }
 
 function RegistrationsPanel({ onPreviewDistributor }) {
@@ -3296,7 +3346,10 @@ function AmbassadorApplicationsPanel() {
   const [ship, setShip] = useState({}) // { [id]: { shipment_details, tracking_number, tracking_url } }
   const [noteDraft, setNoteDraft] = useState({}) // { [id]: 'new internal note being typed' }
   const [currentAdminEmail, setCurrentAdminEmail] = useState('')
+  const [currentAdminName, setCurrentAdminName] = useState('')
   const [openIds, setOpenIds] = useState(() => new Set()) // which applicant cards are expanded
+  const [shipmentPanelOpen, setShipmentPanelOpen] = useState({})
+  const [nextPackageMode, setNextPackageMode] = useState({})
   const [shipmentEmailLock, setShipmentEmailLock] = useState(() => {
     try {
       const parsed = JSON.parse(localStorage.getItem(SHIPMENT_EMAIL_LOCK_STORAGE_KEY) || '{}')
@@ -3313,7 +3366,16 @@ function AmbassadorApplicationsPanel() {
   })
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setCurrentAdminEmail(data?.user?.email || ''))
+    supabase.auth.getUser().then(({ data }) => {
+      const user = data?.user || null
+      const displayName = String(
+        user?.user_metadata?.full_name
+        || user?.user_metadata?.name
+        || ''
+      ).trim()
+      setCurrentAdminName(displayName)
+      setCurrentAdminEmail(user?.email || '')
+    })
   }, [])
 
   const load = useCallback(async () => {
@@ -3513,13 +3575,52 @@ function AmbassadorApplicationsPanel() {
   // Follow-up: PR box details, tracking + comments.
   const shipVal = (row, field) => (ship[row.id]?.[field] ?? row[field] ?? '')
   const setShipField = (id, field, value) => setShip(prev => ({ ...prev, [id]: { ...prev[id], [field]: value } }))
+  const NOTE_AUTHOR_SWATCHES = [
+    { bg: '#EEF2FF', text: '#3730A3', border: '#C7D2FE' },
+    { bg: '#ECFEFF', text: '#155E75', border: '#A5F3FC' },
+    { bg: '#F0FDF4', text: '#166534', border: '#BBF7D0' },
+    { bg: '#FFF7ED', text: '#9A3412', border: '#FED7AA' },
+    { bg: '#FDF2F8', text: '#9D174D', border: '#FBCFE8' },
+    { bg: '#FEFCE8', text: '#854D0E', border: '#FEF08A' },
+  ]
+  const getAdminDisplayLabel = () => {
+    if (currentAdminName) return currentAdminName
+    const email = String(currentAdminEmail || '').trim()
+    if (!email) return 'Unknown admin'
+    return email.split('@')[0]
+      .replace(/[._-]+/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase())
+  }
+  const parseNoteLine = (line) => {
+    const raw = String(line || '').trim()
+    const match = raw.match(/^\[([^\]]+)\]\s*(?:\[([^\]]+)\]\s*)?(.*)$/)
+    if (!match) return { raw, stamp: null, author: null, text: raw }
+    return {
+      raw,
+      stamp: match[1] || null,
+      author: String(match[2] || '').trim() || null,
+      text: String(match[3] || '').trim(),
+    }
+  }
+  const authorSwatch = (author) => NOTE_AUTHOR_SWATCHES[hashKey(String(author || 'unknown')) % NOTE_AUTHOR_SWATCHES.length]
+  const getAmbassadorType = (row) => extractTaggedValue(row?.admin_comment, 'AMBASSADOR_TYPE')
+  const setAmbassadorType = async (row, type) => {
+    const normalized = String(type || '').trim().toLowerCase()
+    const value = ['standard_ambassador', 'super_ambassador', 'extreme_ambassador'].includes(normalized) ? normalized : ''
+    const nextComment = ensureTaggedValue(row.admin_comment, 'AMBASSADOR_TYPE', value ? value.toUpperCase() : '')
+    setSaving(row.id)
+    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: nextComment }).eq('id', row.id)
+    setSaving(null)
+    if (err) { alert(err.message); return }
+    patchRow(row.id, { admin_comment: nextComment })
+  }
 
   // Internal notes log — appends a timestamped entry to admin_comment and clears the input.
   const addNote = async (row) => {
     const note = (noteDraft[row.id] || '').trim()
     if (!note) return
     const stamp = fmtDate(new Date().toISOString())
-    const entry = `[${stamp}] ${note}`
+    const entry = `[${stamp}] [${getAdminDisplayLabel()}] ${note}`
     const newLog = row.admin_comment ? `${row.admin_comment}\n${entry}` : entry
     setSaving(row.id)
     const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: newLog }).eq('id', row.id)
@@ -3533,8 +3634,10 @@ function AmbassadorApplicationsPanel() {
   // appended into admin_comment; we now keep them out of the editable notes and
   // surface them (plus the new message_log column) in the Messages section.
   const isAmbassadorMsgLine = (line) => String(line).includes('📧')
+  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE):[^\]]+\]$/i.test(String(line).trim())
 
-  const noteLines = (row) => String(row.admin_comment || '').split('\n').filter((l) => l.trim() && !isAmbassadorMsgLine(l))
+  const noteLines = (row) => String(row.admin_comment || '').split('\n').filter((l) => l.trim() && !isAmbassadorMsgLine(l) && !isMetaLine(l))
+  const noteEntries = (row) => noteLines(row).map((line) => parseNoteLine(line))
 
   // Outbound message trail (separate from internal notes). Merges the dedicated
   // message_log column with any legacy 📧 lines still living in admin_comment so
@@ -3545,6 +3648,20 @@ function AmbassadorApplicationsPanel() {
     const seen = new Set()
     return [...historical, ...fromLog].filter((l) => { if (seen.has(l)) return false; seen.add(l); return true })
   }
+  const latestShipmentHistory = (row) => {
+    const lines = messageLines(row).filter((l) => /PR package is on the way/i.test(String(l)))
+    const latest = lines.length ? lines[lines.length - 1] : null
+    if (!latest) return { sentAtIso: null, sentAtLabel: null }
+    const stampMatch = String(latest).match(/^\[([^\]]+)\]/)
+    const sentAtLabel = stampMatch?.[1] || null
+    const sentAtIso = parseDateLabelToIso(sentAtLabel)
+    return { sentAtIso, sentAtLabel }
+  }
+  const hasWelcomeContractSent = (row) => messageLines(row).some((line) => {
+    const text = String(line)
+    return /Welcome email with Ambassador Agreement PDF attached\./i.test(text)
+      || /Welcome to the GEL\.IT\.UP Ambassador Programme/i.test(text)
+  })
 
   // Auto-log an outgoing email to the shared message trail so every admin can
   // see the interaction (who emailed the ambassador, when, and what was said).
@@ -3571,8 +3688,11 @@ function AmbassadorApplicationsPanel() {
   const saveNotes = async (row, lines) => {
     // Preserve any legacy 📧 message lines so editing/deleting a note never drops
     // the historical communication trail from admin_comment.
-    const preservedMsgs = String(row.admin_comment || '').split('\n').filter((l) => l.trim() && isAmbassadorMsgLine(l))
-    const newLog = [...preservedMsgs, ...lines].join('\n') || null
+    const preserved = String(row.admin_comment || '').split('\n').filter((l) => {
+      const trimmed = String(l).trim()
+      return trimmed && (isAmbassadorMsgLine(trimmed) || isMetaLine(trimmed))
+    })
+    const newLog = [...preserved, ...lines].join('\n') || null
     setSaving(row.id)
     const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: newLog }).eq('id', row.id)
     if (err) { setSaving(null); alert(err.message); return }
@@ -3582,9 +3702,18 @@ function AmbassadorApplicationsPanel() {
 
   const editNote = async (row, idx) => {
     const lines = noteLines(row)
-    const edited = window.prompt('Edit note:', lines[idx])
+    const original = parseNoteLine(lines[idx])
+    const edited = window.prompt('Edit note:', original.text || original.raw)
     if (edited === null) return
-    if (!edited.trim()) { lines.splice(idx, 1) } else { lines[idx] = edited.trim() }
+    if (!edited.trim()) {
+      lines.splice(idx, 1)
+    } else if (original.stamp || original.author) {
+      const stamp = original.stamp || fmtDate(new Date().toISOString())
+      const author = original.author ? ` [${original.author}]` : ''
+      lines[idx] = `[${stamp}]${author} ${edited.trim()}`
+    } else {
+      lines[idx] = edited.trim()
+    }
     await saveNotes(row, lines)
   }
 
@@ -3648,11 +3777,15 @@ function AmbassadorApplicationsPanel() {
       const res = await sendAmbassadorEmail({ to: row.email, subject, html, attachments })
       setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Shipment email + About Us letter sent to ${row.email}` : res.error)
       if (res.ok) {
+        const sentAt = new Date().toISOString()
         persistShipmentEmailLock((prev) => ({
           ...prev,
-          [row.id]: { signature: JSON.stringify(currentDraft), sentAt: new Date().toISOString() },
+          [row.id]: { signature: JSON.stringify(currentDraft), sentAt },
         }))
+        setNextPackageMode((prev) => ({ ...prev, [row.id]: false }))
+        setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: false }))
         logAmbassadorSend(updatedRow, { to: row.email, subject, body: htmlToText(html) })
+        openReminderDraft(updatedRow, sentAt, fmtDateTime(sentAt))
       }
     } else {
       setEmail(row.id, 'sent', 'Follow-up details saved')
@@ -3718,7 +3851,22 @@ function AmbassadorApplicationsPanel() {
               ? shipmentLockRaw
               : (typeof shipmentLockRaw === 'string' ? { signature: shipmentLockRaw, sentAt: null } : null)
             const isShipmentLocked = shipmentLock?.signature === shipmentSignature(row)
-            const sentAt = shipmentLock?.sentAt || null
+            const shipmentHistory = latestShipmentHistory(row)
+            const sentAt = shipmentLock?.sentAt || shipmentHistory.sentAtIso || null
+            const sentAtLabel = sentAt ? fmtDateTime(sentAt) : (shipmentHistory.sentAtLabel || null)
+            const shipmentPreviouslySent = Boolean(sentAt || shipmentHistory.sentAtLabel)
+            const contractAlreadySent = hasWelcomeContractSent(row)
+            const ambassadorType = getAmbassadorType(row)
+            const ambassadorTypeLabel = ambassadorType === 'super_ambassador'
+              ? 'Super Ambassador'
+              : ambassadorType === 'extreme_ambassador'
+                ? 'Extreme Ambassador'
+              : ambassadorType === 'standard_ambassador'
+                ? 'Standard Ambassador'
+                : 'Not set'
+            const isNextPackageMode = Boolean(nextPackageMode[row.id])
+            const isShipmentClosed = shipmentPreviouslySent && !isNextPackageMode
+            const isShipmentPanelExpanded = shipmentPanelOpen[row.id] ?? !isShipmentClosed
             const nextReminderAt = sentAt ? addOneMonth(sentAt) : null
             const isReminderDue = Boolean(nextReminderAt && new Date(nextReminderAt).getTime() <= Date.now())
             return (
@@ -3792,10 +3940,14 @@ function AmbassadorApplicationsPanel() {
                             await sendWelcomeContractEmail(row)
                             setSaving(null)
                           }}
-                          disabled={saving === row.id}
-                          className="rounded-lg border border-fuchsia-300 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 transition hover:bg-fuchsia-50 disabled:opacity-60"
+                          disabled={saving === row.id || contractAlreadySent}
+                          className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition disabled:opacity-60 ${
+                            contractAlreadySent
+                              ? 'border-slate-200 bg-slate-100 text-slate-400'
+                              : 'border-fuchsia-300 text-fuchsia-700 hover:bg-fuchsia-50'
+                          }`}
                         >
-                          📄 Send contract
+                          {contractAlreadySent ? '📄 Contract sent' : '📄 Send contract'}
                         </button>
                       )}
                       {!isApproved && (
@@ -3843,17 +3995,31 @@ function AmbassadorApplicationsPanel() {
                     <p className="text-xs font-bold uppercase tracking-wide text-rose-700">Reconsideration notes (private)</p>
                     <p className="mt-0.5 text-[11px] text-slate-500">Internal-only notes for future review. These are never emailed to the ambassador.</p>
                     <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-2">
-                      {noteLines(row).length > 0 && (
+                      {noteEntries(row).length > 0 && (
                         <div className="mb-1.5 max-h-32 space-y-1 overflow-y-auto">
-                          {noteLines(row).map((line, idx) => (
+                          {noteEntries(row).map((entry, idx) => {
+                            const swatch = authorSwatch(entry.author)
+                            return (
                             <div key={idx} className="flex items-start justify-between gap-2 rounded bg-white px-2 py-1 text-[11px] text-slate-600">
-                              <span className="whitespace-pre-line">{line}</span>
+                              <span className="min-w-0 whitespace-pre-line">
+                                <span className="mb-0.5 flex flex-wrap items-center gap-1.5">
+                                  <span className="text-[10px] text-slate-400">{entry.stamp || '—'}</span>
+                                  <span
+                                    className="rounded border px-1.5 py-0.5 text-[10px] font-semibold"
+                                    style={{ backgroundColor: swatch.bg, color: swatch.text, borderColor: swatch.border }}
+                                  >
+                                    {entry.author || 'Unknown admin'}
+                                  </span>
+                                </span>
+                                <span>{entry.text || entry.raw}</span>
+                              </span>
                               <span className="flex shrink-0 gap-1.5">
                                 <button type="button" title="Edit" onClick={() => editNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-slate-700 disabled:opacity-50">✎</button>
                                 <button type="button" title="Delete" onClick={() => deleteNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-rose-600 disabled:opacity-50">🗑</button>
                               </span>
                             </div>
-                          ))}
+                            )
+                          })}
                         </div>
                       )}
                       <div className="flex gap-2">
@@ -3884,7 +4050,61 @@ function AmbassadorApplicationsPanel() {
                   <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50/60 p-3">
                     <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">PR box &amp; follow-up</p>
                     <p className="mt-0.5 text-[11px] text-slate-500">Only the tracking number &amp; URL are emailed to the ambassador. Box contents and comments stay internal.</p>
+                    <div className="mt-2 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Ambassador package type</p>
+                      <p className="mt-0.5 text-[11px] text-slate-500">Selected type: <span className="font-semibold text-slate-700">{ambassadorTypeLabel}</span></p>
+                      <div className="mt-1.5 flex flex-wrap gap-3 text-[11px]">
+                        <label className="inline-flex items-center gap-1.5 text-slate-700">
+                          <input
+                            type="checkbox"
+                            checked={ambassadorType === 'standard_ambassador'}
+                            disabled={saving === row.id}
+                            onChange={() => setAmbassadorType(row, ambassadorType === 'standard_ambassador' ? '' : 'standard_ambassador')}
+                          />
+                          Standard Ambassador
+                        </label>
+                        <label className="inline-flex items-center gap-1.5 text-slate-700">
+                          <input
+                            type="checkbox"
+                            checked={ambassadorType === 'super_ambassador'}
+                            disabled={saving === row.id}
+                            onChange={() => setAmbassadorType(row, ambassadorType === 'super_ambassador' ? '' : 'super_ambassador')}
+                          />
+                          Super Ambassador
+                        </label>
+                        <label className="inline-flex items-center gap-1.5 text-slate-700">
+                          <input
+                            type="checkbox"
+                            checked={ambassadorType === 'extreme_ambassador'}
+                            disabled={saving === row.id}
+                            onChange={() => setAmbassadorType(row, ambassadorType === 'extreme_ambassador' ? '' : 'extreme_ambassador')}
+                          />
+                          Extreme Ambassador
+                        </label>
+                      </div>
+                    </div>
+                    {isShipmentClosed && !isShipmentPanelExpanded && (
+                      <div className="mt-2 rounded-lg border border-emerald-200 bg-white px-2.5 py-2 text-[11px]">
+                        <p className="font-semibold text-emerald-700">✅ Shipment flow closed</p>
+                        <p className="text-slate-600">Last shipment email sent: {sentAtLabel || 'Recorded in history'}</p>
+                        <p className={`${isReminderDue ? 'font-semibold text-amber-700' : 'text-slate-600'}`}>
+                          Next sample kit reminder: {nextReminderAt ? fmtDate(nextReminderAt) : 'Set when shipment date is available'}{isReminderDue ? ' (due now)' : ''}
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <button onClick={() => setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: true }))} className="rounded-lg border border-slate-300 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">Expand details</button>
+                          <button onClick={() => openReminderDraft(row, sentAt, sentAtLabel)} className="rounded-lg border border-sky-300 px-2.5 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-50">Open reminder email draft</button>
+                          <button onClick={() => startNextPackageFlow(row)} className="rounded-lg border border-fuchsia-300 px-2.5 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50">Start next package</button>
+                        </div>
+                      </div>
+                    )}
+                    {isShipmentPanelExpanded && (
                     <div className="mt-2 space-y-2">
+                      {isShipmentClosed && (
+                        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[11px]">
+                          <p className="text-emerald-700">Closed shipment record: {sentAtLabel || 'Recorded in history'}</p>
+                          <button onClick={() => setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: false }))} className="rounded border border-emerald-300 px-2 py-0.5 font-semibold text-emerald-700 hover:bg-emerald-100">Collapse</button>
+                        </div>
+                      )}
                       <textarea
                         value={shipVal(row, 'shipment_details')}
                         onChange={(e) => setShipField(row.id, 'shipment_details', e.target.value)}
@@ -3908,7 +4128,10 @@ function AmbassadorApplicationsPanel() {
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <button onClick={() => saveShipment(row, false)} disabled={saving === row.id} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Save box &amp; tracking</button>
-                        <button onClick={() => saveShipment(row, true)} disabled={saving === row.id || isShipmentLocked} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
+                        <button onClick={() => saveShipment(row, true)} disabled={saving === row.id || (isShipmentClosed && !isNextPackageMode) || isShipmentLocked} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
+                        {isShipmentClosed && !isNextPackageMode && (
+                          <button onClick={() => startNextPackageFlow(row)} className="rounded-lg border border-fuchsia-300 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50">Start next package</button>
+                        )}
                       </div>
                       {isShipmentLocked && (
                         <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-[11px]">
@@ -3940,17 +4163,31 @@ function AmbassadorApplicationsPanel() {
                       {/* Internal notes log (private, not emailed) */}
                       <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50 p-2">
                         <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">Internal notes (private)</p>
-                        {noteLines(row).length > 0 && (
+                        {noteEntries(row).length > 0 && (
                           <div className="mb-1.5 max-h-32 space-y-1 overflow-y-auto">
-                            {noteLines(row).map((line, idx) => (
+                            {noteEntries(row).map((entry, idx) => {
+                              const swatch = authorSwatch(entry.author)
+                              return (
                               <div key={idx} className="flex items-start justify-between gap-2 rounded bg-white px-2 py-1 text-[11px] text-slate-600">
-                                <span className="whitespace-pre-line">{line}</span>
+                                <span className="min-w-0 whitespace-pre-line">
+                                  <span className="mb-0.5 flex flex-wrap items-center gap-1.5">
+                                    <span className="text-[10px] text-slate-400">{entry.stamp || '—'}</span>
+                                    <span
+                                      className="rounded border px-1.5 py-0.5 text-[10px] font-semibold"
+                                      style={{ backgroundColor: swatch.bg, color: swatch.text, borderColor: swatch.border }}
+                                    >
+                                      {entry.author || 'Unknown admin'}
+                                    </span>
+                                  </span>
+                                  <span>{entry.text || entry.raw}</span>
+                                </span>
                                 <span className="flex shrink-0 gap-1.5">
                                   <button type="button" title="Edit" onClick={() => editNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-slate-700 disabled:opacity-50">✎</button>
                                   <button type="button" title="Delete" onClick={() => deleteNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-rose-600 disabled:opacity-50">🗑</button>
                                 </span>
                               </div>
-                            ))}
+                              )
+                            })}
                           </div>
                         )}
                         <div className="flex gap-2">
@@ -3965,6 +4202,7 @@ function AmbassadorApplicationsPanel() {
                         </div>
                       </div>
                     </div>
+                    )}
                   </div>
                 )}
                 </div>
