@@ -11847,8 +11847,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       unmatched,
     }
     const savedDraft = readOrderEditDraft(handoff.orderId)
-    const canRestoreDraft = savedDraft?.editingOrder?.handoffSavedAt
-      && savedDraft.editingOrder.handoffSavedAt === resolvedEditingOrder.handoffSavedAt
+    const canRestoreDraft = savedDraft?.editingOrder?.id === resolvedEditingOrder.id
     setSelectedCodes(canRestoreDraft && Array.isArray(savedDraft.selectedCodes) ? savedDraft.selectedCodes : codes)
     setItemQtys(canRestoreDraft && savedDraft.itemQtys && typeof savedDraft.itemQtys === 'object' ? savedDraft.itemQtys : qtys)
     setPackageCartItems(canRestoreDraft && Array.isArray(savedDraft.packageCartItems) ? savedDraft.packageCartItems : [])
@@ -11876,7 +11875,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       if (handoff.registrationId) {
         const { data } = await supabase
           .from(registrationsTable)
-          .select('customer_type, company_name, contact_name, contact_email, customer_email, phone, contact_phone, vat_number, vies_vat, shipping_type, address, city, region, country, postal_code, invoice_address_line1, invoice_address_line2, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_address_line2, shipping_area, shipping_region, shipping_country, shipping_postal_code')
+          .select('customer_type, company_name, contact_name, contact_email, phone, contact_phone, vat_number, vies_vat, shipping_type, address, city, region, country, postal_code, invoice_address_line1, invoice_address_line2, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_address_line2, shipping_area, shipping_region, shipping_country, shipping_postal_code')
           .eq('id', handoff.registrationId)
           .maybeSingle()
         reg = data || null
@@ -11885,19 +11884,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       if (!reg && handoff.customerEmail) {
         const { data } = await supabase
           .from(registrationsTable)
-          .select('customer_type, company_name, contact_name, contact_email, customer_email, phone, contact_phone, vat_number, vies_vat, shipping_type, address, city, region, country, postal_code, invoice_address_line1, invoice_address_line2, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_address_line2, shipping_area, shipping_region, shipping_country, shipping_postal_code')
+          .select('customer_type, company_name, contact_name, contact_email, phone, contact_phone, vat_number, vies_vat, shipping_type, address, city, region, country, postal_code, invoice_address_line1, invoice_address_line2, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_address_line2, shipping_area, shipping_region, shipping_country, shipping_postal_code')
           .ilike('contact_email', handoff.customerEmail)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle()
-        reg = data || null
-      }
-
-      if (!reg && handoff.customerEmail) {
-        const { data } = await supabase
-          .from(registrationsTable)
-          .select('customer_type, company_name, contact_name, contact_email, customer_email, phone, contact_phone, vat_number, vies_vat, shipping_type, address, city, region, country, postal_code, invoice_address_line1, invoice_address_line2, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_address_line2, shipping_area, shipping_region, shipping_country, shipping_postal_code')
-          .ilike('customer_email', handoff.customerEmail)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle()
@@ -16984,7 +16972,6 @@ function OrdersModule() {
                         <button
                           onClick={() => {
                             try {
-                              localStorage.removeItem(getOrderEditDraftKey(order.id))
                               localStorage.setItem(ORDER_EDIT_HANDOFF_KEY, JSON.stringify({
                                 orderId: order.id,
                                 customerEmail: order.customer_email || '',

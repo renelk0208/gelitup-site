@@ -289,46 +289,31 @@ function RegistrationsPanel({ onPreviewDistributor }) {
     const registrationById = new Map()
     const registrationByEmail = new Map()
 
+    // NOTE: b2b_registrations has NO customer_email column — selecting or filtering
+    // on it makes the entire PostgREST query fail, so only contact_email is used here.
     if (registrationIds.length > 0) {
       const { data: regsById } = await supabase
         .from(REGISTRATIONS_TABLE)
-        .select('id, contact_email, customer_email, distributor_tier, prices_allocated')
+        .select('id, contact_email, distributor_tier, prices_allocated')
         .in('id', registrationIds)
       ;(regsById || []).forEach((reg) => {
         const idKey = String(reg?.id || '').trim()
         if (idKey) registrationById.set(idKey, reg)
         const contactEmailKey = String(reg?.contact_email || '').trim().toLowerCase()
         if (contactEmailKey) registrationByEmail.set(contactEmailKey, reg)
-        const customerEmailKey = String(reg?.customer_email || '').trim().toLowerCase()
-        if (customerEmailKey) registrationByEmail.set(customerEmailKey, reg)
       })
     }
 
     if (customerEmails.length > 0) {
       const { data: regsByContactEmail } = await supabase
         .from(REGISTRATIONS_TABLE)
-        .select('id, contact_email, customer_email, distributor_tier, prices_allocated')
+        .select('id, contact_email, distributor_tier, prices_allocated')
         .in('contact_email', customerEmails)
       ;(regsByContactEmail || []).forEach((reg) => {
         const idKey = String(reg?.id || '').trim()
         if (idKey && !registrationById.has(idKey)) registrationById.set(idKey, reg)
         const contactEmailKey = String(reg?.contact_email || '').trim().toLowerCase()
         if (contactEmailKey) registrationByEmail.set(contactEmailKey, reg)
-        const customerEmailKey = String(reg?.customer_email || '').trim().toLowerCase()
-        if (customerEmailKey) registrationByEmail.set(customerEmailKey, reg)
-      })
-
-      const { data: regsByCustomerEmail } = await supabase
-        .from(REGISTRATIONS_TABLE)
-        .select('id, contact_email, customer_email, distributor_tier, prices_allocated')
-        .in('customer_email', customerEmails)
-      ;(regsByCustomerEmail || []).forEach((reg) => {
-        const idKey = String(reg?.id || '').trim()
-        if (idKey && !registrationById.has(idKey)) registrationById.set(idKey, reg)
-        const contactEmailKey = String(reg?.contact_email || '').trim().toLowerCase()
-        if (contactEmailKey) registrationByEmail.set(contactEmailKey, reg)
-        const customerEmailKey = String(reg?.customer_email || '').trim().toLowerCase()
-        if (customerEmailKey) registrationByEmail.set(customerEmailKey, reg)
       })
     }
 
@@ -1628,19 +1613,17 @@ function OrdersPanel() {
       return { ok: false, message: 'No linked registration or customer email is available to sync the tier.' }
     }
 
-    const attempts = [
-      supabase.from(REGISTRATIONS_TABLE).update(syncPatch).eq('contact_email', trimmedEmail).select('id'),
-      supabase.from(REGISTRATIONS_TABLE).update(syncPatch).eq('customer_email', trimmedEmail).select('id'),
-    ]
-
-    for (const attempt of attempts) {
-      const { data, error } = await attempt
-      if (error) {
-        return { ok: false, message: error.message }
-      }
-      if (Array.isArray(data) && data.length > 0) {
-        return { ok: true }
-      }
+    // b2b_registrations has no customer_email column — match on contact_email only.
+    const { data, error } = await supabase
+      .from(REGISTRATIONS_TABLE)
+      .update(syncPatch)
+      .ilike('contact_email', trimmedEmail)
+      .select('id')
+    if (error) {
+      return { ok: false, message: error.message }
+    }
+    if (Array.isArray(data) && data.length > 0) {
+      return { ok: true }
     }
 
     return { ok: false, message: `No matching distributor registration was found for ${trimmedEmail}.` }
