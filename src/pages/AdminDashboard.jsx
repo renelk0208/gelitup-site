@@ -1360,12 +1360,14 @@ function OrdersPanel() {
   const [saving, setSaving] = useState(null)
   const [trackingDraft, setTrackingDraft] = useState({})
   const [priceLookupMap, setPriceLookupMap] = useState(new Map())
+  const [priceCatalog, setPriceCatalog] = useState([]) // raw price-list items for product search
   const [isPriceLookupLoaded, setIsPriceLookupLoaded] = useState(false)
   const [emailingOrderId, setEmailingOrderId] = useState(null)
   const [emailingAllOrders, setEmailingAllOrders] = useState(false)
   // editing state
   const [editing, setEditing] = useState(null) // order id being edited
   const [editDraft, setEditDraft] = useState({})
+  const [itemSearch, setItemSearch] = useState('') // product search inside the order editor
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -1397,10 +1399,12 @@ function OrdersPanel() {
         const items = Array.isArray(payload?.items) ? payload.items : []
         if (!mounted) return
         setPriceLookupMap(buildOrderPriceLookupMap(items))
+        setPriceCatalog(items)
       }
       catch {
         if (!mounted) return
         setPriceLookupMap(new Map())
+        setPriceCatalog([])
       }
       finally {
         if (mounted) setIsPriceLookupLoaded(true)
@@ -1711,6 +1715,7 @@ function OrdersPanel() {
 
   const startEdit = (row) => {
     setEditing(row.id)
+    setItemSearch('')
     setEditDraft({
       customer_email: row.customer_email || '',
       consignee_name: row.consignee_name || '',
@@ -2157,11 +2162,55 @@ function OrdersPanel() {
                             </li>
                           ))}
                         </ul>
+                        {/* Product search — pick items straight from the price list */}
+                        <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-2">
+                          <p className="mb-1 text-[11px] font-semibold text-slate-500">Add product from price list</p>
+                          <input
+                            type="text"
+                            value={itemSearch}
+                            onChange={e => setItemSearch(e.target.value)}
+                            placeholder="Search by name or SKU…"
+                            className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-200"
+                          />
+                          {itemSearch.trim().length >= 2 && (() => {
+                            const terms = itemSearch.trim().toLowerCase().split(/\s+/)
+                            const matches = priceCatalog
+                              .filter(p => {
+                                const hay = `${p.name || ''} ${p.sku || ''}`.toLowerCase()
+                                return terms.every(t => hay.includes(t))
+                              })
+                              .slice(0, 12)
+                            if (!matches.length) return <p className="mt-1 px-1 text-[11px] text-slate-400">No products match “{itemSearch.trim()}”.</p>
+                            return (
+                              <ul className="mt-1 max-h-48 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200 bg-white">
+                                {matches.map((p, idx) => (
+                                  <li key={`${p.sku || p.name}-${idx}`}>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setEditDraft(d => ({ ...d, items: [...d.items, { text: p.name || p.sku || '', sku: p.sku || '', qty: 1 }] }))
+                                        setItemSearch('')
+                                      }}
+                                      className="flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-xs hover:bg-amber-50"
+                                    >
+                                      <span className="min-w-0 flex-1 truncate text-slate-700">{p.name || p.sku}</span>
+                                      <span className="shrink-0 font-mono text-[10px] text-slate-400">{p.sku}</span>
+                                      {Number.isFinite(Number(p.price)) && (
+                                        <span className="shrink-0 text-[11px] font-semibold text-slate-500">€{Number(p.price).toFixed(2)}</span>
+                                      )}
+                                      <span className="shrink-0 text-emerald-600">＋</span>
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            )
+                          })()}
+                        </div>
                         <button
                           type="button"
                           onClick={() => setEditDraft(d => ({ ...d, items: [...d.items, { text: '', sku: '', qty: 1 }] }))}
                           className="mt-2 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs text-slate-500 hover:bg-slate-50"
-                        >+ Add Item</button>
+                        >+ Add blank item</button>
                       </div>
 
                       <div className="flex flex-wrap gap-2 pt-2">
