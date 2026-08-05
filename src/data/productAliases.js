@@ -32,6 +32,8 @@ export const PRODUCT_ALIAS_GROUPS = [
   { codes: ['ALL IN ONE LIQUID 500ML', 'ALL IN ONE LIQUID 500 ML', 'ALL-IN-ONE-LIQUID-500ML'], target: 'All In One Liquid 500 ml -HTF' },
   { codes: ['MIRROR TOP COAT', 'MIRROR POWDER TOP COAT'], target: 'Mirror Powder Top Coat -HTF' },
   { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
+  // Nail Clips Dual Form — catalogue slugs (incl. the "nial" typo used on stored orders)
+  { codes: ['NAIL-CLIPS-DUAL-FORMS-PACK-OF-5', 'NIAL-CLIPS-DUAL-FORMS-PACK-OF-5', 'NAIL CLIPS DUAL FORMS PACK OF 5', 'NIAL CLIPS DUAL FORMS PACK OF 5', 'NAIL CLIPS DUAL FORM PACK OF 5'], target: 'Nail Clips Dual Form Pack of 5 -HTF' },
   { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
   { codes: ['GIUPSB', 'GIUP SB', 'GIUP-SB'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
   { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
