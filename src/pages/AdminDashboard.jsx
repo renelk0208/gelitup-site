@@ -19,6 +19,7 @@ const AMBASSADOR_FROM_EMAIL = import.meta.env.VITE_AMBASSADOR_EMAIL_FROM || 'GEL
 // Statuses that count as "needs review" (form inserts default to 'new').
 const AMBASSADOR_PENDING_STATUSES = ['new', 'pending', 'submitted']
 const AMBASSADOR_LETTER_ATTACHMENT_URL = ambassadorLetterAttachmentUrl
+const SHIPMENT_EMAIL_LOCK_STORAGE_KEY = 'gelitup.admin.shipmentEmailLock.v1'
 const ADMIN_TAB_STORAGE_KEY = 'gelitup.admin.activeTab.v1'
 const ADMIN_TAB_KEYS = new Set(['registrations', 'orders', 'admins', 'pricing', 'ambassadors', 'guestbook', 'draft-carts'])
 
@@ -65,6 +66,25 @@ function statusBadge(status) {
 function fmtDate(iso) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+function fmtDateTime(iso) {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString(undefined, {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function addOneMonth(iso) {
+  const source = new Date(iso)
+  if (Number.isNaN(source.getTime())) return null
+  const next = new Date(source)
+  next.setMonth(next.getMonth() + 1)
+  return next.toISOString()
 }
 
 function triggerFileDownload(blob, filename) {
@@ -3281,6 +3301,14 @@ function AmbassadorApplicationsPanel() {
   const [noteDraft, setNoteDraft] = useState({}) // { [id]: 'new internal note being typed' }
   const [currentAdminEmail, setCurrentAdminEmail] = useState('')
   const [openIds, setOpenIds] = useState(() => new Set()) // which applicant cards are expanded
+  const [shipmentEmailLock, setShipmentEmailLock] = useState(() => {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(SHIPMENT_EMAIL_LOCK_STORAGE_KEY) || '{}')
+      return parsed && typeof parsed === 'object' ? parsed : {}
+    } catch (_) {
+      return {}
+    }
+  })
 
   const toggleOpen = (id) => setOpenIds((prev) => {
     const next = new Set(prev)
@@ -3380,6 +3408,24 @@ function AmbassadorApplicationsPanel() {
 
   const patchRow = (id, patch) => setRows(prev => prev.map(r => r.id === id ? { ...r, ...patch } : r))
   const setEmail = (id, state, message) => setEmailStatus(prev => ({ ...prev, [id]: { state, message } }))
+  const normalizeAmbassadorStatus = (status) => String(status || '').trim().toLowerCase()
+  const getShipmentDraft = (row) => ({
+    shipment_details: shipVal(row, 'shipment_details').trim() || '',
+    tracking_number: shipVal(row, 'tracking_number').trim() || '',
+    tracking_url: shipVal(row, 'tracking_url').trim() || '',
+  })
+  const shipmentSignature = (row) => JSON.stringify(getShipmentDraft(row))
+  const persistShipmentEmailLock = (updater) => {
+    setShipmentEmailLock((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      try {
+        localStorage.setItem(SHIPMENT_EMAIL_LOCK_STORAGE_KEY, JSON.stringify(next))
+      } catch (_) {
+        // Ignore localStorage errors; UI lock still works for this session.
+      }
+      return next
+    })
+  }
 
   // Sends the welcome email with the Ambassador Agreement PDF attached.
   // Used automatically on approval and manually via the "Send contract" button.
@@ -3554,10 +3600,11 @@ function AmbassadorApplicationsPanel() {
   }
 
   const saveShipment = async (row, alsoEmail) => {
+    const currentDraft = getShipmentDraft(row)
     const draft = {
-      shipment_details: shipVal(row, 'shipment_details').trim() || null,
-      tracking_number: shipVal(row, 'tracking_number').trim() || null,
-      tracking_url: shipVal(row, 'tracking_url').trim() || null,
+      shipment_details: currentDraft.shipment_details || null,
+      tracking_number: currentDraft.tracking_number || null,
+      tracking_url: currentDraft.tracking_url || null,
     }
     setSaving(row.id)
     const { error: err } = await supabase.from(AMBASSADOR_TABLE).update(draft).eq('id', row.id)
@@ -3604,7 +3651,13 @@ function AmbassadorApplicationsPanel() {
       }
       const res = await sendAmbassadorEmail({ to: row.email, subject, html, attachments })
       setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Shipment email + About Us letter sent to ${row.email}` : res.error)
-      if (res.ok) logAmbassadorSend(updatedRow, { to: row.email, subject, body: htmlToText(html) })
+      if (res.ok) {
+        persistShipmentEmailLock((prev) => ({
+          ...prev,
+          [row.id]: { signature: JSON.stringify(currentDraft), sentAt: new Date().toISOString() },
+        }))
+        logAmbassadorSend(updatedRow, { to: row.email, subject, body: htmlToText(html) })
+      }
     } else {
       setEmail(row.id, 'sent', 'Follow-up details saved')
     }
@@ -3661,6 +3714,17 @@ function AmbassadorApplicationsPanel() {
           {rows.map((row) => {
             const es = emailStatus[row.id]
             const isOpen = openIds.has(row.id)
+            const normalizedStatus = normalizeAmbassadorStatus(row.status)
+            const isApproved = normalizedStatus === 'approved'
+            const isRejected = normalizedStatus === 'rejected'
+            const shipmentLockRaw = shipmentEmailLock[row.id]
+            const shipmentLock = (shipmentLockRaw && typeof shipmentLockRaw === 'object')
+              ? shipmentLockRaw
+              : (typeof shipmentLockRaw === 'string' ? { signature: shipmentLockRaw, sentAt: null } : null)
+            const isShipmentLocked = shipmentLock?.signature === shipmentSignature(row)
+            const sentAt = shipmentLock?.sentAt || null
+            const nextReminderAt = sentAt ? addOneMonth(sentAt) : null
+            const isReminderDue = Boolean(nextReminderAt && new Date(nextReminderAt).getTime() <= Date.now())
             return (
               <div key={row.id} className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
                 {/* Collapsible header — click anywhere to open/close */}
@@ -3724,7 +3788,7 @@ function AmbassadorApplicationsPanel() {
                       >
                         ✉ Message
                       </button>
-                      {row.status === 'approved' && (
+                      {isApproved && (
                         <button
                           onClick={async () => {
                             if (!window.confirm(`Send the welcome email with the Ambassador Agreement PDF to ${row.full_name} (${row.email})?`)) return
@@ -3738,7 +3802,7 @@ function AmbassadorApplicationsPanel() {
                           📄 Send contract
                         </button>
                       )}
-                      {row.status !== 'approved' && (
+                      {!isApproved && (
                         <button
                           onClick={() => approveRow(row)}
                           disabled={saving === row.id}
@@ -3747,7 +3811,7 @@ function AmbassadorApplicationsPanel() {
                           ✓ Approve
                         </button>
                       )}
-                      {row.status !== 'rejected' && (
+                      {!isRejected && (
                         <button
                           onClick={() => openDecline(row)}
                           disabled={saving === row.id}
@@ -3756,7 +3820,7 @@ function AmbassadorApplicationsPanel() {
                           ✕ Decline
                         </button>
                       )}
-                      {row.status === 'rejected' && (
+                      {isRejected && (
                         <button
                           onClick={() => deleteApplication(row)}
                           disabled={saving === row.id}
@@ -3820,7 +3884,7 @@ function AmbassadorApplicationsPanel() {
                     </div>
                   </div>
                 )}
-                {row.status === 'approved' && (
+                {isApproved && (
                   <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50/60 p-3">
                     <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">PR box &amp; follow-up</p>
                     <p className="mt-0.5 text-[11px] text-slate-500">Only the tracking number &amp; URL are emailed to the ambassador. Box contents and comments stay internal.</p>
@@ -3848,8 +3912,17 @@ function AmbassadorApplicationsPanel() {
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <button onClick={() => saveShipment(row, false)} disabled={saving === row.id} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Save box &amp; tracking</button>
-                        <button onClick={() => saveShipment(row, true)} disabled={saving === row.id} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
+                        <button onClick={() => saveShipment(row, true)} disabled={saving === row.id || isShipmentLocked} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
                       </div>
+                      {isShipmentLocked && (
+                        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-[11px]">
+                          <p className="font-semibold text-emerald-700">✅ Email sent on {fmtDateTime(sentAt)}.</p>
+                          <p className={`${isReminderDue ? 'text-amber-700 font-semibold' : 'text-slate-600'}`}>
+                            Next package reminder: {fmtDate(nextReminderAt)}{isReminderDue ? ' (due now)' : ''}
+                          </p>
+                          <p className="text-slate-500">To send the next package, update shipment details or tracking and the send button will enable again.</p>
+                        </div>
+                      )}
                       {(() => {
                         const previewDraft = {
                           tracking_number: shipVal(row, 'tracking_number'),
@@ -3858,7 +3931,10 @@ function AmbassadorApplicationsPanel() {
                         const preview = buildAmbassadorShipmentEmail(row, previewDraft)
                         return (
                           <div className="rounded-lg border border-sky-200 bg-white p-2.5">
-                            <p className="text-[10px] font-bold uppercase tracking-wide text-sky-700">Shipment email preview</p>
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-sky-700">{isShipmentLocked ? 'Shipment email status' : 'Shipment email preview'}</p>
+                            {isShipmentLocked && (
+                              <p className="mt-1 text-[11px] font-semibold text-emerald-700">Email sent ✓</p>
+                            )}
                             <p className="mt-1 text-[11px] text-slate-600"><strong>Subject:</strong> {preview.subject}</p>
                             <div className="mt-1 rounded border border-slate-200 bg-slate-50 p-2 text-[11px] text-slate-700" dangerouslySetInnerHTML={{ __html: preview.html }} />
                           </div>
