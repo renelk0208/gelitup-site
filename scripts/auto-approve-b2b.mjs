@@ -27,8 +27,8 @@ const SMTP_PASS        = process.env.NOTIFY_SMTP_PASSWORD || ''
 const ADMIN_DASHBOARD  = 'https://gelitup.com/portal/admin-login'
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
-  console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
-  process.exit(1)
+  console.warn('Supabase not configured — skipping B2B notification run.')
+  process.exit(0)
 }
 
 // ─── 1. Find NEW registrations (created in the last 16 minutes) ──────────────

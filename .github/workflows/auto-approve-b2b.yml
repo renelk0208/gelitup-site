@@ -39,7 +39,7 @@ jobs:
         run: node scripts/auto-approve-b2b.mjs
 
       - name: Alert on failure
-        if: failure()
+        if: failure() && secrets.NOTIFY_ADMIN_EMAIL != '' && secrets.NOTIFY_SMTP_SERVER != '' && secrets.NOTIFY_SMTP_PORT != '' && secrets.NOTIFY_SMTP_USERNAME != '' && secrets.NOTIFY_SMTP_PASSWORD != ''
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.NOTIFY_SMTP_SERVER }}
