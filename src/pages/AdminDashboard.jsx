@@ -1480,6 +1480,44 @@ function OrdersPanel() {
     return true
   }
 
+  const syncDistributorTierByEmail = async (email, tier) => {
+    const trimmedEmail = String(email || '').trim().toLowerCase()
+    const trimmedTier = String(tier || '').trim()
+
+    if (!trimmedEmail) {
+      return { ok: false, message: 'No customer email is available to sync the tier.' }
+    }
+
+    if (!trimmedTier) {
+      return { ok: true, skipped: true }
+    }
+
+    const syncPatch = {
+      distributor_tier: trimmedTier,
+      application_type: 'distributor',
+      status: 'approved',
+      prices_allocated: true,
+      reviewed_at: new Date().toISOString(),
+    }
+
+    const attempts = [
+      supabase.from(REGISTRATIONS_TABLE).update(syncPatch).eq('contact_email', trimmedEmail).select('id'),
+      supabase.from(REGISTRATIONS_TABLE).update(syncPatch).eq('customer_email', trimmedEmail).select('id'),
+    ]
+
+    for (const attempt of attempts) {
+      const { data, error } = await attempt
+      if (error) {
+        return { ok: false, message: error.message }
+      }
+      if (Array.isArray(data) && data.length > 0) {
+        return { ok: true }
+      }
+    }
+
+    return { ok: false, message: `No matching distributor registration was found for ${trimmedEmail}.` }
+  }
+
   const deleteOrder = async (id) => {
     if (!window.confirm('Permanently delete this order? This cannot be undone.')) return
     setSaving(id)
@@ -1835,6 +1873,10 @@ function OrdersPanel() {
     }
     const ok = await updateOrder(id, nextRow)
     if (ok) {
+      const tierSync = await syncDistributorTierByEmail(nextRow.customer_email, nextRow.distributor_tier)
+      if (!tierSync.ok && !tierSync.skipped) {
+        alert(`Order saved, but the linked client tier could not be updated: ${tierSync.message}`)
+      }
       setEditing(null)
       // Only email when this save is what newly moved the order into "tracking_placed" —
       // avoids re-sending the tracking email on every subsequent unrelated edit.
@@ -2166,6 +2208,7 @@ function OrdersPanel() {
                             <option value="country">Level 2 Country</option>
                             <option value="authority">Authority</option>
                           </select>
+                          <p className="mt-1 text-[10px] text-slate-500">This also updates the linked distributor registration tier when a matching email is found.</p>
                         </div>
                         <div className="sm:col-span-2">
                           <label className="mb-1 block text-xs font-medium text-slate-600">Shipping Address</label>

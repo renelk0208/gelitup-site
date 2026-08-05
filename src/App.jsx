@@ -11721,6 +11721,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   // Apply admin order-edit handoff: preload the cart with an existing order's items
   useEffect(() => {
     if (appliedOrderEditRef.current) return
+    if (location.pathname !== '/portal/dashboard/products' && location.pathname !== '/portal/products') return
     if (!products.length) return
     const handoff = readOrderEditHandoff()
     if (!handoff) return
@@ -11783,7 +11784,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       email: handoff.customerEmail || '',
       unmatched,
     })
-  }, [products]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [products, location.pathname]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const cancelOrderEdit = () => {
     try { localStorage.removeItem(ORDER_EDIT_HANDOFF_KEY) } catch { /* ignore */ }
@@ -16786,12 +16787,23 @@ function OrdersModule() {
                       {itemLines.length > 0 && (
                         <button
                           onClick={() => {
-                            const encoded = itemLines.map(i => encodeURIComponent(i)).join(',')
-                            navigate(`/portal/dashboard/products?reorder=${encoded}`)
+                            try {
+                              localStorage.setItem(ORDER_EDIT_HANDOFF_KEY, JSON.stringify({
+                                orderId: order.id,
+                                customerEmail: order.customer_email || '',
+                                items: Array.isArray(order.items) ? order.items : [],
+                                savedAt: Date.now(),
+                              }))
+                            }
+                            catch {
+                              window.alert('Could not reopen this order for editing because browser storage is unavailable.')
+                              return
+                            }
+                            navigate('/portal/dashboard/products')
                           }}
                           className="rounded-md border border-fuchsia-300 bg-fuchsia-50 px-2 py-1 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100"
                         >
-                          Re-Order
+                          Edit Order
                         </button>
                       )}
                       <button
