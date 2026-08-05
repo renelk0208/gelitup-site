@@ -1368,15 +1368,30 @@ function buildProformaFromCart({
   products,
   priceMap,
   tierPriceMultiplier = 1.0,
+  authorityOverrides = null,
+  tier = null,
 }) {
   const productMap = new Map(products.map((product) => [normalizeSkuCode(product.code), product]))
+  // Returns the effective multiplier for a given product name/code, respecting authority overrides.
+  const resolveItemMultiplier = (name, code) => {
+    if (tier !== 'authority' || !authorityOverrides?.rules?.length) return tierPriceMultiplier
+    const n = String(name || '').toLowerCase()
+    const s = String(code || '').toLowerCase()
+    for (const rule of authorityOverrides.rules) {
+      if (rule.patterns?.some(p => n.includes(String(p).toLowerCase()) || s.includes(String(p).toLowerCase()))) {
+        return rule.multiplier
+      }
+    }
+    return tierPriceMultiplier
+  }
 
   const selectedLines = selectedCodes.map((code) => {
     const normalized = normalizeSkuCode(code)
     const product = productMap.get(normalized)
     const basePriceEur = product?.price ?? proformaLookupPrice(priceMap, code, product?.name) ?? null
+    const mult = resolveItemMultiplier(product?.name, code)
     const unitPriceEur = basePriceEur != null
-      ? Number((basePriceEur * tierPriceMultiplier).toFixed(2))
+      ? Number((basePriceEur * mult).toFixed(2))
       : null
     const qty = Number(itemQtys?.[code] || itemQtys?.[normalized] || 1)
 
@@ -1393,8 +1408,9 @@ function buildProformaFromCart({
   const packageLines = packageCartItems.map((item) => {
     const product = productMap.get(normalizeSkuCode(item.sku))
     const basePriceEur = product?.price ?? item.price ?? proformaLookupPrice(priceMap, item.sku, item.name) ?? null
+    const mult = resolveItemMultiplier(item.name || product?.name, item.sku)
     const unitPriceEur = basePriceEur != null
-      ? Number((basePriceEur * tierPriceMultiplier).toFixed(2))
+      ? Number((basePriceEur * mult).toFixed(2))
       : null
     const qty = Number(item.qty || 0)
     return {
@@ -11619,6 +11635,19 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   // Level 2 Country Tier: Authority price + 20% (0.22 × 1.20 = 0.264).
   // Sales Representative: B2B price - 15% (pay 85%).
   const tierPriceMultiplier = tier === 'authority' ? 0.22 : tier === 'professional' ? 0.37 : tier === 'country' ? 0.264 : tier === 'sales' ? 0.85 : 1.0
+  // Returns per-item effective multiplier for authority clients: checks authority-price-overrides.json rules.
+  // All new orders (placed now) are "after" the effective_from date, so overrides always apply for authority.
+  const getEffectiveProductMultiplier = useCallback((productName, productCode) => {
+    if (tier !== 'authority' || !authorityOverrides?.rules?.length) return tierPriceMultiplier
+    const n = String(productName || '').toLowerCase()
+    const s = String(productCode || '').toLowerCase()
+    for (const rule of authorityOverrides.rules) {
+      if (rule.patterns?.some(p => n.includes(String(p).toLowerCase()) || s.includes(String(p).toLowerCase()))) {
+        return rule.multiplier
+      }
+    }
+    return tierPriceMultiplier
+  }, [tier, tierPriceMultiplier, authorityOverrides])
   const location = useLocation()
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
@@ -11693,6 +11722,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [priceMap, setPriceMap] = useState(() => new Map())
   // priceWordIndex: [{words: Set<string>, entry}] for fuzzy word-overlap fallback
   const [priceWordIndex, setPriceWordIndex] = useState([])
+  const [authorityOverrides, setAuthorityOverrides] = useState(null)
   const [shippingMetadata, setShippingMetadata] = useState(SHIPPING_RULES)
   const [shippingMetadataStatus, setShippingMetadataStatus] = useState('Using embedded shipping metadata rules.')
   const isDistributorRole = useMemo(() => String(b2bUserRole || '').trim().toLowerCase().includes('distributor'), [b2bUserRole])
@@ -12768,6 +12798,14 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         if (!res.ok) return
         const payload = await res.json()
         const items = Array.isArray(payload?.items) ? payload.items : []
+        // Also load authority per-item price overrides (non-fatal if missing)
+        try {
+          const ovRes = await fetch('/gelitup-content/authority-price-overrides.json')
+          if (ovRes.ok) {
+            const ovPayload = await ovRes.json()
+            if (mounted) setAuthorityOverrides(ovPayload || null)
+          }
+        } catch { /* overrides are optional */ }
         const map = new Map()
         const wordIndex = []
         const stripSuffix = (s) => String(s || '').replace(/\s*[-—]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '').trim()
@@ -13825,10 +13863,10 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   }, [selectedProducts])
 
   const orderTotal = useMemo(() => {
-    const itemsTotal = selectedProducts.reduce((s, p) => s + (p.price != null ? Number(p.price) * tierPriceMultiplier * (itemQtys[p.code] || 1) : 0), 0)
-    const pkgTotal = packageCartItems.reduce((s, item) => s + (item.price != null ? Number(item.price) * tierPriceMultiplier * item.qty : 0), 0)
+    const itemsTotal = selectedProducts.reduce((s, p) => s + (p.price != null ? Number(p.price) * getEffectiveProductMultiplier(p.name, p.code) * (itemQtys[p.code] || 1) : 0), 0)
+    const pkgTotal = packageCartItems.reduce((s, item) => s + (item.price != null ? Number(item.price) * getEffectiveProductMultiplier(item.name, item.sku) * item.qty : 0), 0)
     return itemsTotal + pkgTotal
-  }, [selectedProducts, packageCartItems, itemQtys, tierPriceMultiplier])
+  }, [selectedProducts, packageCartItems, itemQtys, getEffectiveProductMultiplier])
 
   const toggleSelection = (code) => {
     setSelectedCodes((current) =>
@@ -14567,6 +14605,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       products,
       priceMap,
       tierPriceMultiplier,
+      authorityOverrides,
+      tier,
     })
 
     let { data: insertedOrder, error } = await supabase
@@ -15538,7 +15578,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <div className="p-5">
               <p className="text-sm font-semibold text-slate-900 leading-snug">{upsellModal.product?.name}</p>
               {upsellModal.product?.price != null && pricesAllocated && (
-                <p className="mt-1 text-sm font-bold text-fuchsia-700">€{(Number(upsellModal.product.price) * tierPriceMultiplier).toFixed(2)}</p>
+                <p className="mt-1 text-sm font-bold text-fuchsia-700">€{(Number(upsellModal.product.price) * getEffectiveProductMultiplier(upsellModal.product.name, upsellModal.product.code)).toFixed(2)}</p>
               )}
               <div className="mt-4 flex gap-2">
                 <button
@@ -15713,7 +15753,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <div className="mt-2 divide-y divide-slate-100">
               {selectedProducts.map(product => {
                 const qty = itemQtys[product.code] || 1
-                const lineTotal = product.price != null ? Number(product.price) * tierPriceMultiplier * qty : null
+                const lineTotal = product.price != null ? Number(product.price) * getEffectiveProductMultiplier(product.name, product.code) * qty : null
                 return (
                   <div key={product.code} className="flex items-center gap-2 py-2">
                     <div
@@ -16412,7 +16452,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                             <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{cleanProductName(product.name)}</p>
                             {product.price != null && (
                             pricesAllocated
-                              ? <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{(Number(product.price) * tierPriceMultiplier).toFixed(2)}</p>
+                              ? <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{(Number(product.price) * getEffectiveProductMultiplier(product.name, product.code)).toFixed(2)}</p>
                               : <p className="text-[10px] text-slate-400">POA</p>
                           )}
                           </div>

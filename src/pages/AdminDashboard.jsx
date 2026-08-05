@@ -1283,6 +1283,30 @@ function getTierMultiplier(tier) {
   return ADMIN_TIER_PRICE_MULTIPLIERS[normalized] ?? 1.0
 }
 
+// Returns the authority per-item override multiplier if a rule matches name/sku, else null.
+function getAuthorityItemMultiplier(name, sku, rules) {
+  if (!rules?.length) return null
+  const n = String(name || '').toLowerCase()
+  const s = String(sku || '').toLowerCase()
+  for (const rule of rules) {
+    if (rule.patterns?.some(p => n.includes(String(p).toLowerCase()) || s.includes(String(p).toLowerCase()))) {
+      return rule.multiplier
+    }
+  }
+  return null
+}
+
+// Returns the effective per-item multiplier for a given order row and item.
+// For authority orders created on or after effective_from, per-item overrides apply.
+// All other tiers and older orders use the flat tier multiplier.
+function getEffectiveItemMultiplier(tier, orderCreatedAt, itemName, itemSku, authorityOverrides) {
+  const base = getTierMultiplier(tier)
+  if (tier !== 'authority' || !authorityOverrides?.rules?.length) return base
+  const effectiveFrom = authorityOverrides?.effective_from
+  if (effectiveFrom && orderCreatedAt && new Date(orderCreatedAt) < new Date(effectiveFrom)) return base
+  return getAuthorityItemMultiplier(itemName, itemSku, authorityOverrides.rules) ?? base
+}
+
 // Delegates to resolveOrderItemPriceEntry so the UI uses the same full lookup logic
 // (override map + simplified name + digit-strip) as the export functions.
 function resolveOrderItemUnitPrice(item, priceLookupMap, tierMultiplier = 1.0) {
@@ -1378,7 +1402,7 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) 
   return { unitPrice: null, resolvedName: null, resolvedSku: null }
 }
 
-function buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier = 1.0) {
+function buildOrderCsvPayload(row, parsedItems, priceLookupMap, tier, authorityOverrides) {
   const csvEsc = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`
   const orderId = row?.id ?? '-'
   const orderDate = row?.created_at ? new Date(row.created_at).toISOString().slice(0, 10) : ''
@@ -1388,7 +1412,8 @@ function buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier =
 
   let orderTotal = 0
   const lines = parsedItems.map((item, index) => {
-    const { unitPrice, resolvedName, resolvedSku } = resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier)
+    const itemMult = getEffectiveItemMultiplier(tier, row?.created_at, item.name, item.sku, authorityOverrides)
+    const { unitPrice, resolvedName, resolvedSku } = resolveOrderItemPriceEntry(item, priceLookupMap, itemMult)
     const lineTotal = unitPrice != null ? unitPrice * item.qty : null
     if (lineTotal != null) orderTotal += lineTotal
     // Use canonical Zoho product name (includes -HTF etc.) when available; fall back to stored name
@@ -1448,8 +1473,9 @@ function OrdersPanel() {
   const [saving, setSaving] = useState(null)
   const [trackingDraft, setTrackingDraft] = useState({})
   const [priceLookupMap, setPriceLookupMap] = useState(new Map())
-  const [priceCatalog, setPriceCatalog] = useState([]) // raw price-list items for product search
+  const [priceCatalog, setPriceCatalog] = useState([])
   const [isPriceLookupLoaded, setIsPriceLookupLoaded] = useState(false)
+  const [authorityOverrides, setAuthorityOverrides] = useState(null)
   const [emailingOrderId, setEmailingOrderId] = useState(null)
   const [emailingAllOrders, setEmailingAllOrders] = useState(false)
   // editing state
@@ -1555,13 +1581,18 @@ function OrdersPanel() {
 
     const loadPriceLookup = async () => {
       try {
-        const response = await fetch('/gelitup-content/b2b-price-list.json')
-        if (!response.ok) throw new Error('price list unavailable')
-        const payload = await response.json()
+        const [priceRes, overridesRes] = await Promise.all([
+          fetch('/gelitup-content/b2b-price-list.json'),
+          fetch('/gelitup-content/authority-price-overrides.json'),
+        ])
+        if (!priceRes.ok) throw new Error('price list unavailable')
+        const payload = await priceRes.json()
         const items = Array.isArray(payload?.items) ? payload.items : []
+        const overridesPayload = overridesRes.ok ? await overridesRes.json() : null
         if (!mounted) return
         setPriceLookupMap(buildOrderPriceLookupMap(items))
         setPriceCatalog(items)
+        setAuthorityOverrides(overridesPayload || null)
       }
       catch {
         if (!mounted) return
@@ -1701,7 +1732,6 @@ function OrdersPanel() {
   const downloadOrderCsv = (row) => {
     try {
       const parsedItems = resolveRawItems(row).map((item, index) => parseOrderItemEntry(item, index))
-      const tierMultiplier = getTierMultiplier(row?.distributor_tier)
       // Always generate the CSV — if no items, generate a header-only row with order metadata
       if (!parsedItems.length) {
         const csvEsc = v => `"${String(v ?? '').replace(/"/g, '""')}"`
@@ -1714,7 +1744,7 @@ function OrdersPanel() {
         return
       }
 
-      const { csv } = buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier)
+      const { csv } = buildOrderCsvPayload(row, parsedItems, priceLookupMap, row?.distributor_tier, authorityOverrides)
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
       triggerFileDownload(blob, `order-${row?.id || 'unknown'}.csv`)
     } catch (err) {
@@ -1726,7 +1756,6 @@ function OrdersPanel() {
   const downloadOrderXlsx = (row) => {
     try {
       const rawItems = resolveRawItems(row)
-      const tierMultiplier = getTierMultiplier(row?.distributor_tier)
 
       // Sheet 1: Order metadata
       const meta = [{
@@ -1753,7 +1782,8 @@ function OrdersPanel() {
         const parsed = parseOrderItemEntry(item, index)
         const rawSku = typeof item === 'object' && item !== null ? (item.sku || '') : ''
         const rawName = typeof item === 'object' && item !== null ? (item.name || '') : String(item || '')
-        const { unitPrice, resolvedName } = resolveOrderItemPriceEntry(parsed, priceLookupMap, tierMultiplier)
+        const itemMult = getEffectiveItemMultiplier(row?.distributor_tier, row?.created_at, parsed.name, parsed.sku, authorityOverrides)
+        const { unitPrice, resolvedName } = resolveOrderItemPriceEntry(parsed, priceLookupMap, itemMult)
         const lineTotal = unitPrice != null ? unitPrice * parsed.qty : null
         if (lineTotal != null) orderTotal += lineTotal
         // Use canonical Zoho product name (includes -HTF etc.) when available; fall back to stored name
@@ -1818,8 +1848,7 @@ function OrdersPanel() {
       return { ok: false, message: 'Order has no items.' }
     }
 
-    const tierMultiplier = getTierMultiplier(row?.distributor_tier)
-    const { csv, orderTotal } = buildOrderCsvPayload(row, parsedItems, priceLookupMap, tierMultiplier)
+    const { csv, orderTotal } = buildOrderCsvPayload(row, parsedItems, priceLookupMap, row?.distributor_tier, authorityOverrides)
     const csvBase64 = encodeCsvToBase64(csv)
     const toEmail = ORDER_INBOX_EMAIL || 'distribution@gelitup.com'
     const subject = `B2B Order #${row.id || '-'} CSV Export`
@@ -2148,11 +2177,11 @@ function OrdersPanel() {
           const isCancellationRequested = currentStatus === 'cancellation_requested'
           const isPendingApproval = currentStatus === 'pending_approval'
           const isEditing = editing === row.id
-          const rowTierMultiplier = getTierMultiplier(row.distributor_tier)
           const missingPriceItems = items
             .map((item, i) => parseOrderItemEntry(item, i))
             .filter(parsed => {
-              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, rowTierMultiplier)
+              const itemMult = getEffectiveItemMultiplier(row.distributor_tier, row.created_at, parsed.name, parsed.sku, authorityOverrides)
+              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, itemMult)
               return resolved.unitPrice == null && !resolved.isImageAsset
             })
           const hasMissingPrices = missingPriceItems.length > 0
@@ -2233,8 +2262,8 @@ function OrdersPanel() {
                             {items.map((item, i) => {
                               const parsed = parseOrderItemEntry(item, i)
                               const rawSku = typeof item === 'object' && item !== null ? (item.sku || item.code || '') : ''
-                              const rowTierMultiplier = getTierMultiplier(row.distributor_tier)
-                              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, rowTierMultiplier)
+                              const itemMult = getEffectiveItemMultiplier(row.distributor_tier, row.created_at, parsed.name, parsed.sku, authorityOverrides)
+                              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, itemMult)
                               const unitPrice = resolved.unitPrice
                               const isImageAsset = resolved.isImageAsset
                               const displaySku = normalizeAdminSkuToken(rawSku || parsed.sku || resolved.resolvedSku || '').replace(/\s+IMAGE$/i, '')
@@ -2268,12 +2297,12 @@ function OrdersPanel() {
                             })}
                           </ul>
                           {(() => {
-                            const rowTierMultiplier = getTierMultiplier(row.distributor_tier)
                             let total = 0
                             let unpriced = 0
                             items.forEach((item, i) => {
                               const parsed = parseOrderItemEntry(item, i)
-                              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, rowTierMultiplier)
+                              const itemMult = getEffectiveItemMultiplier(row.distributor_tier, row.created_at, parsed.name, parsed.sku, authorityOverrides)
+                              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, itemMult)
                               if (resolved.isImageAsset) return
                               if (resolved.unitPrice != null) total += resolved.unitPrice * parsed.qty
                               else unpriced += 1

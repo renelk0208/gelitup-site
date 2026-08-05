@@ -1,0 +1,83 @@
+{
+  "_meta": {
+    "description": "Authority tier per-item price override rules. Patterns match case-insensitively against product name or SKU. First matching rule wins. Items not matched fall back to the authority tier default (0.22×). Only applies to orders created on or after effective_from.",
+    "effective_from": "2026-08-05",
+    "tiers": {
+      "authority_default": 0.22,
+      "50_percent_of_b2b": 0.5,
+      "40_percent_of_b2b": 0.4
+    }
+  },
+  "rules": [
+    {
+      "label": "GEL.IT.UP Nail Forms (40% of B2B — 60% off)",
+      "multiplier": 0.4,
+      "patterns": ["nail forms"]
+    },
+    {
+      "label": "Mirror X Powders (50% of B2B)",
+      "multiplier": 0.5,
+      "patterns": ["mirror x", "mirror clear powder"]
+    },
+    {
+      "label": "Cuticle Oils (50% of B2B)",
+      "multiplier": 0.5,
+      "patterns": ["cuticle oil"]
+    },
+    {
+      "label": "Dual Forms — all shapes (50% of B2B)",
+      "multiplier": 0.5,
+      "patterns": ["dual form"]
+    },
+    {
+      "label": "Nail Files and Buffing Blocks (50% of B2B)",
+      "multiplier": 0.5,
+      "patterns": ["nail file", "nail files", "buffing block"]
+    },
+    {
+      "label": "Nail Clips (50% of B2B)",
+      "multiplier": 0.5,
+      "patterns": ["nail clip"]
+    },
+    {
+      "label": "Cuticle and Spring Scissors (50% of B2B)",
+      "multiplier": 0.5,
+      "patterns": ["cuticle scissors", "spring scissors"]
+    },
+    {
+      "label": "Stainless Steel Probes (50% of B2B)",
+      "multiplier": 0.5,
+      "patterns": ["probes stainless"]
+    },
+    {
+      "label": "Cross Magnets (50% of B2B)",
+      "multiplier": 0.5,
+      "patterns": ["cross magnet"]
+    },
+    {
+      "label": "Corner Nippers (50% of B2B)",
+      "multiplier": 0.5,
+      "patterns": ["nippers"]
+    },
+    {
+      "label": "Cuticle Pushers (50% of B2B)",
+      "multiplier": 0.5,
+      "patterns": ["cuticle pusher"]
+    },
+    {
+      "label": "Art Brushes and Spatulas (50% of B2B)",
+      "multiplier": 0.5,
+      "patterns": ["acrylic brush", "gel brush", "nail brush", "aquarela brush", "ombre brush", "liner brush", "polygel brush", "spatula rose gold"]
+    },
+    {
+      "label": "Pododisc Replacement Stickers (50% of B2B)",
+      "multiplier": 0.5,
+      "patterns": ["pododisc", "replacement stickers"]
+    },
+    {
+      "label": "Sugary Glitter Pigments (50% of B2B)",
+      "multiplier": 0.5,
+      "patterns": ["sugary glitter"]
+    }
+  ]
+}
