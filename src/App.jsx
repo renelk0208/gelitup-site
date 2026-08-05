@@ -1,4 +1,4 @@
-﻿import { Component, Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Component, Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import appLogo from '/gelitup_logo.png'
 import PWABadge from './PWABadge.jsx'
@@ -897,6 +897,7 @@ function buildClientProfileFromRegistration(registration) {
     ...defaultClientProfile,
     customerType: registration.customer_type || 'company',
     customerName: registration.company_name || '',
+    contactPersonName: registration.contact_name || registration.company_name || '',
     vatNumber: registration.vat_number || '',
     shippingType: registration.shipping_type || 'road',
     contactPhone: registration.phone || '',
@@ -916,6 +917,29 @@ function buildClientProfileFromRegistration(registration) {
     shippingRegion: registration.shipping_region || '',
     shippingCountry: registration.shipping_country || '',
     shippingPostalCode: registration.shipping_postal_code || '',
+  }
+}
+
+function buildClientProfileFromOrderEditHandoff(handoff) {
+  if (!handoff || typeof handoff !== 'object') {
+    return { ...defaultClientProfile }
+  }
+
+  const consigneeName = String(handoff.consigneeName || '').trim()
+  const consigneePhone = String(handoff.consigneePhone || '').trim()
+  const shippingAddress = String(handoff.shippingAddress || '').trim()
+  const customerEmail = String(handoff.customerEmail || '').trim()
+
+  return {
+    ...defaultClientProfile,
+    contactPersonName: consigneeName,
+    contactPhone: consigneePhone,
+    contactEmail: customerEmail,
+    invoiceAddressLine1: shippingAddress,
+    shippingSameAsInvoice: true,
+    shippingName: consigneeName,
+    shippingPhone: consigneePhone,
+    shippingAddressLine1: shippingAddress,
   }
 }
 
@@ -11546,6 +11570,13 @@ function normalizeImageMap(payload) {
 // distributor portal can reopen the order in the full catalogue with the cart preloaded.
 const ORDER_EDIT_HANDOFF_KEY = 'giup_order_edit_handoff'
 
+function isPortalOrderEditPath(pathname) {
+  return pathname === '/portal/dashboard/catalog'
+    || pathname === '/portal/catalog'
+    || pathname === '/portal/dashboard/products'
+    || pathname === '/portal/products'
+}
+
 function readOrderEditHandoff() {
   try {
     const raw = localStorage.getItem(ORDER_EDIT_HANDOFF_KEY)
@@ -11648,11 +11679,14 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const isDistributorRole = useMemo(() => String(b2bUserRole || '').trim().toLowerCase().includes('distributor'), [b2bUserRole])
   const productsTable = import.meta.env.VITE_B2B_PRODUCTS_TABLE || DEFAULT_PRODUCTS_TABLE
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
+  const registrationsTable = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || DEFAULT_REGISTRATIONS_TABLE
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
+  const orderEditOriginalProfileRef = useRef(null)
 
   useEffect(() => {
+    if (editingOrder) return
     localStorage.setItem(CLIENT_PROFILE_STORAGE_KEY, JSON.stringify(clientProfile))
-  }, [clientProfile])
+  }, [clientProfile, editingOrder])
 
   useEffect(() => {
     let isMounted = true
@@ -11723,11 +11757,14 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   // Apply admin order-edit handoff: preload the cart with an existing order's items
   useEffect(() => {
     if (appliedOrderEditRef.current) return
-    if (location.pathname !== '/portal/dashboard/catalog' && location.pathname !== '/portal/catalog') return
+    if (!isPortalOrderEditPath(location.pathname)) return
     if (!products.length) return
     const handoff = readOrderEditHandoff()
     if (!handoff) return
     appliedOrderEditRef.current = true
+    if (!orderEditOriginalProfileRef.current) {
+      orderEditOriginalProfileRef.current = clientProfile
+    }
 
     // Lookup maps: normalized code/sku/name → product code
     const codeLookup = new Map()
@@ -11789,10 +11826,58 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       pricesAllocated: typeof handoff.pricesAllocated === 'boolean' ? handoff.pricesAllocated : null,
       unmatched,
     })
-  }, [products, location.pathname]) // eslint-disable-line react-hooks/exhaustive-deps
+    const fallbackProfile = buildClientProfileFromOrderEditHandoff(handoff)
+    setClientProfile(fallbackProfile)
+
+    const hydrateOrderEditProfile = async () => {
+      if (!hasSupabaseConfig || !supabase) return
+
+      let reg = null
+      if (handoff.registrationId) {
+        const { data } = await supabase
+          .from(registrationsTable)
+          .select('customer_type, company_name, contact_name, contact_email, phone, vat_number, shipping_type, address, city, country, postal_code, invoice_address_line1, invoice_address_line2, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_address_line2, shipping_area, shipping_region, shipping_country, shipping_postal_code')
+          .eq('id', handoff.registrationId)
+          .maybeSingle()
+        reg = data || null
+      }
+
+      if (!reg && handoff.customerEmail) {
+        const { data } = await supabase
+          .from(registrationsTable)
+          .select('customer_type, company_name, contact_name, contact_email, phone, vat_number, shipping_type, address, city, country, postal_code, invoice_address_line1, invoice_address_line2, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_address_line2, shipping_area, shipping_region, shipping_country, shipping_postal_code')
+          .ilike('contact_email', handoff.customerEmail)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        reg = data || null
+      }
+
+      if (!reg) return
+
+      const registrationProfile = buildClientProfileFromRegistration(reg)
+      setClientProfile({
+        ...fallbackProfile,
+        ...registrationProfile,
+        contactPersonName: registrationProfile.contactPersonName || fallbackProfile.contactPersonName,
+        contactPhone: registrationProfile.contactPhone || fallbackProfile.contactPhone,
+        contactEmail: registrationProfile.contactEmail || fallbackProfile.contactEmail,
+        shippingName: registrationProfile.shippingName || fallbackProfile.shippingName,
+        shippingPhone: registrationProfile.shippingPhone || fallbackProfile.shippingPhone,
+        shippingAddressLine1: registrationProfile.shippingAddressLine1 || fallbackProfile.shippingAddressLine1,
+        invoiceAddressLine1: registrationProfile.invoiceAddressLine1 || fallbackProfile.invoiceAddressLine1,
+      })
+    }
+
+    void hydrateOrderEditProfile()
+  }, [products, location.pathname, clientProfile, registrationsTable]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const cancelOrderEdit = () => {
     try { localStorage.removeItem(ORDER_EDIT_HANDOFF_KEY) } catch { /* ignore */ }
+    if (orderEditOriginalProfileRef.current) {
+      setClientProfile(orderEditOriginalProfileRef.current)
+      orderEditOriginalProfileRef.current = null
+    }
     setEditingOrder(null)
     setSelectedCodes([])
     setItemQtys({})
@@ -14271,6 +14356,10 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       }
       const finishedOrderId = editingOrder.id
       try { localStorage.removeItem(ORDER_EDIT_HANDOFF_KEY) } catch { /* ignore */ }
+      if (orderEditOriginalProfileRef.current) {
+        setClientProfile(orderEditOriginalProfileRef.current)
+        orderEditOriginalProfileRef.current = null
+      }
       setEditingOrder(null)
       setSelectedCodes([])
       setItemQtys({})
@@ -15130,50 +15219,52 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
               }
             </button>
             <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled={profileSaveStatus === 'saving'}
-              onClick={async () => {
-                if (!hasSupabaseConfig || !supabase) return
-                setProfileSaveStatus('saving')
-                try {
-                  await supabase.auth.updateUser({
-                    data: {
-                      company_name: clientProfile.customerName,
-                      full_name: clientProfile.contactPersonName,
-                      contact_name: clientProfile.contactPersonName,
-                      customer_type: clientProfile.customerType,
-                      vat_number: clientProfile.vatNumber,
-                      contact_phone: clientProfile.contactPhone,
-                      contact_email: clientProfile.contactEmail,
-                      shipping_type: clientProfile.shippingType,
-                      invoice_address_line1: clientProfile.invoiceAddressLine1,
-                      invoice_address_line2: clientProfile.invoiceAddressLine2,
-                      invoice_area: clientProfile.invoiceArea,
-                      invoice_region: clientProfile.invoiceRegion,
-                      invoice_country: clientProfile.invoiceCountry,
-                      invoice_postal_code: clientProfile.invoicePostalCode,
-                      shipping_same_as_invoice: clientProfile.shippingSameAsInvoice,
-                      shipping_name: clientProfile.shippingName,
-                      shipping_phone: clientProfile.shippingPhone,
-                      shipping_address_line1: clientProfile.shippingAddressLine1,
-                      shipping_address_line2: clientProfile.shippingAddressLine2,
-                      shipping_area: clientProfile.shippingArea,
-                      shipping_region: clientProfile.shippingRegion,
-                      shipping_country: clientProfile.shippingCountry,
-                      shipping_postal_code: clientProfile.shippingPostalCode,
-                    },
-                  })
-                  setProfileSaveStatus('saved')
-                  window.setTimeout(() => setProfileSaveStatus(null), 3000)
-                } catch {
-                  setProfileSaveStatus('error')
-                }
-              }}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-            >
-              {profileSaveStatus === 'saving' ? 'Saving…' : '💾 Save to My Account'}
-            </button>
+            {!editingOrder && (
+              <button
+                type="button"
+                disabled={profileSaveStatus === 'saving'}
+                onClick={async () => {
+                  if (!hasSupabaseConfig || !supabase) return
+                  setProfileSaveStatus('saving')
+                  try {
+                    await supabase.auth.updateUser({
+                      data: {
+                        company_name: clientProfile.customerName,
+                        full_name: clientProfile.contactPersonName,
+                        contact_name: clientProfile.contactPersonName,
+                        customer_type: clientProfile.customerType,
+                        vat_number: clientProfile.vatNumber,
+                        contact_phone: clientProfile.contactPhone,
+                        contact_email: clientProfile.contactEmail,
+                        shipping_type: clientProfile.shippingType,
+                        invoice_address_line1: clientProfile.invoiceAddressLine1,
+                        invoice_address_line2: clientProfile.invoiceAddressLine2,
+                        invoice_area: clientProfile.invoiceArea,
+                        invoice_region: clientProfile.invoiceRegion,
+                        invoice_country: clientProfile.invoiceCountry,
+                        invoice_postal_code: clientProfile.invoicePostalCode,
+                        shipping_same_as_invoice: clientProfile.shippingSameAsInvoice,
+                        shipping_name: clientProfile.shippingName,
+                        shipping_phone: clientProfile.shippingPhone,
+                        shipping_address_line1: clientProfile.shippingAddressLine1,
+                        shipping_address_line2: clientProfile.shippingAddressLine2,
+                        shipping_area: clientProfile.shippingArea,
+                        shipping_region: clientProfile.shippingRegion,
+                        shipping_country: clientProfile.shippingCountry,
+                        shipping_postal_code: clientProfile.shippingPostalCode,
+                      },
+                    })
+                    setProfileSaveStatus('saved')
+                    window.setTimeout(() => setProfileSaveStatus(null), 3000)
+                  } catch {
+                    setProfileSaveStatus('error')
+                  }
+                }}
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              >
+                {profileSaveStatus === 'saving' ? 'Saving…' : '💾 Save to My Account'}
+              </button>
+            )}
             <button onClick={() => navigate('/portal/dashboard/products')} className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
               ← Back to Order
             </button>
@@ -16812,6 +16903,9 @@ function OrdersModule() {
                                 registrationId: order.registration_id || null,
                                 distributorTier: order.distributor_tier || null,
                                 pricesAllocated: typeof order.prices_allocated === 'boolean' ? order.prices_allocated : null,
+                                consigneeName: order.consignee_name || '',
+                                consigneePhone: order.consignee_phone || '',
+                                shippingAddress: order.shipping_address || '',
                                 items: Array.isArray(order.items) ? order.items : [],
                                 savedAt: Date.now(),
                               }))
@@ -17852,7 +17946,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
   const [guideRect, setGuideRect] = useState(null)
 
   const orderEditHandoff = useMemo(() => {
-    if (location.pathname !== '/portal/dashboard/catalog' && location.pathname !== '/portal/catalog') return null
+    if (!isPortalOrderEditPath(location.pathname)) return null
     return readOrderEditHandoff()
   }, [location.pathname])
 

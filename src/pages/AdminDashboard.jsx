@@ -465,6 +465,33 @@ function RegistrationsPanel({ onPreviewDistributor }) {
     setRows(prev => prev.map(r => r.id === row.id ? { ...r, prices_allocated: next } : r))
   }
 
+  const syncRegistrationTierToOrders = async (row, newTier) => {
+    const trimmedRegistrationId = String(row?.id || '').trim()
+    const trimmedEmail = String(row?.contact_email || row?.customer_email || '').trim().toLowerCase()
+    const orderPatch = {
+      distributor_tier: newTier || null,
+      prices_allocated: newTier ? true : Boolean(row?.prices_allocated),
+    }
+
+    if (trimmedRegistrationId) {
+      const { error } = await supabase
+        .from(ORDERS_TABLE)
+        .update(orderPatch)
+        .eq('registration_id', trimmedRegistrationId)
+      if (error) return { ok: false, message: error.message }
+    }
+
+    if (trimmedEmail) {
+      const { error } = await supabase
+        .from(ORDERS_TABLE)
+        .update(orderPatch)
+        .ilike('customer_email', trimmedEmail)
+      if (error) return { ok: false, message: error.message }
+    }
+
+    return { ok: true }
+  }
+
   const updateTier = async (row, newTier) => {
     const resolvedType = getResolvedApplicationType(row)
     const sameTier = (row.distributor_tier || '') === (newTier || '')
@@ -512,6 +539,11 @@ function RegistrationsPanel({ onPreviewDistributor }) {
       ...(newTier ? { application_type: 'distributor', status: 'approved', prices_allocated: true, notes: patch.notes } : {}),
     }
     setRows(prev => prev.map(r => r.id === row.id ? updatedRow : r))
+
+    const orderTierSync = await syncRegistrationTierToOrders(updatedRow, newTier)
+    if (!orderTierSync.ok) {
+      alert(`Client tier was updated, but linked orders could not be synced: ${orderTierSync.message}`)
+    }
 
     if (newTier && row?.contact_email && EMAIL_WEBHOOK_URL) {
       const tierEmail = buildDistributorAccessEmail({ ...row, distributor_tier: newTier || row.distributor_tier })
@@ -1851,6 +1883,9 @@ function OrdersPanel() {
         registrationId: row.registration_id || null,
         distributorTier: row.distributor_tier || null,
         pricesAllocated: typeof row.prices_allocated === 'boolean' ? row.prices_allocated : null,
+        consigneeName: row.consignee_name || '',
+        consigneePhone: row.consignee_phone || '',
+        shippingAddress: row.shipping_address || '',
         items: Array.isArray(row.items) ? row.items : [],
         savedAt: Date.now(),
       }))
