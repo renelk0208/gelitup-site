@@ -898,25 +898,25 @@ function buildClientProfileFromRegistration(registration) {
     customerType: registration.customer_type || 'company',
     customerName: registration.company_name || '',
     contactPersonName: registration.contact_name || registration.company_name || '',
-    vatNumber: registration.vat_number || '',
+    vatNumber: registration.vat_number || registration.vies_vat || '',
     shippingType: registration.shipping_type || 'road',
-    contactPhone: registration.phone || '',
-    contactEmail: registration.contact_email || '',
+    contactPhone: registration.phone || registration.contact_phone || '',
+    contactEmail: registration.contact_email || registration.customer_email || '',
     invoiceAddressLine1: registration.invoice_address_line1 || registration.address || '',
     invoiceAddressLine2: registration.invoice_address_line2 || '',
     invoiceArea: registration.invoice_area || registration.city || '',
-    invoiceRegion: registration.invoice_region || '',
+    invoiceRegion: registration.invoice_region || registration.region || '',
     invoiceCountry: registration.invoice_country || registration.country || '',
     invoicePostalCode: registration.invoice_postal_code || registration.postal_code || '',
     shippingSameAsInvoice,
     shippingName: registration.shipping_name || '',
     shippingPhone: registration.shipping_phone || '',
-    shippingAddressLine1: registration.shipping_address_line1 || '',
+    shippingAddressLine1: registration.shipping_address_line1 || registration.invoice_address_line1 || registration.address || '',
     shippingAddressLine2: registration.shipping_address_line2 || '',
     shippingArea: registration.shipping_area || '',
-    shippingRegion: registration.shipping_region || '',
-    shippingCountry: registration.shipping_country || '',
-    shippingPostalCode: registration.shipping_postal_code || '',
+    shippingRegion: registration.shipping_region || registration.invoice_region || registration.region || '',
+    shippingCountry: registration.shipping_country || registration.invoice_country || registration.country || '',
+    shippingPostalCode: registration.shipping_postal_code || registration.invoice_postal_code || registration.postal_code || '',
   }
 }
 
@@ -11836,7 +11836,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       if (handoff.registrationId) {
         const { data } = await supabase
           .from(registrationsTable)
-          .select('customer_type, company_name, contact_name, contact_email, phone, vat_number, shipping_type, address, city, country, postal_code, invoice_address_line1, invoice_address_line2, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_address_line2, shipping_area, shipping_region, shipping_country, shipping_postal_code')
+          .select('customer_type, company_name, contact_name, contact_email, customer_email, phone, contact_phone, vat_number, vies_vat, shipping_type, address, city, region, country, postal_code, invoice_address_line1, invoice_address_line2, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_address_line2, shipping_area, shipping_region, shipping_country, shipping_postal_code')
           .eq('id', handoff.registrationId)
           .maybeSingle()
         reg = data || null
@@ -11845,8 +11845,19 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       if (!reg && handoff.customerEmail) {
         const { data } = await supabase
           .from(registrationsTable)
-          .select('customer_type, company_name, contact_name, contact_email, phone, vat_number, shipping_type, address, city, country, postal_code, invoice_address_line1, invoice_address_line2, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_address_line2, shipping_area, shipping_region, shipping_country, shipping_postal_code')
+          .select('customer_type, company_name, contact_name, contact_email, customer_email, phone, contact_phone, vat_number, vies_vat, shipping_type, address, city, region, country, postal_code, invoice_address_line1, invoice_address_line2, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_address_line2, shipping_area, shipping_region, shipping_country, shipping_postal_code')
           .ilike('contact_email', handoff.customerEmail)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        reg = data || null
+      }
+
+      if (!reg && handoff.customerEmail) {
+        const { data } = await supabase
+          .from(registrationsTable)
+          .select('customer_type, company_name, contact_name, contact_email, customer_email, phone, contact_phone, vat_number, vies_vat, shipping_type, address, city, region, country, postal_code, invoice_address_line1, invoice_address_line2, invoice_area, invoice_region, invoice_country, invoice_postal_code, shipping_same_as_invoice, shipping_name, shipping_phone, shipping_address_line1, shipping_address_line2, shipping_area, shipping_region, shipping_country, shipping_postal_code')
+          .ilike('customer_email', handoff.customerEmail)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle()
@@ -14333,18 +14344,12 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         + packageCartItems.reduce((s, i) => s + (i.qty || 0), 0)
         + unmatchedUnits
       const resolvedEditingTier = String(tier || editingOrder.tier || '').trim() || null
-      const resolvedEditingPricesAllocated = typeof pricesAllocated === 'boolean'
-        ? pricesAllocated
-        : typeof editingOrder.pricesAllocated === 'boolean'
-          ? editingOrder.pricesAllocated
-          : null
       const { error: updateError } = await supabase
         .from(ordersTable)
         .update({
           customer_email: editingOrder.email || null,
           registration_id: editingOrder.registrationId || null,
           distributor_tier: resolvedEditingTier,
-          prices_allocated: resolvedEditingPricesAllocated,
           items: updatedItems,
           total_units: updatedUnits,
         })

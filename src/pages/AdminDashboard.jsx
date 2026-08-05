@@ -269,7 +269,83 @@ function RegistrationsPanel({ onPreviewDistributor }) {
     const { data, error: err } = await query
     setLoading(false)
     if (err) { setError(err.message); return }
-    setRows(data || [])
+    const orderRows = Array.isArray(data) ? data : []
+    if (!orderRows.length) {
+      setRows([])
+      return
+    }
+
+    const registrationIds = [...new Set(
+      orderRows
+        .map((row) => String(row?.registration_id || '').trim())
+        .filter(Boolean),
+    )]
+    const customerEmails = [...new Set(
+      orderRows
+        .map((row) => String(row?.customer_email || '').trim().toLowerCase())
+        .filter(Boolean),
+    )]
+
+    const registrationById = new Map()
+    const registrationByEmail = new Map()
+
+    if (registrationIds.length > 0) {
+      const { data: regsById } = await supabase
+        .from(REGISTRATIONS_TABLE)
+        .select('id, contact_email, customer_email, distributor_tier, prices_allocated')
+        .in('id', registrationIds)
+      ;(regsById || []).forEach((reg) => {
+        const idKey = String(reg?.id || '').trim()
+        if (idKey) registrationById.set(idKey, reg)
+        const contactEmailKey = String(reg?.contact_email || '').trim().toLowerCase()
+        if (contactEmailKey) registrationByEmail.set(contactEmailKey, reg)
+        const customerEmailKey = String(reg?.customer_email || '').trim().toLowerCase()
+        if (customerEmailKey) registrationByEmail.set(customerEmailKey, reg)
+      })
+    }
+
+    if (customerEmails.length > 0) {
+      const { data: regsByContactEmail } = await supabase
+        .from(REGISTRATIONS_TABLE)
+        .select('id, contact_email, customer_email, distributor_tier, prices_allocated')
+        .in('contact_email', customerEmails)
+      ;(regsByContactEmail || []).forEach((reg) => {
+        const idKey = String(reg?.id || '').trim()
+        if (idKey && !registrationById.has(idKey)) registrationById.set(idKey, reg)
+        const contactEmailKey = String(reg?.contact_email || '').trim().toLowerCase()
+        if (contactEmailKey) registrationByEmail.set(contactEmailKey, reg)
+        const customerEmailKey = String(reg?.customer_email || '').trim().toLowerCase()
+        if (customerEmailKey) registrationByEmail.set(customerEmailKey, reg)
+      })
+
+      const { data: regsByCustomerEmail } = await supabase
+        .from(REGISTRATIONS_TABLE)
+        .select('id, contact_email, customer_email, distributor_tier, prices_allocated')
+        .in('customer_email', customerEmails)
+      ;(regsByCustomerEmail || []).forEach((reg) => {
+        const idKey = String(reg?.id || '').trim()
+        if (idKey && !registrationById.has(idKey)) registrationById.set(idKey, reg)
+        const contactEmailKey = String(reg?.contact_email || '').trim().toLowerCase()
+        if (contactEmailKey) registrationByEmail.set(contactEmailKey, reg)
+        const customerEmailKey = String(reg?.customer_email || '').trim().toLowerCase()
+        if (customerEmailKey) registrationByEmail.set(customerEmailKey, reg)
+      })
+    }
+
+    const mergedRows = orderRows.map((row) => {
+      const idKey = String(row?.registration_id || '').trim()
+      const emailKey = String(row?.customer_email || '').trim().toLowerCase()
+      const reg = (idKey && registrationById.get(idKey)) || (emailKey && registrationByEmail.get(emailKey)) || null
+      if (!reg) return row
+
+      return {
+        ...row,
+        distributor_tier: reg.distributor_tier || row.distributor_tier || null,
+        prices_allocated: typeof reg.prices_allocated === 'boolean' ? reg.prices_allocated : row.prices_allocated,
+      }
+    })
+
+    setRows(mergedRows)
   }, [filter])
 
   useEffect(() => { load() }, [load])
@@ -470,7 +546,6 @@ function RegistrationsPanel({ onPreviewDistributor }) {
     const trimmedEmail = String(row?.contact_email || row?.customer_email || '').trim().toLowerCase()
     const orderPatch = {
       distributor_tier: newTier || null,
-      prices_allocated: newTier ? true : Boolean(row?.prices_allocated),
     }
 
     if (trimmedRegistrationId) {
@@ -500,7 +575,13 @@ function RegistrationsPanel({ onPreviewDistributor }) {
       String(row?.status || '').toLowerCase() !== 'approved' ||
       !row?.prices_allocated
     )
-    if (sameTier && !needsDistributorProvisioning) return
+    if (sameTier && !needsDistributorProvisioning) {
+      const existingTierSync = await syncRegistrationTierToOrders(row, newTier)
+      if (!existingTierSync.ok) {
+        alert(`Tier is already set, but linked orders could not be synced: ${existingTierSync.message}`)
+      }
+      return
+    }
     const currentTierLabel = titleCaseTierLabel(row.distributor_tier || '')
     const nextTierLabel = titleCaseTierLabel(newTier || '')
     const ok = window.confirm(
