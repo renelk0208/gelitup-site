@@ -1,7 +1,7 @@
 {
   "_meta": {
     "description": "Authority tier per-item price override rules. Patterns match case-insensitively against product name or SKU. First matching rule wins. Items not matched fall back to the authority tier default (0.22×). Only applies to orders created on or after effective_from.",
-    "effective_from": "2026-08-05",
+    "effective_from": "2026-08-03",
     "tiers": {
       "authority_default": 0.22,
       "50_percent_of_b2b": 0.5,
@@ -20,9 +20,9 @@
       "patterns": ["mirror x", "mirror clear powder"]
     },
     {
-      "label": "Cuticle Oils (50% of B2B)",
+      "label": "Cuticle Oils + Scrub Removers (50% of B2B)",
       "multiplier": 0.5,
-      "patterns": ["cuticle oil"]
+      "patterns": ["cuticle oil", "cuticle scrub remover", "almond cuticle scrub remover"]
     },
     {
       "label": "Dual Forms — all shapes (50% of B2B)",

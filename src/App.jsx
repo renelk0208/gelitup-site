@@ -98,6 +98,21 @@ function getSmallOrderShippingFee(country) {
   return null
 }
 const B2B_PRICE_MULTIPLIER = 1.2
+const PERFECT_SHAPE_TOP_COAT_UPLIFT = 1.06
+function isPerfectShapeTopCoatProduct(name, sku) {
+  const normalizedName = String(name || '').toLowerCase()
+  const normalizedSku = String(sku || '').toLowerCase()
+  return normalizedName.includes('top coat perfect shape')
+    || normalizedName.includes('perfect shape top coat')
+    || normalizedSku.includes('nwpt15')
+}
+function getAdjustedB2bBasePrice(name, sku, rawPrice) {
+  const numericPrice = Number(rawPrice)
+  if (!Number.isFinite(numericPrice) || numericPrice <= 0) return null
+  return isPerfectShapeTopCoatProduct(name, sku)
+    ? numericPrice * PERFECT_SHAPE_TOP_COAT_UPLIFT
+    : numericPrice
+}
 const EU_COUNTRIES = ['Austria','Belgium','Bulgaria','Croatia','Cyprus','Czech Republic','Denmark','Estonia','Finland','France','Germany','Greece','Hungary','Ireland','Italy','Latvia','Lithuania','Luxembourg','Malta','Netherlands','Poland','Portugal','Romania','Slovakia','Slovenia','Spain','Sweden']
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
@@ -3724,8 +3739,9 @@ function FullCataloguePage() {
         const isMultimix30g = (n) => /multimix/i.test(n) && /\b30\s*g/i.test(n)
         for (const { name, sku, price } of items) {
           const cleanName = stripSuffix(name)
+          const basePrice = getAdjustedB2bBasePrice(name, sku, price)
           const surcharge = isMultimix30g(name) ? 1.1 : 1
-          const entry = { name, price: price != null ? Math.ceil(Number(price) * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10 : null }
+          const entry = { name, price: basePrice != null ? Math.ceil(basePrice * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10 : null }
           const keys = [
             normalizeSkuCode(sku),
             normalizeSkuCode(stripSuffix(sku)),
@@ -9415,8 +9431,9 @@ function CheckoutPage() {
         const isMultimix30g = (n) => /multimix/i.test(n) && /\b30\s*g/i.test(n)
         for (const { name, sku, price } of items) {
           const cleanName = stripSuffix(name)
+          const basePrice = getAdjustedB2bBasePrice(name, sku, price)
           const surcharge = isMultimix30g(name) ? 1.1 : 1
-          const entry = { name, price: price != null ? Math.ceil(Number(price) * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10 : null }
+          const entry = { name, price: basePrice != null ? Math.ceil(basePrice * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10 : null }
           const keys = [normalizeSkuCode(sku), normalizeSkuCode(stripSuffix(sku)), normalizeProductName(name), normalizeProductName(cleanName)]
           // Extract short product code (e.g. "15", "15A", "BTO02", "FR01") from the SKU/name
           const norm = normalizeSkuCode(cleanName)
@@ -11635,19 +11652,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   // Level 2 Country Tier: Authority price + 20% (0.22 × 1.20 = 0.264).
   // Sales Representative: B2B price - 15% (pay 85%).
   const tierPriceMultiplier = tier === 'authority' ? 0.22 : tier === 'professional' ? 0.37 : tier === 'country' ? 0.264 : tier === 'sales' ? 0.85 : 1.0
-  // Returns per-item effective multiplier for authority clients: checks authority-price-overrides.json rules.
-  // All new orders (placed now) are "after" the effective_from date, so overrides always apply for authority.
-  const getEffectiveProductMultiplier = useCallback((productName, productCode) => {
-    if (tier !== 'authority' || !authorityOverrides?.rules?.length) return tierPriceMultiplier
-    const n = String(productName || '').toLowerCase()
-    const s = String(productCode || '').toLowerCase()
-    for (const rule of authorityOverrides.rules) {
-      if (rule.patterns?.some(p => n.includes(String(p).toLowerCase()) || s.includes(String(p).toLowerCase()))) {
-        return rule.multiplier
-      }
-    }
-    return tierPriceMultiplier
-  }, [tier, tierPriceMultiplier, authorityOverrides])
   const location = useLocation()
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
@@ -11725,6 +11729,19 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [authorityOverrides, setAuthorityOverrides] = useState(null)
   const [shippingMetadata, setShippingMetadata] = useState(SHIPPING_RULES)
   const [shippingMetadataStatus, setShippingMetadataStatus] = useState('Using embedded shipping metadata rules.')
+  // Returns per-item effective multiplier for authority clients: checks authority-price-overrides.json rules.
+  // All new orders (placed now) are "after" the effective_from date, so overrides always apply for authority.
+  const getEffectiveProductMultiplier = useCallback((productName, productCode) => {
+    if (tier !== 'authority' || !authorityOverrides?.rules?.length) return tierPriceMultiplier
+    const n = String(productName || '').toLowerCase()
+    const s = String(productCode || '').toLowerCase()
+    for (const rule of authorityOverrides.rules) {
+      if (rule.patterns?.some(p => n.includes(String(p).toLowerCase()) || s.includes(String(p).toLowerCase()))) {
+        return rule.multiplier
+      }
+    }
+    return tierPriceMultiplier
+  }, [tier, tierPriceMultiplier, authorityOverrides])
   const isDistributorRole = useMemo(() => String(b2bUserRole || '').trim().toLowerCase().includes('distributor'), [b2bUserRole])
   const productsTable = import.meta.env.VITE_B2B_PRODUCTS_TABLE || DEFAULT_PRODUCTS_TABLE
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
@@ -12812,8 +12829,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         const isMultimix30g = (n) => /multimix/i.test(n) && /\b30\s*g/i.test(n)
         for (const { name, sku, price } of items) {
           const cleanName = stripSuffix(name)
+          const basePrice = getAdjustedB2bBasePrice(name, sku, price)
           const surcharge = isMultimix30g(name) ? 1.1 : 1
-          const entry = { name, price: price != null ? Math.ceil(Number(price) * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10 : null }
+          const entry = { name, price: basePrice != null ? Math.ceil(basePrice * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10 : null }
           const keys = [
             normalizeSkuCode(sku),
             normalizeSkuCode(stripSuffix(sku)),

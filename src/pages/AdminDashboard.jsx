@@ -1165,11 +1165,10 @@ function buildOrderPriceLookupMap(items = []) {
   }
 
   items.forEach(({ name, sku, price }) => {
-    if (price == null) return
-    const numeric = Number(price)
-    if (!Number.isFinite(numeric) || numeric <= 0) return
+    const adjustedBasePrice = getAdjustedB2bBasePrice(name, sku, price)
+    if (adjustedBasePrice == null) return
 
-    const unitPrice = Math.ceil(numeric * 1.2 * 10) / 10
+    const unitPrice = Math.ceil(adjustedBasePrice * B2B_PRICE_MULTIPLIER * 10) / 10
     const entry = {
       name: String(name || '').trim(),
       sku: normalizeAdminSkuToken(sku || name || ''),
@@ -1300,8 +1299,9 @@ function getAuthorityItemMultiplier(name, sku, rules) {
 // For authority orders created on or after effective_from, per-item overrides apply.
 // All other tiers and older orders use the flat tier multiplier.
 function getEffectiveItemMultiplier(tier, orderCreatedAt, itemName, itemSku, authorityOverrides) {
-  const base = getTierMultiplier(tier)
-  if (tier !== 'authority' || !authorityOverrides?.rules?.length) return base
+  const normalizedTier = String(tier || '').trim().toLowerCase()
+  const base = getTierMultiplier(normalizedTier)
+  if (normalizedTier !== 'authority' || !authorityOverrides?.rules?.length) return base
   const effectiveFrom = authorityOverrides?.effective_from
   if (effectiveFrom && orderCreatedAt && new Date(orderCreatedAt) < new Date(effectiveFrom)) return base
   return getAuthorityItemMultiplier(itemName, itemSku, authorityOverrides.rules) ?? base
@@ -3032,6 +3032,21 @@ const TIER_PRICING_DATA = [
 ]
 
 const B2B_PRICE_MULTIPLIER = 1.2
+const PERFECT_SHAPE_TOP_COAT_UPLIFT = 1.06
+function isPerfectShapeTopCoatProduct(name, sku) {
+  const normalizedName = String(name || '').toLowerCase()
+  const normalizedSku = String(sku || '').toLowerCase()
+  return normalizedName.includes('top coat perfect shape')
+    || normalizedName.includes('perfect shape top coat')
+    || normalizedSku.includes('nwpt15')
+}
+function getAdjustedB2bBasePrice(name, sku, rawPrice) {
+  const numericPrice = Number(rawPrice)
+  if (!Number.isFinite(numericPrice) || numericPrice <= 0) return null
+  return isPerfectShapeTopCoatProduct(name, sku)
+    ? numericPrice * PERFECT_SHAPE_TOP_COAT_UPLIFT
+    : numericPrice
+}
 
 // Map price-list item names to display categories
 function classifyProduct(name) {
@@ -3083,10 +3098,11 @@ function TierPricingPanel() {
         // Group by category
         const groups = {}
         const isMultimix30g = (n) => /multimix/i.test(n) && /\b30\s*g/i.test(n)
-        for (const { name, price } of items) {
-          if (price == null || Number(price) <= 0) continue
+        for (const { name, sku, price } of items) {
+          const adjustedBasePrice = getAdjustedB2bBasePrice(name, sku, price)
+          if (adjustedBasePrice == null) continue
           const surcharge = isMultimix30g(name) ? 1.1 : 1
-          const b2bPrice = Math.ceil(Number(price) * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10
+          const b2bPrice = Math.ceil(adjustedBasePrice * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10
           const cat = classifyProduct(name)
           if (!groups[cat]) groups[cat] = { products: [], min: Infinity, max: -Infinity, total: 0 }
           groups[cat].products.push({ name, b2bPrice })
