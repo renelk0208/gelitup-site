@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabaseClient'
 import * as XLSX from 'xlsx'
 import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
 import ambassadorLetterAttachmentUrl from '../lib/ambassadorletter/Gelitup Ambassador Letter.pdf?url'
+import { buildAmbassadorContractPdf } from '../lib/ambassadorContractPdf.js'
 
 const REGISTRATIONS_TABLE = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || 'b2b_registrations'
 const ORDERS_TABLE = import.meta.env.VITE_B2B_ORDERS_TABLE || 'b2b_orders'
@@ -3060,6 +3061,53 @@ function buildAmbassadorShipmentEmail(row, ship, setPasswordLink) {
   }
 }
 
+// Welcome email sent automatically when an application is approved. The signed
+// Ambassador Agreement PDF is attached so every ambassador has their contract.
+function buildAmbassadorWelcomeEmail(row) {
+  const name = String(row?.full_name || '').trim().split(' ')[0] || 'there'
+  const discountCode = String(row?.discount_code || '').trim()
+  const codeBlock = discountCode
+    ? `<p><strong>Your personal ambassador code:</strong> <span style="font-size:15px;color:#D43790">${escAmb(discountCode)}</span><br/>Share it privately with your nail-tech followers — it gives them 20% off GEL.IT.UP.</p>`
+    : ''
+  return {
+    subject: 'Welcome to the GEL.IT.UP Ambassador Programme 🎉',
+    html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5">
+      <p>Hi ${escAmb(name)},</p>
+      <p>Great news — your GEL.IT.UP ambassador application has been <strong>approved</strong>! Welcome to the programme. 🎉</p>
+      ${codeBlock}
+      <p>📎 Your <strong>Ambassador Agreement</strong> is attached to this email as a PDF for your records.</p>
+      <p>Your PR package is being prepared — we'll email you again with the tracking details as soon as it ships.</p>
+      <p>If you have any questions in the meantime, just reply to this email.</p>
+      <p>With love,<br/>The GEL.IT.UP Team</p>
+    </div>`,
+  }
+}
+
+// Builds the Ambassador Agreement PDF attachment from an application row.
+async function buildContractAttachmentForRow(row) {
+  const address = [row?.address, [row?.city, row?.postal_code].filter(Boolean).join(' '), row?.country]
+    .filter(Boolean).join(', ')
+  const signedDate = row?.created_at
+    ? new Date(row.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    : ''
+  const pdf = await buildAmbassadorContractPdf({
+    fullName: row?.full_name,
+    email: row?.email,
+    phone: row?.phone,
+    instagram: row?.instagram,
+    tiktok: row?.tiktok,
+    address,
+    country: row?.country,
+    qualifiedTech: row?.is_qualified_tech ?? true,
+    workShown: row?.work_shown_on_profile ?? true,
+    followersOver500: row?.followers_over_500 ?? true,
+    agreementVersion: row?.agreement_version,
+    lang: row?.language,
+    signedDate,
+  })
+  return { filename: pdf.filename, content: pdf.base64, contentType: 'application/pdf' }
+}
+
 async function buildPdfAttachment(pdfUrl, fallbackFilename) {
   const response = await fetch(pdfUrl)
   if (!response.ok) {
@@ -3249,11 +3297,35 @@ function AmbassadorApplicationsPanel() {
   const patchRow = (id, patch) => setRows(prev => prev.map(r => r.id === id ? { ...r, ...patch } : r))
   const setEmail = (id, state, message) => setEmailStatus(prev => ({ ...prev, [id]: { state, message } }))
 
-  // APPROVE → set status + allocate/attach code. No ambassador email here.
-  // First outward notification is sent later together with shipment details.
+  // Sends the welcome email with the Ambassador Agreement PDF attached.
+  // Used automatically on approval and manually via the "Send contract" button.
+  const sendWelcomeContractEmail = async (row) => {
+    const email = String(row?.email || '').trim()
+    if (!email) {
+      setEmail(row.id, 'error', 'Welcome email blocked: ambassador email is missing.')
+      return false
+    }
+    setEmail(row.id, 'sending', '')
+    let attachment
+    try {
+      attachment = await buildContractAttachmentForRow(row)
+    } catch (e) {
+      setEmail(row.id, 'error', `Could not build the agreement PDF: ${e.message || e}`)
+      return false
+    }
+    const { subject, html } = buildAmbassadorWelcomeEmail(row)
+    const res = await sendAmbassadorEmail({ to: email, subject, html, attachments: [attachment] })
+    setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Welcome email + agreement sent to ${email}` : res.error)
+    if (res.ok) logAmbassadorSend(row, { to: email, subject, body: 'Welcome email with Ambassador Agreement PDF attached.' })
+    return res.ok
+  }
+
+  // APPROVE → set status + allocate/attach code, then automatically send the
+  // welcome email with the Ambassador Agreement PDF attached. Shipment/tracking
+  // details are still emailed separately later.
   const approveRow = async (row) => {
     if (String(row?.status || '').toLowerCase() === 'approved') return
-    if (!window.confirm(`Approve ${row.full_name} (@${row.instagram})?\n\nThis allocates/links their ambassador code now, but does NOT notify them yet. They will be notified when shipping details are sent.`)) return
+    if (!window.confirm(`Approve ${row.full_name} (@${row.instagram})?\n\nThis allocates/links their ambassador code and immediately emails them a welcome message with their Ambassador Agreement PDF attached.`)) return
     setSaving(row.id)
     const { data, error: err } = await supabase.rpc('approve_ambassador_application', { p_application_id: row.id })
     if (err) { setSaving(null); alert(err.message); return }
@@ -3261,7 +3333,8 @@ function AmbassadorApplicationsPanel() {
     const reviewedAt = approved?.reviewed_at || new Date().toISOString()
     const discountCode = approved?.discount_code || row.discount_code || null
     patchRow(row.id, { status: 'approved', reviewed_at: reviewedAt, discount_code: discountCode })
-    setEmail(row.id, 'sent', 'Approved and code allocated. Awaiting shipment details before notifying ambassador.')
+    const updatedRow = { ...row, status: 'approved', reviewed_at: reviewedAt, discount_code: discountCode }
+    await sendWelcomeContractEmail(updatedRow)
     setSaving(null)
   }
 
@@ -3567,6 +3640,20 @@ function AmbassadorApplicationsPanel() {
                       >
                         ✉ Message
                       </button>
+                      {row.status === 'approved' && (
+                        <button
+                          onClick={async () => {
+                            if (!window.confirm(`Send the welcome email with the Ambassador Agreement PDF to ${row.full_name} (${row.email})?`)) return
+                            setSaving(row.id)
+                            await sendWelcomeContractEmail(row)
+                            setSaving(null)
+                          }}
+                          disabled={saving === row.id}
+                          className="rounded-lg border border-fuchsia-300 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 transition hover:bg-fuchsia-50 disabled:opacity-60"
+                        >
+                          📄 Send contract
+                        </button>
+                      )}
                       {row.status !== 'approved' && (
                         <button
                           onClick={() => approveRow(row)}
