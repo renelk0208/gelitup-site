@@ -15,9 +15,14 @@ export const CONTRACT_I18N = {
     intro: 'Congratulations — your application has been approved and you are now an official GEL.IT.UP Ambassador! Your signed agreement is attached. Here is a reminder of what you are committing to:',
     obligationsHeading: 'Your obligations as an ambassador',
     obligations: [
-      'Post at least 4 pieces of your own content each month (at least one a video/reel) using GEL.IT.UP products and tagging #gelitup and @gelitup.',
+      'Post at least 10 pieces of your own content each month using GEL.IT.UP products, including at least 4 videos/reels across Instagram and TikTok (if you have a TikTok account).',
+      'Every post must include #gelitup and mention @gelitupinternational on Instagram or @gelitupofficial on TikTok.',
+      'Send the content you create to our WhatsApp/Viber (+30 694 071 5234) so we can save and feature it.',
+      'You are welcome to add GEL.IT.UP as a collaborator on your Instagram and TikTok posts.',
       'Disclose the partnership where advertising rules require it (e.g. #ad or “gifted”).',
-      'Use your personal discount code only for yourself and genuine clients/followers — never on coupon or reseller sites.',
+      'Your followers who are genuine nail technicians receive a flat 20% discount with your personal code.',
+      'You may share your code publicly, but links used with it must lead only to www.gelitup.com — never to coupon, deal or reseller sites.',
+      'You get a GEL.IT.UP Portal B2B account automatically, and commission from code orders is credited to your account (10%, then 15% from €1,000 total referred orders, then 20% from €2,000).',
       'Allow GEL.IT.UP to repost, feature and reuse content you tag us in, with credit.',
       'Free product drops are gifts to support your content and depend on you keeping up the monthly posts.',
       'The partnership is non-exclusive and month-to-month; either side may end it at any time.',
@@ -180,25 +185,30 @@ export const CONTRACT_I18N = {
   },
 }
 
-// Country (free-text, any language) → site language code. Best-effort fallback only;
-// the applicant's captured site language is the primary signal.
+// Country (free-text, any language) → site language code. The applicant's
+// selected country is the PRIMARY signal for the contract language, so this map
+// covers common English names, native spellings and ISO codes for each supported
+// language. The captured site language is used only as a fallback.
 export const COUNTRY_TO_LANG = {
-  romania: 'ro', românia: 'ro', roumanie: 'ro',
-  france: 'fr', frankreich: 'fr',
-  germany: 'de', deutschland: 'de', allemagne: 'de',
-  austria: 'de', österreich: 'de',
-  spain: 'es', españa: 'es', espana: 'es',
-  portugal: 'pt',
-  poland: 'pl', polska: 'pl',
-  hungary: 'hu', magyarország: 'hu', magyarorszag: 'hu',
-  greece: 'el', ελλάδα: 'el', ellada: 'el',
-  bulgaria: 'bg', българия: 'bg',
+  romania: 'ro', românia: 'ro', roumanie: 'ro', rumänien: 'ro', rumanien: 'ro', rumania: 'ro', ro: 'ro',
+  france: 'fr', frankreich: 'fr', francia: 'fr', frankrijk: 'fr', fr: 'fr',
+  germany: 'de', deutschland: 'de', allemagne: 'de', alemania: 'de', germania: 'de', de: 'de',
+  austria: 'de', österreich: 'de', osterreich: 'de', autriche: 'de', at: 'de',
+  spain: 'es', españa: 'es', espana: 'es', espagne: 'es', spanien: 'es', spagna: 'es', es: 'es',
+  portugal: 'pt', brazil: 'pt', brasil: 'pt', portogallo: 'pt', pt: 'pt', br: 'pt',
+  poland: 'pl', polska: 'pl', pologne: 'pl', polen: 'pl', polonia: 'pl', pl: 'pl',
+  hungary: 'hu', magyarország: 'hu', magyarorszag: 'hu', hongrie: 'hu', ungarn: 'hu', ungheria: 'hu', hu: 'hu',
+  greece: 'el', ελλάδα: 'el', ellada: 'el', hellas: 'el', grèce: 'el', grece: 'el', griechenland: 'el', grecia: 'el', gr: 'el', el: 'el',
+  bulgaria: 'bg', българия: 'bg', bulgarie: 'bg', bulgarien: 'bg', bg: 'bg',
 }
 
 export function resolveContractLang(lang, country) {
-  const code = String(lang || '').toLowerCase()
-  if (CONTRACT_I18N[code]) return code
+  // The applicant's selected country takes priority, so the contract is produced
+  // in the language of that country when we support it. If the country isn't
+  // recognised, fall back to the site language they applied in, then English.
   const c = String(country || '').trim().toLowerCase()
   if (COUNTRY_TO_LANG[c] && CONTRACT_I18N[COUNTRY_TO_LANG[c]]) return COUNTRY_TO_LANG[c]
+  const code = String(lang || '').toLowerCase()
+  if (CONTRACT_I18N[code]) return code
   return 'en'
 }

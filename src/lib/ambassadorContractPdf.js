@@ -11,7 +11,8 @@
 // preview script / non-browser environments).
 
 import { AGREEMENT_SECTIONS, AGREEMENT_VERSION } from '../data/ambassadorAgreement.js'
-import { CONTRACT_I18N, resolveContractLang } from '../data/ambassadorContractI18n.js'
+import { resolveContractLang } from '../data/ambassadorContractI18n.js'
+import { AGREEMENT_I18N } from '../data/ambassadorAgreementI18n.js'
 
 // ── Company letterhead details — edit freely. ──
 export const CONTRACT_COMPANY = {
@@ -152,53 +153,55 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
     y += 22
   }
 
-  // ── Courtesy translation in the ambassador's language (English governs) ──
+  // ── Full translated agreement in the ambassador's language (English governs) ──
+  // The complete contract is rendered in the applicant's language first, then the
+  // English governing version follows on a fresh page. Translations are drafts —
+  // only the English version is authoritative (see ambassadorAgreementI18n.js).
   const lang = resolveContractLang(applicant.lang, applicant.country)
-  const t = lang !== 'en' ? CONTRACT_I18N[lang] : null
-  if (t) {
+  const tr = lang !== 'en' ? AGREEMENT_I18N[lang] : null
+  if (tr) {
     renderLetterhead()
     doc.setFont(FONT, 'bold')
     doc.setFontSize(16)
     doc.setTextColor(...INK)
-    doc.text('Ambassador Agreement', margin, y)
+    doc.text(tr.title || 'Ambassador Agreement', margin, y)
     y += 14
     doc.setFont(FONT, 'normal')
     doc.setFontSize(8.5)
     doc.setTextColor(...MUTED)
-    const subtitle = doc.splitTextToSize('Translation for your reference. The English version that follows is the governing version of the agreement.', contentW)
+    const subtitle = doc.splitTextToSize(tr.referenceNote, contentW)
     doc.text(subtitle, margin, y)
-    y += subtitle.length * 11 + 10
+    y += subtitle.length * 11 + 12
 
-    doc.setFont(FONT, 'normal')
-    doc.setFontSize(9.5)
-    doc.setTextColor(60, 60, 60)
-    const introLines = doc.splitTextToSize(t.intro, contentW)
-    ensureSpace(introLines.length * 12 + 6)
-    doc.text(introLines, margin, y)
-    y += introLines.length * 12 + 10
-
-    doc.setFont(FONT, 'bold')
-    doc.setFontSize(10.5)
-    doc.setTextColor(...INK)
-    ensureSpace(16)
-    doc.text(t.obligationsHeading, margin, y)
-    y += 14
-    doc.setFont(FONT, 'normal')
-    doc.setFontSize(9)
-    doc.setTextColor(60, 60, 60)
-    t.obligations.forEach((point) => {
-      const lines = doc.splitTextToSize(`•  ${point}`, contentW - 6)
-      ensureSpace(lines.length * 12 + 4)
-      doc.text(lines, margin + 4, y)
-      y += lines.length * 12 + 3
+    // Translated sections — mirrors the English AGREEMENT_SECTIONS layout.
+    tr.sections.forEach((section) => {
+      ensureSpace(28)
+      doc.setFont(FONT, 'bold')
+      doc.setFontSize(10.5)
+      doc.setTextColor(...INK)
+      doc.text(section.heading, margin, y)
+      y += 13
+      doc.setFont(FONT, 'normal')
+      doc.setFontSize(9)
+      doc.setTextColor(60, 60, 60)
+      section.points.forEach((point) => {
+        const lines = doc.splitTextToSize(`•  ${point}`, contentW - 6)
+        ensureSpace(lines.length * 11 + 4)
+        doc.text(lines, margin + 4, y)
+        y += lines.length * 11 + 3
+      })
+      y += 6
     })
-    y += 10
-    doc.setFont(FONT, 'normal')
-    doc.setFontSize(9.5)
-    doc.setTextColor(...INK)
-    const signLines = doc.splitTextToSize(t.signoff, contentW)
-    ensureSpace(signLines.length * 12 + 6)
-    doc.text(signLines, margin, y)
+
+    if (tr.governingNote) {
+      ensureSpace(30)
+      y += 4
+      doc.setFont(FONT, 'normal')
+      doc.setFontSize(8.5)
+      doc.setTextColor(...MUTED)
+      const govLines = doc.splitTextToSize(tr.governingNote, contentW)
+      doc.text(govLines, margin, y)
+    }
 
     doc.addPage()
     y = margin
