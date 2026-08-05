@@ -113,6 +113,14 @@ function getAdjustedB2bBasePrice(name, sku, rawPrice) {
     ? numericPrice * PERFECT_SHAPE_TOP_COAT_UPLIFT
     : numericPrice
 }
+function isMarkupExemptCuticleProduct(name) {
+  // Scented cuticle oil & scrub range (e.g. "Cooling Coconut Cuticle Oil 5ml -HTF",
+  // "Almond Cuticle Scrub Remover 100ml -HTF"). Their price-list values are already the
+  // final retail prices, so the standard 1.2x B2B markup must not be applied.
+  const normalizedName = String(name || '').toLowerCase()
+  if (!/cuticle\s+(oil|scrub)/.test(normalizedName)) return false
+  return /\d+\s*ml\b/.test(normalizedName)
+}
 const EU_COUNTRIES = ['Austria','Belgium','Bulgaria','Croatia','Cyprus','Czech Republic','Denmark','Estonia','Finland','France','Germany','Greece','Hungary','Ireland','Italy','Latvia','Lithuania','Luxembourg','Malta','Netherlands','Poland','Portugal','Romania','Slovakia','Slovenia','Spain','Sweden']
 const LEGACY_MIRROR_ENABLED = readBooleanEnvFlag(import.meta.env.VITE_ENABLE_LEGACY_MIRROR, false)
 const LEGACY_SITE_ORIGIN = (import.meta.env.VITE_LEGACY_SITE_ORIGIN || 'https://www.gelitup.com').replace(/\/$/, '')
@@ -3741,7 +3749,7 @@ function FullCataloguePage() {
           const cleanName = stripSuffix(name)
           const basePrice = getAdjustedB2bBasePrice(name, sku, price)
           const surcharge = isMultimix30g(name) ? 1.1 : 1
-          const entry = { name, price: basePrice != null ? Math.ceil(basePrice * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10 : null }
+          const entry = { name, price: basePrice != null ? Math.ceil(basePrice * (isMarkupExemptCuticleProduct(name) ? 1 : B2B_PRICE_MULTIPLIER) * surcharge * 10) / 10 : null }
           const keys = [
             normalizeSkuCode(sku),
             normalizeSkuCode(stripSuffix(sku)),
@@ -9433,7 +9441,7 @@ function CheckoutPage() {
           const cleanName = stripSuffix(name)
           const basePrice = getAdjustedB2bBasePrice(name, sku, price)
           const surcharge = isMultimix30g(name) ? 1.1 : 1
-          const entry = { name, price: basePrice != null ? Math.ceil(basePrice * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10 : null }
+          const entry = { name, price: basePrice != null ? Math.ceil(basePrice * (isMarkupExemptCuticleProduct(name) ? 1 : B2B_PRICE_MULTIPLIER) * surcharge * 10) / 10 : null }
           const keys = [normalizeSkuCode(sku), normalizeSkuCode(stripSuffix(sku)), normalizeProductName(name), normalizeProductName(cleanName)]
           // Extract short product code (e.g. "15", "15A", "BTO02", "FR01") from the SKU/name
           const norm = normalizeSkuCode(cleanName)
@@ -12831,7 +12839,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           const cleanName = stripSuffix(name)
           const basePrice = getAdjustedB2bBasePrice(name, sku, price)
           const surcharge = isMultimix30g(name) ? 1.1 : 1
-          const entry = { name, price: basePrice != null ? Math.ceil(basePrice * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10 : null }
+          const entry = { name, price: basePrice != null ? Math.ceil(basePrice * (isMarkupExemptCuticleProduct(name) ? 1 : B2B_PRICE_MULTIPLIER) * surcharge * 10) / 10 : null }
           const keys = [
             normalizeSkuCode(sku),
             normalizeSkuCode(stripSuffix(sku)),
