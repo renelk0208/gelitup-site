@@ -11571,6 +11571,24 @@ function normalizeImageMap(payload) {
 const ORDER_EDIT_HANDOFF_KEY = 'giup_order_edit_handoff'
 const ORDER_EDIT_DRAFT_KEY_PREFIX = 'giup_order_edit_draft'
 
+function getOrderEditDraftKey(orderId) {
+  return `${ORDER_EDIT_DRAFT_KEY_PREFIX}_${orderId}`
+}
+
+function readOrderEditDraft(orderId) {
+  if (!orderId) return null
+  try {
+    const raw = localStorage.getItem(getOrderEditDraftKey(orderId))
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object') return null
+    return parsed
+  }
+  catch {
+    return null
+  }
+}
+
 function isPortalOrderEditPath(pathname) {
   return pathname === '/portal/dashboard/catalog'
     || pathname === '/portal/catalog'
@@ -11587,24 +11605,6 @@ function readOrderEditHandoff() {
     if (!parsed.savedAt || Date.now() - parsed.savedAt > 24 * 60 * 60 * 1000) {
       localStorage.removeItem(ORDER_EDIT_HANDOFF_KEY)
       return null
-    }
-
-    function getOrderEditDraftKey(orderId) {
-      return `${ORDER_EDIT_DRAFT_KEY_PREFIX}_${orderId}`
-    }
-
-    function readOrderEditDraft(orderId) {
-      if (!orderId) return null
-      try {
-        const raw = localStorage.getItem(getOrderEditDraftKey(orderId))
-        if (!raw) return null
-        const parsed = JSON.parse(raw)
-        if (!parsed || typeof parsed !== 'object') return null
-        return parsed
-      }
-      catch {
-        return null
-      }
     }
     return parsed
   }

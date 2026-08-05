@@ -269,68 +269,7 @@ function RegistrationsPanel({ onPreviewDistributor }) {
     const { data, error: err } = await query
     setLoading(false)
     if (err) { setError(err.message); return }
-    const orderRows = Array.isArray(data) ? data : []
-    if (!orderRows.length) {
-      setRows([])
-      return
-    }
-
-    const registrationIds = [...new Set(
-      orderRows
-        .map((row) => String(row?.registration_id || '').trim())
-        .filter(Boolean),
-    )]
-    const customerEmails = [...new Set(
-      orderRows
-        .map((row) => String(row?.customer_email || '').trim().toLowerCase())
-        .filter(Boolean),
-    )]
-
-    const registrationById = new Map()
-    const registrationByEmail = new Map()
-
-    // NOTE: b2b_registrations has NO customer_email column — selecting or filtering
-    // on it makes the entire PostgREST query fail, so only contact_email is used here.
-    if (registrationIds.length > 0) {
-      const { data: regsById } = await supabase
-        .from(REGISTRATIONS_TABLE)
-        .select('id, contact_email, distributor_tier, prices_allocated')
-        .in('id', registrationIds)
-      ;(regsById || []).forEach((reg) => {
-        const idKey = String(reg?.id || '').trim()
-        if (idKey) registrationById.set(idKey, reg)
-        const contactEmailKey = String(reg?.contact_email || '').trim().toLowerCase()
-        if (contactEmailKey) registrationByEmail.set(contactEmailKey, reg)
-      })
-    }
-
-    if (customerEmails.length > 0) {
-      const { data: regsByContactEmail } = await supabase
-        .from(REGISTRATIONS_TABLE)
-        .select('id, contact_email, distributor_tier, prices_allocated')
-        .in('contact_email', customerEmails)
-      ;(regsByContactEmail || []).forEach((reg) => {
-        const idKey = String(reg?.id || '').trim()
-        if (idKey && !registrationById.has(idKey)) registrationById.set(idKey, reg)
-        const contactEmailKey = String(reg?.contact_email || '').trim().toLowerCase()
-        if (contactEmailKey) registrationByEmail.set(contactEmailKey, reg)
-      })
-    }
-
-    const mergedRows = orderRows.map((row) => {
-      const idKey = String(row?.registration_id || '').trim()
-      const emailKey = String(row?.customer_email || '').trim().toLowerCase()
-      const reg = (idKey && registrationById.get(idKey)) || (emailKey && registrationByEmail.get(emailKey)) || null
-      if (!reg) return row
-
-      return {
-        ...row,
-        distributor_tier: reg.distributor_tier || row.distributor_tier || null,
-        prices_allocated: typeof reg.prices_allocated === 'boolean' ? reg.prices_allocated : row.prices_allocated,
-      }
-    })
-
-    setRows(mergedRows)
+    setRows(data || [])
   }, [filter])
 
   useEffect(() => { load() }, [load])
@@ -1532,7 +1471,81 @@ function OrdersPanel() {
     const { data, error: err } = await query
     setLoading(false)
     if (err) { setError(err.message); return }
-    setRows(data || [])
+    const orderRows = Array.isArray(data) ? data : []
+    if (!orderRows.length) {
+      setRows([])
+      return
+    }
+
+    // Enrich order rows with the live distributor tier from the registration,
+    // and auto-heal stale tier values stored on the order rows themselves.
+    const registrationIds = [...new Set(
+      orderRows
+        .map((row) => String(row?.registration_id || '').trim())
+        .filter(Boolean),
+    )]
+    const customerEmails = [...new Set(
+      orderRows
+        .map((row) => String(row?.customer_email || '').trim().toLowerCase())
+        .filter((email) => email && !/[,()]/.test(email)),
+    )]
+
+    const registrationById = new Map()
+    const registrationByEmail = new Map()
+    const indexRegistration = (reg) => {
+      const idKey = String(reg?.id || '').trim()
+      if (idKey && !registrationById.has(idKey)) registrationById.set(idKey, reg)
+      const contactEmailKey = String(reg?.contact_email || '').trim().toLowerCase()
+      if (contactEmailKey && !registrationByEmail.has(contactEmailKey)) registrationByEmail.set(contactEmailKey, reg)
+    }
+
+    // NOTE: b2b_registrations has NO customer_email column — selecting or filtering
+    // on it makes the entire PostgREST query fail, so only contact_email is used here.
+    if (registrationIds.length > 0) {
+      const { data: regsById } = await supabase
+        .from(REGISTRATIONS_TABLE)
+        .select('id, contact_email, distributor_tier, prices_allocated')
+        .in('id', registrationIds)
+      ;(regsById || []).forEach(indexRegistration)
+    }
+
+    if (customerEmails.length > 0) {
+      // ilike gives a case-insensitive exact match per email.
+      const { data: regsByContactEmail } = await supabase
+        .from(REGISTRATIONS_TABLE)
+        .select('id, contact_email, distributor_tier, prices_allocated')
+        .or(customerEmails.map((email) => `contact_email.ilike.${email}`).join(','))
+      ;(regsByContactEmail || []).forEach(indexRegistration)
+    }
+
+    const staleTierFixes = []
+    const mergedRows = orderRows.map((row) => {
+      const idKey = String(row?.registration_id || '').trim()
+      const emailKey = String(row?.customer_email || '').trim().toLowerCase()
+      const reg = (idKey && registrationById.get(idKey)) || (emailKey && registrationByEmail.get(emailKey)) || null
+      if (!reg) return row
+
+      const regTier = String(reg.distributor_tier || '').trim().toLowerCase()
+      const rowTier = String(row?.distributor_tier || '').trim().toLowerCase()
+      if (regTier && regTier !== rowTier && row?.id) {
+        staleTierFixes.push({ orderId: row.id, tier: regTier })
+      }
+
+      return {
+        ...row,
+        distributor_tier: reg.distributor_tier || row.distributor_tier || null,
+        prices_allocated: typeof reg.prices_allocated === 'boolean' ? reg.prices_allocated : row.prices_allocated,
+      }
+    })
+
+    setRows(mergedRows)
+
+    // Persist the corrected tier back onto the order rows (fire-and-forget).
+    if (staleTierFixes.length > 0) {
+      Promise.all(staleTierFixes.map(({ orderId, tier }) => (
+        supabase.from(ORDERS_TABLE).update({ distributor_tier: tier }).eq('id', orderId)
+      ))).catch(() => {})
+    }
   }, [filter])
 
   useEffect(() => { load() }, [load])
@@ -1759,12 +1772,32 @@ function OrdersPanel() {
       }
 
       const wb = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(meta), 'Order Details')
-      XLSX.utils.book_append_sheet(
-        wb,
-        XLSX.utils.json_to_sheet(itemRows.length ? itemRows : [{ Note: 'No items stored for this order' }]),
-        'Items',
-      )
+      // Single sheet: order details block on top, full item list underneath,
+      // so the whole order is visible as soon as the file opens.
+      const metaEntries = Object.entries(meta[0])
+      const aoa = [
+        ...metaEntries.map(([label, value]) => [label, value]),
+        [],
+        ['SKU', 'Item Name', 'Qty', 'Unit Price (EUR)', 'Line Total (EUR)'],
+      ]
+      if (itemRows.length) {
+        itemRows.forEach((item) => {
+          aoa.push([
+            item['SKU'],
+            item['Item Name'],
+            item['Qty'],
+            item['Unit Price (EUR)'],
+            item['Line Total (EUR)'],
+          ])
+        })
+        aoa.push([])
+        aoa.push(['', 'ORDER TOTAL (EUR)', '', '', orderTotal > 0 ? orderTotal : ''])
+      } else {
+        aoa.push(['No items stored for this order'])
+      }
+      const sheet = XLSX.utils.aoa_to_sheet(aoa)
+      sheet['!cols'] = [{ wch: 22 }, { wch: 60 }, { wch: 8 }, { wch: 16 }, { wch: 16 }]
+      XLSX.utils.book_append_sheet(wb, sheet, 'Order')
       const xlsxBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
       const blob = new Blob([xlsxBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
       triggerFileDownload(blob, `order-${row?.id || 'unknown'}.xlsx`)
