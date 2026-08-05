@@ -1480,13 +1480,10 @@ function OrdersPanel() {
     return true
   }
 
-  const syncDistributorTierByEmail = async (email, tier) => {
+  const syncDistributorTierByRegistration = async (registrationId, email, tier) => {
+    const trimmedRegistrationId = String(registrationId || '').trim()
     const trimmedEmail = String(email || '').trim().toLowerCase()
     const trimmedTier = String(tier || '').trim()
-
-    if (!trimmedEmail) {
-      return { ok: false, message: 'No customer email is available to sync the tier.' }
-    }
 
     if (!trimmedTier) {
       return { ok: true, skipped: true }
@@ -1498,6 +1495,24 @@ function OrdersPanel() {
       status: 'approved',
       prices_allocated: true,
       reviewed_at: new Date().toISOString(),
+    }
+
+    if (trimmedRegistrationId) {
+      const { data, error } = await supabase
+        .from(REGISTRATIONS_TABLE)
+        .update(syncPatch)
+        .eq('id', trimmedRegistrationId)
+        .select('id')
+      if (error) {
+        return { ok: false, message: error.message }
+      }
+      if (Array.isArray(data) && data.length > 0) {
+        return { ok: true }
+      }
+    }
+
+    if (!trimmedEmail) {
+      return { ok: false, message: 'No linked registration or customer email is available to sync the tier.' }
     }
 
     const attempts = [
@@ -1833,6 +1848,9 @@ function OrdersPanel() {
       localStorage.setItem('giup_order_edit_handoff', JSON.stringify({
         orderId: row.id,
         customerEmail: row.customer_email || '',
+        registrationId: row.registration_id || null,
+        distributorTier: row.distributor_tier || null,
+        pricesAllocated: typeof row.prices_allocated === 'boolean' ? row.prices_allocated : null,
         items: Array.isArray(row.items) ? row.items : [],
         savedAt: Date.now(),
       }))
@@ -1860,6 +1878,7 @@ function OrdersPanel() {
       nextStatus = 'payment_received'
     }
     const nextRow = {
+      registration_id: row.registration_id || null,
       customer_email: editDraft.customer_email.trim() || null,
       consignee_name: editDraft.consignee_name.trim() || null,
       consignee_phone: editDraft.consignee_phone.trim() || null,
@@ -1873,7 +1892,7 @@ function OrdersPanel() {
     }
     const ok = await updateOrder(id, nextRow)
     if (ok) {
-      const tierSync = await syncDistributorTierByEmail(nextRow.customer_email, nextRow.distributor_tier)
+      const tierSync = await syncDistributorTierByRegistration(nextRow.registration_id, nextRow.customer_email, nextRow.distributor_tier)
       if (!tierSync.ok && !tierSync.skipped) {
         alert(`Order saved, but the linked client tier could not be updated: ${tierSync.message}`)
       }

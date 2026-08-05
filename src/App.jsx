@@ -837,9 +837,11 @@ function extractTaggedValue(notesValue, tagName) {
 
 function getApplicationTypeFromRecord(record) {
   const explicit = String(record?.application_type || '').trim().toLowerCase()
-  if (explicit) return explicit
-
   const tagged = extractTaggedValue(record?.notes, 'APPLICATION_TYPE')
+  const tier = String(record?.distributor_tier || '').trim().toLowerCase()
+
+  if (explicit === 'distributor' || tagged === 'distributor' || tier) return 'distributor'
+  if (explicit) return explicit
   if (tagged) return tagged
 
   return 'b2b_order'
@@ -11782,6 +11784,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     setEditingOrder({
       id: handoff.orderId,
       email: handoff.customerEmail || '',
+      registrationId: handoff.registrationId || null,
+      tier: handoff.distributorTier || null,
+      pricesAllocated: typeof handoff.pricesAllocated === 'boolean' ? handoff.pricesAllocated : null,
       unmatched,
     })
   }, [products, location.pathname]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -14242,9 +14247,22 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       const updatedUnits = selectedCodes.reduce((s, c) => s + (itemQtys[c] || 1), 0)
         + packageCartItems.reduce((s, i) => s + (i.qty || 0), 0)
         + unmatchedUnits
+      const resolvedEditingTier = String(tier || editingOrder.tier || '').trim() || null
+      const resolvedEditingPricesAllocated = typeof pricesAllocated === 'boolean'
+        ? pricesAllocated
+        : typeof editingOrder.pricesAllocated === 'boolean'
+          ? editingOrder.pricesAllocated
+          : null
       const { error: updateError } = await supabase
         .from(ordersTable)
-        .update({ items: updatedItems, total_units: updatedUnits })
+        .update({
+          customer_email: editingOrder.email || null,
+          registration_id: editingOrder.registrationId || null,
+          distributor_tier: resolvedEditingTier,
+          prices_allocated: resolvedEditingPricesAllocated,
+          items: updatedItems,
+          total_units: updatedUnits,
+        })
         .eq('id', editingOrder.id)
       if (updateError) {
         setCheckoutError(`Order update failed: ${updateError.message}`)
@@ -16791,6 +16809,9 @@ function OrdersModule() {
                               localStorage.setItem(ORDER_EDIT_HANDOFF_KEY, JSON.stringify({
                                 orderId: order.id,
                                 customerEmail: order.customer_email || '',
+                                registrationId: order.registration_id || null,
+                                distributorTier: order.distributor_tier || null,
+                                pricesAllocated: typeof order.prices_allocated === 'boolean' ? order.prices_allocated : null,
                                 items: Array.isArray(order.items) ? order.items : [],
                                 savedAt: Date.now(),
                               }))
@@ -17830,14 +17851,29 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
   })
   const [guideRect, setGuideRect] = useState(null)
 
+  const orderEditHandoff = useMemo(() => {
+    if (location.pathname !== '/portal/dashboard/catalog' && location.pathname !== '/portal/catalog') return null
+    return readOrderEditHandoff()
+  }, [location.pathname])
+
   useEffect(() => {
     if (!hasSupabaseConfig || !supabase) return
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data?.user) return
       setPortalUser(data.user)
-      // Fetch live registration so prices_allocated / tier are always up-to-date,
-      // even if user_metadata is stale (e.g. after a password reset flow).
-      const email = data.user.email
+      // When an existing order is being reopened, keep the original client context.
+      if (orderEditHandoff?.registrationId) {
+        const { data: regById } = await supabase
+          .from(registrationsTable)
+          .select('prices_allocated, distributor_tier, status, application_type, notes')
+          .eq('id', orderEditHandoff.registrationId)
+          .maybeSingle()
+        if (regById) {
+          setLiveRegistration(regById)
+          return
+        }
+      }
+      const email = orderEditHandoff?.customerEmail || data.user.email
       if (email) {
         const { data: reg } = await supabase
           .from(registrationsTable)
@@ -17849,7 +17885,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
         if (reg) setLiveRegistration(reg)
       }
     })
-  }, [])
+  }, [orderEditHandoff, registrationsTable])
 
   useEffect(() => {
     let isMounted = true
@@ -18421,6 +18457,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
   // Prefer live registration data (always fresh) over stale user_metadata
   const effectiveTier = tierOverride
     ?? liveRegistration?.distributor_tier
+    ?? orderEditHandoff?.distributorTier
     ?? portalUser?.user_metadata?.distributor_tier
     ?? null
   // Prices are shown by default. The ONLY case where prices are hidden is when we have a
@@ -18429,9 +18466,19 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
   const isUnreleasedDistributor = liveRegistration !== null
     && getApplicationTypeFromRecord(liveRegistration) === 'distributor'
     && !Boolean(liveRegistration.prices_allocated)
+  const livePricesAllocated = typeof liveRegistration?.prices_allocated === 'boolean'
+    ? liveRegistration.prices_allocated
+    : null
+  const handoffPricesAllocated = typeof orderEditHandoff?.pricesAllocated === 'boolean'
+    ? orderEditHandoff.pricesAllocated
+    : null
   const effectivePricesAllocated = pricesAllocatedOverride !== null
     ? pricesAllocatedOverride
-    : !isUnreleasedDistributor
+    : livePricesAllocated !== null
+      ? livePricesAllocated
+      : handoffPricesAllocated !== null
+        ? handoffPricesAllocated
+        : !isUnreleasedDistributor
 
   if (portalUser?.user_metadata?.role === 'buyer') {
     return (
