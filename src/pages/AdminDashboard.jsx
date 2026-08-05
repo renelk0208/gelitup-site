@@ -33,31 +33,6 @@ function buildDistributorAccessEmail(row) {
     subject: 'Your Distributor Tier Is Active - Portal Login Ready',
     html: `<p>Dear ${row?.contact_name || 'Partner'},</p><p>Your account for <strong>${row?.company_name || 'your company'}</strong> has been confirmed as a <strong>Distributor</strong>.</p><p>Your assigned tier: <strong>${tierLabel}</strong>.</p><p>To activate your access, first create or refresh your password using the secure link below.</p><p><a href="${createPasswordLink}" style="background:#7c3aed;color:#fff;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:700;display:inline-block;">Set Password & Access Portal</a></p><p style="margin-top:12px;">After setting your password, sign in here: <a href="${portalLink}">${portalLink}</a></p><p>If you have questions, contact us at distribution@gelitup.com.</p><p>The GEL.IT.UP Distribution Team</p>`,
   }
-  const openReminderDraft = (row, sentAtIso, sentAtLabel) => {
-    const dueIso = sentAtIso ? addOneMonth(sentAtIso) : null
-    const dueLabel = dueIso ? fmtDate(dueIso) : 'in 1 month'
-    const subject = `Reminder: Send next GEL.IT.UP sample kit to ${row?.full_name || row?.email || 'ambassador'}`
-    const body = [
-      `Ambassador: ${row?.full_name || '-'}`,
-      `Email: ${row?.email || '-'}`,
-      `Instagram: @${row?.instagram || '-'}`,
-      `Last shipment email sent: ${sentAtLabel || (sentAtIso ? fmtDateTime(sentAtIso) : 'Unknown')}`,
-      `Next sample kit due: ${dueLabel}`,
-      '',
-      'Please prepare and send the next sample kit follow-up.',
-    ].join('\n')
-    const href = `mailto:${encodeURIComponent(AMBASSADOR_REMINDER_EMAIL)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-    window.open(href, '_blank')
-  }
-  const startNextPackageFlow = (row) => {
-    persistShipmentEmailLock((prev) => {
-      const next = { ...prev }
-      delete next[row.id]
-      return next
-    })
-    setNextPackageMode((prev) => ({ ...prev, [row.id]: true }))
-    setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: true }))
-  }
 }
 
 const ORDER_STATUSES = ['submitted', 'processing', 'shipped', 'completed', 'cancelled']
@@ -207,6 +182,12 @@ function extractTaggedValue(notesValue, tagName) {
   const notes = String(notesValue || '')
   const match = notes.match(new RegExp(`\\[${tagName}:([^\\]]+)\\]`, 'i'))
   return String(match?.[1] || '').trim().toLowerCase()
+}
+
+function extractTaggedRawValue(notesValue, tagName) {
+  const notes = String(notesValue || '')
+  const match = notes.match(new RegExp(`\\[${tagName}:([^\\]]+)\\]`, 'i'))
+  return String(match?.[1] || '').trim()
 }
 
 function getResolvedApplicationType(row) {
@@ -3345,8 +3326,10 @@ function AmbassadorApplicationsPanel() {
   const [msgBody, setMsgBody] = useState('')
   const [ship, setShip] = useState({}) // { [id]: { shipment_details, tracking_number, tracking_url } }
   const [noteDraft, setNoteDraft] = useState({}) // { [id]: 'new internal note being typed' }
+  const [packAdditionDraft, setPackAdditionDraft] = useState({}) // { [id]: 'extra pack items to consider' }
   const [currentAdminEmail, setCurrentAdminEmail] = useState('')
-  const [currentAdminName, setCurrentAdminName] = useState('')
+  const [reminderDateDraft, setReminderDateDraft] = useState({})
+  const [reminderNoteDraft, setReminderNoteDraft] = useState({})
   const [openIds, setOpenIds] = useState(() => new Set()) // which applicant cards are expanded
   const [shipmentPanelOpen, setShipmentPanelOpen] = useState({})
   const [nextPackageMode, setNextPackageMode] = useState({})
@@ -3368,12 +3351,6 @@ function AmbassadorApplicationsPanel() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       const user = data?.user || null
-      const displayName = String(
-        user?.user_metadata?.full_name
-        || user?.user_metadata?.name
-        || ''
-      ).trim()
-      setCurrentAdminName(displayName)
       setCurrentAdminEmail(user?.email || '')
     })
   }, [])
@@ -3484,6 +3461,51 @@ function AmbassadorApplicationsPanel() {
       return next
     })
   }
+  const openReminderDraft = (row, sentAtIso, sentAtLabel, nextReminderAtIso, nextReminderNoteText) => {
+    const dueLabel = nextReminderAtIso ? fmtDate(nextReminderAtIso) : 'in 1 month'
+    const body = [
+      `Ambassador: ${row?.full_name || '-'}`,
+      `Email: ${row?.email || '-'}`,
+      `Instagram: @${row?.instagram || '-'}`,
+      `Last shipment email sent: ${sentAtLabel || (sentAtIso ? fmtDateTime(sentAtIso) : 'Unknown')}`,
+      `Next sample kit due: ${dueLabel}`,
+      `What to send: ${String(nextReminderNoteText || '').trim() || '(not set)'}`,
+      '',
+      'Please prepare and send the next sample kit follow-up.',
+    ].join('\n')
+    const subject = `Reminder: Send next GEL.IT.UP sample kit to ${row?.full_name || row?.email || 'ambassador'}`
+    const href = `mailto:${encodeURIComponent(AMBASSADOR_REMINDER_EMAIL)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    window.open(href, '_blank')
+  }
+  const startNextPackageFlow = async (row) => {
+    persistShipmentEmailLock((prev) => {
+      const next = { ...prev }
+      delete next[row.id]
+      return next
+    })
+    const metaResult = await saveShipmentMeta(row, { sentAt: '', nextReminderAt: '', nextReminderNote: '' })
+    if (!metaResult.ok) {
+      alert(`Could not reset closed shipment flow: ${metaResult.error}`)
+      return
+    }
+    setReminderDateDraft((prev) => ({ ...prev, [row.id]: '' }))
+    setReminderNoteDraft((prev) => ({ ...prev, [row.id]: '' }))
+    setNextPackageMode((prev) => ({ ...prev, [row.id]: true }))
+    setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: true }))
+  }
+  const saveReminderDetails = async (row, sentAtIso, fallbackReminderAtIso) => {
+    const rawDate = String(reminderDateVal(row, fallbackReminderAtIso) || '').trim()
+    const nextReminderAt = rawDate ? new Date(`${rawDate}T10:00:00Z`).toISOString() : (sentAtIso ? addOneMonth(sentAtIso) : '')
+    const nextReminderNote = reminderNoteVal(row)
+    const result = await saveShipmentMeta(row, { nextReminderAt, nextReminderNote })
+    if (!result.ok) {
+      alert(`Could not save reminder details: ${result.error}`)
+      return
+    }
+    setReminderDateDraft((prev) => ({ ...prev, [row.id]: nextReminderAt ? nextReminderAt.slice(0, 10) : '' }))
+    setReminderNoteDraft((prev) => ({ ...prev, [row.id]: nextReminderNote }))
+    setEmail(row.id, 'sent', 'Reminder details saved')
+  }
 
   // Sends the welcome email with the Ambassador Agreement PDF attached.
   // Used automatically on approval and manually via the "Send contract" button.
@@ -3583,14 +3605,7 @@ function AmbassadorApplicationsPanel() {
     { bg: '#FDF2F8', text: '#9D174D', border: '#FBCFE8' },
     { bg: '#FEFCE8', text: '#854D0E', border: '#FEF08A' },
   ]
-  const getAdminDisplayLabel = () => {
-    if (currentAdminName) return currentAdminName
-    const email = String(currentAdminEmail || '').trim()
-    if (!email) return 'Unknown admin'
-    return email.split('@')[0]
-      .replace(/[._-]+/g, ' ')
-      .replace(/\b\w/g, (c) => c.toUpperCase())
-  }
+  const getAdminDisplayLabel = () => String(currentAdminEmail || '').trim() || 'admin@unknown'
   const parseNoteLine = (line) => {
     const raw = String(line || '').trim()
     const match = raw.match(/^\[([^\]]+)\]\s*(?:\[([^\]]+)\]\s*)?(.*)$/)
@@ -3603,6 +3618,45 @@ function AmbassadorApplicationsPanel() {
     }
   }
   const authorSwatch = (author) => NOTE_AUTHOR_SWATCHES[hashKey(String(author || 'unknown')) % NOTE_AUTHOR_SWATCHES.length]
+  const readMetaTag = (row, tagName) => extractTaggedRawValue(row?.admin_comment, tagName)
+  const decodeReminderNote = (value) => {
+    const raw = String(value || '').trim()
+    if (!raw) return ''
+    try { return decodeURIComponent(raw) } catch (_) { return raw }
+  }
+  const encodeReminderNote = (value) => {
+    const raw = String(value || '').trim()
+    return raw ? encodeURIComponent(raw) : ''
+  }
+  const buildCommentWithMeta = (row, patch) => {
+    let nextComment = String(row?.admin_comment || '')
+    if (Object.prototype.hasOwnProperty.call(patch, 'sentAt')) {
+      nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_SENT_AT', patch.sentAt || '')
+    }
+    if (Object.prototype.hasOwnProperty.call(patch, 'nextReminderAt')) {
+      nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_NEXT_REMINDER_AT', patch.nextReminderAt || '')
+    }
+    if (Object.prototype.hasOwnProperty.call(patch, 'nextReminderNote')) {
+      nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_REMINDER_NOTE', encodeReminderNote(patch.nextReminderNote))
+    }
+    return nextComment
+  }
+  const saveShipmentMeta = async (row, patch) => {
+    const nextComment = buildCommentWithMeta(row, patch)
+    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: nextComment || null }).eq('id', row.id)
+    if (err) return { ok: false, error: err.message }
+    patchRow(row.id, { admin_comment: nextComment || null })
+    return { ok: true, comment: nextComment || null }
+  }
+  const reminderNoteVal = (row) => {
+    if (Object.prototype.hasOwnProperty.call(reminderNoteDraft, row.id)) return reminderNoteDraft[row.id]
+    return decodeReminderNote(readMetaTag(row, 'SHIPMENT_REMINDER_NOTE'))
+  }
+  const reminderDateVal = (row, fallbackIso) => {
+    if (Object.prototype.hasOwnProperty.call(reminderDateDraft, row.id)) return reminderDateDraft[row.id]
+    const tagged = readMetaTag(row, 'SHIPMENT_NEXT_REMINDER_AT') || fallbackIso || ''
+    return tagged ? String(tagged).slice(0, 10) : ''
+  }
   const getAmbassadorType = (row) => extractTaggedValue(row?.admin_comment, 'AMBASSADOR_TYPE')
   const setAmbassadorType = async (row, type) => {
     const normalized = String(type || '').trim().toLowerCase()
@@ -3634,7 +3688,7 @@ function AmbassadorApplicationsPanel() {
   // appended into admin_comment; we now keep them out of the editable notes and
   // surface them (plus the new message_log column) in the Messages section.
   const isAmbassadorMsgLine = (line) => String(line).includes('📧')
-  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE):[^\]]+\]$/i.test(String(line).trim())
+  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE):[^\]]+\]$/i.test(String(line).trim())
 
   const noteLines = (row) => String(row.admin_comment || '').split('\n').filter((l) => l.trim() && !isAmbassadorMsgLine(l) && !isMetaLine(l))
   const noteEntries = (row) => noteLines(row).map((line) => parseNoteLine(line))
@@ -3709,10 +3763,10 @@ function AmbassadorApplicationsPanel() {
       lines.splice(idx, 1)
     } else if (original.stamp || original.author) {
       const stamp = original.stamp || fmtDate(new Date().toISOString())
-      const author = original.author ? ` [${original.author}]` : ''
+      const author = ` [${original.author || getAdminDisplayLabel()}]`
       lines[idx] = `[${stamp}]${author} ${edited.trim()}`
     } else {
-      lines[idx] = edited.trim()
+      lines[idx] = `[${fmtDate(new Date().toISOString())}] [${getAdminDisplayLabel()}] ${edited.trim()}`
     }
     await saveNotes(row, lines)
   }
@@ -3778,14 +3832,24 @@ function AmbassadorApplicationsPanel() {
       setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Shipment email + About Us letter sent to ${row.email}` : res.error)
       if (res.ok) {
         const sentAt = new Date().toISOString()
+        const nextReminderAt = addOneMonth(sentAt)
+        const nextReminderNote = reminderNoteVal(row) || currentDraft.shipment_details || ''
         persistShipmentEmailLock((prev) => ({
           ...prev,
           [row.id]: { signature: JSON.stringify(currentDraft), sentAt },
         }))
+        const metaResult = await saveShipmentMeta(row, { sentAt, nextReminderAt, nextReminderNote })
+        if (!metaResult.ok) {
+          setEmail(row.id, 'error', `Shipment email sent, but reminder metadata failed to save: ${metaResult.error}`)
+          setSaving(null)
+          return
+        }
+        setReminderDateDraft((prev) => ({ ...prev, [row.id]: nextReminderAt ? nextReminderAt.slice(0, 10) : '' }))
+        setReminderNoteDraft((prev) => ({ ...prev, [row.id]: nextReminderNote }))
         setNextPackageMode((prev) => ({ ...prev, [row.id]: false }))
         setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: false }))
         logAmbassadorSend(updatedRow, { to: row.email, subject, body: htmlToText(html) })
-        openReminderDraft(updatedRow, sentAt, fmtDateTime(sentAt))
+        openReminderDraft(updatedRow, sentAt, fmtDateTime(sentAt), nextReminderAt, nextReminderNote)
       }
     } else {
       setEmail(row.id, 'sent', 'Follow-up details saved')
@@ -3851,10 +3915,14 @@ function AmbassadorApplicationsPanel() {
               ? shipmentLockRaw
               : (typeof shipmentLockRaw === 'string' ? { signature: shipmentLockRaw, sentAt: null } : null)
             const isShipmentLocked = shipmentLock?.signature === shipmentSignature(row)
+            const sentAtMeta = readMetaTag(row, 'SHIPMENT_SENT_AT')
+            const reminderAtMeta = readMetaTag(row, 'SHIPMENT_NEXT_REMINDER_AT')
             const shipmentHistory = latestShipmentHistory(row)
-            const sentAt = shipmentLock?.sentAt || shipmentHistory.sentAtIso || null
+            const sentAt = shipmentLock?.sentAt || sentAtMeta || shipmentHistory.sentAtIso || null
             const sentAtLabel = sentAt ? fmtDateTime(sentAt) : (shipmentHistory.sentAtLabel || null)
             const shipmentPreviouslySent = Boolean(sentAt || shipmentHistory.sentAtLabel)
+            const nextReminderAt = reminderAtMeta || (sentAt ? addOneMonth(sentAt) : null)
+            const nextReminderNote = reminderNoteVal(row)
             const contractAlreadySent = hasWelcomeContractSent(row)
             const ambassadorType = getAmbassadorType(row)
             const ambassadorTypeLabel = ambassadorType === 'super_ambassador'
@@ -3864,10 +3932,43 @@ function AmbassadorApplicationsPanel() {
               : ambassadorType === 'standard_ambassador'
                 ? 'Standard Ambassador'
                 : 'Not set'
+            const ambassadorPackByType = {
+              standard_ambassador: {
+                title: 'Standard Pack',
+                items: [
+                  'Standard Sample Box',
+                  'Premium builder gel',
+                  '3-in-1 builder gel',
+                  'Nail file',
+                  'Photo Perfect / Cream / Cuticle Oil (based on current stock)',
+                ],
+              },
+              super_ambassador: {
+                title: 'Super Ambassador Pack',
+                items: [
+                  'Standard Sample Pack',
+                  '2 x Premium Builder Gel (Clear / Colour)',
+                  'Multimix: 1 x 30g and 1 x 60g (based on current stock)',
+                  '3-in-1 Clear and 1 colour (based on current stock)',
+                  'All in One Liquid',
+                  'Nail file',
+                  'Cuticle oil',
+                  'Photo Perfect Cuticle Oil',
+                  '3 different Cat Eye shades',
+                  '1 shimmer shade',
+                  '1 metallic shade',
+                  'Chrome / mirror powder with a mirror top',
+                ],
+              },
+              extreme_ambassador: {
+                title: 'Extreme Pack',
+                items: [],
+              },
+            }
+            const selectedPack = ambassadorPackByType[ambassadorType] || null
             const isNextPackageMode = Boolean(nextPackageMode[row.id])
             const isShipmentClosed = shipmentPreviouslySent && !isNextPackageMode
             const isShipmentPanelExpanded = shipmentPanelOpen[row.id] ?? !isShipmentClosed
-            const nextReminderAt = sentAt ? addOneMonth(sentAt) : null
             const isReminderDue = Boolean(nextReminderAt && new Date(nextReminderAt).getTime() <= Date.now())
             return (
               <div key={row.id} className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
@@ -4008,7 +4109,7 @@ function AmbassadorApplicationsPanel() {
                                     className="rounded border px-1.5 py-0.5 text-[10px] font-semibold"
                                     style={{ backgroundColor: swatch.bg, color: swatch.text, borderColor: swatch.border }}
                                   >
-                                    {entry.author || 'Unknown admin'}
+                                    {entry.author || 'legacy note (email not recorded)'}
                                   </span>
                                 </span>
                                 <span>{entry.text || entry.raw}</span>
@@ -4082,6 +4183,32 @@ function AmbassadorApplicationsPanel() {
                           Extreme Ambassador
                         </label>
                       </div>
+                      {selectedPack ? (
+                        <div className="mt-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50/60 px-2.5 py-2">
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">{selectedPack.title} contents</p>
+                          {selectedPack.items.length > 0 ? (
+                            <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-700">
+                              {selectedPack.items.map((item) => (
+                                <li key={item}>{item}</li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="mt-1 text-[11px] text-slate-600">Pack details not added yet for this type.</p>
+                          )}
+                          <div className="mt-2">
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Extra items to add</p>
+                            <textarea
+                              value={packAdditionDraft[row.id] || ''}
+                              onChange={(e) => setPackAdditionDraft((prev) => ({ ...prev, [row.id]: e.target.value }))}
+                              placeholder="Write anything extra to add to this pack..."
+                              rows={2}
+                              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="mt-2 text-[11px] text-slate-500">Select an ambassador type to view the pack contents.</p>
+                      )}
                     </div>
                     {isShipmentClosed && !isShipmentPanelExpanded && (
                       <div className="mt-2 rounded-lg border border-emerald-200 bg-white px-2.5 py-2 text-[11px]">
@@ -4090,9 +4217,10 @@ function AmbassadorApplicationsPanel() {
                         <p className={`${isReminderDue ? 'font-semibold text-amber-700' : 'text-slate-600'}`}>
                           Next sample kit reminder: {nextReminderAt ? fmtDate(nextReminderAt) : 'Set when shipment date is available'}{isReminderDue ? ' (due now)' : ''}
                         </p>
+                        <p className="text-slate-600">What to send: {nextReminderNote || 'Not set'}</p>
                         <div className="mt-2 flex flex-wrap gap-2">
                           <button onClick={() => setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: true }))} className="rounded-lg border border-slate-300 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">Expand details</button>
-                          <button onClick={() => openReminderDraft(row, sentAt, sentAtLabel)} className="rounded-lg border border-sky-300 px-2.5 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-50">Open reminder email draft</button>
+                          <button onClick={() => openReminderDraft(row, sentAt, sentAtLabel, nextReminderAt, nextReminderNote)} className="rounded-lg border border-sky-300 px-2.5 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-50">Open reminder email draft</button>
                           <button onClick={() => startNextPackageFlow(row)} className="rounded-lg border border-fuchsia-300 px-2.5 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50">Start next package</button>
                         </div>
                       </div>
@@ -4125,6 +4253,34 @@ function AmbassadorApplicationsPanel() {
                           placeholder="Tracking URL"
                           className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
                         />
+                      </div>
+                      <div className="rounded-lg border border-slate-200 bg-white p-2.5">
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Next package reminder</p>
+                        <div className="mt-1.5 grid gap-2 sm:grid-cols-2">
+                          <input
+                            type="date"
+                            value={reminderDateVal(row, nextReminderAt)}
+                            onChange={(e) => setReminderDateDraft((prev) => ({ ...prev, [row.id]: e.target.value }))}
+                            className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
+                          />
+                          <button
+                            onClick={() => saveReminderDetails(row, sentAt, nextReminderAt)}
+                            disabled={saving === row.id}
+                            className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60"
+                          >
+                            Save reminder details
+                          </button>
+                        </div>
+                        <textarea
+                          value={reminderNoteVal(row)}
+                          onChange={(e) => setReminderNoteDraft((prev) => ({ ...prev, [row.id]: e.target.value }))}
+                          placeholder="What needs to be sent in the next sample kit?"
+                          rows={2}
+                          className="mt-2 w-full rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs"
+                        />
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <button onClick={() => openReminderDraft(row, sentAt, sentAtLabel, nextReminderAt, reminderNoteVal(row))} className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50">Open reminder email draft</button>
+                        </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <button onClick={() => saveShipment(row, false)} disabled={saving === row.id} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Save box &amp; tracking</button>
@@ -4176,7 +4332,7 @@ function AmbassadorApplicationsPanel() {
                                       className="rounded border px-1.5 py-0.5 text-[10px] font-semibold"
                                       style={{ backgroundColor: swatch.bg, color: swatch.text, borderColor: swatch.border }}
                                     >
-                                      {entry.author || 'Unknown admin'}
+                                      {entry.author || 'legacy note (email not recorded)'}
                                     </span>
                                   </span>
                                   <span>{entry.text || entry.raw}</span>
