@@ -1726,13 +1726,14 @@ function OrdersPanel() {
       status: normalizeOrderStatus(row.status),
       distributor_tier: row.distributor_tier || '',
       items: Array.isArray(row.items)
-        ? row.items.map(it => {
-            if (it && typeof it === 'object') {
-              return { text: it.name || it.sku || '', sku: it.sku || '', qty: Math.max(1, Number(it.qty) || 1) }
-            }
-            const str = String(it || '')
-            const m = str.match(/^(.+?) x(\d+)$/)
-            return m ? { text: m[1], sku: '', qty: parseInt(m[2], 10) } : { text: str, sku: '', qty: 1 }
+        ? row.items.map((it, index) => {
+            // Reuse the shared parser + price-list resolver so SKUs stored as
+            // plain strings (or missing from the object) are filled in here too.
+            const parsed = parseOrderItemEntry(it, index)
+            const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, 1.0)
+            const sku = String((it && typeof it === 'object' && it.sku) || resolved.resolvedSku || parsed.sku || '').trim()
+            const text = String((it && typeof it === 'object' && it.name) || parsed.name || '').trim()
+            return { text, sku, qty: Math.max(1, Number(parsed.qty) || 1) }
           })
         : [],
     })
@@ -2173,13 +2174,28 @@ function OrdersPanel() {
                             className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-200"
                           />
                           {itemSearch.trim().length >= 2 && (() => {
+                            // Normalize away dashes/spacing so SKUs like "GIUP-SBCIMF" and
+                            // "GIUP SBCIMF" match price-list entries regardless of formatting.
+                            const normalize = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]+/g, '')
                             const terms = itemSearch.trim().toLowerCase().split(/\s+/)
-                            const matches = priceCatalog
+                            const normQuery = normalize(itemSearch)
+                            let matches = priceCatalog
                               .filter(p => {
                                 const hay = `${p.name || ''} ${p.sku || ''}`.toLowerCase()
-                                return terms.every(t => hay.includes(t))
+                                const normHay = normalize(hay)
+                                return terms.every(t => hay.includes(t)) || (normQuery && normHay.includes(normQuery))
                               })
                               .slice(0, 12)
+                            // Fall back to the same SKU resolver used for pricing, so aliases
+                            // and short codes (e.g. "GIUP-SBCIMF", "SH07") still find the product.
+                            if (!matches.length) {
+                              const q = itemSearch.trim()
+                              const resolved = resolveOrderItemPriceEntry({ sku: q, name: q }, priceLookupMap, 1.0)
+                              if (resolved?.resolvedName) {
+                                const hit = priceCatalog.find(p => (p.name || '') === resolved.resolvedName)
+                                matches = [hit || { name: resolved.resolvedName, sku: resolved.resolvedSku || '', price: null }]
+                              }
+                            }
                             if (!matches.length) return <p className="mt-1 px-1 text-[11px] text-slate-400">No products match “{itemSearch.trim()}”.</p>
                             return (
                               <ul className="mt-1 max-h-48 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200 bg-white">
