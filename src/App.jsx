@@ -11569,6 +11569,7 @@ function normalizeImageMap(payload) {
 // Admin → portal order-edit handoff: AdminDashboard writes an order's items here so the
 // distributor portal can reopen the order in the full catalogue with the cart preloaded.
 const ORDER_EDIT_HANDOFF_KEY = 'giup_order_edit_handoff'
+const ORDER_EDIT_DRAFT_KEY_PREFIX = 'giup_order_edit_draft'
 
 function isPortalOrderEditPath(pathname) {
   return pathname === '/portal/dashboard/catalog'
@@ -11586,6 +11587,24 @@ function readOrderEditHandoff() {
     if (!parsed.savedAt || Date.now() - parsed.savedAt > 24 * 60 * 60 * 1000) {
       localStorage.removeItem(ORDER_EDIT_HANDOFF_KEY)
       return null
+    }
+
+    function getOrderEditDraftKey(orderId) {
+      return `${ORDER_EDIT_DRAFT_KEY_PREFIX}_${orderId}`
+    }
+
+    function readOrderEditDraft(orderId) {
+      if (!orderId) return null
+      try {
+        const raw = localStorage.getItem(getOrderEditDraftKey(orderId))
+        if (!raw) return null
+        const parsed = JSON.parse(raw)
+        if (!parsed || typeof parsed !== 'object') return null
+        return parsed
+      }
+      catch {
+        return null
+      }
     }
     return parsed
   }
@@ -11682,6 +11701,10 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const registrationsTable = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || DEFAULT_REGISTRATIONS_TABLE
   const silverFreeGuarantee = useMemo(() => getSilverFreeGuaranteeText(new Date()), [])
   const orderEditOriginalProfileRef = useRef(null)
+  const pendingOrderEditHandoff = useMemo(
+    () => (isPortalOrderEditPath(location.pathname) ? readOrderEditHandoff() : null),
+    [location.pathname],
+  )
 
   useEffect(() => {
     if (editingOrder) return
@@ -11814,18 +11837,35 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       }
     }
 
-    setSelectedCodes(codes)
-    setItemQtys(qtys)
-    setPackageCartItems([])
-    setIncludeProfessionalBasePack(false)
-    setEditingOrder({
+    const resolvedEditingOrder = {
       id: handoff.orderId,
       email: handoff.customerEmail || '',
       registrationId: handoff.registrationId || null,
       tier: handoff.distributorTier || null,
       pricesAllocated: typeof handoff.pricesAllocated === 'boolean' ? handoff.pricesAllocated : null,
+      handoffSavedAt: handoff.savedAt || null,
       unmatched,
-    })
+    }
+    const savedDraft = readOrderEditDraft(handoff.orderId)
+    const canRestoreDraft = savedDraft?.editingOrder?.handoffSavedAt
+      && savedDraft.editingOrder.handoffSavedAt === resolvedEditingOrder.handoffSavedAt
+    setSelectedCodes(canRestoreDraft && Array.isArray(savedDraft.selectedCodes) ? savedDraft.selectedCodes : codes)
+    setItemQtys(canRestoreDraft && savedDraft.itemQtys && typeof savedDraft.itemQtys === 'object' ? savedDraft.itemQtys : qtys)
+    setPackageCartItems(canRestoreDraft && Array.isArray(savedDraft.packageCartItems) ? savedDraft.packageCartItems : [])
+    setIncludeProfessionalBasePack(canRestoreDraft ? Boolean(savedDraft.includeProfessionalBasePack) : false)
+    setEditingOrder(canRestoreDraft && savedDraft.editingOrder
+      ? {
+          ...resolvedEditingOrder,
+          ...savedDraft.editingOrder,
+          id: resolvedEditingOrder.id,
+          email: resolvedEditingOrder.email,
+          registrationId: resolvedEditingOrder.registrationId,
+          tier: resolvedEditingOrder.tier,
+          pricesAllocated: resolvedEditingOrder.pricesAllocated,
+          unmatched: Array.isArray(savedDraft.editingOrder.unmatched) ? savedDraft.editingOrder.unmatched : resolvedEditingOrder.unmatched,
+          handoffSavedAt: resolvedEditingOrder.handoffSavedAt,
+        }
+      : resolvedEditingOrder)
     const fallbackProfile = buildClientProfileFromOrderEditHandoff(handoff)
     setClientProfile(fallbackProfile)
 
@@ -11885,6 +11925,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   const cancelOrderEdit = () => {
     try { localStorage.removeItem(ORDER_EDIT_HANDOFF_KEY) } catch { /* ignore */ }
+    if (editingOrder?.id) {
+      try { localStorage.removeItem(getOrderEditDraftKey(editingOrder.id)) } catch { /* ignore */ }
+    }
     if (orderEditOriginalProfileRef.current) {
       setClientProfile(orderEditOriginalProfileRef.current)
       orderEditOriginalProfileRef.current = null
@@ -12004,6 +12047,19 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       abandonedReminderCount: contentsChanged ? 0 : (existing?.abandonedReminderCount || 0),
     }))
   }, [selectedCodes, itemQtys, packageCartItems])
+
+  useEffect(() => {
+    if (!editingOrder?.id) return
+    const key = getOrderEditDraftKey(editingOrder.id)
+    localStorage.setItem(key, JSON.stringify({
+      editingOrder,
+      selectedCodes,
+      itemQtys,
+      packageCartItems,
+      includeProfessionalBasePack,
+      savedAt: Date.now(),
+    }))
+  }, [editingOrder, selectedCodes, itemQtys, packageCartItems, includeProfessionalBasePack])
 
   // Sync portal cart to Supabase draft_carts so admin can see abandoned carts
   useEffect(() => {
@@ -14326,6 +14382,12 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       return
     }
 
+    if (!editingOrder && pendingOrderEditHandoff?.orderId) {
+      setCheckoutError('Order edit session is still loading. Please wait a moment and try again.')
+      setCheckoutMessage('')
+      return
+    }
+
     // ── Order-edit mode: update the existing order instead of creating a new one ──
     if (editingOrder) {
       setIsSubmittingOrder(true)
@@ -14344,12 +14406,29 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         + packageCartItems.reduce((s, i) => s + (i.qty || 0), 0)
         + unmatchedUnits
       const resolvedEditingTier = String(tier || editingOrder.tier || '').trim() || null
+      const resolvedConsigneeName = String(
+        shippingConsigneeName
+        || clientProfile.shippingName
+        || clientProfile.contactPersonName
+        || clientProfile.customerName
+        || '',
+      ).trim() || null
+      const resolvedConsigneePhone = String(
+        shippingConsigneePhone
+        || clientProfile.shippingPhone
+        || clientProfile.contactPhone
+        || '',
+      ).trim() || null
+      const resolvedShippingAddress = String(shippingAddressComposed || '').trim() || null
       const { error: updateError } = await supabase
         .from(ordersTable)
         .update({
           customer_email: editingOrder.email || null,
           registration_id: editingOrder.registrationId || null,
           distributor_tier: resolvedEditingTier,
+          consignee_name: resolvedConsigneeName,
+          consignee_phone: resolvedConsigneePhone,
+          shipping_address: resolvedShippingAddress,
           items: updatedItems,
           total_units: updatedUnits,
         })
@@ -14361,6 +14440,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       }
       const finishedOrderId = editingOrder.id
       try { localStorage.removeItem(ORDER_EDIT_HANDOFF_KEY) } catch { /* ignore */ }
+      try { localStorage.removeItem(getOrderEditDraftKey(finishedOrderId)) } catch { /* ignore */ }
       if (orderEditOriginalProfileRef.current) {
         setClientProfile(orderEditOriginalProfileRef.current)
         orderEditOriginalProfileRef.current = null
@@ -15215,9 +15295,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           })()}
 
           <div className="mt-8 space-y-3 border-t border-slate-100 pt-6">
-            <button onClick={submitOrder} disabled={isSubmittingOrder} className="flex w-full items-center justify-center rounded-2xl bg-fuchsia-600 py-4 text-base font-bold text-white shadow-lg transition hover:bg-fuchsia-700 disabled:cursor-not-allowed disabled:bg-fuchsia-300">
+            <button onClick={submitOrder} disabled={isSubmittingOrder || (!editingOrder && Boolean(pendingOrderEditHandoff?.orderId))} className="flex w-full items-center justify-center rounded-2xl bg-fuchsia-600 py-4 text-base font-bold text-white shadow-lg transition hover:bg-fuchsia-700 disabled:cursor-not-allowed disabled:bg-fuchsia-300">
               {isSubmittingOrder
                 ? <span className="flex items-center gap-2"><svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>Submitting…</span>
+                : (!editingOrder && pendingOrderEditHandoff?.orderId)
+                  ? 'Loading order edit session…'
                 : editingOrder
                   ? `Update Order #${editingOrder.id} · ${totalUnits} unit${totalUnits === 1 ? '' : 's'} →`
                   : `Place Order · ${totalUnits} unit${totalUnits === 1 ? '' : 's'} →`
@@ -16902,6 +16984,7 @@ function OrdersModule() {
                         <button
                           onClick={() => {
                             try {
+                              localStorage.removeItem(getOrderEditDraftKey(order.id))
                               localStorage.setItem(ORDER_EDIT_HANDOFF_KEY, JSON.stringify({
                                 orderId: order.id,
                                 customerEmail: order.customer_email || '',
