@@ -3578,6 +3578,7 @@ function AmbassadorApplicationsPanel() {
   const [currentAdminEmail, setCurrentAdminEmail] = useState('')
   const [reminderDateDraft, setReminderDateDraft] = useState({})
   const [reminderNoteDraft, setReminderNoteDraft] = useState({})
+const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail, date } forces a next-ship date before tracking saves
   const [openIds, setOpenIds] = useState(() => new Set()) // which applicant cards are expanded
   const [shipmentPanelOpen, setShipmentPanelOpen] = useState({})
   const [nextPackageMode, setNextPackageMode] = useState({})
@@ -3844,6 +3845,11 @@ function AmbassadorApplicationsPanel() {
 
   // Follow-up: PR box details, tracking + comments.
   const shipVal = (row, field) => (ship[row.id]?.[field] ?? row[field] ?? '')
+const requestShipmentSave = (row, alsoEmail) => {
+const hasDate = Boolean(String(reminderDateVal(row, null) || '').trim())
+if (hasDate) { saveShipment(row, alsoEmail); return }
+setShipDatePrompt({ rowId: row.id, alsoEmail, date: '' })
+}
   const setShipField = (id, field, value) => setShip(prev => ({ ...prev, [id]: { ...prev[id], [field]: value } }))
   const NOTE_AUTHOR_SWATCHES = [
     { bg: '#EEF2FF', text: '#3730A3', border: '#C7D2FE' },
@@ -3866,6 +3872,17 @@ function AmbassadorApplicationsPanel() {
     }
   }
   const authorSwatch = (author) => NOTE_AUTHOR_SWATCHES[hashKey(String(author || 'unknown')) % NOTE_AUTHOR_SWATCHES.length]
+const renderAmbassadorMessageLine = (line) => {
+const text = String(line || '')
+const m = text.match(/ by ([^\s\u00b7]+@[^\s\u00b7]+)/)
+if (!m) return text
+const email = m[1]
+const swatch = authorSwatch(email)
+const idx = text.indexOf(m[0])
+const before = text.slice(0, idx)
+const after = text.slice(idx + m[0].length)
+return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] font-semibold" style={{ backgroundColor: swatch.bg, color: swatch.text, borderColor: swatch.border }}>{email}</span>{after}</>)
+}
   const readMetaTag = (row, tagName) => extractTaggedRawValue(row?.admin_comment, tagName)
   const decodeReminderNote = (value) => {
     const raw = String(value || '').trim()
@@ -4026,7 +4043,7 @@ function AmbassadorApplicationsPanel() {
     await saveNotes(row, lines)
   }
 
-  const saveShipment = async (row, alsoEmail) => {
+  const saveShipment = async (row, alsoEmail, overrideReminderDate) => {
     const currentDraft = getShipmentDraft(row)
     const draft = {
       shipment_details: currentDraft.shipment_details || null,
@@ -4080,7 +4097,8 @@ function AmbassadorApplicationsPanel() {
       setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Shipment email + About Us letter sent to ${row.email}` : res.error)
       if (res.ok) {
         const sentAt = new Date().toISOString()
-        const nextReminderAt = addOneMonth(sentAt)
+        const chosenReminderRaw = String(overrideReminderDate || reminderDateVal(row, null) || '').trim()
+const nextReminderAt = chosenReminderRaw ? new Date(`${chosenReminderRaw}T10:00:00Z`).toISOString() : addOneMonth(sentAt)
         const nextReminderNote = reminderNoteVal(row) || currentDraft.shipment_details || ''
         persistShipmentEmailLock((prev) => ({
           ...prev,
@@ -4100,7 +4118,12 @@ function AmbassadorApplicationsPanel() {
         openReminderDraft(updatedRow, sentAt, fmtDateTime(sentAt), nextReminderAt, nextReminderNote)
       }
     } else {
-      setEmail(row.id, 'sent', 'Follow-up details saved')
+      const chosenReminderRawB = String(overrideReminderDate || reminderDateVal(row, null) || '').trim()
+if (chosenReminderRawB) {
+const chosenIso = new Date(`${chosenReminderRawB}T10:00:00Z`).toISOString()
+await saveShipmentMeta(row, { nextReminderAt: chosenIso, nextReminderNote: reminderNoteVal(row) })
+}
+setEmail(row.id, 'sent', 'Follow-up details saved')
     }
     setSaving(null)
   }
@@ -4384,13 +4407,14 @@ function AmbassadorApplicationsPanel() {
                     </div>
                   </div>
                 )}
-                {/* Messages sent to the ambassador — shared record, visible to every admin (read-only) */}
+                {!isApproved && !isRejected && (<div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3"><p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">Internal notes (private)</p>{noteEntries(row).length > 0 && (<div className="mb-1.5 max-h-32 space-y-1 overflow-y-auto">{noteEntries(row).map((entry, idx) => {const swatch = authorSwatch(entry.author);return (<div key={idx} className="flex items-start justify-between gap-2 rounded bg-white px-2 py-1 text-[11px] text-slate-600"><span className="min-w-0 whitespace-pre-line"><span className="mb-0.5 flex flex-wrap items-center gap-1.5"><span className="text-[10px] text-slate-400">{entry.stamp || '—'}</span><span className="rounded border px-1.5 py-0.5 text-[10px] font-semibold" style={{ backgroundColor: swatch.bg, color: swatch.text, borderColor: swatch.border }}>{entry.author || 'legacy note (email not recorded)'}</span></span><span>{entry.text || entry.raw}</span></span><span className="flex shrink-0 gap-1.5"><button type="button" title="Edit" onClick={() => editNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-slate-700 disabled:opacity-50">✎</button><button type="button" title="Delete" onClick={() => deleteNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-rose-600 disabled:opacity-50">🗑</button></span></div>)})}</div>)}<div className="flex gap-2"><input value={noteDraft[row.id] || ''} onChange={(e) => setNoteDraft(prev => ({ ...prev, [row.id]: e.target.value }))} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addNote(row) } }} placeholder="Add a note…" className="flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs" /><button onClick={() => addNote(row)} disabled={saving === row.id || !(noteDraft[row.id] || '').trim()} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Add note</button></div></div>)}
+{/* Messages sent to the ambassador — shared record, visible to every admin (read-only) */}
                 {messageLines(row).length > 0 && (
                   <div className="mt-3 rounded-lg border border-sky-200 bg-sky-50/60 p-3">
                     <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-sky-700">Messages sent to ambassador (visible to all admins)</p>
                     <div className="max-h-40 space-y-1 overflow-y-auto">
                       {messageLines(row).map((line, idx) => (
-                        <div key={idx} className="whitespace-pre-line rounded bg-white px-2 py-1 text-[11px] text-slate-600">{line}</div>
+                        <div key={idx} className="whitespace-pre-line rounded bg-white px-2 py-1 text-[11px] text-slate-600">{renderAmbassadorMessageLine(line)}</div>
                       ))}
                     </div>
                   </div>
@@ -4531,8 +4555,8 @@ function AmbassadorApplicationsPanel() {
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        <button onClick={() => saveShipment(row, false)} disabled={saving === row.id} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Save box &amp; tracking</button>
-                        <button onClick={() => saveShipment(row, true)} disabled={saving === row.id || (isShipmentClosed && !isNextPackageMode) || isShipmentLocked} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
+                        <button onClick={() => requestShipmentSave(row, false)} disabled={saving === row.id} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Save box &amp; tracking</button>
+                        <button onClick={() => requestShipmentSave(row, true)} disabled={saving === row.id || (isShipmentClosed && !isNextPackageMode) || isShipmentLocked} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
                         {isShipmentClosed && !isNextPackageMode && (
                           <button onClick={() => startNextPackageFlow(row)} className="rounded-lg border border-fuchsia-300 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50">Start next package</button>
                         )}
@@ -4617,7 +4641,8 @@ function AmbassadorApplicationsPanel() {
         </div>
       )}
 
-      {msgRow && (
+      {shipDatePrompt && (<div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4"><div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"><h3 className="text-base font-bold text-slate-900">When should the next package go out?</h3><p className="mt-1 text-xs text-slate-500">Pick the next ship date before saving these tracking details — this keeps follow-ups from being missed.</p><input type="date" value={shipDatePrompt.date || ''} onChange={(e) => setShipDatePrompt((prev) => ({ ...prev, date: e.target.value }))} className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /><div className="mt-4 flex justify-end gap-2"><button onClick={() => setShipDatePrompt(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button><button onClick={() => { const row = rows.find((r) => r.id === shipDatePrompt.rowId); if (!row || !shipDatePrompt.date) return; setReminderDateDraft((prev) => ({ ...prev, [row.id]: shipDatePrompt.date })); const alsoEmail = shipDatePrompt.alsoEmail; const chosenDate = shipDatePrompt.date; setShipDatePrompt(null); saveShipment(row, alsoEmail, chosenDate) }} disabled={!shipDatePrompt.date} className="rounded-lg bg-[#D43790] px-3 py-2 text-sm font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Confirm date &amp; save</button></div></div></div>)}
+{msgRow && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4" onClick={() => setMsgRow(null)}>
           <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-base font-bold text-slate-900">Message {msgRow.full_name}</h3>
