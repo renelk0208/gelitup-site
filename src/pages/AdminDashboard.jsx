@@ -35,6 +35,14 @@ function buildDistributorAccessEmail(row) {
   }
 }
 
+function getRegistrationDisplayName(row) {
+  const customerType = String(row?.customer_type || '').trim().toLowerCase()
+  if (customerType === 'client') {
+    return row?.contact_name || row?.company_name || 'Unknown client'
+  }
+  return row?.company_name || row?.contact_name || 'Unknown company'
+}
+
 const ORDER_STATUSES = ['submitted', 'processing', 'shipped', 'completed', 'cancelled']
 
 function statusBadge(status) {
@@ -277,7 +285,7 @@ function RegistrationsPanel({ onPreviewDistributor }) {
   const updateStatus = async (row, status) => {
     const current = String(row?.status || '').toLowerCase()
     if (current === status) return
-    const ok = window.confirm(`Are you sure you want to change status for "${row.company_name}" from ${current || 'unknown'} to ${status}?`)
+    const ok = window.confirm(`Are you sure you want to change status for "${getRegistrationDisplayName(row)}" from ${current || 'unknown'} to ${status}?`)
     if (!ok) return
     setSaving(row.id)
     const { error: err } = await supabase
@@ -333,7 +341,7 @@ function RegistrationsPanel({ onPreviewDistributor }) {
     }
 
     const firstConfirm = window.confirm(
-      `Permanently delete rejected registration "${row.company_name || 'Unknown company'}" (${row.contact_email || 'no email'})?\n\nThis cannot be undone.`
+      `Permanently delete rejected registration "${getRegistrationDisplayName(row)}" (${row.contact_email || 'no email'})?\n\nThis cannot be undone.`
     )
     if (!firstConfirm) return
 
@@ -389,7 +397,7 @@ function RegistrationsPanel({ onPreviewDistributor }) {
   }
 
   const convertToB2B = async (row) => {
-    if (!window.confirm(`Convert "${row.company_name}" from Distributor to B2B Client?\n\nThis will:\n• Set application_type → b2b_order\n• Set status → approved\n• Set prices_allocated → true\n• Clear distributor_tier\n• Update [APPLICATION_TYPE] tag in notes`)) return
+    if (!window.confirm(`Convert "${getRegistrationDisplayName(row)}" from Distributor to B2B Client?\n\nThis will:\n• Set application_type → b2b_order\n• Set status → approved\n• Set prices_allocated → true\n• Clear distributor_tier\n• Update [APPLICATION_TYPE] tag in notes`)) return
     setSaving(row.id)
     // Replace [APPLICATION_TYPE:distributor] tag in notes so it no longer overrides
     // the application_type column (getResolvedApplicationType checks notes tag first).
@@ -509,7 +517,7 @@ function RegistrationsPanel({ onPreviewDistributor }) {
     const currentTierLabel = titleCaseTierLabel(row.distributor_tier || '')
     const nextTierLabel = titleCaseTierLabel(newTier || '')
     const ok = window.confirm(
-      `Are you sure you want to change ${row.company_name} tier from "${currentTierLabel}" to "${nextTierLabel}"?\n\n` +
+      `Are you sure you want to change ${getRegistrationDisplayName(row)} tier from "${currentTierLabel}" to "${nextTierLabel}"?\n\n` +
       (newTier
         ? (sameTier
           ? 'This will confirm distributor activation on the current tier, enable login-ready tier pricing, and send a confirmation email.'
@@ -628,6 +636,7 @@ function RegistrationsPanel({ onPreviewDistributor }) {
         {rows.map(row => {
           const resolvedType = getResolvedApplicationType(row)
           const access = getDistributorAccessSummary(row)
+          const displayName = getRegistrationDisplayName(row)
           return (
           <li key={row.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
             <button
@@ -636,7 +645,7 @@ function RegistrationsPanel({ onPreviewDistributor }) {
               onClick={() => setExpanded(expanded === row.id ? null : row.id)}
             >
               {statusBadge(row.status)}
-              <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">{row.company_name}</span>
+              <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">{displayName}</span>
               <span className="hidden truncate text-xs text-slate-400 sm:block">{row.contact_email}</span>
               <span className="hidden text-xs text-slate-400 md:block">{row.country}</span>
               <span className="shrink-0 text-xs text-slate-400">{fmtDate(row.created_at)}</span>
