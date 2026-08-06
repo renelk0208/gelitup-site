@@ -17164,6 +17164,14 @@ function PendingApplicationsModule() {
     return 'bg-slate-100 text-slate-800'
   }, [])
 
+  const getApplicationDisplayName = useCallback((application) => {
+    const customerType = String(application?.customer_type || '').trim().toLowerCase()
+    if (customerType === 'client') {
+      return application?.contact_name || application?.company_name || '-'
+    }
+    return application?.company_name || application?.contact_name || '-'
+  }, [])
+
   const loadPendingApplications = useCallback(async () => {
     if (!hasSupabaseConfig || !supabase) {
       setErrorMessage('Supabase is not configured.')
@@ -17320,7 +17328,7 @@ function PendingApplicationsModule() {
       `Type: ${applicationType === 'distributor' ? 'Distributor Application' : 'B2B Registration Request'}`,
       `Order Profile: ${applicationType === 'b2b_order' ? orderProfile : '-'}`,
       `Submission Status: ${application.status || '-'}`,
-      `Company/Client: ${application.company_name || '-'}`,
+      `Company/Client: ${getApplicationDisplayName(application)}`,
       `Customer Type: ${application.customer_type === 'client' ? 'Client' : 'Company'}`,
       `Business Type: ${application.business_type || '-'}`,
       `VAT: ${application.vat_number || '-'}`,
@@ -17356,7 +17364,7 @@ function PendingApplicationsModule() {
 
     const lines = [
       `Application #${application.id}`,
-      `Company/Client: ${application.company_name || '-'}`,
+      `Company/Client: ${getApplicationDisplayName(application)}`,
       `Customer Type: ${application.customer_type === 'client' ? 'Client' : 'Company'}`,
       `VAT: ${application.vat_number || '-'}`,
       `Invoice Address: ${invoiceAddress || '-'}`,
@@ -17396,7 +17404,7 @@ function PendingApplicationsModule() {
 
     const lines = [
       `Application #${application.id}`,
-      `Company/Client: ${application.company_name || '-'}`,
+      `Company/Client: ${getApplicationDisplayName(application)}`,
       `Shipping Type: ${application.shipping_type || '-'}`,
       `Shipping same as invoice: ${shippingSameAsInvoice ? 'Yes' : 'No'}`,
       `Shipping Address: ${shippingAddress || '-'}`,
@@ -17579,6 +17587,7 @@ function PendingApplicationsModule() {
                 {visibleApplications.map((application) => {
                   const isDistributor = isDistributorSubmission(application)
                   const draft = getActionDraft(application)
+                  const displayName = getApplicationDisplayName(application)
                   return (
                   <tr key={application.id} className="border-b border-slate-100 text-slate-700">
                     <td className="py-2 pr-4 font-semibold">#{application.id}</td>
@@ -17593,7 +17602,7 @@ function PendingApplicationsModule() {
                         {application.status || '-'}
                       </span>
                     </td>
-                    <td className="py-2 pr-4">{application.company_name}</td>
+                    <td className="py-2 pr-4">{displayName}</td>
                     <td className="py-2 pr-4">
                       <div>{application.contact_name}</div>
                       <div className="text-xs text-slate-500">{application.contact_email}</div>
@@ -17818,6 +17827,7 @@ function PendingApplicationsModule() {
               <tbody>
                 {reviewedApplications.map((application) => {
                   const isDistributor = isDistributorSubmission(application)
+                  const displayName = getApplicationDisplayName(application)
                   return (
                   <tr key={`reviewed-${application.id}`} className="border-b border-slate-100 text-slate-700">
                     <td className="py-2 pr-4 font-semibold">#{application.id}</td>
@@ -17836,7 +17846,7 @@ function PendingApplicationsModule() {
                       <div className="text-xs text-slate-500">{application.reviewed_by || '-'}</div>
                     </td>
                     <td className="py-2 pr-4">
-                      <div>{application.company_name}</div>
+                      <div>{displayName}</div>
                       <div className="text-xs text-slate-500">VAT: {application.vat_number || '-'}</div>
                     </td>
                     <td className="py-2 pr-4">
