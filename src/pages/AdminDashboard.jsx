@@ -3751,9 +3751,9 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       alert(`Could not save reminder details: ${result.error}`)
       return
     }
-    setReminderDateDraft((prev) => ({ ...prev, [row.id]: nextReminderAt ? nextReminderAt.slice(0, 10) : '' }))
-    setReminderNoteDraft((prev) => ({ ...prev, [row.id]: nextReminderNote }))
-    setEmail(row.id, 'sent', 'Reminder details saved')
+    setReminderDateDraft((prev) => ({ ...prev, [row.id]: '' }))
+  setReminderNoteDraft((prev) => ({ ...prev, [row.id]: nextReminderNote }))
+  setEmail(row.id, 'sent', 'Reminder saved — enter the date for the next parcel')
   }
 
   // Sends the welcome email with the Ambassador Agreement PDF attached.
@@ -3846,8 +3846,6 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   // Follow-up: PR box details, tracking + comments.
   const shipVal = (row, field) => (ship[row.id]?.[field] ?? row[field] ?? '')
 const requestShipmentSave = (row, alsoEmail) => {
-const hasDate = Boolean(String(reminderDateVal(row, null) || '').trim())
-if (hasDate) { saveShipment(row, alsoEmail); return }
 setShipDatePrompt({ rowId: row.id, alsoEmail, date: '' })
 }
   const setShipField = (id, field, value) => setShip(prev => ({ ...prev, [id]: { ...prev[id], [field]: value } }))
@@ -4044,91 +4042,75 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   }
 
   const saveShipment = async (row, alsoEmail, overrideReminderDate) => {
-    const currentDraft = getShipmentDraft(row)
-    const draft = {
-      shipment_details: currentDraft.shipment_details || null,
-      tracking_number: currentDraft.tracking_number || null,
-      tracking_url: currentDraft.tracking_url || null,
-    }
-    setSaving(row.id)
-    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update(draft).eq('id', row.id)
-    if (err) { setSaving(null); alert(err.message); return }
-    patchRow(row.id, draft)
-    if (alsoEmail) {
-      const updatedRow = { ...row, ...draft }
-      const fullName = String(updatedRow?.full_name || '').trim()
-      const discountCode = String(updatedRow?.discount_code || '').trim()
-      const normalizedEmail = String(updatedRow?.email || '').trim().toLowerCase()
-      const setPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(normalizedEmail)}`
-      if (!fullName) {
-        setSaving(null)
-        setEmail(row.id, 'error', 'Shipment email blocked: ambassador name is missing.')
-        return
-      }
-      if (!discountCode) {
-        setSaving(null)
-        setEmail(row.id, 'error', 'Shipment email blocked: discount code is missing.')
-        return
-      }
-      if (!normalizedEmail) {
-        setSaving(null)
-        setEmail(row.id, 'error', 'Shipment email blocked: ambassador email is missing.')
-        return
-      }
-      setEmail(row.id, 'sending', '')
-      try {
-        await ensureAmbassadorPortalAccount(updatedRow)
-      } catch (e) {
-        setSaving(null)
-        setEmail(row.id, 'error', e.message || 'Could not provision ambassador portal account.')
-        return
-      }
-      const { subject, html } = buildAmbassadorShipmentEmail(updatedRow, draft, setPasswordLink)
-      let attachments = []
-      try {
-        const letterAttachment = await buildPdfAttachment(AMBASSADOR_LETTER_ATTACHMENT_URL, 'Gelitup Ambassador Letter.pdf')
-        attachments = [letterAttachment]
-      } catch (e) {
-        setSaving(null)
-        setEmail(row.id, 'error', e.message || 'Could not attach About Us letter PDF.')
-        return
-      }
-      const res = await sendAmbassadorEmail({ to: row.email, subject, html, attachments })
-      setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Shipment email + About Us letter sent to ${row.email}` : res.error)
-      if (res.ok) {
-        const sentAt = new Date().toISOString()
-        const chosenReminderRaw = String(overrideReminderDate || reminderDateVal(row, null) || '').trim()
-const nextReminderAt = chosenReminderRaw ? new Date(`${chosenReminderRaw}T10:00:00Z`).toISOString() : addOneMonth(sentAt)
-        const nextReminderNote = reminderNoteVal(row) || currentDraft.shipment_details || ''
-        persistShipmentEmailLock((prev) => ({
-          ...prev,
-          [row.id]: { signature: JSON.stringify(currentDraft), sentAt },
-        }))
-        const metaResult = await saveShipmentMeta(row, { sentAt, nextReminderAt, nextReminderNote })
-        if (!metaResult.ok) {
-          setEmail(row.id, 'error', `Shipment email sent, but reminder metadata failed to save: ${metaResult.error}`)
-          setSaving(null)
-          return
-        }
-        setReminderDateDraft((prev) => ({ ...prev, [row.id]: nextReminderAt ? nextReminderAt.slice(0, 10) : '' }))
-        setReminderNoteDraft((prev) => ({ ...prev, [row.id]: nextReminderNote }))
-        setNextPackageMode((prev) => ({ ...prev, [row.id]: false }))
-        setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: false }))
-        logAmbassadorSend(updatedRow, { to: row.email, subject, body: htmlToText(html) })
-        openReminderDraft(updatedRow, sentAt, fmtDateTime(sentAt), nextReminderAt, nextReminderNote)
-      }
-    } else {
-      const chosenReminderRawB = String(overrideReminderDate || reminderDateVal(row, null) || '').trim()
-if (chosenReminderRawB) {
-const chosenIso = new Date(`${chosenReminderRawB}T10:00:00Z`).toISOString()
-await saveShipmentMeta(row, { nextReminderAt: chosenIso, nextReminderNote: reminderNoteVal(row) })
-}
-setEmail(row.id, 'sent', 'Follow-up details saved')
-    }
-    setSaving(null)
+  const currentDraft = getShipmentDraft(row)
+  const hasShipmentInfo = Boolean(currentDraft.tracking_number || currentDraft.tracking_url || currentDraft.shipment_details)
+  const draft = {
+    shipment_details: currentDraft.shipment_details || null,
+    tracking_number: currentDraft.tracking_number || null,
+    tracking_url: currentDraft.tracking_url || null,
   }
-
-  const deleteApplication = async (row) => {
+  setSaving(row.id)
+  const { error: err } = await supabase.from(AMBASSADOR_TABLE).update(draft).eq('id', row.id)
+  if (err) { setSaving(null); alert(err.message); return }
+  patchRow(row.id, draft)
+  if (hasShipmentInfo) {
+    const shippedStamp = fmtDate(new Date().toISOString())
+    const archiveLine = `[${shippedStamp}] [${getAdminDisplayLabel()}] 📦 Shipped — ${[
+      currentDraft.tracking_number ? `Tracking: ${currentDraft.tracking_number}` : null,
+      currentDraft.tracking_url || null,
+      currentDraft.shipment_details ? `Box: ${currentDraft.shipment_details}` : null,
+    ].filter(Boolean).join(' · ')}`
+    const loggedComment = row.admin_comment ? `${row.admin_comment}\n${archiveLine}` : archiveLine
+    const { error: logErr } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: loggedComment }).eq('id', row.id)
+    if (!logErr) patchRow(row.id, { admin_comment: loggedComment })
+    setShip((prev) => ({ ...prev, [row.id]: { ...prev[row.id], shipment_details: '', tracking_number: '', tracking_url: '' } }))
+  }
+  if (alsoEmail) {
+    const updatedRow = { ...row, ...draft }
+    const fullName = String(updatedRow?.full_name || '').trim()
+    const discountCode = String(updatedRow?.discount_code || '').trim()
+    const normalizedEmail = String(updatedRow?.email || '').trim().toLowerCase()
+    const setPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(normalizedEmail)}`
+    if (!fullName) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: ambassador name is missing.'); return }
+    if (!discountCode) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: discount code is missing.'); return }
+    if (!normalizedEmail) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: ambassador email is missing.'); return }
+    setEmail(row.id, 'sending', '')
+    try { await ensureAmbassadorPortalAccount(updatedRow) } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not provision ambassador portal account.'); return }
+    const { subject, html } = buildAmbassadorShipmentEmail(updatedRow, draft, setPasswordLink)
+    let attachments = []
+    try {
+      const letterAttachment = await buildPdfAttachment(AMBASSADOR_LETTER_ATTACHMENT_URL, 'Gelitup Ambassador Letter.pdf')
+      attachments = [letterAttachment]
+    } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not attach About Us letter PDF.'); return }
+    const res = await sendAmbassadorEmail({ to: row.email, subject, html, attachments })
+    setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Shipment email + About Us letter sent to ${row.email}` : res.error)
+    if (res.ok) {
+      const sentAt = new Date().toISOString()
+      const chosenReminderRaw = String(overrideReminderDate || reminderDateVal(row, null) || '').trim()
+      const nextReminderAt = chosenReminderRaw ? new Date(`${chosenReminderRaw}T10:00:00Z`).toISOString() : addOneMonth(sentAt)
+      const nextReminderNote = reminderNoteVal(row) || currentDraft.shipment_details || ''
+      persistShipmentEmailLock((prev) => ({ ...prev, [row.id]: { signature: JSON.stringify(currentDraft), sentAt }, }))
+      const metaResult = await saveShipmentMeta(row, { sentAt, nextReminderAt, nextReminderNote })
+      if (!metaResult.ok) { setEmail(row.id, 'error', `Shipment email sent, but reminder metadata failed to save: ${metaResult.error}`); setSaving(null); return }
+      setReminderDateDraft((prev) => ({ ...prev, [row.id]: nextReminderAt ? nextReminderAt.slice(0, 10) : '' }))
+      setReminderNoteDraft((prev) => ({ ...prev, [row.id]: nextReminderNote }))
+      setNextPackageMode((prev) => ({ ...prev, [row.id]: false }))
+      setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: false }))
+      logAmbassadorSend(updatedRow, { to: row.email, subject, body: htmlToText(html) })
+      openReminderDraft(updatedRow, sentAt, fmtDateTime(sentAt), nextReminderAt, nextReminderNote)
+    }
+  } else {
+    const chosenReminderRawB = String(overrideReminderDate || reminderDateVal(row, null) || '').trim()
+    if (chosenReminderRawB) {
+      const chosenIso = new Date(`${chosenReminderRawB}T10:00:00Z`).toISOString()
+      await saveShipmentMeta(row, { nextReminderAt: chosenIso, nextReminderNote: reminderNoteVal(row) })
+      setReminderDateDraft((prev) => ({ ...prev, [row.id]: chosenIso.slice(0, 10) }))
+    }
+    setEmail(row.id, 'sent', hasShipmentInfo ? 'Shipment logged — box & tracking cleared for the next parcel' : 'Follow-up details saved')
+  }
+  setSaving(null)
+} 
+const deleteApplication = async (row) => {
     if (String(row?.status || '').toLowerCase() !== 'rejected') {
       alert('Only rejected applications can be deleted.')
       return
