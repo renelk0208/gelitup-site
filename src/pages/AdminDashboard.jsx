@@ -3794,6 +3794,11 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     patchRow(row.id, { status: 'approved', reviewed_at: reviewedAt, discount_code: discountCode })
     const updatedRow = { ...row, status: 'approved', reviewed_at: reviewedAt, discount_code: discountCode }
     await sendWelcomeContractEmail(updatedRow)
+    try {
+      const factorySubject = `New GEL.IT.UP Ambassador approved — ${updatedRow.full_name || 'New ambassador'}`
+      const factoryHtml = `<p>A new ambassador has been approved and a PR package needs preparing.</p><p><strong>Name:</strong> ${updatedRow.full_name || ''}<br/><strong>Instagram:</strong> ${updatedRow.instagram || ''}<br/><strong>Country:</strong> ${updatedRow.country || ''}<br/><strong>Address:</strong> ${updatedRow.address || ''}, ${updatedRow.city || ''} ${updatedRow.postal_code || ''}<br/><strong>Ambassador code:</strong> ${discountCode || ''}</p><p>Please mark it acknowledged in the admin panel once you've seen this.</p>`
+      await Promise.all(['leeukopf@gmail.com', 'acc1.leeukopf@gmail.com'].map((to) => sendAmbassadorEmail({ to, subject: factorySubject, html: factoryHtml })))
+    } catch (_) {}
     setSaving(null)
   }
 
@@ -3925,6 +3930,16 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const normalized = String(type || '').trim().toLowerCase()
     const value = ['standard_ambassador', 'super_ambassador', 'extreme_ambassador'].includes(normalized) ? normalized : ''
     const nextComment = ensureTaggedValue(row.admin_comment, 'AMBASSADOR_TYPE', value ? value.toUpperCase() : '')
+    setSaving(row.id)
+    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: nextComment }).eq('id', row.id)
+    setSaving(null)
+    if (err) { alert(err.message); return }
+    patchRow(row.id, { admin_comment: nextComment })
+  }
+  const getFactoryAck = (row) => extractTaggedValue(row?.admin_comment, 'FACTORY_ACK')
+  const acknowledgeFactory = async (row) => {
+    const value = `${getAdminDisplayLabel()} on ${fmtDate(new Date().toISOString())}`
+    const nextComment = ensureTaggedValue(row.admin_comment, 'FACTORY_ACK', value)
     setSaving(row.id)
     const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: nextComment }).eq('id', row.id)
     setSaving(null)
@@ -4178,6 +4193,7 @@ const deleteApplication = async (row) => {
             const nextReminderNote = reminderNoteVal(row)
             const contractAlreadySent = hasWelcomeContractSent(row)
             const ambassadorType = getAmbassadorType(row)
+            const factoryAckValue = getFactoryAck(row)
             const ambassadorTypeLabel = ambassadorType === 'super_ambassador'
               ? 'Super Ambassador'
               : ambassadorType === 'extreme_ambassador'
@@ -4304,6 +4320,17 @@ const deleteApplication = async (row) => {
                           {contractAlreadySent ? '📄 Contract sent' : '📄 Send contract'}
                         </button>
                       )}
+                      {isApproved && (factoryAckValue ? (
+                        <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">🏭 Factory acknowledged</span>
+                      ) : (
+                        <button
+                          onClick={() => acknowledgeFactory(row)}
+                          disabled={saving === row.id}
+                          className="rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-50 disabled:opacity-60"
+                        >
+                          🏭 Mark factory acknowledged
+                        </button>
+                      ))}
                       {!isApproved && (
                         <button
                           onClick={() => approveRow(row)}
