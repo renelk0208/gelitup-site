@@ -3434,7 +3434,7 @@ function buildAmbassadorShipmentEmail(row, ship, setPasswordLink) {
       <p>Great news — your GEL.IT.UP PR package is on its way! 🎉</p>
       ${parts.join('')}
       <p>📎 We've attached a short <strong>“About Us”</strong> letter — please have a read before you film, so you know a little about the brand and what to mention.</p>
-      <p>Tag <strong>@gelitup</strong> and send your looks to our WhatsApp/Viber so we can feature you.</p>
+      <p>Tag <strong>@gelitupinternational</strong> and send your looks to our WhatsApp/Viber so we can feature you.</p>
       <p>The GEL.IT.UP Team</p>
     </div>`,
   }

@@ -37,7 +37,7 @@ export const CONTRACT_I18N = {
     intro: 'Felicitări — cererea ta a fost aprobată și acum ești ambasador oficial GEL.IT.UP! Contractul semnat este atașat. Îți reamintim la ce te angajezi:',
     obligationsHeading: 'Obligațiile tale ca ambasador',
     obligations: [
-      'Publică cel puțin 4 conținuturi proprii în fiecare lună (cel puțin unul video/reel) folosind produsele GEL.IT.UP și etichetând #gelitup și @gelitup.',
+      'Publică cel puțin 4 conținuturi proprii în fiecare lună (cel puțin unul video/reel) folosind produsele GEL.IT.UP și etichetând #gelitup și @gelitupinternational.',
       'Menționează parteneriatul acolo unde regulile de publicitate o cer (de ex. #ad sau „primit cadou”).',
       'Folosește codul tău personal de reducere doar pentru tine și pentru clienți/urmăritori reali — niciodată pe site-uri de cupoane sau de revânzare.',
       'Permite GEL.IT.UP să reposteze, să prezinte și să refolosească conținutul în care ne etichetezi, cu menționarea ta.',
@@ -54,7 +54,7 @@ export const CONTRACT_I18N = {
     intro: 'Félicitations — votre candidature a été acceptée et vous êtes désormais ambassadeur/ambassadrice officiel(le) GEL.IT.UP ! Votre contrat signé est en pièce jointe. Voici un rappel de vos engagements :',
     obligationsHeading: 'Vos obligations en tant qu’ambassadeur',
     obligations: [
-      'Publier au moins 4 contenus originaux chaque mois (dont au moins une vidéo/reel) avec les produits GEL.IT.UP en identifiant #gelitup et @gelitup.',
+      'Publier au moins 4 contenus originaux chaque mois (dont au moins une vidéo/reel) avec les produits GEL.IT.UP en identifiant #gelitup et @gelitupinternational.',
       'Indiquer le partenariat lorsque la réglementation publicitaire l’exige (par ex. #ad ou « offert »).',
       'Utiliser votre code de réduction personnel uniquement pour vous et vos clients/abonnés réels — jamais sur des sites de coupons ou de revente.',
       'Autoriser GEL.IT.UP à repartager, mettre en avant et réutiliser les contenus où vous nous identifiez, avec mention de votre compte.',
@@ -71,7 +71,7 @@ export const CONTRACT_I18N = {
     intro: 'Herzlichen Glückwunsch — deine Bewerbung wurde angenommen und du bist jetzt offizielle(r) GEL.IT.UP-Ambassador! Dein unterschriebener Vertrag ist angehängt. Hier eine Erinnerung an deine Verpflichtungen:',
     obligationsHeading: 'Deine Pflichten als Ambassador',
     obligations: [
-      'Poste jeden Monat mindestens 4 eigene Inhalte (mindestens ein Video/Reel) mit GEL.IT.UP-Produkten und markiere #gelitup und @gelitup.',
+      'Poste jeden Monat mindestens 4 eigene Inhalte (mindestens ein Video/Reel) mit GEL.IT.UP-Produkten und markiere #gelitup und @gelitupinternational.',
       'Kennzeichne die Partnerschaft, wo die Werberegeln es verlangen (z. B. #ad oder „gesponsert“).',
       'Nutze deinen persönlichen Rabattcode nur für dich und echte Kund:innen/Follower — niemals auf Gutschein- oder Wiederverkaufsseiten.',
       'Erlaube GEL.IT.UP, Inhalte, in denen du uns markierst, mit Namensnennung zu reposten, zu zeigen und wiederzuverwenden.',
@@ -88,7 +88,7 @@ export const CONTRACT_I18N = {
     intro: '¡Enhorabuena! Tu solicitud ha sido aprobada y ya eres embajador/a oficial de GEL.IT.UP. Tu contrato firmado está adjunto. Aquí tienes un recordatorio de tus compromisos:',
     obligationsHeading: 'Tus obligaciones como embajador/a',
     obligations: [
-      'Publica al menos 4 contenidos propios cada mes (al menos uno en vídeo/reel) usando productos GEL.IT.UP y etiquetando #gelitup y @gelitup.',
+      'Publica al menos 4 contenidos propios cada mes (al menos uno en vídeo/reel) usando productos GEL.IT.UP y etiquetando #gelitup y @gelitupinternational.',
       'Indica la colaboración cuando las normas de publicidad lo exijan (p. ej. #ad o «regalo»).',
       'Usa tu código de descuento personal solo para ti y para clientes/seguidores reales — nunca en sitios de cupones o reventa.',
       'Permite que GEL.IT.UP vuelva a publicar, destaque y reutilice el contenido en el que nos etiquetes, con mención a tu cuenta.',
@@ -105,7 +105,7 @@ export const CONTRACT_I18N = {
     intro: 'Parabéns — a tua candidatura foi aprovada e és agora embaixador/a oficial da GEL.IT.UP! O teu contrato assinado está em anexo. Aqui fica um lembrete dos teus compromissos:',
     obligationsHeading: 'As tuas obrigações como embaixador/a',
     obligations: [
-      'Publica pelo menos 4 conteúdos próprios por mês (pelo menos um em vídeo/reel) usando produtos GEL.IT.UP e marcando #gelitup e @gelitup.',
+      'Publica pelo menos 4 conteúdos próprios por mês (pelo menos um em vídeo/reel) usando produtos GEL.IT.UP e marcando #gelitup e @gelitupinternational.',
       'Divulga a parceria quando as regras de publicidade o exigirem (por ex. #ad ou «oferta»).',
       'Usa o teu código de desconto pessoal apenas para ti e para clientes/seguidores reais — nunca em sites de cupões ou revenda.',
       'Permite que a GEL.IT.UP republique, destaque e reutilize os conteúdos onde nos marcas, com crédito.',
@@ -122,7 +122,7 @@ export const CONTRACT_I18N = {
     intro: 'Gratulacje — Twoje zgłoszenie zostało zaakceptowane i jesteś teraz oficjalnym ambasadorem GEL.IT.UP! Podpisana umowa jest w załączniku. Przypomnienie Twoich zobowiązań:',
     obligationsHeading: 'Twoje obowiązki jako ambasadora',
     obligations: [
-      'Publikuj co najmniej 4 własne treści miesięcznie (w tym co najmniej jedno wideo/reel) z produktami GEL.IT.UP, oznaczając #gelitup i @gelitup.',
+      'Publikuj co najmniej 4 własne treści miesięcznie (w tym co najmniej jedno wideo/reel) z produktami GEL.IT.UP, oznaczając #gelitup i @gelitupinternational.',
       'Oznaczaj współpracę tam, gdzie wymagają tego przepisy reklamowe (np. #ad lub „prezent”).',
       'Używaj swojego osobistego kodu rabatowego tylko dla siebie i prawdziwych klientów/obserwujących — nigdy na stronach z kuponami lub odsprzedażą.',
       'Zezwól GEL.IT.UP na udostępnianie, prezentowanie i wykorzystywanie treści, w których nas oznaczasz, z podaniem Twojego konta.',
@@ -139,7 +139,7 @@ export const CONTRACT_I18N = {
     intro: 'Gratulálunk — jelentkezésedet elfogadtuk, és mostantól hivatalos GEL.IT.UP nagykövet vagy! Az aláírt szerződést mellékeltük. Íme egy emlékeztető a vállalásaidról:',
     obligationsHeading: 'Nagykövetként vállalt kötelezettségeid',
     obligations: [
-      'Havonta legalább 4 saját tartalmat tegyél közzé (ebből legalább egy videó/reel) GEL.IT.UP termékekkel, a #gelitup és @gelitup megjelölésével.',
+      'Havonta legalább 4 saját tartalmat tegyél közzé (ebből legalább egy videó/reel) GEL.IT.UP termékekkel, a #gelitup és @gelitupinternational megjelölésével.',
       'Tüntesd fel az együttműködést, ahol a reklámszabályok megkövetelik (pl. #ad vagy „ajándékba kaptam”).',
       'Személyes kedvezménykódodat csak magadnak és valódi ügyfeleknek/követőknek használd — soha ne kuponos vagy viszonteladói oldalakon.',
       'Engedélyezd, hogy a GEL.IT.UP újraposztolja, kiemelje és felhasználja azokat a tartalmakat, amelyekben megjelölsz minket, feltüntetve téged.',
@@ -156,7 +156,7 @@ export const CONTRACT_I18N = {
     intro: 'Συγχαρητήρια — η αίτησή σου εγκρίθηκε και είσαι πλέον επίσημη/ος Πρεσβευτής της GEL.IT.UP! Το υπογεγραμμένο συμβόλαιο επισυνάπτεται. Μια υπενθύμιση των υποχρεώσεών σου:',
     obligationsHeading: 'Οι υποχρεώσεις σου ως πρεσβευτής',
     obligations: [
-      'Δημοσίευε τουλάχιστον 4 δικά σου περιεχόμενα κάθε μήνα (τουλάχιστον ένα βίντεο/reel) με προϊόντα GEL.IT.UP και ετικέτες #gelitup και @gelitup.',
+      'Δημοσίευε τουλάχιστον 4 δικά σου περιεχόμενα κάθε μήνα (τουλάχιστον ένα βίντεο/reel) με προϊόντα GEL.IT.UP και ετικέτες #gelitup και @gelitupinternational.',
       'Δήλωσε τη συνεργασία όπου το απαιτούν οι κανόνες διαφήμισης (π.χ. #ad ή «δώρο»).',
       'Χρησιμοποίησε τον προσωπικό σου κωδικό έκπτωσης μόνο για εσένα και πραγματικούς πελάτες/ακόλουθους — ποτέ σε ιστότοπους κουπονιών ή μεταπώλησης.',
       'Επίτρεψε στην GEL.IT.UP να αναδημοσιεύει, να προβάλλει και να επαναχρησιμοποιεί περιεχόμενο όπου μας κάνεις tag, με αναφορά σε εσένα.',
@@ -173,7 +173,7 @@ export const CONTRACT_I18N = {
     intro: 'Поздравления — кандидатурата ти е одобрена и вече си официален посланик на GEL.IT.UP! Подписаният договор е прикачен. Ето напомняне за твоите ангажименти:',
     obligationsHeading: 'Твоите задължения като посланик',
     obligations: [
-      'Публикувай поне 4 свои съдържания всеки месец (поне едно видео/reel) с продукти на GEL.IT.UP, като отбелязваш #gelitup и @gelitup.',
+      'Публикувай поне 4 свои съдържания всеки месец (поне едно видео/reel) с продукти на GEL.IT.UP, като отбелязваш #gelitup и @gelitupinternational.',
       'Обявявай партньорството, когато рекламните правила го изискват (напр. #ad или „подарък“).',
       'Използвай личния си код за отстъпка само за себе си и за реални клиенти/последователи — никога в сайтове за купони или препродажба.',
       'Разреши на GEL.IT.UP да републикува, представя и използва съдържанието, в което ни отбелязваш, с посочване на твоя профил.',
