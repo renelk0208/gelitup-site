@@ -9373,6 +9373,7 @@ function CheckoutPage() {
   const [walletError, setWalletError] = useState('')
   const [useWalletCredit, setUseWalletCredit] = useState(false)
   const handoffPopupShownForCountryRef = useRef('')
+  const [handoffModalOpen, setHandoffModalOpen] = useState(false)
   const [checkoutMode, setCheckoutMode] = useState(
     localStorage.getItem('portalAuth') === 'true' ? 'form' : 'choose'
   )
@@ -9545,7 +9546,7 @@ function CheckoutPage() {
     if (!handoff || !deliveryCountry) return
     if (handoffPopupShownForCountryRef.current === deliveryCountry) return
     handoffPopupShownForCountryRef.current = deliveryCountry
-    window.alert(`Your shipping country is served by ${handoff.label}. Please continue your purchase on ${handoff.url}.`)
+    setHandoffModalOpen(true)
   }, [handoff, deliveryCountry])
 
   // Persist cart back to localStorage
@@ -10220,6 +10221,41 @@ function CheckoutPage() {
 
       {checkoutMode === 'form' && (
         <>
+      {handoffModalOpen && handoff && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4" onClick={() => setHandoffModalOpen(false)}>
+          <div className="relative w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="mb-4 flex items-center justify-center">
+              <span className="text-4xl">🌍</span>
+            </div>
+            <h2 className="mb-3 text-xl font-extrabold text-slate-900">
+              Shop with your local distributor
+            </h2>
+            <p className="mb-2 text-base font-semibold text-slate-700">
+              <strong>{deliveryCountry}</strong> is served exclusively by <strong>{handoff.label}</strong>.
+            </p>
+            <p className="mb-6 text-sm text-slate-600">
+              Please complete your purchase directly on their website:
+            </p>
+            <a
+              href={handoff.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mb-6 inline-block rounded-xl bg-black px-6 py-3 text-base font-bold text-white hover:opacity-80 transition"
+            >
+              {handoff.url}
+            </a>
+            <div>
+              <button
+                onClick={() => setHandoffModalOpen(false)}
+                className="mt-2 rounded-lg border border-slate-300 px-6 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {handoff && (
         <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           Your shipping country ({deliveryCountry}) is served by <strong>{handoff.label}</strong>. Please complete your order on{' '}

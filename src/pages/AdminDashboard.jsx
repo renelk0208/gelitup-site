@@ -3418,7 +3418,7 @@ function buildAmbassadorDeclineEmail(row, reasonText) {
 }
 
 function buildAmbassadorShipmentEmail(row, ship, setPasswordLink, nextPackageIso) {
-  const name = row?.full_name?.trim() || 'there'
+  const name = (row?.full_name?.trim() || 'there').replace(/\b\w/g, (c) => c.toUpperCase())
   const discountCode = String(row?.discount_code || '').trim()
   const parts = []
   // NOTE: shipment_details ("what's in the box") is internal-only — not included here.
@@ -4259,6 +4259,45 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   }
   setSaving(null)
 } 
+const resendShipmentEmail = async (row, nextReminderAt) => {
+  const trackingNumber = String(row?.tracking_number || '').trim()
+  const trackingUrl = String(row?.tracking_url || '').trim()
+  if (!trackingNumber || !trackingUrl) {
+    alert('Tracking number and tracking URL must be saved on this record before resending.')
+    return
+  }
+  const fullName = String(row?.full_name || '').trim()
+  const discountCode = String(row?.discount_code || '').trim()
+  const normalizedEmail = String(row?.email || '').trim().toLowerCase()
+  if (!fullName || !discountCode || !normalizedEmail) {
+    alert('Ambassador name, discount code, and email are all required to resend the tracking email.')
+    return
+  }
+  if (!window.confirm(`Resend tracking email (with welcome letter) to ${normalizedEmail}?`)) return
+  setSaving(row.id)
+  setEmail(row.id, 'sending', '')
+  try { await ensureAmbassadorPortalAccount(row) } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not provision ambassador portal account.'); return }
+  const setPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(normalizedEmail)}`
+  const reminderIso = nextReminderAt ? new Date(`${String(nextReminderAt).slice(0, 10)}T10:00:00Z`).toISOString() : null
+  const draft = { tracking_number: trackingNumber, tracking_url: trackingUrl }
+  const { subject, html } = buildAmbassadorShipmentEmail(row, draft, setPasswordLink, reminderIso)
+  let attachments = []
+  try {
+    const letterPdf = await buildAmbassadorWelcomeLetterPdf({ fullName: row.full_name, discountCode: row.discount_code })
+    attachments = [{ filename: letterPdf.filename, content: letterPdf.base64, contentType: 'application/pdf' }]
+  } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not build welcome letter PDF.'); return }
+  const res = await sendAmbassadorEmail({ to: normalizedEmail, subject, html, attachments })
+  if (res.ok) {
+    const resendStamp = `[${fmtDateTime(new Date().toISOString())}] [${getAdminDisplayLabel()}] 📧 Tracking email resent to ${normalizedEmail}`
+    const updatedComment = row.admin_comment ? `${row.admin_comment}\n${resendStamp}` : resendStamp
+    await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: updatedComment }).eq('id', row.id)
+    patchRow(row.id, { admin_comment: updatedComment })
+    setEmail(row.id, 'sent', `Tracking email + welcome letter resent to ${normalizedEmail}`)
+  } else {
+    setEmail(row.id, 'error', res.error || 'Failed to resend tracking email.')
+  }
+  setSaving(null)
+}
 const deleteApplication = async (row) => {
     if (String(row?.status || '').toLowerCase() !== 'rejected') {
       alert('Only rejected applications can be deleted.')
@@ -4715,7 +4754,7 @@ const deleteApplication = async (row) => {
                         <p className="text-slate-600">What to send: {nextReminderNote || 'Not set'}</p>
                         <div className="mt-2 flex flex-wrap gap-2">
                           <button onClick={() => setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: true }))} className="rounded-lg border border-slate-300 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">Expand details</button>
-                          <button onClick={() => openReminderDraft(row, sentAt, sentAtLabel, nextReminderAt, nextReminderNote)} className="rounded-lg border border-sky-300 px-2.5 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-50">Open reminder email draft</button>
+                          <button onClick={() => resendShipmentEmail(row, nextReminderAt)} disabled={saving === row.id} className="rounded-lg border border-sky-300 px-2.5 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-50 disabled:opacity-60">Resend tracking email</button>
                           <button onClick={() => startNextPackageFlow(row)} className="rounded-lg border border-fuchsia-300 px-2.5 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50">Start next package</button>
                         </div>
                         <div className="mt-2 flex gap-2">
@@ -4777,14 +4816,14 @@ const deleteApplication = async (row) => {
                           rows={2}
                           className="mt-2 w-full rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs"
                         />
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          <button onClick={() => openReminderDraft(row, sentAt, sentAtLabel, nextReminderAt, reminderNoteVal(row))} className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50">Open reminder email draft</button>
-                        </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <button onClick={() => requestShipmentSave(row, true)} disabled={saving === row.id || (isShipmentClosed && !isNextPackageMode) || !trackingFlowReady} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
                         {isShipmentClosed && !isNextPackageMode && (
-                          <button onClick={() => startNextPackageFlow(row)} className="rounded-lg border border-fuchsia-300 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50">Start next package</button>
+                          <>
+                            <button onClick={() => resendShipmentEmail(row, nextReminderAt)} disabled={saving === row.id} className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50 disabled:opacity-60">Resend tracking email</button>
+                            <button onClick={() => startNextPackageFlow(row)} className="rounded-lg border border-fuchsia-300 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50">Start next package</button>
+                          </>
                         )}
                       </div>
                       {!trackingFlowReady && (
