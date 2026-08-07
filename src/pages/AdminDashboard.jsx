@@ -3725,6 +3725,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
         'code, order_total, commission_amount_eur, created_at',
         'code, order_total_eur, created_at',
         'code, order_total, created_at',
+        'code, created_at',
       ]
       for (const selectColumns of redemptionSelectFallbacks) {
         const result = await supabase
