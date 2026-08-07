@@ -11,7 +11,6 @@ import { hasSupabaseConfig, supabase } from './lib/supabaseClient'
 import useB2BIntelligence from './lib/useB2BIntelligence'
 import { useLang, getTranslations, setLang, SUPPORTED_LANGS } from './lib/i18n'
 import PageLoader from './components/PageLoader'
-import MinimumOrderNudge from './components/MinimumOrderNudge'
 import HowItWorks from './components/HowItWorks'
 import HeroCTA from './components/HeroCTA'
 import SocialProof from './components/SocialProof'
@@ -89,6 +88,16 @@ const SMALL_ORDER_SHIPPING_ZONES = [
   { feeEur: 15, countries: ['Austria', 'Germany', 'Hungary', 'Belgium', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'Croatia', 'Czech Republic'] },
   { feeEur: 22, countries: ['Denmark', 'Spain', 'Luxembourg', 'Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Finland', 'Sweden', 'Norway', 'Switzerland', 'United Kingdom'] },
 ]
+const DISTRIBUTOR_COUNTRY_HANDOFF = {
+  Italy: { url: 'https://www.gelitup.it', label: 'GEL.IT.UP Italy' },
+  Greece: { url: 'https://gelitup.gr', label: 'GEL.IT.UP Greece' },
+  Bulgaria: { url: 'https://gelitup.bg', label: 'GEL.IT.UP Bulgaria' },
+}
+function getDistributorCountryHandoff(country) {
+  const normalized = String(country || '').trim().toLowerCase()
+  if (!normalized) return null
+  return Object.entries(DISTRIBUTOR_COUNTRY_HANDOFF).find(([name]) => name.toLowerCase() === normalized)?.[1] || null
+}
 function getSmallOrderShippingFee(country) {
   const name = String(country || '').trim().toLowerCase()
   if (!name) return null
@@ -4685,8 +4694,7 @@ function FullCataloguePage() {
     return total
   }, [quickCart, lookupCataloguePrice])
 
-  const quickFreeShipEur = getFreeShippingEur()
-  const quickProgress = Math.min(100, Math.round((quickCartTotal / quickFreeShipEur) * 100))
+  const quickProgress = quickCartUnits > 0 ? 100 : 0
 
   const getTileVariant = useCallback((index) => {
     const variant = index % 6
@@ -5508,7 +5516,7 @@ function FullCataloguePage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[13px] font-black uppercase tracking-[0.08em] text-[#1A1A1A]">Free Shipping · EU</p>
-                      <p className="mt-0.5 text-[11px] font-medium text-[#4A4A4A]">On all orders over <span className="font-bold text-[#D43790]">€{MIN_ORDER_EUR}</span></p>
+                      <p className="mt-0.5 text-[11px] font-medium text-[#4A4A4A]">Zone-based shipping is calculated at checkout</p>
                     </div>
                     <button
                       type="button"
@@ -5630,7 +5638,7 @@ function FullCataloguePage() {
                       <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
                         <div className="h-full rounded-full bg-fuchsia-600 transition-all duration-500" style={{ width: `${quickProgress}%` }} />
                       </div>
-                      <p className="mt-0.5 text-[10px] text-black/50">{quickCartTotal < SMALL_ORDER_MIN_EUR ? `€${(SMALL_ORDER_MIN_EUR - quickCartTotal).toFixed(2)} more to unlock checkout (€${SMALL_ORDER_MIN_EUR} min)` : quickProgress < 100 ? `✓ Ready to order · add €${(quickFreeShipEur - quickCartTotal).toFixed(2)} more for 🚚 FREE EU Shipping` : '✓ 🚚 FREE EU Shipping included!'}</p>
+                      <p className="mt-0.5 text-[10px] text-black/50">Checkout is open for any order size. Shipping is charged by delivery zone.</p>
                     </button>
                     <button
                       onClick={() => setShowBasketDetail((v) => !v)}
@@ -5638,18 +5646,12 @@ function FullCataloguePage() {
                     >
                       {showBasketDetail ? 'Hide' : 'View'}
                     </button>
-                    {quickCartTotal >= SMALL_ORDER_MIN_EUR ? (
-                      <NavLink
-                        to="/checkout"
-                        className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
-                      >
-                        Checkout
-                      </NavLink>
-                    ) : (
-                      <span className="inline-flex shrink-0 cursor-not-allowed items-center gap-1.5 rounded-xl bg-slate-300 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500" title={`Add €${(SMALL_ORDER_MIN_EUR - quickCartTotal).toFixed(2)} more to checkout`}>
-                        Checkout
-                      </span>
-                    )}
+                    <NavLink
+                      to="/checkout"
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
+                    >
+                      Checkout
+                    </NavLink>
                     <button
                       onClick={() => { setQuickCart({}); setItemQuantities({}); setShowBasketDetail(false) }}
                       className="shrink-0 text-xs text-black/40 transition hover:text-red-500"
@@ -6567,7 +6569,7 @@ function FullCataloguePage() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-black uppercase tracking-[0.08em] text-[#1A1A1A]">Free Shipping · EU</p>
-                <p className="mt-0.5 text-[11px] font-medium text-[#4A4A4A]">On all orders over <span className="font-bold text-[#D43790]">€{MIN_ORDER_EUR}</span></p>
+                <p className="mt-0.5 text-[11px] font-medium text-[#4A4A4A]">Zone-based shipping is calculated at checkout</p>
               </div>
               <button
                 type="button"
@@ -6651,7 +6653,7 @@ function FullCataloguePage() {
                 <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
                   <div className="h-full rounded-full bg-fuchsia-600 transition-all duration-500" style={{ width: `${quickProgress}%` }} />
                 </div>
-                <p className="mt-0.5 text-[10px] text-black/50">{quickCartTotal < SMALL_ORDER_MIN_EUR ? `€${(SMALL_ORDER_MIN_EUR - quickCartTotal).toFixed(2)} more to unlock checkout (€${SMALL_ORDER_MIN_EUR} min)` : quickProgress < 100 ? `✓ Ready to order · add €${(quickFreeShipEur - quickCartTotal).toFixed(2)} more for 🚚 FREE EU Shipping` : '✓ 🚚 FREE EU Shipping included!'}</p>
+                <p className="mt-0.5 text-[10px] text-black/50">Checkout is open for any order size. Shipping is charged by delivery zone.</p>
               </button>
               <button
                 onClick={() => setShowBasketDetail((v) => !v)}
@@ -6659,18 +6661,12 @@ function FullCataloguePage() {
               >
                 {showBasketDetail ? 'Hide' : 'View'}
               </button>
-              {quickCartTotal >= SMALL_ORDER_MIN_EUR ? (
-                <NavLink
-                  to="/checkout"
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
-                >
-                  Checkout
-                </NavLink>
-              ) : (
-                <span className="inline-flex shrink-0 cursor-not-allowed items-center gap-1.5 rounded-xl bg-slate-300 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500" title={`Add €${(SMALL_ORDER_MIN_EUR - quickCartTotal).toFixed(2)} more to checkout`}>
-                  Checkout
-                </span>
-              )}
+              <NavLink
+                to="/checkout"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
+              >
+                Checkout
+              </NavLink>
               <button
                 onClick={() => { setQuickCart({}); setItemQuantities({}); setShowBasketDetail(false) }}
                 className="shrink-0 text-xs text-black/40 transition hover:text-red-500"
@@ -9512,14 +9508,11 @@ function CheckoutPage() {
   const discountSavings = Number((listSubtotal - cartTotal).toFixed(2))
   const discountActive = isCatalogueDiscountActive() && discountSavings > 0
   const cartUnits = useMemo(() => cartEntries.reduce((s, e) => s + e.qty, 0), [cartEntries])
-  const freeShipEur = getFreeShippingEur()
-  const progress = Math.min(100, Math.round((cartTotal / freeShipEur) * 100))
-
-  // Small-order shipping: fee by delivery country below the free-shipping threshold.
-  // null fee = country not eligible (distributor country / unlisted) or not chosen yet.
+  // Zone shipping: every order is charged by delivery country.
+  // null fee = country not configured yet (or not chosen yet).
   const deliveryCountry = (form.shipToDifferentAddress ? form.shippingCountry : form.invoiceCountry).trim()
   const smallOrderFee = getSmallOrderShippingFee(deliveryCountry)
-  const shippingFee = cartTotal >= freeShipEur ? 0 : (smallOrderFee ?? 0)
+  const shippingFee = smallOrderFee ?? 0
   // Ambassador code discount — mutually exclusive with the site sale: the customer
   // gets whichever discount is larger. Compare the code price (off the list price)
   // to the already sale-discounted cart total and only apply the extra reduction.
@@ -9534,6 +9527,7 @@ function CheckoutPage() {
     : 0
   const productsSubtotalAfterWallet = Number((productsSubtotalAfterCode - walletAppliedEur).toFixed(2))
   const grandTotal = Number((productsSubtotalAfterWallet + shippingFee).toFixed(2))
+  const registrationsTable = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || DEFAULT_REGISTRATIONS_TABLE
 
   // Persist cart back to localStorage
   useEffect(() => {
@@ -9642,7 +9636,6 @@ function CheckoutPage() {
     setError('')
 
     if (!cartEntries.length) { setError('Your basket is empty.'); return }
-    if (cartTotal < SMALL_ORDER_MIN_EUR) { setError(`Minimum order is €${SMALL_ORDER_MIN_EUR}. You need €${(SMALL_ORDER_MIN_EUR - cartTotal).toFixed(2)} more.`); return }
 
     const email = form.email.trim().toLowerCase()
     if (!email) { setError('Email is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
@@ -9664,14 +9657,61 @@ function CheckoutPage() {
       if (!form.shippingCountry.trim()) { setError('Shipping country is required.'); return }
       if (!form.shippingPostalCode.trim()) { setError('Shipping postal code is required.'); return }
     }
-    if (cartTotal < freeShipEur && smallOrderFee == null) {
-      setError(`Orders under €${freeShipEur} are not yet available for delivery to ${deliveryCountry || 'your country'}. Please add €${(freeShipEur - cartTotal).toFixed(2)} more to reach the €${freeShipEur} minimum (free EU shipping included).`)
+    if (smallOrderFee == null) {
+      setError(`Shipping is not configured for ${deliveryCountry || 'the selected country'} yet. Please choose another country or contact us.`)
       return
     }
     if (form.createAccount && form.password.length < 6) { setError('Password must be at least 6 characters.'); return }
     if (!form.agreeTerms) { setError('You must agree to the terms and conditions to place your order.'); return }
 
     if (!hasSupabaseConfig || !supabase) { setError('Order system is not configured. Please contact us.'); return }
+
+    const handoff = getDistributorCountryHandoff(deliveryCountry)
+    if (handoff) {
+      const fallbackName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim() || form.companyName.trim() || 'Client'
+      const leadPayload = {
+        customer_type: 'client',
+        company_name: form.companyName.trim() || fallbackName,
+        vat_number: form.vatNumber.trim() || 'N/A',
+        contact_name: fallbackName,
+        contact_email: email,
+        phone: form.phone.trim() || 'N/A',
+        shipping_type: 'road',
+        address: form.invoiceAddressLine1.trim() || 'N/A',
+        city: form.invoiceArea.trim() || 'N/A',
+        postal_code: form.invoicePostalCode.trim() || 'N/A',
+        country: form.invoiceCountry.trim() || deliveryCountry || 'N/A',
+        invoice_address_line1: form.invoiceAddressLine1.trim() || null,
+        invoice_address_line2: form.invoiceAddressLine2.trim() || null,
+        invoice_area: form.invoiceArea.trim() || null,
+        invoice_region: form.invoiceRegion.trim() || null,
+        invoice_country: form.invoiceCountry.trim() || null,
+        invoice_postal_code: form.invoicePostalCode.trim() || null,
+        shipping_same_as_invoice: !form.shipToDifferentAddress,
+        shipping_name: !form.shipToDifferentAddress ? fallbackName : (form.shippingName.trim() || null),
+        shipping_phone: !form.shipToDifferentAddress ? (form.phone.trim() || null) : (form.shippingPhone.trim() || null),
+        shipping_address_line1: !form.shipToDifferentAddress ? (form.invoiceAddressLine1.trim() || null) : (form.shippingAddressLine1.trim() || null),
+        shipping_address_line2: !form.shipToDifferentAddress ? (form.invoiceAddressLine2.trim() || null) : (form.shippingAddressLine2.trim() || null),
+        shipping_area: !form.shipToDifferentAddress ? (form.invoiceArea.trim() || null) : (form.shippingArea.trim() || null),
+        shipping_region: !form.shipToDifferentAddress ? (form.invoiceRegion.trim() || null) : (form.shippingRegion.trim() || null),
+        shipping_country: !form.shipToDifferentAddress ? (form.invoiceCountry.trim() || null) : (form.shippingCountry.trim() || null),
+        shipping_postal_code: !form.shipToDifferentAddress ? (form.invoicePostalCode.trim() || null) : (form.shippingPostalCode.trim() || null),
+        business_type: 'country_referral_checkout',
+        application_type: 'country_referral',
+        status: 'submitted',
+        notes: `[DISTRIBUTOR_REFERRAL:${handoff.url}]\nCaptured from public checkout handoff.\nCart units: ${cartUnits}\nCart subtotal: €${cartTotal.toFixed(2)}`,
+        admin_comment: `Checkout blocked and referred to local distributor: ${handoff.url}`,
+        order_action: 'referred_to_local_distributor',
+      }
+      const { error: handoffInsertError } = await supabase.from(registrationsTable).insert([leadPayload])
+      if (handoffInsertError) {
+        setError(`Your country is served by ${handoff.label}. Please continue your purchase on ${handoff.url}. We could not save your handoff lead automatically: ${handoffInsertError.message}`)
+        return
+      }
+      setError(`Your country is served by ${handoff.label}. We saved your details and will follow up if needed. Please continue your purchase on ${handoff.url}`)
+      window.open(handoff.url, '_blank', 'noopener,noreferrer')
+      return
+    }
 
     setIsSubmitting(true)
     if (window.gtag) {
@@ -9925,7 +9965,7 @@ function CheckoutPage() {
               <tr><td colspan="4" style="${tdStyle};text-align:right">Products subtotal</td><td style="${tdRStyle}">${cartTotal.toFixed(2)}</td></tr>
               ${ambassadorDiscountEur > 0 ? `<tr><td colspan="4" style="${tdStyle};text-align:right;color:#9B1268">Ambassador code ${escapeHtml(ambassadorCode?.code || '')} (−${ambassadorDiscountPct}%)</td><td style="${tdRStyle};color:#9B1268">− ${ambassadorDiscountEur.toFixed(2)}</td></tr>` : ''}
               ${walletAppliedEur > 0 ? `<tr><td colspan="4" style="${tdStyle};text-align:right;color:#047857">Ambassador wallet credit</td><td style="${tdRStyle};color:#047857">− ${walletAppliedEur.toFixed(2)}</td></tr>` : ''}
-              <tr><td colspan="4" style="${tdStyle};text-align:right">Shipping${shippingFee > 0 ? ` (${escapeHtml(shipping.country)})` : ''}</td><td style="${tdRStyle}">${shippingFee > 0 ? shippingFee.toFixed(2) : 'FREE'}</td></tr>
+              <tr><td colspan="4" style="${tdStyle};text-align:right">Shipping${shipping.country ? ` (${escapeHtml(shipping.country)})` : ''}</td><td style="${tdRStyle}">${shippingFee.toFixed(2)}</td></tr>
               <tr><td colspan="4" style="${tdStyle};text-align:right;font-weight:bold">TOTAL (EUR)</td><td style="${tdRStyle};font-weight:bold">${grandTotal.toFixed(2)}</td></tr>
               ${discountActive ? `<tr><td colspan="5" style="${tdStyle};text-align:right;color:#9B1268">${escapeHtml(CATALOGUE_DISCOUNT_LABEL)} already applied — you saved €${discountSavings.toFixed(2)}</td></tr>` : ''}
             </tbody>
@@ -9943,7 +9983,7 @@ function CheckoutPage() {
             <h2 style="color:#1a1a1a">Thank you for your order!</h2>
             <p>Hi ${escapeHtml(`${form.firstName.trim()} ${form.lastName.trim()}` || form.companyName.trim())},</p>
             <p>Thank you — we've received your order <strong>#${insertedOrder?.id ?? '-'}</strong> and it's now being processed.</p>
-            <p><strong>Order Total:</strong> €${grandTotal.toFixed(2)} (${cartUnits} items${shippingFee > 0 ? ` + €${shippingFee.toFixed(2)} shipping` : ', free shipping'})</p>
+            <p><strong>Order Total:</strong> €${grandTotal.toFixed(2)} (${cartUnits} items + €${shippingFee.toFixed(2)} shipping)</p>
             ${ambassadorDiscountEur > 0 ? `<p style="color:#9B1268"><strong>Ambassador code ${escapeHtml(ambassadorCode?.code || '')}</strong> applied — you saved €${ambassadorDiscountEur.toFixed(2)} (−${ambassadorDiscountPct}%).</p>` : ''}
             ${walletAppliedEur > 0 ? `<p style="color:#047857"><strong>Ambassador wallet credit</strong> applied — €${walletAppliedEur.toFixed(2)} used.</p>` : ''}
             <p style="color:#555">Your VAT invoice will follow by email once your order is processed. Should any item be unavailable, we will arrange a refund or account credit.</p>
@@ -10331,14 +10371,11 @@ function CheckoutPage() {
           </div>
 
           {/* PAYMENT OPTIONS */}
-          <HowItWorks variant="banner" freeShippingAt={freeShipEur} />
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-3">
             <p className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500">Payment Options</p>
             <p className="text-sm text-slate-600">You'll complete payment securely online right after placing your order — all major cards, Google Pay, Apple Pay, PayPal and Revolut.</p>
             <PaymentTrustStrip tone="light" />
           </div>
-
-          <MinimumOrderNudge currentTotal={cartTotal} minimum={SMALL_ORDER_MIN_EUR} freeShippingAt={freeShipEur} shippingFee={smallOrderFee} />
 
           {/* "Almost there" checklist — always visible above the button so clients know what to fix */}
           {checkoutIssues.length > 0 && (
@@ -10355,7 +10392,7 @@ function CheckoutPage() {
             </div>
           )}
 
-          <button type="submit" disabled={isSubmitting || cartTotal < SMALL_ORDER_MIN_EUR} className="w-full rounded-xl bg-fuchsia-600 px-6 py-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500 disabled:opacity-50">
+          <button type="submit" disabled={isSubmitting} className="w-full rounded-xl bg-fuchsia-600 px-6 py-4 text-sm font-bold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-fuchsia-500 disabled:opacity-50">
             {isSubmitting ? 'Placing Order…' : `Place Order — €${grandTotal.toFixed(2)}${shippingFee > 0 ? ' incl. shipping' : ''}`}
           </button>
         </form>
@@ -10410,9 +10447,9 @@ function CheckoutPage() {
                 </div>
               )}
               <div className="mt-1 flex items-center justify-between text-xs">
-                <span className="text-slate-500">Shipping{cartTotal < freeShipEur && deliveryCountry ? ` to ${deliveryCountry}` : ''}</span>
+                <span className="text-slate-500">Shipping{deliveryCountry ? ` to ${deliveryCountry}` : ''}</span>
                 <span className="font-semibold text-slate-700">
-                  {cartTotal >= freeShipEur ? 'FREE' : smallOrderFee != null ? `€${smallOrderFee.toFixed(2)}` : deliveryCountry ? `€${freeShipEur} minimum` : 'select country'}
+                  {smallOrderFee != null ? `€${smallOrderFee.toFixed(2)}` : 'select country'}
                 </span>
               </div>
               <div className="mt-2 flex items-center justify-between border-t border-slate-100 pt-2">
@@ -10420,10 +10457,10 @@ function CheckoutPage() {
                 <span className="text-lg font-bold text-fuchsia-700">€{grandTotal.toFixed(2)}</span>
               </div>
               <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
-                <div className="h-full rounded-full bg-fuchsia-600 transition-all duration-500" style={{ width: `${progress}%` }} />
+                <div className="h-full rounded-full bg-fuchsia-600 transition-all duration-500" style={{ width: `${cartEntries.length > 0 ? 100 : 0}%` }} />
               </div>
               <p className="mt-1 text-[10px] text-slate-500">
-                {progress < 100 ? `Add €${(freeShipEur - cartTotal).toFixed(2)} more for FREE EU shipping` : '✓ Free EU shipping included!'}
+                {smallOrderFee != null ? '✓ Shipping applied by delivery zone.' : 'Select delivery country to calculate shipping.'}
               </p>
               {/* Ambassador discount code */}
               <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
@@ -10479,7 +10516,6 @@ function CheckoutPage() {
                 )}
                 {walletError && <p className="mt-1 text-[11px] font-medium text-red-500">{walletError}</p>}
               </div>
-              <HowItWorks variant="banner" freeShippingAt={freeShipEur} />
               <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
                 <svg viewBox="0 0 20 20" fill="currentColor" className="mt-0.5 h-4 w-4 shrink-0 text-amber-500"><path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clipRule="evenodd" /></svg>
                 <p className="text-xs font-medium leading-relaxed text-amber-800">
@@ -10801,7 +10837,13 @@ function PortalRegister({ onRegister }) {
             return
           }
 
-          setSubmittedProfile({ name: capturedName, isDistributor: capturedIsDistributor, email: String(application.contactEmail || '').trim().toLowerCase() })
+          setSubmittedProfile({
+            name: capturedName,
+            isDistributor: capturedIsDistributor,
+            email: String(application.contactEmail || '').trim().toLowerCase(),
+            redirectUrl: result.redirectUrl || '',
+            redirectLabel: result.redirectLabel || '',
+          })
           setSuccessMessage(result.message || 'Application submitted.')
         }}>
           <div className="grid gap-4 md:grid-cols-2">
@@ -11347,6 +11389,19 @@ function PortalRegister({ onRegister }) {
               )}
 
               <div className="mt-6 flex flex-col gap-3">
+                {submittedProfile.redirectUrl && (
+                  <a
+                    href={submittedProfile.redirectUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-fuchsia-800 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-fuchsia-200 transition hover:opacity-90"
+                  >
+                    Continue on {submittedProfile.redirectLabel || 'your local GEL.IT.UP site'}
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
+                      <path d="M7 17L17 7M9 7h8v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </a>
+                )}
                 {!submittedProfile.isDistributor ? (
                   <NavLink
                     to={submittedProfile.email ? `/portal/login?email=${encodeURIComponent(submittedProfile.email)}` : '/portal/login'}
@@ -20458,6 +20513,7 @@ function App() {
       const shippingRegion = shippingSameAsInvoice ? invoiceRegion : application.shippingRegion.trim()
       const shippingCountry = shippingSameAsInvoice ? invoiceCountry : application.shippingCountry.trim()
       const shippingPostalCode = shippingSameAsInvoice ? invoicePostalCode : application.shippingPostalCode.trim()
+      const handoff = getDistributorCountryHandoff(shippingCountry || invoiceCountry)
 
       const isB2BOrderApplication = applicationType === 'b2b_order'
 
@@ -20521,7 +20577,9 @@ function App() {
         }
       }
 
-      const submissionStatus = isDistributorApplication ? 'pending' : 'approved'
+      const submissionStatus = isDistributorApplication
+        ? 'pending'
+        : (handoff ? 'submitted' : 'approved')
       const derivedBusinessType = isDistributorApplication
         ? application.businessType.trim()
         : `B2B Order - ${isBusinessOrder ? 'Business' : 'Personal'}`
@@ -20540,6 +20598,12 @@ function App() {
 
       if (application.notes?.trim()) {
         notesSections.push(`Additional notes: ${application.notes.trim()}`)
+      }
+      if (handoff) {
+        notesSections.push(
+          `[DISTRIBUTOR_REFERRAL:${handoff.url}]`,
+          `Referred to local distributor checkout: ${handoff.url}`,
+        )
       }
 
       const payload = {
@@ -20574,9 +20638,9 @@ function App() {
         application_type: isDistributorApplication ? 'distributor' : 'b2b_order',
         distributor_tier: isDistributorApplication ? (application.distributorTier || null) : null,
         order_profile: isBusinessOrder ? 'business' : 'personal',
-        prices_allocated: !isDistributorApplication,
-        admin_comment: null,
-        order_action: null,
+        prices_allocated: !isDistributorApplication && !handoff,
+        admin_comment: handoff ? `Auto-referred to local distributor: ${handoff.url}` : null,
+        order_action: handoff ? 'referred_to_local_distributor' : null,
         order_payment_status: isDistributorApplication ? null : 'unpaid',
         order_shipping_status: isDistributorApplication ? null : 'not_ready',
         tracking_number: null,
@@ -20682,6 +20746,15 @@ function App() {
         return {
           ok: true,
           message: 'Submission stored. Email webhook is not configured yet.',
+        }
+      }
+
+      if (handoff) {
+        return {
+          ok: true,
+          message: `Thanks — we saved your details. Your country is served by ${handoff.label}. Please continue your purchase on ${handoff.url}.`,
+          redirectUrl: handoff.url,
+          redirectLabel: handoff.label,
         }
       }
 
