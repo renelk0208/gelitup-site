@@ -4715,7 +4715,6 @@ const deleteApplication = async (row) => {
                         <p className="text-slate-600">What to send: {nextReminderNote || 'Not set'}</p>
                         <div className="mt-2 flex flex-wrap gap-2">
                           <button onClick={() => setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: true }))} className="rounded-lg border border-slate-300 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">Expand details</button>
-                          <button onClick={() => openReminderDraft(row, sentAt, sentAtLabel, nextReminderAt, nextReminderNote)} className="rounded-lg border border-sky-300 px-2.5 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-50">Open reminder email draft</button>
                           <button onClick={() => startNextPackageFlow(row)} className="rounded-lg border border-fuchsia-300 px-2.5 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50">Start next package</button>
                         </div>
                         <div className="mt-2 flex gap-2">
@@ -4777,9 +4776,6 @@ const deleteApplication = async (row) => {
                           rows={2}
                           className="mt-2 w-full rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs"
                         />
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          <button onClick={() => openReminderDraft(row, sentAt, sentAtLabel, nextReminderAt, reminderNoteVal(row))} className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50">Open reminder email draft</button>
-                        </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <button onClick={() => requestShipmentSave(row, true)} disabled={saving === row.id || (isShipmentClosed && !isNextPackageMode) || !trackingFlowReady} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
