@@ -3446,7 +3446,7 @@ function buildAmbassadorWelcomeEmail(row) {
   const name = String(row?.full_name || '').trim().split(' ')[0] || 'there'
   const discountCode = String(row?.discount_code || '').trim()
   const codeBlock = discountCode
-    ? `<p><strong>Your personal ambassador code:</strong> <span style="font-size:15px;color:#D43790">${escAmb(discountCode)}</span><br/>Share it privately with your nail-tech followers — it gives them 20% off GEL.IT.UP.</p>`
+    ? `<p><strong>Your personal ambassador code:</strong> <span style="font-size:15px;color:#D43790">${escAmb(discountCode)}</span><br/>Share it publicly with your nail-tech followers — it gives them 20% off GEL.IT.UP on the <a href="https://www.gelitup.com" style="color:#D43790">www.gelitup.com</a> website only.</p>`
     : ''
   return {
     subject: 'Welcome to the GEL.IT.UP Ambassador Programme 🎉',
