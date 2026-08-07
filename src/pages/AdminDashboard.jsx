@@ -4265,15 +4265,17 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
 const resendShipmentEmail = async (row, nextReminderAt) => {
   const trackingNumber = String(row?.tracking_number || '').trim()
   const trackingUrl = String(row?.tracking_url || '').trim()
-  if (!trackingNumber || !trackingUrl) {
-    alert('Tracking number and tracking URL must be saved on this record before resending.')
-    return
-  }
   const fullName = String(row?.full_name || '').trim()
   const discountCode = String(row?.discount_code || '').trim()
   const normalizedEmail = String(row?.email || '').trim().toLowerCase()
-  if (!fullName || !discountCode || !normalizedEmail) {
-    alert('Ambassador name, discount code, and email are all required to resend the tracking email.')
+  const missingFields = []
+  if (!trackingNumber) missingFields.push('• Tracking number')
+  if (!trackingUrl) missingFields.push('• Tracking URL')
+  if (!fullName) missingFields.push('• Ambassador name')
+  if (!discountCode) missingFields.push('• Discount code')
+  if (!normalizedEmail) missingFields.push('• Ambassador email')
+  if (missingFields.length > 0) {
+    alert(`Cannot resend tracking email — the following required fields are missing:\n\n${missingFields.join('\n')}\n\nPlease fill in all missing fields and save before resending.`)
     return
   }
   if (!window.confirm(`Resend tracking email (with welcome letter) to ${normalizedEmail}?`)) return
@@ -4822,11 +4824,11 @@ const deleteApplication = async (row) => {
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <button onClick={() => requestShipmentSave(row, true)} disabled={saving === row.id || (isShipmentClosed && !isNextPackageMode) || !trackingFlowReady} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
+                        {!isNextPackageMode && (
+                          <button onClick={() => resendShipmentEmail(row, nextReminderAt)} disabled={saving === row.id} className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50 disabled:opacity-60">Resend tracking email</button>
+                        )}
                         {isShipmentClosed && !isNextPackageMode && (
-                          <>
-                            <button onClick={() => resendShipmentEmail(row, nextReminderAt)} disabled={saving === row.id} className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50 disabled:opacity-60">Resend tracking email</button>
-                            <button onClick={() => startNextPackageFlow(row)} className="rounded-lg border border-fuchsia-300 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50">Start next package</button>
-                          </>
+                          <button onClick={() => startNextPackageFlow(row)} className="rounded-lg border border-fuchsia-300 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50">Start next package</button>
                         )}
                       </div>
                       {!trackingFlowReady && (
