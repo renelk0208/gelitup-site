@@ -425,3 +425,144 @@ export async function buildAmbassadorBriefPdf(applicant = {}) {
   const base64 = dataUri.includes('base64,') ? dataUri.split('base64,')[1] : ''
   return { base64, filename, pages: doc.getNumberOfPages() }
 }
+
+// Personalised "Welcome to the family!" letter sent inside the PR/sample box.
+// Replaces the static PDF that had [name] and [discount code] placeholders.
+export async function buildAmbassadorWelcomeLetterPdf(applicant = {}) {
+  const { jsPDF } = await import('jspdf')
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' })
+  const pageW = doc.internal.pageSize.getWidth()
+  const pageH = doc.internal.pageSize.getHeight()
+  const margin = 48
+  const contentW = pageW - margin * 2
+  let y = margin
+
+  const ensureSpace = (needed) => { if (y + needed > pageH - margin - 30) { doc.addPage(); y = margin } }
+  const para = (text, size = 10, gap = 9, color = [55, 55, 55]) => {
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(size)
+    doc.setTextColor(...color)
+    const lines = doc.splitTextToSize(text, contentW)
+    ensureSpace(lines.length * (size + 3.5))
+    doc.text(lines, margin, y)
+    y += lines.length * (size + 3.5) + gap
+  }
+  const boldPara = (label, rest, size = 10, gap = 9) => {
+    doc.setFontSize(size)
+    doc.setTextColor(...INK)
+    const labelLines = doc.splitTextToSize(label, contentW)
+    ensureSpace(labelLines.length * (size + 3.5))
+    doc.setFont('helvetica', 'bold')
+    doc.text(labelLines, margin, y)
+    const labelW = doc.getTextWidth(label.split('\n')[0])
+    if (rest) {
+      doc.setFont('helvetica', 'normal')
+      const restLines = doc.splitTextToSize(rest, contentW - labelW - 4)
+      doc.text(restLines, margin + labelW + 4, y)
+      y += Math.max(labelLines.length, restLines.length) * (size + 3.5) + gap
+    } else {
+      y += labelLines.length * (size + 3.5) + gap
+    }
+  }
+
+  const firstName = String(applicant.fullName || '').trim().split(' ')[0] || 'Ambassador'
+  const discountCode = String(applicant.discountCode || '').trim()
+
+  // Letterhead
+  const logo = await resolveLogo(applicant.logoBase64)
+  if (logo) {
+    const logoW = 96
+    const logoH = logoW * LOGO_RATIO
+    try {
+      doc.addImage(`data:image/png;base64,${logo}`, 'PNG', (pageW - logoW) / 2, y, logoW, logoH, undefined, 'FAST')
+      y += logoH + 6
+    } catch { /* skip logo */ }
+  }
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(8.5)
+  doc.setTextColor(...MUTED)
+  doc.text(CONTRACT_COMPANY.addressLine, pageW / 2, y, { align: 'center' })
+  y += 12
+  doc.text(CONTRACT_COMPANY.contactLine, pageW / 2, y, { align: 'center' })
+  y += 16
+  doc.setDrawColor(...PINK)
+  doc.setLineWidth(1.2)
+  doc.line(margin, y, pageW - margin, y)
+  y += 22
+
+  // Title
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(18)
+  doc.setTextColor(...INK)
+  doc.text('Welcome to the family!', margin, y)
+  y += 26
+
+  // Greeting
+  para(`Dear ${firstName},`, 10.5, 10, INK)
+
+  // Intro
+  para('Welcome to the GEL.IT.UP Ambassador family! We\'re so excited to have you on board, and even more excited for you to open your first box.', 10, 10)
+
+  // Unboxing heading
+  y += 4
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(10)
+  doc.setTextColor(...INK)
+  doc.text('Before you dive in, here\'s how to make the most of your unboxing:', margin, y)
+  y += 16
+
+  // Unboxing steps
+  const steps = [
+    ['1. Film before you open it.', '  Start recording before you cut the tape — the reveal is the best part, and your audience will want to see it too.'],
+    ['2. Show every piece.', '  Take a moment to show off each shade and product clearly — good lighting works best.'],
+    ['3. Share your first impressions.', '  Tell your audience what you\'re most excited to try first.'],
+    ['4. Use your code' + (discountCode ? ` ${discountCode}.` : '.'), '  Your personal discount code is included in this box — share it with your followers for 20% off. Please note that the discount code is only valid for www.gelitup.com and should not be shared publicly but on private messages to your subscribers / followers.'],
+    ['5. Post it.', '  Share your unboxing on Instagram or TikTok.'],
+  ]
+  steps.forEach(([label, rest]) => boldPara(label, rest, 10, 10))
+
+  y += 4
+  // Highlighted reminder box
+  doc.setFontSize(9.5)
+  const dontForgetLines = doc.splitTextToSize('DON\'T FORGET — tag us @gelitup and use the hashtag #gelitup so we can share your content with our community!', contentW - 24)
+  const boxH = 20 + dontForgetLines.length * 13 + 12
+  ensureSpace(boxH + 8)
+  doc.setFillColor(250, 237, 246)
+  doc.setDrawColor(...PINK)
+  doc.setLineWidth(0.8)
+  doc.roundedRect(margin, y, contentW, boxH, 6, 6, 'FD')
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(9)
+  doc.setTextColor(...PINK)
+  doc.text('DON\'T FORGET', margin + 12, y + 16)
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(9.5)
+  doc.setTextColor(60, 60, 60)
+  doc.text(dontForgetLines, margin + 12, y + 32)
+  y += boxH + 18
+
+  // Sign-off
+  para(`Welcome to the family, ${firstName}. We can't wait to see what you create.`, 10, 6, INK)
+  para('With love,\nThe GEL.IT.UP Team', 10, 0, INK)
+
+  // Footer
+  const pages = doc.getNumberOfPages()
+  for (let p = 1; p <= pages; p++) {
+    doc.setPage(p)
+    doc.setDrawColor(235, 235, 235)
+    doc.setLineWidth(0.5)
+    doc.line(margin, pageH - 34, pageW - margin, pageH - 34)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(6.5)
+    doc.setTextColor(150, 150, 150)
+    const footerLine = doc.splitTextToSize(CONTRACT_COMPANY.footer, contentW - 60)[0]
+    doc.text(footerLine, margin, pageH - 22)
+    doc.text(`Page ${p} of ${pages}`, pageW - margin, pageH - 22, { align: 'right' })
+  }
+
+  const safe = String(applicant.fullName || 'ambassador').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'ambassador'
+  const filename = `GELITUP-Welcome-Letter-${safe}.pdf`
+  const dataUri = doc.output('datauristring')
+  const base64 = dataUri.includes('base64,') ? dataUri.split('base64,')[1] : ''
+  return { base64, filename, pages: doc.getNumberOfPages() }
+}
