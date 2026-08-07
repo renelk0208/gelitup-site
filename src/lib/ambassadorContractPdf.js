@@ -237,12 +237,18 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
   ]
   const boxPad = 9
   const rowH = 13
-  const labelW = 150
+  const labelW = 175
   const valueX = margin + boxPad + labelW
   const valueW = contentW - boxPad * 2 - labelW
   doc.setFontSize(8.5)
-  const wrapped = boxLines.map(([label, value]) => ({ label, lines: doc.splitTextToSize(String(value), valueW) }))
-  const totalRows = wrapped.reduce((n, r) => n + r.lines.length, 0)
+  const wrapped = boxLines.map(([label, value]) => {
+    doc.setFont(FONT, 'bold')
+    const labelLines = doc.splitTextToSize(String(label).toUpperCase(), labelW - 4)
+    doc.setFont(FONT, 'normal')
+    const valueLines = doc.splitTextToSize(String(value), valueW)
+    return { labelLines, valueLines }
+  })
+  const totalRows = wrapped.reduce((n, r) => n + Math.max(r.labelLines.length, r.valueLines.length), 0)
   const boxH = boxPad * 2 + totalRows * rowH
   ensureSpace(boxH + 10)
   doc.setDrawColor(228, 228, 228)
@@ -250,14 +256,14 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
   doc.setFillColor(249, 249, 249)
   doc.roundedRect(margin, y, contentW, boxH, 6, 6, 'FD')
   let by = y + boxPad + 10
-  wrapped.forEach(({ label, lines }) => {
+  wrapped.forEach(({ labelLines, valueLines }) => {
     doc.setFont(FONT, 'bold')
     doc.setTextColor(...MUTED)
-    doc.text(String(label).toUpperCase(), margin + boxPad, by)
+    doc.text(labelLines, margin + boxPad, by)
     doc.setFont(FONT, 'normal')
     doc.setTextColor(...INK)
-    doc.text(lines, valueX, by)
-    by += lines.length * rowH
+    doc.text(valueLines, valueX, by)
+    by += Math.max(labelLines.length, valueLines.length) * rowH
   })
   y += boxH + 14
 
