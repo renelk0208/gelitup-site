@@ -3575,6 +3575,7 @@ function AmbassadorApplicationsPanel() {
   const [ship, setShip] = useState({}) // { [id]: { shipment_details, tracking_number, tracking_url } }
   const [noteDraft, setNoteDraft] = useState({}) // { [id]: 'new internal note being typed' }
   const [packAdditionDraft, setPackAdditionDraft] = useState({}) // { [id]: 'extra pack items to consider' }
+  const [codePerformanceByCode, setCodePerformanceByCode] = useState({})
   const [currentAdminEmail, setCurrentAdminEmail] = useState('')
   const [reminderDateDraft, setReminderDateDraft] = useState({})
   const [reminderNoteDraft, setReminderNoteDraft] = useState({})
@@ -3582,6 +3583,8 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   const [openIds, setOpenIds] = useState(() => new Set()) // which applicant cards are expanded
   const [shipmentPanelOpen, setShipmentPanelOpen] = useState({})
   const [nextPackageMode, setNextPackageMode] = useState({})
+  const [sectionOpenState, setSectionOpenState] = useState({})
+  const [shipmentEntryOpen, setShipmentEntryOpen] = useState({})
   const [shipmentEmailLock, setShipmentEmailLock] = useState(() => {
     try {
       const parsed = JSON.parse(localStorage.getItem(SHIPMENT_EMAIL_LOCK_STORAGE_KEY) || '{}')
@@ -3596,6 +3599,30 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     if (next.has(id)) next.delete(id); else next.add(id)
     return next
   })
+  const sectionStateKey = (rowId, key) => `${rowId}:${key}`
+  const isSectionOpen = (rowId, key, defaultOpen = false) => {
+    const stateKey = sectionStateKey(rowId, key)
+    if (Object.prototype.hasOwnProperty.call(sectionOpenState, stateKey)) {
+      return Boolean(sectionOpenState[stateKey])
+    }
+    return defaultOpen
+  }
+  const toggleSection = (rowId, key) => {
+    const stateKey = sectionStateKey(rowId, key)
+    setSectionOpenState((prev) => ({ ...prev, [stateKey]: !prev[stateKey] }))
+  }
+  const shipmentEntryStateKey = (rowId, idx) => `${rowId}:${idx}`
+  const isShipmentEntryOpen = (rowId, idx, defaultOpen = false) => {
+    const stateKey = shipmentEntryStateKey(rowId, idx)
+    if (Object.prototype.hasOwnProperty.call(shipmentEntryOpen, stateKey)) {
+      return Boolean(shipmentEntryOpen[stateKey])
+    }
+    return defaultOpen
+  }
+  const toggleShipmentEntry = (rowId, idx) => {
+    const stateKey = shipmentEntryStateKey(rowId, idx)
+    setShipmentEntryOpen((prev) => ({ ...prev, [stateKey]: !prev[stateKey] }))
+  }
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -3685,6 +3712,39 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     } else if (codeErr) {
       setError((prev) => prev || `Could not load ambassador discount codes: ${codeErr.message}`)
     }
+    const distinctCodes = [...new Set(
+      nextRows
+        .map((row) => String(row?.discount_code || '').trim().toUpperCase())
+        .filter(Boolean),
+    )]
+    if (distinctCodes.length > 0) {
+      const { data: redemptionRows, error: redemptionErr } = await supabase
+        .from('ambassador_redemptions')
+        .select('code, order_total_eur, commission_amount_eur, created_at')
+        .in('code', distinctCodes)
+      if (redemptionErr) {
+        setError((prev) => prev || `Could not load ambassador code performance: ${redemptionErr.message}`)
+      } else {
+        const perf = {}
+        ;(redemptionRows || []).forEach((entry) => {
+          const key = String(entry?.code || '').trim().toUpperCase()
+          if (!key) return
+          if (!perf[key]) {
+            perf[key] = { orders: 0, orderValueEur: 0, commissionEur: 0, lastRedemptionAt: '' }
+          }
+          perf[key].orders += 1
+          perf[key].orderValueEur += Number(entry?.order_total_eur || 0)
+          perf[key].commissionEur += Number(entry?.commission_amount_eur || 0)
+          const createdAt = String(entry?.created_at || '')
+          if (createdAt && (!perf[key].lastRedemptionAt || new Date(createdAt).getTime() > new Date(perf[key].lastRedemptionAt).getTime())) {
+            perf[key].lastRedemptionAt = createdAt
+          }
+        })
+        setCodePerformanceByCode(perf)
+      }
+    } else {
+      setCodePerformanceByCode({})
+    }
     setRows(nextRows)
   }, [filter])
 
@@ -3744,16 +3804,25 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   }
   const saveReminderDetails = async (row, sentAtIso, fallbackReminderAtIso) => {
     const rawDate = String(reminderDateVal(row, fallbackReminderAtIso) || '').trim()
-    const nextReminderAt = rawDate ? new Date(`${rawDate}T10:00:00Z`).toISOString() : (sentAtIso ? addOneMonth(sentAtIso) : '')
+    const parsedReminderAt = rawDate ? new Date(`${rawDate}T10:00:00Z`) : null
+    if (parsedReminderAt && Number.isNaN(parsedReminderAt.getTime())) {
+      setEmail(row.id, 'error', 'Reminder date is invalid.')
+      return
+    }
+    const nextReminderAt = parsedReminderAt ? parsedReminderAt.toISOString() : (sentAtIso ? addOneMonth(sentAtIso) : '')
     const nextReminderNote = reminderNoteVal(row)
+    setSaving(row.id)
     const result = await saveShipmentMeta(row, { nextReminderAt, nextReminderNote })
+    setSaving(null)
     if (!result.ok) {
+      setEmail(row.id, 'error', `Could not save reminder details: ${result.error}`)
       alert(`Could not save reminder details: ${result.error}`)
       return
     }
-    setReminderDateDraft((prev) => ({ ...prev, [row.id]: '' }))
-  setReminderNoteDraft((prev) => ({ ...prev, [row.id]: nextReminderNote }))
-  setEmail(row.id, 'sent', 'Reminder saved — enter the date for the next parcel')
+    setReminderDateDraft((prev) => ({ ...prev, [row.id]: nextReminderAt ? nextReminderAt.slice(0, 10) : '' }))
+    setReminderNoteDraft((prev) => ({ ...prev, [row.id]: nextReminderNote }))
+    setEmail(row.id, 'sent', 'Reminder details saved')
+    await load()
   }
 
   // Sends the welcome email with the Ambassador Agreement PDF attached.
@@ -3851,7 +3920,14 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   // Follow-up: PR box details, tracking + comments.
   const shipVal = (row, field) => (ship[row.id]?.[field] ?? row[field] ?? '')
 const requestShipmentSave = (row, alsoEmail) => {
-setShipDatePrompt({ rowId: row.id, alsoEmail, date: '' })
+  const trackingNumber = String(shipVal(row, 'tracking_number') || '').trim()
+  const trackingUrl = String(shipVal(row, 'tracking_url') || '').trim()
+  if (alsoEmail && (!trackingNumber || !trackingUrl)) {
+    setEmail(row.id, 'error', 'Enter both tracking number and tracking URL before completing this shipment flow.')
+    alert('To complete this shipment flow, enter both the tracking number and tracking URL first.')
+    return
+  }
+  setShipDatePrompt({ rowId: row.id, alsoEmail, date: String(reminderDateVal(row, null) || '').trim() })
 }
   const setShipField = (id, field, value) => setShip(prev => ({ ...prev, [id]: { ...prev[id], [field]: value } }))
   const NOTE_AUTHOR_SWATCHES = [
@@ -3989,6 +4065,18 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const sentAtIso = parseDateLabelToIso(sentAtLabel)
     return { sentAtIso, sentAtLabel }
   }
+  const shipmentHistoryEntries = (row) => String(row.admin_comment || '')
+    .split('\n')
+    .filter((line) => /📦\s*Shipped\s*—/i.test(String(line)))
+    .map((line) => {
+      const text = String(line || '')
+      const stamp = text.match(/^\[([^\]]+)\]/)?.[1] || null
+      const trackingNumber = text.match(/Tracking:\s*([^·]+)/i)?.[1]?.trim() || ''
+      const trackingUrl = text.match(/(https?:\/\/[^\s·]+)/i)?.[1] || ''
+      const boxContents = text.match(/Box:\s*(.+)$/i)?.[1]?.trim() || ''
+      return { raw: text, stamp, trackingNumber, trackingUrl, boxContents }
+    })
+    .reverse()
   const hasWelcomeContractSent = (row) => messageLines(row).some((line) => {
     const text = String(line)
     return /Welcome email with Ambassador Agreement PDF attached\./i.test(text)
@@ -4091,6 +4179,20 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (!normalizedEmail) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: ambassador email is missing.'); return }
     setEmail(row.id, 'sending', '')
     try { await ensureAmbassadorPortalAccount(updatedRow) } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not provision ambassador portal account.'); return }
+    const chosenReminderRaw = String(overrideReminderDate || reminderDateVal(row, null) || '').trim()
+    if (!chosenReminderRaw) {
+      setSaving(null)
+      setEmail(row.id, 'error', 'Set a next package reminder date before completing this shipment flow.')
+      alert('Set a next package reminder date before completing this shipment flow.')
+      return
+    }
+    const chosenReminderAt = new Date(`${chosenReminderRaw}T10:00:00Z`)
+    if (Number.isNaN(chosenReminderAt.getTime())) {
+      setSaving(null)
+      setEmail(row.id, 'error', 'Reminder date is invalid.')
+      alert('Reminder date is invalid.')
+      return
+    }
     const { subject, html } = buildAmbassadorShipmentEmail(updatedRow, draft, setPasswordLink)
     let attachments = []
     try {
@@ -4101,8 +4203,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Shipment email + About Us letter sent to ${row.email}` : res.error)
     if (res.ok) {
       const sentAt = new Date().toISOString()
-      const chosenReminderRaw = String(overrideReminderDate || reminderDateVal(row, null) || '').trim()
-      const nextReminderAt = chosenReminderRaw ? new Date(`${chosenReminderRaw}T10:00:00Z`).toISOString() : addOneMonth(sentAt)
+      const nextReminderAt = chosenReminderAt.toISOString()
       const nextReminderNote = reminderNoteVal(row) || currentDraft.shipment_details || ''
       persistShipmentEmailLock((prev) => ({ ...prev, [row.id]: { signature: JSON.stringify(currentDraft), sentAt }, }))
       const metaResult = await saveShipmentMeta(row, { sentAt, nextReminderAt, nextReminderNote })
@@ -4239,6 +4340,16 @@ const deleteApplication = async (row) => {
             const isShipmentClosed = shipmentPreviouslySent && !isNextPackageMode
             const isShipmentPanelExpanded = shipmentPanelOpen[row.id] ?? !isShipmentClosed
             const isReminderDue = Boolean(nextReminderAt && new Date(nextReminderAt).getTime() <= Date.now())
+            const setupSectionComplete = isApproved && contractAlreadySent && Boolean(ambassadorType) && shipmentPreviouslySent
+            const shipmentEntries = shipmentHistoryEntries(row)
+            const discountCodeKey = String(row?.discount_code || '').trim().toUpperCase()
+            const codePerformance = discountCodeKey ? codePerformanceByCode[discountCodeKey] : null
+            const hasTrackingNumber = Boolean(String(shipVal(row, 'tracking_number') || '').trim())
+            const hasTrackingUrl = Boolean(String(shipVal(row, 'tracking_url') || '').trim())
+            const trackingFlowReady = hasTrackingNumber && hasTrackingUrl
+            const isMessagesSectionOpen = isSectionOpen(row.id, 'messages', false)
+            const isShipmentSectionOpen = isSectionOpen(row.id, 'shipment', !setupSectionComplete)
+            const isHistorySectionOpen = isSectionOpen(row.id, 'history', shipmentEntries.length <= 1)
             return (
               <div key={row.id} className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
                 {/* Collapsible header — click anywhere to open/close */}
@@ -4287,6 +4398,13 @@ const deleteApplication = async (row) => {
                         ? <span className="font-mono">{row.discount_code}</span>
                         : <span className="text-amber-700">Not assigned yet</span>}
                     </p>
+                    {row.discount_code && (
+                      <div className="mt-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[11px] text-slate-600">
+                        <p><strong>Code performance:</strong> {codePerformance?.orders || 0} order{(codePerformance?.orders || 0) === 1 ? '' : 's'} · €{Number(codePerformance?.orderValueEur || 0).toFixed(2)} sales value</p>
+                        <p><strong>Estimated ambassador earnings:</strong> €{Number(codePerformance?.commissionEur || 0).toFixed(2)}</p>
+                        <p><strong>Last order with this code:</strong> {codePerformance?.lastRedemptionAt ? fmtDateTime(codePerformance.lastRedemptionAt) : 'No redemptions yet'}</p>
+                      </div>
+                    )}
                     <p className="mt-1.5 text-[11px] text-slate-400">
                       {row.agreed_terms
                         ? <>✓ Signed the Ambassador Agreement {row.agreement_version ? `(${row.agreement_version})` : ''} on {fmtDate(row.created_at)}</>
@@ -4420,18 +4538,42 @@ const deleteApplication = async (row) => {
 {/* Messages sent to the ambassador — shared record, visible to every admin (read-only) */}
                 {messageLines(row).length > 0 && (
                   <div className="mt-3 rounded-lg border border-sky-200 bg-sky-50/60 p-3">
-                    <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-sky-700">Messages sent to ambassador (visible to all admins)</p>
-                    <div className="max-h-40 space-y-1 overflow-y-auto">
-                      {messageLines(row).map((line, idx) => (
-                        <div key={idx} className="whitespace-pre-line rounded bg-white px-2 py-1 text-[11px] text-slate-600">{renderAmbassadorMessageLine(line)}</div>
-                      ))}
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleSection(row.id, 'messages')}
+                      className="flex w-full items-center justify-between text-left"
+                    >
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-sky-700">Messages sent to ambassador (visible to all admins)</p>
+                      <span className="text-[11px] font-semibold text-sky-700">{isMessagesSectionOpen ? 'Hide' : `Show (${messageLines(row).length})`}</span>
+                    </button>
+                    {isMessagesSectionOpen && (
+                      <div className="mt-2 max-h-40 space-y-1 overflow-y-auto">
+                        {messageLines(row).map((line, idx) => (
+                          <div key={idx} className="whitespace-pre-line rounded bg-white px-2 py-1 text-[11px] text-slate-600">{renderAmbassadorMessageLine(line)}</div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
                 {isApproved && (
                   <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50/60 p-3">
-                    <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">PR box &amp; follow-up</p>
-                    <p className="mt-0.5 text-[11px] text-slate-500">Only the tracking number &amp; URL are emailed to the ambassador. Box contents and comments stay internal.</p>
+                    <button
+                      type="button"
+                      onClick={() => toggleSection(row.id, 'shipment')}
+                      className="flex w-full items-center justify-between text-left"
+                    >
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">PR box &amp; follow-up</p>
+                        <p className="mt-0.5 text-[11px] text-slate-500">
+                          {setupSectionComplete
+                            ? 'Setup complete — contract sent, type selected, and first shipment done.'
+                            : 'Only the tracking number & URL are emailed to the ambassador. Box contents and comments stay internal.'}
+                        </p>
+                      </div>
+                      <span className="text-[11px] font-semibold text-emerald-700">{isShipmentSectionOpen ? 'Hide' : 'Show'}</span>
+                    </button>
+                    {isShipmentSectionOpen && (
+                      <div className="space-y-2">
                     <div className="mt-2 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
                       <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Ambassador package type</p>
                       <p className="mt-0.5 text-[11px] text-slate-500">Selected type: <span className="font-semibold text-slate-700">{ambassadorTypeLabel}</span></p>
@@ -4491,6 +4633,45 @@ const deleteApplication = async (row) => {
                         <p className="mt-2 text-[11px] text-slate-500">Select an ambassador type to view the pack contents.</p>
                       )}
                     </div>
+                    {shipmentEntries.length > 0 && (
+                      <div className="mt-2 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
+                        <button
+                          type="button"
+                          onClick={() => toggleSection(row.id, 'history')}
+                          className="flex w-full items-center justify-between text-left"
+                        >
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Monthly package history</p>
+                          <span className="text-[11px] font-semibold text-slate-600">{isHistorySectionOpen ? 'Hide' : `Show (${shipmentEntries.length})`}</span>
+                        </button>
+                        {isHistorySectionOpen && (
+                          <div className="mt-2 space-y-1.5">
+                            {shipmentEntries.map((entry, idx) => {
+                              const rowIdx = idx + 1
+                              const open = isShipmentEntryOpen(row.id, idx, idx === 0)
+                              return (
+                                <div key={`${row.id}-ship-${idx}`} className="rounded-lg border border-slate-200 bg-slate-50">
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleShipmentEntry(row.id, idx)}
+                                    className="flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left"
+                                  >
+                                    <span className="text-[11px] font-semibold text-slate-700">Package {rowIdx} · {entry.stamp || 'No date'}</span>
+                                    <span className="text-[10px] font-semibold text-slate-500">{open ? 'Hide' : 'Show'}</span>
+                                  </button>
+                                  {open && (
+                                    <div className="space-y-1 border-t border-slate-200 px-2.5 py-1.5 text-[11px] text-slate-600">
+                                      <p><strong>Tracking:</strong> {entry.trackingNumber || '—'}</p>
+                                      <p><strong>URL:</strong> {entry.trackingUrl ? <a href={entry.trackingUrl} target="_blank" rel="noreferrer" className="text-fuchsia-700 hover:underline">{entry.trackingUrl}</a> : '—'}</p>
+                                      <p><strong>Box:</strong> {entry.boxContents || '—'}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
                     {isShipmentClosed && !isShipmentPanelExpanded && (
                       <div className="mt-2 rounded-lg border border-emerald-200 bg-white px-2.5 py-2 text-[11px]">
                         <p className="font-semibold text-emerald-700">✅ Shipment flow closed</p>
@@ -4545,6 +4726,7 @@ const deleteApplication = async (row) => {
                             className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
                           />
                           <button
+                            type="button"
                             onClick={() => saveReminderDetails(row, sentAt, nextReminderAt)}
                             disabled={saving === row.id}
                             className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60"
@@ -4565,11 +4747,16 @@ const deleteApplication = async (row) => {
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <button onClick={() => requestShipmentSave(row, false)} disabled={saving === row.id} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Save box &amp; tracking</button>
-                        <button onClick={() => requestShipmentSave(row, true)} disabled={saving === row.id || (isShipmentClosed && !isNextPackageMode) || isShipmentLocked} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
+                        <button onClick={() => requestShipmentSave(row, true)} disabled={saving === row.id || (isShipmentClosed && !isNextPackageMode) || isShipmentLocked || !trackingFlowReady} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
                         {isShipmentClosed && !isNextPackageMode && (
                           <button onClick={() => startNextPackageFlow(row)} className="rounded-lg border border-fuchsia-300 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50">Start next package</button>
                         )}
                       </div>
+                      {!trackingFlowReady && (
+                        <p className="text-[11px] font-semibold text-amber-700">
+                          To complete this flow, fill in both tracking number and tracking URL.
+                        </p>
+                      )}
                       {isShipmentLocked && (
                         <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-[11px]">
                           <p className="font-semibold text-emerald-700">✅ Email sent on {fmtDateTime(sentAt)}.</p>
@@ -4638,6 +4825,8 @@ const deleteApplication = async (row) => {
                           <button onClick={() => addNote(row)} disabled={saving === row.id || !(noteDraft[row.id] || '').trim()} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Add note</button>
                         </div>
                       </div>
+                        </div>
+                      )}
                     </div>
                     )}
                   </div>
