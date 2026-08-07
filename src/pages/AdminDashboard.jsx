@@ -4736,13 +4736,6 @@ const deleteApplication = async (row) => {
                           <button onClick={() => setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: false }))} className="rounded border border-emerald-300 px-2 py-0.5 font-semibold text-emerald-700 hover:bg-emerald-100">Collapse</button>
                         </div>
                       )}
-                      <textarea
-                        value={shipVal(row, 'shipment_details')}
-                        onChange={(e) => setShipField(row.id, 'shipment_details', e.target.value)}
-                        placeholder="What's in the box (products, freebies) — internal note, NOT sent to the ambassador"
-                        rows={2}
-                        className="w-full rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs"
-                      />
                       <div className="grid gap-2 sm:grid-cols-2">
                         <input
                           value={shipVal(row, 'tracking_number')}
