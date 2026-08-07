@@ -3418,7 +3418,7 @@ function buildAmbassadorDeclineEmail(row, reasonText) {
 }
 
 function buildAmbassadorShipmentEmail(row, ship, setPasswordLink, nextPackageIso) {
-  const name = row?.full_name?.trim() || 'there'
+  const name = (row?.full_name?.trim() || 'there').replace(/\b\w/g, (c) => c.toUpperCase())
   const discountCode = String(row?.discount_code || '').trim()
   const parts = []
   // NOTE: shipment_details ("what's in the box") is internal-only — not included here.
