@@ -3417,7 +3417,7 @@ function buildAmbassadorDeclineEmail(row, reasonText) {
   }
 }
 
-function buildAmbassadorShipmentEmail(row, ship, setPasswordLink) {
+function buildAmbassadorShipmentEmail(row, ship, setPasswordLink, nextPackageIso) {
   const name = row?.full_name?.trim() || 'there'
   const discountCode = String(row?.discount_code || '').trim()
   const parts = []
@@ -3426,6 +3426,14 @@ function buildAmbassadorShipmentEmail(row, ship, setPasswordLink) {
   if (ship.tracking_url) parts.push(`<p><a href="${escAmb(ship.tracking_url)}" style="color:#D43790">Track your parcel →</a></p>`)
   if (discountCode) parts.push(`<p><strong>Your ambassador code:</strong> <span style="font-size:15px;color:#D43790">${escAmb(discountCode)}</span></p>`)
   if (setPasswordLink) parts.push(`<p><a href="${escAmb(setPasswordLink)}" style="display:inline-block;background:#111827;color:#ffffff;padding:10px 16px;border-radius:9999px;text-decoration:none;font-weight:700">Set password & access your ambassador portal</a></p>`)
+  // Next package date range (±1 week) — shown when we have a reminder date.
+  if (nextPackageIso) {
+    const center = new Date(nextPackageIso)
+    const earliest = new Date(center); earliest.setDate(earliest.getDate() - 7)
+    const latest = new Date(center); latest.setDate(latest.getDate() + 7)
+    const fmt = (d) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+    parts.push(`<p>📦 Your next GEL.IT.UP package is expected to ship around <strong>${fmt(earliest)} – ${fmt(latest)}</strong>. We'll email you again with tracking details as soon as it's on its way.</p>`)
+  }
   // NOTE: admin_comment is intentionally NOT included — it is an internal-only note.
   return {
     subject: 'Your GEL.IT.UP PR package is on the way 📦',
@@ -3433,7 +3441,7 @@ function buildAmbassadorShipmentEmail(row, ship, setPasswordLink) {
       <p>Hi ${escAmb(name)},</p>
       <p>Great news — your GEL.IT.UP PR package is on its way! 🎉</p>
       ${parts.join('')}
-      <p>📎 We've attached a short <strong>“About Us”</strong> letter — please have a read before you film, so you know a little about the brand and what to mention.</p>
+      <p>📎 We've attached a short <strong>"About Us"</strong> letter — please have a read before you film, so you know a little about the brand and what to mention.</p>
       <p>Tag <strong>@gelitupinternational</strong> and send your looks to our WhatsApp/Viber so we can feature you.</p>
       <p>The GEL.IT.UP Team</p>
     </div>`,
@@ -4216,7 +4224,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       alert('Reminder date is invalid.')
       return
     }
-    const { subject, html } = buildAmbassadorShipmentEmail(updatedRow, draft, setPasswordLink)
+    const { subject, html } = buildAmbassadorShipmentEmail(updatedRow, draft, setPasswordLink, chosenReminderAt.toISOString())
     let attachments = []
     try {
       const letterAttachment = await buildPdfAttachment(AMBASSADOR_LETTER_ATTACHMENT_URL, 'Gelitup Ambassador Letter.pdf')
@@ -4708,6 +4716,16 @@ const deleteApplication = async (row) => {
                           <button onClick={() => openReminderDraft(row, sentAt, sentAtLabel, nextReminderAt, nextReminderNote)} className="rounded-lg border border-sky-300 px-2.5 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-50">Open reminder email draft</button>
                           <button onClick={() => startNextPackageFlow(row)} className="rounded-lg border border-fuchsia-300 px-2.5 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50">Start next package</button>
                         </div>
+                        <div className="mt-2 flex gap-2">
+                          <input
+                            value={noteDraft[row.id] || ''}
+                            onChange={(e) => setNoteDraft(prev => ({ ...prev, [row.id]: e.target.value }))}
+                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addNote(row) } }}
+                            placeholder="Add a note about this shipment…"
+                            className="flex-1 rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-[11px]"
+                          />
+                          <button onClick={() => addNote(row)} disabled={saving === row.id || !(noteDraft[row.id] || '').trim()} className="rounded-lg border border-slate-300 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Add note</button>
+                        </div>
                       </div>
                     )}
                     {isShipmentPanelExpanded && (
@@ -4794,7 +4812,7 @@ const deleteApplication = async (row) => {
                           tracking_number: shipVal(row, 'tracking_number'),
                           tracking_url: shipVal(row, 'tracking_url'),
                         }
-                        const preview = buildAmbassadorShipmentEmail(row, previewDraft)
+                        const preview = buildAmbassadorShipmentEmail(row, previewDraft, null, reminderDateVal(row, nextReminderAt) ? new Date(`${reminderDateVal(row, nextReminderAt)}T10:00:00Z`).toISOString() : null)
                         return (
                           <div className="rounded-lg border border-sky-200 bg-white p-2.5">
                             <p className="text-[10px] font-bold uppercase tracking-wide text-sky-700">{isShipmentLocked ? 'Shipment email status' : 'Shipment email preview'}</p>
