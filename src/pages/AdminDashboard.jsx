@@ -3718,11 +3718,32 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
         .filter(Boolean),
     )]
     if (distinctCodes.length > 0) {
-      const { data: redemptionRows, error: redemptionErr } = await supabase
-        .from('ambassador_redemptions')
-        .select('code, order_total_eur, commission_amount_eur, created_at')
-        .in('code', distinctCodes)
-      if (redemptionErr) {
+      let redemptionRows = null
+      let redemptionErr = null
+      const redemptionSelectFallbacks = [
+        'code, order_total_eur, commission_amount_eur, created_at',
+        'code, order_total, commission_amount_eur, created_at',
+        'code, order_total_eur, created_at',
+        'code, order_total, created_at',
+      ]
+      for (const selectColumns of redemptionSelectFallbacks) {
+        const result = await supabase
+          .from('ambassador_redemptions')
+          .select(selectColumns)
+          .in('code', distinctCodes)
+        if (!result.error) {
+          redemptionRows = result.data || []
+          redemptionErr = null
+          break
+        }
+        const missingColumn = /column .* does not exist/i.test(String(result.error.message || ''))
+        if (!missingColumn) {
+          redemptionErr = result.error
+          break
+        }
+        redemptionErr = result.error
+      }
+      if (redemptionErr && !redemptionRows) {
         setError((prev) => prev || `Could not load ambassador code performance: ${redemptionErr.message}`)
       } else {
         const perf = {}
@@ -3733,7 +3754,8 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
             perf[key] = { orders: 0, orderValueEur: 0, commissionEur: 0, lastRedemptionAt: '' }
           }
           perf[key].orders += 1
-          perf[key].orderValueEur += Number(entry?.order_total_eur || 0)
+          const orderValue = Number(entry?.order_total_eur ?? entry?.order_total ?? 0)
+          perf[key].orderValueEur += Number.isFinite(orderValue) ? orderValue : 0
           perf[key].commissionEur += Number(entry?.commission_amount_eur || 0)
           const createdAt = String(entry?.created_at || '')
           if (createdAt && (!perf[key].lastRedemptionAt || new Date(createdAt).getTime() > new Date(perf[key].lastRedemptionAt).getTime())) {

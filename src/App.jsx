@@ -9372,6 +9372,7 @@ function CheckoutPage() {
   const [walletLoading, setWalletLoading] = useState(false)
   const [walletError, setWalletError] = useState('')
   const [useWalletCredit, setUseWalletCredit] = useState(false)
+  const handoffPopupShownForCountryRef = useRef('')
   const [checkoutMode, setCheckoutMode] = useState(
     localStorage.getItem('portalAuth') === 'true' ? 'form' : 'choose'
   )
@@ -9399,9 +9400,6 @@ function CheckoutPage() {
     if (!form.lastName.trim()) issues.push('Last name is required')
     if (!form.companyName.trim()) issues.push('Company name is required')
     if (!form.email.trim()) issues.push('Email address is required')
-    const vatOptionalCountry = form.invoiceCountry.trim() === 'Sri Lanka'
-    if (!form.vatNumber.trim()) { if (!vatOptionalCountry) issues.push('VAT number is required') }
-    else if (!viesResult?.valid && !vatOptionalCountry) issues.push('Click the Verify button to validate your VAT number')
     if (!form.invoiceAddressLine1.trim()) issues.push('Street address is required')
     if (!form.invoiceArea.trim()) issues.push('Town / city is required')
     if (!form.invoiceCountry.trim()) issues.push('Country is required')
@@ -9452,6 +9450,9 @@ function CheckoutPage() {
           const words = new Set(normalizeSkuCode(name).split(/\s+/).filter(w => w.length >= 4))
           if (words.size >= 2) wIdx.push({ words, entry })
         }
+        // Keep checkout price resolution aligned with the catalogue item-card
+        // resolver so legacy/underscored codes map to the same price entries.
+        applyProductAliasGroupsToPriceMap(map, normalizeProductName)
         if (mounted) { setPriceMap(map); setWordIndex(wIdx) }
       } catch {}
     }
@@ -9511,6 +9512,7 @@ function CheckoutPage() {
   // Zone shipping: every order is charged by delivery country.
   // null fee = country not configured yet (or not chosen yet).
   const deliveryCountry = (form.shipToDifferentAddress ? form.shippingCountry : form.invoiceCountry).trim()
+  const handoff = getDistributorCountryHandoff(deliveryCountry)
   const smallOrderFee = getSmallOrderShippingFee(deliveryCountry)
   const shippingFee = smallOrderFee ?? 0
   // Ambassador code discount — mutually exclusive with the site sale: the customer
@@ -9526,8 +9528,25 @@ function CheckoutPage() {
     ? Number(Math.min(walletAvailableEur, productsSubtotalAfterCode).toFixed(2))
     : 0
   const productsSubtotalAfterWallet = Number((productsSubtotalAfterCode - walletAppliedEur).toFixed(2))
-  const grandTotal = Number((productsSubtotalAfterWallet + shippingFee).toFixed(2))
+  const invoiceCountry = form.invoiceCountry.trim()
+  const isEuInvoiceCountry = EU_COUNTRIES.includes(invoiceCountry)
+  const hasValidViesVat = Boolean(viesResult?.valid && form.vatNumber.trim())
+  const vatRatePct = isEuInvoiceCountry && !hasValidViesVat ? 20 : 0
+  const vatLabel = !isEuInvoiceCountry
+    ? '0% VAT — non-EU export'
+    : hasValidViesVat
+      ? '0% VAT — EU B2B reverse charge (valid VIES)'
+      : '20% VAT — Bulgarian VAT (EU B2C)'
+  const vatAmount = Number((productsSubtotalAfterWallet * vatRatePct / 100).toFixed(2))
+  const grandTotal = Number((productsSubtotalAfterWallet + vatAmount + shippingFee).toFixed(2))
   const registrationsTable = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || DEFAULT_REGISTRATIONS_TABLE
+
+  useEffect(() => {
+    if (!handoff || !deliveryCountry) return
+    if (handoffPopupShownForCountryRef.current === deliveryCountry) return
+    handoffPopupShownForCountryRef.current = deliveryCountry
+    window.alert(`Your shipping country is served by ${handoff.label}. Please continue your purchase on ${handoff.url}.`)
+  }, [handoff, deliveryCountry])
 
   // Persist cart back to localStorage
   useEffect(() => {
@@ -9598,7 +9617,7 @@ function CheckoutPage() {
       if (walletRpcError) {
         setWalletInfo(null)
         setUseWalletCredit(false)
-        setWalletError('Could not load ambassador credit right now.')
+        setWalletError('')
         return
       }
 
@@ -9620,7 +9639,7 @@ function CheckoutPage() {
     } catch {
       setWalletInfo(null)
       setUseWalletCredit(false)
-      setWalletError('Could not load ambassador credit right now.')
+      setWalletError('')
     } finally {
       setWalletLoading(false)
     }
@@ -9641,9 +9660,6 @@ function CheckoutPage() {
     if (!email) { setError('Email is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
     const vat = form.vatNumber.trim()
     if (!form.companyName.trim()) { setError('Company name is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
-    const vatOptionalForCountry = form.invoiceCountry.trim() === 'Sri Lanka'
-    if (!vat && !vatOptionalForCountry) { setError('VAT number is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
-    if (vat && !viesResult?.valid && !vatOptionalForCountry) { setError('Please verify your VAT number — enter it then click the Verify button.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
     if (!form.firstName.trim()) { setError('First name is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
     if (!form.lastName.trim()) { setError('Last name is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
     if (!form.invoiceAddressLine1.trim()) { setError('Invoice address is required.'); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
@@ -9657,7 +9673,7 @@ function CheckoutPage() {
       if (!form.shippingCountry.trim()) { setError('Shipping country is required.'); return }
       if (!form.shippingPostalCode.trim()) { setError('Shipping postal code is required.'); return }
     }
-    if (smallOrderFee == null) {
+    if (smallOrderFee == null && !handoff) {
       setError(`Shipping is not configured for ${deliveryCountry || 'the selected country'} yet. Please choose another country or contact us.`)
       return
     }
@@ -9666,7 +9682,6 @@ function CheckoutPage() {
 
     if (!hasSupabaseConfig || !supabase) { setError('Order system is not configured. Please contact us.'); return }
 
-    const handoff = getDistributorCountryHandoff(deliveryCountry)
     if (handoff) {
       const fallbackName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim() || form.companyName.trim() || 'Client'
       const leadPayload = {
@@ -9965,6 +9980,7 @@ function CheckoutPage() {
               <tr><td colspan="4" style="${tdStyle};text-align:right">Products subtotal</td><td style="${tdRStyle}">${cartTotal.toFixed(2)}</td></tr>
               ${ambassadorDiscountEur > 0 ? `<tr><td colspan="4" style="${tdStyle};text-align:right;color:#9B1268">Ambassador code ${escapeHtml(ambassadorCode?.code || '')} (−${ambassadorDiscountPct}%)</td><td style="${tdRStyle};color:#9B1268">− ${ambassadorDiscountEur.toFixed(2)}</td></tr>` : ''}
               ${walletAppliedEur > 0 ? `<tr><td colspan="4" style="${tdStyle};text-align:right;color:#047857">Ambassador wallet credit</td><td style="${tdRStyle};color:#047857">− ${walletAppliedEur.toFixed(2)}</td></tr>` : ''}
+              <tr><td colspan="4" style="${tdStyle};text-align:right">VAT (${escapeHtml(vatLabel)})</td><td style="${tdRStyle}">${vatAmount.toFixed(2)}</td></tr>
               <tr><td colspan="4" style="${tdStyle};text-align:right">Shipping${shipping.country ? ` (${escapeHtml(shipping.country)})` : ''}</td><td style="${tdRStyle}">${shippingFee.toFixed(2)}</td></tr>
               <tr><td colspan="4" style="${tdStyle};text-align:right;font-weight:bold">TOTAL (EUR)</td><td style="${tdRStyle};font-weight:bold">${grandTotal.toFixed(2)}</td></tr>
               ${discountActive ? `<tr><td colspan="5" style="${tdStyle};text-align:right;color:#9B1268">${escapeHtml(CATALOGUE_DISCOUNT_LABEL)} already applied — you saved €${discountSavings.toFixed(2)}</td></tr>` : ''}
@@ -9983,7 +9999,7 @@ function CheckoutPage() {
             <h2 style="color:#1a1a1a">Thank you for your order!</h2>
             <p>Hi ${escapeHtml(`${form.firstName.trim()} ${form.lastName.trim()}` || form.companyName.trim())},</p>
             <p>Thank you — we've received your order <strong>#${insertedOrder?.id ?? '-'}</strong> and it's now being processed.</p>
-            <p><strong>Order Total:</strong> €${grandTotal.toFixed(2)} (${cartUnits} items + €${shippingFee.toFixed(2)} shipping)</p>
+            <p><strong>Order Total:</strong> €${grandTotal.toFixed(2)} (${cartUnits} items + €${vatAmount.toFixed(2)} VAT + €${shippingFee.toFixed(2)} shipping)</p>
             ${ambassadorDiscountEur > 0 ? `<p style="color:#9B1268"><strong>Ambassador code ${escapeHtml(ambassadorCode?.code || '')}</strong> applied — you saved €${ambassadorDiscountEur.toFixed(2)} (−${ambassadorDiscountPct}%).</p>` : ''}
             ${walletAppliedEur > 0 ? `<p style="color:#047857"><strong>Ambassador wallet credit</strong> applied — €${walletAppliedEur.toFixed(2)} used.</p>` : ''}
             <p style="color:#555">Your VAT invoice will follow by email once your order is processed. Should any item be unavailable, we will arrange a refund or account credit.</p>
@@ -10028,7 +10044,16 @@ function CheckoutPage() {
       setCart({})
       localStorage.removeItem(QUICK_CART_STORAGE_KEY)
       localStorage.removeItem('gelitup.kits.v1')
-      setOrderConfirmed({ id: insertedOrder?.id ?? 'confirmed', accountCreated: form.createAccount, total: grandTotal, subtotal: productsSubtotalAfterWallet, shippingFee, email: form.email.trim().toLowerCase() })
+      setOrderConfirmed({
+        id: insertedOrder?.id ?? 'confirmed',
+        accountCreated: form.createAccount,
+        total: grandTotal,
+        subtotal: productsSubtotalAfterWallet,
+        vatAmount,
+        vatRatePct,
+        shippingFee,
+        email: form.email.trim().toLowerCase(),
+      })
       await loadAmbassadorWallet()
 
     } catch (err) {
@@ -10068,7 +10093,7 @@ function CheckoutPage() {
         {orderConfirmed.total > 0 && (
           <div className="mt-4 rounded-xl border border-slate-200 bg-white p-5 text-left">
             <p className="mb-1 text-sm font-semibold text-slate-800">Complete Your Payment</p>
-            <p className="text-xs text-slate-500">Order total: <strong className="text-slate-700">€{orderConfirmed.total.toFixed(2)}</strong>{orderConfirmed.shippingFee > 0 ? ` (€${orderConfirmed.subtotal.toFixed(2)} products + €${orderConfirmed.shippingFee.toFixed(2)} shipping)` : ''} — choose your method below. Card and PayPal totals include the processing fee; Revolut adds none. Your order ships as soon as payment is received.</p>
+            <p className="text-xs text-slate-500">Order total: <strong className="text-slate-700">€{orderConfirmed.total.toFixed(2)}</strong>{` (€${orderConfirmed.subtotal.toFixed(2)} products + €${(orderConfirmed.vatAmount || 0).toFixed(2)} VAT + €${orderConfirmed.shippingFee.toFixed(2)} shipping)`} — choose your method below. Card and PayPal totals include the processing fee; Revolut adds none. Your order ships as soon as payment is received.</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {(() => {
                 const { gross: stripeGross, fee: stripeFee } = calcStripeTotal(orderConfirmed.total)
@@ -10195,6 +10220,12 @@ function CheckoutPage() {
 
       {checkoutMode === 'form' && (
         <>
+      {handoff && (
+        <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          Your shipping country ({deliveryCountry}) is served by <strong>{handoff.label}</strong>. Please complete your order on{' '}
+          <a href={handoff.url} target="_blank" rel="noreferrer" className="font-semibold underline">{handoff.url}</a>.
+        </div>
+      )}
       {error && (
         <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>
       )}
@@ -10215,15 +10246,15 @@ function CheckoutPage() {
                 Last Name <span className="text-rose-500">*</span>
                 <input type="text" required autoComplete="family-name" value={form.lastName} onChange={e => updateField('lastName', e.target.value)} className={inputClass} />
               </label>
-              <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
+              <label className="block text-sm font-medium text-slate-700">
                 Company Name <span className="text-rose-500">*</span>
                 <input type="text" required value={form.companyName} onChange={e => updateField('companyName', e.target.value)} placeholder="Your Company Ltd" className={inputClass} />
               </label>
-              <div className="sm:col-span-2">
+              <div>
                 <label className="block text-sm font-medium text-slate-700">
-                  VAT Number {form.invoiceCountry !== 'Sri Lanka' && <span className="text-rose-500">*</span>}
+                  VAT Number
                   <div className="mt-1 flex gap-2">
-                    <input type="text" required={form.invoiceCountry !== 'Sri Lanka'} value={form.vatNumber} onChange={e => { updateField('vatNumber', e.target.value); setViesResult(null) }} placeholder={COUNTRY_VAT_PREFIX[form.invoiceCountry] ? `${COUNTRY_VAT_PREFIX[form.invoiceCountry]}123456789` : 'EU123456789'} className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
+                    <input type="text" value={form.vatNumber} onChange={e => { updateField('vatNumber', e.target.value); setViesResult(null) }} placeholder={COUNTRY_VAT_PREFIX[form.invoiceCountry] ? `${COUNTRY_VAT_PREFIX[form.invoiceCountry]}123456789` : 'EU123456789'} className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-fuchsia-500/20 focus:ring" />
                     <button type="button" onClick={verifyVat} disabled={viesLoading} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50">
                       {viesLoading ? 'Checking…' : 'Verify'}
                     </button>
@@ -10234,6 +10265,9 @@ function CheckoutPage() {
                     For <strong>{form.invoiceCountry}</strong>, your VAT number must start with <strong className="text-slate-600">{COUNTRY_VAT_PREFIX[form.invoiceCountry]}</strong> — e.g. <span className="font-mono">{COUNTRY_VAT_PREFIX[form.invoiceCountry]}123456789</span>
                   </p>
                 )}
+                <p className="mt-1 text-[11px] text-slate-500">
+                  EU B2B with a valid VIES VAT gets 0% reverse charge. EU checkout without a valid VAT is billed with 20% Bulgarian VAT.
+                </p>
                 {viesResult?.valid && (
                   <p className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-700">
                     <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-[10px]">✓</span>
@@ -10281,10 +10315,10 @@ function CheckoutPage() {
           <fieldset className="rounded-xl border border-slate-200 bg-white p-5">
             <legend className="px-2 text-sm font-bold uppercase tracking-[0.08em] text-slate-700">Shipping</legend>
             <label className="mt-2 flex items-center gap-2 text-sm text-slate-700">
-              <input type="checkbox" checked={form.shipToDifferentAddress} onChange={e => updateField('shipToDifferentAddress', e.target.checked)} className="rounded border-slate-300" />
-              Ship to a different address?
+              <input type="checkbox" checked={!form.shipToDifferentAddress} onChange={e => updateField('shipToDifferentAddress', !e.target.checked)} className="rounded border-slate-300" />
+              Shipping address same as invoice address
             </label>
-            {form.shipToDifferentAddress && (
+            {!form.shipToDifferentAddress ? null : (
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <label className="block text-sm font-medium text-slate-700">
                   Recipient Name
@@ -10446,6 +10480,11 @@ function CheckoutPage() {
                   <span className="font-semibold text-emerald-700">− €{walletAppliedEur.toFixed(2)}</span>
                 </div>
               )}
+              <div className="mt-1 flex items-center justify-between text-xs">
+                <span className="text-slate-500">VAT</span>
+                <span className="font-semibold text-slate-700">€{vatAmount.toFixed(2)}</span>
+              </div>
+              <p className="mt-1 text-[10px] text-slate-500">{vatLabel}</p>
               <div className="mt-1 flex items-center justify-between text-xs">
                 <span className="text-slate-500">Shipping{deliveryCountry ? ` to ${deliveryCountry}` : ''}</span>
                 <span className="font-semibold text-slate-700">
