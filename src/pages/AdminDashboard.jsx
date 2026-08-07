@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabaseClient'
 import * as XLSX from 'xlsx'
 import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
 import ambassadorLetterAttachmentUrl from '../lib/ambassadorletter/Gelitup Ambassador Letter.pdf?url'
-import { buildAmbassadorContractPdf } from '../lib/ambassadorContractPdf.js'
+import { buildAmbassadorContractPdf, buildAmbassadorWelcomeLetterPdf } from '../lib/ambassadorContractPdf.js'
 
 const REGISTRATIONS_TABLE = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || 'b2b_registrations'
 const ORDERS_TABLE = import.meta.env.VITE_B2B_ORDERS_TABLE || 'b2b_orders'
@@ -3815,7 +3815,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     ].join('\n')
     const subject = `Reminder: Send next GEL.IT.UP sample kit to ${row?.full_name || row?.email || 'ambassador'}`
     const href = `mailto:${encodeURIComponent(AMBASSADOR_REMINDER_EMAIL)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-    window.open(href, '_blank')
+    window.location.href = href
   }
   const startNextPackageFlow = async (row) => {
     persistShipmentEmailLock((prev) => {
@@ -3875,7 +3875,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     const { subject, html } = buildAmbassadorWelcomeEmail(row)
     const res = await sendAmbassadorEmail({ to: email, subject, html, attachments: [attachment] })
     setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Welcome email + agreement sent to ${email}` : res.error)
-    if (res.ok) logAmbassadorSend(row, { to: email, subject, body: 'Welcome email with Ambassador Agreement PDF attached.' })
+    if (res.ok) await logAmbassadorSend(row, { to: email, subject, body: 'Welcome email with Ambassador Agreement PDF attached.' })
     return res.ok
   }
 
@@ -4187,6 +4187,8 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   const { error: err } = await supabase.from(AMBASSADOR_TABLE).update(draft).eq('id', row.id)
   if (err) { setSaving(null); alert(err.message); return }
   patchRow(row.id, draft)
+  // Track the latest admin_comment so subsequent saveShipmentMeta calls don't overwrite the archive line.
+  let latestAdminComment = row.admin_comment
   if (hasShipmentInfo) {
     const shippedStamp = fmtDate(new Date().toISOString())
     const archiveLine = `[${shippedStamp}] [${getAdminDisplayLabel()}] 📦 Shipped — ${[
@@ -4194,9 +4196,9 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       currentDraft.tracking_url || null,
       currentDraft.shipment_details ? `Box: ${currentDraft.shipment_details}` : null,
     ].filter(Boolean).join(' · ')}`
-    const loggedComment = row.admin_comment ? `${row.admin_comment}\n${archiveLine}` : archiveLine
+    const loggedComment = latestAdminComment ? `${latestAdminComment}\n${archiveLine}` : archiveLine
     const { error: logErr } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: loggedComment }).eq('id', row.id)
-    if (!logErr) patchRow(row.id, { admin_comment: loggedComment })
+    if (!logErr) { patchRow(row.id, { admin_comment: loggedComment }); latestAdminComment = loggedComment }
     setShip((prev) => ({ ...prev, [row.id]: { ...prev[row.id], shipment_details: '', tracking_number: '', tracking_url: '' } }))
   }
   if (alsoEmail) {
@@ -4227,9 +4229,9 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const { subject, html } = buildAmbassadorShipmentEmail(updatedRow, draft, setPasswordLink, chosenReminderAt.toISOString())
     let attachments = []
     try {
-      const letterAttachment = await buildPdfAttachment(AMBASSADOR_LETTER_ATTACHMENT_URL, 'Gelitup Ambassador Letter.pdf')
-      attachments = [letterAttachment]
-    } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not attach About Us letter PDF.'); return }
+      const letterPdf = await buildAmbassadorWelcomeLetterPdf({ fullName: updatedRow.full_name, discountCode: updatedRow.discount_code })
+      attachments = [{ filename: letterPdf.filename, content: letterPdf.base64, contentType: 'application/pdf' }]
+    } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not build personalised welcome letter PDF.'); return }
     const res = await sendAmbassadorEmail({ to: row.email, subject, html, attachments })
     setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Shipment email + About Us letter sent to ${row.email}` : res.error)
     if (res.ok) {
@@ -4250,7 +4252,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const chosenReminderRawB = String(overrideReminderDate || reminderDateVal(row, null) || '').trim()
     if (chosenReminderRawB) {
       const chosenIso = new Date(`${chosenReminderRawB}T10:00:00Z`).toISOString()
-      await saveShipmentMeta(row, { nextReminderAt: chosenIso, nextReminderNote: reminderNoteVal(row) })
+      await saveShipmentMeta({ ...row, admin_comment: latestAdminComment }, { nextReminderAt: chosenIso, nextReminderNote: reminderNoteVal(row) })
       setReminderDateDraft((prev) => ({ ...prev, [row.id]: chosenIso.slice(0, 10) }))
     }
     setEmail(row.id, 'sent', hasShipmentInfo ? 'Shipment logged — box & tracking cleared for the next parcel' : 'Follow-up details saved')
