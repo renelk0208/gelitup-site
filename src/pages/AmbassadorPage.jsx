@@ -86,8 +86,8 @@ const PARTNER_COUNTRIES = [
   {
     key: 'greece',
     name: 'GEL.IT.UP Greece',
-    handle: '@gelitup',
-    instagramUrl: 'https://instagram.com/gelitup',
+    handle: '@gelitupinternational',
+    instagramUrl: 'https://instagram.com/gelitupinternational',
     flag: '🇬🇷',
     match: (c) =>
       ['gr', 'grc'].includes(c) || c.includes('greece') || c.includes('hellas') ||
@@ -355,7 +355,7 @@ export default function AmbassadorPage() {
               This is where you&apos;ll be featured
             </p>
             <h2 className="mt-3 text-2xl font-black tracking-tight text-[#1A1A1A] sm:text-3xl">
-              Our @gelitup feed
+              Our @gelitupinternational feed
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-sm text-black/60">
               Every post below is an ambassador or artist creating with GEL.IT.UP.
@@ -438,7 +438,7 @@ export default function AmbassadorPage() {
               <h3 className="mt-4 text-xl font-black text-white">You&apos;re in the running!</h3>
               <p className="mt-2 text-sm text-white/70">
                 Thanks {form.fullName.split(' ')[0] || 'so much'} — we&apos;ve got your application.
-                Keep an eye on your inbox and keep tagging <span className="font-semibold text-[#e879c4]">@gelitup</span>.
+                Keep an eye on your inbox and keep tagging <span className="font-semibold text-[#e879c4]">@gelitupinternational</span>.
               </p>
               <NavLink
                 to="/full-catalogue"
