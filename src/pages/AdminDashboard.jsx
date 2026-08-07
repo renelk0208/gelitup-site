@@ -4199,7 +4199,9 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const loggedComment = latestAdminComment ? `${latestAdminComment}\n${archiveLine}` : archiveLine
     const { error: logErr } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: loggedComment }).eq('id', row.id)
     if (!logErr) { patchRow(row.id, { admin_comment: loggedComment }); latestAdminComment = loggedComment }
-    setShip((prev) => ({ ...prev, [row.id]: { ...prev[row.id], shipment_details: '', tracking_number: '', tracking_url: '' } }))
+    if (!alsoEmail) {
+      setShip((prev) => ({ ...prev, [row.id]: { ...prev[row.id], shipment_details: '', tracking_number: '', tracking_url: '' } }))
+    }
   }
   if (alsoEmail) {
     const updatedRow = { ...row, ...draft }
@@ -4238,6 +4240,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       const sentAt = new Date().toISOString()
       const nextReminderAt = chosenReminderAt.toISOString()
       const nextReminderNote = reminderNoteVal(row) || currentDraft.shipment_details || ''
+      setShip((prev) => ({ ...prev, [row.id]: { ...prev[row.id], shipment_details: '', tracking_number: '', tracking_url: '' } }))
       persistShipmentEmailLock((prev) => ({ ...prev, [row.id]: { signature: JSON.stringify(currentDraft), sentAt }, }))
       const metaResult = await saveShipmentMeta(row, { sentAt, nextReminderAt, nextReminderNote })
       if (!metaResult.ok) { setEmail(row.id, 'error', `Shipment email sent, but reminder metadata failed to save: ${metaResult.error}`); setSaving(null); return }
