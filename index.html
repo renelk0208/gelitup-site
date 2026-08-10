@@ -109,88 +109,114 @@
     </script>
     <!-- End Meta Pixel Code -->
 
-    <!-- Consent Banner Styling -->
+    <!-- Cookiebot Banner Styling - Custom Look (Dark theme with pink accent) -->
     <style>
-      @media screen and (max-width:720px) {
-        #cookiebanner a.c-button { 
-          width:100%; 
-          box-sizing:border-box; 
-          text-align:center; 
-          margin-bottom:20px;} 
-        #c-right { 
-          float:none;
+      /* Override Cookiebot default styles */
+      #CookiebotMainContainer {
+        background-color: rgb(36, 36, 39) !important;
+        opacity: 0.95 !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+
+      #CookiebotMainContainer * {
+        font-family: Arial, sans-serif !important;
+      }
+
+      /* Message text styling */
+      #CookiebotMainContainer p,
+      #CookiebotMainContainer span {
+        color: #999 !important;
+        font-size: 14px !important;
+        line-height: 1.4 !important;
+      }
+
+      /* Link styling */
+      #CookiebotMainContainer a {
+        color: #D43790 !important;
+        font-weight: bold !important;
+        text-decoration: underline !important;
+      }
+
+      #CookiebotMainContainer a:hover {
+        color: #fff !important;
+      }
+
+      /* Accept button styling */
+      #CookiebotMainContainer button[id*="Accept"],
+      .CookieboxButtonAccept,
+      #CookiebotMainContainer .CookieboxButtonAccept {
+        background-color: rgb(212, 55, 144) !important; /* Pink #D43790 */
+        color: #fff !important;
+        border: none !important;
+        border-radius: 4px !important;
+        padding: 12px 30px !important;
+        font-size: 16px !important;
+        font-weight: bold !important;
+        cursor: pointer !important;
+        transition: 0.2s !important;
+      }
+
+      #CookiebotMainContainer button[id*="Accept"]:hover,
+      .CookieboxButtonAccept:hover,
+      #CookiebotMainContainer .CookieboxButtonAccept:hover {
+        background-color: #c0236f !important;
+        box-shadow: 0 2px 8px rgba(212, 55, 144, 0.3) !important;
+      }
+
+      /* Reject button (if present) */
+      #CookiebotMainContainer button[id*="Reject"],
+      .CookieboxButtonReject,
+      #CookiebotMainContainer .CookieboxButtonReject {
+        background-color: transparent !important;
+        color: #999 !important;
+        border: 1px solid #666 !important;
+        border-radius: 4px !important;
+        padding: 12px 30px !important;
+        font-size: 14px !important;
+        cursor: pointer !important;
+        transition: 0.2s !important;
+      }
+
+      #CookiebotMainContainer button[id*="Reject"]:hover,
+      .CookieboxButtonReject:hover,
+      #CookiebotMainContainer .CookieboxButtonReject:hover {
+        color: #fff !important;
+        border-color: #999 !important;
+      }
+
+      /* Container layout */
+      #CookiebotMainContainer {
+        padding: 25px 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        gap: 20px !important;
+      }
+
+      /* Mobile responsive */
+      @media screen and (max-width: 720px) {
+        #CookiebotMainContainer {
+          flex-direction: column !important;
+          align-items: flex-start !important;
+          padding: 25px 20px !important;
         }
-        #c-left { 
-          float:none;
-        }   
-        #cookiebanner p.c-message { 
-          margin-bottom:20px;
-        }   
-      }    
 
-      @media screen and (min-width:720px) {
-        #cookiebanner #c-left { 
-          float:left; 
-          max-width:80%;
+        #CookiebotMainContainer button {
+          width: 100% !important;
+          text-align: center !important;
         }
-        #cookiebanner #c-right { 
-          float:right; 
+
+        #CookiebotMainContainer p,
+        #CookiebotMainContainer span {
+          margin-bottom: 15px !important;
         }
       }
 
-      #cookiebanner { 
-        box-sizing: border-box; 
-        background-color:rgb(36,36,39); 
-        opacity: 0.9; width:100%; 
-        padding:25px 40px; 
-        position: fixed; 
-        z-index: 2147483645; 
-        bottom:-800px
-      }
-      #cookiebanner p { 
-        font-size:14px; 
-        line-height:1.4;
-      }
-      #cookiebanner .c-header { 
-        text-transform:uppercase; 
-        color:#fff; 
-        font-weight:bold; 
-        margin-bottom:4px;
-      }
-      #cookiebanner p.c-message {
-        font-size:14px; 
-        color:#999;
-      }
-      #cookiebanner a { 
-        font-weight:bold; 
-        color:#999;
-      }
-      #cookiebanner a:hover { 
-        color:#fff;
-      }
-
-      #cookiebanner a.c-button { 
-        border-radius: 4px;
-        background-color: rgb(255,255,255);
-        box-shadow: 0 2px 0 0 rgb(221,221,221);
-        border:1px solid rgb(221,221,221);
-        padding:12px 60px;
-        text-decoration:none;
-        display:inline-block;
-        vertical-align:middle;
-        margin-top:10px;
-        color:#666;
-        font-size:16px;
-        -o-transition:.2s;
-        -ms-transition:.2s;
-        -moz-transition:.2s;
-        -webkit-transition:.2s;
-        transition:.2s;
-      }
-
-      #cookiebanner a.c-button:hover { 
-        box-shadow:none; 
-        background-color:#f8f8f8;
+      @media screen and (min-width: 720px) {
+        #CookiebotMainContainer {
+          flex-direction: row !important;
+        }
       }
     </style>
 
@@ -240,42 +266,6 @@
       </noscript>
     </div>
     <script type="module" src="/src/main.jsx"></script>
-
-    <!-- Consent Banner HTML & Animation Script -->
-    <div id="cookiebanner" lang="en" dir="ltr" ng-non-bindable>
-      <div id="c-left">
-        <p class="c-header">Cookie Consent</p>
-        <p class="c-message">We use cookies to enhance your experience. By continuing to browse this site you agree to our use of cookies.</p>
-      </div>
-      <div id="c-right">
-        <a href="javascript:void(0)" onclick="Cookiebot.dialog.submitConsent()" class="c-button">OK</a>
-      </div>
-      <div style="clear:both"></div>
-    </div>
-
-    <script>
-      var cookieBannerSliderPos = 0;
-
-      function showCookieBanner() {
-          var cookiebanner = document.getElementById("cookiebanner");
-          var dialogHeight = parseInt(cookiebanner.offsetHeight);
-          cookiebanner.style.bottom = (cookieBannerSliderPos - dialogHeight) + "px";
-          cookieBannerSliderPos += 4;
-          if (cookieBannerSliderPos < dialogHeight) {
-              setTimeout(function () {
-                  showCookieBanner();
-              }, 1);
-          } else {
-              cookieBannerSliderPos = 0;
-              cookiebanner.style.bottom = "0px";
-          }
-      }
-
-      function hideCookieBanner() {
-          var cookiebanner = document.getElementById("cookiebanner");
-          cookiebanner.style.display = "none";
-      }
-    </script>
 
     <!-- Schema.org Organisation structured data -->
     <script type="application/ld+json">
