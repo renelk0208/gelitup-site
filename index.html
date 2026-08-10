@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
 
+    <!-- Cookiebot CMP - MUST load before GTM -->
+    <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="59083403-cf9d-4bd1-9ce4-c99ced9d883d" data-blockingmode="auto" type="text/javascript"></script>
+
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -47,7 +50,7 @@
     <!-- Twitter/X Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="GEL.IT.UP by GIUP® | Professional Gel Polish, Builder Gel &amp; Nail Systems" />
-    <meta name="twitter:description" content="Wholesale gel polish, builder gel and nail systems for nail technicians, salons and academies. HEMA-free, TPO-free, EU certified, Leaping Bunny Approved." />
+    <meta name="twitter:description" content="Wholesale gel polish, builder gel and nail systems for nail technicians, salons and academies. HEMA-free, TPO-free, EU certified, Leaping Bunny Approved. 15+ countries." />
     <meta name="twitter:image" content="https://gelitup.com/og-image.jpg" />
 
     <!-- Favicon -->
@@ -106,6 +109,91 @@
     </script>
     <!-- End Meta Pixel Code -->
 
+    <!-- Consent Banner Styling -->
+    <style>
+      @media screen and (max-width:720px) {
+        #cookiebanner a.c-button { 
+          width:100%; 
+          box-sizing:border-box; 
+          text-align:center; 
+          margin-bottom:20px;} 
+        #c-right { 
+          float:none;
+        }
+        #c-left { 
+          float:none;
+        }   
+        #cookiebanner p.c-message { 
+          margin-bottom:20px;
+        }   
+      }    
+
+      @media screen and (min-width:720px) {
+        #cookiebanner #c-left { 
+          float:left; 
+          max-width:80%;
+        }
+        #cookiebanner #c-right { 
+          float:right; 
+        }
+      }
+
+      #cookiebanner { 
+        box-sizing: border-box; 
+        background-color:rgb(36,36,39); 
+        opacity: 0.9; width:100%; 
+        padding:25px 40px; 
+        position: fixed; 
+        z-index: 2147483645; 
+        bottom:-800px
+      }
+      #cookiebanner p { 
+        font-size:14px; 
+        line-height:1.4;
+      }
+      #cookiebanner .c-header { 
+        text-transform:uppercase; 
+        color:#fff; 
+        font-weight:bold; 
+        margin-bottom:4px;
+      }
+      #cookiebanner p.c-message {
+        font-size:14px; 
+        color:#999;
+      }
+      #cookiebanner a { 
+        font-weight:bold; 
+        color:#999;
+      }
+      #cookiebanner a:hover { 
+        color:#fff;
+      }
+
+      #cookiebanner a.c-button { 
+        border-radius: 4px;
+        background-color: rgb(255,255,255);
+        box-shadow: 0 2px 0 0 rgb(221,221,221);
+        border:1px solid rgb(221,221,221);
+        padding:12px 60px;
+        text-decoration:none;
+        display:inline-block;
+        vertical-align:middle;
+        margin-top:10px;
+        color:#666;
+        font-size:16px;
+        -o-transition:.2s;
+        -ms-transition:.2s;
+        -moz-transition:.2s;
+        -webkit-transition:.2s;
+        transition:.2s;
+      }
+
+      #cookiebanner a.c-button:hover { 
+        box-shadow:none; 
+        background-color:#f8f8f8;
+      }
+    </style>
+
   </head>
   <body>
     <!-- Meta Pixel noscript fallback -->
@@ -140,7 +228,7 @@
           </ul>
 
           <h2>Distribution</h2>
-          <p>GEL.IT.UP operates a verified wholesale distribution network across Europe and beyond. <a href="/become-distributor">Apply to become a distributor</a> or <a href="/distributor-packages">view partnership tiers</a>.</p>
+          <p>GEL.IT.UP operates a verified wholesale distribution network across Europe and beyond. <a href="/become-distributor">Apply to become a distributor</a> or <a href="/distributor-packages">view distributor packages</a>.</p>
 
           <h2>For Nail Academies</h2>
           <p>We supply professional nail academies with certified gel systems, training materials and branded support. <a href="/for-academies">Learn more</a>.</p>
@@ -153,6 +241,42 @@
     </div>
     <script type="module" src="/src/main.jsx"></script>
 
+    <!-- Consent Banner HTML & Animation Script -->
+    <div id="cookiebanner" lang="en" dir="ltr" ng-non-bindable>
+      <div id="c-left">
+        <p class="c-header">Cookie Consent</p>
+        <p class="c-message">We use cookies to enhance your experience. By continuing to browse this site you agree to our use of cookies.</p>
+      </div>
+      <div id="c-right">
+        <a href="javascript:void(0)" onclick="Cookiebot.dialog.submitConsent()" class="c-button">OK</a>
+      </div>
+      <div style="clear:both"></div>
+    </div>
+
+    <script>
+      var cookieBannerSliderPos = 0;
+
+      function showCookieBanner() {
+          var cookiebanner = document.getElementById("cookiebanner");
+          var dialogHeight = parseInt(cookiebanner.offsetHeight);
+          cookiebanner.style.bottom = (cookieBannerSliderPos - dialogHeight) + "px";
+          cookieBannerSliderPos += 4;
+          if (cookieBannerSliderPos < dialogHeight) {
+              setTimeout(function () {
+                  showCookieBanner();
+              }, 1);
+          } else {
+              cookieBannerSliderPos = 0;
+              cookiebanner.style.bottom = "0px";
+          }
+      }
+
+      function hideCookieBanner() {
+          var cookiebanner = document.getElementById("cookiebanner");
+          cookiebanner.style.display = "none";
+      }
+    </script>
+
     <!-- Schema.org Organisation structured data -->
     <script type="application/ld+json">
     {
@@ -162,7 +286,7 @@
       "alternateName": ["Gel It Up", "GIUP", "GEL.IT.UP"],
       "url": "https://gelitup.com",
       "logo": "https://gelitup.com/gelitup-media/images/logos/gelitup-logo.png",
-      "description": "Professional gel polish with 1,000+ shades, builder gel systems, base coats and top coats. HEMA-free, TPO-free, EU certified, Leaping Bunny cruelty-free certified. Trusted by professional nail technicians and distributors in 15+ countries.",
+      "description": "Professional gel polish with 1,000+ shades, builder gel systems, base coats and top coats. HEMA-free, TPO-free, EU certified, Leaping Bunny cruelty-free certified. Trusted by nail technicians in 15+ countries.",
       "sameAs": [
         "https://www.instagram.com/gelitupinternational/",
         "https://www.facebook.com/GEL.IT.UP.Greece/",
