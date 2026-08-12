@@ -90,7 +90,6 @@ const SMALL_ORDER_SHIPPING_ZONES = [
 ]
 const DISTRIBUTOR_COUNTRY_HANDOFF = {
   Italy: { url: 'https://www.gelitup.it', label: 'GEL.IT.UP Italy' },
-  Greece: { url: 'https://gelitup.gr', label: 'GEL.IT.UP Greece' },
   Bulgaria: { url: 'https://gelitup.bg', label: 'GEL.IT.UP Bulgaria' },
 }
 function getDistributorCountryHandoff(country) {
