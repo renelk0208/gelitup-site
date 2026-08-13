@@ -440,6 +440,14 @@ function RegistrationsPanel({ onPreviewDistributor }) {
     )) return
 
     const nowIso = new Date().toISOString()
+    const orderRef = `REF-${String(row?.id || 'order').replace(/[^A-Za-z0-9]+/g, '').toUpperCase()}-${Date.now()}`
+    const shippingAddress = [
+      row.shipping_address_line1,
+      row.shipping_address_line2,
+      row.shipping_area,
+      row.shipping_region,
+      row.shipping_postal_code,
+    ].filter(Boolean).join(', ') || row.address || row.city || row.postal_code || row.country || ''
     const updatedNotes = [
       String(row.notes || '')
         .replace(/\[DISTRIBUTOR_REFERRAL:[^\]]+\]\s*/gi, '')
@@ -454,6 +462,28 @@ function RegistrationsPanel({ onPreviewDistributor }) {
       : 'B2B Order - Business'
 
     setSaving(row.id)
+    const { error: orderInsertError } = await supabase
+      .from(ORDERS_TABLE)
+      .insert([{
+        registration_id: row.id,
+        customer_email: row.contact_email || '',
+        order_ref: orderRef,
+        source: 'country_referral_checkout',
+        module: 'products',
+        status: 'received',
+        total_units: Number(String(row.notes || '').match(/Cart units:\s*(\d+)/i)?.[1] || 0),
+        consignee_name: row.shipping_name || row.contact_name || row.company_name || null,
+        consignee_phone: row.shipping_phone || row.phone || null,
+        shipping_address: shippingAddress || null,
+        items: [],
+      }])
+
+    if (orderInsertError) {
+      setSaving(null)
+      alert(`Order reinstatement failed: ${orderInsertError.message}`)
+      return
+    }
+
     const { error: err } = await supabase
       .from(REGISTRATIONS_TABLE)
       .update({
@@ -468,7 +498,14 @@ function RegistrationsPanel({ onPreviewDistributor }) {
       })
       .eq('id', row.id)
     setSaving(null)
-    if (err) { alert(err.message); return }
+    if (err) {
+      await supabase
+        .from(ORDERS_TABLE)
+        .delete()
+        .eq('order_ref', orderRef)
+      alert(`Order reinstatement failed: ${err.message}`)
+      return
+    }
     setRows(prev => prev.map(r => r.id === row.id
       ? {
           ...r,
