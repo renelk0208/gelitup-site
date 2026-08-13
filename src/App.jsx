@@ -2637,6 +2637,24 @@ function getAlternateGalleryBaseImagePath(imagePath = '') {
   return basePath !== normalizedPath ? basePath : ''
 }
 
+function getAlternateGalleryBaseImageCandidates(imagePath = '') {
+  const normalizedPath = String(imagePath || '').trim()
+  if (!normalizedPath) return []
+
+  const basePath = getAlternateGalleryBaseImagePath(normalizedPath)
+  if (!basePath) return []
+
+  const candidates = [basePath]
+  const lastSlashIndex = basePath.lastIndexOf('/')
+  const directory = lastSlashIndex >= 0 ? basePath.slice(0, lastSlashIndex + 1) : ''
+  const fileName = lastSlashIndex >= 0 ? basePath.slice(lastSlashIndex + 1) : basePath
+
+  if (fileName.includes('-')) candidates.push(`${directory}${fileName.replace(/-/g, '_')}`)
+  if (fileName.includes('_')) candidates.push(`${directory}${fileName.replace(/_/g, '-')}`)
+
+  return Array.from(new Set(candidates))
+}
+
 function isAlternateGalleryImagePath(imagePath = '') {
   return /_[BC](-[a-z0-9]+)?\.[a-z0-9]+$/i.test(String(imagePath || '').trim())
 }
@@ -2653,8 +2671,10 @@ function mergeAlternateGalleryItems(items = []) {
     galleryImages: Array.isArray(item.galleryImages) ? [...item.galleryImages] : [],
   }))
   const primaryIndexByName = new Map()
+  const primaryIndexByImageUrl = new Map()
 
   merged.forEach((item, index) => {
+    primaryIndexByImageUrl.set(item.imageUrl, index)
     if (isAlternateGalleryImagePath(item.imageUrl)) return
     const normalizedName = normalizeCatalogueToken(stripAlternateGallerySuffix(item.name))
     if (!normalizedName || primaryIndexByName.has(normalizedName)) return
@@ -2670,7 +2690,16 @@ function mergeAlternateGalleryItems(items = []) {
 
     const normalizedName = normalizeCatalogueToken(stripAlternateGallerySuffix(item.name))
     const primaryIndex = normalizedName ? primaryIndexByName.get(normalizedName) : undefined
-    const primaryItem = primaryIndex === undefined ? null : merged[primaryIndex]
+    let primaryItem = primaryIndex === undefined ? null : merged[primaryIndex]
+
+    if (!primaryItem || primaryItem.imageUrl === item.imageUrl) {
+      const fallbackIndex = getAlternateGalleryBaseImageCandidates(item.imageUrl)
+        .map((candidatePath) => primaryIndexByImageUrl.get(candidatePath))
+        .find((candidateIndex) => candidateIndex !== undefined)
+      if (fallbackIndex !== undefined) {
+        primaryItem = merged[fallbackIndex]
+      }
+    }
 
     if (!primaryItem || primaryItem.imageUrl === item.imageUrl) {
       result.push(item)
