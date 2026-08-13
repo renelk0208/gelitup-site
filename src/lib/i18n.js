@@ -51,6 +51,32 @@ export function getTranslations(lang) {
   return map[lang] || null
 }
 
+/**
+ * Build a locale-prefixed path. English (the default) has no prefix.
+ * localePath('el', '/catalogue') → '/el/catalogue'
+ * localePath('en', '/catalogue') → '/catalogue'
+ */
+export function localePath(lang, path = '/') {
+  const normalized = String(path || '/').replace(/^\/+/, '/')
+  if (!lang || lang === 'en') return normalized
+  return `/${lang}${normalized === '/' ? '' : normalized}`
+}
+
+/**
+ * Strip a locale prefix from a pathname, returning the bare path.
+ * stripLocalePrefix('/el/catalogue') → '/catalogue'
+ * stripLocalePrefix('/catalogue')    → '/catalogue'
+ */
+export function stripLocalePrefix(pathname) {
+  const p = String(pathname || '/')
+  for (const code of [...SUPPORTED_LANGS, 'it']) {
+    if (code === 'en') continue
+    if (p === `/${code}`) return '/'
+    if (p.startsWith(`/${code}/`)) return p.slice(code.length + 1)
+  }
+  return p
+}
+
 export const LangContext = createContext('en')
 export const useLang = () => useContext(LangContext)
 

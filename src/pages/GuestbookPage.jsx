@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase, hasSupabaseConfig } from '../lib/supabaseClient'
-import { useLang, it as itTranslations } from '../lib/i18n.js'
+import { useLang, getTranslations } from '../lib/i18n.js'
 
 const TABLE = 'guestbook'
 const ROLES = ['Nail Technician', 'Salon Owner', 'Distributor', 'Educator']
@@ -70,7 +70,7 @@ const TRUNCATE_LENGTH = 120
 /* ── Entry Card ─────────────────────────────────────────────────────────────── */
 function EntryCard({ entry, featured }) {
   const lang = useLang()
-  const T = lang === 'it' ? itTranslations : null
+  const T = getTranslations(lang)
   const starLabels = T ? T.guestbook.star_labels : STAR_LABELS
   const [expanded, setExpanded] = useState(false)
   const message = entry.message || ''
@@ -139,7 +139,7 @@ export default function GuestbookPage() {
       if (prev.canon) canon?.setAttribute('href', prev.canon)
     }
   }, [])
-  const T = lang === 'it' ? itTranslations : null
+  const T = getTranslations(lang)
   const starLabels = T ? T.guestbook.star_labels : STAR_LABELS
   const roles = T ? T.guestbook.roles : ROLES
   const [entries, setEntries] = useState([])
