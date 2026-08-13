@@ -3692,7 +3692,7 @@ function FullCataloguePage() {
 
   // If a ?category= query param is present (e.g. from a social media or ad link),
   // scroll to the matching catalogue section after the catalogue finishes loading.
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   useEffect(() => {
     const catSlug = (searchParams.get('category') || '').toLowerCase().trim()
     if (!catSlug || isLoading) return
@@ -3710,7 +3710,9 @@ function FullCataloguePage() {
       'essentials':      'catalogue-section-essentials',
       'base-top-coats':  'catalogue-section-essentials',
       'bases':           'catalogue-section-essentials',
+      'bases-tops':      'catalogue-section-essentials',
       'tools':           'catalogue-section-tools',
+      'builder-systems': 'catalogue-section-builders',
       'nail-art':        'catalogue-section-nail-art',
       'nail-arts':       'catalogue-section-nail-art',
       'consumables':     'catalogue-section-consumables',
@@ -5717,14 +5719,14 @@ function FullCataloguePage() {
         <div className="sticky top-[61px] z-30 -mx-3 border-b border-white/10 bg-[#111111]/95 backdrop-blur-sm md:-mx-6 md:top-[69px]">
           <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-6">
             {[
-              { label: '2026 NEW! ✦',   anchor: 'catalogue-section-new-products',  color: '#D43790' },
-              { label: 'Colours',        anchor: 'catalogue-section-colours',       color: '#c084fc' },
-              { label: 'Bases & Tops',   anchor: 'catalogue-section-essentials',    color: '#67e8f9' },
-              { label: 'Builder Systems',anchor: 'catalogue-section-builders',      color: '#86efac' },
-              { label: 'Tools',          anchor: 'catalogue-section-tools',         color: '#fcd34d' },
-              { label: 'Nail Art',       anchor: 'catalogue-section-nail-art',      color: '#f9a8d4' },
-              { label: 'Consumables',    anchor: 'catalogue-section-consumables',   color: '#fb923c' },
-              { label: 'Nail Care',      anchor: 'catalogue-section-nail-hand-foot',color: '#6ee7b7' },
+              { label: '2026 NEW! ✦',   anchor: 'catalogue-section-new-products',  color: '#D43790', slug: 'new-products' },
+              { label: 'Colours',        anchor: 'catalogue-section-colours',       color: '#c084fc', slug: 'colours' },
+              { label: 'Bases & Tops',   anchor: 'catalogue-section-essentials',    color: '#67e8f9', slug: 'bases-tops' },
+              { label: 'Builder Systems',anchor: 'catalogue-section-builders',      color: '#86efac', slug: 'builder-systems' },
+              { label: 'Tools',          anchor: 'catalogue-section-tools',         color: '#fcd34d', slug: 'tools' },
+              { label: 'Nail Art',       anchor: 'catalogue-section-nail-art',      color: '#f9a8d4', slug: 'nail-art' },
+              { label: 'Consumables',    anchor: 'catalogue-section-consumables',   color: '#fb923c', slug: 'consumables' },
+              { label: 'Nail Care',      anchor: 'catalogue-section-nail-hand-foot',color: '#6ee7b7', slug: 'nail-care' },
             ].map((item) => {
               const isActive = activeNavAnchor === item.anchor
               return (
@@ -5733,6 +5735,7 @@ function FullCataloguePage() {
                   type="button"
                   onClick={() => {
                     setActiveNavAnchor(item.anchor)
+                    setSearchParams({ category: item.slug }, { replace: true })
                     const el = document.getElementById(item.anchor)
                     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
                   }}
