@@ -3131,10 +3131,19 @@ function formatSubcategoryDisplayName(subcategoryName = '', categoryName = '') {
   if (normalized === 'THERMO') return 'Thermo'
   if (normalized === 'TUTTI FRUTTI GLASS') return 'Tutti Frutti Glass'
   if (normalized === 'GLASS EFFECT') return 'Glass Effect'
-  
+  if (normalized.includes('3INI BUILDER') && normalized.includes('GLITTER 3 IN 1 BUILDER GEL')) {
+    return '3-IN-1 Builder Gel / Glitter 3-IN-1 Builder Gel'
+  }
+  if (normalized.includes('PREMIUM BUILDER') && normalized.includes('40G')) {
+    return '3-IN-1 Premium Builder Gel / 40g'
+  }
+  if (normalized.includes('PREMIUM BUILDER') && normalized.includes('20G')) {
+    return '3-IN-1 Premium Builder Gel / 20g'
+  }
+
   // Builder Gel Systems subcategories
   if (normalized === '3INI BUILDER') return '3-IN-1 Builder Gel'
-  if (normalized === 'PREMIUM BUILDER') return '3-in-1 Premium Builder Gel'
+  if (normalized === 'PREMIUM BUILDER') return '3-IN-1 Premium Builder Gel'
   if (normalized === 'LIQUID POLYGEL') return 'Liquid Polygel'
   if (normalized === 'COMPETE') return 'Compete Acrylic'
   if (normalized === 'MULTIMIX' || normalized === '30 ML' || normalized === '30GR' || normalized === '30G') return 'Multimix 30g'
@@ -3243,14 +3252,31 @@ function flattenSectionItems(section) {
 function getSubcategoryProductInformation(categoryName = '', subcategoryName = '') {
   const categoryToken = normalizeCatalogueToken(categoryName)
   const subcategoryToken = normalizeCatalogueToken(subcategoryName)
-  if (!categoryToken || !subcategoryToken) return null
+  if (!categoryToken) return null
 
   // Exact subcategory match first, then category-level fallback (subcategory === 'ALL')
-  return (
+  const exactMatch = (
     PRODUCT_INFORMATION_BY_SUBCATEGORY[`${categoryToken}::${subcategoryToken}`] ||
     PRODUCT_INFORMATION_BY_SUBCATEGORY[`${categoryToken}::ALL`] ||
     null
   )
+  if (exactMatch) return exactMatch
+
+  if (!subcategoryToken) return null
+
+  const fuzzyMatchKey = Object.keys(PRODUCT_INFORMATION_BY_SUBCATEGORY).find((key) => {
+    const [rawCategory = '', rawSubcategory = ''] = String(key || '').split('::')
+    if (normalizeCatalogueToken(rawCategory) !== categoryToken) return false
+    const keySubcategoryToken = normalizeCatalogueToken(rawSubcategory)
+    if (!keySubcategoryToken) return false
+    return keySubcategoryToken === subcategoryToken
+      || (subcategoryToken.length >= 5 && (
+        keySubcategoryToken.includes(subcategoryToken)
+        || subcategoryToken.includes(keySubcategoryToken)
+      ))
+  })
+
+  return fuzzyMatchKey ? PRODUCT_INFORMATION_BY_SUBCATEGORY[fuzzyMatchKey] : null
 }
 
 // Flexible lookup for the B2B catalog view where category names come from WooCommerce/Supabase
