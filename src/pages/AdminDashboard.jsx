@@ -481,8 +481,8 @@ function RegistrationsPanel({ onPreviewDistributor }) {
       order_ref: existingOrder?.order_ref || orderRef,
       source: 'country_referral_checkout',
       module: 'products',
-      // Reinstated referral orders should surface in the "new orders" queue first.
-      status: 'pending_approval',
+      // Reinstated referral orders should surface in the standard new orders queue.
+      status: 'received',
       total_units: Number(String(row.notes || '').match(/Cart units:\s*(\d+)/i)?.[1] || 0),
       consignee_name: row.shipping_name || row.contact_name || row.company_name || null,
       consignee_phone: row.shipping_phone || row.phone || null,
