@@ -462,26 +462,54 @@ function RegistrationsPanel({ onPreviewDistributor }) {
       : 'B2B Order - Business'
 
     setSaving(row.id)
-    const { error: orderInsertError } = await supabase
+    const { data: existingOrder, error: existingOrderError } = await supabase
       .from(ORDERS_TABLE)
-      .insert([{
-        registration_id: row.id,
-        customer_email: row.contact_email || '',
-        order_ref: orderRef,
-        source: 'country_referral_checkout',
-        module: 'products',
-        status: 'received',
-        total_units: Number(String(row.notes || '').match(/Cart units:\s*(\d+)/i)?.[1] || 0),
-        consignee_name: row.shipping_name || row.contact_name || row.company_name || null,
-        consignee_phone: row.shipping_phone || row.phone || null,
-        shipping_address: shippingAddress || null,
-        items: [],
-      }])
+      .select('id, status, order_ref')
+      .eq('registration_id', row.id)
+      .maybeSingle()
 
-    if (orderInsertError) {
+    if (existingOrderError) {
       setSaving(null)
-      alert(`Order reinstatement failed: ${orderInsertError.message}`)
+      alert(`Order reinstatement failed: ${existingOrderError.message}`)
       return
+    }
+
+    const previousOrderStatus = existingOrder?.status || 'received'
+    const orderPayload = {
+      registration_id: row.id,
+      customer_email: row.contact_email || '',
+      order_ref: existingOrder?.order_ref || orderRef,
+      source: 'country_referral_checkout',
+      module: 'products',
+      // Reinstated referral orders should surface in the "new orders" queue first.
+      status: 'pending_approval',
+      total_units: Number(String(row.notes || '').match(/Cart units:\s*(\d+)/i)?.[1] || 0),
+      consignee_name: row.shipping_name || row.contact_name || row.company_name || null,
+      consignee_phone: row.shipping_phone || row.phone || null,
+      shipping_address: shippingAddress || null,
+      items: [],
+    }
+
+    if (existingOrder?.id) {
+      const { error: existingOrderUpdateError } = await supabase
+        .from(ORDERS_TABLE)
+        .update(orderPayload)
+        .eq('id', existingOrder.id)
+      if (existingOrderUpdateError) {
+        setSaving(null)
+        alert(`Order reinstatement failed: ${existingOrderUpdateError.message}`)
+        return
+      }
+    } else {
+      const { error: orderInsertError } = await supabase
+        .from(ORDERS_TABLE)
+        .insert([orderPayload])
+
+      if (orderInsertError) {
+        setSaving(null)
+        alert(`Order reinstatement failed: ${orderInsertError.message}`)
+        return
+      }
     }
 
     const { error: err } = await supabase
@@ -499,10 +527,17 @@ function RegistrationsPanel({ onPreviewDistributor }) {
       .eq('id', row.id)
     setSaving(null)
     if (err) {
-      await supabase
-        .from(ORDERS_TABLE)
-        .delete()
-        .eq('order_ref', orderRef)
+      if (existingOrder?.id) {
+        await supabase
+          .from(ORDERS_TABLE)
+          .update({ status: previousOrderStatus })
+          .eq('id', existingOrder.id)
+      } else {
+        await supabase
+          .from(ORDERS_TABLE)
+          .delete()
+          .eq('order_ref', orderRef)
+      }
       alert(`Order reinstatement failed: ${err.message}`)
       return
     }
