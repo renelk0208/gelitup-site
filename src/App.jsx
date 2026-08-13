@@ -5096,7 +5096,14 @@ function FullCataloguePage() {
               return (
                 <button
                   key={`subcategory-${subcategory}`}
-                  onClick={() => { setActiveSubcategory(subcategory); setActiveCatEyeVariant('ALL'); setActiveColorFamily('ALL'); scrollToCategoryDetail() }}
+                  onClick={() => {
+                    setActiveSubcategory(subcategory)
+                    setActiveCatEyeVariant('ALL')
+                    setActiveColorFamily('ALL')
+                    scrollToCategoryDetail()
+                    const urlSlug = vanityPath ? vanityPath.slice(1) : subSlug
+                    setSearchParams({ subcategory: urlSlug }, { replace: true })
+                  }}
                   className="group relative rounded-full border px-4 py-2 text-xs font-semibold tracking-wide transition duration-200"
                   style={
                     isActive
