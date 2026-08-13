@@ -1702,11 +1702,17 @@ function OrdersPanel() {
       const idKey = String(row?.registration_id || '').trim()
       const emailKey = String(row?.customer_email || '').trim().toLowerCase()
       const reg = (idKey && registrationById.get(idKey)) || (emailKey && registrationByEmail.get(emailKey)) || null
-      const wasReinstated = String(reg?.notes || '').includes('[REINSTATED_ORDER:')
+      const orderRef = String(row?.order_ref || '').trim().toUpperCase()
+      const source = String(row?.source || '').trim().toLowerCase()
+      const wasReinstated = source === 'country_referral_checkout' || orderRef.startsWith('REF-')
       if (filter === 'received' && row?.status === 'pending_approval' && !wasReinstated) {
         return null
       }
-      if (!reg) return row
+      if (!reg) {
+        return (filter === 'received' && row?.status === 'pending_approval' && wasReinstated)
+          ? { ...row, status: 'received' }
+          : row
+      }
 
       const regTier = String(reg.distributor_tier || '').trim().toLowerCase()
       const rowTier = String(row?.distributor_tier || '').trim().toLowerCase()
