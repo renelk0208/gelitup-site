@@ -94,7 +94,7 @@ const DISTRIBUTOR_COUNTRY_HANDOFF = {
 }
 function getDistributorCountryHandoff(country) {
   const normalized = String(country || '').trim().toLowerCase()
-  if (!normalized) return null
+  if (!normalized || normalized === 'greece') return null
   return Object.entries(DISTRIBUTOR_COUNTRY_HANDOFF).find(([name]) => name.toLowerCase() === normalized)?.[1] || null
 }
 function getSmallOrderShippingFee(country) {
