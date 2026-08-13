@@ -25,6 +25,8 @@ const ALLOWED_BOTS = [
   /dotbot/i,
   /rogerbot/i,
   /screaming frog/i,
+  /holo/i,
+  /sintra/i,
 ]
 
 // Patterns that indicate automated/headless traffic
@@ -101,6 +103,7 @@ export default async (request, context) => {
 
   const ua = request.headers.get('user-agent') || ''
   const country = context.geo?.country?.code?.toUpperCase() || ''
+  const referer = request.headers.get('referer') || ''
 
   // Allow known legitimate bots through unconditionally
   if (ALLOWED_BOTS.some((p) => p.test(ua))) {
@@ -119,7 +122,6 @@ export default async (request, context) => {
 
   // Block referral-spam networks (e.g. trafficheap.cc) so they never
   // reach the page or register a session in Analytics
-  const referer = request.headers.get('referer') || ''
   if (referer && SPAM_REFERRERS.some((p) => p.test(referer))) {
     return new Response('Forbidden', { status: 403 })
   }
