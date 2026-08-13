@@ -662,6 +662,16 @@ const COUNTRY_VAT_PREFIX = {
   'New Zealand': 'GST',
 }
 
+const EU_COUNTRIES = new Set([
+  'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia', 'Finland',
+  'France', 'Germany', 'Greece', 'Hungary', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta',
+  'Netherlands', 'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
+])
+
+function isEuCountry(country) {
+  return Boolean(country) && EU_COUNTRIES.has(String(country).trim())
+}
+
 // VAT treatment per buyer country (from the seller's perspective: Bulgaria/Greece = EU seller)
 // 'reverse_charge' - EU B2B: 0% VAT, buyer accounts via reverse charge (Art. 44 Directive 2006/112/EC)
 // 'export_exempt' - non-EU export: 0% VAT, zero-rated supply
@@ -11189,11 +11199,13 @@ function PortalRegister({ onRegister }) {
               {R.vat || 'VAT Number'}
               <input
                 type="text"
-                required={application.invoiceCountry === 'Sri Lanka' ? false : (isDistributorFlow || isBusinessOrderProfile)}
+                required={isEuCountry(application.invoiceCountry) && (isDistributorFlow || isBusinessOrderProfile)}
                 value={application.vatNumber}
                 onChange={(event) => setField('vatNumber', event.target.value.toUpperCase())}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
-                placeholder={(isDistributorFlow || isBusinessOrderProfile) ? 'EU123456789' : 'Optional for personal purchases'}
+                placeholder={isEuCountry(application.invoiceCountry)
+                  ? ((isDistributorFlow || isBusinessOrderProfile) ? 'EU123456789' : 'Optional for personal purchases')
+                  : 'Optional for non-EU registrations'}
               />
             </label>
             <label className="block text-sm font-medium text-slate-700">
@@ -20784,7 +20796,7 @@ function App() {
         )
       }
 
-      if (isDistributorApplication && invoiceCountry !== 'Sri Lanka') {
+      if (isDistributorApplication && isEuCountry(invoiceCountry)) {
         requiredFields.push(['VAT number', application.vatNumber])
       }
 
