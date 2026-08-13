@@ -13825,8 +13825,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                     if (section.category === 'COLORS') return sub.name
                     if (section.category === 'BUILDER GEL SYSTEMS') {
                       const n = (sub.name || '').toUpperCase()
-                      if (n === '3INI BUILDER') return '3-in-1 Builder Gel'
-                      if (n === 'PREMIUM BUILDER') return '3-in-1 Premium Builder Gel'
+                      if (n === '3INI BUILDER') return '3-IN-1 Builder Gel'
+                      if (n === 'PREMIUM BUILDER') return '3-IN-1 Premium Builder Gel'
                       if (n === 'CREME DE LA CREME') return 'Crème De La Crème'
                       if (n === '30 ML' || n === '60 ML' || n === 'MULTIMIX') return 'Multimix Polygel'
                       if (n === 'BRUSH ON BUILDER') return 'Brush On Builder'
