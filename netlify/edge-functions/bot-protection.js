@@ -29,14 +29,6 @@ const ALLOWED_BOTS = [
   /sintra/i,
 ]
 
-const PUBLIC_READ_METHODS = new Set(['GET', 'HEAD'])
-const PROTECTED_PATH_PREFIXES = ['/portal/', '/admin/']
-const PROTECTED_EXACT_PATHS = new Set([
-  '/admin-login',
-  '/portal-client-login',
-  '/portal-admin-login',
-])
-
 // Patterns that indicate automated/headless traffic
 const BOT_PATTERNS = [
   /headlesschrome/i,
@@ -98,12 +90,21 @@ const SPAM_REFERRERS = [
   /darodar\./i,
   /ilovevitaly\./i,
 ]
+const TRUSTED_CONTENT_SCRAPER_HOSTS = ['holo.ai', 'sintra.ai']
 
-function isProtectedPath(pathname) {
-  return (
-    PROTECTED_EXACT_PATHS.has(pathname) ||
-    PROTECTED_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix))
-  )
+function hasTrustedScraperHost(headerValue) {
+  if (!headerValue) {
+    return false
+  }
+
+  try {
+    const host = new URL(headerValue).hostname.toLowerCase()
+    return TRUSTED_CONTENT_SCRAPER_HOSTS.some(
+      (trustedHost) => host === trustedHost || host.endsWith(`.${trustedHost}`),
+    )
+  } catch {
+    return false
+  }
 }
 
 export default async (request, context) => {
@@ -118,17 +119,17 @@ export default async (request, context) => {
 
   const ua = request.headers.get('user-agent') || ''
   const country = context.geo?.country?.code?.toUpperCase() || ''
-  const isPublicReadRequest =
-    PUBLIC_READ_METHODS.has(request.method.toUpperCase()) &&
-    !isProtectedPath(url.pathname)
-
-  // Allow public read-only pages to be crawled for content discovery and post generation
-  if (isPublicReadRequest) {
-    return context.next()
-  }
+  const referer = request.headers.get('referer') || ''
+  const origin = request.headers.get('origin') || ''
 
   // Allow known legitimate bots through unconditionally
   if (ALLOWED_BOTS.some((p) => p.test(ua))) {
+    return context.next()
+  }
+
+  // Allow trusted Holo/Sintra content scrapers through even if they use
+  // automation tooling or operate from blocked cloud regions.
+  if (hasTrustedScraperHost(referer) || hasTrustedScraperHost(origin)) {
     return context.next()
   }
 
@@ -144,7 +145,6 @@ export default async (request, context) => {
 
   // Block referral-spam networks (e.g. trafficheap.cc) so they never
   // reach the page or register a session in Analytics
-  const referer = request.headers.get('referer') || ''
   if (referer && SPAM_REFERRERS.some((p) => p.test(referer))) {
     return new Response('Forbidden', { status: 403 })
   }
