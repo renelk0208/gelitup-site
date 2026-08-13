@@ -32,6 +32,13 @@ export const PRODUCT_ALIAS_GROUPS = [
   { codes: ['ALL IN ONE LIQUID 500ML', 'ALL IN ONE LIQUID 500 ML', 'ALL-IN-ONE-LIQUID-500ML'], target: 'All In One Liquid 500 ml -HTF' },
   { codes: ['MIRROR TOP COAT', 'MIRROR POWDER TOP COAT'], target: 'Mirror Powder Top Coat -HTF' },
   { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
+  // GIUP colour series entries from old order data
+  { codes: ['GIUP-COL-010'], target: '10 Bridal Bliss -HTF' },
+  { codes: ['GIUP-COL-051A'], target: '51A Raspberry Ripple -HTF' },
+  { codes: ['GIUP-COL-015'], target: '15 Total Eclipse -HTF' },
+  { codes: ['GIUP-COL-019'], target: '1815 What a Slate -HTF' },
+  { codes: ['GIUP-COL-023'], target: 'N023 Princess Diaries -HTF' },
+  { codes: ['GIUP-COL-025'], target: 'N025 Latte Mouse -HTF' },
   // Nail Clips Dual Form — catalogue slugs (incl. the "nial" typo used on stored orders)
   { codes: ['NAIL-CLIPS-DUAL-FORMS-PACK-OF-5', 'NIAL-CLIPS-DUAL-FORMS-PACK-OF-5', 'NAIL CLIPS DUAL FORMS PACK OF 5', 'NIAL CLIPS DUAL FORMS PACK OF 5', 'NAIL CLIPS DUAL FORM PACK OF 5'], target: 'Nail Clips Dual Form Pack of 5 -HTF' },
   { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
