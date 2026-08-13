@@ -1512,8 +1512,12 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) 
     sku,
     nameNorm,
     normalizeAdminNameToken(name),
+    // Some stored colour-series SKUs are saved as "GIUP-COL-01"; strip the
+    // series label so they can fall through to the numeric shade key ("01").
+    sku.replace(/^GIUP[\s-]*(?:COL(?:OR|OUR)?)[\s-]*/i, '').trim(),
     // Strip GIUP prefix from SKU: "GIUP 01" → "01", "GIUP N008" → "N008", "GIUP 8E" → "8E"
     sku.replace(/^GIUP\s*/i, '').trim(),
+    nameNorm.replace(/^GIUP[\s-]*(?:COL(?:OR|OUR)?)[\s-]*/i, '').trim(),
     // Simplified version of name: strips measurements, filler words, normalizes dashes
     simplifyProductNameForIndex(name),
     // Strip 3–5 digit shade numbers from name: "LINE IT UP 0002 WHITE" → "LINE IT UP WHITE"

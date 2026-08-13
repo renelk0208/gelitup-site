@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS b2b_draft_carts (
   total_units   integer     NOT NULL DEFAULT 0,
   total_estimated numeric(10,2) NOT NULL DEFAULT 0,
   source        text        NOT NULL DEFAULT 'portal',   -- 'portal' | 'catalogue'
+  last_reminder_sent_at timestamptz,
+  reminder_count integer     NOT NULL DEFAULT 0,
   updated_at    timestamptz NOT NULL DEFAULT now(),
   created_at    timestamptz NOT NULL DEFAULT now(),
   UNIQUE (user_id, source)
