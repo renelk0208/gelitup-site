@@ -25,7 +25,17 @@ const ALLOWED_BOTS = [
   /dotbot/i,
   /rogerbot/i,
   /screaming frog/i,
+  /holo/i,
+  /sintra/i,
 ]
+
+const PUBLIC_READ_METHODS = new Set(['GET', 'HEAD'])
+const PROTECTED_PATH_PREFIXES = ['/portal/', '/admin/']
+const PROTECTED_EXACT_PATHS = new Set([
+  '/admin-login',
+  '/portal-client-login',
+  '/portal-admin-login',
+])
 
 // Patterns that indicate automated/headless traffic
 const BOT_PATTERNS = [
@@ -89,6 +99,13 @@ const SPAM_REFERRERS = [
   /ilovevitaly\./i,
 ]
 
+function isProtectedPath(pathname) {
+  return (
+    PROTECTED_EXACT_PATHS.has(pathname) ||
+    PROTECTED_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+  )
+}
+
 export default async (request, context) => {
   // Skip protection for Netlify function calls and static assets
   const url = new URL(request.url)
@@ -101,6 +118,14 @@ export default async (request, context) => {
 
   const ua = request.headers.get('user-agent') || ''
   const country = context.geo?.country?.code?.toUpperCase() || ''
+  const isPublicReadRequest =
+    PUBLIC_READ_METHODS.has(request.method.toUpperCase()) &&
+    !isProtectedPath(url.pathname)
+
+  // Allow public read-only pages to be crawled for content discovery and post generation
+  if (isPublicReadRequest) {
+    return context.next()
+  }
 
   // Allow known legitimate bots through unconditionally
   if (ALLOWED_BOTS.some((p) => p.test(ua))) {
