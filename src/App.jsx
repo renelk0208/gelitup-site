@@ -3072,7 +3072,7 @@ function formatSubcategoryHeadingLabel(subcategoryName = '', categoryName = '') 
   if (normalizedSub === 'BRUSH ON BUILDER') return 'Brush On Builder (BIAB)'
   if (normalizedSub === 'SOLID GEL POLISH') return 'Solid Gel Polish'
   if (normalizedSub === 'CLASSIC TOP COATS') return 'Classic Top Coats'
-  if (normalizedSub === '3INI BUILDER') return '3-in-1 Builder Gel'
+  if (normalizedSub === '3INI BUILDER') return '3-IN-1 Builder Gel'
   return formatSubcategoryDisplayName(subcategoryName, categoryName)
 }
 
@@ -3104,7 +3104,7 @@ function formatSubcategoryDisplayName(subcategoryName = '', categoryName = '') {
   if (normalized === 'GLASS EFFECT') return 'Glass Effect'
   
   // Builder Gel Systems subcategories
-  if (normalized === '3INI BUILDER') return '3-in-1 Builder Gel'
+  if (normalized === '3INI BUILDER') return '3-IN-1 Builder Gel'
   if (normalized === 'PREMIUM BUILDER') return '3-in-1 Premium Builder Gel'
   if (normalized === 'LIQUID POLYGEL') return 'Liquid Polygel'
   if (normalized === 'COMPETE') return 'Compete Acrylic'
