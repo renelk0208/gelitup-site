@@ -90,22 +90,6 @@ const SPAM_REFERRERS = [
   /darodar\./i,
   /ilovevitaly\./i,
 ]
-const TRUSTED_CONTENT_SCRAPER_HOSTS = ['holo.ai', 'sintra.ai']
-
-function hasTrustedScraperHost(headerValue) {
-  if (!headerValue) {
-    return false
-  }
-
-  try {
-    const host = new URL(headerValue).hostname.toLowerCase()
-    return TRUSTED_CONTENT_SCRAPER_HOSTS.some(
-      (trustedHost) => host === trustedHost || host.endsWith(`.${trustedHost}`),
-    )
-  } catch {
-    return false
-  }
-}
 
 export default async (request, context) => {
   // Skip protection for Netlify function calls and static assets
@@ -120,16 +104,9 @@ export default async (request, context) => {
   const ua = request.headers.get('user-agent') || ''
   const country = context.geo?.country?.code?.toUpperCase() || ''
   const referer = request.headers.get('referer') || ''
-  const origin = request.headers.get('origin') || ''
 
   // Allow known legitimate bots through unconditionally
   if (ALLOWED_BOTS.some((p) => p.test(ua))) {
-    return context.next()
-  }
-
-  // Allow trusted Holo/Sintra content scrapers through even if they use
-  // automation tooling or operate from blocked cloud regions.
-  if (hasTrustedScraperHost(referer) || hasTrustedScraperHost(origin)) {
     return context.next()
   }
 
