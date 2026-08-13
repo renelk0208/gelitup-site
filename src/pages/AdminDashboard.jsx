@@ -1899,6 +1899,10 @@ function OrdersPanel() {
     await updateOrder(id, { payment_confirmed: !currentValue })
   }
 
+  const reinstateOrder = async (id) => {
+    await updateOrder(id, { status: 'received' })
+  }
+
   const resolveRawItems = (row) => {
     if (Array.isArray(row?.items)) return row.items
     if (typeof row?.items === 'string') {
@@ -2881,11 +2885,11 @@ function OrdersPanel() {
                         )}
                         {(currentStatus === 'cancelled' || currentStatus === 'completed') && (
                           <button
-                            onClick={() => updateOrder(row.id, { status: 'received' })}
+                            onClick={() => reinstateOrder(row.id)}
                             disabled={saving === row.id}
-                            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                            className="rounded-lg border border-emerald-200 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
                           >
-                            ↩ Reopen Order
+                            ↩ Reinstate Order
                           </button>
                         )}
                         <button
@@ -3424,11 +3428,111 @@ function downloadCSV(priceData, sortedCategories) {
 
 const DRAFT_CARTS_TABLE = 'b2b_draft_carts'
 
+function normalizeDraftCartItems(cart) {
+  const rawItems = cart?.items
+  if (!rawItems) return []
+  if (typeof rawItems === 'string') {
+    try {
+      return normalizeDraftCartItems({ ...cart, items: JSON.parse(rawItems) })
+    } catch {
+      return []
+    }
+  }
+
+  if (Array.isArray(rawItems)) {
+    return rawItems
+      .map((item) => ({
+        name: String(item?.name || item?.displayName || item?.code || item?.sku || 'Item').trim(),
+        sku: String(item?.sku || item?.code || '').trim(),
+        qty: Math.max(1, Number(item?.qty || item?.quantity || 1) || 1),
+      }))
+      .filter((item) => item.name || item.sku)
+  }
+
+  if (Array.isArray(rawItems?.products) || Array.isArray(rawItems?.packages)) {
+    const products = Array.isArray(rawItems.products) ? rawItems.products : []
+    const packages = Array.isArray(rawItems.packages) ? rawItems.packages : []
+    return [
+      ...products.map((item) => ({
+        name: String(item?.name || item?.code || 'Item').trim(),
+        sku: String(item?.code || item?.sku || '').trim(),
+        qty: Math.max(1, Number(item?.qty || 1) || 1),
+      })),
+      ...packages.map((item) => ({
+        name: String(item?.name || item?.sku || 'Item').trim(),
+        sku: String(item?.sku || '').trim(),
+        qty: Math.max(1, Number(item?.qty || 1) || 1),
+      })),
+    ].filter((item) => item.name || item.sku)
+  }
+
+  if (typeof rawItems === 'object') {
+    return Object.entries(rawItems)
+      .map(([key, qty]) => {
+        const [namePart, skuPart] = String(key || '').split('::')
+        const name = String(namePart || skuPart || 'Item').trim()
+        const sku = String(skuPart || '').trim()
+        const normalizedQty = Math.max(1, Number(qty) || 1)
+        return { name, sku, qty: normalizedQty }
+      })
+      .filter((item) => item.name || item.sku)
+  }
+
+  return []
+}
+
+function buildRecoveredOrderPayload(cart) {
+  const items = normalizeDraftCartItems(cart)
+  const totalUnits = items.reduce((sum, item) => sum + Math.max(1, Number(item.qty) || 1), 0)
+  const seed = String(cart?.id || cart?.user_id || cart?.customer_email || Date.now()).replace(/[^A-Za-z0-9]+/g, '').toUpperCase()
+  return {
+    customer_email: String(cart?.customer_email || '').trim() || null,
+    consignee_name: String(cart?.consignee_name || cart?.customer_name || '').trim() || null,
+    consignee_phone: String(cart?.consignee_phone || '').trim() || null,
+    shipping_address: String(cart?.shipping_address || '').trim() || null,
+    items,
+    total_units: totalUnits || items.length,
+    source: String(cart?.source || '').toLowerCase() === 'portal' ? 'portal_checkout' : 'catalogue_checkout',
+    module: 'products',
+    status: 'received',
+    order_ref: `RCV-${seed.slice(0, 12) || 'CART'}-${Date.now().toString().slice(-5)}`,
+  }
+}
+
+async function recoverDraftCartAsOrder(cart) {
+  const orderPayload = buildRecoveredOrderPayload(cart)
+  if (!orderPayload.customer_email) {
+    return { ok: false, message: 'Draft cart has no customer email.' }
+  }
+
+  const { error: orderError } = await supabase
+    .from(ORDERS_TABLE)
+    .insert([orderPayload])
+
+  if (orderError) {
+    return { ok: false, message: orderError.message }
+  }
+
+  const cartId = cart?.id
+  if (cartId != null) {
+    const { error: deleteError } = await supabase
+      .from(DRAFT_CARTS_TABLE)
+      .delete()
+      .eq('id', cartId)
+    if (deleteError) {
+      return { ok: true, message: `Order recovered, but draft cart cleanup failed: ${deleteError.message}` }
+    }
+  }
+
+  return { ok: true, message: `Recovered as order ${orderPayload.order_ref}` }
+}
+
 function DraftCartsPanel() {
   const [carts, setCarts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [expanded, setExpanded] = useState(null)
+  const [recovering, setRecovering] = useState(null)
 
   const fetchCarts = useCallback(async () => {
     setLoading(true)
@@ -3444,6 +3548,20 @@ function DraftCartsPanel() {
   }, [])
 
   useEffect(() => { fetchCarts() }, [fetchCarts])
+
+  const recoverCart = async (cart) => {
+    const ok = window.confirm(`Recover draft cart for ${cart.customer_email || 'this client'} into a live order?`)
+    if (!ok) return
+    setRecovering(cart.id)
+    const result = await recoverDraftCartAsOrder(cart)
+    setRecovering(null)
+    if (!result.ok) {
+      alert(`Could not recover draft cart: ${result.message}`)
+      return
+    }
+    alert(result.message)
+    fetchCarts()
+  }
 
   function renderItems(items, source) {
     if (!items) return <span className="text-xs text-slate-400">No items</span>
@@ -3539,6 +3657,16 @@ function DraftCartsPanel() {
                   <div className="mt-3 rounded-lg bg-white p-3">
                     <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Cart Items</p>
                     {renderItems(cart.items, cart.source)}
+                  </div>
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => recoverCart(cart)}
+                      disabled={recovering === cart.id}
+                      className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                    >
+                      {recovering === cart.id ? 'Recovering…' : 'Recover as Order'}
+                    </button>
                   </div>
                 </div>
               )}
@@ -3705,8 +3833,28 @@ function SearchPanel({ onOpenTab }) {
                 </div>
                 <div className="mt-2 flex items-center justify-between gap-2">
                   <span className="text-slate-500">Draft cart record</span>
-                  <button type="button" onClick={() => onOpenTab('draft-carts')} className="rounded-md border border-slate-200 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">
-                    Go to Draft Carts
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => onOpenTab('draft-carts')} className="rounded-md border border-slate-200 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">
+                      Go to Draft Carts
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-2 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const ok = window.confirm(`Recover draft cart for ${cart.customer_email || 'this client'} into a live order?`)
+                      if (!ok) return
+                      const result = await recoverDraftCartAsOrder(cart)
+                      if (!result.ok) {
+                        alert(`Could not recover draft cart: ${result.message}`)
+                        return
+                      }
+                      alert(result.message)
+                    }}
+                    className="rounded-md bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-emerald-700"
+                  >
+                    Recover as Order
                   </button>
                 </div>
               </div>
