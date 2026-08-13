@@ -247,6 +247,15 @@ function ensureTaggedValue(notesValue, tagName, tagValue) {
   return `${prefix}[${tagName}:${tagValue}]`
 }
 
+function isReferralCheckoutRow(row) {
+  const businessType = String(row?.business_type || '').trim().toLowerCase()
+  const orderAction = String(row?.order_action || '').trim().toLowerCase()
+  const notes = String(row?.notes || '')
+  return businessType === 'country_referral_checkout'
+    || orderAction === 'referred_to_local_distributor'
+    || notes.includes('[DISTRIBUTOR_REFERRAL:')
+}
+
 function RegistrationsPanel({ onPreviewDistributor }) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
@@ -420,6 +429,58 @@ function RegistrationsPanel({ onPreviewDistributor }) {
     if (err) { alert(err.message); return }
     setRows(prev => prev.map(r => r.id === row.id
       ? { ...r, application_type: 'b2b_order', status: 'approved', prices_allocated: true, distributor_tier: null, notes: updatedNotes }
+      : r))
+  }
+
+  const reinstateReferralCheckout = async (row) => {
+    if (!isReferralCheckoutRow(row)) return
+    if (!window.confirm(
+      `Reinstate "${getRegistrationDisplayName(row)}" on gelitup.com?\n\n` +
+      'This will remove the distributor referral flag, keep the client details on the normal B2B path, and restore the record as an approved order.',
+    )) return
+
+    const nowIso = new Date().toISOString()
+    const updatedNotes = [
+      String(row.notes || '')
+        .replace(/\[DISTRIBUTOR_REFERRAL:[^\]]+\]\s*/gi, '')
+        .replace(/Captured from public checkout handoff\.\s*/gi, '')
+        .replace(/Checkout blocked and referred to local distributor:[^\n]+\n?/gi, '')
+        .trim(),
+      `[REINSTATED_ORDER:${nowIso}] Restored to gelitup.com by admin.`,
+    ].filter(Boolean).join('\n')
+
+    const updatedBusinessType = String(row?.order_profile || '').trim().toLowerCase() === 'personal'
+      ? 'B2B Order - Personal'
+      : 'B2B Order - Business'
+
+    setSaving(row.id)
+    const { error: err } = await supabase
+      .from(REGISTRATIONS_TABLE)
+      .update({
+        application_type: 'b2b_order',
+        business_type: updatedBusinessType,
+        status: 'approved',
+        prices_allocated: true,
+        order_action: null,
+        admin_comment: ensureTaggedValue(row.admin_comment, 'ORDER_REINSTATED', nowIso),
+        notes: updatedNotes,
+        reviewed_at: nowIso,
+      })
+      .eq('id', row.id)
+    setSaving(null)
+    if (err) { alert(err.message); return }
+    setRows(prev => prev.map(r => r.id === row.id
+      ? {
+          ...r,
+          application_type: 'b2b_order',
+          business_type: updatedBusinessType,
+          status: 'approved',
+          prices_allocated: true,
+          order_action: null,
+          admin_comment: ensureTaggedValue(r.admin_comment, 'ORDER_REINSTATED', nowIso),
+          notes: updatedNotes,
+          reviewed_at: nowIso,
+        }
       : r))
   }
 
@@ -763,6 +824,15 @@ function RegistrationsPanel({ onPreviewDistributor }) {
                       className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
                     >
                       ↩ Reset to Pending
+                    </button>
+                  )}
+                  {isReferralCheckoutRow(row) && (
+                    <button
+                      onClick={() => reinstateReferralCheckout(row)}
+                      disabled={saving === row.id}
+                      className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
+                    >
+                      ↺ Reinstate Order
                     </button>
                   )}
                   {row.status === 'approved' && (
