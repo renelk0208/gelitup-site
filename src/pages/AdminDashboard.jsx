@@ -1642,7 +1642,8 @@ function OrdersPanel() {
       .select('*')
       .order('created_at', { ascending: false })
       .limit(200)
-    if (filter === 'acknowledged_received') query = query.in('status', ['acknowledged_received', 'submitted'])
+    if (filter === 'received') query = query.in('status', ['received', 'pending_approval'])
+    else if (filter === 'acknowledged_received') query = query.in('status', ['acknowledged_received', 'submitted'])
     else if (filter === 'in_progress') query = query.in('status', ['in_progress', 'processing'])
     else if (filter !== 'all') query = query.eq('status', filter)
     const { data, error: err } = await query
@@ -1681,7 +1682,7 @@ function OrdersPanel() {
     if (registrationIds.length > 0) {
       const { data: regsById } = await supabase
         .from(REGISTRATIONS_TABLE)
-        .select('id, contact_email, distributor_tier, prices_allocated')
+        .select('id, contact_email, distributor_tier, prices_allocated, notes')
         .in('id', registrationIds)
       ;(regsById || []).forEach(indexRegistration)
     }
@@ -1690,16 +1691,21 @@ function OrdersPanel() {
       // ilike gives a case-insensitive exact match per email.
       const { data: regsByContactEmail } = await supabase
         .from(REGISTRATIONS_TABLE)
-        .select('id, contact_email, distributor_tier, prices_allocated')
+        .select('id, contact_email, distributor_tier, prices_allocated, notes')
         .or(customerEmails.map((email) => `contact_email.ilike.${email}`).join(','))
       ;(regsByContactEmail || []).forEach(indexRegistration)
     }
 
     const staleTierFixes = []
+    const staleStatusFixes = []
     const mergedRows = orderRows.map((row) => {
       const idKey = String(row?.registration_id || '').trim()
       const emailKey = String(row?.customer_email || '').trim().toLowerCase()
       const reg = (idKey && registrationById.get(idKey)) || (emailKey && registrationByEmail.get(emailKey)) || null
+      const wasReinstated = String(reg?.notes || '').includes('[REINSTATED_ORDER:')
+      if (filter === 'received' && row?.status === 'pending_approval' && !wasReinstated) {
+        return null
+      }
       if (!reg) return row
 
       const regTier = String(reg.distributor_tier || '').trim().toLowerCase()
@@ -1707,13 +1713,19 @@ function OrdersPanel() {
       if (regTier && regTier !== rowTier && row?.id) {
         staleTierFixes.push({ orderId: row.id, tier: regTier })
       }
+      if (filter === 'received' && row?.status === 'pending_approval' && wasReinstated && row?.id) {
+        staleStatusFixes.push(row.id)
+      }
 
       return {
         ...row,
+        status: filter === 'received' && row?.status === 'pending_approval' && wasReinstated
+          ? 'received'
+          : row.status,
         distributor_tier: reg.distributor_tier || row.distributor_tier || null,
         prices_allocated: typeof reg.prices_allocated === 'boolean' ? reg.prices_allocated : row.prices_allocated,
       }
-    })
+    }).filter(Boolean)
 
     setRows(mergedRows)
 
@@ -1722,6 +1734,15 @@ function OrdersPanel() {
       Promise.all(staleTierFixes.map(({ orderId, tier }) => (
         supabase.from(ORDERS_TABLE).update({ distributor_tier: tier }).eq('id', orderId)
       ))).catch(() => {})
+    }
+
+    if (staleStatusFixes.length > 0) {
+      supabase
+        .from(ORDERS_TABLE)
+        .update({ status: 'received' })
+        .in('id', staleStatusFixes)
+        .then(() => {})
+        .catch(() => {})
     }
   }, [filter])
 
