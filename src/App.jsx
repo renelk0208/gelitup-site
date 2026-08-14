@@ -662,14 +662,9 @@ const COUNTRY_VAT_PREFIX = {
   'New Zealand': 'GST',
 }
 
-const EU_COUNTRIES = new Set([
-  'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia', 'Finland',
-  'France', 'Germany', 'Greece', 'Hungary', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta',
-  'Netherlands', 'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
-])
-
 function isEuCountry(country) {
-  return Boolean(country) && EU_COUNTRIES.has(String(country).trim())
+  const normalized = String(country || '').trim()
+  return Boolean(normalized) && EU_COUNTRIES.includes(normalized)
 }
 
 // VAT treatment per buyer country (from the seller's perspective: Bulgaria/Greece = EU seller)
