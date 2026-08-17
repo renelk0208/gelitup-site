@@ -76,12 +76,11 @@ function applyCatalogueDiscount(priceEur) {
 // Public catalogue small-order model: orders of €49–99.99 ship at a flat zone fee;
 // €100+ keeps free shipping. Countries with exclusive distributors (Italy, France,
 // Bulgaria, Greece) and any country not listed below keep the €100 minimum.
+// B2B orders must keep the full €100 free-shipping threshold even when promotional
+// pricing or seasonal banners are active.
 const FREE_SHIPPING_EUR = 100
-// While the SUMMER MADNESS sale runs, the free-shipping threshold drops to €80 so
-// discounted baskets keep the same free-shipping reach; reverts automatically.
-const SALE_FREE_SHIPPING_EUR = 80
 function getFreeShippingEur() {
-  return isCatalogueDiscountActive() ? SALE_FREE_SHIPPING_EUR : FREE_SHIPPING_EUR
+  return FREE_SHIPPING_EUR
 }
 const SMALL_ORDER_MIN_EUR = 49
 const SMALL_ORDER_SHIPPING_ZONES = [

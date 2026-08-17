@@ -169,6 +169,60 @@ const STEPS = [
   { n: '3', title: 'Create & get featured', body: 'Post your GEL.IT.UP looks, tag us, and get reposted.' },
 ]
 
+const AMBASSADOR_PACKS = [
+  {
+    key: 'standard',
+    title: 'Standard Ambassador Pack',
+    accent: 'bg-white text-[#1A1A1A] border-black/5',
+    note: 'A starter box for new ambassadors.',
+    items: [
+      'Standard Sample Box',
+      'Premium builder gel',
+      '3-in-1 builder gel',
+      'Nail file',
+      'Photo Perfect / Cream / Cuticle Oil (based on current stock)',
+    ],
+  },
+  {
+    key: 'super',
+    title: 'Super Ambassador Pack',
+    accent: 'bg-[#1A1A1A] text-white border-[#D43790]/30',
+    note: 'A bigger creator box with builder, colour, tips, and tools.',
+    items: [
+      'Standard Sample Pack',
+      '2 x Premium Builder Gel (Clear / Colour)',
+      'Multimix: 1 x 30g and 1 x 60g (based on current stock)',
+      '3-in-1 Clear and 1 colour (based on current stock)',
+      'All in One Liquid',
+      'Nail file',
+      'Cuticle oil',
+      'Photo Perfect Cuticle Oil',
+      '3 different Cat Eye shades',
+      '1 shimmer shade',
+      '1 metallic shade',
+      'Chrome / mirror powder with a mirror top',
+      'Any dual form box of tips',
+      'Flexi tips',
+      'Dual extension tip box',
+      '3 nail tools - cuticle nipper, scissor and pusher',
+    ],
+  },
+  {
+    key: 'extreme',
+    title: 'Extreme Ambassador Pack',
+    accent: 'bg-gradient-to-br from-[#2a1030] to-[#17111c] text-white border-[#D43790]/40',
+    note: 'Includes everything in the Super pack, plus larger pro tools based on availability.',
+    items: [
+      'Everything in the Super Ambassador Pack',
+      'Dust collector',
+      'Nail lamp (for polygel)',
+      '1 of each nail tool and a gel brush',
+      'Polygel brush',
+      'Nail art brush / French brush / ombre brush (whichever is available)',
+    ],
+  },
+]
+
 function scrollToApply() {
   document.getElementById('ambassador-apply')?.scrollIntoView({ behavior: 'smooth' })
 }
@@ -344,6 +398,45 @@ export default function AmbassadorPage() {
               <p className="mt-2 text-sm leading-relaxed text-black/65">{perk.body}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="bg-[#F9F4F7] px-5 py-16">
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#D43790]">
+              Ambassador packs
+            </p>
+            <h2 className="mt-3 text-2xl font-black tracking-tight text-[#1A1A1A] sm:text-3xl">
+              What can be included in your box
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm text-black/60">
+              Pack contents are prepared around current stock availability, with Super and Extreme tiers
+              including the expanded creator kits below.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-6 lg:grid-cols-3">
+            {AMBASSADOR_PACKS.map((pack) => (
+              <div key={pack.key} className={`rounded-3xl border p-6 shadow-sm ${pack.accent}`}>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#D43790]">
+                  {pack.title}
+                </p>
+                <p className={`mt-3 text-sm ${pack.key === 'standard' ? 'text-black/65' : 'text-white/70'}`}>
+                  {pack.note}
+                </p>
+                <ul className="mt-5 space-y-2.5">
+                  {pack.items.map((item) => (
+                    <li key={item} className="flex items-start gap-2.5 text-sm">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#D43790] text-xs font-bold text-white">
+                        ✓
+                      </span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

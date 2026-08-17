@@ -4927,11 +4927,22 @@ const deleteApplication = async (row) => {
                   '1 shimmer shade',
                   '1 metallic shade',
                   'Chrome / mirror powder with a mirror top',
+                  'Any dual form box of tips',
+                  'Flexi tips',
+                  'Dual extension tip box',
+                  '3 nail tools - cuticle nipper, scissor and pusher',
                 ],
               },
               extreme_ambassador: {
-                title: 'Extreme Pack',
-                items: [],
+                title: 'Extreme Ambassador Pack',
+                items: [
+                  'Everything in the Super Ambassador Pack',
+                  'Dust collector',
+                  'Nail lamp (for polygel)',
+                  '1 of each nail tool and a gel brush',
+                  'Polygel brush',
+                  'Nail art brush / French brush / ombre brush (whichever is available)',
+                ],
               },
             }
             const selectedPack = ambassadorPackByType[ambassadorType] || null
