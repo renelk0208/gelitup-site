@@ -9847,10 +9847,7 @@ function CheckoutPage() {
       if (!form.shippingCountry.trim()) { setError('Shipping country is required.'); return }
       if (!form.shippingPostalCode.trim()) { setError('Shipping postal code is required.'); return }
     }
-    if (smallOrderFee == null && !handoff) {
-      setError(`Shipping is not configured for ${deliveryCountry || 'the selected country'} yet. Please choose another country or contact us.`)
-      return
-    }
+
     if (form.createAccount && form.password.length < 6) { setError('Password must be at least 6 characters.'); return }
     if (!form.agreeTerms) { setError('You must agree to the terms and conditions to place your order.'); return }
 
