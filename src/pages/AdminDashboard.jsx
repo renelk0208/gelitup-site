@@ -1522,6 +1522,7 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) 
   const nameNorm = normalizeAdminSkuToken(name)
   const extractedSkuFromName = extractOrderItemSkuToken(name)
   const extractedSkuFromSku = extractOrderItemSkuToken(sku)
+  // Strip year+NEW campaign prefixes (e.g. "2026-NEW-...") before lookup.
   const skuWithoutCampaignPrefix = sku.replace(/^\d{4}[-\s]*NEW[-\s]*/i, '').trim()
 
   // Skip catalog hero/section image filenames — these are image assets, not products.
