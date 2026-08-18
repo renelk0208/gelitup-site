@@ -597,28 +597,33 @@ export async function buildAmbassadorFactoryPrepPdf({ ambassadors = [], generate
     y += Math.max(14, wrapped.length * 12)
   }
 
-  doc.setFont(FONT, 'bold')
-  doc.setFontSize(18)
-  doc.setTextColor(...INK)
-  doc.text('GEL.IT.UP Ambassador Factory Prep List', margin, y)
-  y += 24
-  doc.setFont(FONT, 'normal')
-  doc.setFontSize(10)
-  doc.setTextColor(...MUTED)
-  doc.text(`Generated: ${new Date(generatedAt).toLocaleString()}`, margin, y)
-  y += 14
-  doc.text(`Approved ambassadors included: ${ambassadors.length}`, margin, y)
-  y += 18
-  doc.setDrawColor(...PINK)
-  doc.setLineWidth(0.9)
-  doc.line(margin, y, pageW - margin, y)
-  y += 16
-
   ambassadors.forEach((ambassador, idx) => {
+    if (idx > 0) {
+      doc.addPage()
+      y = margin
+    }
+
+    doc.setFont(FONT, 'bold')
+    doc.setFontSize(18)
+    doc.setTextColor(...INK)
+    doc.text('GEL.IT.UP Ambassador Factory Prep Sheet', margin, y)
+    y += 24
+    doc.setFont(FONT, 'normal')
+    doc.setFontSize(10)
+    doc.setTextColor(...MUTED)
+    doc.text(`Generated: ${new Date(generatedAt).toLocaleString()}`, margin, y)
+    y += 14
+    doc.text(`Sheet ${idx + 1} of ${ambassadors.length}`, margin, y)
+    y += 18
+    doc.setDrawColor(...PINK)
+    doc.setLineWidth(0.9)
+    doc.line(margin, y, pageW - margin, y)
+    y += 16
+
     const items = Array.isArray(ambassador?.packItems) ? ambassador.packItems : []
-    let estimatedHeight = 128 + (items.length > 0 ? items.length * 13 : 14)
-    if (estimatedHeight < 170) estimatedHeight = 170
-    ensureSpace(estimatedHeight + 10)
+    let estimatedHeight = 118 + (items.length > 0 ? items.length * 13 : 14)
+    if (estimatedHeight < 160) estimatedHeight = 160
+    ensureSpace(estimatedHeight + 4)
 
     doc.setDrawColor(228, 228, 233)
     doc.setFillColor(255, 255, 255)
@@ -688,7 +693,12 @@ export async function buildAmbassadorFactoryPrepPdf({ ambassadors = [], generate
   }
 
   const datePart = String(generatedAt || '').slice(0, 10) || new Date().toISOString().slice(0, 10)
-  const filename = `GELITUP-Ambassador-Factory-Prep-${datePart}.pdf`
+  const singleName = ambassadors.length === 1
+    ? String(ambassadors[0]?.fullName || 'ambassador').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase()
+    : ''
+  const filename = singleName
+    ? `GELITUP-Ambassador-Factory-Prep-${singleName}-${datePart}.pdf`
+    : `GELITUP-Ambassador-Factory-Prep-Sheets-${datePart}.pdf`
   const blob = doc.output('blob')
   return { blob, filename, count: ambassadors.length, pages: pageCount }
 }

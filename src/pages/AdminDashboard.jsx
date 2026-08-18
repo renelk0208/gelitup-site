@@ -4619,57 +4619,40 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     [row?.city, row?.postal_code].filter(Boolean).join(' '),
     row?.country,
   ].filter(Boolean).join(', ')
-  const exportFactoryPrepPdf = async () => {
+  const exportFactoryPrepPdfForRow = async (row) => {
     if (factoryPdfBusy) return
     setFactoryPdfBusy(true)
     try {
-      const allRows = []
-      const pageSize = 1000
-      let from = 0
-      while (true) {
-        const { data, error: fetchErr } = await supabase
-          .from(AMBASSADOR_TABLE)
-          .select('id, created_at, status, full_name, email, instagram, address, city, postal_code, country, discount_code, admin_comment')
-          .order('created_at', { ascending: false })
-          .range(from, from + pageSize - 1)
-        if (fetchErr) throw fetchErr
-        const chunk = Array.isArray(data) ? data : []
-        if (chunk.length === 0) break
-        allRows.push(...chunk)
-        if (chunk.length < pageSize) break
-        from += pageSize
+      if (!row || !row.id) {
+        throw new Error('Ambassador record is missing.')
       }
-
-      const approvedRows = allRows.filter((row) => normalizeAmbassadorStatus(row?.status) === 'approved')
-      if (approvedRows.length === 0) {
-        alert('No approved ambassadors found to include in the factory PDF.')
+      if (normalizeAmbassadorStatus(row?.status) !== 'approved') {
+        alert('Approve this ambassador before printing a factory prep sheet.')
         setFactoryPdfBusy(false)
         return
       }
 
-      const ambassadors = approvedRows.map((row) => {
-        const ambassadorType = getAmbassadorType(row)
-        const selectedPack = AMBASSADOR_PACKS_BY_TYPE[ambassadorType] || null
-        return {
-          fullName: String(row?.full_name || '').trim() || 'Unknown ambassador',
-          instagram: String(row?.instagram || '').trim(),
-          email: String(row?.email || '').trim().toLowerCase(),
-          discountCode: String(row?.discount_code || '').trim().toUpperCase(),
-          ambassadorType: ambassadorType || 'not_set',
-          packTitle: selectedPack?.title || 'Pack type not set',
-          packItems: selectedPack?.items || [],
-          address: formatAmbassadorAddress(row) || 'Address not provided',
-          status: normalizeAmbassadorStatus(row?.status) || 'unknown',
-          createdAt: String(row?.created_at || ''),
-        }
-      })
+      const ambassadorType = getAmbassadorType(row)
+      const selectedPack = AMBASSADOR_PACKS_BY_TYPE[ambassadorType] || null
+      const ambassadors = [{
+        fullName: String(row?.full_name || '').trim() || 'Unknown ambassador',
+        instagram: String(row?.instagram || '').trim(),
+        email: String(row?.email || '').trim().toLowerCase(),
+        discountCode: String(row?.discount_code || '').trim().toUpperCase(),
+        ambassadorType: ambassadorType || 'not_set',
+        packTitle: selectedPack?.title || 'Pack type not set',
+        packItems: selectedPack?.items || [],
+        address: formatAmbassadorAddress(row) || 'Address not provided',
+        status: normalizeAmbassadorStatus(row?.status) || 'unknown',
+        createdAt: String(row?.created_at || ''),
+      }]
 
-      const { blob, filename, count } = await buildAmbassadorFactoryPrepPdf({
+      const { blob, filename } = await buildAmbassadorFactoryPrepPdf({
         ambassadors,
         generatedAt: new Date().toISOString(),
       })
       triggerFileDownload(blob, filename)
-      alert(`Factory prep PDF downloaded (${count} ambassadors).`)
+      alert(`Factory prep sheet downloaded for ${row.full_name || 'ambassador'}.`)
     } catch (err) {
       alert(`Factory PDF export failed: ${err?.message || String(err)}`)
     }
@@ -4958,14 +4941,6 @@ const deleteApplication = async (row) => {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-base font-bold text-slate-900">Ambassador Applications</h2>
         <div className="flex flex-wrap items-center gap-1.5">
-          <button
-            type="button"
-            onClick={exportFactoryPrepPdf}
-            disabled={factoryPdfBusy}
-            className="rounded-full border border-fuchsia-300 bg-fuchsia-50 px-3 py-1 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-60"
-          >
-            {factoryPdfBusy ? 'Preparing factory PDF…' : '↓ Factory PDF (all ambassadors)'}
-          </button>
           {FILTERS.map((f) => (
             <button
               key={f.key}
@@ -5289,6 +5264,16 @@ const deleteApplication = async (row) => {
                       </div>
                       {selectedPack ? (
                         <div className="mt-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50/60 px-2.5 py-2">
+                          <div className="mb-2">
+                            <button
+                              type="button"
+                              onClick={() => exportFactoryPrepPdfForRow(row)}
+                              disabled={factoryPdfBusy || !isApproved}
+                              className="rounded-lg border border-fuchsia-300 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-60"
+                            >
+                              {factoryPdfBusy ? 'Preparing sheet…' : '↓ Print Factory Sheet'}
+                            </button>
+                          </div>
                           <p className="text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">{selectedPack.title} contents</p>
                           {selectedPack.items.length > 0 ? (
                             <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-700">
