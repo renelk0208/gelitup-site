@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabaseClient'
 import * as XLSX from 'xlsx'
 import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
 import ambassadorLetterAttachmentUrl from '../lib/ambassadorletter/Gelitup Ambassador Letter.pdf?url'
-import { buildAmbassadorContractPdf, buildAmbassadorWelcomeLetterPdf } from '../lib/ambassadorContractPdf.js'
+import { buildAmbassadorContractPdf, buildAmbassadorFactoryPrepPdf, buildAmbassadorWelcomeLetterPdf } from '../lib/ambassadorContractPdf.js'
 
 const REGISTRATIONS_TABLE = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || 'b2b_registrations'
 const ORDERS_TABLE = import.meta.env.VITE_B2B_ORDERS_TABLE || 'b2b_orders'
@@ -44,6 +44,51 @@ function getRegistrationDisplayName(row) {
 }
 
 const ORDER_STATUSES = ['submitted', 'processing', 'shipped', 'completed', 'cancelled']
+
+const AMBASSADOR_PACKS_BY_TYPE = {
+  standard_ambassador: {
+    title: 'Standard Pack',
+    items: [
+      'Standard Sample Box',
+      'Premium builder gel',
+      '3-in-1 builder gel',
+      'Nail file',
+      'Photo Perfect / Cream / Cuticle Oil (based on current stock)',
+    ],
+  },
+  super_ambassador: {
+    title: 'Super Ambassador Pack',
+    items: [
+      'Standard Sample Pack',
+      '2 x Premium Builder Gel (Clear / Colour)',
+      'Multimix: 1 x 30g and 1 x 60g (based on current stock)',
+      '3-in-1 Clear and 1 colour (based on current stock)',
+      'All in One Liquid',
+      'Nail file',
+      'Cuticle oil',
+      'Photo Perfect Cuticle Oil',
+      '3 different Cat Eye shades',
+      '1 shimmer shade',
+      '1 metallic shade',
+      'Chrome / mirror powder with a mirror top',
+      'Any dual form box of tips',
+      'Flexi tips',
+      'Dual extension tip box',
+      '3 nail tools - cuticle nipper, scissor and pusher',
+    ],
+  },
+  extreme_ambassador: {
+    title: 'Extreme Ambassador Pack',
+    items: [
+      'Everything in the Super Ambassador Pack',
+      'Dust collector',
+      'Nail lamp (for polygel)',
+      '1 of each nail tool and a gel brush',
+      'Polygel brush',
+      'Nail art brush / French brush / ombre brush (whichever is available)',
+    ],
+  },
+}
 
 function statusBadge(status) {
   const map = {
@@ -4117,6 +4162,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   const [nextPackageMode, setNextPackageMode] = useState({})
   const [sectionOpenState, setSectionOpenState] = useState({})
   const [shipmentEntryOpen, setShipmentEntryOpen] = useState({})
+  const [factoryPdfBusy, setFactoryPdfBusy] = useState(false)
   const [shipmentEmailLock, setShipmentEmailLock] = useState(() => {
     try {
       const parsed = JSON.parse(localStorage.getItem(SHIPMENT_EMAIL_LOCK_STORAGE_KEY) || '{}')
@@ -4568,6 +4614,67 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     patchRow(row.id, { admin_comment: nextComment })
   }
   const getFactoryAck = (row) => extractTaggedValue(row?.admin_comment, 'FACTORY_ACK')
+  const formatAmbassadorAddress = (row) => [
+    row?.address,
+    [row?.city, row?.postal_code].filter(Boolean).join(' '),
+    row?.country,
+  ].filter(Boolean).join(', ')
+  const exportFactoryPrepPdf = async () => {
+    if (factoryPdfBusy) return
+    setFactoryPdfBusy(true)
+    try {
+      const allRows = []
+      const pageSize = 1000
+      let from = 0
+      while (true) {
+        const { data, error: fetchErr } = await supabase
+          .from(AMBASSADOR_TABLE)
+          .select('id, created_at, status, full_name, email, instagram, address, city, postal_code, country, discount_code, admin_comment')
+          .order('created_at', { ascending: false })
+          .range(from, from + pageSize - 1)
+        if (fetchErr) throw fetchErr
+        const chunk = Array.isArray(data) ? data : []
+        if (chunk.length === 0) break
+        allRows.push(...chunk)
+        if (chunk.length < pageSize) break
+        from += pageSize
+      }
+
+      const approvedRows = allRows.filter((row) => normalizeAmbassadorStatus(row?.status) === 'approved')
+      if (approvedRows.length === 0) {
+        alert('No approved ambassadors found to include in the factory PDF.')
+        setFactoryPdfBusy(false)
+        return
+      }
+
+      const ambassadors = approvedRows.map((row) => {
+        const ambassadorType = getAmbassadorType(row)
+        const selectedPack = AMBASSADOR_PACKS_BY_TYPE[ambassadorType] || null
+        return {
+          fullName: String(row?.full_name || '').trim() || 'Unknown ambassador',
+          instagram: String(row?.instagram || '').trim(),
+          email: String(row?.email || '').trim().toLowerCase(),
+          discountCode: String(row?.discount_code || '').trim().toUpperCase(),
+          ambassadorType: ambassadorType || 'not_set',
+          packTitle: selectedPack?.title || 'Pack type not set',
+          packItems: selectedPack?.items || [],
+          address: formatAmbassadorAddress(row) || 'Address not provided',
+          status: normalizeAmbassadorStatus(row?.status) || 'unknown',
+          createdAt: String(row?.created_at || ''),
+        }
+      })
+
+      const { blob, filename, count } = await buildAmbassadorFactoryPrepPdf({
+        ambassadors,
+        generatedAt: new Date().toISOString(),
+      })
+      triggerFileDownload(blob, filename)
+      alert(`Factory prep PDF downloaded (${count} ambassadors).`)
+    } catch (err) {
+      alert(`Factory PDF export failed: ${err?.message || String(err)}`)
+    }
+    setFactoryPdfBusy(false)
+  }
   const acknowledgeFactory = async (row) => {
     const value = `${getAdminDisplayLabel()} on ${fmtDate(new Date().toISOString())}`
     const nextComment = ensureTaggedValue(row.admin_comment, 'FACTORY_ACK', value)
@@ -4850,7 +4957,15 @@ const deleteApplication = async (row) => {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-base font-bold text-slate-900">Ambassador Applications</h2>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            onClick={exportFactoryPrepPdf}
+            disabled={factoryPdfBusy}
+            className="rounded-full border border-fuchsia-300 bg-fuchsia-50 px-3 py-1 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-60"
+          >
+            {factoryPdfBusy ? 'Preparing factory PDF…' : '↓ Factory PDF (all ambassadors)'}
+          </button>
           {FILTERS.map((f) => (
             <button
               key={f.key}
@@ -4901,51 +5016,7 @@ const deleteApplication = async (row) => {
               : ambassadorType === 'standard_ambassador'
                 ? 'Standard Ambassador'
                 : 'Not set'
-            const ambassadorPackByType = {
-              standard_ambassador: {
-                title: 'Standard Pack',
-                items: [
-                  'Standard Sample Box',
-                  'Premium builder gel',
-                  '3-in-1 builder gel',
-                  'Nail file',
-                  'Photo Perfect / Cream / Cuticle Oil (based on current stock)',
-                ],
-              },
-              super_ambassador: {
-                title: 'Super Ambassador Pack',
-                items: [
-                  'Standard Sample Pack',
-                  '2 x Premium Builder Gel (Clear / Colour)',
-                  'Multimix: 1 x 30g and 1 x 60g (based on current stock)',
-                  '3-in-1 Clear and 1 colour (based on current stock)',
-                  'All in One Liquid',
-                  'Nail file',
-                  'Cuticle oil',
-                  'Photo Perfect Cuticle Oil',
-                  '3 different Cat Eye shades',
-                  '1 shimmer shade',
-                  '1 metallic shade',
-                  'Chrome / mirror powder with a mirror top',
-                  'Any dual form box of tips',
-                  'Flexi tips',
-                  'Dual extension tip box',
-                  '3 nail tools - cuticle nipper, scissor and pusher',
-                ],
-              },
-              extreme_ambassador: {
-                title: 'Extreme Ambassador Pack',
-                items: [
-                  'Everything in the Super Ambassador Pack',
-                  'Dust collector',
-                  'Nail lamp (for polygel)',
-                  '1 of each nail tool and a gel brush',
-                  'Polygel brush',
-                  'Nail art brush / French brush / ombre brush (whichever is available)',
-                ],
-              },
-            }
-            const selectedPack = ambassadorPackByType[ambassadorType] || null
+            const selectedPack = AMBASSADOR_PACKS_BY_TYPE[ambassadorType] || null
             const isNextPackageMode = Boolean(nextPackageMode[row.id])
             const isShipmentClosed = shipmentPreviouslySent && !isNextPackageMode
             const isShipmentPanelExpanded = shipmentPanelOpen[row.id] ?? !isShipmentClosed

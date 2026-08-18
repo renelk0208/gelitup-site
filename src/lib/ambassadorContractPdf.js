@@ -566,3 +566,129 @@ export async function buildAmbassadorWelcomeLetterPdf(applicant = {}) {
   const base64 = dataUri.includes('base64,') ? dataUri.split('base64,')[1] : ''
   return { base64, filename, pages: doc.getNumberOfPages() }
 }
+
+export async function buildAmbassadorFactoryPrepPdf({ ambassadors = [], generatedAt = new Date().toISOString() } = {}) {
+  const { jsPDF } = await import('jspdf')
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' })
+  const FONT = await registerUnicodeFont(doc)
+  const pageW = doc.internal.pageSize.getWidth()
+  const pageH = doc.internal.pageSize.getHeight()
+  const margin = 42
+  const contentW = pageW - margin * 2
+  let y = margin
+
+  const ensureSpace = (needed) => {
+    if (y + needed > pageH - margin) {
+      doc.addPage()
+      y = margin
+    }
+  }
+
+  const printLabelValue = (label, value) => {
+    doc.setFont(FONT, 'bold')
+    doc.setFontSize(9)
+    doc.setTextColor(...MUTED)
+    doc.text(label, margin + 10, y)
+    doc.setFont(FONT, 'normal')
+    doc.setFontSize(10)
+    doc.setTextColor(...INK)
+    const wrapped = doc.splitTextToSize(String(value || '—'), contentW - 110)
+    doc.text(wrapped, margin + 95, y)
+    y += Math.max(14, wrapped.length * 12)
+  }
+
+  doc.setFont(FONT, 'bold')
+  doc.setFontSize(18)
+  doc.setTextColor(...INK)
+  doc.text('GEL.IT.UP Ambassador Factory Prep List', margin, y)
+  y += 24
+  doc.setFont(FONT, 'normal')
+  doc.setFontSize(10)
+  doc.setTextColor(...MUTED)
+  doc.text(`Generated: ${new Date(generatedAt).toLocaleString()}`, margin, y)
+  y += 14
+  doc.text(`Approved ambassadors included: ${ambassadors.length}`, margin, y)
+  y += 18
+  doc.setDrawColor(...PINK)
+  doc.setLineWidth(0.9)
+  doc.line(margin, y, pageW - margin, y)
+  y += 16
+
+  ambassadors.forEach((ambassador, idx) => {
+    const items = Array.isArray(ambassador?.packItems) ? ambassador.packItems : []
+    let estimatedHeight = 128 + (items.length > 0 ? items.length * 13 : 14)
+    if (estimatedHeight < 170) estimatedHeight = 170
+    ensureSpace(estimatedHeight + 10)
+
+    doc.setDrawColor(228, 228, 233)
+    doc.setFillColor(255, 255, 255)
+    doc.roundedRect(margin, y, contentW, estimatedHeight, 8, 8, 'FD')
+    y += 18
+
+    doc.setFont(FONT, 'bold')
+    doc.setFontSize(12)
+    doc.setTextColor(...INK)
+    doc.text(`${idx + 1}. ${ambassador?.fullName || 'Unknown ambassador'}`, margin + 10, y)
+    y += 16
+
+    const subtitleBits = [
+      ambassador?.packTitle ? `Pack: ${ambassador.packTitle}` : '',
+      ambassador?.discountCode ? `Code: ${ambassador.discountCode}` : '',
+      ambassador?.instagram ? `@${String(ambassador.instagram).replace(/^@+/, '')}` : '',
+    ].filter(Boolean)
+    if (subtitleBits.length > 0) {
+      doc.setFont(FONT, 'normal')
+      doc.setFontSize(9)
+      doc.setTextColor(...MUTED)
+      const subtitle = doc.splitTextToSize(subtitleBits.join('  •  '), contentW - 20)
+      doc.text(subtitle, margin + 10, y)
+      y += subtitle.length * 11 + 4
+    }
+
+    printLabelValue('Address', ambassador?.address || 'Address not provided')
+    printLabelValue('Email', ambassador?.email || '—')
+
+    doc.setFont(FONT, 'bold')
+    doc.setFontSize(9)
+    doc.setTextColor(...MUTED)
+    doc.text('Kit items', margin + 10, y)
+    y += 13
+    doc.setFont(FONT, 'normal')
+    doc.setFontSize(10)
+    doc.setTextColor(...INK)
+    if (items.length === 0) {
+      const fallback = doc.splitTextToSize('Ambassador package type is not set yet. Assign type in Admin before shipment.', contentW - 35)
+      doc.text(fallback, margin + 22, y)
+      y += fallback.length * 12
+    } else {
+      items.forEach((item) => {
+        const wrapped = doc.splitTextToSize(String(item || ''), contentW - 35)
+        doc.text(`• ${wrapped[0] || ''}`, margin + 22, y)
+        y += 12
+        for (let i = 1; i < wrapped.length; i += 1) {
+          doc.text(wrapped[i], margin + 32, y)
+          y += 12
+        }
+      })
+    }
+
+    y += 14
+  })
+
+  const pageCount = doc.getNumberOfPages()
+  for (let page = 1; page <= pageCount; page += 1) {
+    doc.setPage(page)
+    doc.setDrawColor(235, 235, 235)
+    doc.setLineWidth(0.5)
+    doc.line(margin, pageH - 28, pageW - margin, pageH - 28)
+    doc.setFont(FONT, 'normal')
+    doc.setFontSize(8)
+    doc.setTextColor(...MUTED)
+    doc.text(`Page ${page} of ${pageCount}`, pageW - margin, pageH - 14, { align: 'right' })
+  }
+
+  const datePart = String(generatedAt || '').slice(0, 10) || new Date().toISOString().slice(0, 10)
+  const filename = `GELITUP-Ambassador-Factory-Prep-${datePart}.pdf`
+  const blob = doc.output('blob')
+  return { blob, filename, count: ambassadors.length, pages: pageCount }
+}
