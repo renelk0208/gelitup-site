@@ -1520,6 +1520,10 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) 
   const sku = normalizeAdminSkuToken(item?.sku)
   const name = String(item?.name || '').trim()
   const nameNorm = normalizeAdminSkuToken(name)
+  const extractedSkuFromName = extractOrderItemSkuToken(name)
+  const extractedSkuFromSku = extractOrderItemSkuToken(sku)
+  // Strip year+NEW campaign prefixes (e.g. "2026-NEW-...") before lookup.
+  const skuWithoutCampaignPrefix = sku.replace(/^\d{4}[-\s]*NEW[-\s]*/i, '').trim()
 
   // Skip catalog hero/section image filenames — these are image assets, not products.
   if (/\.hero\.image|hero\.image\b/i.test(name) || /\.hero\.image|hero\.image\b/i.test(sku)) {
@@ -1527,7 +1531,7 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) 
   }
 
   // Check manual override map first (items not in b2b-price-list.json)
-  for (const key of [sku, nameNorm, normalizeAdminSkuToken(name)]) {
+  for (const key of [sku, nameNorm, extractedSkuFromSku, extractedSkuFromName, skuWithoutCampaignPrefix]) {
     if (!key) continue
     const override = SKU_OVERRIDE_MAP[key]
     if (override) {
@@ -1556,6 +1560,9 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) 
   const candidates = [
     sku,
     nameNorm,
+    extractedSkuFromSku,
+    extractedSkuFromName,
+    skuWithoutCampaignPrefix,
     normalizeAdminNameToken(name),
     // Some stored colour-series SKUs are saved as "GIUP-COL-01"; strip the
     // series label so they can fall through to the numeric shade key ("01").
