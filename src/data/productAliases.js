@@ -26,7 +26,7 @@ export const PRODUCT_ALIAS_GROUPS = [
   { codes: ['GIUP-SBLS', 'GIUP SBLS', 'SBLS'], target: '5-in-1 Superior Base 15ml Lemon Serenity -HTF' },
   { codes: ['GIUP-SBMS', 'GIUP SBMS', 'SBMS'], target: '5-in-1 Superior Base 15ml Mint Serenity -HTF' },
   { codes: ['GIUP-SBBlue', 'GIUP SBBlue', 'SBBLUE'], target: '5-in-1 Superior Base 15ml Blue Serenity -HTF' },
-  { codes: ['GIUP-SBPS', 'GIUP SBPS', 'SBPS'], target: '5-in-1 Superior Base 15ml Peach Serenity -HTF' },
+  { codes: ['GIUP-SBPS', 'GIUP SBPS', 'SBPS', '2026-NEW-5IN1-PEACH-SERENITY', '2026 NEW 5IN1 PEACH SERENITY'], target: '5-in-1 Superior Base 15ml Peach Serenity -HTF' },
   // All In One Liquids (separate line from 5-in-1 Superior Base)
   { codes: ['ALL IN ONE LIQUID', 'ALL IN ONE LIQUID 200ML', 'ALL IN ONE LIQUID 200 ML', 'ALL-IN-ONE-LIQUID-200ML'], target: 'All In One Liquid 200 ml -HTF' },
   { codes: ['ALL IN ONE LIQUID 500ML', 'ALL IN ONE LIQUID 500 ML', 'ALL-IN-ONE-LIQUID-500ML'], target: 'All In One Liquid 500 ml -HTF' },
