@@ -17,7 +17,7 @@ import { useState } from 'react'
 const FAQS = [
   {
     q: 'Can we order a sample kit before committing to a full order?',
-    a: 'Yes. Registered academy accounts can request sample packs before placing bulk orders. Contact us via WhatsApp or through your B2B dashboard to arrange a sample selection.',
+    a: 'Yes. Registered academy accounts can request sample packs before placing bulk orders.     Contact us via WhatsApp message or through your B2B dashboard to arrange a sample selection.',
   },
   {
     q: 'Are your products safe for repeated daily use in a training environment?',
@@ -172,7 +172,7 @@ export default function AcademyFAQ() {
             rel="noopener noreferrer"
             style={{ color: '#D43790', fontWeight: 600, textDecoration: 'none' }}
           >
-            Chat with us on WhatsApp →
+            Message us on WhatsApp →
           </a>
         </p>
 

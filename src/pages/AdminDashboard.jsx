@@ -4685,7 +4685,19 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     return /duplicate key value violates unique constraint/i.test(message)
       && /idx_ambassador_(applications|codes)_discount_code|discount_code/i.test(message)
   }
-  const makeAmbassadorCodeCandidate = () => {
+  const makeAmbassadorCodePrefix = (row) => {
+    const cleanToken = (value) => String(value || '')
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/^@+/, '')
+      .replace(/[^A-Za-z0-9]+/g, '')
+      .toUpperCase()
+    const handle = cleanToken(row?.instagram)
+    const firstName = cleanToken(String(row?.full_name || '').trim().split(/\s+/)[0] || '')
+    const source = handle || firstName || 'AMB'
+    return source.slice(0, 6) || 'AMB'
+  }
+  const makeAmbassadorCodeCandidate = (row) => {
     const alphabet = '23456789ABCDEFGHJKMNPQRSTUVWXYZ'
     const bytes = new Uint8Array(8)
     crypto.getRandomValues(bytes)
@@ -4693,9 +4705,9 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     for (let i = 0; i < bytes.length; i += 1) {
       suffix += alphabet[bytes[i] % alphabet.length]
     }
-    return `GIUP-${suffix.slice(0, 4)}-${suffix.slice(4, 8)}`
+    return `${makeAmbassadorCodePrefix(row)}-${suffix.slice(0, 4)}`
   }
-  const generateUniqueAmbassadorCode = async () => {
+  const generateUniqueAmbassadorCode = async (row) => {
     const [codesRes, appsRes] = await Promise.all([
       supabase.from('ambassador_codes').select('code'),
       supabase.from(AMBASSADOR_TABLE).select('discount_code'),
@@ -4706,10 +4718,10 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       ...(codesRes.data || []).map((r) => String(r.code || '').trim().toUpperCase()).filter(Boolean),
       ...(appsRes.data || []).map((r) => String(r.discount_code || '').trim().toUpperCase()).filter(Boolean),
     ])
-    let code = makeAmbassadorCodeCandidate()
+    let code = makeAmbassadorCodeCandidate(row)
     let attempts = 0
     while (used.has(code.toUpperCase()) && attempts < 50) {
-      code = makeAmbassadorCodeCandidate()
+      code = makeAmbassadorCodeCandidate(row)
       attempts += 1
     }
     if (used.has(code.toUpperCase())) {
@@ -4723,7 +4735,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     let discountCode = null
     let lastCodeErr = null
     for (let attempt = 0; attempt < 5; attempt += 1) {
-      const candidate = await generateUniqueAmbassadorCode()
+      const candidate = await generateUniqueAmbassadorCode(row)
       const { error: codeErr } = await supabase.from('ambassador_codes').insert({
         code: candidate,
         ambassador_name: row.full_name,

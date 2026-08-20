@@ -12,6 +12,7 @@ create unique index if not exists idx_ambassador_applications_discount_code
 
 create or replace function public.generate_ambassador_discount_code(
   p_full_name text,
+  p_instagram text,
   p_application_id bigint
 )
 returns text
@@ -20,24 +21,38 @@ security definer
 set search_path = public
 as $$
 declare
+  v_prefix_source text;
+  v_prefix text;
   v_seed bytea;
   v_alphabet text := '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
   v_candidate text;
   v_suffix text;
   i integer;
 begin
+  v_prefix_source := upper(regexp_replace(
+    coalesce(nullif(trim(p_instagram), ''), split_part(trim(coalesce(p_full_name, '')), ' ', 1), 'AMB'),
+    '[^A-Za-z0-9]+',
+    '',
+    'g'
+  ));
+  if v_prefix_source = '' then
+    v_prefix_source := 'AMB';
+  end if;
+  v_prefix := substr(v_prefix_source, 1, 6);
+
   loop
     v_seed := decode(md5(
       random()::text ||
       clock_timestamp()::text ||
       coalesce(p_application_id::text, '') ||
-      coalesce(p_full_name, '')
+      coalesce(p_full_name, '') ||
+      coalesce(p_instagram, '')
     ), 'hex');
     v_suffix := '';
     for i in 0..7 loop
       v_suffix := v_suffix || substr(v_alphabet, (get_byte(v_seed, i) % 32) + 1, 1);
     end loop;
-    v_candidate := 'GIUP-' || substr(v_suffix, 1, 4) || '-' || substr(v_suffix, 5, 4);
+    v_candidate := v_prefix || '-' || substr(v_suffix, 1, 4);
     exit when not exists (
       select 1
       from public.ambassador_codes c
@@ -55,7 +70,7 @@ begin
 end;
 $$;
 
-grant execute on function public.generate_ambassador_discount_code(text, bigint) to authenticated;
+grant execute on function public.generate_ambassador_discount_code(text, text, bigint) to authenticated;
 
 create or replace function public.approve_ambassador_application(
   p_application_id bigint
@@ -108,7 +123,7 @@ begin
   end if;
 
   if v_code is null then
-    v_code := public.generate_ambassador_discount_code(v_row.full_name, v_row.id);
+    v_code := public.generate_ambassador_discount_code(v_row.full_name, v_row.instagram, v_row.id);
   end if;
 
   if not exists (

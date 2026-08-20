@@ -9082,7 +9082,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.570-.347z" />
               <path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.522 5.836L.057 23.928a.5.5 0 00.608.593l6.358-1.43A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-4.985-1.356l-.357-.213-3.704.833.886-3.576-.233-.369A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z" />
             </svg>
-            Need help? Chat on WhatsApp
+            Need help? Message on WhatsApp
           </a>
         </div>
       </div>
@@ -16913,14 +16913,11 @@ function SupportModule() {
         <p className="mt-1 text-sm text-slate-500">Reach us through your preferred channel. WhatsApp is the fastest for urgent matters.</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           {!CONTACT_EMAIL_ONLY && (
-            <a
-              href={`tel:${String(PROFORMA_LEEUKOPF_PHONE || '').replace(/\s+/g, '')}`}
-              className="flex flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50 p-4 hover:border-fuchsia-200 hover:bg-fuchsia-50 transition"
-            >
+            <div className="flex flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50 p-4">
               <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Phone</span>
               <span className="text-sm font-semibold text-slate-900">{PROFORMA_LEEUKOPF_PHONE || '—'}</span>
               <span className="text-xs text-slate-500">Mon–Fri 9:00–17:00 EET</span>
-            </a>
+            </div>
           )}
           {!CONTACT_EMAIL_ONLY && (
             <a
@@ -21472,7 +21469,7 @@ function App() {
 
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Contact</p>
-            {!CONTACT_EMAIL_ONLY && <a href={`tel:${String(PROFORMA_LEEUKOPF_PHONE || '').replace(/[\s()]/g, '')}`} className="mt-2 block transition hover:text-fuchsia-300">{PROFORMA_LEEUKOPF_PHONE}</a>}
+            {!CONTACT_EMAIL_ONLY && <span className="mt-2 block">{PROFORMA_LEEUKOPF_PHONE}</span>}
             {!CONTACT_EMAIL_ONLY && <p className="mt-0.5 text-xs" style={{ color: 'rgba(255,255,255,0.40)' }}>Bulgaria-based · Serving distributors across Europe</p>}
             <a href={`mailto:${B2B_EMAIL}`}className="mt-2 inline-flex items-center gap-2 transition hover:text-fuchsia-300">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4 shrink-0">
@@ -21492,7 +21489,7 @@ function App() {
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.570-.347z"/>
                   <path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.522 5.836L.057 23.928a.5.5 0 00.608.593l6.358-1.43A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-4.985-1.356l-.357-.213-3.704.833.886-3.576-.233-.369A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
                 </svg>
-                WhatsApp Support
+                Message on WhatsApp
               </a>
             )}
           </div>
@@ -21604,7 +21601,7 @@ function App() {
           href={SUPPORT_WHATSAPP_URL}
           target="_blank"
           rel="noreferrer"
-          aria-label="Chat with us on WhatsApp"
+          aria-label="Message us on WhatsApp"
           className={`flex items-center gap-2.5 rounded-full bg-[#111111] ${isCheckoutRoute ? 'p-2.5' : 'pl-3 pr-5 py-2.5'} shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-white/10 transition duration-300 hover:bg-[#1a1a1a] active:scale-95`}
         >
           <svg viewBox="0 0 24 24" fill="currentColor" className="h-7 w-7 shrink-0 text-[#25D366]">

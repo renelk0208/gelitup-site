@@ -212,7 +212,7 @@ export default function BookAppointmentPage() {
           Prefer to reach us directly?{' '}
           <a href="mailto:info@gelitup.com" className="font-semibold text-fuchsia-600 underline hover:text-fuchsia-800">info@gelitup.com</a>
           {' · '}
-          <a href="https://wa.me/306940715234" target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-600 underline hover:text-fuchsia-800">WhatsApp</a>
+          <a href="https://wa.me/306940715234" target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-600 underline hover:text-fuchsia-800">Message on WhatsApp</a>
         </p>
       </div>
     </section>
