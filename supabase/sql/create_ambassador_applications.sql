@@ -14,7 +14,9 @@ create table if not exists public.ambassador_applications (
   message     text,
   status      text        not null default 'new',  -- new | reviewing | approved | rejected
   reviewed_at timestamptz,                          -- set by the admin approval workflow
-  reviewed_by text
+  reviewed_by text,
+  portal_account_created_at timestamptz,
+  portal_account_reminder_sent_at timestamptz
 );
 
 -- One application per Instagram handle keeps the review list clean.

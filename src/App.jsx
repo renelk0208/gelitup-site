@@ -20575,6 +20575,16 @@ function App() {
     }
   }
 
+  const markAmbassadorPortalAccountCreated = async () => {
+    if (!hasSupabaseConfig || !supabase) return false
+    const { error } = await supabase.rpc('mark_ambassador_portal_account_created')
+    if (error) {
+      console.error('Could not mark ambassador portal account as created.', error)
+      return false
+    }
+    return true
+  }
+
   const handleCreatePortalPassword = async ({ email, password, confirmPassword, isRecoveryFlow = false }) => {
     const normalizedEmail = String(email || '').trim().toLowerCase()
     const isInternalBypassEmail = PORTAL_INTERNAL_BYPASS_EMAILS.has(normalizedEmail)
@@ -20605,6 +20615,7 @@ function App() {
         }
         return { ok: false, message: updateError.message || 'Password update failed.' }
       }
+      await markAmbassadorPortalAccountCreated()
       setIsPortalAuthenticated(true)
       return {
         ok: true,
@@ -20623,6 +20634,7 @@ function App() {
         return { ok: false, message: updateError.message || 'Unable to set your password. Please try again or use Forgot password.' }
       }
       localStorage.setItem('portalRememberedEmail', normalizedEmail)
+      await markAmbassadorPortalAccountCreated()
       setIsPortalAuthenticated(true)
       return {
         ok: true,
@@ -20681,6 +20693,7 @@ function App() {
       const latestRegistration = registrationResult.data || null
       if (!latestRegistration) {
         if (isInternalBypassEmail) {
+          await markAmbassadorPortalAccountCreated()
           setIsPortalAuthenticated(true)
           return {
             ok: true,
@@ -20691,6 +20704,7 @@ function App() {
         }
 
         setIsPortalAuthenticated(true)
+        await markAmbassadorPortalAccountCreated()
         return {
           ok: true,
           infoMessage: 'Password created successfully. No B2B registration profile was found yet; submit a distributor application if approval-gated access is needed.',
@@ -20714,6 +20728,7 @@ function App() {
       }
 
       setIsPortalAuthenticated(true)
+      await markAmbassadorPortalAccountCreated()
     }
 
     return {
