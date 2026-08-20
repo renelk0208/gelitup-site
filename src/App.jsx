@@ -9509,9 +9509,10 @@ function BuyerRegister() {
 
 function CheckoutPage() {
   const navigate = useNavigate()
-  const [cart, setCart] = useState(() => {
+  const readCheckoutCartFromStorage = useCallback(() => {
     try { const saved = localStorage.getItem(QUICK_CART_STORAGE_KEY); return saved ? JSON.parse(saved) : {} } catch { return {} }
-  })
+  }, [])
+  const [cart, setCart] = useState(() => readCheckoutCartFromStorage())
   const [priceMap, setPriceMap] = useState(null)
   const [wordIndex, setWordIndex] = useState([])
 
@@ -9604,6 +9605,18 @@ function CheckoutPage() {
       }
     })
   }, [])
+
+  useEffect(() => {
+    const syncCheckoutCart = () => setCart(readCheckoutCartFromStorage())
+    window.addEventListener('gelitup:cart-change', syncCheckoutCart)
+    window.addEventListener('focus', syncCheckoutCart)
+    window.addEventListener('storage', syncCheckoutCart)
+    return () => {
+      window.removeEventListener('gelitup:cart-change', syncCheckoutCart)
+      window.removeEventListener('focus', syncCheckoutCart)
+      window.removeEventListener('storage', syncCheckoutCart)
+    }
+  }, [readCheckoutCartFromStorage])
 
   const updateField = (field, value) => setForm(f => ({ ...f, [field]: value }))
 
@@ -12337,63 +12350,71 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   // Cart persistence — restore cart from localStorage on mount, keyed by user ID
   const cartUserIdRef = useRef(null)
+  const restoredPortalCartUserIdRef = useRef('')
 
-  useEffect(() => {
+  const restorePortalCartForUser = useCallback(async (sessionUser = null) => {
     if (!hasSupabaseConfig || !supabase) return
-    supabase.auth.getUser().then(async ({ data }) => {
-      const uid = data?.user?.id
-      if (!uid) return
-      cartUserIdRef.current = uid
-      if (readOrderEditHandoff()) return // order-edit mode preloads the cart itself
-      const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${uid}`
-      let saved = null
-      try { saved = JSON.parse(localStorage.getItem(key) || 'null') } catch { /* ignore */ }
+    const user = sessionUser || (await supabase.auth.getUser()).data?.user
+    const uid = user?.id
+    if (!uid) return
+    cartUserIdRef.current = uid
+    if (readOrderEditHandoff()) return
+    const key = `${B2B_CART_STORAGE_KEY_PREFIX}_${uid}`
+    let saved = null
+    try { saved = JSON.parse(localStorage.getItem(key) || 'null') } catch { /* ignore */ }
 
-      // If localStorage is empty (e.g. incognito tab, new device, cleared data),
-      // fall back to the Supabase draft cart so the order is never lost.
-      if (!saved || (!saved.selectedCodes?.length && !saved.packageCartItems?.length)) {
-        try {
-          const { data: dbCart } = await supabase
-            .from('b2b_draft_carts')
-            .select('items')
-            .eq('user_id', uid)
-            .eq('source', 'portal')
-            .maybeSingle()
-          if (dbCart?.items) {
-            const items = dbCart.items
-            const codes = (items.products || []).map(p => p.code).filter(Boolean)
-            const qtys = (items.products || []).reduce((acc, p) => { if (p.code) acc[p.code] = p.qty || 1; return acc }, {})
-            if (codes.length) { setSelectedCodes(codes); setItemQtys(qtys) }
-            if (Array.isArray(items.packages) && items.packages.length) setPackageCartItems(items.packages)
-            return
-          }
-        } catch { /* ignore, cart simply stays empty */ }
-        if (!saved) return
+    // If localStorage is empty (e.g. incognito tab, new device, cleared data),
+    // fall back to the Supabase draft cart so the order is never lost.
+    if (!saved || (!saved.selectedCodes?.length && !saved.packageCartItems?.length)) {
+      try {
+        const { data: dbCart } = await supabase
+          .from('b2b_draft_carts')
+          .select('items')
+          .eq('user_id', uid)
+          .eq('source', 'portal')
+          .maybeSingle()
+        if (dbCart?.items) {
+          const items = dbCart.items
+          const codes = (items.products || []).map(p => p.code).filter(Boolean)
+          const qtys = (items.products || []).reduce((acc, p) => { if (p.code) acc[p.code] = p.qty || 1; return acc }, {})
+          setSelectedCodes(codes)
+          setItemQtys(qtys)
+          setPackageCartItems(Array.isArray(items.packages) ? items.packages : [])
+          restoredPortalCartUserIdRef.current = uid
+          return
+        }
+      } catch { /* ignore, cart simply stays empty */ }
+      if (!saved) {
+        restoredPortalCartUserIdRef.current = uid
+        return
       }
+    }
 
-      if (Array.isArray(saved.selectedCodes) && saved.selectedCodes.length) setSelectedCodes(saved.selectedCodes)
-      if (saved.itemQtys && typeof saved.itemQtys === 'object') setItemQtys(saved.itemQtys)
-      if (Array.isArray(saved.packageCartItems) && saved.packageCartItems.length) setPackageCartItems(saved.packageCartItems)
-      // Abandoned cart reminder — every 48 h, max 3 times (~1 week), then stop
-      const REMINDER_INTERVAL = 48 * 60 * 60 * 1000 // 48 hours
-      const MAX_REMINDERS = 3
-      const reminderCount = saved.abandonedReminderCount || 0
-      const lastReminder = saved.lastReminderAt || saved.savedAt
-      if (lastReminder && reminderCount < MAX_REMINDERS && Date.now() - lastReminder > REMINDER_INTERVAL) {
-        const itemCount = (saved.selectedCodes?.length || 0) + (saved.packageCartItems?.length || 0)
-        const userEmail = String(data?.user?.email || '').trim()
-        if (itemCount > 0 && userEmail) {
-          const firstName = String(data?.user?.user_metadata?.contact_name || '').split(' ')[0] || 'there'
-          const newCount = reminderCount + 1
-          sendPortalEmailNotification({
-            eventType: 'b2b_abandoned_cart',
-            to: userEmail,
-            subject: newCount === 1
-              ? `Psst… your cart is calling you, ${firstName}! 🛒`
-              : newCount === 2
-                ? `Still thinking it over, ${firstName}? Your cart misses you 💅`
-                : `Last call, ${firstName} — your colours are waiting! ✨`,
-            html: `
+    setSelectedCodes(Array.isArray(saved.selectedCodes) ? saved.selectedCodes : [])
+    setItemQtys(saved.itemQtys && typeof saved.itemQtys === 'object' ? saved.itemQtys : {})
+    setPackageCartItems(Array.isArray(saved.packageCartItems) ? saved.packageCartItems : [])
+    restoredPortalCartUserIdRef.current = uid
+
+    // Abandoned cart reminder — every 48 h, max 3 times (~1 week), then stop
+    const REMINDER_INTERVAL = 48 * 60 * 60 * 1000 // 48 hours
+    const MAX_REMINDERS = 3
+    const reminderCount = saved.abandonedReminderCount || 0
+    const lastReminder = saved.lastReminderAt || saved.savedAt
+    if (lastReminder && reminderCount < MAX_REMINDERS && Date.now() - lastReminder > REMINDER_INTERVAL) {
+      const itemCount = (saved.selectedCodes?.length || 0) + (saved.packageCartItems?.length || 0)
+      const userEmail = String(user?.email || '').trim()
+      if (itemCount > 0 && userEmail) {
+        const firstName = String(user?.user_metadata?.contact_name || '').split(' ')[0] || 'there'
+        const newCount = reminderCount + 1
+        sendPortalEmailNotification({
+          eventType: 'b2b_abandoned_cart',
+          to: userEmail,
+          subject: newCount === 1
+            ? `Psst… your cart is calling you, ${firstName}! 🛒`
+            : newCount === 2
+              ? `Still thinking it over, ${firstName}? Your cart misses you 💅`
+              : `Last call, ${firstName} — your colours are waiting! ✨`,
+          html: `
 <div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;max-width:540px;margin:0 auto;background:#111;border-radius:16px;overflow:hidden;">
   <div style="background:linear-gradient(135deg,#D43790,#9333ea);padding:32px 28px;text-align:center;">
     <p style="margin:0;font-size:28px;">🛒✨</p>
@@ -12412,13 +12433,38 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     <p style="margin:0;font-size:11px;color:#666;">GEL.IT.UP by GIUP® · Professional Nail Colour</p>
   </div>
 </div>`,
-          }).catch(() => {})
-          // Update reminder tracking so we don't exceed 3 nudges
-          localStorage.setItem(key, JSON.stringify({ ...saved, lastReminderAt: Date.now(), abandonedReminderCount: newCount }))
-        }
+        }).catch(() => {})
+        // Update reminder tracking so we don't exceed 3 nudges
+        localStorage.setItem(key, JSON.stringify({ ...saved, lastReminderAt: Date.now(), abandonedReminderCount: newCount }))
       }
+    }
+  }, [hasSupabaseConfig, supabase])
+
+  useEffect(() => {
+    if (!hasSupabaseConfig || !supabase) return
+    let active = true
+    const restoreCurrentUserCart = async () => {
+      const { data } = await supabase.auth.getUser()
+      const user = data?.user || null
+      if (!active || !user?.id || restoredPortalCartUserIdRef.current === user.id) return
+      await restorePortalCartForUser(user)
+    }
+    void restoreCurrentUserCart()
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        cartUserIdRef.current = null
+        restoredPortalCartUserIdRef.current = ''
+        return
+      }
+      const user = session?.user || null
+      if (!user?.id || restoredPortalCartUserIdRef.current === user.id) return
+      void restorePortalCartForUser(user)
     })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    return () => {
+      active = false
+      authListener.subscription.unsubscribe()
+    }
+  }, [hasSupabaseConfig, restorePortalCartForUser, supabase])
 
   // Persist cart to localStorage whenever it changes
   useEffect(() => {
