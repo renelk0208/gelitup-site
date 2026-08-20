@@ -10,6 +10,9 @@ CREATE TABLE IF NOT EXISTS b2b_draft_carts (
   source        text        NOT NULL DEFAULT 'portal',   -- 'portal' | 'catalogue'
   last_reminder_sent_at timestamptz,
   reminder_count integer     NOT NULL DEFAULT 0,
+  customer_action text,
+  customer_action_at timestamptz,
+  customer_action_note text,
   updated_at    timestamptz NOT NULL DEFAULT now(),
   created_at    timestamptz NOT NULL DEFAULT now(),
   UNIQUE (user_id, source)

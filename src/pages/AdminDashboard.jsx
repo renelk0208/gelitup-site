@@ -3590,6 +3590,25 @@ async function recoverDraftCartAsOrder(cart) {
   return { ok: true, message: `Recovered as order ${orderPayload.order_ref}` }
 }
 
+function getDraftCartCustomerActionLabel(cart) {
+  const action = String(cart?.customer_action || '').trim().toLowerCase()
+  if (action === 'delete') return 'Customer asked to delete cart contents'
+  if (action === 'keep') return 'Customer chose to check out later'
+  return ''
+}
+
+function isDraftCartCustomerActionCurrent(cart) {
+  const action = String(cart?.customer_action || '').trim().toLowerCase()
+  if (!action) return false
+  const actionTime = new Date(cart?.customer_action_at || '').getTime()
+  const updatedTime = new Date(cart?.updated_at || cart?.created_at || '').getTime()
+  return Number.isFinite(actionTime) && Number.isFinite(updatedTime) && actionTime >= updatedTime
+}
+
+function hasRecoverableDraftCartItems(cart) {
+  return Number(cart?.total_units || 0) > 0 && normalizeDraftCartItems(cart).length > 0
+}
+
 function DraftCartsPanel() {
   const [carts, setCarts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -3677,7 +3696,7 @@ function DraftCartsPanel() {
         <h2 className="text-lg font-bold text-slate-900">Draft / Abandoned Carts</h2>
         <button onClick={fetchCarts} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">Refresh</button>
       </div>
-      <p className="mt-1 text-xs text-slate-500">Live carts from clients who have not yet submitted. Updated every time a client changes their cart.</p>
+      <p className="mt-1 text-xs text-slate-500">Live carts from clients who have not yet submitted. Updated every time a client changes their cart. Customer reminder-email choices are also logged here for admin review.</p>
 
       {error && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p>}
 
@@ -3697,6 +3716,11 @@ function DraftCartsPanel() {
                   {cart.source}
                 </span>
                 <span className="flex-1 truncate text-sm font-semibold text-slate-800">{cart.customer_email || '—'}</span>
+                {isDraftCartCustomerActionCurrent(cart) && getDraftCartCustomerActionLabel(cart) && (
+                  <span className={`hidden rounded-full px-2 py-0.5 text-[10px] font-semibold md:inline-flex ${String(cart?.customer_action || '').trim().toLowerCase() === 'delete' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}`}>
+                    {getDraftCartCustomerActionLabel(cart)}
+                  </span>
+                )}
                 <span className="text-xs text-slate-500">{cart.total_units} unit{cart.total_units !== 1 ? 's' : ''}</span>
                 <span className="text-xs text-slate-400">{fmtDate(cart.updated_at)}</span>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${expanded === cart.id ? 'rotate-180' : ''}`}>
@@ -3716,20 +3740,36 @@ function DraftCartsPanel() {
                     <span className="text-slate-700">{cart.updated_at ? new Date(cart.updated_at).toLocaleString() : '—'}</span>
                     <span className="text-slate-400">Created</span>
                     <span className="text-slate-700">{cart.created_at ? new Date(cart.created_at).toLocaleString() : '—'}</span>
+                    <span className="text-slate-400">Customer reply</span>
+                    <span className="text-slate-700">{getDraftCartCustomerActionLabel(cart) || '—'}</span>
+                    <span className="text-slate-400">Reply recorded</span>
+                    <span className="text-slate-700">{cart.customer_action_at ? new Date(cart.customer_action_at).toLocaleString() : '—'}</span>
                   </div>
+                  {cart.customer_action_note && (
+                    <div className={`mt-3 rounded-lg border px-3 py-2 text-xs ${String(cart?.customer_action || '').trim().toLowerCase() === 'delete' ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-amber-200 bg-amber-50 text-amber-700'}`}>
+                      <strong>Admin note:</strong> {cart.customer_action_note}
+                      {!isDraftCartCustomerActionCurrent(cart) && (
+                        <span className="block pt-1 text-[11px] text-slate-500">The cart was updated after this response, so the reply is now historical.</span>
+                      )}
+                    </div>
+                  )}
                   <div className="mt-3 rounded-lg bg-white p-3">
                     <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Cart Items</p>
                     {renderItems(cart.items, cart.source)}
                   </div>
                   <div className="mt-3 flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => recoverCart(cart)}
-                      disabled={recovering === cart.id}
-                      className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
-                    >
-                      {recovering === cart.id ? 'Recovering…' : 'Recover as Order'}
-                    </button>
+                    {hasRecoverableDraftCartItems(cart) ? (
+                      <button
+                        type="button"
+                        onClick={() => recoverCart(cart)}
+                        disabled={recovering === cart.id}
+                        className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                      >
+                        {recovering === cart.id ? 'Recovering…' : 'Recover as Order'}
+                      </button>
+                    ) : (
+                      <span className="text-[11px] text-slate-400">This cart no longer has recoverable items.</span>
+                    )}
                   </div>
                 </div>
               )}
