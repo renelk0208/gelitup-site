@@ -50,8 +50,7 @@ const AMBASSADOR_PACKS_BY_TYPE = {
     title: 'Standard Pack',
     items: [
       'Standard Sample Box',
-      'Premium builder gel',
-      '3-in-1 builder gel',
+      '3-in-1 All in One Liquid',
       'Nail file',
       'Photo Perfect / Cream / Cuticle Oil (based on current stock)',
     ],
@@ -1676,6 +1675,7 @@ function OrdersPanel() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
   const [expanded, setExpanded] = useState(null)
   const [saving, setSaving] = useState(null)
   const [trackingDraft, setTrackingDraft] = useState({})
@@ -2321,25 +2321,56 @@ function OrdersPanel() {
     'cancelled',
   ]
 
+  const normalizedOrderSearch = String(searchQuery || '').trim().toLowerCase()
+  const filteredRows = normalizedOrderSearch
+    ? rows.filter((row) => {
+        const itemsText = resolveRawItems(row)
+          .map((item, index) => {
+            const parsed = parseOrderItemEntry(item, index)
+            return [parsed.name, parsed.sku, parsed.rawLabel].filter(Boolean).join(' ')
+          })
+          .join(' ')
+        const haystack = [
+          row.id,
+          row.order_ref,
+          row.customer_email,
+          row.consignee_name,
+          row.consignee_phone,
+          row.shipping_address,
+          row.tracking_number,
+          row.zoho_salesorder_number,
+          row.zoho_invoice_number,
+          row.distributor_tier,
+          row.status,
+          itemsText,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+        return normalizedOrderSearch.split(/\s+/).every((token) => haystack.includes(token))
+      })
+    : rows
+
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        {FILTERS.map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`rounded-full px-3 py-1 text-xs font-semibold transition ${filter === f ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-          >
-            {f === 'cancellation_requested' ? 'Cancel Req.' : f === 'pending_approval' ? 'Pending Approval' : formatOrderStatusLabel(f).replace(/\b\w/g, (c) => c.toUpperCase())}
+      <div className="mb-4 space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {FILTERS.map(f => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${filter === f ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            >
+              {f === 'cancellation_requested' ? 'Cancel Req.' : f === 'pending_approval' ? 'Pending Approval' : formatOrderStatusLabel(f).replace(/\b\w/g, (c) => c.toUpperCase())}
+            </button>
+          ))}
+          <button onClick={load} className="ml-auto rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-500 hover:bg-slate-50">
+            ↻ Refresh
           </button>
-        ))}
-        <button onClick={load} className="ml-auto rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-500 hover:bg-slate-50">
-          ↻ Refresh
-        </button>
-        <button
-          onClick={() => {
-            if (!rows.length) { alert('No orders to export.'); return }
-            const data = rows.map(r => {
+          <button
+            onClick={() => {
+              if (!filteredRows.length) { alert('No orders to export.'); return }
+              const data = filteredRows.map(r => {
               const items = Array.isArray(r.items) ? r.items : []
               return {
                 'Order ID': r.id,
@@ -2367,18 +2398,38 @@ function OrdersPanel() {
             })
             triggerFileDownload(xlsxBlob, `gelitup-orders-${filter}-${new Date().toISOString().slice(0,10)}.xlsx`)
           }}
-          disabled={!rows.length}
+          disabled={!filteredRows.length}
           className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 disabled:opacity-40"
-        >
+          >
           ↓ Export Excel
-        </button>
-        <button
+          </button>
+          <button
           onClick={emailAllHistoricalOrdersToInbox}
           disabled={emailingAllOrders}
           className="rounded-full border border-fuchsia-200 px-3 py-1 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-40"
-        >
+          >
           {emailingAllOrders ? 'Sending CSVs…' : '✉ Email CSVs (All Orders)'}
-        </button>
+          </button>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+          type="search"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search orders by name, email, order ref, tracking, item..."
+          className="min-w-[260px] flex-1 rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-fuchsia-300 focus:outline-none focus:ring-2 focus:ring-fuchsia-100"
+          />
+          {normalizedOrderSearch && (
+          <button
+            type="button"
+            onClick={() => setSearchQuery('')}
+            className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-50"
+          >
+            Clear
+          </button>
+          )}
+          <span className="text-xs text-slate-400">{filteredRows.length} result{filteredRows.length === 1 ? '' : 's'}</span>
+        </div>
       </div>
 
       {!isPriceLookupLoaded && (
@@ -2395,14 +2446,16 @@ function OrdersPanel() {
 
       {loading && <p className="py-6 text-center text-sm text-slate-400">Loading…</p>}
 
-      {!loading && rows.length === 0 && !error && (
+      {!loading && filteredRows.length === 0 && !error && (
         <p className="py-6 text-center text-sm text-slate-400">
-          No {filter === 'all' ? '' : filter + ' '}orders found.
+          {normalizedOrderSearch
+            ? 'No orders match your search.'
+            : `No ${filter === 'all' ? '' : `${filter} `}orders found.`}
         </p>
       )}
 
       <ul className="space-y-2">
-        {rows.map(row => {
+        {filteredRows.map(row => {
           const items = resolveRawItems(row)
           const draft = trackingDraft[row.id] || {}
           const currentStatus = normalizeOrderStatus(row.status)
@@ -4224,6 +4277,7 @@ function AmbassadorApplicationsPanel() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState('pending')
+  const [searchQuery, setSearchQuery] = useState('')
   const [saving, setSaving] = useState(null)
   const [emailStatus, setEmailStatus] = useState({}) // { [id]: { state, message } }
   const [declineRow, setDeclineRow] = useState(null)
@@ -4563,15 +4617,37 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   async function sweepAmbassadorPasswordReminders() {
     if (!EMAIL_WEBHOOK_URL) return
     const cutoffMs = Date.now() - (7 * 24 * 60 * 60 * 1000)
-    const { data, error } = await supabase
-      .from(AMBASSADOR_TABLE)
-      .select('id,full_name,email,instagram,discount_code,discount_code_created_at,reviewed_at,created_at,portal_account_created_at,portal_account_reminder_sent_at,status')
-      .eq('status', 'approved')
-    if (error) {
+    const reminderSelectFallbacks = [
+      'id,full_name,email,instagram,discount_code,discount_code_created_at,reviewed_at,created_at,portal_account_created_at,portal_account_reminder_sent_at,status',
+      'id,full_name,email,instagram,discount_code,discount_code_created_at,reviewed_at,created_at,status',
+    ]
+    let data = null
+    let error = null
+    let hasPortalTrackingColumns = false
+    for (const selectColumns of reminderSelectFallbacks) {
+      const result = await supabase
+        .from(AMBASSADOR_TABLE)
+        .select(selectColumns)
+        .eq('status', 'approved')
+      if (!result.error) {
+        data = result.data || []
+        error = null
+        hasPortalTrackingColumns = selectColumns.includes('portal_account_created_at')
+        break
+      }
+      const missingColumn = /column .* does not exist/i.test(String(result.error.message || ''))
+      if (!missingColumn) {
+        error = result.error
+        break
+      }
+      error = result.error
+    }
+    if (error && !data) {
       console.error('Could not scan ambassador password reminders.', error)
       setError((prev) => prev || `Could not scan ambassador password reminders: ${error.message}`)
       return
     }
+    if (!hasPortalTrackingColumns) return
     const dueRows = (data || []).filter((row) => {
       if (row.portal_account_created_at || row.portal_account_reminder_sent_at) return false
       const issuedAt = row.discount_code_created_at || row.reviewed_at || row.created_at
@@ -5232,33 +5308,79 @@ const deleteApplication = async (row) => {
     { key: 'all', label: 'All' },
   ]
 
+  const normalizedAmbassadorSearch = String(searchQuery || '').trim().toLowerCase()
+  const filteredRows = normalizedAmbassadorSearch
+    ? rows.filter((row) => {
+        const haystack = [
+          row.full_name,
+          row.email,
+          row.instagram,
+          row.tiktok,
+          row.phone,
+          row.facebook,
+          row.country,
+          row.city,
+          row.postal_code,
+          row.address,
+          row.discount_code,
+          row.status,
+          row.message,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+        return normalizedAmbassadorSearch.split(/\s+/).every((token) => haystack.includes(token))
+      })
+    : rows
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-base font-bold text-slate-900">Ambassador Applications</h2>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {FILTERS.map((f) => (
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-base font-bold text-slate-900">Ambassador Applications</h2>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {FILTERS.map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setFilter(f.key)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${filter === f.key ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search ambassadors by name, Instagram, email, code, country..."
+            className="min-w-[260px] flex-1 rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-fuchsia-300 focus:outline-none focus:ring-2 focus:ring-fuchsia-100"
+          />
+          {normalizedAmbassadorSearch && (
             <button
-              key={f.key}
-              onClick={() => setFilter(f.key)}
-              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${filter === f.key ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-50"
             >
-              {f.label}
+              Clear
             </button>
-          ))}
+          )}
+          <span className="text-xs text-slate-400">{filteredRows.length} result{filteredRows.length === 1 ? '' : 's'}</span>
         </div>
       </div>
 
       {loading && <p className="text-sm text-slate-500">Loading…</p>}
       {error && <p className="text-sm text-rose-600">{error}</p>}
 
-      {!loading && !error && rows.length === 0 && (
-        <p className="text-sm text-slate-500">{filter === 'pending' ? 'No applications waiting for review. 🎉' : 'No applications found.'}</p>
+      {!loading && !error && filteredRows.length === 0 && (
+        <p className="text-sm text-slate-500">{normalizedAmbassadorSearch ? 'No ambassadors match your search.' : filter === 'pending' ? 'No applications waiting for review. 🎉' : 'No applications found.'}</p>
       )}
 
-      {!loading && rows.length > 0 && (
+      {!loading && filteredRows.length > 0 && (
         <div className="space-y-2">
-          {rows.map((row) => {
+          {filteredRows.map((row) => {
             const es = emailStatus[row.id]
             const isOpen = openIds.has(row.id)
             const normalizedStatus = normalizeAmbassadorStatus(row.status)

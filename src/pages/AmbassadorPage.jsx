@@ -177,8 +177,7 @@ const AMBASSADOR_PACKS = [
     note: 'A starter box for new ambassadors.',
     items: [
       'Standard Sample Box',
-      'Premium builder gel',
-      '3-in-1 builder gel',
+      '3-in-1 All in One Liquid',
       'Nail file',
       'Photo Perfect / Cream / Cuticle Oil (based on current stock)',
     ],
