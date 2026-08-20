@@ -4719,18 +4719,28 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   }
   const approveAmbassadorWithFallback = async (row) => {
     const reviewedAt = new Date().toISOString()
-    const discountCode = await generateUniqueAmbassadorCode()
     const notes = `Auto-created from approved ambassador application #${row.id}`
-    const { error: codeErr } = await supabase.from('ambassador_codes').upsert({
-      code: discountCode,
-      ambassador_name: row.full_name,
-      ambassador_email: row.email,
-      discount_pct: 20,
-      commission_pct: 20,
-      active: true,
-      notes,
-    }, { onConflict: 'code' })
-    if (codeErr) throw codeErr
+    let discountCode = null
+    let lastCodeErr = null
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const candidate = await generateUniqueAmbassadorCode()
+      const { error: codeErr } = await supabase.from('ambassador_codes').insert({
+        code: candidate,
+        ambassador_name: row.full_name,
+        ambassador_email: row.email,
+        discount_pct: 20,
+        commission_pct: 20,
+        active: true,
+        notes,
+      })
+      if (!codeErr) {
+        discountCode = candidate
+        break
+      }
+      lastCodeErr = codeErr
+      if (!isAmbassadorDiscountCodeCollisionError(codeErr)) throw codeErr
+    }
+    if (!discountCode) throw lastCodeErr || new Error('Could not create ambassador code.')
     const { error: appErr } = await supabase
       .from(AMBASSADOR_TABLE)
       .update({

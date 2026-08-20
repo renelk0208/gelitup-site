@@ -390,7 +390,6 @@ const CLIENT_PROFILE_STORAGE_KEY = 'gelitup.portal.client_profile.v1'
 const B2B_CART_STORAGE_KEY_PREFIX = 'gelitup.portal.b2b_cart.v1'
 const QUICK_CART_STORAGE_KEY = 'gelitup.catalogue.quick_cart.v1'
 const CHECKOUT_DETAILS_STORAGE_KEY = 'gelitup.checkout.details.v1'
-const COOKIE_CONSENT_STORAGE_KEY = 'gelitup.cookies.consent.v2'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
 const HOME_HERO_VIDEO_URL = '/gelitup-media/videos/reaching%20hands.mp4'
@@ -19849,7 +19848,6 @@ function App() {
   const [isAdminSession, setIsAdminSession] = useState(false)
   const [authReady, setAuthReady] = useState(!hasSupabaseConfig)
   const [pendingRecoverySession, setPendingRecoverySession] = useState(false)
-  const [hasAcceptedCookies, setHasAcceptedCookies] = useState(() => localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY) === 'accepted')
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
   const [contactRequestForm, setContactRequestForm] = useState({ name: '', email: '', phone: '' })
   const [isSubmittingContactRequest, setIsSubmittingContactRequest] = useState(false)
@@ -19864,12 +19862,6 @@ function App() {
   const exitIntentShownRef = useRef(false)
   const lang = useLang()
   const EI = (getTranslations(lang) || {}).exit_intent || {}
-  const Ck = (getTranslations(lang) || {}).cookies || {}
-
-  const handleAcceptCookies = useCallback(() => {
-    localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, 'accepted')
-    setHasAcceptedCookies(true)
-  }, [])
 
   // Global cart count — reactive across all pages via custom event from FullCataloguePage
   const [appCartCount, setAppCartCount] = useState(() => {
@@ -21466,25 +21458,6 @@ function App() {
                 {EI.dismiss || "No thanks, I'll keep browsing"}
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {!hasAcceptedCookies && (
-        <div className="fixed bottom-4 left-0 right-0 z-40 px-3 md:px-6">
-          <div className="mx-auto flex max-w-6xl flex-col gap-3 rounded-xl border border-white/20 bg-black/90 p-3 text-white shadow-sm backdrop-blur-[10px] sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-white/80">
-              {Ck.message || 'We use cookies to improve your experience. By continuing, you agree to our cookie use.'}
-              {' '}
-              <NavLink to="/cookie-policy" className="font-semibold text-fuchsia-300 underline">{Ck.policy_link || 'Read Cookie Policy'}</NavLink>
-            </p>
-            <button
-              type="button"
-              onClick={handleAcceptCookies}
-              className="rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
-            >
-              {Ck.accept || 'Accept Cookies'}
-            </button>
           </div>
         </div>
       )}
