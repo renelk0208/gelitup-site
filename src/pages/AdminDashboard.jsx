@@ -4464,7 +4464,22 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     if (!window.confirm(`Approve ${row.full_name} (@${row.instagram})?\n\nThis allocates/links their ambassador code and immediately emails them a welcome message with their Ambassador Agreement PDF attached.`)) return
     setSaving(row.id)
     const { data, error: err } = await supabase.rpc('approve_ambassador_application', { p_application_id: row.id })
-    if (err) { setSaving(null); alert(err.message); return }
+    if (err) {
+      if (isAmbassadorDiscountCodeCollisionError(err)) {
+        try {
+          await approveAmbassadorWithFallback(row)
+          setSaving(null)
+          return
+        } catch (fallbackErr) {
+          setSaving(null)
+          alert(fallbackErr.message || String(fallbackErr))
+          return
+        }
+      }
+      setSaving(null)
+      alert(err.message)
+      return
+    }
     const approved = Array.isArray(data) ? data[0] : data
     const reviewedAt = approved?.reviewed_at || new Date().toISOString()
     const discountCode = approved?.discount_code || row.discount_code || null
@@ -4664,6 +4679,77 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       alert(`Factory PDF export failed: ${err?.message || String(err)}`)
     }
     setFactoryPdfBusy(false)
+  }
+  const isAmbassadorDiscountCodeCollisionError = (err) => {
+    const message = String(err?.message || '')
+    return /duplicate key value violates unique constraint/i.test(message)
+      && /idx_ambassador_(applications|codes)_discount_code|discount_code/i.test(message)
+  }
+  const makeAmbassadorCodeCandidate = () => {
+    const alphabet = '23456789ABCDEFGHJKMNPQRSTUVWXYZ'
+    const bytes = new Uint8Array(8)
+    crypto.getRandomValues(bytes)
+    let suffix = ''
+    for (let i = 0; i < bytes.length; i += 1) {
+      suffix += alphabet[bytes[i] % alphabet.length]
+    }
+    return `GIUP-${suffix.slice(0, 4)}-${suffix.slice(4, 8)}`
+  }
+  const generateUniqueAmbassadorCode = async () => {
+    const [codesRes, appsRes] = await Promise.all([
+      supabase.from('ambassador_codes').select('code'),
+      supabase.from(AMBASSADOR_TABLE).select('discount_code'),
+    ])
+    if (codesRes.error) throw codesRes.error
+    if (appsRes.error) throw appsRes.error
+    const used = new Set([
+      ...(codesRes.data || []).map((r) => String(r.code || '').trim().toUpperCase()).filter(Boolean),
+      ...(appsRes.data || []).map((r) => String(r.discount_code || '').trim().toUpperCase()).filter(Boolean),
+    ])
+    let code = makeAmbassadorCodeCandidate()
+    let attempts = 0
+    while (used.has(code.toUpperCase()) && attempts < 50) {
+      code = makeAmbassadorCodeCandidate()
+      attempts += 1
+    }
+    if (used.has(code.toUpperCase())) {
+      throw new Error('Could not generate a unique ambassador code.')
+    }
+    return code
+  }
+  const approveAmbassadorWithFallback = async (row) => {
+    const reviewedAt = new Date().toISOString()
+    const discountCode = await generateUniqueAmbassadorCode()
+    const notes = `Auto-created from approved ambassador application #${row.id}`
+    const { error: codeErr } = await supabase.from('ambassador_codes').upsert({
+      code: discountCode,
+      ambassador_name: row.full_name,
+      ambassador_email: row.email,
+      discount_pct: 20,
+      commission_pct: 20,
+      active: true,
+      notes,
+    }, { onConflict: 'code' })
+    if (codeErr) throw codeErr
+    const { error: appErr } = await supabase
+      .from(AMBASSADOR_TABLE)
+      .update({
+        status: 'approved',
+        reviewed_at: reviewedAt,
+        reviewed_by: currentAdminEmail || null,
+        discount_code: discountCode,
+        discount_code_created_at: reviewedAt,
+      })
+      .eq('id', row.id)
+    if (appErr) throw appErr
+    const updatedRow = { ...row, status: 'approved', reviewed_at: reviewedAt, discount_code: discountCode }
+    patchRow(row.id, { status: 'approved', reviewed_at: reviewedAt, discount_code: discountCode, discount_code_created_at: reviewedAt })
+    await sendWelcomeContractEmail(updatedRow)
+    try {
+      const factorySubject = `New GEL.IT.UP Ambassador approved — ${updatedRow.full_name || 'New ambassador'}`
+      const factoryHtml = `<p>A new ambassador has been approved and a PR package needs preparing.</p><p><strong>Name:</strong> ${updatedRow.full_name || ''}<br/><strong>Instagram:</strong> ${updatedRow.instagram || ''}<br/><strong>Country:</strong> ${updatedRow.country || ''}<br/><strong>Address:</strong> ${updatedRow.address || ''}, ${updatedRow.city || ''} ${updatedRow.postal_code || ''}<br/><strong>Ambassador code:</strong> ${discountCode || ''}</p><p>Please mark it acknowledged in the admin panel once you've seen this.</p>`
+      await Promise.all(['leeukopf@gmail.com', 'acc1.leeukopf@gmail.com'].map((to) => sendAmbassadorEmail({ to, subject: factorySubject, html: factoryHtml })))
+    } catch (_) {}
   }
   const acknowledgeFactory = async (row) => {
     const value = `${getAdminDisplayLabel()} on ${fmtDate(new Date().toISOString())}`
