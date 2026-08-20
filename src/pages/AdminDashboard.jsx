@@ -5881,57 +5881,57 @@ export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
           </button>
         </div>
 
-        <div className="mt-5 flex gap-2 border-t border-slate-100 pt-4">
+        <div className="mt-5 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4 sm:flex sm:flex-wrap">
           <button
             onClick={() => setTab('registrations')}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${tab === 'registrations' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            className={`w-full rounded-full px-3 py-2 text-center text-[11px] font-semibold leading-tight transition sm:w-auto sm:px-4 sm:py-1.5 sm:text-sm ${tab === 'registrations' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
             Registrations
           </button>
           <button
             onClick={() => setTab('orders')}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${tab === 'orders' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            className={`w-full rounded-full px-3 py-2 text-center text-[11px] font-semibold leading-tight transition sm:w-auto sm:px-4 sm:py-1.5 sm:text-sm ${tab === 'orders' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
             Orders
           </button>
           <button
             onClick={() => setTab('search')}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${tab === 'search' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            className={`w-full rounded-full px-3 py-2 text-center text-[11px] font-semibold leading-tight transition sm:w-auto sm:px-4 sm:py-1.5 sm:text-sm ${tab === 'search' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
             Search
           </button>
           <button
             onClick={() => setTab('admins')}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${tab === 'admins' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            className={`w-full rounded-full px-3 py-2 text-center text-[11px] font-semibold leading-tight transition sm:w-auto sm:px-4 sm:py-1.5 sm:text-sm ${tab === 'admins' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
             Admins
           </button>
           <button
             onClick={() => setTab('pricing')}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${tab === 'pricing' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            className={`w-full rounded-full px-3 py-2 text-center text-[11px] font-semibold leading-tight transition sm:w-auto sm:px-4 sm:py-1.5 sm:text-sm ${tab === 'pricing' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
             Tier Pricing
           </button>
           <button
             onClick={() => setTab('ambassadors')}
-            className={`relative rounded-full px-4 py-1.5 text-sm font-semibold transition ${tab === 'ambassadors' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            className={`relative w-full rounded-full px-3 py-2 text-center text-[11px] font-semibold leading-tight transition sm:w-auto sm:px-4 sm:py-1.5 sm:text-sm ${tab === 'ambassadors' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
             Ambassadors
             {ambassadorPending > 0 && (
-              <span className="ml-1.5 inline-flex min-w-[18px] items-center justify-center rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+              <span className="ml-1.5 inline-flex min-w-[18px] items-center justify-center rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-[10px] font-bold text-white align-middle">
                 {ambassadorPending}
               </span>
             )}
           </button>
           <button
             onClick={() => setTab('guestbook')}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${tab === 'guestbook' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            className={`w-full rounded-full px-3 py-2 text-center text-[11px] font-semibold leading-tight transition sm:w-auto sm:px-4 sm:py-1.5 sm:text-sm ${tab === 'guestbook' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
             Guestbook
           </button>
           <button
             onClick={() => setTab('draft-carts')}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${tab === 'draft-carts' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            className={`w-full rounded-full px-3 py-2 text-center text-[11px] font-semibold leading-tight transition sm:w-auto sm:px-4 sm:py-1.5 sm:text-sm ${tab === 'draft-carts' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
             Draft Carts
           </button>
