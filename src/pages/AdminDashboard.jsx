@@ -5325,7 +5325,7 @@ const deleteApplication = async (row) => {
 
                 {isOpen && (
                 <div className="border-t border-slate-200 p-4">
-                <div className="flex items-start justify-between gap-3">
+                <div className="space-y-4">
                   <div className="min-w-0">
                     <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-600">
                       <a href={`https://instagram.com/${row.instagram}`} target="_blank" rel="noreferrer" className="font-medium text-fuchsia-700 hover:underline">@{row.instagram}</a>
@@ -5363,8 +5363,8 @@ const deleteApplication = async (row) => {
                         : <span className="text-rose-500">⚠ No agreement on record</span>}
                     </p>
                   </div>
-                  <div className="flex shrink-0 flex-col items-end gap-1.5">
-                    <div className="flex gap-1.5">
+                  <div className="border-t border-slate-200 pt-3">
+                    <div className="flex flex-wrap gap-1.5">
                       <button
                         onClick={() => openMessage(row)}
                         disabled={saving === row.id}
@@ -5450,7 +5450,7 @@ const deleteApplication = async (row) => {
                       )}
                     </div>
                     {es && (
-                      <p className={`text-[11px] ${es.state === 'error' ? 'text-rose-600' : es.state === 'sent' ? 'text-emerald-600' : 'text-slate-400'}`}>
+                      <p className={`mt-2 text-[11px] ${es.state === 'error' ? 'text-rose-600' : es.state === 'sent' ? 'text-emerald-600' : 'text-slate-400'}`}>
                         {es.state === 'sending' ? 'Sending email…' : es.message}
                       </p>
                     )}
