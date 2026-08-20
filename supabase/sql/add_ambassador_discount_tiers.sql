@@ -25,6 +25,10 @@ AS $$
 DECLARE
   v_row public.ambassador_applications%rowtype;
   v_code text;
+  v_seed bytea;
+  v_alphabet text := '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
+  v_suffix text;
+  i integer;
 BEGIN
   SELECT *
     INTO v_row
@@ -55,6 +59,30 @@ BEGIN
   IF v_code IS NULL THEN
     v_code := public.generate_ambassador_discount_code(v_row.full_name, v_row.id);
   END IF;
+
+  LOOP
+    EXIT WHEN NOT EXISTS (
+      SELECT 1 FROM public.ambassador_codes c WHERE upper(c.code) = upper(v_code)
+    )
+    AND NOT EXISTS (
+      SELECT 1
+      FROM public.ambassador_applications a
+      WHERE a.id <> p_application_id
+        AND upper(coalesce(a.discount_code, '')) = upper(v_code)
+    );
+
+    v_seed := decode(md5(
+      random()::text ||
+      clock_timestamp()::text ||
+      coalesce(v_row.id::text, '') ||
+      coalesce(v_row.full_name, '')
+    ), 'hex');
+    v_suffix := '';
+    FOR i IN 0..7 LOOP
+      v_suffix := v_suffix || substr(v_alphabet, (get_byte(v_seed, i) % 32) + 1, 1);
+    END LOOP;
+    v_code := 'GIUP-' || substr(v_suffix, 1, 4) || '-' || substr(v_suffix, 5, 4);
+  END LOOP;
 
   IF NOT EXISTS (
     SELECT 1 FROM public.ambassador_codes c WHERE upper(c.code) = upper(v_code)

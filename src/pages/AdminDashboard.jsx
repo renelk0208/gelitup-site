@@ -5101,6 +5101,16 @@ const deleteApplication = async (row) => {
                           {contractAlreadySent ? '📄 Contract sent' : '📄 Send contract'}
                         </button>
                       )}
+                      {isApproved && (
+                        <button
+                          type="button"
+                          onClick={() => exportFactoryPrepPdfForRow(row)}
+                          disabled={factoryPdfBusy}
+                          className="rounded-lg border border-fuchsia-300 bg-white px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-60"
+                        >
+                          {factoryPdfBusy ? 'Preparing sheet…' : '↓ Print Factory Sheet'}
+                        </button>
+                      )}
                       {isApproved && (factoryAckValue ? (
                         <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">🏭 Factory acknowledged</span>
                       ) : (
@@ -5271,16 +5281,6 @@ const deleteApplication = async (row) => {
                       </div>
                       {selectedPack ? (
                         <div className="mt-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50/60 px-2.5 py-2">
-                          <div className="mb-2">
-                            <button
-                              type="button"
-                              onClick={() => exportFactoryPrepPdfForRow(row)}
-                              disabled={factoryPdfBusy || !isApproved}
-                              className="rounded-lg border border-fuchsia-300 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-60"
-                            >
-                              {factoryPdfBusy ? 'Preparing sheet…' : '↓ Print Factory Sheet'}
-                            </button>
-                          </div>
                           <p className="text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">{selectedPack.title} contents</p>
                           {selectedPack.items.length > 0 ? (
                             <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-700">

@@ -1,14 +1,8 @@
--- Auto-create ambassador discount codes when an application is approved.
--- Also stores the generated code on the application row so admins can see it.
+-- Fix approval failures caused by duplicate ambassador discount codes.
+-- This replaces the approval RPC so generated codes are unique across both:
+--   1) public.ambassador_codes
+--   2) public.ambassador_applications.discount_code
 -- Safe to run multiple times.
-
-alter table public.ambassador_applications
-  add column if not exists discount_code text,
-  add column if not exists discount_code_created_at timestamptz;
-
-create unique index if not exists idx_ambassador_applications_discount_code
-  on public.ambassador_applications (upper(discount_code))
-  where discount_code is not null;
 
 create or replace function public.generate_ambassador_discount_code(
   p_full_name text,
@@ -85,7 +79,6 @@ begin
     raise exception 'Ambassador application not found';
   end if;
 
-  -- Pre-read reviewed_at into a variable to avoid ambiguity with RETURNS TABLE column
   v_reviewed_at := v_row.reviewed_at;
 
   v_code := nullif(trim(coalesce(v_row.discount_code, '')), '');
@@ -110,6 +103,20 @@ begin
   if v_code is null then
     v_code := public.generate_ambassador_discount_code(v_row.full_name, v_row.id);
   end if;
+
+  while exists (
+    select 1
+    from public.ambassador_codes c
+    where upper(c.code) = upper(v_code)
+  )
+  or exists (
+    select 1
+    from public.ambassador_applications a
+    where a.id <> p_application_id
+      and upper(coalesce(a.discount_code, '')) = upper(v_code)
+  ) loop
+    v_code := public.generate_ambassador_discount_code(v_row.full_name, v_row.id);
+  end loop;
 
   if not exists (
     select 1
@@ -142,7 +149,6 @@ begin
      where upper(c.code) = upper(v_code);
   end if;
 
-  -- All SET values use v_ variables to avoid ambiguity with RETURNS TABLE column names
   update public.ambassador_applications
      set status = 'approved',
          reviewed_at = coalesce(v_reviewed_at, now()),
@@ -159,31 +165,3 @@ end;
 $$;
 
 grant execute on function public.approve_ambassador_application(bigint) to authenticated;
-
-do $$
-declare
-  r record;
-begin
-  -- First, sync already-approved applications to previously allocated codes.
-  update public.ambassador_applications a
-     set discount_code = c.code,
-         discount_code_created_at = coalesce(a.discount_code_created_at, now())
-    from public.ambassador_codes c
-   where a.status = 'approved'
-     and a.discount_code is null
-     and (
-       lower(coalesce(c.ambassador_email, '')) = lower(coalesce(a.email, ''))
-       or lower(coalesce(c.ambassador_name, '')) = lower(coalesce(a.full_name, ''))
-     );
-
-  -- Only generate/create when there is still no matched existing code.
-  for r in
-    select id
-    from public.ambassador_applications
-    where status = 'approved'
-      and discount_code is null
-  loop
-    perform public.approve_ambassador_application(r.id);
-  end loop;
-end;
-$$;
