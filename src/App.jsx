@@ -4754,6 +4754,50 @@ function FullCataloguePage() {
     return total
   }, [quickCart, lookupCataloguePrice])
 
+  // Meta Pixel: fire AddToCart when total quickCart units increase (not on decrease/removal).
+  const prevQuickCartRef = useRef(quickCart)
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.fbq !== 'function') {
+      prevQuickCartRef.current = quickCart
+      return
+    }
+    const prev = prevQuickCartRef.current || {}
+    for (const [key, qty] of Object.entries(quickCart)) {
+      const prevQty = Number(prev[key] || 0)
+      const nextQty = Number(qty || 0)
+      if (nextQty > prevQty) {
+        const delta = nextQty - prevQty
+        let value
+        if (!key.startsWith('KIT::')) {
+          const [name, code] = key.split('::')
+          const price = lookupCataloguePrice(name, code)
+          if (price != null) value = Number(price) * delta
+        }
+        const payload = { content_type: 'product', content_name: key.split('::')[0] }
+        if (value != null) {
+          payload.value = value
+          payload.currency = 'EUR'
+        }
+        window.fbq('track', 'AddToCart', payload)
+      }
+    }
+    prevQuickCartRef.current = quickCart
+  }, [quickCart, lookupCataloguePrice])
+
+  // Meta Pixel: fire ViewContent when the active category actually changes (approximates viewing a product group).
+  const lastViewContentCategoryRef = useRef('')
+  useEffect(() => {
+    if (!activeCategory) return
+    if (lastViewContentCategoryRef.current === activeCategory) return
+    lastViewContentCategoryRef.current = activeCategory
+    if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
+      window.fbq('track', 'ViewContent', {
+        content_type: 'product_group',
+        content_category: activeCategory,
+      })
+    }
+  }, [activeCategory])
+
   const quickProgress = quickCartUnits > 0 ? 100 : 0
 
   const getTileVariant = useCallback((index) => {
@@ -10182,14 +10226,14 @@ function CheckoutPage() {
       // 8. Fire GA4/Google Ads purchase conversion once per submitted order.
       const purchaseEventId = String(insertedOrder?.id || orderRef || '').trim()
       const purchaseValue = Number(grandTotal.toFixed(2))
-      if (purchaseEventId && window.gtag) {
+      if (purchaseEventId) {
         const purchaseGuardKey = `gelitup.purchase.${purchaseEventId}`
         let shouldTrackPurchase = true
         try {
           if (sessionStorage.getItem(purchaseGuardKey)) shouldTrackPurchase = false
           else sessionStorage.setItem(purchaseGuardKey, '1')
         } catch {}
-        if (shouldTrackPurchase) {
+        if (shouldTrackPurchase && window.gtag) {
           window.gtag('event', 'purchase', {
             transaction_id: purchaseEventId,
             currency: 'EUR',
@@ -10206,6 +10250,14 @@ function CheckoutPage() {
             transaction_id: purchaseEventId,
             value: purchaseValue,
             currency: 'EUR',
+          })
+        }
+        if (shouldTrackPurchase && typeof window.fbq === 'function') {
+          window.fbq('track', 'Purchase', {
+            value: purchaseValue,
+            currency: 'EUR',
+            content_type: 'product',
+            content_ids: cartEntries.map((line) => String(line.code || '').trim()).filter(Boolean),
           })
         }
       }
