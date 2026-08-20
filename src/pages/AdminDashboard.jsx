@@ -311,7 +311,6 @@ function RegistrationsPanel({ onPreviewDistributor }) {
   const [saving, setSaving] = useState(null)
   const [emailStatus, setEmailStatus] = useState({}) // { [id]: { state: 'sending'|'sent'|'error', message: '' } }
   const [currentAdminEmail, setCurrentAdminEmail] = useState('')
-  const reminderSweepStartedRef = useRef(false)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -336,12 +335,6 @@ function RegistrationsPanel({ onPreviewDistributor }) {
   }, [filter])
 
   useEffect(() => { load() }, [load])
-
-  useEffect(() => {
-    if (reminderSweepStartedRef.current) return
-    reminderSweepStartedRef.current = true
-    void sweepAmbassadorPasswordReminders()
-  }, [])
 
   const updateStatus = async (row, status) => {
     const current = String(row?.status || '').toLowerCase()
@@ -4253,6 +4246,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   const [sectionOpenState, setSectionOpenState] = useState({})
   const [shipmentEntryOpen, setShipmentEntryOpen] = useState({})
   const [factoryPdfBusy, setFactoryPdfBusy] = useState(false)
+  const reminderSweepStartedRef = useRef(false)
   const [shipmentEmailLock, setShipmentEmailLock] = useState(() => {
     try {
       const parsed = JSON.parse(localStorage.getItem(SHIPMENT_EMAIL_LOCK_STORAGE_KEY) || '{}')
@@ -4440,6 +4434,12 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   }, [filter])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    if (reminderSweepStartedRef.current) return
+    reminderSweepStartedRef.current = true
+    void sweepAmbassadorPasswordReminders()
+  }, [])
 
   const patchRow = (id, patch) => setRows(prev => prev.map(r => r.id === id ? { ...r, ...patch } : r))
   const setEmail = (id, state, message) => setEmailStatus(prev => ({ ...prev, [id]: { state, message } }))
