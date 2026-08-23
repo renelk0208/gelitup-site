@@ -32,13 +32,34 @@ export default function AmbassadorAgreementPage() {
       <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-700 sm:p-6">
         <div className="space-y-7">
           {AGREEMENT_SECTIONS.map((section) => (
-            <div key={section.heading}>
-              <h2 className="text-base font-bold text-slate-900 sm:text-lg">{section.heading}</h2>
+            <div
+              key={section.heading}
+              className={
+                section.strict
+                  ? 'rounded-xl border-2 border-red-500 bg-red-50 p-4 sm:p-5'
+                  : undefined
+              }
+            >
+              <h2
+                className={
+                  section.strict
+                    ? 'text-base font-black uppercase tracking-wide text-red-700 underline decoration-2 underline-offset-4 sm:text-lg'
+                    : 'text-base font-bold text-slate-900 sm:text-lg'
+                }
+              >
+                {section.strict && <span aria-hidden="true">⚠ </span>}
+                {section.heading}
+              </h2>
               <ul className="mt-3 space-y-2.5">
                 {section.points.map((point, i) => (
                   <li key={i} className="flex gap-3">
-                    <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#D43790]" />
-                    <span>{point}</span>
+                    <span
+                      aria-hidden="true"
+                      className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${section.strict ? 'bg-red-600' : 'bg-[#D43790]'}`}
+                    />
+                    <span className={section.strict ? 'font-bold text-red-700 underline decoration-1 underline-offset-2' : undefined}>
+                      {point}
+                    </span>
                   </li>
                 ))}
               </ul>

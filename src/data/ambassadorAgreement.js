@@ -3,7 +3,7 @@
 // /ambassador-agreement page. Bump AGREEMENT_VERSION whenever the terms change
 // so stored consents stay traceable to the exact wording that was agreed.
 
-export const AGREEMENT_VERSION = 'v4-2026-08'
+export const AGREEMENT_VERSION = 'v5-2026-08'
 
 // Minimum content commitment. Change this number to adjust the requirement
 // everywhere it appears (summary, full terms, and helper copy).
@@ -22,9 +22,10 @@ export const FOLLOWER_DISCOUNT_PCT = 20
 export const AGREEMENT_SUMMARY = [
   `Post at least ${POST_MIN_PER_MONTH} pieces of your own content each month using GEL.IT.UP products, including at least ${VIDEO_MIN_PER_MONTH} videos/reels across Instagram and TikTok (if you have a TikTok account).`,
   'Every post must include #gelitup and mention @gelitupinternational on Instagram or @gelitupofficial on TikTok.',
-  'Disclose the partnership where advertising rules require it (e.g. #ad / “gifted”).',
+  'Disclose the partnership where advertising rules require it (e.g. #ad / "gifted").',
   `Send the content you create to our official WhatsApp/Viber number (${CONTENT_SUBMISSION_NUMBER}) so we can save it to our library.`,
   'You are welcome to add GEL.IT.UP as a collaborator on your Instagram and TikTok posts so they are shared to our profiles too.',
+  'STRICT — NO EXCEPTIONS: no other nail brand’s products may appear in the same photo, video, frame or post as GEL.IT.UP. Other brands are fine in separate, unrelated content — never together with GEL.IT.UP in the same piece of content.',
   `Your personal code gives genuine nail-technician followers a flat ${FOLLOWER_DISCOUNT_PCT}% off.`,
   'You may share your code publicly, but any link used with it must lead only to www.gelitup.com — never to coupon, deal or reseller sites.',
   'You will receive a GEL.IT.UP Portal B2B account automatically (gelitup.com/portal/login), with activation sent by email.',
@@ -39,6 +40,11 @@ export const AGREEMENT_SUMMARY = [
 
 // Full agreement, section by section. Kept short, warm and plain — a friendly
 // one-page working agreement rather than dense legalese.
+//
+// A section may set `strict: true` to mark it as a firm, non-negotiable rule.
+// Renderers (the /ambassador-agreement page and the contract PDF) style
+// `strict` sections in bold + underline + a red highlight so they visually
+// stand out as serious, no-exceptions terms.
 export const AGREEMENT_SECTIONS = [
   {
     heading: 'Welcome',
@@ -63,7 +69,18 @@ export const AGREEMENT_SECTIONS = [
       'Every post must include the hashtag #gelitup, and mention @gelitupinternational on Instagram or @gelitupofficial on TikTok.',
       `Send the content you create to our WhatsApp/Viber (${CONTENT_SUBMISSION_NUMBER}) so we can save and feature it.`,
       'You are also welcome to add GEL.IT.UP as a collaborator on your Instagram and TikTok posts, so they are shared directly to our profiles too.',
-      'Where the rules ask (e.g. because a product was gifted), simply mark it as a partnership — #ad or “gifted”.',
+      'Where the rules ask (e.g. because a product was gifted), simply mark it as a partnership — #ad or "gifted".',
+    ],
+  },
+  {
+    heading: 'NO OTHER BRANDS IN YOUR CONTENT — STRICT, NO EXCEPTIONS',
+    strict: true,
+    points: [
+      'This rule is absolute and non-negotiable: no product from any other nail brand may appear in the same photo, video, frame, reel or post as any GEL.IT.UP product. Not in the foreground, not in the background, not visible on a table or shelf in shot — no other brand may be present anywhere in the same piece of content.',
+      'This is because your followers see these posts and ask what products are being used — and we cannot have another company named, shown or implied alongside our brand. Every post you make featuring GEL.IT.UP must feature GEL.IT.UP products only.',
+      'You are free to use other brands’ products in your own separate content — just never together with, alongside, or in the same post as GEL.IT.UP. It is one or the other, never both in the same content.',
+      'Any content that breaks this rule will not be approved and will not be posted or featured by us under any circumstances. Content mixing brands is rejected outright, with no exceptions and no case-by-case review.',
+      'Repeated or knowing breaches of this rule are treated as a serious violation of this agreement and may result in immediate removal from the Ambassador Programme.',
     ],
   },
   {

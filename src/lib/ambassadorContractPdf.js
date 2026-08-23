@@ -17,14 +17,15 @@ import { AGREEMENT_I18N } from '../data/ambassadorAgreementI18n.js'
 // ── Company letterhead details — edit freely. ──
 export const CONTRACT_COMPANY = {
   brand: 'Thermitek Ltd — GEL.IT.UP by GIUP®',
-  addressLine: '8 Racho Dimchev, Sofia, Bulgaria, 2700   ·   VAT BG202102027',
-  contactLine: 'info@gelitup.com   ·   gelitup.com',
+  addressLine: '8 Racho Dimchev, Sofia, Bulgaria, 2700 · VAT BG202102027',
+  contactLine: 'info@gelitup.com · gelitup.com',
   footer: 'Thermitek Ltd — GEL.IT.UP by GIUP® · VAT BG202102027 · Governed by the laws of Bulgaria.',
 }
 
 const PINK = [212, 55, 144]
 const INK = [26, 26, 26]
 const MUTED = [110, 110, 110]
+const STRICT_RED = [176, 26, 26]
 const LOGO_RATIO = 1881 / 2481 // height / width of public/logo.png
 
 // ── "About Us" creator brief — sent with the shipment/tracking email. Edit freely. ──
@@ -185,7 +186,7 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
       doc.setFontSize(9)
       doc.setTextColor(60, 60, 60)
       section.points.forEach((point) => {
-        const lines = doc.splitTextToSize(`•  ${point}`, contentW - 6)
+        const lines = doc.splitTextToSize(`• ${point}`, contentW - 6)
         ensureSpace(lines.length * 11 + 4)
         doc.text(lines, margin + 4, y)
         y += lines.length * 11 + 3
@@ -268,20 +269,44 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
   y += boxH + 14
 
   // ── Agreement sections ──
+  // Sections flagged `strict: true` (e.g. "no other brands in your content") are
+  // rendered bold, underlined and in red with a ⚠ marker, so they visually stand
+  // out from the rest of the contract as firm, no-exceptions terms.
   AGREEMENT_SECTIONS.forEach((section) => {
+    const strict = !!section.strict
     ensureSpace(28)
     doc.setFont(FONT, 'bold')
-    doc.setFontSize(10.5)
-    doc.setTextColor(...INK)
-    doc.text(section.heading, margin, y)
-    y += 13
-    doc.setFont(FONT, 'normal')
+    doc.setFontSize(strict ? 11.5 : 10.5)
+    doc.setTextColor(...(strict ? STRICT_RED : INK))
+    const headingText = strict ? `⚠ ${section.heading}` : section.heading
+    const headingLines = doc.splitTextToSize(headingText, contentW)
+    doc.text(headingLines, margin, y)
+    if (strict) {
+      doc.setDrawColor(...STRICT_RED)
+      doc.setLineWidth(1)
+      headingLines.forEach((line, li) => {
+        const lineW = doc.getTextWidth(line)
+        const lineY = y + li * 13 + 3
+        doc.line(margin, lineY, margin + lineW, lineY)
+      })
+    }
+    y += headingLines.length * 13
+    doc.setFont(FONT, strict ? 'bold' : 'normal')
     doc.setFontSize(9)
-    doc.setTextColor(60, 60, 60)
+    doc.setTextColor(...(strict ? STRICT_RED : [60, 60, 60]))
     section.points.forEach((point) => {
-      const lines = doc.splitTextToSize(`•  ${point}`, contentW - 6)
+      const lines = doc.splitTextToSize(`• ${point}`, contentW - 6)
       ensureSpace(lines.length * 11 + 4)
       doc.text(lines, margin + 4, y)
+      if (strict) {
+        doc.setDrawColor(...STRICT_RED)
+        doc.setLineWidth(0.6)
+        lines.forEach((line, li) => {
+          const lineW = doc.getTextWidth(line)
+          const lineY = y + li * 11 + 1.5
+          doc.line(margin + 4, lineY, margin + 4 + lineW, lineY)
+        })
+      }
       y += lines.length * 11 + 3
     })
     y += 6
@@ -513,11 +538,11 @@ export async function buildAmbassadorWelcomeLetterPdf(applicant = {}) {
 
   // Unboxing steps
   const steps = [
-    ['1. Film before you open it.', '  Start recording before you cut the tape — the reveal is the best part, and your audience will want to see it too.'],
-    ['2. Show every piece.', '  Take a moment to show off each shade and product clearly — good lighting works best.'],
-    ['3. Share your first impressions.', '  Tell your audience what you\'re most excited to try first.'],
-    ['4. Use your code' + (discountCode ? ` ${discountCode}.` : '.'), '  Your personal discount code is included in this box — share it with your followers for 20% off. Please note that the discount code can only be used on www.gelitup.com.'],
-    ['5. Post it.', '  Share your unboxing on Instagram or TikTok.'],
+    ['1. Film before you open it.', ' Start recording before you cut the tape — the reveal is the best part, and your audience will want to see it too.'],
+    ['2. Show every piece.', ' Take a moment to show off each shade and product clearly — good lighting works best.'],
+    ['3. Share your first impressions.', ' Tell your audience what you\'re most excited to try first.'],
+    ['4. Use your code' + (discountCode ? ` ${discountCode}.` : '.'), ' Your personal discount code is included in this box — share it with your followers for 20% off. Please note that the discount code can only be used on www.gelitup.com.'],
+    ['5. Post it.', ' Share your unboxing on Instagram or TikTok.'],
   ]
   steps.forEach(([label, rest]) => boldPara(label, rest, 10, 10))
 
@@ -645,7 +670,7 @@ export async function buildAmbassadorFactoryPrepPdf({ ambassadors = [], generate
       doc.setFont(FONT, 'normal')
       doc.setFontSize(9)
       doc.setTextColor(...MUTED)
-      const subtitle = doc.splitTextToSize(subtitleBits.join('  •  '), contentW - 20)
+      const subtitle = doc.splitTextToSize(subtitleBits.join(' • '), contentW - 20)
       doc.text(subtitle, margin + 10, y)
       y += subtitle.length * 11 + 4
     }
