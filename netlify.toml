@@ -23,6 +23,9 @@
 [functions]
   node_bundler = "esbuild"
 
+[functions."send-ambassador-agreement-update"]
+  schedule = "0 7 23 8 *"
+
 [[redirects]]
   from = "https://gelitup.netlify.app/*"
   to = "https://gelitup.com/:splat"
