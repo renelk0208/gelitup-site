@@ -5005,7 +5005,62 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   // appended into admin_comment; we now keep them out of the editable notes and
   // surface them (plus the new message_log column) in the Messages section.
   const isAmbassadorMsgLine = (line) => String(line).includes('📧')
-  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE):[^\]]+\]$/i.test(String(line).trim())
+  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|PACK_NOTE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE):[^\]]+\]$/i.test(String(line).trim())
+  const packNoteLines = (row) => String(row.admin_comment || '').split('\n').filter((line) => /^\[PACK_NOTE:[^\]]+\]$/i.test(String(line).trim()))
+  const parsePackNote = (line) => {
+    const encoded = String(line || '').trim().match(/^\[PACK_NOTE:([^\]]+)\]$/i)?.[1]
+    if (!encoded) return null
+    try {
+      const parsed = JSON.parse(decodeURIComponent(encoded))
+      return parsed && typeof parsed.text === 'string' ? parsed : null
+    } catch (_) {
+      return null
+    }
+  }
+  const packNoteEntries = (row) => packNoteLines(row).map(parsePackNote).filter(Boolean)
+  const createPackNoteLine = ({ stamp, author, text }) => `[PACK_NOTE:${encodeURIComponent(JSON.stringify({ stamp, author, text }))}]`
+  const savePackNotes = async (row, lines) => {
+    const preserved = String(row.admin_comment || '').split('\n').filter((line) => line.trim() && !/^\[PACK_NOTE:[^\]]+\]$/i.test(line.trim()))
+    const newLog = [...preserved, ...lines].join('\n') || null
+    setSaving(row.id)
+    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: newLog }).eq('id', row.id)
+    if (err) { setSaving(null); alert(err.message); return false }
+    patchRow(row.id, { admin_comment: newLog })
+    setSaving(null)
+    return true
+  }
+  const addPackNote = async (row) => {
+    const text = String(packAdditionDraft[row.id] || '').trim()
+    if (!text) return
+    const lines = packNoteLines(row)
+    lines.push(createPackNoteLine({
+      stamp: fmtDate(new Date().toISOString()),
+      author: getAdminDisplayLabel(),
+      text,
+    }))
+    if (await savePackNotes(row, lines)) {
+      setPackAdditionDraft((prev) => ({ ...prev, [row.id]: '' }))
+    }
+  }
+  const editPackNote = async (row, idx) => {
+    const lines = packNoteLines(row)
+    const original = parsePackNote(lines[idx])
+    if (!original) return
+    const edited = window.prompt('Edit extra pack item:', original.text)
+    if (edited === null) return
+    if (!edited.trim()) {
+      lines.splice(idx, 1)
+    } else {
+      lines[idx] = createPackNoteLine({ ...original, text: edited.trim() })
+    }
+    await savePackNotes(row, lines)
+  }
+  const deletePackNote = async (row, idx) => {
+    if (!window.confirm('Delete this extra pack item?')) return
+    const lines = packNoteLines(row)
+    lines.splice(idx, 1)
+    await savePackNotes(row, lines)
+  }
 
   const noteLines = (row) => String(row.admin_comment || '').split('\n').filter((l) => l.trim() && !isAmbassadorMsgLine(l) && !isMetaLine(l))
   const noteEntries = (row) => noteLines(row).map((line) => parseNoteLine(line))
@@ -5714,6 +5769,33 @@ const deleteApplication = async (row) => {
                           )}
                           <div className="mt-2">
                             <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Extra items to add</p>
+                            {packNoteEntries(row).length > 0 && (
+                              <div className="mt-1 space-y-1">
+                                {packNoteEntries(row).map((entry, idx) => {
+                                  const swatch = authorSwatch(entry.author)
+                                  return (
+                                    <div key={idx} className="flex items-start justify-between gap-2 rounded border border-fuchsia-100 bg-white px-2 py-1.5 text-[11px] text-slate-700">
+                                      <span className="min-w-0 whitespace-pre-line">
+                                        <span className="mb-0.5 flex flex-wrap items-center gap-1.5">
+                                          <span className="text-[10px] text-slate-400">{entry.stamp || '—'}</span>
+                                          <span
+                                            className="rounded border px-1.5 py-0.5 text-[10px] font-semibold"
+                                            style={{ backgroundColor: swatch.bg, color: swatch.text, borderColor: swatch.border }}
+                                          >
+                                            {entry.author || 'admin not recorded'}
+                                          </span>
+                                        </span>
+                                        <span>{entry.text}</span>
+                                      </span>
+                                      <span className="flex shrink-0 gap-1.5">
+                                        <button type="button" title="Edit" onClick={() => editPackNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-slate-700 disabled:opacity-50">✎</button>
+                                        <button type="button" title="Delete" onClick={() => deletePackNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-rose-600 disabled:opacity-50">🗑</button>
+                                      </span>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )}
                             <textarea
                               value={packAdditionDraft[row.id] || ''}
                               onChange={(e) => setPackAdditionDraft((prev) => ({ ...prev, [row.id]: e.target.value }))}
@@ -5721,6 +5803,14 @@ const deleteApplication = async (row) => {
                               rows={2}
                               className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700"
                             />
+                            <button
+                              type="button"
+                              onClick={() => addPackNote(row)}
+                              disabled={saving === row.id || !String(packAdditionDraft[row.id] || '').trim()}
+                              className="mt-1.5 rounded-lg border border-fuchsia-300 bg-white px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-60"
+                            >
+                              Add item
+                            </button>
                           </div>
                         </div>
                       ) : (
