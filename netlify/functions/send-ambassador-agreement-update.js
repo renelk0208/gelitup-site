@@ -8,6 +8,7 @@ const AMBASSADOR_TABLE = process.env.AMBASSADOR_TABLE || 'ambassador_application
 const EMAIL_WEBHOOK_URL = process.env.VITE_EMAIL_WEBHOOK_URL || process.env.EMAIL_WEBHOOK_URL || ''
 const SUPABASE_URL = process.env.SUPABASE_URL || ''
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE || ''
+const SEND_DATE_UTC = '2026-08-23'
 const MESSAGE_MARKER = '[AMBASSADOR_AGREEMENT_V5_UPDATE_SENT]'
 const SUBJECT = 'A small but important update to the Ambassador Agreement'
 
@@ -83,6 +84,13 @@ async function appendSendLog(supabase, row) {
 }
 
 export async function handler() {
+  if (new Date().toISOString().slice(0, 10) !== SEND_DATE_UTC) {
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ ok: true, skipped: true, reason: 'outside_one_time_send_date' }),
+    }
+  }
+
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     return {
       statusCode: 500,
