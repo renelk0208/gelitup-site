@@ -3,14 +3,14 @@
 // /ambassador-agreement page. Bump AGREEMENT_VERSION whenever the terms change
 // so stored consents stay traceable to the exact wording that was agreed.
 
-export const AGREEMENT_VERSION = 'v5-2026-08'
+export const AGREEMENT_VERSION = 'v6-2026-08'
 
 // Minimum content commitment. Change this number to adjust the requirement
 // everywhere it appears (summary, full terms, and helper copy).
-export const POST_MIN_PER_MONTH = 10
+export const POST_MIN_PER_MONTH = 5
 
 // Minimum videos/reels required each month.
-export const VIDEO_MIN_PER_MONTH = 4
+export const VIDEO_MIN_PER_MONTH = 2
 
 // Where ambassadors must send their content for our library.
 export const CONTENT_SUBMISSION_NUMBER = '+30 694 071 5234'
@@ -20,7 +20,7 @@ export const FOLLOWER_DISCOUNT_PCT = 20
 
 // Short bullets shown inside the form's scrollable agreement panel.
 export const AGREEMENT_SUMMARY = [
-  `Post at least ${POST_MIN_PER_MONTH} pieces of your own content each month using GEL.IT.UP products, including at least ${VIDEO_MIN_PER_MONTH} videos/reels across Instagram and TikTok (if you have a TikTok account).`,
+  `Post at least ${POST_MIN_PER_MONTH} pieces of your own content each month using GEL.IT.UP products, including at least ${VIDEO_MIN_PER_MONTH} videos/reels across Instagram and TikTok (if you have a TikTok account). This minimum reflects the amount of product provided in each PR package.`,
   'Every post must include #gelitup and mention @gelitupinternational on Instagram or @gelitupofficial on TikTok.',
   'Disclose the partnership where advertising rules require it (e.g. #ad / "gifted").',
   `Send the content you create to our official WhatsApp/Viber number (${CONTENT_SUBMISSION_NUMBER}) so we can save it to our library.`,
@@ -66,6 +66,7 @@ export const AGREEMENT_SECTIONS = [
     heading: 'What you do',
     points: [
       `Share at least ${POST_MIN_PER_MONTH} pieces of your own content each month using GEL.IT.UP products, including at least ${VIDEO_MIN_PER_MONTH} videos/reels across Instagram and TikTok (if you hold a TikTok account).`,
+      'This minimum is set considering the amount of product you receive in each PR package — the quantity provided is enough to support this level of content.',
       'Every post must include the hashtag #gelitup, and mention @gelitupinternational on Instagram or @gelitupofficial on TikTok.',
       `Send the content you create to our WhatsApp/Viber (${CONTENT_SUBMISSION_NUMBER}) so we can save and feature it.`,
       'You are also welcome to add GEL.IT.UP as a collaborator on your Instagram and TikTok posts, so they are shared directly to our profiles too.',
