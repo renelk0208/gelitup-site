@@ -2551,6 +2551,46 @@ function normalizeCatalogueToken(value = '') {
     .trim()
 }
 
+const CAT_EYE_COLLECTIONS = [
+  { value: 'DREAMY CAT EYE', label: 'Dreamy Cat Eye', slug: 'dreamy-cat-eye' },
+  { value: 'FAN', label: 'Fan Cat Eye', slug: 'fan-cat-eye' },
+  { value: 'GLASS CAT EYE', label: 'Glass Cat Eye', slug: 'glass-cat-eye' },
+  { value: 'NEON CAT EYE', label: 'Neon Cat Eye', slug: 'neon-cat-eye' },
+  { value: 'ROSE QUARTZ CAT EYE', label: 'Rose Quartz Cat Eye', slug: 'rose-quartz-cat-eye' },
+  { value: 'SAPPHIRE CAT EYE', label: 'Sapphire Cat Eye', slug: 'sapphire-cat-eye' },
+  { value: 'VELVET CAT EYE', label: 'Velvet Cat Eye', slug: 'velvet-cat-eye' },
+]
+
+function getCatEyeCollectionBySlug(slug = '') {
+  const normalizedSlug = String(slug || '').toLowerCase().trim()
+  return CAT_EYE_COLLECTIONS.find((collection) => collection.slug === normalizedSlug) || null
+}
+
+function resolveCatEyeCollection(rawCategoryName = '', imageUrl = '') {
+  const categoryToken = normalizeCatalogueToken(rawCategoryName)
+  if (categoryToken === 'FAN CAT EYE') return 'FAN'
+  const categoryMatch = CAT_EYE_COLLECTIONS.find((collection) => collection.value === categoryToken)
+  if (categoryMatch) return categoryMatch.value
+
+  const pathMatch = String(imageUrl || '').match(/\/COLORS\/CAT EYE\/([^/]+)\//i)
+  if (!pathMatch) return null
+  const pathToken = normalizeCatalogueToken(pathMatch[1])
+  return CAT_EYE_COLLECTIONS.find((collection) => collection.value === pathToken)?.value || null
+}
+
+function resolveSolidGelColorFamily(rawCategoryName = '', imageUrl = '', productName = '') {
+  const nestedPathMatch = String(imageUrl || '').match(/\/COLORS\/SOLID GEL POLISH\/([^/]+)\//i)
+  if (nestedPathMatch) return normalizeCatalogueToken(nestedPathMatch[1])
+
+  const flatPathMatch = String(imageUrl || '').match(/\/COLORS\/(FRENCH|NUDE|PASTEL|RONE)\//i)
+  if (flatPathMatch) return flatPathMatch[1].toUpperCase() === 'RONE' ? 'GIUP1' : flatPathMatch[1].toUpperCase()
+
+  const categoryToken = normalizeCatalogueToken(rawCategoryName)
+  if (categoryToken === 'RONE') return 'GIUP1'
+  if (COLOR_FAMILY_FILTERS.some((family) => family.key === categoryToken)) return categoryToken
+  return resolveColorFamilyKey(productName)
+}
+
 function findCatalogueItemByMatch(items = [], rawMatch = '', used = new Set()) {
   const match = normalizeCatalogueToken(rawMatch)
   if (!match) return null
@@ -2895,7 +2935,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
       // Standard: COLORS/CAT EYE/img.jpg ? subcategory='CAT EYE'
       // NUDE, FRENCH, PASTEL, RONE (GIUP1) belong under Solid Gel Polish
       const folderToken = (segments[segments.length - 2] || 'General').toUpperCase()
-      subcategory = ['NUDE', 'PASTEL', 'RONE'].includes(folderToken)
+      subcategory = ['FRENCH', 'NUDE', 'PASTEL', 'RONE'].includes(folderToken)
         ? 'SOLID GEL POLISH'
         : (segments[segments.length - 2] || 'General')
     } else if (segments.length > 2) {
@@ -3003,21 +3043,68 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
 
 const COLOR_FAMILY_FILTERS = [
   { key: 'ALL', label: 'All', swatchClass: 'bg-slate-300' },
-  { key: 'BLACK', label: 'Black', swatchClass: 'bg-black' },
-  { key: 'BLUE', label: 'Blue', swatchClass: 'bg-blue-500' },
-  { key: 'BROWN', label: 'Brown', swatchClass: 'bg-amber-700' },
-  { key: 'CORAL ORANGE', label: 'Coral Orange', swatchClass: 'bg-orange-400' },
-  { key: 'GIUP1', label: 'GIUP1', swatchClass: 'bg-fuchsia-200 border border-fuchsia-300' },
-  { key: 'GREEN', label: 'Green', swatchClass: 'bg-emerald-500' },
-  { key: 'GREY', label: 'Grey', swatchClass: 'bg-slate-500' },
-  { key: 'NEON', label: 'Neon', swatchClass: 'bg-lime-400' },
-  { key: 'NUDE', label: 'Nude', swatchClass: 'bg-amber-100 border border-amber-200' },
-  { key: 'PASTEL', label: 'Pastel', swatchClass: 'bg-sky-200 border border-sky-300' },
-  { key: 'PINK', label: 'Pink', swatchClass: 'bg-pink-400' },
-  { key: 'PURPLE', label: 'Purple', swatchClass: 'bg-violet-500' },
-  { key: 'RED', label: 'Red', swatchClass: 'bg-red-500' },
-  { key: 'WHITE', label: 'White', swatchClass: 'bg-white border border-slate-300' },
-  { key: 'YELLOW', label: 'Yellow', swatchClass: 'bg-yellow-300' },
+  { key: 'BLACK', label: 'Black', slug: 'black', swatchClass: 'bg-black' },
+  { key: 'BLUE', label: 'Blue', slug: 'blue', swatchClass: 'bg-blue-500' },
+  { key: 'BROWN', label: 'Brown', slug: 'brown', swatchClass: 'bg-amber-700' },
+  { key: 'CORAL ORANGE', label: 'Coral Orange', slug: 'coral-orange', swatchClass: 'bg-orange-400' },
+  { key: 'FRENCH', label: 'French', slug: 'french', swatchClass: 'bg-rose-100 border border-rose-200' },
+  { key: 'GIUP1', label: 'GIUP1', slug: 'giup1', swatchClass: 'bg-fuchsia-200 border border-fuchsia-300' },
+  { key: 'GREEN', label: 'Green', slug: 'green', swatchClass: 'bg-emerald-500' },
+  { key: 'GREY', label: 'Grey', slug: 'grey', swatchClass: 'bg-slate-500' },
+  { key: 'NEON', label: 'Neon', slug: 'neon', swatchClass: 'bg-lime-400' },
+  { key: 'NUDE', label: 'Nude', slug: 'nude', swatchClass: 'bg-amber-100 border border-amber-200' },
+  { key: 'PASTEL', label: 'Pastel', slug: 'pastel', swatchClass: 'bg-sky-200 border border-sky-300' },
+  { key: 'PINK', label: 'Pink', slug: 'pink', swatchClass: 'bg-pink-400' },
+  { key: 'PURPLE', label: 'Purple', slug: 'purple', swatchClass: 'bg-violet-500' },
+  { key: 'RED', label: 'Red', slug: 'red', swatchClass: 'bg-red-500' },
+  { key: 'WHITE', label: 'White', slug: 'white', swatchClass: 'bg-white border border-slate-300' },
+  { key: 'YELLOW', label: 'Yellow', slug: 'yellow', swatchClass: 'bg-yellow-300' },
+]
+
+function getColorFamilyBySlug(slug = '') {
+  const normalizedSlug = String(slug || '').toLowerCase().trim()
+  return COLOR_FAMILY_FILTERS.find((family) => family.slug === normalizedSlug) || null
+}
+
+const COLOR_CATEGORY_LINKS = [
+  {
+    category: 'CAT EYE',
+    label: 'Cat Eye',
+    slug: 'cat-eye',
+    children: [
+      { label: 'All Cat Eye', to: '/full-catalogue?subcategory=cat-eye' },
+      ...CAT_EYE_COLLECTIONS.map((collection) => ({
+        label: collection.label,
+        to: `/full-catalogue?subcategory=cat-eye&collection=${collection.slug}`,
+      })),
+    ],
+  },
+  { category: 'BY THE OCEAN', label: 'By the Ocean', slug: 'by-the-ocean' },
+  {
+    category: 'SOLID GEL POLISH',
+    label: 'Solid Gel Polish',
+    slug: 'solid-gel-polish',
+    children: [
+      { label: 'All Solid Gel Polish', to: '/full-catalogue?subcategory=solid-gel-polish' },
+      ...COLOR_FAMILY_FILTERS
+        .filter((family) => family.slug)
+        .map((family) => ({
+          label: family.label,
+          to: `/full-catalogue?subcategory=solid-gel-polish&family=${family.slug}`,
+        })),
+    ],
+  },
+  { category: 'GLASS EFFECT', label: 'Glass Effect', slug: 'glass-effect' },
+  { category: 'GLITTERS', label: 'Glitters', slug: 'glitters' },
+  { category: 'JELLY', label: 'Jelly', slug: 'jelly' },
+  { category: 'METALLIC COLLECTION', label: 'Metallic Collection', slug: 'metallic-collection' },
+  { category: 'NEW YORK', label: 'New York', slug: 'new-york' },
+  { category: 'PEARL', label: 'Pearl', slug: 'pearl' },
+  { category: 'PMA', label: 'PMA', slug: 'pma' },
+  { category: 'SHIMMER COLORS', label: 'Shimmer Colors', slug: 'shimmer-colors' },
+  { category: 'SNOWFLAKE', label: 'Snowflake', slug: 'snowflake' },
+  { category: 'SPIX & SPEX', label: 'Spix & Spex', slug: 'spix-spex' },
+  { category: 'TUTTI FRUTTI GLASS', label: 'Tutti Frutti Glass', slug: 'tutti-frutti-glass' },
 ]
 
 function resolveColorFamilyKey(name = '') {
@@ -4884,12 +4971,16 @@ function FullCataloguePage() {
     })
   }, [])
 
-  const openCatalogueCategory = useCallback((categoryName = '', subcategoryName = 'ALL', { keepSearch = false } = {}) => {
+  const openCatalogueCategory = useCallback((categoryName = '', subcategoryName = 'ALL', {
+    keepSearch = false,
+    catEyeCollection = 'ALL',
+    colorFamily = 'ALL',
+  } = {}) => {
     if (!categoryName) return
     setActiveCategory(categoryName)
     setActiveSubcategory(subcategoryName || 'ALL')
-    setActiveColorFamily('ALL')
-    setActiveCatEyeVariant('ALL')
+    setActiveColorFamily(colorFamily)
+    setActiveCatEyeVariant(catEyeCollection)
     if (!keepSearch) setSearchQuery('')
     // Expand the correct section so categoryDetail renders
     // Colours skips the grid — categoryDetail is rendered standalone below the banner
@@ -4916,32 +5007,21 @@ function FullCataloguePage() {
   useEffect(() => {
     const subSlug = (searchParams.get('subcategory') || '').toLowerCase().trim()
     if (!subSlug || isLoading) return
+    const requestedCatEyeCollection = getCatEyeCollectionBySlug(searchParams.get('collection'))?.value || 'ALL'
+    const requestedColorFamily = getColorFamilyBySlug(searchParams.get('family'))?.key || 'ALL'
     // Maps URL slug → [categoryName, subcategoryName] using exact folder names from product-images/
     const SUBSLUG_MAP = {
       // ── Gel Polish (COLORS) ──────────────────────────────────────────────────
-      'cat-eye':               ['COLORS', 'CAT EYE'],
+      ...Object.fromEntries(COLOR_CATEGORY_LINKS.map((item) => [item.slug, ['COLORS', item.category]])),
       'cateye':                ['COLORS', 'CAT EYE'],
       'shimmer':               ['COLORS', 'SHIMMER COLORS'],
-      'shimmer-colors':        ['COLORS', 'SHIMMER COLORS'],
       'glitter':               ['COLORS', 'GLITTERS'],
-      'glitters':              ['COLORS', 'GLITTERS'],
-      'jelly':                 ['COLORS', 'JELLY'],
       'metallic':              ['COLORS', 'METALLIC COLLECTION'],
-      'metallic-collection':   ['COLORS', 'METALLIC COLLECTION'],
-      'pearl':                 ['COLORS', 'PEARL'],
-      'glass-effect':          ['COLORS', 'GLASS EFFECT'],
       'glass':                 ['COLORS', 'GLASS EFFECT'],
       'tutti-frutti':          ['COLORS', 'TUTTI FRUTTI GLASS'],
-      'tutti-frutti-glass':    ['COLORS', 'TUTTI FRUTTI GLASS'],
       'spix':                  ['COLORS', 'SPIX & SPEX'],
       'spex':                  ['COLORS', 'SPIX & SPEX'],
-      'spix-spex':             ['COLORS', 'SPIX & SPEX'],
-      'new-york':              ['COLORS', 'NEW YORK'],
-      'snowflake':             ['COLORS', 'SNOWFLAKE'],
-      'pma':                   ['COLORS', 'PMA'],
-      'solid-gel-polish':      ['COLORS', 'SOLID GEL POLISH'],
       'solid':                 ['COLORS', 'SOLID GEL POLISH'],
-      'by-the-ocean':          ['COLORS', 'BY THE OCEAN'],
       // ── Builder Gel Systems ───────────────────────────────────────────────────
       '3in1':                  ['BUILDER GEL SYSTEMS', '3INI BUILDER'],
       '3-in-1':                ['BUILDER GEL SYSTEMS', '3INI BUILDER'],
@@ -4981,7 +5061,13 @@ function FullCataloguePage() {
       'spot-my-tops':          ['TOPS', 'Spot My Tops'],
     }
     const match = SUBSLUG_MAP[subSlug]
-    if (match) { openCatalogueCategory(match[0], match[1]); return }
+    if (match) {
+      openCatalogueCategory(match[0], match[1], {
+        catEyeCollection: match[1] === 'CAT EYE' ? requestedCatEyeCollection : 'ALL',
+        colorFamily: match[1] === 'SOLID GEL POLISH' ? requestedColorFamily : 'ALL',
+      })
+      return
+    }
     // Fallback: convert the slug back to a name and scan live sections
     const nameGuess = subSlug.replace(/-/g, ' ').toUpperCase()
     for (const section of sections) {
@@ -5399,7 +5485,16 @@ function FullCataloguePage() {
                     return (
                       <button
                         key={family.key}
-                        onClick={() => { setActiveColorFamily(family.key); scrollToCategoryDetail() }}
+                        onClick={() => {
+                          setActiveColorFamily(family.key)
+                          scrollToCategoryDetail()
+                          setSearchParams(
+                            family.slug
+                              ? { subcategory: 'solid-gel-polish', family: family.slug }
+                              : { subcategory: 'solid-gel-polish' },
+                            { replace: true },
+                          )
+                        }}
                         className={`inline-flex items-center gap-2 rounded-[12px] border px-2.5 py-1.5 text-xs transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-[#4A4A4A]/35 bg-white text-black/70 hover:border-fuchsia-500'}`}
                       >
                         <span className={`h-3 w-3 rounded-full ${family.swatchClass}`} />
@@ -5418,10 +5513,20 @@ function FullCataloguePage() {
                   {catEyeVariantFilters.map((variant) => {
                     const isActive = activeCatEyeVariant === variant
                     const label = variant === 'ALL' ? 'All Cat Eye' : toTitleCaseLabel(variant)
+                    const collection = CAT_EYE_COLLECTIONS.find((item) => item.value === normalizeCatalogueToken(variant))
                     return (
                       <button
                         key={variant}
-                        onClick={() => { setActiveCatEyeVariant(variant); scrollToCategoryDetail() }}
+                        onClick={() => {
+                          setActiveCatEyeVariant(variant)
+                          scrollToCategoryDetail()
+                          setSearchParams(
+                            collection
+                              ? { subcategory: 'cat-eye', collection: collection.slug }
+                              : { subcategory: 'cat-eye' },
+                            { replace: true },
+                          )
+                        }}
                         className={`rounded-[12px] border px-2.5 py-1.5 text-xs font-semibold transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-[#4A4A4A]/35 bg-white text-black/70 hover:border-fuchsia-500'}`}
                       >
                         {label}
@@ -7206,13 +7311,11 @@ const PRODUCT_MENU = [
   {
     label: 'Gel Polish / Colours',
     to: '/full-catalogue?category=colours',
-    children: [
-      { label: 'Cat Eye', to: '/full-catalogue?subcategory=cat-eye' },
-      { label: 'Glitters', to: '/full-catalogue?subcategory=glitters' },
-      { label: 'Mirror Powder', to: '/full-catalogue?subcategory=mirror-powder' },
-      { label: 'Shimmer', to: '/full-catalogue?subcategory=shimmer' },
-      { label: 'Solid Gel Polish', to: '/full-catalogue?subcategory=solid-gel-polish' },
-    ],
+    children: COLOR_CATEGORY_LINKS.map((item) => ({
+      label: item.label,
+      to: `/full-catalogue?subcategory=${item.slug}`,
+      children: item.children,
+    })),
   },
   { label: 'Nail Art', to: '/full-catalogue?category=nail-art' },
   { label: 'Nail Care (Hand & Foot)', to: '/full-catalogue?category=nail-care' },
@@ -7243,7 +7346,7 @@ function ProductsMenu() {
       </button>
 
       {open && (
-        <div className="absolute left-0 top-[calc(100%+0.55rem)] z-50 w-[23rem] rounded-2xl border border-white/15 bg-[#111111] p-2 shadow-[0_18px_48px_rgba(0,0,0,0.38)] backdrop-blur-xl">
+        <div className="absolute left-0 top-[calc(100%+0.55rem)] z-50 max-h-[calc(100vh-6rem)] w-[23rem] overflow-y-auto rounded-2xl border border-white/15 bg-[#111111] p-2 shadow-[0_18px_48px_rgba(0,0,0,0.38)] backdrop-blur-xl">
           {PRODUCT_MENU.map((cat) => (
             <div key={cat.label} className="px-1 py-0.5">
               <NavLink
@@ -7256,14 +7359,29 @@ function ProductsMenu() {
               {cat.children && (
                 <div className="mt-0.5 grid grid-cols-2 gap-0.5 pb-1 pl-2">
                   {cat.children.map((sub) => (
-                    <NavLink
-                      key={sub.label}
-                      to={sub.to}
-                      onClick={() => setOpen(false)}
-                      className="block rounded-md px-2 py-1.5 text-xs text-white/70 transition duration-200 hover:bg-white/10 hover:text-white"
-                    >
-                      {sub.label}
-                    </NavLink>
+                    <div key={sub.label}>
+                      <NavLink
+                        to={sub.to}
+                        onClick={() => setOpen(false)}
+                        className="block rounded-md px-2 py-1.5 text-xs text-white/70 transition duration-200 hover:bg-white/10 hover:text-white"
+                      >
+                        {sub.label}
+                      </NavLink>
+                      {sub.children && (
+                        <div className="ml-2 border-l border-white/15 pl-1">
+                          {sub.children.map((child) => (
+                            <NavLink
+                              key={child.label}
+                              to={child.to}
+                              onClick={() => setOpen(false)}
+                              className="block rounded-md px-2 py-1 text-[11px] text-white/55 transition duration-200 hover:bg-white/10 hover:text-white"
+                            >
+                              {child.label}
+                            </NavLink>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
@@ -11932,12 +12050,7 @@ function PortalForgotPassword() {
 const B2B_SIDEBAR_GROUPS = [
   {
     label: 'Colours',
-    cats: [
-      'SOLID GEL POLISH', 'CAT EYE', 'GLITTERS', 'GLASS EFFECT',
-      'SHIMMER COLORS', 'METALLIC COLLECTION', 'PEARL', 'JELLY',
-      'SNOWFLAKE', 'PMA', 'NEW YORK', 'BY THE OCEAN',
-      'SPIX & SPEX', 'TUTTI FRUTTI GLASS', 'FRENCH',
-    ],
+    cats: COLOR_CATEGORY_LINKS.map((item) => item.category),
   },
   {
     label: 'Essentials',
@@ -13986,14 +14099,17 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             const B2B_CAT_REMAP = {
               // External feed aliases ? correct subcategory names (matching image-map structure)
               'SOLID COLOURS': 'SOLID GEL POLISH', 'GEL POLISH': 'SOLID GEL POLISH',
-              'DREAMY CAT EYE': 'CAT EYE', 'GLASS CAT EYE': 'CAT EYE',
-              'ROSE QUARTZ CAT EYE': 'CAT EYE',
+              'DREAMY CAT EYE': 'CAT EYE', 'FAN CAT EYE': 'CAT EYE',
+              'GLASS CAT EYE': 'CAT EYE', 'NEON CAT EYE': 'CAT EYE',
+              'ROSE QUARTZ CAT EYE': 'CAT EYE', 'SAPPHIRE CAT EYE': 'CAT EYE',
+              'VELVET CAT EYE': 'CAT EYE',
               'SHIMMER COLOURS': 'SHIMMER COLORS',
               'GLITTER': 'GLITTERS', 'GLITTERS': 'GLITTERS',
               'JELLY NEON': 'JELLY', 'JELLY GEL': 'JELLY',
               'NEW YORK PARTY': 'NEW YORK',
               'COLOUR SAMPLE': 'SOLID GEL POLISH', 'COLOR SAMPLE': 'SOLID GEL POLISH',
               'COLOUR MIX UP': 'SOLID GEL POLISH', 'COLOR MIX UP': 'SOLID GEL POLISH',
+              'FRENCH': 'SOLID GEL POLISH', 'NUDE': 'SOLID GEL POLISH', 'PASTEL': 'SOLID GEL POLISH',
               'SPRING SUMMER': 'SOLID GEL POLISH', 'ODE TO AUTUMN': 'SOLID GEL POLISH',
               'RONE': 'SOLID GEL POLISH', 'GIUP1': 'SOLID GEL POLISH',
               'DUO TONE': 'SOLID GEL POLISH', 'MIRROR CHROME': 'SOLID GEL POLISH',              'SPIX AND SPEX': 'SPIX & SPEX',
@@ -14167,7 +14283,9 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
               description,
               category: categoryName,
               parentSection: item.parentSection || null,
-              colorFamily: item.colorFamily || null,
+              colorFamily: item.colorFamily
+                || (categoryName === 'CAT EYE' ? resolveCatEyeCollection(rawCategoryName, imageUrl) : null)
+                || (categoryName === 'SOLID GEL POLISH' ? resolveSolidGelColorFamily(rawCategoryName, imageUrl, name) : null),
               preview,
               imageUrl,
               galleryImages: item.galleryImages || [],
@@ -16696,6 +16814,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         const showAll = expandedShowAll.has(activeCat)
         const CAT_PAGE_SIZE = 48
         const isColorsCategory = activeCatProducts[0]?.parentSection === 'COLORS'
+          || B2B_SIDEBAR_GROUPS[0].cats.includes(activeCat)
           || activeCat.toUpperCase().includes('COLOR') || activeCat.toUpperCase().includes('COLOUR')
         const familyFilteredProducts = isColorsCategory && b2bColorFamilyFilter !== 'ALL'
           ? activeCatProducts.filter(p => (p.colorFamily || resolveColorFamilyKey(p.name)) === b2bColorFamilyFilter)
@@ -16708,6 +16827,26 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         const groupedCatNamesSet = new Set(B2B_SIDEBAR_GROUPS.flatMap(g => g.cats))
         const ungroupedCats = groupedFilteredProducts.filter(([cat]) => !groupedCatNamesSet.has(cat))
         const SWATCH = { Black: 'bg-black', Blue: 'bg-blue-500', Brown: 'bg-amber-700', 'Coral Orange': 'bg-orange-400', Green: 'bg-emerald-500', Grey: 'bg-slate-400', Neon: 'bg-lime-400', Pink: 'bg-pink-400', Purple: 'bg-violet-500', Red: 'bg-red-500', White: 'bg-white border border-slate-300', Yellow: 'bg-yellow-300' }
+        const getPortalCategoryFamilies = (cat, catProducts) => {
+          if (cat === 'CAT EYE') {
+            return CAT_EYE_COLLECTIONS.filter((collection) =>
+              catProducts.some((product) => product.colorFamily === collection.value),
+            )
+          }
+          if (cat !== 'SOLID GEL POLISH') return []
+
+          const availableValues = [...new Set(
+            catProducts.map((product) => product.colorFamily || resolveColorFamilyKey(product.name)).filter(Boolean),
+          )]
+          return COLOR_FAMILY_FILTERS
+            .filter((family) => family.slug)
+            .map((family) => {
+              const value = availableValues.find((candidate) => normalizeCatalogueToken(candidate) === family.key)
+              return value ? { value, label: family.label } : null
+            })
+            .filter(Boolean)
+        }
+        const activeCategoryFamilies = getPortalCategoryFamilies(activeCat, activeCatProducts)
 
         const renderSidebarGroup = (group) => {
           const available = group.cats.filter(c => availableCatNames.has(c)).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
@@ -16716,24 +16855,49 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <div key={group.label}>
               <p className="px-3 pt-3 pb-1 text-[9px] font-black uppercase tracking-widest" style={{ color: '#b4abc0' }}>{group.label}</p>
               {available.map(cat => {
-                const catTotal = groupedFilteredProducts.find(([c]) => c === cat)?.[1]?.length ?? 0
-                const selInCat = (groupedFilteredProducts.find(([c]) => c === cat)?.[1] ?? []).filter(p => selectedCodes.includes(p.code)).length
+                const catProducts = groupedFilteredProducts.find(([c]) => c === cat)?.[1] ?? []
+                const catTotal = catProducts.length
+                const selInCat = catProducts.filter(p => selectedCodes.includes(p.code)).length
                 const isActive = cat === activeCat
+                const nestedFamilies = getPortalCategoryFamilies(cat, catProducts)
                 return (
-                  <button
-                    key={cat}
-                    onClick={() => toggleCategory(cat)}
-                    className={`flex w-full items-center justify-between py-1.5 text-left text-[11px] transition-colors ${isActive ? 'font-semibold' : 'font-normal text-slate-600 hover:bg-rose-50/60'}`}
-                    style={isActive
-                      ? { backgroundColor: '#fdf0f5', color: '#c8386e', paddingLeft: '10px', paddingRight: '8px', borderLeft: '2px solid #c8386e' }
-                      : { paddingLeft: '12px', paddingRight: '8px', borderLeft: '2px solid transparent' }}
-                  >
-                    <span className="truncate pr-1 leading-tight">{cat}</span>
-                    <span className="flex shrink-0 items-center gap-1">
-                      <span className="text-[9px] text-slate-400">{catTotal}</span>
-                      {selInCat > 0 && <span className="rounded-full px-1 text-[8px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>?{selInCat}</span>}
-                    </span>
-                  </button>
+                  <div key={cat}>
+                    <button
+                      onClick={() => toggleCategory(cat)}
+                      className={`flex w-full items-center justify-between py-1.5 text-left text-[11px] transition-colors ${isActive && b2bColorFamilyFilter === 'ALL' ? 'font-semibold' : 'font-normal text-slate-600 hover:bg-rose-50/60'}`}
+                      style={isActive && b2bColorFamilyFilter === 'ALL'
+                        ? { backgroundColor: '#fdf0f5', color: '#c8386e', paddingLeft: '10px', paddingRight: '8px', borderLeft: '2px solid #c8386e' }
+                        : { paddingLeft: '12px', paddingRight: '8px', borderLeft: '2px solid transparent' }}
+                    >
+                      <span className="truncate pr-1 leading-tight">
+                        {cat === 'CAT EYE' ? 'All Cat Eye' : cat === 'SOLID GEL POLISH' ? 'All Solid Gel Polish' : cat}
+                      </span>
+                      <span className="flex shrink-0 items-center gap-1">
+                        <span className="text-[9px] text-slate-400">{catTotal}</span>
+                        {selInCat > 0 && <span className="rounded-full px-1 text-[8px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>?{selInCat}</span>}
+                      </span>
+                    </button>
+                    {nestedFamilies.map((family) => {
+                      const isCollectionActive = isActive && b2bColorFamilyFilter === family.value
+                      const collectionTotal = catProducts.filter((product) =>
+                        (product.colorFamily || resolveColorFamilyKey(product.name)) === family.value,
+                      ).length
+                      return (
+                        <button
+                          key={family.value}
+                          onClick={() => {
+                            toggleCategory(cat)
+                            setB2bColorFamilyFilter(family.value)
+                          }}
+                          className={`flex w-full items-center justify-between py-1 text-left text-[10px] transition-colors ${isCollectionActive ? 'font-semibold text-rose-700' : 'text-slate-500 hover:bg-rose-50/60'}`}
+                          style={{ paddingLeft: '22px', paddingRight: '8px', borderLeft: isCollectionActive ? '2px solid #c8386e' : '2px solid transparent' }}
+                        >
+                          <span className="truncate pr-1">{family.label}</span>
+                          <span className="text-[9px] text-slate-400">{collectionTotal}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
                 )
               })}
             </div>
@@ -16804,6 +16968,20 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                 </optgroup>
               )}
             </select>
+            {activeCategoryFamilies.length > 0 && (
+              <select
+                value={b2bColorFamilyFilter}
+                onChange={(event) => setB2bColorFamilyFilter(event.target.value)}
+                aria-label={activeCat === 'CAT EYE' ? 'Cat Eye collection' : 'Solid Gel Polish colour family'}
+                className="mt-2 w-full rounded border px-2 py-1.5 text-xs font-medium text-slate-700"
+                style={{ borderColor: '#e2e8f0' }}
+              >
+                <option value="ALL">{activeCat === 'CAT EYE' ? 'All Cat Eye' : 'All Solid Gel Polish'}</option>
+                {activeCategoryFamilies.map((family) => (
+                  <option key={family.value} value={family.value}>{family.label}</option>
+                ))}
+              </select>
+            )}
           </div>
 
           {/* body: sidebar (desktop) + product panel */}
