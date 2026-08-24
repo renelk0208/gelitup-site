@@ -26,6 +26,9 @@
 [functions."send-ambassador-agreement-update"]
   schedule = "0 7 23 8 *"
 
+[functions."send-ambassador-pr-reminders"]
+  schedule = "@daily"
+
 [[redirects]]
   from = "https://gelitup.netlify.app/*"
   to = "https://gelitup.com/:splat"

@@ -17,6 +17,8 @@ const AMBASSADOR_TABLE = import.meta.env.VITE_AMBASSADOR_TABLE || 'ambassador_ap
 const AMBASSADOR_REPLY_TO = import.meta.env.VITE_AMBASSADOR_INBOX || 'info@gelitup.com'
 const AMBASSADOR_FROM_EMAIL = import.meta.env.VITE_AMBASSADOR_EMAIL_FROM || 'GEL.IT.UP <info@gelitup.com>'
 const AMBASSADOR_REMINDER_EMAIL = 'info@gelitup.com'
+const AMBASSADOR_NOTE_NOTIFICATION_RECIPIENTS = ['leeukopf@gmail.com', 'acc1.leeukopf@gmail.com']
+const AMBASSADOR_SHIPMENT_NOTIFICATION_EMAIL = 'rene@gelitup.com'
 // Statuses that count as "needs review" (form inserts default to 'new').
 const AMBASSADOR_PENDING_STATUSES = ['new', 'pending', 'submitted']
 const AMBASSADOR_LETTER_ATTACHMENT_URL = ambassadorLetterAttachmentUrl
@@ -4117,6 +4119,47 @@ function buildAmbassadorShipmentEmail(row, ship, setPasswordLink, nextPackageIso
   }
 }
 
+function buildAmbassadorShipmentNotificationEmail(row, ship, sentAtIso, nextPackageIso, nextPackageItems) {
+  const ambassadorName = String(row?.full_name || row?.email || 'Unknown ambassador').trim()
+  const nextPackageDate = nextPackageIso
+    ? new Date(nextPackageIso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+    : 'Not set'
+  const sentAt = new Date(sentAtIso).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })
+  return {
+    subject: `Ambassador PR package dispatched — ${ambassadorName}`,
+    html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5">
+      <p>An ambassador PR package has been dispatched and the tracking email has been sent.</p>
+      <p><strong>Ambassador:</strong> ${escAmb(ambassadorName)}<br/>
+      <strong>Email:</strong> ${escAmb(row?.email || 'Not recorded')}<br/>
+      <strong>Dispatched:</strong> ${escAmb(sentAt)}<br/>
+      <strong>Tracking number:</strong> ${escAmb(ship?.tracking_number || 'Not recorded')}<br/>
+      <strong>Tracking URL:</strong> ${ship?.tracking_url ? `<a href="${escAmb(ship.tracking_url)}">${escAmb(ship.tracking_url)}</a>` : 'Not recorded'}<br/>
+      <strong>Next package date:</strong> ${escAmb(nextPackageDate)}</p>
+      <p><strong>Items for the next PR package:</strong></p>
+      <div style="white-space:pre-wrap;border-left:3px solid #d43790;padding:8px 12px;background:#fdf0f5;">${escAmb(nextPackageItems || 'Not specified')}</div>
+      <p>An automatic reminder with these items will be emailed three weeks after dispatch.</p>
+    </div>`,
+  }
+}
+
+function buildAmbassadorPauseEmail(row, timeframe, performanceDetails, senderName) {
+  const name = String(row?.full_name || '').trim().split(/\s+/)[0] || 'there'
+  return {
+    subject: 'Checking in on our Ambassador Collaboration',
+    html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.6">
+      <p>Hi ${escAmb(name)},</p>
+      <p>We hope you're doing well. We wanted to reach out personally to check in on how our collaboration has been going from your end.</p>
+      <p>When we started working together, we were really excited about the mutual collaboration with GEL.IT.UP. Looking back over the past ${escAmb(timeframe)}, though, we've noticed that the collaboration hasn't quite reflected what we originally discussed and agreed on — specifically around ${escAmb(performanceDetails)}. We want to be transparent with you about this rather than let it go unaddressed.</p>
+      <p>We understand that priorities and circumstances can shift, and we'd genuinely like to hear your perspective. If there's something going on — whether it's bandwidth, direction, expectations, or anything else — we're happy to talk it through and see if there's a way to reset and move forward together.</p>
+      <p>That said, if this partnership no longer feels like the right fit for you, or if we're not able to align on what's needed going forward, we completely understand, and we're open to discussing a mutual and amicable end to the collaboration.</p>
+      <p>Could we schedule a quick call or exchange a few messages this week to talk this through? We'd rather have an honest conversation than let things continue on a path that isn't working for either side.</p>
+      <p>Looking forward to hearing your thoughts.</p>
+      <p>Warm regards,</p>
+      <p>${escAmb(senderName)}<br/>GEL.IT.UP</p>
+    </div>`,
+  }
+}
+
 // Welcome email sent automatically when an application is approved. The signed
 // Ambassador Agreement PDF is attached so every ambassador has their contract.
 function buildAmbassadorWelcomeEmail(row) {
@@ -4238,6 +4281,36 @@ async function sendAmbassadorEmail({ to, subject, html, attachments, replyTo }) 
   }
 }
 
+async function sendAmbassadorNoteNotifications({ row, note, noteType, author, stamp }) {
+  const ambassadorName = String(row?.full_name || row?.contact_name || 'Unknown ambassador').trim()
+  const ambassadorEmail = String(row?.email || row?.contact_email || '').trim()
+  const ambassadorInstagram = String(row?.instagram || row?.instagram_handle || '').trim()
+  const subject = `Ambassador ${noteType} added — ${ambassadorName}`
+  const html = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5">
+    <p>A new <strong>${escAmb(noteType)}</strong> has been added to an ambassador record.</p>
+    <p><strong>Ambassador:</strong> ${escAmb(ambassadorName)}<br/>
+    <strong>Email:</strong> ${escAmb(ambassadorEmail || 'Not recorded')}<br/>
+    <strong>Instagram:</strong> ${escAmb(ambassadorInstagram || 'Not recorded')}<br/>
+    <strong>Added by:</strong> ${escAmb(author)}<br/>
+    <strong>Date:</strong> ${escAmb(stamp)}</p>
+    <p><strong>Note:</strong></p>
+    <div style="white-space:pre-wrap;border-left:3px solid #d43790;padding:8px 12px;background:#fdf0f5;">${escAmb(note)}</div>
+  </div>`
+  const results = await Promise.all(
+    AMBASSADOR_NOTE_NOTIFICATION_RECIPIENTS.map(async (to) => ({
+      to,
+      result: await sendAmbassadorEmail({ to, subject, html }),
+    })),
+  )
+  const failures = results.filter(({ result }) => !result.ok)
+  return failures.length === 0
+    ? { ok: true }
+    : {
+        ok: false,
+        error: failures.map(({ to, result }) => `${to}: ${result.error || 'Email failed'}`).join('; '),
+      }
+}
+
 async function ensureAmbassadorPortalAccount(row) {
   const email = String(row?.email || '').trim().toLowerCase()
   if (!email) {
@@ -4283,6 +4356,10 @@ function AmbassadorApplicationsPanel() {
   const [declineRow, setDeclineRow] = useState(null)
   const [declinePresets, setDeclinePresets] = useState([])
   const [declineNote, setDeclineNote] = useState('')
+  const [pauseRow, setPauseRow] = useState(null)
+  const [pauseTimeframe, setPauseTimeframe] = useState('')
+  const [pauseDetails, setPauseDetails] = useState('')
+  const [pauseSenderName, setPauseSenderName] = useState('')
   const [msgRow, setMsgRow] = useState(null)
   const [msgSubject, setMsgSubject] = useState('')
   const [msgBody, setMsgBody] = useState('')
@@ -4537,7 +4614,12 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       delete next[row.id]
       return next
     })
-    const metaResult = await saveShipmentMeta(row, { sentAt: '', nextReminderAt: '', nextReminderNote: '' })
+    const metaResult = await saveShipmentMeta(row, {
+      sentAt: '',
+      nextReminderAt: '',
+      nextReminderNote: '',
+      nextPackageOpen: 'TRUE',
+    })
     if (!metaResult.ok) {
       alert(`Could not reset closed shipment flow: ${metaResult.error}`)
       return
@@ -4555,18 +4637,31 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       return
     }
     const nextReminderAt = parsedReminderAt ? parsedReminderAt.toISOString() : (sentAtIso ? addOneMonth(sentAtIso) : '')
-    const nextReminderNote = reminderNoteVal(row)
+    const nextReminderNote = String(reminderNoteVal(row) || '').trim()
+    const previousReminderNote = decodeReminderNote(readMetaTag(row, 'SHIPMENT_REMINDER_NOTE'))
     setSaving(row.id)
     const result = await saveShipmentMeta(row, { nextReminderAt, nextReminderNote })
-    setSaving(null)
     if (!result.ok) {
+      setSaving(null)
       setEmail(row.id, 'error', `Could not save reminder details: ${result.error}`)
       alert(`Could not save reminder details: ${result.error}`)
       return
     }
+    const shouldNotify = nextReminderNote && nextReminderNote !== previousReminderNote
+    const emailResult = shouldNotify
+      ? await sendAmbassadorNoteNotifications({
+          row,
+          note: nextReminderNote,
+          noteType: 'next-package reminder note',
+          author: getAdminDisplayLabel(),
+          stamp: fmtDate(new Date().toISOString()),
+        })
+      : { ok: true }
+    setSaving(null)
     setReminderDateDraft((prev) => ({ ...prev, [row.id]: nextReminderAt ? nextReminderAt.slice(0, 10) : '' }))
     setReminderNoteDraft((prev) => ({ ...prev, [row.id]: nextReminderNote }))
-    setEmail(row.id, 'sent', 'Reminder details saved')
+    setEmail(row.id, emailResult.ok ? 'sent' : 'error', emailResult.ok ? 'Reminder details saved' : 'Reminder saved; notification email failed')
+    if (!emailResult.ok) alert(`Reminder note saved, but notification email failed: ${emailResult.error}`)
     await load()
   }
 
@@ -4809,6 +4904,24 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (Object.prototype.hasOwnProperty.call(patch, 'nextReminderNote')) {
       nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_REMINDER_NOTE', encodeReminderNote(patch.nextReminderNote))
     }
+    if (Object.prototype.hasOwnProperty.call(patch, 'officeReminderAt')) {
+      nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_OFFICE_REMINDER_AT', patch.officeReminderAt || '')
+    }
+    if (Object.prototype.hasOwnProperty.call(patch, 'officeReminderSentAt')) {
+      nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_OFFICE_REMINDER_SENT_AT', patch.officeReminderSentAt || '')
+    }
+    if (Object.prototype.hasOwnProperty.call(patch, 'officeReminderDispatchedAt')) {
+      nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_OFFICE_REMINDER_DISPATCHED_AT', patch.officeReminderDispatchedAt || '')
+    }
+    if (Object.prototype.hasOwnProperty.call(patch, 'officeReminderNextPackageAt')) {
+      nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_OFFICE_REMINDER_NEXT_PACKAGE_AT', patch.officeReminderNextPackageAt || '')
+    }
+    if (Object.prototype.hasOwnProperty.call(patch, 'officeReminderItems')) {
+      nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_OFFICE_REMINDER_ITEMS', encodeReminderNote(patch.officeReminderItems))
+    }
+    if (Object.prototype.hasOwnProperty.call(patch, 'nextPackageOpen')) {
+      nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_NEXT_PACKAGE_OPEN', patch.nextPackageOpen || '')
+    }
     return nextComment
   }
   const saveShipmentMeta = async (row, patch) => {
@@ -4991,21 +5104,30 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const note = (noteDraft[row.id] || '').trim()
     if (!note) return
     const stamp = fmtDate(new Date().toISOString())
-    const entry = `[${stamp}] [${getAdminDisplayLabel()}] ${note}`
+    const author = getAdminDisplayLabel()
+    const entry = `[${stamp}] [${author}] ${note}`
     const newLog = row.admin_comment ? `${row.admin_comment}\n${entry}` : entry
     setSaving(row.id)
     const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: newLog }).eq('id', row.id)
     if (err) { setSaving(null); alert(err.message); return }
     patchRow(row.id, { admin_comment: newLog })
     setNoteDraft(prev => ({ ...prev, [row.id]: '' }))
+    const emailResult = await sendAmbassadorNoteNotifications({
+      row,
+      note,
+      noteType: 'internal note',
+      author,
+      stamp,
+    })
     setSaving(null)
+    if (!emailResult.ok) alert(`Note saved, but notification email failed: ${emailResult.error}`)
   }
 
   // A sent-message log line is marked with the 📧 glyph. Historically these were
   // appended into admin_comment; we now keep them out of the editable notes and
   // surface them (plus the new message_log column) in the Messages section.
   const isAmbassadorMsgLine = (line) => String(line).includes('📧')
-  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|PACK_NOTE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE):[^\]]+\]$/i.test(String(line).trim())
+  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|AMBASSADOR_PROGRAMME_PAUSED|PACK_NOTE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE|SHIPMENT_OFFICE_REMINDER_AT|SHIPMENT_OFFICE_REMINDER_SENT_AT|SHIPMENT_OFFICE_REMINDER_DISPATCHED_AT|SHIPMENT_OFFICE_REMINDER_NEXT_PACKAGE_AT|SHIPMENT_OFFICE_REMINDER_ITEMS|SHIPMENT_NEXT_PACKAGE_OPEN):[^\]]+\]$/i.test(String(line).trim())
   const packNoteLines = (row) => String(row.admin_comment || '').split('\n').filter((line) => /^\[PACK_NOTE:[^\]]+\]$/i.test(String(line).trim()))
   const parsePackNote = (line) => {
     const encoded = String(line || '').trim().match(/^\[PACK_NOTE:([^\]]+)\]$/i)?.[1]
@@ -5032,14 +5154,26 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   const addPackNote = async (row) => {
     const text = String(packAdditionDraft[row.id] || '').trim()
     if (!text) return
+    const stamp = fmtDate(new Date().toISOString())
+    const author = getAdminDisplayLabel()
     const lines = packNoteLines(row)
     lines.push(createPackNoteLine({
-      stamp: fmtDate(new Date().toISOString()),
-      author: getAdminDisplayLabel(),
+      stamp,
+      author,
       text,
     }))
     if (await savePackNotes(row, lines)) {
       setPackAdditionDraft((prev) => ({ ...prev, [row.id]: '' }))
+      setSaving(row.id)
+      const emailResult = await sendAmbassadorNoteNotifications({
+        row,
+        note: text,
+        noteType: 'package note',
+        author,
+        stamp,
+      })
+      setSaving(null)
+      if (!emailResult.ok) alert(`Package note saved, but notification email failed: ${emailResult.error}`)
     }
   }
   const editPackNote = async (row, idx) => {
@@ -5091,8 +5225,9 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       const stamp = text.match(/^\[([^\]]+)\]/)?.[1] || null
       const trackingNumber = text.match(/Tracking:\s*([^·]+)/i)?.[1]?.trim() || ''
       const trackingUrl = text.match(/(https?:\/\/[^\s·]+)/i)?.[1] || ''
-      const boxContents = text.match(/Box:\s*(.+)$/i)?.[1]?.trim() || ''
-      return { raw: text, stamp, trackingNumber, trackingUrl, boxContents }
+      const ambassadorType = text.match(/Status:\s*([^·]+)/i)?.[1]?.trim() || ''
+      const boxContents = text.match(/(?:Items|Box):\s*(.+)$/i)?.[1]?.trim() || ''
+      return { raw: text, stamp, trackingNumber, trackingUrl, ambassadorType, boxContents }
     })
     .reverse()
   const hasWelcomeContractSent = (row) => messageLines(row).some((line) => {
@@ -5165,6 +5300,26 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   const saveShipment = async (row, alsoEmail, overrideReminderDate) => {
   const currentDraft = getShipmentDraft(row)
   const hasShipmentInfo = Boolean(currentDraft.tracking_number || currentDraft.tracking_url || currentDraft.shipment_details)
+  const completedAmbassadorType = getAmbassadorType(row)
+  const completedPack = AMBASSADOR_PACKS_BY_TYPE[completedAmbassadorType] || null
+  const completedTypeLabel = completedAmbassadorType === 'super_ambassador'
+    ? 'Super Ambassador'
+    : completedAmbassadorType === 'extreme_ambassador'
+      ? 'Extreme Ambassador'
+      : completedAmbassadorType === 'standard_ambassador'
+        ? 'Standard Ambassador'
+        : 'Not set'
+  const completedItems = [
+    ...(completedPack?.items || []),
+    ...packNoteEntries(row).map((entry) => entry.text),
+    ...(currentDraft.shipment_details ? [currentDraft.shipment_details] : []),
+  ]
+  const buildArchiveLine = () => `[${fmtDate(new Date().toISOString())}] [${getAdminDisplayLabel()}] 📦 Shipped — ${[
+    `Status: ${completedTypeLabel}`,
+    currentDraft.tracking_number ? `Tracking: ${currentDraft.tracking_number}` : null,
+    currentDraft.tracking_url || null,
+    `Items: ${completedItems.join(', ') || 'Not recorded'}`,
+  ].filter(Boolean).join(' · ')}`
   const draft = {
     shipment_details: currentDraft.shipment_details || null,
     tracking_number: currentDraft.tracking_number || null,
@@ -5176,13 +5331,8 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   patchRow(row.id, draft)
   // Track the latest admin_comment so subsequent saveShipmentMeta calls don't overwrite the archive line.
   let latestAdminComment = row.admin_comment
-  if (hasShipmentInfo) {
-    const shippedStamp = fmtDate(new Date().toISOString())
-    const archiveLine = `[${shippedStamp}] [${getAdminDisplayLabel()}] 📦 Shipped — ${[
-      currentDraft.tracking_number ? `Tracking: ${currentDraft.tracking_number}` : null,
-      currentDraft.tracking_url || null,
-      currentDraft.shipment_details ? `Box: ${currentDraft.shipment_details}` : null,
-    ].filter(Boolean).join(' · ')}`
+  if (hasShipmentInfo && !alsoEmail) {
+    const archiveLine = buildArchiveLine()
     const loggedComment = latestAdminComment ? `${latestAdminComment}\n${archiveLine}` : archiveLine
     const { error: logErr } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: loggedComment }).eq('id', row.id)
     if (!logErr) { patchRow(row.id, { admin_comment: loggedComment }); latestAdminComment = loggedComment }
@@ -5227,16 +5377,81 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       const sentAt = new Date().toISOString()
       const nextReminderAt = chosenReminderAt.toISOString()
       const nextReminderNote = reminderNoteVal(row) || currentDraft.shipment_details || ''
-      setShip((prev) => ({ ...prev, [row.id]: { ...prev[row.id], shipment_details: '', tracking_number: '', tracking_url: '' } }))
+      const officeReminderAt = new Date(new Date(sentAt).getTime() + 21 * 24 * 60 * 60 * 1000).toISOString()
+      const archiveLine = buildArchiveLine()
+      const loggedComment = latestAdminComment ? `${latestAdminComment}\n${archiveLine}` : archiveLine
+      const { error: logErr } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: loggedComment }).eq('id', row.id)
+      if (logErr) {
+        setEmail(row.id, 'error', `Shipment email sent, but the completed package could not be archived: ${logErr.message}`)
+        setSaving(null)
+        return
+      }
+      latestAdminComment = loggedComment
       persistShipmentEmailLock((prev) => ({ ...prev, [row.id]: { signature: JSON.stringify(currentDraft), sentAt }, }))
-      const metaResult = await saveShipmentMeta(row, { sentAt, nextReminderAt, nextReminderNote })
+      const metaResult = await saveShipmentMeta(
+        { ...updatedRow, admin_comment: latestAdminComment },
+        {
+          sentAt,
+          nextReminderAt,
+          nextReminderNote,
+          officeReminderAt,
+          officeReminderSentAt: '',
+          officeReminderDispatchedAt: sentAt,
+          officeReminderNextPackageAt: nextReminderAt,
+          officeReminderItems: nextReminderNote,
+          nextPackageOpen: 'TRUE',
+        },
+      )
       if (!metaResult.ok) { setEmail(row.id, 'error', `Shipment email sent, but reminder metadata failed to save: ${metaResult.error}`); setSaving(null); return }
+      const nextPackageComment = String(metaResult.comment || '')
+        .split('\n')
+        .filter((line) => !/^\[PACK_NOTE:[^\]]+\]$/i.test(line.trim()))
+        .join('\n') || null
+      const { error: resetErr } = await supabase
+        .from(AMBASSADOR_TABLE)
+        .update({
+          shipment_details: null,
+          tracking_number: null,
+          tracking_url: null,
+          admin_comment: nextPackageComment,
+        })
+        .eq('id', row.id)
+      if (resetErr) {
+        setEmail(row.id, 'error', `Shipment archived, but the next package section could not be opened: ${resetErr.message}`)
+        setSaving(null)
+        return
+      }
+      patchRow(row.id, {
+        shipment_details: null,
+        tracking_number: null,
+        tracking_url: null,
+        admin_comment: nextPackageComment,
+      })
+      const notification = buildAmbassadorShipmentNotificationEmail(updatedRow, draft, sentAt, nextReminderAt, nextReminderNote)
+      const notificationResult = await sendAmbassadorEmail({
+        to: AMBASSADOR_SHIPMENT_NOTIFICATION_EMAIL,
+        subject: notification.subject,
+        html: notification.html,
+      })
+      setShip((prev) => ({ ...prev, [row.id]: { shipment_details: '', tracking_number: '', tracking_url: '' } }))
+      setPackAdditionDraft((prev) => ({ ...prev, [row.id]: '' }))
       setReminderDateDraft((prev) => ({ ...prev, [row.id]: nextReminderAt ? nextReminderAt.slice(0, 10) : '' }))
       setReminderNoteDraft((prev) => ({ ...prev, [row.id]: nextReminderNote }))
-      setNextPackageMode((prev) => ({ ...prev, [row.id]: false }))
-      setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: false }))
+      setNextPackageMode((prev) => ({ ...prev, [row.id]: true }))
+      setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: true }))
+      setSectionOpenState((prev) => ({
+        ...prev,
+        [sectionStateKey(row.id, 'shipment')]: true,
+        [sectionStateKey(row.id, 'history')]: false,
+      }))
+      setShipmentEntryOpen((prev) => Object.fromEntries(
+        Object.entries(prev).map(([key, value]) => [key, key.startsWith(`${row.id}:`) ? false : value]),
+      ))
       logAmbassadorSend(updatedRow, { to: row.email, subject, body: htmlToText(html) })
-      openReminderDraft(updatedRow, sentAt, fmtDateTime(sentAt), nextReminderAt, nextReminderNote)
+      if (!notificationResult.ok) {
+        setEmail(row.id, 'error', `Tracking sent, but the dispatch notification to ${AMBASSADOR_SHIPMENT_NOTIFICATION_EMAIL} failed: ${notificationResult.error}`)
+        alert(`Tracking was sent to the ambassador, but the dispatch notification to ${AMBASSADOR_SHIPMENT_NOTIFICATION_EMAIL} failed: ${notificationResult.error}`)
+      }
     }
   } else {
     const chosenReminderRawB = String(overrideReminderDate || reminderDateVal(row, null) || '').trim()
@@ -5356,9 +5571,91 @@ const deleteApplication = async (row) => {
     setRows(prev => prev.filter(r => r.id !== row.id))
   }
 
+  const openPauseAmbassador = (row) => {
+    setPauseRow(row)
+    setPauseTimeframe('')
+    setPauseDetails('')
+    setPauseSenderName('')
+  }
+
+  const submitPauseAmbassador = async () => {
+    if (!pauseRow) return
+    const timeframe = pauseTimeframe.trim()
+    const performanceDetails = pauseDetails.trim()
+    const senderName = pauseSenderName.trim()
+    if (!timeframe || !performanceDetails || !senderName) {
+      alert('Timeframe, performance details, and sender name are all required.')
+      return
+    }
+    if (!window.confirm(`Pause ${pauseRow.full_name || pauseRow.email}'s ambassador programme, stop future packages, deactivate their code, and send the check-in email?`)) return
+
+    const pausedAt = new Date().toISOString()
+    const pauseTag = encodeURIComponent(JSON.stringify({
+      pausedAt,
+      pausedBy: getAdminDisplayLabel(),
+      timeframe,
+      performanceDetails,
+    }))
+    let nextComment = ensureTaggedValue(pauseRow.admin_comment, 'AMBASSADOR_PROGRAMME_PAUSED', pauseTag)
+    nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_NEXT_PACKAGE_OPEN', '')
+    nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_OFFICE_REMINDER_AT', '')
+    nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_OFFICE_REMINDER_SENT_AT', '')
+
+    setSaving(pauseRow.id)
+    setEmail(pauseRow.id, 'sending', '')
+    const { error: appErr } = await supabase
+      .from(AMBASSADOR_TABLE)
+      .update({
+        status: 'paused',
+        shipment_details: null,
+        tracking_number: null,
+        tracking_url: null,
+        admin_comment: nextComment,
+      })
+      .eq('id', pauseRow.id)
+    if (appErr) {
+      setSaving(null)
+      setEmail(pauseRow.id, 'error', appErr.message)
+      alert(`Could not pause the ambassador programme: ${appErr.message}`)
+      return
+    }
+
+    const discountCode = String(pauseRow.discount_code || '').trim()
+    if (discountCode) {
+      const { error: codeErr } = await supabase
+        .from('ambassador_codes')
+        .update({ active: false })
+        .eq('code', discountCode)
+      if (codeErr) {
+        patchRow(pauseRow.id, { status: 'paused', shipment_details: null, tracking_number: null, tracking_url: null, admin_comment: nextComment })
+        setSaving(null)
+        setEmail(pauseRow.id, 'error', `Programme paused, but code deactivation failed: ${codeErr.message}`)
+        alert(`Programme paused, but ambassador code deactivation failed: ${codeErr.message}`)
+        return
+      }
+    }
+
+    const { subject, html } = buildAmbassadorPauseEmail(pauseRow, timeframe, performanceDetails, senderName)
+    const emailResult = await sendAmbassadorEmail({ to: pauseRow.email, subject, html })
+    patchRow(pauseRow.id, { status: 'paused', shipment_details: null, tracking_number: null, tracking_url: null, admin_comment: nextComment })
+    setShip((prev) => ({ ...prev, [pauseRow.id]: { shipment_details: '', tracking_number: '', tracking_url: '' } }))
+    setNextPackageMode((prev) => ({ ...prev, [pauseRow.id]: false }))
+    setShipmentPanelOpen((prev) => ({ ...prev, [pauseRow.id]: false }))
+    if (emailResult.ok) {
+      logAmbassadorSend(pauseRow, { to: pauseRow.email, subject, body: htmlToText(html) })
+      setEmail(pauseRow.id, 'sent', `Programme paused and check-in email sent to ${pauseRow.email}`)
+      setPauseRow(null)
+    } else {
+      setEmail(pauseRow.id, 'error', `Programme paused, but check-in email failed: ${emailResult.error}`)
+      alert(`Programme paused, but the check-in email failed: ${emailResult.error}`)
+    }
+    setSaving(null)
+  }
+
   const FILTERS = [
     { key: 'pending', label: 'Pending' },
     { key: 'approved', label: 'Approved' },
+    { key: 'paused', label: 'Paused' },
     { key: 'rejected', label: 'Rejected' },
     { key: 'all', label: 'All' },
   ]
@@ -5440,6 +5737,7 @@ const deleteApplication = async (row) => {
             const isOpen = openIds.has(row.id)
             const normalizedStatus = normalizeAmbassadorStatus(row.status)
             const isApproved = normalizedStatus === 'approved'
+            const isPaused = normalizedStatus === 'paused'
             const isRejected = normalizedStatus === 'rejected'
             const shipmentLockRaw = shipmentEmailLock[row.id]
             const shipmentLock = (shipmentLockRaw && typeof shipmentLockRaw === 'object')
@@ -5466,6 +5764,7 @@ const deleteApplication = async (row) => {
                 : 'Not set'
             const selectedPack = AMBASSADOR_PACKS_BY_TYPE[ambassadorType] || null
             const isNextPackageMode = Boolean(nextPackageMode[row.id])
+              || readMetaTag(row, 'SHIPMENT_NEXT_PACKAGE_OPEN').toUpperCase() === 'TRUE'
             const isShipmentClosed = shipmentPreviouslySent && !isNextPackageMode
             const isShipmentPanelExpanded = shipmentPanelOpen[row.id] ?? !isShipmentClosed
             const isReminderDue = Boolean(nextReminderAt && new Date(nextReminderAt).getTime() <= Date.now())
@@ -5587,6 +5886,16 @@ const deleteApplication = async (row) => {
                           ↻ Update code & notify
                         </button>
                       )}
+                      {isApproved && (
+                        <button
+                          type="button"
+                          onClick={() => openPauseAmbassador(row)}
+                          disabled={saving === row.id}
+                          className="rounded-lg border border-amber-400 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 disabled:opacity-60"
+                        >
+                          ⏸ Pause ambassador
+                        </button>
+                      )}
                       {isApproved && (factoryAckValue ? (
                         <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">🏭 Factory acknowledged</span>
                       ) : (
@@ -5598,7 +5907,7 @@ const deleteApplication = async (row) => {
                           🏭 Mark factory acknowledged
                         </button>
                       ))}
-                      {!isApproved && (
+                      {!isApproved && !isPaused && !isRejected && (
                         <button
                           onClick={() => approveRow(row)}
                           disabled={saving === row.id}
@@ -5607,7 +5916,7 @@ const deleteApplication = async (row) => {
                           ✓ Approve
                         </button>
                       )}
-                      {!isRejected && (
+                      {!isPaused && !isRejected && (
                         <button
                           onClick={() => openDecline(row)}
                           disabled={saving === row.id}
@@ -5637,6 +5946,12 @@ const deleteApplication = async (row) => {
                   <p className="mt-2 whitespace-pre-line rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700">
                     <strong>Decline reason:</strong>{'\n'}{row.decline_reason}
                   </p>
+                )}
+                {isPaused && (
+                  <div className="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+                    <p className="font-bold uppercase tracking-wide">Ambassador programme paused</p>
+                    <p className="mt-1">Future PR packages and automated PR reminders are stopped. The ambassador discount code is inactive.</p>
+                  </div>
                 )}
                 {row.status === 'rejected' && (
                   <div className="mt-3 rounded-lg border border-rose-200 bg-rose-50/60 p-3">
@@ -5846,7 +6161,8 @@ const deleteApplication = async (row) => {
                                     <div className="space-y-1 border-t border-slate-200 px-2.5 py-1.5 text-[11px] text-slate-600">
                                       <p><strong>Tracking:</strong> {entry.trackingNumber || '—'}</p>
                                       <p><strong>URL:</strong> {entry.trackingUrl ? <a href={entry.trackingUrl} target="_blank" rel="noreferrer" className="text-fuchsia-700 hover:underline">{entry.trackingUrl}</a> : '—'}</p>
-                                      <p><strong>Box:</strong> {entry.boxContents || '—'}</p>
+                                      <p><strong>Status:</strong> {entry.ambassadorType || 'Not recorded'}</p>
+                                      <p><strong>Items:</strong> {entry.boxContents || '—'}</p>
                                     </div>
                                   )}
                                 </div>
@@ -6081,6 +6397,53 @@ const deleteApplication = async (row) => {
             <div className="mt-4 flex justify-end gap-2">
               <button onClick={() => setDeclineRow(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
               <button onClick={submitDecline} disabled={saving === declineRow.id} className="rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-60">Decline &amp; email</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {pauseRow && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4" onClick={() => setPauseRow(null)}>
+          <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-bold text-slate-900">Pause {pauseRow.full_name}</h3>
+            <p className="mt-1 text-xs text-slate-500">This stops future PR packages, cancels the scheduled reminder, deactivates the discount code, and sends the collaboration check-in letter.</p>
+            <label className="mt-3 block text-xs font-semibold text-slate-700">
+              Timeframe
+              <input
+                value={pauseTimeframe}
+                onChange={(e) => setPauseTimeframe(e.target.value)}
+                placeholder="e.g. three months"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-normal"
+              />
+            </label>
+            <label className="mt-3 block text-xs font-semibold text-slate-700">
+              Factual performance concerns
+              <textarea
+                value={pauseDetails}
+                onChange={(e) => setPauseDetails(e.target.value)}
+                placeholder="e.g. posting frequency, content deliverables, engagement, or brand representation"
+                rows={4}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-normal"
+              />
+            </label>
+            <label className="mt-3 block text-xs font-semibold text-slate-700">
+              Sender name
+              <input
+                value={pauseSenderName}
+                onChange={(e) => setPauseSenderName(e.target.value)}
+                placeholder="Your name"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-normal"
+              />
+            </label>
+            <div className="mt-4 flex justify-end gap-2">
+              <button onClick={() => setPauseRow(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+              <button
+                onClick={submitPauseAmbassador}
+                disabled={saving === pauseRow.id || !pauseTimeframe.trim() || !pauseDetails.trim() || !pauseSenderName.trim()}
+                className="rounded-lg bg-amber-600 px-3 py-2 text-sm font-semibold text-white hover:bg-amber-500 disabled:opacity-60"
+              >
+                Pause &amp; send email
+              </button>
             </div>
           </div>
         </div>
