@@ -6,8 +6,9 @@ import { PRODUCT_ALIAS_GROUPS } from './data/productAliases.js'
 import PRODUCT_INFORMATION_BY_SUBCATEGORY from './data/product-info.json'
 import {
   filterReleaseGatedImageMap,
-  isSpiralShimmersProduct,
-  isWinterVaultOpen,
+  isReleaseDateReached,
+  isVaultProductReleased,
+  SPIRAL_SHIMMERS_RELEASE_AT,
   WINTER_VAULT_REVEAL_AT,
 } from './data/product-releases.js'
 import ImportedAnyPage from './pages/imported/ImportedAnyPage.jsx'
@@ -3109,13 +3110,13 @@ const COLOR_CATEGORY_LINKS = [
   { category: 'PMA', label: 'PMA', slug: 'pma' },
   { category: 'SHIMMER COLORS', label: 'Shimmer Colors', slug: 'shimmer-colors' },
   { category: 'SNOWFLAKE', label: 'Snowflake', slug: 'snowflake' },
-  { category: 'SPIRAL SHIMMERS', label: 'Spiral Shimmers', slug: 'spiral-shimmers', releaseAt: WINTER_VAULT_REVEAL_AT },
+  { category: 'SPIRAL SHIMMERS', label: 'Spiral Shimmers', slug: 'spiral-shimmers', releaseAt: SPIRAL_SHIMMERS_RELEASE_AT },
   { category: 'SPIX & SPEX', label: 'Spix & Spex', slug: 'spix-spex' },
   { category: 'TUTTI FRUTTI GLASS', label: 'Tutti Frutti Glass', slug: 'tutti-frutti-glass' },
 ]
 
 function getReleasedColorCategoryLinks(now = Date.now()) {
-  return COLOR_CATEGORY_LINKS.filter((item) => !item.releaseAt || isWinterVaultOpen(now))
+  return COLOR_CATEGORY_LINKS.filter((item) => !item.releaseAt || isReleaseDateReached(item.releaseAt, now))
 }
 
 function resolveColorFamilyKey(name = '') {
@@ -5034,6 +5035,7 @@ function FullCataloguePage() {
       '3in1':                  ['BUILDER GEL SYSTEMS', '3INI BUILDER'],
       '3-in-1':                ['BUILDER GEL SYSTEMS', '3INI BUILDER'],
       '3ini':                  ['BUILDER GEL SYSTEMS', '3INI BUILDER'],
+      'glitter-builder-gels':  ['BUILDER GEL SYSTEMS', 'GLITTER 3-IN-1 BUILDER GELS'],
       'bob':                   ['BUILDER GEL SYSTEMS', 'BRUSH ON BUILDER'],
       'brush-on-builder':      ['BUILDER GEL SYSTEMS', 'BRUSH ON BUILDER'],
       'liquid-polygel':        ['BUILDER GEL SYSTEMS', 'LIQUID POLYGEL'],
@@ -5056,6 +5058,7 @@ function FullCataloguePage() {
       'marble':                ['NAIL ART', 'MARBLE INK'],
       'stickers':              ['NAIL ART', 'STICKERS'],
       'glitter-effects':       ['NAIL ART', 'GLITTER EFFECTS POWEDER'],
+      'prism-art-gel':         ['NAIL ART', 'PRISM ART GEL'],
       // ── Bases ────────────────────────────────────────────────────────────
       '5in1-base':             ['BASES', '5IN1 SUPERIOR BASE'],
       'classic-base':          ['BASES', 'CLASSIC BASE COAT'],
@@ -14304,9 +14307,13 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           })
           .filter((item) => (
             Boolean(item.code)
-            && (
-              isWinterVaultOpen()
-              || !isSpiralShimmersProduct(item.code, item.sku, item.name, item.category, item.imageUrl)
+            && isVaultProductReleased(
+              Date.now(),
+              item.code,
+              item.sku,
+              item.name,
+              item.category,
+              item.imageUrl,
             )
           ))
 

@@ -10,6 +10,11 @@
   },
   "rules": [
     {
+      "label": "3D Prism Art Gel (Authority €3.92)",
+      "multiplier": 0.3322033898305085,
+      "patterns": ["3d prism art gel"]
+    },
+    {
       "label": "GEL.IT.UP Nail Forms (40% of B2B — 60% off)",
       "multiplier": 0.4,
       "patterns": ["nail forms"]

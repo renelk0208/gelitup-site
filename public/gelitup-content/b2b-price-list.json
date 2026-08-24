@@ -2,7 +2,7 @@
   "_meta": {
     "source": "price-list-export.csv",
     "generated": "2026-07-04T05:02:11.623Z",
-    "count": 1113
+    "count": 1138
   },
   "items": [
     {
@@ -2531,6 +2531,36 @@
       "price": 7.41
     },
     {
+      "name": "3D Prism Art Gel Clear -HTF",
+      "sku": "3D Prism Art Gel Clear -HTF",
+      "price": 9.8
+    },
+    {
+      "name": "3D Prism Art Gel Blue -HTF",
+      "sku": "3D Prism Art Gel Blue -HTF",
+      "price": 9.8
+    },
+    {
+      "name": "3D Prism Art Gel Copper - HTF",
+      "sku": "3D Prism Art Gel Copper - HTF",
+      "price": 9.8
+    },
+    {
+      "name": "3D Prism Art Gel Mint -HTF",
+      "sku": "3D Prism Art Gel Mint -HTF",
+      "price": 9.8
+    },
+    {
+      "name": "3D Prism Art Gel Pink -HTF",
+      "sku": "3D Prism Art Gel Pink -HTF",
+      "price": 9.8
+    },
+    {
+      "name": "3D Prism Art Gel Purple -HTF",
+      "sku": "3D Prism Art Gel Purple -HTF",
+      "price": 9.8
+    },
+    {
       "name": "3-in-1 Builder Gel Clear 40g -HTF",
       "sku": "3-in-1 Builder Gel Clear 40g -HTF",
       "price": 23.16
@@ -2546,44 +2576,44 @@
       "price": 23.16
     },
     {
-      "name": "3-in-1 Builder Gel Glitter Copper Sunshine -HTF",
-      "sku": "3-in-1 Builder Gel Glitter Copper Sunshine -HTF",
-      "price": 23.16
+      "name": "3-in-1 Glitter Builder Gels Copper Sunshine 20g -HTF",
+      "sku": "3-in-1 Glitter Builder Gels Copper Sunshine 20g -HTF",
+      "price": 27.8
     },
     {
-      "name": "3-in-1 Builder Gel Glitter Cosmic Dust -HTF",
-      "sku": "3-in-1 Builder Gel Glitter Cosmic Dust -HTF",
-      "price": 23.16
+      "name": "3-in-1 Glitter Builder Gels Cosmic Glitter 20g -HTF",
+      "sku": "3-in-1 Glitter Builder Gels Cosmic Glitter 20g -HTF",
+      "price": 27.8
     },
     {
-      "name": "3-in-1 Builder Gel Glitter Deep Sea Galaxy -HTF",
-      "sku": "3-in-1 Builder Gel Glitter Deep Sea Galaxy -HTF",
-      "price": 23.16
+      "name": "3-in-1 Glitter Builder Gels Copper Deep Sea Galaxy 20g -HTF",
+      "sku": "3-in-1 Glitter Builder Gels Copper Deep Sea Galaxy 20g -HTF",
+      "price": 27.8
     },
     {
-      "name": "3-in-1 Builder Gel Glitter Electric Orchid -HTF",
-      "sku": "3-in-1 Builder Gel Glitter Electric Orchid -HTF",
-      "price": 23.16
+      "name": "3-in-1 Glitter Builder Gels Copper Electric Orchid 20g -HTF",
+      "sku": "3-in-1 Glitter Builder Gels Copper Electric Orchid 20g -HTF",
+      "price": 27.8
     },
     {
-      "name": "3-in-1 Builder Gel Glitter Rose Stardust -HTF",
-      "sku": "3-in-1 Builder Gel Glitter Rose Stardust -HTF",
-      "price": 23.16
+      "name": "3-in-1 Glitter Builder Gels Copper Rose Stardust 20g -HTF",
+      "sku": "3-in-1 Glitter Builder Gels Copper Rose Stardust 20g -HTF",
+      "price": 27.8
     },
     {
-      "name": "3-in-1 Builder Gel Glitter Stardust Plum -HTF",
-      "sku": "3-in-1 Builder Gel Glitter Stardust Plum -HTF",
-      "price": 23.16
+      "name": "3-in-1 Glitter Builder Gels Copper Stardust Plum 20g -HTF",
+      "sku": "3-in-1 Glitter Builder Gels Copper Stardust Plum 20g -HTF",
+      "price": 27.8
     },
     {
-      "name": "3-in-1 Builder Gel Glitter Supernova Indigo -HTF",
-      "sku": "3-in-1 Builder Gel Glitter Supernova Indigo -HTF",
-      "price": 23.16
+      "name": "3-in-1 Glitter Builder Gels Copper Supernova Indigo 20g -HTF",
+      "sku": "3-in-1 Glitter Builder Gels Copper Supernova Indigo 20g -HTF",
+      "price": 27.8
     },
     {
-      "name": "3-in-1 Builder Gel Glitter Warm Sand Glow -HTF",
-      "sku": "3-in-1 Builder Gel Glitter Warm Sand Glow -HTF",
-      "price": 23.16
+      "name": "3-in-1 Glitter Builder Gels Copper Warm Sand Glow 20g -HTF",
+      "sku": "3-in-1 Glitter Builder Gels Copper Warm Sand Glow 20g -HTF",
+      "price": 27.8
     },
     {
       "name": "3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF",
@@ -5041,9 +5071,9 @@
       "price": 24.45
     },
     {
-      "name": "Premium Builder Gel Blue 20g -HTF",
-      "sku": "Premium Builder Gel Blue 20g -HTF",
-      "price": 24.45
+      "name": "Premium Builder Gel Blue - 20g -HTF",
+      "sku": "Premium Builder Gel Blue - 20g -HTF",
+      "price": 21.45
     },
     {
       "name": "Premium Builder Gel Clear 40gr -HTF",
@@ -5061,9 +5091,9 @@
       "price": 24.45
     },
     {
-      "name": "Premium Builder Gel Mint 20g -HTF",
-      "sku": "Premium Builder Gel Mint 20g -HTF",
-      "price": 24.45
+      "name": "Premium Builder Gel Mint - 20g -HTF",
+      "sku": "Premium Builder Gel Mint - 20g -HTF",
+      "price": 21.45
     },
     {
       "name": "Premium Builder Gel Nude 40gr -HTF",
@@ -5091,9 +5121,9 @@
       "price": 24.45
     },
     {
-      "name": "Premium Builder Gel Purple 20g -HTF",
-      "sku": "Premium Builder Gel Purple 20g -HTF",
-      "price": 24.45
+      "name": "Premium Builder Gel Purple - 20g -HTF",
+      "sku": "Premium Builder Gel Purple - 20g -HTF",
+      "price": 21.45
     },
     {
       "name": "Premium Builder Gel White 40gr -HTF",
