@@ -4,6 +4,12 @@ import appLogo from '/gelitup_logo.png'
 import PWABadge from './PWABadge.jsx'
 import { PRODUCT_ALIAS_GROUPS } from './data/productAliases.js'
 import PRODUCT_INFORMATION_BY_SUBCATEGORY from './data/product-info.json'
+import {
+  filterReleaseGatedImageMap,
+  isSpiralShimmersProduct,
+  isWinterVaultOpen,
+  WINTER_VAULT_REVEAL_AT,
+} from './data/product-releases.js'
 import ImportedAnyPage from './pages/imported/ImportedAnyPage.jsx'
 import SchemaOrg from './components/SchemaOrg'
 import StarterKits from './components/StarterKits.jsx'
@@ -3103,9 +3109,14 @@ const COLOR_CATEGORY_LINKS = [
   { category: 'PMA', label: 'PMA', slug: 'pma' },
   { category: 'SHIMMER COLORS', label: 'Shimmer Colors', slug: 'shimmer-colors' },
   { category: 'SNOWFLAKE', label: 'Snowflake', slug: 'snowflake' },
+  { category: 'SPIRAL SHIMMERS', label: 'Spiral Shimmers', slug: 'spiral-shimmers', releaseAt: WINTER_VAULT_REVEAL_AT },
   { category: 'SPIX & SPEX', label: 'Spix & Spex', slug: 'spix-spex' },
   { category: 'TUTTI FRUTTI GLASS', label: 'Tutti Frutti Glass', slug: 'tutti-frutti-glass' },
 ]
+
+function getReleasedColorCategoryLinks(now = Date.now()) {
+  return COLOR_CATEGORY_LINKS.filter((item) => !item.releaseAt || isWinterVaultOpen(now))
+}
 
 function resolveColorFamilyKey(name = '') {
   const token = normalizeCatalogueToken(name)
@@ -3556,10 +3567,6 @@ const SUBCATEGORY_SEO = {
   },
 }
 
-// Winter Vault teaser on the catalogue — mirrors REVEAL_AT in
-// src/pages/WinterVaultLandingPage.jsx; keep in sync when the date changes.
-const WINTER_VAULT_REVEAL_AT = '2026-09-01T00:00:00'
-
 function FullCataloguePage() {
   const location = useLocation()
   const [sections, setSections] = useState([])
@@ -3779,7 +3786,8 @@ function FullCataloguePage() {
         const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
         if (!mounted) return
 
-        const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(payload, hiddenKeys), manualRuleIndex)
+        const releasedPayload = filterReleaseGatedImageMap(payload)
+        const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(releasedPayload, hiddenKeys), manualRuleIndex)
         setSections(nextSections)
         if (videoMapResponse.ok) { try { setVideoMap(await videoMapResponse.json()) } catch {} }
         const _normOos = n => String(n).replace(/[_.-]+/g, ' ').replace(/\s+/g, ' ').trim()
@@ -5012,7 +5020,7 @@ function FullCataloguePage() {
     // Maps URL slug → [categoryName, subcategoryName] using exact folder names from product-images/
     const SUBSLUG_MAP = {
       // ── Gel Polish (COLORS) ──────────────────────────────────────────────────
-      ...Object.fromEntries(COLOR_CATEGORY_LINKS.map((item) => [item.slug, ['COLORS', item.category]])),
+      ...Object.fromEntries(getReleasedColorCategoryLinks().map((item) => [item.slug, ['COLORS', item.category]])),
       'cateye':                ['COLORS', 'CAT EYE'],
       'shimmer':               ['COLORS', 'SHIMMER COLORS'],
       'glitter':               ['COLORS', 'GLITTERS'],
@@ -7031,7 +7039,8 @@ function MissingImagesReport() {
         const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
         if (!mounted) return
 
-        const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(payload, hiddenKeys), manualRuleIndex)
+        const releasedPayload = filterReleaseGatedImageMap(payload)
+        const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(releasedPayload, hiddenKeys), manualRuleIndex)
         setSections(nextSections)
       }
       catch (error) {
@@ -7311,7 +7320,7 @@ const PRODUCT_MENU = [
   {
     label: 'Gel Polish / Colours',
     to: '/full-catalogue?category=colours',
-    children: COLOR_CATEGORY_LINKS.map((item) => ({
+    children: getReleasedColorCategoryLinks().map((item) => ({
       label: item.label,
       to: `/full-catalogue?subcategory=${item.slug}`,
       children: item.children,
@@ -12050,7 +12059,7 @@ function PortalForgotPassword() {
 const B2B_SIDEBAR_GROUPS = [
   {
     label: 'Colours',
-    cats: COLOR_CATEGORY_LINKS.map((item) => item.category),
+    cats: getReleasedColorCategoryLinks().map((item) => item.category),
   },
   {
     label: 'Essentials',
@@ -14053,7 +14062,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             const manualOrderPayload = orderResponse.ok ? await orderResponse.json() : { rules: [] }
             const hiddenKeys = hiddenResponse.ok ? await hiddenResponse.json() : []
             const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
-            const sections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(mapPayload, hiddenKeys), manualRuleIndex)
+            const releasedPayload = filterReleaseGatedImageMap(mapPayload)
+            const sections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(releasedPayload, hiddenKeys), manualRuleIndex)
             return sections.flatMap((section) =>
               section.subcategories.flatMap((sub) =>
                 sub.items.map((item) => ({
@@ -14292,7 +14302,13 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
               price,
             }
           })
-          .filter((item) => Boolean(item.code))
+          .filter((item) => (
+            Boolean(item.code)
+            && (
+              isWinterVaultOpen()
+              || !isSpiralShimmersProduct(item.code, item.sku, item.name, item.category, item.imageUrl)
+            )
+          ))
 
         if (!normalized.length) {
           throw new Error('Feed has no valid products')

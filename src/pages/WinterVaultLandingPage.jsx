@@ -1,9 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase, hasSupabaseConfig } from '../lib/supabaseClient'
-
-// New-product reveal date — update when the real date is confirmed.
-const REVEAL_AT = '2026-09-01T00:00:00'
+import { SPIRAL_SHIMMERS_PRODUCTS, WINTER_VAULT_REVEAL_AT } from '../data/product-releases.js'
 
 function useDetailedCountdown(targetIso) {
   const [msLeft, setMsLeft] = useState(() => new Date(targetIso).getTime() - Date.now())
@@ -55,7 +53,7 @@ function VaultDoorGraphic() {
 }
 
 export default function WinterVaultLandingPage() {
-  const reveal = useDetailedCountdown(REVEAL_AT)
+  const reveal = useDetailedCountdown(WINTER_VAULT_REVEAL_AT)
   const [subscribeEmail, setSubscribeEmail] = useState('')
   const [subscribeStatus, setSubscribeStatus] = useState('idle') // idle | submitting | success | error
 
@@ -105,20 +103,20 @@ export default function WinterVaultLandingPage() {
           GEL.IT.UP by GIUP® — The Winter Vault
         </p>
         <h1 className="heading-on-dark mt-4 text-4xl sm:text-6xl font-black leading-tight tracking-tight" style={{ color: '#fff' }}>
-          Something new is<br />locked away
+          {reveal.isOver ? <>Spiral Shimmers<br />have arrived</> : <>Something new is<br />locked away</>}
         </h1>
         <p className="mt-5 mx-auto max-w-lg text-base sm:text-lg" style={{ color: 'rgba(255,255,255,0.72)' }}>
-          Brand new products, sealed until the vault opens on 1 September.
-          Leave your email and be the first inside.
+          {reveal.isOver
+            ? 'Five new Spiral Shimmers gel polish colours are now available.'
+            : 'Brand new products, sealed until the vault opens on 1 September. Leave your email and be the first inside.'}
         </p>
 
-        <div className="relative mx-auto mt-12" style={{ maxWidth: '280px' }}>
-          <VaultDoorGraphic />
-          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center">
-            <div className="rounded-xl px-4 py-3" style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
-              {reveal.isOver ? (
-                <p className="text-sm font-bold text-white">It's open</p>
-              ) : (
+        {!reveal.isOver ? (
+          <>
+            <div className="relative mx-auto mt-12" style={{ maxWidth: '280px' }}>
+              <VaultDoorGraphic />
+              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center">
+                <div className="rounded-xl px-4 py-3" style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
                 <div className="flex items-end gap-3">
                   {[
                     { v: reveal.days, l: 'D' },
@@ -132,37 +130,60 @@ export default function WinterVaultLandingPage() {
                     </div>
                   ))}
                 </div>
-              )}
+                </div>
+              </div>
             </div>
+            <p className="mt-10 text-sm font-bold text-white">Opens 1 September 2026</p>
+            <form onSubmit={handleSubscribe} className="mt-6 mx-auto flex flex-col sm:flex-row gap-2 justify-center max-w-sm">
+              <input
+                type="email"
+                required
+                value={subscribeEmail}
+                onChange={(e) => setSubscribeEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="rounded-xl px-4 py-3 text-sm flex-1"
+                style={{ border: '1px solid rgba(255,255,255,0.25)', backgroundColor: 'rgba(255,255,255,0.06)', color: '#fff' }}
+              />
+              <button
+                type="submit"
+                disabled={subscribeStatus === 'submitting' || subscribeStatus === 'success'}
+                className="rounded-xl px-6 py-3 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-60"
+                style={{ backgroundColor: '#D43790' }}
+              >
+                {subscribeStatus === 'submitting' ? 'Saving…' : subscribeStatus === 'success' ? "You're on the list ✓" : 'Keep Me Posted'}
+              </button>
+            </form>
+            {subscribeStatus === 'error' && (
+              <p className="mt-2 text-xs" style={{ color: '#f87171' }}>Something went wrong. Please try again.</p>
+            )}
+            {subscribeStatus === 'success' && (
+              <p className="mt-2 text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>We'll email you the moment the vault opens.</p>
+            )}
+          </>
+        ) : (
+          <div className="mx-auto mt-10 max-w-5xl">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+              {SPIRAL_SHIMMERS_PRODUCTS.map((product) => (
+                <NavLink
+                  key={product.code}
+                  to="/full-catalogue?subcategory=spiral-shimmers"
+                  className="overflow-hidden rounded-2xl border border-white/15 bg-white/5 text-left transition hover:-translate-y-1 hover:border-[#D43790]"
+                >
+                  <img src={product.imageUrl} alt={product.name} className="aspect-square w-full object-cover" />
+                  <div className="p-3">
+                    <p className="text-sm font-bold text-white">{product.name}</p>
+                    <p className="mt-1 text-xs text-white/55">View in catalogue</p>
+                  </div>
+                </NavLink>
+              ))}
+            </div>
+            <NavLink
+              to="/full-catalogue?subcategory=spiral-shimmers"
+              className="mt-8 inline-flex rounded-xl bg-[#D43790] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#BF3182]"
+            >
+              Shop Spiral Shimmers
+            </NavLink>
           </div>
-        </div>
-
-        <p className="mt-10 text-sm font-bold text-white">Opens 1 September 2026</p>
-
-        <form onSubmit={handleSubscribe} className="mt-6 mx-auto flex flex-col sm:flex-row gap-2 justify-center max-w-sm">
-          <input
-            type="email"
-            required
-            value={subscribeEmail}
-            onChange={(e) => setSubscribeEmail(e.target.value)}
-            placeholder="your@email.com"
-            className="rounded-xl px-4 py-3 text-sm flex-1"
-            style={{ border: '1px solid rgba(255,255,255,0.25)', backgroundColor: 'rgba(255,255,255,0.06)', color: '#fff' }}
-          />
-          <button
-            type="submit"
-            disabled={subscribeStatus === 'submitting' || subscribeStatus === 'success'}
-            className="rounded-xl px-6 py-3 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-60"
-            style={{ backgroundColor: '#D43790' }}
-          >
-            {subscribeStatus === 'submitting' ? 'Saving…' : subscribeStatus === 'success' ? "You're on the list ✓" : 'Keep Me Posted'}
-          </button>
-        </form>
-        {subscribeStatus === 'error' && (
-          <p className="mt-2 text-xs" style={{ color: '#f87171' }}>Something went wrong. Please try again.</p>
-        )}
-        {subscribeStatus === 'success' && (
-          <p className="mt-2 text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>We'll email you the moment the vault opens.</p>
         )}
       </section>
 

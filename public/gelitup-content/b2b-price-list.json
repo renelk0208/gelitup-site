@@ -2,7 +2,7 @@
   "_meta": {
     "source": "price-list-export.csv",
     "generated": "2026-07-04T05:02:11.623Z",
-    "count": 1108
+    "count": 1113
   },
   "items": [
     {
@@ -5614,6 +5614,31 @@
       "name": "Velvet Cat Eye #VCE10 -HTF",
       "sku": "Velvet Cat Eye #VCE10 -HTF",
       "price": 9.03
+    },
+    {
+      "name": "Spiral_shimmers_01 -HTF",
+      "sku": "Spiral_shimmers_01 -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "Spiral_shimmers_02 -HTF",
+      "sku": "Spiral_shimmers_02 -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "Spiral_shimmers_03 -HTF",
+      "sku": "Spiral_shimmers_03 -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "Spiral_shimmers_04 -HTF",
+      "sku": "Spiral_shimmers_04 -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "Spiral_shimmers_05 -HTF",
+      "sku": "Spiral_shimmers_05 -HTF",
+      "price": 7.41
     },
     {
       "name": "Watercolors Aquarelle Pallete",
