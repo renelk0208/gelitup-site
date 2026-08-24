@@ -2771,11 +2771,11 @@ function applyManualCatalogueOrder(items = [], rule = null) {
 
 function applyHiddenProductsFilter(payload, hiddenKeys = []) {
   if (!Array.isArray(hiddenKeys) || hiddenKeys.length === 0) return payload
-  const hiddenSet = new Set(hiddenKeys.map(k => String(k).trim()).filter(Boolean))
+  const hiddenSet = new Set(hiddenKeys.map(k => String(k).trim().toLowerCase()).filter(Boolean))
   if (hiddenSet.size === 0) return payload
   const filtered = {}
   for (const [key, value] of Object.entries(payload)) {
-    if (!hiddenSet.has(key)) filtered[key] = value
+    if (!hiddenSet.has(key.trim().toLowerCase())) filtered[key] = value
   }
   return filtered
 }
