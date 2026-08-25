@@ -83,7 +83,7 @@ function ReleasedStage({ stage }) {
   return (
     <div className="rounded-3xl border border-white/15 bg-white/[0.04] p-4 sm:p-6">
       <div className="mb-5 text-left">
-        <p className="text-[10px] font-bold uppercase tracking-[0.25em]" style={{ color: '#D43790' }}>Stage {stage.stage} — Now Open</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.25em]" style={{ color: '#D43790' }}>Now Open</p>
         <h2 className="mt-1 text-2xl font-black text-white">{stage.title}</h2>
         <p className="mt-1 text-sm text-white/60">{stage.description}</p>
       </div>
@@ -126,12 +126,11 @@ export default function WinterVaultLandingPage() {
     if (!subscribeEmail.trim()) return
     setSubscribeStatus('submitting')
     try {
-      if (hasSupabaseConfig && supabase) {
-        const { error: insertError } = await supabase
-          .from('vault_subscribers')
-          .insert({ email: subscribeEmail.trim().toLowerCase(), campaign: 'winter-vault-reveal' })
-        if (insertError && insertError.code !== '23505') throw insertError
-      }
+      if (!hasSupabaseConfig || !supabase) throw new Error('Vault registration is not configured.')
+      const { error: insertError } = await supabase
+        .from('vault_subscribers')
+        .insert({ email: subscribeEmail.trim().toLowerCase(), campaign: 'winter-vault-reveal' })
+      if (insertError && insertError.code !== '23505') throw insertError
       setSubscribeStatus('success')
     } catch {
       setSubscribeStatus('error')
@@ -145,8 +144,8 @@ export default function WinterVaultLandingPage() {
       meta.setAttribute(
         'content',
         hasReleasedProducts
-          ? 'Discover the staged Winter Vault product releases from GEL.IT.UP by GIUP®.'
-          : 'Something new is locked in the vault. Stage 1 opens 1 September 2026.',
+          ? 'Discover the Winter Vault releases from GEL.IT.UP by GIUP®.'
+          : 'Something new is locked in the GEL.IT.UP Winter Vault.',
       )
     }
   }, [hasReleasedProducts])
@@ -182,7 +181,7 @@ export default function WinterVaultLandingPage() {
             ? `All ${VAULT_RELEASE_STAGES.length} September collections are now available.`
             : hasReleasedProducts
               ? 'New professional nail collections are being released throughout September.'
-              : 'Brand new products, sealed until Stage 1 opens on 1 September. Leave your email and be the first inside.'}
+              : 'Brand new products are sealed inside. Register your email to be the first inside and qualify for 20% off Vault purchases.'}
         </p>
 
         {!hasReleasedProducts && nextStage && (
@@ -198,8 +197,8 @@ export default function WinterVaultLandingPage() {
 
         {nextStage && (
           <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-[#D43790]/50 bg-[#D43790]/10 px-5 py-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.25em]" style={{ color: '#D43790' }}>Next Unlock — Stage {nextStage.stage}</p>
-            <p className="mt-1 text-lg font-black text-white">{nextStage.title}</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em]" style={{ color: '#D43790' }}>Next Unlock</p>
+            <p className="mt-1 text-lg font-black text-white">Mystery Release</p>
             <p className="mt-1 text-sm text-white/60">{formatReleaseDate(nextStage.releaseAt)}</p>
             {hasReleasedProducts && <div className="mt-4"><CountdownDisplay countdown={countdown} /></div>}
           </div>
@@ -213,6 +212,10 @@ export default function WinterVaultLandingPage() {
 
         {nextStage && (
           <>
+            <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-[#D43790]/50 bg-[#D43790]/10 px-5 py-4">
+              <p className="text-sm font-black text-white">Register and qualify for 20% off Vault purchases</p>
+              <p className="mt-1 text-xs text-white/65">Use the same email at checkout and your discount will be applied automatically to eligible Vault items.</p>
+            </div>
             <form onSubmit={handleSubscribe} className="mt-8 mx-auto flex max-w-sm flex-col justify-center gap-2 sm:flex-row">
               <input
                 type="email"
@@ -229,14 +232,14 @@ export default function WinterVaultLandingPage() {
                 className="rounded-xl px-6 py-3 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-60"
                 style={{ backgroundColor: '#D43790' }}
               >
-                {subscribeStatus === 'submitting' ? 'Saving…' : subscribeStatus === 'success' ? "You're on the list ✓" : 'Keep Me Posted'}
+                {subscribeStatus === 'submitting' ? 'Saving…' : subscribeStatus === 'success' ? 'Discount registration saved ✓' : 'Register for 20% Off'}
               </button>
             </form>
             {subscribeStatus === 'error' && (
               <p className="mt-2 text-xs" style={{ color: '#f87171' }}>Something went wrong. Please try again.</p>
             )}
             {subscribeStatus === 'success' && (
-              <p className="mt-2 text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>We'll email you when the next stage opens.</p>
+              <p className="mt-2 text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>Your email is saved. Use it at checkout for 20% off eligible Vault items, and we'll notify you when the next release opens.</p>
             )}
           </>
         )}

@@ -6,6 +6,7 @@ import { PRODUCT_ALIAS_GROUPS } from './data/productAliases.js'
 import PRODUCT_INFORMATION_BY_SUBCATEGORY from './data/product-info.json'
 import {
   filterReleaseGatedImageMap,
+  getVaultReleaseStage,
   isReleaseDateReached,
   isVaultProductReleased,
   SPIRAL_SHIMMERS_RELEASE_AT,
@@ -69,6 +70,7 @@ const MIN_ORDER_EUR = 100
 const CATALOGUE_DISCOUNT_PCT = 0
 const CATALOGUE_DISCOUNT_LABEL = 'SUMMER MADNESS -20%'
 const CATALOGUE_DISCOUNT_ENDS = new Date('2026-08-20T23:59:59+03:00')
+const VAULT_DISCOUNT_PCT = 20
 function isCatalogueDiscountActive() {
   return CATALOGUE_DISCOUNT_PCT > 0 && Date.now() <= CATALOGUE_DISCOUNT_ENDS.getTime()
 }
@@ -2827,6 +2829,16 @@ function applyHiddenProductsFilter(payload, hiddenKeys = []) {
   return filtered
 }
 
+function normalizeOutOfStockName(value) {
+  return String(value || '')
+    .replace(/\bHTF\b/gi, ' ')
+    .replace(/(\bLINE\s+IT\s+UP)\s+0*\d+\b/gi, '$1')
+    .replace(/\bMULTI\s+COLOU?R\b/gi, 'MULTICOLOUR')
+    .replace(/[^a-z0-9]+/gi, ' ')
+    .trim()
+    .toUpperCase()
+}
+
 function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()) {
   if (!payload || typeof payload !== 'object') return []
 
@@ -3791,8 +3803,7 @@ function FullCataloguePage() {
         const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(releasedPayload, hiddenKeys), manualRuleIndex)
         setSections(nextSections)
         if (videoMapResponse.ok) { try { setVideoMap(await videoMapResponse.json()) } catch {} }
-        const _normOos = n => String(n).replace(/[_.-]+/g, ' ').replace(/\s+/g, ' ').trim()
-        setOutOfStockNames(new Set(Array.isArray(oosNames) ? oosNames.map(_normOos) : []))
+        setOutOfStockNames(new Set(Array.isArray(oosNames) ? oosNames.map(normalizeOutOfStockName) : []))
         const _normSizeKey = k => String(k).replace(/[_.-]+/g, ' ').replace(/\s+/g, ' ').trim()
         const _enrichedSizes = { ...(sizesPayload || {}) }
         if (sizesPayload && payload) {
@@ -5595,7 +5606,7 @@ function FullCataloguePage() {
                   const qty = getQty(itemKey)
                   const hasChangedQty = qty !== 1
                   const inCart = quickCart[itemKey] > 0
-                  const isOOS = outOfStockNames.has(item.name)
+                  const isOOS = outOfStockNames.has(normalizeOutOfStockName(item.name))
                   const _sizeFilename = item.imageUrl.split('/').pop() || ''
                   const _sizeMatchFile = _sizeFilename.match(/\b(\d+(?:\.\d+)?)\s*(ml|gr|g)\b/i)
                   const _sizeMatchName = item.name.match(/\b(\d+(?:\.\d+)?)\s*(ml|gr|g)\b/i)
@@ -5912,6 +5923,28 @@ function FullCataloguePage() {
 
   return (
     <section className="space-y-5">
+      <NavLink
+        to="/winter-vault"
+        className="group relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] -mt-4 block w-screen overflow-hidden border-y border-fuchsia-400/40 bg-[#080509] px-4 py-7 text-white shadow-[0_12px_40px_rgba(212,55,144,0.22)] md:-mt-10 md:px-8 md:py-9"
+        aria-label="Enter the Winter Vault. Next mystery unlock 7 September 2026."
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(212,55,144,0.32),transparent_55%)]" />
+        <div className="relative mx-auto flex max-w-6xl flex-col items-center justify-between gap-5 text-center sm:flex-row sm:text-left">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.32em] text-fuchsia-300">Something new is locked away</p>
+            <h1 className="mt-2 text-3xl font-black uppercase tracking-[0.12em] text-white sm:text-4xl">
+              The Winter Vault
+            </h1>
+            <p className="mt-2 text-sm font-medium text-white/75 sm:text-base">
+              Next mystery unlock: 7 September 2026
+            </p>
+          </div>
+          <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-fuchsia-300/60 bg-fuchsia-500 px-6 py-3 text-sm font-bold uppercase tracking-[0.16em] text-white transition group-hover:border-white group-hover:bg-fuchsia-400 group-focus-visible:border-white group-focus-visible:bg-fuchsia-400">
+            Enter the Vault
+            <span aria-hidden="true">→</span>
+          </span>
+        </div>
+      </NavLink>
       {SEASONAL_BANNER_ENABLED && (
         <a
           href="#catalogue-section-new-products"
@@ -6045,6 +6078,12 @@ function FullCataloguePage() {
           {/* WINTER VAULT CAMPAIGN TEASER */}
           {(() => {
             const daysToReveal = Math.max(0, Math.ceil((new Date(WINTER_VAULT_REVEAL_AT).getTime() - Date.now()) / 86400000))
+            const nextUnlockDate = new Date(WINTER_VAULT_REVEAL_AT).toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+              timeZone: 'Europe/Sofia',
+            })
             return (
               <div className="mx-auto max-w-6xl px-4 sm:px-8 pb-2">
                 <NavLink
@@ -6060,10 +6099,10 @@ function FullCataloguePage() {
                       </p>
                       <p className="mt-1.5 text-lg font-black leading-snug text-white sm:text-xl">
                         Something new is locked away.{' '}
-                        {daysToReveal > 0 ? `The vault opens in ${daysToReveal} days.` : 'The vault is open.'}
+                        {daysToReveal > 0 ? `The next mystery unlock is in ${daysToReveal} days.` : 'The next mystery release is open.'}
                       </p>
                       <p className="mt-1 text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                        Brand new products, sealed until 1 September. Leave your email and be the first inside.
+                        Next unlock: {nextUnlockDate}. Register your email to qualify for 20% off Vault purchases.
                       </p>
                     </div>
                     <span className="shrink-0 self-start sm:self-auto rounded-lg px-5 py-2.5 text-sm font-bold text-white transition group-hover:opacity-90" style={{ backgroundColor: '#D43790' }}>
@@ -6094,7 +6133,7 @@ function FullCataloguePage() {
                     const itemListPrice = resolveCatalogueListPrice(item.name, itemCode)
                     const itemDiscounted = isCatalogueDiscountActive() && itemPrice != null && itemListPrice != null && itemPrice < itemListPrice
                     const inCart = quickCart[itemKey] > 0
-                    const isOOS = outOfStockNames.has(item.name)
+                    const isOOS = outOfStockNames.has(normalizeOutOfStockName(item.name))
                     return (
                       <article
                         key={idx}
@@ -9715,6 +9754,7 @@ function CheckoutPage() {
   const [ambassadorCode, setAmbassadorCode] = useState(null) // { code, name, pct } when applied
   const [ambassadorApplying, setAmbassadorApplying] = useState(false)
   const [ambassadorError, setAmbassadorError] = useState('')
+  const [vaultEligibility, setVaultEligibility] = useState({ email: '', status: 'idle', eligible: false, message: '' })
   const [walletInfo, setWalletInfo] = useState(null) // { code, name, availableEur, earnedEur, spentEur, commissionPct }
   const [walletLoading, setWalletLoading] = useState(false)
   const [walletError, setWalletError] = useState('')
@@ -9856,12 +9896,14 @@ function CheckoutPage() {
         if (key.startsWith('KIT::')) {
           const kit = kitStore[key.slice(5)]
           const price = kit ? Number(kit.total) : null
-          return { key, name: kit?.name || 'Starter Kit', code: 'KIT', qty, price, listPrice: price, lineTotal: price != null ? price * qty : null, listLineTotal: price != null ? price * qty : null, kit: kit || null }
+          return { key, name: kit?.name || 'Starter Kit', code: 'KIT', qty, price, listPrice: price, lineTotal: price != null ? price * qty : null, listLineTotal: price != null ? price * qty : null, kit: kit || null, isVaultProduct: false }
         }
         const [name, code] = key.split('::')
         const price = lookupPrice(name, code)
         const listPrice = resolveCheckoutListPrice(name, code)
-        return { key, name, code, qty, price, listPrice, lineTotal: price != null ? Number(price) * qty : null, listLineTotal: listPrice != null ? Number(listPrice) * qty : null }
+        const vaultStage = getVaultReleaseStage(name, code)
+        const isVaultProduct = Boolean(vaultStage && isReleaseDateReached(vaultStage.releaseAt))
+        return { key, name, code, qty, price, listPrice, lineTotal: price != null ? Number(price) * qty : null, listLineTotal: listPrice != null ? Number(listPrice) * qty : null, isVaultProduct }
       }), [cart, kitStore, lookupPrice, resolveCheckoutListPrice])
 
   const cartTotal = useMemo(() => cartEntries.reduce((s, e) => s + (e.lineTotal || 0), 0), [cartEntries])
@@ -9869,25 +9911,42 @@ function CheckoutPage() {
   const discountSavings = Number((listSubtotal - cartTotal).toFixed(2))
   const discountActive = isCatalogueDiscountActive() && discountSavings > 0
   const cartUnits = useMemo(() => cartEntries.reduce((s, e) => s + e.qty, 0), [cartEntries])
+  const hasVaultProducts = cartEntries.some((entry) => entry.isVaultProduct)
   // Zone shipping: every order is charged by delivery country.
   // null fee = country not configured yet (or not chosen yet).
   const deliveryCountry = (form.shipToDifferentAddress ? form.shippingCountry : form.invoiceCountry).trim()
   const handoff = getDistributorCountryHandoff(deliveryCountry)
   const smallOrderFee = getSmallOrderShippingFee(deliveryCountry)
   const shippingFee = smallOrderFee ?? 0
-  // Ambassador code discount — mutually exclusive with the site sale: the customer
-  // gets whichever discount is larger. Compare the code price (off the list price)
-  // to the already sale-discounted cart total and only apply the extra reduction.
+  // Site, ambassador, and Vault promotions do not stack; each line gets the best price.
   const ambassadorDiscountPct = ambassadorCode?.pct || 0
-  const ambassadorDiscountEur = ambassadorDiscountPct > 0
-    ? Math.max(0, Number((cartTotal - listSubtotal * (1 - ambassadorDiscountPct / 100)).toFixed(2)))
-    : 0
-  const productsSubtotalAfterCode = Number((cartTotal - ambassadorDiscountEur).toFixed(2))
+  const checkoutCartEntries = useMemo(() => cartEntries.map((entry) => {
+    if (entry.price == null) return { ...entry, ambassadorSavings: 0, vaultSavings: 0 }
+
+    const baseUnitPrice = Number(entry.price)
+    const ambassadorUnitPrice = ambassadorDiscountPct > 0 && entry.listPrice != null
+      ? Math.min(baseUnitPrice, Number(entry.listPrice) * (1 - ambassadorDiscountPct / 100))
+      : baseUnitPrice
+    const vaultUnitPrice = vaultEligibility.eligible && entry.isVaultProduct && entry.listPrice != null
+      ? Math.min(ambassadorUnitPrice, Number(entry.listPrice) * (1 - VAULT_DISCOUNT_PCT / 100))
+      : ambassadorUnitPrice
+
+    return {
+      ...entry,
+      price: Number(vaultUnitPrice.toFixed(2)),
+      lineTotal: Number((vaultUnitPrice * entry.qty).toFixed(2)),
+      ambassadorSavings: Number(((baseUnitPrice - ambassadorUnitPrice) * entry.qty).toFixed(2)),
+      vaultSavings: Number(((ambassadorUnitPrice - vaultUnitPrice) * entry.qty).toFixed(2)),
+    }
+  }), [ambassadorDiscountPct, cartEntries, vaultEligibility.eligible])
+  const ambassadorDiscountEur = Number(checkoutCartEntries.reduce((sum, entry) => sum + entry.ambassadorSavings, 0).toFixed(2))
+  const vaultDiscountEur = Number(checkoutCartEntries.reduce((sum, entry) => sum + entry.vaultSavings, 0).toFixed(2))
+  const productsSubtotalAfterDiscounts = Number(checkoutCartEntries.reduce((sum, entry) => sum + (entry.lineTotal || 0), 0).toFixed(2))
   const walletAvailableEur = Number(walletInfo?.availableEur || 0)
   const walletAppliedEur = useWalletCredit
-    ? Number(Math.min(walletAvailableEur, productsSubtotalAfterCode).toFixed(2))
+    ? Number(Math.min(walletAvailableEur, productsSubtotalAfterDiscounts).toFixed(2))
     : 0
-  const productsSubtotalAfterWallet = Number((productsSubtotalAfterCode - walletAppliedEur).toFixed(2))
+  const productsSubtotalAfterWallet = Number((productsSubtotalAfterDiscounts - walletAppliedEur).toFixed(2))
   const invoiceCountry = form.invoiceCountry.trim()
   const isEuInvoiceCountry = EU_COUNTRIES.includes(invoiceCountry)
   const hasValidViesVat = Boolean(viesResult?.valid && form.vatNumber.trim())
@@ -9907,6 +9966,45 @@ function CheckoutPage() {
     handoffPopupShownForCountryRef.current = deliveryCountry
     setHandoffModalOpen(true)
   }, [handoff, deliveryCountry])
+
+  useEffect(() => {
+    const email = form.email.trim().toLowerCase()
+    if (!hasVaultProducts || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setVaultEligibility({ email: '', status: 'idle', eligible: false, message: '' })
+      return undefined
+    }
+
+    const controller = new AbortController()
+    const timer = window.setTimeout(async () => {
+      setVaultEligibility({ email, status: 'loading', eligible: false, message: '' })
+      try {
+        const response = await fetch('/.netlify/functions/check-vault-discount', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+          signal: controller.signal,
+        })
+        const result = await response.json()
+        if (!response.ok) {
+          throw new Error(result.error || 'Vault discount eligibility could not be checked.')
+        }
+        setVaultEligibility({ email, status: 'ready', eligible: Boolean(result.eligible), message: '' })
+      } catch (eligibilityError) {
+        if (eligibilityError.name === 'AbortError') return
+        setVaultEligibility({
+          email,
+          status: 'error',
+          eligible: false,
+          message: eligibilityError.message || 'Vault discount eligibility could not be checked.',
+        })
+      }
+    }, 400)
+
+    return () => {
+      window.clearTimeout(timer)
+      controller.abort()
+    }
+  }, [form.email, hasVaultProducts])
 
   // Persist cart back to localStorage
   useEffect(() => {
@@ -10038,6 +10136,14 @@ function CheckoutPage() {
     if (!form.agreeTerms) { setError('You must agree to the terms and conditions to place your order.'); return }
 
     if (!hasSupabaseConfig || !supabase) { setError('Order system is not configured. Please contact us.'); return }
+    if (hasVaultProducts && (vaultEligibility.email !== email || vaultEligibility.status === 'loading' || vaultEligibility.status === 'idle')) {
+      setError('Please wait while we check your Winter Vault discount eligibility.')
+      return
+    }
+    if (hasVaultProducts && vaultEligibility.status === 'error') {
+      setError(vaultEligibility.message || 'We could not check your Winter Vault discount. Please try again.')
+      return
+    }
 
     if (handoff) {
       const fallbackName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim() || form.companyName.trim() || 'Client'
@@ -10255,7 +10361,7 @@ function CheckoutPage() {
 
       // 4. Build item rates for Zoho
       const itemRates = {}
-      for (const e of cartEntries) {
+      for (const e of checkoutCartEntries) {
         if (e.price != null) itemRates[normalizeSkuCode(e.code)] = e.price
       }
 
@@ -10336,6 +10442,7 @@ function CheckoutPage() {
             <tbody>${orderTableRows}
               <tr><td colspan="4" style="${tdStyle};text-align:right">Products subtotal</td><td style="${tdRStyle}">${cartTotal.toFixed(2)}</td></tr>
               ${ambassadorDiscountEur > 0 ? `<tr><td colspan="4" style="${tdStyle};text-align:right;color:#9B1268">Ambassador code ${escapeHtml(ambassadorCode?.code || '')} (−${ambassadorDiscountPct}%)</td><td style="${tdRStyle};color:#9B1268">− ${ambassadorDiscountEur.toFixed(2)}</td></tr>` : ''}
+              ${vaultDiscountEur > 0 ? `<tr><td colspan="4" style="${tdStyle};text-align:right;color:#9B1268">Registered Winter Vault customer (−${VAULT_DISCOUNT_PCT}%)</td><td style="${tdRStyle};color:#9B1268">− ${vaultDiscountEur.toFixed(2)}</td></tr>` : ''}
               ${walletAppliedEur > 0 ? `<tr><td colspan="4" style="${tdStyle};text-align:right;color:#047857">Ambassador wallet credit</td><td style="${tdRStyle};color:#047857">− ${walletAppliedEur.toFixed(2)}</td></tr>` : ''}
               <tr><td colspan="4" style="${tdStyle};text-align:right">VAT (${escapeHtml(vatLabel)})</td><td style="${tdRStyle}">${vatAmount.toFixed(2)}</td></tr>
               <tr><td colspan="4" style="${tdStyle};text-align:right">Shipping${shipping.country ? ` (${escapeHtml(shipping.country)})` : ''}</td><td style="${tdRStyle}">${shippingFee.toFixed(2)}</td></tr>
@@ -10358,6 +10465,7 @@ function CheckoutPage() {
             <p>Thank you — we've received your order <strong>#${insertedOrder?.id ?? '-'}</strong> and it's now being processed.</p>
             <p><strong>Order Total:</strong> €${grandTotal.toFixed(2)} (${cartUnits} items + €${vatAmount.toFixed(2)} VAT + €${shippingFee.toFixed(2)} shipping)</p>
             ${ambassadorDiscountEur > 0 ? `<p style="color:#9B1268"><strong>Ambassador code ${escapeHtml(ambassadorCode?.code || '')}</strong> applied — you saved €${ambassadorDiscountEur.toFixed(2)} (−${ambassadorDiscountPct}%).</p>` : ''}
+            ${vaultDiscountEur > 0 ? `<p style="color:#9B1268"><strong>Winter Vault registration discount</strong> applied to eligible Vault products — you saved €${vaultDiscountEur.toFixed(2)}.</p>` : ''}
             ${walletAppliedEur > 0 ? `<p style="color:#047857"><strong>Ambassador wallet credit</strong> applied — €${walletAppliedEur.toFixed(2)} used.</p>` : ''}
             <p style="color:#555">Your VAT invoice will follow by email once your order is processed. Should any item be unavailable, we will arrange a refund or account credit.</p>
             ${form.createAccount ? '<p>You can now log in with your email and password to track your orders.</p>' : '<p>If you would like to track future orders, you can create an account at checkout next time.</p>'}
@@ -10381,7 +10489,7 @@ function CheckoutPage() {
             transaction_id: purchaseEventId,
             currency: 'EUR',
             value: purchaseValue,
-            items: cartEntries.map((line) => ({
+            items: checkoutCartEntries.map((line) => ({
               item_id: String(line.code || '').trim(),
               item_name: String(line.name || line.code || '').trim(),
               price: Number((line.price ?? 0).toFixed(2)),
@@ -10400,7 +10508,7 @@ function CheckoutPage() {
             value: purchaseValue,
             currency: 'EUR',
             content_type: 'product',
-            content_ids: cartEntries.map((line) => String(line.code || '').trim()).filter(Boolean),
+            content_ids: checkoutCartEntries.map((line) => String(line.code || '').trim()).filter(Boolean),
           })
         }
       }
@@ -10874,6 +10982,29 @@ function CheckoutPage() {
                   <span className="font-semibold text-fuchsia-700">− €{ambassadorDiscountEur.toFixed(2)}</span>
                 </div>
               )}
+              {vaultDiscountEur > 0 && (
+                <div className="mt-1 flex items-center justify-between text-xs">
+                  <span className="font-semibold text-fuchsia-700">Winter Vault registration (−{VAULT_DISCOUNT_PCT}%)</span>
+                  <span className="font-semibold text-fuchsia-700">− €{vaultDiscountEur.toFixed(2)}</span>
+                </div>
+              )}
+              {cartEntries.some((entry) => entry.isVaultProduct) && form.email.trim() && (
+                <p className={`mt-2 text-[11px] font-semibold ${
+                  vaultEligibility.status === 'error'
+                    ? 'text-red-600'
+                    : vaultEligibility.eligible
+                      ? 'text-emerald-700'
+                      : 'text-slate-500'
+                }`}>
+                  {vaultEligibility.status === 'loading' || vaultEligibility.email !== form.email.trim().toLowerCase()
+                    ? 'Checking Winter Vault discount eligibility…'
+                    : vaultEligibility.status === 'error'
+                      ? vaultEligibility.message
+                      : vaultEligibility.eligible
+                        ? 'Winter Vault registration confirmed — 20% discount applied to eligible Vault items.'
+                        : 'Register this email in the Winter Vault to qualify for 20% off Vault items.'}
+                </p>
+              )}
               {walletAppliedEur > 0 && (
                 <div className="mt-1 flex items-center justify-between text-xs">
                   <span className="font-semibold text-emerald-700">Ambassador wallet credit</span>
@@ -10947,7 +11078,7 @@ function CheckoutPage() {
                         checked={useWalletCredit}
                         onChange={(e) => setUseWalletCredit(e.target.checked)}
                       />
-                      Use up to €{Math.min(walletAvailableEur, productsSubtotalAfterCode).toFixed(2)} on this order (before shipping)
+                      Use up to €{Math.min(walletAvailableEur, productsSubtotalAfterDiscounts).toFixed(2)} on this order (before shipping)
                     </label>
                   </>
                 ) : (
@@ -12156,6 +12287,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [products, setProducts] = useState([])
   const [isLoadingFeed, setIsLoadingFeed] = useState(false)
   const [feedMessage, setFeedMessage] = useState('Live product feed not loaded yet.')
+  const [portalOutOfStockNames, setPortalOutOfStockNames] = useState(new Set())
+  const [stockAvailabilityError, setStockAvailabilityError] = useState('')
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
   const [checkoutMessage, setCheckoutMessage] = useState('')
   const [checkoutError, setCheckoutError] = useState('')
@@ -12265,6 +12398,27 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     () => (isPortalOrderEditPath(location.pathname) ? readOrderEditHandoff() : null),
     [location.pathname],
   )
+
+  useEffect(() => {
+    let isMounted = true
+    const loadStockAvailability = async () => {
+      try {
+        const response = await fetch('/gelitup-content/out-of-stock.json')
+        if (!response.ok) throw new Error(`Stock availability request failed with ${response.status}`)
+        const names = await response.json()
+        if (!Array.isArray(names)) throw new Error('Stock availability response is invalid')
+        if (!isMounted) return
+        setPortalOutOfStockNames(new Set(names.map(normalizeOutOfStockName).filter(Boolean)))
+        setStockAvailabilityError('')
+      }
+      catch (error) {
+        if (!isMounted) return
+        setStockAvailabilityError(error instanceof Error ? error.message : 'Stock availability could not be loaded')
+      }
+    }
+    void loadStockAvailability()
+    return () => { isMounted = false }
+  }, [])
 
   useEffect(() => {
     if (editingOrder) return
@@ -16001,6 +16155,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           </div>
         </div>
       )}
+      {stockAvailabilityError && (
+        <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">
+          Stock availability is unavailable: {stockAvailabilityError}. Refresh before adding products.
+        </p>
+      )}
       {/* Lightbox modal */}
       {lightboxUrl && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 p-4" onClick={() => setLightboxUrl(null)}>
@@ -17079,11 +17238,18 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                     {visibleProducts.map(product => {
                       const selected = selectedCodes.includes(product.code)
                       const qty = itemQtys[product.code] || 1
+                      const isOOS = [product.name, product.code, product.sku]
+                        .some((value) => portalOutOfStockNames.has(normalizeOutOfStockName(value)))
                       return (
                         <div key={product.code} className="flex min-w-0 flex-col overflow-hidden bg-white" style={selected ? { outline: '2px solid #c8386e', outlineOffset: '-2px' } : {}}>
                           {/* image */}
                           <div className="relative aspect-square w-full cursor-pointer bg-slate-50" onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}>
-                            <ProductImage src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
+                            <ProductImage src={product.imageUrl} alt={product.name} loading="lazy" className={`h-full w-full object-cover ${isOOS ? 'brightness-50 grayscale' : ''}`} />
+                            {isOOS && (
+                              <span className="absolute inset-x-2 top-1/2 -translate-y-1/2 rounded-full bg-rose-600/90 px-2 py-1 text-center text-[9px] font-bold uppercase tracking-wide text-white">
+                                Out of Stock
+                              </span>
+                            )}
                             {selected && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
                           </div>
                           {product.galleryImages?.length > 0 && (
@@ -17103,7 +17269,16 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                           )}
                           </div>
                           {/* action */}
-                          {selected ? (
+                          {isOOS ? (
+                            <div className="mt-auto flex items-center justify-center gap-1 border-t border-rose-100 bg-rose-50 px-1 py-1 text-[10px] font-semibold text-rose-600">
+                              <span>Out of Stock</span>
+                              {selected && (
+                                <button onClick={() => toggleSelection(product.code)} className="rounded border border-rose-200 bg-white px-1.5 py-0.5 hover:bg-rose-100">
+                                  Remove
+                                </button>
+                              )}
+                            </div>
+                          ) : selected ? (
                             <div className="mt-auto flex items-center justify-center gap-1 border-t px-1 py-1" style={{ borderColor: '#fde8f0' }}>
                               <button onClick={() => setItemQtys(p => { const q = (p[product.code] || 1) - 1; if (q <= 0) { toggleSelection(product.code); return p; } return {...p, [product.code]: q} })} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>-</button>
                               <input type="number" min="1" value={qty} onChange={(e) => { const v = parseInt(e.target.value, 10); if (v > 0) setItemQtys(p => ({...p, [product.code]: v})); else if (e.target.value === '') setItemQtys(p => ({...p, [product.code]: ''})) }} onBlur={(e) => { const v = parseInt(e.target.value, 10); if (!v || v <= 0) toggleSelection(product.code) }} className="h-5 w-10 rounded border text-center text-[10px] font-bold outline-none focus:border-fuchsia-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" style={{ borderColor: '#f0c4d0', color: '#c8386e' }} />
