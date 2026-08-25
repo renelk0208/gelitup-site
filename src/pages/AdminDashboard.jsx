@@ -6027,10 +6027,12 @@ const deleteApplication = async (row) => {
                       className="flex w-full items-center justify-between text-left"
                     >
                       <div>
-                        <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">PR box &amp; follow-up</p>
+                        <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">
+                          {shipmentPreviouslySent ? 'Next PR package & follow-up' : 'Initial PR package'}
+                        </p>
                         <p className="mt-0.5 text-[11px] text-slate-500">
-                          {setupSectionComplete
-                            ? 'Setup complete — contract sent, type selected, and first shipment done.'
+                          {shipmentPreviouslySent
+                            ? 'Initial package complete. Add the next package date, planned items, and new tracking details here.'
                             : 'Only the tracking number & URL are emailed to the ambassador. Box contents and comments stay internal.'}
                         </p>
                       </div>
@@ -6038,6 +6040,7 @@ const deleteApplication = async (row) => {
                     </button>
                     {isShipmentSectionOpen && (
                       <div className="space-y-2">
+                    {!shipmentPreviouslySent && (
                     <div className="mt-2 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
                       <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Ambassador package type</p>
                       <p className="mt-0.5 text-[11px] text-slate-500">Selected type: <span className="font-semibold text-slate-700">{ambassadorTypeLabel}</span></p>
@@ -6132,6 +6135,7 @@ const deleteApplication = async (row) => {
                         <p className="mt-2 text-[11px] text-slate-500">Select an ambassador type to view the pack contents.</p>
                       )}
                     </div>
+                    )}
                     {shipmentEntries.length > 0 && (
                       <div className="mt-2 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
                         <button
@@ -6205,6 +6209,12 @@ const deleteApplication = async (row) => {
                           <button onClick={() => setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: false }))} className="rounded border border-emerald-300 px-2 py-0.5 font-semibold text-emerald-700 hover:bg-emerald-100">Collapse</button>
                         </div>
                       )}
+                      {shipmentPreviouslySent && (
+                        <div className="rounded-lg border border-slate-200 bg-white px-2.5 py-2">
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Ambassador type</p>
+                          <p className="mt-0.5 text-xs font-semibold text-slate-700">{ambassadorTypeLabel}</p>
+                        </div>
+                      )}
                       <div className="grid gap-2 sm:grid-cols-2">
                         <input
                           value={shipVal(row, 'tracking_number')}
@@ -6219,8 +6229,9 @@ const deleteApplication = async (row) => {
                           className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
                         />
                       </div>
+                      {shipmentPreviouslySent && (
                       <div className="rounded-lg border border-slate-200 bg-white p-2.5">
-                        <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Next package reminder</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Next package</p>
                         <div className="mt-1.5 grid gap-2 sm:grid-cols-2">
                           <input
                             type="date"
@@ -6240,11 +6251,12 @@ const deleteApplication = async (row) => {
                         <textarea
                           value={reminderNoteVal(row)}
                           onChange={(e) => setReminderNoteDraft((prev) => ({ ...prev, [row.id]: e.target.value }))}
-                          placeholder="What needs to be sent in the next sample kit?"
+                          placeholder="What we will send in this package"
                           rows={2}
                           className="mt-2 w-full rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs"
                         />
                       </div>
+                      )}
                       <div className="flex flex-wrap gap-2">
                         <button onClick={() => requestShipmentSave(row, true)} disabled={saving === row.id || (isShipmentClosed && !isNextPackageMode) || !trackingFlowReady} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
                         {isShipmentClosed && !isNextPackageMode && (
