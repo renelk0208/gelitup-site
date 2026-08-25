@@ -1,60 +1,8 @@
 const SOFIA_MIDNIGHT = {
-  stage1: '2026-09-01T00:00:00+03:00',
   stage2: '2026-09-07T00:00:00+03:00',
   stage3: '2026-09-14T00:00:00+03:00',
   stage4: '2026-09-21T00:00:00+03:00',
 }
-
-const builderGlitters = [
-  {
-    code: '3-in-1 Glitter Builder Gels Copper Sunshine 20g -HTF',
-    name: 'Copper Sunshine',
-    imageUrl: '/gelitup-content/product-images/BUILDER GEL/3-IN-1 BUILDER/Glitter 3-in-1-Builder-Gel/3-in-1_builder_gel_glitter_copper_sunshine.webp',
-    matchTerms: ['COPPER SUNSHINE'],
-  },
-  {
-    code: '3-in-1 Glitter Builder Gels Cosmic Glitter 20g -HTF',
-    name: 'Cosmic Glitter',
-    imageUrl: '/gelitup-content/product-images/BUILDER GEL/3-IN-1 BUILDER/Glitter 3-in-1-Builder-Gel/3-in-1_builder_gel_glitter_cosmic_dust.webp',
-    matchTerms: ['COSMIC GLITTER', 'COSMIC DUST'],
-  },
-  {
-    code: '3-in-1 Glitter Builder Gels Copper Deep Sea Galaxy 20g -HTF',
-    name: 'Deep Sea Galaxy',
-    imageUrl: '/gelitup-content/product-images/BUILDER GEL/3-IN-1 BUILDER/Glitter 3-in-1-Builder-Gel/3-in-1_builder_gel_glitter_deep_sea_galaxy.webp',
-    matchTerms: ['DEEP SEA GALAXY'],
-  },
-  {
-    code: '3-in-1 Glitter Builder Gels Copper Electric Orchid 20g -HTF',
-    name: 'Electric Orchid',
-    imageUrl: '/gelitup-content/product-images/BUILDER GEL/3-IN-1 BUILDER/Glitter 3-in-1-Builder-Gel/3-in-1_builder_gel_glitter_electric_orchid.webp',
-    matchTerms: ['ELECTRIC ORCHID'],
-  },
-  {
-    code: '3-in-1 Glitter Builder Gels Copper Rose Stardust 20g -HTF',
-    name: 'Rose Stardust',
-    imageUrl: '/gelitup-content/product-images/BUILDER GEL/3-IN-1 BUILDER/Glitter 3-in-1-Builder-Gel/3-in-1_builder_gel_glitter_rose_stardust.webp',
-    matchTerms: ['ROSE STARDUST'],
-  },
-  {
-    code: '3-in-1 Glitter Builder Gels Copper Stardust Plum 20g -HTF',
-    name: 'Stardust Plum',
-    imageUrl: '/gelitup-content/product-images/BUILDER GEL/3-IN-1 BUILDER/Glitter 3-in-1-Builder-Gel/3-in-1_builder_gel_glitter_stardust_plum.webp',
-    matchTerms: ['STARDUST PLUM'],
-  },
-  {
-    code: '3-in-1 Glitter Builder Gels Copper Supernova Indigo 20g -HTF',
-    name: 'Supernova Indigo',
-    imageUrl: '/gelitup-content/product-images/BUILDER GEL/3-IN-1 BUILDER/Glitter 3-in-1-Builder-Gel/3-in-1_builder_gel_glitter_supernova_indigo.webp',
-    matchTerms: ['SUPERNOVA INDIGO'],
-  },
-  {
-    code: '3-in-1 Glitter Builder Gels Copper Warm Sand Glow 20g -HTF',
-    name: 'Warm Sand Glow',
-    imageUrl: '/gelitup-content/product-images/BUILDER GEL/3-IN-1 BUILDER/Glitter 3-in-1-Builder-Gel/3-in-1_builder_gel_glitter_warm_sand_glow.webp',
-    matchTerms: ['WARM SAND GLOW'],
-  },
-]
 
 const spiralShimmers = Array.from({ length: 5 }, (_, index) => {
   const number = String(index + 1).padStart(2, '0')
@@ -92,16 +40,6 @@ const prismArtGels = [
 }))
 
 export const VAULT_RELEASE_STAGES = [
-  {
-    id: 'builder-glitters',
-    stage: 1,
-    title: '3-in-1 Builder Gel Glitters',
-    description: 'Eight sparkling 20g builder gels.',
-    releaseAt: SOFIA_MIDNIGHT.stage1,
-    cataloguePath: '/full-catalogue?subcategory=glitter-builder-gels',
-    products: builderGlitters,
-    requiredTerms: ['BUILDER', 'GLITTER'],
-  },
   {
     id: 'spiral-shimmers',
     stage: 2,

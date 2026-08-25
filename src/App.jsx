@@ -12216,8 +12216,22 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     }
   })
   const [packageCartItems, setPackageCartItems] = useState([])
-  // Order-edit mode: { id, email, unmatched } when an admin reopened an existing order in the portal
-  const [editingOrder, setEditingOrder] = useState(null)
+  // Activate edit mode immediately; catalogue matching fills the editable items once products load.
+  const [editingOrder, setEditingOrder] = useState(() => {
+    if (!isPortalOrderEditPath(location.pathname)) return null
+    const handoff = readOrderEditHandoff()
+    if (!handoff) return null
+    return {
+      id: handoff.orderId,
+      email: handoff.customerEmail || '',
+      registrationId: handoff.registrationId || null,
+      tier: handoff.distributorTier || null,
+      pricesAllocated: typeof handoff.pricesAllocated === 'boolean' ? handoff.pricesAllocated : null,
+      handoffSavedAt: handoff.savedAt || null,
+      unmatched: [],
+      isLoadingItems: true,
+    }
+  })
   const appliedOrderEditRef = useRef(false)
   const [podCatalog, setPodCatalog] = useState({ pod_1: [], pod_2: [], pod_3: [], pod_4: [] })
   const [localImageMap, setLocalImageMap] = useState(() => new Map())
@@ -12391,6 +12405,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       pricesAllocated: typeof handoff.pricesAllocated === 'boolean' ? handoff.pricesAllocated : null,
       handoffSavedAt: handoff.savedAt || null,
       unmatched,
+      isLoadingItems: false,
     }
     const savedDraft = readOrderEditDraft(handoff.orderId)
     const canRestoreDraft = savedDraft?.editingOrder?.id === resolvedEditingOrder.id
@@ -12409,6 +12424,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           pricesAllocated: resolvedEditingOrder.pricesAllocated,
           unmatched: Array.isArray(savedDraft.editingOrder.unmatched) ? savedDraft.editingOrder.unmatched : resolvedEditingOrder.unmatched,
           handoffSavedAt: resolvedEditingOrder.handoffSavedAt,
+          isLoadingItems: false,
         }
       : resolvedEditingOrder)
     const fallbackProfile = buildClientProfileFromOrderEditHandoff(handoff)
@@ -12616,7 +12632,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   }, [selectedCodes, itemQtys, packageCartItems])
 
   useEffect(() => {
-    if (!editingOrder?.id) return
+    if (!editingOrder?.id || editingOrder.isLoadingItems) return
     const key = getOrderEditDraftKey(editingOrder.id)
     localStorage.setItem(key, JSON.stringify({
       editingOrder,
@@ -15968,7 +15984,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-sm font-bold text-amber-900">✏️ Editing order #{editingOrder.id}{editingOrder.email ? ` — ${editingOrder.email}` : ''}</p>
-              <p className="mt-1 text-xs text-amber-800">The order's items are loaded into the cart below. Add or remove products, then submit — this will <strong>update the existing order</strong>, not create a new one.</p>
+              <p className="mt-1 text-xs text-amber-800">
+                {editingOrder.isLoadingItems
+                  ? 'Loading this order into the editable catalogue…'
+                  : <>The order's items are loaded into the cart below. Add or remove products, then submit — this will <strong>update the existing order</strong>, not create a new one.</>}
+              </p>
               {editingOrder.unmatched?.length > 0 && (
                 <p className="mt-1 text-xs text-amber-700">
                   {editingOrder.unmatched.length} item{editingOrder.unmatched.length === 1 ? '' : 's'} couldn't be shown in the catalogue but will be kept on the order: {editingOrder.unmatched.map(it => (it && typeof it === 'object') ? `${it.name || it.sku}${it.qty > 1 ? ` x${it.qty}` : ''}` : String(it)).join(', ')}
