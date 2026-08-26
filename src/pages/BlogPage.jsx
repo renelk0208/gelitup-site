@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { blogPosts } from '../data/blogPosts'
+import { useEffect, useRef, useState } from 'react'
+
+const HOLO_EMBED_URL = 'https://prod-api-holo-ai.fly.dev/public/seo/embed/c9956a33-1367-4e77-817e-f85680901089.js'
 
 const SEO = {
   title: 'Professional Nail Industry Blog | GEL.IT.UP by GIUP®',
@@ -28,35 +28,55 @@ function usePageSeo() {
   }, [])
 }
 
-function BlogCard({ post }) {
+function HoloBlogEmbed() {
+  const containerRef = useRef(null)
+  const [loadError, setLoadError] = useState(false)
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return undefined
+
+    const previousScript = document.querySelector(`script[src="${HOLO_EMBED_URL}"]`)
+    previousScript?.remove()
+
+    const script = document.createElement('script')
+    const loadTimeout = window.setTimeout(() => setLoadError(true), 15000)
+    const handleLoad = () => {
+      window.clearTimeout(loadTimeout)
+      if (!container.hasChildNodes()) setLoadError(true)
+    }
+    const handleError = () => {
+      window.clearTimeout(loadTimeout)
+      setLoadError(true)
+    }
+
+    script.src = HOLO_EMBED_URL
+    script.defer = true
+    script.dataset.holoBlogEmbed = 'true'
+    script.addEventListener('load', handleLoad)
+    script.addEventListener('error', handleError)
+    document.body.appendChild(script)
+
+    return () => {
+      window.clearTimeout(loadTimeout)
+      script.removeEventListener('load', handleLoad)
+      script.removeEventListener('error', handleError)
+      script.remove()
+      container.replaceChildren()
+      document.getElementById('holo-blog-jsonld')?.remove()
+      document.querySelector('link[rel="canonical"][data-holo]')?.remove()
+    }
+  }, [])
+
   return (
-    <Link
-      to={`/blog/${post.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_10px_30px_rgba(24,24,27,0.06)] transition hover:-translate-y-1 hover:border-[#D43790]/40 hover:shadow-[0_16px_42px_rgba(24,24,27,0.1)]"
-    >
-      <div className="aspect-video overflow-hidden bg-neutral-100">
-        <img
-          src={post.heroImage}
-          alt=""
-          className="h-full w-full object-contain transition duration-500 group-hover:scale-[1.02]"
-        />
-      </div>
-      <div className="flex flex-1 flex-col p-5 sm:p-6">
-        <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#D43790]">{post.category}</p>
-        <h2 className="mt-3 text-xl font-bold leading-tight tracking-tight text-neutral-950 sm:text-2xl">
-          {post.shortTitle || post.title}
-        </h2>
-        <p className="mt-3 line-clamp-3 text-sm leading-6 text-neutral-600">{post.excerpt}</p>
-        <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-          <time dateTime={post.publishedAt}>{post.publishedLabel}</time>
-          <span aria-hidden="true">•</span>
-          <span>{post.readTime}</span>
+    <>
+      <div ref={containerRef} id="holo-blog" />
+      {loadError && (
+        <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
+          The journal could not be loaded. Please refresh the page or try again shortly.
         </div>
-        <span className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-bold text-[#B32373] transition group-hover:text-[#D43790]">
-          Read article <span aria-hidden="true">→</span>
-        </span>
-      </div>
-    </Link>
+      )}
+    </>
   )
 }
 
@@ -80,16 +100,7 @@ export default function BlogPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
-        <div className="mb-8 flex items-end justify-between gap-6">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#D43790]">The journal</p>
-            <h2 className="mt-2 font-serif text-3xl font-semibold sm:text-4xl">All articles</h2>
-          </div>
-          <p className="hidden text-sm text-neutral-500 sm:block">{blogPosts.length} article{blogPosts.length === 1 ? '' : 's'}</p>
-        </div>
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {blogPosts.map((post) => <BlogCard key={post.slug} post={post} />)}
-        </div>
+        <HoloBlogEmbed />
       </section>
     </main>
   )
