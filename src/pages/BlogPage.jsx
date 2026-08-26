@@ -32,29 +32,29 @@ function BlogCard({ post }) {
   return (
     <Link
       to={`/blog/${post.slug}`}
-      className="group block overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_10px_30px_rgba(24,24,27,0.06)] transition hover:-translate-y-1 hover:border-[#D43790]/40 hover:shadow-[0_16px_42px_rgba(24,24,27,0.1)]"
     >
-      {post.heroImage && (
-        <div className="aspect-[16/9] w-full overflow-hidden bg-neutral-100">
-          <img
-            src={post.heroImage}
-            alt={post.title}
-            loading="lazy"
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-          />
-        </div>
-      )}
-      <div className="p-6">
-        <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#D43790]">{post.category}</p>
-        <h2 className="mt-3 font-serif text-2xl font-semibold leading-tight text-neutral-950 group-hover:text-[#D43790]">
+      <div className="aspect-video overflow-hidden bg-neutral-100">
+        <img
+          src={post.heroImage}
+          alt=""
+          className="h-full w-full object-contain transition duration-500 group-hover:scale-[1.02]"
+        />
+      </div>
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
+        <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#D43790]">{post.category}</p>
+        <h2 className="mt-3 text-xl font-bold leading-tight tracking-tight text-neutral-950 sm:text-2xl">
           {post.shortTitle || post.title}
         </h2>
-        <p className="mt-3 text-[0.95rem] leading-6 text-neutral-600">{post.excerpt}</p>
-        <div className="mt-5 flex items-center gap-3 text-xs text-neutral-500">
+        <p className="mt-3 line-clamp-3 text-sm leading-6 text-neutral-600">{post.excerpt}</p>
+        <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
           <time dateTime={post.publishedAt}>{post.publishedLabel}</time>
           <span aria-hidden="true">•</span>
           <span>{post.readTime}</span>
         </div>
+        <span className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-bold text-[#B32373] transition group-hover:text-[#D43790]">
+          Read article <span aria-hidden="true">→</span>
+        </span>
       </div>
     </Link>
   )
@@ -89,11 +89,14 @@ export default function BlogPage() {
             No published articles yet.
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post) => (
-              <BlogCard key={post.slug} post={post} />
-            ))}
-          </div>
+          <>
+            <p className="mb-4 hidden text-sm text-neutral-500 sm:block">{blogPosts.length} article{blogPosts.length === 1 ? '' : 's'}</p>
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {posts.map((post) => (
+                <BlogCard key={post.slug} post={post} />
+              ))}
+            </div>
+          </>
         )}
       </section>
     </main>
