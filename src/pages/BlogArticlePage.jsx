@@ -78,7 +78,7 @@ export default function BlogArticlePage() {
               {post.title}
             </h1>
             <div className="mt-7 flex flex-wrap gap-2">
-              {['HEMA-Free', 'TPO-Free', 'CPNP Notified'].map((label) => (
+              {(post.tags || ['HEMA-Free', 'TPO-Free', 'CPNP Notified']).map((label) => (
                 <span key={label} className="rounded-full border border-[#D43790]/25 bg-[#D43790]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#9c1f61]">
                   {label}
                 </span>
@@ -104,10 +104,10 @@ export default function BlogArticlePage() {
                     <p className="text-base font-semibold leading-7 text-neutral-800">{section.takeaway}</p>
                   </aside>
                 )}
-                {index === 3 && (
+                {index === (post.calloutAfterSection ?? 3) && (
                   <img
                     src={post.calloutImage}
-                    alt="Ingredient transparency turns compliance into a competitive advantage."
+                    alt={post.calloutAlt || 'Ingredient transparency turns compliance into a competitive advantage.'}
                     loading="lazy"
                     className="mt-12 w-full rounded-2xl border border-neutral-200 shadow-sm"
                   />
@@ -131,7 +131,7 @@ export default function BlogArticlePage() {
           >
             <img
               src={post.closingImage}
-              alt="Explore the GEL.IT.UP HEMA-free, TPO-free and CPNP-notified professional gel system."
+              alt={post.closingAlt || 'Explore the GEL.IT.UP HEMA-free, TPO-free and CPNP-notified professional gel system.'}
               loading="lazy"
               className="w-full"
             />
