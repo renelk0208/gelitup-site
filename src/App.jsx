@@ -5940,7 +5940,7 @@ function FullCataloguePage() {
         <div className="relative mx-auto flex max-w-6xl flex-col items-center justify-between gap-5 text-center sm:flex-row sm:text-left">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.32em] text-fuchsia-300">Something new is locked away</p>
-            <h1 className="mt-2 text-3xl font-black uppercase tracking-[0.12em] text-white sm:text-4xl">
+            <h1 className="heading-on-dark mt-2 text-3xl font-black uppercase tracking-[0.12em] text-white sm:text-4xl">
               The Winter Vault
             </h1>
             <p className="mt-2 text-sm font-medium text-white/75 sm:text-base">
