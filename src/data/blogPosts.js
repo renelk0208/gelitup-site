@@ -12,7 +12,7 @@ export const blogPosts = [
     publishedAt: '2026-08-26',
     publishedLabel: '26 August 2026',
     readTime: '8 min read',
-    heroImage: `${ARTICLE_MEDIA}/hero_banner.png`,
+    heroImage: `${ARTICLE_MEDIA}/hero_banner.webp`,
     calloutImage: `${ARTICLE_MEDIA}/callout_quote.png`,
     closingImage: `${ARTICLE_MEDIA}/closing_cta.png`,
     intro: [
