@@ -20,6 +20,8 @@ const PRERENDER_ROUTES = [
   '/terms-and-conditions',
   '/guestbook',
   '/inspiration',
+  '/blog',
+  '/blog/hema-free-tpo-free-gel-salon-liability-guide',
   // Vanity subcategory routes
   '/cat-eye', '/shimmer', '/glitters', '/jelly', '/metallic',
   '/glass-effect', '/spix', '/by-the-ocean', '/solid-gel-polish',

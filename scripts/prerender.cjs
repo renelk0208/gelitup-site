@@ -112,6 +112,16 @@ const ROUTE_SEO_MAP = {
     description: 'Read reviews from professional nail technicians, salons and academies who trust GEL.IT.UP products every day. Join our global wholesale community at gelitup.com.',
     canonical:   'https://gelitup.com/guestbook',
   },
+  '/blog': {
+    title:       'Professional Nail Industry Blog | GEL.IT.UP by GIUP®',
+    description: 'Professional guidance for nail salons and technicians on gel safety, EU compliance, ingredients, business protection and product performance.',
+    canonical:   'https://gelitup.com/blog',
+  },
+  '/blog/hema-free-tpo-free-gel-salon-liability-guide': {
+    title:       'HEMA-Free, TPO-Free Gels: Salon Liability & EU Compliance Guide',
+    description: 'Understand the liability risks of non-EU compliant nail gels containing HEMA and TPO. How salon owners can protect their business with HEMA-free, TPO-free formulations.',
+    canonical:   'https://gelitup.com/blog/hema-free-tpo-free-gel-salon-liability-guide',
+  },
   '/about-us': {
     title:       'About GEL.IT.UP by GIUP® | Professional Nail Supplies EU',
     description: 'Learn about GEL.IT.UP by GIUP® — professional nail supply brand trusted by technicians in 15+ countries. HEMA-free, TPO-free, EU certified, Leaping Bunny Approved.',

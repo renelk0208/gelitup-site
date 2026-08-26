@@ -38,6 +38,8 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
 const GuestbookPage = lazy(() => import('./pages/GuestbookPage.jsx'))
 const InspirationPage = lazy(() => import('./pages/InspirationPage.jsx'))
+const BlogPage = lazy(() => import('./pages/BlogPage.jsx'))
+const BlogArticlePage = lazy(() => import('./pages/BlogArticlePage.jsx'))
 const GelColoursLandingPage = lazy(() => import('./pages/GelColoursLandingPage.jsx'))
 const WinterVaultLandingPage = lazy(() => import('./pages/WinterVaultLandingPage.jsx'))
 const WholesaleLandingPage = lazy(() => import('./pages/WholesaleLandingPage.jsx'))
@@ -74,10 +76,6 @@ const VAULT_DISCOUNT_PCT = 20
 function isCatalogueDiscountActive() {
   return CATALOGUE_DISCOUNT_PCT > 0 && Date.now() <= CATALOGUE_DISCOUNT_ENDS.getTime()
 }
-// ── Seasonal storefront banner ─────────────────────────────────────────────
-// Standalone catalogue banner shown independently of any promotion. Toggle off
-// by setting this flag to false.
-const SEASONAL_BANNER_ENABLED = true
 function applyCatalogueDiscount(priceEur) {
   if (priceEur == null || !isCatalogueDiscountActive()) return priceEur
   return Number((Number(priceEur) * (1 - CATALOGUE_DISCOUNT_PCT / 100)).toFixed(2))
@@ -533,6 +531,15 @@ const DISTRIBUTOR_DIRECTORY = [
     ],
   },
   {
+    country: 'Spain',
+    distributors: [
+      {
+        name: 'GEL.IT.UP Spain',
+        address: 'Calle Hermanos Becerril n5, local, Trevi, Cuenca, Cuenca, 16004, Spain',
+      },
+    ],
+  },
+  {
     country: 'Italy',
     distributors: [
       {
@@ -565,6 +572,7 @@ const DISTRIBUTOR_COUNTRY_COORDINATES = {
   Italy: [39.2238, 9.1217],
   'Kingdom of Saudi Arabia': [23.8859, 45.0792],
   Qatar: [25.3548, 51.1839],
+  Spain: [40.0704, -2.1374],
   'United States': [39.8283, -98.5795],
 }
 const DISTRIBUTOR_COUNTRY_POINTS = DISTRIBUTOR_DIRECTORY
@@ -5945,21 +5953,6 @@ function FullCataloguePage() {
           </span>
         </div>
       </NavLink>
-      {SEASONAL_BANNER_ENABLED && (
-        <a
-          href="#catalogue-section-new-products"
-          className="mx-auto block w-full max-w-4xl overflow-hidden rounded-2xl shadow-sm"
-          aria-label="Summer vibes — shop the GEL.IT.UP collection."
-        >
-          <img
-            src="/gelitup-media/seasonal banner/summer-vibe-banner.webp"
-            alt="Summer vibes — shop the GEL.IT.UP collection."
-            className="block h-auto w-full"
-            loading="eager"
-            fetchPriority="high"
-          />
-        </a>
-      )}
       <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
         <div className="mx-auto max-w-6xl">
           <h1 className="heading-on-dark text-4xl font-extrabold uppercase tracking-[0.15em] text-white sm:text-5xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
@@ -6074,45 +6067,6 @@ function FullCataloguePage() {
               </div>
             </div>
           )}
-
-          {/* WINTER VAULT CAMPAIGN TEASER */}
-          {(() => {
-            const daysToReveal = Math.max(0, Math.ceil((new Date(WINTER_VAULT_REVEAL_AT).getTime() - Date.now()) / 86400000))
-            const nextUnlockDate = new Date(WINTER_VAULT_REVEAL_AT).toLocaleDateString('en-GB', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-              timeZone: 'Europe/Sofia',
-            })
-            return (
-              <div className="mx-auto max-w-6xl px-4 sm:px-8 pb-2">
-                <NavLink
-                  to="/winter-vault"
-                  className="group relative block overflow-hidden rounded-2xl transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_40px_rgba(212,55,144,0.35)]"
-                  style={{ backgroundColor: '#1A1A1A', border: '1px solid rgba(212,55,144,0.55)' }}
-                >
-                  <div className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full opacity-25 blur-3xl transition duration-500 group-hover:opacity-50" style={{ backgroundColor: '#D43790' }} />
-                  <div className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-                    <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.3em]" style={{ color: '#D43790' }}>
-                        The Winter Vault
-                      </p>
-                      <p className="mt-1.5 text-lg font-black leading-snug text-white sm:text-xl">
-                        Something new is locked away.{' '}
-                        {daysToReveal > 0 ? `The next mystery unlock is in ${daysToReveal} days.` : 'The next mystery release is open.'}
-                      </p>
-                      <p className="mt-1 text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                        Next unlock: {nextUnlockDate}. Register your email to qualify for 20% off Vault purchases.
-                      </p>
-                    </div>
-                    <span className="shrink-0 self-start sm:self-auto rounded-lg px-5 py-2.5 text-sm font-bold text-white transition group-hover:opacity-90" style={{ backgroundColor: '#D43790' }}>
-                      Enter the Vault →
-                    </span>
-                  </div>
-                </NavLink>
-              </div>
-            )
-          })()}
 
           {/* GLOBAL SEARCH RESULTS */}
           {searchQuery && !activeCategory && (
@@ -7336,6 +7290,7 @@ function LangSwitcher() {
 const navItems = [
   { to: '/starter-kits', label: 'Starter Kits' },
   { to: '/about-us', label: 'About us' },
+  { to: '/blog', label: 'Blog' },
   { to: '/for-academies', label: 'Academies' },
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/ambassadors', label: 'Ambassadors' },
@@ -7453,7 +7408,7 @@ function Nav({ onOpenContactModal }) {
   }, [location.pathname])
 
   return (
-    <nav className="hidden gap-1 md:flex items-center">
+    <nav className="hidden items-center gap-1 xl:flex">
       {/* Our Products mega-menu */}
       <ProductsMenu />
 
@@ -7583,7 +7538,7 @@ function MobileNav({ onOpenContactModal }) {
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         style={{ top: 'calc(9px + env(safe-area-inset-top, 0px))', right: 'calc(12px + env(safe-area-inset-right, 0px))' }}
-        className="fixed z-[60] flex h-11 w-11 flex-col items-center justify-center gap-[5px] rounded-lg border border-white/20 bg-black/85 backdrop-blur md:hidden"
+        className="fixed z-[60] flex h-11 w-11 flex-col items-center justify-center gap-[5px] rounded-lg border border-white/20 bg-black/85 backdrop-blur xl:hidden"
       >
         <span className={`block h-px w-[18px] origin-center bg-white transition-all duration-200 ${open ? 'translate-y-[6px] rotate-45' : ''}`} />
         <span className={`block h-px w-[18px] bg-white transition-all duration-200 ${open ? 'opacity-0 scale-x-0' : ''}`} />
@@ -7592,7 +7547,7 @@ function MobileNav({ onOpenContactModal }) {
 
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-[55] bg-black/55 backdrop-blur-sm transition-opacity duration-300 md:hidden ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 z-[55] bg-black/55 backdrop-blur-sm transition-opacity duration-300 xl:hidden ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setOpen(false)}
         aria-hidden="true"
       />
@@ -7602,7 +7557,7 @@ function MobileNav({ onOpenContactModal }) {
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
-        className={`fixed inset-y-0 right-0 z-[58] flex w-72 flex-col border-l border-white/10 bg-[#111111] transition-transform duration-300 ease-in-out md:hidden ${open ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed inset-y-0 right-0 z-[58] flex w-72 flex-col border-l border-white/10 bg-[#111111] transition-transform duration-300 ease-in-out xl:hidden ${open ? 'translate-x-0' : 'translate-x-full'}`}
       >
         {/* Drawer header */}
         <div className="flex h-[52px] shrink-0 items-center justify-between border-b border-white/10 px-4">
@@ -21811,6 +21766,8 @@ function App() {
           <Route path="/sample-kit" element={<Navigate to="/academy-kit" replace />} />
           <Route path="/guestbook" element={<GuestbookPage />} />
           <Route path="/inspiration" element={<InspirationPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:slug" element={<BlogArticlePage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/cookie-policy" element={<CookiePolicyPage />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditionsPage />} />

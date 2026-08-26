@@ -15,6 +15,8 @@ const ROUTES = [
   { path: '/',                           priority: '1.0', changefreq: 'daily'   },
   { path: '/full-catalogue',             priority: '0.9', changefreq: 'weekly'  },
   { path: '/guestbook',                  priority: '0.6', changefreq: 'weekly'  },
+  { path: '/blog',                       priority: '0.7', changefreq: 'weekly'  },
+  { path: '/blog/hema-free-tpo-free-gel-salon-liability-guide', priority: '0.8', changefreq: 'monthly' },
   { path: '/about-us',                   priority: '0.6', changefreq: 'monthly' },
   { path: '/contact',                    priority: '0.6', changefreq: 'monthly' },
 

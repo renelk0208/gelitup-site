@@ -70,6 +70,27 @@ export default function DistributorMap({ center, zoom, selectedCountry, points }
         }
         .gmap-popup {
           padding: 14px 16px;
+          max-height: 300px;
+          overflow-y: auto;
+          overscroll-behavior: contain;
+          scrollbar-color: rgba(224, 97, 138, 0.7) rgba(255, 255, 255, 0.08);
+          scrollbar-width: thin;
+        }
+        .gmap-popup::-webkit-scrollbar {
+          width: 6px;
+        }
+        .gmap-popup::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.08);
+          border-radius: 999px;
+        }
+        .gmap-popup::-webkit-scrollbar-thumb {
+          background: rgba(224, 97, 138, 0.7);
+          border-radius: 999px;
+        }
+        @media (max-width: 640px) {
+          .gmap-popup {
+            max-height: 220px;
+          }
         }
         .gmap-popup__country {
           font-size: 11px;
