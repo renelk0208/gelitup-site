@@ -118,7 +118,7 @@ export default function BlogArticlePage() {
 
           <section className="mt-16 rounded-[2rem] bg-neutral-950 px-6 py-10 text-white sm:px-10 sm:py-12">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#f168ae]">Professional standard</p>
-            <h2 className="mt-3 font-serif text-3xl font-semibold sm:text-4xl">{post.verdict.title}</h2>
+            <h2 className="heading-on-dark mt-3 font-serif text-3xl font-semibold sm:text-4xl">{post.verdict.title}</h2>
             <div className="mt-6 space-y-5 text-[1.05rem] leading-8 text-white/75">
               {post.verdict.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             </div>
