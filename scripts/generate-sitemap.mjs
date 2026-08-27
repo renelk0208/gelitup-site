@@ -5,10 +5,19 @@
 import { writeFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import COLOR_FAMILY_PAGES from './colour-family-pages.cjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DIST = resolve(__dirname, '../dist')
 const BASE_URL = 'https://gelitup.com'
+
+const COLOR_FAMILY_ROUTES = COLOR_FAMILY_PAGES
+  .filter(({ includeInSitemap = true }) => includeInSitemap)
+  .map(({ slug }) => ({
+    path: `/colours/${slug}`,
+    priority: '0.8',
+    changefreq: 'weekly',
+  }))
 
 const ROUTES = [
   // Core pages
@@ -43,6 +52,9 @@ const ROUTES = [
   { path: '/our-products/tools',         priority: '0.6', changefreq: 'weekly'  },
   { path: '/our-products/consumables',   priority: '0.6', changefreq: 'weekly'  },
   { path: '/our-products/nail-care',     priority: '0.6', changefreq: 'weekly'  },
+
+  // Colour family landing pages
+  ...COLOR_FAMILY_ROUTES,
 
   // Gel polish subcategory vanity routes
   { path: '/solid-gel-polish',           priority: '0.8', changefreq: 'weekly'  },
