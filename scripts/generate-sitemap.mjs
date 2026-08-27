@@ -2,7 +2,7 @@
 // Run after build: node scripts/generate-sitemap.mjs
 // Already wired into: "build" script below
 
-import { writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import COLOR_FAMILY_PAGES from './colour-family-pages.cjs'
@@ -10,6 +10,12 @@ import COLOR_FAMILY_PAGES from './colour-family-pages.cjs'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DIST = resolve(__dirname, '../dist')
 const BASE_URL = 'https://gelitup.com'
+const PRODUCT_MANIFEST = JSON.parse(
+  readFileSync(
+    resolve(__dirname, '../public/gelitup-content/product-manifest.json'),
+    'utf8',
+  ),
+)
 
 const COLOR_FAMILY_ROUTES = COLOR_FAMILY_PAGES
   .filter(({ includeInSitemap = true }) => includeInSitemap)
@@ -18,6 +24,12 @@ const COLOR_FAMILY_ROUTES = COLOR_FAMILY_PAGES
     priority: '0.8',
     changefreq: 'weekly',
   }))
+
+const PRODUCT_ROUTES = PRODUCT_MANIFEST.map(({ slug }) => ({
+  path: `/products/${slug}`,
+  priority: '0.7',
+  changefreq: 'weekly',
+}))
 
 const ROUTES = [
   // Core pages
@@ -55,6 +67,9 @@ const ROUTES = [
 
   // Colour family landing pages
   ...COLOR_FAMILY_ROUTES,
+
+  // Individual Solid Gel Polish products
+  ...PRODUCT_ROUTES,
 
   // Gel polish subcategory vanity routes
   { path: '/solid-gel-polish',           priority: '0.8', changefreq: 'weekly'  },

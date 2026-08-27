@@ -1,0 +1,5354 @@
+[
+  {
+    "slug": "01-ice-ice-baby",
+    "name": "01 Ice Ice Baby",
+    "code": "01",
+    "price": 8.9,
+    "colorFamily": "WHITE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/White/GIUP-01.webp",
+    "galleryImages": [
+      "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/White/GIUP-01-FFF.webp"
+    ]
+  },
+  {
+    "slug": "02-cotton-candy",
+    "name": "02 Cotton Candy",
+    "code": "02",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-02.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "02b-giup-2b",
+    "name": "GIUP 2B",
+    "code": "02B",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-2B.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "02c-giup-2c",
+    "name": "GIUP 2C",
+    "code": "02C",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-2C.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "02d-giup-2d",
+    "name": "GIUP 2D",
+    "code": "02D",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-2D.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "02e-giup-2e",
+    "name": "GIUP 2E",
+    "code": "02E",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-2E.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "02f-giup-2f",
+    "name": "GIUP 2F",
+    "code": "02F",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-2F.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "02g-giup-2g",
+    "name": "GIUP 2G",
+    "code": "02G",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-2G.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "02h-giup-2h",
+    "name": "GIUP 2H",
+    "code": "02H",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-2H.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "02i-giup-2i",
+    "name": "GIUP 2I",
+    "code": "02I",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-2I.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "03-in-the-flesh",
+    "name": "03 In the Flesh",
+    "code": "03",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-03.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "04-milkyway",
+    "name": "04 Milkyway",
+    "code": "04",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-04.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "05-snow-queen",
+    "name": "05 Snow Queen",
+    "code": "05",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-05.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "06-spring-breath",
+    "name": "06 Spring Breath",
+    "code": "06",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-06.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "07-lavender-dreams",
+    "name": "07 Lavender Dreams",
+    "code": "07",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-07.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "07b-giup-7b",
+    "name": "GIUP 7B",
+    "code": "07B",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-7B.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "07c-giup-7c",
+    "name": "GIUP 7C",
+    "code": "07C",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-7C.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "07d-giup-7d",
+    "name": "GIUP 7D",
+    "code": "07D",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-7D.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "08-ivory",
+    "name": "08 Ivory",
+    "code": "08",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-08.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "08a-giup-8a",
+    "name": "GIUP 8A",
+    "code": "08A",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-8A.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "08b-save-the-kalasha",
+    "name": "08B Save the Kalasha",
+    "code": "08B",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-08B.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "08c-giup-8c",
+    "name": "GIUP 8C",
+    "code": "08C",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-8C.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "08d-giup-8d",
+    "name": "GIUP 8D",
+    "code": "08D",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-8D.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "08e-giup-8e",
+    "name": "GIUP 8E",
+    "code": "08E",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-8E.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "08f-giup-8f",
+    "name": "GIUP 8F",
+    "code": "08F",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-8F.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "09-coco-nude",
+    "name": "09 Coco Nude",
+    "code": "09",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-09.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "09a-giup-9a",
+    "name": "GIUP 9A",
+    "code": "09A",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-9A.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "09b-giup-9b",
+    "name": "GIUP 9B",
+    "code": "09B",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-9B.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "10-bridal-bliss",
+    "name": "10 Bridal Bliss",
+    "code": "10",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-10.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "11-nimbus",
+    "name": "11 Nimbus",
+    "code": "11",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-11.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "12-stratus",
+    "name": "12 Stratus",
+    "code": "12",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-12.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "13-purple-rain",
+    "name": "13 Purple Rain",
+    "code": "13",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-13.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "14-matriarch",
+    "name": "14 Matriarch",
+    "code": "14",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-14.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "15-total-eclipse",
+    "name": "15 Total Eclipse",
+    "code": "15",
+    "price": 8.9,
+    "colorFamily": "BLACK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Black/GIUP-15.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "15a-mohana",
+    "name": "15A Mohana",
+    "code": "15A",
+    "price": 8.9,
+    "colorFamily": "BLACK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Black/GIUP-15A.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "16-black-hot-chilli-peppers",
+    "name": "16 Black Hot Chilli Peppers",
+    "code": "16",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-16.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "17-bruised-ego",
+    "name": "17 Bruised Ego",
+    "code": "17",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-17.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "18-violet-nights",
+    "name": "18 Violet Nights",
+    "code": "18",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-18.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "19-kelp-me",
+    "name": "19 Kelp Me",
+    "code": "19",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-19.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "20-lemon-swirl",
+    "name": "20 Lemon Swirl",
+    "code": "20",
+    "price": 8.9,
+    "colorFamily": "YELLOW",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-20.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "20a-chiffon",
+    "name": "20A Chiffon",
+    "code": "20A",
+    "price": 8.9,
+    "colorFamily": "YELLOW",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-20A.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "20b-tie-a-yellow-ribbon",
+    "name": "20B Tie A Yellow Ribbon",
+    "code": "20B",
+    "price": 8.9,
+    "colorFamily": "YELLOW",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-20B.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "20c-dawn-patrol",
+    "name": "20C Dawn Patrol",
+    "code": "20C",
+    "price": 8.9,
+    "colorFamily": "YELLOW",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-20C.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "21-mikado",
+    "name": "21 Mikado",
+    "code": "21",
+    "price": 8.9,
+    "colorFamily": "YELLOW",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-21.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "21a-hungover",
+    "name": "21A Hungover",
+    "code": "21A",
+    "price": 8.9,
+    "colorFamily": "NEON",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Neon/GIUP-21A.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "22-havanna-banana",
+    "name": "22 Havanna Banana",
+    "code": "22",
+    "price": 8.9,
+    "colorFamily": "YELLOW",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-22.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "23-jupe-jupe",
+    "name": "23 Jupe-Jupe",
+    "code": "23",
+    "price": 8.9,
+    "colorFamily": "NEON",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Neon/GIUP-23.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "24-pink-a-boo",
+    "name": "24 Pink-A-Boo",
+    "code": "24",
+    "price": 8.9,
+    "colorFamily": "NEON",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Neon/GIUP-24.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "25-glowstick",
+    "name": "25 Glowstick",
+    "code": "25",
+    "price": 8.9,
+    "colorFamily": "YELLOW",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-25.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "26-electric-lime",
+    "name": "26 Electric Lime",
+    "code": "26",
+    "price": 8.9,
+    "colorFamily": "NEON",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Neon/GIUP-26.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "27-atomic-tangerine",
+    "name": "27 Atomic Tangerine",
+    "code": "27",
+    "price": 8.9,
+    "colorFamily": "NEON",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Neon/GIUP-27.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "27a-sex-wax",
+    "name": "27A Sex Wax",
+    "code": "27A",
+    "price": 8.9,
+    "colorFamily": "NEON",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Neon/GIUP-27A.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "28-working-girl",
+    "name": "28 Working Girl",
+    "code": "28",
+    "price": 8.9,
+    "colorFamily": "NEON",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Neon/GIUP-28.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "28a-stripper",
+    "name": "28A Stripper",
+    "code": "28A",
+    "price": 8.9,
+    "colorFamily": "NEON",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Neon/GIUP-28A.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "29-screaming-queen",
+    "name": "29 Screaming Queen",
+    "code": "29",
+    "price": 8.9,
+    "colorFamily": "NEON",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Neon/GIUP-29.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "29a-dz-dz-dzzzzz",
+    "name": "29A Dz Dz Dzzzzz",
+    "code": "29A",
+    "price": 8.9,
+    "colorFamily": "NEON",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Neon/GIUP-29A.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "30-manilla-buff",
+    "name": "30 Manilla Buff",
+    "code": "30",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-30.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "31-just-peachy",
+    "name": "31 Just Peachy",
+    "code": "31",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-31.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "32-oranya",
+    "name": "32 Oranya",
+    "code": "32",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-32.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "33-finding-nemo",
+    "name": "33 Finding Nemo",
+    "code": "33",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-33.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "34-papaya-cream",
+    "name": "34 Papaya Cream",
+    "code": "34",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-34.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "34b-stop-using-me",
+    "name": "34B Stop using Me",
+    "code": "34B",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-34B.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "35-tropicana",
+    "name": "35 Tropicana",
+    "code": "35",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-35.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "36-carmine",
+    "name": "36 Carmine",
+    "code": "36",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-36.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "37-sanguini",
+    "name": "37 Sanguini",
+    "code": "37",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-37.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "38-under-the-cover",
+    "name": "38 Under the Cover",
+    "code": "38",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-38.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "39-mandarinia",
+    "name": "39 Mandarinia",
+    "code": "39",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-39.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "40-juicy-lucy",
+    "name": "40 Juicy Lucy",
+    "code": "40",
+    "price": 8.9,
+    "colorFamily": "NEON",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Neon/GIUP-40.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "41-dancing-with-attitude",
+    "name": "41 Dancing with Attitude",
+    "code": "41",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-41.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "50-reckless",
+    "name": "50 Reckless",
+    "code": "50",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-50.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "51-very-berry",
+    "name": "51 Very Berry",
+    "code": "51",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-51.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "51a-raspberry-ripple",
+    "name": "51A Raspberry Ripple",
+    "code": "51A",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-51A.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "52-mailbox",
+    "name": "52 Mailbox",
+    "code": "52",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-52.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "53-cabernet",
+    "name": "53 Cabernet",
+    "code": "53",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-53.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "54-seduce-me",
+    "name": "54 Seduce Me",
+    "code": "54",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-54.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "55-passion-8",
+    "name": "55 Passion-8",
+    "code": "55",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-55.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "56-ker-a-sie",
+    "name": "56 Ker-A-Sie",
+    "code": "56",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-56.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "57-throw-a-flame",
+    "name": "57 Throw-A-Flame",
+    "code": "57",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-57.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "58-cherri-o-baby",
+    "name": "58 Cherri-O-Baby",
+    "code": "58",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-58.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "59-try-everything-once",
+    "name": "59 Try Everything Once",
+    "code": "59",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-59.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "60-candy-apple",
+    "name": "60 Candy Apple",
+    "code": "60",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-60.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "61-bite-me",
+    "name": "61 Bite Me",
+    "code": "61",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-61.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "62-redrum",
+    "name": "62 RedRum",
+    "code": "62",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-62.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "63-sangria-talking",
+    "name": "63 Sangria Talking",
+    "code": "63",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-63.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "64-tuscany",
+    "name": "64 Tuscany",
+    "code": "64",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-64.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "70-bubbles",
+    "name": "70 Bubbles",
+    "code": "70",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-70.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "71-vanuatu",
+    "name": "71 Vanuatu",
+    "code": "71",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-71.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "72-monday-milkshake",
+    "name": "72 Monday Milkshake",
+    "code": "72",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-72.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "73-smurfboard",
+    "name": "73 Smurfboard",
+    "code": "73",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-73.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "74-sailor-she",
+    "name": "74 Sailor She",
+    "code": "74",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-74.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "75-oia-blue",
+    "name": "75 Oia Blue",
+    "code": "75",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-75.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "76-dusty-sky",
+    "name": "76 Dusty Sky",
+    "code": "76",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-76.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "77-starboard",
+    "name": "77 Starboard",
+    "code": "77",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-77.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "78-the-abyss",
+    "name": "78 The Abyss",
+    "code": "78",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-78.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "79-mobi-dick",
+    "name": "79 Mobi Dick",
+    "code": "79",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-79.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "80-minty-moment",
+    "name": "80 Minty Moment",
+    "code": "80",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-80.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "81-mojito-mint",
+    "name": "81 Mojito Mint",
+    "code": "81",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-81.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "82-after-winter",
+    "name": "82 After Winter",
+    "code": "82",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-82.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "83-mojo-jojo",
+    "name": "83 Mojo Jojo",
+    "code": "83",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-83.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "84-laguna",
+    "name": "84 Laguna",
+    "code": "84",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-84.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "85-luck-o-irish",
+    "name": "85 Luck o Irish",
+    "code": "85",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-85.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "86-cad-mi-um",
+    "name": "86 Cad-mi-um",
+    "code": "86",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-86.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "87-army-chic",
+    "name": "87 Army Chic",
+    "code": "87",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-87.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "88-girls-enlisted",
+    "name": "88 Girls Enlisted",
+    "code": "88",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-88.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "89-tank-her-up",
+    "name": "89 Tank-Her-Up",
+    "code": "89",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-89.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "90-foxtrot",
+    "name": "90 Foxtrot",
+    "code": "90",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-90.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "91-montego-twist",
+    "name": "91 Montego Twist",
+    "code": "91",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-91.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "92-stay-cool",
+    "name": "92 Stay Cool",
+    "code": "92",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-92.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "93-grey-envy",
+    "name": "93 Grey Envy",
+    "code": "93",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-93.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "94-del-ta-fem",
+    "name": "94 Del-Ta-Fem",
+    "code": "94",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-94.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "95-peppermint-crisp",
+    "name": "95 Peppermint Crisp",
+    "code": "95",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-95.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "96-stoned",
+    "name": "96 Stoned",
+    "code": "96",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-96.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "97-spirit-of-the-ocean",
+    "name": "97 Spirit of the Ocean",
+    "code": "97",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-97.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "100-baby-blush",
+    "name": "100 Baby Blush",
+    "code": "100",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-100.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "100a-she-bangs",
+    "name": "100A She Bangs",
+    "code": "100A",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-100A.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "101-hispanicum",
+    "name": "101 Hispanicum",
+    "code": "101",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-101.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "102-marshmallow",
+    "name": "102 Marshmallow",
+    "code": "102",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-102.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "103-pink-pizazz",
+    "name": "103 Pink Pizazz",
+    "code": "103",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-103.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "104-flamingo",
+    "name": "104 Flamingo",
+    "code": "104",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-104.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "105-bar-bee",
+    "name": "105 Bar-Bee",
+    "code": "105",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-105.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "106-smooch",
+    "name": "106 Smooch",
+    "code": "106",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-106.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "107-strawbs-and-cream",
+    "name": "107 Strawbs and Cream",
+    "code": "107",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-107.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "108-funky-fusion",
+    "name": "108 Funky Fusion",
+    "code": "108",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-108.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "110-plush",
+    "name": "110 Plush",
+    "code": "110",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-110.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "111-stupid-cupid",
+    "name": "111 Stupid Cupid",
+    "code": "111",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-111.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "112-moscow-pink",
+    "name": "112 Moscow Pink",
+    "code": "112",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-112.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "113-orgasmink",
+    "name": "113 Orgasmink",
+    "code": "113",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-113.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "114-carnations-kiss",
+    "name": "114 Carnations Kiss",
+    "code": "114",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-114.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "115-tickled-pink",
+    "name": "115 Tickled Pink",
+    "code": "115",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-115.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "116-fandango",
+    "name": "116 Fandango",
+    "code": "116",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-116.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "117-plum-it",
+    "name": "117 Plum-it",
+    "code": "117",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-117.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "118-midnight-royale",
+    "name": "118 Midnight Royale",
+    "code": "118",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-118.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "119-indescent-proposal",
+    "name": "119 Indescent Proposal",
+    "code": "119",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-119.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "120-wisteria-lane",
+    "name": "120 Wisteria Lane",
+    "code": "120",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-120.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "121-tau-pe-do",
+    "name": "121 Tau-Pe-Do",
+    "code": "121",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-121.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "122-floating-lilly",
+    "name": "122 Floating Lilly",
+    "code": "122",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-122.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "123-psychedelic-barney",
+    "name": "123 Psychedelic Barney",
+    "code": "123",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-123.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "124-ma-di-gra",
+    "name": "124 Ma-Di-Gra",
+    "code": "124",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-124.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "125-cyber-grape",
+    "name": "125 Cyber Grape",
+    "code": "125",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-125.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "126-moody-monday",
+    "name": "126 Moody Monday",
+    "code": "126",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-126.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "127-purple-hearts",
+    "name": "127 Purple Hearts",
+    "code": "127",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-127.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "128-indigo-dreams",
+    "name": "128 Indigo Dreams",
+    "code": "128",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-128.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "129-smoke-on-the-water",
+    "name": "129 Smoke on the Water",
+    "code": "129",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-129.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "130-byzantium",
+    "name": "130 Byzantium",
+    "code": "130",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-130.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "132-jamaikin-me-purple",
+    "name": "132 Jamaikin Me Purple",
+    "code": "132",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-132.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "133-african-violet",
+    "name": "133 African Violet",
+    "code": "133",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-133.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "134-obsessive",
+    "name": "134 Obsessive",
+    "code": "134",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-134.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "135-secret-randesvouz",
+    "name": "135 Secret Randesvouz",
+    "code": "135",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-135.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "136-jac-a-randa",
+    "name": "136 Jac-A-Randa",
+    "code": "136",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-136.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "137-love-child",
+    "name": "137 Love Child",
+    "code": "137",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-137.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "140-nudity",
+    "name": "140 Nudity",
+    "code": "140",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-140.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "141-sands-of-time",
+    "name": "141 Sands of Time",
+    "code": "141",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-141.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "142-be-nutty",
+    "name": "142 Be Nutty",
+    "code": "142",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-142.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "143-cinna-bum",
+    "name": "143 Cinna-Bum",
+    "code": "143",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-143.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "144-choc-a-holic",
+    "name": "144 Choc-A-Holic",
+    "code": "144",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-144.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "145-spiced-up",
+    "name": "145 Spiced Up",
+    "code": "145",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-145.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "146-cocoa-bean",
+    "name": "146 Cocoa Bean",
+    "code": "146",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-146.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "147-bitter-sweet",
+    "name": "147 Bitter Sweet",
+    "code": "147",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-147.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "148-cherrywood",
+    "name": "148 Cherrywood",
+    "code": "148",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-148.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "149-illumi-latte",
+    "name": "149 Illumi-Latte",
+    "code": "149",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-149.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "150-espresso-no",
+    "name": "150 Espresso No",
+    "code": "150",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-150.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "151-praline-mocca",
+    "name": "151 Praline Mocca",
+    "code": "151",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-151.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "152-frisco",
+    "name": "152 Frisco",
+    "code": "152",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-152.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "153-barely-there",
+    "name": "153 Barely There",
+    "code": "153",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-153.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "154-minky",
+    "name": "154 Minky",
+    "code": "154",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-154.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "155-memory-lane",
+    "name": "155 Memory Lane",
+    "code": "155",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-155.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "156-foxen",
+    "name": "156 Foxen",
+    "code": "156",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-156.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "701-portside",
+    "name": "701 Portside",
+    "code": "701",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-701.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "702-sea-breeze",
+    "name": "702 Sea Breeze",
+    "code": "702",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-702.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "703-electric-stingray",
+    "name": "703 Electric Stingray",
+    "code": "703",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-703.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "704-cape-of-storms",
+    "name": "704 Cape Of Storms",
+    "code": "704",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-704.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "705-hang-ten",
+    "name": "705 Hang Ten",
+    "code": "705",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-705.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "706-whale-watching",
+    "name": "706 Whale Watching",
+    "code": "706",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-706.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "707-hang-11",
+    "name": "707 Hang 11",
+    "code": "707",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-707.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "708-blue-bayou",
+    "name": "708 Blue Bayou",
+    "code": "708",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-708.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1801-2-hot-2-handle",
+    "name": "1801 2 Hot 2 Handle",
+    "code": "1801",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-1801.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1802-bite-your-lip",
+    "name": "1802 Bite Your Lip",
+    "code": "1802",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-1802.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1803-dont-pout",
+    "name": "1803 Dont Pout",
+    "code": "1803",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-1803.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1804-cuddle-me",
+    "name": "1804 Cuddle Me",
+    "code": "1804",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-1804.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1805-rack-em-up",
+    "name": "1805 Rack Em Up",
+    "code": "1805",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-1805.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1806-linger-on",
+    "name": "1806 Linger On",
+    "code": "1806",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-1806.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1807-truth-be-told",
+    "name": "1807 Truth Be Told",
+    "code": "1807",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-1807.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1808-show-me-yours",
+    "name": "1808 Show Me Yours",
+    "code": "1808",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-1808.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1809-naughtier-than-nice",
+    "name": "1809 Naughtier Than Nice",
+    "code": "1809",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-1809.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1810-behind-closed-doors",
+    "name": "1810 Behind Closed Doors",
+    "code": "1810",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-1810.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1811-another-shade-of-grey",
+    "name": "1811 Another Shade of Grey",
+    "code": "1811",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-1811.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1812-giup-oil",
+    "name": "1812 GIUP® Oil",
+    "code": "1812",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-1812.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1814-swinger",
+    "name": "1814 Swinger",
+    "code": "1814",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-1814.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1815-what-a-slate",
+    "name": "1815 What a Slate",
+    "code": "1815",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-1815.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1816-tempted",
+    "name": "1816 Tempted",
+    "code": "1816",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-1816.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1820-not-on-purpose",
+    "name": "1820 Not on PurPose",
+    "code": "1820",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-1820.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1821-another-kinda-pink",
+    "name": "1821 Another Kinda Pink",
+    "code": "1821",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-1821.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1823-pumpkin-pie",
+    "name": "1823 Pumpkin Pie",
+    "code": "1823",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-1823.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1900-moon-mist",
+    "name": "1900 Moon Mist",
+    "code": "1900",
+    "price": 8.9,
+    "colorFamily": "YELLOW",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-1900.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1901-desert-hori-zen",
+    "name": "1901 Desert Hori-Zen",
+    "code": "1901",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-1901.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1902-rings-around-the-sun",
+    "name": "1902 Rings Around the Sun",
+    "code": "1902",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-1902.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1903-dancing-firefly-thermo-glow",
+    "name": "1903 Dancing Firefly (Thermo / Glow)",
+    "code": "1903",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-1903.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1904-sienna",
+    "name": "1904 Sienna",
+    "code": "1904",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-1904.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1905-sweet-sunset",
+    "name": "1905 Sweet Sunset",
+    "code": "1905",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-1905.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1906-the-new-black",
+    "name": "1906 The New Black",
+    "code": "1906",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-1906.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1907-red-acacia",
+    "name": "1907 Red Acacia",
+    "code": "1907",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-1907.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1908-desert-scorpion",
+    "name": "1908 Desert Scorpion",
+    "code": "1908",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-1908.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1909-tamarix",
+    "name": "1909 Tamarix",
+    "code": "1909",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-1909.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1910-pink-lady-lemonade",
+    "name": "1910 Pink Lady Lemonade",
+    "code": "1910",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-1910.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1911-unveiling",
+    "name": "1911 Unveiling",
+    "code": "1911",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-1911.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1912-heat-overload-thermo-glow",
+    "name": "1912 Heat Overload (Thermo /Glow)",
+    "code": "1912",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-1912.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1913-shallow-water",
+    "name": "1913 Shallow Water",
+    "code": "1913",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-1913.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1914-lime-sorbet",
+    "name": "1914 Lime Sorbet",
+    "code": "1914",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-1914.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1915-mirage",
+    "name": "1915 Mirage",
+    "code": "1915",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-1915.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1916-shoe-blue",
+    "name": "1916 Shoe Blue",
+    "code": "1916",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-1916.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1920-sea-shells",
+    "name": "1920 Sea Shells",
+    "code": "1920",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-1920.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1921-up-up-and-away",
+    "name": "1921 Up Up and Away",
+    "code": "1921",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-1921.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1922-no-footprint",
+    "name": "1922 No Footprint",
+    "code": "1922",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-1922.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1923-hug-a-bear",
+    "name": "1923 Hug-A-Bear",
+    "code": "1923",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-1923.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1924-purified",
+    "name": "1924 Purified",
+    "code": "1924",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-1924.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1925-serengeti",
+    "name": "1925 Serengeti",
+    "code": "1925",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-1925.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1926-eco-savvy",
+    "name": "1926 Eco-Savvy",
+    "code": "1926",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-1926.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1927-forestation",
+    "name": "1927 Forestation",
+    "code": "1927",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-1927.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1928-caretta-caretta",
+    "name": "1928 Caretta Caretta",
+    "code": "1928",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-1928.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1929-paint-it-green",
+    "name": "1929 Paint It Green",
+    "code": "1929",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-1929.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1930-pink-rhino-horns",
+    "name": "1930 Pink Rhino Horns",
+    "code": "1930",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-1930.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1931-binnit",
+    "name": "1931 Binnit",
+    "code": "1931",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-1931.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1932-habibi-tat",
+    "name": "1932 Habibi-Tat",
+    "code": "1932",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-1932.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1933-hump-back",
+    "name": "1933 Hump Back",
+    "code": "1933",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-1933.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1934-r-r-r",
+    "name": "1934 R-R-R",
+    "code": "1934",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-1934.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1938-midnight",
+    "name": "1938 Midnight",
+    "code": "1938",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-1938.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1940-delight-me",
+    "name": "1940 Delight Me",
+    "code": "1940",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-1940.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1941-keep-me-guessing",
+    "name": "1941 Keep Me Guessing",
+    "code": "1941",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-1941.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1943-dancing-shoes",
+    "name": "1943 Dancing Shoes",
+    "code": "1943",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-1943.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1945-amaranth",
+    "name": "1945 Amaranth",
+    "code": "1945",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-1945.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1946-whoops",
+    "name": "1946 Whoops",
+    "code": "1946",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-1946.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "1947-naturally-yours",
+    "name": "1947 Naturally Yours",
+    "code": "1947",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-1947.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2020-soft-and-sweet",
+    "name": "2020 Soft and Sweet",
+    "code": "2020",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2020.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2021-sri-lanka",
+    "name": "2021 Sri-Lanka",
+    "code": "2021",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2021.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2022-phiphi-island",
+    "name": "2022 PhiPhi Island",
+    "code": "2022",
+    "price": 8.9,
+    "colorFamily": "YELLOW",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-2022.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2023-picknickers",
+    "name": "2023 PickNickers",
+    "code": "2023",
+    "price": 8.9,
+    "colorFamily": "YELLOW",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-2023.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2024-durban-weed",
+    "name": "2024 Durban Weed",
+    "code": "2024",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2024.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2025-calm-palm",
+    "name": "2025 Calm Palm",
+    "code": "2025",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2025.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2026-whaat-pistachio",
+    "name": "2026 Whaat Pistachio",
+    "code": "2026",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2026.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2027-emerald-coast",
+    "name": "2027 Emerald Coast",
+    "code": "2027",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2027.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2028-below-sea-level",
+    "name": "2028 Below Sea Level",
+    "code": "2028",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2028.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2029-show-me-the-moneee",
+    "name": "2029 Show Me The Moneee",
+    "code": "2029",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2029.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2030-under-the-boardwalk",
+    "name": "2030 Under The Boardwalk",
+    "code": "2030",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2030.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2031-down-by-the-sea",
+    "name": "2031 Down By The Sea",
+    "code": "2031",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2031.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2032-salt-water-toffee",
+    "name": "2032 Salt Water Toffee",
+    "code": "2032",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2032.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2033-baby-shark",
+    "name": "2033 Baby Shark",
+    "code": "2033",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2033.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2034-smurfs-baby",
+    "name": "2034 Smurfs Baby",
+    "code": "2034",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2034.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2035-scuubie",
+    "name": "2035 Scuubie",
+    "code": "2035",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2035.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2036-not-so-purple",
+    "name": "2036 Not So Purple",
+    "code": "2036",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2036.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2037-salty-caramel",
+    "name": "2037 Salty Caramel",
+    "code": "2037",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2037.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2038-hibiscus",
+    "name": "2038 Hibiscus",
+    "code": "2038",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2038.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2039-coral-reef",
+    "name": "2039 Coral Reef",
+    "code": "2039",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2039.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2040-precious-moments",
+    "name": "2040 Precious Moments",
+    "code": "2040",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2040.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2041-di-bi-di-bi",
+    "name": "2041 Di-Bi-Di-Bi",
+    "code": "2041",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2041.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2042-up-up",
+    "name": "2042 Up-Up",
+    "code": "2042",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2042.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2043-love-mania",
+    "name": "2043 Love Mania",
+    "code": "2043",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2043.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2044-bashful-lilac",
+    "name": "2044 Bashful Lilac",
+    "code": "2044",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2044.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2045-heather-heights",
+    "name": "2045 Heather Heights",
+    "code": "2045",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2045.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2046-twilight-mist",
+    "name": "2046 Twilight Mist",
+    "code": "2046",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2046.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2047-delphi-grove",
+    "name": "2047 Delphi Grove",
+    "code": "2047",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2047.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2048-still-good",
+    "name": "2048 Still Good",
+    "code": "2048",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2048.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2049-bad-apple",
+    "name": "2049 Bad Apple",
+    "code": "2049",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2049.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2050-twice-bitten",
+    "name": "2050 Twice Bitten",
+    "code": "2050",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2050.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2051-thrice-shy",
+    "name": "2051 Thrice Shy",
+    "code": "2051",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2051.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2052-clear-grey-skies",
+    "name": "2052 Clear Grey Skies",
+    "code": "2052",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2052.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2053-lockdown-blues",
+    "name": "2053 Lockdown Blues",
+    "code": "2053",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2053.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2054-ko-heeba",
+    "name": "2054 Ko Heeba",
+    "code": "2054",
+    "price": 8.9,
+    "colorFamily": "YELLOW",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-2054.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2055-liquid-tar",
+    "name": "2055 Liquid Tar",
+    "code": "2055",
+    "price": 8.9,
+    "colorFamily": "BLACK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Black/GIUP-2055.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2056-beeehave",
+    "name": "2056 BeeeHave",
+    "code": "2056",
+    "price": 8.9,
+    "colorFamily": "YELLOW",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-2056.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2057-curfew",
+    "name": "2057 Curfew",
+    "code": "2057",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2057.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2058-pewt-me-on-the-shelf",
+    "name": "2058 Pewt me on the Shelf",
+    "code": "2058",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2058.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2059-puff-me-up",
+    "name": "2059 Puff Me Up",
+    "code": "2059",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2059.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2060-chocolate-cherry",
+    "name": "2060 Chocolate Cherry",
+    "code": "2060",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2060.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2061-onyx",
+    "name": "2061 Onyx",
+    "code": "2061",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2061.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2062-dark-side-of-the-street",
+    "name": "2062 Dark Side of the Street",
+    "code": "2062",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2062.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2063-trick-or-treat",
+    "name": "2063 Trick or Treat",
+    "code": "2063",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2063.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2100-popsicles",
+    "name": "2100 Popsicles",
+    "code": "2100",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2100.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2101-hammocking",
+    "name": "2101 Hammocking",
+    "code": "2101",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2101.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2102-barefoot-in-blue-jeans",
+    "name": "2102 Barefoot in Blue Jeans",
+    "code": "2102",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2102.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2103-you-are-my-sunshine",
+    "name": "2103 You are my Sunshine",
+    "code": "2103",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2103.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2104-tiny-dancer",
+    "name": "2104 Tiny Dancer",
+    "code": "2104",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2104.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2105-happiness-is",
+    "name": "2105 Happiness Is…",
+    "code": "2105",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2105.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2106-take-a-slice",
+    "name": "2106 Take a Slice",
+    "code": "2106",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2106.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2107-dragonfly-dances",
+    "name": "2107 Dragonfly Dances",
+    "code": "2107",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2107.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2108-aquaholic",
+    "name": "2108 Aquaholic",
+    "code": "2108",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2108.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2109-commotion-in-the-ocean",
+    "name": "2109 Commotion in the Ocean",
+    "code": "2109",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2109.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2110-hazy-lazy-dayz",
+    "name": "2110 Hazy Lazy Dayz",
+    "code": "2110",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2110.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2111-rainbow-bubbles",
+    "name": "2111 Rainbow Bubbles",
+    "code": "2111",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2111.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2120-spoilt-for-choice",
+    "name": "2120 Spoilt For Choice",
+    "code": "2120",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2120.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2121-green-light",
+    "name": "2121 Green Light",
+    "code": "2121",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2121.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2122-no-fear",
+    "name": "2122 No Fear",
+    "code": "2122",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2122.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2123-echo-of-life",
+    "name": "2123 Echo of life",
+    "code": "2123",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2123.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2124-blow-your-mind",
+    "name": "2124 Blow Your Mind",
+    "code": "2124",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2124.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2125-crystal-clear-dreams",
+    "name": "2125 Crystal Clear Dreams",
+    "code": "2125",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2125.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2126-late-night-hopes",
+    "name": "2126 Late Night Hopes",
+    "code": "2126",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2126.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2127-creativity",
+    "name": "2127 Creativity",
+    "code": "2127",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2127.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2128-new-horizons",
+    "name": "2128 New Horizons",
+    "code": "2128",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2128.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2129-absolute",
+    "name": "2129 Absolute",
+    "code": "2129",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2129.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2130-passing-storm",
+    "name": "2130 Passing Storm",
+    "code": "2130",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2130.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2131-conquest",
+    "name": "2131 Conquest",
+    "code": "2131",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2131.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2132-lilac-chaser-illusion",
+    "name": "2132 Lilac Chaser Illusion",
+    "code": "2132",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2132.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2133-voir-la-vie-en-rose",
+    "name": "2133 Voir la vie en rose",
+    "code": "2133",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2133.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2134-vintage-rose",
+    "name": "2134 Vintage Rose",
+    "code": "2134",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2134.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2135-ruby-velvet",
+    "name": "2135 Ruby Velvet",
+    "code": "2135",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2135.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2136-bright-stimulus",
+    "name": "2136 Bright Stimulus",
+    "code": "2136",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2136.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2137-amber-embers",
+    "name": "2137 Amber Embers",
+    "code": "2137",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2137.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2138-sans-retenue",
+    "name": "2138 Sans Retenue",
+    "code": "2138",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2138.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2139-sugar-free",
+    "name": "2139 Sugar Free",
+    "code": "2139",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2139.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2140-speechless",
+    "name": "2140 Speechless",
+    "code": "2140",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2140.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2141-salamander-s-realm",
+    "name": "2141 Salamander’s Realm",
+    "code": "2141",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2141.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2142-master-key",
+    "name": "2142 Master key",
+    "code": "2142",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2142.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2143-sunshine-ahead",
+    "name": "2143 Sunshine Ahead",
+    "code": "2143",
+    "price": 8.9,
+    "colorFamily": "YELLOW",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-2143.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2144-dark-shine",
+    "name": "2144 Dark Shine",
+    "code": "2144",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2144.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2146-another-red",
+    "name": "2146 Another Red",
+    "code": "2146",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2146.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2200-electric-lizard",
+    "name": "2200 Electric Lizard",
+    "code": "2200",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2200.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2201-leave-mealon",
+    "name": "2201 Leave Mealon",
+    "code": "2201",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2201.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2202-messy-opalina",
+    "name": "2202 Messy Opalina",
+    "code": "2202",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2202.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2203-pinchy-orange",
+    "name": "2203 Pinchy Orange",
+    "code": "2203",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2203.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2204-ouch",
+    "name": "2204 Ouch",
+    "code": "2204",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2204.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2205-firecracker",
+    "name": "2205 Firecracker",
+    "code": "2205",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2205.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2206-jazzberry",
+    "name": "2206 Jazzberry",
+    "code": "2206",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2206.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2207-pink-mexican",
+    "name": "2207 Pink Mexican",
+    "code": "2207",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2207.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2208-coral-fusion",
+    "name": "2208 Coral Fusion",
+    "code": "2208",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2208.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2209-taffy-pink",
+    "name": "2209 Taffy Pink",
+    "code": "2209",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2209.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2210-kazoo",
+    "name": "2210 Kazoo",
+    "code": "2210",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2210.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2211-purple-people-eater",
+    "name": "2211 Purple People Eater",
+    "code": "2211",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2211.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2212-ghosted",
+    "name": "2212 Ghosted",
+    "code": "2212",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2212.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2213-drunken-acorn",
+    "name": "2213 Drunken Acorn",
+    "code": "2213",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2213.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2214-what-happened-to-olive",
+    "name": "2214 What happened to Olive",
+    "code": "2214",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2214.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2215-glass-frog",
+    "name": "2215 Glass Frog",
+    "code": "2215",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2215.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2216-search-party",
+    "name": "2216 Search Party",
+    "code": "2216",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2216.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2217-pouting-porpoise",
+    "name": "2217 Pouting Porpoise",
+    "code": "2217",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2217.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2218-simmer-down",
+    "name": "2218 Simmer Down",
+    "code": "2218",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2218.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2219-captain-obvious",
+    "name": "2219 Captain Obvious",
+    "code": "2219",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2219.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2220-fading-whiskey-hangover",
+    "name": "2220 Fading Whiskey Hangover",
+    "code": "2220",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2220.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2221-collapsed-creme-caramel",
+    "name": "2221 Collapsed Créme Caramel",
+    "code": "2221",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2221.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2222-hot-cheetos",
+    "name": "2222 Hot Cheetos",
+    "code": "2222",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2222.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2223-chocolate-deprived",
+    "name": "2223 Chocolate Deprived",
+    "code": "2223",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2223.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2224-poor-gingerbread-man",
+    "name": "2224 Poor Gingerbread Man",
+    "code": "2224",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2224.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2225-milk-and-water",
+    "name": "2225 Milk and Water",
+    "code": "2225",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2225.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2226-moon-rake",
+    "name": "2226 Moon Rake",
+    "code": "2226",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2226.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2227-vudu-u-think-u-r",
+    "name": "2227 VuDu U Think U R",
+    "code": "2227",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2227.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2228-spilt-wine",
+    "name": "2228 Spilt Wine",
+    "code": "2228",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2228.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2229-blue-bean",
+    "name": "2229 Blue Bean",
+    "code": "2229",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2229.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2230-smalty",
+    "name": "2230 Smalty",
+    "code": "2230",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2230.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2231-pennyless",
+    "name": "2231 Pennyless",
+    "code": "2231",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2231.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2232-bahama-blue",
+    "name": "2232 Bahama Blue",
+    "code": "2232",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2232.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2233-astronaut-in-the-ocean",
+    "name": "2233 Astronaut in the Ocean",
+    "code": "2233",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2233.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2300-in-the-shallows",
+    "name": "2300 In the Shallows",
+    "code": "2300",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2300.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2301-marry-me-please",
+    "name": "2301 Marry Me, Please",
+    "code": "2301",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2301.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2302-fugly-yellow",
+    "name": "2302 Fugly Yellow",
+    "code": "2302",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2302.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2303-blou-berg-strand",
+    "name": "2303 Blou Berg Strand",
+    "code": "2303",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2303.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2304-coral-me-red",
+    "name": "2304 Coral Me Red",
+    "code": "2304",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2304.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2305-genderless-barney",
+    "name": "2305 Genderless Barney",
+    "code": "2305",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2305.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2306-my-favourite-sweater",
+    "name": "2306 My Favourite Sweater",
+    "code": "2306",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2306.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2307-japanese-spring",
+    "name": "2307 Japanese Spring",
+    "code": "2307",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2307.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2308-tealy-blue",
+    "name": "2308 Tealy Blue",
+    "code": "2308",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2308.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2316-am-i-ferrari-red",
+    "name": "2316 Am I Ferrari Red",
+    "code": "2316",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2316.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2318-ciel-blue-bliss",
+    "name": "2318 Ciel Blue Bliss",
+    "code": "2318",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2318.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2319-iris-intensity",
+    "name": "2319 Iris Intensity",
+    "code": "2319",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2319.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2320-orchid-obsession",
+    "name": "2320 Orchid Obsession",
+    "code": "2320",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2320.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2321-twilight-tincture",
+    "name": "2321 Twilight Tincture",
+    "code": "2321",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2321.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2322-amathyst-awakening",
+    "name": "2322 Amathyst Awakening",
+    "code": "2322",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2322.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2323-maraschino-maven",
+    "name": "2323 Maraschino Maven",
+    "code": "2323",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2323.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2324-petrol-pearl",
+    "name": "2324 Petrol Pearl",
+    "code": "2324",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2324.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2332-back-off",
+    "name": "2332 Back Off",
+    "code": "2332",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2332.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2401-sister-of-the-bride",
+    "name": "2401 Sister of the Bride",
+    "code": "2401",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2401.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2402-mother-of-the-bride",
+    "name": "2402 Mother of the Bride",
+    "code": "2402",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2402.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2403-flowergirl",
+    "name": "2403 Flowergirl",
+    "code": "2403",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2403.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2404-daddys-girl",
+    "name": "2404 Daddys Girl",
+    "code": "2404",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2404.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2405-never-a-bride",
+    "name": "2405 Never a Bride",
+    "code": "2405",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2405.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2406-always-a-bridemaid",
+    "name": "2406 Always a Bridemaid",
+    "code": "2406",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2406.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2407-iceberg",
+    "name": "2407 Iceberg",
+    "code": "2407",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2407.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2408-subtle",
+    "name": "2408 Subtle",
+    "code": "2408",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2408.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2409-bad-boy-blue",
+    "name": "2409 Bad Boy Blue",
+    "code": "2409",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2409.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2410-if-ever-there-was",
+    "name": "2410 If Ever There Was",
+    "code": "2410",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2410.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2411-jacaranda",
+    "name": "2411 Jacaranda",
+    "code": "2411",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2411.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2412-vanilla-bean",
+    "name": "2412 Vanilla Bean",
+    "code": "2412",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2412.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2413-indecisive",
+    "name": "2413 Indecisive",
+    "code": "2413",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2413.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2414-pink-lemonade",
+    "name": "2414 Pink Lemonade",
+    "code": "2414",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2414.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2415-sweet-16",
+    "name": "2415 Sweet 16",
+    "code": "2415",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2415.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2419-dipsy",
+    "name": "2419 Dipsy",
+    "code": "2419",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2419.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2420-pink-smarty",
+    "name": "2420 Pink Smarty",
+    "code": "2420",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2420.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2421-fashionable-fuchs",
+    "name": "2421 Fashionable Fuchs",
+    "code": "2421",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2421.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2422-mango-mania",
+    "name": "2422 Mango Mania",
+    "code": "2422",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2422.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2423-peaceful-surrender",
+    "name": "2423 Peaceful Surrender",
+    "code": "2423",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2423.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2424-bulbasaur",
+    "name": "2424 BulBaSaur",
+    "code": "2424",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2424.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2425-frozen-nemo",
+    "name": "2425 Frozen Nemo",
+    "code": "2425",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2425.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2426-tinky-winky",
+    "name": "2426 Tinky Winky",
+    "code": "2426",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2426.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2427-chop-hop",
+    "name": "2427 Chop Hop",
+    "code": "2427",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2427.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2428-shock-me-magenta",
+    "name": "2428 Shock Me Magenta",
+    "code": "2428",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2428.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2429-2-blue-2-b-tru",
+    "name": "2429 2 Blue 2 B Tru",
+    "code": "2429",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2429.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2432-superb-milky",
+    "name": "2432 Superb Milky",
+    "code": "2432",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2432.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2433-glitzy-marshmallow",
+    "name": "2433 Glitzy Marshmallow",
+    "code": "2433",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2433.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2436-lava-stone",
+    "name": "2436 Lava Stone",
+    "code": "2436",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2436.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2437-sangiovese",
+    "name": "2437 Sangiovese",
+    "code": "2437",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2437.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2438-midnight-allnight",
+    "name": "2438 Midnight Allnight",
+    "code": "2438",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2438.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2439-irish-cream",
+    "name": "2439 Irish Cream",
+    "code": "2439",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2439.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2440-peacko-peacko",
+    "name": "2440 Peacko Peacko",
+    "code": "2440",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2440.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2441-creamy-tomatoes",
+    "name": "2441 Creamy Tomatoes",
+    "code": "2441",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2441.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2442-chocolate-crepes",
+    "name": "2442 Chocolate Crepes",
+    "code": "2442",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2442.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2443-oti-nane-blue",
+    "name": "2443 Oti Nane Blue",
+    "code": "2443",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2443.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2444-mulberry",
+    "name": "2444 Mulberry",
+    "code": "2444",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2444.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2445-gunmetal-grey",
+    "name": "2445 Gunmetal Grey",
+    "code": "2445",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2445.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2446-too-dark-for-you",
+    "name": "2446 Too Dark For You",
+    "code": "2446",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2446.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2449-its-gonna-be-my-favourite",
+    "name": "2449 Its Gonna Be My Favourite",
+    "code": "2449",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2449.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2450-grumpy-forest",
+    "name": "2450 Grumpy Forest",
+    "code": "2450",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2450.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2451-bluetallica",
+    "name": "2451 Bluetallica",
+    "code": "2451",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2451.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2453-flirting-with-purple",
+    "name": "2453 Flirting with Purple",
+    "code": "2453",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2453.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2455-cabaret-style",
+    "name": "2455 Cabaret Style",
+    "code": "2455",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2455.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2456-maybe-denim",
+    "name": "2456 Maybe Denim",
+    "code": "2456",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2456.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2457-chilli-peppers",
+    "name": "2457 Chilli Peppers",
+    "code": "2457",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2457.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2458-cherry-cherry-lady",
+    "name": "2458 Cherry Cherry Lady",
+    "code": "2458",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2458.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2459-lipstick",
+    "name": "2459 Lipstick",
+    "code": "2459",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2459.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2460-venice-mask",
+    "name": "2460 Venice Mask",
+    "code": "2460",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2460.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2461-gluhwein",
+    "name": "2461 Gluhwein",
+    "code": "2461",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2461.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2500-cupcake",
+    "name": "2500 Cupcake",
+    "code": "2500",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2500.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2501-petal-pink",
+    "name": "2501 Petal Pink",
+    "code": "2501",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2501.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2502-cotton-blue",
+    "name": "2502 Cotton Blue",
+    "code": "2502",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2502.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2503-iris-elegance",
+    "name": "2503 Iris Elegance",
+    "code": "2503",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2503.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2504-rozy-peach",
+    "name": "2504 Rozy Peach",
+    "code": "2504",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2504.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2505-matchy-matchy",
+    "name": "2505 Matchy Matchy",
+    "code": "2505",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2505.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2506-lemony-lime",
+    "name": "2506 Lemony Lime",
+    "code": "2506",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2506.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2507-aqua-splash",
+    "name": "2507 Aqua Splash",
+    "code": "2507",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2507.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2508-80s-babe",
+    "name": "2508 80s Babe",
+    "code": "2508",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2508.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2509-floral-fiesta",
+    "name": "2509 Floral Fiesta",
+    "code": "2509",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2509.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2510-pink-parfait",
+    "name": "2510 Pink Parfait",
+    "code": "2510",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2510.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2511-skin-shock",
+    "name": "2511 Skin Shock",
+    "code": "2511",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2511.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2512-ember-rose",
+    "name": "2512 Ember Rose",
+    "code": "2512",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2512.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2513-misty-dove",
+    "name": "2513 Misty Dove",
+    "code": "2513",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2513.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2515-shadow-grey",
+    "name": "2515 Shadow Grey",
+    "code": "2515",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2515.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2516-berry-obsession",
+    "name": "2516 Berry Obsession",
+    "code": "2516",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2516.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2518-vintage-whisper",
+    "name": "2518 Vintage Whisper",
+    "code": "2518",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2518.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2519-merlot-veil",
+    "name": "2519 Merlot Veil",
+    "code": "2519",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2519.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2521-choco-veil",
+    "name": "2521 Choco Veil",
+    "code": "2521",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2521.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2523-ruby-noir",
+    "name": "2523 Ruby Noir",
+    "code": "2523",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2523.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2525-dark-matter",
+    "name": "2525 Dark Matter",
+    "code": "2525",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2525.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2526-double-jeopardy",
+    "name": "2526 Double Jeopardy",
+    "code": "2526",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2526.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2527-the-doll-s-dress",
+    "name": "2527 The Doll's Dress",
+    "code": "2527",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2527.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2528-queen-of-the-night",
+    "name": "2528 Queen of the night",
+    "code": "2528",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2528.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2529-thunderstorm",
+    "name": "2529 Thunderstorm",
+    "code": "2529",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2529.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2600-cloud-dancer",
+    "name": "2600 Cloud Dancer",
+    "code": "2600",
+    "price": 8.9,
+    "colorFamily": "PASTEL",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2600.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2601-vanilla-fog",
+    "name": "2601 Vanilla Fog",
+    "code": "2601",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2601.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2602-porcelain-sky",
+    "name": "2602 Porcelain Sky",
+    "code": "2602",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2602.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2603-butter-air",
+    "name": "2603 Butter Air",
+    "code": "2603",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2603.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2604-peach-whisper",
+    "name": "2604 Peach Whisper",
+    "code": "2604",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2604.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2605-apricot-sunrise",
+    "name": "2605 Apricot Sunrise",
+    "code": "2605",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2605.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2606-first-cloud",
+    "name": "2606 First Cloud",
+    "code": "2606",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2606.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2607-silent-altitude",
+    "name": "2607 Silent Altitude",
+    "code": "2607",
+    "price": 8.9,
+    "colorFamily": "GREY",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2607.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2608-daybreak-pink",
+    "name": "2608 Daybreak Pink",
+    "code": "2608",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2608.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2609-cool-atmosphere",
+    "name": "2609 Cool Atmosphere",
+    "code": "2609",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2609.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2610-twilight-air",
+    "name": "2610 Twilight Air",
+    "code": "2610",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/PASTEL/GIUP-2610.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2611-angel-pink",
+    "name": "2611 Angel Pink",
+    "code": "2611",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2611.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2612-coral-milk",
+    "name": "2612 Coral Milk",
+    "code": "2612",
+    "price": 8.9,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2612.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2613-rosy-pop",
+    "name": "2613 Rosy Pop",
+    "code": "2613",
+    "price": 8.9,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2613.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2614-soft-iris",
+    "name": "2614 Soft Iris",
+    "code": "2614",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2614.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "2615-sky-cream",
+    "name": "2615 Sky Cream",
+    "code": "2615",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2615.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "ad01-bloody-red-moon",
+    "name": "AD01 Bloody Red Moon",
+    "code": "AD01",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-AD01.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "ad02-cyprus-hill-asylum",
+    "name": "AD02 Cyprus Hill Asylum",
+    "code": "AD02",
+    "price": 8.9,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-AD02.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "ad03-strange-blue-things",
+    "name": "AD03 Strange Blue Things",
+    "code": "AD03",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-AD03.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "btb01-rosso-corso",
+    "name": "BTB01 Rosso Corso",
+    "code": "BTB01",
+    "price": 8.9,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-B2BRed0001.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "btb02-nautilus",
+    "name": "BTB02 Nautilus",
+    "code": "BTB02",
+    "price": 8.9,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-B2BBlue0003.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "btb03-brimstone",
+    "name": "BTB03 Brimstone",
+    "code": "BTB03",
+    "price": 8.9,
+    "colorFamily": "YELLOW",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-B2BYellow0002.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "fr01-egalite",
+    "name": "FR01 Egalité",
+    "code": "FR01",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-FR01.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "fr02-fraternite",
+    "name": "FR02 Fraternité",
+    "code": "FR02",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-FR02.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "fr03-garnet",
+    "name": "FR03 Garnet",
+    "code": "FR03",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-FR03.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "fr04-living-coral",
+    "name": "FR04 Living Coral",
+    "code": "FR04",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-FR04.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "fr05-almond-glaze",
+    "name": "FR05 Almond Glaze",
+    "code": "FR05",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-FR05.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "fr06-the-perfect-nude",
+    "name": "FR06 The Perfect Nude",
+    "code": "FR06",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-FR06.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "fr08-ice-drop",
+    "name": "FR08 Ice Drop",
+    "code": "FR08",
+    "price": 8.9,
+    "colorFamily": "FRENCH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/FRENCH/GIUP-FR08.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "giup131-131-bubblegum",
+    "name": "131 Bubblegum",
+    "code": "GIUP131",
+    "price": 8.9,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP131.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n001-geisha-girl",
+    "name": "N001 Geisha Girl",
+    "code": "N001",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N001.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n002-cashmere",
+    "name": "N002 Cashmere",
+    "code": "N002",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N002.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n003-porcelain",
+    "name": "N003 Porcelain",
+    "code": "N003",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N003.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n004-spun-sugar",
+    "name": "N004 Spun Sugar",
+    "code": "N004",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N004.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n005-burberry-blush",
+    "name": "N005 Burberry Blush",
+    "code": "N005",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N005.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n006-chanterel",
+    "name": "N006 Chanterel",
+    "code": "N006",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N006.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n007-naked-beauty",
+    "name": "N007 Naked Beauty",
+    "code": "N007",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N007.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n008-if-the-shoe-fits",
+    "name": "N008 If The Shoe Fits",
+    "code": "N008",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N008.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n009-blushing-bride",
+    "name": "N009 Blushing Bride",
+    "code": "N009",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N009.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n010-frappelicious",
+    "name": "N010 Frappelicious",
+    "code": "N010",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N010.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n011-berry-me-softly",
+    "name": "N011 Berry Me Softly",
+    "code": "N011",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N011.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n012-fluffy-blue-sky",
+    "name": "N012 Fluffy Blue Sky",
+    "code": "N012",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N012.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n013-antique",
+    "name": "N013 Antique",
+    "code": "N013",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N013.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n014-sugarcane",
+    "name": "N014 Sugarcane",
+    "code": "N014",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N014.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n015-celestial",
+    "name": "N015 Celestial",
+    "code": "N015",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N015.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n016-wild-card",
+    "name": "N016 Wild Card",
+    "code": "N016",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N016.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n017-pale-petal",
+    "name": "N017 Pale Petal",
+    "code": "N017",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N017.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n018-chic",
+    "name": "N018 Chic",
+    "code": "N018",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N018.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n019-luxe-linen",
+    "name": "N019 Luxe Linen",
+    "code": "N019",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N019.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n020-beige-bliss",
+    "name": "N020 Beige Bliss",
+    "code": "N020",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N020.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n021-soft-mocha",
+    "name": "N021 Soft Mocha",
+    "code": "N021",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N021.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n022-blushing-buff",
+    "name": "N022 Blushing Buff",
+    "code": "N022",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N022.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n023-princess-diaries",
+    "name": "N023 Princess Diaries",
+    "code": "N023",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N023.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "n025-latte-mouse",
+    "name": "N025 Latte Mouse",
+    "code": "N025",
+    "price": 8.9,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N025.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r01-silver",
+    "name": "R01 Silver",
+    "code": "R01",
+    "price": 10.8,
+    "colorFamily": "SILVER",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Silver/GIUP-R01-Silver.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r02-gold",
+    "name": "R02 Gold",
+    "code": "R02",
+    "price": 10.8,
+    "colorFamily": "GOLD",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Gold/GIUP-R02-Gold.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r03-red",
+    "name": "R03 Red",
+    "code": "R03",
+    "price": 10.8,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-R03-Red.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r04-purple",
+    "name": "R04 Purple",
+    "code": "R04",
+    "price": 10.8,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-R04-purple.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r05-green",
+    "name": "R05 Green",
+    "code": "R05",
+    "price": 10.8,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-R05-Green.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r06-blue",
+    "name": "R06 Blue",
+    "code": "R06",
+    "price": 10.8,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-R06-blue.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r07-pink",
+    "name": "R07 Pink",
+    "code": "R07",
+    "price": 10.8,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-R07-pink.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r08-yellow",
+    "name": "R08 Yellow",
+    "code": "R08",
+    "price": 10.8,
+    "colorFamily": "YELLOW",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Yellow/GIUP-R08-yellow.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r09-purple",
+    "name": "R09 Purple",
+    "code": "R09",
+    "price": 10.8,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-R09-purple.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r10-green",
+    "name": "R10 Green",
+    "code": "R10",
+    "price": 10.8,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-R010-Green .webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r11-gold",
+    "name": "R11 Gold",
+    "code": "R11",
+    "price": 10.8,
+    "colorFamily": "GOLD",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Gold/GIUP-R011-gold.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r12-peach",
+    "name": "R12 Peach",
+    "code": "R12",
+    "price": 10.8,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-R012-peach.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r13-pink",
+    "name": "R13 Pink",
+    "code": "R13",
+    "price": 10.8,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-R013-pink.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r14-green",
+    "name": "R14 Green",
+    "code": "R14",
+    "price": 10.8,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-R014-green.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r15-orange",
+    "name": "R15 Orange",
+    "code": "R15",
+    "price": 10.8,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-R015-orange.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r16-pink",
+    "name": "R16 Pink",
+    "code": "R16",
+    "price": 10.8,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-R016-pink.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r17-black",
+    "name": "R17 Black",
+    "code": "R17",
+    "price": 10.8,
+    "colorFamily": "BLACK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Black/GIUP-R017-black.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r18-white",
+    "name": "R18 White",
+    "code": "R18",
+    "price": 10.8,
+    "colorFamily": "WHITE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/White/GIUP-R018-white.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r19-pink",
+    "name": "R19 Pink",
+    "code": "R19",
+    "price": 10.8,
+    "colorFamily": "PINK",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-R019-pink.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r20-coral",
+    "name": "R20 Coral",
+    "code": "R20",
+    "price": 10.8,
+    "colorFamily": "CORAL ORANGE PEACH",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-R020-coral.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r21-blue",
+    "name": "R21 Blue",
+    "code": "R21",
+    "price": 10.8,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-R021-blue.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r22-blue",
+    "name": "R22 Blue",
+    "code": "R22",
+    "price": 10.8,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/RONE/GIUP-R022-blue.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r23-purple",
+    "name": "R23 Purple",
+    "code": "R23",
+    "price": 10.8,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-R023-purple.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r24-brown",
+    "name": "R24 Brown",
+    "code": "R24",
+    "price": 10.8,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-R024-brown.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r25-brown",
+    "name": "R25 Brown",
+    "code": "R25",
+    "price": 10.8,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-R025-brown.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r26-red",
+    "name": "R26 Red",
+    "code": "R26",
+    "price": 10.8,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-R026-red.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r27-brown",
+    "name": "R27 Brown",
+    "code": "R27",
+    "price": 10.8,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-R027-brown.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r28-purple",
+    "name": "R28 Purple",
+    "code": "R28",
+    "price": 10.8,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-R028-purple.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r29-red",
+    "name": "R29 Red",
+    "code": "R29",
+    "price": 10.8,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-R029-red.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r30-purple",
+    "name": "R30 Purple",
+    "code": "R30",
+    "price": 10.8,
+    "colorFamily": "PURPLE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-R030-purple.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r31-green",
+    "name": "R31 Green",
+    "code": "R31",
+    "price": 10.8,
+    "colorFamily": "GREEN",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/RONE/GIUP-R031-green.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r32-blue",
+    "name": "R32 Blue",
+    "code": "R32",
+    "price": 10.8,
+    "colorFamily": "BLUE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/RONE/GIUP-R032-blue.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r33-nude",
+    "name": "R33 Nude",
+    "code": "R33",
+    "price": 10.8,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-R033-nude.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r34-nude",
+    "name": "R34 Nude",
+    "code": "R34",
+    "price": 10.8,
+    "colorFamily": "BROWN NUDE",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-R034-nude.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r35-red",
+    "name": "R35 Red",
+    "code": "R35",
+    "price": 10.8,
+    "colorFamily": "RED",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/RONE/GIUP-R035-red.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r36-neon-orange",
+    "name": "R36 Neon Orange",
+    "code": "R36",
+    "price": 10.8,
+    "colorFamily": "NEON",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Neon/GIUP-R036-neon-orange.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r37-neon-yellow",
+    "name": "R37 Neon Yellow",
+    "code": "R37",
+    "price": 10.8,
+    "colorFamily": "NEON",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Neon/GIUP-R037-neon-yellow.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r38-neon-green",
+    "name": "R38 Neon Green",
+    "code": "R38",
+    "price": 10.8,
+    "colorFamily": "NEON",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Neon/GIUP-R038-neon-green.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r39-neon-purple",
+    "name": "R39 Neon Purple",
+    "code": "R39",
+    "price": 10.8,
+    "colorFamily": "NEON",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Neon/GIUP-R039-neon-purple.webp",
+    "galleryImages": []
+  },
+  {
+    "slug": "r40-neon-blue",
+    "name": "R40 Neon Blue",
+    "code": "R40",
+    "price": 10.8,
+    "colorFamily": "NEON",
+    "size": "11ml",
+    "imageUrl": "/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Neon/GIUP-R040--neon-blue.webp",
+    "galleryImages": []
+  }
+]

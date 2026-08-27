@@ -7308,6 +7308,325 @@ function pickHomepageMedia(items = []) {
   }
 }
 
+function ProductPage() {
+  const { slug = '' } = useParams()
+  const [product, setProduct] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+  const [selectedImage, setSelectedImage] = useState('')
+  const [isOutOfStock, setIsOutOfStock] = useState(false)
+  const [cartMessage, setCartMessage] = useState('')
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    const loadProduct = async () => {
+      setIsLoading(true)
+      setLoadError('')
+      setProduct(null)
+      setSelectedImage('')
+      setCartMessage('')
+
+      try {
+        const [manifestResponse, stockResponse] = await Promise.all([
+          fetch('/gelitup-content/product-manifest.json', {
+            signal: controller.signal,
+          }),
+          fetch('/gelitup-content/out-of-stock.json', {
+            signal: controller.signal,
+          }),
+        ])
+
+        if (!manifestResponse.ok) {
+          throw new Error(`Product catalogue unavailable (${manifestResponse.status})`)
+        }
+        if (!stockResponse.ok) {
+          throw new Error(`Product availability unavailable (${stockResponse.status})`)
+        }
+
+        const manifest = await manifestResponse.json()
+        const outOfStockProducts = await stockResponse.json()
+        const match = Array.isArray(manifest)
+          ? manifest.find((item) => item.slug === slug)
+          : null
+
+        if (!match) return
+
+        const outOfStockSet = new Set(
+          (Array.isArray(outOfStockProducts) ? outOfStockProducts : [])
+            .map(normalizeOutOfStockName),
+        )
+
+        setProduct(match)
+        setSelectedImage(match.imageUrl)
+        setIsOutOfStock(outOfStockSet.has(normalizeOutOfStockName(match.name)))
+      }
+      catch (error) {
+        if (error?.name !== 'AbortError') {
+          setLoadError(
+            error instanceof Error
+              ? error.message
+              : 'Unable to load this product.',
+          )
+        }
+      }
+      finally {
+        if (!controller.signal.aborted) setIsLoading(false)
+      }
+    }
+
+    void loadProduct()
+    return () => controller.abort()
+  }, [slug])
+
+  const family = product
+    ? COLOR_FAMILY_FILTERS.find((item) => item.key === product.colorFamily)
+    : null
+  const familyLabel = family?.label || product?.colorFamily || ''
+  const listPrice = product
+    ? Number(product.price)
+    : null
+  const displayPrice = applyCatalogueDiscount(listPrice)
+  const description = product
+    ? `Discover ${product.name}, a professional ${familyLabel.toLowerCase()} gel polish from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
+    : ''
+  const galleryImages = useMemo(
+    () => product
+      ? [product.imageUrl, ...(product.galleryImages || [])]
+      : [],
+    [product],
+  )
+
+  useEffect(() => {
+    if (!product) return undefined
+
+    return setPageSEO({
+      title: `${product.name} Gel Polish | GEL.IT.UP`,
+      description,
+      canonical: `https://gelitup.com/products/${product.slug}`,
+    })
+  }, [description, product])
+
+  const productSchema = useMemo(() => {
+    if (!product || displayPrice == null) return null
+
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: product.name,
+      description,
+      sku: product.code,
+      brand: {
+        '@type': 'Brand',
+        name: 'GEL.IT.UP by GIUP®',
+      },
+      image: galleryImages.map((imageUrl) => (
+        encodeURI(`https://gelitup.com${imageUrl}`)
+      )),
+      offers: {
+        '@type': 'Offer',
+        url: `https://gelitup.com/products/${product.slug}`,
+        priceCurrency: 'EUR',
+        price: Number(displayPrice).toFixed(2),
+        availability: isOutOfStock
+          ? 'https://schema.org/OutOfStock'
+          : 'https://schema.org/InStock',
+        seller: {
+          '@type': 'Organization',
+          name: 'GEL.IT.UP by GIUP®',
+        },
+      },
+    }
+  }, [description, displayPrice, galleryImages, isOutOfStock, product])
+
+  const addQuickItem = useCallback(() => {
+    if (!product || isOutOfStock) return
+
+    const itemKey = `${product.name}::${product.code}`
+
+    try {
+      const savedCart = JSON.parse(
+        localStorage.getItem(QUICK_CART_STORAGE_KEY) || '{}',
+      )
+      if (!savedCart || Array.isArray(savedCart) || typeof savedCart !== 'object') {
+        throw new Error('Saved basket data is invalid')
+      }
+
+      const nextCart = {
+        ...savedCart,
+        [itemKey]: Number(savedCart[itemKey] || 0) + 1,
+      }
+      localStorage.setItem(QUICK_CART_STORAGE_KEY, JSON.stringify(nextCart))
+      window.dispatchEvent(new Event('gelitup:cart-change'))
+      setCartMessage('Added to basket')
+
+      if (window.gtag) {
+        window.gtag('event', 'add_to_cart', {
+          currency: 'EUR',
+          value: displayPrice,
+          items: [{
+            item_id: itemKey,
+            item_name: product.name,
+            price: displayPrice,
+            quantity: 1,
+          }],
+        })
+        window.gtag('event', 'conversion', {
+          send_to: 'AW-1008159504/m23ACI_9w6oaEJCW3eAD',
+          value: 1.0,
+          currency: 'EUR',
+        })
+      }
+
+      window.dataLayer = window.dataLayer || []
+      window.dataLayer.push({
+        event: 'add_to_cart',
+        ecommerce: {
+          currency: 'EUR',
+          value: displayPrice,
+          items: [{
+            item_id: itemKey,
+            item_name: product.name,
+            price: displayPrice,
+            quantity: 1,
+          }],
+        },
+      })
+    }
+    catch (error) {
+      console.error('[ProductPage] Unable to update basket', error)
+      setCartMessage('Unable to add this product. Please try again.')
+    }
+  }, [displayPrice, isOutOfStock, product])
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <p className="text-sm text-white/70">Loading product...</p>
+      </div>
+    )
+  }
+
+  if (loadError) {
+    return (
+      <section className="mx-auto max-w-xl rounded-2xl border border-rose-300/30 bg-rose-950/30 p-6 text-center">
+        <h1 className="text-xl font-bold text-white">Product unavailable</h1>
+        <p className="mt-2 text-sm text-rose-100/80">{loadError}</p>
+        <NavLink
+          to="/full-catalogue?subcategory=solid-gel-polish"
+          className="mt-5 inline-flex rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-semibold text-white"
+        >
+          Browse Solid Gel Polish
+        </NavLink>
+      </section>
+    )
+  }
+
+  if (!product) return <NotFoundPage />
+
+  return (
+    <article className="mx-auto max-w-5xl">
+      {productSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+        />
+      )}
+
+      <div className="grid gap-8 rounded-3xl border border-white/15 bg-white/5 p-4 md:grid-cols-2 md:p-8">
+        <section>
+          <div className="flex min-h-[360px] items-center justify-center rounded-2xl bg-white p-4">
+            <ProductImage
+              src={selectedImage || product.imageUrl}
+              alt={`${product.name} gel polish`}
+              className="max-h-[520px] w-full object-contain"
+            />
+          </div>
+
+          {galleryImages.length > 1 && (
+            <div className="mt-3 flex flex-wrap gap-3">
+              {galleryImages.map((imageUrl) => (
+                <button
+                  key={imageUrl}
+                  type="button"
+                  onClick={() => setSelectedImage(imageUrl)}
+                  className={`h-20 w-20 overflow-hidden rounded-xl border bg-white p-1 ${
+                    selectedImage === imageUrl
+                      ? 'border-fuchsia-500'
+                      : 'border-white/20'
+                  }`}
+                >
+                  <ProductImage
+                    src={imageUrl}
+                    alt={`${product.name} view`}
+                    className="h-full w-full object-contain"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="flex flex-col justify-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-300">
+            Solid Gel Polish
+          </p>
+          <h1 className="mt-2 text-3xl font-black text-white md:text-4xl">
+            {product.name}
+          </h1>
+
+          <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <dt className="text-white/50">Code</dt>
+              <dd className="font-semibold text-white">{product.code}</dd>
+            </div>
+            <div>
+              <dt className="text-white/50">Size</dt>
+              <dd className="font-semibold text-white">{product.size}</dd>
+            </div>
+          </dl>
+
+          <p className="mt-6 text-3xl font-black text-fuchsia-300">
+            €{Number(displayPrice).toFixed(2)}
+          </p>
+
+          <p className="mt-5 text-sm leading-7 text-white/75">
+            {product.name} is a professional {familyLabel.toLowerCase()} gel
+            polish created in a HEMA-free, TPO-free and EU-certified
+            formulation for salon use.
+          </p>
+
+          {family?.slug && (
+            <NavLink
+              to={`/colours/${family.slug}`}
+              className="mt-4 text-sm font-semibold text-fuchsia-300 underline-offset-4 hover:underline"
+            >
+              Explore all {family.label} gel polish
+            </NavLink>
+          )}
+
+          <button
+            type="button"
+            onClick={addQuickItem}
+            disabled={isOutOfStock}
+            className={`mt-7 rounded-xl px-6 py-3 text-sm font-bold text-white ${
+              isOutOfStock
+                ? 'cursor-not-allowed bg-rose-800/60'
+                : 'bg-fuchsia-600 hover:bg-fuchsia-500'
+            }`}
+          >
+            {isOutOfStock ? 'Out of Stock' : 'Add to Basket'}
+          </button>
+
+          {cartMessage && (
+            <p className="mt-3 text-sm text-white/70">{cartMessage}</p>
+          )}
+        </section>
+      </div>
+    </article>
+  )
+}
+
 function NotFoundPage() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
@@ -21794,6 +22113,7 @@ function App() {
           <Route path="/for-academies" element={<ForAcademiesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
           <Route path="/colours/:family" element={<FullCataloguePage />} />
+          <Route path="/products/:slug" element={<ProductPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/starter-kits" element={<StarterKits discount={{ active: isCatalogueDiscountActive(), pct: CATALOGUE_DISCOUNT_PCT }} onAddKit={handleAddKit} />} />
           <Route path="/starter-kits/:kitId" element={<StarterKits discount={{ active: isCatalogueDiscountActive(), pct: CATALOGUE_DISCOUNT_PCT }} onAddKit={handleAddKit} />} />

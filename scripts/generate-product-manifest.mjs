@@ -12,6 +12,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
 const CONTENT_DIR = resolve(ROOT, 'public/gelitup-content')
 const OUTPUT_PATH = resolve(CONTENT_DIR, 'product-manifest.json')
+const B2B_PRICE_MULTIPLIER = 1.2
 
 const WINDOWS_1252_BYTES = new Map([
   [0x20ac, 0x80], [0x201a, 0x82], [0x0192, 0x83],
@@ -207,6 +208,10 @@ function choosePriceEntry(code, candidates) {
   return first
 }
 
+function toCataloguePrice(rawPrice) {
+  return Math.ceil(Number(rawPrice) * B2B_PRICE_MULTIPLIER * 10) / 10
+}
+
 const imageMap = loadJson('product-image-map.json')
 const priceList = loadJson('b2b-price-list.json').items
 const colourFamilies = loadJson('solid-gel-colour-families.json')
@@ -344,10 +349,10 @@ for (const record of recordsByPath.values()) {
   const exactMatches = record.aliases.flatMap(alias => (
     exactPriceIndex.get(normalizeJoinKey(alias)) || []
   ))
-  const priceEntry = choosePriceEntry(code, [
-    ...exactMatches,
-    ...(pricesByCode.get(code) || []),
-  ])
+  const priceEntry = (
+    choosePriceEntry(code, exactMatches)
+    || choosePriceEntry(code, pricesByCode.get(code) || [])
+  )
 
   if (!priceEntry) {
     if (code === '109') {
@@ -418,7 +423,7 @@ for (const record of recordsByPath.values()) {
     slug,
     name,
     code,
-    price: priceEntry.price,
+    price: toCataloguePrice(priceEntry.price),
     colorFamily,
     size,
     imageUrl: record.imageUrl,

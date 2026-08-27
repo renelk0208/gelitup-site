@@ -14,6 +14,12 @@ const fs   = require('fs')
 const COLOR_FAMILY_PAGES = require('./colour-family-pages.cjs')
 
 const DIST = path.resolve(__dirname, '../dist')
+const PRODUCT_MANIFEST = JSON.parse(
+  fs.readFileSync(
+    path.resolve(__dirname, '../public/gelitup-content/product-manifest.json'),
+    'utf8',
+  ),
+)
 
 // ─── Per-route SEO map ────────────────────────────────────────────────────────
 
@@ -35,6 +41,25 @@ const COLOR_FAMILY_ROUTE_SEO = Object.fromEntries(
   }),
 )
 
+const PRODUCT_ROUTE_SEO = Object.fromEntries(
+  PRODUCT_MANIFEST.map((product) => {
+    const familyName = product.colorFamily
+      .toLowerCase()
+      .replace(/\b\w/g, (letter) => letter.toUpperCase())
+    const description = `Discover ${product.name}, a professional ${familyName.toLowerCase()} gel polish from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
+
+    return [
+      `/products/${product.slug}`,
+      {
+        title: `${product.name} Gel Polish | GEL.IT.UP`,
+        description,
+        canonical: `https://gelitup.com/products/${product.slug}`,
+        bodyHtml: `<main><h1>${escapeHtml(product.name)} Gel Polish</h1><img src="${escapeHtml(product.imageUrl)}" alt="${escapeHtml(product.name)} gel polish"><p>${escapeHtml(description)}</p></main>`,
+      },
+    ]
+  }),
+)
+
 const ROUTE_SEO_MAP = {
   '/': {
     title:       'GEL.IT.UP by GIUP® | Professional Gel Polish, Builder Gel & Nail Systems',
@@ -47,6 +72,7 @@ const ROUTE_SEO_MAP = {
     canonical:   'https://gelitup.com/full-catalogue',
   },
   ...COLOR_FAMILY_ROUTE_SEO,
+  ...PRODUCT_ROUTE_SEO,
   '/solid-gel-polish': {
     title:       'Wholesale Gel Polish Supplier | 1,000+ Shades | GEL.IT.UP Professional',
     description: 'Over 1,000 shades of professional gel polish available wholesale. HEMA-free, TPO-free, Leaping Bunny Approved. Bulk supply for nail technicians, salons and academies across the EU and worldwide.',
