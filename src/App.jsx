@@ -4558,15 +4558,17 @@ function FullCataloguePage() {
   const filteredItems = useMemo(() => {
     const resolveFamily = (item) => {
       // Primary: path-derived colour family from physical sub-folder
-      if (item.colorFamily) return normalizeCatalogueToken(item.colorFamily)
-      // Secondary: manually-curated JSON lookup
       const urlParts = (item.imageUrl || '').split('/')
       const filename = urlParts[urlParts.length - 1] || ''
       const sku = filename.replace(/\.[^.]+$/, '')
       const jsonFamily = solidGelColourFamilies[sku]
+      if (item.colorFamily && normalizeCatalogueToken(item.colorFamily) !== 'GIUP1') {
+        return normalizeCatalogueToken(item.colorFamily)
+      }
+      // RONE shades use the per-SKU family when one has been curated.
       if (jsonFamily) return jsonFamily
       // Fallback: name keyword matching
-      return item.colorFamilyKey
+      return item.colorFamily ? normalizeCatalogueToken(item.colorFamily) : item.colorFamilyKey
     }
 
     const colorFiltered = (!isSolidGelPolish || activeColorFamily === 'ALL')
