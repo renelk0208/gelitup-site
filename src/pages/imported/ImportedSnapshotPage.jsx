@@ -705,6 +705,61 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
 
     return (
       <section className="space-y-6">
+        <section className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] -mt-4 w-screen overflow-hidden bg-[#151116] text-white md:-mt-10">
+          <div className="grid min-h-[520px] lg:grid-cols-2">
+            <div className="relative min-h-[300px] lg:order-2 lg:min-h-full">
+              <img
+                src={ABOUT_US_HERO_IMAGE_URL}
+                alt="GEL.IT.UP by GIUP professional nail products"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#151116]/75 via-transparent to-transparent lg:bg-gradient-to-r lg:from-[#151116]/35 lg:to-transparent" />
+            </div>
+
+            <div className="flex items-center px-5 py-12 sm:px-8 sm:py-16 lg:px-12 xl:px-[max(3rem,calc((100vw-80rem)/2))]">
+              <div className="max-w-2xl">
+                <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#f168ae]">Who we are</p>
+                <h1 className="heading-on-dark mt-4 text-4xl font-black uppercase leading-[1.08] tracking-[0.04em] sm:text-5xl">
+                  Professional colour. Built on science since 2011.
+                </h1>
+                <div className="mt-6 space-y-4 text-base leading-7 text-white/80 sm:text-lg sm:leading-8">
+                  <p>
+                    GEL.IT.UP by GIUP® is a professional nail brand created for nail technicians,
+                    salons, educators and distributors who expect dependable performance, safer
+                    formulations and colour without compromise.
+                  </p>
+                  <p>
+                    Behind the brand is Leeukopf Laboratories, our manufacturing and research
+                    division, where products are formulated, tested and manufactured. Since 2011,
+                    we have supported nail professionals with a growing range of 1,000+ shades and
+                    complete professional nail systems.
+                  </p>
+                  <p>
+                    Our work is guided by EU regulatory requirements, GMP-oriented practices,
+                    professional-only standards and a cruelty-free commitment that extends from
+                    raw-material sourcing to finished products.
+                  </p>
+                </div>
+
+                <dl className="mt-8 grid grid-cols-3 gap-3 border-t border-white/15 pt-6">
+                  <div>
+                    <dt className="text-2xl font-black text-white sm:text-3xl">2011</dt>
+                    <dd className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-white/55">Our journey began</dd>
+                  </div>
+                  <div>
+                    <dt className="text-2xl font-black text-white sm:text-3xl">1,000+</dt>
+                    <dd className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-white/55">Professional shades</dd>
+                  </div>
+                  <div>
+                    <dt className="text-2xl font-black text-white sm:text-3xl">9+</dt>
+                    <dd className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-white/55">Countries served</dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <HomeHeroCarousel />
 
         <div className="rounded-2xl border border-[#E8E8E8] bg-transparent p-5 sm:p-8">
