@@ -16,6 +16,44 @@ const DIST = path.resolve(__dirname, '../dist')
 
 // ─── Per-route SEO map ────────────────────────────────────────────────────────
 
+const COLOR_FAMILY_PAGES = [
+  { label: 'Black', slug: 'black' },
+  { label: 'Blue', slug: 'blue' },
+  { label: 'Brown Nude', slug: 'brown-nude' },
+  { label: 'Coral Orange Peach', slug: 'coral-orange-peach' },
+  { label: 'French', slug: 'french' },
+  { label: 'GIUP1', slug: 'giup1' },
+  { label: 'Gold', slug: 'gold' },
+  { label: 'Green', slug: 'green' },
+  { label: 'Grey', slug: 'grey' },
+  { label: 'Neon', slug: 'neon' },
+  { label: 'Pastel', slug: 'pastel' },
+  { label: 'Pink', slug: 'pink' },
+  { label: 'Purple', slug: 'purple' },
+  { label: 'Red', slug: 'red' },
+  { label: 'Silver', slug: 'silver' },
+  { label: 'White', slug: 'white' },
+  { label: 'Yellow', slug: 'yellow' },
+]
+
+const COLOR_FAMILY_ROUTE_SEO = Object.fromEntries(
+  COLOR_FAMILY_PAGES.map(({ label, slug }) => {
+    const labelLower = label.toLowerCase()
+    const heading = `${label} Gel Polish Wholesale`
+    const intro = `Explore GEL.IT.UP ${labelLower} gel polish in professional, HEMA-free, TPO-free and EU-certified formulations. These salon-ready ${labelLower} shades are available wholesale for nail technicians, academies and distributors.`
+
+    return [
+      `/colours/${slug}`,
+      {
+        title: `${heading} | GEL.IT.UP`,
+        description: `Shop professional ${labelLower} gel polish wholesale from GEL.IT.UP. Every shade is HEMA-free, TPO-free and EU-certified for nail technicians, salons, academies and distributors.`,
+        canonical: `https://gelitup.com/colours/${slug}`,
+        bodyHtml: `<main><h1>${heading}</h1><p>${intro}</p></main>`,
+      },
+    ]
+  }),
+)
+
 const ROUTE_SEO_MAP = {
   '/': {
     title:       'GEL.IT.UP by GIUP® | Professional Gel Polish, Builder Gel & Nail Systems',
@@ -27,6 +65,7 @@ const ROUTE_SEO_MAP = {
     description: 'Browse the complete GEL.IT.UP wholesale catalogue. 1,000+ gel polish shades, builder gels, base coats, nail art and professional tools. HEMA-free, TPO-free, EU certified.',
     canonical:   'https://gelitup.com/full-catalogue',
   },
+  ...COLOR_FAMILY_ROUTE_SEO,
   '/solid-gel-polish': {
     title:       'Wholesale Gel Polish Supplier | 1,000+ Shades | GEL.IT.UP Professional',
     description: 'Over 1,000 shades of professional gel polish available wholesale. HEMA-free, TPO-free, Leaping Bunny Approved. Bulk supply for nail technicians, salons and academies across the EU and worldwide.',
@@ -222,10 +261,10 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
 }
 
-function injectSeo(html, { title, description, canonical }) {
+function injectSeo(html, { title, description, canonical, bodyHtml = '' }) {
   const t = escapeHtml(title)
   const d = escapeHtml(description)
-  return html
+  const seoHtml = html
     .replace(/<title>[^<]*<\/title>/i,                     `<title>${t}</title>`)
     .replace(/<meta\s+name="description"[^>]*>/i,          `<meta name="description" content="${d}" />`)
     .replace(/<link\s+rel="canonical"[^>]*>/i,             `<link rel="canonical" href="${canonical}" />`)
@@ -234,6 +273,10 @@ function injectSeo(html, { title, description, canonical }) {
     .replace(/<meta\s+property="og:url"[^>]*>/i,           `<meta property="og:url" content="${canonical}" />`)
     .replace(/<meta\s+name="twitter:title"[^>]*>/i,        `<meta name="twitter:title" content="${t}" />`)
     .replace(/<meta\s+name="twitter:description"[^>]*>/i,  `<meta name="twitter:description" content="${d}" />`)
+
+  return bodyHtml
+    ? seoHtml.replace(/<div\s+id="root"\s*>/i, `<div id="root">${bodyHtml}`)
+    : seoHtml
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────

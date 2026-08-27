@@ -3103,6 +3103,20 @@ function getColorFamilyBySlug(slug = '') {
   return COLOR_FAMILY_FILTERS.find((family) => family.slug === normalizedSlug) || null
 }
 
+function getColorFamilyPageContent(family) {
+  if (!family?.slug || !family?.label) return null
+
+  const familyName = family.label
+  const familyNameLower = familyName.toLowerCase()
+  return {
+    title: `${familyName} Gel Polish Wholesale | GEL.IT.UP`,
+    description: `Shop professional ${familyNameLower} gel polish wholesale from GEL.IT.UP. Every shade is HEMA-free, TPO-free and EU-certified for nail technicians, salons, academies and distributors.`,
+    canonical: `https://gelitup.com/colours/${family.slug}`,
+    heading: `${familyName} Gel Polish Wholesale`,
+    intro: `Explore GEL.IT.UP ${familyNameLower} gel polish in professional, HEMA-free, TPO-free and EU-certified formulations. These salon-ready ${familyNameLower} shades are available wholesale for nail technicians, academies and distributors.`,
+  }
+}
+
 const COLOR_CATEGORY_LINKS = [
   {
     category: 'CAT EYE',
@@ -3127,7 +3141,7 @@ const COLOR_CATEGORY_LINKS = [
         .filter((family) => family.slug)
         .map((family) => ({
           label: family.label,
-          to: `/full-catalogue?subcategory=solid-gel-polish&family=${family.slug}`,
+          to: `/colours/${family.slug}`,
         })),
     ],
   },
@@ -3602,6 +3616,13 @@ const SUBCATEGORY_SEO = {
 
 function FullCataloguePage() {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { family: routeFamilySlug = '' } = useParams()
+  const routeColorFamily = getColorFamilyBySlug(routeFamilySlug)
+  const colorFamilyPageContent = useMemo(
+    () => getColorFamilyPageContent(routeColorFamily),
+    [routeColorFamily],
+  )
   const [sections, setSections] = useState([])
   const [activeCategory, setActiveCategory] = useState('')
   const [expandedSections, setExpandedSections] = useState({})
@@ -3919,6 +3940,10 @@ function FullCataloguePage() {
   }, [isLoading, searchParams])
 
   useEffect(() => {
+    if (colorFamilyPageContent) {
+      return setPageSEO(colorFamilyPageContent)
+    }
+
     const subSlug = (searchParams.get('subcategory') || '').toLowerCase().trim()
     const seo = SUBCATEGORY_SEO[subSlug] || {
       title: 'Full Product Catalogue | Wholesale Nail Supplies | GEL.IT.UP by GIUP®',
@@ -3926,7 +3951,7 @@ function FullCataloguePage() {
       canonical: 'https://gelitup.com/full-catalogue',
     }
     return setPageSEO(seo)
-  }, [searchParams])
+  }, [colorFamilyPageContent, searchParams])
 
   // Load B2B price list for public price display
   useEffect(() => {
@@ -5052,10 +5077,11 @@ function FullCataloguePage() {
 
   // Handle ?subcategory= deep-link — e.g. gelitup.com/cat-eye resolves here via a vanity route
   useEffect(() => {
-    const subSlug = (searchParams.get('subcategory') || '').toLowerCase().trim()
+    const querySubSlug = (searchParams.get('subcategory') || '').toLowerCase().trim()
+    const subSlug = routeColorFamily ? 'solid-gel-polish' : querySubSlug
     if (!subSlug || isLoading) return
     const requestedCatEyeCollection = getCatEyeCollectionBySlug(searchParams.get('collection'))?.value || 'ALL'
-    const requestedColorFamily = getColorFamilyBySlug(searchParams.get('family'))?.key || 'ALL'
+    const requestedColorFamily = routeColorFamily?.key || getColorFamilyBySlug(searchParams.get('family'))?.key || 'ALL'
     // Maps URL slug → [categoryName, subcategoryName] using exact folder names from product-images/
     const SUBSLUG_MAP = {
       // ── Gel Polish (COLORS) ──────────────────────────────────────────────────
@@ -5126,7 +5152,7 @@ function FullCataloguePage() {
       })
       if (found) { openCatalogueCategory(section.category, found.name); return }
     }
-  }, [isLoading, searchParams, openCatalogueCategory, sections])
+  }, [isLoading, searchParams, openCatalogueCategory, routeColorFamily, sections])
 
   const getCategoryCoverImage = useCallback((categoryName = '', fallbackImageUrl = '') => {
     const candidates = buildCategoryHeroImageCandidates(categoryName, fallbackImageUrl)
@@ -5327,9 +5353,7 @@ function FullCataloguePage() {
               <p className="mt-1.5 text-[12px] leading-relaxed text-black/65">{TRIAL_PACK_DESCRIPTION}</p>
               <p className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-black/45">Includes: {TRIAL_PACK_CONTENTS.join(' · ')}</p>
               <div className="mt-2.5 flex items-baseline gap-2">
-                <span className="text-xs font-medium text-black/40 line-through">€{TRIAL_PACK_LIST_PRICE.toFixed(2)}</span>
                 <span className="text-lg font-bold text-fuchsia-700">€{TRIAL_PACK_PRICE.toFixed(2)}</span>
-                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700">Save €{(TRIAL_PACK_LIST_PRICE - TRIAL_PACK_PRICE).toFixed(2)}</span>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
@@ -5545,6 +5569,17 @@ function FullCataloguePage() {
               )
             })()}
 
+            {colorFamilyPageContent && (
+              <section className="mt-3 rounded-[14px] border border-fuchsia-200 bg-fuchsia-50/50 p-4">
+                <h1 className="text-xl font-black tracking-tight text-black sm:text-2xl">
+                  {colorFamilyPageContent.heading}
+                </h1>
+                <p className="mt-2 max-w-4xl text-sm leading-relaxed text-black/70">
+                  {colorFamilyPageContent.intro}
+                </p>
+              </section>
+            )}
+
             <div className="mt-3">
               <label className="sr-only" htmlFor="catalog-search">Search catalogue</label>
               <input
@@ -5569,6 +5604,14 @@ function FullCataloguePage() {
                         onClick={() => {
                           setActiveColorFamily(family.key)
                           scrollToCategoryDetail()
+                          if (routeColorFamily) {
+                            navigate(
+                              family.slug
+                                ? `/colours/${family.slug}`
+                                : '/full-catalogue?subcategory=solid-gel-polish',
+                            )
+                            return
+                          }
                           setSearchParams(
                             family.slug
                               ? { subcategory: 'solid-gel-polish', family: family.slug }
@@ -21750,6 +21793,7 @@ function App() {
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
           <Route path="/for-academies" element={<ForAcademiesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
+          <Route path="/colours/:family" element={<FullCataloguePage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/starter-kits" element={<StarterKits discount={{ active: isCatalogueDiscountActive(), pct: CATALOGUE_DISCOUNT_PCT }} onAddKit={handleAddKit} />} />
           <Route path="/starter-kits/:kitId" element={<StarterKits discount={{ active: isCatalogueDiscountActive(), pct: CATALOGUE_DISCOUNT_PCT }} onAddKit={handleAddKit} />} />
