@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 /**
@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom'
  *  - First image loads eagerly; the rest are lazy and the *next* slide's
  *    image is preloaded so transitions are instant.
  *  - The pill fill is pure CSS (no JS animation loop).
- *  - Respects prefers-reduced-motion (no auto-advance, no fill animation).
+ *  - Respects prefers-reduced-motion by suppressing transition and fill animations.
  */
 
 const SLIDE_MS = 5000
@@ -105,6 +105,7 @@ const BANNERS = [
 export default function HomeHeroCarousel() {
   const navigate = useNavigate()
   const [index, setIndex] = useState(0)
+  const touchStart = useRef(null)
   const reduced = useMemo(
     () => typeof window !== 'undefined' && window.matchMedia
       ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -114,12 +115,11 @@ export default function HomeHeroCarousel() {
 
   // Auto-advance — resets whenever the active slide changes (incl. manual jumps).
   useEffect(() => {
-    if (reduced) return undefined
     const timer = setTimeout(() => {
       setIndex((i) => (i + 1) % BANNERS.length)
     }, SLIDE_MS)
     return () => clearTimeout(timer)
-  }, [index, reduced])
+  }, [index])
 
   // Preload the next slide's image so the transition is instant.
   useEffect(() => {
@@ -131,7 +131,29 @@ export default function HomeHeroCarousel() {
   const slide = BANNERS[index]
 
   return (
-    <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#1A1A1A]">
+    <div
+      className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen touch-pan-y overflow-hidden bg-[#1A1A1A]"
+      onTouchStart={(event) => {
+        const touch = event.touches[0]
+        touchStart.current = { x: touch.clientX, y: touch.clientY }
+      }}
+      onTouchEnd={(event) => {
+        const start = touchStart.current
+        touchStart.current = null
+        if (!start || event.changedTouches.length === 0) return
+
+        const touch = event.changedTouches[0]
+        const deltaX = touch.clientX - start.x
+        const deltaY = touch.clientY - start.y
+        if (Math.abs(deltaX) < 50 || Math.abs(deltaX) <= Math.abs(deltaY)) return
+
+        setIndex((current) => (
+          deltaX < 0
+            ? (current + 1) % BANNERS.length
+            : (current - 1 + BANNERS.length) % BANNERS.length
+        ))
+      }}
+    >
       <style>{`
         @keyframes giupHeroPill { from { width: 0%; } to { width: 100%; } }
         @keyframes giupHeroIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
