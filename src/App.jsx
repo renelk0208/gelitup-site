@@ -3081,18 +3081,19 @@ const COLOR_FAMILY_FILTERS = [
   { key: 'ALL', label: 'All', swatchClass: 'bg-slate-300' },
   { key: 'BLACK', label: 'Black', slug: 'black', swatchClass: 'bg-black' },
   { key: 'BLUE', label: 'Blue', slug: 'blue', swatchClass: 'bg-blue-500' },
-  { key: 'BROWN', label: 'Brown', slug: 'brown', swatchClass: 'bg-amber-700' },
-  { key: 'CORAL ORANGE', label: 'Coral Orange', slug: 'coral-orange', swatchClass: 'bg-orange-400' },
+  { key: 'BROWN NUDE', label: 'Brown Nude', slug: 'brown-nude', swatchClass: 'bg-amber-700' },
+  { key: 'CORAL ORANGE PEACH', label: 'Coral Orange Peach', slug: 'coral-orange-peach', swatchClass: 'bg-orange-400' },
   { key: 'FRENCH', label: 'French', slug: 'french', swatchClass: 'bg-rose-100 border border-rose-200' },
   { key: 'GIUP1', label: 'GIUP1', slug: 'giup1', swatchClass: 'bg-fuchsia-200 border border-fuchsia-300' },
+  { key: 'GOLD', label: 'Gold', slug: 'gold', swatchClass: 'bg-amber-400' },
   { key: 'GREEN', label: 'Green', slug: 'green', swatchClass: 'bg-emerald-500' },
   { key: 'GREY', label: 'Grey', slug: 'grey', swatchClass: 'bg-slate-500' },
   { key: 'NEON', label: 'Neon', slug: 'neon', swatchClass: 'bg-lime-400' },
-  { key: 'NUDE', label: 'Nude', slug: 'nude', swatchClass: 'bg-amber-100 border border-amber-200' },
   { key: 'PASTEL', label: 'Pastel', slug: 'pastel', swatchClass: 'bg-sky-200 border border-sky-300' },
   { key: 'PINK', label: 'Pink', slug: 'pink', swatchClass: 'bg-pink-400' },
   { key: 'PURPLE', label: 'Purple', slug: 'purple', swatchClass: 'bg-violet-500' },
   { key: 'RED', label: 'Red', slug: 'red', swatchClass: 'bg-red-500' },
+  { key: 'SILVER', label: 'Silver', slug: 'silver', swatchClass: 'bg-slate-300 border border-slate-400' },
   { key: 'WHITE', label: 'White', slug: 'white', swatchClass: 'bg-white border border-slate-300' },
   { key: 'YELLOW', label: 'Yellow', slug: 'yellow', swatchClass: 'bg-yellow-300' },
 ]
@@ -3154,14 +3155,16 @@ function resolveColorFamilyKey(name = '') {
 
   if (/\bRED|CHERRY|CRIMSON|RUBY|SCARLET|ROUGE|WINE|BURGUNDY|BORDEAUX|MERLOT\b/.test(token)) return 'RED'
   if (/\bPINK|BLUSH|FUCHSIA|MAGENTA|ROSE|PINKY|BARBIE\b/.test(token)) return 'PINK'
-  if (/\bNUDE|BEIGE|IVORY|ALMOND|SAND|MILKY|NATURAL|LATTE|CREAM|PORCELAIN|SKIN|COCO\b/.test(token)) return 'NUDE'
-  if (/\bORANGE|CORAL|PEACH|APRICOT|TANGERINE|TERRACOTTA\b/.test(token)) return 'ORANGE'
+  if (/\bNUDE|BEIGE|IVORY|ALMOND|SAND|MILKY|NATURAL|LATTE|CREAM|PORCELAIN|SKIN|COCO\b/.test(token)) return 'BROWN NUDE'
+  if (/\bORANGE|CORAL|PEACH|APRICOT|TANGERINE|TERRACOTTA\b/.test(token)) return 'CORAL ORANGE PEACH'
+  if (/\bGOLD\b/.test(token)) return 'GOLD'
   if (/\bYELLOW|LEMON|SUN|MUSTARD|GOLDEN\b/.test(token)) return 'YELLOW'
   if (/\bGREEN|MINT|OLIVE|PISTACHIO|EMERALD|SAGE|LIME|FOREST\b/.test(token)) return 'GREEN'
   if (/\bBLUE|NAVY|COBALT|AQUA|SKY|OCEAN|TURQUOISE|AZURE|DENIM\b/.test(token)) return 'BLUE'
   if (/\bPURPLE|LILAC|VIOLET|LAVENDER|PLUM|MAUVE|AMETHYST\b/.test(token)) return 'PURPLE'
-  if (/\bBROWN|CHOC|MOCHA|CARAMEL|COFFEE|TAUPE|TOFFEE|BRONZE\b/.test(token)) return 'BROWN'
-  if (/\bGREY|GRAY|SILVER|SLATE|SMOKE|ASH|GRAPHITE|CHARCOAL\b/.test(token)) return 'GREY'
+  if (/\bBROWN|CHOC|MOCHA|CARAMEL|COFFEE|TAUPE|TOFFEE|BRONZE\b/.test(token)) return 'BROWN NUDE'
+  if (/\bSILVER\b/.test(token)) return 'SILVER'
+  if (/\bGREY|GRAY|SLATE|SMOKE|ASH|GRAPHITE|CHARCOAL\b/.test(token)) return 'GREY'
   if (/\bBLACK\b/.test(token)) return 'BLACK'
   if (/\bWHITE\b/.test(token)) return 'WHITE'
 
@@ -4562,11 +4565,10 @@ function FullCataloguePage() {
       const filename = urlParts[urlParts.length - 1] || ''
       const sku = filename.replace(/\.[^.]+$/, '')
       const jsonFamily = solidGelColourFamilies[sku]
+      if (jsonFamily) return normalizeCatalogueToken(jsonFamily)
       if (item.colorFamily && normalizeCatalogueToken(item.colorFamily) !== 'GIUP1') {
         return normalizeCatalogueToken(item.colorFamily)
       }
-      // RONE shades use the per-SKU family when one has been curated.
-      if (jsonFamily) return jsonFamily
       // Fallback: name keyword matching
       return item.colorFamily ? normalizeCatalogueToken(item.colorFamily) : item.colorFamilyKey
     }
