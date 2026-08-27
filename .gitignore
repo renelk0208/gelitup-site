@@ -38,6 +38,7 @@ tmp-*.js
 build-check.txt
 build-out.txt
 *-out.txt
+public/gelitup-content/product-manifest.json
 
 # Office temp lock files
 ~$*

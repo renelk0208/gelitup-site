@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/generate-meta-product-feed.mjs && node scripts/generate-sitemap.mjs && node scripts/prerender.cjs",
+    "build": "npm run generate:product-manifest && vite build && node scripts/generate-meta-product-feed.mjs && node scripts/generate-sitemap.mjs && node scripts/prerender.cjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "sync:gelitup-products": "node scripts/sync-gelitup-products.mjs",
     "generate:product-image-map": "node scripts/generate-product-image-map.mjs",
+    "generate:product-manifest": "node scripts/generate-product-manifest.mjs",
     "sync:product-images-local": "node scripts/sync-product-images-from-local.mjs",
     "normalize:product-image-map": "node scripts/normalize-product-image-map.mjs",
     "import:product-images": "node scripts/import-product-images-from-map.mjs",
