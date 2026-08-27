@@ -7,12 +7,14 @@ import {
 } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { PRODUCT_ALIAS_GROUPS } from '../src/data/productAliases.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
 const CONTENT_DIR = resolve(ROOT, 'public/gelitup-content')
 const OUTPUT_PATH = resolve(CONTENT_DIR, 'product-manifest.json')
 const B2B_PRICE_MULTIPLIER = 1.2
+const PERFECT_SHAPE_TOP_COAT_UPLIFT = 1.06
 
 const WINDOWS_1252_BYTES = new Map([
   [0x20ac, 0x80], [0x201a, 0x82], [0x0192, 0x83],
@@ -141,6 +143,13 @@ function isSolidGelImage(imageUrl) {
     .test(imageUrl)
 }
 
+function isBasesTopsImage(imageUrl) {
+  return /\/product-images\/(?:BASES|TOPS|NAIL PREPARATIONS)\//i
+    .test(imageUrl)
+    || /\/product-images\/2026 NEW!\/5-in-1 Superior Base\//i
+      .test(imageUrl)
+}
+
 function resolveColorFamily(imageUrl, colourFamilies) {
   const stem = imageUrl.split('/').pop().replace(/\.[^.]+$/, '')
   if (colourFamilies[stem]) {
@@ -208,8 +217,90 @@ function choosePriceEntry(code, candidates) {
   return first
 }
 
-function toCataloguePrice(rawPrice) {
-  return Math.ceil(Number(rawPrice) * B2B_PRICE_MULTIPLIER * 10) / 10
+function isPerfectShapeTopCoatProduct(name, sku) {
+  const normalizedName = String(name || '').toLowerCase()
+  const normalizedSku = String(sku || '').toLowerCase()
+  return normalizedName.includes('top coat perfect shape')
+    || normalizedName.includes('perfect shape top coat')
+    || normalizedSku.includes('nwpt15')
+}
+
+function isMarkupExemptCuticleProduct(name) {
+  const normalizedName = String(name || '').toLowerCase()
+  return /cuticle\s+(oil|scrub)/.test(normalizedName)
+    && /\d+\s*ml\b/.test(normalizedName)
+}
+
+function toCataloguePrice(product) {
+  const rawPrice = Number(product?.price)
+  if (!Number.isFinite(rawPrice) || rawPrice <= 0) {
+    throw new Error(`Invalid price for ${product?.sku || product?.name || 'product'}`)
+  }
+
+  const adjustedPrice = isPerfectShapeTopCoatProduct(
+    product.name,
+    product.sku,
+  )
+    ? rawPrice * PERFECT_SHAPE_TOP_COAT_UPLIFT
+    : rawPrice
+  const multiplier = isMarkupExemptCuticleProduct(product.name)
+    ? 1
+    : B2B_PRICE_MULTIPLIER
+
+  return Math.ceil(adjustedPrice * multiplier * 10) / 10
+}
+
+function mergeAlternateGalleryRecords(recordsByPath) {
+  for (const [imageUrl, record] of [...recordsByPath]) {
+    const baseImageUrl = imageUrl.replace(
+      /_[BC](-[a-z0-9]+)?(\.[a-z0-9]+)$/i,
+      '$1$2',
+    )
+    if (
+      baseImageUrl === imageUrl
+      || !recordsByPath.has(baseImageUrl)
+    ) {
+      continue
+    }
+
+    recordsByPath
+      .get(baseImageUrl)
+      .galleryImages
+      .push(imageUrl, ...record.galleryImages)
+    recordsByPath
+      .get(baseImageUrl)
+      .aliases
+      .push(...record.aliases)
+    recordsByPath.delete(imageUrl)
+  }
+}
+
+function scoreProductCode(value) {
+  const normalized = normalizeText(value)
+  if (!normalized) return Number.NEGATIVE_INFINITY
+
+  let score = 0
+  if (/^GIUP\b/.test(normalized)) score += 10
+  if (/^[A-Z]{2,8}\s*\d+[A-Z0-9-]*$/.test(normalized)) score += 8
+  if (!/\s/.test(String(value).trim())) score += 3
+  score -= normalized.length / 100
+  return score
+}
+
+function chooseProductCode(aliases, fallbackName) {
+  return [...aliases]
+    .sort((left, right) => scoreProductCode(right) - scoreProductCode(left))[0]
+    || fallbackName
+}
+
+function resolveBasesTopsSubcategory(imageUrl) {
+  const segments = imageUrl
+    .split('/gelitup-content/product-images/')[1]
+    ?.split('/')
+    .filter(Boolean) || []
+
+  if (segments[0] === '2026 NEW!') return segments[1] || 'Bases & Tops'
+  return segments.slice(1, -1).join(' / ') || 'Bases & Tops'
 }
 
 const imageMap = loadJson('product-image-map.json')
@@ -252,24 +343,7 @@ const recordsByPath = new Map(
   ]),
 )
 
-for (const [imageUrl, record] of [...recordsByPath]) {
-  const baseImageUrl = imageUrl.replace(
-    /_[BC](-[a-z0-9]+)?(\.[a-z0-9]+)$/i,
-    '$1$2',
-  )
-  if (
-    baseImageUrl === imageUrl
-    || !recordsByPath.has(baseImageUrl)
-  ) {
-    continue
-  }
-
-  recordsByPath
-    .get(baseImageUrl)
-    .galleryImages
-    .push(imageUrl, ...record.galleryImages)
-  recordsByPath.delete(imageUrl)
-}
+mergeAlternateGalleryRecords(recordsByPath)
 
 const findImagePath = filename => (
   [...recordsByPath.keys()].find(path => (
@@ -316,6 +390,22 @@ for (const product of priceList) {
   const matches = pricesByCode.get(code) || []
   matches.push(product)
   pricesByCode.set(code, matches)
+}
+
+const aliasedPriceIndex = new Map()
+for (const { codes, target } of PRODUCT_ALIAS_GROUPS) {
+  const targetEntry = choosePriceEntry(
+    target,
+    exactPriceIndex.get(normalizeJoinKey(target)) || [],
+  )
+  if (!targetEntry) continue
+
+  for (const code of codes) {
+    const key = normalizeJoinKey(code)
+    const matches = aliasedPriceIndex.get(key) || []
+    matches.push(targetEntry)
+    aliasedPriceIndex.set(key, matches)
+  }
 }
 
 const exactSizeIndex = new Map()
@@ -423,7 +513,9 @@ for (const record of recordsByPath.values()) {
     slug,
     name,
     code,
-    price: toCataloguePrice(priceEntry.price),
+    price: toCataloguePrice(priceEntry),
+    category: 'Solid Gel Polish',
+    subcategory: 'Solid Gel Polish',
     colorFamily,
     size,
     imageUrl: record.imageUrl,
@@ -431,8 +523,123 @@ for (const record of recordsByPath.values()) {
   })
 }
 
+const basesTopsAliasesByPath = new Map()
+for (const [alias, rawImageUrl] of Object.entries(imageMap)) {
+  if (hiddenSet.has(alias.trim().toLowerCase())) continue
+  if (typeof rawImageUrl !== 'string') continue
+  if (!isBasesTopsImage(rawImageUrl)) continue
+  if (/hero\.image/i.test(rawImageUrl.split('/').pop() || '')) continue
+  if (/\/BASES\/BRUSH ON BUILDER\//i.test(rawImageUrl)) continue
+
+  const aliases = basesTopsAliasesByPath.get(rawImageUrl) || []
+  aliases.push(alias)
+  basesTopsAliasesByPath.set(rawImageUrl, aliases)
+}
+
+const basesTopsRecordsByPath = new Map(
+  [...basesTopsAliasesByPath].map(([imageUrl, aliases]) => [
+    imageUrl,
+    {
+      imageUrl,
+      aliases,
+      galleryImages: [],
+      subcategory: resolveBasesTopsSubcategory(imageUrl),
+    },
+  ]),
+)
+mergeAlternateGalleryRecords(basesTopsRecordsByPath)
+
+const resolvedBasesTopsRecords = []
+for (const record of basesTopsRecordsByPath.values()) {
+  const exactMatches = record.aliases.flatMap(alias => (
+    exactPriceIndex.get(normalizeJoinKey(alias)) || []
+  ))
+  const aliasedMatches = record.aliases.flatMap(alias => (
+    aliasedPriceIndex.get(normalizeJoinKey(alias)) || []
+  ))
+  const priceEntry = (
+    choosePriceEntry(record.imageUrl, exactMatches)
+    || choosePriceEntry(record.imageUrl, aliasedMatches)
+  )
+
+  if (!priceEntry) {
+    throw new Error(
+      `Missing Bases & Tops price-list entry (${record.imageUrl})`,
+    )
+  }
+
+  const name = stripStatusSuffix(priceEntry.name)
+  const size = [
+    priceEntry.name,
+    priceEntry.sku,
+    ...record.aliases,
+  ]
+    .map(candidate => (
+      exactSizeIndex.get(normalizeSizeKey(candidate))
+    ))
+    .find(Boolean) || null
+
+  if (!size) {
+    throw new Error(
+      `Missing Bases & Tops size for ${name} (${record.imageUrl})`,
+    )
+  }
+
+  resolvedBasesTopsRecords.push({
+    ...record,
+    code: chooseProductCode(record.aliases, priceEntry.sku),
+    name,
+    price: toCataloguePrice(priceEntry),
+    priceKey: normalizeJoinKey(priceEntry.sku),
+    size,
+  })
+}
+
+const canonicalBasesTopsRecords = new Map()
+for (const record of resolvedBasesTopsRecords) {
+  const existing = canonicalBasesTopsRecords.get(record.priceKey)
+  if (!existing) {
+    canonicalBasesTopsRecords.set(record.priceKey, {
+      ...record,
+      aliases: [...record.aliases],
+      galleryImages: [...record.galleryImages],
+    })
+    continue
+  }
+
+  existing.aliases.push(...record.aliases)
+  existing.galleryImages.push(
+    record.imageUrl,
+    ...record.galleryImages,
+  )
+}
+
+for (const record of canonicalBasesTopsRecords.values()) {
+  const canonicalId = `bases-tops:${slugify(record.code)}`
+  const slug = slugOverrides[canonicalId] || slugify(record.name)
+
+  manifest.push({
+    slug,
+    name: record.name,
+    code: record.code,
+    price: record.price,
+    category: 'Bases & Tops',
+    subcategory: record.subcategory,
+    colorFamily: null,
+    size: record.size,
+    imageUrl: record.imageUrl,
+    galleryImages: [...new Set(record.galleryImages)]
+      .filter(imageUrl => imageUrl !== record.imageUrl)
+      .sort(),
+  })
+}
+
 manifest.sort((left, right) => (
-  left.code.localeCompare(right.code, undefined, {
+  left.category.localeCompare(right.category, undefined, {
+    numeric: true,
+    sensitivity: 'base',
+  })
+  || left.name.localeCompare(right.name, undefined, {
     numeric: true,
     sensitivity: 'base',
   })

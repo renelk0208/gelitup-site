@@ -43,18 +43,29 @@ const COLOR_FAMILY_ROUTE_SEO = Object.fromEntries(
 
 const PRODUCT_ROUTE_SEO = Object.fromEntries(
   PRODUCT_MANIFEST.map((product) => {
+    const isSolidGelPolish = product.category === 'Solid Gel Polish'
     const familyName = product.colorFamily
-      .toLowerCase()
-      .replace(/\b\w/g, (letter) => letter.toUpperCase())
-    const description = `Discover ${product.name}, a professional ${familyName.toLowerCase()} gel polish from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
+      ? product.colorFamily
+          .toLowerCase()
+          .replace(/\b\w/g, (letter) => letter.toUpperCase())
+      : ''
+    const productType = isSolidGelPolish
+      ? 'gel polish'
+      : String(product.subcategory || product.category).toLowerCase()
+    const heading = isSolidGelPolish
+      ? `${product.name} Gel Polish`
+      : product.name
+    const description = isSolidGelPolish
+      ? `Discover ${product.name}, a professional ${familyName.toLowerCase()} gel polish from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
+      : `Discover ${product.name}, professional ${productType} from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
 
     return [
       `/products/${product.slug}`,
       {
-        title: `${product.name} Gel Polish | GEL.IT.UP`,
+        title: `${heading} | GEL.IT.UP`,
         description,
         canonical: `https://gelitup.com/products/${product.slug}`,
-        bodyHtml: `<main><h1>${escapeHtml(product.name)} Gel Polish</h1><img src="${escapeHtml(product.imageUrl)}" alt="${escapeHtml(product.name)} gel polish"><p>${escapeHtml(description)}</p></main>`,
+        bodyHtml: `<main><h1>${escapeHtml(heading)}</h1><img src="${escapeHtml(product.imageUrl)}" alt="${escapeHtml(product.name)} ${escapeHtml(productType)}"><p>${escapeHtml(description)}</p></main>`,
       },
     ]
   }),

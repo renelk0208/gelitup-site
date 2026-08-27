@@ -7382,13 +7382,32 @@ function ProductPage() {
   const family = product
     ? COLOR_FAMILY_FILTERS.find((item) => item.key === product.colorFamily)
     : null
+  const isSolidGelPolish = product?.category === 'Solid Gel Polish'
+  const categoryLabel = product?.category || 'Professional Nail Product'
   const familyLabel = family?.label || product?.colorFamily || ''
+  const productTypeLabel = isSolidGelPolish
+    ? 'Gel Polish'
+    : product?.subcategory || categoryLabel
+  const pageHeading = isSolidGelPolish
+    ? `${product?.name || ''} Gel Polish`
+    : product?.name || ''
+  const categoryLink = isSolidGelPolish && family?.slug
+    ? {
+        to: `/colours/${family.slug}`,
+        label: `Explore all ${family.label} gel polish`,
+      }
+    : {
+        to: '/full-catalogue?category=bases-tops',
+        label: 'Explore all Bases & Tops',
+      }
   const listPrice = product
     ? Number(product.price)
     : null
   const displayPrice = applyCatalogueDiscount(listPrice)
   const description = product
-    ? `Discover ${product.name}, a professional ${familyLabel.toLowerCase()} gel polish from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
+    ? isSolidGelPolish
+      ? `Discover ${product.name}, a professional ${familyLabel.toLowerCase()} gel polish from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
+      : `Discover ${product.name}, professional ${productTypeLabel.toLowerCase()} from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
     : ''
   const galleryImages = useMemo(
     () => product
@@ -7401,11 +7420,11 @@ function ProductPage() {
     if (!product) return undefined
 
     return setPageSEO({
-      title: `${product.name} Gel Polish | GEL.IT.UP`,
+      title: `${pageHeading} | GEL.IT.UP`,
       description,
       canonical: `https://gelitup.com/products/${product.slug}`,
     })
-  }, [description, product])
+  }, [description, pageHeading, product])
 
   const productSchema = useMemo(() => {
     if (!product || displayPrice == null) return null
@@ -7513,10 +7532,10 @@ function ProductPage() {
         <h1 className="text-xl font-bold text-white">Product unavailable</h1>
         <p className="mt-2 text-sm text-rose-100/80">{loadError}</p>
         <NavLink
-          to="/full-catalogue?subcategory=solid-gel-polish"
+          to="/full-catalogue"
           className="mt-5 inline-flex rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-semibold text-white"
         >
-          Browse Solid Gel Polish
+          Browse Product Catalogue
         </NavLink>
       </section>
     )
@@ -7538,7 +7557,7 @@ function ProductPage() {
           <div className="flex min-h-[360px] items-center justify-center rounded-2xl bg-white p-4">
             <ProductImage
               src={selectedImage || product.imageUrl}
-              alt={`${product.name} gel polish`}
+              alt={`${product.name} ${productTypeLabel.toLowerCase()}`}
               className="max-h-[520px] w-full object-contain"
             />
           </div>
@@ -7569,7 +7588,7 @@ function ProductPage() {
 
         <section className="flex flex-col justify-center">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-300">
-            Solid Gel Polish
+            {categoryLabel}
           </p>
           <h1 className="mt-2 text-3xl font-black text-white md:text-4xl">
             {product.name}
@@ -7591,17 +7610,17 @@ function ProductPage() {
           </p>
 
           <p className="mt-5 text-sm leading-7 text-white/75">
-            {product.name} is a professional {familyLabel.toLowerCase()} gel
-            polish created in a HEMA-free, TPO-free and EU-certified
-            formulation for salon use.
+            {product.name} is professional {productTypeLabel.toLowerCase()}{' '}
+            created in a HEMA-free, TPO-free and EU-certified formulation for
+            salon use.
           </p>
 
-          {family?.slug && (
+          {categoryLink && (
             <NavLink
-              to={`/colours/${family.slug}`}
+              to={categoryLink.to}
               className="mt-4 text-sm font-semibold text-fuchsia-300 underline-offset-4 hover:underline"
             >
-              Explore all {family.label} gel polish
+              {categoryLink.label}
             </NavLink>
           )}
 

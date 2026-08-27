@@ -41,7 +41,9 @@ export const PRODUCT_ALIAS_GROUPS = [
   { codes: ['GIUP-COL-025'], target: 'N025 Latte Mouse -HTF' },
   // Nail Clips Dual Form — catalogue slugs (incl. the "nial" typo used on stored orders)
   { codes: ['NAIL-CLIPS-DUAL-FORMS-PACK-OF-5', 'NIAL-CLIPS-DUAL-FORMS-PACK-OF-5', 'NAIL CLIPS DUAL FORMS PACK OF 5', 'NIAL CLIPS DUAL FORMS PACK OF 5', 'NAIL CLIPS DUAL FORM PACK OF 5'], target: 'Nail Clips Dual Form Pack of 5 -HTF' },
-  { codes: ['NWPT15', 'NWPT15-1', 'NWPT15 1'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
+  { codes: ['NWPT15'], target: 'Non Wipe Top Coat Perfect Shape 15ml -HTF' },
+  { codes: ['NWPT15-1', 'NWPT15 1'], target: 'Aurora Flakes Non Wipe Top Coat 15ml -HTF' },
+  { codes: ['SFT 2113'], target: 'Super Flash Top Coat 11ml -HTF' },
   { codes: ['GIUPSB', 'GIUP SB', 'GIUP-SB'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
   { codes: ['GIUP-SB-NO-ACID', 'GIUP SB NO ACID', 'SB NO ACID'], target: 'Superbond Nail Dehydrator 11ml - Acid Free -HTF' },
   { codes: ['GIUP-SB-WITH-ACID', 'GIUP SB WITH ACID', 'SB WITH ACID', 'superbond.with.acid', 'SUPERBOND WITH ACID'], target: 'Superbond Nail Dehydrator 11ml - with Acid -HTF' },
