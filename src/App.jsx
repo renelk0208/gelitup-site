@@ -53,6 +53,20 @@ const PRODUCT_CATEGORIES = ['Solid Colours', 'Builder Gels', 'Base & Top', 'Nail
 const DEFAULT_PRODUCTS_TABLE = 'b2b_products'
 const DEFAULT_ORDERS_TABLE = 'b2b_orders'
 const DEFAULT_REGISTRATIONS_TABLE = 'b2b_registrations'
+const TRIAL_PACK_NAME = 'Trial Pack — Try the GEL.IT.UP System'
+const TRIAL_PACK_CODE = 'TRIAL-PACK-01'
+const TRIAL_PACK_KEY = `${TRIAL_PACK_NAME}::${TRIAL_PACK_CODE}`
+const TRIAL_PACK_PRICE = 54.9
+const TRIAL_PACK_LIST_PRICE = 63.5
+const TRIAL_PACK_DESCRIPTION = 'Everything you need to try GEL.IT.UP for the first time: our 5-in-1 Base Coat, Non Wipe Top Coat, Superbond, and three essential shades — Black, White, and Red. One order, no commitment, the full system in your hands.'
+const TRIAL_PACK_CONTENTS = [
+  '5-in-1 Base Coat Clear',
+  'Non Wipe Top Coat Green Cap',
+  'Superbond (without Acid)',
+  'Black #15 Total Eclipse',
+  'White #01 Ice Ice Baby',
+  'Red #52 Mailbox',
+]
 function readBooleanEnvFlag(value, fallbackValue = false) {
   if (value === undefined || value === null || value === '') {
     return fallbackValue
@@ -4808,6 +4822,7 @@ function FullCataloguePage() {
   }, [])
 
   const resolveCatalogueListPrice = useCallback((itemName = '', itemCode = '') => {
+    if (itemCode === TRIAL_PACK_CODE) return TRIAL_PACK_LIST_PRICE
     if (!cataloguePriceMap) return null
     const byName = cataloguePriceMap.get(normalizeProductName(itemName))
     if (byName?.price != null) return byName.price
@@ -4853,7 +4868,7 @@ function FullCataloguePage() {
   // Effective catalogue price = list price with the SUMMER MADNESS discount applied.
   // Every card, cart total and checkout uses this so displayed and charged prices match.
   const lookupCataloguePrice = useCallback(
-    (itemName = '', itemCode = '') => applyCatalogueDiscount(resolveCatalogueListPrice(itemName, itemCode)),
+    (itemName = '', itemCode = '') => (itemCode === TRIAL_PACK_CODE ? TRIAL_PACK_PRICE : applyCatalogueDiscount(resolveCatalogueListPrice(itemName, itemCode))),
     [resolveCatalogueListPrice],
   )
 
@@ -5305,6 +5320,38 @@ function FullCataloguePage() {
             )
           })()}
         </div>
+{(isColorsCategory || normalizeCatalogueToken(activeSection?.category) === 'BUILDER GEL SYSTEMS') && (
+          <div className="mt-4 flex flex-col gap-4 rounded-[16px] border-2 border-fuchsia-500/60 bg-gradient-to-r from-fuchsia-50 to-white p-4 sm:flex-row sm:items-center" data-catalogue-item>
+            <div className="min-w-0 flex-1">
+              <span className="inline-flex items-center rounded-full bg-fuchsia-600 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Featured — Start Here</span>
+              <h3 className="mt-2 text-sm font-black uppercase tracking-[0.02em] text-black">{TRIAL_PACK_NAME}</h3>
+              <p className="mt-1.5 text-[12px] leading-relaxed text-black/65">{TRIAL_PACK_DESCRIPTION}</p>
+              <p className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-black/45">Includes: {TRIAL_PACK_CONTENTS.join(' · ')}</p>
+              <div className="mt-2.5 flex items-baseline gap-2">
+                <span className="text-xs font-medium text-black/40 line-through">€{TRIAL_PACK_LIST_PRICE.toFixed(2)}</span>
+                <span className="text-lg font-bold text-fuchsia-700">€{TRIAL_PACK_PRICE.toFixed(2)}</span>
+                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700">Save €{(TRIAL_PACK_LIST_PRICE - TRIAL_PACK_PRICE).toFixed(2)}</span>
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              {quickCart[TRIAL_PACK_KEY] > 0 ? (
+                <div className="flex items-center gap-1.5">
+                  <button type="button" onClick={() => setQuickCart(c => { const q = Number(c[TRIAL_PACK_KEY] || 0); if (q <= 1) { const n = { ...c }; delete n[TRIAL_PACK_KEY]; return n } return { ...c, [TRIAL_PACK_KEY]: q - 1 } })} className="flex h-9 w-9 items-center justify-center rounded-lg border border-fuchsia-300 text-sm text-fuchsia-600 transition hover:bg-fuchsia-50">−</button>
+                  <span className="w-20 text-center text-xs font-bold text-fuchsia-700">{quickCart[TRIAL_PACK_KEY]}× added</span>
+                  <button type="button" onClick={() => addQuickItem(TRIAL_PACK_KEY)} className="flex h-9 w-9 items-center justify-center rounded-lg border border-fuchsia-300 text-sm text-fuchsia-600 transition hover:bg-fuchsia-50">+</button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => addQuickItem(TRIAL_PACK_KEY)}
+                  className={`rounded-[10px] bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-fuchsia-500 ${pulseItemKey === TRIAL_PACK_KEY ? 'scale-95' : ''}`}
+                >
+                  + Add Trial Pack to Cart
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="mt-3 flex flex-wrap gap-2">
           {(() => {
@@ -9821,6 +9868,7 @@ function CheckoutPage() {
   }, [])
 
   const resolveCheckoutListPrice = useCallback((itemName = '', itemCode = '') => {
+    if (itemCode === TRIAL_PACK_CODE) return TRIAL_PACK_LIST_PRICE
     if (!priceMap) return null
     const byName = priceMap.get(normalizeProductName(itemName))
     if (byName?.price != null) return byName.price
@@ -9842,7 +9890,7 @@ function CheckoutPage() {
 
   // Effective checkout price = list price with the SUMMER MADNESS discount applied.
   const lookupPrice = useCallback(
-    (itemName = '', itemCode = '') => applyCatalogueDiscount(resolveCheckoutListPrice(itemName, itemCode)),
+    (itemName = '', itemCode = '') => (itemCode === TRIAL_PACK_CODE ? TRIAL_PACK_PRICE : applyCatalogueDiscount(resolveCheckoutListPrice(itemName, itemCode))),
     [resolveCheckoutListPrice],
   )
 
@@ -10222,7 +10270,10 @@ function CheckoutPage() {
       }
 
       // 2. Build order items
-      const checkoutItems = cartEntries.map(e => e.qty > 1 ? `${e.code} x${e.qty}` : e.code)
+      const checkoutItems = cartEntries.map(e => {
+        const label = e.qty > 1 ? `${e.code} x${e.qty}` : e.code
+        return e.code === TRIAL_PACK_CODE ? `${label} (Contents: ${TRIAL_PACK_CONTENTS.join(', ')})` : label
+      })
 
       const invoiceAddress = [form.invoiceAddressLine1, form.invoiceAddressLine2, form.invoiceArea, form.invoiceRegion, form.invoicePostalCode].filter(Boolean).join(', ')
       const shippingAddr = !form.shipToDifferentAddress
@@ -10358,7 +10409,7 @@ function CheckoutPage() {
           <td style="${tdRStyle}">${line.qty}</td>
           <td style="${tdRStyle}">${line.price != null ? line.price.toFixed(2) : '-'}</td>
           <td style="${tdRStyle}">${line.lineTotal != null ? line.lineTotal.toFixed(2) : '-'}</td>
-        </tr>`).join('')
+        </tr>${line.code === TRIAL_PACK_CODE ? `<tr><td></td><td colspan="4" style="${tdStyle};font-style:italic;color:#555">Contents: ${escapeHtml(TRIAL_PACK_CONTENTS.join(', '))}</td></tr>` : ''}`).join('')
 
       const invoiceBlockHtml = `
         <p style="margin:2px 0"><strong>Company:</strong> ${escapeHtml(invoice.name)}</p>
