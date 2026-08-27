@@ -4785,6 +4785,11 @@ function FullCataloguePage() {
       window.gtag('event', 'add_to_cart', { currency: 'EUR', items: [{ item_name: itemName, quantity: qty }] })
       window.gtag('event', 'conversion', { send_to: 'AW-1008159504/m23ACI_9w6oaEJCW3eAD', value: 1.0, currency: 'EUR' })
     }
+    window.dataLayer = window.dataLayer || []
+    window.dataLayer.push({
+      event: 'add_to_cart',
+      ecommerce: { currency: 'EUR', value: 0, items: [{ item_id: itemKey, item_name: itemKey, quantity: qty }] },
+    })
   }, [itemQuantities, quickCartUnits])
 
   const extractProductCode = useCallback((name = '') => {
@@ -10151,6 +10156,11 @@ function CheckoutPage() {
       window.gtag('event', 'begin_checkout', { currency: 'EUR', value: grandTotal })
       window.gtag('event', 'conversion', { send_to: 'AW-1008159504/huwrCJTYhIIDEJCW3eAD', value: grandTotal, currency: 'EUR' })
     }
+    window.dataLayer = window.dataLayer || []
+    window.dataLayer.push({
+      event: 'begin_checkout',
+      ecommerce: { currency: 'EUR', value: grandTotal, items: cartEntries.map((entry) => ({ item_id: entry.code, item_name: entry.name, price: entry.price, quantity: entry.qty })) },
+    })
 
     let walletSpendOrderRef = null
     let rollbackWalletSpend = false
@@ -10450,6 +10460,11 @@ function CheckoutPage() {
               price: Number((line.price ?? 0).toFixed(2)),
               quantity: Number(line.qty || 1),
             })),
+          })
+          window.dataLayer = window.dataLayer || []
+          window.dataLayer.push({
+            event: 'purchase',
+            ecommerce: { transaction_id: purchaseEventId, currency: 'EUR', value: purchaseValue, items: checkoutCartEntries.map((line) => ({ item_id: line.code, item_name: line.name, price: line.price, quantity: line.qty })) },
           })
           window.gtag('event', 'conversion', {
             send_to: 'AW-1008159504/8692CPf3leEBEJCW3eAD',
