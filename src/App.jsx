@@ -33,6 +33,15 @@ import GuestbookTeaser from './components/GuestbookTeaser'
 import ClarityScript from './components/ClarityScript'
 import { cleanProductName } from './utils/productUtils'
 import CatalogueSkeleton from './components/CatalogueSkeleton'
+import {
+  TRIAL_PACK_NAME,
+  TRIAL_PACK_CODE,
+  TRIAL_PACK_KEY,
+  TRIAL_PACK_PRICE,
+  TRIAL_PACK_LIST_PRICE,
+  TRIAL_PACK_DESCRIPTION,
+  TRIAL_PACK_CONTENTS,
+} from './data/trialPack.js'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
@@ -53,20 +62,6 @@ const PRODUCT_CATEGORIES = ['Solid Colours', 'Builder Gels', 'Base & Top', 'Nail
 const DEFAULT_PRODUCTS_TABLE = 'b2b_products'
 const DEFAULT_ORDERS_TABLE = 'b2b_orders'
 const DEFAULT_REGISTRATIONS_TABLE = 'b2b_registrations'
-const TRIAL_PACK_NAME = 'Trial Pack — Try the GEL.IT.UP System'
-const TRIAL_PACK_CODE = 'TRIAL-PACK-01'
-const TRIAL_PACK_KEY = `${TRIAL_PACK_NAME}::${TRIAL_PACK_CODE}`
-const TRIAL_PACK_PRICE = 54.9
-const TRIAL_PACK_LIST_PRICE = 63.5
-const TRIAL_PACK_DESCRIPTION = 'Everything you need to try GEL.IT.UP for the first time: our 5-in-1 Base Coat, Non Wipe Top Coat, Superbond, and three essential shades — Black, White, and Red. One order, no commitment, the full system in your hands.'
-const TRIAL_PACK_CONTENTS = [
-  '5-in-1 Base Coat Clear',
-  'Non Wipe Top Coat Green Cap',
-  'Superbond (without Acid)',
-  'Black #15 Total Eclipse',
-  'White #01 Ice Ice Baby',
-  'Red #52 Mailbox',
-]
 function readBooleanEnvFlag(value, fallbackValue = false) {
   if (value === undefined || value === null || value === '') {
     return fallbackValue
@@ -6013,7 +6008,7 @@ function FullCataloguePage() {
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-white/90 sm:text-lg" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
             The complete professional nail range — gel polish, builder gel, base coats, top coats, and accessories. HEMA &amp; TPO-Free formulations, <a href="https://www.crueltyfreeinternational.org/approved-brands/listing/gel-it-up/" target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-300 hover:underline">Leaping Bunny Approved</a>, and engineered for professional excellence. Browse every shade, system, and tool in the Gel It Up collection.
           </p>
-          <HeroCTA />
+          <HeroCTA showTrialPack />
         </div>
       </div>
 
