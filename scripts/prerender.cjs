@@ -44,6 +44,7 @@ const COLOR_FAMILY_ROUTE_SEO = Object.fromEntries(
 const PRODUCT_ROUTE_SEO = Object.fromEntries(
   PRODUCT_MANIFEST.map((product) => {
     const isSolidGelPolish = product.category === 'Solid Gel Polish'
+    const isNailArt = product.category === 'Nail Art'
     const familyName = product.colorFamily
       ? product.colorFamily
           .toLowerCase()
@@ -57,7 +58,9 @@ const PRODUCT_ROUTE_SEO = Object.fromEntries(
       : product.name
     const description = isSolidGelPolish
       ? `Discover ${product.name}, a professional ${familyName.toLowerCase()} gel polish from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
-      : `Discover ${product.name}, professional ${productType} from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
+      : isNailArt
+        ? `Discover ${product.name}, professional ${productType} from GEL.IT.UP for creative salon nail art.`
+        : `Discover ${product.name}, professional ${productType} from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
 
     return [
       `/products/${product.slug}`,

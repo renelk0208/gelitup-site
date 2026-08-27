@@ -150,6 +150,11 @@ function isBasesTopsImage(imageUrl) {
       .test(imageUrl)
 }
 
+function isNailArtImage(imageUrl) {
+  return /\/product-images\/(?:NAIL ART|COBWEB|LINE-IT-UP|LINE IT UP)\//i
+    .test(imageUrl)
+}
+
 function resolveColorFamily(imageUrl, colourFamilies) {
   const stem = imageUrl.split('/').pop().replace(/\.[^.]+$/, '')
   if (colourFamilies[stem]) {
@@ -283,6 +288,7 @@ function scoreProductCode(value) {
   if (/^GIUP\b/.test(normalized)) score += 10
   if (/^[A-Z]{2,8}\s*\d+[A-Z0-9-]*$/.test(normalized)) score += 8
   if (!/\s/.test(String(value).trim())) score += 3
+  if (/\s[BC]$/i.test(String(value).trim())) score -= 20
   score -= normalized.length / 100
   return score
 }
@@ -293,14 +299,17 @@ function chooseProductCode(aliases, fallbackName) {
     || fallbackName
 }
 
-function resolveBasesTopsSubcategory(imageUrl) {
+function resolveProductSubcategory(imageUrl, category) {
   const segments = imageUrl
     .split('/gelitup-content/product-images/')[1]
     ?.split('/')
     .filter(Boolean) || []
 
-  if (segments[0] === '2026 NEW!') return segments[1] || 'Bases & Tops'
-  return segments.slice(1, -1).join(' / ') || 'Bases & Tops'
+  if (segments[0] === '2026 NEW!') return segments[1] || category
+  if (category === 'Nail Art' && segments[0] !== 'NAIL ART') {
+    return segments[0] || category
+  }
+  return segments.slice(1, -1).join(' / ') || category
 }
 
 const imageMap = loadJson('product-image-map.json')
@@ -425,6 +434,139 @@ for (const [name, size] of Object.entries(productSizes)) {
 const manifest = []
 const warnings = []
 
+function resolveProductSize(priceEntry, aliases) {
+  const candidates = [
+    priceEntry.name,
+    priceEntry.sku,
+    ...aliases,
+  ]
+  const indexedSize = candidates
+    .map(candidate => (
+      exactSizeIndex.get(normalizeSizeKey(candidate))
+    ))
+    .find(Boolean)
+
+  if (indexedSize) return indexedSize
+
+  for (const candidate of candidates) {
+    const match = repairMojibake(candidate)
+      .match(/\b(\d+(?:[.,]\d+)?)\s*(ml|gr|g)\b/i)
+    if (match) return `${match[1].replace(',', '.')}${match[2].toLowerCase()}`
+  }
+
+  return null
+}
+
+function appendNameBasedCategoryProducts({
+  category,
+  canonicalIdPrefix,
+  includeImage,
+  excludeImage = () => false,
+  requireSize,
+}) {
+  const aliasesByImagePath = new Map()
+  for (const [alias, rawImageUrl] of Object.entries(imageMap)) {
+    if (hiddenSet.has(alias.trim().toLowerCase())) continue
+    if (typeof rawImageUrl !== 'string') continue
+    if (!includeImage(rawImageUrl)) continue
+    if (/hero\.image/i.test(rawImageUrl.split('/').pop() || '')) continue
+    if (excludeImage(rawImageUrl)) continue
+
+    const aliases = aliasesByImagePath.get(rawImageUrl) || []
+    aliases.push(alias)
+    aliasesByImagePath.set(rawImageUrl, aliases)
+  }
+
+  const categoryRecordsByPath = new Map(
+    [...aliasesByImagePath].map(([imageUrl, aliases]) => [
+      imageUrl,
+      {
+        imageUrl,
+        aliases,
+        galleryImages: [],
+        subcategory: resolveProductSubcategory(imageUrl, category),
+      },
+    ]),
+  )
+  mergeAlternateGalleryRecords(categoryRecordsByPath)
+
+  const resolvedRecords = []
+  for (const record of categoryRecordsByPath.values()) {
+    const exactMatches = record.aliases.flatMap(alias => (
+      exactPriceIndex.get(normalizeJoinKey(alias)) || []
+    ))
+    const aliasedMatches = record.aliases.flatMap(alias => (
+      aliasedPriceIndex.get(normalizeJoinKey(alias)) || []
+    ))
+    const priceEntry = (
+      choosePriceEntry(record.imageUrl, exactMatches)
+      || choosePriceEntry(record.imageUrl, aliasedMatches)
+    )
+
+    if (!priceEntry) {
+      throw new Error(
+        `Missing ${category} price-list entry (${record.imageUrl})`,
+      )
+    }
+
+    const name = stripStatusSuffix(priceEntry.name)
+    const size = resolveProductSize(priceEntry, record.aliases)
+    if (requireSize && !size) {
+      throw new Error(
+        `Missing ${category} size for ${name} (${record.imageUrl})`,
+      )
+    }
+
+    resolvedRecords.push({
+      ...record,
+      code: chooseProductCode(record.aliases, priceEntry.sku),
+      name,
+      price: toCataloguePrice(priceEntry),
+      priceKey: normalizeJoinKey(priceEntry.sku),
+      size,
+    })
+  }
+
+  const canonicalRecords = new Map()
+  for (const record of resolvedRecords) {
+    const existing = canonicalRecords.get(record.priceKey)
+    if (!existing) {
+      canonicalRecords.set(record.priceKey, {
+        ...record,
+        aliases: [...record.aliases],
+        galleryImages: [...record.galleryImages],
+      })
+      continue
+    }
+
+    existing.aliases.push(...record.aliases)
+    existing.galleryImages.push(
+      record.imageUrl,
+      ...record.galleryImages,
+    )
+  }
+
+  for (const record of canonicalRecords.values()) {
+    const canonicalId = `${canonicalIdPrefix}:${slugify(record.code)}`
+    const slug = slugOverrides[canonicalId] || slugify(record.name)
+
+    manifest.push({
+      slug,
+      name: record.name,
+      code: record.code,
+      price: record.price,
+      category,
+      subcategory: record.subcategory,
+      colorFamily: null,
+      size: record.size,
+      imageUrl: record.imageUrl,
+      galleryImages: [...new Set(record.galleryImages)]
+        .filter(imageUrl => imageUrl !== record.imageUrl)
+        .sort(),
+    })
+  }
+}
+
 for (const record of recordsByPath.values()) {
   const code = (
     extractShadeCode(record.imageUrl.split('/').pop())
@@ -523,116 +665,22 @@ for (const record of recordsByPath.values()) {
   })
 }
 
-const basesTopsAliasesByPath = new Map()
-for (const [alias, rawImageUrl] of Object.entries(imageMap)) {
-  if (hiddenSet.has(alias.trim().toLowerCase())) continue
-  if (typeof rawImageUrl !== 'string') continue
-  if (!isBasesTopsImage(rawImageUrl)) continue
-  if (/hero\.image/i.test(rawImageUrl.split('/').pop() || '')) continue
-  if (/\/BASES\/BRUSH ON BUILDER\//i.test(rawImageUrl)) continue
+appendNameBasedCategoryProducts({
+  category: 'Bases & Tops',
+  canonicalIdPrefix: 'bases-tops',
+  includeImage: isBasesTopsImage,
+  excludeImage: imageUrl => (
+    /\/BASES\/BRUSH ON BUILDER\//i.test(imageUrl)
+  ),
+  requireSize: true,
+})
 
-  const aliases = basesTopsAliasesByPath.get(rawImageUrl) || []
-  aliases.push(alias)
-  basesTopsAliasesByPath.set(rawImageUrl, aliases)
-}
-
-const basesTopsRecordsByPath = new Map(
-  [...basesTopsAliasesByPath].map(([imageUrl, aliases]) => [
-    imageUrl,
-    {
-      imageUrl,
-      aliases,
-      galleryImages: [],
-      subcategory: resolveBasesTopsSubcategory(imageUrl),
-    },
-  ]),
-)
-mergeAlternateGalleryRecords(basesTopsRecordsByPath)
-
-const resolvedBasesTopsRecords = []
-for (const record of basesTopsRecordsByPath.values()) {
-  const exactMatches = record.aliases.flatMap(alias => (
-    exactPriceIndex.get(normalizeJoinKey(alias)) || []
-  ))
-  const aliasedMatches = record.aliases.flatMap(alias => (
-    aliasedPriceIndex.get(normalizeJoinKey(alias)) || []
-  ))
-  const priceEntry = (
-    choosePriceEntry(record.imageUrl, exactMatches)
-    || choosePriceEntry(record.imageUrl, aliasedMatches)
-  )
-
-  if (!priceEntry) {
-    throw new Error(
-      `Missing Bases & Tops price-list entry (${record.imageUrl})`,
-    )
-  }
-
-  const name = stripStatusSuffix(priceEntry.name)
-  const size = [
-    priceEntry.name,
-    priceEntry.sku,
-    ...record.aliases,
-  ]
-    .map(candidate => (
-      exactSizeIndex.get(normalizeSizeKey(candidate))
-    ))
-    .find(Boolean) || null
-
-  if (!size) {
-    throw new Error(
-      `Missing Bases & Tops size for ${name} (${record.imageUrl})`,
-    )
-  }
-
-  resolvedBasesTopsRecords.push({
-    ...record,
-    code: chooseProductCode(record.aliases, priceEntry.sku),
-    name,
-    price: toCataloguePrice(priceEntry),
-    priceKey: normalizeJoinKey(priceEntry.sku),
-    size,
-  })
-}
-
-const canonicalBasesTopsRecords = new Map()
-for (const record of resolvedBasesTopsRecords) {
-  const existing = canonicalBasesTopsRecords.get(record.priceKey)
-  if (!existing) {
-    canonicalBasesTopsRecords.set(record.priceKey, {
-      ...record,
-      aliases: [...record.aliases],
-      galleryImages: [...record.galleryImages],
-    })
-    continue
-  }
-
-  existing.aliases.push(...record.aliases)
-  existing.galleryImages.push(
-    record.imageUrl,
-    ...record.galleryImages,
-  )
-}
-
-for (const record of canonicalBasesTopsRecords.values()) {
-  const canonicalId = `bases-tops:${slugify(record.code)}`
-  const slug = slugOverrides[canonicalId] || slugify(record.name)
-
-  manifest.push({
-    slug,
-    name: record.name,
-    code: record.code,
-    price: record.price,
-    category: 'Bases & Tops',
-    subcategory: record.subcategory,
-    colorFamily: null,
-    size: record.size,
-    imageUrl: record.imageUrl,
-    galleryImages: [...new Set(record.galleryImages)]
-      .filter(imageUrl => imageUrl !== record.imageUrl)
-      .sort(),
-  })
-}
+appendNameBasedCategoryProducts({
+  category: 'Nail Art',
+  canonicalIdPrefix: 'nail-art',
+  includeImage: isNailArtImage,
+  requireSize: false,
+})
 
 manifest.sort((left, right) => (
   left.category.localeCompare(right.category, undefined, {

@@ -7383,6 +7383,7 @@ function ProductPage() {
     ? COLOR_FAMILY_FILTERS.find((item) => item.key === product.colorFamily)
     : null
   const isSolidGelPolish = product?.category === 'Solid Gel Polish'
+  const isNailArt = product?.category === 'Nail Art'
   const categoryLabel = product?.category || 'Professional Nail Product'
   const familyLabel = family?.label || product?.colorFamily || ''
   const productTypeLabel = isSolidGelPolish
@@ -7396,10 +7397,15 @@ function ProductPage() {
         to: `/colours/${family.slug}`,
         label: `Explore all ${family.label} gel polish`,
       }
-    : {
-        to: '/full-catalogue?category=bases-tops',
-        label: 'Explore all Bases & Tops',
-      }
+    : isNailArt
+      ? {
+          to: '/full-catalogue?category=nail-art',
+          label: 'Explore all Nail Art',
+        }
+      : {
+          to: '/full-catalogue?category=bases-tops',
+          label: 'Explore all Bases & Tops',
+        }
   const listPrice = product
     ? Number(product.price)
     : null
@@ -7407,7 +7413,9 @@ function ProductPage() {
   const description = product
     ? isSolidGelPolish
       ? `Discover ${product.name}, a professional ${familyLabel.toLowerCase()} gel polish from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
-      : `Discover ${product.name}, professional ${productTypeLabel.toLowerCase()} from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
+      : isNailArt
+        ? `Discover ${product.name}, professional ${productTypeLabel.toLowerCase()} from GEL.IT.UP for creative salon nail art.`
+        : `Discover ${product.name}, professional ${productTypeLabel.toLowerCase()} from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
     : ''
   const galleryImages = useMemo(
     () => product
@@ -7599,10 +7607,12 @@ function ProductPage() {
               <dt className="text-white/50">Code</dt>
               <dd className="font-semibold text-white">{product.code}</dd>
             </div>
-            <div>
-              <dt className="text-white/50">Size</dt>
-              <dd className="font-semibold text-white">{product.size}</dd>
-            </div>
+            {product.size && (
+              <div>
+                <dt className="text-white/50">Size</dt>
+                <dd className="font-semibold text-white">{product.size}</dd>
+              </div>
+            )}
           </dl>
 
           <p className="mt-6 text-3xl font-black text-fuchsia-300">
@@ -7610,9 +7620,9 @@ function ProductPage() {
           </p>
 
           <p className="mt-5 text-sm leading-7 text-white/75">
-            {product.name} is professional {productTypeLabel.toLowerCase()}{' '}
-            created in a HEMA-free, TPO-free and EU-certified formulation for
-            salon use.
+            {isNailArt
+              ? `${product.name} is professional ${productTypeLabel.toLowerCase()} designed for creative salon nail art.`
+              : `${product.name} is professional ${productTypeLabel.toLowerCase()} created in a HEMA-free, TPO-free and EU-certified formulation for salon use.`}
           </p>
 
           {categoryLink && (
