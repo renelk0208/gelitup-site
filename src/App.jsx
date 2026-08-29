@@ -1059,11 +1059,12 @@ function getSilverFreeGuaranteeText(referenceDate = new Date()) {
  * for the current route. Used in page-level useEffect calls.
  * Returns a cleanup function that restores the default home-page SEO values.
  */
-function setPageSEO({ title, description, canonical } = {}) {
+function setPageSEO({ title, description, canonical, robots } = {}) {
   const SITE_NAME = 'GEL.IT.UP by GIUP®'
   const DEFAULT_TITLE = `${SITE_NAME} | Gel Polish, Builder Gel & Nail Systems`
   const DEFAULT_DESCRIPTION = 'Professional gel polish with 1,000+ shades, builder gel systems, base coats and top coats. HEMA-free, TPO-free, EU certified. Available wholesale to professional nail technicians worldwide.'
   const DEFAULT_CANONICAL = 'https://gelitup.com/'
+  const ROBOTS_DEFAULT = 'index, follow'
 
   const resolvedTitle = title
     ? (title.includes('GEL.IT.UP') ? title : `${title} | ${SITE_NAME}`)
@@ -1076,6 +1077,17 @@ function setPageSEO({ title, description, canonical } = {}) {
 
   const canonicalLink = document.querySelector('link[rel="canonical"]')
   if (canonicalLink) canonicalLink.setAttribute('href', canonical || DEFAULT_CANONICAL)
+
+  // robots meta — allow pages to opt-out of indexing (default: index, follow)
+  let metaRobots = document.querySelector('meta[name="robots"]')
+  if (metaRobots) {
+    metaRobots.setAttribute('content', robots || ROBOTS_DEFAULT)
+  } else {
+    metaRobots = document.createElement('meta')
+    metaRobots.setAttribute('name', 'robots')
+    metaRobots.setAttribute('content', robots || ROBOTS_DEFAULT)
+    document.head.appendChild(metaRobots)
+  }
 
   // Keep Open Graph in sync for social sharing of inner pages
   const ogTitle = document.querySelector('meta[property="og:title"]')
@@ -1093,6 +1105,7 @@ function setPageSEO({ title, description, canonical } = {}) {
     document.title = DEFAULT_TITLE
     if (metaDesc) metaDesc.setAttribute('content', DEFAULT_DESCRIPTION)
     if (canonicalLink) canonicalLink.setAttribute('href', DEFAULT_CANONICAL)
+    if (metaRobots) metaRobots.setAttribute('content', ROBOTS_DEFAULT)
     if (ogTitle) ogTitle.setAttribute('content', DEFAULT_TITLE)
     if (ogDesc) ogDesc.setAttribute('content', DEFAULT_DESCRIPTION)
     if (ogUrl) ogUrl.setAttribute('content', DEFAULT_CANONICAL)
@@ -7427,12 +7440,30 @@ function ProductPage() {
   useEffect(() => {
     if (!product) return undefined
 
+    // Determine canonical target. Use /colours/:family for solid gel polishes;
+    // otherwise prefer the marketing-friendly /our-products/* landing pages
+    let canonicalUrl = `https://gelitup.com/products/${product.slug}`
+    if (isSolidGelPolish && family?.slug) {
+      canonicalUrl = `https://gelitup.com/colours/${family.slug}`
+    } else if (isNailArt) {
+      canonicalUrl = 'https://gelitup.com/our-products/nail-art'
+    } else {
+      const cat = String(product.category || '').toLowerCase()
+      if (/builder/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/builder-gel'
+      else if (/base|top|bases|tops|essentials/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/bases-and-tops'
+      else if (/nail[- ]?care|skin/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/nail-care'
+      else if (/tool|tools/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/tools'
+      else if (/consumable|consumables/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/consumables'
+      else canonicalUrl = 'https://gelitup.com/our-products'
+    }
+
     return setPageSEO({
       title: `${pageHeading} | GEL.IT.UP`,
       description,
-      canonical: `https://gelitup.com/products/${product.slug}`,
+      canonical: canonicalUrl,
+      robots: 'noindex, follow',
     })
-  }, [description, pageHeading, product])
+  }, [description, pageHeading, product, isSolidGelPolish, isNailArt, family])
 
   const productSchema = useMemo(() => {
     if (!product || displayPrice == null) return null

@@ -25,11 +25,8 @@ const COLOR_FAMILY_ROUTES = COLOR_FAMILY_PAGES
     changefreq: 'weekly',
   }))
 
-const PRODUCT_ROUTES = PRODUCT_MANIFEST.map(({ slug }) => ({
-  path: `/products/${slug}`,
-  priority: '0.7',
-  changefreq: 'weekly',
-}))
+// Individual product pages intentionally omitted from the sitemap because they will be noindexed.
+const PRODUCT_ROUTES = []
 
 const ROUTES = [
   // Core pages
@@ -68,8 +65,8 @@ const ROUTES = [
   // Colour family landing pages
   ...COLOR_FAMILY_ROUTES,
 
-  // Individual Solid Gel Polish products
-  ...PRODUCT_ROUTES,
+  // Individual Solid Gel Polish products are intentionally omitted (noindex)
+  // (see PRODUCT_ROUTES comment above)
 
   // Gel polish subcategory vanity routes
   { path: '/solid-gel-polish',           priority: '0.8', changefreq: 'weekly'  },

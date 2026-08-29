@@ -62,12 +62,30 @@ const PRODUCT_ROUTE_SEO = Object.fromEntries(
         ? `Discover ${product.name}, professional ${productType} from GEL.IT.UP for creative salon nail art.`
         : `Discover ${product.name}, professional ${productType} from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
 
+    // Determine canonical: colours family pages for solid gel polishes; otherwise map to our-products landing pages
+    let canonicalUrl = `https://gelitup.com/products/${product.slug}`
+    if (isSolidGelPolish && product.colorFamily) {
+      const slug = String(product.colorFamily).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '')
+      canonicalUrl = `https://gelitup.com/colours/${slug}`
+    } else if (isNailArt) {
+      canonicalUrl = 'https://gelitup.com/our-products/nail-art'
+    } else {
+      const cat = String(product.category || '').toLowerCase()
+      if (/builder/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/builder-gel'
+      else if (/base|top|bases|tops|essentials/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/bases-and-tops'
+      else if (/nail[- ]?care|skin/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/nail-care'
+      else if (/tool|tools/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/tools'
+      else if (/consumable|consumables/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/consumables'
+      else canonicalUrl = 'https://gelitup.com/our-products'
+    }
+
     return [
       `/products/${product.slug}`,
       {
         title: `${heading} | GEL.IT.UP`,
         description,
-        canonical: `https://gelitup.com/products/${product.slug}`,
+        canonical: canonicalUrl,
+        robots: 'noindex, follow',
         bodyHtml: `<main><h1>${escapeHtml(heading)}</h1><img src="${escapeHtml(product.imageUrl)}" alt="${escapeHtml(product.name)} ${escapeHtml(productType)}"><p>${escapeHtml(description)}</p></main>`,
       },
     ]
@@ -282,13 +300,13 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
 }
 
-function injectSeo(html, { title, description, canonical, bodyHtml = '' }) {
+function injectSeo(html, { title, description, canonical, robots, bodyHtml = '' }) {
   const t = escapeHtml(title)
   const d = escapeHtml(description)
   const seoHtml = html
     .replace(/<title>[^<]*<\/title>/i,                     `<title>${t}</title>`)
     .replace(/<meta\s+name="description"[^>]*>/i,          `<meta name="description" content="${d}" />`)
-    .replace(/<link\s+rel="canonical"[^>]*>/i,             `<link rel="canonical" href="${canonical}" />`)
+    .replace(/<link\s+rel="canonical"[^>]*>/i,             `<link rel="canonical" href="${canonical}" />\n    <meta name="robots" content="${robots || 'index, follow'}" />`)
     .replace(/<meta\s+property="og:title"[^>]*>/i,         `<meta property="og:title" content="${t}" />`)
     .replace(/<meta\s+property="og:description"[^>]*>/i,   `<meta property="og:description" content="${d}" />`)
     .replace(/<meta\s+property="og:url"[^>]*>/i,           `<meta property="og:url" content="${canonical}" />`)
