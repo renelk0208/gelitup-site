@@ -906,6 +906,8 @@ function isDistributorSubmission(record) {
 const defaultClientProfile = {
   customerType: 'company',
   customerName: '',
+  contactFirstName: '',
+  contactLastName: '',
   contactPersonName: '',
   vatNumber: '',
   shippingType: 'road',
@@ -928,18 +930,50 @@ const defaultClientProfile = {
   shippingPostalCode: '',
 }
 
+function splitContactPersonName(value = '') {
+  const fullName = String(value || '').trim()
+  if (!fullName) {
+    return { contactFirstName: '', contactLastName: '', contactPersonName: '' }
+  }
+
+  const parts = fullName.split(/\s+/).filter(Boolean)
+  if (parts.length === 0) {
+    return { contactFirstName: '', contactLastName: '', contactPersonName: '' }
+  }
+  if (parts.length === 1) {
+    return { contactFirstName: parts[0], contactLastName: '', contactPersonName: fullName }
+  }
+
+  return {
+    contactFirstName: parts[0],
+    contactLastName: parts.slice(1).join(' '),
+    contactPersonName: fullName,
+  }
+}
+
+function buildContactPersonName(firstName = '', lastName = '') {
+  return [String(firstName || '').trim(), String(lastName || '').trim()].filter(Boolean).join(' ')
+}
+
 function buildClientProfileFromRegistration(registration) {
   if (!registration || typeof registration !== 'object') {
     return { ...defaultClientProfile }
   }
 
   const shippingSameAsInvoice = registration.shipping_same_as_invoice !== false
+  const contactName = registration.contact_name || registration.full_name || registration.contact_person_name || ''
+  const parsedContact = splitContactPersonName(contactName)
+  const contactFirstName = registration.contact_first_name || registration.first_name || parsedContact.contactFirstName
+  const contactLastName = registration.contact_last_name || registration.last_name || parsedContact.contactLastName
+  const combinedContactName = buildContactPersonName(contactFirstName, contactLastName) || registration.company_name || ''
 
   return {
     ...defaultClientProfile,
     customerType: registration.customer_type || 'company',
     customerName: registration.company_name || '',
-    contactPersonName: registration.contact_name || registration.company_name || '',
+    contactFirstName: contactFirstName || '',
+    contactLastName: contactLastName || '',
+    contactPersonName: combinedContactName,
     vatNumber: registration.vat_number || registration.vies_vat || '',
     shippingType: registration.shipping_type || 'road',
     contactPhone: registration.phone || registration.contact_phone || '',
@@ -971,10 +1005,13 @@ function buildClientProfileFromOrderEditHandoff(handoff) {
   const consigneePhone = String(handoff.consigneePhone || '').trim()
   const shippingAddress = String(handoff.shippingAddress || '').trim()
   const customerEmail = String(handoff.customerEmail || '').trim()
+  const parsedConsignee = splitContactPersonName(consigneeName)
 
   return {
     ...defaultClientProfile,
-    contactPersonName: consigneeName,
+    contactFirstName: parsedConsignee.contactFirstName,
+    contactLastName: parsedConsignee.contactLastName,
+    contactPersonName: parsedConsignee.contactPersonName,
     contactPhone: consigneePhone,
     contactEmail: customerEmail,
     invoiceAddressLine1: shippingAddress,
@@ -987,12 +1024,20 @@ function buildClientProfileFromOrderEditHandoff(handoff) {
 
 function buildUserMetadataFromRegistration(registration) {
   const profile = buildClientProfileFromRegistration(registration)
+  const fullName = buildContactPersonName(profile.contactFirstName, profile.contactLastName)
+    || registration?.contact_name
+    || profile.customerName
 
   return {
     customer_type: profile.customerType,
     account_type: profile.customerType,
     company_name: profile.customerName,
-    full_name: registration?.contact_name || profile.customerName,
+    full_name: fullName,
+    contact_name: fullName,
+    contact_first_name: profile.contactFirstName || null,
+    contact_last_name: profile.contactLastName || null,
+    first_name: profile.contactFirstName || null,
+    last_name: profile.contactLastName || null,
     vat_number: profile.vatNumber,
     contact_phone: profile.contactPhone,
     contact_email: profile.contactEmail,
@@ -12140,10 +12185,17 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       const resolvedRole = userMeta.role || userMeta.account_type || userMeta.customer_type || 'salon'
       setB2bUserRole(String(resolvedRole || 'salon'))
 
+      const contactMetaName = userMeta.full_name || userMeta.contact_name || userMeta.contact_person_name || ''
+      const parsedContactMeta = splitContactPersonName(contactMetaName)
       const metaProfile = {
         customerType: userMeta.customer_type || userMeta.account_type || '',
         customerName: userMeta.company_name || '',
-        contactPersonName: userMeta.full_name || userMeta.contact_name || '',
+        contactFirstName: userMeta.contact_first_name || userMeta.first_name || parsedContactMeta.contactFirstName || '',
+        contactLastName: userMeta.contact_last_name || userMeta.last_name || parsedContactMeta.contactLastName || '',
+        contactPersonName: buildContactPersonName(
+          userMeta.contact_first_name || userMeta.first_name || parsedContactMeta.contactFirstName,
+          userMeta.contact_last_name || userMeta.last_name || parsedContactMeta.contactLastName,
+        ) || contactMetaName || '',
         vatNumber: userMeta.vat_number || userMeta.vies_vat || '',
         shippingType: userMeta.shipping_type || '',
         contactPhone: userMeta.contact_phone || userMeta.phone || '',
@@ -12316,6 +12368,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       setClientProfile({
         ...fallbackProfile,
         ...registrationProfile,
+        contactFirstName: registrationProfile.contactFirstName || fallbackProfile.contactFirstName,
+        contactLastName: registrationProfile.contactLastName || fallbackProfile.contactLastName,
         contactPersonName: registrationProfile.contactPersonName || fallbackProfile.contactPersonName,
         contactPhone: registrationProfile.contactPhone || fallbackProfile.contactPhone,
         contactEmail: registrationProfile.contactEmail || fallbackProfile.contactEmail,
@@ -12531,7 +12585,30 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   }, [selectedCodes, itemQtys, packageCartItems])
 
   const setClientField = useCallback((key, value) => {
-    setClientProfile((current) => ({ ...current, [key]: value }))
+    setClientProfile((current) => {
+      if (key === 'contactFirstName' || key === 'contactLastName') {
+        const nextFirstName = key === 'contactFirstName' ? value : current.contactFirstName
+        const nextLastName = key === 'contactLastName' ? value : current.contactLastName
+        return {
+          ...current,
+          contactFirstName: nextFirstName,
+          contactLastName: nextLastName,
+          contactPersonName: buildContactPersonName(nextFirstName, nextLastName),
+        }
+      }
+
+      if (key === 'contactPersonName') {
+        const parsed = splitContactPersonName(value)
+        return {
+          ...current,
+          contactFirstName: parsed.contactFirstName,
+          contactLastName: parsed.contactLastName,
+          contactPersonName: parsed.contactPersonName,
+        }
+      }
+
+      return { ...current, [key]: value }
+    })
     if (key === 'vatNumber') setViesResult(null) // reset VIES result when VAT changes
   }, [])
 
@@ -12606,6 +12683,10 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     ? clientProfile.contactPhone
     : clientProfile.shippingPhone
 
+  const contactDisplayName = buildContactPersonName(clientProfile.contactFirstName, clientProfile.contactLastName)
+    || clientProfile.contactPersonName
+    || ''
+
   const clientValidation = useMemo(() => {
     const vatPrefixError = validateVatPrefix(clientProfile.vatNumber, clientProfile.invoiceCountry)
     const vatNotVerified = String(clientProfile.vatNumber || '').trim().length >= 4 && !vatPrefixError && (!viesResult || !viesResult.valid)
@@ -12613,6 +12694,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       customerType: !String(clientProfile.customerType || '').trim(),
       shippingType: !String(clientProfile.shippingType || '').trim(),
       customerName: !String(clientProfile.customerName || '').trim(),
+      contactFirstName: clientProfile.customerType === 'company' && !String(clientProfile.contactFirstName || '').trim(),
+      contactLastName: clientProfile.customerType === 'company' && !String(clientProfile.contactLastName || '').trim(),
       vatNumber: !String(clientProfile.vatNumber || '').trim() || Boolean(vatPrefixError) || vatNotVerified,
       contactPhone: !String(clientProfile.contactPhone || '').trim(),
       contactEmail: !String(clientProfile.contactEmail || '').trim(),
@@ -12634,6 +12717,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       customerType: 'customer type',
       shippingType: 'shipping type',
       customerName: 'company/client name',
+      contactFirstName: 'contact name',
+      contactLastName: 'contact surname',
       vatNumber: 'VAT number',
       contactPhone: 'contact number (with country code)',
       contactEmail: 'contact email',
@@ -12670,6 +12755,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     }
   }, [
     clientProfile.contactEmail,
+    clientProfile.contactFirstName,
+    clientProfile.contactLastName,
     clientProfile.contactPhone,
     clientProfile.customerName,
     clientProfile.customerType,
@@ -14928,8 +15015,12 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           ...userMeta,
           customer_type: clientProfile.customerType,
           company_name: clientProfile.customerName,
-          full_name: clientProfile.contactPersonName,
-          contact_name: clientProfile.contactPersonName,
+          full_name: contactDisplayName,
+          contact_name: contactDisplayName,
+          contact_first_name: clientProfile.contactFirstName,
+          contact_last_name: clientProfile.contactLastName,
+          first_name: clientProfile.contactFirstName,
+          last_name: clientProfile.contactLastName,
           vat_number: clientProfile.vatNumber,
           contact_phone: clientProfile.contactPhone,
           contact_email: clientProfile.contactEmail,
@@ -15617,9 +15708,14 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
               <input type="text" value={clientProfile.customerName} onChange={(e) => setClientField('customerName', e.target.value)} className={getClientInputClass('customerName')} placeholder={clientProfile.customerType === 'company' ? 'Company name' : 'Client name'} />
             </label>
             {clientProfile.customerType === 'company' && (
-              <label className="text-xs text-slate-700">Contact Person Name <span className="text-rose-600">*</span>
-                <input type="text" value={clientProfile.contactPersonName} onChange={(e) => setClientField('contactPersonName', e.target.value)} className={getClientInputClass('contactPersonName')} placeholder="e.g. Maria Rossi" />
-              </label>
+              <>
+                <label className="text-xs text-slate-700">Contact Name <span className="text-rose-600">*</span>
+                  <input type="text" value={clientProfile.contactFirstName} onChange={(e) => setClientField('contactFirstName', e.target.value)} className={getClientInputClass('contactFirstName')} placeholder="e.g. Maria" />
+                </label>
+                <label className="text-xs text-slate-700">Contact Surname <span className="text-rose-600">*</span>
+                  <input type="text" value={clientProfile.contactLastName} onChange={(e) => setClientField('contactLastName', e.target.value)} className={getClientInputClass('contactLastName')} placeholder="e.g. Rossi" />
+                </label>
+              </>
             )}
             <label className="text-xs text-slate-700">VAT Number <span className="text-rose-600">*</span>
               <div className="mt-1 flex gap-1.5">
@@ -15767,8 +15863,12 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                     await supabase.auth.updateUser({
                       data: {
                         company_name: clientProfile.customerName,
-                        full_name: clientProfile.contactPersonName,
-                        contact_name: clientProfile.contactPersonName,
+                        full_name: contactDisplayName,
+                        contact_name: contactDisplayName,
+                        contact_first_name: clientProfile.contactFirstName,
+                        contact_last_name: clientProfile.contactLastName,
+                        first_name: clientProfile.contactFirstName,
+                        last_name: clientProfile.contactLastName,
                         customer_type: clientProfile.customerType,
                         vat_number: clientProfile.vatNumber,
                         contact_phone: clientProfile.contactPhone,
