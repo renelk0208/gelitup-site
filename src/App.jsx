@@ -4,14 +4,6 @@ import appLogo from '/gelitup_logo.png'
 import PWABadge from './PWABadge.jsx'
 import { PRODUCT_ALIAS_GROUPS } from './data/productAliases.js'
 import PRODUCT_INFORMATION_BY_SUBCATEGORY from './data/product-info.json'
-import {
-  filterReleaseGatedImageMap,
-  getVaultReleaseStage,
-  isReleaseDateReached,
-  isVaultProductReleased,
-  SPIRAL_SHIMMERS_RELEASE_AT,
-  WINTER_VAULT_REVEAL_AT,
-} from './data/product-releases.js'
 import ImportedAnyPage from './pages/imported/ImportedAnyPage.jsx'
 import SchemaOrg from './components/SchemaOrg'
 import StarterKits from './components/StarterKits.jsx'
@@ -33,15 +25,6 @@ import GuestbookTeaser from './components/GuestbookTeaser'
 import ClarityScript from './components/ClarityScript'
 import { cleanProductName } from './utils/productUtils'
 import CatalogueSkeleton from './components/CatalogueSkeleton'
-import {
-  TRIAL_PACK_NAME,
-  TRIAL_PACK_CODE,
-  TRIAL_PACK_KEY,
-  TRIAL_PACK_PRICE,
-  TRIAL_PACK_LIST_PRICE,
-  TRIAL_PACK_DESCRIPTION,
-  TRIAL_PACK_CONTENTS,
-} from './data/trialPack.js'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
@@ -81,7 +64,6 @@ const MIN_ORDER_EUR = 100
 const CATALOGUE_DISCOUNT_PCT = 0
 const CATALOGUE_DISCOUNT_LABEL = 'SUMMER MADNESS -20%'
 const CATALOGUE_DISCOUNT_ENDS = new Date('2026-08-20T23:59:59+03:00')
-const VAULT_DISCOUNT_PCT = 20
 function isCatalogueDiscountActive() {
   return CATALOGUE_DISCOUNT_PCT > 0 && Date.now() <= CATALOGUE_DISCOUNT_ENDS.getTime()
 }
@@ -1059,12 +1041,11 @@ function getSilverFreeGuaranteeText(referenceDate = new Date()) {
  * for the current route. Used in page-level useEffect calls.
  * Returns a cleanup function that restores the default home-page SEO values.
  */
-function setPageSEO({ title, description, canonical, robots } = {}) {
+function setPageSEO({ title, description, canonical } = {}) {
   const SITE_NAME = 'GEL.IT.UP by GIUP®'
   const DEFAULT_TITLE = `${SITE_NAME} | Gel Polish, Builder Gel & Nail Systems`
   const DEFAULT_DESCRIPTION = 'Professional gel polish with 1,000+ shades, builder gel systems, base coats and top coats. HEMA-free, TPO-free, EU certified. Available wholesale to professional nail technicians worldwide.'
   const DEFAULT_CANONICAL = 'https://gelitup.com/'
-  const ROBOTS_DEFAULT = 'index, follow'
 
   const resolvedTitle = title
     ? (title.includes('GEL.IT.UP') ? title : `${title} | ${SITE_NAME}`)
@@ -1077,17 +1058,6 @@ function setPageSEO({ title, description, canonical, robots } = {}) {
 
   const canonicalLink = document.querySelector('link[rel="canonical"]')
   if (canonicalLink) canonicalLink.setAttribute('href', canonical || DEFAULT_CANONICAL)
-
-  // robots meta — allow pages to opt-out of indexing (default: index, follow)
-  let metaRobots = document.querySelector('meta[name="robots"]')
-  if (metaRobots) {
-    metaRobots.setAttribute('content', robots || ROBOTS_DEFAULT)
-  } else {
-    metaRobots = document.createElement('meta')
-    metaRobots.setAttribute('name', 'robots')
-    metaRobots.setAttribute('content', robots || ROBOTS_DEFAULT)
-    document.head.appendChild(metaRobots)
-  }
 
   // Keep Open Graph in sync for social sharing of inner pages
   const ogTitle = document.querySelector('meta[property="og:title"]')
@@ -1105,7 +1075,6 @@ function setPageSEO({ title, description, canonical, robots } = {}) {
     document.title = DEFAULT_TITLE
     if (metaDesc) metaDesc.setAttribute('content', DEFAULT_DESCRIPTION)
     if (canonicalLink) canonicalLink.setAttribute('href', DEFAULT_CANONICAL)
-    if (metaRobots) metaRobots.setAttribute('content', ROBOTS_DEFAULT)
     if (ogTitle) ogTitle.setAttribute('content', DEFAULT_TITLE)
     if (ogDesc) ogDesc.setAttribute('content', DEFAULT_DESCRIPTION)
     if (ogUrl) ogUrl.setAttribute('content', DEFAULT_CANONICAL)
@@ -2590,46 +2559,6 @@ function normalizeCatalogueToken(value = '') {
     .trim()
 }
 
-const CAT_EYE_COLLECTIONS = [
-  { value: 'DREAMY CAT EYE', label: 'Dreamy Cat Eye', slug: 'dreamy-cat-eye' },
-  { value: 'FAN', label: 'Fan Cat Eye', slug: 'fan-cat-eye' },
-  { value: 'GLASS CAT EYE', label: 'Glass Cat Eye', slug: 'glass-cat-eye' },
-  { value: 'NEON CAT EYE', label: 'Neon Cat Eye', slug: 'neon-cat-eye' },
-  { value: 'ROSE QUARTZ CAT EYE', label: 'Rose Quartz Cat Eye', slug: 'rose-quartz-cat-eye' },
-  { value: 'SAPPHIRE CAT EYE', label: 'Sapphire Cat Eye', slug: 'sapphire-cat-eye' },
-  { value: 'VELVET CAT EYE', label: 'Velvet Cat Eye', slug: 'velvet-cat-eye' },
-]
-
-function getCatEyeCollectionBySlug(slug = '') {
-  const normalizedSlug = String(slug || '').toLowerCase().trim()
-  return CAT_EYE_COLLECTIONS.find((collection) => collection.slug === normalizedSlug) || null
-}
-
-function resolveCatEyeCollection(rawCategoryName = '', imageUrl = '') {
-  const categoryToken = normalizeCatalogueToken(rawCategoryName)
-  if (categoryToken === 'FAN CAT EYE') return 'FAN'
-  const categoryMatch = CAT_EYE_COLLECTIONS.find((collection) => collection.value === categoryToken)
-  if (categoryMatch) return categoryMatch.value
-
-  const pathMatch = String(imageUrl || '').match(/\/COLORS\/CAT EYE\/([^/]+)\//i)
-  if (!pathMatch) return null
-  const pathToken = normalizeCatalogueToken(pathMatch[1])
-  return CAT_EYE_COLLECTIONS.find((collection) => collection.value === pathToken)?.value || null
-}
-
-function resolveSolidGelColorFamily(rawCategoryName = '', imageUrl = '', productName = '') {
-  const nestedPathMatch = String(imageUrl || '').match(/\/COLORS\/SOLID GEL POLISH\/([^/]+)\//i)
-  if (nestedPathMatch) return normalizeCatalogueToken(nestedPathMatch[1])
-
-  const flatPathMatch = String(imageUrl || '').match(/\/COLORS\/(FRENCH|NUDE|PASTEL|RONE)\//i)
-  if (flatPathMatch) return flatPathMatch[1].toUpperCase() === 'RONE' ? 'GIUP1' : flatPathMatch[1].toUpperCase()
-
-  const categoryToken = normalizeCatalogueToken(rawCategoryName)
-  if (categoryToken === 'RONE') return 'GIUP1'
-  if (COLOR_FAMILY_FILTERS.some((family) => family.key === categoryToken)) return categoryToken
-  return resolveColorFamilyKey(productName)
-}
-
 function findCatalogueItemByMatch(items = [], rawMatch = '', used = new Set()) {
   const match = normalizeCatalogueToken(rawMatch)
   if (!match) return null
@@ -2850,23 +2779,13 @@ function applyManualCatalogueOrder(items = [], rule = null) {
 
 function applyHiddenProductsFilter(payload, hiddenKeys = []) {
   if (!Array.isArray(hiddenKeys) || hiddenKeys.length === 0) return payload
-  const hiddenSet = new Set(hiddenKeys.map(k => String(k).trim().toLowerCase()).filter(Boolean))
+  const hiddenSet = new Set(hiddenKeys.map(k => String(k).trim()).filter(Boolean))
   if (hiddenSet.size === 0) return payload
   const filtered = {}
   for (const [key, value] of Object.entries(payload)) {
-    if (!hiddenSet.has(key.trim().toLowerCase())) filtered[key] = value
+    if (!hiddenSet.has(key)) filtered[key] = value
   }
   return filtered
-}
-
-function normalizeOutOfStockName(value) {
-  return String(value || '')
-    .replace(/\bHTF\b/gi, ' ')
-    .replace(/(\bLINE\s+IT\s+UP)\s+0*\d+\b/gi, '$1')
-    .replace(/\bMULTI\s+COLOU?R\b/gi, 'MULTICOLOUR')
-    .replace(/[^a-z0-9]+/gi, ' ')
-    .trim()
-    .toUpperCase()
 }
 
 function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()) {
@@ -2984,7 +2903,7 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
       // Standard: COLORS/CAT EYE/img.jpg ? subcategory='CAT EYE'
       // NUDE, FRENCH, PASTEL, RONE (GIUP1) belong under Solid Gel Polish
       const folderToken = (segments[segments.length - 2] || 'General').toUpperCase()
-      subcategory = ['FRENCH', 'NUDE', 'PASTEL', 'RONE'].includes(folderToken)
+      subcategory = ['NUDE', 'PASTEL', 'RONE'].includes(folderToken)
         ? 'SOLID GEL POLISH'
         : (segments[segments.length - 2] || 'General')
     } else if (segments.length > 2) {
@@ -3092,89 +3011,23 @@ function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()
 
 const COLOR_FAMILY_FILTERS = [
   { key: 'ALL', label: 'All', swatchClass: 'bg-slate-300' },
-  { key: 'BLACK', label: 'Black', slug: 'black', swatchClass: 'bg-black' },
-  { key: 'BLUE', label: 'Blue', slug: 'blue', swatchClass: 'bg-blue-500' },
-  { key: 'BROWN NUDE', label: 'Brown Nude', slug: 'brown-nude', swatchClass: 'bg-amber-700' },
-  { key: 'CORAL ORANGE PEACH', label: 'Coral Orange Peach', slug: 'coral-orange-peach', swatchClass: 'bg-orange-400' },
-  { key: 'FRENCH', label: 'French', slug: 'french', swatchClass: 'bg-rose-100 border border-rose-200' },
-  { key: 'GIUP1', label: 'GIUP1', slug: 'giup1', swatchClass: 'bg-fuchsia-200 border border-fuchsia-300' },
-  { key: 'GOLD', label: 'Gold', slug: 'gold', swatchClass: 'bg-amber-400' },
-  { key: 'GREEN', label: 'Green', slug: 'green', swatchClass: 'bg-emerald-500' },
-  { key: 'GREY', label: 'Grey', slug: 'grey', swatchClass: 'bg-slate-500' },
-  { key: 'NEON', label: 'Neon', slug: 'neon', swatchClass: 'bg-lime-400' },
-  { key: 'PASTEL', label: 'Pastel', slug: 'pastel', swatchClass: 'bg-sky-200 border border-sky-300' },
-  { key: 'PINK', label: 'Pink', slug: 'pink', swatchClass: 'bg-pink-400' },
-  { key: 'PURPLE', label: 'Purple', slug: 'purple', swatchClass: 'bg-violet-500' },
-  { key: 'RED', label: 'Red', slug: 'red', swatchClass: 'bg-red-500' },
-  { key: 'SILVER', label: 'Silver', slug: 'silver', swatchClass: 'bg-slate-300 border border-slate-400' },
-  { key: 'WHITE', label: 'White', slug: 'white', swatchClass: 'bg-white border border-slate-300' },
-  { key: 'YELLOW', label: 'Yellow', slug: 'yellow', swatchClass: 'bg-yellow-300' },
+  { key: 'BLACK', label: 'Black', swatchClass: 'bg-black' },
+  { key: 'BLUE', label: 'Blue', swatchClass: 'bg-blue-500' },
+  { key: 'BROWN NUDE', label: 'Brown Nude', swatchClass: 'bg-amber-700' },
+  { key: 'CORAL ORANGE PEACH', label: 'Coral Orange Peach', swatchClass: 'bg-orange-400' },
+  { key: 'GIUP1', label: 'GIUP1', swatchClass: 'bg-fuchsia-200 border border-fuchsia-300' },
+  { key: 'GOLD', label: 'Gold', swatchClass: 'bg-amber-400' },
+  { key: 'GREEN', label: 'Green', swatchClass: 'bg-emerald-500' },
+  { key: 'GREY', label: 'Grey', swatchClass: 'bg-slate-500' },
+  { key: 'NEON', label: 'Neon', swatchClass: 'bg-lime-400' },
+  { key: 'PASTEL', label: 'Pastel', swatchClass: 'bg-sky-200 border border-sky-300' },
+  { key: 'PINK', label: 'Pink', swatchClass: 'bg-pink-400' },
+  { key: 'PURPLE', label: 'Purple', swatchClass: 'bg-violet-500' },
+  { key: 'RED', label: 'Red', swatchClass: 'bg-red-500' },
+  { key: 'SILVER', label: 'Silver', swatchClass: 'bg-slate-300 border border-slate-400' },
+  { key: 'WHITE', label: 'White', swatchClass: 'bg-white border border-slate-300' },
+  { key: 'YELLOW', label: 'Yellow', swatchClass: 'bg-yellow-300' },
 ]
-
-function getColorFamilyBySlug(slug = '') {
-  const normalizedSlug = String(slug || '').toLowerCase().trim()
-  return COLOR_FAMILY_FILTERS.find((family) => family.slug === normalizedSlug) || null
-}
-
-function getColorFamilyPageContent(family) {
-  if (!family?.slug || !family?.label) return null
-
-  const familyName = family.label
-  const familyNameLower = familyName.toLowerCase()
-  return {
-    title: `${familyName} Gel Polish Wholesale | GEL.IT.UP`,
-    description: `Shop professional ${familyNameLower} gel polish wholesale from GEL.IT.UP. Every shade is HEMA-free, TPO-free and EU-certified for nail technicians, salons, academies and distributors.`,
-    canonical: `https://gelitup.com/colours/${family.slug}`,
-    heading: `${familyName} Gel Polish Wholesale`,
-    intro: `Explore GEL.IT.UP ${familyNameLower} gel polish in professional, HEMA-free, TPO-free and EU-certified formulations. These salon-ready ${familyNameLower} shades are available wholesale for nail technicians, academies and distributors.`,
-  }
-}
-
-const COLOR_CATEGORY_LINKS = [
-  {
-    category: 'CAT EYE',
-    label: 'Cat Eye',
-    slug: 'cat-eye',
-    children: [
-      { label: 'All Cat Eye', to: '/full-catalogue?subcategory=cat-eye' },
-      ...CAT_EYE_COLLECTIONS.map((collection) => ({
-        label: collection.label,
-        to: `/full-catalogue?subcategory=cat-eye&collection=${collection.slug}`,
-      })),
-    ],
-  },
-  { category: 'BY THE OCEAN', label: 'By the Ocean', slug: 'by-the-ocean' },
-  {
-    category: 'SOLID GEL POLISH',
-    label: 'Solid Gel Polish',
-    slug: 'solid-gel-polish',
-    children: [
-      { label: 'All Solid Gel Polish', to: '/full-catalogue?subcategory=solid-gel-polish' },
-      ...COLOR_FAMILY_FILTERS
-        .filter((family) => family.slug)
-        .map((family) => ({
-          label: family.label,
-          to: `/colours/${family.slug}`,
-        })),
-    ],
-  },
-  { category: 'GLASS EFFECT', label: 'Glass Effect', slug: 'glass-effect' },
-  { category: 'GLITTERS', label: 'Glitters', slug: 'glitters' },
-  { category: 'JELLY', label: 'Jelly', slug: 'jelly' },
-  { category: 'METALLIC COLLECTION', label: 'Metallic Collection', slug: 'metallic-collection' },
-  { category: 'NEW YORK', label: 'New York', slug: 'new-york' },
-  { category: 'PEARL', label: 'Pearl', slug: 'pearl' },
-  { category: 'PMA', label: 'PMA', slug: 'pma' },
-  { category: 'SHIMMER COLORS', label: 'Shimmer Colors', slug: 'shimmer-colors' },
-  { category: 'SNOWFLAKE', label: 'Snowflake', slug: 'snowflake' },
-  { category: 'SPIRAL SHIMMERS', label: 'Spiral Shimmers', slug: 'spiral-shimmers', releaseAt: SPIRAL_SHIMMERS_RELEASE_AT },
-  { category: 'SPIX & SPEX', label: 'Spix & Spex', slug: 'spix-spex' },
-  { category: 'TUTTI FRUTTI GLASS', label: 'Tutti Frutti Glass', slug: 'tutti-frutti-glass' },
-]
-
-function getReleasedColorCategoryLinks(now = Date.now()) {
-  return COLOR_CATEGORY_LINKS.filter((item) => !item.releaseAt || isReleaseDateReached(item.releaseAt, now))
-}
 
 function resolveColorFamilyKey(name = '') {
   const token = normalizeCatalogueToken(name)
@@ -3627,15 +3480,12 @@ const SUBCATEGORY_SEO = {
   },
 }
 
+// Winter Vault teaser on the catalogue — mirrors REVEAL_AT in
+// src/pages/WinterVaultLandingPage.jsx; keep in sync when the date changes.
+const WINTER_VAULT_REVEAL_AT = '2026-09-01T00:00:00'
+
 function FullCataloguePage() {
   const location = useLocation()
-  const navigate = useNavigate()
-  const { family: routeFamilySlug = '' } = useParams()
-  const routeColorFamily = getColorFamilyBySlug(routeFamilySlug)
-  const colorFamilyPageContent = useMemo(
-    () => getColorFamilyPageContent(routeColorFamily),
-    [routeColorFamily],
-  )
   const [sections, setSections] = useState([])
   const [activeCategory, setActiveCategory] = useState('')
   const [expandedSections, setExpandedSections] = useState({})
@@ -3853,11 +3703,11 @@ function FullCataloguePage() {
         const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
         if (!mounted) return
 
-        const releasedPayload = filterReleaseGatedImageMap(payload)
-        const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(releasedPayload, hiddenKeys), manualRuleIndex)
+        const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(payload, hiddenKeys), manualRuleIndex)
         setSections(nextSections)
         if (videoMapResponse.ok) { try { setVideoMap(await videoMapResponse.json()) } catch {} }
-        setOutOfStockNames(new Set(Array.isArray(oosNames) ? oosNames.map(normalizeOutOfStockName) : []))
+        const _normOos = n => String(n).replace(/[_.-]+/g, ' ').replace(/\s+/g, ' ').trim()
+        setOutOfStockNames(new Set(Array.isArray(oosNames) ? oosNames.map(_normOos) : []))
         const _normSizeKey = k => String(k).replace(/[_.-]+/g, ' ').replace(/\s+/g, ' ').trim()
         const _enrichedSizes = { ...(sizesPayload || {}) }
         if (sizesPayload && payload) {
@@ -3953,10 +3803,6 @@ function FullCataloguePage() {
   }, [isLoading, searchParams])
 
   useEffect(() => {
-    if (colorFamilyPageContent) {
-      return setPageSEO(colorFamilyPageContent)
-    }
-
     const subSlug = (searchParams.get('subcategory') || '').toLowerCase().trim()
     const seo = SUBCATEGORY_SEO[subSlug] || {
       title: 'Full Product Catalogue | Wholesale Nail Supplies | GEL.IT.UP by GIUP®',
@@ -3964,7 +3810,7 @@ function FullCataloguePage() {
       canonical: 'https://gelitup.com/full-catalogue',
     }
     return setPageSEO(seo)
-  }, [colorFamilyPageContent, searchParams])
+  }, [searchParams])
 
   // Load B2B price list for public price display
   useEffect(() => {
@@ -4836,11 +4682,6 @@ function FullCataloguePage() {
       window.gtag('event', 'add_to_cart', { currency: 'EUR', items: [{ item_name: itemName, quantity: qty }] })
       window.gtag('event', 'conversion', { send_to: 'AW-1008159504/m23ACI_9w6oaEJCW3eAD', value: 1.0, currency: 'EUR' })
     }
-    window.dataLayer = window.dataLayer || []
-    window.dataLayer.push({
-      event: 'add_to_cart',
-      ecommerce: { currency: 'EUR', value: 0, items: [{ item_id: itemKey, item_name: itemKey, quantity: qty }] },
-    })
   }, [itemQuantities, quickCartUnits])
 
   const extractProductCode = useCallback((name = '') => {
@@ -4859,7 +4700,6 @@ function FullCataloguePage() {
   }, [])
 
   const resolveCatalogueListPrice = useCallback((itemName = '', itemCode = '') => {
-    if (itemCode === TRIAL_PACK_CODE) return TRIAL_PACK_LIST_PRICE
     if (!cataloguePriceMap) return null
     const byName = cataloguePriceMap.get(normalizeProductName(itemName))
     if (byName?.price != null) return byName.price
@@ -4905,7 +4745,7 @@ function FullCataloguePage() {
   // Effective catalogue price = list price with the SUMMER MADNESS discount applied.
   // Every card, cart total and checkout uses this so displayed and charged prices match.
   const lookupCataloguePrice = useCallback(
-    (itemName = '', itemCode = '') => (itemCode === TRIAL_PACK_CODE ? TRIAL_PACK_PRICE : applyCatalogueDiscount(resolveCatalogueListPrice(itemName, itemCode))),
+    (itemName = '', itemCode = '') => applyCatalogueDiscount(resolveCatalogueListPrice(itemName, itemCode)),
     [resolveCatalogueListPrice],
   )
 
@@ -5056,16 +4896,12 @@ function FullCataloguePage() {
     })
   }, [])
 
-  const openCatalogueCategory = useCallback((categoryName = '', subcategoryName = 'ALL', {
-    keepSearch = false,
-    catEyeCollection = 'ALL',
-    colorFamily = 'ALL',
-  } = {}) => {
+  const openCatalogueCategory = useCallback((categoryName = '', subcategoryName = 'ALL', { keepSearch = false } = {}) => {
     if (!categoryName) return
     setActiveCategory(categoryName)
     setActiveSubcategory(subcategoryName || 'ALL')
-    setActiveColorFamily(colorFamily)
-    setActiveCatEyeVariant(catEyeCollection)
+    setActiveColorFamily('ALL')
+    setActiveCatEyeVariant('ALL')
     if (!keepSearch) setSearchQuery('')
     // Expand the correct section so categoryDetail renders
     // Colours skips the grid — categoryDetail is rendered standalone below the banner
@@ -5090,29 +4926,38 @@ function FullCataloguePage() {
 
   // Handle ?subcategory= deep-link — e.g. gelitup.com/cat-eye resolves here via a vanity route
   useEffect(() => {
-    const querySubSlug = (searchParams.get('subcategory') || '').toLowerCase().trim()
-    const subSlug = routeColorFamily ? 'solid-gel-polish' : querySubSlug
+    const subSlug = (searchParams.get('subcategory') || '').toLowerCase().trim()
     if (!subSlug || isLoading) return
-    const requestedCatEyeCollection = getCatEyeCollectionBySlug(searchParams.get('collection'))?.value || 'ALL'
-    const requestedColorFamily = routeColorFamily?.key || getColorFamilyBySlug(searchParams.get('family'))?.key || 'ALL'
     // Maps URL slug → [categoryName, subcategoryName] using exact folder names from product-images/
     const SUBSLUG_MAP = {
       // ── Gel Polish (COLORS) ──────────────────────────────────────────────────
-      ...Object.fromEntries(getReleasedColorCategoryLinks().map((item) => [item.slug, ['COLORS', item.category]])),
+      'cat-eye':               ['COLORS', 'CAT EYE'],
       'cateye':                ['COLORS', 'CAT EYE'],
       'shimmer':               ['COLORS', 'SHIMMER COLORS'],
+      'shimmer-colors':        ['COLORS', 'SHIMMER COLORS'],
       'glitter':               ['COLORS', 'GLITTERS'],
+      'glitters':              ['COLORS', 'GLITTERS'],
+      'jelly':                 ['COLORS', 'JELLY'],
       'metallic':              ['COLORS', 'METALLIC COLLECTION'],
+      'metallic-collection':   ['COLORS', 'METALLIC COLLECTION'],
+      'pearl':                 ['COLORS', 'PEARL'],
+      'glass-effect':          ['COLORS', 'GLASS EFFECT'],
       'glass':                 ['COLORS', 'GLASS EFFECT'],
       'tutti-frutti':          ['COLORS', 'TUTTI FRUTTI GLASS'],
+      'tutti-frutti-glass':    ['COLORS', 'TUTTI FRUTTI GLASS'],
       'spix':                  ['COLORS', 'SPIX & SPEX'],
       'spex':                  ['COLORS', 'SPIX & SPEX'],
+      'spix-spex':             ['COLORS', 'SPIX & SPEX'],
+      'new-york':              ['COLORS', 'NEW YORK'],
+      'snowflake':             ['COLORS', 'SNOWFLAKE'],
+      'pma':                   ['COLORS', 'PMA'],
+      'solid-gel-polish':      ['COLORS', 'SOLID GEL POLISH'],
       'solid':                 ['COLORS', 'SOLID GEL POLISH'],
+      'by-the-ocean':          ['COLORS', 'BY THE OCEAN'],
       // ── Builder Gel Systems ───────────────────────────────────────────────────
       '3in1':                  ['BUILDER GEL SYSTEMS', '3INI BUILDER'],
       '3-in-1':                ['BUILDER GEL SYSTEMS', '3INI BUILDER'],
       '3ini':                  ['BUILDER GEL SYSTEMS', '3INI BUILDER'],
-      'glitter-builder-gels':  ['BUILDER GEL SYSTEMS', 'GLITTER 3-IN-1 BUILDER GELS'],
       'bob':                   ['BUILDER GEL SYSTEMS', 'BRUSH ON BUILDER'],
       'brush-on-builder':      ['BUILDER GEL SYSTEMS', 'BRUSH ON BUILDER'],
       'liquid-polygel':        ['BUILDER GEL SYSTEMS', 'LIQUID POLYGEL'],
@@ -5135,7 +4980,6 @@ function FullCataloguePage() {
       'marble':                ['NAIL ART', 'MARBLE INK'],
       'stickers':              ['NAIL ART', 'STICKERS'],
       'glitter-effects':       ['NAIL ART', 'GLITTER EFFECTS POWEDER'],
-      'prism-art-gel':         ['NAIL ART', 'PRISM ART GEL'],
       // ── Bases ────────────────────────────────────────────────────────────
       '5in1-base':             ['BASES', '5IN1 SUPERIOR BASE'],
       'classic-base':          ['BASES', 'CLASSIC BASE COAT'],
@@ -5149,13 +4993,7 @@ function FullCataloguePage() {
       'spot-my-tops':          ['TOPS', 'Spot My Tops'],
     }
     const match = SUBSLUG_MAP[subSlug]
-    if (match) {
-      openCatalogueCategory(match[0], match[1], {
-        catEyeCollection: match[1] === 'CAT EYE' ? requestedCatEyeCollection : 'ALL',
-        colorFamily: match[1] === 'SOLID GEL POLISH' ? requestedColorFamily : 'ALL',
-      })
-      return
-    }
+    if (match) { openCatalogueCategory(match[0], match[1]); return }
     // Fallback: convert the slug back to a name and scan live sections
     const nameGuess = subSlug.replace(/-/g, ' ').toUpperCase()
     for (const section of sections) {
@@ -5165,7 +5003,7 @@ function FullCataloguePage() {
       })
       if (found) { openCatalogueCategory(section.category, found.name); return }
     }
-  }, [isLoading, searchParams, openCatalogueCategory, routeColorFamily, sections])
+  }, [isLoading, searchParams, openCatalogueCategory, sections])
 
   const getCategoryCoverImage = useCallback((categoryName = '', fallbackImageUrl = '') => {
     const candidates = buildCategoryHeroImageCandidates(categoryName, fallbackImageUrl)
@@ -5358,36 +5196,6 @@ function FullCataloguePage() {
             )
           })()}
         </div>
-{(isColorsCategory || normalizeCatalogueToken(activeSection?.category) === 'BUILDER GEL SYSTEMS') && (
-          <div className="mt-4 flex flex-col gap-4 rounded-[16px] border-2 border-fuchsia-500/60 bg-gradient-to-r from-fuchsia-50 to-white p-4 sm:flex-row sm:items-center" data-catalogue-item>
-            <div className="min-w-0 flex-1">
-              <span className="inline-flex items-center rounded-full bg-fuchsia-600 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Featured — Start Here</span>
-              <h3 className="mt-2 text-sm font-black uppercase tracking-[0.02em] text-black">{TRIAL_PACK_NAME}</h3>
-              <p className="mt-1.5 text-[12px] leading-relaxed text-black/65">{TRIAL_PACK_DESCRIPTION}</p>
-              <p className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-black/45">Includes: {TRIAL_PACK_CONTENTS.join(' · ')}</p>
-              <div className="mt-2.5 flex items-baseline gap-2">
-                <span className="text-lg font-bold text-fuchsia-700">€{TRIAL_PACK_PRICE.toFixed(2)}</span>
-              </div>
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              {quickCart[TRIAL_PACK_KEY] > 0 ? (
-                <div className="flex items-center gap-1.5">
-                  <button type="button" onClick={() => setQuickCart(c => { const q = Number(c[TRIAL_PACK_KEY] || 0); if (q <= 1) { const n = { ...c }; delete n[TRIAL_PACK_KEY]; return n } return { ...c, [TRIAL_PACK_KEY]: q - 1 } })} className="flex h-9 w-9 items-center justify-center rounded-lg border border-fuchsia-300 text-sm text-fuchsia-600 transition hover:bg-fuchsia-50">−</button>
-                  <span className="w-20 text-center text-xs font-bold text-fuchsia-700">{quickCart[TRIAL_PACK_KEY]}× added</span>
-                  <button type="button" onClick={() => addQuickItem(TRIAL_PACK_KEY)} className="flex h-9 w-9 items-center justify-center rounded-lg border border-fuchsia-300 text-sm text-fuchsia-600 transition hover:bg-fuchsia-50">+</button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => addQuickItem(TRIAL_PACK_KEY)}
-                  className={`rounded-[10px] bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-fuchsia-500 ${pulseItemKey === TRIAL_PACK_KEY ? 'scale-95' : ''}`}
-                >
-                  + Add Trial Pack to Cart
-                </button>
-              )}
-            </div>
-          </div>
-        )}
 
         <div className="mt-3 flex flex-wrap gap-2">
           {(() => {
@@ -5582,17 +5390,6 @@ function FullCataloguePage() {
               )
             })()}
 
-            {colorFamilyPageContent && (
-              <section className="mt-3 rounded-[14px] border border-fuchsia-200 bg-fuchsia-50/50 p-4">
-                <h1 className="text-xl font-black tracking-tight text-black sm:text-2xl">
-                  {colorFamilyPageContent.heading}
-                </h1>
-                <p className="mt-2 max-w-4xl text-sm leading-relaxed text-black/70">
-                  {colorFamilyPageContent.intro}
-                </p>
-              </section>
-            )}
-
             <div className="mt-3">
               <label className="sr-only" htmlFor="catalog-search">Search catalogue</label>
               <input
@@ -5614,24 +5411,7 @@ function FullCataloguePage() {
                     return (
                       <button
                         key={family.key}
-                        onClick={() => {
-                          setActiveColorFamily(family.key)
-                          scrollToCategoryDetail()
-                          if (routeColorFamily) {
-                            navigate(
-                              family.slug
-                                ? `/colours/${family.slug}`
-                                : '/full-catalogue?subcategory=solid-gel-polish',
-                            )
-                            return
-                          }
-                          setSearchParams(
-                            family.slug
-                              ? { subcategory: 'solid-gel-polish', family: family.slug }
-                              : { subcategory: 'solid-gel-polish' },
-                            { replace: true },
-                          )
-                        }}
+                        onClick={() => { setActiveColorFamily(family.key); scrollToCategoryDetail() }}
                         className={`inline-flex items-center gap-2 rounded-[12px] border px-2.5 py-1.5 text-xs transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-[#4A4A4A]/35 bg-white text-black/70 hover:border-fuchsia-500'}`}
                       >
                         <span className={`h-3 w-3 rounded-full ${family.swatchClass}`} />
@@ -5650,20 +5430,10 @@ function FullCataloguePage() {
                   {catEyeVariantFilters.map((variant) => {
                     const isActive = activeCatEyeVariant === variant
                     const label = variant === 'ALL' ? 'All Cat Eye' : toTitleCaseLabel(variant)
-                    const collection = CAT_EYE_COLLECTIONS.find((item) => item.value === normalizeCatalogueToken(variant))
                     return (
                       <button
                         key={variant}
-                        onClick={() => {
-                          setActiveCatEyeVariant(variant)
-                          scrollToCategoryDetail()
-                          setSearchParams(
-                            collection
-                              ? { subcategory: 'cat-eye', collection: collection.slug }
-                              : { subcategory: 'cat-eye' },
-                            { replace: true },
-                          )
-                        }}
+                        onClick={() => { setActiveCatEyeVariant(variant); scrollToCategoryDetail() }}
                         className={`rounded-[12px] border px-2.5 py-1.5 text-xs font-semibold transition duration-300 ${isActive ? 'border-fuchsia-600 bg-fuchsia-600 text-white' : 'border-[#4A4A4A]/35 bg-white text-black/70 hover:border-fuchsia-500'}`}
                       >
                         {label}
@@ -5721,7 +5491,7 @@ function FullCataloguePage() {
                   const qty = getQty(itemKey)
                   const hasChangedQty = qty !== 1
                   const inCart = quickCart[itemKey] > 0
-                  const isOOS = outOfStockNames.has(normalizeOutOfStockName(item.name))
+                  const isOOS = outOfStockNames.has(item.name)
                   const _sizeFilename = item.imageUrl.split('/').pop() || ''
                   const _sizeMatchFile = _sizeFilename.match(/\b(\d+(?:\.\d+)?)\s*(ml|gr|g)\b/i)
                   const _sizeMatchName = item.name.match(/\b(\d+(?:\.\d+)?)\s*(ml|gr|g)\b/i)
@@ -6038,28 +5808,38 @@ function FullCataloguePage() {
 
   return (
     <section className="space-y-5">
-      <NavLink
-        to="/winter-vault"
-        className="group relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] -mt-4 block w-screen overflow-hidden border-y border-fuchsia-400/40 bg-[#080509] px-4 py-7 text-white shadow-[0_12px_40px_rgba(212,55,144,0.22)] md:-mt-10 md:px-8 md:py-9"
-        aria-label="Enter the Winter Vault. Next mystery unlock 7 September 2026."
-      >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(212,55,144,0.32),transparent_55%)]" />
-        <div className="relative mx-auto flex max-w-6xl flex-col items-center justify-between gap-5 text-center sm:flex-row sm:text-left">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.32em] text-fuchsia-300">Something new is locked away</p>
-            <h1 className="heading-on-dark mt-2 text-3xl font-black uppercase tracking-[0.12em] text-white sm:text-4xl">
-              The Winter Vault
-            </h1>
-            <p className="mt-2 text-sm font-medium text-white/75 sm:text-base">
-              Next mystery unlock: 7 September 2026
-            </p>
+      {/* WINTER VAULT CAMPAIGN TEASER */}
+      {(() => {
+        const daysToReveal = Math.max(0, Math.ceil((new Date(WINTER_VAULT_REVEAL_AT).getTime() - Date.now()) / 86400000))
+        return (
+          <div className="mx-auto w-full max-w-6xl px-4 sm:px-8">
+            <NavLink
+              to="/winter-vault"
+              className="group relative block overflow-hidden rounded-2xl transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_40px_rgba(212,55,144,0.35)]"
+              style={{ backgroundColor: '#1A1A1A', border: '1px solid rgba(212,55,144,0.55)' }}
+            >
+              <div className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full opacity-25 blur-3xl transition duration-500 group-hover:opacity-50" style={{ backgroundColor: '#D43790' }} />
+              <div className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.3em]" style={{ color: '#D43790' }}>
+                    The Winter Vault
+                  </p>
+                  <p className="mt-1.5 text-lg font-black leading-snug text-white sm:text-xl">
+                    Something new is locked away.{' '}
+                    {daysToReveal > 0 ? `The vault opens in ${daysToReveal} days.` : 'The vault is open.'}
+                  </p>
+                  <p className="mt-1 text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                    Brand new products, sealed until 1 September. Leave your email and be the first inside.
+                  </p>
+                </div>
+                <span className="shrink-0 self-start rounded-lg px-5 py-2.5 text-sm font-bold text-white transition group-hover:opacity-90 sm:self-auto" style={{ backgroundColor: '#D43790' }}>
+                  Enter the Vault →
+                </span>
+              </div>
+            </NavLink>
           </div>
-          <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-fuchsia-300/60 bg-fuchsia-500 px-6 py-3 text-sm font-bold uppercase tracking-[0.16em] text-white transition group-hover:border-white group-hover:bg-fuchsia-400 group-focus-visible:border-white group-focus-visible:bg-fuchsia-400">
-            Enter the Vault
-            <span aria-hidden="true">→</span>
-          </span>
-        </div>
-      </NavLink>
+        )
+      })()}
       <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
         <div className="mx-auto max-w-6xl">
           <h1 className="heading-on-dark text-4xl font-extrabold uppercase tracking-[0.15em] text-white sm:text-5xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
@@ -6068,7 +5848,7 @@ function FullCataloguePage() {
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-white/90 sm:text-lg" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
             The complete professional nail range — gel polish, builder gel, base coats, top coats, and accessories. HEMA &amp; TPO-Free formulations, <a href="https://www.crueltyfreeinternational.org/approved-brands/listing/gel-it-up/" target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-300 hover:underline">Leaping Bunny Approved</a>, and engineered for professional excellence. Browse every shade, system, and tool in the Gel It Up collection.
           </p>
-          <HeroCTA showTrialPack />
+          <HeroCTA />
         </div>
       </div>
 
@@ -6194,7 +5974,7 @@ function FullCataloguePage() {
                     const itemListPrice = resolveCatalogueListPrice(item.name, itemCode)
                     const itemDiscounted = isCatalogueDiscountActive() && itemPrice != null && itemListPrice != null && itemPrice < itemListPrice
                     const inCart = quickCart[itemKey] > 0
-                    const isOOS = outOfStockNames.has(normalizeOutOfStockName(item.name))
+                    const isOOS = outOfStockNames.has(item.name)
                     return (
                       <article
                         key={idx}
@@ -7142,8 +6922,7 @@ function MissingImagesReport() {
         const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
         if (!mounted) return
 
-        const releasedPayload = filterReleaseGatedImageMap(payload)
-        const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(releasedPayload, hiddenKeys), manualRuleIndex)
+        const nextSections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(payload, hiddenKeys), manualRuleIndex)
         setSections(nextSections)
       }
       catch (error) {
@@ -7321,372 +7100,6 @@ function pickHomepageMedia(items = []) {
   }
 }
 
-function ProductPage() {
-  const { slug = '' } = useParams()
-  const [product, setProduct] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [loadError, setLoadError] = useState('')
-  const [selectedImage, setSelectedImage] = useState('')
-  const [isOutOfStock, setIsOutOfStock] = useState(false)
-  const [cartMessage, setCartMessage] = useState('')
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    const loadProduct = async () => {
-      setIsLoading(true)
-      setLoadError('')
-      setProduct(null)
-      setSelectedImage('')
-      setCartMessage('')
-
-      try {
-        const [manifestResponse, stockResponse] = await Promise.all([
-          fetch('/gelitup-content/product-manifest.json', {
-            signal: controller.signal,
-          }),
-          fetch('/gelitup-content/out-of-stock.json', {
-            signal: controller.signal,
-          }),
-        ])
-
-        if (!manifestResponse.ok) {
-          throw new Error(`Product catalogue unavailable (${manifestResponse.status})`)
-        }
-        if (!stockResponse.ok) {
-          throw new Error(`Product availability unavailable (${stockResponse.status})`)
-        }
-
-        const manifest = await manifestResponse.json()
-        const outOfStockProducts = await stockResponse.json()
-        const match = Array.isArray(manifest)
-          ? manifest.find((item) => item.slug === slug)
-          : null
-
-        if (!match) return
-
-        const outOfStockSet = new Set(
-          (Array.isArray(outOfStockProducts) ? outOfStockProducts : [])
-            .map(normalizeOutOfStockName),
-        )
-
-        setProduct(match)
-        setSelectedImage(match.imageUrl)
-        setIsOutOfStock(outOfStockSet.has(normalizeOutOfStockName(match.name)))
-      }
-      catch (error) {
-        if (error?.name !== 'AbortError') {
-          setLoadError(
-            error instanceof Error
-              ? error.message
-              : 'Unable to load this product.',
-          )
-        }
-      }
-      finally {
-        if (!controller.signal.aborted) setIsLoading(false)
-      }
-    }
-
-    void loadProduct()
-    return () => controller.abort()
-  }, [slug])
-
-  const family = product
-    ? COLOR_FAMILY_FILTERS.find((item) => item.key === product.colorFamily)
-    : null
-  const isSolidGelPolish = product?.category === 'Solid Gel Polish'
-  const isNailArt = product?.category === 'Nail Art'
-  const categoryLabel = product?.category || 'Professional Nail Product'
-  const familyLabel = family?.label || product?.colorFamily || ''
-  const productTypeLabel = isSolidGelPolish
-    ? 'Gel Polish'
-    : product?.subcategory || categoryLabel
-  const pageHeading = isSolidGelPolish
-    ? `${product?.name || ''} Gel Polish`
-    : product?.name || ''
-  const categoryLink = isSolidGelPolish && family?.slug
-    ? {
-        to: `/colours/${family.slug}`,
-        label: `Explore all ${family.label} gel polish`,
-      }
-    : isNailArt
-      ? {
-          to: '/full-catalogue?category=nail-art',
-          label: 'Explore all Nail Art',
-        }
-      : {
-          to: '/full-catalogue?category=bases-tops',
-          label: 'Explore all Bases & Tops',
-        }
-  const listPrice = product
-    ? Number(product.price)
-    : null
-  const displayPrice = applyCatalogueDiscount(listPrice)
-  const description = product
-    ? isSolidGelPolish
-      ? `Discover ${product.name}, a professional ${familyLabel.toLowerCase()} gel polish from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
-      : isNailArt
-        ? `Discover ${product.name}, professional ${productTypeLabel.toLowerCase()} from GEL.IT.UP for creative salon nail art.`
-        : `Discover ${product.name}, professional ${productTypeLabel.toLowerCase()} from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
-    : ''
-  const galleryImages = useMemo(
-    () => product
-      ? [product.imageUrl, ...(product.galleryImages || [])]
-      : [],
-    [product],
-  )
-
-  useEffect(() => {
-    if (!product) return undefined
-
-    // Determine canonical target. Use /colours/:family for solid gel polishes;
-    // otherwise prefer the marketing-friendly /our-products/* landing pages
-    let canonicalUrl = `https://gelitup.com/products/${product.slug}`
-    if (isSolidGelPolish && family?.slug) {
-      canonicalUrl = `https://gelitup.com/colours/${family.slug}`
-    } else if (isNailArt) {
-      canonicalUrl = 'https://gelitup.com/our-products/nail-art'
-    } else {
-      const cat = String(product.category || '').toLowerCase()
-      if (/builder/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/builder-gel'
-      else if (/base|top|bases|tops|essentials/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/bases-and-tops'
-      else if (/nail[- ]?care|skin/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/nail-care'
-      else if (/tool|tools/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/tools'
-      else if (/consumable|consumables/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/consumables'
-      else canonicalUrl = 'https://gelitup.com/our-products'
-    }
-
-    return setPageSEO({
-      title: `${pageHeading} | GEL.IT.UP`,
-      description,
-      canonical: canonicalUrl,
-      robots: 'noindex, follow',
-    })
-  }, [description, pageHeading, product, isSolidGelPolish, isNailArt, family])
-
-  const productSchema = useMemo(() => {
-    if (!product || displayPrice == null) return null
-
-    return {
-      '@context': 'https://schema.org',
-      '@type': 'Product',
-      name: product.name,
-      description,
-      sku: product.code,
-      brand: {
-        '@type': 'Brand',
-        name: 'GEL.IT.UP by GIUP®',
-      },
-      image: galleryImages.map((imageUrl) => (
-        encodeURI(`https://gelitup.com${imageUrl}`)
-      )),
-      offers: {
-        '@type': 'Offer',
-        url: `https://gelitup.com/products/${product.slug}`,
-        priceCurrency: 'EUR',
-        price: Number(displayPrice).toFixed(2),
-        availability: isOutOfStock
-          ? 'https://schema.org/OutOfStock'
-          : 'https://schema.org/InStock',
-        seller: {
-          '@type': 'Organization',
-          name: 'GEL.IT.UP by GIUP®',
-        },
-      },
-    }
-  }, [description, displayPrice, galleryImages, isOutOfStock, product])
-
-  const addQuickItem = useCallback(() => {
-    if (!product || isOutOfStock) return
-
-    const itemKey = `${product.name}::${product.code}`
-
-    try {
-      const savedCart = JSON.parse(
-        localStorage.getItem(QUICK_CART_STORAGE_KEY) || '{}',
-      )
-      if (!savedCart || Array.isArray(savedCart) || typeof savedCart !== 'object') {
-        throw new Error('Saved basket data is invalid')
-      }
-
-      const nextCart = {
-        ...savedCart,
-        [itemKey]: Number(savedCart[itemKey] || 0) + 1,
-      }
-      localStorage.setItem(QUICK_CART_STORAGE_KEY, JSON.stringify(nextCart))
-      window.dispatchEvent(new Event('gelitup:cart-change'))
-      setCartMessage('Added to basket')
-
-      if (window.gtag) {
-        window.gtag('event', 'add_to_cart', {
-          currency: 'EUR',
-          value: displayPrice,
-          items: [{
-            item_id: itemKey,
-            item_name: product.name,
-            price: displayPrice,
-            quantity: 1,
-          }],
-        })
-        window.gtag('event', 'conversion', {
-          send_to: 'AW-1008159504/m23ACI_9w6oaEJCW3eAD',
-          value: 1.0,
-          currency: 'EUR',
-        })
-      }
-
-      window.dataLayer = window.dataLayer || []
-      window.dataLayer.push({
-        event: 'add_to_cart',
-        ecommerce: {
-          currency: 'EUR',
-          value: displayPrice,
-          items: [{
-            item_id: itemKey,
-            item_name: product.name,
-            price: displayPrice,
-            quantity: 1,
-          }],
-        },
-      })
-    }
-    catch (error) {
-      console.error('[ProductPage] Unable to update basket', error)
-      setCartMessage('Unable to add this product. Please try again.')
-    }
-  }, [displayPrice, isOutOfStock, product])
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-sm text-white/70">Loading product...</p>
-      </div>
-    )
-  }
-
-  if (loadError) {
-    return (
-      <section className="mx-auto max-w-xl rounded-2xl border border-rose-300/30 bg-rose-950/30 p-6 text-center">
-        <h1 className="text-xl font-bold text-white">Product unavailable</h1>
-        <p className="mt-2 text-sm text-rose-100/80">{loadError}</p>
-        <NavLink
-          to="/full-catalogue"
-          className="mt-5 inline-flex rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-semibold text-white"
-        >
-          Browse Product Catalogue
-        </NavLink>
-      </section>
-    )
-  }
-
-  if (!product) return <NotFoundPage />
-
-  return (
-    <article className="mx-auto max-w-5xl">
-      {productSchema && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
-        />
-      )}
-
-      <div className="grid gap-8 rounded-3xl border border-white/15 bg-white/5 p-4 md:grid-cols-2 md:p-8">
-        <section>
-          <div className="flex min-h-[360px] items-center justify-center rounded-2xl bg-white p-4">
-            <ProductImage
-              src={selectedImage || product.imageUrl}
-              alt={`${product.name} ${productTypeLabel.toLowerCase()}`}
-              className="max-h-[520px] w-full object-contain"
-            />
-          </div>
-
-          {galleryImages.length > 1 && (
-            <div className="mt-3 flex flex-wrap gap-3">
-              {galleryImages.map((imageUrl) => (
-                <button
-                  key={imageUrl}
-                  type="button"
-                  onClick={() => setSelectedImage(imageUrl)}
-                  className={`h-20 w-20 overflow-hidden rounded-xl border bg-white p-1 ${
-                    selectedImage === imageUrl
-                      ? 'border-fuchsia-500'
-                      : 'border-white/20'
-                  }`}
-                >
-                  <ProductImage
-                    src={imageUrl}
-                    alt={`${product.name} view`}
-                    className="h-full w-full object-contain"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="flex flex-col justify-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-300">
-            {categoryLabel}
-          </p>
-          <h1 className="mt-2 text-3xl font-black text-white md:text-4xl">
-            {product.name}
-          </h1>
-
-          <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <dt className="text-white/50">Code</dt>
-              <dd className="font-semibold text-white">{product.code}</dd>
-            </div>
-            {product.size && (
-              <div>
-                <dt className="text-white/50">Size</dt>
-                <dd className="font-semibold text-white">{product.size}</dd>
-              </div>
-            )}
-          </dl>
-
-          <p className="mt-6 text-3xl font-black text-fuchsia-300">
-            €{Number(displayPrice).toFixed(2)}
-          </p>
-
-          <p className="mt-5 text-sm leading-7 text-white/75">
-            {isNailArt
-              ? `${product.name} is professional ${productTypeLabel.toLowerCase()} designed for creative salon nail art.`
-              : `${product.name} is professional ${productTypeLabel.toLowerCase()} created in a HEMA-free, TPO-free and EU-certified formulation for salon use.`}
-          </p>
-
-          {categoryLink && (
-            <NavLink
-              to={categoryLink.to}
-              className="mt-4 text-sm font-semibold text-fuchsia-300 underline-offset-4 hover:underline"
-            >
-              {categoryLink.label}
-            </NavLink>
-          )}
-
-          <button
-            type="button"
-            onClick={addQuickItem}
-            disabled={isOutOfStock}
-            className={`mt-7 rounded-xl px-6 py-3 text-sm font-bold text-white ${
-              isOutOfStock
-                ? 'cursor-not-allowed bg-rose-800/60'
-                : 'bg-fuchsia-600 hover:bg-fuchsia-500'
-            }`}
-          >
-            {isOutOfStock ? 'Out of Stock' : 'Add to Basket'}
-          </button>
-
-          {cartMessage && (
-            <p className="mt-3 text-sm text-white/70">{cartMessage}</p>
-          )}
-        </section>
-      </div>
-    </article>
-  )
-}
-
 function NotFoundPage() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
@@ -7790,11 +7203,13 @@ const PRODUCT_MENU = [
   {
     label: 'Gel Polish / Colours',
     to: '/full-catalogue?category=colours',
-    children: getReleasedColorCategoryLinks().map((item) => ({
-      label: item.label,
-      to: `/full-catalogue?subcategory=${item.slug}`,
-      children: item.children,
-    })),
+    children: [
+      { label: 'Cat Eye', to: '/full-catalogue?subcategory=cat-eye' },
+      { label: 'Glitters', to: '/full-catalogue?subcategory=glitters' },
+      { label: 'Mirror Powder', to: '/full-catalogue?subcategory=mirror-powder' },
+      { label: 'Shimmer', to: '/full-catalogue?subcategory=shimmer' },
+      { label: 'Solid Gel Polish', to: '/full-catalogue?subcategory=solid-gel-polish' },
+    ],
   },
   { label: 'Nail Art', to: '/full-catalogue?category=nail-art' },
   { label: 'Nail Care (Hand & Foot)', to: '/full-catalogue?category=nail-care' },
@@ -7825,7 +7240,7 @@ function ProductsMenu() {
       </button>
 
       {open && (
-        <div className="absolute left-0 top-[calc(100%+0.55rem)] z-50 max-h-[calc(100vh-6rem)] w-[23rem] overflow-y-auto rounded-2xl border border-white/15 bg-[#111111] p-2 shadow-[0_18px_48px_rgba(0,0,0,0.38)] backdrop-blur-xl">
+        <div className="absolute left-0 top-[calc(100%+0.55rem)] z-50 w-[23rem] rounded-2xl border border-white/15 bg-[#111111] p-2 shadow-[0_18px_48px_rgba(0,0,0,0.38)] backdrop-blur-xl">
           {PRODUCT_MENU.map((cat) => (
             <div key={cat.label} className="px-1 py-0.5">
               <NavLink
@@ -7838,29 +7253,14 @@ function ProductsMenu() {
               {cat.children && (
                 <div className="mt-0.5 grid grid-cols-2 gap-0.5 pb-1 pl-2">
                   {cat.children.map((sub) => (
-                    <div key={sub.label}>
-                      <NavLink
-                        to={sub.to}
-                        onClick={() => setOpen(false)}
-                        className="block rounded-md px-2 py-1.5 text-xs text-white/70 transition duration-200 hover:bg-white/10 hover:text-white"
-                      >
-                        {sub.label}
-                      </NavLink>
-                      {sub.children && (
-                        <div className="ml-2 border-l border-white/15 pl-1">
-                          {sub.children.map((child) => (
-                            <NavLink
-                              key={child.label}
-                              to={child.to}
-                              onClick={() => setOpen(false)}
-                              className="block rounded-md px-2 py-1 text-[11px] text-white/55 transition duration-200 hover:bg-white/10 hover:text-white"
-                            >
-                              {child.label}
-                            </NavLink>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    <NavLink
+                      key={sub.label}
+                      to={sub.to}
+                      onClick={() => setOpen(false)}
+                      className="block rounded-md px-2 py-1.5 text-xs text-white/70 transition duration-200 hover:bg-white/10 hover:text-white"
+                    >
+                      {sub.label}
+                    </NavLink>
                   ))}
                 </div>
               )}
@@ -10182,7 +9582,6 @@ function CheckoutPage() {
   const [ambassadorCode, setAmbassadorCode] = useState(null) // { code, name, pct } when applied
   const [ambassadorApplying, setAmbassadorApplying] = useState(false)
   const [ambassadorError, setAmbassadorError] = useState('')
-  const [vaultEligibility, setVaultEligibility] = useState({ email: '', status: 'idle', eligible: false, message: '' })
   const [walletInfo, setWalletInfo] = useState(null) // { code, name, availableEur, earnedEur, spentEur, commissionPct }
   const [walletLoading, setWalletLoading] = useState(false)
   const [walletError, setWalletError] = useState('')
@@ -10289,7 +9688,6 @@ function CheckoutPage() {
   }, [])
 
   const resolveCheckoutListPrice = useCallback((itemName = '', itemCode = '') => {
-    if (itemCode === TRIAL_PACK_CODE) return TRIAL_PACK_LIST_PRICE
     if (!priceMap) return null
     const byName = priceMap.get(normalizeProductName(itemName))
     if (byName?.price != null) return byName.price
@@ -10311,7 +9709,7 @@ function CheckoutPage() {
 
   // Effective checkout price = list price with the SUMMER MADNESS discount applied.
   const lookupPrice = useCallback(
-    (itemName = '', itemCode = '') => (itemCode === TRIAL_PACK_CODE ? TRIAL_PACK_PRICE : applyCatalogueDiscount(resolveCheckoutListPrice(itemName, itemCode))),
+    (itemName = '', itemCode = '') => applyCatalogueDiscount(resolveCheckoutListPrice(itemName, itemCode)),
     [resolveCheckoutListPrice],
   )
 
@@ -10325,14 +9723,12 @@ function CheckoutPage() {
         if (key.startsWith('KIT::')) {
           const kit = kitStore[key.slice(5)]
           const price = kit ? Number(kit.total) : null
-          return { key, name: kit?.name || 'Starter Kit', code: 'KIT', qty, price, listPrice: price, lineTotal: price != null ? price * qty : null, listLineTotal: price != null ? price * qty : null, kit: kit || null, isVaultProduct: false }
+          return { key, name: kit?.name || 'Starter Kit', code: 'KIT', qty, price, listPrice: price, lineTotal: price != null ? price * qty : null, listLineTotal: price != null ? price * qty : null, kit: kit || null }
         }
         const [name, code] = key.split('::')
         const price = lookupPrice(name, code)
         const listPrice = resolveCheckoutListPrice(name, code)
-        const vaultStage = getVaultReleaseStage(name, code)
-        const isVaultProduct = Boolean(vaultStage && isReleaseDateReached(vaultStage.releaseAt))
-        return { key, name, code, qty, price, listPrice, lineTotal: price != null ? Number(price) * qty : null, listLineTotal: listPrice != null ? Number(listPrice) * qty : null, isVaultProduct }
+        return { key, name, code, qty, price, listPrice, lineTotal: price != null ? Number(price) * qty : null, listLineTotal: listPrice != null ? Number(listPrice) * qty : null }
       }), [cart, kitStore, lookupPrice, resolveCheckoutListPrice])
 
   const cartTotal = useMemo(() => cartEntries.reduce((s, e) => s + (e.lineTotal || 0), 0), [cartEntries])
@@ -10340,42 +9736,25 @@ function CheckoutPage() {
   const discountSavings = Number((listSubtotal - cartTotal).toFixed(2))
   const discountActive = isCatalogueDiscountActive() && discountSavings > 0
   const cartUnits = useMemo(() => cartEntries.reduce((s, e) => s + e.qty, 0), [cartEntries])
-  const hasVaultProducts = cartEntries.some((entry) => entry.isVaultProduct)
   // Zone shipping: every order is charged by delivery country.
   // null fee = country not configured yet (or not chosen yet).
   const deliveryCountry = (form.shipToDifferentAddress ? form.shippingCountry : form.invoiceCountry).trim()
   const handoff = getDistributorCountryHandoff(deliveryCountry)
   const smallOrderFee = getSmallOrderShippingFee(deliveryCountry)
   const shippingFee = smallOrderFee ?? 0
-  // Site, ambassador, and Vault promotions do not stack; each line gets the best price.
+  // Ambassador code discount — mutually exclusive with the site sale: the customer
+  // gets whichever discount is larger. Compare the code price (off the list price)
+  // to the already sale-discounted cart total and only apply the extra reduction.
   const ambassadorDiscountPct = ambassadorCode?.pct || 0
-  const checkoutCartEntries = useMemo(() => cartEntries.map((entry) => {
-    if (entry.price == null) return { ...entry, ambassadorSavings: 0, vaultSavings: 0 }
-
-    const baseUnitPrice = Number(entry.price)
-    const ambassadorUnitPrice = ambassadorDiscountPct > 0 && entry.listPrice != null
-      ? Math.min(baseUnitPrice, Number(entry.listPrice) * (1 - ambassadorDiscountPct / 100))
-      : baseUnitPrice
-    const vaultUnitPrice = vaultEligibility.eligible && entry.isVaultProduct && entry.listPrice != null
-      ? Math.min(ambassadorUnitPrice, Number(entry.listPrice) * (1 - VAULT_DISCOUNT_PCT / 100))
-      : ambassadorUnitPrice
-
-    return {
-      ...entry,
-      price: Number(vaultUnitPrice.toFixed(2)),
-      lineTotal: Number((vaultUnitPrice * entry.qty).toFixed(2)),
-      ambassadorSavings: Number(((baseUnitPrice - ambassadorUnitPrice) * entry.qty).toFixed(2)),
-      vaultSavings: Number(((ambassadorUnitPrice - vaultUnitPrice) * entry.qty).toFixed(2)),
-    }
-  }), [ambassadorDiscountPct, cartEntries, vaultEligibility.eligible])
-  const ambassadorDiscountEur = Number(checkoutCartEntries.reduce((sum, entry) => sum + entry.ambassadorSavings, 0).toFixed(2))
-  const vaultDiscountEur = Number(checkoutCartEntries.reduce((sum, entry) => sum + entry.vaultSavings, 0).toFixed(2))
-  const productsSubtotalAfterDiscounts = Number(checkoutCartEntries.reduce((sum, entry) => sum + (entry.lineTotal || 0), 0).toFixed(2))
+  const ambassadorDiscountEur = ambassadorDiscountPct > 0
+    ? Math.max(0, Number((cartTotal - listSubtotal * (1 - ambassadorDiscountPct / 100)).toFixed(2)))
+    : 0
+  const productsSubtotalAfterCode = Number((cartTotal - ambassadorDiscountEur).toFixed(2))
   const walletAvailableEur = Number(walletInfo?.availableEur || 0)
   const walletAppliedEur = useWalletCredit
-    ? Number(Math.min(walletAvailableEur, productsSubtotalAfterDiscounts).toFixed(2))
+    ? Number(Math.min(walletAvailableEur, productsSubtotalAfterCode).toFixed(2))
     : 0
-  const productsSubtotalAfterWallet = Number((productsSubtotalAfterDiscounts - walletAppliedEur).toFixed(2))
+  const productsSubtotalAfterWallet = Number((productsSubtotalAfterCode - walletAppliedEur).toFixed(2))
   const invoiceCountry = form.invoiceCountry.trim()
   const isEuInvoiceCountry = EU_COUNTRIES.includes(invoiceCountry)
   const hasValidViesVat = Boolean(viesResult?.valid && form.vatNumber.trim())
@@ -10395,45 +9774,6 @@ function CheckoutPage() {
     handoffPopupShownForCountryRef.current = deliveryCountry
     setHandoffModalOpen(true)
   }, [handoff, deliveryCountry])
-
-  useEffect(() => {
-    const email = form.email.trim().toLowerCase()
-    if (!hasVaultProducts || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setVaultEligibility({ email: '', status: 'idle', eligible: false, message: '' })
-      return undefined
-    }
-
-    const controller = new AbortController()
-    const timer = window.setTimeout(async () => {
-      setVaultEligibility({ email, status: 'loading', eligible: false, message: '' })
-      try {
-        const response = await fetch('/.netlify/functions/check-vault-discount', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
-          signal: controller.signal,
-        })
-        const result = await response.json()
-        if (!response.ok) {
-          throw new Error(result.error || 'Vault discount eligibility could not be checked.')
-        }
-        setVaultEligibility({ email, status: 'ready', eligible: Boolean(result.eligible), message: '' })
-      } catch (eligibilityError) {
-        if (eligibilityError.name === 'AbortError') return
-        setVaultEligibility({
-          email,
-          status: 'error',
-          eligible: false,
-          message: eligibilityError.message || 'Vault discount eligibility could not be checked.',
-        })
-      }
-    }, 400)
-
-    return () => {
-      window.clearTimeout(timer)
-      controller.abort()
-    }
-  }, [form.email, hasVaultProducts])
 
   // Persist cart back to localStorage
   useEffect(() => {
@@ -10565,14 +9905,6 @@ function CheckoutPage() {
     if (!form.agreeTerms) { setError('You must agree to the terms and conditions to place your order.'); return }
 
     if (!hasSupabaseConfig || !supabase) { setError('Order system is not configured. Please contact us.'); return }
-    if (hasVaultProducts && (vaultEligibility.email !== email || vaultEligibility.status === 'loading' || vaultEligibility.status === 'idle')) {
-      setError('Please wait while we check your Winter Vault discount eligibility.')
-      return
-    }
-    if (hasVaultProducts && vaultEligibility.status === 'error') {
-      setError(vaultEligibility.message || 'We could not check your Winter Vault discount. Please try again.')
-      return
-    }
 
     if (handoff) {
       const fallbackName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim() || form.companyName.trim() || 'Client'
@@ -10625,11 +9957,6 @@ function CheckoutPage() {
       window.gtag('event', 'begin_checkout', { currency: 'EUR', value: grandTotal })
       window.gtag('event', 'conversion', { send_to: 'AW-1008159504/huwrCJTYhIIDEJCW3eAD', value: grandTotal, currency: 'EUR' })
     }
-    window.dataLayer = window.dataLayer || []
-    window.dataLayer.push({
-      event: 'begin_checkout',
-      ecommerce: { currency: 'EUR', value: grandTotal, items: cartEntries.map((entry) => ({ item_id: entry.code, item_name: entry.name, price: entry.price, quantity: entry.qty })) },
-    })
 
     let walletSpendOrderRef = null
     let rollbackWalletSpend = false
@@ -10691,10 +10018,7 @@ function CheckoutPage() {
       }
 
       // 2. Build order items
-      const checkoutItems = cartEntries.map(e => {
-        const label = e.qty > 1 ? `${e.code} x${e.qty}` : e.code
-        return e.code === TRIAL_PACK_CODE ? `${label} (Contents: ${TRIAL_PACK_CONTENTS.join(', ')})` : label
-      })
+      const checkoutItems = cartEntries.map(e => e.qty > 1 ? `${e.code} x${e.qty}` : e.code)
 
       const invoiceAddress = [form.invoiceAddressLine1, form.invoiceAddressLine2, form.invoiceArea, form.invoiceRegion, form.invoicePostalCode].filter(Boolean).join(', ')
       const shippingAddr = !form.shipToDifferentAddress
@@ -10798,7 +10122,7 @@ function CheckoutPage() {
 
       // 4. Build item rates for Zoho
       const itemRates = {}
-      for (const e of checkoutCartEntries) {
+      for (const e of cartEntries) {
         if (e.price != null) itemRates[normalizeSkuCode(e.code)] = e.price
       }
 
@@ -10830,7 +10154,7 @@ function CheckoutPage() {
           <td style="${tdRStyle}">${line.qty}</td>
           <td style="${tdRStyle}">${line.price != null ? line.price.toFixed(2) : '-'}</td>
           <td style="${tdRStyle}">${line.lineTotal != null ? line.lineTotal.toFixed(2) : '-'}</td>
-        </tr>${line.code === TRIAL_PACK_CODE ? `<tr><td></td><td colspan="4" style="${tdStyle};font-style:italic;color:#555">Contents: ${escapeHtml(TRIAL_PACK_CONTENTS.join(', '))}</td></tr>` : ''}`).join('')
+        </tr>`).join('')
 
       const invoiceBlockHtml = `
         <p style="margin:2px 0"><strong>Company:</strong> ${escapeHtml(invoice.name)}</p>
@@ -10879,7 +10203,6 @@ function CheckoutPage() {
             <tbody>${orderTableRows}
               <tr><td colspan="4" style="${tdStyle};text-align:right">Products subtotal</td><td style="${tdRStyle}">${cartTotal.toFixed(2)}</td></tr>
               ${ambassadorDiscountEur > 0 ? `<tr><td colspan="4" style="${tdStyle};text-align:right;color:#9B1268">Ambassador code ${escapeHtml(ambassadorCode?.code || '')} (−${ambassadorDiscountPct}%)</td><td style="${tdRStyle};color:#9B1268">− ${ambassadorDiscountEur.toFixed(2)}</td></tr>` : ''}
-              ${vaultDiscountEur > 0 ? `<tr><td colspan="4" style="${tdStyle};text-align:right;color:#9B1268">Registered Winter Vault customer (−${VAULT_DISCOUNT_PCT}%)</td><td style="${tdRStyle};color:#9B1268">− ${vaultDiscountEur.toFixed(2)}</td></tr>` : ''}
               ${walletAppliedEur > 0 ? `<tr><td colspan="4" style="${tdStyle};text-align:right;color:#047857">Ambassador wallet credit</td><td style="${tdRStyle};color:#047857">− ${walletAppliedEur.toFixed(2)}</td></tr>` : ''}
               <tr><td colspan="4" style="${tdStyle};text-align:right">VAT (${escapeHtml(vatLabel)})</td><td style="${tdRStyle}">${vatAmount.toFixed(2)}</td></tr>
               <tr><td colspan="4" style="${tdStyle};text-align:right">Shipping${shipping.country ? ` (${escapeHtml(shipping.country)})` : ''}</td><td style="${tdRStyle}">${shippingFee.toFixed(2)}</td></tr>
@@ -10902,7 +10225,6 @@ function CheckoutPage() {
             <p>Thank you — we've received your order <strong>#${insertedOrder?.id ?? '-'}</strong> and it's now being processed.</p>
             <p><strong>Order Total:</strong> €${grandTotal.toFixed(2)} (${cartUnits} items + €${vatAmount.toFixed(2)} VAT + €${shippingFee.toFixed(2)} shipping)</p>
             ${ambassadorDiscountEur > 0 ? `<p style="color:#9B1268"><strong>Ambassador code ${escapeHtml(ambassadorCode?.code || '')}</strong> applied — you saved €${ambassadorDiscountEur.toFixed(2)} (−${ambassadorDiscountPct}%).</p>` : ''}
-            ${vaultDiscountEur > 0 ? `<p style="color:#9B1268"><strong>Winter Vault registration discount</strong> applied to eligible Vault products — you saved €${vaultDiscountEur.toFixed(2)}.</p>` : ''}
             ${walletAppliedEur > 0 ? `<p style="color:#047857"><strong>Ambassador wallet credit</strong> applied — €${walletAppliedEur.toFixed(2)} used.</p>` : ''}
             <p style="color:#555">Your VAT invoice will follow by email once your order is processed. Should any item be unavailable, we will arrange a refund or account credit.</p>
             ${form.createAccount ? '<p>You can now log in with your email and password to track your orders.</p>' : '<p>If you would like to track future orders, you can create an account at checkout next time.</p>'}
@@ -10926,17 +10248,12 @@ function CheckoutPage() {
             transaction_id: purchaseEventId,
             currency: 'EUR',
             value: purchaseValue,
-            items: checkoutCartEntries.map((line) => ({
+            items: cartEntries.map((line) => ({
               item_id: String(line.code || '').trim(),
               item_name: String(line.name || line.code || '').trim(),
               price: Number((line.price ?? 0).toFixed(2)),
               quantity: Number(line.qty || 1),
             })),
-          })
-          window.dataLayer = window.dataLayer || []
-          window.dataLayer.push({
-            event: 'purchase',
-            ecommerce: { transaction_id: purchaseEventId, currency: 'EUR', value: purchaseValue, items: checkoutCartEntries.map((line) => ({ item_id: line.code, item_name: line.name, price: line.price, quantity: line.qty })) },
           })
           window.gtag('event', 'conversion', {
             send_to: 'AW-1008159504/8692CPf3leEBEJCW3eAD',
@@ -10950,7 +10267,7 @@ function CheckoutPage() {
             value: purchaseValue,
             currency: 'EUR',
             content_type: 'product',
-            content_ids: checkoutCartEntries.map((line) => String(line.code || '').trim()).filter(Boolean),
+            content_ids: cartEntries.map((line) => String(line.code || '').trim()).filter(Boolean),
           })
         }
       }
@@ -11424,29 +10741,6 @@ function CheckoutPage() {
                   <span className="font-semibold text-fuchsia-700">− €{ambassadorDiscountEur.toFixed(2)}</span>
                 </div>
               )}
-              {vaultDiscountEur > 0 && (
-                <div className="mt-1 flex items-center justify-between text-xs">
-                  <span className="font-semibold text-fuchsia-700">Winter Vault registration (−{VAULT_DISCOUNT_PCT}%)</span>
-                  <span className="font-semibold text-fuchsia-700">− €{vaultDiscountEur.toFixed(2)}</span>
-                </div>
-              )}
-              {cartEntries.some((entry) => entry.isVaultProduct) && form.email.trim() && (
-                <p className={`mt-2 text-[11px] font-semibold ${
-                  vaultEligibility.status === 'error'
-                    ? 'text-red-600'
-                    : vaultEligibility.eligible
-                      ? 'text-emerald-700'
-                      : 'text-slate-500'
-                }`}>
-                  {vaultEligibility.status === 'loading' || vaultEligibility.email !== form.email.trim().toLowerCase()
-                    ? 'Checking Winter Vault discount eligibility…'
-                    : vaultEligibility.status === 'error'
-                      ? vaultEligibility.message
-                      : vaultEligibility.eligible
-                        ? 'Winter Vault registration confirmed — 20% discount applied to eligible Vault items.'
-                        : 'Register this email in the Winter Vault to qualify for 20% off Vault items.'}
-                </p>
-              )}
               {walletAppliedEur > 0 && (
                 <div className="mt-1 flex items-center justify-between text-xs">
                   <span className="font-semibold text-emerald-700">Ambassador wallet credit</span>
@@ -11520,7 +10814,7 @@ function CheckoutPage() {
                         checked={useWalletCredit}
                         onChange={(e) => setUseWalletCredit(e.target.checked)}
                       />
-                      Use up to €{Math.min(walletAvailableEur, productsSubtotalAfterDiscounts).toFixed(2)} on this order (before shipping)
+                      Use up to €{Math.min(walletAvailableEur, productsSubtotalAfterCode).toFixed(2)} on this order (before shipping)
                     </label>
                   </>
                 ) : (
@@ -12635,7 +11929,12 @@ function PortalForgotPassword() {
 const B2B_SIDEBAR_GROUPS = [
   {
     label: 'Colours',
-    cats: getReleasedColorCategoryLinks().map((item) => item.category),
+    cats: [
+      'SOLID GEL POLISH', 'CAT EYE', 'GLITTERS', 'GLASS EFFECT',
+      'SHIMMER COLORS', 'METALLIC COLLECTION', 'PEARL', 'JELLY',
+      'SNOWFLAKE', 'PMA', 'NEW YORK', 'BY THE OCEAN',
+      'SPIX & SPEX', 'TUTTI FRUTTI GLASS', 'FRENCH',
+    ],
   },
   {
     label: 'Essentials',
@@ -12729,8 +12028,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [products, setProducts] = useState([])
   const [isLoadingFeed, setIsLoadingFeed] = useState(false)
   const [feedMessage, setFeedMessage] = useState('Live product feed not loaded yet.')
-  const [portalOutOfStockNames, setPortalOutOfStockNames] = useState(new Set())
-  const [stockAvailabilityError, setStockAvailabilityError] = useState('')
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
   const [checkoutMessage, setCheckoutMessage] = useState('')
   const [checkoutError, setCheckoutError] = useState('')
@@ -12791,22 +12088,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     }
   })
   const [packageCartItems, setPackageCartItems] = useState([])
-  // Activate edit mode immediately; catalogue matching fills the editable items once products load.
-  const [editingOrder, setEditingOrder] = useState(() => {
-    if (!isPortalOrderEditPath(location.pathname)) return null
-    const handoff = readOrderEditHandoff()
-    if (!handoff) return null
-    return {
-      id: handoff.orderId,
-      email: handoff.customerEmail || '',
-      registrationId: handoff.registrationId || null,
-      tier: handoff.distributorTier || null,
-      pricesAllocated: typeof handoff.pricesAllocated === 'boolean' ? handoff.pricesAllocated : null,
-      handoffSavedAt: handoff.savedAt || null,
-      unmatched: [],
-      isLoadingItems: true,
-    }
-  })
+  // Order-edit mode: { id, email, unmatched } when an admin reopened an existing order in the portal
+  const [editingOrder, setEditingOrder] = useState(null)
   const appliedOrderEditRef = useRef(false)
   const [podCatalog, setPodCatalog] = useState({ pod_1: [], pod_2: [], pod_3: [], pod_4: [] })
   const [localImageMap, setLocalImageMap] = useState(() => new Map())
@@ -12840,27 +12123,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     () => (isPortalOrderEditPath(location.pathname) ? readOrderEditHandoff() : null),
     [location.pathname],
   )
-
-  useEffect(() => {
-    let isMounted = true
-    const loadStockAvailability = async () => {
-      try {
-        const response = await fetch('/gelitup-content/out-of-stock.json')
-        if (!response.ok) throw new Error(`Stock availability request failed with ${response.status}`)
-        const names = await response.json()
-        if (!Array.isArray(names)) throw new Error('Stock availability response is invalid')
-        if (!isMounted) return
-        setPortalOutOfStockNames(new Set(names.map(normalizeOutOfStockName).filter(Boolean)))
-        setStockAvailabilityError('')
-      }
-      catch (error) {
-        if (!isMounted) return
-        setStockAvailabilityError(error instanceof Error ? error.message : 'Stock availability could not be loaded')
-      }
-    }
-    void loadStockAvailability()
-    return () => { isMounted = false }
-  }, [])
 
   useEffect(() => {
     if (editingOrder) return
@@ -13001,7 +12263,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       pricesAllocated: typeof handoff.pricesAllocated === 'boolean' ? handoff.pricesAllocated : null,
       handoffSavedAt: handoff.savedAt || null,
       unmatched,
-      isLoadingItems: false,
     }
     const savedDraft = readOrderEditDraft(handoff.orderId)
     const canRestoreDraft = savedDraft?.editingOrder?.id === resolvedEditingOrder.id
@@ -13020,7 +12281,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           pricesAllocated: resolvedEditingOrder.pricesAllocated,
           unmatched: Array.isArray(savedDraft.editingOrder.unmatched) ? savedDraft.editingOrder.unmatched : resolvedEditingOrder.unmatched,
           handoffSavedAt: resolvedEditingOrder.handoffSavedAt,
-          isLoadingItems: false,
         }
       : resolvedEditingOrder)
     const fallbackProfile = buildClientProfileFromOrderEditHandoff(handoff)
@@ -13228,7 +12488,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   }, [selectedCodes, itemQtys, packageCartItems])
 
   useEffect(() => {
-    if (!editingOrder?.id || editingOrder.isLoadingItems) return
+    if (!editingOrder?.id) return
     const key = getOrderEditDraftKey(editingOrder.id)
     localStorage.setItem(key, JSON.stringify({
       editingOrder,
@@ -14677,8 +13937,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             const manualOrderPayload = orderResponse.ok ? await orderResponse.json() : { rules: [] }
             const hiddenKeys = hiddenResponse.ok ? await hiddenResponse.json() : []
             const manualRuleIndex = buildManualRuleIndex(manualOrderPayload)
-            const releasedPayload = filterReleaseGatedImageMap(mapPayload)
-            const sections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(releasedPayload, hiddenKeys), manualRuleIndex)
+            const sections = buildCatalogueSectionsFromImageMap(applyHiddenProductsFilter(mapPayload, hiddenKeys), manualRuleIndex)
             return sections.flatMap((section) =>
               section.subcategories.flatMap((sub) =>
                 sub.items.map((item) => ({
@@ -14724,17 +13983,14 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             const B2B_CAT_REMAP = {
               // External feed aliases ? correct subcategory names (matching image-map structure)
               'SOLID COLOURS': 'SOLID GEL POLISH', 'GEL POLISH': 'SOLID GEL POLISH',
-              'DREAMY CAT EYE': 'CAT EYE', 'FAN CAT EYE': 'CAT EYE',
-              'GLASS CAT EYE': 'CAT EYE', 'NEON CAT EYE': 'CAT EYE',
-              'ROSE QUARTZ CAT EYE': 'CAT EYE', 'SAPPHIRE CAT EYE': 'CAT EYE',
-              'VELVET CAT EYE': 'CAT EYE',
+              'DREAMY CAT EYE': 'CAT EYE', 'GLASS CAT EYE': 'CAT EYE',
+              'ROSE QUARTZ CAT EYE': 'CAT EYE',
               'SHIMMER COLOURS': 'SHIMMER COLORS',
               'GLITTER': 'GLITTERS', 'GLITTERS': 'GLITTERS',
               'JELLY NEON': 'JELLY', 'JELLY GEL': 'JELLY',
               'NEW YORK PARTY': 'NEW YORK',
               'COLOUR SAMPLE': 'SOLID GEL POLISH', 'COLOR SAMPLE': 'SOLID GEL POLISH',
               'COLOUR MIX UP': 'SOLID GEL POLISH', 'COLOR MIX UP': 'SOLID GEL POLISH',
-              'FRENCH': 'SOLID GEL POLISH', 'NUDE': 'SOLID GEL POLISH', 'PASTEL': 'SOLID GEL POLISH',
               'SPRING SUMMER': 'SOLID GEL POLISH', 'ODE TO AUTUMN': 'SOLID GEL POLISH',
               'RONE': 'SOLID GEL POLISH', 'GIUP1': 'SOLID GEL POLISH',
               'DUO TONE': 'SOLID GEL POLISH', 'MIRROR CHROME': 'SOLID GEL POLISH',              'SPIX AND SPEX': 'SPIX & SPEX',
@@ -14908,26 +14164,14 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
               description,
               category: categoryName,
               parentSection: item.parentSection || null,
-              colorFamily: item.colorFamily
-                || (categoryName === 'CAT EYE' ? resolveCatEyeCollection(rawCategoryName, imageUrl) : null)
-                || (categoryName === 'SOLID GEL POLISH' ? resolveSolidGelColorFamily(rawCategoryName, imageUrl, name) : null),
+              colorFamily: item.colorFamily || null,
               preview,
               imageUrl,
               galleryImages: item.galleryImages || [],
               price,
             }
           })
-          .filter((item) => (
-            Boolean(item.code)
-            && isVaultProductReleased(
-              Date.now(),
-              item.code,
-              item.sku,
-              item.name,
-              item.category,
-              item.imageUrl,
-            )
-          ))
+          .filter((item) => Boolean(item.code))
 
         if (!normalized.length) {
           throw new Error('Feed has no valid products')
@@ -16580,11 +15824,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-sm font-bold text-amber-900">✏️ Editing order #{editingOrder.id}{editingOrder.email ? ` — ${editingOrder.email}` : ''}</p>
-              <p className="mt-1 text-xs text-amber-800">
-                {editingOrder.isLoadingItems
-                  ? 'Loading this order into the editable catalogue…'
-                  : <>The order's items are loaded into the cart below. Add or remove products, then submit — this will <strong>update the existing order</strong>, not create a new one.</>}
-              </p>
+              <p className="mt-1 text-xs text-amber-800">The order's items are loaded into the cart below. Add or remove products, then submit — this will <strong>update the existing order</strong>, not create a new one.</p>
               {editingOrder.unmatched?.length > 0 && (
                 <p className="mt-1 text-xs text-amber-700">
                   {editingOrder.unmatched.length} item{editingOrder.unmatched.length === 1 ? '' : 's'} couldn't be shown in the catalogue but will be kept on the order: {editingOrder.unmatched.map(it => (it && typeof it === 'object') ? `${it.name || it.sku}${it.qty > 1 ? ` x${it.qty}` : ''}` : String(it)).join(', ')}
@@ -16596,11 +15836,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             </button>
           </div>
         </div>
-      )}
-      {stockAvailabilityError && (
-        <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">
-          Stock availability is unavailable: {stockAvailabilityError}. Refresh before adding products.
-        </p>
       )}
       {/* Lightbox modal */}
       {lightboxUrl && (
@@ -17458,7 +16693,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         const showAll = expandedShowAll.has(activeCat)
         const CAT_PAGE_SIZE = 48
         const isColorsCategory = activeCatProducts[0]?.parentSection === 'COLORS'
-          || B2B_SIDEBAR_GROUPS[0].cats.includes(activeCat)
           || activeCat.toUpperCase().includes('COLOR') || activeCat.toUpperCase().includes('COLOUR')
         const familyFilteredProducts = isColorsCategory && b2bColorFamilyFilter !== 'ALL'
           ? activeCatProducts.filter(p => (p.colorFamily || resolveColorFamilyKey(p.name)) === b2bColorFamilyFilter)
@@ -17471,26 +16705,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         const groupedCatNamesSet = new Set(B2B_SIDEBAR_GROUPS.flatMap(g => g.cats))
         const ungroupedCats = groupedFilteredProducts.filter(([cat]) => !groupedCatNamesSet.has(cat))
         const SWATCH = { Black: 'bg-black', Blue: 'bg-blue-500', Brown: 'bg-amber-700', 'Coral Orange': 'bg-orange-400', Green: 'bg-emerald-500', Grey: 'bg-slate-400', Neon: 'bg-lime-400', Pink: 'bg-pink-400', Purple: 'bg-violet-500', Red: 'bg-red-500', White: 'bg-white border border-slate-300', Yellow: 'bg-yellow-300' }
-        const getPortalCategoryFamilies = (cat, catProducts) => {
-          if (cat === 'CAT EYE') {
-            return CAT_EYE_COLLECTIONS.filter((collection) =>
-              catProducts.some((product) => product.colorFamily === collection.value),
-            )
-          }
-          if (cat !== 'SOLID GEL POLISH') return []
-
-          const availableValues = [...new Set(
-            catProducts.map((product) => product.colorFamily || resolveColorFamilyKey(product.name)).filter(Boolean),
-          )]
-          return COLOR_FAMILY_FILTERS
-            .filter((family) => family.slug)
-            .map((family) => {
-              const value = availableValues.find((candidate) => normalizeCatalogueToken(candidate) === family.key)
-              return value ? { value, label: family.label } : null
-            })
-            .filter(Boolean)
-        }
-        const activeCategoryFamilies = getPortalCategoryFamilies(activeCat, activeCatProducts)
 
         const renderSidebarGroup = (group) => {
           const available = group.cats.filter(c => availableCatNames.has(c)).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
@@ -17499,49 +16713,24 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <div key={group.label}>
               <p className="px-3 pt-3 pb-1 text-[9px] font-black uppercase tracking-widest" style={{ color: '#b4abc0' }}>{group.label}</p>
               {available.map(cat => {
-                const catProducts = groupedFilteredProducts.find(([c]) => c === cat)?.[1] ?? []
-                const catTotal = catProducts.length
-                const selInCat = catProducts.filter(p => selectedCodes.includes(p.code)).length
+                const catTotal = groupedFilteredProducts.find(([c]) => c === cat)?.[1]?.length ?? 0
+                const selInCat = (groupedFilteredProducts.find(([c]) => c === cat)?.[1] ?? []).filter(p => selectedCodes.includes(p.code)).length
                 const isActive = cat === activeCat
-                const nestedFamilies = getPortalCategoryFamilies(cat, catProducts)
                 return (
-                  <div key={cat}>
-                    <button
-                      onClick={() => toggleCategory(cat)}
-                      className={`flex w-full items-center justify-between py-1.5 text-left text-[11px] transition-colors ${isActive && b2bColorFamilyFilter === 'ALL' ? 'font-semibold' : 'font-normal text-slate-600 hover:bg-rose-50/60'}`}
-                      style={isActive && b2bColorFamilyFilter === 'ALL'
-                        ? { backgroundColor: '#fdf0f5', color: '#c8386e', paddingLeft: '10px', paddingRight: '8px', borderLeft: '2px solid #c8386e' }
-                        : { paddingLeft: '12px', paddingRight: '8px', borderLeft: '2px solid transparent' }}
-                    >
-                      <span className="truncate pr-1 leading-tight">
-                        {cat === 'CAT EYE' ? 'All Cat Eye' : cat === 'SOLID GEL POLISH' ? 'All Solid Gel Polish' : cat}
-                      </span>
-                      <span className="flex shrink-0 items-center gap-1">
-                        <span className="text-[9px] text-slate-400">{catTotal}</span>
-                        {selInCat > 0 && <span className="rounded-full px-1 text-[8px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>?{selInCat}</span>}
-                      </span>
-                    </button>
-                    {nestedFamilies.map((family) => {
-                      const isCollectionActive = isActive && b2bColorFamilyFilter === family.value
-                      const collectionTotal = catProducts.filter((product) =>
-                        (product.colorFamily || resolveColorFamilyKey(product.name)) === family.value,
-                      ).length
-                      return (
-                        <button
-                          key={family.value}
-                          onClick={() => {
-                            toggleCategory(cat)
-                            setB2bColorFamilyFilter(family.value)
-                          }}
-                          className={`flex w-full items-center justify-between py-1 text-left text-[10px] transition-colors ${isCollectionActive ? 'font-semibold text-rose-700' : 'text-slate-500 hover:bg-rose-50/60'}`}
-                          style={{ paddingLeft: '22px', paddingRight: '8px', borderLeft: isCollectionActive ? '2px solid #c8386e' : '2px solid transparent' }}
-                        >
-                          <span className="truncate pr-1">{family.label}</span>
-                          <span className="text-[9px] text-slate-400">{collectionTotal}</span>
-                        </button>
-                      )
-                    })}
-                  </div>
+                  <button
+                    key={cat}
+                    onClick={() => toggleCategory(cat)}
+                    className={`flex w-full items-center justify-between py-1.5 text-left text-[11px] transition-colors ${isActive ? 'font-semibold' : 'font-normal text-slate-600 hover:bg-rose-50/60'}`}
+                    style={isActive
+                      ? { backgroundColor: '#fdf0f5', color: '#c8386e', paddingLeft: '10px', paddingRight: '8px', borderLeft: '2px solid #c8386e' }
+                      : { paddingLeft: '12px', paddingRight: '8px', borderLeft: '2px solid transparent' }}
+                  >
+                    <span className="truncate pr-1 leading-tight">{cat}</span>
+                    <span className="flex shrink-0 items-center gap-1">
+                      <span className="text-[9px] text-slate-400">{catTotal}</span>
+                      {selInCat > 0 && <span className="rounded-full px-1 text-[8px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>?{selInCat}</span>}
+                    </span>
+                  </button>
                 )
               })}
             </div>
@@ -17612,20 +16801,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                 </optgroup>
               )}
             </select>
-            {activeCategoryFamilies.length > 0 && (
-              <select
-                value={b2bColorFamilyFilter}
-                onChange={(event) => setB2bColorFamilyFilter(event.target.value)}
-                aria-label={activeCat === 'CAT EYE' ? 'Cat Eye collection' : 'Solid Gel Polish colour family'}
-                className="mt-2 w-full rounded border px-2 py-1.5 text-xs font-medium text-slate-700"
-                style={{ borderColor: '#e2e8f0' }}
-              >
-                <option value="ALL">{activeCat === 'CAT EYE' ? 'All Cat Eye' : 'All Solid Gel Polish'}</option>
-                {activeCategoryFamilies.map((family) => (
-                  <option key={family.value} value={family.value}>{family.label}</option>
-                ))}
-              </select>
-            )}
           </div>
 
           {/* body: sidebar (desktop) + product panel */}
@@ -17680,18 +16855,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                     {visibleProducts.map(product => {
                       const selected = selectedCodes.includes(product.code)
                       const qty = itemQtys[product.code] || 1
-                      const isOOS = [product.name, product.code, product.sku]
-                        .some((value) => portalOutOfStockNames.has(normalizeOutOfStockName(value)))
                       return (
                         <div key={product.code} className="flex min-w-0 flex-col overflow-hidden bg-white" style={selected ? { outline: '2px solid #c8386e', outlineOffset: '-2px' } : {}}>
                           {/* image */}
                           <div className="relative aspect-square w-full cursor-pointer bg-slate-50" onClick={() => product.imageUrl && setLightboxUrl(product.imageUrl)}>
-                            <ProductImage src={product.imageUrl} alt={product.name} loading="lazy" className={`h-full w-full object-cover ${isOOS ? 'brightness-50 grayscale' : ''}`} />
-                            {isOOS && (
-                              <span className="absolute inset-x-2 top-1/2 -translate-y-1/2 rounded-full bg-rose-600/90 px-2 py-1 text-center text-[9px] font-bold uppercase tracking-wide text-white">
-                                Out of Stock
-                              </span>
-                            )}
+                            <ProductImage src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
                             {selected && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: '#c8386e' }}>{qty}</span>}
                           </div>
                           {product.galleryImages?.length > 0 && (
@@ -17711,16 +16879,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                           )}
                           </div>
                           {/* action */}
-                          {isOOS ? (
-                            <div className="mt-auto flex items-center justify-center gap-1 border-t border-rose-100 bg-rose-50 px-1 py-1 text-[10px] font-semibold text-rose-600">
-                              <span>Out of Stock</span>
-                              {selected && (
-                                <button onClick={() => toggleSelection(product.code)} className="rounded border border-rose-200 bg-white px-1.5 py-0.5 hover:bg-rose-100">
-                                  Remove
-                                </button>
-                              )}
-                            </div>
-                          ) : selected ? (
+                          {selected ? (
                             <div className="mt-auto flex items-center justify-center gap-1 border-t px-1 py-1" style={{ borderColor: '#fde8f0' }}>
                               <button onClick={() => setItemQtys(p => { const q = (p[product.code] || 1) - 1; if (q <= 0) { toggleSelection(product.code); return p; } return {...p, [product.code]: q} })} className="flex h-5 w-5 items-center justify-center rounded border text-xs font-bold" style={{ borderColor: '#f0c4d0', color: '#c8386e' }}>-</button>
                               <input type="number" min="1" value={qty} onChange={(e) => { const v = parseInt(e.target.value, 10); if (v > 0) setItemQtys(p => ({...p, [product.code]: v})); else if (e.target.value === '') setItemQtys(p => ({...p, [product.code]: ''})) }} onBlur={(e) => { const v = parseInt(e.target.value, 10); if (!v || v <= 0) toggleSelection(product.code) }} className="h-5 w-10 rounded border text-center text-[10px] font-bold outline-none focus:border-fuchsia-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" style={{ borderColor: '#f0c4d0', color: '#c8386e' }} />
@@ -22172,8 +21331,6 @@ function App() {
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
           <Route path="/for-academies" element={<ForAcademiesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
-          <Route path="/colours/:family" element={<FullCataloguePage />} />
-          <Route path="/products/:slug" element={<ProductPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/starter-kits" element={<StarterKits discount={{ active: isCatalogueDiscountActive(), pct: CATALOGUE_DISCOUNT_PCT }} onAddKit={handleAddKit} />} />
           <Route path="/starter-kits/:kitId" element={<StarterKits discount={{ active: isCatalogueDiscountActive(), pct: CATALOGUE_DISCOUNT_PCT }} onAddKit={handleAddKit} />} />

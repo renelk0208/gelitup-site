@@ -11,86 +11,10 @@
 
 const path = require('path')
 const fs   = require('fs')
-const COLOR_FAMILY_PAGES = require('./colour-family-pages.cjs')
 
 const DIST = path.resolve(__dirname, '../dist')
-const PRODUCT_MANIFEST = JSON.parse(
-  fs.readFileSync(
-    path.resolve(__dirname, '../public/gelitup-content/product-manifest.json'),
-    'utf8',
-  ),
-)
 
 // ─── Per-route SEO map ────────────────────────────────────────────────────────
-
-const COLOR_FAMILY_ROUTE_SEO = Object.fromEntries(
-  COLOR_FAMILY_PAGES.map(({ label, slug }) => {
-    const labelLower = label.toLowerCase()
-    const heading = `${label} Gel Polish Wholesale`
-    const intro = `Explore GEL.IT.UP ${labelLower} gel polish in professional, HEMA-free, TPO-free and EU-certified formulations. These salon-ready ${labelLower} shades are available wholesale for nail technicians, academies and distributors.`
-
-    return [
-      `/colours/${slug}`,
-      {
-        title: `${heading} | GEL.IT.UP`,
-        description: `Shop professional ${labelLower} gel polish wholesale from GEL.IT.UP. Every shade is HEMA-free, TPO-free and EU-certified for nail technicians, salons, academies and distributors.`,
-        canonical: `https://gelitup.com/colours/${slug}`,
-        bodyHtml: `<main><h1>${heading}</h1><p>${intro}</p></main>`,
-      },
-    ]
-  }),
-)
-
-const PRODUCT_ROUTE_SEO = Object.fromEntries(
-  PRODUCT_MANIFEST.map((product) => {
-    const isSolidGelPolish = product.category === 'Solid Gel Polish'
-    const isNailArt = product.category === 'Nail Art'
-    const familyName = product.colorFamily
-      ? product.colorFamily
-          .toLowerCase()
-          .replace(/\b\w/g, (letter) => letter.toUpperCase())
-      : ''
-    const productType = isSolidGelPolish
-      ? 'gel polish'
-      : String(product.subcategory || product.category).toLowerCase()
-    const heading = isSolidGelPolish
-      ? `${product.name} Gel Polish`
-      : product.name
-    const description = isSolidGelPolish
-      ? `Discover ${product.name}, a professional ${familyName.toLowerCase()} gel polish from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
-      : isNailArt
-        ? `Discover ${product.name}, professional ${productType} from GEL.IT.UP for creative salon nail art.`
-        : `Discover ${product.name}, professional ${productType} from GEL.IT.UP. HEMA-free, TPO-free and EU-certified for professional nail technicians and salons.`
-
-    // Determine canonical: colours family pages for solid gel polishes; otherwise map to our-products landing pages
-    let canonicalUrl = `https://gelitup.com/products/${product.slug}`
-    if (isSolidGelPolish && product.colorFamily) {
-      const slug = String(product.colorFamily).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '')
-      canonicalUrl = `https://gelitup.com/colours/${slug}`
-    } else if (isNailArt) {
-      canonicalUrl = 'https://gelitup.com/our-products/nail-art'
-    } else {
-      const cat = String(product.category || '').toLowerCase()
-      if (/builder/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/builder-gel'
-      else if (/base|top|bases|tops|essentials/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/bases-and-tops'
-      else if (/nail[- ]?care|skin/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/nail-care'
-      else if (/tool|tools/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/tools'
-      else if (/consumable|consumables/.test(cat)) canonicalUrl = 'https://gelitup.com/our-products/consumables'
-      else canonicalUrl = 'https://gelitup.com/our-products'
-    }
-
-    return [
-      `/products/${product.slug}`,
-      {
-        title: `${heading} | GEL.IT.UP`,
-        description,
-        canonical: canonicalUrl,
-        robots: 'noindex, follow',
-        bodyHtml: `<main><h1>${escapeHtml(heading)}</h1><img src="${escapeHtml(product.imageUrl)}" alt="${escapeHtml(product.name)} ${escapeHtml(productType)}"><p>${escapeHtml(description)}</p></main>`,
-      },
-    ]
-  }),
-)
 
 const ROUTE_SEO_MAP = {
   '/': {
@@ -103,8 +27,6 @@ const ROUTE_SEO_MAP = {
     description: 'Browse the complete GEL.IT.UP wholesale catalogue. 1,000+ gel polish shades, builder gels, base coats, nail art and professional tools. HEMA-free, TPO-free, EU certified.',
     canonical:   'https://gelitup.com/full-catalogue',
   },
-  ...COLOR_FAMILY_ROUTE_SEO,
-  ...PRODUCT_ROUTE_SEO,
   '/solid-gel-polish': {
     title:       'Wholesale Gel Polish Supplier | 1,000+ Shades | GEL.IT.UP Professional',
     description: 'Over 1,000 shades of professional gel polish available wholesale. HEMA-free, TPO-free, Leaping Bunny Approved. Bulk supply for nail technicians, salons and academies across the EU and worldwide.',
@@ -194,11 +116,6 @@ const ROUTE_SEO_MAP = {
     title:       'Professional Nail Industry Blog | GEL.IT.UP by GIUP®',
     description: 'Professional guidance for nail salons and technicians on gel safety, EU compliance, ingredients, business protection and product performance.',
     canonical:   'https://gelitup.com/blog',
-  },
-  '/blog/why-ingredient-labels-matter': {
-    title:       'Why Gel Polish Ingredient Labels Matter | HEMA & TPO Guide',
-    description: 'Learn what HEMA and TPO are, why ingredient labels matter, and how nail professionals can evaluate safer, compliant gel polish formulations.',
-    canonical:   'https://gelitup.com/blog/why-ingredient-labels-matter',
   },
   '/blog/hema-free-tpo-free-gel-salon-liability-guide': {
     title:       'HEMA-Free, TPO-Free Gels: Salon Liability & EU Compliance Guide',
@@ -300,22 +217,18 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
 }
 
-function injectSeo(html, { title, description, canonical, robots, bodyHtml = '' }) {
+function injectSeo(html, { title, description, canonical }) {
   const t = escapeHtml(title)
   const d = escapeHtml(description)
-  const seoHtml = html
+  return html
     .replace(/<title>[^<]*<\/title>/i,                     `<title>${t}</title>`)
     .replace(/<meta\s+name="description"[^>]*>/i,          `<meta name="description" content="${d}" />`)
-    .replace(/<link\s+rel="canonical"[^>]*>/i,             `<link rel="canonical" href="${canonical}" />\n    <meta name="robots" content="${robots || 'index, follow'}" />`)
+    .replace(/<link\s+rel="canonical"[^>]*>/i,             `<link rel="canonical" href="${canonical}" />`)
     .replace(/<meta\s+property="og:title"[^>]*>/i,         `<meta property="og:title" content="${t}" />`)
     .replace(/<meta\s+property="og:description"[^>]*>/i,   `<meta property="og:description" content="${d}" />`)
     .replace(/<meta\s+property="og:url"[^>]*>/i,           `<meta property="og:url" content="${canonical}" />`)
     .replace(/<meta\s+name="twitter:title"[^>]*>/i,        `<meta name="twitter:title" content="${t}" />`)
     .replace(/<meta\s+name="twitter:description"[^>]*>/i,  `<meta name="twitter:description" content="${d}" />`)
-
-  return bodyHtml
-    ? seoHtml.replace(/<div\s+id="root"\s*>/i, `<div id="root">${bodyHtml}`)
-    : seoHtml
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────

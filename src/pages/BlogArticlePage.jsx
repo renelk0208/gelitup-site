@@ -78,7 +78,7 @@ export default function BlogArticlePage() {
               {post.title}
             </h1>
             <div className="mt-7 flex flex-wrap gap-2">
-              {(post.tags || ['HEMA-Free', 'TPO-Free', 'CPNP Notified']).map((label) => (
+              {['HEMA-Free', 'TPO-Free', 'CPNP Notified'].map((label) => (
                 <span key={label} className="rounded-full border border-[#D43790]/25 bg-[#D43790]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#9c1f61]">
                   {label}
                 </span>
@@ -104,10 +104,10 @@ export default function BlogArticlePage() {
                     <p className="text-base font-semibold leading-7 text-neutral-800">{section.takeaway}</p>
                   </aside>
                 )}
-                {index === (post.calloutAfterSection ?? 3) && (
+                {index === 3 && (
                   <img
                     src={post.calloutImage}
-                    alt={post.calloutAlt || 'Ingredient transparency turns compliance into a competitive advantage.'}
+                    alt="Ingredient transparency turns compliance into a competitive advantage."
                     loading="lazy"
                     className="mt-12 w-full rounded-2xl border border-neutral-200 shadow-sm"
                   />
@@ -118,7 +118,7 @@ export default function BlogArticlePage() {
 
           <section className="mt-16 rounded-[2rem] bg-neutral-950 px-6 py-10 text-white sm:px-10 sm:py-12">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#f168ae]">Professional standard</p>
-            <h2 className="heading-on-dark mt-3 font-serif text-3xl font-semibold sm:text-4xl">{post.verdict.title}</h2>
+            <h2 className="mt-3 font-serif text-3xl font-semibold sm:text-4xl">{post.verdict.title}</h2>
             <div className="mt-6 space-y-5 text-[1.05rem] leading-8 text-white/75">
               {post.verdict.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             </div>
@@ -131,7 +131,7 @@ export default function BlogArticlePage() {
           >
             <img
               src={post.closingImage}
-              alt={post.closingAlt || 'Explore the GEL.IT.UP HEMA-free, TPO-free and CPNP-notified professional gel system.'}
+              alt="Explore the GEL.IT.UP HEMA-free, TPO-free and CPNP-notified professional gel system."
               loading="lazy"
               className="w-full"
             />

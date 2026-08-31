@@ -21,7 +21,6 @@ const PRERENDER_ROUTES = [
   '/guestbook',
   '/inspiration',
   '/blog',
-  '/blog/why-ingredient-labels-matter',
   '/blog/hema-free-tpo-free-gel-salon-liability-guide',
   // Vanity subcategory routes
   '/cat-eye', '/shimmer', '/glitters', '/jelly', '/metallic',

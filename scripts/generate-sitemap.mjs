@@ -2,31 +2,13 @@
 // Run after build: node scripts/generate-sitemap.mjs
 // Already wired into: "build" script below
 
-import { readFileSync, writeFileSync } from 'node:fs'
+import { writeFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import COLOR_FAMILY_PAGES from './colour-family-pages.cjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DIST = resolve(__dirname, '../dist')
 const BASE_URL = 'https://gelitup.com'
-const PRODUCT_MANIFEST = JSON.parse(
-  readFileSync(
-    resolve(__dirname, '../public/gelitup-content/product-manifest.json'),
-    'utf8',
-  ),
-)
-
-const COLOR_FAMILY_ROUTES = COLOR_FAMILY_PAGES
-  .filter(({ includeInSitemap = true }) => includeInSitemap)
-  .map(({ slug }) => ({
-    path: `/colours/${slug}`,
-    priority: '0.8',
-    changefreq: 'weekly',
-  }))
-
-// Individual product pages intentionally omitted from the sitemap because they will be noindexed.
-const PRODUCT_ROUTES = []
 
 const ROUTES = [
   // Core pages
@@ -34,7 +16,6 @@ const ROUTES = [
   { path: '/full-catalogue',             priority: '0.9', changefreq: 'weekly'  },
   { path: '/guestbook',                  priority: '0.6', changefreq: 'weekly'  },
   { path: '/blog',                       priority: '0.7', changefreq: 'weekly'  },
-  { path: '/blog/why-ingredient-labels-matter', priority: '0.8', changefreq: 'monthly' },
   { path: '/blog/hema-free-tpo-free-gel-salon-liability-guide', priority: '0.8', changefreq: 'monthly' },
   { path: '/about-us',                   priority: '0.6', changefreq: 'monthly' },
   { path: '/contact',                    priority: '0.6', changefreq: 'monthly' },
@@ -61,12 +42,6 @@ const ROUTES = [
   { path: '/our-products/tools',         priority: '0.6', changefreq: 'weekly'  },
   { path: '/our-products/consumables',   priority: '0.6', changefreq: 'weekly'  },
   { path: '/our-products/nail-care',     priority: '0.6', changefreq: 'weekly'  },
-
-  // Colour family landing pages
-  ...COLOR_FAMILY_ROUTES,
-
-  // Individual Solid Gel Polish products are intentionally omitted (noindex)
-  // (see PRODUCT_ROUTES comment above)
 
   // Gel polish subcategory vanity routes
   { path: '/solid-gel-polish',           priority: '0.8', changefreq: 'weekly'  },

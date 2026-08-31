@@ -1,89 +1,6 @@
 const ARTICLE_MEDIA = '/gelitup-media/blog/hema-free-tpo-free-gel-salon-liability-guide'
-const INGREDIENT_LABELS_MEDIA = '/gelitup-media/blog/why-ingredient-labels-matter'
 
 export const blogPosts = [
-  {
-    slug: 'why-ingredient-labels-matter',
-    category: 'Ingredients & compliance',
-    title: 'Why Ingredient Labels Matter More Than Ever',
-    shortTitle: 'Why Ingredient Labels Matter More Than Ever',
-    excerpt: 'Understand HEMA, TPO and the ingredient-label checks every nail technician, salon and distributor should make before choosing a gel system.',
-    metaTitle: 'Why Gel Polish Ingredient Labels Matter | HEMA & TPO Guide',
-    metaDescription: 'Learn what HEMA and TPO are, why ingredient labels matter, and how nail professionals can evaluate safer, compliant gel polish formulations.',
-    publishedAt: '2026-08-26',
-    publishedLabel: '26 August 2026',
-    readTime: '7 min read',
-    heroImage: `${INGREDIENT_LABELS_MEDIA}/hero.webp`,
-    calloutImage: `${INGREDIENT_LABELS_MEDIA}/callout.webp`,
-    calloutAlt: 'Ingredient transparency is the foundation of safer, compliant professional nail services.',
-    calloutAfterSection: 3,
-    closingImage: `${INGREDIENT_LABELS_MEDIA}/closing-cta.webp`,
-    closingAlt: 'Choose HEMA-free, TPO-free and silver-free professional nail products from GEL.IT.UP.',
-    tags: ['HEMA-Free', 'TPO-Free', 'Silver-Free'],
-    intro: [
-      'Walk into any professional nail salon in Europe today, and you will hear the same two acronyms: HEMA and TPO. These monomers have become the central topic in gel chemistry discussions, regulatory checklists, and manufacturer reformulation roadmaps. For nail technicians and salon owners who stock their own product library, understanding what these ingredients are — and why an increasing number of professional brands are removing them — is no longer optional. It is a compliance requirement, a client safety decision, and a business differentiator.',
-      'This guide covers what HEMA and TPO are, why they are under regulatory scrutiny, and how to evaluate gel polish formulations when sourcing for your studio or distribution network.',
-    ],
-    sections: [
-      {
-        title: 'What Are HEMA and TPO?',
-        paragraphs: [
-          'HEMA (hydroxyethyl methacrylate) is a methacrylate monomer commonly used in gel and acrylic nail products as a cross-linking agent. It helps the product adhere to the natural nail plate and creates the hard, durable finish that gel systems are known for.',
-          'TPO (trimethylbenzoyldiphenylphosphine oxide) is a photoinitiator — the chemical that triggers the curing reaction when gel polish is exposed to UV or LED light. Without photoinitiators, gel would never harden under the lamp.',
-          'Both chemicals are effective. Both have been standard in professional nail products for years. And both are now the subject of tightening EU Cosmetics Regulation (EC) No. 1223/2009 compliance standards, driven by a growing body of dermatological data on allergen sensitisation.',
-        ],
-      },
-      {
-        title: 'The Regulatory Shift: Why HEMA and TPO Are Being Phased Out',
-        paragraphs: [
-          'The European Union’s Scientific Committee on Consumer Safety (SCCS) has classified HEMA as a sensitiser, meaning repeated skin contact can lead to allergic contact dermatitis. Once sensitised, a technician or client may react not only to HEMA but also to cross-reacting methacrylates found in dental and medical adhesives.',
-          'TPO has followed a similar trajectory. While less potent as a sensitiser than HEMA, TPO photoinitiators have been flagged under EU classification, labelling, and packaging regulations for skin sensitisation Category 1B. Several EU member states now restrict TPO concentrations in leave-on cosmetic products, and the broader trend points toward eventual restriction in professional nail categories.',
-        ],
-        takeaway: 'What this means in practice: a growing number of distributors, salon chains, and individual studios now require CPNP-notified, HEMA-free and TPO-free declarations on every product they stock.',
-      },
-      {
-        title: 'What HEMA-Free and TPO-Free Actually Mean for Performance',
-        paragraphs: [
-          'A common concern among nail professionals is that removing HEMA and TPO will compromise adhesion, durability, or curing speed. In early-generation formulations, that concern had some merit. But the chemistry has moved on.',
-          'Modern HEMA-free, TPO-free gel systems achieve their cross-linking and photoinitiation through alternative monomer blends and photoinitiator packages. Properly balanced alternatives maintain strong adhesion, cure reliably under standard 48W UV/LED lamps, reduce sensitisation risk and avoid the yellowing that some TPO formulations develop over time.',
-          'The trade-off is small: slightly longer cure times and a narrower margin for under-curing. As long as your lamp is powerful enough and you follow the manufacturer’s cure schedule, the result is just as durable.',
-        ],
-      },
-      {
-        title: 'How to Read a Gel Polish Ingredient Label',
-        paragraphs: [
-          'HEMA: If listed anywhere in the ingredients, the product contains HEMA monomer. Avoid it for hypoallergenic or compliance-first stocking decisions.',
-          'TPO: Look for trimethylbenzoyldiphenylphosphine oxide or CAS No. 75980-60-8. A TPO-free claim should be explicit on the packaging or technical data sheet.',
-          'CPNP notification: Every cosmetic product sold in the EU must be registered in the Cosmetic Products Notification Portal. Ask the supplier for documentation confirming its notification.',
-          'Silver (CI 77820): Some formulations that remove HEMA and TPO still use silver as an alternative sensitiser. A truly allergen-conscious formulation will also be silver-free.',
-        ],
-      },
-      {
-        title: 'GEL.IT.UP: A Case Study in Compliant Formulation',
-        paragraphs: [
-          'GEL.IT.UP by GIUP® formulates every product in its catalogue — from the Multimix Professional Builder Gel System and 3-IN-1 Builder Gel to Brush on Builder, 5-in-1 Superior Base Coat and all colour collections — as HEMA-free, TPO-free and Silver (CI 77820)-free.',
-          'Each formulation is notified through the UK Submit Cosmetic Product Notification service and complies with EU Cosmetics Regulation standards. The brand’s entire 1,000+ shade library carries the same compliance baseline.',
-          'For the professional nail technician, this means one compliance standard across every SKU, interchangeable layering without introducing sensitisers from another product layer, and consistent curing at 60–90 seconds under a 48W UV/LED lamp.',
-        ],
-      },
-      {
-        title: 'Building a Compliant Product Library',
-        paragraphs: [
-          'Request the Safety Data Sheet before the first order. Formulation data sheets are not trade secrets, and any compliant manufacturer should make them available.',
-          'Verify CPNP or SCPN notification by requesting supporting documentation from the supplier.',
-          'Test the cure time yourself. HEMA-free, TPO-free gel often requires the full recommended cure window, so test a small batch with your lamp before committing to a bulk order.',
-          'Check for silver as a hidden sensitiser, and standardise on one compliance level across your entire product set. Mixing HEMA-free and standard products in the same service creates cross-contamination risk on brushes, files and during curing.',
-        ],
-      },
-    ],
-    verdict: {
-      title: 'The Bottom Line',
-      paragraphs: [
-        'HEMA-free and TPO-free gel polish is not a downgrade in performance. It is an upgrade in safety, compliance, and professional credibility. For the salon owner, stocking compliant formulations removes a growing regulatory risk. For the distributor, it unlocks a wider sales channel across EU markets. And for the individual nail technician, it means less sensitisation risk over a career of daily application.',
-        'GEL.IT.UP has built its entire product line around this principle. The HEMA-free, TPO-free and silver-free standard represents a formulation decision that puts technician safety and regulatory compliance on the same level as colour payoff and durability.',
-      ],
-    },
-  },
   {
     slug: 'hema-free-tpo-free-gel-salon-liability-guide',
     category: 'Salon compliance & liability',
@@ -95,7 +12,7 @@ export const blogPosts = [
     publishedAt: '2026-08-26',
     publishedLabel: '26 August 2026',
     readTime: '8 min read',
-    heroImage: `${ARTICLE_MEDIA}/hero_banner.webp`,
+    heroImage: `${ARTICLE_MEDIA}/hero_banner.png`,
     calloutImage: `${ARTICLE_MEDIA}/callout_quote.png`,
     closingImage: `${ARTICLE_MEDIA}/closing_cta.png`,
     intro: [
