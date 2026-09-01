@@ -296,7 +296,11 @@ export default function PrivateLabelPage() {
     setError('')
 
     if (!formValid) { setError('Please fill in all required fields.'); return }
-    if (!logoFile) { setError('Please upload your logo.'); return }
+    if (!logoFile) {
+      setError('Please upload your logo.')
+      alert('Please upload your logo before submitting.')
+      return
+    }
     if (!meetsMinimum) { setError(`Minimum order is €${MIN_ORDER_EUR}. Your current subtotal is €${subtotal.toFixed(2)}.`); return }
     if (!termsAccepted) { setError('Please accept the Studio One terms & conditions to continue.'); return }
     if (!hasSupabaseConfig) { setError('Ordering is temporarily unavailable. Please try again shortly.'); return }
