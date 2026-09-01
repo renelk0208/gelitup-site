@@ -160,12 +160,6 @@ const BOTTLE_TEMPLATES = [
     src: '/private-label/bottle-11ml-colour.jpg',
     labelBox: { left: 27, top: 70.5, width: 38, height: 8 },
   },
-  {
-    key: 'base-top-15ml',
-    label: '15ml Base / Top Coat',
-    src: '/private-label/bottle-15ml-base-top.jpg',
-    labelBox: { left: 38, top: 74.5, width: 22, height: 6.5 },
-  },
 ]
 
 const emptyForm = {
@@ -346,12 +340,12 @@ export default function PrivateLabelPage() {
           {logoPreview && (
             <div className="mt-6">
               <h3 className="text-sm font-semibold mb-3 text-black/70">See it on your bottle</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="max-w-[220px] mx-auto">
                 {BOTTLE_TEMPLATES.map(tpl => (
                   <BottlePreview key={tpl.key} template={tpl} logoUrl={logoPreview} />
                 ))}
               </div>
-              <p className="text-[10px] text-black/40 mt-2">
+              <p className="text-[10px] text-black/40 mt-2 text-center">
                 Preview only — final label placement and print quality are confirmed during logo approval.
               </p>
             </div>
@@ -451,11 +445,13 @@ function BottlePreview({ template, logoUrl }) {
   const { src, label, labelBox } = template
   return (
     <div className="text-center">
-      <div className="relative w-full aspect-[3/5] bg-white rounded-lg overflow-hidden border">
-        <img src={src} alt={label} className="w-full h-full object-contain" />
+      {/* Wrapper sizes itself to the image's true rendered dimensions (no forced
+          aspect ratio) so the % -based overlay lines up exactly with the photo. */}
+      <div className="relative inline-block bg-white rounded-lg overflow-hidden border">
+        <img src={src} alt={label} className="block w-full h-auto" />
         {/* White patch masks the printed sample logo, customer's logo renders on top */}
         <div
-          className="absolute bg-white flex items-center justify-center p-[2%] shadow-sm"
+          className="absolute bg-white flex items-center justify-center p-[4%] shadow-sm"
           style={{
             left: `${labelBox.left}%`,
             top: `${labelBox.top}%`,
