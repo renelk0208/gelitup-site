@@ -158,9 +158,11 @@ const ESSENTIALS = [
 const COLOUR_PRICE = 9.7 // per bottle, private-label colour
 const MIN_ORDER_EUR = 200
 
+const EU_COUNTRIES = ['Austria','Belgium','Bulgaria','Croatia','Cyprus','Czech Republic','Denmark','Estonia','Finland','France','Germany','Greece','Hungary','Ireland','Italy','Latvia','Lithuania','Luxembourg','Malta','Netherlands','Poland','Portugal','Romania','Slovakia','Slovenia','Spain','Sweden']
+
 const emptyForm = {
   first_name: '', last_name: '', company_name: '', email: '', phone: '',
-  address: '', city: '', postal_code: '', country: '',
+  address: '', city: '', postal_code: '', country: '', vat_number: '',
 }
 
 export default function PrivateLabelPage() {
@@ -190,7 +192,7 @@ export default function PrivateLabelPage() {
         if (!colourGroups[family]) colourGroups[family] = []
         colourGroups[family].push({ code, qty: item.qty, image: imgPath, price: item.price })
       } else {
-        essentialsChosen.push({ code, name: item.name, qty: item.qty })
+        essentialsChosen.push({ code, name: item.name, qty: item.qty, price: item.price })
       }
     }
     const sortedFamilies = Object.entries(colourGroups)
@@ -215,6 +217,34 @@ export default function PrivateLabelPage() {
   }
 
   const [logoPreviewable, setLogoPreviewable] = useState(true)
+
+  const [viesLoading, setViesLoading] = useState(false)
+  const [viesResult, setViesResult] = useState(null) // { valid, name }
+  const [viesError, setViesError] = useState('')
+
+  async function verifyVat() {
+    const vat = String(form.vat_number || '').trim().toUpperCase().replace(/[\s\-.]/g, '')
+    if (vat.length < 4) { setViesError('Enter a full VAT number to verify'); return }
+    setViesLoading(true)
+    setViesError('')
+    setViesResult(null)
+    try {
+      const res = await fetch('/.netlify/functions/validate-vat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vatNumber: vat }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setViesError(data.error || 'VIES check failed'); return }
+      setViesResult(data)
+      if (!data.valid) setViesError('VAT number not found in VIES — please check and try again')
+    } catch {
+      setViesError('Unable to reach VAT validation service')
+    } finally {
+      setViesLoading(false)
+    }
+  }
+
 
   function handleLogoChange(e) {
     const file = e.target.files?.[0]
@@ -300,6 +330,9 @@ export default function PrivateLabelPage() {
           city: form.city.trim(),
           postal_code: form.postal_code.trim(),
           country: form.country.trim(),
+          vat_number: form.vat_number.trim() || null,
+          vat_verified: Boolean(viesResult?.valid),
+          vat_verified_name: viesResult?.valid ? (viesResult.name || null) : null,
           logo_url: publicUrlData?.publicUrl || null,
           cart_json: cartJson,
           subtotal_eur: subtotal,
@@ -365,13 +398,49 @@ export default function PrivateLabelPage() {
           </div>
           <input required placeholder="Address" className="border rounded-lg p-3 w-full mb-3"
             value={form.address} onChange={e => updateField('address', e.target.value)} />
-          <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="grid grid-cols-3 gap-3 mb-3">
             <input required placeholder="City" className="border rounded-lg p-3"
               value={form.city} onChange={e => updateField('city', e.target.value)} />
             <input required placeholder="Postal code" className="border rounded-lg p-3"
               value={form.postal_code} onChange={e => updateField('postal_code', e.target.value)} />
-            <input required placeholder="Country" className="border rounded-lg p-3"
-              value={form.country} onChange={e => updateField('country', e.target.value)} />
+            <select required className="border rounded-lg p-3 bg-white"
+              value={form.country} onChange={e => updateField('country', e.target.value)}>
+              <option value="" disabled>Country</option>
+              {EU_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-black/70 mb-1">
+              VAT number{' '}
+              <span className="ml-1 rounded bg-black/5 px-1.5 py-0.5 text-[10px] font-normal text-black/50">
+                for businesses — optional
+              </span>
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="e.g. EL123456789"
+                className="flex-1 border rounded-lg p-3"
+                value={form.vat_number}
+                onChange={e => { updateField('vat_number', e.target.value); setViesResult(null); setViesError('') }}
+              />
+              <button
+                type="button"
+                onClick={verifyVat}
+                disabled={viesLoading || !form.vat_number.trim()}
+                className="shrink-0 rounded-lg bg-black/80 px-4 text-xs font-semibold text-white hover:bg-black disabled:opacity-40"
+              >
+                {viesLoading ? 'Checking…' : 'Verify'}
+              </button>
+            </div>
+            {viesResult?.valid && (
+              <p className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-700">
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-[10px]">✓</span>
+                VAT verified{viesResult.name ? ` — ${viesResult.name}` : ''}
+              </p>
+            )}
+            {viesError && <p className="mt-1.5 text-xs text-red-600">{viesError}</p>}
           </div>
 
           <h2 className="text-xl font-semibold mb-1">2. Upload your logo</h2>
@@ -447,8 +516,8 @@ export default function PrivateLabelPage() {
                 <div className="mb-3">
                   {cartSummary.essentialsChosen.map(item => (
                     <div key={item.code} className="flex justify-between text-xs text-black/70 py-0.5">
-                      <span>{item.name}</span>
-                      <span>×{item.qty}</span>
+                      <span>{item.name} <span className="text-black/40">×{item.qty}</span></span>
+                      <span>€{(item.qty * item.price).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
@@ -543,6 +612,7 @@ export default function PrivateLabelPage() {
                 <li>Logos must be submitted in clear, print-ready format. Logos requiring design correction or adaptation may be rejected, delayed, and/or subject to an additional fee.</li>
                 <li>Thermitek LTD reserves the right to reject any logo or order, in whole or in part, without providing a reason. In case of doubt or dispute, the Company holds the final decision.</li>
                 <li>All colours and products are subject to availability — orders are fulfilled while stocks last. Approved orders are dispatched within 7–14 working days.</li>
+                <li>Shipping costs are calculated separately by our team and confirmed before payment is requested.</li>
                 <li>This service is not available to competing brands or businesses engaged in gel polish manufacture, private label, or wholesale distribution.</li>
                 <li>Removal or alteration of labels once applied to bottles is strictly prohibited.</li>
                 <li>It is the client's sole responsibility to ensure batch numbers and production dates remain visible and unaltered.</li>

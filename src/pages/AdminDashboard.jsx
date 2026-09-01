@@ -3858,6 +3858,7 @@ function StudioOneRequestsPanel() {
   const [filter, setFilter] = useState('pending_review')
   const [actingId, setActingId] = useState(null)
   const [notesDraft, setNotesDraft] = useState({})
+  const [shippingDraft, setShippingDraft] = useState({})
 
   const fetchRequests = useCallback(async () => {
     setLoading(true)
@@ -3876,6 +3877,8 @@ function StudioOneRequestsPanel() {
     if (!row.email) return { ok: false, skipped: true, message: 'Request has no email — approval email not sent.' }
     if (!EMAIL_WEBHOOK_URL) return { ok: false, skipped: true, message: 'VITE_EMAIL_WEBHOOK_URL is not configured — approval email not sent.' }
 
+    const shippingAmount = Number(row.shipping_eur) || 0
+    const orderTotal = Number(row.subtotal_eur) + shippingAmount
     const checkoutUrl = `https://gelitup.com/studio-one/checkout?token=${encodeURIComponent(row.checkout_token)}`
     const subject = 'Your Studio One logo has been approved — complete your order'
     const html = `
@@ -3886,7 +3889,9 @@ function StudioOneRequestsPanel() {
       <p style="margin:20px 0">
         <a href="${checkoutUrl}" style="display:inline-block;background:#D43790;color:#fff;padding:14px 32px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;">Complete my order →</a>
       </p>
-      <p style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;margin:0 0 8px">Order total: €${Number(row.subtotal_eur).toFixed(2)}</p>
+      <p style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;margin:0 0 4px">Subtotal: €${Number(row.subtotal_eur).toFixed(2)}</p>
+      <p style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;margin:0 0 4px">Shipping: €${shippingAmount.toFixed(2)}</p>
+      <p style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;font-weight:700;margin:0 0 8px">Order total: €${orderTotal.toFixed(2)}</p>
       <p style="font-family:Arial,sans-serif;font-size:12px;color:#6b7280;margin:12px 0 0">Questions? Reply to this email or contact us at distribution@gelitup.com.</p>
     `
 
@@ -3910,7 +3915,31 @@ function StudioOneRequestsPanel() {
     }
   }
 
+  async function saveShipping(row) {
+    const raw = shippingDraft[row.id]
+    const amount = Number(raw)
+    if (raw === undefined || raw === '' || !Number.isFinite(amount) || amount < 0) {
+      alert('Enter a valid shipping amount (0 or more).')
+      return
+    }
+    setActingId(row.id)
+    const { error: err } = await supabase
+      .from(STUDIO_ONE_TABLE)
+      .update({ shipping_eur: amount, shipping_set_at: new Date().toISOString() })
+      .eq('id', row.id)
+    setActingId(null)
+    if (err) {
+      alert(`Could not save shipping: ${err.message}`)
+      return
+    }
+    fetchRequests()
+  }
+
   async function updateStatus(row, nextStatus) {
+    if (nextStatus === 'approved' && row.shipping_eur == null) {
+      alert('Set the shipping amount for this order before approving — the customer needs the final total to pay.')
+      return
+    }
     const confirmLabel = nextStatus === 'approved' ? 'approve' : 'reject'
     const ok = window.confirm(`Are you sure you want to ${confirmLabel} the Studio One request from ${row.first_name} ${row.last_name}?`)
     if (!ok) return
@@ -3995,6 +4024,11 @@ function StudioOneRequestsPanel() {
                   Submitted {new Date(row.created_at).toLocaleString()}
                   {row.terms_accepted ? ' · Terms accepted' : ' · Terms NOT accepted'}
                 </p>
+                {row.vat_number && (
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    VAT: {row.vat_number}{row.vat_verified ? ` ✓ verified${row.vat_verified_name ? ` — ${row.vat_verified_name}` : ''}` : ' (not verified)'}
+                  </p>
+                )}
               </div>
               {studioOneStatusBadge(row.status)}
             </div>
@@ -4014,6 +4048,34 @@ function StudioOneRequestsPanel() {
                 <p className="text-sm font-semibold text-slate-900 mt-2">
                   Subtotal: €{Number(row.subtotal_eur).toFixed(2)}
                 </p>
+                <div className="flex items-center gap-2 mt-2">
+                  <label className="text-xs text-slate-600">Shipping (€):</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder={row.shipping_eur != null ? String(row.shipping_eur) : 'Not set'}
+                    value={shippingDraft[row.id] ?? (row.shipping_eur != null ? String(row.shipping_eur) : '')}
+                    onChange={e => setShippingDraft(prev => ({ ...prev, [row.id]: e.target.value }))}
+                    className="w-24 border rounded-lg px-2 py-1 text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => saveShipping(row)}
+                    disabled={actingId === row.id}
+                    className="rounded-lg bg-slate-700 text-white text-[11px] font-semibold px-3 py-1 disabled:opacity-50"
+                  >
+                    Save
+                  </button>
+                  {row.shipping_eur != null && (
+                    <span className="text-[11px] text-slate-500">
+                      Total: €{(Number(row.subtotal_eur) + Number(row.shipping_eur)).toFixed(2)}
+                    </span>
+                  )}
+                </div>
+                {row.shipping_eur == null && (
+                  <p className="text-[11px] text-amber-600 mt-1">Shipping not set — required before the customer can be sent a payment link.</p>
+                )}
               </div>
             </div>
 

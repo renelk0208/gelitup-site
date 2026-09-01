@@ -52,7 +52,7 @@ export default function StudioOneCheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderId: String(request.id),
-          amountEur: Number(request.subtotal_eur),
+          amountEur: Number(request.subtotal_eur) + (Number(request.shipping_eur) || 0),
           email: String(request.email),
         }),
       })
@@ -121,6 +121,9 @@ export default function StudioOneCheckoutPage() {
 
   // status === 'approved'
   const cartItems = Array.isArray(request.cart_json) ? request.cart_json : []
+  const shippingAmount = Number(request.shipping_eur) || 0
+  const orderTotal = Number(request.subtotal_eur) + shippingAmount
+  const shippingReady = request.shipping_eur != null
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-16">
@@ -143,22 +146,38 @@ export default function StudioOneCheckoutPage() {
             </li>
           ))}
         </ul>
-        <div className="border-t pt-3 flex justify-between font-semibold">
-          <span>Total</span>
-          <span>€{Number(request.subtotal_eur).toFixed(2)}</span>
+        <div className="border-t pt-3 space-y-1">
+          <div className="flex justify-between text-sm text-black/70">
+            <span>Subtotal</span>
+            <span>€{Number(request.subtotal_eur).toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between text-sm text-black/70">
+            <span>Shipping</span>
+            <span>{shippingReady ? `€${shippingAmount.toFixed(2)}` : 'To be confirmed'}</span>
+          </div>
+          <div className="flex justify-between font-semibold pt-1">
+            <span>Total</span>
+            <span>{shippingReady ? `€${orderTotal.toFixed(2)}` : '—'}</span>
+          </div>
         </div>
       </div>
 
       {error && <div className="text-sm text-red-600 mb-4">{error}</div>}
 
-      <button
-        type="button"
-        onClick={handlePay}
-        disabled={paying}
-        className="w-full bg-[#D43790] text-white font-semibold rounded-lg py-3 disabled:opacity-50"
-      >
-        {paying ? 'Redirecting to payment…' : `Pay €${Number(request.subtotal_eur).toFixed(2)}`}
-      </button>
+      {!shippingReady ? (
+        <p className="text-sm text-black/60 bg-black/[0.03] border rounded-lg p-3">
+          Your shipping cost hasn't been confirmed yet — we'll email you again as soon as it's ready to pay.
+        </p>
+      ) : (
+        <button
+          type="button"
+          onClick={handlePay}
+          disabled={paying}
+          className="w-full bg-[#D43790] text-white font-semibold rounded-lg py-3 disabled:opacity-50"
+        >
+          {paying ? 'Redirecting to payment…' : `Pay €${orderTotal.toFixed(2)}`}
+        </button>
+      )}
     </div>
   )
 }
