@@ -347,7 +347,7 @@ export default function PrivateLabelPage() {
 
           <h2 className="text-xl font-semibold mb-1">4. Choose your colours</h2>
           <p className="text-xs text-black/50 mb-4">
-            Photos are our actual catalogue shots — the physical dip sample that ships with your order is the true reference.
+            Official colour swatches — the physical dip sample that ships with your order remains the true reference.
           </p>
           <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-6 max-h-96 overflow-y-auto pr-1">
             {COLOUR_CODES.map(code => {
@@ -358,12 +358,12 @@ export default function PrivateLabelPage() {
                   key={code}
                   className={`border rounded-lg p-2 text-center transition ${inCart ? 'border-[#D43790] ring-1 ring-[#D43790]' : ''}`}
                 >
-                  <div className="w-12 h-12 rounded-full mx-auto mb-1 border border-black/10 overflow-hidden bg-black/5 flex items-center justify-center">
+                  <div className="w-16 h-16 mx-auto mb-1 flex items-center justify-center">
                     {imgSrc ? (
                       <img
                         src={imgSrc}
                         alt={`Colour ${code}`}
-                        className="w-full h-full object-cover"
+                        className="max-w-full max-h-full object-contain"
                         loading="lazy"
                         onError={e => { e.currentTarget.style.display = 'none' }}
                       />
