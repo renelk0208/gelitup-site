@@ -6,6 +6,7 @@ import { PRODUCT_ALIAS_GROUPS } from './data/productAliases.js'
 import PRODUCT_INFORMATION_BY_SUBCATEGORY from './data/product-info.json'
 import ImportedAnyPage from './pages/imported/ImportedAnyPage.jsx'
 import PrivateLabelPage from './pages/PrivateLabelPage.jsx'
+import StudioOneCheckoutPage from './pages/StudioOneCheckoutPage.jsx'
 import SchemaOrg from './components/SchemaOrg'
 import StarterKits from './components/StarterKits.jsx'
 import { hasSupabaseConfig, supabase } from './lib/supabaseClient'
@@ -21434,6 +21435,7 @@ function App() {
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/private-label" element={<PrivateLabelPage />} />
+          <Route path="/studio-one/checkout" element={<StudioOneCheckoutPage />} />
           <Route path="/starter-kits" element={<StarterKits discount={{ active: isCatalogueDiscountActive(), pct: CATALOGUE_DISCOUNT_PCT }} onAddKit={handleAddKit} />} />
           <Route path="/starter-kits/:kitId" element={<StarterKits discount={{ active: isCatalogueDiscountActive(), pct: CATALOGUE_DISCOUNT_PCT }} onAddKit={handleAddKit} />} />
           <Route path="/catalogue/starterkits" element={<Navigate to="/starter-kits" replace />} />

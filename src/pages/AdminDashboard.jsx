@@ -24,7 +24,7 @@ const AMBASSADOR_PENDING_STATUSES = ['new', 'pending', 'submitted']
 const AMBASSADOR_LETTER_ATTACHMENT_URL = ambassadorLetterAttachmentUrl
 const SHIPMENT_EMAIL_LOCK_STORAGE_KEY = 'gelitup.admin.shipmentEmailLock.v1'
 const ADMIN_TAB_STORAGE_KEY = 'gelitup.admin.activeTab.v1'
-const ADMIN_TAB_KEYS = new Set(['registrations', 'orders', 'search', 'admins', 'pricing', 'ambassadors', 'guestbook', 'draft-carts'])
+const ADMIN_TAB_KEYS = new Set(['registrations', 'orders', 'search', 'admins', 'pricing', 'ambassadors', 'guestbook', 'draft-carts', 'studio-one'])
 
 function buildDistributorAccessEmail(row) {
   const tierLabel = titleCaseTierLabel(row?.distributor_tier || '') || 'Distributor'
@@ -3829,6 +3829,227 @@ function DraftCartsPanel() {
   )
 }
 
+const STUDIO_ONE_TABLE = 'private_label_requests'
+
+function studioOneStatusBadge(status) {
+  const styles = {
+    pending_review: 'bg-amber-100 text-amber-700',
+    approved: 'bg-emerald-100 text-emerald-700',
+    rejected: 'bg-rose-100 text-rose-700',
+    checked_out: 'bg-slate-200 text-slate-700',
+  }
+  const labels = {
+    pending_review: 'Pending Review',
+    approved: 'Approved',
+    rejected: 'Rejected',
+    checked_out: 'Checked Out',
+  }
+  return (
+    <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${styles[status] || 'bg-slate-100 text-slate-600'}`}>
+      {labels[status] || status}
+    </span>
+  )
+}
+
+function StudioOneRequestsPanel() {
+  const [requests, setRequests] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [filter, setFilter] = useState('pending_review')
+  const [actingId, setActingId] = useState(null)
+  const [notesDraft, setNotesDraft] = useState({})
+
+  const fetchRequests = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    let query = supabase.from(STUDIO_ONE_TABLE).select('*').order('created_at', { ascending: false })
+    if (filter !== 'all') query = query.eq('status', filter)
+    const { data, error: err } = await query
+    if (err) setError(`Could not load Studio One requests: ${err.message}`)
+    else setRequests(data || [])
+    setLoading(false)
+  }, [filter])
+
+  useEffect(() => { fetchRequests() }, [fetchRequests])
+
+  async function sendStudioOneApprovalEmail(row) {
+    if (!row.email) return { ok: false, skipped: true, message: 'Request has no email — approval email not sent.' }
+    if (!EMAIL_WEBHOOK_URL) return { ok: false, skipped: true, message: 'VITE_EMAIL_WEBHOOK_URL is not configured — approval email not sent.' }
+
+    const checkoutUrl = `https://gelitup.com/studio-one/checkout?token=${encodeURIComponent(row.checkout_token)}`
+    const subject = 'Your Studio One logo has been approved — complete your order'
+    const html = `
+      <p style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;margin:0 0 8px">Hi ${row.first_name || 'there'},</p>
+      <p style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;margin:0 0 8px">
+        Great news — your logo has been approved for Studio One private label! Click below to complete your order.
+      </p>
+      <p style="margin:20px 0">
+        <a href="${checkoutUrl}" style="display:inline-block;background:#D43790;color:#fff;padding:14px 32px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;">Complete my order →</a>
+      </p>
+      <p style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;margin:0 0 8px">Order total: €${Number(row.subtotal_eur).toFixed(2)}</p>
+      <p style="font-family:Arial,sans-serif;font-size:12px;color:#6b7280;margin:12px 0 0">Questions? Reply to this email or contact us at distribution@gelitup.com.</p>
+    `
+
+    const headers = { 'Content-Type': 'application/json' }
+    if (SUPABASE_ANON_KEY) {
+      headers.apikey = SUPABASE_ANON_KEY
+      headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`
+    }
+
+    try {
+      const response = await fetch(EMAIL_WEBHOOK_URL, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ from: FROM_EMAIL, to: row.email, subject, html }),
+      })
+      const responsePayload = await response.json().catch(() => null)
+      if (!response.ok) return { ok: false, message: responsePayload?.error || `HTTP ${response.status}` }
+      return { ok: true, message: `Approval email sent to ${row.email}.` }
+    } catch (err) {
+      return { ok: false, message: err?.message || 'Network error while sending approval email.' }
+    }
+  }
+
+  async function updateStatus(row, nextStatus) {
+    const confirmLabel = nextStatus === 'approved' ? 'approve' : 'reject'
+    const ok = window.confirm(`Are you sure you want to ${confirmLabel} the Studio One request from ${row.first_name} ${row.last_name}?`)
+    if (!ok) return
+    setActingId(row.id)
+    const patch = {
+      status: nextStatus,
+      admin_notes: notesDraft[row.id] ?? row.admin_notes ?? null,
+      ...(nextStatus === 'approved' ? { approved_at: new Date().toISOString() } : {}),
+      ...(nextStatus === 'rejected' ? { rejected_at: new Date().toISOString() } : {}),
+    }
+    const { error: err } = await supabase.from(STUDIO_ONE_TABLE).update(patch).eq('id', row.id)
+    if (err) {
+      setActingId(null)
+      alert(`Could not update request: ${err.message}`)
+      return
+    }
+    if (nextStatus === 'approved') {
+      const emailResult = await sendStudioOneApprovalEmail({ ...row, ...patch })
+      if (!emailResult.ok && !emailResult.skipped) {
+        alert(`Request approved, but the approval email failed to send: ${emailResult.message}`)
+      }
+    }
+    setActingId(null)
+    fetchRequests()
+  }
+
+  function renderCart(cartJson) {
+    if (!Array.isArray(cartJson) || !cartJson.length) {
+      return <span className="text-xs text-slate-400">No items</span>
+    }
+    return (
+      <ul className="space-y-0.5">
+        {cartJson.map((item, i) => (
+          <li key={i} className="flex items-center gap-2 text-xs">
+            <span className="font-mono text-slate-500 w-16 truncate">{item.code}</span>
+            <span className="flex-1 truncate text-slate-700">{item.name}</span>
+            <span className="text-slate-500">€{Number(item.price).toFixed(2)}</span>
+            <span className="font-semibold text-slate-900">×{item.qty}</span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold text-slate-900">Studio One Requests</h2>
+        <div className="flex gap-1.5">
+          {['pending_review', 'approved', 'rejected', 'all'].map(key => (
+            <button
+              key={key}
+              onClick={() => setFilter(key)}
+              className={`rounded-full px-3 py-1 text-[11px] font-semibold transition ${filter === key ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            >
+              {key === 'pending_review' ? 'Pending' : key === 'all' ? 'All' : key[0].toUpperCase() + key.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading && <p className="text-sm text-slate-500">Loading…</p>}
+      {error && <p className="text-sm text-rose-600">{error}</p>}
+      {!loading && !error && requests.length === 0 && (
+        <p className="text-sm text-slate-400">No {filter === 'all' ? '' : filter.replace('_', ' ')} requests.</p>
+      )}
+
+      <div className="space-y-4">
+        {requests.map(row => (
+          <div key={row.id} className="rounded-xl border border-slate-200 p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+              <div>
+                <p className="font-semibold text-slate-900">
+                  {row.first_name} {row.last_name}
+                  {row.company_name ? <span className="text-slate-500 font-normal"> — {row.company_name}</span> : null}
+                </p>
+                <p className="text-xs text-slate-500">{row.email} {row.phone ? `· ${row.phone}` : ''}</p>
+                <p className="text-xs text-slate-500">
+                  {row.address}, {row.city}, {row.postal_code}, {row.country}
+                </p>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Submitted {new Date(row.created_at).toLocaleString()}
+                  {row.terms_accepted ? ' · Terms accepted' : ' · Terms NOT accepted'}
+                </p>
+              </div>
+              {studioOneStatusBadge(row.status)}
+            </div>
+
+            <div className="grid sm:grid-cols-[120px_1fr] gap-4 mb-3">
+              <div>
+                {row.logo_url ? (
+                  <a href={row.logo_url} target="_blank" rel="noreferrer">
+                    <img src={row.logo_url} alt="Logo" className="w-28 h-28 object-contain border rounded-lg bg-white" />
+                  </a>
+                ) : (
+                  <div className="w-28 h-28 flex items-center justify-center border rounded-lg text-[11px] text-slate-400">No logo</div>
+                )}
+              </div>
+              <div>
+                {renderCart(row.cart_json)}
+                <p className="text-sm font-semibold text-slate-900 mt-2">
+                  Subtotal: €{Number(row.subtotal_eur).toFixed(2)}
+                </p>
+              </div>
+            </div>
+
+            <textarea
+              placeholder="Admin notes (optional — e.g. reason for rejection)"
+              value={notesDraft[row.id] ?? row.admin_notes ?? ''}
+              onChange={e => setNotesDraft(prev => ({ ...prev, [row.id]: e.target.value }))}
+              className="w-full border rounded-lg p-2 text-xs mb-3"
+              rows={2}
+            />
+
+            {row.status === 'pending_review' && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => updateStatus(row, 'approved')}
+                  disabled={actingId === row.id}
+                  className="rounded-lg bg-emerald-600 text-white text-xs font-semibold px-4 py-2 disabled:opacity-50"
+                >
+                  Approve
+                </button>
+                <button
+                  onClick={() => updateStatus(row, 'rejected')}
+                  disabled={actingId === row.id}
+                  className="rounded-lg bg-rose-600 text-white text-xs font-semibold px-4 py-2 disabled:opacity-50"
+                >
+                  Reject
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function buildSearchIndex(row) {
   try {
     return JSON.stringify(row || {}).toLowerCase()
@@ -6561,6 +6782,12 @@ export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
           >
             Draft Carts
           </button>
+          <button
+            onClick={() => setTab('studio-one')}
+            className={`w-full rounded-full px-3 py-2 text-center text-[11px] font-semibold leading-tight transition sm:w-auto sm:px-4 sm:py-1.5 sm:text-sm ${tab === 'studio-one' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+          >
+            Studio One
+          </button>
         </div>
       </div>
 
@@ -6573,6 +6800,7 @@ export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
         {tab === 'ambassadors' && <AmbassadorApplicationsPanel />}
         {tab === 'guestbook' && <GuestbookPanel />}
         {tab === 'draft-carts' && <DraftCartsPanel />}
+        {tab === 'studio-one' && <StudioOneRequestsPanel />}
       </div>
     </section>
   )
