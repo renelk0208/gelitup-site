@@ -190,18 +190,23 @@ export default function PrivateLabelPage() {
     setForm(prev => ({ ...prev, [key]: value }))
   }
 
+  const [logoPreviewable, setLogoPreviewable] = useState(true)
+
   function handleLogoChange(e) {
     const file = e.target.files?.[0]
     if (!file) return
+    const previewable = file.type.startsWith('image/') // PNG/JPG/GIF/WEBP/SVG render in <img>; PDF/AI/EPS do not
     setLogoFile(file)
+    setLogoPreviewable(previewable)
     setLogoPreview(prev => {
       if (prev) URL.revokeObjectURL(prev)
-      return URL.createObjectURL(file)
+      return previewable ? URL.createObjectURL(file) : null
     })
   }
 
   function handleRemoveLogo() {
     setLogoFile(null)
+    setLogoPreviewable(true)
     setLogoPreview(prev => {
       if (prev) URL.revokeObjectURL(prev)
       return null
@@ -345,14 +350,26 @@ export default function PrivateLabelPage() {
           </p>
           <label className="block border-2 border-dashed rounded-xl p-6 text-center cursor-pointer hover:border-[#D43790] transition">
             <input type="file" accept="image/*,.ai,.eps,.pdf" className="hidden" onChange={handleLogoChange} />
-            {logoPreview ? (
+            {logoFile && logoPreviewable && logoPreview ? (
               <img src={logoPreview} alt="Logo preview" className="max-h-32 mx-auto object-contain" />
+            ) : logoFile && !logoPreviewable ? (
+              <div className="text-[#4A4A4A]">
+                <div className="font-medium">{logoFile.name}</div>
+                <div className="text-xs text-black/50 mt-1">File selected — no live preview available for this file type</div>
+              </div>
             ) : (
               <span className="text-[#4A4A4A]">Click to upload your logo (PNG, SVG, AI, EPS, PDF)</span>
             )}
           </label>
 
-          {logoPreview ? (
+          {logoFile && !logoPreviewable && (
+            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-2">
+              PDF, AI, and EPS files can't show a live preview in your browser — but your file will still be
+              uploaded and used for the real print. For a live bottle preview, upload a PNG, JPG, or SVG instead.
+            </p>
+          )}
+
+          {logoFile ? (
             <div className="flex items-center justify-center gap-4 mt-2">
               <label className="text-xs font-medium text-[#D43790] cursor-pointer hover:underline">
                 Try a different logo
@@ -371,7 +388,7 @@ export default function PrivateLabelPage() {
             Your logo will be reviewed by our team before checkout is enabled.
           </p>
 
-          {logoPreview && (
+          {logoFile && logoPreviewable && logoPreview && (
             <div className="mt-6">
               <h3 className="text-sm font-semibold mb-3 text-black/70">See it on your bottle</h3>
               <div className="max-w-[220px] mx-auto">
@@ -494,8 +511,12 @@ function BottlePreview({ template, logoUrl }) {
   // the same point as the original box, so a square logo doesn't sit inside
   // an oversized wide rectangle.
   const box = (() => {
-    const maxW = (labelBox.width / 100) * imgWidth
-    const maxH = (labelBox.height / 100) * imgHeight
+    // Shrink the max bounds slightly up front (in geometry, not CSS padding —
+    // percentage CSS padding resolves against the container's width even for
+    // top/bottom, which badly distorts a short-and-wide patch like this one).
+    const MARGIN = 0.92
+    const maxW = (labelBox.width / 100) * imgWidth * MARGIN
+    const maxH = (labelBox.height / 100) * imgHeight * MARGIN
     let w = maxW
     let h = maxH
     if (logoDims && logoDims.w > 0 && logoDims.h > 0) {
@@ -529,7 +550,7 @@ function BottlePreview({ template, logoUrl }) {
         <img src={src} alt={label} className="block w-full h-auto" />
         {/* White patch masks the printed sample logo, customer's logo renders on top */}
         <div
-          className="absolute bg-white flex items-center justify-center p-[4%] shadow-sm"
+          className="absolute bg-white flex items-center justify-center shadow-sm"
           style={{
             left: `${box.left}%`,
             top: `${box.top}%`,
