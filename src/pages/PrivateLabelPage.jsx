@@ -158,7 +158,7 @@ const BOTTLE_TEMPLATES = [
     key: 'colour-11ml',
     label: '11ml Colour Bottle',
     src: '/private-label/bottle-11ml-colour.jpg',
-    labelBox: { left: 27, top: 70.5, width: 38, height: 8 },
+    labelBox: { left: 29.95, top: 72.8, width: 34.87, height: 9.41 },
   },
 ]
 
