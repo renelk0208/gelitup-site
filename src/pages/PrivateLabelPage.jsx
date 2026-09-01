@@ -1,6 +1,10 @@
 import { useMemo, useState } from 'react'
 import { supabase, hasSupabaseConfig } from '../lib/supabaseClient'
 
+const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL || ''
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+const EMAIL_FROM = import.meta.env.VITE_EMAIL_FROM || 'GEL.IT.UP Distributors <distributors@gelitup.com>'
+
 // ────────────────────────────────────────────────────────────────────────────
 // Colour catalogue for the Custom Bottle Branding Programme.
 // Codes sourced from the Studio One private-label colour PDF.
@@ -357,6 +361,73 @@ export default function PrivateLabelPage() {
         })
       if (insertError) throw insertError
 
+      // Send the customer an order-confirmation email — non-blocking, the
+      // request itself is already saved even if this fails.
+      if (EMAIL_WEBHOOK_URL) {
+        try {
+          const itemsHtml = cartJson.map(item =>
+            `<li style="font-family:Arial,sans-serif;font-size:13px;color:#1f2937;">${item.name} × ${item.qty} — €${(item.price * item.qty).toFixed(2)}</li>`
+          ).join('')
+          const headers = { 'Content-Type': 'application/json' }
+          if (SUPABASE_ANON_KEY) {
+            headers.apikey = SUPABASE_ANON_KEY
+            headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`
+          }
+          await fetch(EMAIL_WEBHOOK_URL, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              from: EMAIL_FROM,
+              to: form.email.trim().toLowerCase(),
+              subject: 'We\'ve received your Studio One order',
+              html: `
+                <p style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;margin:0 0 8px">Hi ${form.first_name || 'there'},</p>
+                <p style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;margin:0 0 8px">
+                  Thanks for your Studio One order! Here's what you submitted:
+                </p>
+                <ul style="margin:0 0 12px;padding-left:18px">${itemsHtml}</ul>
+                <p style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;font-weight:700;margin:0 0 8px">Subtotal: €${subtotal.toFixed(2)}</p>
+                <p style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;margin:0 0 8px">
+                  Our team will review your logo and email you a secure checkout link once approved
+                  (usually within 1–2 business days). Shipping will be confirmed at that point.
+                </p>
+                <p style="font-family:Arial,sans-serif;font-size:12px;color:#6b7280;margin:12px 0 0">Questions? Reply to this email or contact us at distribution@gelitup.com.</p>
+              `,
+            }),
+          })
+        } catch {
+          // Email failed to send — the request itself was still recorded successfully.
+        }
+      }
+
+      // Silently create (or reuse) a B2B portal account so the customer can log in
+      // later. Non-blocking — if this fails, the Studio One request itself still stands.
+      try {
+        const randomPassword = crypto.randomUUID().slice(0, 16)
+        await supabase.auth.signUp({
+          email: form.email.trim().toLowerCase(),
+          password: randomPassword,
+          options: {
+            data: {
+              company_name: form.company_name.trim(),
+              vat_number: form.vat_number.trim() || null,
+              account_type: 'studio_one',
+              full_name: `${form.first_name.trim()} ${form.last_name.trim()}`,
+              contact_phone: form.phone.trim(),
+              contact_email: form.email.trim().toLowerCase(),
+              invoice_address_line1: form.address.trim(),
+              invoice_area: form.city.trim(),
+              invoice_country: form.country.trim(),
+              invoice_postal_code: form.postal_code.trim(),
+            },
+            emailRedirectTo: `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(form.email.trim().toLowerCase())}`,
+          },
+        })
+      } catch {
+        // Account already exists, or signup silently failed — either way the
+        // Studio One request has already been recorded, so don't block on this.
+      }
+
       setSubmitted(true)
     } catch (err) {
       console.error(err)
@@ -376,6 +447,10 @@ export default function PrivateLabelPage() {
         <p className="text-[#4A4A4A]">
           Our team will review your logo and get back to you at <strong>{form.email}</strong> with a secure
           checkout link once approved. This usually takes 1–2 business days.
+        </p>
+        <p className="text-[#4A4A4A] mt-2">
+          We've also created you an account — check your email for a link to set your password so you
+          can log in and track your order.
         </p>
       </div>
     )
