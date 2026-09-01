@@ -7222,7 +7222,7 @@ function LangSwitcher() {
 
 const navItems = [
   { to: '/starter-kits', label: 'Starter Kits' },
-  { to: '/private-label', label: 'Studio One', highlight: true },
+  { to: '/studio-one', label: 'Studio One', highlight: true },
   { to: '/about-us', label: 'About us' },
   { to: '/blog', label: 'Blog' },
   { to: '/for-academies', label: 'Academies' },
@@ -21435,7 +21435,8 @@ function App() {
           <Route path="/for-academies" element={<ForAcademiesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/private-label" element={<PrivateLabelPage />} />
+          <Route path="/studio-one" element={<PrivateLabelPage />} />
+          <Route path="/private-label" element={<Navigate to="/studio-one" replace />} />
           <Route path="/studio-one/checkout" element={<StudioOneCheckoutPage />} />
           <Route path="/starter-kits" element={<StarterKits discount={{ active: isCatalogueDiscountActive(), pct: CATALOGUE_DISCOUNT_PCT }} onAddKit={handleAddKit} />} />
           <Route path="/starter-kits/:kitId" element={<StarterKits discount={{ active: isCatalogueDiscountActive(), pct: CATALOGUE_DISCOUNT_PCT }} onAddKit={handleAddKit} />} />

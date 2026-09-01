@@ -3915,6 +3915,75 @@ function StudioOneRequestsPanel() {
     }
   }
 
+  function buildStudioOneCsvRows(rows) {
+    const csvEsc = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`
+    const header = [
+      'Order #', 'Order Date', 'Status',
+      'First Name', 'Last Name', 'Company', 'Email', 'Phone',
+      'Address', 'City', 'Postal Code', 'Country',
+      'VAT Number', 'VAT Verified',
+      'Item Code', 'Item Name', 'Qty', 'Unit Price (EUR)', 'Line Total (EUR)',
+      'Subtotal (EUR)', 'Shipping (EUR)', 'Order Total (EUR)',
+      'Logo URL',
+    ].join(',')
+
+    const lines = []
+    rows.forEach(row => {
+      const items = Array.isArray(row.cart_json) ? row.cart_json : []
+      const shipping = Number(row.shipping_eur) || 0
+      const orderTotal = Number(row.subtotal_eur || 0) + shipping
+      const orderDate = row.created_at ? new Date(row.created_at).toISOString().slice(0, 10) : ''
+      const baseFields = [
+        csvEsc(row.id), csvEsc(orderDate), csvEsc(row.status),
+        csvEsc(row.first_name), csvEsc(row.last_name), csvEsc(row.company_name || ''),
+        csvEsc(row.email), csvEsc(row.phone || ''),
+        csvEsc(row.address), csvEsc(row.city), csvEsc(row.postal_code), csvEsc(row.country),
+        csvEsc(row.vat_number || ''), csvEsc(row.vat_verified ? 'Yes' : 'No'),
+      ]
+      if (!items.length) {
+        lines.push([...baseFields, '', '', '', '', '',
+          csvEsc(Number(row.subtotal_eur || 0).toFixed(2)),
+          csvEsc(shipping.toFixed(2)),
+          csvEsc(orderTotal.toFixed(2)),
+          csvEsc(row.logo_url || ''),
+        ].join(','))
+        return
+      }
+      items.forEach((item, idx) => {
+        const lineTotal = Number(item.price || 0) * Number(item.qty || 0)
+        lines.push([
+          ...baseFields,
+          csvEsc(item.code || ''), csvEsc(item.name || ''), csvEsc(item.qty || ''),
+          csvEsc(Number(item.price || 0).toFixed(2)), csvEsc(lineTotal.toFixed(2)),
+          csvEsc(idx === 0 ? Number(row.subtotal_eur || 0).toFixed(2) : ''),
+          csvEsc(idx === 0 ? shipping.toFixed(2) : ''),
+          csvEsc(idx === 0 ? orderTotal.toFixed(2) : ''),
+          csvEsc(idx === 0 ? (row.logo_url || '') : ''),
+        ].join(','))
+      })
+    })
+    return [header, ...lines].join('\r\n')
+  }
+
+  function downloadStudioOneCsv(rows, filename) {
+    const csv = buildStudioOneCsvRows(rows)
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    triggerFileDownload(blob, filename)
+  }
+
+  async function downloadLogo(row) {
+    if (!row.logo_url) return
+    try {
+      const res = await fetch(row.logo_url)
+      const blob = await res.blob()
+      const ext = row.logo_url.split('.').pop().split('?')[0] || 'png'
+      const safeName = `${row.first_name}-${row.last_name}-logo`.replace(/[^a-z0-9-]/gi, '_')
+      triggerFileDownload(blob, `${safeName}.${ext}`)
+    } catch {
+      window.open(row.logo_url, '_blank', 'noopener,noreferrer')
+    }
+  }
+
   async function saveShipping(row) {
     const raw = shippingDraft[row.id]
     const amount = Number(raw)
@@ -3988,16 +4057,26 @@ function StudioOneRequestsPanel() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold text-slate-900">Studio One Requests</h2>
-        <div className="flex gap-1.5">
-          {['pending_review', 'approved', 'rejected', 'all'].map(key => (
-            <button
-              key={key}
-              onClick={() => setFilter(key)}
-              className={`rounded-full px-3 py-1 text-[11px] font-semibold transition ${filter === key ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-            >
-              {key === 'pending_review' ? 'Pending' : key === 'all' ? 'All' : key[0].toUpperCase() + key.slice(1)}
-            </button>
-          ))}
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1.5">
+            {['pending_review', 'approved', 'rejected', 'all'].map(key => (
+              <button
+                key={key}
+                onClick={() => setFilter(key)}
+                className={`rounded-full px-3 py-1 text-[11px] font-semibold transition ${filter === key ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              >
+                {key === 'pending_review' ? 'Pending' : key === 'all' ? 'All' : key[0].toUpperCase() + key.slice(1)}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => downloadStudioOneCsv(requests, `studio-one-${filter}-${new Date().toISOString().slice(0, 10)}.csv`)}
+            disabled={!requests.length}
+            className="rounded-lg bg-emerald-700 text-white text-[11px] font-semibold px-3 py-1.5 disabled:opacity-40"
+          >
+            Export CSV ({requests.length})
+          </button>
         </div>
       </div>
 
@@ -4041,6 +4120,15 @@ function StudioOneRequestsPanel() {
                   </a>
                 ) : (
                   <div className="w-28 h-28 flex items-center justify-center border rounded-lg text-[11px] text-slate-400">No logo</div>
+                )}
+                {row.logo_url && (
+                  <button
+                    type="button"
+                    onClick={() => downloadLogo(row)}
+                    className="mt-1.5 w-28 rounded-lg bg-slate-100 text-slate-700 text-[10px] font-semibold px-2 py-1 hover:bg-slate-200"
+                  >
+                    Download logo
+                  </button>
                 )}
               </div>
               <div>
@@ -4087,7 +4175,7 @@ function StudioOneRequestsPanel() {
               rows={2}
             />
 
-            {row.status === 'pending_review' && (
+            {row.status === 'pending_review' ? (
               <div className="flex gap-2">
                 <button
                   onClick={() => updateStatus(row, 'approved')}
@@ -4103,7 +4191,22 @@ function StudioOneRequestsPanel() {
                 >
                   Reject
                 </button>
+                <button
+                  type="button"
+                  onClick={() => downloadStudioOneCsv([row], `studio-one-order-${row.id}.csv`)}
+                  className="rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold px-4 py-2 hover:bg-slate-200"
+                >
+                  Export CSV
+                </button>
               </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => downloadStudioOneCsv([row], `studio-one-order-${row.id}.csv`)}
+                className="rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold px-4 py-2 hover:bg-slate-200"
+              >
+                Export CSV
+              </button>
             )}
           </div>
         ))}
