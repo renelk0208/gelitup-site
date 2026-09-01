@@ -340,7 +340,7 @@ export default function PrivateLabelPage() {
           your logo on every bottle.
         </p>
         <p className="text-[#4A4A4A] mt-2">Minimum order €{MIN_ORDER_EUR}.</p>
-        <p className="font-bold text-[#D43790] mt-1">Pilot programme runs 15 September – 15 November.</p>
+        <p className="font-bold text-[#D43790] mt-1">Pilot programme runs 15 September – 15 November</p>
       </header>
 
       <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-12">
