@@ -280,7 +280,7 @@ export default function PrivateLabelPage() {
       <div className="max-w-2xl mx-auto px-6 py-24 text-center">
         <h1 className="text-3xl font-bold text-[#D43790] mb-4">Request received!</h1>
         <p className="text-[#4A4A4A] mb-2">
-          Thank you — your private label request and logo have been submitted for review.
+          Thank you — your Studio One request and logo have been submitted for review.
         </p>
         <p className="text-[#4A4A4A]">
           Our team will review your logo and get back to you at <strong>{form.email}</strong> with a secure
@@ -293,7 +293,7 @@ export default function PrivateLabelPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-16">
       <header className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-3">Your Brand. Our Signature.</h1>
+        <h1 className="text-4xl font-bold mb-3">Studio One — Your Brand. Our Signature.</h1>
         <p className="text-[#4A4A4A] max-w-2xl mx-auto">
           The same superior, HEMA-free, EU-certified gel formula your clients already trust — now with
           your logo on every bottle. Minimum order €{MIN_ORDER_EUR}.
