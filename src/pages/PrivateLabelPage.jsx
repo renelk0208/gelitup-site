@@ -173,6 +173,19 @@ export default function PrivateLabelPage() {
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [error, setError] = useState('')
 
+  const colourCodeSet = useMemo(() => new Set(COLOUR_CODES.map(c => String(c))), [])
+  const colourStats = useMemo(() => {
+    let distinctColours = 0
+    let totalColourBottles = 0
+    for (const [code, item] of Object.entries(cart)) {
+      if (colourCodeSet.has(String(code)) && item.qty > 0) {
+        distinctColours += 1
+        totalColourBottles += item.qty
+      }
+    }
+    return { distinctColours, totalColourBottles }
+  }, [cart, colourCodeSet])
+
   const subtotal = useMemo(
     () => Object.values(cart).reduce((sum, item) => sum + item.qty * item.price, 0),
     [cart]
@@ -405,6 +418,12 @@ export default function PrivateLabelPage() {
               </div>
             ))}
           </div>
+
+          <p className="text-sm font-medium text-black/70 mb-6">
+            {colourStats.distinctColours === 0
+              ? 'No colours selected yet'
+              : `${colourStats.distinctColours} colour${colourStats.distinctColours === 1 ? '' : 's'} selected (${colourStats.totalColourBottles} bottle${colourStats.totalColourBottles === 1 ? '' : 's'} total)`}
+          </p>
 
           <h2 className="text-xl font-semibold mb-1">4. Choose your colours</h2>
           <p className="text-xs text-black/50 mb-4">
