@@ -307,7 +307,8 @@ export default function PrivateLabelPage() {
         <h1 className="text-4xl font-bold mb-3">Studio One — Your Brand. Our Signature.</h1>
         <p className="text-[#4A4A4A] max-w-2xl mx-auto">
           The same superior, HEMA-free, EU-certified gel formula your clients already trust — now with
-          your logo on every bottle. Minimum order €{MIN_ORDER_EUR}. Pilot programme runs 15 September – 15 November.
+          your logo on every bottle. Minimum order €{MIN_ORDER_EUR}. Pilot programme runs{' '}
+          <span className="font-bold text-[#D43790]">15 September – 15 November</span>.
         </p>
       </header>
 
