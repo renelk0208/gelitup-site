@@ -334,8 +334,8 @@ export default function PrivateLabelPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-16">
       <header className="text-center mb-12">
-        <p className="text-lg font-bold tracking-wide text-[#D43790] mb-1">STUDIO ONE</p>
-        <h1 className="text-4xl font-bold mb-3">Your Brand. Our Signature.</h1>
+        <h1 className="text-4xl font-bold tracking-wide text-[#D43790] mb-2">STUDIO ONE</h1>
+        <p className="text-2xl font-semibold mb-3">Your Brand. Our Signature.</p>
         <p className="text-[#4A4A4A] max-w-2xl mx-auto">
           The same superior, HEMA-free, EU-certified gel formula your clients already trust — now with
           your logo on every bottle.
