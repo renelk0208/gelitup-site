@@ -190,7 +190,18 @@ export default function PrivateLabelPage() {
     const file = e.target.files?.[0]
     if (!file) return
     setLogoFile(file)
-    setLogoPreview(URL.createObjectURL(file))
+    setLogoPreview(prev => {
+      if (prev) URL.revokeObjectURL(prev)
+      return URL.createObjectURL(file)
+    })
+  }
+
+  function handleRemoveLogo() {
+    setLogoFile(null)
+    setLogoPreview(prev => {
+      if (prev) URL.revokeObjectURL(prev)
+      return null
+    })
   }
 
   function addToCart(code, name, price) {
@@ -333,6 +344,22 @@ export default function PrivateLabelPage() {
               <span className="text-[#4A4A4A]">Click to upload your logo (PNG, SVG, AI, EPS, PDF)</span>
             )}
           </label>
+
+          {logoPreview ? (
+            <div className="flex items-center justify-center gap-4 mt-2">
+              <label className="text-xs font-medium text-[#D43790] cursor-pointer hover:underline">
+                Try a different logo
+                <input type="file" accept="image/*,.ai,.eps,.pdf" className="hidden" onChange={handleLogoChange} />
+              </label>
+              <button
+                type="button"
+                onClick={handleRemoveLogo}
+                className="text-xs font-medium text-black/50 hover:text-black/70 hover:underline"
+              >
+                Remove
+              </button>
+            </div>
+          ) : null}
           <p className="text-xs text-black/50 mt-2">
             Your logo will be reviewed by our team before checkout is enabled.
           </p>
