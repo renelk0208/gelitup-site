@@ -467,11 +467,9 @@ export default function PrivateLabelPage() {
                             {item.image && (
                               <img src={item.image} alt={`Colour ${item.code}`} className="w-full h-full object-contain" />
                             )}
-                            {item.qty > 1 && (
-                              <span className="absolute -bottom-0.5 -right-0.5 bg-[#D43790] text-white text-[9px] leading-none rounded-full w-4 h-4 flex items-center justify-center">
-                                {item.qty}
-                              </span>
-                            )}
+                            <span className="absolute -bottom-0.5 -right-0.5 bg-[#D43790] text-white text-[9px] leading-none rounded-full w-4 h-4 flex items-center justify-center">
+                              {item.qty}
+                            </span>
                           </div>
                         ))}
                       </div>
