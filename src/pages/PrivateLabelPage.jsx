@@ -174,17 +174,6 @@ export default function PrivateLabelPage() {
   const [error, setError] = useState('')
 
   const colourCodeSet = useMemo(() => new Set(COLOUR_CODES.map(c => String(c))), [])
-  const colourStats = useMemo(() => {
-    let distinctColours = 0
-    let totalColourBottles = 0
-    for (const [code, item] of Object.entries(cart)) {
-      if (colourCodeSet.has(String(code)) && item.qty > 0) {
-        distinctColours += 1
-        totalColourBottles += item.qty
-      }
-    }
-    return { distinctColours, totalColourBottles }
-  }, [cart, colourCodeSet])
 
   // Groups selected colours by family (derived from their image folder, e.g.
   // ".../SOLID GEL POLISH/Red/GIUP-50.webp" -> "Red") so the order summary
@@ -448,53 +437,8 @@ export default function PrivateLabelPage() {
             ))}
           </div>
 
-          <p className="text-sm font-medium text-black/70 mb-6">
-            {colourStats.distinctColours === 0
-              ? 'No colours selected yet'
-              : `${colourStats.distinctColours} colour${colourStats.distinctColours === 1 ? '' : 's'} selected (${colourStats.totalColourBottles} bottle${colourStats.totalColourBottles === 1 ? '' : 's'} total)`}
-          </p>
-
-          <h2 className="text-xl font-semibold mb-1">4. Choose your colours</h2>
-          <p className="text-xs text-black/50 mb-4">
-            Official colour swatches — the physical dip sample that ships with your order remains the true reference.
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-6 max-h-[32rem] overflow-y-auto pr-1">
-            {COLOUR_CODES.map(code => {
-              const imgSrc = COLOUR_IMAGE[code]
-              const inCart = (cart[code]?.qty || 0) > 0
-              return (
-                <div
-                  key={code}
-                  className={`border rounded-lg p-3 text-center transition overflow-hidden bg-white ${inCart ? 'border-[#D43790] ring-1 ring-[#D43790]' : ''}`}
-                >
-                  <div className="w-full aspect-square mx-auto mb-1 flex items-center justify-center overflow-hidden">
-                    {imgSrc ? (
-                      <img
-                        src={imgSrc}
-                        alt={`Colour ${code}`}
-                        className="block max-w-full max-h-full object-contain"
-                        loading="lazy"
-                        onError={e => { e.currentTarget.style.display = 'none' }}
-                      />
-                    ) : (
-                      <span className="text-xs text-black/30">N/A</span>
-                    )}
-                  </div>
-                  <div className="text-sm font-semibold mb-1">{code}</div>
-                  <div className="text-xs text-black/50 mb-2">€{COLOUR_PRICE.toFixed(2)}</div>
-                  <CartStepper
-                    compact
-                    qty={cart[code]?.qty || 0}
-                    onAdd={() => addToCart(code, `Colour ${code}`, COLOUR_PRICE)}
-                    onRemove={() => removeFromCart(code)}
-                  />
-                </div>
-              )
-            })}
-          </div>
-
           {(cartSummary.essentialsChosen.length > 0 || cartSummary.colourFamilies.length > 0) && (
-            <div className="border rounded-lg p-4 mb-4 bg-black/[0.02]">
+            <div className="border rounded-lg p-4 mb-6 bg-black/[0.02]">
               <p className="font-semibold text-sm mb-3">Your order so far</p>
 
               {cartSummary.essentialsChosen.length > 0 && (
@@ -536,6 +480,45 @@ export default function PrivateLabelPage() {
               )}
             </div>
           )}
+
+          <h2 className="text-xl font-semibold mb-1">4. Choose your colours</h2>
+          <p className="text-xs text-black/50 mb-4">
+            Official colour swatches — the physical dip sample that ships with your order remains the true reference.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-6 max-h-[32rem] overflow-y-auto pr-1">
+            {COLOUR_CODES.map(code => {
+              const imgSrc = COLOUR_IMAGE[code]
+              const inCart = (cart[code]?.qty || 0) > 0
+              return (
+                <div
+                  key={code}
+                  className={`border rounded-lg p-3 text-center transition overflow-hidden bg-white ${inCart ? 'border-[#D43790] ring-1 ring-[#D43790]' : ''}`}
+                >
+                  <div className="w-full aspect-square mx-auto mb-1 flex items-center justify-center overflow-hidden">
+                    {imgSrc ? (
+                      <img
+                        src={imgSrc}
+                        alt={`Colour ${code}`}
+                        className="block max-w-full max-h-full object-contain"
+                        loading="lazy"
+                        onError={e => { e.currentTarget.style.display = 'none' }}
+                      />
+                    ) : (
+                      <span className="text-xs text-black/30">N/A</span>
+                    )}
+                  </div>
+                  <div className="text-sm font-semibold mb-1">{code}</div>
+                  <div className="text-xs text-black/50 mb-2">€{COLOUR_PRICE.toFixed(2)}</div>
+                  <CartStepper
+                    compact
+                    qty={cart[code]?.qty || 0}
+                    onAdd={() => addToCart(code, `Colour ${code}`, COLOUR_PRICE)}
+                    onRemove={() => removeFromCart(code)}
+                  />
+                </div>
+              )
+            })}
+          </div>
 
           <div className="border-t pt-4 bg-white">
             <div className="flex justify-between font-semibold mb-1">
