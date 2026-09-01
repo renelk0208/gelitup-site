@@ -169,7 +169,13 @@ export default function PrivateLabelPage() {
   const [form, setForm] = useState(emptyForm)
   const [logoFile, setLogoFile] = useState(null)
   const [logoPreview, setLogoPreview] = useState(null)
-  const [cart, setCart] = useState({}) // { [code]: { qty, price, name } }
+  const [cart, setCart] = useState(() => {
+    const initial = {}
+    ESSENTIALS.forEach(item => {
+      initial[item.code] = { qty: 1, price: item.price, name: item.name }
+    })
+    return initial
+  }) // { [code]: { qty, price, name } }
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
@@ -296,6 +302,12 @@ export default function PrivateLabelPage() {
     setError('')
 
     if (!formValid) { setError('Please fill in all required fields.'); return }
+    const missingEssential = ESSENTIALS.find(item => !(cart[item.code]?.qty >= 1))
+    if (missingEssential) {
+      setError(`${missingEssential.name} is included for best results — please keep it in your order.`)
+      alert(`It's preferable that our products are used together for the best performance and durability, so ${missingEssential.name} is included with every Studio One order.`)
+      return
+    }
     if (!logoFile) {
       setError('Please upload your logo.')
       alert('Please upload your logo before submitting.')
@@ -348,7 +360,7 @@ export default function PrivateLabelPage() {
       setSubmitted(true)
     } catch (err) {
       console.error(err)
-      setError('Something went wrong submitting your request. Please try again.')
+      setError(`Something went wrong submitting your request: ${err?.message || 'please try again.'}`)
     } finally {
       setSubmitting(false)
     }
@@ -504,11 +516,12 @@ export default function PrivateLabelPage() {
             {ESSENTIALS.map(item => (
               <div key={item.code} className="flex items-center justify-between border rounded-lg p-3">
                 <div>
-                  <div className="font-medium">{item.name}</div>
+                  <div className="font-medium">{item.name} <span className="text-[10px] font-normal text-black/40">(included)</span></div>
                   <div className="text-xs text-black/50">€{item.price.toFixed(2)} / bottle</div>
                 </div>
                 <CartStepper
-                  qty={cart[item.code]?.qty || 0}
+                  min={1}
+                  qty={cart[item.code]?.qty || 1}
                   onAdd={() => addToCart(item.code, item.name, item.price)}
                   onRemove={() => removeFromCart(item.code)}
                 />
@@ -656,10 +669,10 @@ export default function PrivateLabelPage() {
   )
 }
 
-function CartStepper({ qty, onAdd, onRemove, compact }) {
+function CartStepper({ qty, onAdd, onRemove, compact, min = 0 }) {
   return (
     <div className={`flex items-center justify-center gap-2 ${compact ? '' : 'mt-1'}`}>
-      <button type="button" onClick={onRemove} disabled={qty === 0}
+      <button type="button" onClick={onRemove} disabled={qty <= min}
         className="w-6 h-6 rounded-full border flex items-center justify-center disabled:opacity-30">−</button>
       <span className="w-5 text-center text-sm">{qty}</span>
       <button type="button" onClick={onAdd}
