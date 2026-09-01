@@ -381,30 +381,30 @@ export default function PrivateLabelPage() {
           <p className="text-xs text-black/50 mb-4">
             Official colour swatches — the physical dip sample that ships with your order remains the true reference.
           </p>
-          <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-6 max-h-96 overflow-y-auto pr-1">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-6 max-h-[32rem] overflow-y-auto pr-1">
             {COLOUR_CODES.map(code => {
               const imgSrc = COLOUR_IMAGE[code]
               const inCart = (cart[code]?.qty || 0) > 0
               return (
                 <div
                   key={code}
-                  className={`border rounded-lg p-2 text-center transition ${inCart ? 'border-[#D43790] ring-1 ring-[#D43790]' : ''}`}
+                  className={`border rounded-lg p-3 text-center transition overflow-hidden bg-white ${inCart ? 'border-[#D43790] ring-1 ring-[#D43790]' : ''}`}
                 >
-                  <div className="w-16 h-16 mx-auto mb-1 flex items-center justify-center">
+                  <div className="w-full aspect-square mx-auto mb-1 flex items-center justify-center overflow-hidden">
                     {imgSrc ? (
                       <img
                         src={imgSrc}
                         alt={`Colour ${code}`}
-                        className="max-w-full max-h-full object-contain"
+                        className="block max-w-full max-h-full object-contain"
                         loading="lazy"
                         onError={e => { e.currentTarget.style.display = 'none' }}
                       />
                     ) : (
-                      <span className="text-[9px] text-black/30">N/A</span>
+                      <span className="text-xs text-black/30">N/A</span>
                     )}
                   </div>
-                  <div className="text-xs font-semibold mb-1">{code}</div>
-                  <div className="text-[10px] text-black/50 mb-1">€{COLOUR_PRICE.toFixed(2)}</div>
+                  <div className="text-sm font-semibold mb-1">{code}</div>
+                  <div className="text-xs text-black/50 mb-2">€{COLOUR_PRICE.toFixed(2)}</div>
                   <CartStepper
                     compact
                     qty={cart[code]?.qty || 0}
