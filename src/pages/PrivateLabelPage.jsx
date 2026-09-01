@@ -212,19 +212,19 @@ function trimImageToContent(url) {
           }
         }
 
-        if (maxX < minX || maxY < minY) { resolve(url); return } // nothing detected, fall back
+        if (maxX < minX || maxY < minY) { resolve({ url, hasAlpha }); return } // nothing detected, fall back
         const w = maxX - minX + 1
         const h = maxY - minY + 1
         const out = document.createElement('canvas')
         out.width = w
         out.height = h
         out.getContext('2d').drawImage(canvas, minX, minY, w, h, 0, 0, w, h)
-        resolve(out.toDataURL('image/png'))
+        resolve({ url: out.toDataURL('image/png'), hasAlpha })
       } catch {
-        resolve(url) // canvas access issue — fall back to the untrimmed image
+        resolve({ url, hasAlpha: null }) // canvas access issue — fall back to the untrimmed image
       }
     }
-    img.onerror = () => resolve(url)
+    img.onerror = () => resolve({ url, hasAlpha: null })
     img.src = url
   })
 }
@@ -249,6 +249,7 @@ export default function PrivateLabelPage() {
   }
 
   const [logoPreviewable, setLogoPreviewable] = useState(true)
+  const [logoHasTransparency, setLogoHasTransparency] = useState(null) // null = unknown/not applicable
 
   async function handleLogoChange(e) {
     const file = e.target.files?.[0]
@@ -256,6 +257,7 @@ export default function PrivateLabelPage() {
     const previewable = file.type.startsWith('image/') // PNG/JPG/GIF/WEBP/SVG render in <img>; PDF/AI/EPS do not
     setLogoFile(file)
     setLogoPreviewable(previewable)
+    setLogoHasTransparency(null)
 
     if (!previewable) {
       setLogoPreview(prev => {
@@ -271,9 +273,10 @@ export default function PrivateLabelPage() {
       return rawUrl // show immediately, then swap to the trimmed version once ready
     })
     try {
-      const trimmedUrl = await trimImageToContent(rawUrl)
+      const { url: trimmedUrl, hasAlpha } = await trimImageToContent(rawUrl)
       URL.revokeObjectURL(rawUrl)
       setLogoPreview(trimmedUrl)
+      if (file.type === 'image/png') setLogoHasTransparency(hasAlpha)
     } catch {
       // keep the untrimmed preview if trimming fails for any reason
     }
@@ -282,6 +285,7 @@ export default function PrivateLabelPage() {
   function handleRemoveLogo() {
     setLogoFile(null)
     setLogoPreviewable(true)
+    setLogoHasTransparency(null)
     setLogoPreview(prev => {
       if (prev) URL.revokeObjectURL(prev)
       return null
@@ -441,6 +445,14 @@ export default function PrivateLabelPage() {
             <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-2">
               PDF, AI, and EPS files can't show a live preview in your browser — but your file will still be
               uploaded and used for the real print. For a live bottle preview, upload a PNG, JPG, or SVG instead.
+            </p>
+          )}
+
+          {logoHasTransparency === false && (
+            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-2">
+              This PNG has a solid white background, not a transparent one. It'll still work, but the white
+              area may show as a visible box on the bottle instead of blending in. For best results, save your
+              logo as a PNG with a transparent background.
             </p>
           )}
 
