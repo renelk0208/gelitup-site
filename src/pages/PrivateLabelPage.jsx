@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase, hasSupabaseConfig } from '../lib/supabaseClient'
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -158,6 +158,10 @@ const BOTTLE_TEMPLATES = [
     key: 'colour-11ml',
     label: '11ml Colour Bottle',
     src: '/private-label/bottle-11ml-colour.jpg',
+    imgWidth: 1319,
+    imgHeight: 2390,
+    // Maximum bounds the label patch may occupy (in % of the photo) — the
+    // actual patch shrinks to hug the logo's own aspect ratio within this box.
     labelBox: { left: 29.95, top: 72.8, width: 34.87, height: 9.41 },
   },
 ]
@@ -472,7 +476,51 @@ export default function PrivateLabelPage() {
 }
 
 function BottlePreview({ template, logoUrl }) {
-  const { src, label, labelBox } = template
+  const { src, label, labelBox, imgWidth, imgHeight } = template
+  const [logoDims, setLogoDims] = useState(null) // { w, h } natural size of uploaded logo
+
+  useEffect(() => {
+    if (!logoUrl) { setLogoDims(null); return }
+    let cancelled = false
+    const im = new Image()
+    im.onload = () => {
+      if (!cancelled) setLogoDims({ w: im.naturalWidth, h: im.naturalHeight })
+    }
+    im.src = logoUrl
+    return () => { cancelled = true }
+  }, [logoUrl])
+
+  // Fit the logo's own aspect ratio inside the max label bounds, centered on
+  // the same point as the original box, so a square logo doesn't sit inside
+  // an oversized wide rectangle.
+  const box = (() => {
+    const maxW = (labelBox.width / 100) * imgWidth
+    const maxH = (labelBox.height / 100) * imgHeight
+    let w = maxW
+    let h = maxH
+    if (logoDims && logoDims.w > 0 && logoDims.h > 0) {
+      const logoAspect = logoDims.w / logoDims.h
+      const maxAspect = maxW / maxH
+      if (logoAspect > maxAspect) {
+        w = maxW
+        h = w / logoAspect
+      } else {
+        h = maxH
+        w = h * logoAspect
+      }
+    }
+    const centerXpx = ((labelBox.left + labelBox.width / 2) / 100) * imgWidth
+    const centerYpx = ((labelBox.top + labelBox.height / 2) / 100) * imgHeight
+    const leftPx = centerXpx - w / 2
+    const topPx = centerYpx - h / 2
+    return {
+      left: (leftPx / imgWidth) * 100,
+      top: (topPx / imgHeight) * 100,
+      width: (w / imgWidth) * 100,
+      height: (h / imgHeight) * 100,
+    }
+  })()
+
   return (
     <div className="text-center">
       {/* Wrapper sizes itself to the image's true rendered dimensions (no forced
@@ -483,10 +531,10 @@ function BottlePreview({ template, logoUrl }) {
         <div
           className="absolute bg-white flex items-center justify-center p-[4%] shadow-sm"
           style={{
-            left: `${labelBox.left}%`,
-            top: `${labelBox.top}%`,
-            width: `${labelBox.width}%`,
-            height: `${labelBox.height}%`,
+            left: `${box.left}%`,
+            top: `${box.top}%`,
+            width: `${box.width}%`,
+            height: `${box.height}%`,
           }}
         >
           <img src={logoUrl} alt="Your logo" className="max-w-full max-h-full object-contain" />
