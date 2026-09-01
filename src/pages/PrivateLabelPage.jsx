@@ -210,7 +210,7 @@ export default function PrivateLabelPage() {
         items: items.sort((a, b) => String(a.code).localeCompare(String(b.code), undefined, { numeric: true })),
         count: items.reduce((s, i) => s + i.qty, 0),
       }))
-      .sort((a, b) => b.count - a.count)
+      .sort((a, b) => a.family.localeCompare(b.family))
     return { essentialsChosen, colourFamilies: sortedFamilies }
   }, [cart, colourCodeSet])
 
@@ -556,7 +556,7 @@ export default function PrivateLabelPage() {
                 <li>This is a pilot programme running from 15 September to 15 November, and does not constitute a contract or ongoing commitment between Thermitek LTD and the client.</li>
                 <li>Logos must be submitted in clear, print-ready format. Logos requiring design correction or adaptation may be rejected, delayed, and/or subject to an additional fee.</li>
                 <li>Thermitek LTD reserves the right to reject any logo or order, in whole or in part, without providing a reason. In case of doubt or dispute, the Company holds the final decision.</li>
-                <li>All colours and products are subject to availability — orders are fulfilled while stocks last.</li>
+                <li>All colours and products are subject to availability — orders are fulfilled while stocks last. Approved orders are dispatched within 7–14 working days.</li>
                 <li>This service is not available to competing brands or businesses engaged in gel polish manufacture, private label, or wholesale distribution.</li>
                 <li>Removal or alteration of labels once applied to bottles is strictly prohibited.</li>
                 <li>It is the client's sole responsibility to ensure batch numbers and production dates remain visible and unaltered.</li>
