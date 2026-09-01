@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { supabase, hasSupabaseConfig } from '../lib/supabaseClient'
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -151,82 +151,9 @@ const ESSENTIALS = [
 const COLOUR_PRICE = 9.7 // per bottle, private-label colour
 const MIN_ORDER_EUR = 200
 
-// Label placement (as % of image width/height) where each bottle's printed
-// logo sits, so we can mask it and composite the customer's own logo there.
-const BOTTLE_TEMPLATES = [
-  {
-    key: 'colour-11ml',
-    label: '11ml Colour Bottle',
-    src: '/private-label/bottle-11ml-colour.jpg',
-    imgWidth: 1319,
-    imgHeight: 2390,
-    // Maximum bounds the label patch may occupy (in % of the photo) — the
-    // actual patch shrinks to hug the logo's own aspect ratio within this box.
-    // Centered on the vertical midpoint of the bottle's white body (measured
-    // between the cap and the base curve), above the printed divider line.
-    labelBox: { left: 29.95, top: 59.8, width: 34.87, height: 9.41 },
-  },
-]
-
 const emptyForm = {
   first_name: '', last_name: '', company_name: '', email: '', phone: '',
   address: '', city: '', postal_code: '', country: '',
-}
-
-// Crops a logo image down to its actual visible content (trimming any
-// transparent or near-white padding baked into the uploaded file), so the
-// bottle preview sizes/positions the real artwork rather than its canvas.
-// Only affects the on-screen preview — the original file is what gets
-// uploaded/printed untouched.
-function trimImageToContent(url) {
-  return new Promise(resolve => {
-    const img = new Image()
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas')
-        canvas.width = img.naturalWidth
-        canvas.height = img.naturalHeight
-        const ctx = canvas.getContext('2d')
-        ctx.drawImage(img, 0, 0)
-        const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height)
-
-        let hasAlpha = false
-        for (let i = 3; i < data.length; i += 4 * 97) {
-          if (data[i] < 255) { hasAlpha = true; break }
-        }
-
-        let minX = width, minY = height, maxX = -1, maxY = -1
-        for (let y = 0; y < height; y++) {
-          const rowStart = y * width * 4
-          for (let x = 0; x < width; x++) {
-            const idx = rowStart + x * 4
-            const isContent = hasAlpha
-              ? data[idx + 3] > 10
-              : !(data[idx] > 245 && data[idx + 1] > 245 && data[idx + 2] > 245)
-            if (isContent) {
-              if (x < minX) minX = x
-              if (x > maxX) maxX = x
-              if (y < minY) minY = y
-              if (y > maxY) maxY = y
-            }
-          }
-        }
-
-        if (maxX < minX || maxY < minY) { resolve({ url, hasAlpha }); return } // nothing detected, fall back
-        const w = maxX - minX + 1
-        const h = maxY - minY + 1
-        const out = document.createElement('canvas')
-        out.width = w
-        out.height = h
-        out.getContext('2d').drawImage(canvas, minX, minY, w, h, 0, 0, w, h)
-        resolve({ url: out.toDataURL('image/png'), hasAlpha })
-      } catch {
-        resolve({ url, hasAlpha: null }) // canvas access issue — fall back to the untrimmed image
-      }
-    }
-    img.onerror = () => resolve({ url, hasAlpha: null })
-    img.src = url
-  })
 }
 
 export default function PrivateLabelPage() {
@@ -250,33 +177,16 @@ export default function PrivateLabelPage() {
 
   const [logoPreviewable, setLogoPreviewable] = useState(true)
 
-  async function handleLogoChange(e) {
+  function handleLogoChange(e) {
     const file = e.target.files?.[0]
     if (!file) return
     const previewable = file.type.startsWith('image/') // PNG/JPG/GIF/WEBP/SVG render in <img>; PDF/AI/EPS do not
     setLogoFile(file)
     setLogoPreviewable(previewable)
-
-    if (!previewable) {
-      setLogoPreview(prev => {
-        if (prev) URL.revokeObjectURL(prev)
-        return null
-      })
-      return
-    }
-
-    const rawUrl = URL.createObjectURL(file)
     setLogoPreview(prev => {
       if (prev) URL.revokeObjectURL(prev)
-      return rawUrl // show immediately, then swap to the trimmed version once ready
+      return previewable ? URL.createObjectURL(file) : null
     })
-    try {
-      const { url: trimmedUrl } = await trimImageToContent(rawUrl)
-      URL.revokeObjectURL(rawUrl)
-      setLogoPreview(trimmedUrl)
-    } catch {
-      // keep the untrimmed preview if trimming fails for any reason
-    }
   }
 
   function handleRemoveLogo() {
@@ -463,19 +373,6 @@ export default function PrivateLabelPage() {
             Your logo will be reviewed by our team before checkout is enabled.
           </p>
 
-          {logoFile && logoPreviewable && logoPreview && (
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold mb-3 text-black/70">See it on your bottle</h3>
-              <div className="max-w-[220px] mx-auto">
-                {BOTTLE_TEMPLATES.map(tpl => (
-                  <BottlePreview key={tpl.key} template={tpl} logoUrl={logoPreview} />
-                ))}
-              </div>
-              <p className="text-[10px] text-black/40 mt-2 text-center">
-                Preview only — final label placement and print quality are confirmed during logo approval.
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Right column: colour & product cart */}
@@ -563,80 +460,6 @@ export default function PrivateLabelPage() {
           </div>
         </div>
       </form>
-    </div>
-  )
-}
-
-function BottlePreview({ template, logoUrl }) {
-  const { src, label, labelBox, imgWidth, imgHeight } = template
-  const [logoDims, setLogoDims] = useState(null) // { w, h } natural size of uploaded logo
-
-  useEffect(() => {
-    if (!logoUrl) { setLogoDims(null); return }
-    let cancelled = false
-    const im = new Image()
-    im.onload = () => {
-      if (!cancelled) setLogoDims({ w: im.naturalWidth, h: im.naturalHeight })
-    }
-    im.src = logoUrl
-    return () => { cancelled = true }
-  }, [logoUrl])
-
-  // Fit the logo's own aspect ratio inside the max label bounds, centered on
-  // the same point as the original box, so a square logo doesn't sit inside
-  // an oversized wide rectangle.
-  const box = (() => {
-    // Shrink the max bounds slightly up front (in geometry, not CSS padding —
-    // percentage CSS padding resolves against the container's width even for
-    // top/bottom, which badly distorts a short-and-wide patch like this one).
-    const MARGIN = 0.92
-    const maxW = (labelBox.width / 100) * imgWidth * MARGIN
-    const maxH = (labelBox.height / 100) * imgHeight * MARGIN
-    let w = maxW
-    let h = maxH
-    if (logoDims && logoDims.w > 0 && logoDims.h > 0) {
-      const logoAspect = logoDims.w / logoDims.h
-      const maxAspect = maxW / maxH
-      if (logoAspect > maxAspect) {
-        w = maxW
-        h = w / logoAspect
-      } else {
-        h = maxH
-        w = h * logoAspect
-      }
-    }
-    const centerXpx = ((labelBox.left + labelBox.width / 2) / 100) * imgWidth
-    const centerYpx = ((labelBox.top + labelBox.height / 2) / 100) * imgHeight
-    const leftPx = centerXpx - w / 2
-    const topPx = centerYpx - h / 2
-    return {
-      left: (leftPx / imgWidth) * 100,
-      top: (topPx / imgHeight) * 100,
-      width: (w / imgWidth) * 100,
-      height: (h / imgHeight) * 100,
-    }
-  })()
-
-  return (
-    <div className="text-center">
-      {/* Wrapper sizes itself to the image's true rendered dimensions (no forced
-          aspect ratio) so the % -based overlay lines up exactly with the photo. */}
-      <div className="relative inline-block bg-white rounded-lg overflow-hidden border">
-        <img src={src} alt={label} className="block w-full h-auto" />
-        {/* White patch masks the printed sample logo, customer's logo renders on top */}
-        <div
-          className="absolute bg-white flex items-center justify-center shadow-sm"
-          style={{
-            left: `${box.left}%`,
-            top: `${box.top}%`,
-            width: `${box.width}%`,
-            height: `${box.height}%`,
-          }}
-        >
-          <img src={logoUrl} alt="Your logo" className="max-w-full max-h-full object-contain" />
-        </div>
-      </div>
-      <p className="text-[11px] text-black/60 mt-1">{label}</p>
     </div>
   )
 }
