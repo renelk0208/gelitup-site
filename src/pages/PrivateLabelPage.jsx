@@ -9,6 +9,8 @@ import { supabase, hasSupabaseConfig } from '../lib/supabaseClient'
 // (public/gelitup-content/product-images) via the product manifest — matches what
 // ships, not an on-screen colour approximation.
 const COLOUR_IMAGE = {
+  '01': '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/White/GIUP-01.webp',
+  15: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Black/GIUP-15.webp',
   127: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-127.webp',
   130: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-130.webp',
   131: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP131.webp',
@@ -132,6 +134,7 @@ const COLOUR_IMAGE = {
 }
 
 const COLOUR_CODES = [
+  '01', 15,
   127,130,131,132,133,134,137,140,141,142,107,108,109,114,115,117,119,121,122,126,
   75,78,79,84,85,86,87,88,94,96,11,14,16,50,52,53,60,61,62,63,
   2051,2052,2055,2057,2060,2062,2135,2136,2137,2138,1929,1930,1933,1934,1947,2034,2045,2046,2049,2050,
@@ -144,7 +147,7 @@ const COLOUR_CODES = [
 const ESSENTIALS = [
   { code: 'B2B01', name: 'Non-Wipe Top Coat', price: 12.225 },
   { code: 'B2B03', name: '5-in-1 Base Clear', price: 12.225 },
-  { code: '15', name: 'Primer', price: 3.9 },
+  { code: 'PRIMER', name: 'Primer', price: 3.9 },
   { code: 'SUPERBOND', name: 'Superbond', price: 9.0 },
 ]
 
