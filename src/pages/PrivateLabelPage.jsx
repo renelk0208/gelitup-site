@@ -162,7 +162,9 @@ const BOTTLE_TEMPLATES = [
     imgHeight: 2390,
     // Maximum bounds the label patch may occupy (in % of the photo) — the
     // actual patch shrinks to hug the logo's own aspect ratio within this box.
-    labelBox: { left: 29.95, top: 72.8, width: 34.87, height: 9.41 },
+    // Centered on the vertical midpoint of the bottle's white body (measured
+    // between the cap and the base curve), above the printed divider line.
+    labelBox: { left: 29.95, top: 59.8, width: 34.87, height: 9.41 },
   },
 ]
 
