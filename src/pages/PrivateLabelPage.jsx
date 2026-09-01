@@ -150,6 +150,23 @@ const ESSENTIALS = [
 const COLOUR_PRICE = 5.9 // per bottle, private-label colour
 const MIN_ORDER_EUR = 200
 
+// Label placement (as % of image width/height) where each bottle's printed
+// logo sits, so we can mask it and composite the customer's own logo there.
+const BOTTLE_TEMPLATES = [
+  {
+    key: 'colour-11ml',
+    label: '11ml Colour Bottle',
+    src: '/private-label/bottle-11ml-colour.jpg',
+    labelBox: { left: 27, top: 70.5, width: 38, height: 8 },
+  },
+  {
+    key: 'base-top-15ml',
+    label: '15ml Base / Top Coat',
+    src: '/private-label/bottle-15ml-base-top.jpg',
+    labelBox: { left: 38, top: 74.5, width: 22, height: 6.5 },
+  },
+]
+
 const emptyForm = {
   first_name: '', last_name: '', company_name: '', email: '', phone: '',
   address: '', city: '', postal_code: '', country: '',
@@ -324,6 +341,20 @@ export default function PrivateLabelPage() {
           <p className="text-xs text-black/50 mt-2">
             Your logo will be reviewed by our team before checkout is enabled.
           </p>
+
+          {logoPreview && (
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold mb-3 text-black/70">See it on your bottle</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {BOTTLE_TEMPLATES.map(tpl => (
+                  <BottlePreview key={tpl.key} template={tpl} logoUrl={logoPreview} />
+                ))}
+              </div>
+              <p className="text-[10px] text-black/40 mt-2">
+                Preview only — final label placement and print quality are confirmed during logo approval.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Right column: colour & product cart */}
@@ -411,6 +442,30 @@ export default function PrivateLabelPage() {
           </div>
         </div>
       </form>
+    </div>
+  )
+}
+
+function BottlePreview({ template, logoUrl }) {
+  const { src, label, labelBox } = template
+  return (
+    <div className="text-center">
+      <div className="relative w-full aspect-[3/5] bg-white rounded-lg overflow-hidden border">
+        <img src={src} alt={label} className="w-full h-full object-contain" />
+        {/* White patch masks the printed sample logo, customer's logo renders on top */}
+        <div
+          className="absolute bg-white flex items-center justify-center p-[2%] shadow-sm"
+          style={{
+            left: `${labelBox.left}%`,
+            top: `${labelBox.top}%`,
+            width: `${labelBox.width}%`,
+            height: `${labelBox.height}%`,
+          }}
+        >
+          <img src={logoUrl} alt="Your logo" className="max-w-full max-h-full object-contain" />
+        </div>
+      </div>
+      <p className="text-[11px] text-black/60 mt-1">{label}</p>
     </div>
   )
 }
