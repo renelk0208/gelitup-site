@@ -4103,7 +4103,6 @@ function buildAmbassadorShipmentEmail(row, ship, setPasswordLink, nextPackageIso
     const earliest = new Date(center); earliest.setDate(earliest.getDate() - 7)
     const latest = new Date(center); latest.setDate(latest.getDate() + 7)
     const fmt = (d) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-    parts.push(`<p>📦 Your next GEL.IT.UP package is expected to ship around <strong>${fmt(earliest)} – ${fmt(latest)}</strong>. We'll email you again with tracking details as soon as it's on its way.</p>`)
   }
   // NOTE: admin_comment is intentionally NOT included — it is an internal-only note.
   return {
