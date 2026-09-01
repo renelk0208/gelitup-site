@@ -148,7 +148,7 @@ const ESSENTIALS = [
   { code: 'SUPERBOND', name: 'Superbond', price: 9.0 },
 ]
 
-const COLOUR_PRICE = 5.9 // per bottle, private-label colour
+const COLOUR_PRICE = 9.7 // per bottle, private-label colour
 const MIN_ORDER_EUR = 200
 
 // Label placement (as % of image width/height) where each bottle's printed
