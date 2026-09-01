@@ -455,7 +455,7 @@ export default function PrivateLabelPage() {
               <ol className="list-decimal list-inside space-y-1">
                 <li>This is a pilot programme and does not constitute a contract or ongoing commitment between Thermitek LTD and the client.</li>
                 <li>Logos must be submitted in clear, print-ready format. Logos requiring design correction or adaptation may be rejected, delayed, and/or subject to an additional fee.</li>
-                <li>Thermitek LTD reserves the right to reject any logo or order, in whole or in part, without providing a reason.</li>
+                <li>Thermitek LTD reserves the right to reject any logo or order, in whole or in part, without providing a reason. In case of doubt or dispute, the Company holds the final decision.</li>
                 <li>All colours and products are subject to availability — orders are fulfilled while stocks last.</li>
                 <li>This service is not available to competing brands or businesses engaged in gel polish manufacture, private label, or wholesale distribution.</li>
                 <li>Removal or alteration of labels once applied to bottles is strictly prohibited.</li>
