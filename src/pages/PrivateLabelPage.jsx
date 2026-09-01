@@ -188,7 +188,7 @@ export default function PrivateLabelPage() {
         const parts = imgPath.split('/')
         const family = parts.length >= 2 ? parts[parts.length - 2] : 'Other'
         if (!colourGroups[family]) colourGroups[family] = []
-        colourGroups[family].push({ code, qty: item.qty, image: imgPath })
+        colourGroups[family].push({ code, qty: item.qty, image: imgPath, price: item.price })
       } else {
         essentialsChosen.push({ code, name: item.name, qty: item.qty })
       }
@@ -198,6 +198,7 @@ export default function PrivateLabelPage() {
         family,
         items: items.sort((a, b) => String(a.code).localeCompare(String(b.code), undefined, { numeric: true })),
         count: items.reduce((s, i) => s + i.qty, 0),
+        total: items.reduce((s, i) => s + i.qty * i.price, 0),
       }))
       .sort((a, b) => a.family.localeCompare(b.family))
     return { essentialsChosen, colourFamilies: sortedFamilies }
@@ -459,17 +460,20 @@ export default function PrivateLabelPage() {
                     <div key={group.family}>
                       <div className="flex justify-between text-xs font-medium text-black/70 mb-1">
                         <span>{group.family}</span>
-                        <span>{group.count} bottle{group.count === 1 ? '' : 's'}</span>
+                        <span>{group.count} bottle{group.count === 1 ? '' : 's'} · €{group.total.toFixed(2)}</span>
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-2">
                         {group.items.map(item => (
-                          <div key={item.code} className="relative w-8 h-8 rounded border bg-white overflow-hidden" title={`#${item.code} × ${item.qty}`}>
-                            {item.image && (
-                              <img src={item.image} alt={`Colour ${item.code}`} className="w-full h-full object-contain" />
-                            )}
-                            <span className="absolute -bottom-0.5 -right-0.5 bg-[#D43790] text-white text-[9px] leading-none rounded-full w-4 h-4 flex items-center justify-center">
-                              {item.qty}
-                            </span>
+                          <div key={item.code} className="text-center">
+                            <div className="relative w-8 h-8 rounded border bg-white overflow-hidden" title={`#${item.code} × ${item.qty}`}>
+                              {item.image && (
+                                <img src={item.image} alt={`Colour ${item.code}`} className="w-full h-full object-contain" />
+                              )}
+                              <span className="absolute -bottom-0.5 -right-0.5 bg-[#D43790] text-white text-[9px] leading-none rounded-full w-4 h-4 flex items-center justify-center">
+                                {item.qty}
+                              </span>
+                            </div>
+                            <div className="text-[9px] text-black/50 mt-0.5">€{(item.qty * item.price).toFixed(2)}</div>
                           </div>
                         ))}
                       </div>
