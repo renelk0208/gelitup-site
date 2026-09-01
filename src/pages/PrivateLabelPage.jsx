@@ -142,8 +142,8 @@ const COLOUR_CODES = [
 ]
 
 const ESSENTIALS = [
-  { code: 'B2B01', name: 'Non-Wipe Top Coat', price: 4.5 },
-  { code: 'B2B03', name: '5-in-1 Base Clear', price: 4.5 },
+  { code: 'B2B01', name: 'Non-Wipe Top Coat', price: 12.225 },
+  { code: 'B2B03', name: '5-in-1 Base Clear', price: 12.225 },
   { code: '15', name: 'Primer', price: 3.9 },
 ]
 
