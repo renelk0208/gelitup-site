@@ -5,33 +5,130 @@ import { supabase, hasSupabaseConfig } from '../lib/supabaseClient'
 // Colour catalogue for the Custom Bottle Branding Programme.
 // Codes sourced from the Studio One private-label colour PDF.
 // ────────────────────────────────────────────────────────────────────────────
-// Hex approximated from the official colour-catalogue swatch art (Studio One colours PDF).
-// Close enough for browsing/selection — the real dip sample ships with every order.
-const COLOUR_HEX = {
-  11: '#B8B8B8', 14: '#9B938E', 16: '#4F2B2B', 50: '#BE2135', 52: '#A41B26',
-  53: '#911D2D', 60: '#551E2A', 61: '#441821', 62: '#44101D', 63: '#590D26',
-  75: '#18005A', 78: '#223C64', 79: '#4C546D', 84: '#2E6964', 85: '#0C6346',
-  86: '#3A3630', 87: '#5C6B54', 88: '#808C73', 94: '#6E866A', 96: '#5D795F',
-  107: '#8F516F', 108: '#BF6E84', 109: '#CE7BA5', 114: '#C35D7E', 115: '#A77A96',
-  117: '#883752', 119: '#CBA3AB', 121: '#A4939A', 122: '#AC8580', 126: '#966652',
-  127: '#50385D', 130: '#644C71', 131: '#B47EB5', 132: '#501B49', 133: '#9682AA',
-  134: '#473756', 137: '#C8ACBC', 140: '#A29992', 141: '#AA8E70', 142: '#B37758',
-  143: '#91796A', 144: '#886156', 145: '#401F1F', 146: '#412C28', 147: '#C0BFBE',
-  150: '#664431', 151: '#65321F', 152: '#884F3B', 153: '#AB988D', 156: '#8D6D62',
-  704: '#265A6F', 706: '#5F6380', 1804: '#A28A99', 1808: '#6C4F5C', 1809: '#501A87',
-  1814: '#6A5E56', 1815: '#111134', 1816: '#200F4B', 1820: '#7D6B42', 1927: '#9B8849',
-  1929: '#2B2C17', 1930: '#412221', 1933: '#292539', 1934: '#783643', 1947: '#AA9E93',
-  2034: '#808994', 2045: '#836F7C', 2046: '#894640', 2049: '#7F3A2B', 2050: '#9B4E2F',
-  2051: '#C0C0C0', 2052: '#4D4248', 2055: '#7F8082', 2057: '#8D303B', 2060: '#35232A',
-  2062: '#3F4240', 2135: '#652521', 2136: '#7A2E29', 2137: '#7C3727', 2138: '#9A4928',
-  2139: '#63442B', 2140: '#5F3023', 2141: '#4E443A', 2142: '#3A372E', 2211: '#C400B4',
-  2212: '#B3AA91', 2214: '#474228', 2216: '#6E6656', 2217: '#937760', 2221: '#9D703C',
-  2222: '#974422', 2223: '#4F3825', 2224: '#412B1F', 2227: '#4D140F', 2228: '#471B2B',
-  2230: '#4D6B69', 2231: '#28565A', 2232: '#2D3F53', 2233: '#8C6992', 2305: '#C686D9',
-  2442: '#813523', 2444: '#717169', 2458: '#600A1B', 2461: '#540009', 2511: '#D8BBB4',
-  2515: '#B09C95', 2523: '#937A77', 2525: '#45232F', 2526: '#713887', 2527: '#DFA8C7',
-  2528: '#74000B', 2529: '#8FB4E0', AD01: '#540011', AD02: '#B1AFAF', N006: '#BA9A90',
-  N007: '#C7B5AF', N018: '#C7B3AF', R27: '#3E1715', R29: '#4B0021', R32: '#C2C0C2',
+// Real product-photo swatches, resolved from the existing catalogue image library
+// (public/gelitup-content/product-images) via the product manifest — matches what
+// ships, not an on-screen colour approximation.
+const COLOUR_IMAGE = {
+  127: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-127.webp',
+  130: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-130.webp',
+  131: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP131.webp',
+  132: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-132.webp',
+  133: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-133.webp',
+  134: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-134.webp',
+  137: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-137.webp',
+  140: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-140.webp',
+  141: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-141.webp',
+  142: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-142.webp',
+  107: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-107.webp',
+  108: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-108.webp',
+  109: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-109.webp',
+  114: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-114.webp',
+  115: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-115.webp',
+  117: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-117.webp',
+  119: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-119.webp',
+  121: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-121.webp',
+  122: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-122.webp',
+  126: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-126.webp',
+  75: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-75.webp',
+  78: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-78.webp',
+  79: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-79.webp',
+  84: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-84.webp',
+  85: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-85.webp',
+  86: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-86.webp',
+  87: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-87.webp',
+  88: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-88.webp',
+  94: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-94.webp',
+  96: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-96.webp',
+  11: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-11.webp',
+  14: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-14.webp',
+  16: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-16.webp',
+  50: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-50.webp',
+  52: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-52.webp',
+  53: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-53.webp',
+  60: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-60.webp',
+  61: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-61.webp',
+  62: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-62.webp',
+  63: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-63.webp',
+  2051: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2051.webp',
+  2052: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2052.webp',
+  2055: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Black/GIUP-2055.webp',
+  2057: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Pink/GIUP-2057.webp',
+  2060: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2060.webp',
+  2062: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2062.webp',
+  2135: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2135.webp',
+  2136: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2136.webp',
+  2137: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2137.webp',
+  2138: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2138.webp',
+  1929: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-1929.webp',
+  1930: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-1930.webp',
+  1933: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-1933.webp',
+  1934: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-1934.webp',
+  1947: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-1947.webp',
+  2034: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2034.webp',
+  2045: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2045.webp',
+  2046: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2046.webp',
+  2049: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2049.webp',
+  2050: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2050.webp',
+  704: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-704.webp',
+  706: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-706.webp',
+  1804: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-1804.webp',
+  1808: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-1808.webp',
+  1809: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-1809.webp',
+  1814: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-1814.webp',
+  1815: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-1815.webp',
+  1816: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-1816.webp',
+  1820: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-1820.webp',
+  1927: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-1927.webp',
+  143: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-143.webp',
+  144: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-144.webp',
+  145: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-145.webp',
+  146: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-146.webp',
+  147: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-147.webp',
+  150: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-150.webp',
+  151: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-151.webp',
+  152: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-152.webp',
+  153: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-153.webp',
+  156: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-156.webp',
+  2528: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2528.webp',
+  2529: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2529.webp',
+  AD01: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-AD01.webp',
+  AD02: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-AD02.webp',
+  N006: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N006.webp',
+  N007: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N007.webp',
+  N018: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-N018.webp',
+  R27: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-R027-brown.webp',
+  R29: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-R029-red.webp',
+  R32: '/gelitup-content/product-images/COLORS/RONE/GIUP-R032-blue.webp',
+  2442: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2442.webp',
+  2444: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2444.webp',
+  2458: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2458.webp',
+  2461: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2461.webp',
+  2511: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2511.webp',
+  2515: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2515.webp',
+  2523: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2523.webp',
+  2525: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2525.webp',
+  2526: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2526.webp',
+  2527: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2527.webp',
+  2222: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Coral Orange Peach/GIUP-2222.webp',
+  2223: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2223.webp',
+  2224: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2224.webp',
+  2227: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Red/GIUP-2227.webp',
+  2228: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2228.webp',
+  2230: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2230.webp',
+  2231: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2231.webp',
+  2232: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2232.webp',
+  2233: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Blue/GIUP-2233.webp',
+  2305: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2305.webp',
+  2139: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2139.webp',
+  2140: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2140.webp',
+  2141: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2141.webp',
+  2142: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Grey/GIUP-2142.webp',
+  2211: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Purple/GIUP-2211.webp',
+  2212: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2212.webp',
+  2214: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2214.webp',
+  2216: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2216.webp',
+  2217: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Green/GIUP-2217.webp',
+  2221: '/gelitup-content/product-images/COLORS/SOLID GEL POLISH/Brown Nude/GIUP-2221.webp',
 }
 
 const COLOUR_CODES = [
@@ -250,22 +347,30 @@ export default function PrivateLabelPage() {
 
           <h2 className="text-xl font-semibold mb-1">4. Choose your colours</h2>
           <p className="text-xs text-black/50 mb-4">
-            Swatches are a close on-screen match — your printed shade card and physical dip sample are the true reference.
+            Photos are our actual catalogue shots — the physical dip sample that ships with your order is the true reference.
           </p>
           <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-6 max-h-96 overflow-y-auto pr-1">
             {COLOUR_CODES.map(code => {
-              const hex = COLOUR_HEX[code] || '#CCCCCC'
+              const imgSrc = COLOUR_IMAGE[code]
               const inCart = (cart[code]?.qty || 0) > 0
               return (
                 <div
                   key={code}
                   className={`border rounded-lg p-2 text-center transition ${inCart ? 'border-[#D43790] ring-1 ring-[#D43790]' : ''}`}
                 >
-                  <div
-                    className="w-10 h-10 rounded-full mx-auto mb-1 border border-black/10 shadow-inner"
-                    style={{ backgroundColor: hex }}
-                    title={`Colour ${code}`}
-                  />
+                  <div className="w-12 h-12 rounded-full mx-auto mb-1 border border-black/10 overflow-hidden bg-black/5 flex items-center justify-center">
+                    {imgSrc ? (
+                      <img
+                        src={imgSrc}
+                        alt={`Colour ${code}`}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        onError={e => { e.currentTarget.style.display = 'none' }}
+                      />
+                    ) : (
+                      <span className="text-[9px] text-black/30">N/A</span>
+                    )}
+                  </div>
                   <div className="text-xs font-semibold mb-1">{code}</div>
                   <div className="text-[10px] text-black/50 mb-1">€{COLOUR_PRICE.toFixed(2)}</div>
                   <CartStepper
