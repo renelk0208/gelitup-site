@@ -7222,6 +7222,7 @@ function LangSwitcher() {
 
 const navItems = [
   { to: '/starter-kits', label: 'Starter Kits' },
+  { to: '/private-label', label: 'Studio One', highlight: true },
   { to: '/about-us', label: 'About us' },
   { to: '/blog', label: 'Blog' },
   { to: '/for-academies', label: 'Academies' },
