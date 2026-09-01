@@ -163,6 +163,7 @@ export default function PrivateLabelPage() {
   const [cart, setCart] = useState({}) // { [code]: { qty, price, name } }
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [termsAccepted, setTermsAccepted] = useState(false)
   const [error, setError] = useState('')
 
   const subtotal = useMemo(
@@ -229,6 +230,7 @@ export default function PrivateLabelPage() {
     if (!formValid) { setError('Please fill in all required fields.'); return }
     if (!logoFile) { setError('Please upload your logo.'); return }
     if (!meetsMinimum) { setError(`Minimum order is €${MIN_ORDER_EUR}. Your current subtotal is €${subtotal.toFixed(2)}.`); return }
+    if (!termsAccepted) { setError('Please accept the Studio One terms & conditions to continue.'); return }
     if (!hasSupabaseConfig) { setError('Ordering is temporarily unavailable. Please try again shortly.'); return }
 
     setSubmitting(true)
@@ -263,6 +265,8 @@ export default function PrivateLabelPage() {
           logo_url: publicUrlData?.publicUrl || null,
           cart_json: cartJson,
           subtotal_eur: subtotal,
+          terms_accepted: true,
+          terms_accepted_at: new Date().toISOString(),
         })
       if (insertError) throw insertError
 
@@ -446,16 +450,40 @@ export default function PrivateLabelPage() {
 
             {error && <div className="text-sm text-red-600 mb-3">{error}</div>}
 
+            <div className="border rounded-lg p-3 mb-3 max-h-32 overflow-y-auto text-[11px] text-black/60 leading-relaxed bg-black/[0.02]">
+              <p className="font-semibold text-black/70 mb-1">Studio One — Terms &amp; Conditions</p>
+              <ol className="list-decimal list-inside space-y-1">
+                <li>This is a pilot programme and does not constitute a contract or ongoing commitment between Thermitek LTD and the client.</li>
+                <li>Logos must be submitted in clear, print-ready format. Logos requiring design correction or adaptation may be rejected, delayed, and/or subject to an additional fee.</li>
+                <li>Thermitek LTD reserves the right to reject any logo or order, in whole or in part, without providing a reason.</li>
+                <li>All colours and products are subject to availability — orders are fulfilled while stocks last.</li>
+                <li>This service is not available to competing brands or businesses engaged in gel polish manufacture, private label, or wholesale distribution.</li>
+                <li>Removal or alteration of labels once applied to bottles is strictly prohibited.</li>
+                <li>It is the client's sole responsibility to ensure batch numbers and production dates remain visible and unaltered.</li>
+                <li>Thermitek LTD is not responsible for any non-compliance, mislabeling, or alteration occurring after products have left the factory.</li>
+                <li>Participation in this pilot does not entitle the client to future private label runs, pricing, or terms.</li>
+              </ol>
+            </div>
+
+            <label className="flex items-start gap-2 mb-4 text-xs text-black/70 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={termsAccepted}
+                onChange={e => setTermsAccepted(e.target.checked)}
+                className="mt-0.5"
+              />
+              I have read and agree to the Studio One Terms &amp; Conditions above.
+            </label>
+
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || !termsAccepted}
               className="w-full bg-[#D43790] text-white font-semibold rounded-lg py-3 disabled:opacity-50"
             >
               {submitting ? 'Submitting…' : 'Submit for logo approval'}
             </button>
             <p className="text-[10px] text-black/40 mt-2 text-center">
               You won't be charged now — we'll email you a checkout link once your logo is approved.
-              Terms and conditions apply.
             </p>
           </div>
         </div>
