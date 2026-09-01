@@ -335,7 +335,10 @@ export default function PrivateLabelPage() {
               value={form.country} onChange={e => updateField('country', e.target.value)} />
           </div>
 
-          <h2 className="text-xl font-semibold mb-4">2. Upload your logo</h2>
+          <h2 className="text-xl font-semibold mb-1">2. Upload your logo</h2>
+          <p className="text-xs text-black/50 mb-3">
+            Best results: a wide logo (roughly 2:1 to 3:1), PNG with a transparent background, at least 800×400px.
+          </p>
           <label className="block border-2 border-dashed rounded-xl p-6 text-center cursor-pointer hover:border-[#D43790] transition">
             <input type="file" accept="image/*,.ai,.eps,.pdf" className="hidden" onChange={handleLogoChange} />
             {logoPreview ? (
