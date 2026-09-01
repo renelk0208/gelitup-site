@@ -7229,6 +7229,7 @@ const navItems = [
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/ambassadors', label: 'Ambassadors' },
   { to: '/guestbook', label: 'Guestbook' },
+  { to: '/pages/contact-us', label: 'Contact us' },
   { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
 ]
 
@@ -20052,7 +20053,6 @@ function App() {
   const adminsTable = import.meta.env.VITE_B2B_ADMINS_TABLE || 'b2b_admins'
   const requireApproval = import.meta.env.VITE_REQUIRE_B2B_APPROVAL !== 'false'
   const [showBackToTop, setShowBackToTop] = useState(false)
-  const [showChatPanel, setShowChatPanel] = useState(false)
   const [showExitIntent, setShowExitIntent] = useState(false)
   const exitIntentShownRef = useRef(false)
   const lang = useLang()
@@ -21762,85 +21762,8 @@ function App() {
         <p className="border-t border-white/15 pt-3 text-white/55">— 2026 GEL.IT.UP by GIUP®</p>
       </footer>
 
-      {/* Floating chat widget + back-to-top */}
+      {/* Back-to-top button */}
       <div className="fixed z-50 flex flex-col items-end gap-2" style={{ bottom: 'calc(24px + env(safe-area-inset-bottom, 0px))', right: 'calc(12px + env(safe-area-inset-right, 0px))' }}>
-        {/* Expandable chat panel */}
-        {!CONTACT_EMAIL_ONLY && showChatPanel && (
-          <div className="mb-1 w-64 rounded-2xl border border-white/10 bg-[#1a1a1a] shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-              <p className="text-sm font-semibold text-white">Chat with us</p>
-              <button
-                type="button"
-                aria-label="Close chat panel"
-                onClick={() => setShowChatPanel(false)}
-                className="text-white/50 hover:text-white"
-              >
-                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
-              </button>
-            </div>
-            <div className="flex flex-col gap-2 p-3">
-              {/* WhatsApp */}
-              <a
-                href={SUPPORT_WHATSAPP_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-3 rounded-xl bg-[#25D366]/15 px-3 py-2.5 transition hover:bg-[#25D366]/25"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 shrink-0 text-[#25D366]">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                </svg>
-                <div>
-                  <p className="text-sm font-semibold text-white">WhatsApp</p>
-                  <p className="text-[11px] text-white/55">English support</p>
-                </div>
-              </a>
-              {/* Viber */}
-              <a
-                href={SUPPORT_VIBER_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-3 rounded-xl bg-[#7360f2]/15 px-3 py-2.5 transition hover:bg-[#7360f2]/25"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 shrink-0 text-[#7360f2]">
-                  <path d="M11.992 2C6.256 2 2 6.03 2 11.578c0 2.704 1.076 5.136 3.017 6.887V21l2.834-1.56c.747.204 1.538.314 2.353.314.122 0 .243-.003.364-.008C10.91 19.81 11.45 20 12 20c3.866 0 7-2.686 7-6s-3.134-6-7-6c-.003 0-.006 0-.01 0zM7.5 9.5c.276 0 .5.224.5.5v.01c0 .276-.224.5-.5.5S7 10.286 7 10.01V10c0-.276.224-.5.5-.5zm4 0c.276 0 .5.224.5.5v.01c0 .276-.224.5-.5.5s-.5-.224-.5-.5V10c0-.276.224-.5.5-.5zm4 0c.276 0 .5.224.5.5v.01c0 .276-.224.5-.5.5s-.5-.224-.5-.5V10c0-.276.224-.5.5-.5zm-8.938 2.964c.343 2.69 2.518 4.846 5.215 5.183l-.043.037c-.413.35-.882.537-1.359.537-.395 0-.791-.118-1.157-.35l-.337-.215-1.693.932.455-1.554-.25-.32A7.014 7.014 0 012.999 11.59c0-2.33 1.096-4.408 2.82-5.77A8.058 8.058 0 002 11.578c0 1.873.641 3.603 1.715 4.982l-.618 2.112 2.165-1.191c.535.285 1.1.43 1.672.43.87 0 1.713-.3 2.428-.858A7.023 7.023 0 018 14c0-3.866 3.134-7 7-7 .341 0 .677.025 1.006.072C14.485 4.81 11.44 2 7.562 2z"/>
-                </svg>
-                <div>
-                  <p className="text-sm font-semibold text-white">Viber</p>
-                  <p className="text-[11px] text-white/55">Multilingual · auto-translate</p>
-                </div>
-              </a>
-              <p className="px-1 pt-1 text-[10px] text-white/30">Opens in a new tab — you won't lose your place.</p>
-            </div>
-          </div>
-        )}
-        {/* WhatsApp direct link — hidden when CONTACT_EMAIL_ONLY */}
-        {!CONTACT_EMAIL_ONLY && <a
-          href={SUPPORT_WHATSAPP_URL}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Message us on WhatsApp"
-          className={`flex items-center gap-2.5 rounded-full bg-[#111111] ${isCheckoutRoute ? 'p-2.5' : 'pl-3 pr-5 py-2.5'} shadow-[0_4px_20px_rgba(0,0,0,0.5)] ring-1 ring-white/10 transition duration-300 hover:bg-[#1a1a1a] active:scale-95`}
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor" className="h-7 w-7 shrink-0 text-[#25D366]">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-          </svg>
-          {!isCheckoutRoute && <span className="flex flex-col leading-tight">
-            <span className="text-sm font-bold text-white">WhatsApp</span>
-            <span className="text-[10px] font-medium text-[#25D366]">click to chat</span>
-          </span>}
-        </a>}
-        {/* Toggle Viber/other channels */}
-        {!CONTACT_EMAIL_ONLY && <button
-          type="button"
-          aria-label={showChatPanel ? 'Close chat options' : 'More chat options'}
-          onClick={() => setShowChatPanel(p => !p)}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-[#111111] shadow-lg ring-1 ring-white/10 transition duration-300 hover:bg-[#1a1a1a] active:scale-95"
-        >
-          {showChatPanel
-            ? <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-white/70" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
-            : <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-white/70" stroke="currentColor" strokeWidth="2"><path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
-          }
-        </button>}
         <button
           type="button"
           aria-label="Back to top"
