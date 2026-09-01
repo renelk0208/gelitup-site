@@ -437,7 +437,7 @@ export default function PrivateLabelPage() {
             })}
           </div>
 
-          <div className="border-t pt-4 sticky bottom-0 bg-white">
+          <div className="border-t pt-4 bg-white">
             <div className="flex justify-between font-semibold mb-1">
               <span>Subtotal</span>
               <span>€{subtotal.toFixed(2)}</span>
