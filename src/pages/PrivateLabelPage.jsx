@@ -171,6 +171,62 @@ const emptyForm = {
   address: '', city: '', postal_code: '', country: '',
 }
 
+// Crops a logo image down to its actual visible content (trimming any
+// transparent or near-white padding baked into the uploaded file), so the
+// bottle preview sizes/positions the real artwork rather than its canvas.
+// Only affects the on-screen preview — the original file is what gets
+// uploaded/printed untouched.
+function trimImageToContent(url) {
+  return new Promise(resolve => {
+    const img = new Image()
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas')
+        canvas.width = img.naturalWidth
+        canvas.height = img.naturalHeight
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0)
+        const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height)
+
+        let hasAlpha = false
+        for (let i = 3; i < data.length; i += 4 * 97) {
+          if (data[i] < 255) { hasAlpha = true; break }
+        }
+
+        let minX = width, minY = height, maxX = -1, maxY = -1
+        for (let y = 0; y < height; y++) {
+          const rowStart = y * width * 4
+          for (let x = 0; x < width; x++) {
+            const idx = rowStart + x * 4
+            const isContent = hasAlpha
+              ? data[idx + 3] > 10
+              : !(data[idx] > 245 && data[idx + 1] > 245 && data[idx + 2] > 245)
+            if (isContent) {
+              if (x < minX) minX = x
+              if (x > maxX) maxX = x
+              if (y < minY) minY = y
+              if (y > maxY) maxY = y
+            }
+          }
+        }
+
+        if (maxX < minX || maxY < minY) { resolve(url); return } // nothing detected, fall back
+        const w = maxX - minX + 1
+        const h = maxY - minY + 1
+        const out = document.createElement('canvas')
+        out.width = w
+        out.height = h
+        out.getContext('2d').drawImage(canvas, minX, minY, w, h, 0, 0, w, h)
+        resolve(out.toDataURL('image/png'))
+      } catch {
+        resolve(url) // canvas access issue — fall back to the untrimmed image
+      }
+    }
+    img.onerror = () => resolve(url)
+    img.src = url
+  })
+}
+
 export default function PrivateLabelPage() {
   const [form, setForm] = useState(emptyForm)
   const [logoFile, setLogoFile] = useState(null)
@@ -192,16 +248,33 @@ export default function PrivateLabelPage() {
 
   const [logoPreviewable, setLogoPreviewable] = useState(true)
 
-  function handleLogoChange(e) {
+  async function handleLogoChange(e) {
     const file = e.target.files?.[0]
     if (!file) return
     const previewable = file.type.startsWith('image/') // PNG/JPG/GIF/WEBP/SVG render in <img>; PDF/AI/EPS do not
     setLogoFile(file)
     setLogoPreviewable(previewable)
+
+    if (!previewable) {
+      setLogoPreview(prev => {
+        if (prev) URL.revokeObjectURL(prev)
+        return null
+      })
+      return
+    }
+
+    const rawUrl = URL.createObjectURL(file)
     setLogoPreview(prev => {
       if (prev) URL.revokeObjectURL(prev)
-      return previewable ? URL.createObjectURL(file) : null
+      return rawUrl // show immediately, then swap to the trimmed version once ready
     })
+    try {
+      const trimmedUrl = await trimImageToContent(rawUrl)
+      URL.revokeObjectURL(rawUrl)
+      setLogoPreview(trimmedUrl)
+    } catch {
+      // keep the untrimmed preview if trimming fails for any reason
+    }
   }
 
   function handleRemoveLogo() {
