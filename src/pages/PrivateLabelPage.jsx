@@ -300,7 +300,7 @@ export default function PrivateLabelPage() {
         <h1 className="text-4xl font-bold mb-3">Studio One — Your Brand. Our Signature.</h1>
         <p className="text-[#4A4A4A] max-w-2xl mx-auto">
           The same superior, HEMA-free, EU-certified gel formula your clients already trust — now with
-          your logo on every bottle. Minimum order €{MIN_ORDER_EUR}.
+          your logo on every bottle. Minimum order €{MIN_ORDER_EUR}. Pilot programme runs 15 September – 15 November.
         </p>
       </header>
 
@@ -453,7 +453,7 @@ export default function PrivateLabelPage() {
             <div className="border rounded-lg p-3 mb-3 max-h-32 overflow-y-auto text-[11px] text-black/60 leading-relaxed bg-black/[0.02]">
               <p className="font-semibold text-black/70 mb-1">Studio One — Terms &amp; Conditions</p>
               <ol className="list-decimal list-inside space-y-1">
-                <li>This is a pilot programme and does not constitute a contract or ongoing commitment between Thermitek LTD and the client.</li>
+                <li>This is a pilot programme running from 15 September to 15 November, and does not constitute a contract or ongoing commitment between Thermitek LTD and the client.</li>
                 <li>Logos must be submitted in clear, print-ready format. Logos requiring design correction or adaptation may be rejected, delayed, and/or subject to an additional fee.</li>
                 <li>Thermitek LTD reserves the right to reject any logo or order, in whole or in part, without providing a reason. In case of doubt or dispute, the Company holds the final decision.</li>
                 <li>All colours and products are subject to availability — orders are fulfilled while stocks last.</li>
