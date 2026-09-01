@@ -186,6 +186,34 @@ export default function PrivateLabelPage() {
     return { distinctColours, totalColourBottles }
   }, [cart, colourCodeSet])
 
+  // Groups selected colours by family (derived from their image folder, e.g.
+  // ".../SOLID GEL POLISH/Red/GIUP-50.webp" -> "Red") so the order summary
+  // reads like "Reds: 3, Blues: 2" instead of a flat list of codes.
+  const cartSummary = useMemo(() => {
+    const essentialsChosen = []
+    const colourGroups = {} // family -> [{ code, qty }]
+    for (const [code, item] of Object.entries(cart)) {
+      if (item.qty <= 0) continue
+      if (colourCodeSet.has(String(code))) {
+        const imgPath = COLOUR_IMAGE[code] || COLOUR_IMAGE[Number(code)] || ''
+        const parts = imgPath.split('/')
+        const family = parts.length >= 2 ? parts[parts.length - 2] : 'Other'
+        if (!colourGroups[family]) colourGroups[family] = []
+        colourGroups[family].push({ code, qty: item.qty, image: imgPath })
+      } else {
+        essentialsChosen.push({ code, name: item.name, qty: item.qty })
+      }
+    }
+    const sortedFamilies = Object.entries(colourGroups)
+      .map(([family, items]) => ({
+        family,
+        items: items.sort((a, b) => String(a.code).localeCompare(String(b.code), undefined, { numeric: true })),
+        count: items.reduce((s, i) => s + i.qty, 0),
+      }))
+      .sort((a, b) => b.count - a.count)
+    return { essentialsChosen, colourFamilies: sortedFamilies }
+  }, [cart, colourCodeSet])
+
   const subtotal = useMemo(
     () => Object.values(cart).reduce((sum, item) => sum + item.qty * item.price, 0),
     [cart]
@@ -464,6 +492,50 @@ export default function PrivateLabelPage() {
               )
             })}
           </div>
+
+          {(cartSummary.essentialsChosen.length > 0 || cartSummary.colourFamilies.length > 0) && (
+            <div className="border rounded-lg p-4 mb-4 bg-black/[0.02]">
+              <p className="font-semibold text-sm mb-3">Your order so far</p>
+
+              {cartSummary.essentialsChosen.length > 0 && (
+                <div className="mb-3">
+                  {cartSummary.essentialsChosen.map(item => (
+                    <div key={item.code} className="flex justify-between text-xs text-black/70 py-0.5">
+                      <span>{item.name}</span>
+                      <span>×{item.qty}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {cartSummary.colourFamilies.length > 0 && (
+                <div className="space-y-2">
+                  {cartSummary.colourFamilies.map(group => (
+                    <div key={group.family}>
+                      <div className="flex justify-between text-xs font-medium text-black/70 mb-1">
+                        <span>{group.family}</span>
+                        <span>{group.count} bottle{group.count === 1 ? '' : 's'}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {group.items.map(item => (
+                          <div key={item.code} className="relative w-8 h-8 rounded border bg-white overflow-hidden" title={`#${item.code} × ${item.qty}`}>
+                            {item.image && (
+                              <img src={item.image} alt={`Colour ${item.code}`} className="w-full h-full object-contain" />
+                            )}
+                            {item.qty > 1 && (
+                              <span className="absolute -bottom-0.5 -right-0.5 bg-[#D43790] text-white text-[9px] leading-none rounded-full w-4 h-4 flex items-center justify-center">
+                                {item.qty}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="border-t pt-4 bg-white">
             <div className="flex justify-between font-semibold mb-1">
