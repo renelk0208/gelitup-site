@@ -372,14 +372,18 @@ export default function PrivateLabelPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-16">
       <header className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-wide text-[#D43790] mb-2">STUDIO ONE</h1>
-        <p className="text-2xl font-semibold mb-3">Your Brand. Our Signature.</p>
-        <p className="text-[#4A4A4A] max-w-2xl mx-auto">
+        <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-[#9B1268]">Studio One</p>
+        <h1 className="mt-3 text-4xl font-light tracking-tight text-neutral-900 sm:text-5xl">
+          Your Brand <span className="font-serif italic text-[#9B1268]">&amp;</span> Our Signature
+        </h1>
+        <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-neutral-500">
           The same superior, HEMA-free, EU-certified gel formula your clients already trust — now with
           your logo on every bottle.
         </p>
-        <p className="text-[#4A4A4A] mt-2">Minimum order €{MIN_ORDER_EUR}.</p>
-        <p className="font-bold text-[#D43790] mt-1">Pilot programme runs 15 September – 15 November</p>
+        <p className="mt-3 text-[15px] text-neutral-500">Minimum order €{MIN_ORDER_EUR}</p>
+        <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.1em] text-[#9B1268]">
+          Pilot programme runs 15 September – 15 November
+        </p>
       </header>
 
       <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-12">
