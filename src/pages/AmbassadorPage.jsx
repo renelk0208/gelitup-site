@@ -57,7 +57,7 @@ async function notifyAdminOfApplication(record, pdf) {
     <table style="font-family:Arial,sans-serif;font-size:14px;border-collapse:collapse">
       ${rows.map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#6b7280">${escapeHtml(k)}</td><td style="padding:4px 0;color:#1a1a1a"><strong>${escapeHtml(v)}</strong></td></tr>`).join('')}
     </table>
-    ${record.message ? `<p style="font-family:Arial,sans-serif;font-size:14px;color:#374151"><em>“${escapeHtml(record.message)}”</em></p>` : ''}
+    ${record.message ? `<p style="font-family:Arial,sans-serif;font-size:14px;color:#374151"><em>"${escapeHtml(record.message)}"</em></p>` : ''}
     <p style="font-family:Arial,sans-serif;font-size:12px;color:#9ca3af">The applicant's signed agreement (English, governing version) is attached as a PDF.</p>
   `
   const headers = { 'Content-Type': 'application/json' }
@@ -122,7 +122,7 @@ async function sendPartnerRedirectEmail(record, partner) {
     <div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.6">
       <p>Hi ${escapeHtml(firstName)},</p>
       <p>Thank you so much for applying to the GEL.IT.UP Ambassador Programme — we love that you want to create with us.</p>
-      <p>Applications from your country are handled by <strong>${escapeHtml(partner.name)}</strong>. To make your application, please get in touch with them directly on Instagram at <a href="${partner.instagramUrl}" style="color:#D43790;font-weight:bold">${escapeHtml(partner.handle)}</a> — that's where you'll need to apply.</p>
+      <p>Applications from your country are handled by <strong>${escapeHtml(partner.name)}</strong>. To make your application, please get in touch with them directly on Instagram at <a href="${partner.instagramUrl}" style="color:#D43790;font-weight:bold">${escapeHtml(partner.handle)}</a>.</p>
       <p>If you need anything else, just email us at <a href="mailto:info@gelitup.com" style="color:#D43790;font-weight:bold">info@gelitup.com</a>.</p>
       <p>Warm wishes,<br/>The GEL.IT.UP Team</p>
     </div>`
@@ -167,59 +167,6 @@ const STEPS = [
   { n: '1', title: 'Apply', body: 'Fill in the quick form below with your socials.' },
   { n: '2', title: 'We review', body: 'We check out your work — open to professional nail technicians creating with gel.' },
   { n: '3', title: 'Create & get featured', body: 'Post your GEL.IT.UP looks, tag us, and get reposted.' },
-]
-
-const AMBASSADOR_PACKS = [
-  {
-    key: 'standard',
-    title: 'Standard Ambassador Pack',
-    accent: 'bg-white text-[#1A1A1A] border-black/5',
-    note: 'A starter box for new ambassadors.',
-    items: [
-      'Standard Sample Box',
-      '3-in-1 All in One Liquid',
-      'Nail file',
-      'Photo Perfect / Cream / Cuticle Oil (based on current stock)',
-    ],
-  },
-  {
-    key: 'super',
-    title: 'Super Ambassador Pack',
-    accent: 'bg-[#1A1A1A] text-white border-[#D43790]/30',
-    note: 'A bigger creator box with builder, colour, tips, and tools.',
-    items: [
-      'Standard Sample Pack',
-      '2 x Premium Builder Gel (Clear / Colour)',
-      'Multimix: 1 x 30g and 1 x 60g (based on current stock)',
-      '3-in-1 Clear and 1 colour (based on current stock)',
-      'All in One Liquid',
-      'Nail file',
-      'Cuticle oil',
-      'Photo Perfect Cuticle Oil',
-      '3 different Cat Eye shades',
-      '1 shimmer shade',
-      '1 metallic shade',
-      'Chrome / mirror powder with a mirror top',
-      'Any dual form box of tips',
-      'Flexi tips',
-      'Dual extension tip box',
-      '3 nail tools - cuticle nipper, scissor and pusher',
-    ],
-  },
-  {
-    key: 'extreme',
-    title: 'Extreme Ambassador Pack',
-    accent: 'bg-gradient-to-br from-[#2a1030] to-[#17111c] text-white border-[#D43790]/40',
-    note: 'Includes everything in the Super pack, plus larger pro tools based on availability.',
-    items: [
-      'Everything in the Super Ambassador Pack',
-      'Dust collector',
-      'Nail lamp (for polygel)',
-      '1 of each nail tool and a gel brush',
-      'Polygel brush',
-      'Nail art brush / French brush / ombre brush (whichever is available)',
-    ],
-  },
 ]
 
 function scrollToApply() {
@@ -365,7 +312,7 @@ export default function AmbassadorPage() {
           <button
             type="button"
             onClick={scrollToApply}
-            className="inline-flex items-center gap-2 rounded-full bg-[#D43790] px-8 py-4 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[0_0_24px_rgba(212,55,144,0.5)] transition duration-300 hover:scale-[1.03] hover:bg-[#c22f82]"
+            className="inline-flex items-center gap-2 rounded-full bg-[#D43790] px-8 py-4 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[0_0_24px_rgba(212,55,144,0.5)] transition duration-300 hover:scale-[1.03] hover:shadow-[0_0_32px_rgba(212,55,144,0.6)]"
           >
             Apply in 60 seconds
             <span aria-hidden="true">→</span>
@@ -374,7 +321,7 @@ export default function AmbassadorPage() {
             href="https://www.instagram.com/gelitupinternational/"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-white/25 px-8 py-4 text-sm font-bold uppercase tracking-[0.06em] text-white/85 transition duration-300 hover:bg-white/10 hover:text-white"
+            className="inline-flex items-center gap-2 rounded-full border border-white/25 px-8 py-4 text-sm font-bold uppercase tracking-[0.06em] text-white/85 transition duration-300 hover:bg-white/5"
           >
             See @gelitupinternational
           </a>
@@ -400,45 +347,6 @@ export default function AmbassadorPage() {
         </div>
       </section>
 
-      <section className="bg-[#F9F4F7] px-5 py-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#D43790]">
-              Ambassador packs
-            </p>
-            <h2 className="mt-3 text-2xl font-black tracking-tight text-[#1A1A1A] sm:text-3xl">
-              What can be included in your box
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-sm text-black/60">
-              Pack contents are prepared around current stock availability, with Super and Extreme tiers
-              including the expanded creator kits below.
-            </p>
-          </div>
-          <div className="mt-10 grid gap-6 lg:grid-cols-3">
-            {AMBASSADOR_PACKS.map((pack) => (
-              <div key={pack.key} className={`rounded-3xl border p-6 shadow-sm ${pack.accent}`}>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#D43790]">
-                  {pack.title}
-                </p>
-                <p className={`mt-3 text-sm ${pack.key === 'standard' ? 'text-black/65' : 'text-white/70'}`}>
-                  {pack.note}
-                </p>
-                <ul className="mt-5 space-y-2.5">
-                  {pack.items.map((item) => (
-                    <li key={item} className="flex items-start gap-2.5 text-sm">
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#D43790] text-xs font-bold text-white">
-                        ✓
-                      </span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Where you'll be featured — live Instagram feed */}
       <section className="bg-[#F5F5F5] px-5 py-16">
         <div className="mx-auto max-w-6xl">
@@ -461,7 +369,7 @@ export default function AmbassadorPage() {
             <button
               type="button"
               onClick={scrollToApply}
-              className="inline-flex items-center gap-2 rounded-full bg-[#D43790] px-7 py-3.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-lg transition duration-300 hover:scale-[1.03] hover:bg-[#c22f82]"
+              className="inline-flex items-center gap-2 rounded-full bg-[#D43790] px-7 py-3.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-lg transition duration-300 hover:scale-[1.02] hover:shadow-xl"
             >
               I want in — apply now
               <span aria-hidden="true">→</span>
@@ -654,7 +562,7 @@ export default function AmbassadorPage() {
                   </p>
                 </div>
                 <p className="mt-2 text-[11px] leading-relaxed text-white/45">
-                  These are the initial terms for applying. If your application is approved, we&rsquo;ll email you your full GEL.IT.UP Ambassador Agreement to keep &mdash; in your language where possible, and in English.
+                  These are the initial terms for applying. If your application is approved, we&rsquo;ll email you your full GEL.IT.UP Ambassador Agreement to keep &mdash; in your language where available.
                 </p>
                 <div className="mt-3 max-h-44 space-y-2.5 overflow-y-auto pr-2">
                   {AGREEMENT_SUMMARY.map((point, i) => (
@@ -694,7 +602,7 @@ export default function AmbassadorPage() {
               <button
                 type="submit"
                 disabled={status === 'submitting' || !requiredFilled}
-                className="w-full rounded-full bg-[#D43790] px-6 py-4 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[0_0_24px_rgba(212,55,144,0.4)] transition duration-300 hover:bg-[#c22f82] disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full rounded-full bg-[#D43790] px-6 py-4 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[0_0_24px_rgba(212,55,144,0.4)] transition duration-300 hover:shadow-[0_0_32px_rgba(212,55,144,0.5)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {status === 'submitting' ? 'Sending…' : 'Sign & submit my application'}
               </button>
