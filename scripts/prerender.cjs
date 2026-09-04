@@ -117,6 +117,11 @@ const ROUTE_SEO_MAP = {
     description: 'Professional guidance for nail salons and technicians on gel safety, EU compliance, ingredients, business protection and product performance.',
     canonical:   'https://gelitup.com/blog',
   },
+  '/blog/why-ingredient-labels-matter': {
+    title:       'Why Gel Polish Ingredient Labels Matter | HEMA & TPO Guide',
+    description: 'Learn what HEMA and TPO are, why ingredient labels matter, and how nail professionals can evaluate safer, compliant gel polish formulations.',
+    canonical:   'https://gelitup.com/blog/why-ingredient-labels-matter',
+  },
   '/blog/hema-free-tpo-free-gel-salon-liability-guide': {
     title:       'HEMA-Free, TPO-Free Gels: Salon Liability & EU Compliance Guide',
     description: 'Understand the liability risks of non-EU compliant nail gels containing HEMA and TPO. How salon owners can protect their business with HEMA-free, TPO-free formulations.',
