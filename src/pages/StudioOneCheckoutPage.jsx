@@ -47,6 +47,9 @@ export default function StudioOneCheckoutPage() {
         .update({ status: 'checked_out' })
         .eq('id', request.id)
 
+      // Extract country code from order (if available)
+      const countryCode = String(request.country || '').trim().toUpperCase()
+
       const res = await fetch('/.netlify/functions/create-stripe-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,6 +57,7 @@ export default function StudioOneCheckoutPage() {
           orderId: String(request.id),
           amountEur: Number(request.subtotal_eur) + (Number(request.shipping_eur) || 0),
           email: String(request.email),
+          countryCode,
         }),
       })
       const data = await res.json().catch(() => ({}))
