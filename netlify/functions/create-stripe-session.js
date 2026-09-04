@@ -1,9 +1,16 @@
 // Netlify serverless function — creates a Stripe Checkout Session for B2B / distributor order payment.
-// POST { orderId, amountEur, email }
+// POST { orderId, amountEur, email, countryCode }
 // Returns { url } — the Stripe-hosted checkout page URL (supports cards, Google Pay, Apple Pay).
 // Requires STRIPE_SECRET_KEY environment variable (set in Netlify dashboard, never exposed to client).
 
 const SITE_ORIGIN = 'https://gelitup.com'
+
+// EU member states (no VAT for B2B within EU)
+const EU_COUNTRIES = new Set([
+  'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR',
+  'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL',
+  'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'
+])
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -25,12 +32,13 @@ export async function handler(event) {
     return { statusCode: 503, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Payment service not configured' }) }
   }
 
-  let orderId, amountEur, email
+  let orderId, amountEur, email, countryCode
   try {
     const body = JSON.parse(event.body || '{}')
     orderId = String(body.orderId || '').trim()
     amountEur = Number(body.amountEur)
     email = String(body.email || '').trim().toLowerCase()
+    countryCode = String(body.countryCode || '').trim().toUpperCase()
   } catch {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid request body' }) }
   }
@@ -49,15 +57,27 @@ export async function handler(event) {
   const successUrl = `${SITE_ORIGIN}/?payment=success&order=${encodeURIComponent(orderId)}`
   const cancelUrl = `${SITE_ORIGIN}/`
 
+  // Determine if customer is within EU
+  const isEU = EU_COUNTRIES.has(countryCode)
+
   // Build Stripe API request using application/x-www-form-urlencoded (no SDK needed)
   const params = new URLSearchParams()
   params.append('mode', 'payment')
   params.append('success_url', successUrl)
   params.append('cancel_url', cancelUrl)
   params.append('customer_email', email)
+  
+  // EU customers: no VAT. Non-EU customers: enable automatic tax calculation
+  if (!isEU) {
+    params.append('automatic_tax[enabled]', 'true')
+  } else {
+    params.append('automatic_tax[enabled]', 'false')
+  }
+  
   params.append('line_items[0][price_data][currency]', 'eur')
   params.append('line_items[0][price_data][product_data][name]', `GEL.IT.UP Order #${orderId}`)
   params.append('line_items[0][price_data][unit_amount]', String(amountCents))
+  params.append('line_items[0][price_data][tax_behavior]', 'exclusive')
   params.append('line_items[0][quantity]', '1')
   // Google Pay and Apple Pay are enabled automatically by Stripe Checkout when cards are configured
 
