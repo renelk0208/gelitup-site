@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
-
-const HOLO_EMBED_URL = 'https://prod-api-holo-ai.fly.dev/public/seo/embed/c9956a33-1367-4e77-817e-f85680901089.js'
+import { useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { blogPosts } from '../data/blogPosts'
 
 const SEO = {
   title: 'Professional Nail Industry Blog | GEL.IT.UP by GIUP®',
@@ -28,60 +28,44 @@ function usePageSeo() {
   }, [])
 }
 
-function HoloBlogEmbed() {
-  const containerRef = useRef(null)
-  const [loadError, setLoadError] = useState(false)
-
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return undefined
-
-    const previousScript = document.querySelector(`script[src="${HOLO_EMBED_URL}"]`)
-    previousScript?.remove()
-
-    const script = document.createElement('script')
-    const loadTimeout = window.setTimeout(() => setLoadError(true), 15000)
-    const handleLoad = () => {
-      window.clearTimeout(loadTimeout)
-      if (!container.hasChildNodes()) setLoadError(true)
-    }
-    const handleError = () => {
-      window.clearTimeout(loadTimeout)
-      setLoadError(true)
-    }
-
-    script.src = HOLO_EMBED_URL
-    script.defer = true
-    script.dataset.holoBlogEmbed = 'true'
-    script.addEventListener('load', handleLoad)
-    script.addEventListener('error', handleError)
-    document.body.appendChild(script)
-
-    return () => {
-      window.clearTimeout(loadTimeout)
-      script.removeEventListener('load', handleLoad)
-      script.removeEventListener('error', handleError)
-      script.remove()
-      container.replaceChildren()
-      document.getElementById('holo-blog-jsonld')?.remove()
-      document.querySelector('link[rel="canonical"][data-holo]')?.remove()
-    }
-  }, [])
-
+function BlogCard({ post }) {
   return (
-    <>
-      <div ref={containerRef} id="holo-blog" />
-      {loadError && (
-        <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
-          The journal could not be loaded. Please refresh the page or try again shortly.
+    <Link
+      to={`/blog/${post.slug}`}
+      className="group block overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+    >
+      {post.heroImage && (
+        <div className="aspect-[16/9] w-full overflow-hidden bg-neutral-100">
+          <img
+            src={post.heroImage}
+            alt={post.title}
+            loading="lazy"
+            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+          />
         </div>
       )}
-    </>
+      <div className="p-6">
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#D43790]">{post.category}</p>
+        <h2 className="mt-3 font-serif text-2xl font-semibold leading-tight text-neutral-950 group-hover:text-[#D43790]">
+          {post.shortTitle || post.title}
+        </h2>
+        <p className="mt-3 text-[0.95rem] leading-6 text-neutral-600">{post.excerpt}</p>
+        <div className="mt-5 flex items-center gap-3 text-xs text-neutral-500">
+          <time dateTime={post.publishedAt}>{post.publishedLabel}</time>
+          <span aria-hidden="true">•</span>
+          <span>{post.readTime}</span>
+        </div>
+      </div>
+    </Link>
   )
 }
 
 export default function BlogPage() {
   usePageSeo()
+
+  const posts = [...blogPosts].sort(
+    (a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)
+  )
 
   return (
     <main className="min-h-screen bg-[#f8f4f1] text-neutral-950">
@@ -100,7 +84,17 @@ export default function BlogPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
-        <HoloBlogEmbed />
+        {posts.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-neutral-300 bg-white/60 p-16 text-center text-neutral-500">
+            No published articles yet.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {posts.map((post) => (
+              <BlogCard key={post.slug} post={post} />
+            ))}
+          </div>
+        )}
       </section>
     </main>
   )
