@@ -9807,12 +9807,12 @@ function CheckoutPage() {
   const invoiceCountry = form.invoiceCountry.trim()
   const isEuInvoiceCountry = EU_COUNTRIES.includes(invoiceCountry)
   const hasValidViesVat = Boolean(viesResult?.valid && form.vatNumber.trim())
-  const vatRatePct = isEuInvoiceCountry && !hasValidViesVat ? 20 : 0
+  const vatRatePct = 0
   const vatLabel = !isEuInvoiceCountry
     ? '0% VAT — non-EU export'
     : hasValidViesVat
       ? '0% VAT — EU B2B reverse charge (valid VIES)'
-      : '20% VAT — Bulgarian VAT (EU B2C)'
+      : '0% VAT — EU'
   const vatAmount = Number((productsSubtotalAfterWallet * vatRatePct / 100).toFixed(2))
   const grandTotal = Number((productsSubtotalAfterWallet + vatAmount + shippingFee).toFixed(2))
   const registrationsTable = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || DEFAULT_REGISTRATIONS_TABLE
