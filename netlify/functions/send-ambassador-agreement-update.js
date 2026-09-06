@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 
-export const config = {
-  // Scheduled for 07:00 UTC (10:00 AM Athens / Greek time) on 7 September 2026
-  schedule: '0 7 7 9 *',
-}
+// PAUSED: Automatic email send disabled per admin instruction pending new logo clause & updated contract.
+// export const config = {
+//   schedule: '0 7 7 9 *',
+// }
 
 const AMBASSADOR_TABLE = process.env.AMBASSADOR_TABLE || 'ambassador_applications'
 const EMAIL_WEBHOOK_URL = process.env.VITE_EMAIL_WEBHOOK_URL || process.env.EMAIL_WEBHOOK_URL || ''
