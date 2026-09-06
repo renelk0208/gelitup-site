@@ -3,14 +3,14 @@
 // /ambassador-agreement page. Bump AGREEMENT_VERSION whenever the terms change
 // so stored consents stay traceable to the exact wording that was agreed.
 
-export const AGREEMENT_VERSION = 'v7-2026-09'
+export const AGREEMENT_VERSION = 'v8-2026-09'
 
 // Minimum content commitment. Change this number to adjust the requirement
 // everywhere it appears (summary, full terms, and helper copy).
-export const POST_MIN_PER_MONTH = 5
+export const POST_MIN_PER_MONTH = 10
 
 // Minimum videos/reels required each month.
-export const VIDEO_MIN_PER_MONTH = 2
+export const VIDEO_MIN_PER_MONTH = 4
 
 // Where ambassadors must send their content for our library.
 export const CONTENT_SUBMISSION_NUMBER = '+30 694 071 5234'
@@ -26,11 +26,12 @@ export const AGREEMENT_SUMMARY = [
   `Send the content you create to our official WhatsApp/Viber number (${CONTENT_SUBMISSION_NUMBER}) so we can save it to our library.`,
   'You are welcome to add GEL.IT.UP as a collaborator on your Instagram and TikTok posts so they are shared to our profiles too.',
   'STRICT — NO EXCEPTIONS: no other nail brand’s products may appear in the same photo, video, frame or post as GEL.IT.UP. Other brands are fine in separate, unrelated content — never together with GEL.IT.UP in the same piece of content.',
-  `Your personal code gives genuine nail-technician followers a flat ${FOLLOWER_DISCOUNT_PCT}% off.`,
+  `Your personal code gives genuine nail-technician followers a flat ${FOLLOWER_DISCOUNT_PCT}% off (valid on www.gelitup.com only).`,
   'You may share your code publicly, but any link used with it must lead only to www.gelitup.com — never to coupon, deal or reseller sites.',
   'You will receive a GEL.IT.UP Portal B2B account automatically (gelitup.com/portal/login), with activation sent by email.',
   'Commission from orders placed with your code is added as account credit toward your next order: 10% by default, 15% once total referred orders reach €1,000, and 20% once they reach €2,000.',
   'Represent GEL.IT.UP professionally — use the products as directed, keep your content and conduct in line with our brand and reputation, and never resell, relabel or make misleading claims about them.',
+  'Do not create your own GEL.IT.UP logos — this is strictly against our policy. You will be provided with official black and white logos to use unchanged, only on media created with GEL.IT.UP products.',
   'Let GEL.IT.UP save, repost, feature and reuse your content — including what you send us and what you tag — across our channels, marketing and other platforms, credited with your social media tags.',
   'Your content may also be shared to a central drive used by GEL.IT.UP teams in other countries, who may repost it to local social media with credit to your own handles.',
   'Should another country upload your media, they may do so provided they tag the relevant ambassador — please note your discount code will not apply to that country.',
@@ -66,10 +67,11 @@ export const AGREEMENT_SECTIONS = [
   {
     heading: 'What you do',
     points: [
-      `Share at least ${POST_MIN_PER_MONTH} pieces of your own content each month using GEL.IT.UP products, including at least ${VIDEO_MIN_PER_MONTH} videos/reels across Instagram and TikTok (if you hold a TikTok account).`,
+      `Share at least ${POST_MIN_PER_MONTH} pieces of your own content each month using GEL.IT.UP products — including a minimum of ${VIDEO_MIN_PER_MONTH} videos/reels across Instagram and TikTok (if you hold a TikTok account).`,
       'This minimum is set considering the amount of product you receive in each PR package — the quantity provided is enough to support this level of content.',
       'Every post must include the hashtag #gelitup, and mention @gelitupinternational on Instagram or @gelitupofficial on TikTok.',
       `Send the content you create to our WhatsApp/Viber (${CONTENT_SUBMISSION_NUMBER}) so we can save and feature it.`,
+      'When you share your discount code, please note that it is only valid for the www.gelitup.com website.',
       'You are also welcome to add GEL.IT.UP as a collaborator on your Instagram and TikTok posts, so they are shared directly to our profiles too.',
       'Where the rules ask (e.g. because a product was gifted), simply mark it as a partnership — #ad or "gifted".',
     ],
@@ -100,6 +102,7 @@ export const AGREEMENT_SECTIONS = [
       'As an ambassador you’re a face of GEL.IT.UP, so we ask that everything you do with our products reflects the brand well.',
       'Use the products professionally and as directed, following correct application and safety guidance. Don’t resell, decant, relabel or tamper with them, and don’t make medical or misleading claims.',
       'Keep your content and public conduct respectful and on-brand — nothing that could reasonably harm GEL.IT.UP’s name or reputation. If something you post is off-brand, we may ask you to adjust or remove it, and we can end the partnership if the brand is being misrepresented.',
+      'Do not create your own GEL.IT.UP logos — this is strictly against our policy. You will be provided with official logos you can use in black and white. No changes to the logo are allowed — no colour changes, no distortion or misuse, and it is only allowed to be used on media you create with GEL.IT.UP products.',
     ],
   },
   {
