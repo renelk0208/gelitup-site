@@ -200,6 +200,7 @@ export const COUNTRY_TO_LANG = {
   hungary: 'hu', magyarország: 'hu', magyarorszag: 'hu', hongrie: 'hu', ungarn: 'hu', ungheria: 'hu', hu: 'hu',
   greece: 'el', ελλάδα: 'el', ellada: 'el', hellas: 'el', grèce: 'el', grece: 'el', griechenland: 'el', grecia: 'el', gr: 'el', el: 'el',
   bulgaria: 'bg', българия: 'bg', bulgarie: 'bg', bulgarien: 'bg', bg: 'bg',
+  albania: 'sq', shqipëri: 'sq', shqiperi: 'sq', albanie: 'sq', al: 'sq', sq: 'sq',
 }
 
 export function resolveContractLang(lang, country) {
