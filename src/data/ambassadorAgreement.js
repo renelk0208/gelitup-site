@@ -3,7 +3,7 @@
 // /ambassador-agreement page. Bump AGREEMENT_VERSION whenever the terms change
 // so stored consents stay traceable to the exact wording that was agreed.
 
-export const AGREEMENT_VERSION = 'v6-2026-08'
+export const AGREEMENT_VERSION = 'v7-2026-09'
 
 // Minimum content commitment. Change this number to adjust the requirement
 // everywhere it appears (summary, full terms, and helper copy).
@@ -33,7 +33,8 @@ export const AGREEMENT_SUMMARY = [
   'Represent GEL.IT.UP professionally — use the products as directed, keep your content and conduct in line with our brand and reputation, and never resell, relabel or make misleading claims about them.',
   'Let GEL.IT.UP save, repost, feature and reuse your content — including what you send us and what you tag — across our channels, marketing and other platforms, credited with your social media tags.',
   'Your content may also be shared to a central drive used by GEL.IT.UP teams in other countries, who may repost it to local social media with credit to your own handles.',
-  'You keep ownership of your work.',
+  'Should another country upload your media, they may do so provided they tag the relevant ambassador — please note your discount code will not apply to that country.',
+  'You keep ownership of your work — except that anything uploaded with our logo becomes the property of GEL.IT.UP by GIUP®, as the name is a registered trademark.',
   'PR packages are sent about once a month — sometimes more often around new product drops — as gifts to support your content, depending on you keeping up your monthly posts.',
   'Non-exclusive and month-to-month — you can work with others, and either side can end it anytime.',
 ]
@@ -113,7 +114,9 @@ export const AGREEMENT_SECTIONS = [
     points: [
       'You let us save, repost, edit for format and reuse the content you send us or tag us in — across our channels, website, marketing and other platforms, always credited with your tags.',
       'Your content may also be uploaded to a shared central drive accessible by GEL.IT.UP teams in other countries, who may repost it to their own local social media, provided they credit you using your own social media handles.',
+      'Should another country upload your media (photos/videos) they are entitled to do so provided that they tag the relevant ambassador. Please note that when this happens, your discount code will not apply to that country.',
       'The work must be your own; you keep ownership, and this stays true for anything already shared even if you later stop.',
+      'Please note that anything uploaded with our logo becomes property of GEL.IT.UP by GIUP®, as the name is a registered trademark.',
     ],
   },
   {
