@@ -4960,6 +4960,12 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   const patchRow = (id, patch) => setRows(prev => prev.map(r => r.id === id ? { ...r, ...patch } : r))
   const setEmail = (id, state, message) => setEmailStatus(prev => ({ ...prev, [id]: { state, message } }))
   const normalizeAmbassadorStatus = (status) => String(status || '').trim().toLowerCase()
+  const isNextPackageDraft = (row) => Boolean(nextPackageMode[row.id])
+    || readMetaTag(row, 'SHIPMENT_NEXT_PACKAGE_OPEN').toUpperCase() === 'TRUE'
+  const shipVal = (row, field) => {
+    if (isNextPackageDraft(row) && !ship[row.id]) return ''
+    return ship[row.id]?.[field] ?? row[field] ?? ''
+  }
   const getShipmentDraft = (row) => ({
     shipment_details: shipVal(row, 'shipment_details').trim() || '',
     tracking_number: shipVal(row, 'tracking_number').trim() || '',
@@ -5235,7 +5241,6 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   }
 
   // Follow-up: PR box details, tracking + comments.
-  const shipVal = (row, field) => (ship[row.id]?.[field] ?? row[field] ?? '')
 const requestShipmentSave = (row, alsoEmail) => {
   const trackingNumber = String(shipVal(row, 'tracking_number') || '').trim()
   const trackingUrl = String(shipVal(row, 'tracking_url') || '').trim()
