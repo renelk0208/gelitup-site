@@ -4999,7 +4999,18 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       delete next[row.id]
       return next
     })
-    const metaResult = await saveShipmentMeta(row, {
+    const nextPackageRow = { ...row, shipment_details: null, tracking_number: null, tracking_url: null }
+    const { error: resetError } = await supabase
+      .from(AMBASSADOR_TABLE)
+      .update({ shipment_details: null, tracking_number: null, tracking_url: null })
+      .eq('id', row.id)
+    if (resetError) {
+      alert(`Could not clear previous tracking details: ${resetError.message}`)
+      return
+    }
+    patchRow(row.id, { shipment_details: null, tracking_number: null, tracking_url: null })
+    setShip((prev) => ({ ...prev, [row.id]: { shipment_details: '', tracking_number: '', tracking_url: '' } }))
+    const metaResult = await saveShipmentMeta(nextPackageRow, {
       sentAt: '',
       nextReminderAt: '',
       nextReminderNote: '',
@@ -6640,6 +6651,28 @@ const deleteApplication = async (row) => {
                           rows={2}
                           className="mt-2 w-full rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs"
                         />
+                          <div className="mt-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50/60 p-2">
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">Products for this package</p>
+                            {packNoteEntries(row).length > 0 && (
+                              <div className="mt-1 space-y-1">
+                                {packNoteEntries(row).map((entry, idx) => (
+                                  <div key={idx} className="flex items-center justify-between gap-2 rounded border border-fuchsia-100 bg-white px-2 py-1.5 text-[11px] text-slate-700">
+                                    <span>{entry.text}</span>
+                                    <button type="button" title="Delete product" onClick={() => deletePackNote(row, idx)} disabled={saving === row.id} className="shrink-0 text-slate-400 hover:text-rose-600 disabled:opacity-50">×</button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            <div className="mt-1.5 flex gap-2">
+                              <input
+                                value={packAdditionDraft[row.id] || ''}
+                                onChange={(e) => setPackAdditionDraft((prev) => ({ ...prev, [row.id]: e.target.value }))}
+                                placeholder="Add a product"
+                                className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs"
+                              />
+                              <button type="button" onClick={() => addPackNote(row)} disabled={saving === row.id || !String(packAdditionDraft[row.id] || '').trim()} className="rounded-lg border border-fuchsia-300 bg-white px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-60">Add</button>
+                            </div>
+                          </div>
                       </div>
                       )}
                       <div className="flex flex-wrap gap-2">
