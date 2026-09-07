@@ -5397,6 +5397,64 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     }
     setFactoryPdfBusy(false)
   }
+  const downloadAmbassadorPackageCsv = (row) => {
+    const csvEsc = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`
+    const history = shipmentHistoryEntries(row)
+    const nextPackageItems = packNoteEntries(row).map((entry) => entry.text).join(' | ')
+    const rowsToExport = history.length > 0
+      ? history.map((entry, index) => ({
+        packageNumber: history.length - index,
+        packageDate: entry.stamp || '',
+        status: 'Shipped',
+        trackingNumber: entry.trackingNumber,
+        trackingUrl: entry.trackingUrl,
+        ambassadorType: entry.ambassadorType,
+        products: entry.boxContents,
+      }))
+      : []
+    if (nextPackageItems || reminderDateVal(row, null)) {
+      rowsToExport.unshift({
+        packageNumber: 'Next',
+        packageDate: reminderDateVal(row, null),
+        status: 'Planned',
+        trackingNumber: '',
+        trackingUrl: '',
+        ambassadorType: getAmbassadorType(row),
+        products: nextPackageItems,
+      })
+    }
+    if (rowsToExport.length === 0) {
+      rowsToExport.push({
+        packageNumber: '',
+        packageDate: '',
+        status: 'No package history recorded',
+        trackingNumber: '',
+        trackingUrl: '',
+        ambassadorType: getAmbassadorType(row),
+        products: '',
+      })
+    }
+    const header = ['Ambassador name', 'Email', 'Instagram', 'Country', 'Ambassador type', 'Package', 'Package date', 'Status', 'Tracking number', 'Tracking URL', 'Products']
+    const lines = [header.map(csvEsc).join(',')]
+    rowsToExport.forEach((entry) => {
+      lines.push([
+        row.full_name,
+        row.email,
+        row.instagram,
+        row.country,
+        entry.ambassadorType,
+        entry.packageNumber,
+        entry.packageDate,
+        entry.status,
+        entry.trackingNumber,
+        entry.trackingUrl,
+        entry.products,
+      ].map(csvEsc).join(','))
+    })
+    const blob = new Blob([`${lines.join('\n')}\n`], { type: 'text/csv;charset=utf-8' })
+    const safeName = String(row.full_name || 'ambassador').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'ambassador'
+    triggerFileDownload(blob, `ambassador-package-history-${safeName}.csv`)
+  }
   const isAmbassadorDiscountCodeCollisionError = (err) => {
     const message = String(err?.message || '')
     return /duplicate key value violates unique constraint/i.test(message)
@@ -6275,6 +6333,15 @@ const deleteApplication = async (row) => {
                           className="rounded-lg border border-fuchsia-300 bg-white px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-60"
                         >
                           {factoryPdfBusy ? 'Preparing sheet…' : '↓ Print Factory Sheet'}
+                        </button>
+                      )}
+                      {isApproved && (
+                        <button
+                          type="button"
+                          onClick={() => downloadAmbassadorPackageCsv(row)}
+                          className="rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
+                        >
+                          ↓ Download package history
                         </button>
                       )}
                       {isApproved && (
