@@ -6649,13 +6649,6 @@ const deleteApplication = async (row) => {
                             Save reminder details
                           </button>
                         </div>
-                        <textarea
-                          value={reminderNoteVal(row)}
-                          onChange={(e) => setReminderNoteDraft((prev) => ({ ...prev, [row.id]: e.target.value }))}
-                          placeholder="What we will send in this package"
-                          rows={2}
-                          className="mt-2 w-full rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs"
-                        />
                           <div className="mt-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50/60 p-2">
                             <p className="text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">Products for this package</p>
                             {packNoteEntries(row).length > 0 && (
