@@ -4648,7 +4648,9 @@ async function buildPdfAttachment(pdfUrl, fallbackFilename) {
 }
 
 // Sends an email (optionally with a PDF attachment) via the webhook. Returns {ok, error}.
-async function sendAmbassadorEmail({ to, subject, html, attachments, replyTo }) {
+// If a row is supplied, the send is also logged to that ambassador profile so every
+// outbound message remains auditable in the shared communication history.
+async function sendAmbassadorEmail({ to, subject, html, attachments, replyTo, row, logBody, auditLog }) {
   if (!EMAIL_WEBHOOK_URL) return { ok: false, error: 'VITE_EMAIL_WEBHOOK_URL is not configured — email not sent.' }
   const headers = { 'Content-Type': 'application/json' }
   if (SUPABASE_ANON_KEY) {
@@ -4660,7 +4662,22 @@ async function sendAmbassadorEmail({ to, subject, html, attachments, replyTo }) 
   try {
     const res = await fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers, body: JSON.stringify(body) })
     const json = await res.json().catch(() => null)
-    return res.ok ? { ok: true } : { ok: false, error: json?.error || `HTTP ${res.status}` }
+    if (!res.ok) {
+      return { ok: false, error: json?.error || `HTTP ${res.status}` }
+    }
+    if (row && auditLog) {
+      const rowEmail = String(row?.email || '').trim().toLowerCase()
+      const targetEmail = String(to || '').trim().toLowerCase()
+      if (rowEmail && rowEmail === targetEmail) {
+        try {
+          const messageBody = typeof logBody === 'string' ? logBody : (typeof html === 'string' ? htmlToText(html) : '')
+          await auditLog(row, { to: targetEmail, subject, body: messageBody })
+        } catch (_) {
+          // Best-effort logging must never block a successful email send.
+        }
+      }
+    }
+    return { ok: true }
   } catch (err) {
     return { ok: false, error: err.message || 'Network error' }
   }
@@ -5084,9 +5101,16 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       return false
     }
     const { subject, html } = buildAmbassadorWelcomeEmail(row)
-    const res = await sendAmbassadorEmail({ to: email, subject, html, attachments: [attachment] })
+    const res = await sendAmbassadorEmail({
+      to: email,
+      subject,
+      html,
+      attachments: [attachment],
+      row,
+      logBody: 'Welcome email with Ambassador Agreement PDF attached.',
+      auditLog: logAmbassadorSend,
+    })
     setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Welcome email + agreement sent to ${email}` : res.error)
-    if (res.ok) await logAmbassadorSend(row, { to: email, subject, body: 'Welcome email with Ambassador Agreement PDF attached.' })
     return res.ok
   }
 
@@ -5095,7 +5119,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     if (!email) return false
     const { subject, html } = buildAmbassadorPasswordReminderEmail(row)
     setEmail(row.id, 'sending', '')
-    const res = await sendAmbassadorEmail({ to: email, subject, html })
+    const res = await sendAmbassadorEmail({ to: email, subject, html, row, logBody: htmlToText(html), auditLog: logAmbassadorSend })
     if (!res.ok) {
       setEmail(row.id, 'error', res.error || 'Failed to send password reminder.')
       return false
@@ -5106,7 +5130,6 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       .update({ portal_account_reminder_sent_at: reminderSentAt })
       .eq('id', row.id)
     if (!updateError) patchRow(row.id, { portal_account_reminder_sent_at: reminderSentAt })
-    logAmbassadorSend(row, { to: email, subject, body: htmlToText(html) })
     setEmail(row.id, 'sent', `Password reminder sent to ${email}`)
     return true
   }
@@ -5234,9 +5257,8 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     setDeclineRow(null)
     setEmail(row.id, 'sending', '')
     const { subject, html } = buildAmbassadorDeclineEmail(row, reasonText)
-    const res = await sendAmbassadorEmail({ to: row.email, subject, html })
+    const res = await sendAmbassadorEmail({ to: row.email, subject, html, row, logBody: `Declined — ${reasonText}`, auditLog: logAmbassadorSend })
     setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Decline email sent to ${row.email}` : res.error)
-    if (res.ok) logAmbassadorSend(row, { to: row.email, subject, body: `Declined — ${reasonText}` })
     setSaving(null)
   }
 
@@ -5950,7 +5972,7 @@ const resendShipmentEmail = async (row, nextReminderAt) => {
     const letterPdf = await buildAmbassadorWelcomeLetterPdf({ fullName: row.full_name, discountCode: row.discount_code })
     attachments = [{ filename: letterPdf.filename, content: letterPdf.base64, contentType: 'application/pdf' }]
   } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not build welcome letter PDF.'); return }
-  const res = await sendAmbassadorEmail({ to: normalizedEmail, subject, html, attachments })
+  const res = await sendAmbassadorEmail({ to: normalizedEmail, subject, html, attachments, row, logBody: htmlToText(html), auditLog: logAmbassadorSend })
   if (res.ok) {
     const resendStamp = `[${fmtDateTime(new Date().toISOString())}] [${getAdminDisplayLabel()}] 📧 Tracking email resent to ${normalizedEmail}`
     const updatedComment = row.admin_comment ? `${row.admin_comment}\n${resendStamp}` : resendStamp
