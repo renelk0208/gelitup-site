@@ -5477,6 +5477,99 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const safeName = String(row.full_name || 'ambassador').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'ambassador'
     triggerFileDownload(blob, `ambassador-package-history-${safeName}.csv`)
   }
+  const loadAllAmbassadorRows = async () => {
+    const allRows = []
+    for (let start = 0; ; start += 1000) {
+      const { data, error: err } = await supabase
+        .from(AMBASSADOR_TABLE)
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(start, start + 999)
+      if (err) throw err
+      allRows.push(...(data || []))
+      if (!data || data.length < 1000) return allRows
+    }
+  }
+  const ambassadorPackageExportRow = (row) => {
+    const type = getAmbassadorType(row)
+    const pack = AMBASSADOR_PACKS_BY_TYPE[type] || null
+    const history = shipmentHistoryEntries(row)
+    const additionalProducts = packNoteEntries(row).map((entry) => entry.text).join(' | ')
+    const shippedProducts = history.map((entry) => entry.boxContents).filter(Boolean).join(' || ')
+    return {
+      ID: row.id,
+      'Ambassador name': row.full_name,
+      Email: row.email,
+      Instagram: row.instagram,
+      Country: row.country,
+      Status: row.status,
+      'Ambassador type': type,
+      'Pack title': pack?.title || '',
+      'Pack contents': pack?.items?.join(' | ') || '',
+      'Additional products': additionalProducts,
+      'Shipped products': shippedProducts,
+      'Shipment count': history.length,
+      'Latest tracking number': history[0]?.trackingNumber || row.tracking_number || '',
+      'Latest tracking URL': history[0]?.trackingUrl || row.tracking_url || '',
+    }
+  }
+  const downloadAllAmbassadorPackages = async () => {
+    try {
+      const allRows = await loadAllAmbassadorRows()
+      const exportRows = allRows.map(ambassadorPackageExportRow)
+      const sheet = XLSX.utils.json_to_sheet(exportRows)
+      const workbook = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(workbook, sheet, 'Ambassador packages')
+      const xlsxData = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
+      triggerFileDownload(new Blob([xlsxData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `all-ambassador-packages-${new Date().toISOString().slice(0, 10)}.xlsx`)
+      alert(`${exportRows.length} ambassador package records downloaded.`)
+    } catch (err) {
+      alert(`Ambassador package export failed: ${err?.message || String(err)}`)
+    }
+  }
+  const importAllAmbassadorPackages = async (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    try {
+      const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array' })
+      const sheet = workbook.Sheets[workbook.SheetNames[0]]
+      const importedRows = XLSX.utils.sheet_to_json(sheet, { defval: '' })
+      const allRows = await loadAllAmbassadorRows()
+      const byId = new Map(allRows.map((row) => [String(row.id), row]))
+      const byEmail = new Map(allRows.map((row) => [String(row.email || '').trim().toLowerCase(), row]).filter(([key]) => key))
+      const byInstagram = new Map(allRows.map((row) => [String(row.instagram || '').replace(/^@+/, '').trim().toLowerCase(), row]).filter(([key]) => key))
+      const validTypes = new Set(['standard_ambassador', 'super_ambassador', 'extreme_ambassador'])
+      let updated = 0
+      let skipped = 0
+      for (const imported of importedRows) {
+        const row = byId.get(String(imported.ID || '').trim())
+          || byEmail.get(String(imported.Email || '').trim().toLowerCase())
+          || byInstagram.get(String(imported.Instagram || '').replace(/^@+/, '').trim().toLowerCase())
+        if (!row) { skipped += 1; continue }
+        const requestedType = String(imported['Ambassador type'] || '').trim().toLowerCase()
+        const hasAdditionalProductsColumn = Object.prototype.hasOwnProperty.call(imported, 'Additional products')
+        const additionalProducts = String(imported['Additional products'] || '').trim()
+        let nextComment = String(row.admin_comment || '')
+        if (requestedType && validTypes.has(requestedType)) {
+          nextComment = ensureTaggedValue(nextComment, 'AMBASSADOR_TYPE', requestedType.toUpperCase())
+        }
+        const existingPackLines = nextComment.split('\n').filter((line) => /^\[PACK_NOTE:[^\]]+\]$/i.test(line.trim()))
+        const preservedLines = nextComment.split('\n').filter((line) => line.trim() && !/^\[PACK_NOTE:[^\]]+\]$/i.test(line.trim()))
+        const packLines = hasAdditionalProductsColumn
+          ? additionalProducts.split('|').map((text) => text.trim()).filter(Boolean).map((text) => createPackNoteLine({ stamp: fmtDate(new Date().toISOString()), author: getAdminDisplayLabel(), text }))
+          : existingPackLines
+        const finalComment = [...preservedLines, ...packLines].join('\n') || null
+        const { error: updateErr } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: finalComment }).eq('id', row.id)
+        if (updateErr) throw updateErr
+        patchRow(row.id, { admin_comment: finalComment })
+        updated += 1
+      }
+      alert(`Updated ${updated} ambassador package records. ${skipped} rows could not be matched.`)
+    } catch (err) {
+      alert(`Ambassador package upload failed: ${err?.message || String(err)}`)
+    }
+  }
   const isAmbassadorDiscountCodeCollisionError = (err) => {
     const message = String(err?.message || '')
     return /duplicate key value violates unique constraint/i.test(message)
@@ -6181,6 +6274,17 @@ const deleteApplication = async (row) => {
                 {f.label}
               </button>
             ))}
+            <button
+              type="button"
+              onClick={downloadAllAmbassadorPackages}
+              className="rounded-full border border-emerald-300 bg-white px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
+            >
+              ↓ Download package list
+            </button>
+            <label className="cursor-pointer rounded-full border border-sky-300 bg-white px-3 py-1 text-xs font-semibold text-sky-700 hover:bg-sky-50">
+              ↑ Upload package list
+              <input type="file" accept=".csv,.xlsx,.xls" onChange={importAllAmbassadorPackages} className="hidden" />
+            </label>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
