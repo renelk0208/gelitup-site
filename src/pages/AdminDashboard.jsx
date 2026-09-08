@@ -307,9 +307,12 @@ function RegistrationsPanel({ onPreviewDistributor }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState('all')
+  const [registrationSearch, setRegistrationSearch] = useState('')
   const [expanded, setExpanded] = useState(null)
   const [commentMap, setCommentMap] = useState({}) // new comment being typed, keyed by row id
   const [saving, setSaving] = useState(null)
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
   const [emailStatus, setEmailStatus] = useState({}) // { [id]: { state: 'sending'|'sent'|'error', message: '' } }
   const [currentAdminEmail, setCurrentAdminEmail] = useState('')
 
@@ -319,21 +322,29 @@ function RegistrationsPanel({ onPreviewDistributor }) {
     })
   }, [])
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (requestedPage = 0) => {
     setLoading(true)
     setError('')
     let query = supabase
       .from(REGISTRATIONS_TABLE)
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(200)
+      .range(requestedPage * 200, requestedPage * 200 + 199)
     if (filter === 'pending') query = query.in('status', ['pending', 'submitted'])
     else if (filter !== 'all') query = query.eq('status', filter)
+    const search = registrationSearch.trim()
+    if (search) {
+      const escaped = search.replace(/[,()]/g, ' ')
+      query = query.or(`contact_email.ilike.%${escaped}%,contact_name.ilike.%${escaped}%,company_name.ilike.%${escaped}%,vat_number.ilike.%${escaped}%`)
+    }
     const { data, error: err } = await query
     setLoading(false)
     if (err) { setError(err.message); return }
-    setRows(data || [])
-  }, [filter])
+    const nextRows = data || []
+    setRows((previous) => requestedPage === 0 ? nextRows : [...previous, ...nextRows])
+    setPage(requestedPage)
+    setHasMore(nextRows.length === 200)
+  }, [filter, registrationSearch])
 
   useEffect(() => { load() }, [load])
 
@@ -780,6 +791,13 @@ function RegistrationsPanel({ onPreviewDistributor }) {
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          value={registrationSearch}
+          onChange={(event) => setRegistrationSearch(event.target.value)}
+          placeholder="Search name, company, email, or VAT"
+          className="min-w-[240px] flex-1 rounded-full border border-slate-200 px-3 py-1.5 text-xs text-slate-700 placeholder:text-slate-400 focus:border-fuchsia-300 focus:outline-none focus:ring-2 focus:ring-fuchsia-100"
+        />
         {FILTERS.map(f => (
           <button
             key={f}
@@ -1080,6 +1098,11 @@ function RegistrationsPanel({ onPreviewDistributor }) {
           </li>
         )})}
       </ul>
+      {!loading && hasMore && (
+        <button type="button" onClick={() => load(page + 1)} className="mt-4 w-full rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+          Load more registrations
+        </button>
+      )}
     </div>
   )
 }
@@ -1676,6 +1699,8 @@ function OrdersPanel() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
   const [filter, setFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [expanded, setExpanded] = useState(null)
@@ -1692,14 +1717,14 @@ function OrdersPanel() {
   const [editDraft, setEditDraft] = useState({})
   const [itemSearch, setItemSearch] = useState('') // product search inside the order editor
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (requestedPage = 0) => {
     setLoading(true)
     setError('')
     let query = supabase
       .from(ORDERS_TABLE)
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(200)
+      .range(requestedPage * 200, requestedPage * 200 + 199)
     if (filter === 'received') query = query.in('status', ['received', 'pending_approval'])
     else if (filter === 'acknowledged_received') query = query.in('status', ['acknowledged_received', 'submitted'])
     else if (filter === 'in_progress') query = query.in('status', ['in_progress', 'processing'])
@@ -1709,7 +1734,9 @@ function OrdersPanel() {
     if (err) { setError(err.message); return }
     const orderRows = Array.isArray(data) ? data : []
     if (!orderRows.length) {
-      setRows([])
+      if (requestedPage === 0) setRows([])
+      setPage(requestedPage)
+      setHasMore(false)
       return
     }
 
@@ -1791,7 +1818,9 @@ function OrdersPanel() {
       }
     }).filter(Boolean)
 
-    setRows(mergedRows)
+    setRows((previous) => requestedPage === 0 ? mergedRows : [...previous, ...mergedRows])
+    setPage(requestedPage)
+    setHasMore(orderRows.length === 200)
 
     // Persist the corrected tier back onto the order rows (fire-and-forget).
     if (staleTierFixes.length > 0) {
@@ -3019,6 +3048,11 @@ function OrdersPanel() {
           )
         })}
       </ul>
+      {!loading && hasMore && (
+        <button type="button" onClick={() => load(page + 1)} className="mt-4 w-full rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+          Load more orders
+        </button>
+      )}
     </div>
   )
 }
@@ -4751,6 +4785,8 @@ function AmbassadorApplicationsPanel() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
   const [filter, setFilter] = useState('pending')
   const [searchQuery, setSearchQuery] = useState('')
   const [saving, setSaving] = useState(null)
@@ -4826,7 +4862,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     })
   }, [])
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (requestedPage = 0) => {
     setLoading(true)
     setError('')
     const normalizeLookupKey = (value) => String(value || '')
@@ -4851,7 +4887,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       .from(AMBASSADOR_TABLE)
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(200)
+      .range(requestedPage * 200, requestedPage * 200 + 199)
     if (filter === 'pending') query = query.in('status', AMBASSADOR_PENDING_STATUSES)
     else if (filter !== 'all') query = query.eq('status', filter)
     const { data, error: err } = await query
@@ -4963,7 +4999,9 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     } else {
       setCodePerformanceByCode({})
     }
-    setRows(nextRows)
+    setRows((previous) => requestedPage === 0 ? nextRows : [...previous, ...nextRows])
+    setPage(requestedPage)
+    setHasMore(nextRows.length === 200)
   }, [filter])
 
   useEffect(() => { load() }, [load])
@@ -7024,6 +7062,11 @@ const deleteApplication = async (row) => {
             )
           })}
         </div>
+      )}
+      {!loading && hasMore && (
+        <button type="button" onClick={() => load(page + 1)} className="mt-4 w-full rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+          Load more ambassadors
+        </button>
       )}
 
       {shipDatePrompt && (<div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4"><div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"><h3 className="text-base font-bold text-slate-900">When should the next package go out?</h3><p className="mt-1 text-xs text-slate-500">Pick the next ship date before saving these tracking details — this keeps follow-ups from being missed.</p><input type="date" value={shipDatePrompt.date || ''} onChange={(e) => setShipDatePrompt((prev) => ({ ...prev, date: e.target.value }))} className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /><div className="mt-4 flex justify-end gap-2"><button onClick={() => setShipDatePrompt(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button><button onClick={() => { const row = rows.find((r) => r.id === shipDatePrompt.rowId); if (!row || !shipDatePrompt.date) return; setReminderDateDraft((prev) => ({ ...prev, [row.id]: shipDatePrompt.date })); const alsoEmail = shipDatePrompt.alsoEmail; const chosenDate = shipDatePrompt.date; setShipDatePrompt(null); saveShipment(row, alsoEmail, chosenDate) }} disabled={!shipDatePrompt.date} className="rounded-lg bg-[#D43790] px-3 py-2 text-sm font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Confirm date &amp; save</button></div></div></div>)}
