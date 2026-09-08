@@ -6525,6 +6525,15 @@ const deleteApplication = async (row) => {
             const isShipmentClosed = shipmentPreviouslySent && !isNextPackageMode
             const isShipmentPanelExpanded = shipmentPanelOpen[row.id] ?? !isShipmentClosed
             const isReminderDue = Boolean(nextReminderAt && new Date(nextReminderAt).getTime() <= Date.now())
+            const nextPackageDueBadge = nextReminderAt ? (
+              <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
+                isReminderDue
+                  ? 'border-rose-200 bg-rose-100 text-rose-700'
+                  : 'border-violet-200 bg-violet-100 text-violet-700'
+              }`}>
+                {isReminderDue ? 'Next package due now' : `Next package due ${fmtDate(nextReminderAt)}`}
+              </span>
+            ) : null
             const setupSectionComplete = isApproved && contractAlreadySent && Boolean(ambassadorType) && shipmentPreviouslySent
             const shipmentEntries = shipmentHistoryEntries(row)
             const discountCodeKey = String(row?.discount_code || '').trim().toUpperCase()
@@ -6550,6 +6559,7 @@ const deleteApplication = async (row) => {
                     <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ${ambassadorStatusPill(row.status)}`}>
                       {row.status || 'new'}
                     </span>
+                    {nextPackageDueBadge}
                     <span className="text-xs text-fuchsia-700">@{row.instagram}</span>
                     <span className="text-[11px] text-slate-400">{row.country ? `${row.country} · ` : ''}{fmtDate(row.created_at)}</span>
                   </span>
