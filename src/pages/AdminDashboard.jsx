@@ -435,7 +435,14 @@ function RegistrationsPanel({ onPreviewDistributor }) {
   }
 
   const resendApprovalEmail = async (row) => {
-    if (!row?.contact_email || !EMAIL_WEBHOOK_URL) return
+    if (!row?.contact_email) {
+      setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: 'No email address is saved for this registration.' } }))
+      return
+    }
+    if (!EMAIL_WEBHOOK_URL) {
+      setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'error', message: 'Email service is not configured in this admin build. Refresh the portal and try again.' } }))
+      return
+    }
     const { subject, html } = buildDistributorAccessEmail(row)
     setEmailStatus(prev => ({ ...prev, [row.id]: { state: 'sending', message: '' } }))
     const emailHeaders = { 'Content-Type': 'application/json' }
