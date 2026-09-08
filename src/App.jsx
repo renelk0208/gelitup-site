@@ -3553,6 +3553,7 @@ function FullCataloguePage() {
   const [shippingToastVisible, setShippingToastVisible] = useState(false)
   const shippingToastTimerRef = useRef(null)
   const [cartRestoredToast, setCartRestoredToast] = useState(false)
+  const quickCartTotalRef = useRef(0)
   const [outOfStockNames, setOutOfStockNames] = useState(new Set())
   const [productSizes, setProductSizes] = useState({})
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('portalAuth') === 'true')
@@ -3614,7 +3615,7 @@ function FullCataloguePage() {
           customer_email: data.user.email,
           items: quickCart,
           total_units: units,
-          total_estimated: 0,
+          total_estimated: Number(quickCartTotalRef.current || 0),
           source: 'catalogue',
           updated_at: now,
         }, { onConflict: 'user_id,source' }).then(() => {})
@@ -4813,6 +4814,11 @@ function FullCataloguePage() {
     }
     return total
   }, [quickCart, lookupCataloguePrice])
+
+  // Keep a ref mirror of the computed cart total so the earlier draft-cart
+  // Supabase sync effect (which runs before this value exists in render order)
+  // can read the real total instead of hardcoding 0.
+  useEffect(() => { quickCartTotalRef.current = quickCartTotal }, [quickCartTotal])
 
   // Meta Pixel: fire AddToCart when total quickCart units increase (not on decrease/removal).
   const prevQuickCartRef = useRef(quickCart)
@@ -12406,6 +12412,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   // Cart persistence — restore cart from localStorage on mount, keyed by user ID
   const cartUserIdRef = useRef(null)
+  const orderTotalRef = useRef(0)
   const restoredPortalCartUserIdRef = useRef('')
 
   const restorePortalCartForUser = useCallback(async (sessionUser = null) => {
@@ -12580,7 +12587,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           customer_email: data.user.email,
           items: { products: itemsSummary, packages: pkgSummary },
           total_units: totalUnitsForDraft,
-          total_estimated: 0,
+          total_estimated: Number(orderTotalRef.current || 0),
           source: 'portal',
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id,source' }).then(() => {})
@@ -14381,6 +14388,11 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     const pkgTotal = packageCartItems.reduce((s, item) => s + (item.price != null ? Number(item.price) * getEffectiveProductMultiplier(item.name, item.sku) * item.qty : 0), 0)
     return itemsTotal + pkgTotal
   }, [selectedProducts, packageCartItems, itemQtys, getEffectiveProductMultiplier])
+
+  // Keep a ref mirror of the computed order total so the earlier draft-cart
+  // Supabase sync effect (which runs before this value exists in render order)
+  // can read the real total instead of hardcoding 0.
+  useEffect(() => { orderTotalRef.current = orderTotal }, [orderTotal])
 
   const toggleSelection = (code) => {
     setSelectedCodes((current) =>
