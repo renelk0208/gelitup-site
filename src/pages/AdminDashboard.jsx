@@ -5507,17 +5507,47 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       'New PR Pack': pack?.title || '',
       Items: plannedItems || pack?.items?.join(' | ') || shippedProducts,
       'Date to be Sent': reminderDateVal(row, null),
-      'Tracking number': row.tracking_number || '',
-      'Tracking URL': row.tracking_url || '',
+      'Tracking number': history[0]?.trackingNumber || row.tracking_number || '',
+      'Tracking URL': history[0]?.trackingUrl || row.tracking_url || '',
     }
   }
   const downloadAllAmbassadorPackages = async () => {
     try {
       const allRows = await loadAllAmbassadorRows()
       const exportRows = allRows.map(ambassadorPackageExportRow)
-      const sheet = XLSX.utils.json_to_sheet(exportRows)
       const workbook = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(workbook, sheet, 'Ambassador packages')
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(exportRows), 'Summary')
+      const usedSheetNames = new Set(['Summary'])
+      allRows.forEach((row) => {
+        const safeBase = String(row.full_name || row.email || `Ambassador ${row.id}`)
+          .replace(/[\\/?*\[\]:]/g, '')
+          .trim()
+          .slice(0, 31) || `Ambassador ${row.id}`
+        let sheetName = safeBase
+        let suffix = 2
+        while (usedSheetNames.has(sheetName)) {
+          const suffixText = ` (${suffix})`
+          sheetName = `${safeBase.slice(0, 31 - suffixText.length)}${suffixText}`
+          suffix += 1
+        }
+        usedSheetNames.add(sheetName)
+        const exported = ambassadorPackageExportRow(row)
+        const details = [
+          ['Field', 'Value'],
+          ['ID', exported.ID],
+          ['Ambassador name', exported['Ambassador name']],
+          ['Email', exported.Email],
+          ['Instagram', exported.Instagram],
+          ['Country', exported.Country],
+          ['Status', exported.Status],
+          ['New PR Pack', exported['New PR Pack']],
+          ['Items', exported.Items],
+          ['Date to be Sent', exported['Date to be Sent']],
+          ['Tracking number', exported['Tracking number']],
+          ['Tracking URL', exported['Tracking URL']],
+        ]
+        XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(details), sheetName)
+      })
       const xlsxData = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
       triggerFileDownload(new Blob([xlsxData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `all-ambassador-packages-${new Date().toISOString().slice(0, 10)}.xlsx`)
       alert(`${exportRows.length} ambassador package records downloaded.`)
@@ -5531,8 +5561,6 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (!file) return
     try {
       const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array' })
-      const sheet = workbook.Sheets[workbook.SheetNames[0]]
-      const importedRows = XLSX.utils.sheet_to_json(sheet, { defval: '' })
       const allRows = await loadAllAmbassadorRows()
       const byId = new Map(allRows.map((row) => [String(row.id), row]))
       const byEmail = new Map(allRows.map((row) => [String(row.email || '').trim().toLowerCase(), row]).filter(([key]) => key))
@@ -5540,6 +5568,14 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       const validTypes = new Set(['standard_ambassador', 'super_ambassador', 'extreme_ambassador'])
       let updated = 0
       let skipped = 0
+      const importedRows = workbook.SheetNames.flatMap((sheetName) => {
+        const sheetRows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: '' })
+        if (sheetRows[0]?.[0] === 'Field' && sheetRows[0]?.[1] === 'Value') {
+          const details = Object.fromEntries(sheetRows.slice(1).filter((line) => line[0]).map((line) => [line[0], line[1] ?? '']))
+          return [details]
+        }
+        return XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: '' })
+      })
       for (const imported of importedRows) {
         const row = byId.get(String(imported.ID || '').trim())
           || byEmail.get(String(imported.Email || '').trim().toLowerCase())
@@ -6307,10 +6343,10 @@ const deleteApplication = async (row) => {
               onClick={downloadAllAmbassadorPackages}
               className="rounded-full border border-emerald-300 bg-white px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
             >
-              ↓ Download package list
+              ↓ Download ambassador workbook
             </button>
             <label className="cursor-pointer rounded-full border border-sky-300 bg-white px-3 py-1 text-xs font-semibold text-sky-700 hover:bg-sky-50">
-              ↑ Upload package list
+              ↑ Upload ambassador workbook
               <input type="file" accept=".csv,.xlsx,.xls" onChange={importAllAmbassadorPackages} className="hidden" />
             </label>
           </div>
