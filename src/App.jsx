@@ -797,6 +797,7 @@ function getVatTreatmentLabel(treatment, country) {
 
 // Returns null if valid, or an error string if the VAT prefix is wrong for the country
 function validateVatPrefix(vatNumber, country) {
+  if (!isEuCountry(country)) return null
   const prefix = COUNTRY_VAT_PREFIX[country]
   if (!prefix) return null
   const vat = String(vatNumber || '').trim().toUpperCase().replace(/[\s\-\.]/g, '')
