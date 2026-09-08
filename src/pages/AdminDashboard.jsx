@@ -91,6 +91,32 @@ const AMBASSADOR_PACKS_BY_TYPE = {
   },
 }
 
+const AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE = {
+  standard_ambassador: {
+    daysAfterDispatch: 21,
+    items: [
+      '1x Pink Buffer',
+      '1 x Purple Buffer',
+      '3 x Autumn / Winter Colours',
+      'Blossom',
+      '1 x Glitter Gel',
+    ],
+  },
+  super_ambassador: {
+    daysAfterDispatch: 21,
+    items: [
+      'New Dual Forms',
+      '1 x roll of Gelitup Nail Forms',
+      '1 Pink Buffer',
+      '1 x Purple Buffer',
+      '1 Line it up Black',
+      '1 Line it up White',
+      '5 x Autumn / Winter Colours',
+      '1 Glitter Builder Gel',
+    ],
+  },
+}
+
 function statusBadge(status) {
   const map = {
     pending:                 'bg-amber-100 text-amber-700',
@@ -4551,6 +4577,13 @@ function buildAmbassadorShipmentNotificationEmail(row, ship, sentAtIso, nextPack
     ? new Date(nextPackageIso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
     : 'Not set'
   const sentAt = new Date(sentAtIso).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })
+  const followUpPack = (() => {
+    const normalized = String(row?.admin_comment || '').match(/\[AMBASSADOR_TYPE:([^\]]+)\]/i)?.[1]
+    const type = String(normalized || '').trim().toLowerCase()
+    const pack = AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE[type] || null
+    return pack ? pack.items.join(', ') : null
+  })()
+  const resolvedItems = String(nextPackageItems || followUpPack || '').trim() || 'Not specified'
   return {
     subject: `Ambassador PR package dispatched — ${ambassadorName}`,
     html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5">
@@ -4562,7 +4595,7 @@ function buildAmbassadorShipmentNotificationEmail(row, ship, sentAtIso, nextPack
       <strong>Tracking URL:</strong> ${ship?.tracking_url ? `<a href="${escAmb(ship.tracking_url)}">${escAmb(ship.tracking_url)}</a>` : 'Not recorded'}<br/>
       <strong>Next package date:</strong> ${escAmb(nextPackageDate)}</p>
       <p><strong>Items for the next PR package:</strong></p>
-      <div style="white-space:pre-wrap;border-left:3px solid #d43790;padding:8px 12px;background:#fdf0f5;">${escAmb(nextPackageItems || 'Not specified')}</div>
+      <div style="white-space:pre-wrap;border-left:3px solid #d43790;padding:8px 12px;background:#fdf0f5;">${escAmb(resolvedItems)}</div>
       <p>An automatic reminder with these items will be emailed three weeks after dispatch.</p>
     </div>`,
   }
@@ -5100,8 +5133,15 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       setEmail(row.id, 'error', 'Reminder date is invalid.')
       return
     }
-    const nextReminderAt = parsedReminderAt ? parsedReminderAt.toISOString() : (sentAtIso ? addOneMonth(sentAtIso) : '')
-    const nextReminderNote = String(reminderNoteVal(row) || '').trim()
+    const followUpPack = getFollowUpPackForRow(row)
+    const nextReminderAt = parsedReminderAt
+      ? parsedReminderAt.toISOString()
+      : (sentAtIso
+        ? (followUpPack
+          ? new Date(new Date(sentAtIso).getTime() + (Number(followUpPack.daysAfterDispatch || 21) * 24 * 60 * 60 * 1000)).toISOString()
+          : addOneMonth(sentAtIso))
+        : '')
+    const nextReminderNote = resolveFollowUpReminderNote(row, '')
     const previousReminderNote = decodeReminderNote(readMetaTag(row, 'SHIPMENT_REMINDER_NOTE'))
     setSaving(row.id)
     const result = await saveShipmentMeta(row, { nextReminderAt, nextReminderNote })
@@ -5316,7 +5356,8 @@ const requestShipmentSave = (row, alsoEmail) => {
     alert('To complete this shipment flow, enter both the tracking number and tracking URL first.')
     return
   }
-  setShipDatePrompt({ rowId: row.id, alsoEmail, date: String(reminderDateVal(row, null) || '').trim() })
+  const nextDate = String(reminderDateVal(row, getDefaultFollowUpDateValue(row)) || '').trim()
+  setShipDatePrompt({ rowId: row.id, alsoEmail, date: nextDate })
 }
   const setShipField = (id, field, value) => setShip(prev => ({ ...prev, [id]: { ...prev[id], [field]: value } }))
   const NOTE_AUTHOR_SWATCHES = [
@@ -5360,6 +5401,26 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   const encodeReminderNote = (value) => {
     const raw = String(value || '').trim()
     return raw ? encodeURIComponent(raw) : ''
+  }
+  const getFollowUpPackForType = (type) => {
+    const normalized = String(type || '').trim().toLowerCase()
+    return AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE[normalized] || null
+  }
+  const getFollowUpPackForRow = (row) => getFollowUpPackForType(getAmbassadorType(row))
+  const resolveFollowUpReminderNote = (row, fallbackText = '') => {
+    const explicit = String(reminderNoteVal(row) || fallbackText || '').trim()
+    if (explicit) return explicit
+    const followUpPack = getFollowUpPackForRow(row)
+    return followUpPack ? followUpPack.items.join(', ') : ''
+  }
+  const getDefaultFollowUpDateValue = (row, baseIso = new Date().toISOString()) => {
+    const followUpPack = getFollowUpPackForRow(row)
+    if (!followUpPack) return ''
+    const source = new Date(baseIso)
+    if (Number.isNaN(source.getTime())) return ''
+    const next = new Date(source)
+    next.setUTCDate(next.getUTCDate() + Number(followUpPack.daysAfterDispatch || 21))
+    return next.toISOString().slice(0, 10)
   }
   const buildCommentWithMeta = (row, patch) => {
     let nextComment = String(row?.admin_comment || '')
@@ -6034,7 +6095,8 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (!normalizedEmail) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: ambassador email is missing.'); return }
     setEmail(row.id, 'sending', '')
     try { await ensureAmbassadorPortalAccount(updatedRow) } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not provision ambassador portal account.'); return }
-    const chosenReminderRaw = String(overrideReminderDate || reminderDateVal(row, null) || '').trim()
+    const defaultFollowUpDate = getDefaultFollowUpDateValue(updatedRow, new Date().toISOString())
+    const chosenReminderRaw = String(overrideReminderDate || reminderDateVal(row, defaultFollowUpDate) || defaultFollowUpDate || '').trim()
     if (!chosenReminderRaw) {
       setSaving(null)
       setEmail(row.id, 'error', 'Set a next package reminder date before completing this shipment flow.')
@@ -6048,6 +6110,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       alert('Reminder date is invalid.')
       return
     }
+    const nextReminderNote = resolveFollowUpReminderNote(updatedRow, currentDraft.shipment_details || '')
     const { subject, html } = buildAmbassadorShipmentEmail(updatedRow, draft, setPasswordLink, chosenReminderAt.toISOString())
     let attachments = []
     try {
@@ -6059,7 +6122,6 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (res.ok) {
       const sentAt = new Date().toISOString()
       const nextReminderAt = chosenReminderAt.toISOString()
-      const nextReminderNote = reminderNoteVal(row) || currentDraft.shipment_details || ''
       const officeReminderAt = new Date(new Date(sentAt).getTime() + 21 * 24 * 60 * 60 * 1000).toISOString()
       const archiveLine = buildArchiveLine()
       const loggedComment = latestAdminComment ? `${latestAdminComment}\n${archiveLine}` : archiveLine
@@ -6137,10 +6199,11 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       }
     }
   } else {
-    const chosenReminderRawB = String(overrideReminderDate || reminderDateVal(row, null) || '').trim()
+    const defaultFollowUpDate = getDefaultFollowUpDateValue(row, new Date().toISOString())
+    const chosenReminderRawB = String(overrideReminderDate || reminderDateVal(row, defaultFollowUpDate) || defaultFollowUpDate || '').trim()
     if (chosenReminderRawB) {
       const chosenIso = new Date(`${chosenReminderRawB}T10:00:00Z`).toISOString()
-      await saveShipmentMeta({ ...row, admin_comment: latestAdminComment }, { nextReminderAt: chosenIso, nextReminderNote: reminderNoteVal(row) })
+      await saveShipmentMeta({ ...row, admin_comment: latestAdminComment }, { nextReminderAt: chosenIso, nextReminderNote: resolveFollowUpReminderNote(row, '') })
       setReminderDateDraft((prev) => ({ ...prev, [row.id]: chosenIso.slice(0, 10) }))
     }
     setEmail(row.id, 'sent', hasShipmentInfo ? 'Shipment logged — box & tracking cleared for the next parcel' : 'Follow-up details saved')
@@ -6470,7 +6533,7 @@ const deleteApplication = async (row) => {
             const hasTrackingUrl = Boolean(String(shipVal(row, 'tracking_url') || '').trim())
             const trackingFlowReady = hasTrackingNumber && hasTrackingUrl
             const isMessagesSectionOpen = isSectionOpen(row.id, 'messages', false)
-            const isShipmentSectionOpen = isSectionOpen(row.id, 'shipment', !setupSectionComplete)
+            const isShipmentSectionOpen = isSectionOpen(row.id, 'shipment', isApproved)
             const isHistorySectionOpen = isSectionOpen(row.id, 'history', shipmentEntries.length <= 1)
             return (
               <div key={row.id} className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
