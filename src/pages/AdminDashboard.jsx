@@ -4841,6 +4841,7 @@ function AmbassadorApplicationsPanel() {
   const [msgRow, setMsgRow] = useState(null)
   const [msgSubject, setMsgSubject] = useState('')
   const [msgBody, setMsgBody] = useState('')
+  const [ambassadorInfoDraft, setAmbassadorInfoDraft] = useState({})
   const [ship, setShip] = useState({}) // { [id]: { shipment_details, tracking_number, tracking_url } }
   const [noteDraft, setNoteDraft] = useState({}) // { [id]: 'new internal note being typed' }
   const [packAdditionDraft, setPackAdditionDraft] = useState({}) // { [id]: 'extra pack items to consider' }
@@ -5303,6 +5304,56 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   }
 
   const openMessage = (row) => { setMsgRow(row); setMsgSubject('A message from GEL.IT.UP'); setMsgBody('') }
+
+  const updateAmbassadorInfoField = (row, field, value) => {
+    setAmbassadorInfoDraft((prev) => ({
+      ...prev,
+      [row.id]: {
+        ...(prev[row.id] || {}),
+        [field]: value,
+      },
+    }))
+  }
+
+  const saveAmbassadorInfo = async (row) => {
+    const draft = ambassadorInfoDraft[row.id] || {}
+    const nextPatch = {
+      email: String(draft.email ?? row.email ?? '').trim(),
+      phone: String(draft.phone ?? row.phone ?? '').trim() || null,
+      address: String(draft.address ?? row.address ?? '').trim() || null,
+      city: String(draft.city ?? row.city ?? '').trim() || null,
+      postal_code: String(draft.postal_code ?? row.postal_code ?? '').trim() || null,
+      country: String(draft.country ?? row.country ?? '').trim() || null,
+    }
+    if (!nextPatch.email) {
+      alert('Email address is required.')
+      return
+    }
+    setSaving(row.id)
+    const { error } = await supabase
+      .from(AMBASSADOR_TABLE)
+      .update(nextPatch)
+      .eq('id', row.id)
+    setSaving(null)
+    if (error) {
+      alert(error.message)
+      return
+    }
+    patchRow(row.id, {
+      ...nextPatch,
+      email: nextPatch.email,
+      phone: nextPatch.phone,
+      address: nextPatch.address,
+      city: nextPatch.city,
+      postal_code: nextPatch.postal_code,
+      country: nextPatch.country,
+    })
+    setAmbassadorInfoDraft((prev) => {
+      const next = { ...prev }
+      delete next[row.id]
+      return next
+    })
+  }
 
   // Free-form message to the ambassador. Reply-to points at the Zoho inbox so replies come back to you.
   const sendMessage = async () => {
@@ -6587,6 +6638,71 @@ const deleteApplication = async (row) => {
                     {row.message && (
                       <p className="mt-2 whitespace-pre-line text-xs italic text-slate-600">“{row.message}”</p>
                     )}
+
+                    <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
+                      <div className="mb-2 flex items-center justify-between gap-2">
+                        <h4 className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">Contact details</h4>
+                        <button
+                          type="button"
+                          onClick={() => saveAmbassadorInfo(row)}
+                          disabled={saving === row.id}
+                          className="rounded-lg bg-slate-900 px-2.5 py-1 text-[10px] font-semibold text-white hover:bg-slate-700 disabled:opacity-60"
+                        >
+                          Save details
+                        </button>
+                      </div>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <label className="text-[11px] font-medium text-slate-600">
+                          <span className="mb-1 block">Email</span>
+                          <input
+                            value={String((ambassadorInfoDraft[row.id]?.email ?? row.email ?? '')).trim()}
+                            onChange={(e) => updateAmbassadorInfoField(row, 'email', e.target.value)}
+                            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs outline-none ring-slate-900/20 focus:ring"
+                          />
+                        </label>
+                        <label className="text-[11px] font-medium text-slate-600">
+                          <span className="mb-1 block">Phone</span>
+                          <input
+                            value={String((ambassadorInfoDraft[row.id]?.phone ?? row.phone ?? '')).trim()}
+                            onChange={(e) => updateAmbassadorInfoField(row, 'phone', e.target.value)}
+                            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs outline-none ring-slate-900/20 focus:ring"
+                          />
+                        </label>
+                        <label className="sm:col-span-2 text-[11px] font-medium text-slate-600">
+                          <span className="mb-1 block">Address</span>
+                          <input
+                            value={String((ambassadorInfoDraft[row.id]?.address ?? row.address ?? '')).trim()}
+                            onChange={(e) => updateAmbassadorInfoField(row, 'address', e.target.value)}
+                            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs outline-none ring-slate-900/20 focus:ring"
+                          />
+                        </label>
+                        <label className="text-[11px] font-medium text-slate-600">
+                          <span className="mb-1 block">City</span>
+                          <input
+                            value={String((ambassadorInfoDraft[row.id]?.city ?? row.city ?? '')).trim()}
+                            onChange={(e) => updateAmbassadorInfoField(row, 'city', e.target.value)}
+                            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs outline-none ring-slate-900/20 focus:ring"
+                          />
+                        </label>
+                        <label className="text-[11px] font-medium text-slate-600">
+                          <span className="mb-1 block">Postal code</span>
+                          <input
+                            value={String((ambassadorInfoDraft[row.id]?.postal_code ?? row.postal_code ?? '')).trim()}
+                            onChange={(e) => updateAmbassadorInfoField(row, 'postal_code', e.target.value)}
+                            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs outline-none ring-slate-900/20 focus:ring"
+                          />
+                        </label>
+                        <label className="sm:col-span-2 text-[11px] font-medium text-slate-600">
+                          <span className="mb-1 block">Country</span>
+                          <input
+                            value={String((ambassadorInfoDraft[row.id]?.country ?? row.country ?? '')).trim()}
+                            onChange={(e) => updateAmbassadorInfoField(row, 'country', e.target.value)}
+                            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs outline-none ring-slate-900/20 focus:ring"
+                          />
+                        </label>
+                      </div>
+                    </div>
+
                     <p className="mt-1 text-xs font-semibold text-fuchsia-700">
                       Discount code:{' '}
                       {row.discount_code
