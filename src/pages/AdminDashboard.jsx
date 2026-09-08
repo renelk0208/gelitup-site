@@ -5494,7 +5494,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const type = getAmbassadorType(row)
     const pack = AMBASSADOR_PACKS_BY_TYPE[type] || null
     const history = shipmentHistoryEntries(row)
-    const additionalProducts = packNoteEntries(row).map((entry) => entry.text).join(' | ')
+    const plannedItems = packNoteEntries(row).map((entry) => entry.text).join(' | ')
     const shippedProducts = history.map((entry) => entry.boxContents).filter(Boolean).join(' || ')
     return {
       ID: row.id,
@@ -5504,13 +5504,11 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       Country: row.country,
       Status: row.status,
       'Ambassador type': type,
-      'Pack title': pack?.title || '',
-      'Pack contents': pack?.items?.join(' | ') || '',
-      'Additional products': additionalProducts,
-      'Shipped products': shippedProducts,
-      'Shipment count': history.length,
-      'Latest tracking number': history[0]?.trackingNumber || row.tracking_number || '',
-      'Latest tracking URL': history[0]?.trackingUrl || row.tracking_url || '',
+      'New PR Pack': pack?.title || '',
+      Items: plannedItems || pack?.items?.join(' | ') || shippedProducts,
+      'Date to be Sent': reminderDateVal(row, null),
+      'Tracking number': row.tracking_number || '',
+      'Tracking URL': row.tracking_url || '',
     }
   }
   const downloadAllAmbassadorPackages = async () => {
@@ -5547,22 +5545,52 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
           || byEmail.get(String(imported.Email || '').trim().toLowerCase())
           || byInstagram.get(String(imported.Instagram || '').replace(/^@+/, '').trim().toLowerCase())
         if (!row) { skipped += 1; continue }
-        const requestedType = String(imported['Ambassador type'] || '').trim().toLowerCase()
-        const hasAdditionalProductsColumn = Object.prototype.hasOwnProperty.call(imported, 'Additional products')
-        const additionalProducts = String(imported['Additional products'] || '').trim()
+        const requestedPack = String(imported['New PR Pack'] || '').trim().toLowerCase()
+        const requestedType = requestedPack === 'standard pack' || requestedPack === 'standard ambassador'
+          ? 'standard_ambassador'
+          : requestedPack === 'super ambassador pack' || requestedPack === 'super ambassador'
+            ? 'super_ambassador'
+            : requestedPack === 'extreme ambassador pack' || requestedPack === 'extreme ambassador'
+              ? 'extreme_ambassador'
+              : String(imported['Ambassador type'] || '').trim().toLowerCase()
+        const hasItemsColumn = Object.prototype.hasOwnProperty.call(imported, 'Items')
+        const items = String(imported.Items || '').trim()
+        const dateToBeSent = String(imported['Date to be Sent'] || '').trim()
+        const hasTrackingNumberColumn = Object.prototype.hasOwnProperty.call(imported, 'Tracking number')
+        const hasTrackingUrlColumn = Object.prototype.hasOwnProperty.call(imported, 'Tracking URL')
+        const trackingNumber = String(imported['Tracking number'] || '').trim()
+        const trackingUrl = String(imported['Tracking URL'] || '').trim()
         let nextComment = String(row.admin_comment || '')
         if (requestedType && validTypes.has(requestedType)) {
           nextComment = ensureTaggedValue(nextComment, 'AMBASSADOR_TYPE', requestedType.toUpperCase())
         }
         const existingPackLines = nextComment.split('\n').filter((line) => /^\[PACK_NOTE:[^\]]+\]$/i.test(line.trim()))
-        const preservedLines = nextComment.split('\n').filter((line) => line.trim() && !/^\[PACK_NOTE:[^\]]+\]$/i.test(line.trim()))
-        const packLines = hasAdditionalProductsColumn
-          ? additionalProducts.split('|').map((text) => text.trim()).filter(Boolean).map((text) => createPackNoteLine({ stamp: fmtDate(new Date().toISOString()), author: getAdminDisplayLabel(), text }))
+        const preservedLines = nextComment.split('\n').filter((line) => line.trim()
+          && !/^\[PACK_NOTE:[^\]]+\]$/i.test(line.trim())
+          && !/^\[SHIPMENT_NEXT_REMINDER_AT:[^\]]+\]$/i.test(line.trim()))
+        const packLines = hasItemsColumn
+          ? items.split('|').map((text) => text.trim()).filter(Boolean).map((text) => createPackNoteLine({ stamp: fmtDate(new Date().toISOString()), author: getAdminDisplayLabel(), text }))
           : existingPackLines
-        const finalComment = [...preservedLines, ...packLines].join('\n') || null
-        const { error: updateErr } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: finalComment }).eq('id', row.id)
+        if (dateToBeSent) {
+          const parsedDate = new Date(dateToBeSent)
+          if (!Number.isNaN(parsedDate.getTime())) {
+            nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_NEXT_REMINDER_AT', parsedDate.toISOString())
+          }
+        }
+        const finalComment = [...preservedLines, ...packLines]
+          .concat(dateToBeSent && !Number.isNaN(new Date(dateToBeSent).getTime())
+            ? [`[SHIPMENT_NEXT_REMINDER_AT:${new Date(dateToBeSent).toISOString()}]`]
+            : [])
+          .join('\n') || null
+        const shipmentPatch = {
+          admin_comment: finalComment,
+          ...(hasItemsColumn ? { shipment_details: items || null } : {}),
+          ...(hasTrackingNumberColumn ? { tracking_number: trackingNumber || null } : {}),
+          ...(hasTrackingUrlColumn ? { tracking_url: trackingUrl || null } : {}),
+        }
+        const { error: updateErr } = await supabase.from(AMBASSADOR_TABLE).update(shipmentPatch).eq('id', row.id)
         if (updateErr) throw updateErr
-        patchRow(row.id, { admin_comment: finalComment })
+        patchRow(row.id, shipmentPatch)
         updated += 1
       }
       alert(`Updated ${updated} ambassador package records. ${skipped} rows could not be matched.`)
