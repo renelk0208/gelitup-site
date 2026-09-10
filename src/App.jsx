@@ -4493,17 +4493,21 @@ function FullCataloguePage() {
 
   const filteredItems = useMemo(() => {
     const resolveFamily = (item) => {
-      // Primary: path-derived colour family from physical sub-folder
+      // Primary: explicit GIUP1 folder metadata takes precedence over per-shade JSON colour tags,
+      // otherwise the RONE collection is silently re-classified into its individual shade families.
+      const explicitFamily = item.colorFamily ? normalizeCatalogueToken(item.colorFamily) : ''
+      if (explicitFamily === 'GIUP1' || explicitFamily === 'RONE') return 'GIUP1'
+
+      // Secondary: path-derived colour family from physical sub-folder
       const urlParts = (item.imageUrl || '').split('/')
       const filename = urlParts[urlParts.length - 1] || ''
       const sku = filename.replace(/\.[^.]+$/, '')
       const jsonFamily = solidGelColourFamilies[sku]
       if (jsonFamily) return normalizeCatalogueToken(jsonFamily)
-      if (item.colorFamily && normalizeCatalogueToken(item.colorFamily) !== 'GIUP1') {
-        return normalizeCatalogueToken(item.colorFamily)
-      }
+      if (explicitFamily) return explicitFamily
+
       // Fallback: name keyword matching
-      return item.colorFamily ? normalizeCatalogueToken(item.colorFamily) : item.colorFamilyKey
+      return item.colorFamilyKey || ''
     }
 
     const colorFiltered = (!isSolidGelPolish || activeColorFamily === 'ALL')
