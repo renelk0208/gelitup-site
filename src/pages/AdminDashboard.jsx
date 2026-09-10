@@ -6560,6 +6560,14 @@ const deleteApplication = async (row) => {
             const shipmentPreviouslySent = Boolean(sentAt || shipmentHistory.sentAtLabel)
             const nextReminderAt = reminderAtMeta || (sentAt ? addOneMonth(sentAt) : null)
             const nextReminderNote = reminderNoteVal(row)
+            const nextPackageItems = (() => {
+              const noteText = String(nextReminderNote || '').trim()
+              if (noteText) {
+                return noteText.split(',').map((item) => item.trim()).filter(Boolean)
+              }
+              const followUpPack = getFollowUpPackForRow(row)
+              return followUpPack ? followUpPack.items.map((item) => String(item).trim()).filter(Boolean) : []
+            })()
             const contractAlreadySent = hasWelcomeContractSent(row)
             const ambassadorType = getAmbassadorType(row)
             const factoryAckValue = getFactoryAck(row)
@@ -7076,6 +7084,16 @@ const deleteApplication = async (row) => {
                           Next sample kit reminder: {nextReminderAt ? fmtDate(nextReminderAt) : 'Set when shipment date is available'}{isReminderDue ? ' (due now)' : ''}
                         </p>
                         <p className="text-slate-600">What to send: {nextReminderNote || 'Not set'}</p>
+                        {nextPackageItems.length > 0 && (
+                          <div className="mt-2 rounded border border-fuchsia-200 bg-fuchsia-50/80 px-2 py-1.5">
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">Scheduled next package items</p>
+                            <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-700">
+                              {nextPackageItems.map((item) => (
+                                <li key={item}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                         <div className="mt-2 flex flex-wrap gap-2">
                           <button onClick={() => setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: true }))} className="rounded-lg border border-slate-300 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">Expand details</button>
                           <button onClick={() => resendShipmentEmail(row, nextReminderAt)} disabled={saving === row.id} className="rounded-lg border border-sky-300 px-2.5 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-50 disabled:opacity-60">Resend tracking email</button>
@@ -7142,8 +7160,18 @@ const deleteApplication = async (row) => {
                         </div>
                           <div className="mt-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50/60 p-2">
                             <p className="text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">Products for this package</p>
+                            {nextPackageItems.length > 0 && (
+                              <div className="mt-1 rounded border border-fuchsia-200 bg-white px-2 py-1.5">
+                                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Default reminder pack</p>
+                                <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-700">
+                                  {nextPackageItems.map((item) => (
+                                    <li key={item}>{item}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
                             {packNoteEntries(row).length > 0 && (
-                              <div className="mt-1 space-y-1">
+                              <div className="mt-2 space-y-1">
                                 {packNoteEntries(row).map((entry, idx) => (
                                   <div key={idx} className="flex items-center justify-between gap-2 rounded border border-fuchsia-100 bg-white px-2 py-1.5 text-[11px] text-slate-700">
                                     <span>{entry.text}</span>
