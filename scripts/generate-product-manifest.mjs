@@ -155,6 +155,11 @@ function isNailArtImage(imageUrl) {
     .test(imageUrl)
 }
 
+function isLiquidPolygelImage(imageUrl) {
+  return /\/product-images\/BUILDER GEL\/LIQUID POLYGEL\//i
+    .test(imageUrl)
+}
+
 function resolveColorFamily(imageUrl, colourFamilies) {
   const stem = imageUrl.split('/').pop().replace(/\.[^.]+$/, '')
   if (colourFamilies[stem]) {
@@ -680,6 +685,14 @@ appendNameBasedCategoryProducts({
   canonicalIdPrefix: 'nail-art',
   includeImage: isNailArtImage,
   requireSize: false,
+})
+
+appendNameBasedCategoryProducts({
+  category: 'Builder Gels',
+  canonicalIdPrefix: 'liquid-polygel',
+  includeImage: isLiquidPolygelImage,
+  excludeImage: imageUrl => /Liquid\.polygel\.hero\.image\.webp$/i.test(imageUrl),
+  requireSize: true,
 })
 
 manifest.sort((left, right) => (
