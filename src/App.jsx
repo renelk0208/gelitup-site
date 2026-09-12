@@ -35,7 +35,6 @@ const InspirationPage = lazy(() => import('./pages/InspirationPage.jsx'))
 const BlogPage = lazy(() => import('./pages/BlogPage.jsx'))
 const BlogArticlePage = lazy(() => import('./pages/BlogArticlePage.jsx'))
 const GelColoursLandingPage = lazy(() => import('./pages/GelColoursLandingPage.jsx'))
-const WinterVaultLandingPage = lazy(() => import('./pages/WinterVaultLandingPage.jsx'))
 const WholesaleLandingPage = lazy(() => import('./pages/WholesaleLandingPage.jsx'))
 const AcademySampleKitPage = lazy(() => import('./pages/AcademySampleKitPage.jsx'))
 const AmbassadorPage = lazy(() => import('./pages/AmbassadorPage.jsx'))
@@ -3528,10 +3527,6 @@ const SUBCATEGORY_SEO = {
   },
 }
 
-// Winter Vault teaser on the catalogue — mirrors REVEAL_AT in
-// src/pages/WinterVaultLandingPage.jsx; keep in sync when the date changes.
-const WINTER_VAULT_REVEAL_AT = '2026-09-01T00:00:00'
-
 function FullCataloguePage() {
   const location = useLocation()
   const [sections, setSections] = useState([])
@@ -5866,38 +5861,6 @@ function FullCataloguePage() {
 
   return (
     <section className="space-y-5">
-      {/* WINTER VAULT CAMPAIGN TEASER */}
-      {(() => {
-        const daysToReveal = Math.max(0, Math.ceil((new Date(WINTER_VAULT_REVEAL_AT).getTime() - Date.now()) / 86400000))
-        return (
-          <div className="mx-auto w-full max-w-6xl px-4 sm:px-8">
-            <NavLink
-              to="/winter-vault"
-              className="group relative block overflow-hidden rounded-2xl transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_40px_rgba(212,55,144,0.35)]"
-              style={{ backgroundColor: '#1A1A1A', border: '1px solid rgba(212,55,144,0.55)' }}
-            >
-              <div className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full opacity-25 blur-3xl transition duration-500 group-hover:opacity-50" style={{ backgroundColor: '#D43790' }} />
-              <div className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.3em]" style={{ color: '#D43790' }}>
-                    The Winter Vault
-                  </p>
-                  <p className="mt-1.5 text-lg font-black leading-snug text-white sm:text-xl">
-                    Something new is locked away.{' '}
-                    {daysToReveal > 0 ? `The vault opens in ${daysToReveal} days.` : 'The vault is open.'}
-                  </p>
-                  <p className="mt-1 text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                    Brand new products, sealed until 1 September. Leave your email and be the first inside.
-                  </p>
-                </div>
-                <span className="shrink-0 self-start rounded-lg px-5 py-2.5 text-sm font-bold text-white transition group-hover:opacity-90 sm:self-auto" style={{ backgroundColor: '#D43790' }}>
-                  Enter the Vault →
-                </span>
-              </div>
-            </NavLink>
-          </div>
-        )
-      })()}
       <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-12 sm:px-8 sm:py-16">
         <div className="mx-auto max-w-6xl">
           <h1 className="heading-on-dark text-4xl font-extrabold uppercase tracking-[0.15em] text-white sm:text-5xl" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
@@ -21521,7 +21484,6 @@ function App() {
           <Route path="/spot-my-tops"      element={<Navigate to="/full-catalogue?subcategory=spot-my-tops"      replace />} />
           <Route path="/packages" element={<Navigate to="/distributor-packages" replace />} />
           <Route path="/gel-colours" element={<GelColoursLandingPage />} />
-          <Route path="/winter-vault" element={<WinterVaultLandingPage />} />
           <Route path="/wholesale" element={<WholesaleLandingPage />} />
           <Route path="/academy-kit" element={<AcademySampleKitPage />} />
           <Route path="/ambassadors" element={<AmbassadorPage />} />
