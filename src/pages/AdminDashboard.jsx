@@ -4604,17 +4604,24 @@ function buildAmbassadorShipmentNotificationEmail(row, ship, sentAtIso, nextPack
 function buildAmbassadorPauseEmail(row, timeframe, performanceDetails, senderName) {
   const name = String(row?.full_name || '').trim().split(/\s+/)[0] || 'there'
   return {
-    subject: 'Checking in on our Ambassador Collaboration',
-    html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.6">
+    subject: 'A Quick Check-In About Your Ambassador Status',
+    html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.65">
       <p>Hi ${escAmb(name)},</p>
-      <p>We hope you're doing well. We wanted to reach out personally to check in on how our collaboration has been going from your end.</p>
-      <p>When we started working together, we were really excited about the mutual collaboration with GEL.IT.UP. Looking back over the past ${escAmb(timeframe)}, though, we've noticed that the collaboration hasn't quite reflected what we originally discussed and agreed on — specifically around ${escAmb(performanceDetails)}. We want to be transparent with you about this rather than let it go unaddressed.</p>
-      <p>We understand that priorities and circumstances can shift, and we'd genuinely like to hear your perspective. If there's something going on — whether it's bandwidth, direction, expectations, or anything else — we're happy to talk it through and see if there's a way to reset and move forward together.</p>
-      <p>That said, if this partnership no longer feels like the right fit for you, or if we're not able to align on what's needed going forward, we completely understand, and we're open to discussing a mutual and amicable end to the collaboration.</p>
-      <p>Could we schedule a quick call or exchange a few messages this week to talk this through? We'd rather have an honest conversation than let things continue on a path that isn't working for either side.</p>
-      <p>Looking forward to hearing your thoughts.</p>
+      <p>We hope you're doing well! We wanted to reach out personally because we've noticed there hasn't been recent activity on your end with the content and posts that are part of our Ambassador Programme.</p>
+      <p>As you know, staying active with regular posts and videos is an important part of keeping the partnership going strong — it's how we grow together and how your work gets the visibility it deserves. Since we haven't seen recent posts, we've paused your ambassador status for now while we check in with you.</p>
+      <p>We'd love to understand where things stand, so please let us know which of the following applies to you:</p>
+      <p><strong>1. You have content ready to share</strong> — If you've created videos or posts you haven't submitted yet, just send them over and we'll happily review them and reactivate your status.</p>
+      <p><strong>2. You'd like to continue, but need a bit of support</strong> — If something has been holding you back (${escAmb(performanceDetails)}), let us know — we're happy to work with you on a plan going forward.</p>
+      <p><strong>3. You'd like to step back from the programme</strong> — That's completely okay too, and we appreciate you being part of our community. If this is the case, it would help us to know why, so we can keep improving — for example:</p>
+      <ul style="margin:0 0 16px 20px;padding:0">
+        <li style="margin:0 0 6px">The product wasn't the right fit for you</li>
+        <li style="margin:0 0 6px">You weren't happy with communication or support from our side</li>
+        <li style="margin:0 0 6px">Personal or scheduling reasons</li>
+        <li style="margin:0 0 6px">Other (feel free to share)</li>
+      </ul>
+      <p>Whatever you decide, we're grateful for the time you've spent with GEL.IT.UP so far, and we'd love to hear back from you within ${escAmb(timeframe)} so we can update your status accordingly.</p>
       <p>Warm regards,</p>
-      <p>${escAmb(senderName)}<br/>GEL.IT.UP</p>
+      <p>${escAmb(senderName)}<br/>GEL.IT.UP Ambassador Programme</p>
     </div>`,
   }
 }
@@ -4838,6 +4845,7 @@ function AmbassadorApplicationsPanel() {
   const [pauseTimeframe, setPauseTimeframe] = useState('')
   const [pauseDetails, setPauseDetails] = useState('')
   const [pauseSenderName, setPauseSenderName] = useState('')
+  const [pauseSendEmail, setPauseSendEmail] = useState(true)
   const [msgRow, setMsgRow] = useState(null)
   const [msgSubject, setMsgSubject] = useState('')
   const [msgBody, setMsgBody] = useState('')
@@ -6373,6 +6381,7 @@ const deleteApplication = async (row) => {
     setPauseTimeframe('')
     setPauseDetails('')
     setPauseSenderName('')
+    setPauseSendEmail(true)
   }
 
   const submitPauseAmbassador = async () => {
@@ -6380,11 +6389,18 @@ const deleteApplication = async (row) => {
     const timeframe = pauseTimeframe.trim()
     const performanceDetails = pauseDetails.trim()
     const senderName = pauseSenderName.trim()
-    if (!timeframe || !performanceDetails || !senderName) {
-      alert('Timeframe, performance details, and sender name are all required.')
+    if (!timeframe || !performanceDetails) {
+      alert('Timeframe and performance details are required.')
       return
     }
-    if (!window.confirm(`Pause ${pauseRow.full_name || pauseRow.email}'s ambassador programme, stop future packages, deactivate their code, and send the check-in email?`)) return
+    if (pauseSendEmail && !senderName) {
+      alert('Sender name is required when sending the pause email.')
+      return
+    }
+    if (!window.confirm(
+      `Pause ${pauseRow.full_name || pauseRow.email}'s ambassador programme, stop future packages, deactivate their code, ` +
+      (pauseSendEmail ? 'and send the check-in email?' : 'without sending the check-in email?'),
+    )) return
 
     const pausedAt = new Date().toISOString()
     const pauseTag = encodeURIComponent(JSON.stringify({
@@ -6432,19 +6448,24 @@ const deleteApplication = async (row) => {
       }
     }
 
-    const { subject, html } = buildAmbassadorPauseEmail(pauseRow, timeframe, performanceDetails, senderName)
-    const emailResult = await sendAmbassadorEmail({ to: pauseRow.email, subject, html })
     patchRow(pauseRow.id, { status: 'paused', shipment_details: null, tracking_number: null, tracking_url: null, admin_comment: nextComment })
     setShip((prev) => ({ ...prev, [pauseRow.id]: { shipment_details: '', tracking_number: '', tracking_url: '' } }))
     setNextPackageMode((prev) => ({ ...prev, [pauseRow.id]: false }))
     setShipmentPanelOpen((prev) => ({ ...prev, [pauseRow.id]: false }))
-    if (emailResult.ok) {
-      logAmbassadorSend(pauseRow, { to: pauseRow.email, subject, body: htmlToText(html) })
-      setEmail(pauseRow.id, 'sent', `Programme paused and check-in email sent to ${pauseRow.email}`)
-      setPauseRow(null)
+    if (pauseSendEmail) {
+      const { subject, html } = buildAmbassadorPauseEmail(pauseRow, timeframe, performanceDetails, senderName)
+      const emailResult = await sendAmbassadorEmail({ to: pauseRow.email, subject, html })
+      if (emailResult.ok) {
+        logAmbassadorSend(pauseRow, { to: pauseRow.email, subject, body: htmlToText(html) })
+        setEmail(pauseRow.id, 'sent', `Programme paused and check-in email sent to ${pauseRow.email}`)
+        setPauseRow(null)
+      } else {
+        setEmail(pauseRow.id, 'error', `Programme paused, but check-in email failed: ${emailResult.error}`)
+        alert(`Programme paused, but the check-in email failed: ${emailResult.error}`)
+      }
     } else {
-      setEmail(pauseRow.id, 'error', `Programme paused, but check-in email failed: ${emailResult.error}`)
-      alert(`Programme paused, but the check-in email failed: ${emailResult.error}`)
+      setEmail(pauseRow.id, 'sent', 'Programme paused without sending a check-in email')
+      setPauseRow(null)
     }
     setSaving(null)
   }
@@ -7358,7 +7379,7 @@ const deleteApplication = async (row) => {
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4" onClick={() => setPauseRow(null)}>
           <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-base font-bold text-slate-900">Pause {pauseRow.full_name}</h3>
-            <p className="mt-1 text-xs text-slate-500">This stops future PR packages, cancels the scheduled reminder, deactivates the discount code, and sends the collaboration check-in letter.</p>
+            <p className="mt-1 text-xs text-slate-500">This stops future PR packages, cancels the scheduled reminder, deactivates the discount code, and can optionally send the collaboration check-in letter.</p>
             <label className="mt-3 block text-xs font-semibold text-slate-700">
               Timeframe
               <input
@@ -7387,14 +7408,23 @@ const deleteApplication = async (row) => {
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-normal"
               />
             </label>
+            <label className="mt-3 flex items-center gap-2 text-xs font-semibold text-slate-700">
+              <input
+                type="checkbox"
+                checked={pauseSendEmail}
+                onChange={(e) => setPauseSendEmail(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500"
+              />
+              Send a check-in email
+            </label>
             <div className="mt-4 flex justify-end gap-2">
               <button onClick={() => setPauseRow(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
               <button
                 onClick={submitPauseAmbassador}
-                disabled={saving === pauseRow.id || !pauseTimeframe.trim() || !pauseDetails.trim() || !pauseSenderName.trim()}
+                disabled={saving === pauseRow.id || !pauseTimeframe.trim() || !pauseDetails.trim() || (pauseSendEmail && !pauseSenderName.trim())}
                 className="rounded-lg bg-amber-600 px-3 py-2 text-sm font-semibold text-white hover:bg-amber-500 disabled:opacity-60"
               >
-                Pause &amp; send email
+                {pauseSendEmail ? 'Pause & send email' : 'Pause without email'}
               </button>
             </div>
           </div>

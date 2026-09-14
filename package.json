@@ -31,6 +31,7 @@
     "generate:order-template": "node scripts/generate-client-order-template.mjs",
     "convert:order-to-zoho": "node scripts/convert-order-to-zoho-csv.mjs",
     "export:product-info-excel": "node scripts/export-product-info-excel.mjs",
+    "export:ambassador-discount-codes": "node scripts/export-ambassador-discount-codes.mjs",
     "import:product-info-excel": "node scripts/import-product-info-excel.mjs"
   },
   "dependencies": {
