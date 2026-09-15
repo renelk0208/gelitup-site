@@ -71,7 +71,8 @@ const TRUNCATE_LENGTH = 120
 function EntryCard({ entry, featured }) {
   const lang = useLang()
   const T = getTranslations(lang)
-  const starLabels = T ? T.guestbook.star_labels : STAR_LABELS
+  const guestbookT = T?.guestbook || null
+  const starLabels = guestbookT?.star_labels || STAR_LABELS
   const [expanded, setExpanded] = useState(false)
   const message = entry.message || ''
   const isLong = message.length > TRUNCATE_LENGTH
@@ -114,7 +115,7 @@ function EntryCard({ entry, featured }) {
           onClick={() => setExpanded((e) => !e)}
           className="mt-1.5 text-xs font-semibold text-fuchsia-600 hover:text-fuchsia-800 transition"
         >
-          {expanded ? (T ? T.guestbook.show_less : 'Show less ▲') : (T ? T.guestbook.read_more : 'Read more ▼')}
+          {expanded ? (guestbookT?.show_less || 'Show less ▲') : (guestbookT?.read_more || 'Read more ▼')}
         </button>
       )}
     </div>
@@ -140,8 +141,9 @@ export default function GuestbookPage() {
     }
   }, [])
   const T = getTranslations(lang)
-  const starLabels = T ? T.guestbook.star_labels : STAR_LABELS
-  const roles = T ? T.guestbook.roles : ROLES
+  const guestbookT = T?.guestbook || null
+  const starLabels = guestbookT?.star_labels || STAR_LABELS
+  const roles = guestbookT?.roles || ROLES
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(true)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -246,7 +248,7 @@ export default function GuestbookPage() {
         <div className="relative px-6 py-14 text-center sm:px-10 sm:py-20">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">Professionals in 15+ countries trust GEL.IT.UP</p>
           <h1 className="heading-on-dark mt-4 text-3xl font-extrabold text-white sm:text-4xl lg:text-5xl">
-            {T ? T.guestbook.hero_title : 'Join the GEL.IT.UP Global Guestbook'}
+            {guestbookT?.hero_title || 'Join the GEL.IT.UP Global Guestbook'}
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
             Join thousands of nail professionals sharing their experience with GEL.IT.UP.
@@ -299,7 +301,7 @@ export default function GuestbookPage() {
         )}
 
         {!loading && entries.length === 0 && (
-          <p className="mt-4 text-sm text-slate-500">{T ? T.guestbook.no_messages : 'No messages yet. Be the first to sign the guestbook!'}</p>
+          <p className="mt-4 text-sm text-slate-500">{guestbookT?.no_messages || 'No messages yet. Be the first to sign the guestbook!'}</p>
         )}
 
         {!loading && entries.length > 0 && (
@@ -338,7 +340,7 @@ export default function GuestbookPage() {
                   onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
                   className="rounded-full border border-slate-200 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
                 >
-                  {T ? T.guestbook.load_more : 'Load more'}
+                  {guestbookT?.load_more || 'Load more'}
                 </button>
               </div>
             )}
@@ -359,14 +361,14 @@ export default function GuestbookPage() {
         {submitted ? (
           <div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-5 text-center">
             <p className="text-2xl">🎉</p>
-            <p className="mt-2 text-base font-bold text-emerald-800">{T ? T.guestbook.success_title : 'Thank you — you are now part of the GEL.IT.UP community.'}</p>
-            <p className="mt-1 text-sm text-emerald-600">{T ? T.guestbook.success_subtitle : 'Your entry will appear once reviewed by our team.'}</p>
+            <p className="mt-2 text-base font-bold text-emerald-800">{guestbookT?.success_title || 'Thank you — you are now part of the GEL.IT.UP community.'}</p>
+            <p className="mt-1 text-sm text-emerald-600">{guestbookT?.success_subtitle || 'Your entry will appear once reviewed by our team.'}</p>
             <button
               type="button"
               onClick={() => setSubmitted(false)}
               className="mt-4 text-sm font-semibold text-emerald-600 underline hover:text-emerald-800"
             >
-              {T ? T.guestbook.submit_another : 'Submit another entry'}
+              {guestbookT?.submit_another || 'Submit another entry'}
             </button>
           </div>
         ) : (
@@ -385,18 +387,18 @@ export default function GuestbookPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">{T ? T.guestbook.field_name : 'Name'} *</label>
+                <label className="mb-1 block text-sm font-medium text-slate-700">{guestbookT?.field_name || 'Name'} *</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   maxLength={100}
                   className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-200"
-                  placeholder={T ? T.guestbook.placeholder_name : 'Your name'}
+                  placeholder={guestbookT?.placeholder_name || 'Your name'}
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">{T ? T.guestbook.field_country : 'Country'} *</label>
+                <label className="mb-1 block text-sm font-medium text-slate-700">{guestbookT?.field_country || 'Country'} *</label>
                 <input
                   type="text"
                   value={country}
@@ -409,19 +411,19 @@ export default function GuestbookPage() {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">{T ? T.guestbook.field_role : 'Role'} *</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">{guestbookT?.field_role || 'Role'} *</label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-200"
               >
-                <option value="">{T ? T.guestbook.select_role : 'Select your role…'}</option>
+                <option value="">{guestbookT?.select_role || 'Select your role…'}</option>
                 {ROLES.map((r, i) => <option key={r} value={r}>{roles[i] || r}</option>)}
               </select>
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">{T ? T.guestbook.field_rating : 'Rating'} <span className="text-slate-400 font-normal">{T ? T.guestbook.field_rating_optional : '(optional)'}</span></label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">{guestbookT?.field_rating || 'Rating'} <span className="text-slate-400 font-normal">{guestbookT?.field_rating_optional || '(optional)'}</span></label>
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((s) => (
                   <button
@@ -443,14 +445,14 @@ export default function GuestbookPage() {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">{T ? T.guestbook.field_comment : 'Comment'} *</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">{guestbookT?.field_comment || 'Comment'} *</label>
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 maxLength={1000}
                 rows={4}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-200"
-                placeholder={T ? T.guestbook.placeholder_comment : 'Share your experience with GEL.IT.UP products…'}
+                placeholder={guestbookT?.placeholder_comment || 'Share your experience with GEL.IT.UP products…'}
               />
               <p className="mt-1 text-right text-xs text-slate-400">{comment.length}/1,000</p>
             </div>
@@ -462,7 +464,7 @@ export default function GuestbookPage() {
                 onChange={(e) => setAnonymous(e.target.checked)}
                 className="h-4 w-4 rounded border-slate-300 text-fuchsia-600 focus:ring-fuchsia-200"
               />
-              <span className="text-sm text-slate-600">{T ? T.guestbook.field_anonymous : 'I prefer to remain anonymous'}</span>
+              <span className="text-sm text-slate-600">{guestbookT?.field_anonymous || 'I prefer to remain anonymous'}</span>
             </label>
 
             {error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-600">{error}</p>}
@@ -472,7 +474,7 @@ export default function GuestbookPage() {
               disabled={submitting || !formValid}
               className="rounded-lg bg-fuchsia-600 px-6 py-2.5 text-sm font-bold text-white shadow-[0_0_14px_rgba(212,55,144,0.4)] transition duration-300 hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {submitting ? (T ? T.guestbook.submitting : 'Submitting…') : (T ? T.guestbook.submit : '✍️ Sign the Guestbook')}
+              {submitting ? (guestbookT?.submitting || 'Submitting…') : (guestbookT?.submit || '✍️ Sign the Guestbook')}
             </button>
           </form>
         )}
