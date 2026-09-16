@@ -93,7 +93,7 @@ const AMBASSADOR_PACKS_BY_TYPE = {
 
 const AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE = {
   standard_ambassador: {
-    daysAfterDispatch: 28,
+    daysAfterDispatch: 21,
     items: [
       '1x Pink Buffer',
       '1 x Purple Buffer',
@@ -103,7 +103,7 @@ const AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE = {
     ],
   },
   super_ambassador: {
-    daysAfterDispatch: 28,
+    daysAfterDispatch: 21,
     items: [
       'New Dual Forms',
       '1 x roll of Gelitup Nail Forms',
@@ -5548,6 +5548,46 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     patchRow(row.id, { admin_comment: nextComment || null })
     return { ok: true, comment: nextComment || null }
   }
+  const bulkUpdateWeeklyPackageDates = async () => {
+    const weekStart = '2026-09-10T00:00:00Z'
+    const weekEnd = '2026-09-16T23:59:59Z'
+    const nextPackageDate = '2026-10-07T00:00:00Z'
+    
+    const { data, error } = await supabase
+      .from(AMBASSADOR_TABLE)
+      .select('id, full_name, admin_comment')
+      .eq('status', 'approved')
+    
+    if (error) {
+      alert(`Error fetching ambassadors: ${error.message}`)
+      return
+    }
+    
+    const sentThisWeek = data.filter(row => {
+      const adminComment = String(row.admin_comment || '')
+      const match = adminComment.match(/\[SHIPMENT_SENT_AT:([^\]]+)\]/i)
+      if (!match) return false
+      const sentAt = match[1]
+      return sentAt >= weekStart && sentAt <= weekEnd
+    })
+    
+    if (sentThisWeek.length === 0) {
+      alert('No ambassadors found sent between Sep 10-16, 2026')
+      return
+    }
+    
+    const updated = []
+    for (const row of sentThisWeek) {
+      const patch = { nextReminderAt: nextPackageDate }
+      const { ok, comment } = await saveShipmentMeta(row, patch)
+      if (ok) {
+        updated.push(row.full_name)
+        patchRow(row.id, { admin_comment: comment })
+      }
+    }
+    
+    alert(`Updated ${updated.length} ambassadors sent this week:\n${updated.join('\n')}`)
+  }
   const reminderNoteVal = (row) => {
     if (Object.prototype.hasOwnProperty.call(reminderNoteDraft, row.id)) return reminderNoteDraft[row.id]
     return decodeReminderNote(readMetaTag(row, 'SHIPMENT_REMINDER_NOTE'))
@@ -6668,6 +6708,14 @@ const deleteApplication = async (row) => {
               ↑ Upload ambassador workbook
               <input type="file" accept=".csv,.xlsx,.xls" onChange={importAllAmbassadorPackages} className="hidden" />
             </label>
+            <button
+              type="button"
+              onClick={bulkUpdateWeeklyPackageDates}
+              className="rounded-full border border-orange-300 bg-white px-3 py-1 text-xs font-semibold text-orange-700 hover:bg-orange-50"
+              title="Update next package dates for ambassadors sent this week (Sep 10-16) to Oct 7, 2026"
+            >
+              🔄 Update this week's dates
+            </button>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
