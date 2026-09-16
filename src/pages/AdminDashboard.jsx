@@ -5417,7 +5417,10 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
 
   // Follow-up: PR box details, tracking + comments.
 const requestShipmentSave = (row, alsoEmail) => {
-  if (shipmentSaveInFlightRef.current.has(String(row?.id || ''))) return
+  if (shipmentSaveInFlightRef.current.has(String(row?.id || ''))) {
+    setEmail(row.id, 'sending', 'Shipment save is already in progress. Please wait a moment.')
+    return
+  }
   const trackingNumber = String(shipVal(row, 'tracking_number') || '').trim()
   const trackingUrl = String(shipVal(row, 'tracking_url') || '').trim()
   if (alsoEmail && (!trackingNumber || !trackingUrl)) {
@@ -6307,7 +6310,12 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     setEmail(row.id, 'sent', hasShipmentInfo ? 'Shipment logged — box & tracking cleared for the next parcel' : 'Follow-up details saved')
   }
   setSaving(null)
+  } catch (err) {
+    const message = err?.message || String(err)
+    setEmail(row.id, 'error', `Could not complete shipment flow: ${message}`)
+    alert(`Could not complete shipment flow: ${message}`)
   } finally {
+    setSaving((current) => (current === row.id ? null : current))
     shipmentSaveInFlightRef.current.delete(shipmentSaveKey)
   }
 } 
