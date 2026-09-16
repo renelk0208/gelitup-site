@@ -5532,7 +5532,17 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     return nextComment
   }
   const saveShipmentMeta = async (row, patch) => {
-    const nextComment = buildCommentWithMeta(row, patch)
+    const { data: latestMetaRow, error: fetchErr } = await supabase
+      .from(AMBASSADOR_TABLE)
+      .select('admin_comment')
+      .eq('id', row.id)
+      .maybeSingle()
+    if (fetchErr) return { ok: false, error: fetchErr.message }
+    const mergedRow = {
+      ...row,
+      admin_comment: latestMetaRow?.admin_comment ?? row?.admin_comment ?? '',
+    }
+    const nextComment = buildCommentWithMeta(mergedRow, patch)
     const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: nextComment || null }).eq('id', row.id)
     if (err) return { ok: false, error: err.message }
     patchRow(row.id, { admin_comment: nextComment || null })
@@ -6075,7 +6085,15 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     // Append the 📧 line to admin_comment instead — the Messages section reads
     // those legacy lines and the internal notes list filters them out, so the
     // message still shows for every admin regardless of the migration state.
-    const newComment = row.admin_comment ? `${row.admin_comment}\n${entry}` : entry
+    const { data: latestRow } = await supabase
+      .from(AMBASSADOR_TABLE)
+      .select('admin_comment')
+      .eq('id', row.id)
+      .maybeSingle()
+    const currentComment = String(latestRow?.admin_comment ?? row.admin_comment ?? '')
+    const lines = currentComment.split('\n').map((line) => String(line).trim()).filter(Boolean)
+    if (lines.includes(entry)) return
+    const newComment = currentComment ? `${currentComment}\n${entry}` : entry
     const { error: err2 } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: newComment }).eq('id', row.id)
     if (!err2) patchRow(row.id, { admin_comment: newComment })
   }
@@ -6293,7 +6311,10 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       setShipmentEntryOpen((prev) => Object.fromEntries(
         Object.entries(prev).map(([key, value]) => [key, key.startsWith(`${row.id}:`) ? false : value]),
       ))
-      logAmbassadorSend(updatedRow, { to: row.email, subject, body: htmlToText(html) })
+      await logAmbassadorSend(
+        { ...updatedRow, admin_comment: nextPackageComment, message_log: row.message_log },
+        { to: row.email, subject, body: htmlToText(html) },
+      )
       if (!notificationResult.ok) {
         setEmail(row.id, 'error', `Tracking sent, but the dispatch notification to ${AMBASSADOR_SHIPMENT_NOTIFICATION_EMAIL} failed: ${notificationResult.error}`)
         alert(`Tracking was sent to the ambassador, but the dispatch notification to ${AMBASSADOR_SHIPMENT_NOTIFICATION_EMAIL} failed: ${notificationResult.error}`)
