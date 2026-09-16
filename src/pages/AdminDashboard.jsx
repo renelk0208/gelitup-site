@@ -6323,12 +6323,74 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   } else {
     const defaultFollowUpDate = getDefaultFollowUpDateValue(row, new Date().toISOString())
     const chosenReminderRawB = String(overrideReminderDate || reminderDateVal(row, defaultFollowUpDate) || defaultFollowUpDate || '').trim()
+    const nextReminderNote = resolveFollowUpReminderNote(row, currentDraft.shipment_details || '')
+    const sentAt = new Date().toISOString()
+    const officeReminderAt = new Date(new Date(sentAt).getTime() + 21 * 24 * 60 * 60 * 1000).toISOString()
     if (chosenReminderRawB) {
       const chosenIso = new Date(`${chosenReminderRawB}T10:00:00Z`).toISOString()
-      await saveShipmentMeta({ ...row, admin_comment: latestAdminComment }, { nextReminderAt: chosenIso, nextReminderNote: resolveFollowUpReminderNote(row, '') })
+      const metaResult = await saveShipmentMeta(
+        { ...row, admin_comment: latestAdminComment },
+        hasShipmentInfo
+          ? {
+              sentAt,
+              nextReminderAt: chosenIso,
+              nextReminderNote,
+              officeReminderAt,
+              officeReminderSentAt: '',
+              officeReminderDispatchedAt: sentAt,
+              officeReminderNextPackageAt: chosenIso,
+              officeReminderItems: nextReminderNote,
+              nextPackageOpen: 'TRUE',
+            }
+          : {
+              nextReminderAt: chosenIso,
+              nextReminderNote,
+            },
+      )
+      if (!metaResult.ok) {
+        setEmail(row.id, 'error', `Could not complete package flow: ${metaResult.error}`)
+        setSaving(null)
+        return
+      }
       setReminderDateDraft((prev) => ({ ...prev, [row.id]: chosenIso.slice(0, 10) }))
+      setReminderNoteDraft((prev) => ({ ...prev, [row.id]: nextReminderNote }))
+      if (hasShipmentInfo) {
+        const nextPackageComment = String(metaResult.comment || '')
+          .split('\n')
+          .filter((line) => !/^\[PACK_NOTE:[^\]]+\]$/i.test(line.trim()))
+          .join('\n') || null
+        const { error: resetErr } = await supabase
+          .from(AMBASSADOR_TABLE)
+          .update({
+            shipment_details: null,
+            tracking_number: null,
+            tracking_url: null,
+            admin_comment: nextPackageComment,
+          })
+          .eq('id', row.id)
+        if (resetErr) {
+          setEmail(row.id, 'error', `Package logged, but could not open next package flow: ${resetErr.message}`)
+          setSaving(null)
+          return
+        }
+        patchRow(row.id, {
+          shipment_details: null,
+          tracking_number: null,
+          tracking_url: null,
+          admin_comment: nextPackageComment,
+        })
+        setShip((prev) => ({ ...prev, [row.id]: { shipment_details: '', tracking_number: '', tracking_url: '' } }))
+        setPackAdditionDraft((prev) => ({ ...prev, [row.id]: '' }))
+        setNextPackageMode((prev) => ({ ...prev, [row.id]: true }))
+        setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: true }))
+        setSectionOpenState((prev) => ({
+          ...prev,
+          [sectionStateKey(row.id, 'shipment')]: true,
+          [sectionStateKey(row.id, 'history')]: false,
+        }))
+      }
     }
-    setEmail(row.id, 'sent', hasShipmentInfo ? 'Shipment logged — box & tracking cleared for the next parcel' : 'Follow-up details saved')
+    setEmail(row.id, 'sent', hasShipmentInfo ? 'Shipment logged — next package flow opened' : 'Follow-up details saved')
   }
   setSaving(null)
   } catch (err) {
@@ -6677,12 +6739,8 @@ const deleteApplication = async (row) => {
             const isShipmentPanelExpanded = shipmentPanelOpen[row.id] ?? !isShipmentClosed
             const isReminderDue = Boolean(nextReminderAt && new Date(nextReminderAt).getTime() <= Date.now())
             const nextPackageDueBadge = nextReminderAt ? (
-              <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
-                isReminderDue
-                  ? 'border-rose-200 bg-rose-100 text-rose-700'
-                  : 'border-violet-200 bg-violet-100 text-violet-700'
-              }`}>
-                {isReminderDue ? 'Next package due now' : `Next package due ${fmtDate(nextReminderAt)}`}
+              <span className="inline-flex items-center rounded-full border border-violet-200 bg-violet-100 px-2 py-0.5 text-[10px] font-semibold text-violet-700">
+                {`Next package date ${fmtDate(nextReminderAt)}`}
               </span>
             ) : null
             const setupSectionComplete = isApproved && contractAlreadySent && Boolean(ambassadorType) && shipmentPreviouslySent
@@ -7285,6 +7343,7 @@ const deleteApplication = async (row) => {
                       </div>
                       )}
                       <div className="flex flex-wrap gap-2">
+                        <button onClick={() => requestShipmentSave(row, false)} disabled={saving === row.id || (isShipmentClosed && !isNextPackageMode) || !trackingFlowReady} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60">Save package (no email)</button>
                         <button onClick={() => requestShipmentSave(row, true)} disabled={saving === row.id || (isShipmentClosed && !isNextPackageMode) || !trackingFlowReady} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
                         {isShipmentClosed && !isNextPackageMode && (
                           <>
@@ -7301,8 +7360,8 @@ const deleteApplication = async (row) => {
                       {isShipmentLocked && (
                         <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-[11px]">
                           <p className="font-semibold text-emerald-700">✅ Email sent on {fmtDateTime(sentAt)}.</p>
-                          <p className={`${isReminderDue ? 'text-amber-700 font-semibold' : 'text-slate-600'}`}>
-                            Next package reminder: {fmtDate(nextReminderAt)}{isReminderDue ? ' (due now)' : ''}
+                          <p className="text-slate-600">
+                            Next package date: {fmtDate(nextReminderAt)}
                           </p>
                           <p className="text-slate-500">To send the next package, update shipment details or tracking and the send button will enable again.</p>
                         </div>
