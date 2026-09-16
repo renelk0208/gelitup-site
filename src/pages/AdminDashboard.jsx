@@ -5548,6 +5548,48 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     patchRow(row.id, { admin_comment: nextComment || null })
     return { ok: true, comment: nextComment || null }
   }
+  const bulkFixPastPackageDates = async () => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const nextPackageDate = new Date(today)
+    nextPackageDate.setDate(nextPackageDate.getDate() + 21) // 3 weeks from today
+    const nextPackageDateIso = nextPackageDate.toISOString()
+    
+    const { data, error } = await supabase
+      .from(AMBASSADOR_TABLE)
+      .select('id, full_name, admin_comment')
+      .eq('status', 'approved')
+    
+    if (error) {
+      alert(`Error fetching ambassadors: ${error.message}`)
+      return
+    }
+    
+    const pastDates = data.filter(row => {
+      const adminComment = String(row.admin_comment || '')
+      const match = adminComment.match(/\[SHIPMENT_NEXT_REMINDER_AT:([^\]]+)\]/i)
+      if (!match) return false
+      const reminderAt = match[1]
+      return new Date(reminderAt) < today
+    })
+    
+    if (pastDates.length === 0) {
+      alert('No ambassadors found with past package dates.')
+      return
+    }
+    
+    const updated = []
+    for (const row of pastDates) {
+      const patch = { nextReminderAt: nextPackageDateIso }
+      const { ok, comment } = await saveShipmentMeta(row, patch)
+      if (ok) {
+        updated.push(row.full_name)
+        patchRow(row.id, { admin_comment: comment })
+      }
+    }
+    
+    alert(`Updated ${updated.length} ambassadors with past dates to Oct 7, 2026:\n${updated.join('\n')}`)
+  }
   const bulkUpdateWeeklyPackageDates = async () => {
     const weekStart = '2026-09-10T00:00:00Z'
     const weekEnd = '2026-09-16T23:59:59Z'
@@ -6716,6 +6758,14 @@ const deleteApplication = async (row) => {
             >
               🔄 Update this week's dates
             </button>
+            <button
+              type="button"
+              onClick={bulkFixPastPackageDates}
+              className="rounded-full border border-red-300 bg-white px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-50"
+              title="Fix all overdue/past package dates to Oct 7, 2026"
+            >
+              🚨 Fix past dates
+            </button>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -6787,8 +6837,13 @@ const deleteApplication = async (row) => {
               || readMetaTag(row, 'SHIPMENT_NEXT_PACKAGE_OPEN').toUpperCase() === 'TRUE'
             const isShipmentClosed = shipmentPreviouslySent && !isNextPackageMode
             const isShipmentPanelExpanded = shipmentPanelOpen[row.id] ?? !isShipmentClosed
+            const isDatePast = nextReminderAt && new Date(nextReminderAt) < new Date()
             const nextPackageDueBadge = nextReminderAt ? (
-              <span className="inline-flex items-center rounded-full border border-violet-200 bg-violet-100 px-2 py-0.5 text-[10px] font-semibold text-violet-700">
+              <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
+                isDatePast 
+                  ? 'border-red-300 bg-red-100 text-red-700' 
+                  : 'border-violet-200 bg-violet-100 text-violet-700'
+              }`}>
                 {`Next package date ${fmtDate(nextReminderAt)}`}
               </span>
             ) : null
