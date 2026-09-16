@@ -11229,7 +11229,7 @@ function PortalRegister({ onRegister }) {
                   }}
                   className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
                 >
-                  <option value="business">Business (VAT required)</option>
+                  <option value="business">Business (VAT optional)</option>
                   <option value="personal">Personal (EU purchases)</option>
                 </select>
               </label>
@@ -11274,13 +11274,11 @@ function PortalRegister({ onRegister }) {
               {R.vat || 'VAT Number'}
               <input
                 type="text"
-                required={isEuCountry(application.invoiceCountry) && (isDistributorFlow || isBusinessOrderProfile)}
+                required={false}
                 value={application.vatNumber}
                 onChange={(event) => setField('vatNumber', event.target.value.toUpperCase())}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none ring-slate-900/20 focus:ring"
-                placeholder={isEuCountry(application.invoiceCountry)
-                  ? ((isDistributorFlow || isBusinessOrderProfile) ? 'EU123456789' : 'Optional for personal purchases')
-                  : 'Optional for non-EU registrations'}
+                placeholder="Optional: EU VAT, Australian ABN/ACN, or other business number"
               />
             </label>
             <label className="block text-sm font-medium text-slate-700">
@@ -20969,9 +20967,10 @@ function App() {
         )
       }
 
-      if (isDistributorApplication && isEuCountry(invoiceCountry)) {
-        requiredFields.push(['VAT number', application.vatNumber])
-      }
+      // VAT is now optional for all registrations including distributors, to support international business numbers
+      // if (isDistributorApplication && isEuCountry(invoiceCountry)) {
+      //   requiredFields.push(['VAT number', application.vatNumber])
+      // }
 
       if (isDistributorApplication) {
         requiredFields.push(
@@ -20998,8 +20997,8 @@ function App() {
         return { ok: false, message: `Please complete ${missingField[0]}.` }
       }
 
-      // VAT prefix validation for known countries
-      if (isDistributorApplication) {
+      // VAT prefix validation for known countries (only if VAT is provided)
+      if (isDistributorApplication && application.vatNumber?.trim()) {
         const vatPrefixErr = validateVatPrefix(application.vatNumber, invoiceCountry)
         if (vatPrefixErr) {
           return { ok: false, message: vatPrefixErr }
