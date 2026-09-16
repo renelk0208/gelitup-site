@@ -4865,6 +4865,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   const [shipmentEntryOpen, setShipmentEntryOpen] = useState({})
   const [factoryPdfBusy, setFactoryPdfBusy] = useState(false)
   const reminderSweepStartedRef = useRef(false)
+  const shipmentSaveInFlightRef = useRef(new Set())
   const [shipmentEmailLock, setShipmentEmailLock] = useState(() => {
     try {
       const parsed = JSON.parse(localStorage.getItem(SHIPMENT_EMAIL_LOCK_STORAGE_KEY) || '{}')
@@ -5076,6 +5077,14 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     tracking_url: shipVal(row, 'tracking_url').trim() || '',
   })
   const shipmentSignature = (row) => JSON.stringify(getShipmentDraft(row))
+  const shipmentDispatchNotificationSignature = (row, draft, nextReminderAt) => JSON.stringify({
+    ambassadorId: String(row?.id || ''),
+    email: String(row?.email || '').trim().toLowerCase(),
+    trackingNumber: String(draft?.tracking_number || '').trim(),
+    trackingUrl: String(draft?.tracking_url || '').trim(),
+    shipmentDetails: String(draft?.shipment_details || '').trim(),
+    nextReminderAt: String(nextReminderAt || '').trim(),
+  })
   const persistShipmentEmailLock = (updater) => {
     setShipmentEmailLock((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
@@ -5408,6 +5417,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
 
   // Follow-up: PR box details, tracking + comments.
 const requestShipmentSave = (row, alsoEmail) => {
+  if (shipmentSaveInFlightRef.current.has(String(row?.id || ''))) return
   const trackingNumber = String(shipVal(row, 'tracking_number') || '').trim()
   const trackingUrl = String(shipVal(row, 'tracking_url') || '').trim()
   if (alsoEmail && (!trackingNumber || !trackingUrl)) {
@@ -5506,6 +5516,12 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     }
     if (Object.prototype.hasOwnProperty.call(patch, 'officeReminderItems')) {
       nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_OFFICE_REMINDER_ITEMS', encodeReminderNote(patch.officeReminderItems))
+    }
+    if (Object.prototype.hasOwnProperty.call(patch, 'officeDispatchNotificationSignature')) {
+      nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SIGNATURE', patch.officeDispatchNotificationSignature || '')
+    }
+    if (Object.prototype.hasOwnProperty.call(patch, 'officeDispatchNotificationSentAt')) {
+      nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SENT_AT', patch.officeDispatchNotificationSentAt || '')
     }
     if (Object.prototype.hasOwnProperty.call(patch, 'nextPackageOpen')) {
       nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_NEXT_PACKAGE_OPEN', patch.nextPackageOpen || '')
@@ -5930,7 +5946,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   // appended into admin_comment; we now keep them out of the editable notes and
   // surface them (plus the new message_log column) in the Messages section.
   const isAmbassadorMsgLine = (line) => String(line).includes('📧')
-  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|AMBASSADOR_PROGRAMME_PAUSED|PACK_NOTE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE|SHIPMENT_OFFICE_REMINDER_AT|SHIPMENT_OFFICE_REMINDER_SENT_AT|SHIPMENT_OFFICE_REMINDER_DISPATCHED_AT|SHIPMENT_OFFICE_REMINDER_NEXT_PACKAGE_AT|SHIPMENT_OFFICE_REMINDER_ITEMS|SHIPMENT_NEXT_PACKAGE_OPEN):[^\]]+\]$/i.test(String(line).trim())
+  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|AMBASSADOR_PROGRAMME_PAUSED|PACK_NOTE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE|SHIPMENT_OFFICE_REMINDER_AT|SHIPMENT_OFFICE_REMINDER_SENT_AT|SHIPMENT_OFFICE_REMINDER_DISPATCHED_AT|SHIPMENT_OFFICE_REMINDER_NEXT_PACKAGE_AT|SHIPMENT_OFFICE_REMINDER_ITEMS|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SIGNATURE|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SENT_AT|SHIPMENT_NEXT_PACKAGE_OPEN):[^\]]+\]$/i.test(String(line).trim())
   const packNoteLines = (row) => String(row.admin_comment || '').split('\n').filter((line) => /^\[PACK_NOTE:[^\]]+\]$/i.test(String(line).trim()))
   const parsePackNote = (line) => {
     const encoded = String(line || '').trim().match(/^\[PACK_NOTE:([^\]]+)\]$/i)?.[1]
@@ -6101,6 +6117,11 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   }
 
   const saveShipment = async (row, alsoEmail, overrideReminderDate) => {
+  const shipmentSaveKey = String(row?.id || '')
+  if (!shipmentSaveKey) return
+  if (shipmentSaveInFlightRef.current.has(shipmentSaveKey)) return
+  shipmentSaveInFlightRef.current.add(shipmentSaveKey)
+  try {
   const currentDraft = getShipmentDraft(row)
   const hasShipmentInfo = Boolean(currentDraft.tracking_number || currentDraft.tracking_url || currentDraft.shipment_details)
   const completedAmbassadorType = getAmbassadorType(row)
@@ -6231,12 +6252,30 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
         tracking_url: null,
         admin_comment: nextPackageComment,
       })
-      const notification = buildAmbassadorShipmentNotificationEmail(updatedRow, draft, sentAt, nextReminderAt, nextReminderNote)
-      const notificationResult = await sendAmbassadorEmail({
-        to: AMBASSADOR_SHIPMENT_NOTIFICATION_EMAIL,
-        subject: notification.subject,
-        html: notification.html,
-      })
+      const dispatchNotificationSignature = shipmentDispatchNotificationSignature(updatedRow, draft, nextReminderAt)
+      const previousDispatchNotificationSignature = extractTaggedRawValue(nextPackageComment, 'SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SIGNATURE')
+      let notificationResult = { ok: true }
+      if (previousDispatchNotificationSignature !== dispatchNotificationSignature) {
+        const notification = buildAmbassadorShipmentNotificationEmail(updatedRow, draft, sentAt, nextReminderAt, nextReminderNote)
+        notificationResult = await sendAmbassadorEmail({
+          to: AMBASSADOR_SHIPMENT_NOTIFICATION_EMAIL,
+          subject: notification.subject,
+          html: notification.html,
+        })
+        if (notificationResult.ok) {
+          const notificationMetaResult = await saveShipmentMeta(
+            { ...updatedRow, admin_comment: nextPackageComment || '' },
+            {
+              officeDispatchNotificationSignature: dispatchNotificationSignature,
+              officeDispatchNotificationSentAt: sentAt,
+            },
+          )
+          if (!notificationMetaResult.ok) {
+            setEmail(row.id, 'error', `Tracking sent, but notification audit metadata failed to save: ${notificationMetaResult.error}`)
+            alert(`Tracking was sent, but notification audit metadata failed to save: ${notificationMetaResult.error}`)
+          }
+        }
+      }
       setShip((prev) => ({ ...prev, [row.id]: { shipment_details: '', tracking_number: '', tracking_url: '' } }))
       setPackAdditionDraft((prev) => ({ ...prev, [row.id]: '' }))
       setReminderDateDraft((prev) => ({ ...prev, [row.id]: nextReminderAt ? nextReminderAt.slice(0, 10) : '' }))
@@ -6268,6 +6307,9 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     setEmail(row.id, 'sent', hasShipmentInfo ? 'Shipment logged — box & tracking cleared for the next parcel' : 'Follow-up details saved')
   }
   setSaving(null)
+  } finally {
+    shipmentSaveInFlightRef.current.delete(shipmentSaveKey)
+  }
 } 
 const resendShipmentEmail = async (row, nextReminderAt) => {
   const trackingNumber = String(row?.tracking_number || '').trim()
