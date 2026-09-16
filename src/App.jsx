@@ -1,4 +1,4 @@
-import { Component, Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+﻿import { Component, Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import appLogo from '/gelitup_logo.png'
 import PWABadge from './PWABadge.jsx'
@@ -5641,13 +5641,14 @@ function FullCataloguePage() {
                               <button type="button" onClick={() => addQuickItem(itemKey)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-fuchsia-300 text-sm text-fuchsia-600 transition hover:bg-fuchsia-50">+</button>
                             </div>
                           ) : (
-                            <button
-                              type="button"
-                              onClick={() => addQuickItem(itemKey)}
-                              className={`flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500 ${pulseItemKey === itemKey ? 'scale-95' : ''}`}
+                            <a
+                              href="https://shop.gelitup.com"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
                             >
-                              + Add to Cart
-                            </button>
+                              Buy on shop.gelitup.com
+                            </a>
                           )}
                         </div>
                       </div>
@@ -5822,12 +5823,14 @@ function FullCataloguePage() {
                     >
                       {showBasketDetail ? 'Hide' : 'View'}
                     </button>
-                    <NavLink
-                      to="/checkout"
+                    <a
+                      href="https://shop.gelitup.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
                     >
                       Checkout
-                    </NavLink>
+                    </a>
                     <button
                       onClick={() => { setQuickCart({}); setItemQuantities({}); setShowBasketDetail(false) }}
                       className="shrink-0 text-xs text-black/40 transition hover:text-red-500"
@@ -6894,12 +6897,14 @@ function FullCataloguePage() {
               >
                 {showBasketDetail ? 'Hide' : 'View'}
               </button>
-              <NavLink
-                to="/checkout"
+              <a
+                href="https://shop.gelitup.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
               >
                 Checkout
-              </NavLink>
+              </a>
               <button
                 onClick={() => { setQuickCart({}); setItemQuantities({}); setShowBasketDetail(false) }}
                 className="shrink-0 text-xs text-black/40 transition hover:text-red-500"
@@ -9419,7 +9424,11 @@ function BuyerRegister() {
           const savedCart = localStorage.getItem(QUICK_CART_STORAGE_KEY)
           const cartObj = savedCart ? JSON.parse(savedCart) : {}
           const hasItems = Object.values(cartObj).some(q => q > 0)
-          navigate(hasItems ? '/checkout' : '/full-catalogue')
+          if (hasItems) {
+            window.location.href = 'https://shop.gelitup.com'
+          } else {
+            navigate('/full-catalogue')
+          }
         } catch {
           navigate('/full-catalogue')
         }
@@ -21413,7 +21422,7 @@ function App() {
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
           <Route path="/for-academies" element={<ForAcademiesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/checkout" element={<ExternalRedirect to="https://shop.gelitup.com" />} />
           <Route path="/studio-one" element={<PrivateLabelPage />} />
           <Route path="/private-label" element={<Navigate to="/studio-one" replace />} />
           <Route path="/studio-one/checkout" element={<StudioOneCheckoutPage />} />
@@ -21539,7 +21548,7 @@ function App() {
                 <Route path="/portal/sign-in" element={<Navigate to="/portal/login" replace />} />
                 <Route path="/portal-admin-login" element={<Navigate to="/portal/admin-login" replace />} />
                 <Route path="/portal/register" element={<BuyerRegister />} />
-                <Route path="/portal/buy" element={<Navigate to="/checkout" replace />} />
+                <Route path="/portal/buy" element={<ExternalRedirect to="https://shop.gelitup.com" />} />
                 <Route path="/portal/forgot-password" element={<PortalForgotPassword />} />
                 <Route
                   path="/portal/dashboard/:module"
