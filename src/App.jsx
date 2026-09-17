@@ -12675,7 +12675,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   const clientValidation = useMemo(() => {
     const vatPrefixError = validateVatPrefix(clientProfile.vatNumber, clientProfile.invoiceCountry)
-    const vatNotVerified = String(clientProfile.vatNumber || '').trim().length >= 4 && !vatPrefixError && (!viesResult || !viesResult.valid)
+    const vatNotVerified = isEuCountry(clientProfile.invoiceCountry) && String(clientProfile.vatNumber || '').trim().length >= 4 && !vatPrefixError && (!viesResult || !viesResult.valid)
     const missing = {
       customerType: !String(clientProfile.customerType || '').trim(),
       shippingType: !String(clientProfile.shippingType || '').trim(),
@@ -15711,16 +15711,18 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <label className="text-xs text-slate-700">VAT Number <span className="text-rose-600">*</span>
               <div className="mt-1 flex gap-1.5">
                 <input type="text" value={clientProfile.vatNumber} onChange={(e) => setClientField('vatNumber', e.target.value.toUpperCase())} className={`flex-1 rounded-lg border px-3 py-2 text-xs text-slate-700 ${hasClientFieldError('vatNumber') ? 'border-rose-400 bg-rose-50' : 'border-slate-300 bg-white'}`} placeholder={COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry] ? `${COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry]}123456789` : 'VAT / Tax ID'} />
-                <button type="button" disabled={viesLoading || !clientProfile.vatNumber.trim()} onClick={() => verifyVat(clientProfile.vatNumber)} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40">
-                  {viesLoading ? 'Checking…' : 'Verify'}
-                </button>
+                {isEuCountry(clientProfile.invoiceCountry) && (
+                  <button type="button" disabled={viesLoading || !clientProfile.vatNumber.trim()} onClick={() => verifyVat(clientProfile.vatNumber)} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40">
+                    {viesLoading ? 'Checking…' : 'Verify'}
+                  </button>
+                )}
               </div>
               {COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry] && (
                 <span className="mt-0.5 block text-[10px] text-slate-400">Must start with <strong>{COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry]}</strong> for {clientProfile.invoiceCountry}</span>
               )}
               {clientValidation.vatPrefixError && <span className="mt-0.5 block text-[10px] text-rose-600">{clientValidation.vatPrefixError}</span>}
-              {viesError && <span className="mt-0.5 block text-[10px] text-rose-600">{viesError}</span>}
-              {viesResult?.valid && (
+              {isEuCountry(clientProfile.invoiceCountry) && viesError && <span className="mt-0.5 block text-[10px] text-rose-600">{viesError}</span>}
+              {isEuCountry(clientProfile.invoiceCountry) && viesResult?.valid && (
                 <div className="mt-1 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1.5">
                   <p className="text-[10px] font-semibold text-emerald-700">✓ Valid — verified via EU VIES</p>
                   {viesResult.name && <p className="text-[10px] text-emerald-600">{viesResult.name}</p>}
