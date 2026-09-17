@@ -12205,9 +12205,18 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       if (!isMounted) return
 
       setClientProfile((current) => {
-        const merged = { ...current }
+        const authedEmail = String(data?.user?.email || '').trim().toLowerCase()
+        const cachedEmail = String(current.contactEmail || '').trim().toLowerCase()
+        // A different account signed in on this device — the cached profile
+        // belongs to someone else, so start clean instead of leaking their
+        // billing/shipping/VAT details into the new user's session.
+        const base = (authedEmail && cachedEmail && authedEmail !== cachedEmail)
+          ? { ...defaultClientProfile }
+          : { ...current }
+
+        const merged = { ...base }
         Object.entries(metaProfile).forEach(([key, value]) => {
-          const currentValue = current[key]
+          const currentValue = base[key]
           const currentEmpty = typeof currentValue === 'string'
             ? !currentValue.trim()
             : currentValue == null

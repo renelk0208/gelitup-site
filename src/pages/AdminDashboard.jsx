@@ -2341,8 +2341,8 @@ function OrdersPanel() {
     if (!trackingNumber && nextStatus === 'tracking_placed') {
       nextStatus = 'payment_received'
     }
+    const registrationIdForSync = row.registration_id || null
     const nextRow = {
-      registration_id: row.registration_id || null,
       customer_email: editDraft.customer_email.trim() || null,
       consignee_name: editDraft.consignee_name.trim() || null,
       consignee_phone: editDraft.consignee_phone.trim() || null,
@@ -2356,7 +2356,7 @@ function OrdersPanel() {
     }
     const ok = await updateOrder(id, nextRow)
     if (ok) {
-      const tierSync = await syncDistributorTierByRegistration(nextRow.registration_id, nextRow.customer_email, nextRow.distributor_tier)
+      const tierSync = await syncDistributorTierByRegistration(registrationIdForSync, nextRow.customer_email, nextRow.distributor_tier)
       if (!tierSync.ok && !tierSync.skipped) {
         alert(`Order saved, but the linked client tier could not be updated: ${tierSync.message}`)
       }
