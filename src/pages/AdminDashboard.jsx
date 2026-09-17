@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import * as XLSX from 'xlsx'
 import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
+import tierPricingOverrides from '../data/tierPricingOverrides.json'
 import ambassadorLetterAttachmentUrl from '../lib/ambassadorletter/Gelitup Ambassador Letter.pdf?url'
 import { buildAmbassadorContractPdf, buildAmbassadorFactoryPrepPdf, buildAmbassadorWelcomeLetterPdf } from '../lib/ambassadorContractPdf.js'
 
@@ -3391,6 +3392,10 @@ const TIER_PRICING_DATA = [
   { key: 'country',      label: 'Level 2 Country Tier',      multiplier: 0.264, colour: 'bg-sky-100 text-sky-700 border-sky-200' },
 ]
 
+function findTierOverride(productName) {
+  return tierPricingOverrides.find(o => o.product === productName) || null
+}
+
 const B2B_PRICE_MULTIPLIER = 1.2
 const PERFECT_SHAPE_TOP_COAT_UPLIFT = 1.06
 function isPerfectShapeTopCoatProduct(name, sku) {
@@ -3555,16 +3560,19 @@ function TierPricingPanel() {
                 // Expanded: individual products
                 ...(isExpanded ? g.products
                   .sort((a, b) => a.b2bPrice - b.b2bPrice)
-                  .map((p, i) => (
-                    <tr key={`${cat}-${i}`} className="bg-slate-50/60">
-                      <td className="pl-8 pr-3 py-1.5 text-[11px] text-slate-600 truncate max-w-[200px]" title={p.name}>{p.name}</td>
-                      <td className="px-3 py-1.5" />
-                      <td className="px-3 py-1.5 text-right font-mono text-[11px] text-slate-600">€{p.b2bPrice.toFixed(2)}</td>
-                      {TIER_PRICING_DATA.filter(t => t.key !== 'b2b').map(t => (
-                        <td key={t.key} className="px-3 py-1.5 text-right font-mono text-[11px] text-slate-500">€{(p.b2bPrice * t.multiplier).toFixed(2)}</td>
-                      ))}
-                    </tr>
-                  )) : []),
+                  .map((p, i) => {
+                    const override = findTierOverride(p.name)
+                    return (
+                      <tr key={`${cat}-${i}`} className="bg-slate-50/60">
+                        <td className="pl-8 pr-3 py-1.5 text-[11px] text-slate-600 truncate max-w-[200px]" title={p.name}>{p.name}</td>
+                        <td className="px-3 py-1.5" />
+                        <td className="px-3 py-1.5 text-right font-mono text-[11px] text-slate-600">€{p.b2bPrice.toFixed(2)}</td>
+                        {TIER_PRICING_DATA.filter(t => t.key !== 'b2b').map(t => (
+                          <td key={t.key} className="px-3 py-1.5 text-right font-mono text-[11px] text-slate-500">€{(override ? override[t.key] : p.b2bPrice * t.multiplier).toFixed(2)}</td>
+                        ))}
+                      </tr>
+                    )
+                  }) : []),
               ]
             })}
           </tbody>
@@ -3593,7 +3601,8 @@ function downloadCSV(priceData, sortedCategories) {
     const sorted = [...g.products].sort((a, b) => a.b2bPrice - b.b2bPrice)
     for (const p of sorted) {
       const escapeName = `"${p.name.replace(/"/g, '""')}"`
-      const tierPrices = tiers.map(t => (p.b2bPrice * t.multiplier).toFixed(2))
+      const override = findTierOverride(p.name)
+      const tierPrices = tiers.map(t => (override ? override[t.key] : p.b2bPrice * t.multiplier).toFixed(2))
       rows.push([`"${cat}"`, escapeName, p.b2bPrice.toFixed(2), ...tierPrices].join(','))
     }
   }
