@@ -5647,7 +5647,7 @@ function FullCataloguePage() {
                               rel="noopener noreferrer"
                               className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
                             >
-                              Buy on shop.gelitup.com
+                              Buy Now!
                             </a>
                           )}
                         </div>
@@ -7200,7 +7200,6 @@ function LangSwitcher() {
 }
 
 const navItems = [
-  { to: '/starter-kits', label: 'Starter Kits' },
   { to: '/studio-one', label: 'Studio One', highlight: true },
   { to: '/about-us', label: 'About us' },
   { to: '/blog', label: 'Blog' },
@@ -21437,11 +21436,12 @@ function App() {
           <Route path="/studio-one" element={<PrivateLabelPage />} />
           <Route path="/private-label" element={<Navigate to="/studio-one" replace />} />
           <Route path="/studio-one/checkout" element={<StudioOneCheckoutPage />} />
-          <Route path="/starter-kits" element={<StarterKits discount={{ active: isCatalogueDiscountActive(), pct: CATALOGUE_DISCOUNT_PCT }} onAddKit={handleAddKit} />} />
-          <Route path="/starter-kits/:kitId" element={<StarterKits discount={{ active: isCatalogueDiscountActive(), pct: CATALOGUE_DISCOUNT_PCT }} onAddKit={handleAddKit} />} />
-          <Route path="/catalogue/starterkits" element={<Navigate to="/starter-kits" replace />} />
-          <Route path="/starterkits" element={<Navigate to="/starter-kits" replace />} />
-          <Route path="/kits" element={<Navigate to="/starter-kits" replace />} />
+          {/* Starter Kits page disabled on gelitup.com — already available on shop.gelitup.com. Routes kept (redirected) for easy re-enable later. */}
+          <Route path="/starter-kits" element={<ExternalRedirect to="https://shop.gelitup.com" />} />
+          <Route path="/starter-kits/:kitId" element={<ExternalRedirect to="https://shop.gelitup.com" />} />
+          <Route path="/catalogue/starterkits" element={<ExternalRedirect to="https://shop.gelitup.com" />} />
+          <Route path="/starterkits" element={<ExternalRedirect to="https://shop.gelitup.com" />} />
+          <Route path="/kits" element={<ExternalRedirect to="https://shop.gelitup.com" />} />
           <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           {/* Vanity routes for social media & advertising — each lands on the right catalogue section */}
