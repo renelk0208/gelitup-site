@@ -5564,14 +5564,18 @@ function FullCataloguePage() {
                             {itemSize && <span className="ml-2 rounded bg-black/10 px-1.5 py-0.5 text-[10px] font-medium text-black/50">{itemSize}</span>}
                           </p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => addQuickItem(itemKey)}
-                          disabled={isOOS}
-                          className={`shrink-0 rounded-[10px] px-3 py-1.5 text-[11px] font-semibold transition ${isOOS ? 'cursor-not-allowed border border-rose-200 bg-rose-50 text-rose-500' : `text-white ${inCart ? 'bg-fuchsia-700 hover:bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`} ${pulseItemKey === itemKey ? 'scale-95' : ''}`}
-                        >
-                          {isOOS ? 'Out of Stock' : inCart ? `+1 (${quickCart[itemKey]})` : '+ Add'}
-                        </button>
+                        {isOOS ? (
+                          <span className="shrink-0 cursor-not-allowed rounded-[10px] border border-rose-200 bg-rose-50 px-3 py-1.5 text-[11px] font-semibold text-rose-500">Out of Stock</span>
+                        ) : (
+                          <a
+                            href={activeSection?.category === '2026 NEW!' ? 'https://shop.gelitup.com/collections/new-2026' : 'https://shop.gelitup.com'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="shrink-0 rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-fuchsia-500"
+                          >
+                            Buy Now!
+                          </a>
+                        )}
                       </div>
                     )
                   }
@@ -5642,7 +5646,7 @@ function FullCataloguePage() {
                             </div>
                           ) : (
                             <a
-                              href="https://shop.gelitup.com"
+                              href={activeSection?.category === '2026 NEW!' ? 'https://shop.gelitup.com/collections/new-2026' : 'https://shop.gelitup.com'}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
