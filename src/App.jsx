@@ -3527,6 +3527,13 @@ const SUBCATEGORY_SEO = {
   },
 }
 
+// Deep-links a specific catalogue item to its matching product on shop.gelitup.com
+// via Shopify's built-in search, since there is no direct name-to-handle mapping.
+function buildShopSearchUrl(itemName) {
+  const cleanName = String(itemName || '').replace(/\s*-HTF\s*$/i, '').trim()
+  return `https://shop.gelitup.com/search?q=${encodeURIComponent(cleanName)}&type=product`
+}
+
 function FullCataloguePage() {
   const location = useLocation()
   const [sections, setSections] = useState([])
@@ -5568,7 +5575,7 @@ function FullCataloguePage() {
                           <span className="shrink-0 cursor-not-allowed rounded-[10px] border border-rose-200 bg-rose-50 px-3 py-1.5 text-[11px] font-semibold text-rose-500">Out of Stock</span>
                         ) : (
                           <a
-                            href={activeSection?.category === '2026 NEW!' ? 'https://shop.gelitup.com/collections/new-2026' : 'https://shop.gelitup.com'}
+                            href={buildShopSearchUrl(item.name)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="shrink-0 rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-fuchsia-500"
@@ -5646,7 +5653,7 @@ function FullCataloguePage() {
                             </div>
                           ) : (
                             <a
-                              href={activeSection?.category === '2026 NEW!' ? 'https://shop.gelitup.com/collections/new-2026' : 'https://shop.gelitup.com'}
+                              href={buildShopSearchUrl(item.name)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
@@ -6211,7 +6218,7 @@ function FullCataloguePage() {
                                 )}
                                 <div className="mt-auto pt-3">
                                   <a
-                                    href="https://shop.gelitup.com/collections/new-2026"
+                                    href={buildShopSearchUrl(item.name)}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
