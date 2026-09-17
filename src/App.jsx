@@ -3527,6 +3527,13 @@ const SUBCATEGORY_SEO = {
   },
 }
 
+// Deep-links a specific catalogue item to its matching product on shop.gelitup.com
+// via Shopify's built-in search, since there is no direct name-to-handle mapping.
+function buildShopSearchUrl(itemName) {
+  const cleanName = String(itemName || '').replace(/\s*-HTF\s*$/i, '').trim()
+  return `https://shop.gelitup.com/search?q=${encodeURIComponent(cleanName)}&type=product`
+}
+
 function FullCataloguePage() {
   // Prices are hidden here — customers purchase via shop.gelitup.com to avoid price discrepancies.
   const SHOW_CATALOGUE_PRICES = false
@@ -5566,14 +5573,18 @@ function FullCataloguePage() {
                             {itemSize && <span className="ml-2 rounded bg-black/10 px-1.5 py-0.5 text-[10px] font-medium text-black/50">{itemSize}</span>}
                           </p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => addQuickItem(itemKey)}
-                          disabled={isOOS}
-                          className={`shrink-0 rounded-[10px] px-3 py-1.5 text-[11px] font-semibold transition ${isOOS ? 'cursor-not-allowed border border-rose-200 bg-rose-50 text-rose-500' : `text-white ${inCart ? 'bg-fuchsia-700 hover:bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`} ${pulseItemKey === itemKey ? 'scale-95' : ''}`}
-                        >
-                          {isOOS ? 'Out of Stock' : inCart ? `+1 (${quickCart[itemKey]})` : '+ Add'}
-                        </button>
+                        {isOOS ? (
+                          <span className="shrink-0 cursor-not-allowed rounded-[10px] border border-rose-200 bg-rose-50 px-3 py-1.5 text-[11px] font-semibold text-rose-500">Out of Stock</span>
+                        ) : (
+                          <a
+                            href={buildShopSearchUrl(item.name)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="shrink-0 rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-fuchsia-500"
+                          >
+                            Buy Now!
+                          </a>
+                        )}
                       </div>
                     )
                   }
@@ -5644,7 +5655,7 @@ function FullCataloguePage() {
                             </div>
                           ) : (
                             <a
-                              href="https://shop.gelitup.com"
+                              href={buildShopSearchUrl(item.name)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
@@ -6177,7 +6188,6 @@ function FullCataloguePage() {
                           const price = lookupCataloguePrice(item.name, itemCode)
                           const listPrice = resolveCatalogueListPrice(item.name, itemCode)
                           const isDiscounted = isCatalogueDiscountActive() && price != null && listPrice != null && price < listPrice
-                          const inCart = (quickCart[itemKey] || 0) > 0
                           return (
                             <article key={idx} className="flex flex-col overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)]" data-catalogue-item>
                               <div className="relative flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
@@ -6207,12 +6217,14 @@ function FullCataloguePage() {
                                   )
                                 ) : null}
                                 <div className="mt-auto pt-3">
-                                  <div className="flex items-center gap-2">
-                                    <button onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
-                                    <span className={`w-8 text-center text-xs font-bold ${inCart ? 'text-fuchsia-700' : 'text-black/40'}`}>{quickCart[itemKey] || 0}</span>
-                                    <button onClick={() => addQuickItem(itemKey)} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border border-fuchsia-600 text-sm text-fuchsia-600 transition duration-300 hover:bg-fuchsia-50 ${pulseItemKey === itemKey ? 'lux-pulse' : ''}`}>+</button>
-                                    {inCart && <span className="ml-auto text-[10px] font-semibold text-fuchsia-700">in basket</span>}
-                                  </div>
+                                  <a
+                                    href={buildShopSearchUrl(item.name)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
+                                  >
+                                    Buy Now!
+                                  </a>
                                 </div>
                               </div>
                             </article>
