@@ -28,8 +28,8 @@ export const PRODUCT_ALIAS_GROUPS = [
   { codes: ['GIUP-SBBlue', 'GIUP SBBlue', 'SBBLUE'], target: '5-in-1 Superior Base 15ml Blue Serenity -HTF' },
   { codes: ['GIUP-SBPS', 'GIUP SBPS', 'SBPS', '2026-NEW-5IN1-PEACH-SERENITY', '2026 NEW 5IN1 PEACH SERENITY'], target: '5-in-1 Superior Base 15ml Peach Serenity -HTF' },
   // All In One Liquids (separate line from 5-in-1 Superior Base)
-  { codes: ['ALL IN ONE LIQUID', 'ALL IN ONE LIQUID 200ML', 'ALL IN ONE LIQUID 200 ML', 'ALL-IN-ONE-LIQUID-200ML'], target: 'All In One Liquid 200 ml -HTF' },
-  { codes: ['ALL IN ONE LIQUID 500ML', 'ALL IN ONE LIQUID 500 ML', 'ALL-IN-ONE-LIQUID-500ML'], target: 'All In One Liquid 500 ml -HTF' },
+  { codes: ['ALL IN ONE LIQUID', 'ALL IN ONE LIQUID 200ML', 'ALL IN ONE LIQUID 200 ML', 'ALL-IN-ONE-LIQUID-200ML', 'NAIL-PREP-ALL-IN-ONE-LIQUID-200ML', 'NAIL PREP ALL IN ONE LIQUID 200ML'], target: 'All In One Liquid 200 ml -HTF' },
+  { codes: ['ALL IN ONE LIQUID 500ML', 'ALL IN ONE LIQUID 500 ML', 'ALL-IN-ONE-LIQUID-500ML', 'NAIL-PREP-ALL-IN-ONE-LIQUID-500ML', 'NAIL PREP ALL IN ONE LIQUID 500ML'], target: 'All In One Liquid 500 ml -HTF' },
   { codes: ['MIRROR TOP COAT', 'MIRROR POWDER TOP COAT'], target: 'Mirror Powder Top Coat -HTF' },
   { codes: ['NWMT15'], target: 'Non Wipe Top Coat Milky 15ml -HTF' },
   // GIUP colour series entries from old order data
