@@ -3528,6 +3528,8 @@ const SUBCATEGORY_SEO = {
 }
 
 function FullCataloguePage() {
+  // Prices are hidden here — customers purchase via shop.gelitup.com to avoid price discrepancies.
+  const SHOW_CATALOGUE_PRICES = false
   const location = useLocation()
   const [sections, setSections] = useState([])
   const [activeCategory, setActiveCategory] = useState('')
@@ -5558,7 +5560,7 @@ function FullCataloguePage() {
                         <div className="min-w-0 flex-1">
                           <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                           <p className="break-words text-[11px] font-light text-black/55">
-                            {itemPrice != null && (itemDiscounted
+                            {SHOW_CATALOGUE_PRICES && itemPrice != null && (itemDiscounted
                               ? <span><span className="mr-1 text-black/35 line-through">€{Number(itemListPrice).toFixed(2)}</span><span className="text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</span></span>
                               : <span className="text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</span>)}
                             {itemSize && <span className="ml-2 rounded bg-black/10 px-1.5 py-0.5 text-[10px] font-medium text-black/50">{itemSize}</span>}
@@ -5614,7 +5616,7 @@ function FullCataloguePage() {
                           <p className="break-words text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
                         </div>
                         <div className="mt-1.5 flex items-center gap-2">
-                          {itemPrice != null && (
+                          {SHOW_CATALOGUE_PRICES && itemPrice != null && (
                             itemDiscounted ? (
                               <span className="flex items-baseline gap-1.5">
                                 <span className="text-[11px] font-medium text-black/40 line-through">€{Number(itemListPrice).toFixed(2)}</span>
@@ -5724,7 +5726,7 @@ function FullCataloguePage() {
                             <div key={key} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
                               <div className="min-w-0 flex-1">
                                 <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{name}</p>
-                                <p className="truncate text-[11px] text-black/45">{code}{price != null && <span className="ml-2 text-fuchsia-700">€{Number(price).toFixed(2)} ea.</span>}</p>
+                                <p className="truncate text-[11px] text-black/45">{code}{SHOW_CATALOGUE_PRICES && price != null && <span className="ml-2 text-fuchsia-700">€{Number(price).toFixed(2)} ea.</span>}</p>
                               </div>
                               <div className="flex items-center gap-1">
                                 <button
@@ -5788,7 +5790,7 @@ function FullCataloguePage() {
                                     className="inline-flex items-center gap-1 rounded-lg border border-fuchsia-300/60 bg-fuchsia-50 px-2 py-1 text-[11px] font-semibold text-fuchsia-700 transition hover:bg-fuchsia-100"
                                   >
                                     <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" /></svg>
-                                    {u.label}{price != null && <span className="text-black/40">€{price.toFixed(2)}</span>}
+                                    {u.label}{SHOW_CATALOGUE_PRICES && price != null && <span className="text-black/40">€{price.toFixed(2)}</span>}
                                   </button>
                                 )
                               })}
@@ -6019,7 +6021,7 @@ function FullCataloguePage() {
                           <p className="truncate text-[10px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                           <p className="line-clamp-2 text-[11px] font-semibold uppercase leading-tight tracking-[0.02em] text-black">{item.name}</p>
                           <p className="mt-1 truncate text-[10px] text-fuchsia-600">{formatSubcategoryDisplayName(item.subcategory, item.category)}</p>
-                          {itemPrice != null && (
+                          {SHOW_CATALOGUE_PRICES && itemPrice != null && (
                             itemDiscounted ? (
                               <p className="mt-1 flex items-baseline gap-1">
                                 <span className="text-[10px] font-medium text-black/40 line-through">€{Number(itemListPrice).toFixed(2)}</span>
@@ -6194,7 +6196,7 @@ function FullCataloguePage() {
                               <div className="flex flex-1 flex-col border-t border-black/10 px-2.5 py-2">
                                 <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                                 <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                                {price != null ? (
+                                {SHOW_CATALOGUE_PRICES && price != null ? (
                                   isDiscounted ? (
                                     <p className="mt-1.5 flex items-baseline gap-1.5">
                                       <span className="text-[11px] font-medium text-black/40 line-through">€{Number(listPrice).toFixed(2)}</span>
@@ -6203,9 +6205,7 @@ function FullCataloguePage() {
                                   ) : (
                                     <p className="mt-1.5 text-xs font-bold text-fuchsia-700">€{Number(price).toFixed(2)}</p>
                                   )
-                                ) : (
-                                  <p className="mt-1.5 text-xs font-bold text-fuchsia-700">Price on request</p>
-                                )}
+                                ) : null}
                                 <div className="mt-auto pt-3">
                                   <div className="flex items-center gap-2">
                                     <button onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
@@ -6835,7 +6835,7 @@ function FullCataloguePage() {
                       <div key={key} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{name}</p>
-                          <p className="truncate text-[11px] text-black/45">{code}{price != null && <span className="ml-2 text-fuchsia-700">€{Number(price).toFixed(2)} ea.</span>}</p>
+                          <p className="truncate text-[11px] text-black/45">{code}{SHOW_CATALOGUE_PRICES && price != null && <span className="ml-2 text-fuchsia-700">€{Number(price).toFixed(2)} ea.</span>}</p>
                         </div>
                         <div className="flex items-center gap-1">
                           <button
