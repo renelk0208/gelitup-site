@@ -1174,6 +1174,12 @@ function normalizeOrderStatus(status) {
   return value
 }
 
+function shouldUseLatestPricingForOrder(status) {
+  const normalized = normalizeOrderStatus(status)
+  if (!normalized) return true
+  return normalized === 'pending_approval' || normalized === 'draft'
+}
+
 function formatOrderStatusLabel(status) {
   const normalized = normalizeOrderStatus(status)
   if (!normalized) return '—'
@@ -1742,6 +1748,8 @@ function OrdersPanel() {
   const [trackingDraft, setTrackingDraft] = useState({})
   const [priceLookupMap, setPriceLookupMap] = useState(new Map())
   const [priceCatalog, setPriceCatalog] = useState([])
+  const [historicalPriceLookupMap, setHistoricalPriceLookupMap] = useState(new Map())
+  const [historicalPriceCatalog, setHistoricalPriceCatalog] = useState([])
   const [isPriceLookupLoaded, setIsPriceLookupLoaded] = useState(false)
   const [authorityOverrides, setAuthorityOverrides] = useState(null)
   const [emailingOrderId, setEmailingOrderId] = useState(null)
@@ -1880,23 +1888,30 @@ function OrdersPanel() {
 
     const loadPriceLookup = async () => {
       try {
-        const [priceRes, overridesRes] = await Promise.all([
+        const [priceRes, historicalPriceRes, overridesRes] = await Promise.all([
           fetch('/gelitup-content/b2b-price-list.json'),
+          fetch('/gelitup-content/b2b-price-list.backup.json'),
           fetch('/gelitup-content/authority-price-overrides.json'),
         ])
         if (!priceRes.ok) throw new Error('price list unavailable')
         const payload = await priceRes.json()
         const items = Array.isArray(payload?.items) ? payload.items : []
+        const historicalPayload = historicalPriceRes.ok ? await historicalPriceRes.json() : null
+        const historicalItems = Array.isArray(historicalPayload?.items) ? historicalPayload.items : items
         const overridesPayload = overridesRes.ok ? await overridesRes.json() : null
         if (!mounted) return
         setPriceLookupMap(buildOrderPriceLookupMap(items))
         setPriceCatalog(items)
+        setHistoricalPriceLookupMap(buildOrderPriceLookupMap(historicalItems))
+        setHistoricalPriceCatalog(historicalItems)
         setAuthorityOverrides(overridesPayload || null)
       }
       catch {
         if (!mounted) return
         setPriceLookupMap(new Map())
         setPriceCatalog([])
+        setHistoricalPriceLookupMap(new Map())
+        setHistoricalPriceCatalog([])
       }
       finally {
         if (mounted) setIsPriceLookupLoaded(true)
@@ -1920,6 +1935,16 @@ function OrdersPanel() {
     setRows(prev => prev.map(r => r.id === id ? { ...r, ...patch } : r))
     return true
   }
+
+  const getOrderPricingContext = useCallback((row) => {
+    const useLatest = shouldUseLatestPricingForOrder(row?.status)
+    const hasHistorical = historicalPriceLookupMap.size > 0
+    return {
+      priceMap: useLatest || !hasHistorical ? priceLookupMap : historicalPriceLookupMap,
+      priceList: useLatest || historicalPriceCatalog.length === 0 ? priceCatalog : historicalPriceCatalog,
+      useLatest,
+    }
+  }, [priceLookupMap, historicalPriceLookupMap, priceCatalog, historicalPriceCatalog])
 
   const syncDistributorTierByRegistration = async (registrationId, email, tier) => {
     const trimmedRegistrationId = String(registrationId || '').trim()
@@ -2035,6 +2060,7 @@ function OrdersPanel() {
   const downloadOrderCsv = (row) => {
     try {
       const parsedItems = resolveRawItems(row).map((item, index) => parseOrderItemEntry(item, index))
+      const { priceMap: orderPriceMap } = getOrderPricingContext(row)
       // Always generate the CSV — if no items, generate a header-only row with order metadata
       if (!parsedItems.length) {
         const csvEsc = v => `"${String(v ?? '').replace(/"/g, '""')}"`
@@ -2047,7 +2073,7 @@ function OrdersPanel() {
         return
       }
 
-      const { csv } = buildOrderCsvPayload(row, parsedItems, priceLookupMap, row?.distributor_tier, authorityOverrides)
+      const { csv } = buildOrderCsvPayload(row, parsedItems, orderPriceMap, row?.distributor_tier, authorityOverrides)
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
       triggerFileDownload(blob, `order-${row?.id || 'unknown'}.csv`)
     } catch (err) {
@@ -2059,6 +2085,7 @@ function OrdersPanel() {
   const downloadOrderXlsx = (row) => {
     try {
       const rawItems = resolveRawItems(row)
+      const { priceMap: orderPriceMap } = getOrderPricingContext(row)
 
       // Sheet 1: Order metadata
       const meta = [{
@@ -2086,7 +2113,7 @@ function OrdersPanel() {
         const rawSku = typeof item === 'object' && item !== null ? (item.sku || '') : ''
         const rawName = typeof item === 'object' && item !== null ? (item.name || '') : String(item || '')
         const itemMult = getEffectiveItemMultiplier(row?.distributor_tier, row?.created_at, parsed.name, parsed.sku, authorityOverrides)
-        const { unitPrice, resolvedName } = resolveOrderItemPriceEntry(parsed, priceLookupMap, itemMult)
+        const { unitPrice, resolvedName } = resolveOrderItemPriceEntry(parsed, orderPriceMap, itemMult)
         const lineTotal = unitPrice != null ? unitPrice * parsed.qty : null
         if (lineTotal != null) orderTotal += lineTotal
         // Use canonical Zoho product name (includes -HTF etc.) when available; fall back to stored name
@@ -2147,11 +2174,12 @@ function OrdersPanel() {
     }
 
     const parsedItems = resolveRawItems(row).map((item, index) => parseOrderItemEntry(item, index))
+    const { priceMap: orderPriceMap } = getOrderPricingContext(row)
     if (!parsedItems.length) {
       return { ok: false, message: 'Order has no items.' }
     }
 
-    const { csv, orderTotal } = buildOrderCsvPayload(row, parsedItems, priceLookupMap, row?.distributor_tier, authorityOverrides)
+    const { csv, orderTotal } = buildOrderCsvPayload(row, parsedItems, orderPriceMap, row?.distributor_tier, authorityOverrides)
     const csvBase64 = encodeCsvToBase64(csv)
     const toEmail = ORDER_INBOX_EMAIL || 'distribution@gelitup.com'
     const subject = `B2B Order #${row.id || '-'} CSV Export`
@@ -2279,6 +2307,7 @@ function OrdersPanel() {
   }
 
   const startEdit = (row) => {
+    const { priceMap: orderPriceMap } = getOrderPricingContext(row)
     setEditing(row.id)
     setItemSearch('')
     setEditDraft({
@@ -2295,7 +2324,7 @@ function OrdersPanel() {
             // Reuse the shared parser + price-list resolver so SKUs stored as
             // plain strings (or missing from the object) are filled in here too.
             const parsed = parseOrderItemEntry(it, index)
-            const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, 1.0)
+            const resolved = resolveOrderItemPriceEntry(parsed, orderPriceMap, 1.0)
             const sku = String((it && typeof it === 'object' && it.sku) || resolved.resolvedSku || parsed.sku || '').trim()
             const text = String((it && typeof it === 'object' && it.name) || parsed.name || '').trim()
             return { text, sku, qty: Math.max(1, Number(parsed.qty) || 1) }
@@ -2521,6 +2550,7 @@ function OrdersPanel() {
 
       <ul className="space-y-2">
         {filteredRows.map(row => {
+          const { priceMap: orderPriceMap, priceList: orderPriceCatalog, useLatest: usesLatestPricing } = getOrderPricingContext(row)
           const items = resolveRawItems(row)
           const draft = trackingDraft[row.id] || {}
           const currentStatus = normalizeOrderStatus(row.status)
@@ -2537,7 +2567,7 @@ function OrdersPanel() {
             .map((item, i) => parseOrderItemEntry(item, i))
             .filter(parsed => {
               const itemMult = getEffectiveItemMultiplier(row.distributor_tier, row.created_at, parsed.name, parsed.sku, authorityOverrides)
-              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, itemMult)
+              const resolved = resolveOrderItemPriceEntry(parsed, orderPriceMap, itemMult)
               return resolved.unitPrice == null && !resolved.isImageAsset
             })
           const hasMissingPrices = missingPriceItems.length > 0
@@ -2585,6 +2615,7 @@ function OrdersPanel() {
                         </div>
                         <div><span className="font-semibold text-slate-400">Consignee</span><br />{row.consignee_name || '—'}</div>
                         <div><span className="font-semibold text-slate-400">Phone</span><br />{row.consignee_phone || '—'}</div>
+                        <div><span className="font-semibold text-slate-400">Pricing Source</span><br />{usesLatestPricing ? 'Latest tier prices' : 'Historical snapshot prices'}</div>
                         <div><span className="font-semibold text-slate-400">Payment confirmed</span><br />
                           <span className={row.payment_confirmed ? 'font-semibold text-emerald-600' : 'text-slate-400'}>
                             {row.payment_confirmed ? '✓ Yes' : 'Not yet'}
@@ -2619,7 +2650,7 @@ function OrdersPanel() {
                               const parsed = parseOrderItemEntry(item, i)
                               const rawSku = typeof item === 'object' && item !== null ? (item.sku || item.code || '') : ''
                               const itemMult = getEffectiveItemMultiplier(row.distributor_tier, row.created_at, parsed.name, parsed.sku, authorityOverrides)
-                              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, itemMult)
+                              const resolved = resolveOrderItemPriceEntry(parsed, orderPriceMap, itemMult)
                               const unitPrice = resolved.unitPrice
                               const isImageAsset = resolved.isImageAsset
                               const displaySku = normalizeAdminSkuToken(rawSku || parsed.sku || resolved.resolvedSku || '').replace(/\s+IMAGE$/i, '')
@@ -2658,7 +2689,7 @@ function OrdersPanel() {
                             items.forEach((item, i) => {
                               const parsed = parseOrderItemEntry(item, i)
                               const itemMult = getEffectiveItemMultiplier(row.distributor_tier, row.created_at, parsed.name, parsed.sku, authorityOverrides)
-                              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, itemMult)
+                              const resolved = resolveOrderItemPriceEntry(parsed, orderPriceMap, itemMult)
                               if (resolved.isImageAsset) return
                               if (resolved.unitPrice != null) total += resolved.unitPrice * parsed.qty
                               else unpriced += 1
@@ -2824,7 +2855,7 @@ function OrdersPanel() {
                             const normalize = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]+/g, '')
                             const terms = itemSearch.trim().toLowerCase().split(/\s+/)
                             const normQuery = normalize(itemSearch)
-                            let matches = priceCatalog
+                            let matches = orderPriceCatalog
                               .filter(p => {
                                 const hay = `${p.name || ''} ${p.sku || ''}`.toLowerCase()
                                 const normHay = normalize(hay)
@@ -2835,9 +2866,9 @@ function OrdersPanel() {
                             // and short codes (e.g. "GIUP-SBCIMF", "SH07") still find the product.
                             if (!matches.length) {
                               const q = itemSearch.trim()
-                              const resolved = resolveOrderItemPriceEntry({ sku: q, name: q }, priceLookupMap, 1.0)
+                              const resolved = resolveOrderItemPriceEntry({ sku: q, name: q }, orderPriceMap, 1.0)
                               if (resolved?.resolvedName) {
-                                const hit = priceCatalog.find(p => (p.name || '') === resolved.resolvedName)
+                                const hit = orderPriceCatalog.find(p => (p.name || '') === resolved.resolvedName)
                                 matches = [hit || { name: resolved.resolvedName, sku: resolved.resolvedSku || '', price: null }]
                               }
                             }
