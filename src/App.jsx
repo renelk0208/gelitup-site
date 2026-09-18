@@ -3612,7 +3612,6 @@ function FullCataloguePage() {
   const location = useLocation()
   const [sections, setSections] = useState([])
   const [activeCategory, setActiveCategory] = useState('')
-  const [expandedSections, setExpandedSections] = useState({})
   const [activeSubcategory, setActiveSubcategory] = useState('')
   const [activeColorFamily, setActiveColorFamily] = useState('ALL')
   const [activeCatEyeVariant, setActiveCatEyeVariant] = useState('ALL')
@@ -6329,15 +6328,6 @@ function FullCataloguePage() {
                 </p>
                 <div className="mt-6 flex flex-wrap items-center gap-4">
                   <button
-                    onClick={() => {
-                      const colorsSection = sections.find((s) => isColorsCategoryName(s.category))
-                      if (colorsSection) openCatalogueCategory(colorsSection.category, 'ALL')
-                    }}
-                    className="rounded-lg bg-fuchsia-600 px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
-                  >
-                    BROWSE COLOURS
-                  </button>
-                  <button
                     type="button"
                     title={copiedCategory === 'colours' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=colours'}
                     aria-label={copiedCategory === 'colours' ? 'Copied!' : 'Copy link to Colours'}
@@ -6393,21 +6383,6 @@ function FullCataloguePage() {
                     The non-negotiables of every nail service. Our professional base coat range protects the natural nail and maximises colour adhesion, while our top coat systems deliver the perfect finish — from high-gloss brilliance to matte sophistication. Includes the 5-in-1 base coat, Flexi Base, Brush On Builder (BIAB), and our full top coat collection.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
-                    <button
-                      onClick={() => {
-                        setExpandedSections(prev => ({ ...prev, essentials: true }))
-                        requestAnimationFrame(() => {
-                          const el = document.getElementById('catalogue-section-essentials')
-                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                        })
-                      }}
-                      className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
-                      style={{ background: 'rgba(185,100,130,0.85)' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(205,120,150,0.95)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(185,100,130,0.85)'}
-                    >
-                      BROWSE BASES, TOPS &amp; NAIL PREPARATIONS
-                    </button>
                     <button
                       type="button"
                       title={copiedCategory === 'essentials' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=essentials'}
@@ -6494,15 +6469,6 @@ function FullCataloguePage() {
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
                     <button
-                      onClick={() => openCatalogueCategory('BUILDER GEL SYSTEMS', 'ALL')}
-                      className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
-                      style={{ background: 'rgba(180,90,50,0.85)' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(160,75,40,0.95)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(180,90,50,0.85)'}
-                    >
-                      BROWSE BUILDER SYSTEMS
-                    </button>
-                    <button
                       type="button"
                       title={copiedCategory === 'builders' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=builders'}
                       aria-label={copiedCategory === 'builders' ? 'Copied!' : 'Copy link to Builder Systems'}
@@ -6530,19 +6496,6 @@ function FullCataloguePage() {
               </div>
             </div>
 
-            {(
-              <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
-                <div className="mb-3 flex flex-wrap gap-2">
-                  {chapterBuildersCategories.map(cat => (
-                    <button key={cat} onClick={() => openCatalogueCategory(cat, 'ALL')}
-                      className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
-                        activeCategory === cat ? 'bg-[#FFCCB6] text-gray-800 border border-[#e0a882]' : 'border border-[#4A4A4A]/30 bg-white text-[#1A1A1A] hover:border-[#FFCCB6]'
-                      }`}>{cat}</button>
-                  ))}
-                </div>
-                {categoryDetail}
-              </div>
-            )}
           </div>
 
           {/* CHAPTER 03: THE PROFESSIONAL TOOLSET */}
@@ -6566,15 +6519,6 @@ function FullCataloguePage() {
                     Precision finishing products, expert hardware, and maintenance tools for flawless studio finishes.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
-                    <button
-                      onClick={() => openCatalogueCategory('TOOLS & EQUIPMENT', 'ALL')}
-                      className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
-                      style={{ background: 'rgba(74,53,112,0.85)' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(95,70,140,0.95)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(74,53,112,0.85)'}
-                    >
-                      BROWSE EQUIPMENT
-                    </button>
                     <button
                       type="button"
                       title={copiedCategory === 'tools' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=tools'}
@@ -6602,19 +6546,6 @@ function FullCataloguePage() {
                 </div>
               </div>
             </div>
-            {(
-              <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
-                <div className="mb-3 flex flex-wrap gap-2">
-                  {chapter03Categories.map(cat => (
-                    <button key={cat} onClick={() => openCatalogueCategory(cat, 'ALL')}
-                      className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
-                        activeCategory === cat ? 'bg-[#9b8cc4] text-white border border-[#7b6bad]' : 'border border-[#4A4A4A]/30 bg-white text-[#1A1A1A] hover:border-[#9b8cc4]'
-                      }`}>{cat}</button>
-                  ))}
-                </div>
-                {categoryDetail}
-              </div>
-            )}
           </div>
 
           {/* CHAPTER 04: ARTISTIC MASTERY & CARE */}
@@ -6639,15 +6570,6 @@ function FullCataloguePage() {
                     Creative nail art supplies for professional nail technicians.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
-                    <button
-                      onClick={() => openCatalogueCategory('NAIL ART', 'ALL')}
-                      className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
-                      style={{ background: 'rgba(160,70,100,0.85)' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(185,90,120,0.95)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(160,70,100,0.85)'}
-                    >
-                      BROWSE NAIL ART
-                    </button>
                     <button
                       type="button"
                       title={copiedCategory === 'nail-art' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=nail-art'}
@@ -6705,15 +6627,6 @@ function FullCataloguePage() {
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
                     <button
-                      onClick={() => openCatalogueCategory('CONSUMABLES', 'ALL')}
-                      className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
-                      style={{ background: 'rgba(175,140,0,0.85)' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(155,120,0,0.95)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(175,140,0,0.85)'}
-                    >
-                      BROWSE CONSUMABLES
-                    </button>
-                    <button
                       type="button"
                       title={copiedCategory === 'consumables' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=consumables'}
                       aria-label={copiedCategory === 'consumables' ? 'Copied!' : 'Copy link to Consumables'}
@@ -6769,15 +6682,6 @@ function FullCataloguePage() {
                     Therapeutic formulations for professional nail, hand and foot aftercare.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
-                    <button
-                      onClick={() => openCatalogueCategory('NAIL HAND & FOOT CARE', 'ALL')}
-                      className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
-                      style={{ background: 'rgba(20,140,120,0.90)' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(20,165,140,1)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(20,140,120,0.90)'}
-                    >
-                      BROWSE NAIL, HAND &amp; FOOT CARE
-                    </button>
                     <button
                       type="button"
                       title={copiedCategory === 'nail-care' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=nail-care'}
