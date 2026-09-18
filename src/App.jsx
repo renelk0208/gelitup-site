@@ -3534,6 +3534,78 @@ function buildShopSearchUrl(itemName) {
   return `https://shop.gelitup.com/search?q=${encodeURIComponent(cleanName)}&type=product`
 }
 
+// Exact handles for the "NEW 2026!" Shopify collection, confirmed directly against
+// shop.gelitup.com. Keyed by a distinctive code/keyword found in the gelitup.com item name.
+const NEW_2026_KEYWORD_HANDLES = [
+  ['SBLS', '5-in-1-superior-base-15ml-lemon-serenity-htf'],
+  ['SBMS', '5-in-1-superior-base-15ml-mint-serenity-htf'],
+  ['SBBLUE', '5-in-1-superior-base-15ml-blue-serenity-htf'],
+  ['SBPS', '5-in-1-superior-base-15ml-peach-serenity-htf'],
+  ['SBPURS', '5-in-1-superior-base-15ml-purple-serenity-htf'],
+  ['BERRY STARDUST', 'brush-on-builder-gel-berry-stardust-15ml-htf'],
+  ['BLUSH SORBET', 'brush-on-builder-gel-blush-sorbet-15ml-copy'],
+  ['SKY SPRINKLE', 'brush-on-builder-gel-sky-sprinkle-15ml-htf'],
+  ['COPPER SUNSHINE', 'glitter-builder-gel-copper-sunshine-20g'],
+  ['COSMIC', 'glitter-builder-gel-cosmic-glitter-20g'],
+  ['DEEP SEA GALAXY', 'glitter-builder-gel-deep-sea-galaxy-20g'],
+  ['ELECTRIC ORCHID', 'glitter-builder-gel-electric-orchid-20g'],
+  ['ROSE STARDUST', 'glitter-builder-gel-copper-rose-stardust-20g'],
+  ['STARDUST PLUM', 'glitter-builder-gel-stardust-plum-20g-copy'],
+  ['SUPERNOVA INDIGO', 'glitter-builder-gel-supernova-indigo-20g'],
+  ['WARM SAND GLOW', 'glitter-builder-gel-warm-sand-glow-20g'],
+  ['MIRROR', 'mirror-top-coat'],
+]
+
+function buildNew2026ProductUrl(itemName) {
+  const name = String(itemName || '').toUpperCase()
+
+  // Cloud Dancer / Summer Vibes: 4-digit numeric code (e.g. "GIUP 2613" -> 2613 Rosy Pop)
+  const CLOUD_DANCER_SLUGS = {
+    '2600': 'cloud-dancer', '2601': 'vanilla-fog', '2602': 'porcelain-sky', '2603': 'butter-air',
+    '2604': 'peach-whisper', '2605': 'apricot-sunrise', '2606': 'first-cloud', '2607': 'silent-altitude',
+    '2608': 'daybreak-pink', '2609': 'cool-atmosphere', '2610': 'twilight-air', '2611': 'angel-pink',
+    '2612': 'coral-milk', '2613': 'rosy-pop', '2614': 'soft-iris', '2615': 'sky-cream',
+  }
+  const numMatch = name.match(/\b(26\d{2})\b/)
+  if (numMatch && CLOUD_DANCER_SLUGS[numMatch[1]]) {
+    return `https://shop.gelitup.com/products/${numMatch[1]}-${CLOUD_DANCER_SLUGS[numMatch[1]]}-htf`
+  }
+
+  // Neon Cat Eye NCE01-07, Sapphire Cat Eye SCE01-04
+  const nceMatch = name.match(/\bNCE0?([1-7])\b/)
+  if (nceMatch) {
+    const handles = {
+      '1': 'neon-cat-eye-nce01-yellow', '2': 'neon-cat-eye-nce02-orange', '3': 'neon-cat-eye-nce03-green',
+      '4': 'neon-cat-eye-nce03-blue', '5': 'neon-cat-eye-nce05-fuchsia', '6': 'neon-cat-eye-nce06-lilac-purple',
+      '7': 'neon-cat-eye-nce06-purple',
+    }
+    if (handles[nceMatch[1]]) return `https://shop.gelitup.com/products/${handles[nceMatch[1]]}`
+  }
+  const sceMatch = name.match(/\bSCE0?([1-4])\b/)
+  if (sceMatch) {
+    return `https://shop.gelitup.com/products/sapphire-cat-eye-sce0${sceMatch[1]}-htf`
+  }
+
+  // Shimmer Collection SH07-12
+  const shMatch = name.match(/\bSH(0[7-9]|1[0-2])\b/)
+  if (shMatch) {
+    return `https://shop.gelitup.com/products/shimmer-collection-sh${shMatch[1]}-htf`
+  }
+
+  // Keyword-based matches (5-in-1 colors, BIAB flavors, Glitter Builder flavors, Mirror Top Coat)
+  for (const [keyword, handle] of NEW_2026_KEYWORD_HANDLES) {
+    if (name.includes(keyword)) return `https://shop.gelitup.com/products/${handle}`
+  }
+
+  return null
+}
+
+// Best link for an item shown in the dedicated NEW 2026 collection browser:
+// exact product page when recognized, Shopify search otherwise.
+function buildNew2026BuyUrl(itemName) {
+  return buildNew2026ProductUrl(itemName) || buildShopSearchUrl(itemName)
+}
+
 function FullCataloguePage() {
   // Prices are hidden here — customers purchase via shop.gelitup.com to avoid price discrepancies.
   const SHOW_CATALOGUE_PRICES = false
@@ -5577,7 +5649,7 @@ function FullCataloguePage() {
                           <span className="shrink-0 cursor-not-allowed rounded-[10px] border border-rose-200 bg-rose-50 px-3 py-1.5 text-[11px] font-semibold text-rose-500">Out of Stock</span>
                         ) : (
                           <a
-                            href={buildShopSearchUrl(item.name)}
+                            href={activeSection?.category === '2026 NEW!' ? buildNew2026BuyUrl(item.name) : buildShopSearchUrl(item.name)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="shrink-0 rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-fuchsia-500"
@@ -5655,7 +5727,7 @@ function FullCataloguePage() {
                             </div>
                           ) : (
                             <a
-                              href={buildShopSearchUrl(item.name)}
+                              href={activeSection?.category === '2026 NEW!' ? buildNew2026BuyUrl(item.name) : buildShopSearchUrl(item.name)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
@@ -6218,7 +6290,7 @@ function FullCataloguePage() {
                                 ) : null}
                                 <div className="mt-auto pt-3">
                                   <a
-                                    href={buildShopSearchUrl(item.name)}
+                                    href={buildNew2026BuyUrl(item.name)}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
