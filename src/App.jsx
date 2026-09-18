@@ -5030,9 +5030,14 @@ function FullCataloguePage() {
     })
   }, [])
 
-  const openCatalogueCategory = useCallback((categoryName = '', subcategoryName = 'ALL', { keepSearch = false } = {}) => {
+  const openCatalogueCategory = useCallback((categoryName = '') => {
     if (!categoryName) return
-    setActiveCategory(categoryName)
+    // Full in-app category browsing is retired in favour of shopping directly on
+    // shop.gelitup.com — this keeps only one catalogue to maintain. The "2026 NEW!"
+    // showcase is unaffected since it uses its own separate activeNewCollection state.
+    window.open('https://shop.gelitup.com', '_blank', 'noopener,noreferrer')
+    return
+    /* Original in-app category browsing logic — kept for easy re-enable later.
     setActiveSubcategory(subcategoryName || 'ALL')
     setActiveColorFamily('ALL')
     setActiveCatEyeVariant('ALL')
@@ -5056,6 +5061,7 @@ function FullCataloguePage() {
       setExpandedSections((prev) => ({ ...prev, [sectionKey]: true }))
     }
     setScrollToCategoryTrigger((n) => n + 1)
+    */
   }, [scrollToCatalogueResults])
 
   // Handle ?subcategory= deep-link — e.g. gelitup.com/cat-eye resolves here via a vanity route
@@ -5157,7 +5163,7 @@ function FullCataloguePage() {
     })
   }, [])
 
-  const serviceFlowMenu = useMemo(() => {
+  const _serviceFlowMenu = useMemo(() => {
     const definitions = [
       {
         key: 'COLOURS',
