@@ -1266,6 +1266,82 @@ function parseOrderItemEntry(rawItem, index = 0) {
   }
 }
 
+function normalizeOrderImportHeaderToken(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function parseOrderImportQty(value) {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? Math.max(0, value) : 0
+  }
+  const raw = String(value || '').trim()
+  if (!raw) return 0
+  const normalized = raw.replace(',', '.')
+  const numeric = Number(normalized)
+  if (Number.isFinite(numeric)) return Math.max(0, numeric)
+  const fallback = normalized.match(/-?\d+(?:\.\d+)?/)
+  if (!fallback) return 0
+  const parsed = Number(fallback[0])
+  return Number.isFinite(parsed) ? Math.max(0, parsed) : 0
+}
+
+function parseImportedOrderSkuQtyRows(sheetRows = []) {
+  if (!Array.isArray(sheetRows) || !sheetRows.length) return []
+  const nonEmptyRows = sheetRows
+    .map((row, index) => ({ row: Array.isArray(row) ? row : [], rowIndex: index }))
+    .filter(({ row }) => row.some(cell => String(cell ?? '').trim() !== ''))
+  if (!nonEmptyRows.length) return []
+
+  const skuHeaders = new Set(['sku', 'item code', 'product code', 'code', 'barcode'])
+  const qtyHeaders = new Set(['qty', 'quantity', 'quantity refund', 'q ty', 'qtty', 'qnt'])
+  const nameHeaders = new Set(['item', 'item name', 'name', 'product', 'description'])
+
+  let headerRowIndex = -1
+  let skuCol = -1
+  let qtyCol = -1
+  let nameCol = -1
+
+  for (const { row, rowIndex } of nonEmptyRows.slice(0, 20)) {
+    const normalizedCells = row.map(normalizeOrderImportHeaderToken)
+    const candidateSkuCol = normalizedCells.findIndex(cell => skuHeaders.has(cell))
+    const candidateQtyCol = normalizedCells.findIndex(cell => qtyHeaders.has(cell))
+    const candidateNameCol = normalizedCells.findIndex(cell => nameHeaders.has(cell))
+    if (candidateQtyCol >= 0 && (candidateSkuCol >= 0 || candidateNameCol >= 0)) {
+      headerRowIndex = rowIndex
+      skuCol = candidateSkuCol
+      qtyCol = candidateQtyCol
+      nameCol = candidateNameCol
+      break
+    }
+  }
+
+  const rowsToParse = headerRowIndex >= 0
+    ? sheetRows.slice(headerRowIndex + 1)
+    : nonEmptyRows.map(({ row }) => row)
+
+  if (skuCol < 0 && nameCol < 0) skuCol = 0
+  if (qtyCol < 0) qtyCol = 1
+
+  const parsed = []
+  rowsToParse.forEach((row) => {
+    const values = Array.isArray(row) ? row : []
+    const rawQty = parseOrderImportQty(values[qtyCol])
+    if (rawQty <= 0) return
+    const qty = Math.max(1, Math.round(rawQty))
+    const name = String(nameCol >= 0 ? values[nameCol] || '' : '').trim()
+    const candidateSku = skuCol >= 0 ? normalizeAdminSkuToken(values[skuCol] || '') : ''
+    const sku = candidateSku || extractOrderItemSkuToken(name)
+    if (!sku) return
+    parsed.push({ sku, qty, name })
+  })
+  return parsed
+}
+
 // ─── Manual SKU overrides ──────────────────────────────────────────────────────────────────
 // Add entries here for items that are NOT in b2b-price-list.json.
 // Key  : exact SKU/name as it appears in orders (will be upper-cased automatically).
@@ -1789,6 +1865,8 @@ function OrdersPanel() {
   const [editing, setEditing] = useState(null) // order id being edited
   const [editDraft, setEditDraft] = useState({})
   const [itemSearch, setItemSearch] = useState('') // product search inside the order editor
+  const [newOrderClientEmail, setNewOrderClientEmail] = useState('')
+  const [creatingOrderFromImport, setCreatingOrderFromImport] = useState(false)
 
   const load = useCallback(async (requestedPage = 0) => {
     setLoading(true)
@@ -2418,6 +2496,184 @@ function OrdersPanel() {
     }
   }
 
+  const importOrderItemsFromFile = async (event, orderPriceMap) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    try {
+      const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array' })
+      const firstSheetName = workbook.SheetNames[0]
+      if (!firstSheetName) {
+        alert('The selected file has no sheets.')
+        return
+      }
+
+      const sheet = workbook.Sheets[firstSheetName]
+      const sheetRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' })
+      const importedRows = parseImportedOrderSkuQtyRows(sheetRows)
+      if (!importedRows.length) {
+        alert('No valid SKU + Qty rows were found. Please include SKU and Qty columns.')
+        return
+      }
+
+      const mergedBySku = new Map()
+      importedRows.forEach((line) => {
+        const skuKey = normalizeAdminSkuToken(line.sku)
+        const existing = mergedBySku.get(skuKey)
+        if (existing) {
+          existing.qty += line.qty
+          if (!existing.name && line.name) existing.name = line.name
+          return
+        }
+        mergedBySku.set(skuKey, { ...line })
+      })
+
+      let unresolvedCount = 0
+      const nextItems = [...mergedBySku.values()].map((line, index) => {
+        const parsed = parseOrderItemEntry({ sku: line.sku, name: line.name || line.sku, qty: line.qty }, index)
+        const resolved = resolveOrderItemPriceEntry(parsed, orderPriceMap, 1.0)
+        const resolvedSku = normalizeAdminSkuToken(resolved.resolvedSku || parsed.sku || line.sku)
+        const resolvedName = String(resolved.resolvedName || parsed.name || resolvedSku || `Item ${index + 1}`).trim()
+        if (!resolved.resolvedName && !resolved.resolvedSku) unresolvedCount += 1
+        return {
+          text: resolvedName,
+          sku: resolvedSku,
+          qty: Math.max(1, Number(parsed.qty) || 1),
+        }
+      })
+
+      setEditDraft((draft) => ({ ...draft, items: nextItems }))
+      setItemSearch('')
+      const warning = unresolvedCount > 0 ? ` ${unresolvedCount} SKU(s) could not be matched to price list names, so their imported SKU labels were kept.` : ''
+      alert(`Imported ${nextItems.length} line item(s) from ${file.name}.${warning}`)
+    } catch (err) {
+      alert(`Order import failed: ${err?.message || String(err)}`)
+    }
+  }
+
+  const createOrderFromFile = async (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    const customerEmail = String(newOrderClientEmail || '').trim().toLowerCase()
+    if (!customerEmail) {
+      alert('Please enter the client email first.')
+      return
+    }
+
+    setCreatingOrderFromImport(true)
+    try {
+      const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array' })
+      const firstSheetName = workbook.SheetNames[0]
+      if (!firstSheetName) {
+        alert('The selected file has no sheets.')
+        return
+      }
+
+      const sheetRows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName], { header: 1, defval: '' })
+      const importedRows = parseImportedOrderSkuQtyRows(sheetRows)
+      if (!importedRows.length) {
+        alert('No valid SKU + Qty rows were found. Please include Barcode/Item Name + Quantity columns.')
+        return
+      }
+
+      const { data: registration, error: registrationError } = await supabase
+        .from(REGISTRATIONS_TABLE)
+        .select('id, contact_email, distributor_tier, prices_allocated, contact_name, company_name, phone, contact_phone, shipping_name, shipping_phone, shipping_address_line1, shipping_address_line2, shipping_area, shipping_region, shipping_postal_code, address, city, postal_code, country')
+        .ilike('contact_email', customerEmail)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (registrationError) {
+        alert(`Could not verify client registration: ${registrationError.message}`)
+        return
+      }
+      if (!registration?.id) {
+        alert(`No client registration found for ${customerEmail}. Please create/approve the client first, then import the order.`)
+        return
+      }
+
+      const mergedBySku = new Map()
+      importedRows.forEach((line) => {
+        const skuKey = normalizeAdminSkuToken(line.sku)
+        const existing = mergedBySku.get(skuKey)
+        if (existing) {
+          existing.qty += line.qty
+          if (!existing.name && line.name) existing.name = line.name
+          return
+        }
+        mergedBySku.set(skuKey, { ...line })
+      })
+
+      let unresolvedCount = 0
+      const items = [...mergedBySku.values()].map((line, index) => {
+        const parsed = parseOrderItemEntry({ sku: line.sku, name: line.name || line.sku, qty: line.qty }, index)
+        const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, 1.0)
+        const resolvedSku = normalizeAdminSkuToken(resolved.resolvedSku || parsed.sku || line.sku)
+        const resolvedName = String(resolved.resolvedName || parsed.name || resolvedSku || `Item ${index + 1}`).trim()
+        if (!resolved.resolvedName && !resolved.resolvedSku) unresolvedCount += 1
+        return {
+          name: resolvedName,
+          sku: resolvedSku,
+          qty: Math.max(1, Number(parsed.qty) || 1),
+        }
+      })
+
+      const totalUnits = items.reduce((sum, item) => sum + item.qty, 0)
+      const shippingAddress = [
+        registration.shipping_address_line1,
+        registration.shipping_address_line2,
+        registration.shipping_area,
+        registration.shipping_region,
+        registration.shipping_postal_code,
+      ].filter(Boolean).join(', ')
+        || registration.address
+        || registration.city
+        || registration.postal_code
+        || registration.country
+        || null
+
+      const orderPayload = {
+        registration_id: registration.id,
+        customer_email: registration.contact_email || customerEmail,
+        order_ref: `ADM-EXCEL-${Date.now().toString().slice(-8)}`,
+        source: 'admin_excel_import',
+        module: 'products',
+        status: 'received',
+        total_units: totalUnits,
+        consignee_name: registration.shipping_name || registration.contact_name || registration.company_name || null,
+        consignee_phone: registration.shipping_phone || registration.contact_phone || registration.phone || null,
+        shipping_address: shippingAddress,
+        distributor_tier: registration.distributor_tier || null,
+        prices_allocated: typeof registration.prices_allocated === 'boolean' ? registration.prices_allocated : null,
+        items,
+      }
+
+      const { data: insertedOrder, error: insertError } = await supabase
+        .from(ORDERS_TABLE)
+        .insert([orderPayload])
+        .select('*')
+        .single()
+      if (insertError) {
+        alert(`Order creation failed: ${insertError.message}`)
+        return
+      }
+
+      setRows((prev) => [insertedOrder, ...prev])
+      setExpanded(insertedOrder.id)
+      setFilter('all')
+      setSearchQuery('')
+      setNewOrderClientEmail(customerEmail)
+      const warning = unresolvedCount > 0 ? ` ${unresolvedCount} SKU(s) were kept by imported code because no exact product match was found.` : ''
+      alert(`Created order #${insertedOrder.id} for ${customerEmail} with ${items.length} item lines.${warning}`)
+    } catch (err) {
+      alert(`Order creation failed: ${err?.message || String(err)}`)
+    } finally {
+      setCreatingOrderFromImport(false)
+    }
+  }
+
   const saveEdit = async (row) => {
     const id = row.id
     const previousStatus = normalizeOrderStatus(row.status)
@@ -2587,6 +2843,37 @@ function OrdersPanel() {
           </button>
           )}
           <span className="text-xs text-slate-400">{filteredRows.length} result{filteredRows.length === 1 ? '' : 's'}</span>
+        </div>
+        <div className="rounded-xl border border-fuchsia-200 bg-fuchsia-50 p-3">
+          <p className="text-xs font-semibold text-fuchsia-800">Create offline order from Excel (client email + SKU/Qty)</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <input
+              type="email"
+              value={newOrderClientEmail}
+              onChange={(event) => setNewOrderClientEmail(event.target.value)}
+              placeholder="Client email (e.g. info@comoprof.gr)"
+              className="min-w-[240px] flex-1 rounded-lg border border-fuchsia-200 bg-white px-3 py-2 text-xs text-slate-700 placeholder:text-slate-400 focus:border-fuchsia-300 focus:outline-none focus:ring-2 focus:ring-fuchsia-100"
+            />
+            <label
+              htmlFor="create-order-from-file"
+              className={`inline-flex items-center rounded-lg border px-3 py-2 text-xs font-semibold ${
+                creatingOrderFromImport
+                  ? 'cursor-wait border-slate-200 bg-slate-100 text-slate-400'
+                  : 'cursor-pointer border-fuchsia-300 bg-white text-fuchsia-700 hover:bg-fuchsia-100'
+              }`}
+            >
+              {creatingOrderFromImport ? 'Importing…' : '↑ Create order from .csv/.xlsx'}
+            </label>
+            <input
+              id="create-order-from-file"
+              type="file"
+              accept=".csv,.xlsx,.xls"
+              onChange={createOrderFromFile}
+              disabled={creatingOrderFromImport}
+              className="hidden"
+            />
+          </div>
+          <p className="mt-1 text-[10px] text-fuchsia-700">Expected headers: Barcode, Item Name, Quantity (- Refund). Only rows with quantity greater than 0 are imported.</p>
         </div>
       </div>
 
@@ -2970,6 +3257,22 @@ function OrdersPanel() {
                           onClick={() => setEditDraft(d => ({ ...d, items: [...d.items, { text: '', sku: '', qty: 1 }] }))}
                           className="mt-2 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs text-slate-500 hover:bg-slate-50"
                         >+ Add blank item</button>
+                        <div className="mt-2">
+                          <label
+                            htmlFor={`order-items-import-${row.id}`}
+                            className="inline-flex cursor-pointer items-center rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                          >
+                            ↑ Import SKU + Qty (.csv/.xlsx)
+                          </label>
+                          <input
+                            id={`order-items-import-${row.id}`}
+                            type="file"
+                            accept=".csv,.xlsx,.xls"
+                            onChange={(event) => importOrderItemsFromFile(event, orderPriceMap)}
+                            className="hidden"
+                          />
+                          <p className="mt-1 text-[10px] text-slate-500">Import replaces this order’s current item lines with the file lines (SKU + Qty), and merges duplicate SKUs.</p>
+                        </div>
                       </div>
 
                       <div className="flex flex-wrap gap-2 pt-2">
