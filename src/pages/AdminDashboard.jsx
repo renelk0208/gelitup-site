@@ -1228,6 +1228,14 @@ function extractOrderItemSkuToken(value = '') {
   return ''
 }
 
+function isDiscontinuedOrderItemToken(...tokens) {
+  const values = tokens
+    .map(token => normalizeAdminSkuToken(token))
+    .filter(Boolean)
+  if (!values.length) return false
+  return values.some(value => /\b(?:GIUP\s*)?C0[1-8]\b/.test(value))
+}
+
 function parseOrderItemEntry(rawItem, index = 0) {
   if (rawItem && typeof rawItem === 'object') {
     const qty = Math.max(1, Number(rawItem.qty ?? rawItem.quantity ?? 1) || 1)
@@ -1363,6 +1371,19 @@ const SKU_OVERRIDE_MAP = {
   'FLEXI SHORT ALMOND':      { name: 'FLEXI Soak Off Nail Tips Short Almond -2025',  price: 6.00 },
   'FLEXI-SHORT-ALMOND':      { name: 'FLEXI Soak Off Nail Tips Short Almond -2025',  price: 6.00 },
   'GIUP FLEXI SHORT ALMOND': { name: 'FLEXI Soak Off Nail Tips Short Almond -2025',  price: 6.00 },
+
+  // ── Legacy nail file labels → current replacement SKU ────────────────────────────────
+  // Older orders may carry reversed sponge-color wording and short "BUFFER" labels.
+  'NAIL FILES 180/180 PINK SPONGE':              { name: 'Nail Files Boat Shape 100/180', price: 1.4 },
+  'GIUP BOAT SHAPE NAIL FILE 100/120 PURPLE SPONGE': { name: 'Nail Files Boat Shape 100/180', price: 1.4 },
+  'BUFFER 180':                                  { name: 'Nail Files Boat Shape 100/180', price: 1.4 },
+  'BUFFER 100':                                  { name: 'Nail Files Boat Shape 100/180', price: 1.4 },
+
+  // ── Legacy underscore labels from old order imports ──────────────────────────────────
+  '3-IN-1_BUILDER_GEL_GLITTER_COPPER_SUNSHINE': { name: '3-in-1 Glitter Builder Gels Sunshine 20g -HTF', price: 33.4 },
+  '3 IN 1 BUILDER GEL GLITTER COPPER SUNSHINE': { name: '3-in-1 Glitter Builder Gels Sunshine 20g -HTF', price: 33.4 },
+  '3-IN-1_BUILDER_GEL_GLITTER_DEEP_SEA_GALAXY': { name: '3-in-1 Glitter Builder Gels Deep Sea Galaxy 20g -HTF', price: 33.4 },
+  '3 IN 1 BUILDER GEL GLITTER DEEP SEA GALAXY': { name: '3-in-1 Glitter Builder Gels Deep Sea Galaxy 20g -HTF', price: 33.4 },
 
   // ── GIUP-200 Gel Polish (Glitters) ────────────────────────────────────────────────
   // base 7.41 → B2B 8.9 (same as standard gel polish)
@@ -1592,6 +1613,16 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) 
   // Skip catalog hero/section image filenames — these are image assets, not products.
   if (/\.hero\.image|hero\.image\b/i.test(name) || /\.hero\.image|hero\.image\b/i.test(sku)) {
     return { unitPrice: null, resolvedName: `${name} (image — not a product)`, resolvedSku: null, isImageAsset: true }
+  }
+
+  if (isDiscontinuedOrderItemToken(
+    sku,
+    nameNorm,
+    normalizeAdminNameToken(name),
+    extractedSkuFromSku,
+    extractedSkuFromName,
+  )) {
+    return { unitPrice: null, resolvedName: name || null, resolvedSku: sku || null, isDiscontinued: true }
   }
 
   // Check manual override map first (items not in b2b-price-list.json)
@@ -2601,7 +2632,7 @@ function OrdersPanel() {
             .filter(parsed => {
               const itemMult = getEffectiveItemMultiplier(row.distributor_tier, row.created_at, parsed.name, parsed.sku, authorityOverrides)
               const resolved = resolveOrderItemPriceEntry(parsed, orderPriceMap, itemMult)
-              return resolved.unitPrice == null && !resolved.isImageAsset
+              return resolved.unitPrice == null && !resolved.isImageAsset && !resolved.isDiscontinued
             })
           const hasMissingPrices = missingPriceItems.length > 0
 
@@ -2686,21 +2717,24 @@ function OrdersPanel() {
                               const resolved = resolveOrderItemPriceEntry(parsed, orderPriceMap, itemMult)
                               const unitPrice = resolved.unitPrice
                               const isImageAsset = resolved.isImageAsset
+                              const isDiscontinued = resolved.isDiscontinued
                               const displaySku = normalizeAdminSkuToken(rawSku || parsed.sku || resolved.resolvedSku || '').replace(/\s+IMAGE$/i, '')
-                              const skuMissing = !displaySku && !isImageAsset
+                              const skuMissing = !displaySku && !isImageAsset && !isDiscontinued
                               const lineTotal = unitPrice != null ? unitPrice * parsed.qty : null
                               return (
-                                <li key={i} className={`flex items-center justify-between px-3 py-2 ${unitPrice == null && !isImageAsset ? 'bg-amber-50' : ''}`}>
+                                <li key={i} className={`flex items-center justify-between px-3 py-2 ${unitPrice == null && !isImageAsset && !isDiscontinued ? 'bg-amber-50' : ''}`}>
                                   <div className="min-w-0">
                                     <p className="truncate text-slate-700">{parsed.name || parsed.rawLabel || 'Unknown product'}</p>
                                     <div className="flex flex-wrap items-center gap-2">
-                                      {isImageAsset
+                                      {isDiscontinued
+                                        ? <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-500">discontinued</span>
+                                        : isImageAsset
                                         ? <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-400">image asset — not billable</span>
                                         : skuMissing
                                           ? <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold bg-orange-100 text-orange-700">⚠ SKU missing — edit to fix</span>
                                           : <span className="font-mono text-[10px] text-slate-500">{displaySku}</span>
                                       }
-                                      {!isImageAsset && (unitPrice != null
+                                      {!isImageAsset && !isDiscontinued && (unitPrice != null
                                         ? <span className="text-[10px] text-slate-500">€{unitPrice.toFixed(2)} each</span>
                                         : <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold bg-amber-100 text-amber-700">⚠ no price</span>
                                       )}
@@ -2723,7 +2757,7 @@ function OrdersPanel() {
                               const parsed = parseOrderItemEntry(item, i)
                               const itemMult = getEffectiveItemMultiplier(row.distributor_tier, row.created_at, parsed.name, parsed.sku, authorityOverrides)
                               const resolved = resolveOrderItemPriceEntry(parsed, orderPriceMap, itemMult)
-                              if (resolved.isImageAsset) return
+                              if (resolved.isImageAsset || resolved.isDiscontinued) return
                               if (resolved.unitPrice != null) total += resolved.unitPrice * parsed.qty
                               else unpriced += 1
                             })
