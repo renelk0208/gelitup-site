@@ -3753,8 +3753,6 @@ function FullCataloguePage() {
   const [lightboxUrl, setLightboxUrl] = useState(null)
   const [videoMap, setVideoMap] = useState({})
   const [videoModal, setVideoModal] = useState(null) // YouTube video ID
-  const [activeNewCollection, setActiveNewCollection] = useState('')
-  const [showNewCollections, setShowNewCollections] = useState(false)
   const [copiedSubcat, setCopiedSubcat] = useState('')
   const [copiedCategory, setCopiedCategory] = useState('')
   useEffect(() => {
@@ -3872,9 +3870,6 @@ function FullCataloguePage() {
   useEffect(() => {
     const scrollTo = location?.state?.scrollTo
     if (!scrollTo || isLoading) return
-    if (scrollTo === 'catalogue-section-new-products') {
-      setShowNewCollections(true)
-    }
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const el = document.getElementById(scrollTo)
@@ -3917,7 +3912,6 @@ function FullCataloguePage() {
     }
     const anchor = SLUG_TO_ANCHOR[catSlug]
     if (!anchor) return
-    if (anchor === 'catalogue-section-new-products') setShowNewCollections(true)
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const el = document.getElementById(anchor)
@@ -6133,28 +6127,13 @@ function FullCataloguePage() {
                 rel="noopener noreferrer"
                 className="inline-flex shrink-0 items-center gap-2 rounded-full bg-fuchsia-600 px-8 py-3.5 text-sm font-bold uppercase tracking-wider text-white shadow-md transition hover:bg-fuchsia-500"
               >
-                Shop the Full Catalogue →
+                Shop Now! →
               </a>
             </div>
           </div>
 
           {/* ── NEW PRODUCTS 2026 ── */}
           {(() => {
-            const newSection = sections.find(s => s.category === '2026 NEW!')
-            const NEW_COLS = [
-              { key: 'Cloud Dancer', label: 'Cloud Dancer Collection' },
-              { key: 'Summer Vibes', label: 'Summer Vibes' },
-              { key: '3-in-1 Glitters', label: '3-in-1 Glitters' },
-              { key: 'Sapphire Cat Eye', label: 'Sapphire Cat Eye' },
-              { key: 'Neon Cat Eye', label: 'Neon Cat Eye' },
-              { key: 'Shimmer Colors', label: 'Shimmer Colors' },
-              { key: 'Brush on Builder (BIAB)', label: 'Brush on Builder (BIAB)' },
-              { key: 'Mirror Powder Top Coat', label: 'Mirror Powder Top Coat' },
-              { key: '5-in-1 Superior Base', label: '5-in-1 Superior Base' },
-            ]
-            const activeSubItems = activeNewCollection && newSection
-              ? (newSection.subcategories.find(s => s.name === activeNewCollection)?.items || [])
-              : []
             return (
               <div id="catalogue-section-new-products" className="scroll-mt-28">
                 {/* NEW PRODUCTS banner with hero image */}
@@ -6177,15 +6156,14 @@ function FullCataloguePage() {
                         The latest additions to the GEL.IT.UP range — new gel polish collections, innovative bases, and premium effects.
                       </p>
                       <div className="mt-6 flex flex-wrap items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setShowNewCollections(v => !v)}
-                          className="inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-bold uppercase tracking-[0.1em] text-white transition duration-200"
-                          style={{ background: 'linear-gradient(135deg,#D43790,#9B1268)', boxShadow: '0 4px 20px rgba(212,55,144,0.45)' }}
+                        <a
+                          href="https://shop.gelitup.com"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 rounded-lg bg-fuchsia-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-fuchsia-500"
                         >
-                          Browse New Collections
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`h-4 w-4 transition-transform duration-200 ${showNewCollections ? 'rotate-180' : ''}`} aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-                        </button>
+                          Shop Now! →
+                        </a>
                         <button
                           type="button"
                           title={copiedCategory === 'new-products' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=new-products'}
@@ -6213,93 +6191,6 @@ function FullCataloguePage() {
                     </div>
                   </div>
                 </div>
-                {/* Collection selector — slides open below the banner */}
-                {showNewCollections && (
-                <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#1A1A1A] px-4 py-5 sm:px-10">
-                  <div className="mx-auto max-w-6xl">
-                    <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Select a collection to browse</p>
-                    <div className="flex flex-wrap gap-2">
-                      {NEW_COLS.map(col => {
-                        const isActive = activeNewCollection === col.key
-                        return (
-                          <button
-                            key={col.key}
-                            type="button"
-                            onClick={() => setActiveNewCollection(isActive ? '' : col.key)}
-                            className="group relative flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-bold tracking-wide transition-all duration-200"
-                            style={isActive
-                              ? { background: 'linear-gradient(135deg,#D43790,#9B1268)', color: '#fff', boxShadow: '0 4px 18px rgba(212,55,144,0.5)' }
-                              : { background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.12)' }
-                            }
-                          >
-                            <span className={`h-1.5 w-1.5 rounded-full transition-all ${isActive ? 'bg-white' : 'bg-[#D43790]'}`} />
-                            {col.label}
-                            {isActive && <span className="ml-1 text-white/70">✕</span>}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                </div>
-                )}
-                {activeNewCollection && (
-                  <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8">
-                    <p className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-black/50">{activeNewCollection} — {activeSubItems.length} product{activeSubItems.length !== 1 ? 's' : ''}</p>
-                    {activeSubItems.length === 0 ? (
-                      <p className="text-sm text-black/45">No products found for this collection.</p>
-                    ) : (
-                      <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}>
-                        {activeSubItems.map((item, idx) => {
-                          const itemCode = item.code || extractProductCode(item.name)
-                          const price = lookupCataloguePrice(item.name, itemCode)
-                          const listPrice = resolveCatalogueListPrice(item.name, itemCode)
-                          const isDiscounted = isCatalogueDiscountActive() && price != null && listPrice != null && price < listPrice
-                          return (
-                            <article key={idx} className="flex flex-col overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)]" data-catalogue-item>
-                              <div className="relative flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
-                                {isDiscounted && (
-                                  <span className="absolute left-2 top-2 z-10 rounded-full bg-[#D43790] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-md">-{CATALOGUE_DISCOUNT_PCT}%</span>
-                                )}
-                                <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover opacity-0 transition-opacity duration-300" onLoad={e => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} onError={e => { e.currentTarget.closest('[data-catalogue-item]')?.classList.add('!hidden') }} />
-                                {videoMap[item.name] && (
-                                  <button
-                                    className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white shadow-lg transition hover:bg-black/80"
-                                    title="Watch video"
-                                    onClick={(e) => { e.stopPropagation(); setVideoModal(videoMap[item.name]) }}
-                                  >▶</button>
-                                )}
-                              </div>
-                              <div className="flex flex-1 flex-col border-t border-black/10 px-2.5 py-2">
-                                <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
-                                <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                                {SHOW_CATALOGUE_PRICES && price != null ? (
-                                  isDiscounted ? (
-                                    <p className="mt-1.5 flex items-baseline gap-1.5">
-                                      <span className="text-[11px] font-medium text-black/40 line-through">€{Number(listPrice).toFixed(2)}</span>
-                                      <span className="text-xs font-bold text-fuchsia-700">€{Number(price).toFixed(2)}</span>
-                                    </p>
-                                  ) : (
-                                    <p className="mt-1.5 text-xs font-bold text-fuchsia-700">€{Number(price).toFixed(2)}</p>
-                                  )
-                                ) : null}
-                                <div className="mt-auto pt-3">
-                                  <a
-                                    href={buildNew2026BuyUrl(item.name)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
-                                  >
-                                    Buy Now!
-                                  </a>
-                                </div>
-                              </div>
-                            </article>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
             )
           })()}
@@ -6327,6 +6218,14 @@ function FullCataloguePage() {
                   The Gel It Up gel polish archive. Over 1,000 laboratory-grade gel polish shades categorised by undertone and finish — from the deepest onyx to glass-top effects. Includes Solid Gel Polish, Cat Eye gel polish, Glitters, Thermos, and seasonal collections. Find your signature shade.
                 </p>
                 <div className="mt-6 flex flex-wrap items-center gap-4">
+                  <a
+                    href="https://shop.gelitup.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 rounded-lg bg-fuchsia-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-fuchsia-500"
+                  >
+                    Shop Now! →
+                  </a>
                   <button
                     type="button"
                     title={copiedCategory === 'colours' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=colours'}
@@ -6383,6 +6282,14 @@ function FullCataloguePage() {
                     The non-negotiables of every nail service. Our professional base coat range protects the natural nail and maximises colour adhesion, while our top coat systems deliver the perfect finish — from high-gloss brilliance to matte sophistication. Includes the 5-in-1 base coat, Flexi Base, Brush On Builder (BIAB), and our full top coat collection.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
+                    <a
+                      href="https://shop.gelitup.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 rounded-lg bg-fuchsia-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-fuchsia-500"
+                    >
+                      Shop Now! →
+                    </a>
                     <button
                       type="button"
                       title={copiedCategory === 'essentials' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=essentials'}
@@ -6468,6 +6375,14 @@ function FullCataloguePage() {
                     From Liquid Polygel to the fiberglass builder gel (3-in-1 Premium) and Multimix Synthogel — our complete builder gel range delivers strength, flexibility, and flawless structure. Engineered for nail extensions, natural nail reinforcement, and zero-file technique. BIAB and brush-on builder options also available.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
+                    <a
+                      href="https://shop.gelitup.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 rounded-lg bg-fuchsia-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-fuchsia-500"
+                    >
+                      Shop Now! →
+                    </a>
                     <button
                       type="button"
                       title={copiedCategory === 'builders' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=builders'}
@@ -6519,6 +6434,14 @@ function FullCataloguePage() {
                     Precision finishing products, expert hardware, and maintenance tools for flawless studio finishes.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
+                    <a
+                      href="https://shop.gelitup.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 rounded-lg bg-fuchsia-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-fuchsia-500"
+                    >
+                      Shop Now! →
+                    </a>
                     <button
                       type="button"
                       title={copiedCategory === 'tools' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=tools'}
@@ -6570,6 +6493,14 @@ function FullCataloguePage() {
                     Creative nail art supplies for professional nail technicians.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
+                    <a
+                      href="https://shop.gelitup.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 rounded-lg bg-fuchsia-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-fuchsia-500"
+                    >
+                      Shop Now! →
+                    </a>
                     <button
                       type="button"
                       title={copiedCategory === 'nail-art' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=nail-art'}
@@ -6626,6 +6557,14 @@ function FullCataloguePage() {
                     Professional-grade consumable supplies for everyday salon use.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
+                    <a
+                      href="https://shop.gelitup.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 rounded-lg bg-fuchsia-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-fuchsia-500"
+                    >
+                      Shop Now! →
+                    </a>
                     <button
                       type="button"
                       title={copiedCategory === 'consumables' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=consumables'}
@@ -6682,6 +6621,14 @@ function FullCataloguePage() {
                     Therapeutic formulations for professional nail, hand and foot aftercare.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
+                    <a
+                      href="https://shop.gelitup.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 rounded-lg bg-fuchsia-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition duration-200 hover:bg-fuchsia-500"
+                    >
+                      Shop Now! →
+                    </a>
                     <button
                       type="button"
                       title={copiedCategory === 'nail-care' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=nail-care'}
