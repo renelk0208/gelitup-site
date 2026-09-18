@@ -6114,24 +6114,6 @@ function FullCataloguePage() {
           )}
 
           {!searchQuery && <>
-          {/* ── SHOP THE FULL CATALOGUE — single clear path to buy ── */}
-          <div className="mx-auto mb-6 max-w-6xl px-4 sm:px-8">
-            <div className="flex flex-col items-center gap-3 rounded-[18px] border border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 to-pink-50 px-6 py-8 text-center sm:flex-row sm:justify-between sm:text-left">
-              <div>
-                <p className="text-lg font-extrabold uppercase tracking-[0.06em] text-black">Ready to shop?</p>
-                <p className="mt-1 text-sm text-black/60">Browse our full range and buy directly on shop.gelitup.com.</p>
-              </div>
-              <a
-                href="https://shop.gelitup.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex shrink-0 items-center gap-2 rounded-full bg-fuchsia-600 px-8 py-3.5 text-sm font-bold uppercase tracking-wider text-white shadow-md transition hover:bg-fuchsia-500"
-              >
-                Shop Now! →
-              </a>
-            </div>
-          </div>
-
           {/* ── NEW PRODUCTS 2026 ── */}
           {(() => {
             return (
