@@ -2635,7 +2635,6 @@ function OrdersPanel() {
         || null
 
       const orderPayload = {
-        registration_id: registration.id,
         customer_email: registration.contact_email || customerEmail,
         order_ref: `ADM-EXCEL-${Date.now().toString().slice(-8)}`,
         source: 'admin_excel_import',
