@@ -2646,7 +2646,6 @@ function OrdersPanel() {
         consignee_phone: registration.shipping_phone || registration.contact_phone || registration.phone || null,
         shipping_address: shippingAddress,
         distributor_tier: registration.distributor_tier || null,
-        prices_allocated: typeof registration.prices_allocated === 'boolean' ? registration.prices_allocated : null,
         items,
       }
 
