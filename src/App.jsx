@@ -19075,7 +19075,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
   }
 
   return (
-    <section className="grid gap-4 lg:grid-cols-[240px,1fr]">
+    <section className="notranslate grid gap-4 lg:grid-cols-[240px,1fr]" translate="no">
       <aside className="rounded-2xl border border-slate-200 bg-white p-4">
         <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Portal Menu</p>
         <nav className="space-y-1">
