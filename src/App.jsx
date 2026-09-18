@@ -6042,19 +6042,6 @@ function FullCataloguePage() {
             </div>
           </div>
 
-          {/* REGISTER CTA BANNER — visible to logged-out visitors */}
-          {!isLoggedIn && (
-            <div className="mx-auto max-w-6xl px-4 sm:px-8 pb-2">
-              <div className="flex items-center justify-between gap-4 rounded-xl bg-[#D43790]/10 border border-[#D43790]/30 px-5 py-3">
-                <div>
-                  <p className="text-sm font-bold text-[#D43790]">You're viewing B2B wholesale prices.</p>
-                  <p className="text-xs text-slate-600">Register free to start ordering.</p>
-                </div>
-                <NavLink to="/portal/register" className="shrink-0 rounded-lg bg-[#D43790] px-4 py-2 text-sm font-bold text-white hover:bg-[#BF3182] transition">Register free →</NavLink>
-              </div>
-            </div>
-          )}
-
           {/* GLOBAL SEARCH RESULTS */}
           {searchQuery && !activeCategory && (
             <div className="mx-auto max-w-6xl px-4 sm:px-8 pb-12">
