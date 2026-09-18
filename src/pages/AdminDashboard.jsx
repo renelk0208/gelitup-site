@@ -2580,7 +2580,7 @@ function OrdersPanel() {
 
       const { data: registration, error: registrationError } = await supabase
         .from(REGISTRATIONS_TABLE)
-        .select('id, contact_email, distributor_tier, prices_allocated, contact_name, company_name, phone, contact_phone, shipping_name, shipping_phone, shipping_address_line1, shipping_address_line2, shipping_area, shipping_region, shipping_postal_code, address, city, postal_code, country')
+        .select('*')
         .ilike('contact_email', customerEmail)
         .order('created_at', { ascending: false })
         .limit(1)
