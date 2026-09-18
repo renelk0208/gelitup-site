@@ -1216,6 +1216,11 @@ function extractOrderItemSkuToken(value = '') {
   if (!text) return ''
   const normalized = normalizeAdminSkuToken(text)
 
+  // Excel order sheets often store the product code as the first token in item name
+  // (e.g. "01 Ice Ice Baby -HTF", "02E Co Co Co Carde -HTF", "FR01 Egalité -HTF").
+  const leadingCodeMatch = normalized.match(/^([A-Z]{1,6}\d{1,4}[A-Z]?|\d{1,4}[A-Z]?)\b/)
+  if (leadingCodeMatch) return leadingCodeMatch[1]
+
   const giupMatch = normalized.match(/\bGIUP[-\s]*[A-Z0-9]+(?:[-\s]*[A-Z0-9]+)*\b/)
   if (giupMatch) return normalizeAdminSkuToken(giupMatch[0].replace(/-/g, ' '))
 
