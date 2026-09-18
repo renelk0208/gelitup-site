@@ -3256,48 +3256,6 @@ function formatSubcategoryDisplayName(subcategoryName = '', categoryName = '') {
   return toTitleCaseLabel(cleanName)
 }
 
-function buildCategoryHeroImageCandidates(categoryName = '', fallbackImageUrl = '') {
-  const normalizedCategory = normalizeCatalogueToken(categoryName)
-  const tokens = normalizedCategory.split(' ').filter(Boolean)
-  const slug = tokens.map((token) => token.toLowerCase()).join('-')
-  const baseNames = new Set()
-
-  if (slug) {
-    baseNames.add(slug)
-  }
-
-  tokens.forEach((token) => {
-    baseNames.add(token.toLowerCase())
-  })
-
-  if (baseNames.has('colours')) baseNames.add('colors')
-  if (baseNames.has('colors')) baseNames.add('colours')
-
-  const extensions = ['jpg', 'jpeg', 'png', 'webp']
-  const candidates = []
-
-  // Prioritize catalog-heroes (centralized hero images folder)
-  baseNames.forEach((baseName) => {
-    extensions.forEach((extension) => {
-      candidates.push(`/gelitup-content/catalog-heroes/${baseName}.hero.image.${extension}`)
-    })
-  })
-
-  // Fallback to product-images category folders
-  const encodedCategory = encodeURIComponent(String(categoryName || '').trim())
-  if (encodedCategory) {
-    extensions.forEach((extension) => {
-      candidates.push(`/gelitup-content/product-images/${encodedCategory}/hero.image.${extension}`)
-    })
-  }
-
-  if (fallbackImageUrl) {
-    candidates.push(fallbackImageUrl)
-  }
-
-  return Array.from(new Set(candidates))
-}
-
 function flattenSectionItems(section) {
   if (!section) return []
 
@@ -3618,7 +3576,6 @@ function FullCataloguePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [scrollToCategoryTrigger, setScrollToCategoryTrigger] = useState(0)
   const [bulkMode, setBulkMode] = useState(false)
-  const [heroCandidateIndexByCategory, setHeroCandidateIndexByCategory] = useState({})
   const [itemQuantities, setItemQuantities] = useState({})
   const [quickCart, setQuickCart] = useState(() => {
     try { const saved = localStorage.getItem(QUICK_CART_STORAGE_KEY); return saved ? JSON.parse(saved) : {} } catch { return {} }
@@ -3841,7 +3798,6 @@ function FullCataloguePage() {
         }
         setProductSizes(_enrichedSizes)
         setSolidGelColourFamilies(colourFamiliesPayload)
-        setHeroCandidateIndexByCategory({})
         setActiveCategory('')
         setActiveSubcategory('')
         setActiveColorFamily('ALL')
@@ -5110,24 +5066,6 @@ function FullCataloguePage() {
     }
   }, [isLoading, searchParams, openCatalogueCategory, sections])
 
-  const getCategoryCoverImage = useCallback((categoryName = '', fallbackImageUrl = '') => {
-    const candidates = buildCategoryHeroImageCandidates(categoryName, fallbackImageUrl)
-    const candidateIndex = Math.max(0, Number(heroCandidateIndexByCategory[categoryName] || 0))
-    return candidates[Math.min(candidateIndex, Math.max(0, candidates.length - 1))] || fallbackImageUrl || '/logo.png'
-  }, [heroCandidateIndexByCategory])
-
-  const handleCategoryCoverImageError = useCallback((categoryName = '', fallbackImageUrl = '') => {
-    const candidates = buildCategoryHeroImageCandidates(categoryName, fallbackImageUrl)
-    setHeroCandidateIndexByCategory((current) => {
-      const currentIndex = Math.max(0, Number(current[categoryName] || 0))
-      if (currentIndex >= candidates.length - 1) return current
-      return {
-        ...current,
-        [categoryName]: currentIndex + 1,
-      }
-    })
-  }, [])
-
   const _serviceFlowMenu = useMemo(() => {
     const definitions = [
       {
@@ -6299,40 +6237,6 @@ function FullCataloguePage() {
                 </div>
               </div>
             </div>
-
-            {/* Essentials category grid */}
-            {<div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {chapterEssentialsCategories.map((categoryName) => {
-                  const section = sections.find((s) => s.category === categoryName)
-                  if (!section) return null
-                  const itemCount = section.subcategories.reduce((sum, sub) => sum + sub.items.length, 0)
-                  const coverImageFallback = section.subcategories[0]?.items?.[0]?.imageUrl || '/logo.png'
-                  const coverImage = getCategoryCoverImage(categoryName, coverImageFallback)
-                  const specs = CATEGORY_LAB_SPECS[categoryName] ?? DEFAULT_LAB_SPECS
-                  return (
-                    <Fragment key={categoryName}>
-                      <button
-                        onClick={() => openCatalogueCategory(categoryName, 'ALL')}
-                        className="group overflow-hidden rounded-lg border border-[#4A4A4A]/30 bg-white transition duration-300 hover:border-rose-400/60 hover:shadow-lg"
-                      >
-                        <div className="relative h-52 bg-white">
-                          <img src={coverImage} alt={`${formatCategoryDisplayName(categoryName)} — GEL.IT.UP by GIUP®`} className="h-full w-full object-contain" loading="lazy" onError={() => handleCategoryCoverImageError(categoryName, coverImageFallback)} />
-                        </div>
-                        <div className="border-t border-[#4A4A4A]/20 p-3">
-                          <p className="text-sm font-bold uppercase tracking-[0.04em] text-[#1A1A1A]">{categoryName}</p>
-                          <p className="text-xs text-[#1A1A1A]/75">{itemCount} items</p>
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {specs.cure && <span className="inline-flex items-center rounded-md border border-[#4A4A4A]/20 bg-[#E8E8E8] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A4A4A]">{specs.cure}</span>}
-                          </div>
-                        </div>
-                      </button>
-                      {activeCategory === categoryName && <div className="col-span-full">{categoryDetail}</div>}
-                    </Fragment>
-                  )
-                })}
-              </div>
-            </div>}
           </div>
 
           {/* CHAPTER 02b: BUILDER SYSTEMS */}
