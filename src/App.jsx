@@ -5030,14 +5030,8 @@ function FullCataloguePage() {
     })
   }, [])
 
-  const openCatalogueCategory = useCallback((categoryName = '') => {
+  const openCatalogueCategory = useCallback((categoryName = '', subcategoryName = 'ALL', { keepSearch = false } = {}) => {
     if (!categoryName) return
-    // Full in-app category browsing is retired in favour of shopping directly on
-    // shop.gelitup.com — this keeps only one catalogue to maintain. The "2026 NEW!"
-    // showcase is unaffected since it uses its own separate activeNewCollection state.
-    window.open('https://shop.gelitup.com', '_blank', 'noopener,noreferrer')
-    return
-    /* Original in-app category browsing logic — kept for easy re-enable later.
     setActiveSubcategory(subcategoryName || 'ALL')
     setActiveColorFamily('ALL')
     setActiveCatEyeVariant('ALL')
@@ -5061,7 +5055,6 @@ function FullCataloguePage() {
       setExpandedSections((prev) => ({ ...prev, [sectionKey]: true }))
     }
     setScrollToCategoryTrigger((n) => n + 1)
-    */
   }, [scrollToCatalogueResults])
 
   // Handle ?subcategory= deep-link — e.g. gelitup.com/cat-eye resolves here via a vanity route
@@ -5163,7 +5156,7 @@ function FullCataloguePage() {
     })
   }, [])
 
-  const _serviceFlowMenu = useMemo(() => {
+  const serviceFlowMenu = useMemo(() => {
     const definitions = [
       {
         key: 'COLOURS',
@@ -5351,12 +5344,7 @@ function FullCataloguePage() {
                 <button
                   key={`subcategory-${subcategory}`}
                   onClick={() => {
-                    setActiveSubcategory(subcategory)
-                    setActiveCatEyeVariant('ALL')
-                    setActiveColorFamily('ALL')
-                    scrollToCategoryDetail()
-                    const urlSlug = vanityPath ? vanityPath.slice(1) : subSlug
-                    setSearchParams({ subcategory: urlSlug }, { replace: true })
+                    window.open(buildShopSearchUrl(subcategory), '_blank', 'noopener,noreferrer')
                   }}
                   className="group relative rounded-full border px-4 py-2 text-xs font-semibold tracking-wide transition duration-200"
                   style={
@@ -5616,6 +5604,22 @@ function FullCataloguePage() {
               onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
               className="mt-2 max-h-[68vh] overflow-auto rounded-[14px] border border-[#4A4A4A]/30 bg-white md:max-h-[72vh] scroll-mt-24"
             >
+              {activeSection?.category !== '2026 NEW!' ? (
+                <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+                  <p className="text-sm font-semibold text-black/70">
+                    Choose a subcategory above to shop it on shop.gelitup.com
+                  </p>
+                  <a
+                    href="https://shop.gelitup.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-[10px] bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
+                  >
+                    Browse the Full Catalogue & Buy Now
+                  </a>
+                </div>
+              ) : (
+                <>
               <div style={{ height: topSpacerHeight }} />
 
               <div
@@ -5749,6 +5753,8 @@ function FullCataloguePage() {
               </div>
 
               <div style={{ height: bottomSpacerHeight }} />
+                </>
+              )}
             </div>
 
             {/* CART RESTORED TOAST — shown on page load when saved cart items exist */}
@@ -6572,7 +6578,7 @@ function FullCataloguePage() {
               <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
                 <div className="flex-1 lg:max-w-[500px]">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#fcd34d' }}>The Professional Toolset</p>
-                  <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Tools &amp; Equipment</h2>
+                  <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Equipment</h2>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
                     Precision finishing products, expert hardware, and maintenance tools for flawless studio finishes.
                   </p>
@@ -6584,7 +6590,7 @@ function FullCataloguePage() {
                       onMouseEnter={e => e.currentTarget.style.background = 'rgba(95,70,140,0.95)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'rgba(74,53,112,0.85)'}
                     >
-                      BROWSE TOOLS &amp; EQUIPMENT
+                      BROWSE EQUIPMENT
                     </button>
                     <button
                       type="button"
