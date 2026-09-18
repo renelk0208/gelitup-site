@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import * as XLSX from 'xlsx'
 import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
@@ -1924,6 +1924,32 @@ function OrdersPanel() {
     }
   }, [])
 
+  const mergedHistoricalFallbackPriceLookupMap = useMemo(() => {
+    if (!historicalPriceLookupMap.size) return priceLookupMap
+    if (!priceLookupMap.size) return historicalPriceLookupMap
+    const merged = new Map(priceLookupMap)
+    historicalPriceLookupMap.forEach((value, key) => {
+      merged.set(key, value)
+    })
+    return merged
+  }, [priceLookupMap, historicalPriceLookupMap])
+
+  const mergedHistoricalFallbackPriceCatalog = useMemo(() => {
+    if (!historicalPriceCatalog.length) return priceCatalog
+    if (!priceCatalog.length) return historicalPriceCatalog
+    const merged = new Map()
+    const addWithKey = (item) => {
+      const skuKey = normalizeAdminSkuToken(item?.sku || '')
+      const nameKey = normalizeAdminNameToken(item?.name || '')
+      const key = skuKey || nameKey
+      if (!key) return
+      merged.set(key, item)
+    }
+    priceCatalog.forEach(addWithKey)
+    historicalPriceCatalog.forEach(addWithKey)
+    return [...merged.values()]
+  }, [priceCatalog, historicalPriceCatalog])
+
   const updateOrder = async (id, patch) => {
     setSaving(id)
     const { error: err } = await supabase
@@ -1940,11 +1966,18 @@ function OrdersPanel() {
     const useLatest = shouldUseLatestPricingForOrder(row?.status)
     const hasHistorical = historicalPriceLookupMap.size > 0
     return {
-      priceMap: useLatest || !hasHistorical ? priceLookupMap : historicalPriceLookupMap,
-      priceList: useLatest || historicalPriceCatalog.length === 0 ? priceCatalog : historicalPriceCatalog,
+      priceMap: useLatest || !hasHistorical ? priceLookupMap : mergedHistoricalFallbackPriceLookupMap,
+      priceList: useLatest || historicalPriceCatalog.length === 0 ? priceCatalog : mergedHistoricalFallbackPriceCatalog,
       useLatest,
     }
-  }, [priceLookupMap, historicalPriceLookupMap, priceCatalog, historicalPriceCatalog])
+  }, [
+    priceLookupMap,
+    historicalPriceLookupMap,
+    historicalPriceCatalog.length,
+    priceCatalog,
+    mergedHistoricalFallbackPriceLookupMap,
+    mergedHistoricalFallbackPriceCatalog,
+  ])
 
   const syncDistributorTierByRegistration = async (registrationId, email, tier) => {
     const trimmedRegistrationId = String(registrationId || '').trim()
@@ -2615,7 +2648,7 @@ function OrdersPanel() {
                         </div>
                         <div><span className="font-semibold text-slate-400">Consignee</span><br />{row.consignee_name || '—'}</div>
                         <div><span className="font-semibold text-slate-400">Phone</span><br />{row.consignee_phone || '—'}</div>
-                        <div><span className="font-semibold text-slate-400">Pricing Source</span><br />{usesLatestPricing ? 'Latest tier prices' : 'Historical snapshot prices'}</div>
+                        <div><span className="font-semibold text-slate-400">Pricing Source</span><br />{usesLatestPricing ? 'Latest tier prices' : 'Historical snapshot prices (latest fallback if missing)'}</div>
                         <div><span className="font-semibold text-slate-400">Payment confirmed</span><br />
                           <span className={row.payment_confirmed ? 'font-semibold text-emerald-600' : 'text-slate-400'}>
                             {row.payment_confirmed ? '✓ Yes' : 'Not yet'}
