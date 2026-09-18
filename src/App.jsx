@@ -5010,7 +5010,7 @@ function FullCataloguePage() {
     }
   }
 
-  const scrollToCatalogueResults = useCallback(() => {
+  const _scrollToCatalogueResults = useCallback(() => {
     requestAnimationFrame(() => {
       const targetElement = document.getElementById(CATALOGUE_RESULTS_ANCHOR_ID)
       if (targetElement) {
@@ -5030,33 +5030,11 @@ function FullCataloguePage() {
     })
   }, [])
 
-  const openCatalogueCategory = useCallback((categoryName = '', subcategoryName = 'ALL', { keepSearch = false } = {}) => {
-    if (!categoryName) return
-    setActiveCategory(categoryName)
-    setActiveSubcategory(subcategoryName || 'ALL')
-    setActiveColorFamily('ALL')
-    setActiveCatEyeVariant('ALL')
-    if (!keepSearch) setSearchQuery('')
-    // Expand the correct section so categoryDetail renders
-    // Colours skips the grid — categoryDetail is rendered standalone below the banner
-    const normalized = normalizeCatalogueToken(categoryName)
-    let sectionKey = ''
-    if (normalized.includes('COLOR')) {
-      sectionKey = '' // no grid expansion needed for colours
-    } else if (['BASES', 'TOPS', 'NAIL PREPARATIONS'].some((c) => normalizeCatalogueToken(c) === normalized)) {
-      sectionKey = 'essentials'
-    } else if (['BUILDER GEL SYSTEMS', 'MULTIMIX'].some((c) => normalizeCatalogueToken(c) === normalized)) {
-      sectionKey = 'builders'
-    } else if (['TOOLS & EQUIPMENT'].some((c) => normalizeCatalogueToken(c) === normalized)) {
-      sectionKey = 'tools'
-    } else {
-      sectionKey = 'consumables'
-    }
-    if (sectionKey) {
-      setExpandedSections((prev) => ({ ...prev, [sectionKey]: true }))
-    }
-    setScrollToCategoryTrigger((n) => n + 1)
-  }, [scrollToCatalogueResults])
+  const openCatalogueCategory = useCallback(() => {
+    // In-app category browsing is retired — the category hero sections below are
+    // purely visual now. Shopping happens on shop.gelitup.com via the single
+    // "Shop the Full Catalogue" button at the top of this page.
+  }, [])
 
   // Handle ?subcategory= deep-link — e.g. gelitup.com/cat-eye resolves here via a vanity route
   useEffect(() => {
@@ -5157,7 +5135,7 @@ function FullCataloguePage() {
     })
   }, [])
 
-  const serviceFlowMenu = useMemo(() => {
+  const _serviceFlowMenu = useMemo(() => {
     const definitions = [
       {
         key: 'COLOURS',
@@ -6156,6 +6134,24 @@ function FullCataloguePage() {
           )}
 
           {!searchQuery && <>
+          {/* ── SHOP THE FULL CATALOGUE — single clear path to buy ── */}
+          <div className="mx-auto mb-6 max-w-6xl px-4 sm:px-8">
+            <div className="flex flex-col items-center gap-3 rounded-[18px] border border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 to-pink-50 px-6 py-8 text-center sm:flex-row sm:justify-between sm:text-left">
+              <div>
+                <p className="text-lg font-extrabold uppercase tracking-[0.06em] text-black">Ready to shop?</p>
+                <p className="mt-1 text-sm text-black/60">Browse our full range and buy directly on shop.gelitup.com.</p>
+              </div>
+              <a
+                href="https://shop.gelitup.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex shrink-0 items-center gap-2 rounded-full bg-fuchsia-600 px-8 py-3.5 text-sm font-bold uppercase tracking-wider text-white shadow-md transition hover:bg-fuchsia-500"
+              >
+                Shop the Full Catalogue →
+              </a>
+            </div>
+          </div>
+
           {/* ── NEW PRODUCTS 2026 ── */}
           {(() => {
             const newSection = sections.find(s => s.category === '2026 NEW!')
@@ -6269,7 +6265,6 @@ function FullCataloguePage() {
                       <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}>
                         {activeSubItems.map((item, idx) => {
                           const itemCode = item.code || extractProductCode(item.name)
-                          const itemKey = `${item.name}::${itemCode}`
                           const price = lookupCataloguePrice(item.name, itemCode)
                           const listPrice = resolveCatalogueListPrice(item.name, itemCode)
                           const isDiscounted = isCatalogueDiscountActive() && price != null && listPrice != null && price < listPrice
@@ -6455,7 +6450,7 @@ function FullCataloguePage() {
             </div>
 
             {/* Essentials category grid */}
-            {expandedSections.essentials && <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
+            {<div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {chapterEssentialsCategories.map((categoryName) => {
                   const section = sections.find((s) => s.category === categoryName)
@@ -6548,7 +6543,7 @@ function FullCataloguePage() {
               </div>
             </div>
 
-            {chapterBuildersCategories.includes(activeCategory) && (
+            {(
               <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
                 <div className="mb-3 flex flex-wrap gap-2">
                   {chapterBuildersCategories.map(cat => (
@@ -6620,7 +6615,7 @@ function FullCataloguePage() {
                 </div>
               </div>
             </div>
-            {chapter03Categories.includes(activeCategory) && (
+            {(
               <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
                 <div className="mb-3 flex flex-wrap gap-2">
                   {chapter03Categories.map(cat => (
@@ -6693,7 +6688,8 @@ function FullCataloguePage() {
                 </div>
               </div>
             </div>
-            {chapterNailArtCategories.includes(activeCategory) && (
+            {(
+
               <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
                 {categoryDetail}
               </div>
@@ -6757,7 +6753,8 @@ function FullCataloguePage() {
                 </div>
               </div>
             </div>
-            {chapterConsumablesCategories.includes(activeCategory) && (
+            {(
+
               <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
                 {categoryDetail}
               </div>
@@ -6821,7 +6818,8 @@ function FullCataloguePage() {
                 </div>
               </div>
             </div>
-            {chapterNailHandFootCategories.includes(activeCategory) && (
+            {(
+
               <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
                 {categoryDetail}
               </div>
