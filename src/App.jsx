@@ -5031,9 +5031,9 @@ function FullCataloguePage() {
   }, [])
 
   const openCatalogueCategory = useCallback(() => {
-    // In-app category browsing is retired — the category hero sections below are
-    // purely visual now. Shopping happens on shop.gelitup.com via the single
-    // "Shop the Full Catalogue" button at the top of this page.
+    // Every "Browse X" button and category card now leads to the general shop —
+    // in-app category browsing is retired in favour of the single storefront.
+    window.open('https://shop.gelitup.com', '_blank', 'noopener,noreferrer')
   }, [])
 
   // Handle ?subcategory= deep-link — e.g. gelitup.com/cat-eye resolves here via a vanity route
