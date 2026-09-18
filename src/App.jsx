@@ -5032,6 +5032,7 @@ function FullCataloguePage() {
 
   const openCatalogueCategory = useCallback((categoryName = '', subcategoryName = 'ALL', { keepSearch = false } = {}) => {
     if (!categoryName) return
+    setActiveCategory(categoryName)
     setActiveSubcategory(subcategoryName || 'ALL')
     setActiveColorFamily('ALL')
     setActiveCatEyeVariant('ALL')
