@@ -5222,54 +5222,6 @@ function FullCataloguePage() {
     })
   }, [sections])
 
-  if (HIDE_CATALOGUE_PRODUCTS) {
-    const storefrontHeroCards = [
-      { title: 'Gel Polish', image: '/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg' },
-      { title: 'Bases & Tops', image: '/gelitup-content/catalog-heroes/top-bases-catalog-hero-image.webp' },
-      { title: 'Builder Gel Systems', image: '/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp' },
-      { title: 'Tools & Equipment', image: '/gelitup-content/catalog-heroes/equipment-and-tools-catalog-hero.jpg' },
-      { title: 'Nail Art', image: '/gelitup-content/catalog-heroes/nail-art-catalog-hero-image.jpg' },
-      { title: 'Consumables', image: '/gelitup-content/catalog-heroes/consumables-catalog-hero.jpg' },
-      { title: 'Nail Care', image: '/gelitup-content/catalog-heroes/Hand-nail-and-foot-care-catalog-hero-image.webp' },
-    ]
-
-    return (
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
-        <div className="mb-6 text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#D43790]">Shop Our Products</p>
-          <h1 className="mt-2 text-3xl font-black uppercase tracking-[0.08em] text-[#1A1A1A] sm:text-4xl">Discover the GEL.IT.UP range</h1>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {storefrontHeroCards.map((card) => (
-            <article key={card.title} className="group overflow-hidden rounded-[20px] border border-[#E7E7E7] bg-white shadow-[0_14px_42px_rgba(15,23,42,0.06)]">
-              <div className="relative overflow-hidden">
-                <img
-                  src={card.image}
-                  alt={card.title}
-                  className="h-72 w-full object-cover transition duration-300 group-hover:scale-[1.02]"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-transparent" />
-              </div>
-              <div className="flex items-center justify-between gap-3 p-4">
-                <p className="text-sm font-extrabold uppercase tracking-[0.1em] text-[#1A1A1A]">{card.title}</p>
-                <a
-                  href={SHOPIFY_OUR_PRODUCTS_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-center rounded-lg bg-[#D43790] px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-white transition hover:bg-[#BF3182]"
-                >
-                  SHOP NOW!
-                </a>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
   const categoryDetail = activeCategory
     ? (
       <div id="catalogue-category-detail" className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5 scroll-mt-28">
