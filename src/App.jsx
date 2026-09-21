@@ -5222,6 +5222,54 @@ function FullCataloguePage() {
     })
   }, [sections])
 
+  if (HIDE_CATALOGUE_PRODUCTS) {
+    const storefrontHeroCards = [
+      { title: 'Gel Polish', image: '/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg' },
+      { title: 'Bases & Tops', image: '/gelitup-content/catalog-heroes/top-bases-catalog-hero-image.webp' },
+      { title: 'Builder Gel Systems', image: '/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp' },
+      { title: 'Tools & Equipment', image: '/gelitup-content/catalog-heroes/equipment-and-tools-catalog-hero.jpg' },
+      { title: 'Nail Art', image: '/gelitup-content/catalog-heroes/nail-art-catalog-hero-image.jpg' },
+      { title: 'Consumables', image: '/gelitup-content/catalog-heroes/consumables-catalog-hero.jpg' },
+      { title: 'Nail Care', image: '/gelitup-content/catalog-heroes/Hand-nail-and-foot-care-catalog-hero-image.webp' },
+    ]
+
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
+        <div className="mb-6 text-center">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#D43790]">Shop Our Products</p>
+          <h1 className="mt-2 text-3xl font-black uppercase tracking-[0.08em] text-[#1A1A1A] sm:text-4xl">Discover the GEL.IT.UP range</h1>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {storefrontHeroCards.map((card) => (
+            <article key={card.title} className="group overflow-hidden rounded-[20px] border border-[#E7E7E7] bg-white shadow-[0_14px_42px_rgba(15,23,42,0.06)]">
+              <div className="relative overflow-hidden">
+                <img
+                  src={card.image}
+                  alt={card.title}
+                  className="h-72 w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-transparent" />
+              </div>
+              <div className="flex items-center justify-between gap-3 p-4">
+                <p className="text-sm font-extrabold uppercase tracking-[0.1em] text-[#1A1A1A]">{card.title}</p>
+                <a
+                  href={SHOPIFY_OUR_PRODUCTS_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center rounded-lg bg-[#D43790] px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-white transition hover:bg-[#BF3182]"
+                >
+                  SHOP NOW!
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   const categoryDetail = activeCategory
     ? (
       <div id="catalogue-category-detail" className="rounded-2xl border border-[#4A4A4A]/30 bg-white p-4 sm:p-5 scroll-mt-28">
@@ -6099,28 +6147,15 @@ function FullCataloguePage() {
                         The latest additions to the GEL.IT.UP range — new gel polish collections, innovative bases, and premium effects.
                       </p>
                       <div className="mt-6 flex flex-wrap items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setShowNewCollections(v => !v)}
+                        <a
+                          href={SHOPIFY_OUR_PRODUCTS_URL}
+                          target="_blank"
+                          rel="noreferrer"
                           className="inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-bold uppercase tracking-[0.1em] text-white transition duration-200"
                           style={{ background: 'linear-gradient(135deg,#D43790,#9B1268)', boxShadow: '0 4px 20px rgba(212,55,144,0.45)' }}
                         >
-                          Browse New Collections
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`h-4 w-4 transition-transform duration-200 ${showNewCollections ? 'rotate-180' : ''}`} aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-                        </button>
-                        <button
-                          type="button"
-                          title={copiedCategory === 'new-products' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=new-products'}
-                          aria-label={copiedCategory === 'new-products' ? 'Copied!' : 'Copy link to New Products'}
-                          onClick={() => { navigator.clipboard.writeText('https://gelitup.com/full-catalogue?category=new-products').catch(() => {}); setCopiedCategory('new-products'); setTimeout(() => setCopiedCategory(''), 2000) }}
-                          className="flex items-center gap-1.5 rounded-lg border border-[#9B1268]/30 px-3 py-2.5 text-xs font-semibold text-gray-700 transition duration-200 hover:border-[#9B1268]/60 hover:text-gray-900"
-                        >
-                          {copiedCategory === 'new-products'
-                            ? <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5 text-green-600"><path fillRule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clipRule="evenodd" /></svg>
-                            : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5"><path fillRule="evenodd" d="M11.986 3H12a2 2 0 0 1 2 2v6a2 2 0 0 1-1.5 1.937V13.5A1.5 1.5 0 0 1 11 15H3.5A1.5 1.5 0 0 1 2 13.5v-9A1.5 1.5 0 0 1 3.5 3h1.563A2 2 0 0 1 7 1.5h2a2 2 0 0 1 1.986 1.5Zm-7.48 2.25a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Z" clipRule="evenodd" /></svg>
-                          }
-                          {copiedCategory === 'new-products' ? 'Copied!' : 'Share'}
-                        </button>
+                          SHOP NOW!
+                        </a>
                       </div>
                     </div>
                     <div className="lg:hidden">
@@ -6250,28 +6285,14 @@ function FullCataloguePage() {
                   The Gel It Up gel polish archive. Over 1,000 laboratory-grade gel polish shades categorised by undertone and finish — from the deepest onyx to glass-top effects. Includes Solid Gel Polish, Cat Eye gel polish, Glitters, Thermos, and seasonal collections. Find your signature shade.
                 </p>
                 <div className="mt-6 flex flex-wrap items-center gap-4">
-                  <button
-                    onClick={() => {
-                      const colorsSection = sections.find((s) => isColorsCategoryName(s.category))
-                      if (colorsSection) openCatalogueCategory(colorsSection.category, 'ALL')
-                    }}
+                  <a
+                    href={SHOPIFY_OUR_PRODUCTS_URL}
+                    target="_blank"
+                    rel="noreferrer"
                     className="rounded-lg bg-fuchsia-600 px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
                   >
-                    BROWSE COLOURS
-                  </button>
-                  <button
-                    type="button"
-                    title={copiedCategory === 'colours' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=colours'}
-                    aria-label={copiedCategory === 'colours' ? 'Copied!' : 'Copy link to Colours'}
-                    onClick={() => { navigator.clipboard.writeText('https://gelitup.com/full-catalogue?category=colours').catch(() => {}); setCopiedCategory('colours'); setTimeout(() => setCopiedCategory(''), 2000) }}
-                    className="flex items-center gap-1.5 rounded-lg border border-white/30 px-3 py-2.5 text-xs font-semibold text-white/70 transition duration-200 hover:border-white/60 hover:text-white"
-                  >
-                    {copiedCategory === 'colours'
-                      ? <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5 text-green-400"><path fillRule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clipRule="evenodd" /></svg>
-                      : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5"><path fillRule="evenodd" d="M11.986 3H12a2 2 0 0 1 2 2v6a2 2 0 0 1-1.5 1.937V13.5A1.5 1.5 0 0 1 11 15H3.5A1.5 1.5 0 0 1 2 13.5v-9A1.5 1.5 0 0 1 3.5 3h1.563A2 2 0 0 1 7 1.5h2a2 2 0 0 1 1.986 1.5Zm-7.48 2.25a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Z" clipRule="evenodd" /></svg>
-                    }
-                    {copiedCategory === 'colours' ? 'Copied!' : 'Share'}
-                  </button>
+                    SHOP NOW!
+                  </a>
                 </div>
               </div>
 
@@ -6289,7 +6310,7 @@ function FullCataloguePage() {
             </div>
           </div>
 
-          {activeCategory && isColorsCategoryName(activeCategory) && (
+          {!HIDE_CATALOGUE_PRODUCTS && activeCategory && isColorsCategoryName(activeCategory) && (
             <div className="mx-auto max-w-6xl px-4 py-4 sm:px-8">{categoryDetail}</div>
           )}
 
@@ -6315,34 +6336,17 @@ function FullCataloguePage() {
                     The non-negotiables of every nail service. Our professional base coat range protects the natural nail and maximises colour adhesion, while our top coat systems deliver the perfect finish — from high-gloss brilliance to matte sophistication. Includes the 5-in-1 base coat, Flexi Base, Brush On Builder (BIAB), and our full top coat collection.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
-                    <button
-                      onClick={() => {
-                        setExpandedSections(prev => ({ ...prev, essentials: true }))
-                        requestAnimationFrame(() => {
-                          const el = document.getElementById('catalogue-section-essentials')
-                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                        })
-                      }}
+                    <a
+                      href={SHOPIFY_OUR_PRODUCTS_URL}
+                      target="_blank"
+                      rel="noreferrer"
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
                       style={{ background: 'rgba(185,100,130,0.85)' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'rgba(205,120,150,0.95)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'rgba(185,100,130,0.85)'}
                     >
-                      BROWSE BASES, TOPS &amp; NAIL PREPARATIONS
-                    </button>
-                    <button
-                      type="button"
-                      title={copiedCategory === 'essentials' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=essentials'}
-                      aria-label={copiedCategory === 'essentials' ? 'Copied!' : 'Copy link to Bases, Tops & Nail Preparations'}
-                      onClick={() => { navigator.clipboard.writeText('https://gelitup.com/full-catalogue?category=essentials').catch(() => {}); setCopiedCategory('essentials'); setTimeout(() => setCopiedCategory(''), 2000) }}
-                      className="flex items-center gap-1.5 rounded-lg border border-white/30 px-3 py-2.5 text-xs font-semibold text-white/70 transition duration-200 hover:border-white/60 hover:text-white"
-                    >
-                      {copiedCategory === 'essentials'
-                        ? <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5 text-green-400"><path fillRule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clipRule="evenodd" /></svg>
-                        : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5"><path fillRule="evenodd" d="M11.986 3H12a2 2 0 0 1 2 2v6a2 2 0 0 1-1.5 1.937V13.5A1.5 1.5 0 0 1 11 15H3.5A1.5 1.5 0 0 1 2 13.5v-9A1.5 1.5 0 0 1 3.5 3h1.563A2 2 0 0 1 7 1.5h2a2 2 0 0 1 1.986 1.5Zm-7.48 2.25a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Z" clipRule="evenodd" /></svg>
-                      }
-                      {copiedCategory === 'essentials' ? 'Copied!' : 'Share'}
-                    </button>
+                      SHOP NOW!
+                    </a>
                   </div>
                 </div>
                 <div className="lg:hidden">
@@ -6359,7 +6363,7 @@ function FullCataloguePage() {
             </div>
 
             {/* Essentials category grid */}
-            {expandedSections.essentials && <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
+            {!HIDE_CATALOGUE_PRODUCTS && expandedSections.essentials && <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {chapterEssentialsCategories.map((categoryName) => {
                   const section = sections.find((s) => s.category === categoryName)
@@ -6415,28 +6419,17 @@ function FullCataloguePage() {
                     From Liquid Polygel to the fiberglass builder gel (3-in-1 Premium) and Multimix Synthogel — our complete builder gel range delivers strength, flexibility, and flawless structure. Engineered for nail extensions, natural nail reinforcement, and zero-file technique. BIAB and brush-on builder options also available.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
-                    <button
-                      onClick={() => openCatalogueCategory('BUILDER GEL SYSTEMS', 'ALL')}
+                    <a
+                      href={SHOPIFY_OUR_PRODUCTS_URL}
+                      target="_blank"
+                      rel="noreferrer"
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
                       style={{ background: 'rgba(180,90,50,0.85)' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'rgba(160,75,40,0.95)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'rgba(180,90,50,0.85)'}
                     >
-                      BROWSE BUILDER SYSTEMS
-                    </button>
-                    <button
-                      type="button"
-                      title={copiedCategory === 'builders' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=builders'}
-                      aria-label={copiedCategory === 'builders' ? 'Copied!' : 'Copy link to Builder Systems'}
-                      onClick={() => { navigator.clipboard.writeText('https://gelitup.com/full-catalogue?category=builders').catch(() => {}); setCopiedCategory('builders'); setTimeout(() => setCopiedCategory(''), 2000) }}
-                      className="flex items-center gap-1.5 rounded-lg border border-[#4A4A4A]/30 px-3 py-2.5 text-xs font-semibold text-gray-700 transition duration-200 hover:border-[#4A4A4A]/60 hover:text-gray-900"
-                    >
-                      {copiedCategory === 'builders'
-                        ? <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5 text-green-600"><path fillRule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clipRule="evenodd" /></svg>
-                        : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5"><path fillRule="evenodd" d="M11.986 3H12a2 2 0 0 1 2 2v6a2 2 0 0 1-1.5 1.937V13.5A1.5 1.5 0 0 1 11 15H3.5A1.5 1.5 0 0 1 2 13.5v-9A1.5 1.5 0 0 1 3.5 3h1.563A2 2 0 0 1 7 1.5h2a2 2 0 0 1 1.986 1.5Zm-7.48 2.25a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Z" clipRule="evenodd" /></svg>
-                      }
-                      {copiedCategory === 'builders' ? 'Copied!' : 'Share'}
-                    </button>
+                      SHOP NOW!
+                    </a>
                   </div>
                 </div>
                 <div className="lg:hidden">
@@ -6452,7 +6445,7 @@ function FullCataloguePage() {
               </div>
             </div>
 
-            {chapterBuildersCategories.includes(activeCategory) && (
+            {!HIDE_CATALOGUE_PRODUCTS && chapterBuildersCategories.includes(activeCategory) && (
               <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
                 <div className="mb-3 flex flex-wrap gap-2">
                   {chapterBuildersCategories.map(cat => (
@@ -6488,28 +6481,17 @@ function FullCataloguePage() {
                     Precision finishing products, expert hardware, and maintenance tools for flawless studio finishes.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
-                    <button
-                      onClick={() => openCatalogueCategory('TOOLS & EQUIPMENT', 'ALL')}
+                    <a
+                      href={SHOPIFY_OUR_PRODUCTS_URL}
+                      target="_blank"
+                      rel="noreferrer"
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
                       style={{ background: 'rgba(74,53,112,0.85)' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'rgba(95,70,140,0.95)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'rgba(74,53,112,0.85)'}
                     >
-                      BROWSE TOOLS &amp; EQUIPMENT
-                    </button>
-                    <button
-                      type="button"
-                      title={copiedCategory === 'tools' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=tools'}
-                      aria-label={copiedCategory === 'tools' ? 'Copied!' : 'Copy link to Tools & Equipment'}
-                      onClick={() => { navigator.clipboard.writeText('https://gelitup.com/full-catalogue?category=tools').catch(() => {}); setCopiedCategory('tools'); setTimeout(() => setCopiedCategory(''), 2000) }}
-                      className="flex items-center gap-1.5 rounded-lg border border-white/30 px-3 py-2.5 text-xs font-semibold text-white/70 transition duration-200 hover:border-white/60 hover:text-white"
-                    >
-                      {copiedCategory === 'tools'
-                        ? <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5 text-green-400"><path fillRule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clipRule="evenodd" /></svg>
-                        : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5"><path fillRule="evenodd" d="M11.986 3H12a2 2 0 0 1 2 2v6a2 2 0 0 1-1.5 1.937V13.5A1.5 1.5 0 0 1 11 15H3.5A1.5 1.5 0 0 1 2 13.5v-9A1.5 1.5 0 0 1 3.5 3h1.563A2 2 0 0 1 7 1.5h2a2 2 0 0 1 1.986 1.5Zm-7.48 2.25a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Z" clipRule="evenodd" /></svg>
-                      }
-                      {copiedCategory === 'tools' ? 'Copied!' : 'Share'}
-                    </button>
+                      SHOP NOW!
+                    </a>
                   </div>
                 </div>
                 <div className="lg:hidden">
@@ -6524,7 +6506,7 @@ function FullCataloguePage() {
                 </div>
               </div>
             </div>
-            {chapter03Categories.includes(activeCategory) && (
+            {!HIDE_CATALOGUE_PRODUCTS && chapter03Categories.includes(activeCategory) && (
               <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
                 <div className="mb-3 flex flex-wrap gap-2">
                   {chapter03Categories.map(cat => (
@@ -6561,28 +6543,17 @@ function FullCataloguePage() {
                     Creative nail art supplies for professional nail technicians.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
-                    <button
-                      onClick={() => openCatalogueCategory('NAIL ART', 'ALL')}
+                    <a
+                      href={SHOPIFY_OUR_PRODUCTS_URL}
+                      target="_blank"
+                      rel="noreferrer"
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
                       style={{ background: 'rgba(160,70,100,0.85)' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'rgba(185,90,120,0.95)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'rgba(160,70,100,0.85)'}
                     >
-                      BROWSE NAIL ART
-                    </button>
-                    <button
-                      type="button"
-                      title={copiedCategory === 'nail-art' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=nail-art'}
-                      aria-label={copiedCategory === 'nail-art' ? 'Copied!' : 'Copy link to Nail Art'}
-                      onClick={() => { navigator.clipboard.writeText('https://gelitup.com/full-catalogue?category=nail-art').catch(() => {}); setCopiedCategory('nail-art'); setTimeout(() => setCopiedCategory(''), 2000) }}
-                      className="flex items-center gap-1.5 rounded-lg border border-white/30 px-3 py-2.5 text-xs font-semibold text-white/70 transition duration-200 hover:border-white/60 hover:text-white"
-                    >
-                      {copiedCategory === 'nail-art'
-                        ? <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5 text-green-400"><path fillRule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clipRule="evenodd" /></svg>
-                        : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5"><path fillRule="evenodd" d="M11.986 3H12a2 2 0 0 1 2 2v6a2 2 0 0 1-1.5 1.937V13.5A1.5 1.5 0 0 1 11 15H3.5A1.5 1.5 0 0 1 2 13.5v-9A1.5 1.5 0 0 1 3.5 3h1.563A2 2 0 0 1 7 1.5h2a2 2 0 0 1 1.986 1.5Zm-7.48 2.25a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Z" clipRule="evenodd" /></svg>
-                      }
-                      {copiedCategory === 'nail-art' ? 'Copied!' : 'Share'}
-                    </button>
+                      SHOP NOW!
+                    </a>
                   </div>
                 </div>
                 <div className="lg:hidden">
@@ -6597,7 +6568,7 @@ function FullCataloguePage() {
                 </div>
               </div>
             </div>
-            {chapterNailArtCategories.includes(activeCategory) && (
+            {!HIDE_CATALOGUE_PRODUCTS && chapterNailArtCategories.includes(activeCategory) && (
               <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
                 {categoryDetail}
               </div>
@@ -6625,28 +6596,17 @@ function FullCataloguePage() {
                     Professional-grade consumable supplies for everyday salon use.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
-                    <button
-                      onClick={() => openCatalogueCategory('CONSUMABLES', 'ALL')}
+                    <a
+                      href={SHOPIFY_OUR_PRODUCTS_URL}
+                      target="_blank"
+                      rel="noreferrer"
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
                       style={{ background: 'rgba(175,140,0,0.85)' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'rgba(155,120,0,0.95)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'rgba(175,140,0,0.85)'}
                     >
-                      BROWSE CONSUMABLES
-                    </button>
-                    <button
-                      type="button"
-                      title={copiedCategory === 'consumables' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=consumables'}
-                      aria-label={copiedCategory === 'consumables' ? 'Copied!' : 'Copy link to Consumables'}
-                      onClick={() => { navigator.clipboard.writeText('https://gelitup.com/full-catalogue?category=consumables').catch(() => {}); setCopiedCategory('consumables'); setTimeout(() => setCopiedCategory(''), 2000) }}
-                      className="flex items-center gap-1.5 rounded-lg border border-[#4A4A4A]/30 px-3 py-2.5 text-xs font-semibold text-gray-700 transition duration-200 hover:border-[#4A4A4A]/60 hover:text-gray-900"
-                    >
-                      {copiedCategory === 'consumables'
-                        ? <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5 text-green-600"><path fillRule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clipRule="evenodd" /></svg>
-                        : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5"><path fillRule="evenodd" d="M11.986 3H12a2 2 0 0 1 2 2v6a2 2 0 0 1-1.5 1.937V13.5A1.5 1.5 0 0 1 11 15H3.5A1.5 1.5 0 0 1 2 13.5v-9A1.5 1.5 0 0 1 3.5 3h1.563A2 2 0 0 1 7 1.5h2a2 2 0 0 1 1.986 1.5Zm-7.48 2.25a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Z" clipRule="evenodd" /></svg>
-                      }
-                      {copiedCategory === 'consumables' ? 'Copied!' : 'Share'}
-                    </button>
+                      SHOP NOW!
+                    </a>
                   </div>
                 </div>
                 <div className="lg:hidden">
@@ -6661,7 +6621,7 @@ function FullCataloguePage() {
                 </div>
               </div>
             </div>
-            {chapterConsumablesCategories.includes(activeCategory) && (
+            {!HIDE_CATALOGUE_PRODUCTS && chapterConsumablesCategories.includes(activeCategory) && (
               <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
                 {categoryDetail}
               </div>
@@ -6689,28 +6649,17 @@ function FullCataloguePage() {
                     Therapeutic formulations for professional nail, hand and foot aftercare.
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
-                    <button
-                      onClick={() => openCatalogueCategory('NAIL HAND & FOOT CARE', 'ALL')}
+                    <a
+                      href={SHOPIFY_OUR_PRODUCTS_URL}
+                      target="_blank"
+                      rel="noreferrer"
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
                       style={{ background: 'rgba(20,140,120,0.90)' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'rgba(20,165,140,1)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'rgba(20,140,120,0.90)'}
                     >
-                      BROWSE NAIL, HAND &amp; FOOT CARE
-                    </button>
-                    <button
-                      type="button"
-                      title={copiedCategory === 'nail-care' ? 'Copied!' : 'https://gelitup.com/full-catalogue?category=nail-care'}
-                      aria-label={copiedCategory === 'nail-care' ? 'Copied!' : 'Copy link to Nail, Hand & Foot Care'}
-                      onClick={() => { navigator.clipboard.writeText('https://gelitup.com/full-catalogue?category=nail-care').catch(() => {}); setCopiedCategory('nail-care'); setTimeout(() => setCopiedCategory(''), 2000) }}
-                      className="flex items-center gap-1.5 rounded-lg border border-white/30 px-3 py-2.5 text-xs font-semibold text-white/70 transition duration-200 hover:border-white/60 hover:text-white"
-                    >
-                      {copiedCategory === 'nail-care'
-                        ? <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5 text-green-400"><path fillRule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clipRule="evenodd" /></svg>
-                        : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5"><path fillRule="evenodd" d="M11.986 3H12a2 2 0 0 1 2 2v6a2 2 0 0 1-1.5 1.937V13.5A1.5 1.5 0 0 1 11 15H3.5A1.5 1.5 0 0 1 2 13.5v-9A1.5 1.5 0 0 1 3.5 3h1.563A2 2 0 0 1 7 1.5h2a2 2 0 0 1 1.986 1.5Zm-7.48 2.25a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Z" clipRule="evenodd" /></svg>
-                      }
-                      {copiedCategory === 'nail-care' ? 'Copied!' : 'Share'}
-                    </button>
+                      SHOP NOW!
+                    </a>
                   </div>
                 </div>
                 <div className="lg:hidden">
@@ -6725,7 +6674,7 @@ function FullCataloguePage() {
                 </div>
               </div>
             </div>
-            {chapterNailHandFootCategories.includes(activeCategory) && (
+            {!HIDE_CATALOGUE_PRODUCTS && chapterNailHandFootCategories.includes(activeCategory) && (
               <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-8">
                 {categoryDetail}
               </div>

@@ -95,10 +95,6 @@ export default function HeroCTA({ showTrialPack = false }) {
               + Add Trial Pack to Cart
             </button>
           </div>
-          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-black/55">
-            <Link to="/full-catalogue" className="text-fuchsia-700 hover:underline">Browse full catalogue</Link>
-            <Link to="/portal/register" className="text-fuchsia-700 hover:underline">Register for B2B pricing</Link>
-          </div>
         </div>
       ) : (
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -122,25 +118,6 @@ export default function HeroCTA({ showTrialPack = false }) {
           >
             SHOP NOW!
           </a>
-
-          <Link
-            to="/distributor-packages"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              background: 'transparent',
-              color: '#fff',
-              fontSize: '14px',
-              fontWeight: 600,
-              padding: '11px 20px',
-              borderRadius: '6px',
-              border: '1px solid rgba(255,255,255,0.35)',
-              textDecoration: 'none',
-            }}
-          >
-            Get B2B Pricing
-          </Link>
         </div>
       )}
 
