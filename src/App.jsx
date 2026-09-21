@@ -1,4 +1,4 @@
-﻿import { Component, Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Component, Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import appLogo from '/gelitup_logo.png'
 import PWABadge from './PWABadge.jsx'
@@ -3527,7 +3527,16 @@ const SUBCATEGORY_SEO = {
   },
 }
 
+// Deep-links a specific catalogue item to its matching product on shop.gelitup.com
+// via Shopify's built-in search, since there is no direct name-to-handle mapping.
+function buildShopSearchUrl(itemName) {
+  const cleanName = String(itemName || '').replace(/\s*-HTF\s*$/i, '').trim()
+  return `https://shop.gelitup.com/search?q=${encodeURIComponent(cleanName)}&type=product`
+}
+
 function FullCataloguePage() {
+  // Prices are hidden here — customers purchase via shop.gelitup.com to avoid price discrepancies.
+  const SHOW_CATALOGUE_PRICES = false
   const location = useLocation()
   const [sections, setSections] = useState([])
   const [activeCategory, setActiveCategory] = useState('')
@@ -5558,20 +5567,24 @@ function FullCataloguePage() {
                         <div className="min-w-0 flex-1">
                           <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
                           <p className="break-words text-[11px] font-light text-black/55">
-                            {itemPrice != null && (itemDiscounted
+                            {SHOW_CATALOGUE_PRICES && itemPrice != null && (itemDiscounted
                               ? <span><span className="mr-1 text-black/35 line-through">€{Number(itemListPrice).toFixed(2)}</span><span className="text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</span></span>
                               : <span className="text-fuchsia-700">€{Number(itemPrice).toFixed(2)}</span>)}
                             {itemSize && <span className="ml-2 rounded bg-black/10 px-1.5 py-0.5 text-[10px] font-medium text-black/50">{itemSize}</span>}
                           </p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => addQuickItem(itemKey)}
-                          disabled={isOOS}
-                          className={`shrink-0 rounded-[10px] px-3 py-1.5 text-[11px] font-semibold transition ${isOOS ? 'cursor-not-allowed border border-rose-200 bg-rose-50 text-rose-500' : `text-white ${inCart ? 'bg-fuchsia-700 hover:bg-fuchsia-600' : 'bg-fuchsia-600 hover:bg-fuchsia-500'}`} ${pulseItemKey === itemKey ? 'scale-95' : ''}`}
-                        >
-                          {isOOS ? 'Out of Stock' : inCart ? `+1 (${quickCart[itemKey]})` : '+ Add'}
-                        </button>
+                        {isOOS ? (
+                          <span className="shrink-0 cursor-not-allowed rounded-[10px] border border-rose-200 bg-rose-50 px-3 py-1.5 text-[11px] font-semibold text-rose-500">Out of Stock</span>
+                        ) : (
+                          <a
+                            href={buildShopSearchUrl(item.name)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="shrink-0 rounded-[10px] bg-fuchsia-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-fuchsia-500"
+                          >
+                            Buy Now!
+                          </a>
+                        )}
                       </div>
                     )
                   }
@@ -5614,7 +5627,7 @@ function FullCataloguePage() {
                           <p className="break-words text-[11px] font-light text-black/55">{formatSubcategoryDisplayName(item.subcategory)}</p>
                         </div>
                         <div className="mt-1.5 flex items-center gap-2">
-                          {itemPrice != null && (
+                          {SHOW_CATALOGUE_PRICES && itemPrice != null && (
                             itemDiscounted ? (
                               <span className="flex items-baseline gap-1.5">
                                 <span className="text-[11px] font-medium text-black/40 line-through">€{Number(itemListPrice).toFixed(2)}</span>
@@ -5642,12 +5655,12 @@ function FullCataloguePage() {
                             </div>
                           ) : (
                             <a
-                              href="https://shop.gelitup.com"
+                              href={buildShopSearchUrl(item.name)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
                             >
-                              Buy on shop.gelitup.com
+                              Buy Now!
                             </a>
                           )}
                         </div>
@@ -5724,7 +5737,7 @@ function FullCataloguePage() {
                             <div key={key} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
                               <div className="min-w-0 flex-1">
                                 <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{name}</p>
-                                <p className="truncate text-[11px] text-black/45">{code}{price != null && <span className="ml-2 text-fuchsia-700">€{Number(price).toFixed(2)} ea.</span>}</p>
+                                <p className="truncate text-[11px] text-black/45">{code}{SHOW_CATALOGUE_PRICES && price != null && <span className="ml-2 text-fuchsia-700">€{Number(price).toFixed(2)} ea.</span>}</p>
                               </div>
                               <div className="flex items-center gap-1">
                                 <button
@@ -5788,7 +5801,7 @@ function FullCataloguePage() {
                                     className="inline-flex items-center gap-1 rounded-lg border border-fuchsia-300/60 bg-fuchsia-50 px-2 py-1 text-[11px] font-semibold text-fuchsia-700 transition hover:bg-fuchsia-100"
                                   >
                                     <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" /></svg>
-                                    {u.label}{price != null && <span className="text-black/40">€{price.toFixed(2)}</span>}
+                                    {u.label}{SHOW_CATALOGUE_PRICES && price != null && <span className="text-black/40">€{price.toFixed(2)}</span>}
                                   </button>
                                 )
                               })}
@@ -5824,7 +5837,7 @@ function FullCataloguePage() {
                       {showBasketDetail ? 'Hide' : 'View'}
                     </button>
                     <a
-                      href="https://shop.gelitup.com"
+                      href="https://shop.gelitup.com/pages/ourproducts"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
@@ -6019,7 +6032,7 @@ function FullCataloguePage() {
                           <p className="truncate text-[10px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                           <p className="line-clamp-2 text-[11px] font-semibold uppercase leading-tight tracking-[0.02em] text-black">{item.name}</p>
                           <p className="mt-1 truncate text-[10px] text-fuchsia-600">{formatSubcategoryDisplayName(item.subcategory, item.category)}</p>
-                          {itemPrice != null && (
+                          {SHOW_CATALOGUE_PRICES && itemPrice != null && (
                             itemDiscounted ? (
                               <p className="mt-1 flex items-baseline gap-1">
                                 <span className="text-[10px] font-medium text-black/40 line-through">€{Number(itemListPrice).toFixed(2)}</span>
@@ -6175,7 +6188,6 @@ function FullCataloguePage() {
                           const price = lookupCataloguePrice(item.name, itemCode)
                           const listPrice = resolveCatalogueListPrice(item.name, itemCode)
                           const isDiscounted = isCatalogueDiscountActive() && price != null && listPrice != null && price < listPrice
-                          const inCart = (quickCart[itemKey] || 0) > 0
                           return (
                             <article key={idx} className="flex flex-col overflow-hidden rounded-[14px] border border-[#4A4A4A]/30 bg-[#E8E8E8] transition duration-300 md:hover:scale-[1.03] md:hover:border-fuchsia-500/70 md:hover:shadow-[0_0_0_2px_rgba(212,55,144,0.24)]" data-catalogue-item>
                               <div className="relative flex h-44 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-white p-2 sm:h-52" title="Click to enlarge" onClick={() => setLightboxUrl(item.imageUrl)}>
@@ -6194,7 +6206,7 @@ function FullCataloguePage() {
                               <div className="flex flex-1 flex-col border-t border-black/10 px-2.5 py-2">
                                 <p className="break-words text-[11px] font-light uppercase tracking-[0.08em] text-black/45">{itemCode}</p>
                                 <p className="break-words text-xs font-semibold uppercase tracking-[0.02em] text-black">{item.name}</p>
-                                {price != null ? (
+                                {SHOW_CATALOGUE_PRICES && price != null ? (
                                   isDiscounted ? (
                                     <p className="mt-1.5 flex items-baseline gap-1.5">
                                       <span className="text-[11px] font-medium text-black/40 line-through">€{Number(listPrice).toFixed(2)}</span>
@@ -6203,16 +6215,16 @@ function FullCataloguePage() {
                                   ) : (
                                     <p className="mt-1.5 text-xs font-bold text-fuchsia-700">€{Number(price).toFixed(2)}</p>
                                   )
-                                ) : (
-                                  <p className="mt-1.5 text-xs font-bold text-fuchsia-700">Price on request</p>
-                                )}
+                                ) : null}
                                 <div className="mt-auto pt-3">
-                                  <div className="flex items-center gap-2">
-                                    <button onClick={() => { const prev = quickCart[itemKey] || 0; if (prev > 1) setQuickCart(c => ({ ...c, [itemKey]: prev - 1 })); else if (prev === 1) setQuickCart(c => { const n = { ...c }; delete n[itemKey]; return n }) }} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border text-sm transition duration-300 ${inCart ? 'border-fuchsia-600 text-fuchsia-600 hover:bg-fuchsia-50' : 'border-black/20 text-black/40'}`} disabled={!inCart}>−</button>
-                                    <span className={`w-8 text-center text-xs font-bold ${inCart ? 'text-fuchsia-700' : 'text-black/40'}`}>{quickCart[itemKey] || 0}</span>
-                                    <button onClick={() => addQuickItem(itemKey)} className={`flex h-8 w-8 items-center justify-center rounded-[10px] border border-fuchsia-600 text-sm text-fuchsia-600 transition duration-300 hover:bg-fuchsia-50 ${pulseItemKey === itemKey ? 'lux-pulse' : ''}`}>+</button>
-                                    {inCart && <span className="ml-auto text-[10px] font-semibold text-fuchsia-700">in basket</span>}
-                                  </div>
+                                  <a
+                                    href={buildShopSearchUrl(item.name)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-fuchsia-600 py-2 text-xs font-semibold text-white transition hover:bg-fuchsia-500"
+                                  >
+                                    Buy Now!
+                                  </a>
                                 </div>
                               </div>
                             </article>
@@ -6835,7 +6847,7 @@ function FullCataloguePage() {
                       <div key={key} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-xs font-semibold uppercase tracking-[0.02em] text-black">{name}</p>
-                          <p className="truncate text-[11px] text-black/45">{code}{price != null && <span className="ml-2 text-fuchsia-700">€{Number(price).toFixed(2)} ea.</span>}</p>
+                          <p className="truncate text-[11px] text-black/45">{code}{SHOW_CATALOGUE_PRICES && price != null && <span className="ml-2 text-fuchsia-700">€{Number(price).toFixed(2)} ea.</span>}</p>
                         </div>
                         <div className="flex items-center gap-1">
                           <button
@@ -6898,7 +6910,7 @@ function FullCataloguePage() {
                 {showBasketDetail ? 'Hide' : 'View'}
               </button>
               <a
-                href="https://shop.gelitup.com"
+                href="https://shop.gelitup.com/pages/ourproducts"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-fuchsia-600 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-fuchsia-500"
@@ -7200,7 +7212,6 @@ function LangSwitcher() {
 }
 
 const navItems = [
-  { to: '/starter-kits', label: 'Starter Kits' },
   { to: '/studio-one', label: 'Studio One', highlight: true },
   { to: '/about-us', label: 'About us' },
   { to: '/blog', label: 'Blog' },
@@ -9425,7 +9436,7 @@ function BuyerRegister() {
           const cartObj = savedCart ? JSON.parse(savedCart) : {}
           const hasItems = Object.values(cartObj).some(q => q > 0)
           if (hasItems) {
-            window.location.href = 'https://shop.gelitup.com'
+            window.location.href = 'https://shop.gelitup.com/pages/ourproducts'
           } else {
             navigate('/full-catalogue')
           }
@@ -12205,9 +12216,18 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       if (!isMounted) return
 
       setClientProfile((current) => {
-        const merged = { ...current }
+        const authedEmail = String(data?.user?.email || '').trim().toLowerCase()
+        const cachedEmail = String(current.contactEmail || '').trim().toLowerCase()
+        // A different account signed in on this device — the cached profile
+        // belongs to someone else, so start clean instead of leaking their
+        // billing/shipping/VAT details into the new user's session.
+        const base = (authedEmail && cachedEmail && authedEmail !== cachedEmail)
+          ? { ...defaultClientProfile }
+          : { ...current }
+
+        const merged = { ...base }
         Object.entries(metaProfile).forEach(([key, value]) => {
-          const currentValue = current[key]
+          const currentValue = base[key]
           const currentEmpty = typeof currentValue === 'string'
             ? !currentValue.trim()
             : currentValue == null
@@ -12675,7 +12695,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   const clientValidation = useMemo(() => {
     const vatPrefixError = validateVatPrefix(clientProfile.vatNumber, clientProfile.invoiceCountry)
-    const vatNotVerified = String(clientProfile.vatNumber || '').trim().length >= 4 && !vatPrefixError && (!viesResult || !viesResult.valid)
+    const vatNotVerified = isEuCountry(clientProfile.invoiceCountry) && String(clientProfile.vatNumber || '').trim().length >= 4 && !vatPrefixError && (!viesResult || !viesResult.valid)
     const missing = {
       customerType: !String(clientProfile.customerType || '').trim(),
       shippingType: !String(clientProfile.shippingType || '').trim(),
@@ -15711,16 +15731,18 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <label className="text-xs text-slate-700">VAT Number <span className="text-rose-600">*</span>
               <div className="mt-1 flex gap-1.5">
                 <input type="text" value={clientProfile.vatNumber} onChange={(e) => setClientField('vatNumber', e.target.value.toUpperCase())} className={`flex-1 rounded-lg border px-3 py-2 text-xs text-slate-700 ${hasClientFieldError('vatNumber') ? 'border-rose-400 bg-rose-50' : 'border-slate-300 bg-white'}`} placeholder={COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry] ? `${COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry]}123456789` : 'VAT / Tax ID'} />
-                <button type="button" disabled={viesLoading || !clientProfile.vatNumber.trim()} onClick={() => verifyVat(clientProfile.vatNumber)} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40">
-                  {viesLoading ? 'Checking…' : 'Verify'}
-                </button>
+                {isEuCountry(clientProfile.invoiceCountry) && (
+                  <button type="button" disabled={viesLoading || !clientProfile.vatNumber.trim()} onClick={() => verifyVat(clientProfile.vatNumber)} className="shrink-0 rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40">
+                    {viesLoading ? 'Checking…' : 'Verify'}
+                  </button>
+                )}
               </div>
               {COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry] && (
                 <span className="mt-0.5 block text-[10px] text-slate-400">Must start with <strong>{COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry]}</strong> for {clientProfile.invoiceCountry}</span>
               )}
               {clientValidation.vatPrefixError && <span className="mt-0.5 block text-[10px] text-rose-600">{clientValidation.vatPrefixError}</span>}
-              {viesError && <span className="mt-0.5 block text-[10px] text-rose-600">{viesError}</span>}
-              {viesResult?.valid && (
+              {isEuCountry(clientProfile.invoiceCountry) && viesError && <span className="mt-0.5 block text-[10px] text-rose-600">{viesError}</span>}
+              {isEuCountry(clientProfile.invoiceCountry) && viesResult?.valid && (
                 <div className="mt-1 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1.5">
                   <p className="text-[10px] font-semibold text-emerald-700">✓ Valid — verified via EU VIES</p>
                   {viesResult.name && <p className="text-[10px] text-emerald-600">{viesResult.name}</p>}
@@ -21422,15 +21444,16 @@ function App() {
           <Route path="/distributor-packages" element={<DistributorPackagesPage />} />
           <Route path="/for-academies" element={<ForAcademiesPage />} />
           <Route path="/full-catalogue" element={<FullCataloguePage />} />
-          <Route path="/checkout" element={<ExternalRedirect to="https://shop.gelitup.com" />} />
+          <Route path="/checkout" element={<ExternalRedirect to="https://shop.gelitup.com/pages/ourproducts" />} />
           <Route path="/studio-one" element={<PrivateLabelPage />} />
           <Route path="/private-label" element={<Navigate to="/studio-one" replace />} />
           <Route path="/studio-one/checkout" element={<StudioOneCheckoutPage />} />
-          <Route path="/starter-kits" element={<StarterKits discount={{ active: isCatalogueDiscountActive(), pct: CATALOGUE_DISCOUNT_PCT }} onAddKit={handleAddKit} />} />
-          <Route path="/starter-kits/:kitId" element={<StarterKits discount={{ active: isCatalogueDiscountActive(), pct: CATALOGUE_DISCOUNT_PCT }} onAddKit={handleAddKit} />} />
-          <Route path="/catalogue/starterkits" element={<Navigate to="/starter-kits" replace />} />
-          <Route path="/starterkits" element={<Navigate to="/starter-kits" replace />} />
-          <Route path="/kits" element={<Navigate to="/starter-kits" replace />} />
+          {/* Starter Kits page disabled on gelitup.com — already available on shop.gelitup.com. Routes kept (redirected) for easy re-enable later. */}
+          <Route path="/starter-kits" element={<ExternalRedirect to="https://shop.gelitup.com/pages/ourproducts" />} />
+          <Route path="/starter-kits/:kitId" element={<ExternalRedirect to="https://shop.gelitup.com/pages/ourproducts" />} />
+          <Route path="/catalogue/starterkits" element={<ExternalRedirect to="https://shop.gelitup.com/pages/ourproducts" />} />
+          <Route path="/starterkits" element={<ExternalRedirect to="https://shop.gelitup.com/pages/ourproducts" />} />
+          <Route path="/kits" element={<ExternalRedirect to="https://shop.gelitup.com/pages/ourproducts" />} />
           <Route path="/admin/missing-images" element={isAdminSession ? <MissingImagesReport /> : <Navigate to="/portal/admin-login" replace />} />
           <Route path="/catalogue" element={<Navigate to="/full-catalogue" replace />} />
           {/* Vanity routes for social media & advertising — each lands on the right catalogue section */}
@@ -21548,7 +21571,7 @@ function App() {
                 <Route path="/portal/sign-in" element={<Navigate to="/portal/login" replace />} />
                 <Route path="/portal-admin-login" element={<Navigate to="/portal/admin-login" replace />} />
                 <Route path="/portal/register" element={<BuyerRegister />} />
-                <Route path="/portal/buy" element={<ExternalRedirect to="https://shop.gelitup.com" />} />
+                <Route path="/portal/buy" element={<ExternalRedirect to="https://shop.gelitup.com/pages/ourproducts" />} />
                 <Route path="/portal/forgot-password" element={<PortalForgotPassword />} />
                 <Route
                   path="/portal/dashboard/:module"
