@@ -118,26 +118,7 @@ export default function HeroCTA({ showTrialPack = false }) {
               letterSpacing: '0.02em',
             }}
           >
-            Shop the Catalogue →
-          </Link>
-
-          <Link
-            to="/distributor-packages"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              background: 'transparent',
-              color: '#fff',
-              fontSize: '14px',
-              fontWeight: 600,
-              padding: '11px 20px',
-              borderRadius: '6px',
-              border: '1px solid rgba(255,255,255,0.35)',
-              textDecoration: 'none',
-            }}
-          >
-            Get B2B Pricing
+            Shop Now! →
           </Link>
         </div>
       )}
