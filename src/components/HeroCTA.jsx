@@ -102,8 +102,10 @@ export default function HeroCTA({ showTrialPack = false }) {
         </div>
       ) : (
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <Link
-            to="/full-catalogue"
+          <a
+            href="https://shop.gelitup.com/pages/ourproducts"
+            target="_blank"
+            rel="noreferrer"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -118,8 +120,8 @@ export default function HeroCTA({ showTrialPack = false }) {
               letterSpacing: '0.02em',
             }}
           >
-            Shop the Catalogue →
-          </Link>
+            SHOP NOW!
+          </a>
 
           <Link
             to="/distributor-packages"

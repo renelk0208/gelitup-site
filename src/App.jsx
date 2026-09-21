@@ -863,6 +863,8 @@ const COUNTRY_DIAL_CODES = {
 
 const SHOW_SERVICE_FLOW_SUBCATEGORY_MENU = false
 const CATALOGUE_RESULTS_ANCHOR_ID = 'catalogue-results-anchor'
+const SHOPIFY_OUR_PRODUCTS_URL = 'https://shop.gelitup.com/pages/ourproducts'
+const HIDE_CATALOGUE_PRODUCTS = true
 
 function withCountryDialCode(phoneValue = '', country = '') {
   const dialCode = COUNTRY_DIAL_CODES[country] || ''
@@ -5267,8 +5269,6 @@ function FullCataloguePage() {
               const isSGP = normalizeCatalogueToken(subcategory) === 'SOLID GEL POLISH'
               const subSlug = subcategory.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
               const vanityPath = SUBCAT_VANITY_PATH[subcategory.toUpperCase()]
-              const shareUrl = vanityPath ? `https://gelitup.com${vanityPath}` : `https://gelitup.com/full-catalogue?subcategory=${subSlug}`
-              const isCopied = copiedSubcat === subcategory
               return (
                 <button
                   key={`subcategory-${subcategory}`}
@@ -5292,26 +5292,7 @@ function FullCataloguePage() {
                   {isSGP && !isActive && (
                     <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full ring-2 ring-white" style={{ background: accent.bg }} />
                   )}
-                  <span className="flex items-center gap-1.5">
-                    {formatSubcategoryDisplayName(subcategory, activeCategory)}
-                    <span
-                      role="button"
-                      aria-label={isCopied ? 'Copied!' : 'Copy link'}
-                      title={isCopied ? 'Copied!' : shareUrl}
-                      className="inline-flex items-center opacity-30 group-hover:opacity-80 hover:!opacity-100 transition-opacity"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        navigator.clipboard.writeText(shareUrl).catch(() => {})
-                        setCopiedSubcat(subcategory)
-                        setTimeout(() => setCopiedSubcat(''), 2000)
-                      }}
-                    >
-                      {isCopied
-                        ? <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3 w-3 text-green-600"><path fillRule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clipRule="evenodd" /></svg>
-                        : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3 w-3"><path fillRule="evenodd" d="M11.986 3H12a2 2 0 0 1 2 2v6a2 2 0 0 1-1.5 1.937V13.5A1.5 1.5 0 0 1 11 15H3.5A1.5 1.5 0 0 1 2 13.5v-9A1.5 1.5 0 0 1 3.5 3h1.563A2 2 0 0 1 7 1.5h2a2 2 0 0 1 1.986 1.5Zm-7.48 2.25a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Zm0 2.5a.5.5 0 0 0 0 1h6.988a.5.5 0 0 0 0-1H4.506Z" clipRule="evenodd" /></svg>
-                      }
-                    </span>
-                  </span>
+                  {formatSubcategoryDisplayName(subcategory, activeCategory)}
                 </button>
               )
             })
@@ -5954,46 +5935,54 @@ function FullCataloguePage() {
         <>
           <div id={CATALOGUE_RESULTS_ANCHOR_ID} className="scroll-mt-28" />
 
-          {/* GLOBAL SEARCH BAR */}
-          <div className="mx-auto max-w-6xl px-4 sm:px-8 py-4">
-            <div className="relative flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="pointer-events-none absolute left-3 h-4 w-4 text-black/40">
-                <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clipRule="evenodd" />
-              </svg>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); if (activeCategory) { setActiveCategory(''); setActiveSubcategory(''); } }}
-                placeholder="Search all products by name, code or category..."
-                className="w-full rounded-[14px] border border-[#4A4A4A]/35 bg-white py-2.5 pl-9 pr-10 text-base text-black outline-none ring-fuchsia-500/25 transition focus:border-fuchsia-400 focus:ring"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 flex h-5 w-5 items-center justify-center rounded-full bg-black/15 text-black/60 transition hover:bg-black/25"
-                  aria-label="Clear search"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3 w-3"><path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" /></svg>
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* REGISTER CTA BANNER — visible to logged-out visitors */}
-          {!isLoggedIn && (
-            <div className="mx-auto max-w-6xl px-4 sm:px-8 pb-2">
-              <div className="flex items-center justify-between gap-4 rounded-xl bg-[#D43790]/10 border border-[#D43790]/30 px-5 py-3">
-                <div>
-                  <p className="text-sm font-bold text-[#D43790]">You're viewing B2B wholesale prices.</p>
-                  <p className="text-xs text-slate-600">Register free to start ordering.</p>
+          {!HIDE_CATALOGUE_PRODUCTS && (
+            <>
+              {/* GLOBAL SEARCH BAR */}
+              <div className="mx-auto max-w-6xl px-4 sm:px-8 py-4">
+                <div className="relative flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="pointer-events-none absolute left-3 h-4 w-4 text-black/40">
+                    <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clipRule="evenodd" />
+                  </svg>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => { setSearchQuery(e.target.value); if (activeCategory) { setActiveCategory(''); setActiveSubcategory(''); } }}
+                    placeholder="Search all products by name, code or category..."
+                    className="w-full rounded-[14px] border border-[#4A4A4A]/35 bg-white py-2.5 pl-9 pr-10 text-base text-black outline-none ring-fuchsia-500/25 transition focus:border-fuchsia-400 focus:ring"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3 flex h-5 w-5 items-center justify-center rounded-full bg-black/15 text-black/60 transition hover:bg-black/25"
+                      aria-label="Clear search"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3 w-3"><path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" /></svg>
+                    </button>
+                  )}
                 </div>
-                <NavLink to="/portal/register" className="shrink-0 rounded-lg bg-[#D43790] px-4 py-2 text-sm font-bold text-white hover:bg-[#BF3182] transition">Register free →</NavLink>
               </div>
-            </div>
+            </>
+          )}
+
+          {!HIDE_CATALOGUE_PRODUCTS && (
+            <>
+              {/* REGISTER CTA BANNER — visible to logged-out visitors */}
+              {!isLoggedIn && (
+                <div className="mx-auto max-w-6xl px-4 sm:px-8 pb-2">
+                  <div className="flex items-center justify-between gap-4 rounded-xl bg-[#D43790]/10 border border-[#D43790]/30 px-5 py-3">
+                    <div>
+                      <p className="text-sm font-bold text-[#D43790]">You're viewing B2B wholesale prices.</p>
+                      <p className="text-xs text-slate-600">Register free to start ordering.</p>
+                    </div>
+                    <NavLink to="/portal/register" className="shrink-0 rounded-lg bg-[#D43790] px-4 py-2 text-sm font-bold text-white hover:bg-[#BF3182] transition">Register free →</NavLink>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {/* GLOBAL SEARCH RESULTS */}
-          {searchQuery && !activeCategory && (
+          {!HIDE_CATALOGUE_PRODUCTS && searchQuery && !activeCategory && (
             <div className="mx-auto max-w-6xl px-4 sm:px-8 pb-12">
               <p className="mb-4 text-xs uppercase tracking-[0.1em] text-black/50">
                 {globalSearchResults.length === 0 ? 'No results' : `${globalSearchResults.length} result${globalSearchResults.length === 1 ? '' : 's'}`} for <span className="font-semibold text-black/70">&ldquo;{searchQuery}&rdquo;</span>
