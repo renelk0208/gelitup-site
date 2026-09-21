@@ -14970,7 +14970,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         .from(ordersTable)
         .update({
           customer_email: editingOrder.email || null,
-          registration_id: editingOrder.registrationId || null,
           distributor_tier: resolvedEditingTier,
           consignee_name: resolvedConsigneeName,
           consignee_phone: resolvedConsigneePhone,
