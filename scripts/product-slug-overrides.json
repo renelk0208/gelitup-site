@@ -1,0 +1,4 @@
+{
+  "_comment": "Pin a product slug here when its name changes. Keys are canonical IDs such as solid-gel-polish:1907. Pinned slugs preserve existing URLs.",
+  "overrides": {}
+}

@@ -1,0 +1,14 @@
+
+≡ƒöÄ Running smoke checks against http://localhost:5173
+
+Γä╣∩╕Å VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY not found in environment for this script run.
+   Frontend runtime may still be configured in deployed environment variables.
+Γ¥î Homepage: request failed for http://localhost:5173/ (fetch failed)
+Γ¥î Client login page: request failed for http://localhost:5173/portal/login (fetch failed)
+Γ¥î Admin login page: request failed for http://localhost:5173/portal/admin-login (fetch failed)
+Γ¥î Admin forgot password page: request failed for http://localhost:5173/portal/forgot-password?admin=1 (fetch failed)
+Γ¥î Registration page: request failed for http://localhost:5173/become-distributor (fetch failed)
+Γä╣∩╕Å Skipping DB schema checks (set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY to enable).
+
+≡ƒÜ½ Smoke checks failed. Do not deploy until fixed.
+

@@ -1,0 +1,152 @@
+{
+  "premium_builder_gels": {
+    "total": 10,
+    "no_image": [],
+    "no_price": [
+      {
+        "title": "Premium Builder Gel Nude II 40gr -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Premium Builder Gel Milky 40gr -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Premium Builder Gel Clear 40gr -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Premium Builder Gel Cover 40gr -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Premium Builder Gel Pearly Pink 40gr -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Premium Builder Gel Nude 40gr -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Premium Builder Gel White 40gr -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Premium Builder Gel Blush 40gr -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Premium Builder Gel Pearly Nude 40gr -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Premium Builder Gel Pink 40gr -HTF",
+        "sku": ""
+      }
+    ],
+    "issues": []
+  },
+  "brush_on_builder": {
+    "total": 20,
+    "duplicates": [
+      {
+        "name": "Brush on Builder Gel Purple 15ml -HTF",
+        "count": 2,
+        "products": [
+          {
+            "sku": null,
+            "handle": "brush-on-builder-purple-15ml-htf"
+          },
+          {
+            "sku": null,
+            "handle": "brush-on-builder-gel-purple-15ml-htf"
+          }
+        ]
+      }
+    ],
+    "no_image": [],
+    "no_price": [
+      {
+        "title": "Brush on Builder Gel Milky Glitter 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Cover 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Pink 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Dusty Shimmer 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Rose Glitter 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Magenta Glitter 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Blush Pink 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Clear 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Sky Sprinkle 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Milky 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Blush Sorbet 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Salmon Glitter 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Glittery Pink 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Soft Pink 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Lilac 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Purple 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Creamy 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Berry Stardust 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Purple 15ml -HTF",
+        "sku": ""
+      },
+      {
+        "title": "Brush on Builder Gel Nude 15ml -HTF",
+        "sku": ""
+      }
+    ],
+    "issues": []
+  }
+}

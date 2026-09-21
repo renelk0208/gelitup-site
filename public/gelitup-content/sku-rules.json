@@ -1,0 +1,31 @@
+{
+  "generatedAt": "2026-02-22T00:00:00.000Z",
+  "source": "b2b-launch-catalog-2.0",
+  "baseSystemSkus": [
+    "SUPERBOND",
+    "5IN1_CLR",
+    "5IN1_MPK",
+    "5IN1_MWH",
+    "5IN1_SNU",
+    "5-IN-1 SUPERIOR BASE COAT CLEAR",
+    "5-IN-1 SUPERIOR BASE COAT MILKY PINK",
+    "5-IN-1 SUPERIOR BASE COAT MILKY WHITE",
+    "5-IN-1 SUPERIOR BASE COAT SOFT NUDE",
+    "GIUP-MNT-SB01",
+    "GIUP-MNT-5C01"
+  ],
+  "colorSkus": [
+    "01",
+    "102",
+    "09",
+    "08",
+    "010",
+    "120",
+    "051A",
+    "1803",
+    "015",
+    "2113J",
+    "2026",
+    "2037"
+  ]
+}

@@ -1,0 +1,415 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;800;900&display=swap');
+
+@font-face {
+  font-family: 'PF Futura Neu';
+  src:
+    local('PF Futura Neu'),
+    local('PFFuturaNeu'),
+    url('/fonts/PFFUTURANEU-BOOK.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+  --brand-pink: #D43790;
+  --text-main: #1A1A1A;
+  --accent-dark-grey: #4A4A4A;
+  --accent-light-grey: #E8E8E8;
+  --lux-black: #1A1A1A;
+  --lux-white: #FFFFFF;
+  --lux-gallery: #F8F8F6;
+  --lux-fuchsia: #D43790;
+}
+
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-width: 320px;
+  background-color: var(--lux-gallery);
+  color: var(--lux-black);
+  min-height: 100vh;
+  font-family: 'Montserrat', 'Inter', 'PF Futura Neu', 'Futura PT', 'Futura', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-weight: 400;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+button, [role="button"], a, input, select, textarea {
+  touch-action: manipulation;
+}
+
+.lux-theme {
+  color: var(--text-main);
+}
+
+.lux-theme .bg-fuchsia-600 {
+  background-color: var(--brand-pink) !important;
+}
+
+.lux-theme .text-fuchsia-600,
+.lux-theme .text-fuchsia-300,
+.lux-theme .text-fuchsia-400 {
+  color: var(--brand-pink) !important;
+}
+
+.lux-theme .border-fuchsia-600,
+.lux-theme .border-fuchsia-500,
+.lux-theme .border-fuchsia-300,
+.lux-theme .border-fuchsia-200 {
+  border-color: var(--brand-pink) !important;
+}
+
+.lux-theme .hover\:bg-fuchsia-500:hover {
+  background-color: #BF3182 !important;
+}
+
+.lux-theme button[class*='border-slate-300'],
+.lux-theme a[class*='border-slate-300'] {
+  background-color: var(--accent-light-grey);
+  border-color: var(--accent-light-grey);
+  color: var(--text-main);
+}
+
+.lux-theme button[class*='border-slate-300']:hover,
+.lux-theme a[class*='border-slate-300']:hover {
+  background-color: #DEDEDE;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 800;
+  color: var(--lux-black);
+  font-family: 'Montserrat', 'Inter', 'PF Futura Neu', 'Futura PT', 'Futura', 'Avenir Next', 'Segoe UI', sans-serif;
+}
+
+h1,
+h2 {
+  color: #1A1A1A;
+}
+
+.heading-on-dark {
+  color: #FFFFFF !important;
+}
+
+.heading-on-light {
+  color: #1A1A1A !important;
+}
+
+/* CTA button colour overrides — applied with !important so lux-theme cannot interfere */
+.btn-cta-dark {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+.btn-cta-rose {
+  background-color: #d4185a !important;
+  color: #ffffff !important;
+}
+
+.btn-cta-ghost-white {
+  background-color: transparent !important;
+  border: 1px solid rgba(255,255,255,0.25) !important;
+  color: #ffffff !important;
+}
+
+.hero-copy-shadow {
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+}
+
+/* Force Elfsight Instagram widget text to be visible on the dark strip */
+[class*="elfsight-app-"] h1,
+[class*="elfsight-app-"] h2,
+[class*="elfsight-app-"] h3,
+[class*="elfsight-app-"] h4,
+[class*="elfsight-app-"] p,
+[class*="elfsight-app-"] span,
+[class*="elfsight-app-"] a {
+  color: #ffffff !important;
+}
+
+.lux-theme .portal-luxe {
+  font-family: 'Montserrat', 'Inter', 'PF Futura Neu', 'Futura PT', 'Futura', 'Avenir Next', 'Segoe UI', sans-serif;
+  color: #1A1A1A;
+}
+
+.lux-theme .portal-luxe [class*='text-slate-900'],
+.lux-theme .portal-luxe [class*='text-slate-800'],
+.lux-theme .portal-luxe [class*='text-slate-700'] {
+  color: #1A1A1A !important;
+}
+
+.lux-theme .portal-luxe [class*='text-slate-600'],
+.lux-theme .portal-luxe [class*='text-slate-500'],
+.lux-theme .portal-luxe [class*='text-slate-400'],
+.lux-theme .portal-luxe [class*='text-slate-300'] {
+  color: #4A4A4A !important;
+}
+
+.lux-theme .portal-luxe [class*='border-slate-200'],
+.lux-theme .portal-luxe [class*='border-slate-300'],
+.lux-theme .portal-luxe [class*='border-slate-400'] {
+  border-color: rgba(74, 74, 74, 0.35) !important;
+}
+
+.lux-theme .portal-luxe [class*='bg-slate-50'],
+.lux-theme .portal-luxe [class*='bg-slate-100'] {
+  background-color: #E8E8E8 !important;
+}
+
+.lux-theme .portal-luxe [class*='bg-slate-900'] {
+  background-color: #1A1A1A !important;
+}
+
+.lux-theme .portal-luxe button[class*='bg-slate-900'],
+.lux-theme .portal-luxe a[class*='bg-slate-900'] {
+  background-color: #D43790 !important;
+  color: #FFFFFF !important;
+}
+
+.lux-theme .portal-luxe button[class*='bg-slate-900']:hover,
+.lux-theme .portal-luxe a[class*='bg-slate-900']:hover {
+  background-color: #BF3182 !important;
+}
+
+.lux-theme .portal-luxe input[class*='border-slate-300'],
+.lux-theme .portal-luxe select[class*='border-slate-300'],
+.lux-theme .portal-luxe textarea[class*='border-slate-300'] {
+  border-color: rgba(74, 74, 74, 0.4) !important;
+  color: #1A1A1A !important;
+}
+
+.lux-theme .portal-luxe input[class*='ring-slate-900'],
+.lux-theme .portal-luxe select[class*='ring-slate-900'],
+.lux-theme .portal-luxe textarea[class*='ring-slate-900'] {
+  --tw-ring-color: rgba(212, 55, 144, 0.3) !important;
+}
+
+.lux-theme [class*='bg-slate-900'],
+.lux-theme [class*='bg-slate-950'] {
+  background-color: #1A1A1A !important;
+}
+
+.lux-theme [class*='bg-slate-800'],
+.lux-theme [class*='bg-slate-700'] {
+  background-color: #4A4A4A !important;
+}
+
+.lux-theme [class*='bg-slate-100'],
+.lux-theme [class*='bg-slate-50'],
+.lux-theme [class*='bg-slate-200'] {
+  background-color: #E8E8E8 !important;
+}
+
+.lux-theme [class*='from-slate-900'],
+.lux-theme [class*='from-slate-950'] {
+  --tw-gradient-from: #1A1A1A var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(26 26 26 / 0) var(--tw-gradient-to-position) !important;
+}
+
+.lux-theme [class*='to-slate-900'],
+.lux-theme [class*='to-slate-950'] {
+  --tw-gradient-to: #1A1A1A var(--tw-gradient-to-position) !important;
+}
+
+.lux-theme [class*='from-slate-700'],
+.lux-theme [class*='from-slate-800'] {
+  --tw-gradient-from: #4A4A4A var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(74 74 74 / 0) var(--tw-gradient-to-position) !important;
+}
+
+.lux-theme [class*='to-slate-700'],
+.lux-theme [class*='to-slate-800'] {
+  --tw-gradient-to: #4A4A4A var(--tw-gradient-to-position) !important;
+}
+
+.lux-theme [class*='text-slate-900'],
+.lux-theme [class*='text-slate-800'],
+.lux-theme [class*='text-slate-700'],
+.lux-theme [class*='text-slate-600'],
+.lux-theme [class*='text-slate-500'] {
+  color: #1A1A1A !important;
+}
+
+.lux-theme [class*='text-slate-400'],
+.lux-theme [class*='text-slate-300'],
+.lux-theme [class*='text-slate-200'],
+.lux-theme [class*='text-slate-100'] {
+  color: #FFFFFF !important;
+}
+
+.lux-theme [class*='border-slate-900'],
+.lux-theme [class*='border-slate-800'],
+.lux-theme [class*='border-slate-700'] {
+  border-color: rgba(74, 74, 74, 0.45) !important;
+}
+
+.lux-theme [class*='border-slate-600'],
+.lux-theme [class*='border-slate-500'],
+.lux-theme [class*='border-slate-400'],
+.lux-theme [class*='border-slate-300'],
+.lux-theme [class*='border-slate-200'] {
+  border-color: rgba(74, 74, 74, 0.35) !important;
+}
+
+.lux-theme [class*='bg-blue-'],
+.lux-theme [class*='from-blue-'],
+.lux-theme [class*='to-blue-'] {
+  background-color: #1A1A1A !important;
+}
+
+.lux-theme [class*='text-blue-'] {
+  color: #FFFFFF !important;
+}
+
+.lux-theme [class*='border-blue-'] {
+  border-color: rgba(74, 74, 74, 0.4) !important;
+}
+
+a,
+button,
+input,
+select,
+textarea,
+article {
+  transition: all 0.3s ease;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lux-pulse {
+  animation: luxPulse 0.32s ease;
+}
+
+@keyframes luxPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(212, 55, 144, 0.45);
+  }
+  60% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(212, 55, 144, 0.05);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(212, 55, 144, 0);
+  }
+}
+
+.manifesto-overlay {
+  animation: manifestoOverlayIn 0.24s ease both;
+}
+
+.manifesto-panel {
+  border-radius: 1rem 1rem 0 0;
+  animation: manifestoPanelIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes manifestoOverlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes manifestoPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+@media (max-width: 640px) {
+  body {
+    line-height: 1.35;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: 0.03em;
+  }
+
+  .manifesto-panel {
+    animation: manifestoDrawerUp 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes manifestoDrawerUp {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Free-shipping toast — slides in from the right */
+@keyframes gelitup-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(calc(100% + 1.5rem));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Sticky cart bar — slides up from the bottom on first mount */
+@keyframes gelitup-cart-in {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

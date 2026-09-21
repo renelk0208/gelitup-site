@@ -1,0 +1,49 @@
+{
+  "items": [
+    {
+      "name": "2211 Purple People Eater -HTF",
+      "sku": "2211 Purple People Eater -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2213 Drunken Acorn -HTF",
+      "sku": "2213 Drunken Acorn -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2215 Glass Frog -HTF",
+      "sku": "2215 Glass Frog -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "2218 Simmer Down -HTF",
+      "sku": "2218 Simmer Down -HTF",
+      "price": 7.41
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Purple Serenity -HTF",
+      "sku": "5-in-1 Superior Base 15ml Purple Serenity -HTF",
+      "price": 12.84
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Lemon Serenity -HTF",
+      "sku": "5-in-1 Superior Base 15ml Lemon Serenity -HTF",
+      "price": 12.84
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Mint Serenity -HTF",
+      "sku": "5-in-1 Superior Base 15ml Mint Serenity -HTF",
+      "price": 12.84
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Blue Serenity -HTF",
+      "sku": "5-in-1 Superior Base 15ml Blue Serenity -HTF",
+      "price": 12.84
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Peach Serenity -HTF",
+      "sku": "5-in-1 Superior Base 15ml Peach Serenity -HTF",
+      "price": 12.84
+    }
+  ]
+}

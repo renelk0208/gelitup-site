@@ -1,0 +1,41 @@
+{
+  "title": "Multi-Platform Deduplication Guide",
+  "timestamp": "2026-05-14T07:29:10.596151",
+  "sections": [
+    {
+      "platform": "B2B Price List",
+      "file": "public/gelitup-content/b2b-price-list.json",
+      "issue": "Duplicate SKU entries",
+      "action": "Removed duplicate entries, keeping latest prices",
+      "backup": "public/gelitup-content/b2b-price-list.backup.json"
+    },
+    {
+      "platform": "Product Catalog (CSV)",
+      "file": "products_export_1.csv",
+      "issue": "Products with identical images but missing titles/SKUs",
+      "action": "Identified candidates for manual consolidation",
+      "candidates_file": "product-consolidation-candidates.json",
+      "recommendation": "Review each candidate and either: 1) Assign unique image to product, 2) Remove duplicate product, 3) Fill in missing SKU/Title"
+    },
+    {
+      "platform": "Shopify Catalog",
+      "file": "shopify/sections/gelitup-catalogue.liquid",
+      "issue": "Products with duplicate images will be deduplicated via product map",
+      "action": "Consolidation will happen via product-image-map.json"
+    },
+    {
+      "platform": "Distribution",
+      "file": "public/gelitup-content/b2b-launch-catalog.json",
+      "issue": "Requires manual verification",
+      "action": "Review after other platforms are deduplicated"
+    }
+  ],
+  "next_steps": [
+    "1. Review product-consolidation-candidates.json",
+    "2. For each candidate, assign proper image or consolidate products",
+    "3. Update product-image-map.json with correct mappings",
+    "4. Regenerate meta product feed",
+    "5. Sync all platforms (B2B, Shopify, distribution)",
+    "6. Commit and deploy changes"
+  ]
+}

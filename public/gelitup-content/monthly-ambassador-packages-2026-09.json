@@ -1,0 +1,96 @@
+{
+  "package_name": "Monthly Ambassador Package – September 2026",
+  "package_month": "2026-09",
+  "next_package_date": "2026-10-01",
+  "apply_to": "all_ambassadors",
+  "global_tracking_template": {
+    "carrier": "",
+    "tracking_number": "",
+    "sent_date": "",
+    "notes": "Populate when shipments are generated."
+  },
+  "items": [
+    {
+      "slot": "choice_1",
+      "description": "New Builder Glitter OR New Premium Colour 20gr (choice)",
+      "type": "choice",
+      "options": [
+        {"sku": "NEW_BUILDER_GLITTER", "label": "New Builder Glitter"},
+        {"sku": "NEW_PREMIUM_COLOUR_20GR", "label": "New Premium Colour 20gr"}
+      ],
+      "per_ambassador": true,
+      "instructions": "Ambassador chooses one of the two options; record choice in ambassador-level entry."
+    },
+    {
+      "slot": "ota",
+      "description": "OTA - different pick per ambassador",
+      "type": "single_sku",
+      "per_ambassador": true,
+      "instructions": "Assign a different OTA SKU per ambassador."
+    },
+    {
+      "slot": "winter_colours",
+      "description": "2x Winter colours (from 2026 Winter Collection) - different pick per ambassador",
+      "type": "multi_sku",
+      "quantity": 2,
+      "collection": "2026_Winter",
+      "per_ambassador": true,
+      "instructions": "Select two different SKUs from the 2026 Winter Collection per ambassador."
+    },
+    {
+      "slot": "flash",
+      "description": "Flash - slow-moving stock, different pick per ambassador",
+      "type": "single_sku",
+      "note": "Use slow-moving Flash SKUs to reduce inventory.",
+      "per_ambassador": true
+    },
+    {
+      "slot": "blossom",
+      "description": "Blossom",
+      "type": "single_sku",
+      "per_ambassador": false
+    },
+    {
+      "slot": "shimmer_top",
+      "description": "Shimmer Top - slow-moving stock, different pick per ambassador",
+      "type": "single_sku",
+      "note": "Use slow-moving Shimmer Top SKUs to reduce inventory.",
+      "per_ambassador": true
+    },
+    {
+      "slot": "glitter",
+      "description": "Glitter — slow-moving stock, different pick per ambassador",
+      "type": "single_sku",
+      "note": "Use slow-moving Glitter SKUs to reduce inventory. Also include suggestion field for other slow-moving items to clear.",
+      "per_ambassador": true,
+      "suggestions": []
+    }
+  ],
+  "ambassadors": {
+    "<ambassador_id_or_email>": {
+      "send_package": true,
+      "opt_out": false,
+      "choice_1": "<sku_or_option>",
+      "ota": "<sku>",
+      "winter_colours": ["<sku1>", "<sku2>"],
+      "flash": "<sku>",
+      "blossom": "<sku>",
+      "shimmer_top": "<sku>",
+      "glitter": "<sku>",
+      "suggestions_for_clearance": ["<sku_suggestion_1>", "<sku_suggestion_2>"],
+      "additional_products_requested": [],
+      "tracking": {
+        "carrier": "",
+        "tracking_number": "",
+        "sent_date": ""
+      },
+      "notes": "Ambassador-specific notes or choices"
+    }
+  },
+  "ui_options": {
+    "allow_add_note": true,
+    "add_note_button_label": "Add note",
+    "note_field_placeholder": "If you opt out of receiving the package, list other products you'd like to receive or comments here."
+  },
+  "integration_notes": "This file contains the September 2026 ambassador package definition. To apply, either merge ambassador entries into the system that manages ambassador shipments (DB or API) or use this file as the source for a bulk upload. Do not overwrite existing ambassador metadata unless merging carefully. When ready, provide the filled 'ambassadors' map or allow the logistics team to populate it with final SKUs and tracking details."
+}

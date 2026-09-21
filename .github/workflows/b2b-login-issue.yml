@@ -1,0 +1,94 @@
+name: B2B Login Issue Alert
+
+# Triggered by the notify-admin Netlify function whenever a client
+# hits a login problem on the portal.
+#
+# What this workflow does:
+#   1. Logs full details in the GitHub Actions run summary
+#   2. For unexpected (code) errors: adds a diagnostic comment on the
+#      GitHub Issue and asks Copilot to investigate + propose a fix
+
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: 'Client email address'
+        required: true
+      issue_type:
+        description: 'Issue type (pending_approval | rejected | login_blocked | bad_password | unexpected_error)'
+        required: true
+      issue_label:
+        description: 'Human-readable issue label'
+        required: true
+      message:
+        description: 'Detail message from the portal'
+        required: false
+        default: ''
+      github_issue_url:
+        description: 'URL of the related GitHub Issue (if created)'
+        required: false
+        default: ''
+      github_issue_num:
+        description: 'Number of the related GitHub Issue (if created)'
+        required: false
+        default: ''
+
+jobs:
+  diagnose:
+    name: Diagnose login issue
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Write summary
+        run: |
+          echo "## ⚠️ B2B Login Issue — ${{ inputs.issue_label }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Client email** | \`${{ inputs.email }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Issue type** | \`${{ inputs.issue_type }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Detail** | ${{ inputs.message }} |" >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "${{ inputs.github_issue_url }}" ]; then
+            echo "| **GitHub Issue** | [${{ inputs.github_issue_url }}](${{ inputs.github_issue_url }}) |" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "---" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ inputs.issue_type }}" = "unexpected_error" ]; then
+            echo "> 🐛 **Code bug suspected** — a Copilot diagnostic comment will be posted on the GitHub Issue." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "> ℹ️ Approval/status issue — review the [Admin Dashboard](https://gelitup.com/portal/admin-login) and contact the client." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # For code errors: ask Copilot on the GitHub Issue to investigate and fix
+      - name: Request Copilot fix (unexpected errors only)
+        if: ${{ inputs.issue_type == 'unexpected_error' && inputs.github_issue_num != '' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.NOTIFY_GITHUB_TOKEN }}
+          script: |
+            const issueNumber = parseInt('${{ inputs.github_issue_num }}', 10)
+            if (!issueNumber) { console.log('No issue number — skipping comment'); return }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              issue_number: issueNumber,
+              body: [
+                '### 🤖 Automated Diagnostic Request',
+                '',
+                'This login failure was flagged as a **Technical Error** — a code-level problem in the portal.',
+                '',
+                '**@copilot** Please:',
+                '1. Review `handlePortalLogin` and the surrounding `try/catch` block in `src/App.jsx`',
+                '2. Review the `PortalLogin` component submit handler (the `try { result = await onLogin(...) }` block)',
+                '3. Identify what could cause an unexpected thrown error during login',
+                '4. Propose a fix',
+                '',
+                `Affected client: \`${{ inputs.email }}\``,
+                `Detail: ${{ inputs.message }}`,
+              ].join('\n')
+            })
+            console.log(`Copilot comment posted on issue #${issueNumber}`)

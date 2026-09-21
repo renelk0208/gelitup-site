@@ -1,0 +1,258 @@
+import fs from 'node:fs'
+import path from 'node:path'
+import { PRODUCT_ALIAS_GROUPS } from '../src/data/productAliases.js'
+
+const root = process.cwd()
+const failMessages = []
+const warnMessages = []
+
+function fail(message) {
+  failMessages.push(message)
+}
+
+function warn(message) {
+  warnMessages.push(message)
+}
+
+function readJson(filePath) {
+  const text = fs.readFileSync(filePath, 'utf8')
+  return JSON.parse(text)
+}
+
+function assertRegex(text, regex, message) {
+  if (!regex.test(text)) fail(message)
+}
+
+function assertIncludes(text, needle, message) {
+  if (!text.includes(needle)) fail(message)
+}
+
+function normalizeSkuCode(value) {
+  return String(value || '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim()
+}
+
+function validateSourceInvariants() {
+  const appPath = path.join(root, 'src', 'App.jsx')
+  const appText = fs.readFileSync(appPath, 'utf8')
+
+  assertRegex(
+    appText,
+    /label:\s*'Builder Systems'[\s\S]*?cats:\s*\[[\s\S]*?'BRUSH ON BUILDER'/,
+    "Missing 'BRUSH ON BUILDER' in B2B Builder Systems sidebar group.",
+  )
+
+  assertIncludes(
+    appText,
+    "'BRUSH ON BUILDER': 'BUILDER GEL SYSTEMS'",
+    "Missing BRUSH ON BUILDER -> BUILDER GEL SYSTEMS remap in B2B_CAT_REMAP.",
+  )
+
+  assertIncludes(
+    appText,
+    "'BRUSH ON BUILDER (BIAB)': 'BUILDER GEL SYSTEMS'",
+    "Missing BRUSH ON BUILDER (BIAB) -> BUILDER GEL SYSTEMS remap in B2B_CAT_REMAP.",
+  )
+
+  assertIncludes(
+    appText,
+    "'BIAB': 'BUILDER GEL SYSTEMS'",
+    "Missing BIAB -> BUILDER GEL SYSTEMS remap in B2B_CAT_REMAP.",
+  )
+
+  // Validate the shared alias source itself against the price list so we catch
+  // future drift before it reaches the app or exports.
+  const pricePath = path.join(root, 'public', 'gelitup-content', 'b2b-price-list.json')
+  const pricePayload = readJson(pricePath)
+  const priceItems = Array.isArray(pricePayload?.items) ? pricePayload.items : []
+  const priceTargets = new Set(
+    priceItems.map((item) => normalizeSkuCode(item?.name || item?.sku || '')).filter(Boolean),
+  )
+
+  const aliasGroups = Array.isArray(PRODUCT_ALIAS_GROUPS) ? PRODUCT_ALIAS_GROUPS : []
+  const codeToTargets = new Map()
+
+  for (const group of Array.isArray(aliasGroups) ? aliasGroups : []) {
+    const codes = Array.isArray(group?.codes) ? group.codes : []
+    const target = normalizeSkuCode(group?.target || '')
+    if (!codes.length || !target) continue
+
+    if (/BRUSH ON BUILDER/i.test(group.target || '') && !priceTargets.has(target)) {
+      fail(`Brush On Builder alias target missing from price list: ${group.target}`)
+    }
+
+    for (const code of codes) {
+      const normalizedCode = normalizeSkuCode(code)
+      if (!normalizedCode) continue
+      const existingTargets = codeToTargets.get(normalizedCode) || new Set()
+      existingTargets.add(target)
+      codeToTargets.set(normalizedCode, existingTargets)
+    }
+  }
+
+  for (const [code, targets] of codeToTargets.entries()) {
+    if (targets.size > 1) {
+      fail(`Alias code maps to multiple targets in src/data/productAliases.js: ${code} -> ${[...targets].join(', ')}`)
+    }
+  }
+}
+
+function extractTopCategoryFromImagePath(imagePath) {
+  const marker = '/gelitup-content/product-images/'
+  const idx = imagePath.indexOf(marker)
+  if (idx === -1) return ''
+  const tail = imagePath.slice(idx + marker.length)
+  return (tail.split('/').filter(Boolean)[0] || '').trim()
+}
+
+function validateImageMapInvariants() {
+  const mapPath = path.join(root, 'public', 'gelitup-content', 'product-image-map.json')
+  const payload = readJson(mapPath)
+
+  const allowedTopCategories = new Set([
+    'COLORS',
+    'BASES',
+    'TOPS',
+    'BUILDER GEL',
+    'BUILDER GEL SYSTEMS',
+    'MULTIMIX',
+    'ACRYLIC',
+    'CREME DE LA CREME',
+    'BY THE OCEAN',
+    'COBWEB',
+    'LINE-IT-UP',
+    'NAIL PREPARATIONS',
+    'LIQUIDS',
+    'TOOLS',
+    'EQUIPMENT',
+    'BRUSHES',
+    'NAIL ART',
+    'CONSUMABLES',
+    'NAIL HAND & FOOT CARE',
+    '2026 NEW!',
+    'PACKAGES',
+  ])
+
+  const discoveredTopCategories = new Set()
+  let brushOnBuilderPathCount = 0
+  const brushCanonicalRoot = '/GELITUP-CONTENT/PRODUCT-IMAGES/BUILDER GEL/BRUSH ON BUILDER/'
+
+  // Every image referenced in the map must exist on disk. This catches the
+  // common failure where image folders/files are renamed (or the map is
+  // regenerated/restored) but the map paths drift out of sync — which makes
+  // product tiles silently disappear (the catalogue hides tiles on image error).
+  // The check is CASE-SENSITIVE: Windows/macOS resolve paths case-insensitively,
+  // but Netlify's Linux servers do not, so a casing drift would only 404 in
+  // production. Walking each path segment against the real directory entries
+  // reproduces the Linux behaviour on every OS.
+  const publicDir = path.join(root, 'public')
+  const dirCache = new Map()
+  function readdirCached(dir) {
+    if (!dirCache.has(dir)) {
+      try { dirCache.set(dir, new Set(fs.readdirSync(dir))) }
+      catch { dirCache.set(dir, null) }
+    }
+    return dirCache.get(dir)
+  }
+  function existsCaseSensitive(relative) {
+    const parts = relative.replace(/^\//, '').split('/').filter(Boolean)
+    let dir = publicDir
+    for (const part of parts) {
+      const entries = readdirCached(dir)
+      if (!entries || !entries.has(part)) return false
+      dir = path.join(dir, part)
+    }
+    return true
+  }
+  const missingImageFiles = []
+  for (const value of Object.values(payload)) {
+    if (typeof value !== 'string' || !value.startsWith('/gelitup-content/')) continue
+    let relative = value
+    try { relative = decodeURIComponent(value) } catch { /* keep raw on malformed URI */ }
+    if (!existsCaseSensitive(relative)) missingImageFiles.push(value)
+  }
+  if (missingImageFiles.length) {
+    const sample = missingImageFiles.slice(0, 15)
+    fail(
+      `product-image-map.json references ${missingImageFiles.length} image file(s) that do not exist on disk (case-sensitive):\n` +
+        sample.map((p) => `    ${p}`).join('\n') +
+        (missingImageFiles.length > sample.length ? `\n    …and ${missingImageFiles.length - sample.length} more` : ''),
+    )
+  }
+
+  for (const value of Object.values(payload)) {
+    if (typeof value !== 'string') continue
+    const top = extractTopCategoryFromImagePath(value)
+    if (!top) continue
+    discoveredTopCategories.add(top)
+
+    const normalized = value.toUpperCase()
+    if (normalized.includes('/BRUSH ON BUILDER/')) {
+      brushOnBuilderPathCount += 1
+      if (!normalized.includes(brushCanonicalRoot)) {
+        fail(`Brush On Builder path must use the canonical BUILDER GEL folder: ${value}`)
+      }
+      if (!(top === 'BUILDER GEL' || top === 'BUILDER GEL SYSTEMS')) {
+        fail(`Brush On Builder path found under unexpected top category '${top}': ${value}`)
+      }
+    }
+  }
+
+  if (brushOnBuilderPathCount === 0) {
+    warn('No BRUSH ON BUILDER image paths were found in product-image-map.json.')
+  }
+
+  const unknownCategories = [...discoveredTopCategories].filter((cat) => !allowedTopCategories.has(cat))
+  if (unknownCategories.length) {
+    fail(`Unknown top-level image-map categories detected: ${unknownCategories.sort().join(', ')}`)
+  }
+}
+
+function validatePriceListInvariants() {
+  const pricesPath = path.join(root, 'public', 'gelitup-content', 'b2b-price-list.json')
+  const payload = readJson(pricesPath)
+  const items = Array.isArray(payload?.items) ? payload.items : []
+
+  const brushItems = items.filter((item) => {
+    const text = `${item?.name || ''} ${item?.sku || ''}`.toUpperCase()
+    return text.includes('BRUSH ON BUILDER') || /\bBOB[A-Z0-9]*\b/.test(text) || text.includes('BIAB')
+  })
+
+  if (!brushItems.length) {
+    warn('No Brush On Builder entries were detected in b2b-price-list.json.')
+    return
+  }
+
+  const invalid = brushItems.filter((item) => {
+    const numeric = Number(item?.price)
+    return !Number.isFinite(numeric) || numeric <= 0
+  })
+
+  if (invalid.length) {
+    const sample = invalid
+      .slice(0, 10)
+      .map((item) => `${item?.sku || 'no-sku'} (${item?.name || 'no-name'}) -> ${item?.price}`)
+      .join('; ')
+    fail(`Brush On Builder entries with missing/invalid price: ${sample}`)
+  }
+}
+
+function printSummary() {
+  if (warnMessages.length) {
+    console.log('Warnings:')
+    for (const message of warnMessages) console.log(`- ${message}`)
+  }
+
+  if (failMessages.length) {
+    console.error('Catalogue invariant check failed:')
+    for (const message of failMessages) console.error(`- ${message}`)
+    process.exitCode = 1
+    return
+  }
+
+  console.log('Catalogue invariants passed.')
+}
+
+validateSourceInvariants()
+validateImageMapInvariants()
+validatePriceListInvariants()
+printSummary()

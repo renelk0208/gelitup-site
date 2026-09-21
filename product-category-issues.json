@@ -1,0 +1,20 @@
+{
+  "multimix": {
+    "duplicates": [],
+    "no_image": [],
+    "no_price": [],
+    "no_sku": []
+  },
+  "premium_builder_gel": {
+    "duplicates": [],
+    "no_image": [],
+    "no_price": [],
+    "no_sku": []
+  },
+  "summary": {
+    "multimix_total": 29,
+    "multimix_issues": 0,
+    "pbg_total": 11,
+    "pbg_issues": 0
+  }
+}
