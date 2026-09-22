@@ -2837,14 +2837,95 @@ function applyHiddenProductsFilter(payload, hiddenKeys = []) {
   return filtered
 }
 
+const catalogueLookupCache = new WeakMap()
+
+function buildCatalogueLookupMaps(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return {
+      preferredDisplayNameByImagePath: new Map(),
+      preferredSourceKeyByImagePath: new Map(),
+      canonicalDisplayNameByProductCode: new Map(),
+      canonicalDisplayNameByImagePath: new Map(),
+    }
+  }
+
+  if (catalogueLookupCache.has(payload)) {
+    return catalogueLookupCache.get(payload)
+  }
+
+  const preferredDisplayNameByImagePath = new Map()
+  const preferredSourceKeyByImagePath = new Map()
+  const canonicalDisplayNameByProductCode = new Map()
+  const canonicalDisplayNameByImagePath = new Map()
+  const imagePathScores = new Map()
+  const productCodeScores = new Map()
+  const imagePathSourceScores = new Map()
+
+  for (const [rawKey, rawValue] of Object.entries(payload)) {
+    const imageUrl = typeof rawValue === 'string' ? rawValue.trim() : ''
+    if (!imageUrl || !imageUrl.includes('/gelitup-content/product-images/')) continue
+
+    const formattedKey = formatCatalogueDisplayKey(rawKey)
+    const score = scoreCatalogueDisplayKey(rawKey, formattedKey)
+    const sourceScore = scoreCatalogueSourceKey(rawKey)
+    const productCode = extractCatalogueProductCode(rawKey)
+
+    if (score >= 7) {
+      const currentScore = imagePathScores.get(imageUrl) ?? Number.NEGATIVE_INFINITY
+      if (score > currentScore) {
+        imagePathScores.set(imageUrl, score)
+        preferredDisplayNameByImagePath.set(imageUrl, formattedKey)
+      }
+    }
+
+    if (Number.isFinite(sourceScore)) {
+      const currentScore = imagePathSourceScores.get(imageUrl) ?? Number.NEGATIVE_INFINITY
+      if (sourceScore > currentScore) {
+        imagePathSourceScores.set(imageUrl, sourceScore)
+        preferredSourceKeyByImagePath.set(imageUrl, rawKey)
+      }
+    }
+
+    if (productCode) {
+      const currentScore = productCodeScores.get(productCode) ?? Number.NEGATIVE_INFINITY
+      if (score > currentScore) {
+        productCodeScores.set(productCode, score)
+        canonicalDisplayNameByProductCode.set(productCode, formattedKey)
+      }
+    }
+  }
+
+  for (const [rawKey, rawValue] of Object.entries(payload)) {
+    const imageUrl = typeof rawValue === 'string' ? rawValue.trim() : ''
+    if (!imageUrl || !imageUrl.includes('/gelitup-content/product-images/')) continue
+
+    const productCode = extractCatalogueProductCode(rawKey)
+    if (productCode && canonicalDisplayNameByProductCode.has(productCode)) {
+      canonicalDisplayNameByImagePath.set(imageUrl, canonicalDisplayNameByProductCode.get(productCode))
+    }
+  }
+
+  const lookupMaps = {
+    preferredDisplayNameByImagePath,
+    preferredSourceKeyByImagePath,
+    canonicalDisplayNameByProductCode,
+    canonicalDisplayNameByImagePath,
+  }
+
+  catalogueLookupCache.set(payload, lookupMaps)
+  return lookupMaps
+}
+
 function buildCatalogueSectionsFromImageMap(payload, manualRuleIndex = new Map()) {
   if (!payload || typeof payload !== 'object') return []
 
   const blockedCategoryTokens = new Set(['CRACK', 'THERMO', 'CREME DE LA CREME'])
-  const preferredDisplayNameByImagePath = buildPreferredDisplayNameByImagePath(payload)
-  const preferredSourceKeyByImagePath = buildPreferredSourceKeyByImagePath(payload)
-  const canonicalDisplayNameByProductCode = buildCanonicalDisplayNameByProductCode(payload)
-  const canonicalDisplayNameByImagePath = buildCanonicalDisplayNameByImagePath(payload, canonicalDisplayNameByProductCode)
+  const {
+    preferredDisplayNameByImagePath,
+    preferredSourceKeyByImagePath,
+    canonicalDisplayNameByProductCode,
+    canonicalDisplayNameByImagePath,
+  } = buildCatalogueLookupMaps(payload)
   
   // Map certain folders to be subcategories of parent categories
   const categoryRemapping = new Map([
