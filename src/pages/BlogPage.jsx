@@ -34,26 +34,33 @@ function BlogCard({ post }) {
       to={`/blog/${post.slug}`}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_10px_30px_rgba(24,24,27,0.06)] transition hover:-translate-y-1 hover:border-[#D43790]/40 hover:shadow-[0_16px_42px_rgba(24,24,27,0.1)]"
     >
-      <div className="aspect-video overflow-hidden bg-neutral-100">
+      <div className="aspect-[16/10] overflow-hidden bg-neutral-100">
         <img
           src={post.heroImage}
           alt=""
-          className="h-full w-full object-contain transition duration-500 group-hover:scale-[1.02]"
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
         />
       </div>
-      <div className="flex flex-1 flex-col p-5 sm:p-6">
-        <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#D43790]">{post.category}</p>
-        <h2 className="mt-3 text-xl font-bold leading-tight tracking-tight text-neutral-950 sm:text-2xl">
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#D43790]">{post.category}</p>
+          {post.featured && (
+            <span className="rounded-full bg-[#D43790]/10 px-2 py-1 text-[0.6rem] font-bold uppercase tracking-[0.12em] text-[#9c1f61]">
+              Featured
+            </span>
+          )}
+        </div>
+        <h2 className="mt-3 text-lg font-bold leading-tight tracking-tight text-neutral-950 sm:text-xl">
           {post.shortTitle || post.title}
         </h2>
         <p className="mt-3 line-clamp-3 text-sm leading-6 text-neutral-600">{post.excerpt}</p>
-        <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+        <div className="mt-5 flex flex-wrap items-center gap-2 text-[0.72rem] text-neutral-500">
           <time dateTime={post.publishedAt}>{post.publishedLabel}</time>
           <span aria-hidden="true">•</span>
           <span>{post.readTime}</span>
         </div>
         <span className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-bold text-[#B32373] transition group-hover:text-[#D43790]">
-          Read article <span aria-hidden="true">→</span>
+          Open article <span aria-hidden="true">→</span>
         </span>
       </div>
     </Link>
@@ -83,15 +90,18 @@ export default function BlogPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
         {posts.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-neutral-300 bg-white/60 p-16 text-center text-neutral-500">
             No published articles yet.
           </div>
         ) : (
           <>
-            <p className="mb-4 hidden text-sm text-neutral-500 sm:block">{blogPosts.length} article{blogPosts.length === 1 ? '' : 's'}</p>
-            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="mb-5 flex items-center justify-between gap-4 text-sm text-neutral-500">
+              <p>{posts.length} article{posts.length === 1 ? '' : 's'}</p>
+              <span className="hidden sm:inline">Fresh advice for technicians, salons and product buyers</span>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {posts.map((post) => (
                 <BlogCard key={post.slug} post={post} />
               ))}
