@@ -1525,52 +1525,52 @@ function buildOrderPriceLookupMap(items = []) {
 }
 
 const ADMIN_TIER_PRICE_MULTIPLIERS = {
-  authority: 0.22,
-  professional: 0.37,
-  country: 0.264,
-  sales: 0.85,
+  authority: 1,
+  professional: 1,
+  country: 1,
+  sales: 1,
 }
 
 function getTierMultiplier(tier) {
   const normalized = String(tier || '').trim().toLowerCase()
-  return ADMIN_TIER_PRICE_MULTIPLIERS[normalized] ?? 1.0
+  return ADMIN_TIER_PRICE_MULTIPLIERS[normalized] ?? 1
 }
 
-// Returns the authority per-item override multiplier if a rule matches name/sku, else null.
 function getAuthorityItemMultiplier(name, sku, rules) {
-  if (!rules?.length) return null
-  const n = String(name || '').toLowerCase()
-  const s = String(sku || '').toLowerCase()
-  for (const rule of rules) {
-    if (rule.patterns?.some(p => n.includes(String(p).toLowerCase()) || s.includes(String(p).toLowerCase()))) {
-      return rule.multiplier
-    }
-  }
+  void name
+  void sku
+  void rules
   return null
 }
 
-// Returns the effective per-item multiplier for a given order row and item.
-// For authority orders created on or after effective_from, per-item overrides apply.
-// All other tiers and older orders use the flat tier multiplier.
-function getEffectiveItemMultiplier(tier, orderCreatedAt, itemName, itemSku, authorityOverrides) {
+function getDirectTierPrice(tier, productName) {
   const normalizedTier = String(tier || '').trim().toLowerCase()
-  const base = getTierMultiplier(normalizedTier)
-  if (normalizedTier !== 'authority' || !authorityOverrides?.rules?.length) return base
-  const effectiveFrom = authorityOverrides?.effective_from
-  if (effectiveFrom && orderCreatedAt && new Date(orderCreatedAt) < new Date(effectiveFrom)) return base
-  return getAuthorityItemMultiplier(itemName, itemSku, authorityOverrides.rules) ?? base
+  const normalizedName = String(productName || '').trim()
+  if (!normalizedName || !normalizedTier) return null
+  const entry = tierPricingOverrides.find((override) => String(override?.product || '').trim() === normalizedName)
+  if (!entry) return null
+  const tierValue = Number(entry[normalizedTier])
+  return Number.isFinite(tierValue) ? tierValue : Number(entry.b2bPrice)
+}
+
+function getEffectiveItemMultiplier(tier, orderCreatedAt, itemName, itemSku, authorityOverrides) {
+  void orderCreatedAt
+  void authorityOverrides
+  const directTierPrice = getDirectTierPrice(tier, itemName || itemSku)
+  if (directTierPrice != null) return 1
+  return getTierMultiplier(tier)
 }
 
 // Delegates to resolveOrderItemPriceEntry so the UI uses the same full lookup logic
 // (override map + simplified name + digit-strip) as the export functions.
-function resolveOrderItemUnitPrice(item, priceLookupMap, tierMultiplier = 1.0) {
-  return resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier).unitPrice
+function resolveOrderItemUnitPrice(item, priceLookupMap, tierMultiplier = 1.0, tierKey = null) {
+  return resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier, tierKey).unitPrice
 }
 
 // Resolves both unit price AND the canonical Zoho item name (includes -HTF suffix etc.)
 // from the price list. Returns { unitPrice, resolvedName } where resolvedName is the
 // full price-list name when a match is found, or null when no match.
-function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) {
+function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0, tierKey = null) {
   if (!priceLookupMap && (!item?.sku && !item?.name)) {
     return { unitPrice: null, resolvedName: null, resolvedSku: null }
   }
@@ -1580,15 +1580,30 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0) 
   const nameNorm = normalizeAdminSkuToken(name)
   const extractedSkuFromName = extractOrderItemSkuToken(name)
   const extractedSkuFromSku = extractOrderItemSkuToken(sku)
-  // Strip year+NEW campaign prefixes (e.g. "2026-NEW-...") before lookup.
   const skuWithoutCampaignPrefix = sku.replace(/^\d{4}[-\s]*NEW[-\s]*/i, '').trim()
+  const resolvedTierKey = String(tierKey || '').trim().toLowerCase() || 'b2b'
 
-  // Skip catalog hero/section image filenames — these are image assets, not products.
   if (/\.hero\.image|hero\.image\b/i.test(name) || /\.hero\.image|hero\.image\b/i.test(sku)) {
     return { unitPrice: null, resolvedName: `${name} (image — not a product)`, resolvedSku: null, isImageAsset: true }
   }
 
-  // Check manual override map first (items not in b2b-price-list.json)
+  const directTierProduct = tierPricingOverrides.find((override) =>
+    String(override?.product || '').trim() === name ||
+    String(override?.product || '').trim() === sku ||
+    String(override?.product || '').trim() === nameNorm ||
+    String(override?.product || '').trim() === extractedSkuFromName ||
+    String(override?.product || '').trim() === skuWithoutCampaignPrefix,
+  )
+  if (directTierProduct) {
+    const directValue = Number(directTierProduct?.[resolvedTierKey] ?? directTierProduct?.b2bPrice)
+    const finalPrice = Number.isFinite(directValue) ? directValue : null
+    return {
+      unitPrice: finalPrice != null ? Math.round(finalPrice * 100) / 100 : null,
+      resolvedName: directTierProduct.product || null,
+      resolvedSku: normalizeAdminSkuToken(sku || directTierProduct.product || ''),
+    }
+  }
+
   for (const key of [sku, nameNorm, extractedSkuFromSku, extractedSkuFromName, skuWithoutCampaignPrefix]) {
     if (!key) continue
     const override = SKU_OVERRIDE_MAP[key]
@@ -1678,7 +1693,7 @@ function buildOrderCsvPayload(row, parsedItems, priceLookupMap, tier, authorityO
   let orderTotal = 0
   const lines = parsedItems.map((item, index) => {
     const itemMult = getEffectiveItemMultiplier(tier, row?.created_at, item.name, item.sku, authorityOverrides)
-    const { unitPrice, resolvedName, resolvedSku } = resolveOrderItemPriceEntry(item, priceLookupMap, itemMult)
+    const { unitPrice, resolvedName, resolvedSku } = resolveOrderItemPriceEntry(item, priceLookupMap, itemMult, tier)
     const lineTotal = unitPrice != null ? unitPrice * item.qty : null
     if (lineTotal != null) orderTotal += lineTotal
     // Use canonical Zoho product name (includes -HTF etc.) when available; fall back to stored name
@@ -2086,7 +2101,7 @@ function OrdersPanel() {
         const rawSku = typeof item === 'object' && item !== null ? (item.sku || '') : ''
         const rawName = typeof item === 'object' && item !== null ? (item.name || '') : String(item || '')
         const itemMult = getEffectiveItemMultiplier(row?.distributor_tier, row?.created_at, parsed.name, parsed.sku, authorityOverrides)
-        const { unitPrice, resolvedName } = resolveOrderItemPriceEntry(parsed, priceLookupMap, itemMult)
+        const { unitPrice, resolvedName } = resolveOrderItemPriceEntry(parsed, priceLookupMap, itemMult, row?.distributor_tier || 'b2b')
         const lineTotal = unitPrice != null ? unitPrice * parsed.qty : null
         if (lineTotal != null) orderTotal += lineTotal
         // Use canonical Zoho product name (includes -HTF etc.) when available; fall back to stored name
@@ -2295,7 +2310,7 @@ function OrdersPanel() {
             // Reuse the shared parser + price-list resolver so SKUs stored as
             // plain strings (or missing from the object) are filled in here too.
             const parsed = parseOrderItemEntry(it, index)
-            const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, 1.0)
+            const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, 1.0, row?.distributor_tier || 'b2b')
             const sku = String((it && typeof it === 'object' && it.sku) || resolved.resolvedSku || parsed.sku || '').trim()
             const text = String((it && typeof it === 'object' && it.name) || parsed.name || '').trim()
             return { text, sku, qty: Math.max(1, Number(parsed.qty) || 1) }
@@ -2537,7 +2552,7 @@ function OrdersPanel() {
             .map((item, i) => parseOrderItemEntry(item, i))
             .filter(parsed => {
               const itemMult = getEffectiveItemMultiplier(row.distributor_tier, row.created_at, parsed.name, parsed.sku, authorityOverrides)
-              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, itemMult)
+              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, itemMult, row?.distributor_tier || 'b2b')
               return resolved.unitPrice == null && !resolved.isImageAsset
             })
           const hasMissingPrices = missingPriceItems.length > 0
@@ -2619,7 +2634,7 @@ function OrdersPanel() {
                               const parsed = parseOrderItemEntry(item, i)
                               const rawSku = typeof item === 'object' && item !== null ? (item.sku || item.code || '') : ''
                               const itemMult = getEffectiveItemMultiplier(row.distributor_tier, row.created_at, parsed.name, parsed.sku, authorityOverrides)
-                              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, itemMult)
+                              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, itemMult, row?.distributor_tier || 'b2b')
                               const unitPrice = resolved.unitPrice
                               const isImageAsset = resolved.isImageAsset
                               const displaySku = normalizeAdminSkuToken(rawSku || parsed.sku || resolved.resolvedSku || '').replace(/\s+IMAGE$/i, '')
@@ -2658,7 +2673,7 @@ function OrdersPanel() {
                             items.forEach((item, i) => {
                               const parsed = parseOrderItemEntry(item, i)
                               const itemMult = getEffectiveItemMultiplier(row.distributor_tier, row.created_at, parsed.name, parsed.sku, authorityOverrides)
-                              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, itemMult)
+                              const resolved = resolveOrderItemPriceEntry(parsed, priceLookupMap, itemMult, row?.distributor_tier || 'b2b')
                               if (resolved.isImageAsset) return
                               if (resolved.unitPrice != null) total += resolved.unitPrice * parsed.qty
                               else unpriced += 1
@@ -2835,7 +2850,7 @@ function OrdersPanel() {
                             // and short codes (e.g. "GIUP-SBCIMF", "SH07") still find the product.
                             if (!matches.length) {
                               const q = itemSearch.trim()
-                              const resolved = resolveOrderItemPriceEntry({ sku: q, name: q }, priceLookupMap, 1.0)
+                              const resolved = resolveOrderItemPriceEntry({ sku: q, name: q }, priceLookupMap, 1.0, row?.distributor_tier || 'b2b')
                               if (resolved?.resolvedName) {
                                 const hit = priceCatalog.find(p => (p.name || '') === resolved.resolvedName)
                                 matches = [hit || { name: resolved.resolvedName, sku: resolved.resolvedSku || '', price: null }]

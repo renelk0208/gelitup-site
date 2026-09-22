@@ -27,6 +27,7 @@ import GuestbookTeaser from './components/GuestbookTeaser'
 import ClarityScript from './components/ClarityScript'
 import { cleanProductName } from './utils/productUtils'
 import CatalogueSkeleton from './components/CatalogueSkeleton'
+import tierPricingOverrides from './data/tierPricingOverrides.json'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
@@ -103,8 +104,15 @@ function getSmallOrderShippingFee(country) {
   }
   return null
 }
-const B2B_PRICE_MULTIPLIER = 1.2
-const PERFECT_SHAPE_TOP_COAT_UPLIFT = 1.06
+const B2B_PRICE_MULTIPLIER = 1
+const DIRECT_TIER_PRICE_MAP = new Map(
+  (Array.isArray(tierPricingOverrides) ? tierPricingOverrides : []).map((entry) => {
+    const productName = String(entry?.product || '').trim()
+    if (!productName) return null
+    return [productName.toLowerCase(), entry]
+  }).filter(Boolean),
+)
+
 function isPerfectShapeTopCoatProduct(name, sku) {
   const normalizedName = String(name || '').toLowerCase()
   const normalizedSku = String(sku || '').toLowerCase()
@@ -115,9 +123,15 @@ function isPerfectShapeTopCoatProduct(name, sku) {
 function getAdjustedB2bBasePrice(name, sku, rawPrice) {
   const numericPrice = Number(rawPrice)
   if (!Number.isFinite(numericPrice) || numericPrice <= 0) return null
-  return isPerfectShapeTopCoatProduct(name, sku)
-    ? numericPrice * PERFECT_SHAPE_TOP_COAT_UPLIFT
-    : numericPrice
+  return numericPrice
+}
+function getDirectTierPriceForProduct(productName, tierKey) {
+  const normalizedName = String(productName || '').trim()
+  if (!normalizedName) return null
+  const override = DIRECT_TIER_PRICE_MAP.get(normalizedName.toLowerCase()) || DIRECT_TIER_PRICE_MAP.get(String(productName || '').replace(/\s+/g, ' ').trim().toLowerCase())
+  if (!override) return null
+  const tierValue = Number(override?.[tierKey])
+  return Number.isFinite(tierValue) ? tierValue : null
 }
 function isMarkupExemptCuticleProduct(name) {
   // Scented cuticle oil & scrub range (e.g. "Cooling Coconut Cuticle Oil 5ml -HTF",
@@ -777,20 +791,14 @@ function hasActiveSignUpSession(signUpResult) {
 }
 
 function resolveVatTreatment(country) {
-  return COUNTRY_VAT_TREATMENT[country] || 'export_exempt'
+  return 'zero_rate'
 }
 
 function getVatTreatmentLabel(treatment, country) {
   switch (treatment) {
-    case 'reverse_charge':
-      return { pct: 0, label: '0% - VAT Reverse Charge (EU B2B, Art. 44 Directive 2006/112/EC)', note: 'The customer is liable to account for VAT in their country of establishment.' }
-    case 'domestic_bg':
-      return { pct: 0, label: '0% - VAT Reverse Charge (EU B2B)', note: 'B2B cross-border supply. The customer is liable to account for VAT in their country of establishment.' }
-    case 'domestic_gr':
-      return { pct: 0, label: '0% - VAT Reverse Charge (EU B2B)', note: 'B2B cross-border supply. The customer is liable to account for VAT in their country of establishment.' }
-    case 'export_exempt':
+    case 'zero_rate':
     default:
-      return { pct: 0, label: '0% - Zero-rated Export (outside EU)', note: `Goods exported outside the EU. VAT exempt under export provisions. Buyer may be subject to local import duties in ${country || 'their country'}.` }
+      return { pct: 0, label: '0% - No VAT (direct tier pricing)', note: `These tier prices are treated as final net values with 0% VAT applied. ${country ? `Customer country: ${country}.` : ''}`.trim() }
   }
 }
 
@@ -1463,27 +1471,19 @@ function buildProformaFromCart({
   tier = null,
 }) {
   const productMap = new Map(products.map((product) => [normalizeSkuCode(product.code), product]))
-  // Returns the effective multiplier for a given product name/code, respecting authority overrides.
-  const resolveItemMultiplier = (name, code) => {
-    if (tier !== 'authority' || !authorityOverrides?.rules?.length) return tierPriceMultiplier
-    const n = String(name || '').toLowerCase()
-    const s = String(code || '').toLowerCase()
-    for (const rule of authorityOverrides.rules) {
-      if (rule.patterns?.some(p => n.includes(String(p).toLowerCase()) || s.includes(String(p).toLowerCase()))) {
-        return rule.multiplier
-      }
-    }
-    return tierPriceMultiplier
+  const resolveTierUnitPrice = (name, code, fallbackPrice) => {
+    const directPrice = getDirectTierPriceForProduct(name || code, tier)
+    if (directPrice != null) return Number(directPrice.toFixed(2))
+    const numericFallback = Number(fallbackPrice)
+    if (Number.isFinite(numericFallback)) return Number(numericFallback.toFixed(2))
+    return null
   }
 
   const selectedLines = selectedCodes.map((code) => {
     const normalized = normalizeSkuCode(code)
     const product = productMap.get(normalized)
     const basePriceEur = product?.price ?? proformaLookupPrice(priceMap, code, product?.name) ?? null
-    const mult = resolveItemMultiplier(product?.name, code)
-    const unitPriceEur = basePriceEur != null
-      ? Number((basePriceEur * mult).toFixed(2))
-      : null
+    const unitPriceEur = resolveTierUnitPrice(product?.name, code, basePriceEur)
     const qty = Number(itemQtys?.[code] || itemQtys?.[normalized] || 1)
 
     return {
@@ -1499,10 +1499,7 @@ function buildProformaFromCart({
   const packageLines = packageCartItems.map((item) => {
     const product = productMap.get(normalizeSkuCode(item.sku))
     const basePriceEur = product?.price ?? item.price ?? proformaLookupPrice(priceMap, item.sku, item.name) ?? null
-    const mult = resolveItemMultiplier(item.name || product?.name, item.sku)
-    const unitPriceEur = basePriceEur != null
-      ? Number((basePriceEur * mult).toFixed(2))
-      : null
+    const unitPriceEur = resolveTierUnitPrice(item.name || product?.name || item.sku, item.sku, basePriceEur)
     const qty = Number(item.qty || 0)
     return {
       sku: item.sku,
@@ -1519,9 +1516,12 @@ function buildProformaFromCart({
       const addOnProduct = productMap.get(normalizeSkuCode(PROFESSIONAL_BASE_PACK.sku))
       const listUnitPriceEur = addOnProduct?.price ?? proformaLookupPrice(priceMap, PROFESSIONAL_BASE_PACK.sku, addOnProduct?.name || PROFESSIONAL_BASE_PACK.description) ?? null
       const discountPct = FACTORY_PRICE_BOOK_EUR.professionalPackDiscountPct
-      const discountedUnitPriceEur = listUnitPriceEur != null
-        ? Number((listUnitPriceEur * (1 - (discountPct / 100)) * tierPriceMultiplier).toFixed(2))
-        : null
+      const directPrice = getDirectTierPriceForProduct(addOnProduct?.name || PROFESSIONAL_BASE_PACK.description, tier)
+      const discountedUnitPriceEur = directPrice != null
+        ? Number((directPrice * (1 - (discountPct / 100))).toFixed(2))
+        : listUnitPriceEur != null
+          ? Number((listUnitPriceEur * (1 - (discountPct / 100)) * tierPriceMultiplier).toFixed(2))
+          : null
       const qty = PROFESSIONAL_BASE_PACK.qty
       return [{
         sku: PROFESSIONAL_BASE_PACK.sku,
@@ -11953,7 +11953,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   // Tier 2 / Authority (national): -78% from B2B price (pay 22%).
   // Level 2 Country Tier: Authority price + 20% (0.22 × 1.20 = 0.264).
   // Sales Representative: B2B price - 15% (pay 85%).
-  const tierPriceMultiplier = tier === 'authority' ? 0.22 : tier === 'professional' ? 0.37 : tier === 'country' ? 0.264 : tier === 'sales' ? 0.85 : 1.0
+  const tierPriceMultiplier = 1.0
   const location = useLocation()
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
@@ -12031,19 +12031,12 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const [authorityOverrides, setAuthorityOverrides] = useState(null)
   const [shippingMetadata, setShippingMetadata] = useState(SHIPPING_RULES)
   const [shippingMetadataStatus, setShippingMetadataStatus] = useState('Using embedded shipping metadata rules.')
-  // Returns per-item effective multiplier for authority clients: checks authority-price-overrides.json rules.
-  // All new orders (placed now) are "after" the effective_from date, so overrides always apply for authority.
+  // Direct tier pricing file is the source of truth; percentage multipliers are disabled.
   const getEffectiveProductMultiplier = useCallback((productName, productCode) => {
-    if (tier !== 'authority' || !authorityOverrides?.rules?.length) return tierPriceMultiplier
-    const n = String(productName || '').toLowerCase()
-    const s = String(productCode || '').toLowerCase()
-    for (const rule of authorityOverrides.rules) {
-      if (rule.patterns?.some(p => n.includes(String(p).toLowerCase()) || s.includes(String(p).toLowerCase()))) {
-        return rule.multiplier
-      }
-    }
-    return tierPriceMultiplier
-  }, [tier, tierPriceMultiplier, authorityOverrides])
+    void productName
+    void productCode
+    return 1
+  }, [])
   const isDistributorRole = useMemo(() => String(b2bUserRole || '').trim().toLowerCase().includes('distributor'), [b2bUserRole])
   const productsTable = import.meta.env.VITE_B2B_PRODUCTS_TABLE || DEFAULT_PRODUCTS_TABLE
   const ordersTable = import.meta.env.VITE_B2B_ORDERS_TABLE || DEFAULT_ORDERS_TABLE
@@ -14248,11 +14241,13 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       const priceEntry = priceMap.get(skNorm)
         || priceMap.get(pnNorm)
         || (giupNum ? priceMap.get(giupNum.padStart(2, '0')) || priceMap.get(giupNum) : null)
-      const price = priceEntry?.price ?? null
+      const fallbackPrice = priceEntry?.price ?? null
+      const directPrice = getDirectTierPriceForProduct(priceEntry?.name || code, tier)
+      const price = directPrice ?? fallbackPrice
       const name = priceEntry?.name || code
       return { code, sku: code, name, category: 'Unknown', preview: '#e2e8f0', imageUrl, price }
     })
-  }, [selectedCodes, products, localImageMap, priceMap])
+  }, [selectedCodes, products, localImageMap, priceMap, tier])
 
   // Colour family breakdown for selected products
   const colourFamilyBreakdown = useMemo(() => {
@@ -14268,10 +14263,18 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   }, [selectedProducts])
 
   const orderTotal = useMemo(() => {
-    const itemsTotal = selectedProducts.reduce((s, p) => s + (p.price != null ? Number(p.price) * getEffectiveProductMultiplier(p.name, p.code) * (itemQtys[p.code] || 1) : 0), 0)
-    const pkgTotal = packageCartItems.reduce((s, item) => s + (item.price != null ? Number(item.price) * getEffectiveProductMultiplier(item.name, item.sku) * item.qty : 0), 0)
+    const itemsTotal = selectedProducts.reduce((s, p) => {
+      const directPrice = getDirectTierPriceForProduct(p.name, tier)
+      const unitPrice = directPrice != null ? directPrice : Number(p.price)
+      return s + (Number.isFinite(unitPrice) ? unitPrice * (itemQtys[p.code] || 1) : 0)
+    }, 0)
+    const pkgTotal = packageCartItems.reduce((s, item) => {
+      const directPrice = getDirectTierPriceForProduct(item.name || item.sku, tier)
+      const unitPrice = directPrice != null ? directPrice : Number(item.price)
+      return s + (Number.isFinite(unitPrice) ? unitPrice * item.qty : 0)
+    }, 0)
     return itemsTotal + pkgTotal
-  }, [selectedProducts, packageCartItems, itemQtys, getEffectiveProductMultiplier])
+  }, [selectedProducts, packageCartItems, itemQtys, tier])
 
   // Keep a ref mirror of the computed order total so the earlier draft-cart
   // Supabase sync effect (which runs before this value exists in render order)
@@ -16002,7 +16005,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <div className="p-5">
               <p className="text-sm font-semibold text-slate-900 leading-snug">{upsellModal.product?.name}</p>
               {upsellModal.product?.price != null && pricesAllocated && (
-                <p className="mt-1 text-sm font-bold text-fuchsia-700">€{(Number(upsellModal.product.price) * getEffectiveProductMultiplier(upsellModal.product.name, upsellModal.product.code)).toFixed(2)}</p>
+                <p className="mt-1 text-sm font-bold text-fuchsia-700">€{((getDirectTierPriceForProduct(upsellModal.product.name, tier) ?? Number(upsellModal.product.price)).toFixed(2))}</p>
               )}
               <div className="mt-4 flex gap-2">
                 <button
@@ -16177,7 +16180,8 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <div className="mt-2 divide-y divide-slate-100">
               {selectedProducts.map(product => {
                 const qty = itemQtys[product.code] || 1
-                const lineTotal = product.price != null ? Number(product.price) * getEffectiveProductMultiplier(product.name, product.code) * qty : null
+                const unitPrice = getDirectTierPriceForProduct(product.name, tier) ?? Number(product.price)
+                const lineTotal = product.price != null ? unitPrice * qty : null
                 return (
                   <div key={product.code} className="flex items-center gap-2 py-2">
                     <div
@@ -16876,7 +16880,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                             <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{cleanProductName(product.name)}</p>
                             {product.price != null && (
                             pricesAllocated
-                              ? <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{(Number(product.price) * getEffectiveProductMultiplier(product.name, product.code)).toFixed(2)}</p>
+                              ? <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{((getDirectTierPriceForProduct(product.name, tier) ?? Number(product.price)).toFixed(2))}</p>
                               : <p className="text-[10px] text-slate-400">POA</p>
                           )}
                           </div>
