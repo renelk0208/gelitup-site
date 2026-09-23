@@ -7284,70 +7284,108 @@ function ProductsMenu() {
 
 function Nav({ onOpenContactModal }) {
   const [registerMenuOpen, setRegisterMenuOpen] = useState(false)
+  const [desktopMenuOpen, setDesktopMenuOpen] = useState(false)
   const location = useLocation()
 
   useEffect(() => {
     setRegisterMenuOpen(false)
+    setDesktopMenuOpen(false)
   }, [location.pathname])
 
+  const primaryLinks = navItems.filter(item => item.to === '/blog' || item.to === '/guestbook')
+  const overflowLinks = navItems.filter(item =>
+    !item.mobileOnly
+    && !item.highlight
+    && item.to !== '/blog'
+    && item.to !== '/guestbook'
+    && item.to !== '/portal/login'
+    && item.to !== '/portal/register'
+  )
+
   return (
-    <nav className="hidden items-center justify-end gap-1 xl:flex">
-      {/* Our Products mega-menu */}
+    <nav className="hidden items-center gap-1 xl:flex">
       <ProductsMenu />
 
-      {/* Content links */}
-      {navItems.filter(item => !item.mobileOnly).map((item) => {
-        if (item.isContactAction) {
-          return (
-            <button
-              key={item.to}
-              type="button"
-              onClick={onOpenContactModal}
-              className="rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.06em] !text-white/75 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
-            >
-              {item.label}
-            </button>
-          )
-        }
-        if (item.isExternal) {
-          return (
-            <a
-              key={item.href}
-              href={item.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={item.highlight
-                ? 'rounded-lg border border-fuchsia-500/60 px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-white/80 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400'
-                : 'rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.06em] !text-white/75 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500'
-              }
-            >
-              {item.label}
-            </a>
-          )
-        }
-        return (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              item.highlight
-                ? `rounded-lg border px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 ${
-                    isActive
-                      ? 'border-[#D43790] bg-[#D43790] !text-white shadow-[0_0_12px_rgba(212,55,144,0.55)]'
-                      : 'border-fuchsia-500/60 !text-white/80 hover:bg-white/10 hover:!text-white'
-                  }`
-                : `rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.06em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
-                    isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
-                  }`
-            }
-          >
-            {item.label}
-          </NavLink>
-        )
-      })}
+      {primaryLinks.map((item) => (
+        <NavLink
+          key={item.to}
+          to={item.to}
+          className={({ isActive }) =>
+            `rounded-lg px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+              isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
+            }`
+          }
+        >
+          {item.label}
+        </NavLink>
+      ))}
 
-      {/* Divider */}
-      <span className="mx-1 h-4 w-px bg-white/20" aria-hidden="true" />
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setDesktopMenuOpen((current) => !current)}
+          aria-expanded={desktopMenuOpen}
+          aria-haspopup="menu"
+          className="inline-flex items-center gap-2 rounded-lg border border-white/25 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] !text-white/80 transition duration-300 hover:border-white/40 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
+        >
+          <span className="flex flex-col gap-[4px]" aria-hidden="true">
+            <span className="block h-px w-4 bg-current" />
+            <span className="block h-px w-4 bg-current" />
+            <span className="block h-px w-4 bg-current" />
+          </span>
+          Menu
+        </button>
+
+        {desktopMenuOpen && (
+          <div className="absolute right-0 top-[calc(100%+0.6rem)] z-50 w-64 rounded-2xl border border-white/15 bg-[#111111] p-2 shadow-[0_18px_48px_rgba(0,0,0,0.38)] backdrop-blur-xl">
+            {overflowLinks.map((item) => {
+              if (item.isContactAction) {
+                return (
+                  <button
+                    key={item.to}
+                    type="button"
+                    onClick={() => {
+                      setDesktopMenuOpen(false)
+                      onOpenContactModal?.()
+                    }}
+                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
+                  >
+                    {item.label}
+                  </button>
+                )
+              }
+
+              if (item.isExternal) {
+                return (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setDesktopMenuOpen(false)}
+                    className="block rounded-xl px-3 py-2.5 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
+                  >
+                    {item.label}
+                  </a>
+                )
+              }
+
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setDesktopMenuOpen(false)}
+                  className="block rounded-xl px-3 py-2.5 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
+                >
+                  {item.label}
+                </NavLink>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      <span className="mx-1.5 h-5 w-px bg-white/20" aria-hidden="true" />
 
       <div className="relative">
         <button
@@ -7355,10 +7393,10 @@ function Nav({ onOpenContactModal }) {
           onClick={() => setRegisterMenuOpen((current) => !current)}
           aria-expanded={registerMenuOpen}
           aria-haspopup="menu"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/30 px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.06em] !text-white/80 transition duration-300 hover:border-white/50 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
+          className="inline-flex items-center gap-2 rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] !text-white/80 transition duration-300 hover:border-white/50 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
         >
           Register
-          <svg viewBox="0 0 20 20" fill="none" className={`h-3.5 w-3.5 transition-transform duration-200 ${registerMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none" className={`h-4 w-4 transition-transform duration-200 ${registerMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true">
             <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
@@ -7385,11 +7423,10 @@ function Nav({ onOpenContactModal }) {
 
       <LangSwitcher />
 
-      {/* Sign In — existing B2B clients */}
       <NavLink
         to="/portal/login"
         className={({ isActive }) =>
-          `rounded-lg border border-white/30 px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+          `rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
             isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/80 hover:border-white/50 hover:bg-white/10 hover:!text-white'
           }`
         }

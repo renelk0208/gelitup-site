@@ -117,6 +117,16 @@ const ROUTE_SEO_MAP = {
     description: 'Professional guidance for nail salons and technicians on gel safety, EU compliance, ingredients, business protection and product performance.',
     canonical:   'https://gelitup.com/blog',
   },
+  '/blog/what-is-hema-in-gel-polish': {
+    title:       'What is HEMA in Gel Polish? | HEMA-Free Guide for Salons',
+    description: 'Learn what HEMA is in gel polish, how sensitisation develops, and why HEMA-free systems matter for nail professionals.',
+    canonical:   'https://gelitup.com/blog/what-is-hema-in-gel-polish',
+  },
+  '/blog/what-is-tpo-in-gel-nails': {
+    title:       'What Is TPO in Gel Nails? Why Professional Brands Are Removing It',
+    description: 'Understand TPO in gel polish, why it is drawing EU scrutiny, and why professional nail brands are switching to safer, TPO-free formulas.',
+    canonical:   'https://gelitup.com/blog/what-is-tpo-in-gel-nails',
+  },
   '/blog/why-ingredient-labels-matter': {
     title:       'Why Gel Polish Ingredient Labels Matter | HEMA & TPO Guide',
     description: 'Learn what HEMA and TPO are, why ingredient labels matter, and how nail professionals can evaluate safer, compliant gel polish formulations.',

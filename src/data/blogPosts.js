@@ -1,7 +1,147 @@
 const INGREDIENT_LABELS_MEDIA = '/gelitup-media/blog/why-ingredient-labels-matter'
 const TPO_GUIDE_MEDIA = '/gelitup-media/blog/tpo-guide'
+const HEMA_GUIDE_MEDIA = '/gelitup-media/blog/what-is-hema-in-gel-polish'
 
 export const blogPosts = [
+  {
+    slug: 'what-is-hema-in-gel-polish',
+    category: 'Ingredients & compliance',
+    title: 'What is HEMA in Gel Polish? A Guide for Nail Professionals',
+    shortTitle: 'What is HEMA in Gel Polish?',
+    excerpt: 'Learn what HEMA is, why sensitisation matters, and how salons can move toward safer HEMA-free gel systems.',
+    metaTitle: 'What is HEMA in Gel Polish? | HEMA-Free Guide for Salons',
+    metaDescription: 'Learn what HEMA is in gel polish, how sensitisation develops, and why HEMA-free systems matter for nail professionals.',
+    publishedAt: '2026-09-22',
+    publishedLabel: '22 September 2026',
+    readTime: '6 min read',
+    heroImage: `${HEMA_GUIDE_MEDIA}/hema-guide-blog-header.png`,
+    calloutImage: `${HEMA_GUIDE_MEDIA}/hema-guide-blog-header.png`,
+    calloutAlt: 'A HEMA-free system helps salons reduce sensitisation risk and protect clients.',
+    calloutAfterSection: 2,
+    closingImage: `${HEMA_GUIDE_MEDIA}/hema-guide-blog-header.png`,
+    closingAlt: 'Browse the GEL.IT.UP HEMA-free professional range.',
+    tags: ['HEMA-Free', 'Salon Safety', 'Ingredient Guide'],
+    intro: [
+      'HEMA is one of the most common ingredients used in gel polish systems, but it is also one of the most important for nail professionals to understand. It helps gel adhere, but repeated skin contact with uncured product can create real sensitisation risk.',
+      'This guide explains what HEMA is, how sensitisation develops, why the risk matters for salons and clients, and how to read product labels with more confidence.',
+    ],
+    sections: [
+      {
+        title: 'What is HEMA?',
+        paragraphs: [
+          'HEMA stands for 2-Hydroxyethyl Methacrylate. It is a methacrylate monomer used in UV and LED-cured nail products to improve adhesion and durability.',
+          'That makes it useful in gel systems, but it also means professionals need to understand how it behaves when it touches the skin before curing is complete.',
+        ],
+      },
+      {
+        title: 'How HEMA sensitisation develops',
+        paragraphs: [
+          'When liquid or under-cured HEMA touches the skin around the nail, the cuticle, or the fingertips, it can penetrate the skin barrier and trigger an immune response.',
+          'At first, there may be no obvious reaction. Later exposures can produce redness, itching, swelling, blistering, or dermatitis around the nails.',
+        ],
+        takeaway: 'The key risk is skin contact with uncured product. Good application control and full curing matter just as much as the formulation itself.',
+      },
+      {
+        title: 'What HEMA-free gel polish means',
+        paragraphs: [
+          'HEMA-free means the full product system is formulated without HEMA — not just the base coat, but also the colour, builder, and top coat where relevant.',
+          'A complete HEMA-free system reduces sensitisation risk and gives salons a clearer standard to work from when choosing products for professional services.',
+        ],
+      },
+      {
+        title: 'How to check ingredient labels',
+        paragraphs: [
+          'On packaging or technical documents, HEMA may appear as 2-Hydroxyethyl Methacrylate or Hydroxyethyl Methacrylate. If either appears in the list, the product is not HEMA-free.',
+          'Ask suppliers for full INCI lists and verify every SKU in the system, not just the hero product on the front label.',
+        ],
+      },
+    ],
+    verdict: {
+      title: 'The takeaway',
+      paragraphs: [
+        'HEMA is a useful ingredient, but it comes with a real sensitisation risk when application control is poor or curing is incomplete. For salons, the safer long-term answer is to understand the ingredient, use better labels and documentation, and move toward complete HEMA-free systems where possible.',
+      ],
+    },
+  },
+  {
+    slug: 'what-is-tpo-in-gel-nails',
+    category: 'Ingredients & compliance',
+    title: 'What is TPO in Gel Nails? Why It’s Being Removed from Professional Formulas',
+    shortTitle: 'What is TPO in Gel Nails?',
+    excerpt: 'Learn what TPO is, why it is under EU regulatory pressure, and why more professional nail brands are removing it from gel systems.',
+    metaTitle: 'What Is TPO in Gel Nails? Why Professional Brands Are Removing It',
+    metaDescription: 'Understand TPO in gel polish, why it is drawing EU scrutiny, and why professional nail brands are switching to safer, TPO-free formulas.',
+    publishedAt: '2026-09-24',
+    publishedLabel: '24 September 2026',
+    readTime: '6 min read',
+    heroImage: `${TPO_GUIDE_MEDIA}/hero.png`,
+    calloutImage: `${TPO_GUIDE_MEDIA}/hero.png`,
+    calloutAlt: 'TPO-free formulations are becoming the new standard for professional nail services.',
+    closingImage: `${TPO_GUIDE_MEDIA}/hero.png`,
+    closingAlt: 'Explore the GEL.IT.UP TPO-free, HEMA-free and CPNP-notified range.',
+    ctaLabel: 'Explore the Full Catalogue — gelitup.com',
+    ctaUrl: 'https://shop.gelitup.com/pages/ourproducts',
+    tags: ['TPO-Free', 'HEMA-Free', 'EU Compliant'],
+    intro: [
+      'Until recently, most nail professionals had never heard of TPO. That is changing fast.',
+      'Trimethylbenzoyl Diphenylphosphine Oxide — TPO — is one of the photoinitiators responsible for curing gel polish under UV and LED lamps. It has been a standard component of gel nail formulations for years, but it is now under growing regulatory attention in the EU and a reformulation wave among professional brands.',
+      'This guide explains what TPO is, why the concerns are growing, what the EU regulatory position looks like, and what “TPO-free” meaningfully means for professional practice.',
+    ],
+    sections: [
+      {
+        title: 'What Is TPO?',
+        paragraphs: [
+          'TPO stands for Trimethylbenzoyl Diphenylphosphine Oxide. Its full INCI name is Diphenyl(2,4,6-trimethylbenzoyl)phosphine oxide. It belongs to the acylphosphine oxide class of photoinitiators.',
+          'Its function in gel nail products is to initiate polymerisation. When UV or LED light hits a TPO molecule, it absorbs the energy and generates reactive free radicals. Those radicals trigger the curing reaction that transforms the gel from a liquid monomer system into a solid, cross-linked polymer.',
+          'TPO is particularly efficient under LED lamps, which is part of the reason it became so common as the industry moved from UV to LED curing systems. From a pure formulation-performance standpoint, TPO works. The question is what else it does.',
+        ],
+      },
+      {
+        title: 'Why TPO Is Being Removed from Professional Formulas',
+        paragraphs: [
+          'The primary documented concern with TPO is photoallergy and skin sensitisation. Photoallergy is a specific immune-mediated reaction that occurs when a sensitising molecule requires UV or visible light exposure to trigger a response. In practical terms, skin contact with a TPO-containing product followed by UV or LED light exposure during curing can sensitise a person. Once sensitised, later exposure often triggers an allergic reaction.',
+          'TPO has also been identified as a contact sensitiser independent of photoactivation, although the photoallergic pathway remains the main concern in gel nail settings. The combination of skin contact during application, proximity to the light source and repeated service appointments creates a serious sensitisation profile for professionals and clients alike.',
+        ],
+        takeaway: 'The deeper issue is not just a single service. It is repeated workday exposure, repeated sensitisation and the cumulative burden that builds across a salon team and client base.',
+      },
+      {
+        title: 'The EU Regulatory Position',
+        paragraphs: [
+          'The EU’s Scientific Committee on Consumer Safety (SCCS) has assessed photoinitiators used in nail products, including acylphosphine oxide compounds in the TPO family. The direction of those assessments, combined with the EU Cosmetics Regulation’s precautionary approach to skin sensitizers, has placed TPO on a regulatory trajectory toward restriction or removal from cosmetic products.',
+          'Under EU Cosmetics Regulation (EC) No 1223/2009, substances identified as skin sensitizers or posing unacceptable risk can be added to Annex II or Annex III. Professional brands formulating for the EU market that tracked SCCS opinions had advance notice that TPO’s regulatory status was under active review. Those that reformulated early are now positioned on the right side of the compliance curve.',
+        ],
+      },
+      {
+        title: 'What TPO-Free Means for Professional Practice',
+        paragraphs: [
+          'Removing TPO is not a compromise in quality when the formulation is well balanced. A TPO-free gel that is designed for standard LED lamps can still cure completely, maintain durability and deliver the same professional finish clients expect.',
+          'It creates a safety advantage for clients, a lower occupational risk for technicians and a stronger long-term future-proof position for salons and distributors. A product that is TPO-free, HEMA-free and CPNP-notified gives you a clear answer when a client asks what is in the formula and why it is safer.',
+        ],
+        takeaway: 'For a professional product range, ingredient transparency is no longer a premium feature. It is a minimum baseline for trust and risk management.',
+      },
+      {
+        title: 'What to Look For When Switching to TPO-Free',
+        paragraphs: [
+          'Not every “TPO-free” claim is equally verifiable. Ask for the CPNP notification reference, confirm the full INCI declaration and check that the ingredient list is genuinely free from TPO and related acylphosphine oxide photoinitiators.',
+          'If a supplier is vague, treat that as a no. A product range that can confidently explain its photoinitiator package, confirm EU compliance and show visible manufacturing standards is the one worth building your service menu around.',
+        ],
+      },
+      {
+        title: 'The Combined Risk of HEMA and TPO',
+        paragraphs: [
+          'HEMA and TPO are separate molecules with separate sensitisation pathways, but they frequently appear together in standard gel systems. A formula that removes HEMA but retains TPO still leaves a sensitisation risk in place. A formula that removes TPO but retains HEMA still leaves a different one. The professional standard is increasingly both-free.',
+          'Acts of reformulation are no longer a niche innovation. They are the market response to where science and European regulation are converging. The brands that move first are not simply “ahead of the trend”; they are lower-risk, more trusted and easier to defend in a compliance-conscious market.',
+        ],
+      },
+    ],
+    verdict: {
+      title: 'The Bottom Line',
+      paragraphs: [
+        'TPO is not a minor ingredient detail. It is one of the core photoinitiators in many conventional gel systems, and it is now being revisited through the lens of occupational health, client safety and EU compliance.',
+        'A salon selecting TPO-free, HEMA-free and CPNP-notified products is choosing a safer, more resilient, more future-proof formulation strategy. That is the direction professional nail services are moving in.',
+      ],
+    },
+  },
   {
     slug: 'why-ingredient-labels-matter',
     category: 'Ingredients & compliance',
