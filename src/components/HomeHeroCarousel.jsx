@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom'
 
 const SLIDE_MS = 5000
 const IMG_BASE = '/gelitup-content/banner-images'
+const SHOP_PRODUCTS_URL = 'https://shop.gelitup.com/pages/ourproducts'
 
 const BANNERS = [
   {
@@ -34,7 +35,7 @@ const BANNERS = [
     title: '1,000+ Gel Colours',
     sub: 'Every shade, undertone and finish.',
     cta: 'Shop Colours',
-    to: '/full-catalogue?category=colours',
+    to: SHOP_PRODUCTS_URL,
   },
   {
     img: `${IMG_BASE}/top-bases-catalog-hero-image.webp`,
@@ -168,7 +169,13 @@ export default function HomeHeroCarousel() {
           <div className="mt-6">
             <button
               type="button"
-              onClick={() => navigate(slide.to)}
+              onClick={() => {
+                if (/^https?:\/\//i.test(slide.to)) {
+                  window.location.assign(slide.to)
+                  return
+                }
+                navigate(slide.to)
+              }}
               className="inline-flex items-center gap-2 rounded-lg bg-[#D43790] px-6 py-2.5 text-sm font-bold text-white transition hover:bg-[#BF3182]"
             >
               {slide.cta}

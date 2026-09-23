@@ -677,8 +677,25 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
   }, [activePage])
 
   const heroMedia = previewMedia[0] || null
+  const isContactUsPage = slug === 'contact-us'
+  const contactDetails = useMemo(() => ({
+    address: '8 Racho Dimchev, Sofia, Bulgaria',
+    email: 'info@gelitup.com',
+    backupEmail: 'distribution@gelitup.com',
+    phone: '(+359) 73 891 041',
+  }), [])
   const galleryMedia = previewMedia.slice(1, 7)
-  const quickLinks = (activePage?.links || []).slice(0, 8)
+  const quickLinks = isContactUsPage
+    ? [
+        { text: contactDetails.email, href: `mailto:${contactDetails.email}` },
+        { text: contactDetails.backupEmail, href: `mailto:${contactDetails.backupEmail}` },
+        { text: contactDetails.phone, href: `tel:+35973891041` },
+      ]
+    : (activePage?.links || []).slice(0, 8)
+  const heroParagraphs = isContactUsPage
+    ? [contactDetails.address, contactDetails.email, contactDetails.phone]
+    : structuredContent.heroParagraphs
+  const heroMediaPreview = isContactUsPage ? null : heroMedia
 
   if (isLoading) {
     return <p className="text-sm text-slate-600">Loading page baseline...</p>
@@ -960,7 +977,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
             <p className="mt-2 text-sm font-semibold text-slate-200">{structuredContent.heroSubtitle}</p>
           )}
           <div className="mt-3 space-y-2">
-            {structuredContent.heroParagraphs.map((paragraph) => (
+            {heroParagraphs.map((paragraph) => (
               <p key={paragraph} className="text-sm text-slate-200">{paragraph}</p>
             ))}
           </div>
@@ -972,12 +989,12 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
         </div>
 
         <div>
-          {heroMedia && (heroMedia.displayUrl.toLowerCase().includes('.mp4') || heroMedia.displayUrl.toLowerCase().includes('.webm'))
+          {heroMediaPreview && (heroMediaPreview.displayUrl.toLowerCase().includes('.mp4') || heroMediaPreview.displayUrl.toLowerCase().includes('.webm'))
             ? (
-              <video src={heroMedia.displayUrl} className="h-52 w-full rounded-xl object-cover sm:h-60" muted playsInline controls />
+              <video src={heroMediaPreview.displayUrl} className="h-52 w-full rounded-xl object-cover sm:h-60" muted playsInline controls />
             )
-            : heroMedia
-              ? <img src={heroMedia.displayUrl} alt="Page hero media" className="h-52 w-full rounded-xl object-cover sm:h-60" loading="lazy" />
+            : heroMediaPreview
+              ? <img src={heroMediaPreview.displayUrl} alt="Page hero media" className="h-52 w-full rounded-xl object-cover sm:h-60" loading="lazy" onError={(event) => { event.currentTarget.src = '/logo.png' }} />
               : <div className="h-52 w-full rounded-xl bg-slate-800 sm:h-60" />}
         </div>
       </div>

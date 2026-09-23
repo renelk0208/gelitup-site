@@ -7186,6 +7186,7 @@ const navItems = [
   { to: '/blog', label: 'Blog' },
   { to: '/guestbook', label: 'Guestbook' },
   { to: '/studio-one', label: 'Studio One' },
+  { href: '/gelitup-compliance-certification.html', label: 'Compliance' },
   { to: '/about-us', label: 'About us' },
   { to: '/for-academies', label: 'Academies' },
   { to: '/distributor-packages', label: 'Distribution' },
@@ -7255,6 +7256,19 @@ function MainMenu() {
       {open && (
         <div className="absolute right-0 top-[calc(100%+0.55rem)] z-50 w-64 rounded-2xl border border-white/15 bg-[#111111] p-2 shadow-[0_18px_48px_rgba(0,0,0,0.38)] backdrop-blur-xl">
           {menuItems.map((item) => {
+            if (item.href) {
+              return (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className="block rounded-lg px-3 py-2 text-sm font-semibold text-white transition duration-200 hover:bg-white/10"
+                >
+                  {item.label}
+                </a>
+              )
+            }
+
             if (item.to === '/pages/contact-us') {
               return (
                 <button
@@ -7331,6 +7345,13 @@ function Nav() {
       >
         Studio One
       </NavLink>
+
+      <a
+        href="/gelitup-compliance-certification.html"
+        className="rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] transition duration-300 !text-white/75 hover:bg-white/10 hover:!text-white"
+      >
+        Compliance
+      </a>
 
       <MainMenu />
 
@@ -7409,18 +7430,29 @@ function MobileNav() {
           </a>
 
           {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              onClick={() => setOpen(false)}
-              className={({ isActive }) =>
-                `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
-                  isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
-                }`
-              }
-            >
-              {item.label}
-            </NavLink>
+            item.href ? (
+              <a
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className="block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 !text-white/75 hover:bg-white/10 hover:!text-white"
+              >
+                {item.label}
+              </a>
+            ) : (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={() => setOpen(false)}
+                className={({ isActive }) =>
+                  `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+                    isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
+                  }`
+                }
+              >
+                {item.label}
+              </NavLink>
+            )
           ))}
         </nav>
       </div>
