@@ -7346,13 +7346,6 @@ function Nav() {
         Studio One
       </NavLink>
 
-      <a
-        href="/gelitup-compliance-certification.html"
-        className="rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] transition duration-300 !text-white/75 hover:bg-white/10 hover:!text-white"
-      >
-        Compliance
-      </a>
-
       <MainMenu />
 
       <a

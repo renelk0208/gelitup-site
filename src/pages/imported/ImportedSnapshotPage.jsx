@@ -5,7 +5,6 @@ import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import InspirationTeaser from '../../components/InspirationTeaser'
 import InstagramFeed from '../../components/InstagramFeed'
 import TikTokFeed from '../../components/TikTokFeed'
-import HomeHeroCarousel from '../../components/HomeHeroCarousel'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/gelitupinternational/'
 const INSTAGRAM_HANDLE = 'gelitupinternational'
@@ -721,10 +720,10 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
     const sortedExhibitionEvents = sortEventsByDate(aboutUsExhibitions.events || [])
 
     return (
-      <section className="space-y-6">
+      <section className="space-y-4">
         <section className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] -mt-4 w-screen overflow-hidden bg-[#151116] text-white md:-mt-10">
-          <div className="grid min-h-[520px] lg:grid-cols-2">
-            <div className="relative min-h-[300px] lg:order-2 lg:min-h-full">
+          <div className="mx-auto grid max-w-5xl items-stretch lg:grid-cols-[1fr_0.9fr]">
+            <div className="relative min-h-[220px] lg:order-2 lg:min-h-full">
               <img
                 src={ABOUT_US_HERO_IMAGE_URL}
                 alt="GEL.IT.UP by GIUP professional nail products"
@@ -733,13 +732,13 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
               <div className="absolute inset-0 bg-gradient-to-t from-[#151116]/75 via-transparent to-transparent lg:bg-gradient-to-r lg:from-[#151116]/35 lg:to-transparent" />
             </div>
 
-            <div className="flex items-center px-5 py-12 sm:px-8 sm:py-16 lg:px-12 xl:px-[max(3rem,calc((100vw-80rem)/2))]">
-              <div className="max-w-2xl">
+            <div className="flex items-center px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+              <div className="max-w-lg">
                 <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#f168ae]">Who we are</p>
-                <h1 className="heading-on-dark mt-4 text-4xl font-black uppercase leading-[1.08] tracking-[0.04em] sm:text-5xl">
+                <h1 className="heading-on-dark mt-3 text-2xl font-black uppercase leading-[1.06] tracking-[0.04em] sm:text-3xl lg:text-4xl">
                   Professional colour. Built on science since 2011.
                 </h1>
-                <div className="mt-6 space-y-4 text-base leading-7 text-white/80 sm:text-lg sm:leading-8">
+                <div className="mt-4 space-y-2.5 text-xs leading-6 text-white/80 sm:text-sm sm:leading-6">
                   <p>
                     GEL.IT.UP by GIUP® is a professional nail brand created for nail technicians,
                     salons, educators and distributors who expect dependable performance, safer
@@ -758,17 +757,17 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                   </p>
                 </div>
 
-                <dl className="mt-8 grid grid-cols-3 gap-3 border-t border-white/15 pt-6">
+                <dl className="mt-6 grid grid-cols-3 gap-2 border-t border-white/15 pt-4">
                   <div>
-                    <dt className="text-2xl font-black text-white sm:text-3xl">2011</dt>
+                    <dt className="text-lg font-black text-white sm:text-xl">2011</dt>
                     <dd className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-white/55">Our journey began</dd>
                   </div>
                   <div>
-                    <dt className="text-2xl font-black text-white sm:text-3xl">1,000+</dt>
+                    <dt className="text-lg font-black text-white sm:text-xl">1,000+</dt>
                     <dd className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-white/55">Professional shades</dd>
                   </div>
                   <div>
-                    <dt className="text-2xl font-black text-white sm:text-3xl">9+</dt>
+                    <dt className="text-lg font-black text-white sm:text-xl">9+</dt>
                     <dd className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-white/55">Countries served</dd>
                   </div>
                 </dl>
@@ -777,19 +776,25 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           </div>
         </section>
 
-        <HomeHeroCarousel />
-
-        <div className="rounded-2xl border border-[#E8E8E8] bg-transparent p-5 sm:p-8">
-          <p
-            className="text-2xl font-extrabold uppercase leading-tight tracking-[0.15em] text-[#1A1A1A] sm:text-4xl"
-            style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
-          >
-            THE ARCHITECTS OF PROFESSIONAL COLOR.
-          </p>
-          <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#D43790]">CLEAN SCIENCE</p>
-          <p className="mt-2 text-sm leading-relaxed text-[#1A1A1A] sm:text-base">
-            100% HEMA &amp; TPO Free chemistry engineered for professional confidence.
-          </p>
+        <div className="grid gap-3 rounded-2xl border border-[#E8E8E8] bg-transparent p-4 sm:grid-cols-3">
+          <div className="sm:col-span-2">
+            <p
+              className="text-lg font-extrabold uppercase leading-tight tracking-[0.15em] text-[#1A1A1A] sm:text-2xl"
+              style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
+            >
+              THE ARCHITECTS OF PROFESSIONAL COLOR.
+            </p>
+            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#D43790]">CLEAN SCIENCE</p>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#1A1A1A]">
+              100% HEMA &amp; TPO Free chemistry engineered for professional confidence.
+            </p>
+          </div>
+          <div className="grid gap-1.5 self-start rounded-2xl bg-white/60 p-3 text-[#1A1A1A]">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Brand pillars</p>
+            <p className="text-xs font-semibold sm:text-sm">Professional-only products</p>
+            <p className="text-xs font-semibold sm:text-sm">Regulatory discipline</p>
+            <p className="text-xs font-semibold sm:text-sm">Colour-led education</p>
+          </div>
         </div>
 
         {/* ── Instagram Feed ───────────────────────────────────────────── */}
@@ -868,21 +873,21 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
             )}
             <div className="absolute inset-0 bg-[#1A1A1A]/76" />
 
-            <div className="relative mx-auto max-w-6xl">
-              <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-8 grid-cols-1">
-                <div className="rounded-2xl border border-white/15 bg-black/30 p-5 sm:p-6">
-                  <p className="text-3xl font-black uppercase tracking-[0.18em] !text-[#D43790] drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-4xl">Exhibitions</p>
-                  <h2 className="mt-2 text-2xl font-extrabold uppercase tracking-[0.12em] !text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.65)] sm:text-3xl">{aboutUsExhibitions.title}</h2>
+            <div className="relative mx-auto max-w-5xl">
+              <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,460px)] lg:gap-6 grid-cols-1">
+                <div className="rounded-2xl border border-white/15 bg-black/30 p-4 sm:p-5">
+                  <p className="text-2xl font-black uppercase tracking-[0.18em] !text-[#D43790] drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] sm:text-3xl">Exhibitions</p>
+                  <h2 className="mt-2 text-xl font-extrabold uppercase tracking-[0.12em] !text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.65)] sm:text-2xl">{aboutUsExhibitions.title}</h2>
                   <p className="mt-4 max-w-2xl text-sm leading-relaxed !text-white/95 drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)] sm:text-base">{aboutUsExhibitions.introText}</p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {sortedExhibitionEvents.filter(e => new Date(e.endDate || e.startDate) >= new Date()).map((event, index) => (
-                    <article key={event.id || `${event.name}-${index}`} className="overflow-hidden rounded-2xl border border-white/15 bg-black/30 p-4 sm:p-5">
-                      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_240px]">
+                    <article key={event.id || `${event.name}-${index}`} className="overflow-hidden rounded-2xl border border-white/15 bg-black/30 p-3.5 sm:p-4">
+                      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
                         <div>
                           <p className="text-xs font-semibold uppercase tracking-[0.15em] !text-[#D43790]">Exhibition {index + 1}</p>
-                          <h3 className="mt-1 text-xl font-extrabold uppercase tracking-[0.08em] !text-white">{event.name}</h3>
+                          <h3 className="mt-1 text-lg font-extrabold uppercase tracking-[0.08em] !text-white sm:text-xl">{event.name}</h3>
                           <p className="mt-2 text-sm font-semibold uppercase tracking-[0.08em] !text-white">{formatEventDateRange(event.startDate, event.endDate)}</p>
                           {event.location && <p className="mt-1 text-sm !text-white/90">{event.location}</p>}
                           {event.stand && <p className="mt-2 text-sm font-bold uppercase tracking-[0.06em] !text-white">{event.stand}</p>}
@@ -904,7 +909,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                             <img
                               src={event.imageUrl}
                               alt={event.name}
-                              className="h-44 w-full object-contain sm:h-52"
+                              className="h-36 w-full object-contain sm:h-40"
                               loading="lazy"
                               draggable="false"
                               onContextMenu={e => e.preventDefault()}
@@ -924,25 +929,25 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
         ) : null}
 
         {/* ── Compliance Certification ─────────────────────────────────── */}
-        <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-gradient-to-r from-[#D43790]/10 to-[#1A1A1A]/10 px-4 py-10 sm:px-8 sm:py-12">
-          <div className="mx-auto max-w-6xl">
-            <div className="rounded-2xl border border-[#D43790]/30 bg-black/40 p-6 sm:p-8 backdrop-blur">
-              <div className="flex items-start gap-4 sm:gap-6">
+        <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-gradient-to-r from-[#D43790]/10 to-[#1A1A1A]/10 px-4 py-8 sm:px-8 sm:py-10">
+          <div className="mx-auto max-w-5xl">
+            <div className="rounded-2xl border border-[#D43790]/30 bg-black/40 p-5 backdrop-blur sm:p-6">
+              <div className="flex items-start gap-3 sm:gap-4">
                 <div className="flex-shrink-0">
-                  <svg className="h-8 w-8 text-[#D43790] sm:h-10 sm:w-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="h-7 w-7 text-[#D43790] sm:h-8 sm:w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor" />
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-extrabold uppercase tracking-[0.08em] text-white sm:text-2xl">Full Compliance Documentation</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-white/90 sm:text-base">
+                  <h3 className="text-lg font-extrabold uppercase tracking-[0.08em] text-white sm:text-xl">Full Compliance Documentation</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/90">
                     EU-certified, HEMA-free and TPO-free products with complete compliance documentation for packaging, safety data sheets, and regulatory certifications.
                   </p>
                   <a
                     href="/gelitup-compliance-certification.html"
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-4 inline-flex rounded-lg bg-[#D43790] px-5 py-2.5 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]"
+                    className="mt-3 inline-flex rounded-lg bg-[#D43790] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.06em] text-white transition duration-300 hover:bg-[#BF3182]"
                   >
                     View Compliance Details →
                   </a>
