@@ -1,6 +1,7 @@
 const INGREDIENT_LABELS_MEDIA = '/gelitup-media/blog/why-ingredient-labels-matter'
 const TPO_GUIDE_MEDIA = '/gelitup-media/blog/tpo-guide'
 const HEMA_GUIDE_MEDIA = '/gelitup-media/blog/what-is-hema-in-gel-polish'
+const WHAT_SETS_US_APART_MEDIA = '/gelitup-media/blog/what-makes-us-different'
 
 export const blogPosts = [
   {
@@ -74,10 +75,10 @@ export const blogPosts = [
     publishedAt: '2026-09-24',
     publishedLabel: '24 September 2026',
     readTime: '6 min read',
-    heroImage: `${TPO_GUIDE_MEDIA}/hero.png`,
-    calloutImage: `${TPO_GUIDE_MEDIA}/hero.png`,
+    heroImage: `${TPO_GUIDE_MEDIA}/hero.jpg`,
+    calloutImage: `${TPO_GUIDE_MEDIA}/hero.jpg`,
     calloutAlt: 'TPO-free formulations are becoming the new standard for professional nail services.',
-    closingImage: `${TPO_GUIDE_MEDIA}/hero.png`,
+    closingImage: `${TPO_GUIDE_MEDIA}/hero.jpg`,
     closingAlt: 'Explore the GEL.IT.UP TPO-free, HEMA-free and CPNP-notified range.',
     ctaLabel: 'Explore the Full Catalogue — gelitup.com',
     ctaUrl: 'https://shop.gelitup.com/pages/ourproducts',
@@ -143,6 +144,76 @@ export const blogPosts = [
     },
   },
   {
+    slug: 'what-sets-gelitup-apart',
+    category: 'Brand Standards & Ethics',
+    title: 'What Sets GEL.IT.UP Apart: The Standard Every Professional Nail Brand Should Be Held To',
+    shortTitle: 'What sets GEL.IT.UP apart?',
+    excerpt: 'Why professionals choose GEL.IT.UP: professional-only access, HEMA-free and TPO-free formulas, Leaping Bunny certification, and direct 1-on-1 support.',
+    metaTitle: 'What Sets GEL.IT.UP Apart | Professional Nail Brand Standards',
+    metaDescription: 'Discover what makes GEL.IT.UP the professional nail brand of choice: certified cruelty-free standards, safer formulations, compliance, and genuine support.',
+    publishedAt: '2026-09-23',
+    publishedLabel: '23 September 2026',
+    readTime: '7 min read',
+    heroImage: `${WHAT_SETS_US_APART_MEDIA}/hero.jpg`,
+    calloutImage: `${WHAT_SETS_US_APART_MEDIA}/hero.jpg`,
+    calloutAlt: 'What sets GEL.IT.UP apart: standards, ethics, and professional support.',
+    calloutAfterSection: 2,
+    closingImage: `${WHAT_SETS_US_APART_MEDIA}/hero.jpg`,
+    closingAlt: 'Explore GEL.IT.UP professional products built to higher standards.',
+    ctaLabel: 'Explore the Full Catalogue — shop.gelitup.com',
+    ctaUrl: 'https://shop.gelitup.com/pages/ourproducts',
+    tags: ['Professional-Only', 'HEMA-Free', 'TPO-Free', 'Leaping Bunny'],
+    intro: [
+      'There are thousands of gel polish brands on the market, but very few are built exclusively around professional standards from top to bottom.',
+      'This guide explains what makes GEL.IT.UP different in real operational terms: formulation policy, certification scope, support model, and distributor practice.',
+    ],
+    sections: [
+      {
+        title: 'A Professional-Only Brand by Design',
+        paragraphs: [
+          'GEL.IT.UP sells to nail technicians, salons, academies, and resellers only. This protects professional credibility and keeps product use aligned with trained application and curing standards.',
+          'Rather than mixing consumer and pro positioning, the system is designed for professional workflows from formulation to documentation.',
+        ],
+      },
+      {
+        title: '1,000+ Shades Under One Safety Standard',
+        paragraphs: [
+          'A large catalogue only matters if quality is consistent across every SKU. GEL.IT.UP maintains one compliance baseline across the full range.',
+          'Products are formulated HEMA-free and TPO-free, aligned with EU requirements, and manufactured under GMP-oriented quality controls.',
+        ],
+        takeaway: 'Consistency across base, colour, builder, and top layers is what makes a system reliably professional.',
+      },
+      {
+        title: 'Leaping Bunny Certification Across the Supply Chain',
+        paragraphs: [
+          'Leaping Bunny coverage is not just a final-label claim. It extends through ingredient sourcing and manufacturing pathways.',
+          'For salons and distributors, this gives independently verified evidence of cruelty-free practice rather than marketing-only language.',
+        ],
+      },
+      {
+        title: 'Commercial Terms and Support That Fit Real Salons',
+        paragraphs: [
+          'No minimum order and straightforward access terms make stocking practical for both solo technicians and larger academy or reseller operations.',
+          'Support is delivered through direct channels, enabling faster answers for day-to-day technical or product questions.',
+        ],
+      },
+      {
+        title: 'Long-Term Reliability for Professionals',
+        paragraphs: [
+          'Founded in 2011, GEL.IT.UP has built a multi-country professional network by pairing formulation quality with compliance discipline.',
+          'For professionals, that means clearer product decisions, better risk control, and stronger client confidence over time.',
+        ],
+      },
+    ],
+    verdict: {
+      title: 'The Standard Worth Expecting',
+      paragraphs: [
+        'Professional-only access, safer ingredient policy, verified ethics, and real support should be baseline expectations from any serious nail supplier.',
+        'GEL.IT.UP is built around those standards as an operating model, not as occasional campaign messaging.',
+      ],
+    },
+  },
+  {
     slug: 'why-ingredient-labels-matter',
     category: 'Ingredients & compliance',
     title: 'Why Ingredient Labels Matter More Than Ever',
@@ -154,7 +225,7 @@ export const blogPosts = [
     publishedAt: '2026-08-26',
     publishedLabel: '26 August 2026',
     readTime: '7 min read',
-    heroImage: `${INGREDIENT_LABELS_MEDIA}/hero.webp`,
+    heroImage: `${INGREDIENT_LABELS_MEDIA}/hero.jpg`,
     calloutImage: `${INGREDIENT_LABELS_MEDIA}/callout.webp`,
     calloutAlt: 'Ingredient transparency is the foundation of safer, compliant professional nail services.',
     calloutAfterSection: 3,
@@ -224,85 +295,6 @@ export const blogPosts = [
       paragraphs: [
         'HEMA-free and TPO-free gel polish is not a downgrade in performance. It is an upgrade in safety, compliance, and professional credibility. For the salon owner, stocking compliant formulations removes a growing regulatory risk. For the distributor, it unlocks a wider sales channel across EU markets. And for the individual nail technician, it means less sensitisation risk over a career of daily application.',
         'GEL.IT.UP has built its entire product line around this principle. The HEMA-free, TPO-free and silver-free standard represents a formulation decision that puts technician safety and regulatory compliance on the same level as colour payoff and durability.',
-      ],
-    },
-  },
-  {
-    slug: 'what-is-tpo-in-gel-nails',
-    category: 'Ingredients & compliance',
-    title: 'What is TPO in Gel Nails? Why It’s Being Removed from Professional Formulas',
-    shortTitle: 'What is TPO in Gel Nails?',
-    excerpt: 'Learn what TPO is, why it is under EU regulatory pressure, and why more professional nail brands are removing it from gel systems.',
-    metaTitle: 'What Is TPO in Gel Nails? Why Professional Brands Are Removing It',
-    metaDescription: 'Understand TPO in gel polish, why it is drawing EU scrutiny, and why professional nail brands are switching to safer, TPO-free formulas.',
-    publishedAt: '2026-08-31',
-    publishedLabel: '31 August 2026',
-    readTime: '6 min read',
-    heroImage: `${TPO_GUIDE_MEDIA}/hero.png`,
-    calloutImage: `${TPO_GUIDE_MEDIA}/hero.png`,
-    calloutAlt: 'TPO-free formulations are becoming the new standard for professional nail services.',
-    closingImage: `${TPO_GUIDE_MEDIA}/hero.png`,
-    closingAlt: 'Explore the GEL.IT.UP TPO-free, HEMA-free and CPNP-notified range.',
-    ctaLabel: 'Explore the Full Catalogue — gelitup.com',
-    ctaUrl: 'https://shop.gelitup.com/pages/ourproducts',
-    tags: ['TPO-Free', 'HEMA-Free', 'EU Compliant'],
-    intro: [
-      'Until recently, most nail professionals had never heard of TPO. That is changing fast.',
-      'Trimethylbenzoyl Diphenylphosphine Oxide — TPO — is one of the photoinitiators responsible for curing gel polish under UV and LED lamps. It has been a standard component of gel nail formulations for years, but it is now under growing regulatory attention in the EU and a reformulation wave among professional brands.',
-      'This guide explains what TPO is, why the concerns are growing, what the EU regulatory position looks like, and what “TPO-free” meaningfully means for professional practice.',
-    ],
-    sections: [
-      {
-        title: 'What Is TPO?',
-        paragraphs: [
-          'TPO stands for Trimethylbenzoyl Diphenylphosphine Oxide. Its full INCI name is Diphenyl(2,4,6-trimethylbenzoyl)phosphine oxide. It belongs to the acylphosphine oxide class of photoinitiators.',
-          'Its function in gel nail products is to initiate polymerisation. When UV or LED light hits a TPO molecule, it absorbs the energy and generates reactive free radicals. Those radicals trigger the curing reaction that transforms the gel from a liquid monomer system into a solid, cross-linked polymer.',
-          'TPO is particularly efficient under LED lamps, which is part of the reason it became so common as the industry moved from UV to LED curing systems. From a pure formulation-performance standpoint, TPO works. The question is what else it does.',
-        ],
-      },
-      {
-        title: 'Why TPO Is Being Removed from Professional Formulas',
-        paragraphs: [
-          'The primary documented concern with TPO is photoallergy and skin sensitisation. Photoallergy is a specific immune-mediated reaction that occurs when a sensitising molecule requires UV or visible light exposure to trigger a response. In practical terms, skin contact with a TPO-containing product followed by UV or LED light exposure during curing can sensitise a person. Once sensitised, later exposure often triggers an allergic reaction.',
-          'TPO has also been identified as a contact sensitiser independent of photoactivation, although the photoallergic pathway remains the main concern in gel nail settings. The combination of skin contact during application, proximity to the light source and repeated service appointments creates a serious sensitisation profile for professionals and clients alike.',
-        ],
-        takeaway: 'The deeper issue is not just a single service. It is repeated workday exposure, repeated sensitisation and the cumulative burden that builds across a salon team and client base.',
-      },
-      {
-        title: 'The EU Regulatory Position',
-        paragraphs: [
-          'The EU’s Scientific Committee on Consumer Safety (SCCS) has assessed photoinitiators used in nail products, including acylphosphine oxide compounds in the TPO family. The direction of those assessments, combined with the EU Cosmetics Regulation’s precautionary approach to skin sensitizers, has placed TPO on a regulatory trajectory toward restriction or removal from cosmetic products.',
-          'Under EU Cosmetics Regulation (EC) No 1223/2009, substances identified as skin sensitizers or posing unacceptable risk can be added to Annex II or Annex III. Professional brands formulating for the EU market that tracked SCCS opinions had advance notice that TPO’s regulatory status was under active review. Those that reformulated early are now positioned on the right side of the compliance curve.',
-        ],
-      },
-      {
-        title: 'What TPO-Free Means for Professional Practice',
-        paragraphs: [
-          'Removing TPO is not a compromise in quality when the formulation is well balanced. A TPO-free gel that is designed for standard LED lamps can still cure completely, maintain durability and deliver the same professional finish clients expect.',
-          'It creates a safety advantage for clients, a lower occupational risk for technicians and a stronger long-term future-proof position for salons and distributors. A product that is TPO-free, HEMA-free and CPNP-notified gives you a clear answer when a client asks what is in the formula and why it is safer.',
-        ],
-        takeaway: 'For a professional product range, ingredient transparency is no longer a premium feature. It is a minimum baseline for trust and risk management.',
-      },
-      {
-        title: 'What to Look For When Switching to TPO-Free',
-        paragraphs: [
-          'Not every “TPO-free” claim is equally verifiable. Ask for the CPNP notification reference, confirm the full INCI declaration and check that the ingredient list is genuinely free from TPO and related acylphosphine oxide photoinitiators.',
-          'If a supplier is vague, treat that as a no. A product range that can confidently explain its photoinitiator package, confirm EU compliance and show visible manufacturing standards is the one worth building your service menu around.',
-        ],
-      },
-      {
-        title: 'The Combined Risk of HEMA and TPO',
-        paragraphs: [
-          'HEMA and TPO are separate molecules with separate sensitisation pathways, but they frequently appear together in standard gel systems. A formula that removes HEMA but retains TPO still leaves a sensitisation risk in place. A formula that removes TPO but retains HEMA still leaves a different one. The professional standard is increasingly both-free.',
-          'Acts of reformulation are no longer a niche innovation. They are the market response to where science and European regulation are converging. The brands that move first are not simply “ahead of the trend”; they are lower-risk, more trusted and easier to defend in a compliance-conscious market.',
-        ],
-      },
-    ],
-    verdict: {
-      title: 'The Bottom Line',
-      paragraphs: [
-        'TPO is not a minor ingredient detail. It is one of the core photoinitiators in many conventional gel systems, and it is now being revisited through the lens of occupational health, client safety and EU compliance.',
-        'For salons, technicians and distributors, the right move is to choose a TPO-free, HEMA-free range with documented EU compliance. GEL.IT.UP has built its system around that principle — and it is now one of the clearest ways to future-proof both safety and reputation.',
       ],
     },
   },

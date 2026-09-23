@@ -7195,6 +7195,8 @@ const navItems = [
   { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
 ]
 
+const sortHamburgerMenuItems = (items) => [...items].sort((left, right) => left.label.localeCompare(right.label, undefined, { sensitivity: 'base' }))
+
 // "Our Products" mega-menu. Category links use ?category= (scrolls to the
 // catalogue section); subcategory links use ?subcategory= (selects and scrolls
 // straight to that subcategory). Both are handled by FullCataloguePage.
@@ -7234,7 +7236,7 @@ function MainMenu() {
 
   useEffect(() => { setOpen(false) }, [location.pathname, location.search])
 
-  const menuItems = navItems.filter((item) => item.to !== '/blog' && item.to !== '/guestbook')
+  const menuItems = sortHamburgerMenuItems(navItems.filter((item) => item.to !== '/blog' && item.to !== '/guestbook'))
 
   return (
     <div className="relative">
@@ -7422,7 +7424,7 @@ function MobileNav() {
             SHOP NOW!
           </a>
 
-          {navItems.map((item) => (
+          {sortHamburgerMenuItems(navItems).map((item) => (
             item.href ? (
               <a
                 key={item.href}

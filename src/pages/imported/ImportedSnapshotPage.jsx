@@ -4,6 +4,7 @@ import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import InspirationTeaser from '../../components/InspirationTeaser'
 import InstagramFeed from '../../components/InstagramFeed'
+import HomeHeroCarousel from '../../components/HomeHeroCarousel'
 import TikTokFeed from '../../components/TikTokFeed'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/gelitupinternational/'
@@ -720,10 +721,10 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
     const sortedExhibitionEvents = sortEventsByDate(aboutUsExhibitions.events || [])
 
     return (
-      <section className="space-y-4">
+      <section className="space-y-6">
         <section className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] -mt-4 w-screen overflow-hidden bg-[#151116] text-white md:-mt-10">
-          <div className="mx-auto grid max-w-5xl items-stretch lg:grid-cols-[1fr_0.9fr]">
-            <div className="relative min-h-[220px] lg:order-2 lg:min-h-full">
+          <div className="grid min-h-[520px] lg:grid-cols-2">
+            <div className="relative min-h-[300px] lg:order-2 lg:min-h-full">
               <img
                 src={ABOUT_US_HERO_IMAGE_URL}
                 alt="GEL.IT.UP by GIUP professional nail products"
@@ -732,13 +733,13 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
               <div className="absolute inset-0 bg-gradient-to-t from-[#151116]/75 via-transparent to-transparent lg:bg-gradient-to-r lg:from-[#151116]/35 lg:to-transparent" />
             </div>
 
-            <div className="flex items-center px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-              <div className="max-w-lg">
+            <div className="flex items-center px-5 py-12 sm:px-8 sm:py-16 lg:px-12 xl:px-[max(3rem,calc((100vw-80rem)/2))]">
+              <div className="max-w-2xl">
                 <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#f168ae]">Who we are</p>
-                <h1 className="heading-on-dark mt-3 text-2xl font-black uppercase leading-[1.06] tracking-[0.04em] sm:text-3xl lg:text-4xl">
+                <h1 className="heading-on-dark mt-4 text-4xl font-black uppercase leading-[1.08] tracking-[0.04em] sm:text-5xl">
                   Professional colour. Built on science since 2011.
                 </h1>
-                <div className="mt-4 space-y-2.5 text-xs leading-6 text-white/80 sm:text-sm sm:leading-6">
+                <div className="mt-6 space-y-4 text-base leading-7 text-white/80 sm:text-lg sm:leading-8">
                   <p>
                     GEL.IT.UP by GIUP® is a professional nail brand created for nail technicians,
                     salons, educators and distributors who expect dependable performance, safer
@@ -757,17 +758,17 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                   </p>
                 </div>
 
-                <dl className="mt-6 grid grid-cols-3 gap-2 border-t border-white/15 pt-4">
+                <dl className="mt-8 grid grid-cols-3 gap-3 border-t border-white/15 pt-6">
                   <div>
-                    <dt className="text-lg font-black text-white sm:text-xl">2011</dt>
+                    <dt className="text-2xl font-black text-white sm:text-3xl">2011</dt>
                     <dd className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-white/55">Our journey began</dd>
                   </div>
                   <div>
-                    <dt className="text-lg font-black text-white sm:text-xl">1,000+</dt>
+                    <dt className="text-2xl font-black text-white sm:text-3xl">1,000+</dt>
                     <dd className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-white/55">Professional shades</dd>
                   </div>
                   <div>
-                    <dt className="text-lg font-black text-white sm:text-xl">9+</dt>
+                    <dt className="text-2xl font-black text-white sm:text-3xl">9+</dt>
                     <dd className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-white/55">Countries served</dd>
                   </div>
                 </dl>
@@ -776,24 +777,20 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           </div>
         </section>
 
-        <div className="grid gap-3 rounded-2xl border border-[#E8E8E8] bg-transparent p-4 sm:grid-cols-3">
+        <HomeHeroCarousel />
+
+        <div className="rounded-2xl border border-[#E8E8E8] bg-transparent p-5 sm:p-8">
           <div className="sm:col-span-2">
             <p
-              className="text-lg font-extrabold uppercase leading-tight tracking-[0.15em] text-[#1A1A1A] sm:text-2xl"
+              className="text-2xl font-extrabold uppercase leading-tight tracking-[0.15em] text-[#1A1A1A] sm:text-4xl"
               style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}
             >
               THE ARCHITECTS OF PROFESSIONAL COLOR.
             </p>
-            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#D43790]">CLEAN SCIENCE</p>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#1A1A1A]">
+            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#D43790]">CLEAN SCIENCE</p>
+            <p className="mt-2 text-sm leading-relaxed text-[#1A1A1A] sm:text-base">
               100% HEMA &amp; TPO Free chemistry engineered for professional confidence.
             </p>
-          </div>
-          <div className="grid gap-1.5 self-start rounded-2xl bg-white/60 p-3 text-[#1A1A1A]">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Brand pillars</p>
-            <p className="text-xs font-semibold sm:text-sm">Professional-only products</p>
-            <p className="text-xs font-semibold sm:text-sm">Regulatory discipline</p>
-            <p className="text-xs font-semibold sm:text-sm">Colour-led education</p>
           </div>
         </div>
 
