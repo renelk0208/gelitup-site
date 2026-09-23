@@ -473,6 +473,28 @@ export default function PrivateLabelPage() {
         </p>
       </header>
 
+      <section className="mb-10 rounded-2xl border border-[#D43790]/20 bg-gradient-to-br from-white to-[#fff8fc] p-5 sm:p-6">
+        <h2 className="text-xl font-semibold text-neutral-900">What is Studio One?</h2>
+        <p className="mt-3 text-sm leading-relaxed text-neutral-600">
+          Studio One is GEL.IT.UP&apos;s private-label programme for nail technicians, salons and academies who want
+          to sell professional gel products under their own brand name while keeping the proven GEL.IT.UP formula.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border border-black/5 bg-white p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9B1268]">Step 1</p>
+            <p className="mt-1 text-sm font-medium text-neutral-800">Submit your details and logo</p>
+          </div>
+          <div className="rounded-xl border border-black/5 bg-white p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9B1268]">Step 2</p>
+            <p className="mt-1 text-sm font-medium text-neutral-800">Build your colour and essentials order</p>
+          </div>
+          <div className="rounded-xl border border-black/5 bg-white p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9B1268]">Step 3</p>
+            <p className="mt-1 text-sm font-medium text-neutral-800">Get approval and complete checkout</p>
+          </div>
+        </div>
+      </section>
+
       <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-12">
         {/* Left column: registration + logo */}
         <div>
