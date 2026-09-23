@@ -1100,8 +1100,8 @@ function getSilverFreeGuaranteeText(referenceDate = new Date()) {
  */
 function setPageSEO({ title, description, canonical } = {}) {
   const SITE_NAME = 'GEL.IT.UP by GIUP®'
-  const DEFAULT_TITLE = 'GEL.IT.UP | Professional Gel Polish & Builder Gel'
-  const DEFAULT_DESCRIPTION = 'Professional gel polish, builder gels, base coats and nail systems for salons, technicians and academies. HEMA-free, TPO-free, EU certified.'
+  const DEFAULT_TITLE = 'GEL.IT.UP® | Professional Gel Polish & Builder Gel Systems'
+  const DEFAULT_DESCRIPTION = 'Professional nail gel polish, builder gel systems and wholesale nail products for salons, technicians and academies. HEMA-free, TPO-free, EU certified.'
   const DEFAULT_CANONICAL = 'https://gelitup.com/'
 
   const resolvedTitle = title
@@ -6200,7 +6200,7 @@ function FullCataloguePage() {
                   <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
                     <div className="flex-1 lg:max-w-[500px]">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#9B1268' }}>✦ Summer 2026 Launch</p>
-                      <h2 className="mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-gray-800 sm:text-4xl">New Products</h2>
+                      <h2 className="mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-gray-800 sm:text-4xl">New Professional Gel Polish & Builder Gel Launches</h2>
                       <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-700 sm:text-base">
                         The latest additions to the GEL.IT.UP range — new gel polish collections, innovative bases, and premium effects.
                       </p>
@@ -6596,7 +6596,7 @@ function FullCataloguePage() {
               <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:flex-row lg:items-center lg:gap-0">
                 <div className="flex-1 lg:max-w-[500px]">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#f9a8d4' }}>Artistic Mastery</p>
-                  <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Nail Art</h2>
+                  <h2 className="heading-on-dark mt-2 text-3xl font-extrabold uppercase tracking-[0.1em] text-white sm:text-4xl">Professional Nail Art Supplies & Effects</h2>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
                     Creative nail art supplies for professional nail technicians.
                   </p>
@@ -7804,7 +7804,11 @@ function GoogleReviewsStrip() {
         const data = await res.json()
         if (mounted) {
           const reviewList = data.reviews || []
-          setSummary({ rating: data.rating, totalRatings: data.totalRatings, placeUrl: data.placeUrl })
+          setSummary({
+            rating: data.overallRating,
+            totalRatings: data.totalRatings,
+            placeUrl: data.googleMapsUrl,
+          })
           setReviews(reviewList)
           setStatus(reviewList.length > 0 ? 'ok' : 'error')
         }
@@ -7862,7 +7866,7 @@ function GoogleReviewsStrip() {
               rel="noreferrer"
               className="text-xs font-semibold uppercase tracking-widest text-[#D43790] transition hover:text-fuchsia-300"
             >
-              Write a Review →
+              Open Google Business Profile →
             </a>
           )}
         </div>
@@ -7920,10 +7924,28 @@ function HomePage({ onOpenContactModal }) {
   ]
   const [activeShimmerSlide, setActiveShimmerSlide] = useState(0)
   const safeShimmerIndex = HOME_SHIMMER_IMAGES.length ? Math.min(activeShimmerSlide, HOME_SHIMMER_IMAGES.length - 1) : 0
+  const HOME_FAQS = [
+    {
+      q: 'Are GEL.IT.UP products HEMA-free and TPO-free?',
+      a: 'Yes. GEL.IT.UP focuses on HEMA-free and TPO-free professional nail systems designed for salon use, academy training, and wholesale distribution.',
+    },
+    {
+      q: 'How do salons access wholesale pricing?',
+      a: 'Salons can register free for instant B2B access and view wholesale pricing, core gel polish shades, builder gel systems, and everyday essentials without waiting for manual approval.',
+    },
+    {
+      q: 'Do you ship professional nail products internationally?',
+      a: 'Yes. GEL.IT.UP supplies professional nail technicians, salons, and academies across 15+ countries with EU-certified products and export-ready support.',
+    },
+    {
+      q: 'Can academies and distributors work with GEL.IT.UP?',
+      a: 'Yes. Nail academies can request training support and sample packs, while distributors can apply for regional or country-level partnerships through the dedicated distributor programme.',
+    },
+  ]
 
   useEffect(() => setPageSEO({
-    title: 'GEL.IT.UP | Professional Gel Polish & Builder Gel',
-    description: 'Professional gel polish, builder gels and nail systems for salons, technicians and academies. HEMA-free, TPO-free, EU certified with wholesale pricing.',
+    title: 'GEL.IT.UP® | Professional Gel Polish & Builder Gel Systems',
+    description: 'Professional nail gel polish, builder gel systems and wholesale nail products for salons, technicians and academies. HEMA-free, TPO-free, EU certified.',
     canonical: 'https://gelitup.com/',
   }), [])
 
@@ -8047,10 +8069,10 @@ function HomePage({ onOpenContactModal }) {
                 GEL.IT.UP by GIUP®
               </p>
               <h1 className="hero-copy-shadow heading-on-dark text-3xl font-bold leading-[1.25] tracking-tight text-white sm:text-4xl lg:text-5xl">
-                The home of professional nail colour.
+                Professional nail gel polish and builder gel systems.
               </h1>
               <p className="hero-copy-shadow mt-3 text-sm leading-relaxed text-white/80 sm:text-base">
-                A decade of mastery · EU regulated · HEMA &amp; TPO-free
+                Wholesale professional nail products for salons, technicians, academies and distributors across 15+ countries.
               </p>
               <div className="mt-5 flex flex-wrap items-center gap-3">
                 <NavLink to="/portal/register" className="rounded-lg bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_16px_rgba(212,55,144,0.55)] transition duration-300 hover:bg-fuchsia-500">
@@ -8072,7 +8094,7 @@ function HomePage({ onOpenContactModal }) {
               </p>
               {/* Trust bar */}
               <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5">
-                {['1,000+ shades', 'HEMA-free', 'EU certified', '15+ countries'].map((badge) => (
+                {['1,000+ shades', 'HEMA-free', 'TPO-free', 'EU certified', '15+ countries'].map((badge) => (
                   <span key={badge} className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/70">
                     <span className="h-1 w-1 rounded-full bg-fuchsia-400" aria-hidden="true" />
                     {badge}
@@ -8158,7 +8180,7 @@ function HomePage({ onOpenContactModal }) {
                 <div className="mt-3 flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {homeNewsCarousel.map((item, idx) => {
                     const isActive = idx === safeHomeNewsIndex
-                    return (<button key={idx} type="button" onClick={() => setActiveHomeNewsSlide(idx)} className={`shrink-0 overflow-hidden rounded border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-9 w-7 bg-gray-100"><img src={item.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" /></div></button>)
+                    return (<button key={idx} type="button" onClick={() => setActiveHomeNewsSlide(idx)} className={`shrink-0 overflow-hidden rounded border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-9 w-7 bg-gray-100">                    <img src={item.imageUrl} alt={`Sunshine Ready collection preview ${idx + 1}`} className="h-full w-full object-cover" loading="lazy" /></div></button>)
                   })}
                 </div>
               )}
@@ -8194,7 +8216,7 @@ function HomePage({ onOpenContactModal }) {
                 <div className="mt-3 flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {HOME_SHIMMER_IMAGES.map((src, idx) => {
                     const isActive = idx === safeShimmerIndex
-                    return (<button key={idx} type="button" onClick={() => setActiveShimmerSlide(idx)} className={`shrink-0 overflow-hidden rounded border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-9 w-7 bg-gray-100"><img src={src} alt="" className="h-full w-full object-cover" loading="lazy" /></div></button>)
+                    return (<button key={idx} type="button" onClick={() => setActiveShimmerSlide(idx)} className={`shrink-0 overflow-hidden rounded border-2 transition ${isActive ? 'border-[#D43790]' : 'border-transparent opacity-50 hover:opacity-80'}`}><div className="h-9 w-7 bg-gray-100">                    <img src={src} alt={`Shimmer collection preview ${idx + 1}`} className="h-full w-full object-cover" loading="lazy" /></div></button>)
                   })}
                 </div>
               )}
@@ -8217,11 +8239,18 @@ function HomePage({ onOpenContactModal }) {
       <HeroCTA />
       <TestimonialStrip />
 
-      <InfoCard id="products" title="Our Products">
+      <InfoCard id="products" title="Professional Nail Products for Salons & Technicians">
         <p>
-          The GEL.IT.UP lineup includes Soak-off Gel Polish, Base and Top Coats, Builder System,
-          Nail Polishes, Nail Art, Consumables, and Skin & Nail Care.
-          We also maintain a broad color portfolio (800+ shades) for professional channels.
+          GEL.IT.UP supplies professional nail gel polish, builder gel systems, base and top coats, nail art products,
+          consumables, and skin and nail care for salons, independent nail technicians, academies, and distribution partners.
+          The range is built for wholesale buying, repeat salon use, and colour-led retail growth.
+        </p>
+        <p className="mt-3">
+          Our portfolio includes 1,000+ shades, HEMA-free and TPO-free options, and EU-certified professional nail systems
+          designed to support structured services, training environments, and multi-country B2B supply.
+        </p>
+        <p className="mt-3">
+          GEL.IT.UP Greece showroom & academy: Sikyonos 1, Kiato 20200, Greece. Contact <a href="mailto:info@gelitup.com" className="font-semibold text-fuchsia-600 hover:underline">info@gelitup.com</a> or <a href="tel:+306940715234" className="font-semibold text-fuchsia-600 hover:underline">+30 694 071 5234</a>.
         </p>
         <NavLink to="/full-catalogue" className="mt-3 inline-flex rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
           View our Products
@@ -8245,7 +8274,7 @@ function HomePage({ onOpenContactModal }) {
       <div className="overflow-hidden rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A]">
         <div className="p-5 sm:p-6">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Gallery</p>
-          <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">Inspiration Gallery</h2>
+          <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">Professional Nail Inspiration Gallery</h2>
           <p className="mt-2 max-w-lg text-sm text-white/80">Browse hundreds of professional nail art looks — colours, effects, French, builder gels and more. Find your next signature set.</p>
         </div>
         <NavLink to="/inspiration" className="group block">
@@ -8277,7 +8306,7 @@ function HomePage({ onOpenContactModal }) {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/75">B2B Salon Access</p>
-            <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">Are you a salon?</h2>
+            <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">Professional Nail Salon Wholesale Access</h2>
             <p className="mt-2 max-w-lg text-sm text-white/90">Register free in under 2 minutes. No approval, no waiting — instant access to 1,000+ shades at wholesale B2B pricing from day one.</p>
             <ul className="mt-3 space-y-1">
               {['1,000+ professional shades', 'B2B wholesale pricing — no MOQ', 'HEMA-free · EU certified', 'WhatsApp &amp; Viber support'].map(item => (
@@ -8307,7 +8336,7 @@ function HomePage({ onOpenContactModal }) {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">For Nail Academies</p>
-            <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">Do you run a nail academy or training school?</h2>
+            <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">Professional Nail Academy Supply & Training Support</h2>
             <p className="mt-2 max-w-lg text-sm text-white/80">EU-certified, HEMA-free products built for training volume. From classroom consumables to student kits — with compliance documentation included.</p>
             <ul className="mt-3 space-y-1">
               {['CPNP notified · EU compliant', 'HEMA-free · SDS docs included', 'No MOQ · Sample packs available', 'Intake-cycle ordering support'].map((item) => (
@@ -8327,7 +8356,7 @@ function HomePage({ onOpenContactModal }) {
       {/* DISTRIBUTOR TIERS CARD */}
       <div className="rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-5 sm:p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Distribution</p>
-        <h2 className="heading-on-dark mt-1 text-xl font-extrabold uppercase tracking-[0.08em] text-white">Become a Distributor</h2>
+        <h2 className="heading-on-dark mt-1 text-xl font-extrabold uppercase tracking-[0.08em] text-white">Professional Nail Distributor Programme</h2>
         <p className="mt-2 text-sm text-white/80">Two tiers for regional and country-level distribution — with marketing, brand support and territory protection.</p>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -8352,6 +8381,23 @@ function HomePage({ onOpenContactModal }) {
         <NavLink to="/distributor-packages" className="mt-5 inline-flex rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
           View Distribution Options
         </NavLink>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">FAQ</p>
+        <h2 className="mt-1 text-xl font-semibold text-slate-900">Professional Nail Wholesale FAQs</h2>
+        <p className="mt-2 max-w-3xl text-sm text-slate-600">
+          Common questions from salons, academies, and distributors looking for HEMA-free professional nail products,
+          wholesale pricing, and EU-certified support.
+        </p>
+        <div className="mt-5 grid gap-3 md:grid-cols-2">
+          {HOME_FAQS.map((item) => (
+            <article key={item.q} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <h3 className="text-sm font-bold text-slate-900">{item.q}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.a}</p>
+            </article>
+          ))}
+        </div>
       </div>
 
       <HowItWorks variant="section" freeShippingAt={getFreeShippingEur()} />
