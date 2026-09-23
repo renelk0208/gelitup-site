@@ -101,7 +101,7 @@ export default function BlogPage() {
               <p>{posts.length} article{posts.length === 1 ? '' : 's'}</p>
               <span className="hidden sm:inline">Fresh advice for technicians, salons and product buyers</span>
             </div>
-            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {posts.map((post) => (
                 <BlogCard key={post.slug} post={post} />
               ))}

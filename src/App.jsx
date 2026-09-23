@@ -7183,15 +7183,8 @@ function LangSwitcher() {
 }
 
 const navItems = [
-  { to: '/studio-one', label: 'Studio One', highlight: true },
-  { to: '/about-us', label: 'About us' },
   { to: '/blog', label: 'Blog' },
-  { to: '/for-academies', label: 'Academies' },
-  { to: '/distributor-packages', label: 'Distribution' },
-  { to: '/ambassadors', label: 'Ambassadors' },
   { to: '/guestbook', label: 'Guestbook' },
-  { to: '/pages/contact-us', label: 'Contact us' },
-  { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
 ]
 
 // "Our Products" mega-menu. Category links use ?category= (scrolls to the
@@ -7227,231 +7220,55 @@ const PRODUCT_MENU = [
   { label: 'Tools & Equipment', to: '/full-catalogue?category=tools' },
 ]
 
-function ProductsMenu() {
-  const [open, setOpen] = useState(false)
-  const location = useLocation()
-
-  // Close when the route (path or query) changes so a picked category/subcategory dismisses it.
-  useEffect(() => { setOpen(false) }, [location.pathname, location.search])
-
+function Nav() {
   return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((current) => !current)}
-        aria-expanded={open}
-        aria-haspopup="menu"
-        className="inline-flex items-center gap-1.5 rounded-lg border border-fuchsia-500/60 px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-white/80 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
-      >
-        Our Products
-        <svg viewBox="0 0 20 20" fill="none" className={`h-3.5 w-3.5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} aria-hidden="true">
-          <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-
-      {open && (
-        <div className="absolute left-0 top-[calc(100%+0.55rem)] z-50 w-[23rem] rounded-2xl border border-white/15 bg-[#111111] p-2 shadow-[0_18px_48px_rgba(0,0,0,0.38)] backdrop-blur-xl">
-          {PRODUCT_MENU.map((cat) => (
-            <div key={cat.label} className="px-1 py-0.5">
-              <NavLink
-                to={cat.to}
-                onClick={() => setOpen(false)}
-                className="block rounded-lg px-3 py-2 text-sm font-semibold text-white transition duration-200 hover:bg-white/10"
-              >
-                {cat.label}
-              </NavLink>
-              {cat.children && (
-                <div className="mt-0.5 grid grid-cols-2 gap-0.5 pb-1 pl-2">
-                  {cat.children.map((sub) => (
-                    <NavLink
-                      key={sub.label}
-                      to={sub.to}
-                      onClick={() => setOpen(false)}
-                      className="block rounded-md px-2 py-1.5 text-xs text-white/70 transition duration-200 hover:bg-white/10 hover:text-white"
-                    >
-                      {sub.label}
-                    </NavLink>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function Nav({ onOpenContactModal }) {
-  const [registerMenuOpen, setRegisterMenuOpen] = useState(false)
-  const [desktopMenuOpen, setDesktopMenuOpen] = useState(false)
-  const location = useLocation()
-
-  useEffect(() => {
-    setRegisterMenuOpen(false)
-    setDesktopMenuOpen(false)
-  }, [location.pathname])
-
-  const primaryLinks = navItems.filter(item => item.to === '/blog' || item.to === '/guestbook')
-  const overflowLinks = navItems.filter(item =>
-    !item.mobileOnly
-    && !item.highlight
-    && item.to !== '/blog'
-    && item.to !== '/guestbook'
-    && item.to !== '/portal/login'
-    && item.to !== '/portal/register'
-  )
-
-  return (
-    <nav className="hidden items-center gap-1 xl:flex">
-      <ProductsMenu />
-
-      {primaryLinks.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          className={({ isActive }) =>
-            `rounded-lg px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
-              isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
-            }`
-          }
-        >
-          {item.label}
-        </NavLink>
-      ))}
-
-      <div className="relative">
-        <button
-          type="button"
-          onClick={() => setDesktopMenuOpen((current) => !current)}
-          aria-expanded={desktopMenuOpen}
-          aria-haspopup="menu"
-          className="inline-flex items-center gap-2 rounded-lg border border-white/25 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] !text-white/80 transition duration-300 hover:border-white/40 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
-        >
-          <span className="flex flex-col gap-[4px]" aria-hidden="true">
-            <span className="block h-px w-4 bg-current" />
-            <span className="block h-px w-4 bg-current" />
-            <span className="block h-px w-4 bg-current" />
-          </span>
-          Menu
-        </button>
-
-        {desktopMenuOpen && (
-          <div className="absolute right-0 top-[calc(100%+0.6rem)] z-50 w-64 rounded-2xl border border-white/15 bg-[#111111] p-2 shadow-[0_18px_48px_rgba(0,0,0,0.38)] backdrop-blur-xl">
-            {overflowLinks.map((item) => {
-              if (item.isContactAction) {
-                return (
-                  <button
-                    key={item.to}
-                    type="button"
-                    onClick={() => {
-                      setDesktopMenuOpen(false)
-                      onOpenContactModal?.()
-                    }}
-                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
-                  >
-                    {item.label}
-                  </button>
-                )
-              }
-
-              if (item.isExternal) {
-                return (
-                  <a
-                    key={item.href}
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setDesktopMenuOpen(false)}
-                    className="block rounded-xl px-3 py-2.5 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
-                  >
-                    {item.label}
-                  </a>
-                )
-              }
-
-              return (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  onClick={() => setDesktopMenuOpen(false)}
-                  className="block rounded-xl px-3 py-2.5 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
-                >
-                  {item.label}
-                </NavLink>
-              )
-            })}
-          </div>
-        )}
-      </div>
-
-      <span className="mx-1.5 h-5 w-px bg-white/20" aria-hidden="true" />
-
-      <div className="relative">
-        <button
-          type="button"
-          onClick={() => setRegisterMenuOpen((current) => !current)}
-          aria-expanded={registerMenuOpen}
-          aria-haspopup="menu"
-          className="inline-flex items-center gap-2 rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] !text-white/80 transition duration-300 hover:border-white/50 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
-        >
-          Register
-          <svg viewBox="0 0 20 20" fill="none" className={`h-4 w-4 transition-transform duration-200 ${registerMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true">
-            <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-
-        {registerMenuOpen && (
-          <div className="absolute right-0 top-[calc(100%+0.55rem)] z-50 w-64 rounded-2xl border border-white/15 bg-[#111111] p-2 shadow-[0_18px_48px_rgba(0,0,0,0.38)] backdrop-blur-xl">
-            <NavLink
-              to="/portal/register"
-              className="block rounded-xl px-3 py-3 transition duration-200 hover:bg-white/10"
-            >
-              <span className="block text-xs font-semibold uppercase tracking-[0.12em] text-fuchsia-300">B2B</span>
-              <span className="mt-1 block text-sm font-semibold text-white">Client Registration</span>
-            </NavLink>
-            <NavLink
-              to="/distributors"
-              className="block rounded-xl px-3 py-3 transition duration-200 hover:bg-white/10"
-            >
-              <span className="block text-xs font-semibold uppercase tracking-[0.12em] text-fuchsia-300">Distribution</span>
-              <span className="mt-1 block text-sm font-semibold text-white">Distributor Registration</span>
-            </NavLink>
-          </div>
-        )}
-      </div>
-
-      <LangSwitcher />
-
+    <nav className="hidden items-center justify-end gap-2 xl:flex">
       <NavLink
-        to="/portal/login"
+        to="/blog"
         className={({ isActive }) =>
-          `rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
-            isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/80 hover:border-white/50 hover:bg-white/10 hover:!text-white'
+          `rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] transition duration-300 ${
+            isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
           }`
         }
       >
-        Sign In
+        Blog
       </NavLink>
+
+      <NavLink
+        to="/guestbook"
+        className={({ isActive }) =>
+          `rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] transition duration-300 ${
+            isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
+          }`
+        }
+      >
+        Guestbook
+      </NavLink>
+
+      <a
+        href="https://shop.gelitup.com/pages/ourproducts"
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-center rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-white shadow-[0_0_12px_rgba(212,55,144,0.28)] transition duration-300 hover:bg-fuchsia-500 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+      >
+        SHOP NOW!
+      </a>
+
+      <LangSwitcher />
     </nav>
   )
 }
 
-function MobileNav({ onOpenContactModal }) {
+function MobileNav() {
   const [open, setOpen] = useState(false)
-  const [registerMenuOpen, setRegisterMenuOpen] = useState(false)
-  const [productsMenuOpen, setProductsMenuOpen] = useState(false)
   const location = useLocation()
 
   useEffect(() => {
     setOpen(false)
-    setRegisterMenuOpen(false)
-    setProductsMenuOpen(false)
   }, [location.pathname])
 
   return (
     <>
-      {/* Hamburger button — fixed in header zone on mobile */}
       <button
         type="button"
         aria-label={open ? 'Close menu' : 'Open navigation menu'}
@@ -7465,21 +7282,18 @@ function MobileNav({ onOpenContactModal }) {
         <span className={`block h-px w-[18px] origin-center bg-white transition-all duration-200 ${open ? '-translate-y-[6px] -rotate-45' : ''}`} />
       </button>
 
-      {/* Backdrop */}
       <div
         className={`fixed inset-0 z-[55] bg-black/55 backdrop-blur-sm transition-opacity duration-300 xl:hidden ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setOpen(false)}
         aria-hidden="true"
       />
 
-      {/* Slide-in drawer from right */}
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
         className={`fixed inset-y-0 right-0 z-[58] flex w-72 flex-col border-l border-white/10 bg-[#111111] transition-transform duration-300 ease-in-out xl:hidden ${open ? 'translate-x-0' : 'translate-x-full'}`}
       >
-        {/* Drawer header */}
         <div className="flex h-[52px] shrink-0 items-center justify-between border-b border-white/10 px-4">
           <span className="text-[11px] font-black uppercase tracking-[0.1em] text-white/50">Navigation</span>
           <button
@@ -7494,155 +7308,31 @@ function MobileNav({ onOpenContactModal }) {
           </button>
         </div>
 
-        {/* Nav links */}
-        <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-          {/* Quick-action CTAs at the top */}
-          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-2">
-            <button
-              type="button"
-              onClick={() => setRegisterMenuOpen((current) => !current)}
-              aria-expanded={registerMenuOpen}
-              className="flex w-full items-center justify-between rounded-lg px-2 py-2.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-white/75 transition duration-200 hover:bg-white/10 hover:text-white"
-            >
-              <span>Register</span>
-              <svg viewBox="0 0 20 20" fill="none" className={`h-4 w-4 transition-transform duration-200 ${registerMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true">
-                <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-
-            {registerMenuOpen && (
-              <div className="mt-2 grid gap-2">
-                <NavLink
-                  to="/portal/register"
-                  onClick={() => setOpen(false)}
-                  className="rounded-lg border border-white/20 px-3 py-2.5 transition duration-200 hover:border-white/35 hover:bg-white/10"
-                >
-                  <span className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-fuchsia-300">B2B</span>
-                  <span className="mt-1 block text-sm font-semibold text-white">Client Registration</span>
-                </NavLink>
-                <NavLink
-                  to="/distributors"
-                  onClick={() => setOpen(false)}
-                  className="rounded-lg border border-white/20 px-3 py-2.5 transition duration-200 hover:border-white/35 hover:bg-white/10"
-                >
-                  <span className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-fuchsia-300">Distribution</span>
-                  <span className="mt-1 block text-sm font-semibold text-white">Distributor Registration</span>
-                </NavLink>
-              </div>
-            )}
-          </div>
-
-          <NavLink
-            to="/portal/login"
+        <nav className="flex-1 space-y-2 overflow-y-auto p-3">
+          <a
+            href="https://shop.gelitup.com/pages/ourproducts"
+            target="_blank"
+            rel="noreferrer"
             onClick={() => setOpen(false)}
-            className={({ isActive }) =>
-              `block rounded-lg border border-white/25 px-4 py-3 text-center text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
-                isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/75 hover:border-white/40 hover:bg-white/10 hover:!text-white'
-              }`
-            }
+            className="block rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.05em] !text-white shadow-[0_0_6px_rgba(212,55,144,0.3)] transition duration-200 hover:bg-fuchsia-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
           >
-            Sign In
-          </NavLink>
+            SHOP NOW!
+          </a>
 
-          <div className="my-2 border-t border-white/10" />
-
-          {/* Our Products — expandable categories & subcategories */}
-          <div className="rounded-xl border border-fuchsia-500/40 bg-fuchsia-600/10 p-2">
-            <button
-              type="button"
-              onClick={() => setProductsMenuOpen((current) => !current)}
-              aria-expanded={productsMenuOpen}
-              className="flex w-full items-center justify-between rounded-lg px-2 py-2.5 text-left text-sm font-bold uppercase tracking-[0.05em] text-white transition duration-200 hover:bg-white/10"
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+                  isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
+                }`
+              }
             >
-              <span>Our Products</span>
-              <svg viewBox="0 0 20 20" fill="none" className={`h-4 w-4 transition-transform duration-200 ${productsMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true">
-                <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-
-            {productsMenuOpen && (
-              <div className="mt-1 space-y-1">
-                {PRODUCT_MENU.map((cat) => (
-                  <div key={cat.label}>
-                    <NavLink
-                      to={cat.to}
-                      onClick={() => setOpen(false)}
-                      className="block rounded-lg px-3 py-2 text-sm font-semibold text-white/90 transition duration-200 hover:bg-white/10 hover:text-white"
-                    >
-                      {cat.label}
-                    </NavLink>
-                    {cat.children && (
-                      <div className="ml-3 grid gap-0.5 border-l border-white/10 pl-2">
-                        {cat.children.map((sub) => (
-                          <NavLink
-                            key={sub.label}
-                            to={sub.to}
-                            onClick={() => setOpen(false)}
-                            className="block rounded-md px-2 py-1.5 text-xs text-white/65 transition duration-200 hover:bg-white/10 hover:text-white"
-                          >
-                            {sub.label}
-                          </NavLink>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {navItems.map((item) => {
-            if (item.isContactAction) {
-              return (
-                <button
-                  key={item.to}
-                  type="button"
-                  onClick={() => { setOpen(false); onOpenContactModal?.() }}
-                  className="block w-full rounded-lg px-4 py-3 text-left text-sm font-semibold uppercase tracking-[0.04em] text-white/75 transition duration-200 hover:bg-white/10 hover:text-white"
-                >
-                  {item.label}
-                </button>
-              )
-            }
-            return (
-              item.isExternal ? (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setOpen(false)}
-                  className={item.highlight
-                    ? 'block rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-4 py-3 text-sm font-bold uppercase tracking-[0.05em] !text-white shadow-[0_0_6px_rgba(212,55,144,0.3)] transition duration-200 hover:bg-fuchsia-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400'
-                    : 'block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] !text-white/75 transition duration-200 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500'
-                  }
-                >
-                  {item.label}
-                </a>
-              ) : (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                onClick={() => setOpen(false)}
-                className={({ isActive }) =>
-                  item.highlight
-                    ? `block rounded-lg border px-4 py-3 text-sm font-bold uppercase tracking-[0.05em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 ${
-                        isActive
-                          ? 'border-[#D43790] bg-[#D43790] !text-white shadow-[0_0_12px_rgba(212,55,144,0.4)]'
-                          : 'border-fuchsia-500 bg-fuchsia-600 !text-white shadow-[0_0_6px_rgba(212,55,144,0.3)] hover:bg-fuchsia-500'
-                      }`
-                    : `block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.04em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
-                        isActive
-                          ? 'bg-[#D43790] !text-white shadow-[0_0_0_1px_rgba(212,55,144,0.5)]'
-                          : '!text-white/75 hover:bg-white/10 hover:!text-white'
-                      }`
-                }
-              >
-                {item.label}
-              </NavLink>
-              )
-            )
-          })}
+              {item.label}
+            </NavLink>
+          ))}
         </nav>
       </div>
     </>
