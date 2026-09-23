@@ -7185,6 +7185,12 @@ function LangSwitcher() {
 const navItems = [
   { to: '/blog', label: 'Blog' },
   { to: '/guestbook', label: 'Guestbook' },
+  { to: '/about-us', label: 'About us' },
+  { to: '/for-academies', label: 'Academies' },
+  { to: '/distributor-packages', label: 'Distribution' },
+  { to: '/ambassadors', label: 'Ambassadors' },
+  { to: '/pages/contact-us', label: 'Contact us' },
+  { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
 ]
 
 // "Our Products" mega-menu. Category links use ?category= (scrolls to the
@@ -7220,6 +7226,75 @@ const PRODUCT_MENU = [
   { label: 'Tools & Equipment', to: '/full-catalogue?category=tools' },
 ]
 
+function MainMenu() {
+  const [open, setOpen] = useState(false)
+  const location = useLocation()
+
+  useEffect(() => { setOpen(false) }, [location.pathname, location.search])
+
+  const menuItems = navItems.filter((item) => item.to !== '/blog' && item.to !== '/guestbook')
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className="inline-flex items-center gap-2 rounded-lg border border-white/25 px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] !text-white/80 transition duration-300 hover:border-white/40 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
+      >
+        <span className="flex flex-col items-center justify-center gap-[3px]" aria-hidden="true">
+          <span className="block h-px w-3 bg-current" />
+          <span className="block h-px w-3 bg-current" />
+          <span className="block h-px w-3 bg-current" />
+        </span>
+        Menu
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-[calc(100%+0.55rem)] z-50 w-64 rounded-2xl border border-white/15 bg-[#111111] p-2 shadow-[0_18px_48px_rgba(0,0,0,0.38)] backdrop-blur-xl">
+          {menuItems.map((item) => {
+            if (item.to === '/pages/contact-us') {
+              return (
+                <button
+                  key={item.to}
+                  type="button"
+                  onClick={() => {
+                    setOpen(false)
+                    if (typeof window !== 'undefined') window.location.href = item.to
+                  }}
+                  className="block w-full rounded-lg px-3 py-2 text-left text-sm font-semibold text-white transition duration-200 hover:bg-white/10"
+                >
+                  {item.label}
+                </button>
+              )
+            }
+
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={() => setOpen(false)}
+                className="block rounded-lg px-3 py-2 text-sm font-semibold text-white transition duration-200 hover:bg-white/10"
+              >
+                {item.label}
+              </NavLink>
+            )
+          })}
+
+          <NavLink
+            to="/portal/login?portal=distributor"
+            onClick={() => setOpen(false)}
+            className="mt-1 block rounded-lg border border-fuchsia-500/70 bg-fuchsia-600/10 px-3 py-2 text-sm font-bold uppercase tracking-[0.08em] text-fuchsia-200 transition duration-200 hover:bg-fuchsia-600/20"
+          >
+            Distributor Login
+          </NavLink>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function Nav() {
   return (
     <nav className="hidden items-center justify-end gap-2 xl:flex">
@@ -7244,6 +7319,8 @@ function Nav() {
       >
         Guestbook
       </NavLink>
+
+      <MainMenu />
 
       <a
         href="https://shop.gelitup.com/pages/ourproducts"
