@@ -7185,6 +7185,7 @@ function LangSwitcher() {
 const navItems = [
   { to: '/blog', label: 'Blog' },
   { to: '/guestbook', label: 'Guestbook' },
+  { to: '/studio-one', label: 'Studio One' },
   { to: '/about-us', label: 'About us' },
   { to: '/for-academies', label: 'Academies' },
   { to: '/distributor-packages', label: 'Distribution' },
@@ -7318,6 +7319,17 @@ function Nav() {
         }
       >
         Guestbook
+      </NavLink>
+
+      <NavLink
+        to="/studio-one"
+        className={({ isActive }) =>
+          `rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] transition duration-300 ${
+            isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
+          }`
+        }
+      >
+        Studio One
       </NavLink>
 
       <MainMenu />
