@@ -259,7 +259,7 @@ export default function AcademySampleKitPage() {
             </div>
 
             <p className="mt-6 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
-              HEMA-free · TPO-free · CPNP Notified · EC 1223/2009 · Leaping Bunny Approved
+              HEMA-free · TPO-free · CPNP Notified · EC 1223/2009 · Approved by Cruelty Free International
             </p>
           </div>
 

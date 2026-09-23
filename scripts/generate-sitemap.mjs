@@ -81,6 +81,13 @@ console.log(`✓ sitemap.xml written with ${ROUTES.length} URLs`)
 const robots = `User-agent: *
 Allow: /
 
+# Block private portal, admin, and auth flows from being indexed
+Disallow: /portal/
+Disallow: /admin/
+Disallow: /admin-login
+Disallow: /portal-client-login
+Disallow: /portal-admin-login
+
 Sitemap: ${BASE_URL}/sitemap.xml
 `
 writeFileSync(resolve(DIST, 'robots.txt'), robots, 'utf-8')

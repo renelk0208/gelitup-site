@@ -1100,8 +1100,8 @@ function getSilverFreeGuaranteeText(referenceDate = new Date()) {
  */
 function setPageSEO({ title, description, canonical } = {}) {
   const SITE_NAME = 'GEL.IT.UP by GIUP®'
-  const DEFAULT_TITLE = `${SITE_NAME} | Gel Polish, Builder Gel & Nail Systems`
-  const DEFAULT_DESCRIPTION = 'Professional gel polish with 1,000+ shades, builder gel systems, base coats and top coats. HEMA-free, TPO-free, EU certified. Available wholesale to professional nail technicians worldwide.'
+  const DEFAULT_TITLE = 'GEL.IT.UP | Professional Gel Polish & Builder Gel'
+  const DEFAULT_DESCRIPTION = 'Professional gel polish, builder gels, base coats and nail systems for salons, technicians and academies. HEMA-free, TPO-free, EU certified.'
   const DEFAULT_CANONICAL = 'https://gelitup.com/'
 
   const resolvedTitle = title
@@ -3555,22 +3555,22 @@ const SUBCAT_VANITY_PATH = {
 const SUBCATEGORY_SEO = {
   'solid-gel-polish': {
     title: 'Wholesale Gel Polish Supplier | 1,000+ Shades | GEL.IT.UP Professional',
-    description: 'Over 1,000 shades of professional gel polish available wholesale. HEMA-free, TPO-free, Leaping Bunny Approved. Bulk supply for nail technicians, salons and academies across the EU and worldwide.',
+    description: 'Over 1,000 shades of professional gel polish available wholesale. HEMA-free, TPO-free, Approved by Cruelty Free International. Bulk supply for nail technicians, salons and academies across the EU and worldwide.',
     canonical: 'https://gelitup.com/solid-gel-polish',
   },
   'cat-eye': {
     title: 'Cat Eye Gel Polish Wholesale | Dreamy Cat Eye Collection | GEL.IT.UP',
-    description: 'Professional magnetic cat eye gel polish available wholesale. Multidimensional finish your clients will ask for by name. HEMA-free, TPO-free, Leaping Bunny Approved. Open a wholesale account today.',
+    description: 'Professional magnetic cat eye gel polish available wholesale. Multidimensional finish your clients will ask for by name. HEMA-free, TPO-free, Approved by Cruelty Free International. Open a wholesale account today.',
     canonical: 'https://gelitup.com/cat-eye',
   },
   'shimmer': {
     title: 'Shimmer Gel Polish Wholesale | Professional Nail Supplies | GEL.IT.UP',
-    description: 'Professional shimmer gel polish available in bulk wholesale. HEMA-free, TPO-free, Leaping Bunny Approved. For nail technicians, salons and academies. Open a wholesale account at gelitup.com.',
+    description: 'Professional shimmer gel polish available in bulk wholesale. HEMA-free, TPO-free, Approved by Cruelty Free International. For nail technicians, salons and academies. Open a wholesale account at gelitup.com.',
     canonical: 'https://gelitup.com/shimmer',
   },
   'glitters': {
     title: 'Glitter Gel Polish Wholesale | Professional Nail Supplies | GEL.IT.UP',
-    description: 'Wholesale glitter gel polish for professional nail technicians and salons. HEMA-free, TPO-free, Leaping Bunny Approved. 15+ countries served. Open a B2B wholesale account today.',
+    description: 'Wholesale glitter gel polish for professional nail technicians and salons. HEMA-free, TPO-free, Approved by Cruelty Free International. 15+ countries served. Open a B2B wholesale account today.',
     canonical: 'https://gelitup.com/glitters',
   },
   'mirror-powder': {
@@ -3580,32 +3580,32 @@ const SUBCATEGORY_SEO = {
   },
   'by-the-ocean': {
     title: 'By The Ocean Collection | Wholesale Gel Polish | GEL.IT.UP Professional',
-    description: 'By The Ocean gel polish collection available wholesale for professional nail technicians and salons. HEMA-free, TPO-free, Leaping Bunny Approved. Open a wholesale account today.',
+    description: 'By The Ocean gel polish collection available wholesale for professional nail technicians and salons. HEMA-free, TPO-free, Approved by Cruelty Free International. Open a wholesale account today.',
     canonical: 'https://gelitup.com/by-the-ocean',
   },
   'bob': {
     title: 'BOB Collection | Professional Gel Polish Wholesale | GEL.IT.UP',
-    description: 'The BOB gel polish collection available wholesale for nail technicians and salons. HEMA-free, TPO-free, Leaping Bunny Approved. EU certified. Open a B2B account at gelitup.com.',
+    description: 'The BOB gel polish collection available wholesale for nail technicians and salons. HEMA-free, TPO-free, Approved by Cruelty Free International. EU certified. Open a B2B account at gelitup.com.',
     canonical: 'https://gelitup.com/bob',
   },
   'premium-builder': {
     title: 'Premium Builder Gel Wholesale | HEMA-Free | GEL.IT.UP Professional',
-    description: '3-in-1 Premium Builder Gel wholesale for nail professionals. Fiberglass-reinforced, single-phase, no base or top coat needed. HEMA-free, TPO-free, Leaping Bunny Approved. Open a wholesale account.',
+    description: '3-in-1 Premium Builder Gel wholesale for nail professionals. Fiberglass-reinforced, single-phase, no base or top coat needed. HEMA-free, TPO-free, Approved by Cruelty Free International. Open a wholesale account.',
     canonical: 'https://gelitup.com/premium-builder',
   },
   '3in1': {
     title: '3-in-1 Builder Gel Wholesale | Professional Nail Systems | GEL.IT.UP',
-    description: 'Professional 3-in-1 builder gel available wholesale for nail technicians, salons and academies. HEMA-free, TPO-free, EU certified, Leaping Bunny Approved. Wholesale accounts available worldwide.',
+    description: 'Professional 3-in-1 builder gel available wholesale for nail technicians, salons and academies. HEMA-free, TPO-free, EU certified, Approved by Cruelty Free International. Wholesale accounts available worldwide.',
     canonical: 'https://gelitup.com/3in1',
   },
   '5in1-base': {
     title: '5-in-1 Superior Base Coat Wholesale | HEMA-Free | GEL.IT.UP Professional',
-    description: '5-in-1 Superior Base Coat wholesale for nail professionals. Works as base coat, reinforced base, shaping gel, decoration glue and extension gel. HEMA-free, TPO-free, Leaping Bunny Approved.',
+    description: '5-in-1 Superior Base Coat wholesale for nail professionals. Works as base coat, reinforced base, shaping gel, decoration glue and extension gel. HEMA-free, TPO-free, Approved by Cruelty Free International.',
     canonical: 'https://gelitup.com/5in1-base',
   },
   'liquid-polygel': {
     title: 'Polygel Wholesale Supplier | MultiMix Synthogel | GEL.IT.UP Professional',
-    description: 'Professional polygel wholesale supplier. GEL.IT.UP MultiMix Synthogel — acrylic strength, gel ease, zero heat spikes, odourless. HEMA-free, TPO-free, Leaping Bunny Approved. Open a wholesale account.',
+    description: 'Professional polygel wholesale supplier. GEL.IT.UP MultiMix Synthogel — acrylic strength, gel ease, zero heat spikes, odourless. HEMA-free, TPO-free, Approved by Cruelty Free International. Open a wholesale account.',
     canonical: 'https://gelitup.com/liquid-polygel',
   },
 }
@@ -3941,8 +3941,8 @@ function FullCataloguePage() {
   useEffect(() => {
     const subSlug = (searchParams.get('subcategory') || '').toLowerCase().trim()
     const seo = SUBCATEGORY_SEO[subSlug] || {
-      title: 'Full Product Catalogue | Wholesale Nail Supplies | GEL.IT.UP by GIUP®',
-      description: 'Browse the complete GEL.IT.UP wholesale catalogue. 1,000+ gel polish shades, builder gels, base coats, nail art and professional tools. HEMA-free, TPO-free, EU certified.',
+      title: 'GEL.IT.UP Catalogue | Gel Polish & Builder Gel',
+      description: 'Browse professional gel polish, builder gels and nail supplies wholesale. HEMA-free, TPO-free, EU certified for salons, technicians and academies.',
       canonical: 'https://gelitup.com/full-catalogue',
     }
     return setPageSEO(seo)
@@ -5342,6 +5342,31 @@ function FullCataloguePage() {
           })()}
         </div>
 
+        <div className="mt-4 rounded-2xl border border-[#4A4A4A]/20 bg-[#f8f4f7] p-4">
+          <h3 className="text-sm font-black uppercase tracking-[0.12em] text-black">Frequently asked questions</h3>
+          <div className="mt-3 grid gap-3 md:grid-cols-3">
+            {[
+              {
+                q: 'What is the difference between gel polish and builder gel?',
+                a: 'Gel polish is designed for colour and surface finish, while builder gel adds strength, structure and longevity for overlays, sculpting and reinforcement.',
+              },
+              {
+                q: 'Is GEL.IT.UP suitable for professional salons and academies?',
+                a: 'Yes. The range is built for wholesale clients, professional nail technicians, salons and training academies with HEMA-free, TPO-free formulations and EU compliance.',
+              },
+              {
+                q: 'Can I order a complete starter system?',
+                a: 'Absolutely. The catalogue is structured for full-service ordering, whether you need a colour collection, base and top systems or technical essentials for daily salon work.',
+              },
+            ].map(({ q, a }) => (
+              <details key={q} className="rounded-xl border border-[#4A4A4A]/20 bg-white p-3 text-left">
+                <summary className="cursor-pointer list-none text-sm font-bold text-black">{q}</summary>
+                <p className="mt-2 text-sm leading-relaxed text-black/70">{a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+
         <div className="mt-3 flex flex-wrap gap-2">
           {(() => {
             const accent = getCategoryAccent(activeCategory)
@@ -5945,7 +5970,7 @@ function FullCataloguePage() {
             Gel Polish &amp; Professional Nail Systems
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-white/90 sm:text-lg" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 400 }}>
-            The complete professional nail range — gel polish, builder gel, base coats, top coats, and accessories. HEMA &amp; TPO-Free formulations, <a href="https://www.crueltyfreeinternational.org/approved-brands/listing/gel-it-up/" target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-300 hover:underline">Leaping Bunny Approved</a>, and engineered for professional excellence. Browse every shade, system, and tool in the Gel It Up collection.
+            The complete professional nail range — gel polish, builder gel, base coats, top coats, and accessories. HEMA &amp; TPO-Free formulations, <a href="https://www.crueltyfreeinternational.org/approved-brands/listing/gel-it-up/" target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-300 hover:underline">Approved by Cruelty Free International</a>, and engineered for professional excellence. Browse every shade, system, and tool in the Gel It Up collection.
           </p>
           <HeroCTA />
         </div>
@@ -7897,8 +7922,8 @@ function HomePage({ onOpenContactModal }) {
   const safeShimmerIndex = HOME_SHIMMER_IMAGES.length ? Math.min(activeShimmerSlide, HOME_SHIMMER_IMAGES.length - 1) : 0
 
   useEffect(() => setPageSEO({
-    title: 'GEL.IT.UP by GIUP® | Professional Gel Polish, Builder Gel & Nail Systems',
-    description: 'Wholesale gel polish, builder gel and nail systems for nail technicians, salons and academies. HEMA-free, TPO-free, EU certified, Leaping Bunny Approved. 15+ countries.',
+    title: 'GEL.IT.UP | Professional Gel Polish & Builder Gel',
+    description: 'Professional gel polish, builder gels and nail systems for salons, technicians and academies. HEMA-free, TPO-free, EU certified with wholesale pricing.',
     canonical: 'https://gelitup.com/',
   }), [])
 
@@ -8102,7 +8127,7 @@ function HomePage({ onOpenContactModal }) {
               </svg>
             </div>
             <a href="https://www.crueltyfreeinternational.org/approved-brands/listing/gel-it-up/" target="_blank" rel="noreferrer" className="mt-3 block text-sm font-extrabold uppercase tracking-[0.1em] !text-[#D43790] hover:underline">CRUELTY-FREE</a>
-            <p className="mt-2 text-sm leading-relaxed text-white">Ethics without compromise. We are 100% <a href="https://www.crueltyfreeinternational.org/approved-brands/listing/gel-it-up/" target="_blank" rel="noreferrer" className="font-semibold text-[#D43790] hover:underline">Leaping Bunny Approved</a>—the global gold standard for cruelty-free cosmetics.</p>
+            <p className="mt-2 text-sm leading-relaxed text-white">Ethics without compromise. We are 100% <a href="https://www.crueltyfreeinternational.org/approved-brands/listing/gel-it-up/" target="_blank" rel="noreferrer" className="font-semibold text-[#D43790] hover:underline">Approved by Cruelty Free International</a>—the global gold standard for cruelty-free cosmetics.</p>
           </article>
         </div>
 

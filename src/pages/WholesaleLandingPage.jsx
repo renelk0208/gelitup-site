@@ -6,7 +6,7 @@ const BENEFITS = [
   { icon: '📦', title: '1,000+ Products', detail: 'Full range of gel polish, builder gels, base coats, top coats and nail art supplies.' },
   { icon: '🚚', title: 'Free EU Shipping', detail: 'Free shipping on all wholesale orders across the EU.' },
   { icon: '🧪', title: 'HEMA-Free & EU Certified', detail: 'EC 1223/2009 compliant. Safer for your clients and your technicians.' },
-  { icon: '🐇', title: 'Leaping Bunny Approved', detail: 'Cruelty-free certified. A brand your clients can feel good about.' },
+  { icon: '🐇', title: 'Approved by Cruelty Free International', detail: 'Cruelty-free certified. A brand your clients can feel good about.' },
   { icon: '💬', title: 'Dedicated Support', detail: 'WhatsApp & Viber support from a team that knows the industry.' },
 ]
 
