@@ -5,8 +5,8 @@ name: Notify Admin — New B2B Registrations
 # direct link to the admin dashboard to review and approve.
 
 on:
-  schedule:
-    - cron: '*/15 * * * *'
+  # Scheduled automation is disabled so the live site cannot mutate data overnight.
+  # Re-enable only after a reviewed change and a successful manual validation run.
   workflow_dispatch: {}   # allow manual trigger for testing
 
 jobs:

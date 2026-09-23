@@ -1,9 +1,8 @@
 name: Daily Production Smoke
 
 on:
-  schedule:
-    # 07:00 SAST (UTC+2) = 05:00 UTC every morning
-    - cron: '0 5 * * *'
+  # Scheduled smoke checks are disabled to keep the production site locked while
+  # the registration/order paths are under review.
   workflow_dispatch: {}
 
 jobs:
