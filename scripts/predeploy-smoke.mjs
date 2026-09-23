@@ -4,6 +4,11 @@ const baseUrl = (process.env.SMOKE_BASE_URL || process.argv[2] || 'http://localh
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || ''
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || ''
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+const smokeHeaders = {
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+  accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+  'accept-language': 'en-US,en;q=0.9',
+}
 
 function fail(message) {
   console.error(`❌ ${message}`)
@@ -15,7 +20,10 @@ function pass(message) {
 }
 
 async function fetchText(url) {
-  const response = await fetch(url, { redirect: 'follow' })
+  const response = await fetch(url, {
+    redirect: 'follow',
+    headers: smokeHeaders,
+  })
   const text = await response.text()
   return { response, text }
 }

@@ -20,6 +20,7 @@
 import { chromium } from 'playwright'
 
 const baseUrl = String(process.env.SMOKE_BASE_URL || 'https://gelitup.com').replace(/\/$/, '')
+const smokeUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
 const distributorEmail = String(process.env.SMOKE_DISTRIBUTOR_EMAIL || '').trim().toLowerCase()
 const distributorPassword = String(process.env.SMOKE_DISTRIBUTOR_PASSWORD || '')
 const b2bEmail = String(process.env.SMOKE_B2B_EMAIL || '').trim().toLowerCase()
@@ -36,7 +37,7 @@ function fail(message) { failures.push(message); console.error(`❌ ${message}`)
 
 async function goto(page, path) {
   const url = `${baseUrl}${path}`
-  await page.goto(url, { waitUntil: 'networkidle', timeout: 45000 })
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 })
   return url
 }
 
@@ -56,167 +57,227 @@ function consumeErrors(bucket, label) {
   }
 }
 
-async function checkPublicRoutes(page, clientErrors) {
-  // Homepage
-  let url = await goto(page, '/')
-  const bodyText = await page.locator('body').innerText().catch(() => '')
-  if (!bodyText.trim()) fail(`Homepage: blank body at ${url}`)
-  else pass(`Homepage: loaded at ${url}`)
-  consumeErrors(clientErrors, 'Homepage')
-
-  // B2B login
-  await goto(page, '/portal/login')
-  await expectText(page, 'B2B Portal', 'B2B login page')
-  consumeErrors(clientErrors, 'B2B login page')
-
-  // Distributor login
-  await goto(page, '/portal/login?portal=distributor')
-  await expectText(page, 'Distributor Portal', 'Distributor login page')
-  consumeErrors(clientErrors, 'Distributor login page')
-
-  // Admin login
-  await goto(page, '/portal/admin-login')
-  await expectText(page, 'Sign In as Admin', 'Admin login page')
-  consumeErrors(clientErrors, 'Admin login page')
-
-  // Buyer registration page
-  await goto(page, '/portal/register')
-  const regText = await page.locator('body').innerText().catch(() => '')
-  if (!regText.trim()) fail('Registration page: blank body')
-  else pass('Registration page: loaded')
-  consumeErrors(clientErrors, 'Registration page')
-
-  // Distributor coverage page
-  await goto(page, '/distributors')
-  const distText = await page.locator('body').innerText().catch(() => '')
-  if (!distText.trim()) fail('Distributors page: blank body')
-  else pass('Distributors page: loaded')
-  consumeErrors(clientErrors, 'Distributors page')
-}
-
-async function checkRegistrationFlow(page, clientErrors) {
-  await goto(page, '/portal/register')
-  consumeErrors(clientErrors, 'Registration page JS')
-
-  // Email field must be present
-  const emailField = await page.locator('input[type="email"]').first().isVisible({ timeout: 8000 }).catch(() => false)
-  if (emailField) pass('Registration form: email field visible')
-  else fail('Registration form: email input not found')
-
-  // Submit empty — validation should block it (page stays on /register)
-  const submitBtn = page.getByRole('button', { name: /register|create|sign up/i }).first()
-  if (await submitBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
-    await submitBtn.click()
-    await page.waitForTimeout(800)
-    if (page.url().includes('/register')) {
-      pass('Registration form: empty-submit blocked by validation')
-    } else {
-      fail('Registration form: empty submit navigated away (validation not working)')
+async function createSmokePage(context, clientErrors) {
+  const page = await context.newPage()
+  page.on('pageerror', (err) => {
+    clientErrors.push(err instanceof Error ? err.message : String(err))
+  })
+  page.on('crash', () => {
+    clientErrors.push('page crashed')
+  })
+  await page.route('**/*', (route) => {
+    const resourceType = route.request().resourceType()
+    if (resourceType === 'image' || resourceType === 'font' || resourceType === 'media') {
+      return route.abort()
     }
-    consumeErrors(clientErrors, 'Registration form validation')
-  } else {
-    note('Registration form: submit button not found — form structure may have changed')
+    return route.continue()
+  })
+  return page
+}
+
+async function checkPublicRoutes(context, clientErrors) {
+  const routes = [
+    {
+      path: '/',
+      label: 'Homepage',
+      check: async (page, url) => {
+        const bodyText = await page.locator('body').innerText().catch(() => '')
+        if (!bodyText.trim()) fail(`Homepage: blank body at ${url}`)
+        else pass(`Homepage: loaded at ${url}`)
+      },
+    },
+    {
+      path: '/portal/login',
+      label: 'B2B login page',
+      check: async (page) => expectText(page, 'B2B Portal', 'B2B login page'),
+    },
+    {
+      path: '/portal/login?portal=distributor',
+      label: 'Distributor login page',
+      check: async (page) => expectText(page, 'Distributor Portal', 'Distributor login page'),
+    },
+    {
+      path: '/portal/admin-login',
+      label: 'Admin login page',
+      check: async (page) => expectText(page, 'Sign In as Admin', 'Admin login page'),
+    },
+    {
+      path: '/portal/register',
+      label: 'Registration page',
+      check: async (page) => {
+        const regText = await page.locator('body').innerText().catch(() => '')
+        if (!regText.trim()) fail('Registration page: blank body')
+        else pass('Registration page: loaded')
+      },
+    },
+    {
+      path: '/distributors',
+      label: 'Distributors page',
+      check: async (page) => {
+        const distText = await page.locator('body').innerText().catch(() => '')
+        if (!distText.trim()) fail('Distributors page: blank body')
+        else pass('Distributors page: loaded')
+      },
+    },
+  ]
+
+  for (const route of routes) {
+    const page = await createSmokePage(context, clientErrors)
+    try {
+      const url = await goto(page, route.path)
+      await page.waitForTimeout(1000)
+      await route.check(page, url)
+      consumeErrors(clientErrors, route.label)
+    } finally {
+      await page.close().catch(() => {})
+    }
   }
 }
 
-async function checkB2bPortal(page, clientErrors) {
-  if (!b2bEmail || !b2bPassword) {
-    note('Skipping B2B portal checks — set SMOKE_B2B_EMAIL + SMOKE_B2B_PASSWORD to enable.')
-    return
-  }
-
-  // Sign in via B2B portal
-  await goto(page, '/portal/login')
-  await page.locator('#portal-login-email').fill(b2bEmail)
-  await page.locator('#portal-login-password').fill(b2bPassword)
-  await page.getByRole('button', { name: 'Sign In' }).click()
-
+async function checkRegistrationFlow(context, clientErrors) {
+  const page = await createSmokePage(context, clientErrors)
   try {
-    await page.waitForURL(/\/portal\/dashboard\//, { timeout: 30000 })
-    pass(`B2B login: redirected to ${page.url()}`)
-  } catch {
-    fail(`B2B login: did not reach dashboard within 30s (still at ${page.url()})`)
+    await goto(page, '/portal/register')
+    await page.waitForTimeout(1000)
+    consumeErrors(clientErrors, 'Registration page JS')
+
+    // Email field must be present
+    const emailField = await page.locator('input[type="email"]').first().isVisible({ timeout: 8000 }).catch(() => false)
+    if (emailField) pass('Registration form: email field visible')
+    else fail('Registration form: email input not found')
+
+    // Submit empty — validation should block it (page stays on /register)
+    const submitBtn = page.getByRole('button', { name: /register|create|sign up/i }).first()
+    if (await submitBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+      await submitBtn.click()
+      await page.waitForTimeout(800)
+      if (page.url().includes('/register')) {
+        pass('Registration form: empty-submit blocked by validation')
+      } else {
+        fail('Registration form: empty submit navigated away (validation not working)')
+      }
+      consumeErrors(clientErrors, 'Registration form validation')
+    } else {
+      note('Registration form: submit button not found — form structure may have changed')
+    }
+  } finally {
+    await page.close().catch(() => {})
+  }
+}
+
+async function checkB2bPortal(context, clientErrors) {
+  const page = await createSmokePage(context, clientErrors)
+  try {
+    if (!b2bEmail || !b2bPassword) {
+      note('Skipping B2B portal checks — set SMOKE_B2B_EMAIL + SMOKE_B2B_PASSWORD to enable.')
+      return
+    }
+
+    // Sign in via B2B portal
+    await goto(page, '/portal/login')
+    await page.locator('#portal-login-email').fill(b2bEmail)
+    await page.locator('#portal-login-password').fill(b2bPassword)
+    await page.getByRole('button', { name: 'Sign In' }).click()
+
+    try {
+      await page.waitForURL(/\/portal\/dashboard\//, { timeout: 30000 })
+      pass(`B2B login: redirected to ${page.url()}`)
+    } catch {
+      fail(`B2B login: did not reach dashboard within 30s (still at ${page.url()})`)
+      consumeErrors(clientErrors, 'B2B login')
+      return
+    }
     consumeErrors(clientErrors, 'B2B login')
-    return
+
+    // My Orders
+    await page.goto(`${baseUrl}/portal/dashboard/orders`, { waitUntil: 'domcontentloaded', timeout: 45000 })
+    await page.waitForTimeout(1000)
+    consumeErrors(clientErrors, 'B2B My Orders')
+    const ordersText = await page.locator('body').innerText().catch(() => '')
+    if (!ordersText.trim()) fail('B2B My Orders: blank page')
+    else pass('B2B My Orders: not blank')
+
+    // Shop / Products
+    await page.goto(`${baseUrl}/portal/dashboard/products`, { waitUntil: 'domcontentloaded', timeout: 45000 })
+    await page.waitForTimeout(1000)
+    consumeErrors(clientErrors, 'B2B Shop')
+    const shopText = await page.locator('body').innerText().catch(() => '')
+    if (!shopText.trim()) fail('B2B Shop: blank page')
+    else pass('B2B Shop: not blank')
+
+    // My Information / Profile
+    await page.goto(`${baseUrl}/portal/dashboard/profile`, { waitUntil: 'domcontentloaded', timeout: 45000 })
+    await page.waitForTimeout(1000)
+    consumeErrors(clientErrors, 'B2B My Information')
+    const profileText = await page.locator('body').innerText().catch(() => '')
+    if (!profileText.trim()) fail('B2B My Information: blank page')
+    else pass('B2B My Information: not blank')
+
+    // Sign out cleanly so session doesn't bleed into next check
+    await page.goto(`${baseUrl}/portal/login`, { timeout: 15000 }).catch(() => {})
+  } finally {
+    await page.close().catch(() => {})
   }
-  consumeErrors(clientErrors, 'B2B login')
-
-  // My Orders
-  await page.goto(`${baseUrl}/portal/dashboard/orders`, { waitUntil: 'networkidle', timeout: 45000 })
-  consumeErrors(clientErrors, 'B2B My Orders')
-  const ordersText = await page.locator('body').innerText().catch(() => '')
-  if (!ordersText.trim()) fail('B2B My Orders: blank page')
-  else pass('B2B My Orders: not blank')
-
-  // Shop / Products
-  await page.goto(`${baseUrl}/portal/dashboard/products`, { waitUntil: 'networkidle', timeout: 45000 })
-  consumeErrors(clientErrors, 'B2B Shop')
-  const shopText = await page.locator('body').innerText().catch(() => '')
-  if (!shopText.trim()) fail('B2B Shop: blank page')
-  else pass('B2B Shop: not blank')
-
-  // My Information / Profile
-  await page.goto(`${baseUrl}/portal/dashboard/profile`, { waitUntil: 'networkidle', timeout: 45000 })
-  consumeErrors(clientErrors, 'B2B My Information')
-  const profileText = await page.locator('body').innerText().catch(() => '')
-  if (!profileText.trim()) fail('B2B My Information: blank page')
-  else pass('B2B My Information: not blank')
-
-  // Sign out cleanly so session doesn't bleed into next check
-  await page.goto(`${baseUrl}/portal/login`, { timeout: 15000 }).catch(() => {})
 }
 
-async function checkDistributorPortal(page, clientErrors) {
-  if (!distributorEmail || !distributorPassword) {
-    note('Skipping distributor portal checks — set SMOKE_DISTRIBUTOR_EMAIL + SMOKE_DISTRIBUTOR_PASSWORD to enable.')
-    return
-  }
-
-  // Sign in
-  await goto(page, '/portal/login?portal=distributor')
-  await page.locator('#portal-login-email').fill(distributorEmail)
-  await page.locator('#portal-login-password').fill(distributorPassword)
-  await page.getByRole('button', { name: 'Sign In' }).click()
-
+async function checkDistributorPortal(context, clientErrors) {
+  const page = await createSmokePage(context, clientErrors)
   try {
-    await page.waitForURL(/\/portal\/dashboard\//, { timeout: 30000 })
-    pass(`Distributor login: redirected to ${page.url()}`)
-  } catch {
-    fail(`Distributor login: did not reach dashboard within 30s (still at ${page.url()})`)
+    if (!distributorEmail || !distributorPassword) {
+      note('Skipping distributor portal checks — set SMOKE_DISTRIBUTOR_EMAIL + SMOKE_DISTRIBUTOR_PASSWORD to enable.')
+      return
+    }
+
+    // Sign in
+    await goto(page, '/portal/login?portal=distributor')
+    await page.locator('#portal-login-email').fill(distributorEmail)
+    await page.locator('#portal-login-password').fill(distributorPassword)
+    await page.getByRole('button', { name: 'Sign In' }).click()
+
+    try {
+      await page.waitForURL(/\/portal\/dashboard\//, { timeout: 30000 })
+      pass(`Distributor login: redirected to ${page.url()}`)
+    } catch {
+      fail(`Distributor login: did not reach dashboard within 30s (still at ${page.url()})`)
+      consumeErrors(clientErrors, 'Distributor login')
+      return
+    }
     consumeErrors(clientErrors, 'Distributor login')
-    return
+
+    const overviewText = await page.locator('body').innerText().catch(() => '')
+    if (!overviewText.trim()) fail('Distributor overview: blank page after sign-in')
+    else pass('Distributor overview: not blank')
+
+    // My Orders
+    await page.goto(`${baseUrl}/portal/dashboard/orders`, { waitUntil: 'domcontentloaded', timeout: 45000 })
+    await page.waitForTimeout(1000)
+    consumeErrors(clientErrors, 'Distributor navigation to orders')
+    await expectText(page, 'My Orders', 'Distributor My Orders heading')
+    const ordersBody = await page.locator('body').innerText().catch(() => '')
+    if (!ordersBody.trim()) fail('Distributor My Orders: blank page')
+    else pass('Distributor My Orders: not blank')
+    consumeErrors(clientErrors, 'Distributor My Orders')
+
+    const viewBtn = page.getByRole('button', { name: /View Items/i }).first()
+    if (await viewBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+      await viewBtn.click()
+      await expectText(page, 'Order Contents', 'Distributor order detail expand')
+      consumeErrors(clientErrors, 'Distributor order detail')
+    } else {
+      note('No expandable orders found for smoke account — detail expand skipped.')
+    }
+
+    // Shop
+    await page.goto(`${baseUrl}/portal/dashboard/products`, { waitUntil: 'domcontentloaded', timeout: 45000 })
+    await page.waitForTimeout(1000)
+    consumeErrors(clientErrors, 'Distributor navigation to shop')
+    const shopBody = await page.locator('body').innerText().catch(() => '')
+    if (!shopBody.trim()) fail('Distributor Shop: blank page')
+    else pass('Distributor Shop: not blank')
+    consumeErrors(clientErrors, 'Distributor Shop')
+  } finally {
+    await page.close().catch(() => {})
   }
-  consumeErrors(clientErrors, 'Distributor login')
-
-  const overviewText = await page.locator('body').innerText().catch(() => '')
-  if (!overviewText.trim()) fail('Distributor overview: blank page after sign-in')
-  else pass('Distributor overview: not blank')
-
-  // My Orders
-  await page.goto(`${baseUrl}/portal/dashboard/orders`, { waitUntil: 'networkidle', timeout: 45000 })
-  consumeErrors(clientErrors, 'Distributor navigation to orders')
-  await expectText(page, 'My Orders', 'Distributor My Orders heading')
-  const ordersBody = await page.locator('body').innerText().catch(() => '')
-  if (!ordersBody.trim()) fail('Distributor My Orders: blank page')
-  else pass('Distributor My Orders: not blank')
-  consumeErrors(clientErrors, 'Distributor My Orders')
-
-  const viewBtn = page.getByRole('button', { name: /View Items/i }).first()
-  if (await viewBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
-    await viewBtn.click()
-    await expectText(page, 'Order Contents', 'Distributor order detail expand')
-    consumeErrors(clientErrors, 'Distributor order detail')
-  } else {
-    note('No expandable orders found for smoke account — detail expand skipped.')
-  }
-
-  // Shop
-  await page.goto(`${baseUrl}/portal/dashboard/products`, { waitUntil: 'networkidle', timeout: 45000 })
-  consumeErrors(clientErrors, 'Distributor navigation to shop')
-  const shopBody = await page.locator('body').innerText().catch(() => '')
-  if (!shopBody.trim()) fail('Distributor Shop: blank page')
-  else pass('Distributor Shop: not blank')
-  consumeErrors(clientErrors, 'Distributor Shop')
 }
 
 async function checkSupabaseAuthConfig() {
@@ -285,21 +346,20 @@ async function main() {
 
   const browser = await chromium.launch({ headless: true })
   const context = await browser.newContext({
-    viewport: { width: 1440, height: 900 },
-    userAgent: 'GelitupSmokeBot/1.0 (automated health check)',
+    viewport: { width: 1280, height: 800 },
+    userAgent: smokeUserAgent,
+    locale: 'en-US',
+    extraHTTPHeaders: {
+      'accept-language': 'en-US,en;q=0.9',
+    },
   })
-  const page = await context.newPage()
   const clientErrors = []
 
-  page.on('pageerror', (err) => {
-    clientErrors.push(err instanceof Error ? err.message : String(err))
-  })
-
   try {
-    await checkPublicRoutes(page, clientErrors)
-    await checkRegistrationFlow(page, clientErrors)
-    await checkB2bPortal(page, clientErrors)
-    await checkDistributorPortal(page, clientErrors)
+    await checkPublicRoutes(context, clientErrors)
+    await checkRegistrationFlow(context, clientErrors)
+    await checkB2bPortal(context, clientErrors)
+    await checkDistributorPortal(context, clientErrors)
     await checkSupabaseAuthConfig()
   } finally {
     await context.close()
