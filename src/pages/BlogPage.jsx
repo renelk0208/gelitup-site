@@ -34,11 +34,11 @@ function BlogCard({ post }) {
       to={`/blog/${post.slug}`}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_10px_30px_rgba(24,24,27,0.06)] transition hover:-translate-y-1 hover:border-[#D43790]/40 hover:shadow-[0_16px_42px_rgba(24,24,27,0.1)]"
     >
-      <div className="aspect-[16/10] overflow-hidden bg-neutral-100">
+      <div className="aspect-[16/10] overflow-hidden bg-white">
         <img
           src={post.heroImage}
           alt=""
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+          className="h-full w-full object-contain p-2 transition duration-500 group-hover:scale-[1.02] sm:p-3"
         />
       </div>
       <div className="flex flex-1 flex-col p-4 sm:p-5">

@@ -56,6 +56,9 @@ export default function BlogArticlePage() {
     )
   }
 
+  const shopCtaUrl = post.ctaUrl || 'https://shop.gelitup.com/pages/ourproducts'
+  const shopCtaLabel = post.ctaLabel || 'Explore the Full Catalogue — gelitup.com'
+
   return (
     <main className="min-h-screen bg-[#fbf8f5] text-neutral-900">
       <article>
@@ -63,8 +66,8 @@ export default function BlogArticlePage() {
           <Link to="/blog" className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-600 transition hover:text-[#D43790]">
             <span aria-hidden="true">←</span> Back to all articles
           </Link>
-          <div className="mt-8 overflow-hidden rounded-[1.5rem] shadow-[0_24px_80px_rgba(46,16,36,0.18)] sm:rounded-[2rem]">
-            <img src={post.heroImage} alt={post.title} className="aspect-video w-full object-contain" />
+          <div className="mt-8 overflow-hidden rounded-[1.5rem] bg-[#f7f0f3] shadow-[0_24px_80px_rgba(46,16,36,0.18)] sm:rounded-[2rem]">
+            <img src={post.heroImage} alt={post.title} className="aspect-video w-full object-contain p-2 sm:p-3" />
           </div>
           <div className="mx-auto mt-8 max-w-4xl">
             <div className="flex flex-wrap items-center gap-3 text-sm text-neutral-500">
@@ -109,7 +112,7 @@ export default function BlogArticlePage() {
                     src={post.calloutImage}
                     alt={post.calloutAlt || 'Ingredient transparency turns compliance into a competitive advantage.'}
                     loading="lazy"
-                    className="mt-12 w-full rounded-2xl border border-neutral-200 shadow-sm"
+                    className="mt-12 w-full rounded-2xl border border-neutral-200 bg-white object-contain p-2 shadow-sm sm:p-3"
                   />
                 )}
               </section>
@@ -124,18 +127,24 @@ export default function BlogArticlePage() {
             </div>
           </section>
 
-          <Link
-            to="/full-catalogue"
-            aria-label="Explore the full GEL.IT.UP catalogue"
-            className="mt-12 block overflow-hidden rounded-2xl shadow-[0_20px_60px_rgba(24,24,27,0.16)] transition hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(24,24,27,0.22)]"
-          >
+          <div className="mt-12 overflow-hidden rounded-[1.75rem] border border-neutral-200 bg-white p-2 shadow-[0_20px_60px_rgba(24,24,27,0.12)] sm:p-3">
             <img
               src={post.closingImage}
               alt={post.closingAlt || 'Explore the GEL.IT.UP HEMA-free, TPO-free and CPNP-notified professional gel system.'}
               loading="lazy"
-              className="w-full"
+              className="w-full rounded-[1.2rem] bg-white object-contain"
             />
-          </Link>
+          </div>
+
+          <a
+            href={shopCtaUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Explore the full GEL.IT.UP catalogue"
+            className="mt-6 inline-flex w-full items-center justify-center rounded-[1.1rem] bg-[#D43790] px-5 py-4 text-center text-lg font-extrabold text-white shadow-[0_12px_30px_rgba(212,55,144,0.35)] transition hover:bg-[#bf287d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D43790] focus-visible:ring-offset-2"
+          >
+            {shopCtaLabel}
+          </a>
 
           <div className="mt-10 border-t border-neutral-200 pt-8">
             <Link to="/blog" className="inline-flex items-center gap-2 font-semibold text-neutral-700 transition hover:text-[#D43790]">

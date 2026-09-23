@@ -20,6 +20,8 @@ export const blogPosts = [
     calloutAfterSection: 3,
     closingImage: `${INGREDIENT_LABELS_MEDIA}/closing-cta.webp`,
     closingAlt: 'Choose HEMA-free, TPO-free and silver-free professional nail products from GEL.IT.UP.',
+    ctaLabel: 'Explore the Full Catalogue — gelitup.com',
+    ctaUrl: 'https://shop.gelitup.com/pages/ourproducts',
     tags: ['HEMA-Free', 'TPO-Free', 'Silver-Free'],
     intro: [
       'Walk into any professional nail salon in Europe today, and you will hear the same two acronyms: HEMA and TPO. These monomers have become the central topic in gel chemistry discussions, regulatory checklists, and manufacturer reformulation roadmaps. For nail technicians and salon owners who stock their own product library, understanding what these ingredients are — and why an increasing number of professional brands are removing them — is no longer optional. It is a compliance requirement, a client safety decision, and a business differentiator.',
@@ -101,6 +103,8 @@ export const blogPosts = [
     calloutAlt: 'TPO-free formulations are becoming the new standard for professional nail services.',
     closingImage: `${TPO_GUIDE_MEDIA}/hero.png`,
     closingAlt: 'Explore the GEL.IT.UP TPO-free, HEMA-free and CPNP-notified range.',
+    ctaLabel: 'Explore the Full Catalogue — gelitup.com',
+    ctaUrl: 'https://shop.gelitup.com/pages/ourproducts',
     tags: ['TPO-Free', 'HEMA-Free', 'EU Compliant'],
     intro: [
       'Until recently, most nail professionals had never heard of TPO. That is changing fast.',

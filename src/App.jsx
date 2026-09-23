@@ -7152,10 +7152,10 @@ function LangSwitcher() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-semibold uppercase tracking-[0.08em] !text-white/70 transition hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
+        className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] !text-white/70 transition hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
         aria-label="Change language"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
         </svg>
         {lang.toUpperCase()}
@@ -7241,10 +7241,10 @@ function ProductsMenu() {
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="inline-flex items-center gap-2 rounded-lg border border-fuchsia-500/60 px-3 py-2 text-sm font-bold uppercase tracking-[0.06em] !text-white/80 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-fuchsia-500/60 px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-white/80 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
       >
         Our Products
-        <svg viewBox="0 0 20 20" fill="none" className={`h-4 w-4 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} aria-hidden="true">
+        <svg viewBox="0 0 20 20" fill="none" className={`h-3.5 w-3.5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} aria-hidden="true">
           <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
@@ -7291,7 +7291,7 @@ function Nav({ onOpenContactModal }) {
   }, [location.pathname])
 
   return (
-    <nav className="hidden items-center gap-1 xl:flex">
+    <nav className="hidden items-center justify-end gap-1 xl:flex">
       {/* Our Products mega-menu */}
       <ProductsMenu />
 
@@ -7303,7 +7303,7 @@ function Nav({ onOpenContactModal }) {
               key={item.to}
               type="button"
               onClick={onOpenContactModal}
-              className="rounded-lg px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] !text-white/75 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
+              className="rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.06em] !text-white/75 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
             >
               {item.label}
             </button>
@@ -7317,8 +7317,8 @@ function Nav({ onOpenContactModal }) {
               target="_blank"
               rel="noopener noreferrer"
               className={item.highlight
-                ? 'rounded-lg border border-fuchsia-500/60 px-3 py-2 text-sm font-bold uppercase tracking-[0.06em] !text-white/80 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400'
-                : 'rounded-lg px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] !text-white/75 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500'
+                ? 'rounded-lg border border-fuchsia-500/60 px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-white/80 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400'
+                : 'rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.06em] !text-white/75 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500'
               }
             >
               {item.label}
@@ -7331,12 +7331,12 @@ function Nav({ onOpenContactModal }) {
             to={item.to}
             className={({ isActive }) =>
               item.highlight
-                ? `rounded-lg border px-3 py-2 text-sm font-bold uppercase tracking-[0.06em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 ${
+                ? `rounded-lg border px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 ${
                     isActive
                       ? 'border-[#D43790] bg-[#D43790] !text-white shadow-[0_0_12px_rgba(212,55,144,0.55)]'
                       : 'border-fuchsia-500/60 !text-white/80 hover:bg-white/10 hover:!text-white'
                   }`
-                : `rounded-lg px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+                : `rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.06em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
                     isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
                   }`
             }
@@ -7347,7 +7347,7 @@ function Nav({ onOpenContactModal }) {
       })}
 
       {/* Divider */}
-      <span className="mx-1.5 h-5 w-px bg-white/20" aria-hidden="true" />
+      <span className="mx-1 h-4 w-px bg-white/20" aria-hidden="true" />
 
       <div className="relative">
         <button
@@ -7355,10 +7355,10 @@ function Nav({ onOpenContactModal }) {
           onClick={() => setRegisterMenuOpen((current) => !current)}
           aria-expanded={registerMenuOpen}
           aria-haspopup="menu"
-          className="inline-flex items-center gap-2 rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] !text-white/80 transition duration-300 hover:border-white/50 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-white/30 px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.06em] !text-white/80 transition duration-300 hover:border-white/50 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
         >
           Register
-          <svg viewBox="0 0 20 20" fill="none" className={`h-4 w-4 transition-transform duration-200 ${registerMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none" className={`h-3.5 w-3.5 transition-transform duration-200 ${registerMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true">
             <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
@@ -7389,7 +7389,7 @@ function Nav({ onOpenContactModal }) {
       <NavLink
         to="/portal/login"
         className={({ isActive }) =>
-          `rounded-lg border border-white/30 px-3 py-2 text-sm font-medium uppercase tracking-[0.04em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+          `rounded-lg border border-white/30 px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
             isActive ? 'border-fuchsia-400 bg-fuchsia-600 !text-white' : '!text-white/80 hover:border-white/50 hover:bg-white/10 hover:!text-white'
           }`
         }
