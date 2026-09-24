@@ -13964,6 +13964,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                       if (n === '30 ML' || n === '60 ML' || n === 'MULTIMIX') return 'Multimix Polygel'
                       if (n === 'BRUSH ON BUILDER') return 'Brush On Builder'
                       if (n === 'LIQUID POLYGEL') return 'Liquid Polygel'
+                      if (n === 'LIQUID POLYGEL JARS 20G') return 'Liquid Polygel Jars 20g'
                     }
                     if (section.category === 'ACRYLIC') return 'Acrylics'
                     return section.category
