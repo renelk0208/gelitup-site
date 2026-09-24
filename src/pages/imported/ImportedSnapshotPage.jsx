@@ -977,7 +977,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)] lg:items-start">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#f168ae]">GEL.IT.UP® by GIUP®</p>
-              <h1 className="mt-3 text-3xl font-black uppercase leading-tight tracking-[0.08em] sm:text-4xl">
+              <h1 className="mt-3 !text-white text-3xl font-black uppercase leading-tight tracking-[0.08em] sm:text-4xl">
                 Contact Us
               </h1>
               <p className="mt-5 text-base font-semibold text-white">
