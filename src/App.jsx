@@ -1100,7 +1100,7 @@ function getSilverFreeGuaranteeText(referenceDate = new Date()) {
  */
 function setPageSEO({ title, description, canonical } = {}) {
   const SITE_NAME = 'GEL.IT.UP by GIUP®'
-  const DEFAULT_TITLE = 'GEL.IT.UP® | Professional Gel Polish & Builder Gel Systems'
+  const DEFAULT_TITLE = 'GEL.IT.UP® | Wholesale HEMA-Free Professional Gel Polish EU'
   const DEFAULT_DESCRIPTION = 'Professional nail gel polish, builder gel systems and wholesale nail products for salons, technicians and academies. HEMA-free, TPO-free, EU certified.'
   const DEFAULT_CANONICAL = 'https://gelitup.com/'
 
@@ -6323,9 +6323,8 @@ function FullCataloguePage() {
           {/* CHAPTER 01: THE INFINITE SPECTRUM */}
           <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 overflow-hidden bg-[#7a1040] lg:min-h-[400px]">
             <img
-              aria-hidden="true"
               src="/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg"
-              alt=""
+              alt="Professional UV/LED gel polish — 1,000+ shades, HEMA-free, EU certified"
               className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
               style={{
                 maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
@@ -6360,7 +6359,7 @@ function FullCataloguePage() {
                   <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(212,55,144,0.3)_0%,transparent_70%)] blur-2xl" />
                   <img
                     src="/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg"
-                    alt="Gel It Up gel polish colour collection — over 1,000 professional shades"
+                    alt="Professional UV/LED gel polish — 1,000+ shades, HEMA-free, EU certified"
                     className="relative w-full object-contain drop-shadow-[0_6px_32px_rgba(212,55,144,0.45)]"
                   />
                 </div>
@@ -6459,9 +6458,8 @@ function FullCataloguePage() {
           <div id="catalogue-section-builders" className="scroll-mt-28">
             <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#FFCCB6] lg:min-h-[360px]">
               <img
-                aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp"
-                alt=""
+                alt="Professional builder gel and BIAB — HEMA-free, soak-off, wholesale EU"
                 className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
                 style={{
                   maskImage: 'linear-gradient(to right, transparent 0%, rgba(255,204,182,0.6) 25%, rgb(255,204,182) 50%)',
@@ -6495,7 +6493,7 @@ function FullCataloguePage() {
                     <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(255,204,182,0.5)_0%,transparent_70%)] blur-2xl" />
                     <img
                       src="/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp"
-                      alt="Gel It Up professional builder gel systems for nail extensions and reinforcement"
+                      alt="Professional builder gel and BIAB — HEMA-free, soak-off, wholesale EU"
                       className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(180,90,50,0.3)]"
                     />
                   </div>
@@ -6522,9 +6520,8 @@ function FullCataloguePage() {
           <div id="catalogue-section-tools" className="scroll-mt-28">
             <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#9b8cc4] lg:min-h-[360px]">
               <img
-                aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/equipment-and-tools-catalog-hero.jpg"
-                alt=""
+                alt="Professional nail tools and accessories for gel nail technicians"
                 className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
                 style={{
                   maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
@@ -6557,7 +6554,7 @@ function FullCataloguePage() {
                     <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(74,53,112,0.3)_0%,transparent_70%)] blur-2xl" />
                     <img
                       src="/gelitup-content/catalog-heroes/equipment-and-tools-catalog-hero.jpg"
-                      alt="GEL.IT.UP Tools & Equipment"
+                      alt="Professional nail tools and accessories for gel nail technicians"
                       className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(74,53,112,0.4)]"
                     />
                   </div>
@@ -6584,9 +6581,8 @@ function FullCataloguePage() {
           <div id="catalogue-section-nail-art" className="scroll-mt-28">
             <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#8c4060] lg:min-h-[360px]">
               <img
-                aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/nail-art-catalog-hero-image.jpg"
-                alt=""
+                alt="Nail art supplies and gel nail art products for professionals"
                 className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
                 style={{
                   maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
@@ -6619,7 +6615,7 @@ function FullCataloguePage() {
                     <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(160,70,100,0.3)_0%,transparent_70%)] blur-2xl" />
                     <img
                       src="/gelitup-content/catalog-heroes/nail-art-catalog-hero-image.jpg"
-                      alt="GEL.IT.UP Nail Art"
+                      alt="Nail art supplies and gel nail art products for professionals"
                       className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(160,70,100,0.4)]"
                     />
                   </div>
@@ -7926,25 +7922,37 @@ function HomePage({ onOpenContactModal }) {
   const safeShimmerIndex = HOME_SHIMMER_IMAGES.length ? Math.min(activeShimmerSlide, HOME_SHIMMER_IMAGES.length - 1) : 0
   const HOME_FAQS = [
     {
-      q: 'Are GEL.IT.UP products HEMA-free and TPO-free?',
-      a: 'Yes. GEL.IT.UP focuses on HEMA-free and TPO-free professional nail systems designed for salon use, academy training, and wholesale distribution.',
+      q: 'Is GEL.IT.UP® gel polish HEMA-free?',
+      a: 'Yes. Every GEL.IT.UP® gel polish is HEMA-free and TPO-free. Our formulations are designed for professionals who require the safest possible chemistry without compromising performance.',
     },
     {
-      q: 'How do salons access wholesale pricing?',
-      a: 'Salons can register free for instant B2B access and view wholesale pricing, core gel polish shades, builder gel systems, and everyday essentials without waiting for manual approval.',
+      q: 'Is GEL.IT.UP® cruelty-free?',
+      a: 'Yes. GEL.IT.UP® is approved by Cruelty Free International, verifying that no animal testing occurs at any stage, from raw material sourcing to the finished product.',
     },
     {
-      q: 'Do you ship professional nail products internationally?',
-      a: 'Yes. GEL.IT.UP supplies professional nail technicians, salons, and academies across 15+ countries with EU-certified products and export-ready support.',
+      q: 'Is GEL.IT.UP® compliant with EU cosmetics regulations?',
+      a: 'Yes. All products are manufactured in compliance with EU Cosmetics Regulation EC 1223/2009 and produced under global GMP standards.',
     },
     {
-      q: 'Can academies and distributors work with GEL.IT.UP?',
-      a: 'Yes. Nail academies can request training support and sample packs, while distributors can apply for regional or country-level partnerships through the dedicated distributor programme.',
+      q: 'How do I place a wholesale order?',
+      a: 'Visit the B2B portal at shop.gelitup.com. Access is instant: create your professional account and order immediately. There is no minimum order requirement.',
+    },
+    {
+      q: 'Is there a minimum order quantity?',
+      a: 'No. GEL.IT.UP® has no minimum order. You can order a single product or a full range at trade pricing with no thresholds.',
+    },
+    {
+      q: 'Do you ship across the EU?',
+      a: 'Yes. EU shipping is free on qualifying orders. We distribute to over 15 countries through a selected distributor network and via direct wholesale.',
+    },
+    {
+      q: 'How long does GEL.IT.UP® gel polish take to cure?',
+      a: 'GEL.IT.UP® gel polish cures in 60–90 seconds per coat under a UV/LED lamp.',
     },
   ]
 
   useEffect(() => setPageSEO({
-    title: 'GEL.IT.UP® | Professional Gel Polish & Builder Gel Systems',
+    title: 'GEL.IT.UP® | Wholesale HEMA-Free Professional Gel Polish EU',
     description: 'Professional nail gel polish, builder gel systems and wholesale nail products for salons, technicians and academies. HEMA-free, TPO-free, EU certified.',
     canonical: 'https://gelitup.com/',
   }), [])
@@ -8051,15 +8059,24 @@ function HomePage({ onOpenContactModal }) {
     <section className="space-y-6">
       <div className="mx-auto w-full max-w-6xl overflow-hidden rounded-2xl bg-black">
         <div className="relative h-[calc(100svh-80px)] min-h-[320px] w-full sm:h-[66svh] sm:min-h-[400px]">
-          <img
-            src={HOME_HERO_POSTER_URL || media.heroImage}
-            alt="GEL.IT.UP cinematic hero"
-            className="h-full w-full object-cover object-[50%_35%]"
-            loading="eager"
-            onError={(event) => {
-              event.currentTarget.src = media.heroImage || '/logo.png'
-            }}
-          />
+          <picture>
+            <source
+              type="image/webp"
+              srcSet="/gelitup-content/catalog-heroes/home-page-hero-800.webp 800w, /gelitup-content/catalog-heroes/home-page-hero-1200.webp 1200w"
+              sizes="100vw"
+            />
+            <img
+              src={HOME_HERO_POSTER_URL || media.heroImage}
+              alt="GEL.IT.UP® professional gel nail supplies — wholesale B2B, HEMA-free, EU certified"
+              className="h-full w-full object-cover object-[50%_35%]"
+              width="1600"
+              height="900"
+              fetchPriority="high"
+              onError={(event) => {
+                event.currentTarget.src = media.heroImage || '/logo.png'
+              }}
+            />
+          </picture>
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent" />
 
@@ -8239,7 +8256,7 @@ function HomePage({ onOpenContactModal }) {
       <HeroCTA />
       <TestimonialStrip />
 
-      <InfoCard id="products" title="Professional Nail Products for Salons & Technicians">
+      <InfoCard id="products" title="Professional Gel Polish & Nail Supplies — 1,000+ Shades">
         <p>
           GEL.IT.UP supplies professional nail gel polish, builder gel systems, base and top coats, nail art products,
           consumables, and skin and nail care for salons, independent nail technicians, academies, and distribution partners.
@@ -8250,7 +8267,7 @@ function HomePage({ onOpenContactModal }) {
           designed to support structured services, training environments, and multi-country B2B supply.
         </p>
         <p className="mt-3">
-          GEL.IT.UP Greece showroom & academy: Sikyonos 1, Kiato 20200, Greece. Contact <a href="mailto:info@gelitup.com" className="font-semibold text-fuchsia-600 hover:underline">info@gelitup.com</a> or <a href="tel:+306940715234" className="font-semibold text-fuchsia-600 hover:underline">+30 694 071 5234</a>.
+          Contact GEL.IT.UP® by GIUP® at <a href="mailto:info@gelitup.com" className="font-semibold text-fuchsia-600 hover:underline">info@gelitup.com</a> or <a href="tel:+306940715234" className="font-semibold text-fuchsia-600 hover:underline">+30 694 071 5234</a>.
         </p>
         <NavLink to="/full-catalogue" className="mt-3 inline-flex rounded-lg bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-fuchsia-500">
           View our Products
@@ -8269,6 +8286,28 @@ function HomePage({ onOpenContactModal }) {
           </div>
         )}
       </InfoCard>
+
+      <section className="rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A] p-5 sm:p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">Trade Professionals</p>
+        <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">HEMA-Free Professional Gel Polish & Wholesale Nail Supplies EU</h2>
+        <div className="mt-3 max-w-4xl space-y-3 text-sm leading-relaxed text-white/80">
+          <p>
+            GEL.IT.UP® by GIUP® is a professional nail brand for nail technicians, salons, academies, and resellers across Europe.
+            With over 1,000 shades of UV/LED soak-off gel polish, a complete BIAB and builder gel range, and professional nail art
+            supplies, we provide wholesale nail supplies EU businesses can rely on.
+          </p>
+          <p>
+            Every HEMA-free professional gel polish and TPO-free formulation is manufactured under global GMP standards and designed
+            to meet EU Cosmetics Regulation EC 1223/2009. Our EU compliant gel nail products combine reliable salon performance with
+            a cleaner chemistry approach, while GEL.IT.UP® is approved by Cruelty Free International for cruelty-free nail supplies.
+          </p>
+          <p>
+            Trade access is instant, with no minimum order for professional gel polish wholesale accounts. We support salons with
+            colour-led collections, academies with training-ready systems, and distributors with a scalable B2B range and direct
+            support through WhatsApp and Viber.
+          </p>
+        </div>
+      </section>
 
       {/* INSPIRATION CTA CARD */}
       <div className="overflow-hidden rounded-2xl border border-[#4A4A4A] bg-[#1A1A1A]">
@@ -8392,10 +8431,10 @@ function HomePage({ onOpenContactModal }) {
         </p>
         <div className="mt-5 grid gap-3 md:grid-cols-2">
           {HOME_FAQS.map((item) => (
-            <article key={item.q} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="text-sm font-bold text-slate-900">{item.q}</h3>
+            <details key={item.q} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <summary className="cursor-pointer text-sm font-bold text-slate-900">{item.q}</summary>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.a}</p>
-            </article>
+            </details>
           ))}
         </div>
       </div>
@@ -21581,6 +21620,11 @@ function App() {
             <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Company</p>
             <p className="mt-2 text-sm font-semibold text-white">GEL.IT.UP by GIUP® Professional</p>
             <p className="mt-1">Global Professional Distribution Network</p>
+            <address className="mt-2 not-italic text-white/65">
+              GEL.IT.UP® by GIUP®<br />
+              30 Zelendolsko Shose<br />
+              Blagoevgrad 2700, Bulgaria
+            </address>
           </div>
 
           <div>
