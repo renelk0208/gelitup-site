@@ -6377,6 +6377,7 @@ function FullCataloguePage() {
               <img
                 aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/top-bases-catalog-hero-image.webp"
+                loading="lazy"
                 alt=""
                 className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
                 style={{
@@ -6411,6 +6412,7 @@ function FullCataloguePage() {
                     <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(200,115,145,0.25)_0%,transparent_70%)] blur-2xl" />
                     <img
                       src="/gelitup-content/catalog-heroes/top-bases-catalog-hero-image.webp"
+                      loading="lazy"
                       alt="Gel It Up professional base coat and top coat systems"
                       className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(200,115,145,0.35)]"
                     />
@@ -6459,6 +6461,7 @@ function FullCataloguePage() {
             <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#FFCCB6] lg:min-h-[360px]">
               <img
                 src="/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp"
+                loading="lazy"
                 alt="Professional builder gel and BIAB — HEMA-free, soak-off, wholesale EU"
                 className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
                 style={{
@@ -6493,6 +6496,7 @@ function FullCataloguePage() {
                     <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(255,204,182,0.5)_0%,transparent_70%)] blur-2xl" />
                     <img
                       src="/gelitup-content/catalog-heroes/builder-gel-systems.hero.image.webp"
+                      loading="lazy"
                       alt="Professional builder gel and BIAB — HEMA-free, soak-off, wholesale EU"
                       className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(180,90,50,0.3)]"
                     />
@@ -6521,6 +6525,7 @@ function FullCataloguePage() {
             <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#9b8cc4] lg:min-h-[360px]">
               <img
                 src="/gelitup-content/catalog-heroes/equipment-and-tools-catalog-hero.jpg"
+                loading="lazy"
                 alt="Professional nail tools and accessories for gel nail technicians"
                 className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
                 style={{
@@ -6554,6 +6559,7 @@ function FullCataloguePage() {
                     <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(74,53,112,0.3)_0%,transparent_70%)] blur-2xl" />
                     <img
                       src="/gelitup-content/catalog-heroes/equipment-and-tools-catalog-hero.jpg"
+                      loading="lazy"
                       alt="Professional nail tools and accessories for gel nail technicians"
                       className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(74,53,112,0.4)]"
                     />
@@ -6582,6 +6588,7 @@ function FullCataloguePage() {
             <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen overflow-hidden bg-[#8c4060] lg:min-h-[360px]">
               <img
                 src="/gelitup-content/catalog-heroes/nail-art-catalog-hero-image.jpg"
+                loading="lazy"
                 alt="Nail art supplies and gel nail art products for professionals"
                 className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
                 style={{
@@ -6615,6 +6622,7 @@ function FullCataloguePage() {
                     <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(160,70,100,0.3)_0%,transparent_70%)] blur-2xl" />
                     <img
                       src="/gelitup-content/catalog-heroes/nail-art-catalog-hero-image.jpg"
+                      loading="lazy"
                       alt="Nail art supplies and gel nail art products for professionals"
                       className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(160,70,100,0.4)]"
                     />
@@ -6635,6 +6643,7 @@ function FullCataloguePage() {
               <img
                 aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/consumables-catalog-hero.jpg"
+                loading="lazy"
                 alt=""
                 className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
                 style={{
@@ -6668,6 +6677,7 @@ function FullCataloguePage() {
                     <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(252,239,145,0.5)_0%,transparent_70%)] blur-2xl" />
                     <img
                       src="/gelitup-content/catalog-heroes/consumables-catalog-hero.jpg"
+                      loading="lazy"
                       alt="GEL.IT.UP Consumables"
                       className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(120,90,10,0.3)]"
                     />
@@ -6688,6 +6698,7 @@ function FullCataloguePage() {
               <img
                 aria-hidden="true"
                 src="/gelitup-content/catalog-heroes/Hand-nail-and-foot-care-catalog-hero-image.webp"
+                loading="lazy"
                 alt=""
                 className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
                 style={{
@@ -6721,6 +6732,7 @@ function FullCataloguePage() {
                     <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(59,100,90,0.3)_0%,transparent_70%)] blur-2xl" />
                     <img
                       src="/gelitup-content/catalog-heroes/Hand-nail-and-foot-care-catalog-hero-image.webp"
+                      loading="lazy"
                       alt="GEL.IT.UP Nail, Hand & Foot Care"
                       className="relative w-full object-contain drop-shadow-[0_6px_28px_rgba(59,100,90,0.4)]"
                     />
@@ -11907,7 +11919,7 @@ const B2B_SIDEBAR_GROUPS = [
   },
   {
     label: 'Builder Systems',
-    cats: ['BUILDER GEL SYSTEMS', '3-in-1 Builder Gel', '3-in-1 Premium Builder Gel', 'Multimix Polygel', 'Brush On Builder (BIAB)', 'Liquid Polygel', 'Acrylics'],
+    cats: ['BUILDER GEL SYSTEMS', '3-in-1 Builder Gel', '3-in-1 Premium Builder Gel', 'Multimix Polygel', 'Brush On Builder (BIAB)', 'Brush On Builder', 'Liquid Polygel', 'Liquid Polygel Jars 20g', 'Acrylics'],
   },
   {
     label: 'Tools & Equipment',
