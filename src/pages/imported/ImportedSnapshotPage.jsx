@@ -970,6 +970,68 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
     )
   }
 
+  if (isContactUsPage) {
+    return (
+      <section className="space-y-4">
+        <section className="rounded-2xl bg-[#1A1A1A] p-5 text-white shadow-sm sm:p-8">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)] lg:items-start">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#f168ae]">GEL.IT.UP® by GIUP®</p>
+              <h1 className="mt-3 text-3xl font-black uppercase leading-tight tracking-[0.08em] sm:text-4xl">
+                Contact Us
+              </h1>
+              <p className="mt-5 text-base font-semibold text-white">
+                We are always by your side to help you.
+              </p>
+              <address className="mt-4 space-y-1 not-italic text-sm leading-relaxed text-white/80">
+                <p>{contactDetails.address}</p>
+                <p><a href={`mailto:${contactDetails.email}`} className="hover:text-[#f168ae] hover:underline">{contactDetails.email}</a></p>
+                <p><a href="tel:+35973891041" className="hover:text-[#f168ae] hover:underline">{contactDetails.phone}</a></p>
+              </address>
+              <NavLink to="/become-distributor" className="mt-6 inline-flex rounded-lg bg-[#D43790] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#BF3182]">
+                Become a Distributor
+              </NavLink>
+            </div>
+
+            <form action={`mailto:${contactDetails.email}`} method="post" encType="text/plain" className="rounded-xl bg-white p-5 text-slate-900 sm:p-6">
+              <h2 className="text-xl font-bold">Send us an enquiry</h2>
+              <p className="mt-1 text-sm text-slate-600">Tell us how we can help and your email app will open with your message ready to send.</p>
+              <label className="mt-4 block text-sm font-semibold">
+                Name
+                <input name="name" type="text" required className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base" />
+              </label>
+              <label className="mt-3 block text-sm font-semibold">
+                Email address
+                <input name="email" type="email" required className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base" />
+              </label>
+              <label className="mt-3 block text-sm font-semibold">
+                Message
+                <textarea name="message" rows="4" required className="mt-1 w-full resize-y rounded-lg border border-slate-300 px-3 py-2 text-base" />
+              </label>
+              <button type="submit" className="mt-4 w-full rounded-lg bg-[#D43790] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#BF3182]">
+                Prepare email
+              </button>
+            </form>
+          </div>
+        </section>
+
+        <SnapshotCard title="Quick Links">
+          <div className="flex flex-wrap gap-2">
+            {quickLinks.map((link) => (
+              <a
+                key={`${link.href}-${link.text}`}
+                href={link.href}
+                className="rounded-full border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 transition duration-200 hover:border-fuchsia-500 hover:bg-fuchsia-50 hover:text-fuchsia-700"
+              >
+                {link.text}
+              </a>
+            ))}
+          </div>
+        </SnapshotCard>
+      </section>
+    )
+  }
+
   return (
     <section className="space-y-4">
       <div className="grid gap-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700 p-4 text-white sm:p-6 md:grid-cols-2 md:items-center">
