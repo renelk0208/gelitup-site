@@ -3941,7 +3941,7 @@ function FullCataloguePage() {
   useEffect(() => {
     const subSlug = (searchParams.get('subcategory') || '').toLowerCase().trim()
     const seo = SUBCATEGORY_SEO[subSlug] || {
-      title: 'GEL.IT.UP Catalogue | Gel Polish & Builder Gel',
+      title: 'GEL.IT.UP Gel Polish & Builder Gel | HEMA-Free, EU Certified',
       description: 'Browse professional gel polish, builder gels and nail supplies wholesale. HEMA-free, TPO-free, EU certified for salons, technicians and academies.',
       canonical: 'https://gelitup.com/full-catalogue',
     }

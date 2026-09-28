@@ -89,6 +89,8 @@ const PARTNER_COUNTRIES = [
     handle: '@gelitupinternational',
     instagramUrl: 'https://instagram.com/gelitupinternational',
     flag: '🇬🇷',
+    blockedMessage: 'We\'re so sorry to say that, at the moment, all of our ambassador places in Greece are full.',
+    supportMessage: 'Please contact GEL.IT.UP Greece via Instagram at @gelitupinternational to stay in touch for future openings.',
     match: (c) =>
       ['gr', 'grc'].includes(c) || c.includes('greece') || c.includes('hellas') ||
       c.includes('griechenland') || c.includes('grecia') || c.includes('grèce') ||
@@ -100,6 +102,8 @@ const PARTNER_COUNTRIES = [
     handle: '@gel.it.upitaly',
     instagramUrl: 'https://instagram.com/gel.it.upitaly',
     flag: '🇮🇹',
+    blockedMessage: 'Thank you for your interest in becoming a GEL.IT.UP ambassador. Applications from Italy are handled by GEL.IT.UP Italy.',
+    supportMessage: 'Please get in touch with GEL.IT.UP Italy directly on Instagram at @gel.it.upitaly to continue the conversation.',
     match: (c) =>
       ['it', 'ita'].includes(c) || c.includes('italy') || c.includes('italia') ||
       c.includes('italien') || c.includes('italie'),
@@ -107,6 +111,8 @@ const PARTNER_COUNTRIES = [
 ]
 
 // Returns the partner-country config for a free-text country string, or null.
+// Italy and Greece are handled by local teams and must not continue through the general
+// ambassador application flow.
 function matchPartnerCountry(country) {
   const c = String(country || '').trim().toLowerCase()
   if (!c) return null
@@ -274,8 +280,9 @@ export default function AmbassadorPage() {
         })
         await notifyAdminOfApplication(record, pdf)
       } catch { /* notification is best-effort */ }
-      // Countries with a local GEL.IT.UP partner are served via that partner's Instagram. We
-      // still save + notify admin above, and additionally email the applicant to apply there.
+      // Countries with a local GEL.IT.UP partner are served via that partner's Instagram. 
+      // For Italy and Greece, we intentionally block the form and route applicants to the
+      // local contact instead of allowing them to continue the general ambassador application.
       const partner = matchPartnerCountry(record.country)
       if (partner) {
         try { await sendPartnerRedirectEmail(record, partner) } catch { /* best-effort */ }
@@ -413,13 +420,15 @@ export default function AmbassadorPage() {
           {status === 'partner' && partnerCountry ? (
             <div className="mt-8 rounded-2xl border border-[#D43790]/40 bg-white/[0.04] p-8 text-center">
               <div className="text-4xl">{partnerCountry.flag}</div>
-              <h3 className="mt-4 text-xl font-black text-white">Thank you for applying!</h3>
+              <h3 className="mt-4 text-xl font-black text-white">Thank you for your interest</h3>
               <p className="mt-2 text-sm text-white/70">
-                Thanks {form.fullName.split(' ')[0] || 'so much'} — applications from your country are handled by{' '}
-                <span className="font-semibold text-[#e879c4]">{partnerCountry.name}</span>. Please make your application by
-                contacting them on Instagram at <span className="font-semibold text-[#e879c4]">{partnerCountry.handle}</span>.
+                {partnerCountry.blockedMessage || 'Applications from your country are handled by'}{' '}
+                <span className="font-semibold text-[#e879c4]">{partnerCountry.name}</span>.
               </p>
-              <p className="mt-2 text-sm text-white/70">
+              <p className="mt-3 text-sm text-white/70">
+                {partnerCountry.supportMessage || 'Please contact them directly on Instagram.'}
+              </p>
+              <p className="mt-3 text-sm text-white/70">
                 If you need anything else, email us at{' '}
                 <a href="mailto:info@gelitup.com" className="font-semibold text-[#e879c4] hover:underline">info@gelitup.com</a>.
               </p>
