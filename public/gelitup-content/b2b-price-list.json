@@ -1,8 +1,8 @@
 {
   "_meta": {
     "source": "price-list-export.csv + products_export_1.csv",
-    "generated": "2026-09-28T06:44:35.267Z",
-    "count": 1193
+    "generated": "2026-09-28T07:17:46.042Z",
+    "count": 1168
   },
   "items": [
     {
@@ -951,11 +951,6 @@
       "price": 8.9
     },
     {
-      "name": "2037 -HTF",
-      "sku": "2037 -HTF",
-      "price": 7.41
-    },
-    {
       "name": "2037 Salty Caramel -HTF",
       "sku": "2037 Salty Caramel -HTF",
       "price": 8.9
@@ -994,11 +989,6 @@
       "name": "2043 Love Mania -HTF",
       "sku": "2043 Love Mania -HTF",
       "price": 8.9
-    },
-    {
-      "name": "2044 -HTF",
-      "sku": "2044 -HTF",
-      "price": 7.41
     },
     {
       "name": "2044 Bashful Lilac -HTF",
@@ -1146,11 +1136,6 @@
       "price": 8.9
     },
     {
-      "name": "2100 -HTF",
-      "sku": "2100 -HTF",
-      "price": 7.41
-    },
-    {
       "name": "2100 Popsicles -HTF",
       "sku": "2100 Popsicles -HTF",
       "price": 8.9
@@ -1184,11 +1169,6 @@
       "name": "2106 Take a Slice -HTF",
       "sku": "2106 Take a Slice -HTF",
       "price": 8.9
-    },
-    {
-      "name": "2107 -HTF",
-      "sku": "2107 -HTF",
-      "price": 7.41
     },
     {
       "name": "2107 Dragonfly Dances -HTF",
@@ -3551,11 +3531,6 @@
       "price": 6.5
     },
     {
-      "name": "Cleanser 200 ml -HTF",
-      "sku": "Cleanser 200 ml -HTF",
-      "price": 4.78
-    },
-    {
       "name": "CM12 Mirror X7 Powder",
       "sku": "CM12 Mirror X7 Powder",
       "price": 6.2
@@ -4139,96 +4114,6 @@
       "name": "GEL IT UP SCRUB 750ml SILKY BLISS NEW",
       "sku": "GEL IT UP SCRUB 750ml SILKY BLISS NEW",
       "price": 19.3
-    },
-    {
-      "name": "GIUP 2B",
-      "sku": "GIUP 2B",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 2C",
-      "sku": "GIUP 2C",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 2D",
-      "sku": "GIUP 2D",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 2E",
-      "sku": "GIUP 2E",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 2F",
-      "sku": "GIUP 2F",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 2G",
-      "sku": "GIUP 2G",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 2H",
-      "sku": "GIUP 2H",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 2I",
-      "sku": "GIUP 2I",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 7B",
-      "sku": "GIUP 7B",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 7C",
-      "sku": "GIUP 7C",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 7D",
-      "sku": "GIUP 7D",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 8A",
-      "sku": "GIUP 8A",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 8C",
-      "sku": "GIUP 8C",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 8D",
-      "sku": "GIUP 8D",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 8E",
-      "sku": "GIUP 8E",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 8F",
-      "sku": "GIUP 8F",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 9A",
-      "sku": "GIUP 9A",
-      "price": 7.41
-    },
-    {
-      "name": "GIUP 9B",
-      "sku": "GIUP 9B",
-      "price": 7.41
     },
     {
       "name": "GIUP Boat Shape metallic Nail File",
@@ -4931,11 +4816,6 @@
       "price": 25.6
     },
     {
-      "name": "MultiMix Syntholiquid 100ml -HTF",
-      "sku": "MultiMix Syntholiquid 100ml -HTF",
-      "price": 5.1
-    },
-    {
       "name": "N001 Geisha Girl -HTF",
       "sku": "N001 Geisha Girl -HTF",
       "price": 8.9
@@ -5549,11 +5429,6 @@
       "name": "Salt of the 7 Seas Foot Scrub 370g NEW",
       "sku": "Salt of the 7 Seas Foot Scrub 370g NEW",
       "price": 7.8
-    },
-    {
-      "name": "Sanitizer 200ml -HTF",
-      "sku": "Sanitizer 200ml -HTF",
-      "price": 4.78
     },
     {
       "name": "Sapphire Cat Eye #SCE01 -HTF",

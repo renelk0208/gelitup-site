@@ -8,6 +8,8 @@ const shopifyExportPath = path.join(projectRoot, 'products_export_1.csv')
 const priceListPath = path.join(projectRoot, 'public', 'gelitup-content', 'b2b-price-list.json')
 const priceListExportPath = path.join(projectRoot, 'price-list-export.csv')
 const generatedAliasesPath = path.join(projectRoot, 'src', 'data', 'productAliases.generated.js')
+const hiddenProductsPath = path.join(projectRoot, 'public', 'gelitup-content', 'hidden-products.json')
+const productStatusPath = path.join(projectRoot, 'public', 'gelitup-content', 'product-status.csv')
 
 function parseCsv(text) {
   const rows = []
@@ -81,6 +83,60 @@ function basenameFromUrl(url) {
   return fileName.replace(/\.[^.]+$/, '')
 }
 
+// A "bare code" title is just a shade code with no descriptive colour name,
+// e.g. "GIUP 2B" or "2037 -HTF". These duplicate a fuller named entry
+// (e.g. "02B Sweetheart -HTF") that already carries the real product name.
+function extractCode(title) {
+  const stripped = String(title || '')
+    .replace(/\s*[-—]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '')
+    .trim()
+    .replace(/^GIUP\s+/i, '')
+    .trim()
+  const match = stripped.match(/^(\d{1,4})([A-Z]?)\b/i)
+  if (!match) return null
+
+  let digits = match[1]
+  const letter = (match[2] || '').toUpperCase()
+  // "02B" and "2B" refer to the same shade code — normalize away a single
+  // leading zero on two-digit codes so both forms compare equal.
+  if (digits.length === 2 && digits.startsWith('0')) digits = digits.slice(1)
+  return `${digits}${letter}`
+}
+
+function isBareCodeTitle(title) {
+  const stripped = String(title || '')
+    .replace(/\s*[-—]\s*(HTF|HTE|HEMA[- ]FREE|NEW)\s*$/i, '')
+    .trim()
+    .replace(/^GIUP\s+/i, '')
+    .trim()
+  return /^\d{1,4}[A-Z]?$/i.test(stripped)
+}
+
+function loadHiddenAndDiscontinuedNames() {
+  const skip = new Set()
+
+  if (fs.existsSync(hiddenProductsPath)) {
+    const hidden = JSON.parse(fs.readFileSync(hiddenProductsPath, 'utf8'))
+    for (const value of hidden) skip.add(normalize(value))
+  }
+
+  if (fs.existsSync(productStatusPath)) {
+    const rows = parseCsv(fs.readFileSync(productStatusPath, 'utf8'))
+    const [header, ...dataRows] = rows
+    const nameIdx = header.findIndex((h) => /^name$/i.test(h))
+    const statusIdx = header.findIndex((h) => /^status$/i.test(h))
+    if (nameIdx !== -1 && statusIdx !== -1) {
+      for (const row of dataRows) {
+        if (String(row[statusIdx] || '').trim().toLowerCase() === 'discontinued') {
+          skip.add(normalize(row[nameIdx]))
+        }
+      }
+    }
+  }
+
+  return skip
+}
+
 function getHeaderIndex(headers, patterns) {
   for (const pattern of patterns) {
     const index = headers.findIndex((header) => pattern.test(header))
@@ -106,6 +162,17 @@ const existingItems = Array.isArray(priceList?.items) ? priceList.items : []
 const existingTargetSet = new Set(existingItems.map((item) => normalize(item?.name || item?.sku || '')).filter(Boolean))
 const existingTargetLookup = new Map(existingItems.map((item) => [normalize(item?.name || item?.sku || ''), item]))
 const manualAliasSource = fs.readFileSync(path.join(projectRoot, 'src', 'data', 'productAliases.js'), 'utf8')
+const skipNames = loadHiddenAndDiscontinuedNames()
+
+// Codes already covered by a properly-named existing entry (e.g. "02B Sweetheart -HTF")
+// so a later bare-code row (e.g. "GIUP 2B") is recognised as a duplicate, not a new product.
+const namedCodeSet = new Set()
+for (const item of existingItems) {
+  const name = String(item?.name || '').trim()
+  if (!name || isBareCodeTitle(name)) continue
+  const code = extractCode(name)
+  if (code) namedCodeSet.add(code)
+}
 
 const manualAliasCodes = new Set()
 for (const match of manualAliasSource.matchAll(/codes:\s*\[([^\]]*)\]/g)) {
@@ -155,6 +222,14 @@ for (const row of shopifyRows.slice(1)) {
 
   const normalizedTitle = normalize(title)
   const normalizedBase = normalizeCode(basenameFromUrl(imageSrc))
+
+  // Skip products that are discontinued/hidden per our catalogue records,
+  // and bare shade-code rows that duplicate an already-named entry.
+  const isDiscontinuedOrHidden = skipNames.has(normalizedTitle)
+  const bareCode = isBareCodeTitle(title) ? extractCode(title) : null
+  const isDuplicateBareCode = bareCode && namedCodeSet.has(bareCode)
+
+  if (isDiscontinuedOrHidden || isDuplicateBareCode) continue
 
   if (!existingTargetSet.has(normalizedTitle)) {
     mergedItems.push({
