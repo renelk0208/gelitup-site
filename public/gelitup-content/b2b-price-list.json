@@ -1,2720 +1,10 @@
 {
   "_meta": {
-    "source": "FINAL - gelitup-tier-pricing-2026-09-17.csv",
-    "generated": "2026-09-18T13:17:14.993Z",
-    "count": 1165
+    "source": "price-list-export.csv + products_export_1.csv",
+    "generated": "2026-09-28T06:44:35.267Z",
+    "count": 1193
   },
   "items": [
-    {
-      "name": "Acrylic Classic Powder Clear 35g -HTF",
-      "sku": "Acrylic Classic Powder Clear 35g -HTF",
-      "price": 18.5
-    },
-    {
-      "name": "Acrylic Classic Powder Pink 35g -HTF",
-      "sku": "Acrylic Classic Powder Pink 35g -HTF",
-      "price": 18.5
-    },
-    {
-      "name": "Acrylic Classic Powder White 35g -HTF",
-      "sku": "Acrylic Classic Powder White 35g -HTF",
-      "price": 18.5
-    },
-    {
-      "name": "Acrylic Compete Powder Clear 35g -HTF",
-      "sku": "Acrylic Compete Powder Clear 35g -HTF",
-      "price": 18.5
-    },
-    {
-      "name": "Acrylic Compete Powder Cover 35g -HTF",
-      "sku": "Acrylic Compete Powder Cover 35g -HTF",
-      "price": 18.5
-    },
-    {
-      "name": "Acrylic Compete Powder Extreme White 35g -HTF",
-      "sku": "Acrylic Compete Powder Extreme White 35g -HTF",
-      "price": 18.5
-    },
-    {
-      "name": "Acrylic Compete Powder Milky White 35g -HTF",
-      "sku": "Acrylic Compete Powder Milky White 35g -HTF",
-      "price": 18.5
-    },
-    {
-      "name": "Acrylic Compete Powder Pink 35g -HTF",
-      "sku": "Acrylic Compete Powder Pink 35g -HTF",
-      "price": 18.5
-    },
-    {
-      "name": "Base Coat 15ml -HTF",
-      "sku": "Base Coat 15ml -HTF",
-      "price": 12.6
-    },
-    {
-      "name": "Flexi Base Clear -HTF",
-      "sku": "Flexi Base Clear -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Baby Pink -HTF",
-      "sku": "5-in-1 Superior Base 15ml Baby Pink -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Blue Serenity -HTF",
-      "sku": "5-in-1 Superior Base 15ml Blue Serenity -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Candy Pink -HTF",
-      "sku": "5-in-1 Superior Base 15ml Candy Pink -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Clear -HTF",
-      "sku": "5-in-1 Superior Base 15ml Clear -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Iridescent Milky Flakes -HTF",
-      "sku": "5-in-1 Superior Base 15ml Iridescent Milky Flakes -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Irridecent Pink -HTF",
-      "sku": "5-IN-1 Superior Base 15ml Irridecent Pink -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Lemon Serenity -HTF",
-      "sku": "5-in-1 Superior Base 15ml Lemon Serenity -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Lilac -HTF",
-      "sku": "5-in-1 Superior Base 15ml Lilac -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Milky Pink -HTF",
-      "sku": "5-in-1 Superior Base 15ml Milky Pink -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Milky White -HTF",
-      "sku": "5-in-1 Superior Base 15ml Milky White -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Mint Serenity -HTF",
-      "sku": "5-in-1 Superior Base 15ml Mint Serenity -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Nude -HTF",
-      "sku": "5-in-1 Superior Base 15ml Nude -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Peach Serenity -HTF",
-      "sku": "5-in-1 Superior Base 15ml Peach Serenity -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Pretty Pink -HTF",
-      "sku": "5-in-1 Superior Base 15ml Pretty Pink -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Purple Serenity -HTF",
-      "sku": "5-in-1 Superior Base 15ml Purple Serenity -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Soft Nude -HTF",
-      "sku": "5-IN-1 Superior Base 15ml Soft Nude -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Sweet Pink -HTF",
-      "sku": "5-in-1 Superior Base 15ml Sweet Pink -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Glittery Peach -HTF",
-      "sku": "5-in-1 Superior Base 15ml Glittery Peach -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Glittery Pink -HTF",
-      "sku": "5-IN-1 Superior Base 15ml Glittery Pink -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "5-in-1 Superior Base 15ml Milky Glitter -HTF",
-      "sku": "5-IN-1 Superior Base 15ml Milky Glitter -HTF",
-      "price": 15.5
-    },
-    {
-      "name": "#10 Acrylic Application Brush Rose Gold",
-      "sku": "#10 Acrylic Application Brush Rose Gold",
-      "price": 19.3
-    },
-    {
-      "name": "#12 Acrylic Brush Rose Gold",
-      "sku": "#12 Acrylic Brush Rose Gold",
-      "price": 19.3
-    },
-    {
-      "name": "#8 Acrylic brush Rose Gold",
-      "sku": "#8 Acrylic brush Rose Gold",
-      "price": 19.3
-    },
-    {
-      "name": "#8 Gel Brush Rose Gold",
-      "sku": "#8 Gel Brush Rose Gold",
-      "price": 12.4
-    },
-    {
-      "name": "Ombre brush",
-      "sku": "Ombre brush",
-      "price": 12.4
-    },
-    {
-      "name": "Skinny Liner brush 5-7",
-      "sku": "Skinny Liner brush 5-7",
-      "price": 12.4
-    },
-    {
-      "name": "Skinny Liner brush 9-11",
-      "sku": "Skinny Liner brush 9-11",
-      "price": 12.4
-    },
-    {
-      "name": "Aquarela Brush Rose Gold",
-      "sku": "Aquarela Brush Rose Gold",
-      "price": 13.1
-    },
-    {
-      "name": "Polygel 2 Brush and Spatula Rose Gold",
-      "sku": "Polygel 2 Brush and Spatula Rose Gold",
-      "price": 13.1
-    },
-    {
-      "name": "Polygel Brush and Spatula Rose Gold",
-      "sku": "Polygel Brush and Spatula Rose Gold",
-      "price": 13.1
-    },
-    {
-      "name": "#6 Gel Brush Rose Gold",
-      "sku": "#6 Gel Brush Rose Gold",
-      "price": 19.3
-    },
-    {
-      "name": "AirBrush Machine New",
-      "sku": "AirBrush Machine New",
-      "price": 69.9
-    },
-    {
-      "name": "French Nail Brush Rose Gold",
-      "sku": "French Nail Brush Rose Gold",
-      "price": 12.4
-    },
-    {
-      "name": "3-in-1 Glitter Builder Gels Sunshine 20g -HTF",
-      "sku": "3-in-1 Glitter Builder Gels Sunshine 20g -HTF",
-      "price": 33.4
-    },
-    {
-      "name": "3-in-1 Glitter Builder Gels Cosmic Glitter 20g -HTF",
-      "sku": "3-in-1 Glitter Builder Gels Cosmic Glitter 20g -HTF",
-      "price": 33.4
-    },
-    {
-      "name": "3-in-1 Glitter Builder Gels Deep Sea Galaxy 20g -HTF",
-      "sku": "3-in-1 Glitter Builder Gels Deep Sea Galaxy 20g -HTF",
-      "price": 33.4
-    },
-    {
-      "name": "3-in-1 Glitter Builder Gels Electric Orchid 20g -HTF",
-      "sku": "3-in-1 Glitter Builder Gels Electric Orchid 20g -HTF",
-      "price": 33.4
-    },
-    {
-      "name": "3-in-1 Glitter Builder Gels Rose Stardust 20g -HTF",
-      "sku": "3-in-1 Glitter Builder Gels Rose Stardust 20g -HTF",
-      "price": 33.4
-    },
-    {
-      "name": "3-in-1 Glitter Builder Gels Stardust Plum 20g -HTF",
-      "sku": "3-in-1 Glitter Builder Gels Stardust Plum 20g -HTF",
-      "price": 33.4
-    },
-    {
-      "name": "3-in-1 Glitter Builder Gels Supernova Indigo 20g -HTF",
-      "sku": "3-in-1 Glitter Builder Gels Supernova Indigo 20g -HTF",
-      "price": 33.4
-    },
-    {
-      "name": "3-in-1 Glitter Builder Gels Warm Sand Glow 20g -HTF",
-      "sku": "3-in-1 Glitter Builder Gels Warm Sand Glow 20g -HTF",
-      "price": 33.4
-    },
-    {
-      "name": "Liquid Polygel #LPG1 -HTF",
-      "sku": "Liquid Polygel #LPG1 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG2 -HTF",
-      "sku": "Liquid Polygel #LPG2 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG3 -HTF",
-      "sku": "Liquid Polygel #LPG3 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG4 -HTF",
-      "sku": "Liquid Polygel #LPG4 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG5 -HTF",
-      "sku": "Liquid Polygel #LPG5 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG6 -HTF",
-      "sku": "Liquid Polygel #LPG6 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG7 -HTF",
-      "sku": "Liquid Polygel #LPG7 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG8 -HTF",
-      "sku": "Liquid Polygel #LPG8 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG9 -HTF",
-      "sku": "Liquid Polygel #LPG9 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG10 -HTF",
-      "sku": "Liquid Polygel #LPG10 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG11 -HTF",
-      "sku": "Liquid Polygel #LPG11 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG12 -HTF",
-      "sku": "Liquid Polygel #LPG12 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG13 -HTF",
-      "sku": "Liquid Polygel #LPG13 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG14 -HTF",
-      "sku": "Liquid Polygel #LPG14 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG15 -HTF",
-      "sku": "Liquid Polygel #LPG15 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG16 -HTF",
-      "sku": "Liquid Polygel #LPG16 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG17 -HTF",
-      "sku": "Liquid Polygel #LPG17 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG18 -HTF",
-      "sku": "Liquid Polygel #LPG18 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG19 -HTF",
-      "sku": "Liquid Polygel #LPG19 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Liquid Polygel #LPG20 -HTF",
-      "sku": "Liquid Polygel #LPG20 -HTF",
-      "price": 12.9
-    },
-    {
-      "name": "Multimix Synthogel 30g Light Nude -HTF",
-      "sku": "Multimix Synthogel 30g Light Nude -HTF",
-      "price": 16.1
-    },
-    {
-      "name": "MultiMix Synthogel 30gr Baby Blue -HTF",
-      "sku": "MultiMix Synthogel 30gr Baby Blue -HTF",
-      "price": 16.1
-    },
-    {
-      "name": "MultiMix Synthogel 30gr Clear -HTF",
-      "sku": "MultiMix Synthogel 30gr Clear -HTF",
-      "price": 16.1
-    },
-    {
-      "name": "MultiMix Synthogel 30gr Glitsy Green -HTF",
-      "sku": "MultiMix Synthogel 30gr Glitsy Green -HTF",
-      "price": 16.1
-    },
-    {
-      "name": "MultiMix Synthogel 30gr Minty Green -HTF",
-      "sku": "MultiMix Synthogel 30gr Minty Green -HTF",
-      "price": 16.1
-    },
-    {
-      "name": "MultiMix Synthogel 30gr Pink III -HTF",
-      "sku": "MultiMix Synthogel 30gr Pink III -HTF",
-      "price": 16.1
-    },
-    {
-      "name": "MultiMix Synthogel 30gr Super Soft Pink -HTF",
-      "sku": "MultiMix Synthogel 30gr Super Soft Pink -HTF",
-      "price": 16.1
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Clear -HTF",
-      "sku": "MultiMix Synthogel 60gr Clear -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Cover -HTF",
-      "sku": "MultiMix Synthogel 60gr Cover -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Cover II -HTF",
-      "sku": "MultiMix Synthogel 60gr Cover II -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Crystal Clear -HTF",
-      "sku": "MultiMix Synthogel 60gr Crystal Clear -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Light Lilac -HTF",
-      "sku": "MultiMix Synthogel 60gr Light Lilac -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Light Pink -HTF",
-      "sku": "MultiMix Synthogel 60gr Light Pink -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Milky White -HTF",
-      "sku": "MultiMix Synthogel 60gr Milky White -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Nude -HTF",
-      "sku": "MultiMix Synthogel 60gr Nude -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Pink -HTF",
-      "sku": "MultiMix Synthogel 60gr Pink -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Pink II -HTF",
-      "sku": "MultiMix Synthogel 60gr Pink II -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Super Milky -HTF",
-      "sku": "MultiMix Synthogel 60gr Super Milky -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "MultiMix Synthogel 60gr White -HTF",
-      "sku": "MultiMix Synthogel 60gr White -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "Brush on Builder Gel Dusty Shimmer 15ml -HTF",
-      "sku": "Brush on Builder Gel Dusty Shimmer 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF",
-      "sku": "3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF",
-      "price": 27.8
-    },
-    {
-      "name": "3-in-1 Shimmery Builder Gel 40g Cover -HTF",
-      "sku": "3-in-1 Shimmery Builder Gel 40g Cover -HTF",
-      "price": 27.8
-    },
-    {
-      "name": "3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF",
-      "sku": "3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF",
-      "price": 27.8
-    },
-    {
-      "name": "3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF",
-      "sku": "3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF",
-      "price": 27.8
-    },
-    {
-      "name": "Brush on Builder Gel Berry Stardust 15ml -HTF",
-      "sku": "Brush on Builder Gel Berry Stardust 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Brush on Builder Gel Blush Pink 15ml -HTF",
-      "sku": "Brush on Builder Gel Blush Pink 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Brush on Builder Gel Blush Sorbet 15ml -HTF",
-      "sku": "Brush on Builder Gel Blush Sorbet 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Brush on Builder Gel Clear 15ml -HTF",
-      "sku": "Brush on Builder Gel Clear 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Brush on Builder Gel Cover 15ml -HTF",
-      "sku": "Brush on Builder Gel Cover 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Brush on Builder Gel Creamy 15ml -HTF",
-      "sku": "Brush on Builder Gel Creamy 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Brush on Builder Gel Lilac 15ml -HTF",
-      "sku": "Brush on Builder Gel Lilac 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Brush on Builder Gel Milky 15ml -HTF",
-      "sku": "Brush on Builder Gel Milky 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Brush on Builder Gel Nude 15ml -HTF",
-      "sku": "Brush on Builder Gel Nude 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Brush on Builder Gel Pink 15ml -HTF",
-      "sku": "Brush on Builder Gel Pink 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Brush on Builder Gel Purple 15ml -HTF",
-      "sku": "Brush on Builder Gel Purple 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Brush on Builder Gel Sky Sprinkle 15ml -HTF",
-      "sku": "Brush on Builder Gel Sky Sprinkle 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Brush on Builder Gel Soft Pink 15ml -HTF",
-      "sku": "Brush on Builder Gel Soft Pink 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Premium Builder Gel Blue - 20g -HTF",
-      "sku": "Premium Builder Gel Blue - 20g -HTF",
-      "price": 25.8
-    },
-    {
-      "name": "Premium Builder Gel Mint - 20g -HTF",
-      "sku": "Premium Builder Gel Mint - 20g -HTF",
-      "price": 25.8
-    },
-    {
-      "name": "Premium Builder Gel Purple - 20g -HTF",
-      "sku": "Premium Builder Gel Purple - 20g -HTF",
-      "price": 25.8
-    },
-    {
-      "name": "Premium Builder Gel Vitro Purple - 20g -HTF",
-      "sku": "Premium Builder Gel Vitro Purple - 20g -HTF",
-      "price": 25.8
-    },
-    {
-      "name": "Premium Builder Gel Vitro Green - 20g -HTF",
-      "sku": "Premium Builder Gel Vitro Green - 20g -HTF",
-      "price": 25.8
-    },
-    {
-      "name": "Premium Builder Gel Vitro Pink - 20g -HTF",
-      "sku": "Premium Builder Gel Vitro Pink - 20g -HTF",
-      "price": 25.8
-    },
-    {
-      "name": "Premium Builder Gel Vitro Red - 20g -HTF",
-      "sku": "Premium Builder Gel Vitro Red - 20g -HTF",
-      "price": 25.8
-    },
-    {
-      "name": "Premium Builder Gel Vitro Blue - 20g -HTF",
-      "sku": "Premium Builder Gel Vitro Blue - 20g -HTF",
-      "price": 25.8
-    },
-    {
-      "name": "Premium Builder Gel Vitro Teak Jade - 20g -HTF",
-      "sku": "Premium Builder Gel Vitro Teak Jade - 20g -HTF",
-      "price": 25.8
-    },
-    {
-      "name": "3-in-1 Builder Gel Clear 40g -HTF",
-      "sku": "3-in-1 Builder Gel Clear 40g -HTF",
-      "price": 27.8
-    },
-    {
-      "name": "3-in-1 Builder Gel Cover 40g -HTF",
-      "sku": "3-in-1 Builder Gel Cover 40g -HTF",
-      "price": 27.8
-    },
-    {
-      "name": "3-in-1 Builder Gel Pink 40g -HTF",
-      "sku": "3-in-1 Builder Gel Pink 40g -HTF",
-      "price": 27.8
-    },
-    {
-      "name": "Crystal Clear Builder Gel 40gr -HTF",
-      "sku": "Crystal Clear Builder Gel 40gr -HTF",
-      "price": 29.4
-    },
-    {
-      "name": "Premium Builder Gel Blush 40gr -HTF",
-      "sku": "Premium Builder Gel Blush 40gr -HTF",
-      "price": 29.4
-    },
-    {
-      "name": "Premium Builder Gel Clear 40gr -HTF",
-      "sku": "Premium Builder Gel Clear 40gr -HTF",
-      "price": 29.4
-    },
-    {
-      "name": "Premium Builder Gel Cover 40gr -HTF",
-      "sku": "Premium Builder Gel Cover 40gr -HTF",
-      "price": 29.4
-    },
-    {
-      "name": "Premium Builder Gel Milky 40gr -HTF",
-      "sku": "Premium Builder Gel Milky 40gr -HTF",
-      "price": 29.4
-    },
-    {
-      "name": "Premium Builder Gel Nude 40gr -HTF",
-      "sku": "Premium Builder Gel Nude 40gr -HTF",
-      "price": 29.4
-    },
-    {
-      "name": "Premium Builder Gel Nude II 40gr -HTF",
-      "sku": "Premium Builder Gel Nude II 40gr -HTF",
-      "price": 29.4
-    },
-    {
-      "name": "Premium Builder Gel Pearly Nude 40gr -HTF",
-      "sku": "Premium Builder Gel Pearly Nude 40gr -HTF",
-      "price": 29.4
-    },
-    {
-      "name": "Premium Builder Gel Pearly Pink 40gr -HTF",
-      "sku": "Premium Builder Gel Pearly Pink 40gr -HTF",
-      "price": 29.4
-    },
-    {
-      "name": "Premium Builder Gel Pink 40gr -HTF",
-      "sku": "Premium Builder Gel Pink 40gr -HTF",
-      "price": 29.4
-    },
-    {
-      "name": "Premium Builder Gel White 40gr -HTF",
-      "sku": "Premium Builder Gel White 40gr -HTF",
-      "price": 29.4
-    },
-    {
-      "name": "Premium Plus Fiber Glass Builder Gel 40gr -HTF",
-      "sku": "Premium Plus Fiber Glass Builder Gel 40gr -HTF",
-      "price": 29.4
-    },
-    {
-      "name": "Liquid Polygel #LPG1 20g -HTF",
-      "sku": "Liquid Polygel #LPG1 20g -HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG2 20g -HTF",
-      "sku": "Liquid Polygel #LPG2 20g -HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG3 20g -HTF",
-      "sku": "Liquid Polygel #LPG3 20g -HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG4 20g -HTF",
-      "sku": "Liquid Polygel #LPG4 20g -HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG5 20g -HTF",
-      "sku": "Liquid Polygel #LPG5 20g -HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG6 20g -HTF",
-      "sku": "Liquid Polygel #LPG6 20g -HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG7 20g -HTF",
-      "sku": "Liquid Polygel #LPG7 20g -HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG8 20g -HTF",
-      "sku": "Liquid Polygel #LPG8 20g -HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG9 20g -HTF",
-      "sku": "Liquid Polygel #LPG9 20g -HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG10 20g-HTF",
-      "sku": "Liquid Polygel #LPG10 20g-HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG11 20g -HTF",
-      "sku": "Liquid Polygel #LPG11 20g -HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG12 20g -HTF",
-      "sku": "Liquid Polygel #LPG12 20g -HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG13 20 -HTF",
-      "sku": "Liquid Polygel #LPG13 20 -HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG14 20g-HTF",
-      "sku": "Liquid Polygel #LPG14 20g-HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG15 20g-HTF",
-      "sku": "Liquid Polygel #LPG15 20g-HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG16 20g-HTF",
-      "sku": "Liquid Polygel #LPG16 20g-HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG17 20g-HTF",
-      "sku": "Liquid Polygel #LPG17 20g-HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG18 20g-HTF",
-      "sku": "Liquid Polygel #LPG18 20g-HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG19 20g-HTF",
-      "sku": "Liquid Polygel #LPG19 20g-HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Liquid Polygel #LPG20 20g-HTF",
-      "sku": "Liquid Polygel #LPG20 20g-HTF",
-      "price": 15.6
-    },
-    {
-      "name": "Glass Cat Eye #GCE01 -HTF",
-      "sku": "Glass Cat Eye #GCE01 -HTF",
-      "price": 10
-    },
-    {
-      "name": "Glass Cat Eye #GCE02 -HTF",
-      "sku": "Glass Cat Eye #GCE02 -HTF",
-      "price": 10
-    },
-    {
-      "name": "Glass Cat Eye #GCE03 -HTF",
-      "sku": "Glass Cat Eye #GCE03 -HTF",
-      "price": 10
-    },
-    {
-      "name": "Glass Cat Eye #GCE04 -HTF",
-      "sku": "Glass Cat Eye #GCE04 -HTF",
-      "price": 10
-    },
-    {
-      "name": "Glass Cat Eye #GCE05 -HTF",
-      "sku": "Glass Cat Eye #GCE05 -HTF",
-      "price": 10
-    },
-    {
-      "name": "Glass Cat Eye #GCE06 -HTF",
-      "sku": "Glass Cat Eye #GCE06 -HTF",
-      "price": 10
-    },
-    {
-      "name": "Glass Cat Eye #GCE07 -HTF",
-      "sku": "Glass Cat Eye #GCE07 -HTF",
-      "price": 10
-    },
-    {
-      "name": "Dreamy Cat Eye #DCE1 -HTF",
-      "sku": "Dreamy Cat Eye #DCE1 -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "Dreamy Cat Eye #DCE2 -HTF",
-      "sku": "Dreamy Cat Eye #DCE2 -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "Dreamy Cat Eye #DCE3 -HTF",
-      "sku": "Dreamy Cat Eye #DCE3 -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "Dreamy Cat Eye #DCE4 -HTF",
-      "sku": "Dreamy Cat Eye #DCE4 -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "Velvet Cat Eye #VCE01 -HTF",
-      "sku": "Velvet Cat Eye #VCE01 -HTF",
-      "price": 10.9
-    },
-    {
-      "name": "Velvet Cat Eye #VCE02 -HTF",
-      "sku": "Velvet Cat Eye #VCE02 -HTF",
-      "price": 10.9
-    },
-    {
-      "name": "Velvet Cat Eye #VCE03 -HTF",
-      "sku": "Velvet Cat Eye #VCE03 -HTF",
-      "price": 10.9
-    },
-    {
-      "name": "Velvet Cat Eye #VCE04 -HTF",
-      "sku": "Velvet Cat Eye #VCE04 -HTF",
-      "price": 10.9
-    },
-    {
-      "name": "Velvet Cat Eye #VCE05 -HTF",
-      "sku": "Velvet Cat Eye #VCE05 -HTF",
-      "price": 10.9
-    },
-    {
-      "name": "Velvet Cat Eye #VCE06 -HTF",
-      "sku": "Velvet Cat Eye #VCE06 -HTF",
-      "price": 10.9
-    },
-    {
-      "name": "Velvet Cat Eye #VCE07 -HTF",
-      "sku": "Velvet Cat Eye #VCE07 -HTF",
-      "price": 10.9
-    },
-    {
-      "name": "Velvet Cat Eye #VCE08 -HTF",
-      "sku": "Velvet Cat Eye #VCE08 -HTF",
-      "price": 10.9
-    },
-    {
-      "name": "Velvet Cat Eye #VCE09 -HTF",
-      "sku": "Velvet Cat Eye #VCE09 -HTF",
-      "price": 10.9
-    },
-    {
-      "name": "Velvet Cat Eye #VCE10 -HTF",
-      "sku": "Velvet Cat Eye #VCE10 -HTF",
-      "price": 10.9
-    },
-    {
-      "name": "Rose Quartz Cat Eye #RQCE1 -HTF",
-      "sku": "Rose Quartz Cat Eye #RQCE1 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "Rose Quartz Cat Eye #RQCE2 -HTF",
-      "sku": "Rose Quartz Cat Eye #RQCE2 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "Rose Quartz Cat Eye #RQCE3 -HTF",
-      "sku": "Rose Quartz Cat Eye #RQCE3 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "Sapphire Cat Eye #SCE01 -HTF",
-      "sku": "Sapphire Cat Eye #SCE01 -HTF",
-      "price": 13
-    },
-    {
-      "name": "Sapphire Cat Eye #SCE02 -HTF",
-      "sku": "Sapphire Cat Eye #SCE02 -HTF",
-      "price": 13
-    },
-    {
-      "name": "Sapphire Cat Eye #SCE03 -HTF",
-      "sku": "Sapphire Cat Eye #SCE03 -HTF",
-      "price": 13
-    },
-    {
-      "name": "Sapphire Cat Eye #SCE04 -HTF",
-      "sku": "Sapphire Cat Eye #SCE04 -HTF",
-      "price": 13
-    },
-    {
-      "name": "Neon Cat Eye #NCE01 -HTF",
-      "sku": "Neon Cat Eye #NCE01 -HTF",
-      "price": 16.4
-    },
-    {
-      "name": "Neon Cat Eye #NCE02 -HTF",
-      "sku": "Neon Cat Eye #NCE02 -HTF",
-      "price": 16.4
-    },
-    {
-      "name": "Neon Cat Eye #NCE03 -HTF",
-      "sku": "Neon Cat Eye #NCE03 -HTF",
-      "price": 16.4
-    },
-    {
-      "name": "Neon Cat Eye #NCE04 -HTF",
-      "sku": "Neon Cat Eye #NCE04 -HTF",
-      "price": 16.4
-    },
-    {
-      "name": "Neon Cat Eye #NCE05 -HTF",
-      "sku": "Neon Cat Eye #NCE05 -HTF",
-      "price": 16.4
-    },
-    {
-      "name": "Neon Cat Eye #NCE06 -HTF",
-      "sku": "Neon Cat Eye #NCE06 -HTF",
-      "price": 16.4
-    },
-    {
-      "name": "Neon Cat Eye #NCE07 -HTF",
-      "sku": "Neon Cat Eye #NCE07 -HTF",
-      "price": 16.4
-    },
-    {
-      "name": "FAN01 -HTF",
-      "sku": "FAN01 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "FAN02 -HTF",
-      "sku": "FAN02 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "FAN03 -HTF",
-      "sku": "FAN03 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "FAN04 -HTF",
-      "sku": "FAN04 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "FAN05 -HTF",
-      "sku": "FAN05 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "FAN06 -HTF",
-      "sku": "FAN06 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "FAN07 -HTF",
-      "sku": "FAN07 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "FAN08 -HTF",
-      "sku": "FAN08 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "FAN09 -HTF",
-      "sku": "FAN09 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "FAN10 -HTF",
-      "sku": "FAN10 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "FAN11 -HTF",
-      "sku": "FAN11 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "FAN13 -HTF",
-      "sku": "FAN13 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "Nail wipes 1000s",
-      "sku": "Nail wipes 1000s",
-      "price": 6
-    },
-    {
-      "name": "Almond Cuticle Scrub Remover 5ml -HTF",
-      "sku": "Almond Cuticle Scrub Remover 5ml -HTF",
-      "price": 6.5
-    },
-    {
-      "name": "Almond Cuticle Scrub Remover 100ml -HTF",
-      "sku": "Almond Cuticle Scrub Remover 100ml -HTF",
-      "price": 17.2
-    },
-    {
-      "name": "Nail Files 100/100",
-      "sku": "Nail Files 100/100",
-      "price": 0.98
-    },
-    {
-      "name": "Wooden File Super thin 100/100",
-      "sku": "Wooden File Super thin 100/100",
-      "price": 0.98
-    },
-    {
-      "name": "GIUP Boat Shape Nail Files 180/180 Purple Sponge Buffer",
-      "sku": "GIUP Boat Shape Nail Files 180/180 Purple Sponge Buffer",
-      "price": 1.4
-    },
-    {
-      "name": "GIUP Boat Shape Nail File 220/240",
-      "sku": "GIUP Boat Shape Nail File 220/240",
-      "price": 1.4
-    },
-    {
-      "name": "GIUP Boat Shape Nail Files 100/120 Pink Sponge Buffer",
-      "sku": "GIUP Boat Shape Nail Files 100/120 Pink Sponge Buffer",
-      "price": 1.4
-    },
-    {
-      "name": "Nail Files Boat Shape 100/180",
-      "sku": "Nail Files Boat Shape 100/180",
-      "price": 1.4
-    },
-    {
-      "name": "Nail Files With Back Glue 100 Packet of 10",
-      "sku": "Nail Files With Back Glue 100 Packet of 10",
-      "price": 4.6
-    },
-    {
-      "name": "Nail Files With Back Glue 120 Packet of 10",
-      "sku": "Nail Files With Back Glue 120 Packet of 10",
-      "price": 4.6
-    },
-    {
-      "name": "Nail Files With Back Glue 180 Packet of 10",
-      "sku": "Nail Files With Back Glue 180 Packet of 10",
-      "price": 4.6
-    },
-    {
-      "name": "Cross Magnet Black",
-      "sku": "Cross Magnet Black",
-      "price": 6.3
-    },
-    {
-      "name": "Cross Magnet Pink",
-      "sku": "Cross Magnet Pink",
-      "price": 6.3
-    },
-    {
-      "name": "Chilled Melon Cuticle Oil 5ml -HTF",
-      "sku": "Chilled Melon Cuticle Oil 5ml -HTF",
-      "price": 6.5
-    },
-    {
-      "name": "Chilled Melon Cuticle Oil 100ml -HTF",
-      "sku": "Chilled Melon Cuticle Oil 100ml -HTF",
-      "price": 17.2
-    },
-    {
-      "name": "GIUP Boat Shape metallic Nail File",
-      "sku": "GIUP Boat Shape metallic Nail File",
-      "price": 4.6
-    },
-    {
-      "name": "Natural nail sticks",
-      "sku": "Natural nail sticks",
-      "price": 7
-    },
-    {
-      "name": "GIUP Buffing Block 180/180 Packet of 10",
-      "sku": "GIUP Buffing Block 180/180 Packet of 10",
-      "price": 10.4
-    },
-    {
-      "name": "SOAK OFF GEL TIPS LONG ALMOND",
-      "sku": "SOAK OFF GEL TIPS LONG ALMOND",
-      "price": 13
-    },
-    {
-      "name": "SOAK OFF GEL TIPS LONG COFFIN",
-      "sku": "SOAK OFF GEL TIPS LONG COFFIN",
-      "price": 13
-    },
-    {
-      "name": "SOAK OFF GEL TIPS MEDIUM SQUARE",
-      "sku": "SOAK OFF GEL TIPS MEDIUM SQUARE",
-      "price": 13
-    },
-    {
-      "name": "SOAK OFF GEL TIPS SHORT ALMOND",
-      "sku": "SOAK OFF GEL TIPS SHORT ALMOND",
-      "price": 13
-    },
-    {
-      "name": "Apron Black With Logo",
-      "sku": "Apron Black With Logo",
-      "price": 14
-    },
-    {
-      "name": "GEL.IT.UP by GIUP� Nail Forms",
-      "sku": "GEL.IT.UP by GIUPÂ® Nail Forms",
-      "price": 21.6
-    },
-    {
-      "name": "Nail Clips Dual Form Single",
-      "sku": "Nail Clips Dual Form Single",
-      "price": 0.9
-    },
-    {
-      "name": "Nail Clips Dual Form Pack of 5 -HTF",
-      "sku": "Nail Clips Dual Form Pack of 5 -HTF",
-      "price": 4.2
-    },
-    {
-      "name": "FLEXI Soak Off Nail Tips Long Almond -2025",
-      "sku": "FLEXI Soak Off Nail Tips Long Almond -2025",
-      "price": 7.2
-    },
-    {
-      "name": "FLEXI Soak Off Nail Tips Short Almond -2025",
-      "sku": "FLEXI Soak Off Nail Tips Short Almond -2025",
-      "price": 7.2
-    },
-    {
-      "name": "FLEXI Soak Off Nail Tips Medium Square -2025",
-      "sku": "FLEXI Soak Off Nail Tips Medium Square -2025",
-      "price": 7.2
-    },
-    {
-      "name": "DUAL FORMS ALMOND",
-      "sku": "DUAL FORMS ALMOND",
-      "price": 7.7
-    },
-    {
-      "name": "DUAL FORMS BALLERINA",
-      "sku": "DUAL FORMS BALLERINA",
-      "price": 7.7
-    },
-    {
-      "name": "DUAL FORMS LONG ALMOND",
-      "sku": "DUAL FORMS LONG ALMOND",
-      "price": 7.7
-    },
-    {
-      "name": "DUAL FORMS MODERN SQUARE",
-      "sku": "DUAL FORMS MODERN SQUARE",
-      "price": 7.7
-    },
-    {
-      "name": "DUAL FORMS RUSSIAN ALMOND",
-      "sku": "DUAL FORMS RUSSIAN ALMOND",
-      "price": 7.7
-    },
-    {
-      "name": "DUAL FORMS SQUARE",
-      "sku": "DUAL FORMS SQUARE",
-      "price": 7.7
-    },
-    {
-      "name": "DUAL FORMS SQUOVAL",
-      "sku": "DUAL FORMS SQUOVAL",
-      "price": 7.7
-    },
-    {
-      "name": "NAIL EXTENSION DUAL FORMS RUSSIAN ALMOND",
-      "sku": "NAIL EXTENSION DUAL FORMS RUSSIAN ALMOND",
-      "price": 9.3
-    },
-    {
-      "name": "NAIL EXTENSION DUAL FORMS SQUARE",
-      "sku": "NAIL EXTENSION DUAL FORMS SQUARE",
-      "price": 9.3
-    },
-    {
-      "name": "DUAL FORMS MIX COLOR AND SHAPE",
-      "sku": "DUAL FORMS MIX COLOR AND SHAPE",
-      "price": 19.1
-    },
-    {
-      "name": "Standard Dual Reverse Tips 120 s",
-      "sku": "Standard Dual Reverse Tips 120 s",
-      "price": 6.7
-    },
-    {
-      "name": "Nail sticks clear with ring",
-      "sku": "Nail sticks clear with ring",
-      "price": 7
-    },
-    {
-      "name": "Led Heli Light",
-      "sku": "Led Heli Light",
-      "price": 6.9
-    },
-    {
-      "name": "White Nail Lamp New",
-      "sku": "White Nail Lamp New",
-      "price": 21.91
-    },
-    {
-      "name": "Wireless Nail Dust Collector New",
-      "sku": "Wireless Nail Dust Collector New",
-      "price": 201.6
-    },
-    {
-      "name": "FFF White Years Ahead -HTF",
-      "sku": "FFF White Years Ahead -HTF",
-      "price": 10
-    },
-    {
-      "name": "GEL.IT.UP 1 R01 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R01 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R02 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R02 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R03 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R03 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R04 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R04 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R05 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R05 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R06 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R06 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R07 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R07 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R08 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R08 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R09 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R09 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R10 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R10 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R11 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R11 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R12 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R12 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R13 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R13 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R14 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R14 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R15 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R15 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R16 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R16 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R17 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R17 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R18 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R18 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R19 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R19 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R20 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R20 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R21 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R21 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R22 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R22 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R23 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R23 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R24 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R24 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R25 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R25 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R26 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R26 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R27 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R27 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R28 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R28 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R29 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R29 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R30 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R30 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R31 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R31 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R32 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R32 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R33 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R33 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R34 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R34 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R35 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R35 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R36 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R36 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R37 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R37 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R38 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R38 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R39 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R39 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "GEL.IT.UP 1 R40 11ml -HTF",
-      "sku": "GEL.IT.UP 1 R40 11ml -HTF",
-      "price": 10.8
-    },
-    {
-      "name": "By The Ocean BTO01 -HTF",
-      "sku": "By The Ocean BTO01 -HTF",
-      "price": 10
-    },
-    {
-      "name": "By The Ocean BTO02 -HTF",
-      "sku": "By The Ocean BTO02 -HTF",
-      "price": 10
-    },
-    {
-      "name": "By The Ocean BTO03 -HTF",
-      "sku": "By The Ocean BTO03 -HTF",
-      "price": 10
-    },
-    {
-      "name": "By The Ocean BTO04 -HTF",
-      "sku": "By The Ocean BTO04 -HTF",
-      "price": 10
-    },
-    {
-      "name": "By The Ocean BTO05 -HTF",
-      "sku": "By The Ocean BTO05 -HTF",
-      "price": 10
-    },
-    {
-      "name": "By The Ocean BTO06 -HTF",
-      "sku": "By The Ocean BTO06 -HTF",
-      "price": 10
-    },
-    {
-      "name": "By The Ocean BTO07 -HTF",
-      "sku": "By The Ocean BTO07 -HTF",
-      "price": 10
-    },
-    {
-      "name": "Tuttie Fruity Glass #TFG01 -HTF",
-      "sku": "Tuttie Fruity Glass #TFG01 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Tuttie Fruity Glass #TFG02 -HTF",
-      "sku": "Tuttie Fruity Glass #TFG02 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Tuttie Fruity Glass #TFG03 -HTF",
-      "sku": "Tuttie Fruity Glass #TFG03 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Tuttie Fruity Glass #TFG04- HTF",
-      "sku": "Tuttie Fruity Glass #TFG04- HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Tuttie Fruity Glass #TFG05 -HTF",
-      "sku": "Tuttie Fruity Glass #TFG05 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Tuttie Fruity Glass #TFG06 -HTF",
-      "sku": "Tuttie Fruity Glass #TFG06 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "PMA #1 Champagne Blizzard -HTF",
-      "sku": "PMA #1 Champagne Blizzard -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "PMA #2 Cosmic Confection -HTF",
-      "sku": "PMA #2 Cosmic Confection -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "PMA #3 Pop Dot Drama -HTF",
-      "sku": "PMA #3 Pop Dot Drama -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "PMA #4 Kapow -HTF",
-      "sku": "PMA #4 Kapow -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "PMA #5 Comic Strip Crimson -HTF",
-      "sku": "PMA #5 Comic Strip Crimson -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "PMA #6 Pop Popsicle Pink -HTF",
-      "sku": "PMA #6 Pop Popsicle Pink -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "PMA #7 Blasted Blue -HTF",
-      "sku": "PMA #7 Blasted Blue -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "PMA #8 Vibrant Vector Violet -HTF",
-      "sku": "PMA #8 Vibrant Vector Violet -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Shimmer Collection #SH1 -HTF",
-      "sku": "Shimmer Collection #SH1 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Shimmer Collection #SH2 -HTF",
-      "sku": "Shimmer Collection #SH2 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Shimmer Collection #SH3 -HTF",
-      "sku": "Shimmer Collection #SH3 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Shimmer Collection #SH4 -HTF",
-      "sku": "Shimmer Collection #SH4 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Shimmer Collection #SH5 -HTF",
-      "sku": "Shimmer Collection #SH5 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Shimmer Collection #SH6 -HTF",
-      "sku": "Shimmer Collection #SH6 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Spiral_shimmers_01 -HTF",
-      "sku": "Spiral_shimmers_01 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Spiral_shimmers_02 -HTF",
-      "sku": "Spiral_shimmers_02 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Spiral_shimmers_03 -HTF",
-      "sku": "Spiral_shimmers_03 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Spiral_shimmers_04 -HTF",
-      "sku": "Spiral_shimmers_04 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Spiral_shimmers_05 -HTF",
-      "sku": "Spiral_shimmers_05 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Shimmer Collection #SH07 -HTF",
-      "sku": "Shimmer Collection #SH07 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Shimmer Collection #SH08 -HTF",
-      "sku": "Shimmer Collection #SH08 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Shimmer Collection #SH09 -HTF",
-      "sku": "Shimmer Collection #SH09 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Shimmer Collection #SH10 -HTF",
-      "sku": "Shimmer Collection #SH10 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Shimmer Collection #SH11 -HTF",
-      "sku": "Shimmer Collection #SH11 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Shimmer Collection #SH12 -HTF",
-      "sku": "Shimmer Collection #SH12 -HTF",
-      "price": 10.7
-    },
-    {
-      "name": "Shimmer Top Fairy #STF 01 -HTF",
-      "sku": "Shimmer Top Fairy #STF 01 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "Shimmer Top Fairy #STF 02 -HTF",
-      "sku": "Shimmer Top Fairy #STF 02 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "Shimmer Top Fairy #STF 03 -HTF",
-      "sku": "Shimmer Top Fairy #STF 03 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "Shimmer Top Fairy #STF 04 -HTF",
-      "sku": "Shimmer Top Fairy #STF 04 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "Shimmer Top Fairy #STF 05 -HTF",
-      "sku": "Shimmer Top Fairy #STF 05 -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "320 Divinium -HTF",
-      "sku": "320 Divinium -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "322 Badassium -HTF",
-      "sku": "322 Badassium -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "324 Feminum -HTF",
-      "sku": "324 Feminum -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "325 Tritanium -HTF",
-      "sku": "325 Tritanium -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "326 Dilithium -HTF",
-      "sku": "326 Dilithium -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "327 Orichalcum -HTF",
-      "sku": "327 Orichalcum -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "328 Cryptonite -HTF",
-      "sku": "328 Cryptonite -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "329 Tellurium -HTF",
-      "sku": "329 Tellurium -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "330 Vermilion -HTF",
-      "sku": "330 Vermilion -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "331 Bloody Red -HTF",
-      "sku": "331 Bloody Red -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "900 Ocean Jewel -HTF",
-      "sku": "900 Ocean Jewel -HTF",
-      "price": 9.3
-    },
-    {
-      "name": "901 Sirenes -HTF",
-      "sku": "901 Sirenes -HTF",
-      "price": 9.3
-    },
-    {
-      "name": "902 Afrodite -HTF",
-      "sku": "902 Afrodite -HTF",
-      "price": 9.3
-    },
-    {
-      "name": "903 Laila -HTF",
-      "sku": "903 Laila -HTF",
-      "price": 9.3
-    },
-    {
-      "name": "904 Mystic Blue -HTF",
-      "sku": "904 Mystic Blue -HTF",
-      "price": 9.3
-    },
-    {
-      "name": "600 Unicorn -HTF",
-      "sku": "600 Unicorn -HTF",
-      "price": 10
-    },
-    {
-      "name": "601 Glam-O-Holic -HTF",
-      "sku": "601 Glam-O-Holic -HTF",
-      "price": 10
-    },
-    {
-      "name": "602 Confetti -HTF",
-      "sku": "602 Confetti -HTF",
-      "price": 10
-    },
-    {
-      "name": "603 UniGlam -HTF",
-      "sku": "603 UniGlam -HTF",
-      "price": 10
-    },
-    {
-      "name": "250 Snow Leopard -HTF",
-      "sku": "250 Snow Leopard -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "251 Cougar -HTF",
-      "sku": "251 Cougar -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "252 Twinkle Toes -HTF",
-      "sku": "252 Twinkle Toes -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "253 Panthera -HTF",
-      "sku": "253 Panthera -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "254 Colour Me Pink -HTF",
-      "sku": "254 Colour Me Pink -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "255 Celebration -HTF",
-      "sku": "255 Celebration -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "256 Champagne Pop -HTF",
-      "sku": "256 Champagne Pop -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "257 Bronze Goddess -HTF",
-      "sku": "257 Bronze Goddess -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "258 Purple Passion -HTF",
-      "sku": "258 Purple Passion -HTF",
-      "price": 11.7
-    },
-    {
-      "name": "SS01 SPIX and SPEX Kaleidascope -HTF",
-      "sku": "SS01 SPIX and SPEX Kaleidascope -HTF",
-      "price": 10
-    },
-    {
-      "name": "SS02 SPIX and SPEX Delphinium -HTF",
-      "sku": "SS02 SPIX and SPEX Delphinium -HTF",
-      "price": 10
-    },
-    {
-      "name": "SS03 SPIX and SPEX Giddy Grape -HTF",
-      "sku": "SS03 SPIX and SPEX Giddy Grape -HTF",
-      "price": 10
-    },
-    {
-      "name": "SS04 SPIX and SPEX Popping Candy -HTF",
-      "sku": "SS04 SPIX and SPEX Popping Candy -HTF",
-      "price": 10
-    },
-    {
-      "name": "SS05 SPIX and SPEX Lemon Sorbet -HTF",
-      "sku": "SS05 SPIX and SPEX Lemon Sorbet -HTF",
-      "price": 10
-    },
-    {
-      "name": "SS06 SPIX and SPEX Tusk Tusk -HTF",
-      "sku": "SS06 SPIX and SPEX Tusk Tusk -HTF",
-      "price": 10
-    },
-    {
-      "name": "Sugary Glitter pigment 3gr 01 -HTF",
-      "sku": "Sugary Glitter pigment 3gr 01 -HTF",
-      "price": 3.9
-    },
-    {
-      "name": "Sugary Glitter pigment 3gr 02 -HTF",
-      "sku": "Sugary Glitter pigment 3gr 02 -HTF",
-      "price": 3.9
-    },
-    {
-      "name": "Sugary Glitter pigment 3gr 03 -HTF",
-      "sku": "Sugary Glitter pigment 3gr 03 -HTF",
-      "price": 3.9
-    },
-    {
-      "name": "Sugary Glitter pigment 3gr 04 -HTF",
-      "sku": "Sugary Glitter pigment 3gr 04 -HTF",
-      "price": 3.9
-    },
-    {
-      "name": "Sugary Glitter pigment 3gr 05 -HTF",
-      "sku": "Sugary Glitter pigment 3gr 05 -HTF",
-      "price": 3.9
-    },
-    {
-      "name": "Sugary Glitter pigment 3gr 06 -HTF",
-      "sku": "Sugary Glitter pigment 3gr 06 -HTF",
-      "price": 3.9
-    },
-    {
-      "name": "Sugary Glitter pigment 3gr 07 -HTF",
-      "sku": "Sugary Glitter pigment 3gr 07 -HTF",
-      "price": 3.9
-    },
-    {
-      "name": "FR07 Glitter Petal -HTF",
-      "sku": "FR07 Glitter Petal -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Brush on Builder Gel Glittery Pink 15ml -HTF",
-      "sku": "Brush on Builder Gel Glittery Pink 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Brush on Builder Gel Magenta Glitter 15ml -HTF",
-      "sku": "Brush on Builder Gel Magenta Glitter 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Brush on Builder Gel Purple Glitter 15ml -HTF",
-      "sku": "Brush on Builder Gel Purple Glitter 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Brush on Builder Gel Rose Glitter 15ml -HTF",
-      "sku": "Brush on Builder Gel Rose Glitter 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "Brush on Builder Gel Salmon Glitter 15ml -HTF",
-      "sku": "Brush on Builder Gel Salmon Glitter 15ml -HTF",
-      "price": 14.4
-    },
-    {
-      "name": "MultiMix Synthogel 30g Blue Glitter -HTF",
-      "sku": "MultiMix Synthogel 30g Blue Glitter -HTF",
-      "price": 16.1
-    },
-    {
-      "name": "MultiMix Synthogel 30gr Baby Pink Glitter -HTF",
-      "sku": "MultiMix Synthogel 30gr Baby Pink Glitter -HTF",
-      "price": 16.1
-    },
-    {
-      "name": "MultiMix Synthogel 30gr Bubble Gum Glitter -HTF",
-      "sku": "MultiMix Synthogel 30gr Bubble Gum Glitter -HTF",
-      "price": 16.1
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Clear Glitter -HTF",
-      "sku": "MultiMix Synthogel 60gr Clear Glitter -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Glitter Gold -HTF",
-      "sku": "MultiMix Synthogel 60gr Glitter Gold -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Glitter Nude -HTF",
-      "sku": "MultiMix Synthogel 60gr Glitter Nude -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Glitter Pink -HTF",
-      "sku": "MultiMix Synthogel 60gr Glitter Pink -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Glitter Pink II -HTF",
-      "sku": "MultiMix Synthogel 60gr Glitter Pink II -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "MultiMix Synthogel 60gr Glitter White -HTF",
-      "sku": "MultiMix Synthogel 60gr Glitter White -HTF",
-      "price": 25.6
-    },
-    {
-      "name": "Jelly Neon Flash #JNF01 -HTF",
-      "sku": "Jelly Neon Flash #JNF01 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Jelly Neon Flash #JNF02 -HTF",
-      "sku": "Jelly Neon Flash #JNF02 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Jelly Neon Flash #JNF03 -HTF",
-      "sku": "Jelly Neon Flash #JNF03 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Jelly Neon Flash #JNF04 -HTF",
-      "sku": "Jelly Neon Flash #JNF04 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Jelly Neon Flash #JNF05 -HTF",
-      "sku": "Jelly Neon Flash #JNF05 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Jelly Neon Flash #JNF06 -HTF",
-      "sku": "Jelly Neon Flash #JNF06 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Acrylic Classic Liquid 500ml -HTF",
-      "sku": "Acrylic Classic Liquid 500ml -HTF",
-      "price": 42.6
-    },
-    {
-      "name": "Acrylic Compete Liquid 500ml -HTF",
-      "sku": "Acrylic Compete Liquid 500ml -HTF",
-      "price": 42.6
-    },
-    {
-      "name": "All In One Liquid 200 ml -HTF",
-      "sku": "All In One Liquid 200 ml -HTF",
-      "price": 7
-    },
-    {
-      "name": "All In One Liquid 500 ml -HTF",
-      "sku": "All In One Liquid 500 ml -HTF",
-      "price": 17
-    },
-    {
-      "name": "Metallic Collection #MC1 -HTF",
-      "sku": "Metallic Collection #MC1 -HTF",
-      "price": 10
-    },
-    {
-      "name": "Metallic Collection #MC2 -HTF",
-      "sku": "Metallic Collection #MC2 -HTF",
-      "price": 10
-    },
-    {
-      "name": "Metallic Collection #MC3 -HTF",
-      "sku": "Metallic Collection #MC3 -HTF",
-      "price": 10
-    },
-    {
-      "name": "Metallic Collection #MC4 -HTF",
-      "sku": "Metallic Collection #MC4 -HTF",
-      "price": 10
-    },
-    {
-      "name": "Metallic Collection #MC5 -HTF",
-      "sku": "Metallic Collection #MC5 -HTF",
-      "price": 10
-    },
-    {
-      "name": "Metallic Collection #MC6 -HTF",
-      "sku": "Metallic Collection #MC6 -HTF",
-      "price": 10
-    },
-    {
-      "name": "Metallic Collection #MC7 -HTF",
-      "sku": "Metallic Collection #MC7 -HTF",
-      "price": 10
-    },
-    {
-      "name": "Metallic Collection #MC8 -HTF",
-      "sku": "Metallic Collection #MC8 -HTF",
-      "price": 10
-    },
-    {
-      "name": "SD-1933 Nail Decals French - White",
-      "sku": "SD-1933 Nail Decals French - White",
-      "price": 5.3
-    },
-    {
-      "name": "SD-1934 Nail Decals French - Black",
-      "sku": "SD-1934 Nail Decals French - Black",
-      "price": 5.3
-    },
-    {
-      "name": "Dazzle Me 1gr GP06-Extreme Mirror",
-      "sku": "Dazzle Me 1gr GP06-Extreme Mirror",
-      "price": 3.4
-    },
-    {
-      "name": "Dazzle Me Clear 1gr",
-      "sku": "Dazzle Me Clear 1gr",
-      "price": 3.4
-    },
-    {
-      "name": "CM12 Mirror X7 Powder",
-      "sku": "CM12 Mirror X7 Powder",
-      "price": 6.2
-    },
-    {
-      "name": "SP8001 Mirror Clear Powder",
-      "sku": "SP8001 Mirror Clear Powder",
-      "price": 6.2
-    },
-    {
-      "name": "TR01 Mirror X1 Powder",
-      "sku": "TR01 Mirror X1 Powder",
-      "price": 6.2
-    },
-    {
-      "name": "TR02 Mirror X2 Powder",
-      "sku": "TR02 Mirror X2 Powder",
-      "price": 6.2
-    },
-    {
-      "name": "TR03 Mirror X3 Powder",
-      "sku": "TR03 Mirror X3 Powder",
-      "price": 6.2
-    },
-    {
-      "name": "TR04 Mirror X4 Powder",
-      "sku": "TR04 Mirror X4 Powder",
-      "price": 6.2
-    },
-    {
-      "name": "TR05 Mirror X5 Powder",
-      "sku": "TR05 Mirror X5 Powder",
-      "price": 6.2
-    },
-    {
-      "name": "TR06 Mirror X6 Powder",
-      "sku": "TR06 Mirror X6 Powder",
-      "price": 6.2
-    },
-    {
-      "name": "LINE IT UP APRICOT -HTF",
-      "sku": "LINE IT UP APRICOT -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP BLACK -HTF",
-      "sku": "LINE IT UP BLACK -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP GOLD -HTF",
-      "sku": "LINE IT UP GOLD -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP GREEN -HTF",
-      "sku": "LINE IT UP GREEN -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP LAVENDER -HTF",
-      "sku": "LINE IT UP LAVENDER -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP LILAC -HTF",
-      "sku": "LINE IT UP LILAC -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP MAGENTA -HTF",
-      "sku": "LINE IT UP MAGENTA -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP MINT -HTF",
-      "sku": "LINE IT UP MINT -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP ORANGE -HTF",
-      "sku": "LINE IT UP ORANGE -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP PINK -HTF",
-      "sku": "LINE IT UP PINK -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP PISTACHIO -HTF",
-      "sku": "LINE IT UP PISTACHIO -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP PYRITE -HTF",
-      "sku": "LINE IT UP PYRITE -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP RED -HTF",
-      "sku": "LINE IT UP RED -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP ROSE -HTF",
-      "sku": "LINE IT UP ROSE -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP SILVER -HTF",
-      "sku": "LINE IT UP SILVER -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP SKY -HTF",
-      "sku": "LINE IT UP SKY -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP WHITE -HTF",
-      "sku": "LINE IT UP WHITE -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "LINE IT UP YELLOW -HTF",
-      "sku": "LINE IT UP YELLOW -HTF",
-      "price": 6.6
-    },
-    {
-      "name": "Cushion Pro Gel Black -HTF",
-      "sku": "Cushion Pro Gel Black -HTF",
-      "price": 7.7
-    },
-    {
-      "name": "Cushion Pro Gel White -HTF",
-      "sku": "Cushion Pro Gel White -HTF",
-      "price": 7.7
-    },
-    {
-      "name": "Ombre sponge",
-      "sku": "Ombre sponge",
-      "price": 7.7
-    },
-    {
-      "name": "Marble-It by GIUP #01",
-      "sku": "Marble-It by GIUP #01",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #02",
-      "sku": "Marble-It by GIUP #02",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #03",
-      "sku": "Marble-It by GIUP #03",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #04",
-      "sku": "Marble-It by GIUP #04",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #05",
-      "sku": "Marble-It by GIUP #05",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #06",
-      "sku": "Marble-It by GIUP #06",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #07",
-      "sku": "Marble-It by GIUP #07",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #08",
-      "sku": "Marble-It by GIUP #08",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #09",
-      "sku": "Marble-It by GIUP #09",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #10",
-      "sku": "Marble-It by GIUP #10",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #11",
-      "sku": "Marble-It by GIUP #11",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #12",
-      "sku": "Marble-It by GIUP #12",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #13",
-      "sku": "Marble-It by GIUP #13",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #14",
-      "sku": "Marble-It by GIUP #14",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #15",
-      "sku": "Marble-It by GIUP #15",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #16",
-      "sku": "Marble-It by GIUP #16",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #17",
-      "sku": "Marble-It by GIUP #17",
-      "price": 8.9
-    },
-    {
-      "name": "Marble-It by GIUP #18",
-      "sku": "Marble-It by GIUP #18",
-      "price": 8.9
-    },
-    {
-      "name": "Blossom Flower Power 15ml -HTF",
-      "sku": "Blossom Flower Power 15ml -HTF",
-      "price": 9.3
-    },
-    {
-      "name": "Watercolors Aquarelle Pallete",
-      "sku": "Watercolors Aquarelle Pallete",
-      "price": 27.1
-    },
-    {
-      "name": "3D Prism Art Gel Clear -HTF",
-      "sku": "3D Prism Art Gel Clear -HTF",
-      "price": 11.8
-    },
-    {
-      "name": "3D Prism Art Gel Blue -HTF",
-      "sku": "3D Prism Art Gel Blue -HTF",
-      "price": 11.8
-    },
-    {
-      "name": "3D Prism Art Gel Copper - HTF",
-      "sku": "3D Prism Art Gel Copper - HTF",
-      "price": 11.8
-    },
-    {
-      "name": "3D Prism Art Gel Mint -HTF",
-      "sku": "3D Prism Art Gel Mint -HTF",
-      "price": 11.8
-    },
-    {
-      "name": "3D Prism Art Gel Pink -HTF",
-      "sku": "3D Prism Art Gel Pink -HTF",
-      "price": 11.8
-    },
-    {
-      "name": "3D Prism Art Gel Purple -HTF",
-      "sku": "3D Prism Art Gel Purple -HTF",
-      "price": 11.8
-    },
-    {
-      "name": "Cobweb Gel Black -HTF",
-      "sku": "Cobweb Gel Black -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Cobweb Gel White -HTF",
-      "sku": "Cobweb Gel White -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "GEL IT UP FOOT CREAM 100ml CALM FROST NEW",
-      "sku": "GEL IT UP FOOT CREAM 100ml CALM FROST NEW",
-      "price": 6.2
-    },
-    {
-      "name": "GEL IT UP FOOT CREAM 100ml SASSY SASSY NEW",
-      "sku": "GEL IT UP FOOT CREAM 100ml SASSY SASSY NEW",
-      "price": 6.2
-    },
-    {
-      "name": "GEL IT UP FOOT CREAM 100ml SILKY BLISS NEW",
-      "sku": "GEL IT UP FOOT CREAM 100ml SILKY BLISS NEW",
-      "price": 6.2
-    },
-    {
-      "name": "GEL IT UP HAND AND BODY CREAM 100ml CALM FROST NEW",
-      "sku": "GEL IT UP HAND AND BODY CREAM 100ml CALM FROST NEW",
-      "price": 6.2
-    },
-    {
-      "name": "GEL IT UP HAND AND BODY CREAM 100ml SASSY SASSY NEW",
-      "sku": "GEL IT UP HAND AND BODY CREAM 100ml SASSY SASSY NEW",
-      "price": 6.2
-    },
-    {
-      "name": "GEL IT UP HAND AND BODY CREAM 100ml SILKY BLISS NEW",
-      "sku": "GEL IT UP HAND AND BODY CREAM 100ml SILKY BLISS NEW",
-      "price": 6.2
-    },
-    {
-      "name": "Cooling Coconut Cuticle Oil 5ml -HTF",
-      "sku": "Cooling Coconut Cuticle Oil 5ml -HTF",
-      "price": 6.5
-    },
-    {
-      "name": "Perky Peach Cuticle Oil 5ml -HTF",
-      "sku": "Perky Peach Cuticle Oil 5ml -HTF",
-      "price": 6.5
-    },
-    {
-      "name": "Professional Cuticle Pusher- Double Action 2044 New",
-      "sku": "Professional Cuticle Pusher- Double Action 2044 New",
-      "price": 6.9
-    },
-    {
-      "name": "Professional Cuticle Pusher- Double Action, Rounded 2042 New",
-      "sku": "Professional Cuticle Pusher- Double Action, Rounded 2042 New",
-      "price": 6.9
-    },
-    {
-      "name": "Salt of the 7 Seas Foot Scrub 370g NEW",
-      "sku": "Salt of the 7 Seas Foot Scrub 370g NEW",
-      "price": 7.8
-    },
-    {
-      "name": "PhotoPerfect Cuticle Oil New",
-      "sku": "PhotoPerfect Cuticle Oil New",
-      "price": 8
-    },
-    {
-      "name": "Cooling Coconut Cuticle Oil 100ml -HTF",
-      "sku": "Cooling Coconut Cuticle Oil 100ml -HTF",
-      "price": 17.2
-    },
-    {
-      "name": "Perky Peach Cuticle Oil 100ml -HTF",
-      "sku": "Perky Peach Cuticle Oil 100ml -HTF",
-      "price": 17.2
-    },
-    {
-      "name": "GEL IT UP FOOT CREAM 1000ml CALM FROST NEW",
-      "sku": "GEL IT UP FOOT CREAM 1000ml CALM FROST NEW",
-      "price": 20.9
-    },
-    {
-      "name": "GEL IT UP FOOT CREAM 1000ml SASSY SASSY NEW",
-      "sku": "GEL IT UP FOOT CREAM 1000ml SASSY SASSY NEW",
-      "price": 20.9
-    },
-    {
-      "name": "GEL IT UP FOOT CREAM 1000ml SILKY BLISS NEW",
-      "sku": "GEL IT UP FOOT CREAM 1000ml SILKY BLISS NEW",
-      "price": 20.9
-    },
-    {
-      "name": "GEL IT UP HAND AND BODY CREAM 1000ml CALM FROST NEW",
-      "sku": "GEL IT UP HAND AND BODY CREAM 1000ml CALM FROST NEW",
-      "price": 20.9
-    },
-    {
-      "name": "GEL IT UP HAND AND BODY CREAM 1000ml SASSY SASSY NEW",
-      "sku": "GEL IT UP HAND AND BODY CREAM 1000ml SASSY SASSY NEW",
-      "price": 20.9
-    },
-    {
-      "name": "GEL IT UP HAND AND BODY CREAM 1000ml SILKY BLISS NEW",
-      "sku": "GEL IT UP HAND AND BODY CREAM 1000ml SILKY BLISS NEW",
-      "price": 20.9
-    },
-    {
-      "name": "GEL IT UP SCRUB 200ml CALM FROST NEW",
-      "sku": "GEL IT UP SCRUB 200ml CALM FROST NEW",
-      "price": 7.8
-    },
-    {
-      "name": "GEL IT UP SCRUB 200ml SASSY SASSY NEW",
-      "sku": "GEL IT UP SCRUB 200ml SASSY SASSY NEW",
-      "price": 7.8
-    },
-    {
-      "name": "GEL IT UP SCRUB 200ml SILKY BLISS NEW",
-      "sku": "GEL IT UP SCRUB 200ml SILKY BLISS NEW",
-      "price": 7.8
-    },
-    {
-      "name": "GEL IT UP SCRUB 750ml CALM FROST NEW",
-      "sku": "GEL IT UP SCRUB 750ml CALM FROST NEW",
-      "price": 19.3
-    },
-    {
-      "name": "GEL IT UP SCRUB 750ml SASSY SASSY NEW",
-      "sku": "GEL IT UP SCRUB 750ml SASSY SASSY NEW",
-      "price": 19.3
-    },
-    {
-      "name": "GEL IT UP SCRUB 750ml SILKY BLISS NEW",
-      "sku": "GEL IT UP SCRUB 750ml SILKY BLISS NEW",
-      "price": 19.3
-    },
-    {
-      "name": "Superbond Nail Dehydrator 11ml - Acid Free -HTF",
-      "sku": "Superbond Nail Dehydrator 11ml - Acid Free -HTF",
-      "price": 8.2
-    },
-    {
-      "name": "Superbond Nail Dehydrator 11ml - with Acid -HTF",
-      "sku": "Superbond Nail Dehydrator 11ml - with Acid -HTF",
-      "price": 8.2
-    },
-    {
-      "name": "New York Party #NYP01 -HTF",
-      "sku": "New York Party #NYP01 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "New York Party #NYP02 -HTF",
-      "sku": "New York Party #NYP02 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "New York Party #NYP03 -HTF",
-      "sku": "New York Party #NYP03 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "New York Party #NYP04 -HTF",
-      "sku": "New York Party #NYP04 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "AD01 Bloody Red Moon -HTF",
-      "sku": "AD01 Bloody Red Moon -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "AD02 Cyprus Hill Asylum -HTF",
-      "sku": "AD02 Cyprus Hill Asylum -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "AD03 Strange Blue Things -HTF",
-      "sku": "AD03 Strange Blue Things -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Autumn 2021 OTA01 -HTF",
-      "sku": "Autumn 2021 OTA01 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Autumn 2021 OTA02 -HTF",
-      "sku": "Autumn 2021 OTA02 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Autumn 2021 OTA03 -HTF",
-      "sku": "Autumn 2021 OTA03 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Autumn 2021 OTA04 -HTF",
-      "sku": "Autumn 2021 OTA04 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Autumn 2021 OTA05 -HTF",
-      "sku": "Autumn 2021 OTA05 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Autumn 2021 OTA06 -HTF",
-      "sku": "Autumn 2021 OTA06 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Autumn 2021 OTA07 -HTF",
-      "sku": "Autumn 2021 OTA07 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "Autumn 2021 OTA08 -HTF",
-      "sku": "Autumn 2021 OTA08 -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "BTB01 Rosso Corso -HTF",
-      "sku": "BTB01 Rosso Corso -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "BTB02 Nautilus -HTF",
-      "sku": "BTB02 Nautilus -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "BTB03 Brimstone -HTF",
-      "sku": "BTB03 Brimstone -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "FR01 EgalitÃ© -HTF",
-      "sku": "FR01 EgalitÃ© -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "FR02 FraternitÃ© -HTF",
-      "sku": "FR02 FraternitÃ© -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "FR03 Garnet -HTF",
-      "sku": "FR03 Garnet -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "FR04 Living Coral -HTF",
-      "sku": "FR04 Living Coral -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "FR05 Almond Glaze -HTF",
-      "sku": "FR05 Almond Glaze -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "FR06 The Perfect Nude -HTF",
-      "sku": "FR06 The Perfect Nude -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "FR08 Ice Drop -HTF",
-      "sku": "FR08 Ice Drop -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N001 Geisha Girl -HTF",
-      "sku": "N001 Geisha Girl -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N002 Cashmere -HTF",
-      "sku": "N002 Cashmere -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N003 Porcelain -HTF",
-      "sku": "N003 Porcelain -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N004 Spun Sugar -HTF",
-      "sku": "N004 Spun Sugar -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N005 Burberry Blush -HTF",
-      "sku": "N005 Burberry Blush -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N006 Chanterel -HTF",
-      "sku": "N006 Chanterel -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N007 Naked Beauty -HTF",
-      "sku": "N007 Naked Beauty -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N008 If The Shoe Fits -HTF",
-      "sku": "N008 If The Shoe Fits -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N009 Blushing Bride -HTF",
-      "sku": "N009 Blushing Bride -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N010 Frappelicious -HTF",
-      "sku": "N010 Frappelicious -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N011 Berry Me Softly -HTF",
-      "sku": "N011 Berry Me Softly -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N012 Fluffy Blue Sky -HTF",
-      "sku": "N012 Fluffy Blue Sky -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N013 Antique -HTF",
-      "sku": "N013 Antique -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N014 Sugarcane -HTF",
-      "sku": "N014 Sugarcane -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N015 Celestial -HTF",
-      "sku": "N015 Celestial -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N016 Wild Card -HTF",
-      "sku": "N016 Wild Card -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N017 Pale Petal -HTF",
-      "sku": "N017 Pale Petal -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N018 Chic -HTF",
-      "sku": "N018 Chic -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N019 Luxe Linen -HTF",
-      "sku": "N019 Luxe Linen -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N020 Beige Bliss -HTF",
-      "sku": "N020 Beige Bliss -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N021 Soft Mocha -HTF",
-      "sku": "N021 Soft Mocha -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N022 Blushing Buff -HTF",
-      "sku": "N022 Blushing Buff -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N023 Princess Diaries -HTF",
-      "sku": "N023 Princess Diaries -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N024 New Porn Pink -HTF",
-      "sku": "N024 New Porn Pink -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N025 Latte Mouse -HTF",
-      "sku": "N025 Latte Mouse -HTF",
-      "price": 8.9
-    },
-    {
-      "name": "N026 Whispering Blush -HTF",
-      "sku": "N026 Whispering Blush -HTF",
-      "price": 8.9
-    },
     {
       "name": "01 Ice Ice Baby -HTF",
       "sku": "01 Ice Ice Baby -HTF",
@@ -2856,6 +146,11 @@
       "price": 8.9
     },
     {
+      "name": "#10 Acrylic Application Brush Rose Gold",
+      "sku": "#10 Acrylic Application Brush Rose Gold",
+      "price": 19.3
+    },
+    {
       "name": "10 Bridal Bliss -HTF",
       "sku": "10 Bridal Bliss -HTF",
       "price": 8.9
@@ -2964,6 +259,11 @@
       "name": "119 Indescent Proposal -HTF",
       "sku": "119 Indescent Proposal -HTF",
       "price": 8.9
+    },
+    {
+      "name": "#12 Acrylic Brush Rose Gold",
+      "sku": "#12 Acrylic Brush Rose Gold",
+      "price": 19.3
     },
     {
       "name": "12 Stratus -HTF",
@@ -3651,6 +951,11 @@
       "price": 8.9
     },
     {
+      "name": "2037 -HTF",
+      "sku": "2037 -HTF",
+      "price": 7.41
+    },
+    {
       "name": "2037 Salty Caramel -HTF",
       "sku": "2037 Salty Caramel -HTF",
       "price": 8.9
@@ -3689,6 +994,11 @@
       "name": "2043 Love Mania -HTF",
       "sku": "2043 Love Mania -HTF",
       "price": 8.9
+    },
+    {
+      "name": "2044 -HTF",
+      "sku": "2044 -HTF",
+      "price": 7.41
     },
     {
       "name": "2044 Bashful Lilac -HTF",
@@ -3836,6 +1146,11 @@
       "price": 8.9
     },
     {
+      "name": "2100 -HTF",
+      "sku": "2100 -HTF",
+      "price": 7.41
+    },
+    {
       "name": "2100 Popsicles -HTF",
       "sku": "2100 Popsicles -HTF",
       "price": 8.9
@@ -3869,6 +1184,11 @@
       "name": "2106 Take a Slice -HTF",
       "sku": "2106 Take a Slice -HTF",
       "price": 8.9
+    },
+    {
+      "name": "2107 -HTF",
+      "sku": "2107 -HTF",
+      "price": 7.41
     },
     {
       "name": "2107 Dragonfly Dances -HTF",
@@ -4901,6 +2221,11 @@
       "price": 8.9
     },
     {
+      "name": "250 Snow Leopard -HTF",
+      "sku": "250 Snow Leopard -HTF",
+      "price": 11.7
+    },
+    {
       "name": "2500 Cupcake -HTF",
       "sku": "2500 Cupcake -HTF",
       "price": 8.9
@@ -4949,6 +2274,11 @@
       "name": "2509 Floral Fiesta -HTF",
       "sku": "2509 Floral Fiesta -HTF",
       "price": 8.9
+    },
+    {
+      "name": "251 Cougar -HTF",
+      "sku": "251 Cougar -HTF",
+      "price": 11.7
     },
     {
       "name": "2510 Pink Parfait -HTF",
@@ -5001,6 +2331,11 @@
       "price": 8.9
     },
     {
+      "name": "252 Twinkle Toes -HTF",
+      "sku": "252 Twinkle Toes -HTF",
+      "price": 11.7
+    },
+    {
       "name": "2520 Blood Moon Glow -HTF",
       "sku": "2520 Blood Moon Glow -HTF",
       "price": 8.9
@@ -5049,6 +2384,36 @@
       "name": "2529 Thunderstorm -HTF",
       "sku": "2529 Thunderstorm -HTF",
       "price": 8.9
+    },
+    {
+      "name": "253 Panthera -HTF",
+      "sku": "253 Panthera -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "254 Colour Me Pink -HTF",
+      "sku": "254 Colour Me Pink -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "255 Celebration -HTF",
+      "sku": "255 Celebration -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "256 Champagne Pop -HTF",
+      "sku": "256 Champagne Pop -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "257 Bronze Goddess -HTF",
+      "sku": "257 Bronze Goddess -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "258 Purple Passion -HTF",
+      "sku": "258 Purple Passion -HTF",
+      "price": 11.7
     },
     {
       "name": "26 Electric Lime -HTF",
@@ -5236,6 +2601,81 @@
       "price": 8.9
     },
     {
+      "name": "3-in-1 Builder Gel Clear 40g -HTF",
+      "sku": "3-in-1 Builder Gel Clear 40g -HTF",
+      "price": 27.8
+    },
+    {
+      "name": "3-in-1 Builder Gel Cover 40g -HTF",
+      "sku": "3-in-1 Builder Gel Cover 40g -HTF",
+      "price": 27.8
+    },
+    {
+      "name": "3-in-1 Builder Gel Pink 40g -HTF",
+      "sku": "3-in-1 Builder Gel Pink 40g -HTF",
+      "price": 27.8
+    },
+    {
+      "name": "3-in-1 Glitter Builder Gels Cosmic Glitter 20g -HTF",
+      "sku": "3-in-1 Glitter Builder Gels Cosmic Glitter 20g -HTF",
+      "price": 33.4
+    },
+    {
+      "name": "3-in-1 Glitter Builder Gels Deep Sea Galaxy 20g -HTF",
+      "sku": "3-in-1 Glitter Builder Gels Deep Sea Galaxy 20g -HTF",
+      "price": 33.4
+    },
+    {
+      "name": "3-in-1 Glitter Builder Gels Electric Orchid 20g -HTF",
+      "sku": "3-in-1 Glitter Builder Gels Electric Orchid 20g -HTF",
+      "price": 33.4
+    },
+    {
+      "name": "3-in-1 Glitter Builder Gels Rose Stardust 20g -HTF",
+      "sku": "3-in-1 Glitter Builder Gels Rose Stardust 20g -HTF",
+      "price": 33.4
+    },
+    {
+      "name": "3-in-1 Glitter Builder Gels Stardust Plum 20g -HTF",
+      "sku": "3-in-1 Glitter Builder Gels Stardust Plum 20g -HTF",
+      "price": 33.4
+    },
+    {
+      "name": "3-in-1 Glitter Builder Gels Sunshine 20g -HTF",
+      "sku": "3-in-1 Glitter Builder Gels Sunshine 20g -HTF",
+      "price": 33.4
+    },
+    {
+      "name": "3-in-1 Glitter Builder Gels Supernova Indigo 20g -HTF",
+      "sku": "3-in-1 Glitter Builder Gels Supernova Indigo 20g -HTF",
+      "price": 33.4
+    },
+    {
+      "name": "3-in-1 Glitter Builder Gels Warm Sand Glow 20g -HTF",
+      "sku": "3-in-1 Glitter Builder Gels Warm Sand Glow 20g -HTF",
+      "price": 33.4
+    },
+    {
+      "name": "3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF",
+      "sku": "3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF",
+      "price": 27.8
+    },
+    {
+      "name": "3-in-1 Shimmery Builder Gel 40g Cover -HTF",
+      "sku": "3-in-1 Shimmery Builder Gel 40g Cover -HTF",
+      "price": 27.8
+    },
+    {
+      "name": "3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF",
+      "sku": "3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF",
+      "price": 27.8
+    },
+    {
+      "name": "3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF",
+      "sku": "3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF",
+      "price": 27.8
+    },
+    {
       "name": "30 Manilla Buff -HTF",
       "sku": "30 Manilla Buff -HTF",
       "price": 8.9
@@ -5251,8 +2691,58 @@
       "price": 8.9
     },
     {
+      "name": "320 Divinium -HTF",
+      "sku": "320 Divinium -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "322 Badassium -HTF",
+      "sku": "322 Badassium -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "324 Feminum -HTF",
+      "sku": "324 Feminum -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "325 Tritanium -HTF",
+      "sku": "325 Tritanium -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "326 Dilithium -HTF",
+      "sku": "326 Dilithium -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "327 Orichalcum -HTF",
+      "sku": "327 Orichalcum -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "328 Cryptonite -HTF",
+      "sku": "328 Cryptonite -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "329 Tellurium -HTF",
+      "sku": "329 Tellurium -HTF",
+      "price": 8.9
+    },
+    {
       "name": "33 Finding Nemo -HTF",
       "sku": "33 Finding Nemo -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "330 Vermilion -HTF",
+      "sku": "330 Vermilion -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "331 Bloody Red -HTF",
+      "sku": "331 Bloody Red -HTF",
       "price": 8.9
     },
     {
@@ -5291,6 +2781,36 @@
       "price": 8.9
     },
     {
+      "name": "3D Prism Art Gel Blue -HTF",
+      "sku": "3D Prism Art Gel Blue -HTF",
+      "price": 11.8
+    },
+    {
+      "name": "3D Prism Art Gel Clear -HTF",
+      "sku": "3D Prism Art Gel Clear -HTF",
+      "price": 11.8
+    },
+    {
+      "name": "3D Prism Art Gel Copper - HTF",
+      "sku": "3D Prism Art Gel Copper - HTF",
+      "price": 11.8
+    },
+    {
+      "name": "3D Prism Art Gel Mint -HTF",
+      "sku": "3D Prism Art Gel Mint -HTF",
+      "price": 11.8
+    },
+    {
+      "name": "3D Prism Art Gel Pink -HTF",
+      "sku": "3D Prism Art Gel Pink -HTF",
+      "price": 11.8
+    },
+    {
+      "name": "3D Prism Art Gel Purple -HTF",
+      "sku": "3D Prism Art Gel Purple -HTF",
+      "price": 11.8
+    },
+    {
       "name": "40 Juicy Lucy -HTF",
       "sku": "40 Juicy Lucy -HTF",
       "price": 8.9
@@ -5299,6 +2819,106 @@
       "name": "41 Dancing with Attitude -HTF",
       "sku": "41 Dancing with Attitude -HTF",
       "price": 8.9
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Baby Pink -HTF",
+      "sku": "5-in-1 Superior Base 15ml Baby Pink -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Blue Serenity -HTF",
+      "sku": "5-in-1 Superior Base 15ml Blue Serenity -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Candy Pink -HTF",
+      "sku": "5-in-1 Superior Base 15ml Candy Pink -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Clear -HTF",
+      "sku": "5-in-1 Superior Base 15ml Clear -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Glittery Peach -HTF",
+      "sku": "5-in-1 Superior Base 15ml Glittery Peach -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Glittery Pink -HTF",
+      "sku": "5-IN-1 Superior Base 15ml Glittery Pink -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Iridescent Milky Flakes -HTF",
+      "sku": "5-in-1 Superior Base 15ml Iridescent Milky Flakes -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Irridecent Pink -HTF",
+      "sku": "5-IN-1 Superior Base 15ml Irridecent Pink -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Lemon Serenity -HTF",
+      "sku": "5-in-1 Superior Base 15ml Lemon Serenity -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Lilac -HTF",
+      "sku": "5-in-1 Superior Base 15ml Lilac -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Milky Glitter -HTF",
+      "sku": "5-IN-1 Superior Base 15ml Milky Glitter -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Milky Pink -HTF",
+      "sku": "5-in-1 Superior Base 15ml Milky Pink -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Milky White -HTF",
+      "sku": "5-in-1 Superior Base 15ml Milky White -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Mint Serenity -HTF",
+      "sku": "5-in-1 Superior Base 15ml Mint Serenity -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Nude -HTF",
+      "sku": "5-in-1 Superior Base 15ml Nude -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Peach Serenity -HTF",
+      "sku": "5-in-1 Superior Base 15ml Peach Serenity -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Pretty Pink -HTF",
+      "sku": "5-in-1 Superior Base 15ml Pretty Pink -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Purple Serenity -HTF",
+      "sku": "5-in-1 Superior Base 15ml Purple Serenity -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Soft Nude -HTF",
+      "sku": "5-IN-1 Superior Base 15ml Soft Nude -HTF",
+      "price": 15.5
+    },
+    {
+      "name": "5-in-1 Superior Base 15ml Sweet Pink -HTF",
+      "sku": "5-in-1 Superior Base 15ml Sweet Pink -HTF",
+      "price": 15.5
     },
     {
       "name": "50 Reckless -HTF",
@@ -5356,9 +2976,34 @@
       "price": 8.9
     },
     {
+      "name": "#6 Gel Brush Rose Gold",
+      "sku": "#6 Gel Brush Rose Gold",
+      "price": 19.3
+    },
+    {
       "name": "60 Candy Apple -HTF",
       "sku": "60 Candy Apple -HTF",
       "price": 8.9
+    },
+    {
+      "name": "600 Unicorn -HTF",
+      "sku": "600 Unicorn -HTF",
+      "price": 10
+    },
+    {
+      "name": "601 Glam-O-Holic -HTF",
+      "sku": "601 Glam-O-Holic -HTF",
+      "price": 10
+    },
+    {
+      "name": "602 Confetti -HTF",
+      "sku": "602 Confetti -HTF",
+      "price": 10
+    },
+    {
+      "name": "603 UniGlam -HTF",
+      "sku": "603 UniGlam -HTF",
+      "price": 10
     },
     {
       "name": "61 Bite Me -HTF",
@@ -5471,6 +3116,16 @@
       "price": 8.9
     },
     {
+      "name": "#8 Acrylic brush Rose Gold",
+      "sku": "#8 Acrylic brush Rose Gold",
+      "price": 19.3
+    },
+    {
+      "name": "#8 Gel Brush Rose Gold",
+      "sku": "#8 Gel Brush Rose Gold",
+      "price": 12.4
+    },
+    {
       "name": "80 Minty Moment -HTF",
       "sku": "80 Minty Moment -HTF",
       "price": 8.9
@@ -5526,6 +3181,31 @@
       "price": 8.9
     },
     {
+      "name": "900 Ocean Jewel -HTF",
+      "sku": "900 Ocean Jewel -HTF",
+      "price": 9.3
+    },
+    {
+      "name": "901 Sirenes -HTF",
+      "sku": "901 Sirenes -HTF",
+      "price": 9.3
+    },
+    {
+      "name": "902 Afrodite -HTF",
+      "sku": "902 Afrodite -HTF",
+      "price": 9.3
+    },
+    {
+      "name": "903 Laila -HTF",
+      "sku": "903 Laila -HTF",
+      "price": 9.3
+    },
+    {
+      "name": "904 Mystic Blue -HTF",
+      "sku": "904 Mystic Blue -HTF",
+      "price": 9.3
+    },
+    {
       "name": "91 Montego Twist -HTF",
       "sku": "91 Montego Twist -HTF",
       "price": 8.9
@@ -5561,184 +3241,104 @@
       "price": 8.9
     },
     {
-      "name": "Corner File Straight & Curved Stainless Steel 1289 New",
-      "sku": "Corner File Straight & Curved Stainless Steel 1289 New",
-      "price": 6.9
+      "name": "Acrylic Classic Liquid 500ml -HTF",
+      "sku": "Acrylic Classic Liquid 500ml -HTF",
+      "price": 42.6
     },
     {
-      "name": "Replacement Stickers Pododisc  S-15 mm GRIT 100 New",
-      "sku": "Replacement Stickers Pododisc  S-15 mm GRIT 100 New",
-      "price": 7.5
+      "name": "Acrylic Classic Powder Clear 35g -HTF",
+      "sku": "Acrylic Classic Powder Clear 35g -HTF",
+      "price": 18.5
     },
     {
-      "name": "Replacement Stickers Pododisc  S-15 mm GRIT 180 New",
-      "sku": "Replacement Stickers Pododisc  S-15 mm GRIT 180 New",
-      "price": 7.5
+      "name": "Acrylic Classic Powder Pink 35g -HTF",
+      "sku": "Acrylic Classic Powder Pink 35g -HTF",
+      "price": 18.5
     },
     {
-      "name": "Replacement Stickers Pododisc S-15 mm GRIT 240 New",
-      "sku": "Replacement Stickers Pododisc S-15 mm GRIT 240 New",
-      "price": 7.5
+      "name": "Acrylic Classic Powder White 35g -HTF",
+      "sku": "Acrylic Classic Powder White 35g -HTF",
+      "price": 18.5
     },
     {
-      "name": "Pododisc + 5 Replacement Stickers S-15 mm New",
-      "sku": "Pododisc + 5 Replacement Stickers S-15 mm New",
-      "price": 7.7
+      "name": "Acrylic Compete Liquid 500ml -HTF",
+      "sku": "Acrylic Compete Liquid 500ml -HTF",
+      "price": 42.6
     },
     {
-      "name": "Pododisc + 5 Replacement Stickers M-20 mm New",
-      "sku": "Pododisc + 5 Replacement Stickers M-20 mm New",
-      "price": 9.3
+      "name": "Acrylic Compete Powder Clear 35g -HTF",
+      "sku": "Acrylic Compete Powder Clear 35g -HTF",
+      "price": 18.5
     },
     {
-      "name": "Replacement Stickers Pododisc M-20 mm GRIT 100 New",
-      "sku": "Replacement Stickers Pododisc M-20 mm GRIT 100 New",
-      "price": 9.6
+      "name": "Acrylic Compete Powder Cover 35g -HTF",
+      "sku": "Acrylic Compete Powder Cover 35g -HTF",
+      "price": 18.5
     },
     {
-      "name": "Replacement Stickers Pododisc  M-20 mm GRIT 180 New",
-      "sku": "Replacement Stickers Pododisc  M-20 mm GRIT 180 New",
-      "price": 9.6
+      "name": "Acrylic Compete Powder Extreme White 35g -HTF",
+      "sku": "Acrylic Compete Powder Extreme White 35g -HTF",
+      "price": 18.5
     },
     {
-      "name": "Replacement Stickers Pododisc M-20 mm GRIT 240 New",
-      "sku": "Replacement Stickers Pododisc M-20 mm GRIT 240 New",
-      "price": 9.6
+      "name": "Acrylic Compete Powder Milky White 35g -HTF",
+      "sku": "Acrylic Compete Powder Milky White 35g -HTF",
+      "price": 18.5
     },
     {
-      "name": "Pododisc+5 Replacement Stickers L-25 mm New",
-      "sku": "Pododisc+5 Replacement Stickers L-25 mm New",
-      "price": 10.8
+      "name": "Acrylic Compete Powder Pink 35g -HTF",
+      "sku": "Acrylic Compete Powder Pink 35g -HTF",
+      "price": 18.5
     },
     {
-      "name": "Replacement Stickers Pododisc  L-25 mm GRIT 100 New",
-      "sku": "Replacement Stickers Pododisc  L-25 mm GRIT 100 New",
-      "price": 12
+      "name": "AD01 Bloody Red Moon -HTF",
+      "sku": "AD01 Bloody Red Moon -HTF",
+      "price": 8.9
     },
     {
-      "name": "Replacement Stickers Pododisc L-25 mm GRIT 180 New",
-      "sku": "Replacement Stickers Pododisc L-25 mm GRIT 180 New",
-      "price": 12
+      "name": "AD02 Cyprus Hill Asylum -HTF",
+      "sku": "AD02 Cyprus Hill Asylum -HTF",
+      "price": 8.9
     },
     {
-      "name": "Replacement Stickers Pododisc L-25 mm GRIT 240 New",
-      "sku": "Replacement Stickers Pododisc L-25 mm GRIT 240 New",
-      "price": 12
+      "name": "AD03 Strange Blue Things -HTF",
+      "sku": "AD03 Strange Blue Things -HTF",
+      "price": 8.9
     },
     {
-      "name": "Professional Premium Cuticle Nipper, Oval Fine Cut â 3mm 2119 New",
-      "sku": "Professional Premium Cuticle Nipper, Oval Fine Cut â 3mm 2119 New",
-      "price": 15.4
+      "name": "AirBrush Machine New",
+      "sku": "AirBrush Machine New",
+      "price": 69.9
     },
     {
-      "name": "Professional Premium Cuticle Nipper, Oval Fine Cut â 5mm 2119 New",
-      "sku": "Professional Premium Cuticle Nipper, Oval Fine Cut â 5mm 2119 New",
-      "price": 15.4
+      "name": "All In One Liquid 200 ml -HTF",
+      "sku": "All In One Liquid 200 ml -HTF",
+      "price": 7
     },
     {
-      "name": "Professional Premium Cuticle Nipper, Oval Fine Cut â 7mm 2119 New",
-      "sku": "Professional Premium Cuticle Nipper, Oval Fine Cut â 7mm 2119 New",
-      "price": 15.4
-    },
-    {
-      "name": "Professional Premium Cuticle Nipper, Fine Cut â 3mm 2117 New",
-      "sku": "Professional Premium Cuticle Nipper, Fine Cut â 3mm 2117 New",
-      "price": 15.8
-    },
-    {
-      "name": "Professional Premium Cuticle Nipper, Fine Cut â 5mm 2117 New",
-      "sku": "Professional Premium Cuticle Nipper, Fine Cut â 5mm 2117 New",
-      "price": 15.8
-    },
-    {
-      "name": "Professional Premium Cuticle Nipper, Fine Cut â 7mm 2117 New",
-      "sku": "Professional Premium Cuticle Nipper, Fine Cut â 7mm 2117 New",
-      "price": 15.8
-    },
-    {
-      "name": "Professional Premium Cuticle Nipper, Oval Round Fine Cut â 3mm 2120 New",
-      "sku": "Professional Premium Cuticle Nipper, Oval Round Fine Cut â 3mm 2120 New",
-      "price": 15.8
-    },
-    {
-      "name": "Professional Premium Cuticle Nipper, Oval Round Fine Cut â 5mm 2120 New",
-      "sku": "Professional Premium Cuticle Nipper, Oval Round Fine Cut â 5mm 2120 New",
-      "price": 15.8
-    },
-    {
-      "name": "Professional Premium Cuticle Nipper, Oval Round Fine Cut â 7mm 2120 New",
-      "sku": "Professional Premium Cuticle Nipper, Oval Round Fine Cut â 7mm 2120 New",
-      "price": 15.8
-    },
-    {
-      "name": "Professional Cuticle Scissors, Curved 1463 New",
-      "sku": "Professional Cuticle Scissors, Curved 1463 New",
-      "price": 16.6
-    },
-    {
-      "name": "Corner Nippers Straight Cutter Design Handle  L 11cm 1119 New",
-      "sku": "Corner Nippers Straight Cutter Design Handle  L 11cm 1119 New",
-      "price": 19.3
-    },
-    {
-      "name": "Professional Cuticle Scissors, Curved 1466 New",
-      "sku": "Professional Cuticle Scissors, Curved 1466 New",
-      "price": 23.7
-    },
-    {
-      "name": "Splinter tweezer â 13 cm 1386 New",
-      "sku": "Splinter tweezer â 13 cm 1386 New",
-      "price": 6.2
-    },
-    {
-      "name": "Probes Stainless Steel Rounded 1222 New",
-      "sku": "Probes Stainless Steel Rounded 1222 New",
-      "price": 6.9
-    },
-    {
-      "name": "Professional Spring Scissors, Curved 1468 New",
-      "sku": "Professional Spring Scissors, Curved 1468 New",
+      "name": "All In One Liquid 500 ml -HTF",
+      "sku": "All In One Liquid 500 ml -HTF",
       "price": 17
     },
     {
-      "name": "Corner Nippers Flame Shaped L 10cm 1115 New",
-      "sku": "Corner Nippers Flame Shaped L 10cm 1115 New",
-      "price": 19.3
+      "name": "Almond Cuticle Scrub Remover 100ml -HTF",
+      "sku": "Almond Cuticle Scrub Remover 100ml -HTF",
+      "price": 17.2
     },
     {
-      "name": "Professional Head Cutter Nipper Half Blade L 11.5cm 1006 New",
-      "sku": "Professional Head Cutter Nipper Half Blade L 11.5cm 1006 New",
-      "price": 19.3
+      "name": "Almond Cuticle Scrub Remover 5ml -HTF",
+      "sku": "Almond Cuticle Scrub Remover 5ml -HTF",
+      "price": 6.5
     },
     {
-      "name": "Mirror Powder Top Coat -HTF",
-      "sku": "Mirror Powder Top Coat -HTF",
-      "price": 9.9
+      "name": "Apron Black With Logo",
+      "sku": "Apron Black With Logo",
+      "price": 14
     },
     {
-      "name": "Wipe Off Top Coat 15 ml",
-      "sku": "Wipe Off Top Coat 15 ml",
-      "price": 11.1
-    },
-    {
-      "name": "Non Wipe Top Coat 15ml -HTF",
-      "sku": "Non Wipe Top Coat 15ml -HTF",
+      "name": "Aquarela Brush Rose Gold",
+      "sku": "Aquarela Brush Rose Gold",
       "price": 13.1
-    },
-    {
-      "name": "Non Wipe Top Coat Milky 15ml -HTF",
-      "sku": "Non Wipe Top Coat Milky 15ml -HTF",
-      "price": 13.9
-    },
-    {
-      "name": "Super Fan Top Coat 11ml FAN12 -HTF",
-      "sku": "Super Fan Top Coat 11ml FAN12 -HTF",
-      "price": 13.9
-    },
-    {
-      "name": "Super Flash Top Coat 11ml -HTF",
-      "sku": "Super Flash Top Coat 11ml -HTF",
-      "price": 13.9
     },
     {
       "name": "Aurora Flakes Non Wipe Top Coat 15ml -HTF",
@@ -5746,9 +3346,1419 @@
       "price": 14.7
     },
     {
-      "name": "Non Wipe Top Coat Perfect Shape 15ml -HTF",
-      "sku": "Non Wipe Top Coat Perfect Shape 15ml -HTF",
+      "name": "Autumn 2021 OTA01 -HTF",
+      "sku": "Autumn 2021 OTA01 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Autumn 2021 OTA02 -HTF",
+      "sku": "Autumn 2021 OTA02 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Autumn 2021 OTA03 -HTF",
+      "sku": "Autumn 2021 OTA03 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Autumn 2021 OTA04 -HTF",
+      "sku": "Autumn 2021 OTA04 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Autumn 2021 OTA05 -HTF",
+      "sku": "Autumn 2021 OTA05 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Autumn 2021 OTA06 -HTF",
+      "sku": "Autumn 2021 OTA06 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Autumn 2021 OTA07 -HTF",
+      "sku": "Autumn 2021 OTA07 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Autumn 2021 OTA08 -HTF",
+      "sku": "Autumn 2021 OTA08 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Base Coat 15ml -HTF",
+      "sku": "Base Coat 15ml -HTF",
+      "price": 12.6
+    },
+    {
+      "name": "Blossom Flower Power 15ml -HTF",
+      "sku": "Blossom Flower Power 15ml -HTF",
+      "price": 9.3
+    },
+    {
+      "name": "Brush on Builder Gel Berry Stardust 15ml -HTF",
+      "sku": "Brush on Builder Gel Berry Stardust 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Blush Pink 15ml -HTF",
+      "sku": "Brush on Builder Gel Blush Pink 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Blush Sorbet 15ml -HTF",
+      "sku": "Brush on Builder Gel Blush Sorbet 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Clear 15ml -HTF",
+      "sku": "Brush on Builder Gel Clear 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Cover 15ml -HTF",
+      "sku": "Brush on Builder Gel Cover 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Creamy 15ml -HTF",
+      "sku": "Brush on Builder Gel Creamy 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Dusty Shimmer 15ml -HTF",
+      "sku": "Brush on Builder Gel Dusty Shimmer 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Glittery Pink 15ml -HTF",
+      "sku": "Brush on Builder Gel Glittery Pink 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Lilac 15ml -HTF",
+      "sku": "Brush on Builder Gel Lilac 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Magenta Glitter 15ml -HTF",
+      "sku": "Brush on Builder Gel Magenta Glitter 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Milky 15ml -HTF",
+      "sku": "Brush on Builder Gel Milky 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Nude 15ml -HTF",
+      "sku": "Brush on Builder Gel Nude 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Pink 15ml -HTF",
+      "sku": "Brush on Builder Gel Pink 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Purple 15ml -HTF",
+      "sku": "Brush on Builder Gel Purple 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Purple Glitter 15ml -HTF",
+      "sku": "Brush on Builder Gel Purple Glitter 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Rose Glitter 15ml -HTF",
+      "sku": "Brush on Builder Gel Rose Glitter 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Salmon Glitter 15ml -HTF",
+      "sku": "Brush on Builder Gel Salmon Glitter 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Sky Sprinkle 15ml -HTF",
+      "sku": "Brush on Builder Gel Sky Sprinkle 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "Brush on Builder Gel Soft Pink 15ml -HTF",
+      "sku": "Brush on Builder Gel Soft Pink 15ml -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "BTB01 Rosso Corso -HTF",
+      "sku": "BTB01 Rosso Corso -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "BTB02 Nautilus -HTF",
+      "sku": "BTB02 Nautilus -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "BTB03 Brimstone -HTF",
+      "sku": "BTB03 Brimstone -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "By The Ocean BTO01 -HTF",
+      "sku": "By The Ocean BTO01 -HTF",
+      "price": 10
+    },
+    {
+      "name": "By The Ocean BTO02 -HTF",
+      "sku": "By The Ocean BTO02 -HTF",
+      "price": 10
+    },
+    {
+      "name": "By The Ocean BTO03 -HTF",
+      "sku": "By The Ocean BTO03 -HTF",
+      "price": 10
+    },
+    {
+      "name": "By The Ocean BTO04 -HTF",
+      "sku": "By The Ocean BTO04 -HTF",
+      "price": 10
+    },
+    {
+      "name": "By The Ocean BTO05 -HTF",
+      "sku": "By The Ocean BTO05 -HTF",
+      "price": 10
+    },
+    {
+      "name": "By The Ocean BTO06 -HTF",
+      "sku": "By The Ocean BTO06 -HTF",
+      "price": 10
+    },
+    {
+      "name": "By The Ocean BTO07 -HTF",
+      "sku": "By The Ocean BTO07 -HTF",
+      "price": 10
+    },
+    {
+      "name": "Chilled Melon Cuticle Oil 100ml -HTF",
+      "sku": "Chilled Melon Cuticle Oil 100ml -HTF",
+      "price": 17.2
+    },
+    {
+      "name": "Chilled Melon Cuticle Oil 5ml -HTF",
+      "sku": "Chilled Melon Cuticle Oil 5ml -HTF",
+      "price": 6.5
+    },
+    {
+      "name": "Cleanser 200 ml -HTF",
+      "sku": "Cleanser 200 ml -HTF",
+      "price": 4.78
+    },
+    {
+      "name": "CM12 Mirror X7 Powder",
+      "sku": "CM12 Mirror X7 Powder",
+      "price": 6.2
+    },
+    {
+      "name": "Cobweb Gel Black -HTF",
+      "sku": "Cobweb Gel Black -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Cobweb Gel White -HTF",
+      "sku": "Cobweb Gel White -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "COOL CARE Builder Gel 40gr -HTF",
+      "sku": "COOL CARE Builder Gel 40gr -HTF",
+      "price": 23.16
+    },
+    {
+      "name": "Cooling Coconut Cuticle Oil 100ml -HTF",
+      "sku": "Cooling Coconut Cuticle Oil 100ml -HTF",
+      "price": 17.2
+    },
+    {
+      "name": "Cooling Coconut Cuticle Oil 5ml -HTF",
+      "sku": "Cooling Coconut Cuticle Oil 5ml -HTF",
+      "price": 6.5
+    },
+    {
+      "name": "Corner File Straight & Curved Stainless Steel 1289 New",
+      "sku": "Corner File Straight & Curved Stainless Steel 1289 New",
+      "price": 6.9
+    },
+    {
+      "name": "Corner Nippers Flame Shaped L 10cm 1115 New",
+      "sku": "Corner Nippers Flame Shaped L 10cm 1115 New",
+      "price": 19.3
+    },
+    {
+      "name": "Corner Nippers Straight Cutter Design Handle  L 11cm 1119 New",
+      "sku": "Corner Nippers Straight Cutter Design Handle  L 11cm 1119 New",
+      "price": 19.3
+    },
+    {
+      "name": "Cross Magnet Black",
+      "sku": "Cross Magnet Black",
+      "price": 6.3
+    },
+    {
+      "name": "Cross Magnet Pink",
+      "sku": "Cross Magnet Pink",
+      "price": 6.3
+    },
+    {
+      "name": "Crystal Clear Builder Gel 40gr -HTF",
+      "sku": "Crystal Clear Builder Gel 40gr -HTF",
+      "price": 29.4
+    },
+    {
+      "name": "Cushion Pro Gel Black -HTF",
+      "sku": "Cushion Pro Gel Black -HTF",
+      "price": 7.7
+    },
+    {
+      "name": "Cushion Pro Gel White -HTF",
+      "sku": "Cushion Pro Gel White -HTF",
+      "price": 7.7
+    },
+    {
+      "name": "Dazzle Me 1gr GP06-Extreme Mirror",
+      "sku": "Dazzle Me 1gr GP06-Extreme Mirror",
+      "price": 3.4
+    },
+    {
+      "name": "Dazzle Me Clear 1gr",
+      "sku": "Dazzle Me Clear 1gr",
+      "price": 3.4
+    },
+    {
+      "name": "Dreamy Cat Eye #DCE1 -HTF",
+      "sku": "Dreamy Cat Eye #DCE1 -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "Dreamy Cat Eye #DCE2 -HTF",
+      "sku": "Dreamy Cat Eye #DCE2 -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "Dreamy Cat Eye #DCE3 -HTF",
+      "sku": "Dreamy Cat Eye #DCE3 -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "Dreamy Cat Eye #DCE4 -HTF",
+      "sku": "Dreamy Cat Eye #DCE4 -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "DT01 Dandelion Diamond Top 11ml -HTF",
+      "sku": "DT01 Dandelion Diamond Top 11ml -HTF",
+      "price": 11.4
+    },
+    {
+      "name": "DT02 Diamond Dust Diamond Top 11ml -HTF",
+      "sku": "DT02 Diamond Dust Diamond Top 11ml -HTF",
+      "price": 11.4
+    },
+    {
+      "name": "DT03 Sugar Socks Diamond Top 11ml -HTF",
+      "sku": "DT03 Sugar Socks Diamond Top 11ml -HTF",
+      "price": 11.4
+    },
+    {
+      "name": "DT04 Chipper Diamond Top 11ml -HTF",
+      "sku": "DT04 Chipper Diamond Top 11ml -HTF",
+      "price": 11.4
+    },
+    {
+      "name": "DUAL FORMS ALMOND",
+      "sku": "DUAL FORMS ALMOND",
+      "price": 7.7
+    },
+    {
+      "name": "DUAL FORMS BALLERINA",
+      "sku": "DUAL FORMS BALLERINA",
+      "price": 7.7
+    },
+    {
+      "name": "DUAL FORMS LONG ALMOND",
+      "sku": "DUAL FORMS LONG ALMOND",
+      "price": 7.7
+    },
+    {
+      "name": "DUAL FORMS MIX COLOR AND SHAPE",
+      "sku": "DUAL FORMS MIX COLOR AND SHAPE",
+      "price": 19.1
+    },
+    {
+      "name": "DUAL FORMS MODERN SQUARE",
+      "sku": "DUAL FORMS MODERN SQUARE",
+      "price": 7.7
+    },
+    {
+      "name": "DUAL FORMS RUSSIAN ALMOND",
+      "sku": "DUAL FORMS RUSSIAN ALMOND",
+      "price": 7.7
+    },
+    {
+      "name": "DUAL FORMS SQUARE",
+      "sku": "DUAL FORMS SQUARE",
+      "price": 7.7
+    },
+    {
+      "name": "DUAL FORMS SQUOVAL",
+      "sku": "DUAL FORMS SQUOVAL",
+      "price": 7.7
+    },
+    {
+      "name": "FAN01 -HTF",
+      "sku": "FAN01 -HTF",
       "price": 11.7
+    },
+    {
+      "name": "FAN02 -HTF",
+      "sku": "FAN02 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "FAN03 -HTF",
+      "sku": "FAN03 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "FAN04 -HTF",
+      "sku": "FAN04 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "FAN05 -HTF",
+      "sku": "FAN05 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "FAN06 -HTF",
+      "sku": "FAN06 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "FAN07 -HTF",
+      "sku": "FAN07 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "FAN08 -HTF",
+      "sku": "FAN08 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "FAN09 -HTF",
+      "sku": "FAN09 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "FAN10 -HTF",
+      "sku": "FAN10 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "FAN11 -HTF",
+      "sku": "FAN11 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "FAN13 -HTF",
+      "sku": "FAN13 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "FFF White Years Ahead -HTF",
+      "sku": "FFF White Years Ahead -HTF",
+      "price": 10
+    },
+    {
+      "name": "Flexi Base Clear -HTF",
+      "sku": "Flexi Base Clear -HTF",
+      "price": 14.4
+    },
+    {
+      "name": "FLEXI Soak Off Nail Tips Long Almond -2025",
+      "sku": "FLEXI Soak Off Nail Tips Long Almond -2025",
+      "price": 7.2
+    },
+    {
+      "name": "FLEXI Soak Off Nail Tips Medium Square -2025",
+      "sku": "FLEXI Soak Off Nail Tips Medium Square -2025",
+      "price": 7.2
+    },
+    {
+      "name": "FLEXI Soak Off Nail Tips Short Almond -2025",
+      "sku": "FLEXI Soak Off Nail Tips Short Almond -2025",
+      "price": 7.2
+    },
+    {
+      "name": "FR01 EgalitÃ© -HTF",
+      "sku": "FR01 EgalitÃ© -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "FR02 FraternitÃ© -HTF",
+      "sku": "FR02 FraternitÃ© -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "FR03 Garnet -HTF",
+      "sku": "FR03 Garnet -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "FR04 Living Coral -HTF",
+      "sku": "FR04 Living Coral -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "FR05 Almond Glaze -HTF",
+      "sku": "FR05 Almond Glaze -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "FR06 The Perfect Nude -HTF",
+      "sku": "FR06 The Perfect Nude -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "FR07 Glitter Petal -HTF",
+      "sku": "FR07 Glitter Petal -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "FR08 Ice Drop -HTF",
+      "sku": "FR08 Ice Drop -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "French Nail Brush Rose Gold",
+      "sku": "French Nail Brush Rose Gold",
+      "price": 12.4
+    },
+    {
+      "name": "GEL.IT.UP 1 R01 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R01 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R02 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R02 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R03 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R03 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R04 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R04 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R05 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R05 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R06 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R06 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R07 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R07 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R08 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R08 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R09 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R09 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R10 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R10 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R11 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R11 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R12 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R12 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R13 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R13 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R14 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R14 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R15 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R15 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R16 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R16 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R17 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R17 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R18 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R18 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R19 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R19 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R20 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R20 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R21 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R21 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R22 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R22 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R23 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R23 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R24 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R24 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R25 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R25 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R26 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R26 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R27 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R27 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R28 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R28 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R29 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R29 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R30 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R30 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R31 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R31 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R32 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R32 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R33 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R33 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R34 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R34 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R35 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R35 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R36 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R36 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R37 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R37 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R38 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R38 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R39 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R39 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP 1 R40 11ml -HTF",
+      "sku": "GEL.IT.UP 1 R40 11ml -HTF",
+      "price": 10.8
+    },
+    {
+      "name": "GEL.IT.UP by GIUP� Nail Forms",
+      "sku": "GEL.IT.UP by GIUPÂ® Nail Forms",
+      "price": 21.6
+    },
+    {
+      "name": "GEL IT UP FOOT CREAM 1000ml CALM FROST NEW",
+      "sku": "GEL IT UP FOOT CREAM 1000ml CALM FROST NEW",
+      "price": 20.9
+    },
+    {
+      "name": "GEL IT UP FOOT CREAM 1000ml SASSY SASSY NEW",
+      "sku": "GEL IT UP FOOT CREAM 1000ml SASSY SASSY NEW",
+      "price": 20.9
+    },
+    {
+      "name": "GEL IT UP FOOT CREAM 1000ml SILKY BLISS NEW",
+      "sku": "GEL IT UP FOOT CREAM 1000ml SILKY BLISS NEW",
+      "price": 20.9
+    },
+    {
+      "name": "GEL IT UP FOOT CREAM 100ml CALM FROST NEW",
+      "sku": "GEL IT UP FOOT CREAM 100ml CALM FROST NEW",
+      "price": 6.2
+    },
+    {
+      "name": "GEL IT UP FOOT CREAM 100ml SASSY SASSY NEW",
+      "sku": "GEL IT UP FOOT CREAM 100ml SASSY SASSY NEW",
+      "price": 6.2
+    },
+    {
+      "name": "GEL IT UP FOOT CREAM 100ml SILKY BLISS NEW",
+      "sku": "GEL IT UP FOOT CREAM 100ml SILKY BLISS NEW",
+      "price": 6.2
+    },
+    {
+      "name": "GEL IT UP HAND AND BODY CREAM 1000ml CALM FROST NEW",
+      "sku": "GEL IT UP HAND AND BODY CREAM 1000ml CALM FROST NEW",
+      "price": 20.9
+    },
+    {
+      "name": "GEL IT UP HAND AND BODY CREAM 1000ml SASSY SASSY NEW",
+      "sku": "GEL IT UP HAND AND BODY CREAM 1000ml SASSY SASSY NEW",
+      "price": 20.9
+    },
+    {
+      "name": "GEL IT UP HAND AND BODY CREAM 1000ml SILKY BLISS NEW",
+      "sku": "GEL IT UP HAND AND BODY CREAM 1000ml SILKY BLISS NEW",
+      "price": 20.9
+    },
+    {
+      "name": "GEL IT UP HAND AND BODY CREAM 100ml CALM FROST NEW",
+      "sku": "GEL IT UP HAND AND BODY CREAM 100ml CALM FROST NEW",
+      "price": 6.2
+    },
+    {
+      "name": "GEL IT UP HAND AND BODY CREAM 100ml SASSY SASSY NEW",
+      "sku": "GEL IT UP HAND AND BODY CREAM 100ml SASSY SASSY NEW",
+      "price": 6.2
+    },
+    {
+      "name": "GEL IT UP HAND AND BODY CREAM 100ml SILKY BLISS NEW",
+      "sku": "GEL IT UP HAND AND BODY CREAM 100ml SILKY BLISS NEW",
+      "price": 6.2
+    },
+    {
+      "name": "GEL IT UP SCRUB 200ml CALM FROST NEW",
+      "sku": "GEL IT UP SCRUB 200ml CALM FROST NEW",
+      "price": 7.8
+    },
+    {
+      "name": "GEL IT UP SCRUB 200ml SASSY SASSY NEW",
+      "sku": "GEL IT UP SCRUB 200ml SASSY SASSY NEW",
+      "price": 7.8
+    },
+    {
+      "name": "GEL IT UP SCRUB 200ml SILKY BLISS NEW",
+      "sku": "GEL IT UP SCRUB 200ml SILKY BLISS NEW",
+      "price": 7.8
+    },
+    {
+      "name": "GEL IT UP SCRUB 750ml CALM FROST NEW",
+      "sku": "GEL IT UP SCRUB 750ml CALM FROST NEW",
+      "price": 19.3
+    },
+    {
+      "name": "GEL IT UP SCRUB 750ml SASSY SASSY NEW",
+      "sku": "GEL IT UP SCRUB 750ml SASSY SASSY NEW",
+      "price": 19.3
+    },
+    {
+      "name": "GEL IT UP SCRUB 750ml SILKY BLISS NEW",
+      "sku": "GEL IT UP SCRUB 750ml SILKY BLISS NEW",
+      "price": 19.3
+    },
+    {
+      "name": "GIUP 2B",
+      "sku": "GIUP 2B",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 2C",
+      "sku": "GIUP 2C",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 2D",
+      "sku": "GIUP 2D",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 2E",
+      "sku": "GIUP 2E",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 2F",
+      "sku": "GIUP 2F",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 2G",
+      "sku": "GIUP 2G",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 2H",
+      "sku": "GIUP 2H",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 2I",
+      "sku": "GIUP 2I",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 7B",
+      "sku": "GIUP 7B",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 7C",
+      "sku": "GIUP 7C",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 7D",
+      "sku": "GIUP 7D",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 8A",
+      "sku": "GIUP 8A",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 8C",
+      "sku": "GIUP 8C",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 8D",
+      "sku": "GIUP 8D",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 8E",
+      "sku": "GIUP 8E",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 8F",
+      "sku": "GIUP 8F",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 9A",
+      "sku": "GIUP 9A",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP 9B",
+      "sku": "GIUP 9B",
+      "price": 7.41
+    },
+    {
+      "name": "GIUP Boat Shape metallic Nail File",
+      "sku": "GIUP Boat Shape metallic Nail File",
+      "price": 4.6
+    },
+    {
+      "name": "GIUP Boat Shape Nail File 100/120 Purple Sponge",
+      "sku": "GIUP Boat Shape Nail File 100/120 Purple Sponge",
+      "price": 1.1
+    },
+    {
+      "name": "GIUP Boat Shape Nail File 220/240",
+      "sku": "GIUP Boat Shape Nail File 220/240",
+      "price": 1.4
+    },
+    {
+      "name": "GIUP Boat Shape Nail Files 100/120 Pink Sponge Buffer",
+      "sku": "GIUP Boat Shape Nail Files 100/120 Pink Sponge Buffer",
+      "price": 1.4
+    },
+    {
+      "name": "GIUP Boat Shape Nail Files 180/180 Purple Sponge Buffer",
+      "sku": "GIUP Boat Shape Nail Files 180/180 Purple Sponge Buffer",
+      "price": 1.4
+    },
+    {
+      "name": "GIUP Buffing Block 180/180 Packet of 10",
+      "sku": "GIUP Buffing Block 180/180 Packet of 10",
+      "price": 10.4
+    },
+    {
+      "name": "Glass Cat Eye #GCE01 -HTF",
+      "sku": "Glass Cat Eye #GCE01 -HTF",
+      "price": 10
+    },
+    {
+      "name": "Glass Cat Eye #GCE02 -HTF",
+      "sku": "Glass Cat Eye #GCE02 -HTF",
+      "price": 10
+    },
+    {
+      "name": "Glass Cat Eye #GCE03 -HTF",
+      "sku": "Glass Cat Eye #GCE03 -HTF",
+      "price": 10
+    },
+    {
+      "name": "Glass Cat Eye #GCE04 -HTF",
+      "sku": "Glass Cat Eye #GCE04 -HTF",
+      "price": 10
+    },
+    {
+      "name": "Glass Cat Eye #GCE05 -HTF",
+      "sku": "Glass Cat Eye #GCE05 -HTF",
+      "price": 10
+    },
+    {
+      "name": "Glass Cat Eye #GCE06 -HTF",
+      "sku": "Glass Cat Eye #GCE06 -HTF",
+      "price": 10
+    },
+    {
+      "name": "Glass Cat Eye #GCE07 -HTF",
+      "sku": "Glass Cat Eye #GCE07 -HTF",
+      "price": 10
+    },
+    {
+      "name": "Jelly Neon Flash #JNF01 -HTF",
+      "sku": "Jelly Neon Flash #JNF01 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Jelly Neon Flash #JNF02 -HTF",
+      "sku": "Jelly Neon Flash #JNF02 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Jelly Neon Flash #JNF03 -HTF",
+      "sku": "Jelly Neon Flash #JNF03 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Jelly Neon Flash #JNF04 -HTF",
+      "sku": "Jelly Neon Flash #JNF04 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Jelly Neon Flash #JNF05 -HTF",
+      "sku": "Jelly Neon Flash #JNF05 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Jelly Neon Flash #JNF06 -HTF",
+      "sku": "Jelly Neon Flash #JNF06 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Led Heli Light",
+      "sku": "Led Heli Light",
+      "price": 6.9
+    },
+    {
+      "name": "LINE IT UP APRICOT -HTF",
+      "sku": "LINE IT UP APRICOT -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP BLACK -HTF",
+      "sku": "LINE IT UP BLACK -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP GOLD -HTF",
+      "sku": "LINE IT UP GOLD -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP GREEN -HTF",
+      "sku": "LINE IT UP GREEN -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP LAVENDER -HTF",
+      "sku": "LINE IT UP LAVENDER -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP LILAC -HTF",
+      "sku": "LINE IT UP LILAC -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP MAGENTA -HTF",
+      "sku": "LINE IT UP MAGENTA -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP MINT -HTF",
+      "sku": "LINE IT UP MINT -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP ORANGE -HTF",
+      "sku": "LINE IT UP ORANGE -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP PINK -HTF",
+      "sku": "LINE IT UP PINK -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP PISTACHIO -HTF",
+      "sku": "LINE IT UP PISTACHIO -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP PYRITE -HTF",
+      "sku": "LINE IT UP PYRITE -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP RED -HTF",
+      "sku": "LINE IT UP RED -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP ROSE -HTF",
+      "sku": "LINE IT UP ROSE -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP SILVER -HTF",
+      "sku": "LINE IT UP SILVER -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP SKY -HTF",
+      "sku": "LINE IT UP SKY -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP WHITE -HTF",
+      "sku": "LINE IT UP WHITE -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "LINE IT UP YELLOW -HTF",
+      "sku": "LINE IT UP YELLOW -HTF",
+      "price": 6.6
+    },
+    {
+      "name": "Liquid Polygel #LPG1 -HTF",
+      "sku": "Liquid Polygel #LPG1 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG1 20g -HTF",
+      "sku": "Liquid Polygel #LPG1 20g -HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG10 -HTF",
+      "sku": "Liquid Polygel #LPG10 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG10 20g-HTF",
+      "sku": "Liquid Polygel #LPG10 20g-HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG11 -HTF",
+      "sku": "Liquid Polygel #LPG11 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG11 20g -HTF",
+      "sku": "Liquid Polygel #LPG11 20g -HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG12 -HTF",
+      "sku": "Liquid Polygel #LPG12 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG12 20g -HTF",
+      "sku": "Liquid Polygel #LPG12 20g -HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG13 -HTF",
+      "sku": "Liquid Polygel #LPG13 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG13 20 -HTF",
+      "sku": "Liquid Polygel #LPG13 20 -HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG14 -HTF",
+      "sku": "Liquid Polygel #LPG14 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG14 20g-HTF",
+      "sku": "Liquid Polygel #LPG14 20g-HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG15 -HTF",
+      "sku": "Liquid Polygel #LPG15 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG15 20g-HTF",
+      "sku": "Liquid Polygel #LPG15 20g-HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG16 -HTF",
+      "sku": "Liquid Polygel #LPG16 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG16 20g-HTF",
+      "sku": "Liquid Polygel #LPG16 20g-HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG17 -HTF",
+      "sku": "Liquid Polygel #LPG17 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG17 20g-HTF",
+      "sku": "Liquid Polygel #LPG17 20g-HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG18 -HTF",
+      "sku": "Liquid Polygel #LPG18 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG18 20g-HTF",
+      "sku": "Liquid Polygel #LPG18 20g-HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG19 -HTF",
+      "sku": "Liquid Polygel #LPG19 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG19 20g-HTF",
+      "sku": "Liquid Polygel #LPG19 20g-HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG2 -HTF",
+      "sku": "Liquid Polygel #LPG2 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG2 20g -HTF",
+      "sku": "Liquid Polygel #LPG2 20g -HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG20 -HTF",
+      "sku": "Liquid Polygel #LPG20 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG20 20g-HTF",
+      "sku": "Liquid Polygel #LPG20 20g-HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG3 -HTF",
+      "sku": "Liquid Polygel #LPG3 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG3 20g -HTF",
+      "sku": "Liquid Polygel #LPG3 20g -HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG4 -HTF",
+      "sku": "Liquid Polygel #LPG4 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG4 20g -HTF",
+      "sku": "Liquid Polygel #LPG4 20g -HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG5 -HTF",
+      "sku": "Liquid Polygel #LPG5 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG5 20g -HTF",
+      "sku": "Liquid Polygel #LPG5 20g -HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG6 -HTF",
+      "sku": "Liquid Polygel #LPG6 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG6 20g -HTF",
+      "sku": "Liquid Polygel #LPG6 20g -HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG7 -HTF",
+      "sku": "Liquid Polygel #LPG7 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG7 20g -HTF",
+      "sku": "Liquid Polygel #LPG7 20g -HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG8 -HTF",
+      "sku": "Liquid Polygel #LPG8 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG8 20g -HTF",
+      "sku": "Liquid Polygel #LPG8 20g -HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Liquid Polygel #LPG9 -HTF",
+      "sku": "Liquid Polygel #LPG9 -HTF",
+      "price": 12.9
+    },
+    {
+      "name": "Liquid Polygel #LPG9 20g -HTF",
+      "sku": "Liquid Polygel #LPG9 20g -HTF",
+      "price": 15.6
+    },
+    {
+      "name": "Marble-It by GIUP #01",
+      "sku": "Marble-It by GIUP #01",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #02",
+      "sku": "Marble-It by GIUP #02",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #03",
+      "sku": "Marble-It by GIUP #03",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #04",
+      "sku": "Marble-It by GIUP #04",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #05",
+      "sku": "Marble-It by GIUP #05",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #06",
+      "sku": "Marble-It by GIUP #06",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #07",
+      "sku": "Marble-It by GIUP #07",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #08",
+      "sku": "Marble-It by GIUP #08",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #09",
+      "sku": "Marble-It by GIUP #09",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #10",
+      "sku": "Marble-It by GIUP #10",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #11",
+      "sku": "Marble-It by GIUP #11",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #12",
+      "sku": "Marble-It by GIUP #12",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #13",
+      "sku": "Marble-It by GIUP #13",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #14",
+      "sku": "Marble-It by GIUP #14",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #15",
+      "sku": "Marble-It by GIUP #15",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #16",
+      "sku": "Marble-It by GIUP #16",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #17",
+      "sku": "Marble-It by GIUP #17",
+      "price": 8.9
+    },
+    {
+      "name": "Marble-It by GIUP #18",
+      "sku": "Marble-It by GIUP #18",
+      "price": 8.9
+    },
+    {
+      "name": "Metallic Collection #MC1 -HTF",
+      "sku": "Metallic Collection #MC1 -HTF",
+      "price": 10
+    },
+    {
+      "name": "Metallic Collection #MC2 -HTF",
+      "sku": "Metallic Collection #MC2 -HTF",
+      "price": 10
+    },
+    {
+      "name": "Metallic Collection #MC3 -HTF",
+      "sku": "Metallic Collection #MC3 -HTF",
+      "price": 10
+    },
+    {
+      "name": "Metallic Collection #MC4 -HTF",
+      "sku": "Metallic Collection #MC4 -HTF",
+      "price": 10
+    },
+    {
+      "name": "Metallic Collection #MC5 -HTF",
+      "sku": "Metallic Collection #MC5 -HTF",
+      "price": 10
+    },
+    {
+      "name": "Metallic Collection #MC6 -HTF",
+      "sku": "Metallic Collection #MC6 -HTF",
+      "price": 10
+    },
+    {
+      "name": "Metallic Collection #MC7 -HTF",
+      "sku": "Metallic Collection #MC7 -HTF",
+      "price": 10
+    },
+    {
+      "name": "Metallic Collection #MC8 -HTF",
+      "sku": "Metallic Collection #MC8 -HTF",
+      "price": 10
+    },
+    {
+      "name": "Mirror Powder Top Coat -HTF",
+      "sku": "Mirror Powder Top Coat -HTF",
+      "price": 9.9
+    },
+    {
+      "name": "Mirror Top Coat",
+      "sku": "Mirror Top Coat",
+      "price": 8.25
     },
     {
       "name": "MT01 Spot my top -HTF",
@@ -5781,6 +4791,416 @@
       "price": 10.8
     },
     {
+      "name": "MultiMix Synthogel 30g Blue Glitter -HTF",
+      "sku": "MultiMix Synthogel 30g Blue Glitter -HTF",
+      "price": 16.1
+    },
+    {
+      "name": "Multimix Synthogel 30g Light Nude -HTF",
+      "sku": "Multimix Synthogel 30g Light Nude -HTF",
+      "price": 16.1
+    },
+    {
+      "name": "MultiMix Synthogel 30gr Baby Blue -HTF",
+      "sku": "MultiMix Synthogel 30gr Baby Blue -HTF",
+      "price": 16.1
+    },
+    {
+      "name": "MultiMix Synthogel 30gr Baby Pink Glitter -HTF",
+      "sku": "MultiMix Synthogel 30gr Baby Pink Glitter -HTF",
+      "price": 16.1
+    },
+    {
+      "name": "MultiMix Synthogel 30gr Bubble Gum Glitter -HTF",
+      "sku": "MultiMix Synthogel 30gr Bubble Gum Glitter -HTF",
+      "price": 16.1
+    },
+    {
+      "name": "MultiMix Synthogel 30gr Clear -HTF",
+      "sku": "MultiMix Synthogel 30gr Clear -HTF",
+      "price": 16.1
+    },
+    {
+      "name": "MultiMix Synthogel 30gr Glitsy Green -HTF",
+      "sku": "MultiMix Synthogel 30gr Glitsy Green -HTF",
+      "price": 16.1
+    },
+    {
+      "name": "MultiMix Synthogel 30gr Minty Green -HTF",
+      "sku": "MultiMix Synthogel 30gr Minty Green -HTF",
+      "price": 16.1
+    },
+    {
+      "name": "MultiMix Synthogel 30gr Pink III -HTF",
+      "sku": "MultiMix Synthogel 30gr Pink III -HTF",
+      "price": 16.1
+    },
+    {
+      "name": "MultiMix Synthogel 30gr Super Soft Pink -HTF",
+      "sku": "MultiMix Synthogel 30gr Super Soft Pink -HTF",
+      "price": 16.1
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Clear -HTF",
+      "sku": "MultiMix Synthogel 60gr Clear -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Clear Glitter -HTF",
+      "sku": "MultiMix Synthogel 60gr Clear Glitter -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Cover -HTF",
+      "sku": "MultiMix Synthogel 60gr Cover -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Cover II -HTF",
+      "sku": "MultiMix Synthogel 60gr Cover II -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Crystal Clear -HTF",
+      "sku": "MultiMix Synthogel 60gr Crystal Clear -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Glitter Gold -HTF",
+      "sku": "MultiMix Synthogel 60gr Glitter Gold -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Glitter Nude -HTF",
+      "sku": "MultiMix Synthogel 60gr Glitter Nude -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Glitter Pink -HTF",
+      "sku": "MultiMix Synthogel 60gr Glitter Pink -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Glitter Pink II -HTF",
+      "sku": "MultiMix Synthogel 60gr Glitter Pink II -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Glitter White -HTF",
+      "sku": "MultiMix Synthogel 60gr Glitter White -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Light Lilac -HTF",
+      "sku": "MultiMix Synthogel 60gr Light Lilac -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Light Pink -HTF",
+      "sku": "MultiMix Synthogel 60gr Light Pink -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Milky White -HTF",
+      "sku": "MultiMix Synthogel 60gr Milky White -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Nude -HTF",
+      "sku": "MultiMix Synthogel 60gr Nude -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Pink -HTF",
+      "sku": "MultiMix Synthogel 60gr Pink -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Pink II -HTF",
+      "sku": "MultiMix Synthogel 60gr Pink II -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr Super Milky -HTF",
+      "sku": "MultiMix Synthogel 60gr Super Milky -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Synthogel 60gr White -HTF",
+      "sku": "MultiMix Synthogel 60gr White -HTF",
+      "price": 25.6
+    },
+    {
+      "name": "MultiMix Syntholiquid 100ml -HTF",
+      "sku": "MultiMix Syntholiquid 100ml -HTF",
+      "price": 5.1
+    },
+    {
+      "name": "N001 Geisha Girl -HTF",
+      "sku": "N001 Geisha Girl -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N002 Cashmere -HTF",
+      "sku": "N002 Cashmere -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N003 Porcelain -HTF",
+      "sku": "N003 Porcelain -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N004 Spun Sugar -HTF",
+      "sku": "N004 Spun Sugar -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N005 Burberry Blush -HTF",
+      "sku": "N005 Burberry Blush -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N006 Chanterel -HTF",
+      "sku": "N006 Chanterel -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N007 Naked Beauty -HTF",
+      "sku": "N007 Naked Beauty -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N008 If The Shoe Fits -HTF",
+      "sku": "N008 If The Shoe Fits -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N009 Blushing Bride -HTF",
+      "sku": "N009 Blushing Bride -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N010 Frappelicious -HTF",
+      "sku": "N010 Frappelicious -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N011 Berry Me Softly -HTF",
+      "sku": "N011 Berry Me Softly -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N012 Fluffy Blue Sky -HTF",
+      "sku": "N012 Fluffy Blue Sky -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N013 Antique -HTF",
+      "sku": "N013 Antique -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N014 Sugarcane -HTF",
+      "sku": "N014 Sugarcane -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N015 Celestial -HTF",
+      "sku": "N015 Celestial -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N016 Wild Card -HTF",
+      "sku": "N016 Wild Card -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N017 Pale Petal -HTF",
+      "sku": "N017 Pale Petal -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N018 Chic -HTF",
+      "sku": "N018 Chic -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N019 Luxe Linen -HTF",
+      "sku": "N019 Luxe Linen -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N020 Beige Bliss -HTF",
+      "sku": "N020 Beige Bliss -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N021 Soft Mocha -HTF",
+      "sku": "N021 Soft Mocha -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N022 Blushing Buff -HTF",
+      "sku": "N022 Blushing Buff -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N023 Princess Diaries -HTF",
+      "sku": "N023 Princess Diaries -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N024 New Porn Pink -HTF",
+      "sku": "N024 New Porn Pink -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N025 Latte Mouse -HTF",
+      "sku": "N025 Latte Mouse -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "N026 Whispering Blush -HTF",
+      "sku": "N026 Whispering Blush -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Nail Clips Dual Form Pack of 5 -HTF",
+      "sku": "Nail Clips Dual Form Pack of 5 -HTF",
+      "price": 4.2
+    },
+    {
+      "name": "Nail Clips Dual Form Single",
+      "sku": "Nail Clips Dual Form Single",
+      "price": 0.9
+    },
+    {
+      "name": "NAIL EXTENSION DUAL FORMS RUSSIAN ALMOND",
+      "sku": "NAIL EXTENSION DUAL FORMS RUSSIAN ALMOND",
+      "price": 9.3
+    },
+    {
+      "name": "NAIL EXTENSION DUAL FORMS SQUARE",
+      "sku": "NAIL EXTENSION DUAL FORMS SQUARE",
+      "price": 9.3
+    },
+    {
+      "name": "Nail Files 100/100",
+      "sku": "Nail Files 100/100",
+      "price": 0.98
+    },
+    {
+      "name": "Nail Files 180/180 Pink Sponge",
+      "sku": "Nail Files 180/180 Pink Sponge",
+      "price": 1.1
+    },
+    {
+      "name": "Nail Files Boat Shape 100/180",
+      "sku": "Nail Files Boat Shape 100/180",
+      "price": 1.4
+    },
+    {
+      "name": "Nail Files With Back Glue 100 Packet of 10",
+      "sku": "Nail Files With Back Glue 100 Packet of 10",
+      "price": 4.6
+    },
+    {
+      "name": "Nail Files With Back Glue 120 Packet of 10",
+      "sku": "Nail Files With Back Glue 120 Packet of 10",
+      "price": 4.6
+    },
+    {
+      "name": "Nail Files With Back Glue 180 Packet of 10",
+      "sku": "Nail Files With Back Glue 180 Packet of 10",
+      "price": 4.6
+    },
+    {
+      "name": "Nail sticks clear with ring",
+      "sku": "Nail sticks clear with ring",
+      "price": 7
+    },
+    {
+      "name": "Nail wipes 1000s",
+      "sku": "Nail wipes 1000s",
+      "price": 6
+    },
+    {
+      "name": "Natural nail sticks",
+      "sku": "Natural nail sticks",
+      "price": 7
+    },
+    {
+      "name": "Neon Cat Eye #NCE01 -HTF",
+      "sku": "Neon Cat Eye #NCE01 -HTF",
+      "price": 16.4
+    },
+    {
+      "name": "Neon Cat Eye #NCE02 -HTF",
+      "sku": "Neon Cat Eye #NCE02 -HTF",
+      "price": 16.4
+    },
+    {
+      "name": "Neon Cat Eye #NCE03 -HTF",
+      "sku": "Neon Cat Eye #NCE03 -HTF",
+      "price": 16.4
+    },
+    {
+      "name": "Neon Cat Eye #NCE04 -HTF",
+      "sku": "Neon Cat Eye #NCE04 -HTF",
+      "price": 16.4
+    },
+    {
+      "name": "Neon Cat Eye #NCE05 -HTF",
+      "sku": "Neon Cat Eye #NCE05 -HTF",
+      "price": 16.4
+    },
+    {
+      "name": "Neon Cat Eye #NCE06 -HTF",
+      "sku": "Neon Cat Eye #NCE06 -HTF",
+      "price": 16.4
+    },
+    {
+      "name": "Neon Cat Eye #NCE07 -HTF",
+      "sku": "Neon Cat Eye #NCE07 -HTF",
+      "price": 16.4
+    },
+    {
+      "name": "New York Party #NYP01 -HTF",
+      "sku": "New York Party #NYP01 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "New York Party #NYP02 -HTF",
+      "sku": "New York Party #NYP02 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "New York Party #NYP03 -HTF",
+      "sku": "New York Party #NYP03 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "New York Party #NYP04 -HTF",
+      "sku": "New York Party #NYP04 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Non Wipe Top Coat 15ml -HTF",
+      "sku": "Non Wipe Top Coat 15ml -HTF",
+      "price": 13.1
+    },
+    {
+      "name": "Non Wipe Top Coat Milky 15ml -HTF",
+      "sku": "Non Wipe Top Coat Milky 15ml -HTF",
+      "price": 13.9
+    },
+    {
+      "name": "Non Wipe Top Coat Perfect Shape 15ml -HTF",
+      "sku": "Non Wipe Top Coat Perfect Shape 15ml -HTF",
+      "price": 11.7
+    },
+    {
       "name": "NW01 Spot my top -HTF",
       "sku": "NW01 Spot my top -HTF",
       "price": 10.8
@@ -5796,29 +5216,759 @@
       "price": 10.8
     },
     {
-      "name": "DT01 Dandelion Diamond Top 11ml -HTF",
-      "sku": "DT01 Dandelion Diamond Top 11ml -HTF",
-      "price": 11.4
+      "name": "Ombre brush",
+      "sku": "Ombre brush",
+      "price": 12.4
     },
     {
-      "name": "DT02 Diamond Dust Diamond Top 11ml -HTF",
-      "sku": "DT02 Diamond Dust Diamond Top 11ml -HTF",
-      "price": 11.4
+      "name": "Ombre sponge",
+      "sku": "Ombre sponge",
+      "price": 7.7
     },
     {
-      "name": "DT03 Sugar Socks Diamond Top 11ml -HTF",
-      "sku": "DT03 Sugar Socks Diamond Top 11ml -HTF",
-      "price": 11.4
+      "name": "Perky Peach Cuticle Oil 100ml -HTF",
+      "sku": "Perky Peach Cuticle Oil 100ml -HTF",
+      "price": 17.2
     },
     {
-      "name": "DT04 Chipper Diamond Top 11ml -HTF",
-      "sku": "DT04 Chipper Diamond Top 11ml -HTF",
-      "price": 11.4
+      "name": "Perky Peach Cuticle Oil 5ml -HTF",
+      "sku": "Perky Peach Cuticle Oil 5ml -HTF",
+      "price": 6.5
+    },
+    {
+      "name": "PhotoPerfect Cuticle Oil New",
+      "sku": "PhotoPerfect Cuticle Oil New",
+      "price": 8
+    },
+    {
+      "name": "PMA #1 Champagne Blizzard -HTF",
+      "sku": "PMA #1 Champagne Blizzard -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "PMA #2 Cosmic Confection -HTF",
+      "sku": "PMA #2 Cosmic Confection -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "PMA #3 Pop Dot Drama -HTF",
+      "sku": "PMA #3 Pop Dot Drama -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "PMA #4 Kapow -HTF",
+      "sku": "PMA #4 Kapow -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "PMA #5 Comic Strip Crimson -HTF",
+      "sku": "PMA #5 Comic Strip Crimson -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "PMA #6 Pop Popsicle Pink -HTF",
+      "sku": "PMA #6 Pop Popsicle Pink -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "PMA #7 Blasted Blue -HTF",
+      "sku": "PMA #7 Blasted Blue -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "PMA #8 Vibrant Vector Violet -HTF",
+      "sku": "PMA #8 Vibrant Vector Violet -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Pododisc+5 Replacement Stickers L-25 mm New",
+      "sku": "Pododisc+5 Replacement Stickers L-25 mm New",
+      "price": 10.8
+    },
+    {
+      "name": "Pododisc + 5 Replacement Stickers M-20 mm New",
+      "sku": "Pododisc + 5 Replacement Stickers M-20 mm New",
+      "price": 9.3
+    },
+    {
+      "name": "Pododisc + 5 Replacement Stickers S-15 mm New",
+      "sku": "Pododisc + 5 Replacement Stickers S-15 mm New",
+      "price": 7.7
+    },
+    {
+      "name": "Polygel 2 Brush and Spatula Rose Gold",
+      "sku": "Polygel 2 Brush and Spatula Rose Gold",
+      "price": 13.1
+    },
+    {
+      "name": "Polygel Brush and Spatula Rose Gold",
+      "sku": "Polygel Brush and Spatula Rose Gold",
+      "price": 13.1
+    },
+    {
+      "name": "Premium Builder Gel Blue - 20g -HTF",
+      "sku": "Premium Builder Gel Blue - 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Premium Builder Gel Blush 40gr -HTF",
+      "sku": "Premium Builder Gel Blush 40gr -HTF",
+      "price": 29.4
+    },
+    {
+      "name": "Premium Builder Gel Clear 40gr -HTF",
+      "sku": "Premium Builder Gel Clear 40gr -HTF",
+      "price": 29.4
+    },
+    {
+      "name": "Premium Builder Gel Cover 40gr -HTF",
+      "sku": "Premium Builder Gel Cover 40gr -HTF",
+      "price": 29.4
+    },
+    {
+      "name": "Premium Builder Gel Milky 40gr -HTF",
+      "sku": "Premium Builder Gel Milky 40gr -HTF",
+      "price": 29.4
+    },
+    {
+      "name": "Premium Builder Gel Mint - 20g -HTF",
+      "sku": "Premium Builder Gel Mint - 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Premium Builder Gel Nude 40gr -HTF",
+      "sku": "Premium Builder Gel Nude 40gr -HTF",
+      "price": 29.4
+    },
+    {
+      "name": "Premium Builder Gel Nude II 40gr -HTF",
+      "sku": "Premium Builder Gel Nude II 40gr -HTF",
+      "price": 29.4
+    },
+    {
+      "name": "Premium Builder Gel Pearly Nude 40gr -HTF",
+      "sku": "Premium Builder Gel Pearly Nude 40gr -HTF",
+      "price": 29.4
+    },
+    {
+      "name": "Premium Builder Gel Pearly Pink 40gr -HTF",
+      "sku": "Premium Builder Gel Pearly Pink 40gr -HTF",
+      "price": 29.4
+    },
+    {
+      "name": "Premium Builder Gel Pink 40gr -HTF",
+      "sku": "Premium Builder Gel Pink 40gr -HTF",
+      "price": 29.4
+    },
+    {
+      "name": "Premium Builder Gel Purple - 20g -HTF",
+      "sku": "Premium Builder Gel Purple - 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Premium Builder Gel Vitro Blue - 20g -HTF",
+      "sku": "Premium Builder Gel Vitro Blue - 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Premium Builder Gel Vitro Green - 20g -HTF",
+      "sku": "Premium Builder Gel Vitro Green - 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Premium Builder Gel Vitro Pink - 20g -HTF",
+      "sku": "Premium Builder Gel Vitro Pink - 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Premium Builder Gel Vitro Purple - 20g -HTF",
+      "sku": "Premium Builder Gel Vitro Purple - 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Premium Builder Gel Vitro Red - 20g -HTF",
+      "sku": "Premium Builder Gel Vitro Red - 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Premium Builder Gel Vitro Teak Jade - 20g -HTF",
+      "sku": "Premium Builder Gel Vitro Teak Jade - 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Premium Builder Gel White 40gr -HTF",
+      "sku": "Premium Builder Gel White 40gr -HTF",
+      "price": 29.4
+    },
+    {
+      "name": "Premium Plus Fiber Glass Builder Gel 40gr -HTF",
+      "sku": "Premium Plus Fiber Glass Builder Gel 40gr -HTF",
+      "price": 29.4
+    },
+    {
+      "name": "Probes Stainless Steel Rounded 1222 New",
+      "sku": "Probes Stainless Steel Rounded 1222 New",
+      "price": 6.9
+    },
+    {
+      "name": "Professional Cuticle Pusher- Double Action 2044 New",
+      "sku": "Professional Cuticle Pusher- Double Action 2044 New",
+      "price": 6.9
+    },
+    {
+      "name": "Professional Cuticle Pusher- Double Action, Rounded 2042 New",
+      "sku": "Professional Cuticle Pusher- Double Action, Rounded 2042 New",
+      "price": 6.9
+    },
+    {
+      "name": "Professional Cuticle Scissors, Curved 1463 New",
+      "sku": "Professional Cuticle Scissors, Curved 1463 New",
+      "price": 16.6
+    },
+    {
+      "name": "Professional Cuticle Scissors, Curved 1466 New",
+      "sku": "Professional Cuticle Scissors, Curved 1466 New",
+      "price": 23.7
+    },
+    {
+      "name": "Professional Head Cutter Nipper Half Blade L 11.5cm 1006 New",
+      "sku": "Professional Head Cutter Nipper Half Blade L 11.5cm 1006 New",
+      "price": 19.3
+    },
+    {
+      "name": "Professional Premium Cuticle Nipper, Fine Cut â 3mm 2117 New",
+      "sku": "Professional Premium Cuticle Nipper, Fine Cut â 3mm 2117 New",
+      "price": 15.8
+    },
+    {
+      "name": "Professional Premium Cuticle Nipper, Fine Cut â 5mm 2117 New",
+      "sku": "Professional Premium Cuticle Nipper, Fine Cut â 5mm 2117 New",
+      "price": 15.8
+    },
+    {
+      "name": "Professional Premium Cuticle Nipper, Fine Cut â 7mm 2117 New",
+      "sku": "Professional Premium Cuticle Nipper, Fine Cut â 7mm 2117 New",
+      "price": 15.8
+    },
+    {
+      "name": "Professional Premium Cuticle Nipper, Oval Fine Cut â 3mm 2119 New",
+      "sku": "Professional Premium Cuticle Nipper, Oval Fine Cut â 3mm 2119 New",
+      "price": 15.4
+    },
+    {
+      "name": "Professional Premium Cuticle Nipper, Oval Fine Cut â 5mm 2119 New",
+      "sku": "Professional Premium Cuticle Nipper, Oval Fine Cut â 5mm 2119 New",
+      "price": 15.4
+    },
+    {
+      "name": "Professional Premium Cuticle Nipper, Oval Fine Cut â 7mm 2119 New",
+      "sku": "Professional Premium Cuticle Nipper, Oval Fine Cut â 7mm 2119 New",
+      "price": 15.4
+    },
+    {
+      "name": "Professional Premium Cuticle Nipper, Oval Round Fine Cut â 3mm 2120 New",
+      "sku": "Professional Premium Cuticle Nipper, Oval Round Fine Cut â 3mm 2120 New",
+      "price": 15.8
+    },
+    {
+      "name": "Professional Premium Cuticle Nipper, Oval Round Fine Cut â 5mm 2120 New",
+      "sku": "Professional Premium Cuticle Nipper, Oval Round Fine Cut â 5mm 2120 New",
+      "price": 15.8
+    },
+    {
+      "name": "Professional Premium Cuticle Nipper, Oval Round Fine Cut â 7mm 2120 New",
+      "sku": "Professional Premium Cuticle Nipper, Oval Round Fine Cut â 7mm 2120 New",
+      "price": 15.8
+    },
+    {
+      "name": "Professional Spring Scissors, Curved 1468 New",
+      "sku": "Professional Spring Scissors, Curved 1468 New",
+      "price": 17
+    },
+    {
+      "name": "Replacement Stickers Pododisc  L-25 mm GRIT 100 New",
+      "sku": "Replacement Stickers Pododisc  L-25 mm GRIT 100 New",
+      "price": 12
+    },
+    {
+      "name": "Replacement Stickers Pododisc L-25 mm GRIT 180 New",
+      "sku": "Replacement Stickers Pododisc L-25 mm GRIT 180 New",
+      "price": 12
+    },
+    {
+      "name": "Replacement Stickers Pododisc L-25 mm GRIT 240 New",
+      "sku": "Replacement Stickers Pododisc L-25 mm GRIT 240 New",
+      "price": 12
+    },
+    {
+      "name": "Replacement Stickers Pododisc M-20 mm GRIT 100 New",
+      "sku": "Replacement Stickers Pododisc M-20 mm GRIT 100 New",
+      "price": 9.6
+    },
+    {
+      "name": "Replacement Stickers Pododisc  M-20 mm GRIT 180 New",
+      "sku": "Replacement Stickers Pododisc  M-20 mm GRIT 180 New",
+      "price": 9.6
+    },
+    {
+      "name": "Replacement Stickers Pododisc M-20 mm GRIT 240 New",
+      "sku": "Replacement Stickers Pododisc M-20 mm GRIT 240 New",
+      "price": 9.6
+    },
+    {
+      "name": "Replacement Stickers Pododisc  S-15 mm GRIT 100 New",
+      "sku": "Replacement Stickers Pododisc  S-15 mm GRIT 100 New",
+      "price": 7.5
+    },
+    {
+      "name": "Replacement Stickers Pododisc  S-15 mm GRIT 180 New",
+      "sku": "Replacement Stickers Pododisc  S-15 mm GRIT 180 New",
+      "price": 7.5
+    },
+    {
+      "name": "Replacement Stickers Pododisc S-15 mm GRIT 240 New",
+      "sku": "Replacement Stickers Pododisc S-15 mm GRIT 240 New",
+      "price": 7.5
+    },
+    {
+      "name": "Rose Quartz Cat Eye #RQCE1 -HTF",
+      "sku": "Rose Quartz Cat Eye #RQCE1 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "Rose Quartz Cat Eye #RQCE2 -HTF",
+      "sku": "Rose Quartz Cat Eye #RQCE2 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "Rose Quartz Cat Eye #RQCE3 -HTF",
+      "sku": "Rose Quartz Cat Eye #RQCE3 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "Salt of the 7 Seas Foot Scrub 370g NEW",
+      "sku": "Salt of the 7 Seas Foot Scrub 370g NEW",
+      "price": 7.8
+    },
+    {
+      "name": "Sanitizer 200ml -HTF",
+      "sku": "Sanitizer 200ml -HTF",
+      "price": 4.78
+    },
+    {
+      "name": "Sapphire Cat Eye #SCE01 -HTF",
+      "sku": "Sapphire Cat Eye #SCE01 -HTF",
+      "price": 13
+    },
+    {
+      "name": "Sapphire Cat Eye #SCE02 -HTF",
+      "sku": "Sapphire Cat Eye #SCE02 -HTF",
+      "price": 13
+    },
+    {
+      "name": "Sapphire Cat Eye #SCE03 -HTF",
+      "sku": "Sapphire Cat Eye #SCE03 -HTF",
+      "price": 13
+    },
+    {
+      "name": "Sapphire Cat Eye #SCE04 -HTF",
+      "sku": "Sapphire Cat Eye #SCE04 -HTF",
+      "price": 13
     },
     {
       "name": "Satin Matt RS Top 15 ml -HTF",
       "sku": "Satin Matt RS Top 15 ml -HTF",
       "price": 13.9
+    },
+    {
+      "name": "SD-1933 Nail Decals French - White",
+      "sku": "SD-1933 Nail Decals French - White",
+      "price": 5.3
+    },
+    {
+      "name": "SD-1934 Nail Decals French - Black",
+      "sku": "SD-1934 Nail Decals French - Black",
+      "price": 5.3
+    },
+    {
+      "name": "Shimmer Collection #SH07 -HTF",
+      "sku": "Shimmer Collection #SH07 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Shimmer Collection #SH08 -HTF",
+      "sku": "Shimmer Collection #SH08 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Shimmer Collection #SH09 -HTF",
+      "sku": "Shimmer Collection #SH09 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Shimmer Collection #SH1 -HTF",
+      "sku": "Shimmer Collection #SH1 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Shimmer Collection #SH10 -HTF",
+      "sku": "Shimmer Collection #SH10 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Shimmer Collection #SH11 -HTF",
+      "sku": "Shimmer Collection #SH11 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Shimmer Collection #SH12 -HTF",
+      "sku": "Shimmer Collection #SH12 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Shimmer Collection #SH2 -HTF",
+      "sku": "Shimmer Collection #SH2 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Shimmer Collection #SH3 -HTF",
+      "sku": "Shimmer Collection #SH3 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Shimmer Collection #SH4 -HTF",
+      "sku": "Shimmer Collection #SH4 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Shimmer Collection #SH5 -HTF",
+      "sku": "Shimmer Collection #SH5 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Shimmer Collection #SH6 -HTF",
+      "sku": "Shimmer Collection #SH6 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Shimmer Top Fairy #STF 01 -HTF",
+      "sku": "Shimmer Top Fairy #STF 01 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "Shimmer Top Fairy #STF 02 -HTF",
+      "sku": "Shimmer Top Fairy #STF 02 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "Shimmer Top Fairy #STF 03 -HTF",
+      "sku": "Shimmer Top Fairy #STF 03 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "Shimmer Top Fairy #STF 04 -HTF",
+      "sku": "Shimmer Top Fairy #STF 04 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "Shimmer Top Fairy #STF 05 -HTF",
+      "sku": "Shimmer Top Fairy #STF 05 -HTF",
+      "price": 11.7
+    },
+    {
+      "name": "Skinny Liner brush 5-7",
+      "sku": "Skinny Liner brush 5-7",
+      "price": 12.4
+    },
+    {
+      "name": "Skinny Liner brush 9-11",
+      "sku": "Skinny Liner brush 9-11",
+      "price": 12.4
+    },
+    {
+      "name": "SOAK OFF GEL TIPS LONG ALMOND",
+      "sku": "SOAK OFF GEL TIPS LONG ALMOND",
+      "price": 13
+    },
+    {
+      "name": "SOAK OFF GEL TIPS LONG COFFIN",
+      "sku": "SOAK OFF GEL TIPS LONG COFFIN",
+      "price": 13
+    },
+    {
+      "name": "SOAK OFF GEL TIPS MEDIUM SQUARE",
+      "sku": "SOAK OFF GEL TIPS MEDIUM SQUARE",
+      "price": 13
+    },
+    {
+      "name": "SOAK OFF GEL TIPS SHORT ALMOND",
+      "sku": "SOAK OFF GEL TIPS SHORT ALMOND",
+      "price": 13
+    },
+    {
+      "name": "SP8001 Mirror Clear Powder",
+      "sku": "SP8001 Mirror Clear Powder",
+      "price": 6.2
+    },
+    {
+      "name": "Spiral_shimmers_01 -HTF",
+      "sku": "Spiral_shimmers_01 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Spiral_shimmers_02 -HTF",
+      "sku": "Spiral_shimmers_02 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Spiral_shimmers_03 -HTF",
+      "sku": "Spiral_shimmers_03 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Spiral_shimmers_04 -HTF",
+      "sku": "Spiral_shimmers_04 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Spiral_shimmers_05 -HTF",
+      "sku": "Spiral_shimmers_05 -HTF",
+      "price": 10.7
+    },
+    {
+      "name": "Splinter tweezer â 13 cm 1386 New",
+      "sku": "Splinter tweezer â 13 cm 1386 New",
+      "price": 6.2
+    },
+    {
+      "name": "SS01 SPIX and SPEX Kaleidascope -HTF",
+      "sku": "SS01 SPIX and SPEX Kaleidascope -HTF",
+      "price": 10
+    },
+    {
+      "name": "SS02 SPIX and SPEX Delphinium -HTF",
+      "sku": "SS02 SPIX and SPEX Delphinium -HTF",
+      "price": 10
+    },
+    {
+      "name": "SS03 SPIX and SPEX Giddy Grape -HTF",
+      "sku": "SS03 SPIX and SPEX Giddy Grape -HTF",
+      "price": 10
+    },
+    {
+      "name": "SS04 SPIX and SPEX Popping Candy -HTF",
+      "sku": "SS04 SPIX and SPEX Popping Candy -HTF",
+      "price": 10
+    },
+    {
+      "name": "SS05 SPIX and SPEX Lemon Sorbet -HTF",
+      "sku": "SS05 SPIX and SPEX Lemon Sorbet -HTF",
+      "price": 10
+    },
+    {
+      "name": "SS06 SPIX and SPEX Tusk Tusk -HTF",
+      "sku": "SS06 SPIX and SPEX Tusk Tusk -HTF",
+      "price": 10
+    },
+    {
+      "name": "Standard Dual Reverse Tips 120 s",
+      "sku": "Standard Dual Reverse Tips 120 s",
+      "price": 6.7
+    },
+    {
+      "name": "Sugary Glitter pigment 3gr 01 -HTF",
+      "sku": "Sugary Glitter pigment 3gr 01 -HTF",
+      "price": 3.9
+    },
+    {
+      "name": "Sugary Glitter pigment 3gr 02 -HTF",
+      "sku": "Sugary Glitter pigment 3gr 02 -HTF",
+      "price": 3.9
+    },
+    {
+      "name": "Sugary Glitter pigment 3gr 03 -HTF",
+      "sku": "Sugary Glitter pigment 3gr 03 -HTF",
+      "price": 3.9
+    },
+    {
+      "name": "Sugary Glitter pigment 3gr 04 -HTF",
+      "sku": "Sugary Glitter pigment 3gr 04 -HTF",
+      "price": 3.9
+    },
+    {
+      "name": "Sugary Glitter pigment 3gr 05 -HTF",
+      "sku": "Sugary Glitter pigment 3gr 05 -HTF",
+      "price": 3.9
+    },
+    {
+      "name": "Sugary Glitter pigment 3gr 06 -HTF",
+      "sku": "Sugary Glitter pigment 3gr 06 -HTF",
+      "price": 3.9
+    },
+    {
+      "name": "Sugary Glitter pigment 3gr 07 -HTF",
+      "sku": "Sugary Glitter pigment 3gr 07 -HTF",
+      "price": 3.9
+    },
+    {
+      "name": "Super Fan Top Coat 11ml FAN12 -HTF",
+      "sku": "Super Fan Top Coat 11ml FAN12 -HTF",
+      "price": 13.9
+    },
+    {
+      "name": "Super Flash Top Coat 11ml -HTF",
+      "sku": "Super Flash Top Coat 11ml -HTF",
+      "price": 13.9
+    },
+    {
+      "name": "Superbond Nail Dehydrator 11ml - Acid Free -HTF",
+      "sku": "Superbond Nail Dehydrator 11ml - Acid Free -HTF",
+      "price": 8.2
+    },
+    {
+      "name": "Superbond Nail Dehydrator 11ml - with Acid -HTF",
+      "sku": "Superbond Nail Dehydrator 11ml - with Acid -HTF",
+      "price": 8.2
+    },
+    {
+      "name": "TR01 Mirror X1 Powder",
+      "sku": "TR01 Mirror X1 Powder",
+      "price": 6.2
+    },
+    {
+      "name": "TR02 Mirror X2 Powder",
+      "sku": "TR02 Mirror X2 Powder",
+      "price": 6.2
+    },
+    {
+      "name": "TR03 Mirror X3 Powder",
+      "sku": "TR03 Mirror X3 Powder",
+      "price": 6.2
+    },
+    {
+      "name": "TR04 Mirror X4 Powder",
+      "sku": "TR04 Mirror X4 Powder",
+      "price": 6.2
+    },
+    {
+      "name": "TR05 Mirror X5 Powder",
+      "sku": "TR05 Mirror X5 Powder",
+      "price": 6.2
+    },
+    {
+      "name": "TR06 Mirror X6 Powder",
+      "sku": "TR06 Mirror X6 Powder",
+      "price": 6.2
+    },
+    {
+      "name": "Tuttie Fruity Glass #TFG01 -HTF",
+      "sku": "Tuttie Fruity Glass #TFG01 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Tuttie Fruity Glass #TFG02 -HTF",
+      "sku": "Tuttie Fruity Glass #TFG02 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Tuttie Fruity Glass #TFG03 -HTF",
+      "sku": "Tuttie Fruity Glass #TFG03 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Tuttie Fruity Glass #TFG04- HTF",
+      "sku": "Tuttie Fruity Glass #TFG04- HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Tuttie Fruity Glass #TFG05 -HTF",
+      "sku": "Tuttie Fruity Glass #TFG05 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Tuttie Fruity Glass #TFG06 -HTF",
+      "sku": "Tuttie Fruity Glass #TFG06 -HTF",
+      "price": 8.9
+    },
+    {
+      "name": "Velvet Cat Eye #VCE01 -HTF",
+      "sku": "Velvet Cat Eye #VCE01 -HTF",
+      "price": 10.9
+    },
+    {
+      "name": "Velvet Cat Eye #VCE02 -HTF",
+      "sku": "Velvet Cat Eye #VCE02 -HTF",
+      "price": 10.9
+    },
+    {
+      "name": "Velvet Cat Eye #VCE03 -HTF",
+      "sku": "Velvet Cat Eye #VCE03 -HTF",
+      "price": 10.9
+    },
+    {
+      "name": "Velvet Cat Eye #VCE04 -HTF",
+      "sku": "Velvet Cat Eye #VCE04 -HTF",
+      "price": 10.9
+    },
+    {
+      "name": "Velvet Cat Eye #VCE05 -HTF",
+      "sku": "Velvet Cat Eye #VCE05 -HTF",
+      "price": 10.9
+    },
+    {
+      "name": "Velvet Cat Eye #VCE06 -HTF",
+      "sku": "Velvet Cat Eye #VCE06 -HTF",
+      "price": 10.9
+    },
+    {
+      "name": "Velvet Cat Eye #VCE07 -HTF",
+      "sku": "Velvet Cat Eye #VCE07 -HTF",
+      "price": 10.9
+    },
+    {
+      "name": "Velvet Cat Eye #VCE08 -HTF",
+      "sku": "Velvet Cat Eye #VCE08 -HTF",
+      "price": 10.9
+    },
+    {
+      "name": "Velvet Cat Eye #VCE09 -HTF",
+      "sku": "Velvet Cat Eye #VCE09 -HTF",
+      "price": 10.9
+    },
+    {
+      "name": "Velvet Cat Eye #VCE10 -HTF",
+      "sku": "Velvet Cat Eye #VCE10 -HTF",
+      "price": 10.9
+    },
+    {
+      "name": "Watercolors Aquarelle Pallete",
+      "sku": "Watercolors Aquarelle Pallete",
+      "price": 27.1
+    },
+    {
+      "name": "White Nail Lamp New",
+      "sku": "White Nail Lamp New",
+      "price": 21.91
+    },
+    {
+      "name": "Wipe Off Top Coat 15 ml",
+      "sku": "Wipe Off Top Coat 15 ml",
+      "price": 11.1
+    },
+    {
+      "name": "Wireless Nail Dust Collector New",
+      "sku": "Wireless Nail Dust Collector New",
+      "price": 201.6
+    },
+    {
+      "name": "Wooden File Super thin 100/100",
+      "sku": "Wooden File Super thin 100/100",
+      "price": 0.98
+    },
+    {
+      "name": "Wooden File Super thin 100/100 with Logo",
+      "sku": "Wooden File Super thin 100/100 with Logo",
+      "price": 0.72
     }
   ]
 }

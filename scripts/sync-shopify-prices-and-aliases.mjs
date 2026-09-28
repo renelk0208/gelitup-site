@@ -2,7 +2,6 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import XLSX from 'xlsx'
 
 const projectRoot = process.cwd()
 const shopifyExportPath = path.join(projectRoot, 'products_export_1.csv')
