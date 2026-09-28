@@ -119,16 +119,21 @@ function matchPartnerCountry(country) {
   return PARTNER_COUNTRIES.find((p) => p.match(c)) || null
 }
 
-// Thanks the applicant for applying and redirects them to the local partner on Instagram.
+// Informs the applicant why their application can't proceed via the general programme and
+// points them to the local partner on Instagram. Uses each partner's blockedMessage/
+// supportMessage so the email matches the on-screen copy shown on the success page.
 // Best-effort: any failure is swallowed so it never blocks the applicant's success screen.
 async function sendPartnerRedirectEmail(record, partner) {
   if (!EMAIL_WEBHOOK_URL || !record?.email || !partner) return
   const firstName = String(record.full_name || '').trim().split(' ')[0] || 'there'
+  const blockedMessage = partner.blockedMessage || `Applications from your country are handled by ${partner.name}.`
+  const supportMessage = partner.supportMessage || 'Please contact them directly on Instagram.'
   const html = `
     <div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.6">
       <p>Hi ${escapeHtml(firstName)},</p>
-      <p>Thank you so much for applying to the GEL.IT.UP Ambassador Programme — we love that you want to create with us.</p>
-      <p>Applications from your country are handled by <strong>${escapeHtml(partner.name)}</strong>. To make your application, please get in touch with them directly on Instagram at <a href="${partner.instagramUrl}" style="color:#D43790;font-weight:bold">${escapeHtml(partner.handle)}</a>.</p>
+      <p>Thank you so much for your interest in the GEL.IT.UP Ambassador Programme — we love that you want to create with us.</p>
+      <p>${escapeHtml(blockedMessage)}</p>
+      <p>${escapeHtml(supportMessage)} <a href="${partner.instagramUrl}" style="color:#D43790;font-weight:bold">${escapeHtml(partner.handle)}</a>.</p>
       <p>If you need anything else, just email us at <a href="mailto:info@gelitup.com" style="color:#D43790;font-weight:bold">info@gelitup.com</a>.</p>
       <p>Warm wishes,<br/>The GEL.IT.UP Team</p>
     </div>`
@@ -140,7 +145,7 @@ async function sendPartnerRedirectEmail(record, partner) {
   const body = {
     eventType: 'ambassador_application_partner_redirect',
     to: record.email,
-    subject: `Your GEL.IT.UP ambassador application — please apply via ${partner.name}`,
+    subject: `Your GEL.IT.UP ambassador application — update from ${partner.name}`,
     html,
     from: EMAIL_FROM,
     replyTo: ADMIN_INBOX,

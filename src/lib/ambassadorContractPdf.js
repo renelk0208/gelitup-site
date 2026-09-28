@@ -592,7 +592,27 @@ export async function buildAmbassadorWelcomeLetterPdf(applicant = {}) {
   return { base64, filename, pages: doc.getNumberOfPages() }
 }
 
-export async function buildAmbassadorFactoryPrepPdf({ ambassadors = [], generatedAt = new Date().toISOString() } = {}) {
+const PACKING_LIST_HEADER_BG = PINK
+const PACKING_LIST_ROW_ALT_BG = [253, 240, 245]
+const PACKING_LIST_BORDER = [228, 228, 233]
+
+// Splits a leading "N x " / "N×" quantity token off an item description, e.g.
+// "2 x Premium Builder Gel (Clear / Colour)" -> { qty: '2', desc: 'Premium Builder Gel (Clear / Colour)' }.
+// Falls back to qty '1' when no leading count is present, so every kit item still
+// renders as a proper invoice-style line (description + quantity).
+function splitPackingListItemQty(itemText) {
+  const text = String(itemText || '').trim()
+  const match = text.match(/^(\d+)\s*[x×]\s*(.+)$/i)
+  if (match) return { qty: match[1], desc: match[2].trim() }
+  return { qty: '1', desc: text }
+}
+
+// Builds a compact, one-page-per-ambassador "packing list" styled like a commercial
+// invoice (letterhead, ship-to block, itemised table) — but with no monetary values,
+// since these are gifted ambassador kits, not paid orders. Used by Admin to print or
+// attach alongside a shipment so warehouse staff and the ambassador both have a clear,
+// professional record of what's inside the box.
+export async function buildAmbassadorPackingListPdf({ ambassadors = [], generatedAt = new Date().toISOString() } = {}) {
   const { jsPDF } = await import('jspdf')
   const doc = new jsPDF({ unit: 'pt', format: 'a4' })
   const FONT = await registerUnicodeFont(doc)
@@ -600,130 +620,176 @@ export async function buildAmbassadorFactoryPrepPdf({ ambassadors = [], generate
   const pageH = doc.internal.pageSize.getHeight()
   const margin = 42
   const contentW = pageW - margin * 2
-  let y = margin
+  const logo = await resolveLogo()
 
-  const ensureSpace = (needed) => {
-    if (y + needed > pageH - margin) {
-      doc.addPage()
-      y = margin
+  ambassadors.forEach((ambassador, idx) => {
+    if (idx > 0) doc.addPage()
+    let y = margin
+
+    // ── Letterhead: logo/brand (left) + "PACKING LIST" title + doc meta (right) ──
+    const logoW = 84
+    const logoH = logoW * LOGO_RATIO
+    const textX = margin + (logo ? logoW + 10 : 0)
+    if (logo) {
+      try { doc.addImage(`data:image/png;base64,${logo}`, 'PNG', margin, y, logoW, logoH, undefined, 'FAST') } catch { /* fall through without logo */ }
     }
-  }
+    doc.setFont(FONT, 'bold')
+    doc.setFontSize(11)
+    doc.setTextColor(...INK)
+    doc.text(CONTRACT_COMPANY.brand, textX, y + 12)
+    doc.setFont(FONT, 'normal')
+    doc.setFontSize(8)
+    doc.setTextColor(...MUTED)
+    doc.text(CONTRACT_COMPANY.addressLine, textX, y + 24)
+    doc.text(CONTRACT_COMPANY.contactLine, textX, y + 35)
 
-  const printLabelValue = (label, value) => {
+    doc.setFont(FONT, 'bold')
+    doc.setFontSize(20)
+    doc.setTextColor(...PINK)
+    doc.text('PACKING LIST', pageW - margin, y + 14, { align: 'right' })
+
+    const dateLabel = new Date(generatedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+    const docNumberSeed = String(ambassador?.discountCode || ambassador?.fullName || 'AMB').replace(/[^A-Z0-9]+/gi, '').toUpperCase().slice(0, 10) || 'AMB'
+    doc.setFont(FONT, 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(...MUTED)
+    doc.text(`No. PL-${docNumberSeed}-${String(generatedAt).slice(0, 10)}`, pageW - margin, y + 28, { align: 'right' })
+    doc.text(`Date: ${dateLabel}`, pageW - margin, y + 40, { align: 'right' })
+
+    y += Math.max(logoH, 46) + 14
+    doc.setDrawColor(...PINK)
+    doc.setLineWidth(1.2)
+    doc.line(margin, y, pageW - margin, y)
+    y += 22
+
+    // ── Ship To / Shipment details two-column block ──
+    const colW = (contentW - 20) / 2
     doc.setFont(FONT, 'bold')
     doc.setFontSize(9)
     doc.setTextColor(...MUTED)
-    doc.text(label, margin + 10, y)
-    doc.setFont(FONT, 'normal')
-    doc.setFontSize(10)
-    doc.setTextColor(...INK)
-    const wrapped = doc.splitTextToSize(String(value || '—'), contentW - 110)
-    doc.text(wrapped, margin + 95, y)
-    y += Math.max(14, wrapped.length * 12)
-  }
-
-  ambassadors.forEach((ambassador, idx) => {
-    if (idx > 0) {
-      doc.addPage()
-      y = margin
-    }
-
-    doc.setFont(FONT, 'bold')
-    doc.setFontSize(18)
-    doc.setTextColor(...INK)
-    doc.text('GEL.IT.UP Ambassador Factory Prep Sheet', margin, y)
-    y += 24
-    doc.setFont(FONT, 'normal')
-    doc.setFontSize(10)
-    doc.setTextColor(...MUTED)
-    doc.text(`Generated: ${new Date(generatedAt).toLocaleString()}`, margin, y)
+    doc.text('SHIP TO', margin, y)
+    doc.text('SHIPMENT DETAILS', margin + colW + 20, y)
     y += 14
-    doc.text(`Sheet ${idx + 1} of ${ambassadors.length}`, margin, y)
-    y += 18
-    doc.setDrawColor(...PINK)
-    doc.setLineWidth(0.9)
-    doc.line(margin, y, pageW - margin, y)
-    y += 16
 
-    const items = Array.isArray(ambassador?.packItems) ? ambassador.packItems : []
-    let estimatedHeight = 118 + (items.length > 0 ? items.length * 13 : 14)
-    if (estimatedHeight < 160) estimatedHeight = 160
-    ensureSpace(estimatedHeight + 4)
-
-    doc.setDrawColor(228, 228, 233)
-    doc.setFillColor(255, 255, 255)
-    doc.roundedRect(margin, y, contentW, estimatedHeight, 8, 8, 'FD')
-    y += 18
-
+    let yLeft = y
+    let yRight = y
     doc.setFont(FONT, 'bold')
-    doc.setFontSize(12)
+    doc.setFontSize(11)
     doc.setTextColor(...INK)
-    doc.text(`${idx + 1}. ${ambassador?.fullName || 'Unknown ambassador'}`, margin + 10, y)
-    y += 16
+    doc.text(ambassador?.fullName || 'Unknown ambassador', margin, yLeft)
+    yLeft += 14
+    doc.setFontSize(10)
+    doc.text(ambassador?.packTitle || 'Pack type not set', margin + colW + 20, yRight)
+    yRight += 14
 
-    const subtitleBits = [
-      ambassador?.packTitle ? `Pack: ${ambassador.packTitle}` : '',
-      ambassador?.discountCode ? `Code: ${ambassador.discountCode}` : '',
-      ambassador?.instagram ? `@${String(ambassador.instagram).replace(/^@+/, '')}` : '',
+    doc.setFont(FONT, 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(...INK)
+    const addressLines = doc.splitTextToSize(ambassador?.address || 'Address not provided', colW - 4)
+    doc.text(addressLines, margin, yLeft)
+    yLeft += addressLines.length * 12 + 4
+    if (ambassador?.email) { doc.text(ambassador.email, margin, yLeft); yLeft += 12 }
+    if (ambassador?.instagram) { doc.text(`@${String(ambassador.instagram).replace(/^@+/, '')}`, margin, yLeft); yLeft += 12 }
+
+    const shipmentRows = [
+      ambassador?.discountCode ? ['Ambassador code', ambassador.discountCode] : null,
+      ambassador?.status ? ['Status', String(ambassador.status).replace(/_/g, ' ')] : null,
+      ambassador?.trackingNumber ? ['Tracking number', ambassador.trackingNumber] : null,
     ].filter(Boolean)
-    if (subtitleBits.length > 0) {
+    shipmentRows.forEach(([label, value]) => {
       doc.setFont(FONT, 'normal')
       doc.setFontSize(9)
       doc.setTextColor(...MUTED)
-      const subtitle = doc.splitTextToSize(subtitleBits.join(' • '), contentW - 20)
-      doc.text(subtitle, margin + 10, y)
-      y += subtitle.length * 11 + 4
+      doc.text(`${label}:`, margin + colW + 20, yRight)
+      doc.setTextColor(...INK)
+      doc.text(String(value), margin + colW + 20 + 86, yRight)
+      yRight += 13
+    })
+
+    y = Math.max(yLeft, yRight) + 16
+
+    // ── Items table (description + quantity — no prices; these are gifted kits) ──
+    const qtyColW = 60
+    const descColW = contentW - qtyColW
+    const drawTableHeader = () => {
+      doc.setFillColor(...PACKING_LIST_HEADER_BG)
+      doc.rect(margin, y, contentW, 22, 'F')
+      doc.setFont(FONT, 'bold')
+      doc.setFontSize(9)
+      doc.setTextColor(255, 255, 255)
+      doc.text('ITEM DESCRIPTION', margin + 10, y + 14)
+      doc.text('QTY', margin + descColW + qtyColW / 2, y + 14, { align: 'center' })
+      y += 22
     }
+    drawTableHeader()
 
-    printLabelValue('Address', ambassador?.address || 'Address not provided')
-    printLabelValue('Email', ambassador?.email || '—')
+    const items = Array.isArray(ambassador?.packItems) ? ambassador.packItems : []
+    const rows = items.length > 0
+      ? items.map(splitPackingListItemQty)
+      : [{ qty: '—', desc: 'Ambassador package type is not set yet. Assign type in Admin before shipment.' }]
 
-    doc.setFont(FONT, 'bold')
+    rows.forEach((row, i) => {
+      doc.setFont(FONT, 'normal')
+      doc.setFontSize(9.5)
+      const wrapped = doc.splitTextToSize(row.desc, descColW - 20)
+      const rowH = Math.max(18, wrapped.length * 12 + 6)
+      // Keep the table on one page where possible; if a long item list would run off
+      // the bottom of the sheet, start a new page and repeat the header row.
+      if (y + rowH > pageH - margin - 70) {
+        doc.addPage()
+        y = margin
+        drawTableHeader()
+      }
+      if (i % 2 === 1) {
+        doc.setFillColor(...PACKING_LIST_ROW_ALT_BG)
+        doc.rect(margin, y, contentW, rowH, 'F')
+      }
+      doc.setFont(FONT, 'normal')
+      doc.setFontSize(9.5)
+      doc.setTextColor(...INK)
+      doc.text(wrapped, margin + 10, y + 13)
+      doc.text(row.qty, margin + descColW + qtyColW / 2, y + 13, { align: 'center' })
+      doc.setDrawColor(...PACKING_LIST_BORDER)
+      doc.setLineWidth(0.5)
+      doc.line(margin, y + rowH, pageW - margin, y + rowH)
+      y += rowH
+    })
+    y += 18
+
+    // ── Footer notes ──
+    if (ambassador?.trackingUrl) {
+      doc.setFont(FONT, 'normal')
+      doc.setFontSize(9)
+      doc.setTextColor(...MUTED)
+      doc.text(`Tracking link: ${ambassador.trackingUrl}`, margin, y)
+      y += 14
+    }
+    doc.setFont(FONT, 'normal')
     doc.setFontSize(9)
     doc.setTextColor(...MUTED)
-    doc.text('Kit items', margin + 10, y)
-    y += 13
-    doc.setFont(FONT, 'normal')
-    doc.setFontSize(10)
-    doc.setTextColor(...INK)
-    if (items.length === 0) {
-      const fallback = doc.splitTextToSize('Ambassador package type is not set yet. Assign type in Admin before shipment.', contentW - 35)
-      doc.text(fallback, margin + 22, y)
-      y += fallback.length * 12
-    } else {
-      items.forEach((item) => {
-        const wrapped = doc.splitTextToSize(String(item || ''), contentW - 35)
-        doc.text(`• ${wrapped[0] || ''}`, margin + 22, y)
-        y += 12
-        for (let i = 1; i < wrapped.length; i += 1) {
-          doc.text(wrapped[i], margin + 32, y)
-          y += 12
-        }
-      })
-    }
+    doc.text('This packing list is for reference only and carries no monetary value.', margin, y)
+    y += 20
+    doc.setFont(FONT, 'bold')
+    doc.setFontSize(9)
+    doc.setTextColor(...PINK)
+    doc.text('Thank you for being part of the GEL.IT.UP family!', margin, y)
 
-    y += 14
-  })
-
-  const pageCount = doc.getNumberOfPages()
-  for (let page = 1; page <= pageCount; page += 1) {
-    doc.setPage(page)
     doc.setDrawColor(235, 235, 235)
     doc.setLineWidth(0.5)
     doc.line(margin, pageH - 28, pageW - margin, pageH - 28)
     doc.setFont(FONT, 'normal')
     doc.setFontSize(8)
     doc.setTextColor(...MUTED)
-    doc.text(`Page ${page} of ${pageCount}`, pageW - margin, pageH - 14, { align: 'right' })
-  }
+    doc.text(`${idx + 1} of ${ambassadors.length}`, pageW - margin, pageH - 14, { align: 'right' })
+  })
 
   const datePart = String(generatedAt || '').slice(0, 10) || new Date().toISOString().slice(0, 10)
   const singleName = ambassadors.length === 1
     ? String(ambassadors[0]?.fullName || 'ambassador').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase()
     : ''
   const filename = singleName
-    ? `GELITUP-Ambassador-Factory-Prep-${singleName}-${datePart}.pdf`
-    : `GELITUP-Ambassador-Factory-Prep-Sheets-${datePart}.pdf`
+    ? `GELITUP-Ambassador-Packing-List-${singleName}-${datePart}.pdf`
+    : `GELITUP-Ambassador-Packing-Lists-${datePart}.pdf`
   const blob = doc.output('blob')
-  return { blob, filename, count: ambassadors.length, pages: pageCount }
+  return { blob, filename, count: ambassadors.length, pages: doc.getNumberOfPages() }
 }

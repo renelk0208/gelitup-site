@@ -4,7 +4,7 @@ import * as XLSX from 'xlsx'
 import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
 import tierPricingOverrides from '../data/tierPricingOverrides.json'
 import ambassadorLetterAttachmentUrl from '../lib/ambassadorletter/Gelitup Ambassador Letter.pdf?url'
-import { buildAmbassadorContractPdf, buildAmbassadorFactoryPrepPdf, buildAmbassadorWelcomeLetterPdf } from '../lib/ambassadorContractPdf.js'
+import { buildAmbassadorContractPdf, buildAmbassadorPackingListPdf, buildAmbassadorWelcomeLetterPdf } from '../lib/ambassadorContractPdf.js'
 
 const REGISTRATIONS_TABLE = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || 'b2b_registrations'
 const ORDERS_TABLE = import.meta.env.VITE_B2B_ORDERS_TABLE || 'b2b_orders'
@@ -4887,7 +4887,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   const [nextPackageMode, setNextPackageMode] = useState({})
   const [sectionOpenState, setSectionOpenState] = useState({})
   const [shipmentEntryOpen, setShipmentEntryOpen] = useState({})
-  const [factoryPdfBusy, setFactoryPdfBusy] = useState(false)
+  const [packingListPdfBusy, setPackingListPdfBusy] = useState(false)
   const reminderSweepStartedRef = useRef(false)
   const shipmentSaveInFlightRef = useRef(new Set())
   const [shipmentEmailLock, setShipmentEmailLock] = useState(() => {
@@ -5680,21 +5680,22 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     [row?.city, row?.postal_code].filter(Boolean).join(' '),
     row?.country,
   ].filter(Boolean).join(', ')
-  const exportFactoryPrepPdfForRow = async (row) => {
-    if (factoryPdfBusy) return
-    setFactoryPdfBusy(true)
+  const exportPackingListPdfForRow = async (row) => {
+    if (packingListPdfBusy) return
+    setPackingListPdfBusy(true)
     try {
       if (!row || !row.id) {
         throw new Error('Ambassador record is missing.')
       }
       if (normalizeAmbassadorStatus(row?.status) !== 'approved') {
-        alert('Approve this ambassador before printing a factory prep sheet.')
-        setFactoryPdfBusy(false)
+        alert('Approve this ambassador before printing a packing list.')
+        setPackingListPdfBusy(false)
         return
       }
 
       const ambassadorType = getAmbassadorType(row)
       const selectedPack = AMBASSADOR_PACKS_BY_TYPE[ambassadorType] || null
+      const currentDraft = getShipmentDraft(row)
       const ambassadors = [{
         fullName: String(row?.full_name || '').trim() || 'Unknown ambassador',
         instagram: String(row?.instagram || '').trim(),
@@ -5706,18 +5707,20 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
         address: formatAmbassadorAddress(row) || 'Address not provided',
         status: normalizeAmbassadorStatus(row?.status) || 'unknown',
         createdAt: String(row?.created_at || ''),
+        trackingNumber: String(currentDraft?.tracking_number || row?.tracking_number || '').trim(),
+        trackingUrl: String(currentDraft?.tracking_url || row?.tracking_url || '').trim(),
       }]
 
-      const { blob, filename } = await buildAmbassadorFactoryPrepPdf({
+      const { blob, filename } = await buildAmbassadorPackingListPdf({
         ambassadors,
         generatedAt: new Date().toISOString(),
       })
       triggerFileDownload(blob, filename)
-      alert(`Factory prep sheet downloaded for ${row.full_name || 'ambassador'}.`)
+      alert(`Packing list downloaded for ${row.full_name || 'ambassador'}.`)
     } catch (err) {
-      alert(`Factory PDF export failed: ${err?.message || String(err)}`)
+      alert(`Packing list PDF export failed: ${err?.message || String(err)}`)
     }
-    setFactoryPdfBusy(false)
+    setPackingListPdfBusy(false)
   }
   const downloadAmbassadorPackageCsv = (row) => {
     const csvEsc = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`
@@ -7038,11 +7041,11 @@ const deleteApplication = async (row) => {
                       {isApproved && (
                         <button
                           type="button"
-                          onClick={() => exportFactoryPrepPdfForRow(row)}
-                          disabled={factoryPdfBusy}
+                          onClick={() => exportPackingListPdfForRow(row)}
+                          disabled={packingListPdfBusy}
                           className="rounded-lg border border-fuchsia-300 bg-white px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-60"
                         >
-                          {factoryPdfBusy ? 'Preparing sheet…' : '↓ Print Factory Sheet'}
+                          {packingListPdfBusy ? 'Preparing packing list…' : '↓ Download Packing List'}
                         </button>
                       )}
                       {isApproved && (
