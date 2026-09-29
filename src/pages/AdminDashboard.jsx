@@ -5164,6 +5164,12 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       alert(`Could not reset closed shipment flow: ${metaResult.error}`)
       return
     }
+    // Clear any products manually added for the package that was just sent so
+    // the next cycle starts blank — what was actually sent is preserved in
+    // the package history archive line, this only clears the editable list.
+    const cleared = await savePackNotes({ ...row, admin_comment: metaResult.comment }, [])
+    if (!cleared) return
+    setPackAdditionDraft((prev) => ({ ...prev, [row.id]: '' }))
     setReminderDateDraft((prev) => ({ ...prev, [row.id]: '' }))
     setReminderNoteDraft((prev) => ({ ...prev, [row.id]: '' }))
     setNextPackageMode((prev) => ({ ...prev, [row.id]: true }))
