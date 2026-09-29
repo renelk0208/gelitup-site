@@ -3,10 +3,11 @@
  * audit-tier-pricing-coverage.mjs
  *
  * Checks EVERY product in the live B2B catalog (public/gelitup-content/b2b-price-list.json)
- * against the tier pricing spreadsheet (src/data/tierPricingOverrides.json), using the exact
- * same resolution logic (src/lib/tierPricingResolver.js) that the Admin Dashboard uses to
- * price real distributor orders for every tier (Authority, Professional, Sales
- * Representative, Level 2 Country).
+ * AND the distributor "package"/pod catalog (public/gelitup-content/package-pods.json, used
+ * to build Silver/Gold/Platinum bulk colour packages) against the tier pricing spreadsheet
+ * (src/data/tierPricingOverrides.json), using the exact same resolution logic
+ * (src/lib/tierPricingResolver.js) that the app uses to price real distributor orders for
+ * every tier (Authority, Professional, Sales Representative, Level 2 Country).
  *
  * Run this any time you want to be sure tier pricing is correct catalogue-wide — not just
  * for one order that happened to surface a problem. Because it imports the SAME resolver
@@ -48,62 +49,86 @@ if (!catalogItems.length) {
   process.exit(1)
 }
 
+// The distributor "package" builder (Silver/Gold/Platinum bulk colour packages) draws
+// items from a SEPARATE catalog file that uses short display names (e.g. "Ice Ice Baby"
+// instead of the sheet's "01 Ice Ice Baby -HTF") and GIUP-COL-prefixed SKUs — check this
+// source too, since it is resolved through the same tier lookup but with different
+// name/sku shapes than the main b2b-price-list.json catalog.
+let podCatalogItems = []
+try {
+  const podCatalog = loadJson('public/gelitup-content/package-pods.json')
+  const podGroups = ['pod_1', 'pod_2', 'pod_3', 'pod_4', 'pod_seasonal']
+  podCatalogItems = podGroups.flatMap((key) => (Array.isArray(podCatalog?.[key]) ? podCatalog[key] : []))
+} catch {
+  console.log('(package-pods.json not found — skipping distributor package/pod catalog check)\n')
+}
+
 const tierLookup = buildTierPricingLookup(tierPricingOverrides, PRODUCT_ALIAS_GROUPS)
 
-console.log(`Loaded ${tierPricingOverrides.length} tier pricing sheet rows (${tierLookup.size} lookup keys).`)
-console.log(`Checking ${catalogItems.length} catalog products from b2b-price-list.json...\n`)
+console.log(`Loaded ${tierPricingOverrides.length} tier pricing sheet rows (${tierLookup.size} lookup keys).\n`)
 
-const missing = []
-const zeroOrInvalidTier = []
-let resolved = 0
+function checkCatalog(label, items) {
+  const missing = []
+  const zeroOrInvalidTier = []
+  let resolved = 0
 
-for (const item of catalogItems) {
-  const candidateKeys = buildItemCandidateKeys({ name: item.name, sku: item.sku })
-  let entry = null
-  for (const key of candidateKeys) {
-    entry = tierLookup.get(key)
-    if (entry) break
+  for (const item of items) {
+    const candidateKeys = buildItemCandidateKeys({ name: item.name, sku: item.sku })
+    let entry = null
+    for (const key of candidateKeys) {
+      entry = tierLookup.get(key)
+      if (entry) break
+    }
+
+    if (!entry) {
+      missing.push(item)
+      continue
+    }
+
+    resolved++
+
+    const invalidTiers = TIER_KEYS.filter((t) => {
+      const v = Number(entry[t])
+      return !Number.isFinite(v) || v <= 0
+    })
+    if (invalidTiers.length) {
+      zeroOrInvalidTier.push({ item, entry, invalidTiers })
+    }
   }
 
-  if (!entry) {
-    missing.push(item)
-    continue
+  console.log(`── ${label} (${items.length} products) ──────────────────────────`)
+  console.log(`✅  Resolved: ${resolved} / ${items.length}`)
+  console.log(`${missing.length ? '❌' : '✅'}  Missing (falls back to B2B price for every tier): ${missing.length}`)
+  console.log(`${zeroOrInvalidTier.length ? '⚠️ ' : '✅'}  Resolved but with an invalid/zero tier value: ${zeroOrInvalidTier.length}`)
+
+  if (missing.length) {
+    console.log('\nProducts NOT found in the tier pricing sheet:')
+    for (const item of missing) {
+      console.log(`  • ${item.name}  (sku: ${item.sku || '-'}, b2b price: ${item.price ?? '-'})`)
+    }
   }
 
-  resolved++
-
-  const invalidTiers = TIER_KEYS.filter((t) => {
-    const v = Number(entry[t])
-    return !Number.isFinite(v) || v <= 0
-  })
-  if (invalidTiers.length) {
-    zeroOrInvalidTier.push({ item, entry, invalidTiers })
+  if (zeroOrInvalidTier.length) {
+    console.log('\nProducts resolved, but with a missing/zero tier price:')
+    for (const { item, invalidTiers } of zeroOrInvalidTier) {
+      console.log(`  • ${item.name}  — invalid tiers: ${invalidTiers.join(', ')}`)
+    }
   }
+
+  console.log('')
+  return missing.length > 0 || zeroOrInvalidTier.length > 0
 }
 
-console.log(`✅  Resolved: ${resolved} / ${catalogItems.length}`)
-console.log(`${missing.length ? '❌' : '✅'}  Missing (falls back to B2B price for every tier): ${missing.length}`)
-console.log(`${zeroOrInvalidTier.length ? '⚠️ ' : '✅'}  Resolved but with an invalid/zero tier value: ${zeroOrInvalidTier.length}`)
-
-if (missing.length) {
-  console.log('\n── Products NOT found in the tier pricing sheet ──────────────────────────')
-  for (const item of missing) {
-    console.log(`  • ${item.name}  (sku: ${item.sku || '-'}, b2b price: ${item.price})`)
-  }
+let hasIssues = checkCatalog('b2b-price-list.json (main catalog)', catalogItems)
+if (podCatalogItems.length) {
+  hasIssues = checkCatalog('package-pods.json (distributor package/pod catalog)', podCatalogItems) || hasIssues
 }
 
-if (zeroOrInvalidTier.length) {
-  console.log('\n── Products resolved, but with a missing/zero tier price ─────────────────')
-  for (const { item, invalidTiers } of zeroOrInvalidTier) {
-    console.log(`  • ${item.name}  — invalid tiers: ${invalidTiers.join(', ')}`)
-  }
-}
-
-if (missing.length || zeroOrInvalidTier.length) {
-  console.log('\nFix by adding/correcting rows in the tier pricing sheet (or its JSON conversion),')
+if (hasIssues) {
+  console.log('Fix by adding/correcting rows in the tier pricing sheet (or its JSON conversion),')
   console.log('or by adding an alias in src/data/productAliases.js if the sheet already has the')
   console.log('product under a differently-worded name.')
   process.exit(1)
 }
 
-console.log('\nAll catalog products resolve to a valid tier price for every distributor tier.')
+console.log('All catalog products resolve to a valid tier price for every distributor tier.')

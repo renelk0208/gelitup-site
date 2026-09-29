@@ -28,6 +28,7 @@ import ClarityScript from './components/ClarityScript'
 import { cleanProductName } from './utils/productUtils'
 import CatalogueSkeleton from './components/CatalogueSkeleton'
 import tierPricingOverrides from './data/tierPricingOverrides.json'
+import { buildTierPricingLookup, buildItemCandidateKeys } from './lib/tierPricingResolver.js'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
@@ -105,13 +106,13 @@ function getSmallOrderShippingFee(country) {
   return null
 }
 const B2B_PRICE_MULTIPLIER = 1
-const DIRECT_TIER_PRICE_MAP = new Map(
-  (Array.isArray(tierPricingOverrides) ? tierPricingOverrides : []).map((entry) => {
-    const productName = String(entry?.product || '').trim()
-    if (!productName) return null
-    return [productName.toLowerCase(), entry]
-  }).filter(Boolean),
-)
+// Built once from the tier pricing spreadsheet using the same alias-resolution
+// logic as the Admin Dashboard (src/lib/tierPricingResolver.js), so order
+// items stored/displayed under a short SKU code or a short display name (e.g.
+// the distributor "package"/pod builder, which uses names like "Ice Ice Baby"
+// instead of the sheet's full "01 Ice Ice Baby -HTF") still resolve to their
+// correct tier price instead of silently falling back to the B2B price.
+const DIRECT_TIER_PRICE_LOOKUP = buildTierPricingLookup(Array.isArray(tierPricingOverrides) ? tierPricingOverrides : [], PRODUCT_ALIAS_GROUPS)
 
 function isPerfectShapeTopCoatProduct(name, sku) {
   const normalizedName = String(name || '').toLowerCase()
@@ -125,12 +126,17 @@ function getAdjustedB2bBasePrice(name, sku, rawPrice) {
   if (!Number.isFinite(numericPrice) || numericPrice <= 0) return null
   return numericPrice
 }
-function getDirectTierPriceForProduct(productName, tierKey) {
+function getDirectTierPriceForProduct(productName, tierKey, productSku = null) {
   const normalizedName = String(productName || '').trim()
-  if (!normalizedName) return null
-  const override = DIRECT_TIER_PRICE_MAP.get(normalizedName.toLowerCase()) || DIRECT_TIER_PRICE_MAP.get(String(productName || '').replace(/\s+/g, ' ').trim().toLowerCase())
-  if (!override) return null
-  const tierValue = Number(override?.[tierKey])
+  if (!normalizedName || !tierKey) return null
+  const candidateKeys = buildItemCandidateKeys({ name: normalizedName, sku: productSku || normalizedName })
+  let entry = null
+  for (const key of candidateKeys) {
+    entry = DIRECT_TIER_PRICE_LOOKUP.get(key)
+    if (entry) break
+  }
+  if (!entry) return null
+  const tierValue = Number(entry?.[tierKey])
   return Number.isFinite(tierValue) ? tierValue : null
 }
 function isMarkupExemptCuticleProduct(name) {
@@ -1472,7 +1478,7 @@ function buildProformaFromCart({
 }) {
   const productMap = new Map(products.map((product) => [normalizeSkuCode(product.code), product]))
   const resolveTierUnitPrice = (name, code, fallbackPrice) => {
-    const directPrice = getDirectTierPriceForProduct(name || code, tier)
+    const directPrice = getDirectTierPriceForProduct(name || code, tier, code)
     if (directPrice != null) return Number(directPrice.toFixed(2))
     const numericFallback = Number(fallbackPrice)
     if (Number.isFinite(numericFallback)) return Number(numericFallback.toFixed(2))
@@ -1516,7 +1522,7 @@ function buildProformaFromCart({
       const addOnProduct = productMap.get(normalizeSkuCode(PROFESSIONAL_BASE_PACK.sku))
       const listUnitPriceEur = addOnProduct?.price ?? proformaLookupPrice(priceMap, PROFESSIONAL_BASE_PACK.sku, addOnProduct?.name || PROFESSIONAL_BASE_PACK.description) ?? null
       const discountPct = FACTORY_PRICE_BOOK_EUR.professionalPackDiscountPct
-      const directPrice = getDirectTierPriceForProduct(addOnProduct?.name || PROFESSIONAL_BASE_PACK.description, tier)
+      const directPrice = getDirectTierPriceForProduct(addOnProduct?.name || PROFESSIONAL_BASE_PACK.description, tier, PROFESSIONAL_BASE_PACK.sku)
       const discountedUnitPriceEur = directPrice != null
         ? Number((directPrice * (1 - (discountPct / 100))).toFixed(2))
         : listUnitPriceEur != null
@@ -14329,7 +14335,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         || priceMap.get(pnNorm)
         || (giupNum ? priceMap.get(giupNum.padStart(2, '0')) || priceMap.get(giupNum) : null)
       const fallbackPrice = priceEntry?.price ?? null
-      const directPrice = getDirectTierPriceForProduct(priceEntry?.name || code, tier)
+      const directPrice = getDirectTierPriceForProduct(priceEntry?.name || code, tier, code)
       const price = directPrice ?? fallbackPrice
       const name = priceEntry?.name || code
       return { code, sku: code, name, category: 'Unknown', preview: '#e2e8f0', imageUrl, price }
@@ -14351,12 +14357,12 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
 
   const orderTotal = useMemo(() => {
     const itemsTotal = selectedProducts.reduce((s, p) => {
-      const directPrice = getDirectTierPriceForProduct(p.name, tier)
+      const directPrice = getDirectTierPriceForProduct(p.name, tier, p.sku || p.code)
       const unitPrice = directPrice != null ? directPrice : Number(p.price)
       return s + (Number.isFinite(unitPrice) ? unitPrice * (itemQtys[p.code] || 1) : 0)
     }, 0)
     const pkgTotal = packageCartItems.reduce((s, item) => {
-      const directPrice = getDirectTierPriceForProduct(item.name || item.sku, tier)
+      const directPrice = getDirectTierPriceForProduct(item.name || item.sku, tier, item.sku)
       const unitPrice = directPrice != null ? directPrice : Number(item.price)
       return s + (Number.isFinite(unitPrice) ? unitPrice * item.qty : 0)
     }, 0)
@@ -16092,7 +16098,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <div className="p-5">
               <p className="text-sm font-semibold text-slate-900 leading-snug">{upsellModal.product?.name}</p>
               {upsellModal.product?.price != null && pricesAllocated && (
-                <p className="mt-1 text-sm font-bold text-fuchsia-700">€{((getDirectTierPriceForProduct(upsellModal.product.name, tier) ?? Number(upsellModal.product.price)).toFixed(2))}</p>
+                <p className="mt-1 text-sm font-bold text-fuchsia-700">€{((getDirectTierPriceForProduct(upsellModal.product.name, tier, upsellModal.product.sku || upsellModal.product.code) ?? Number(upsellModal.product.price)).toFixed(2))}</p>
               )}
               <div className="mt-4 flex gap-2">
                 <button
@@ -16267,7 +16273,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             <div className="mt-2 divide-y divide-slate-100">
               {selectedProducts.map(product => {
                 const qty = itemQtys[product.code] || 1
-                const unitPrice = getDirectTierPriceForProduct(product.name, tier) ?? Number(product.price)
+                const unitPrice = getDirectTierPriceForProduct(product.name, tier, product.sku || product.code) ?? Number(product.price)
                 const lineTotal = product.price != null ? unitPrice * qty : null
                 return (
                   <div key={product.code} className="flex items-center gap-2 py-2">
@@ -16967,7 +16973,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                             <p className="line-clamp-2 text-[10px] leading-tight text-slate-800">{cleanProductName(product.name)}</p>
                             {product.price != null && (
                             pricesAllocated
-                              ? <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{((getDirectTierPriceForProduct(product.name, tier) ?? Number(product.price)).toFixed(2))}</p>
+                              ? <p className="text-[10px] font-bold" style={{ color: '#c8386e' }}>€{((getDirectTierPriceForProduct(product.name, tier, product.sku || product.code) ?? Number(product.price)).toFixed(2))}</p>
                               : <p className="text-[10px] text-slate-400">POA</p>
                           )}
                           </div>
