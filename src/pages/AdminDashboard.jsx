@@ -1256,9 +1256,8 @@ function parseOrderItemEntry(rawItem, index = 0) {
 // Add entries here for items that are NOT in b2b-price-list.json.
 // Key  : exact SKU/name as it appears in orders (will be upper-cased automatically).
 // name : canonical Zoho product name shown in exports.
-// price: BASE price (same scale as b2b-price-list.json — before the 1.2× markup).
+// price: the exact price to show/export. No markup or percentage multiplier is applied.
 //        Leave null to show the name but no price in exports.
-// The standard markup formula   Math.ceil(price * 1.2 * 10) / 10 * tierMultiplier   still applies.
 const SKU_OVERRIDE_MAP = {
   // ── Non-Wipe Top Coat (Milky) ──────────────────────────────────────
   // "Non Wipe Top Coat Milky 15ml -HTF" is in b2b-price-list.json at base 11.54 → B2B 13.9
@@ -1422,7 +1421,7 @@ function buildOrderPriceLookupMap(items = []) {
     const adjustedBasePrice = getAdjustedB2bBasePrice(name, sku, price)
     if (adjustedBasePrice == null) return
 
-    const unitPrice = Math.ceil(adjustedBasePrice * B2B_PRICE_MULTIPLIER * 10) / 10
+    const unitPrice = adjustedBasePrice
     const entry = {
       name: String(name || '').trim(),
       sku: normalizeAdminSkuToken(sku || name || ''),
@@ -1615,9 +1614,7 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0, 
         normalizeAdminSkuToken(item?.sku || '') ||
         normalizeAdminSkuToken(canonicalLookup?.sku || '') ||
         normalizeAdminSkuToken(override.name || '')
-      const baseUnitPrice = override.price != null
-        ? Math.ceil(override.price * 1.2 * 10) / 10
-        : null
+      const baseUnitPrice = override.price != null ? override.price : null
       return {
         unitPrice: baseUnitPrice != null ? Math.round(baseUnitPrice * tierMultiplier * 100) / 100 : null,
         resolvedName: override.name || null,
@@ -3398,110 +3395,44 @@ function GuestbookPanel() {
 }
 
 // ─── Tier Pricing panel ───────────────────────────────────────────────────────
+// Every price shown or exported here is read directly, verbatim, from
+// src/data/tierPricingOverrides.json (a 1:1 conversion of the official tier
+// pricing spreadsheet). No markups, surcharges, or percentage multipliers are
+// applied anywhere in this panel — category is used purely to group rows for
+// display and is never part of the price lookup itself.
 
-const TIER_PRICING_DATA = [
-  { key: 'b2b',          label: 'B2B (Salon)',               multiplier: 1.0,   colour: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-  { key: 'authority',    label: 'Authority Distributor',     multiplier: 0.22,  colour: 'bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200' },
-  { key: 'professional', label: 'Professional Distributor',  multiplier: 0.37,  colour: 'bg-pink-100 text-pink-700 border-pink-200' },
-  { key: 'sales',        label: 'Sales Representative',      multiplier: 0.85,  colour: 'bg-slate-100 text-slate-700 border-slate-200' },
-  { key: 'country',      label: 'Level 2 Country Tier',      multiplier: 0.264, colour: 'bg-sky-100 text-sky-700 border-sky-200' },
+const TIER_COLUMNS = [
+  { key: 'authority',    label: 'Authority Distributor',    colour: 'bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200' },
+  { key: 'professional', label: 'Professional Distributor', colour: 'bg-pink-100 text-pink-700 border-pink-200' },
+  { key: 'sales',        label: 'Sales Representative',     colour: 'bg-slate-100 text-slate-700 border-slate-200' },
+  { key: 'country',      label: 'Level 2 Country Tier',     colour: 'bg-sky-100 text-sky-700 border-sky-200' },
 ]
 
-function findTierOverride(productName) {
-  return tierPricingOverrides.find(o => o.product === productName) || null
-}
-
-const B2B_PRICE_MULTIPLIER = 1.2
-const PERFECT_SHAPE_TOP_COAT_UPLIFT = 1.06
-function isPerfectShapeTopCoatProduct(name, sku) {
-  const normalizedName = String(name || '').toLowerCase()
-  const normalizedSku = String(sku || '').toLowerCase()
-  return normalizedName.includes('top coat perfect shape')
-    || normalizedName.includes('perfect shape top coat')
-    || normalizedSku.includes('nwpt15')
-}
 function getAdjustedB2bBasePrice(name, sku, rawPrice) {
+  void name
+  void sku
   const numericPrice = Number(rawPrice)
   if (!Number.isFinite(numericPrice) || numericPrice <= 0) return null
-  return isPerfectShapeTopCoatProduct(name, sku)
-    ? numericPrice * PERFECT_SHAPE_TOP_COAT_UPLIFT
-    : numericPrice
-}
-
-// Map price-list item names to display categories
-function classifyProduct(name) {
-  const n = (name || '').toUpperCase()
-  if (/\bSOLID GEL POLISH\b|SOLID\s*\d|^\d{1,4}[A-Z]?\s/.test(n)) return 'SOLID GEL POLISH'
-  if (/CAT\s*EYE|GCE\b/.test(n)) return 'CAT EYE'
-  if (/GLITTER/i.test(n)) return 'GLITTERS'
-  if (/GLASS\s*EFFECT/i.test(n)) return 'GLASS EFFECT'
-  if (/SHIMMER/i.test(n)) return 'SHIMMER'
-  if (/METALLIC/i.test(n)) return 'METALLIC'
-  if (/\bPEARL\b/i.test(n)) return 'PEARL'
-  if (/\bJELLY\b/i.test(n)) return 'JELLY'
-  if (/SNOWFLAKE/i.test(n)) return 'SNOWFLAKE'
-  if (/\bPMA\b/i.test(n)) return 'PMA'
-  if (/NEW\s*YORK|NYP/i.test(n)) return 'NEW YORK'
-  if (/BY\s*THE\s*OCEAN|BTO/i.test(n)) return 'BY THE OCEAN'
-  if (/SPIX|SPEX/i.test(n)) return 'SPIX & SPEX'
-  if (/TUTTI\s*FRUTTI/i.test(n)) return 'TUTTI FRUTTI'
-  if (/\bFRENCH\b/i.test(n)) return 'FRENCH'
-  if (/BUILDER\s*GEL|BUILD/i.test(n)) return 'BUILDER GEL'
-  if (/ACRYLIC/i.test(n)) return 'ACRYLICS'
-  if (/\bBASE\b|FLEXI\s*BASE|SUPERIOR\s*BASE/i.test(n)) return 'BASES'
-  if (/\bTOP\s*COAT\b|\bTOP\b.*\b(MATTE|GLOSS|WIPE|MILKY|SHIMMER)\b/i.test(n)) return 'TOPS'
-  if (/MAGNET|LAMP|LED|FILE|BUFFER|DRILL/i.test(n)) return 'EQUIPMENT'
-  if (/BRUSH/i.test(n)) return 'BRUSHES'
-  if (/NAIL\s*ART|FOIL|STICKER|STAMP/i.test(n)) return 'NAIL ART'
-  if (/REMOVER|CLEANSER|ACETONE|WIPE|PAD/i.test(n)) return 'CONSUMABLES'
-  if (/HAND|FOOT|CREAM|OIL|CUTICLE/i.test(n)) return 'NAIL HAND & FOOT CARE'
-  if (/SUPERBOND|DEHYDRAT|PRIMER|PREP/i.test(n)) return 'NAIL PREPARATIONS'
-  if (/LIQUID|MONOMER/i.test(n)) return 'LIQUIDS'
-  if (/DUAL\s*FORM|NAIL\s*TIP/i.test(n)) return 'TOOLS'
-  return 'OTHER'
+  return numericPrice
 }
 
 function TierPricingPanel() {
-  const [priceData, setPriceData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
   const [expandedCat, setExpandedCat] = useState(null)
 
-  useEffect(() => {
-    let mounted = true
-    const load = async () => {
-      try {
-        const res = await fetch('/gelitup-content/b2b-price-list.json')
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const payload = await res.json()
-        const items = Array.isArray(payload?.items) ? payload.items : []
-        // Group by category
-        const groups = {}
-        const isMultimix30g = (n) => /multimix/i.test(n) && /\b30\s*g/i.test(n)
-        for (const { name, sku, price } of items) {
-          const adjustedBasePrice = getAdjustedB2bBasePrice(name, sku, price)
-          if (adjustedBasePrice == null) continue
-          const surcharge = isMultimix30g(name) ? 1.1 : 1
-          const b2bPrice = Math.ceil(adjustedBasePrice * B2B_PRICE_MULTIPLIER * surcharge * 10) / 10
-          const cat = classifyProduct(name)
-          if (!groups[cat]) groups[cat] = { products: [], min: Infinity, max: -Infinity, total: 0 }
-          groups[cat].products.push({ name, b2bPrice })
-          groups[cat].min = Math.min(groups[cat].min, b2bPrice)
-          groups[cat].max = Math.max(groups[cat].max, b2bPrice)
-          groups[cat].total += b2bPrice
-        }
-        if (mounted) { setPriceData(groups); setLoading(false) }
-      } catch (e) {
-        if (mounted) { setError(e.message); setLoading(false) }
-      }
+  // Group the sheet rows by their own category label (display grouping only —
+  // every price lookup elsewhere matches on product name, never on category).
+  const priceData = {}
+  for (const entry of tierPricingOverrides) {
+    const cat = entry.category || 'OTHER'
+    if (!priceData[cat]) {
+      priceData[cat] = { products: [], min: Infinity, max: -Infinity }
     }
-    load()
-    return () => { mounted = false }
-  }, [])
-
-  if (loading) return <p className="text-xs text-slate-400">Loading B2B price data…</p>
-  if (error) return <p className="text-xs text-rose-600">Failed to load prices: {error}</p>
-  if (!priceData) return null
+    priceData[cat].products.push(entry)
+    if (Number.isFinite(entry.b2bPrice)) {
+      priceData[cat].min = Math.min(priceData[cat].min, entry.b2bPrice)
+      priceData[cat].max = Math.max(priceData[cat].max, entry.b2bPrice)
+    }
+  }
 
   const CATEGORY_ORDER = [
     'SOLID GEL POLISH', 'CAT EYE', 'GLITTERS', 'GLASS EFFECT', 'SHIMMER', 'METALLIC', 'PEARL', 'JELLY',
@@ -3520,15 +3451,13 @@ function TierPricingPanel() {
 
   return (
     <div>
-      <h2 className="text-sm font-bold text-slate-900 mb-1">Distributor Tier Pricing — Live B2B Prices</h2>
-      <p className="text-xs text-slate-500 mb-2">Prices are sourced from the B2B price list. Each tier multiplier is applied to the actual B2B wholesale price.</p>
+      <h2 className="text-sm font-bold text-slate-900 mb-1">Distributor Tier Pricing — Sheet Prices</h2>
+      <p className="text-xs text-slate-500 mb-2">Every price below is read directly from the tier pricing spreadsheet. No markups or percentage multipliers are applied.</p>
 
-      {/* Tier multiplier legend */}
       <div className="mb-4 flex flex-wrap gap-2">
-        {TIER_PRICING_DATA.map(t => (
+        {TIER_COLUMNS.map(t => (
           <span key={t.key} className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${t.colour}`}>
-            {t.label}: ×{t.multiplier}
-            {t.multiplier < 1 ? ` (−${((1 - t.multiplier) * 100).toFixed(0)}%)` : ''}
+            {t.label}
           </span>
         ))}
       </div>
@@ -3541,7 +3470,7 @@ function TierPricingPanel() {
               <th className="px-3 py-2.5 text-left">Category</th>
               <th className="px-3 py-2.5 text-center">#</th>
               <th className="px-3 py-2.5 text-right">B2B Price Range</th>
-              {TIER_PRICING_DATA.filter(t => t.key !== 'b2b').map(t => (
+              {TIER_COLUMNS.map(t => (
                 <th key={t.key} className="px-3 py-2.5 text-right">{t.label.split(' ')[0]}</th>
               ))}
             </tr>
@@ -3550,6 +3479,11 @@ function TierPricingPanel() {
             {sortedCategories.map(cat => {
               const g = priceData[cat]
               const isExpanded = expandedCat === cat
+              const tierRange = (key) => {
+                const values = g.products.map(p => Number(p?.[key])).filter(Number.isFinite)
+                if (!values.length) return null
+                return { min: Math.min(...values), max: Math.max(...values) }
+              }
               return [
                 <tr
                   key={cat}
@@ -3566,28 +3500,33 @@ function TierPricingPanel() {
                   <td className="px-3 py-2.5 text-right font-mono text-xs text-slate-700">
                     €{g.min.toFixed(2)}{g.min !== g.max ? ` – €${g.max.toFixed(2)}` : ''}
                   </td>
-                  {TIER_PRICING_DATA.filter(t => t.key !== 'b2b').map(t => (
-                    <td key={t.key} className="px-3 py-2.5 text-right font-mono text-xs text-slate-700">
-                      €{(g.min * t.multiplier).toFixed(2)}{g.min !== g.max ? ` – €${(g.max * t.multiplier).toFixed(2)}` : ''}
-                    </td>
-                  ))}
+                  {TIER_COLUMNS.map(t => {
+                    const range = tierRange(t.key)
+                    return (
+                      <td key={t.key} className="px-3 py-2.5 text-right font-mono text-xs text-slate-700">
+                        {range ? `€${range.min.toFixed(2)}${range.min !== range.max ? ` – €${range.max.toFixed(2)}` : ''}` : '—'}
+                      </td>
+                    )
+                  })}
                 </tr>,
                 // Expanded: individual products
-                ...(isExpanded ? g.products
+                ...(isExpanded ? [...g.products]
                   .sort((a, b) => a.b2bPrice - b.b2bPrice)
-                  .map((p, i) => {
-                    const override = findTierOverride(p.name)
-                    return (
-                      <tr key={`${cat}-${i}`} className="bg-slate-50/60">
-                        <td className="pl-8 pr-3 py-1.5 text-[11px] text-slate-600 truncate max-w-[200px]" title={p.name}>{p.name}</td>
-                        <td className="px-3 py-1.5" />
-                        <td className="px-3 py-1.5 text-right font-mono text-[11px] text-slate-600">€{p.b2bPrice.toFixed(2)}</td>
-                        {TIER_PRICING_DATA.filter(t => t.key !== 'b2b').map(t => (
-                          <td key={t.key} className="px-3 py-1.5 text-right font-mono text-[11px] text-slate-500">€{(override ? override[t.key] : p.b2bPrice * t.multiplier).toFixed(2)}</td>
-                        ))}
-                      </tr>
-                    )
-                  }) : []),
+                  .map((p, i) => (
+                    <tr key={`${cat}-${i}`} className="bg-slate-50/60">
+                      <td className="pl-8 pr-3 py-1.5 text-[11px] text-slate-600 truncate max-w-[200px]" title={p.product}>{p.product}</td>
+                      <td className="px-3 py-1.5" />
+                      <td className="px-3 py-1.5 text-right font-mono text-[11px] text-slate-600">€{Number(p.b2bPrice).toFixed(2)}</td>
+                      {TIER_COLUMNS.map(t => {
+                        const value = Number(p?.[t.key])
+                        return (
+                          <td key={t.key} className="px-3 py-1.5 text-right font-mono text-[11px] text-slate-500">
+                            {Number.isFinite(value) ? `€${value.toFixed(2)}` : '—'}
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  )) : []),
               ]
             })}
           </tbody>
@@ -3596,7 +3535,7 @@ function TierPricingPanel() {
       <p className="mt-3 text-[11px] text-slate-400">Click a category row to expand individual product pricing. Level 2 Country Tier is admin-assigned only.</p>
       <div className="mt-4 flex gap-2">
         <button
-          onClick={() => downloadCSV(priceData, sortedCategories)}
+          onClick={() => downloadCSV(sortedCategories, priceData)}
           className="rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition"
         >
           ↓ Download CSV
@@ -3606,19 +3545,20 @@ function TierPricingPanel() {
   )
 }
 
-function downloadCSV(priceData, sortedCategories) {
-  const tiers = TIER_PRICING_DATA.filter(t => t.key !== 'b2b')
-  const headers = ['Category', 'Product', 'B2B Price (€)', ...tiers.map(t => `${t.label} (€)`)]
+function downloadCSV(sortedCategories, priceData) {
+  const headers = ['Category', 'Product', 'B2B Price (€)', ...TIER_COLUMNS.map(t => `${t.label} (€)`)]
   const rows = [headers.join(',')]
 
   for (const cat of sortedCategories) {
     const g = priceData[cat]
     const sorted = [...g.products].sort((a, b) => a.b2bPrice - b.b2bPrice)
     for (const p of sorted) {
-      const escapeName = `"${p.name.replace(/"/g, '""')}"`
-      const override = findTierOverride(p.name)
-      const tierPrices = tiers.map(t => (override ? override[t.key] : p.b2bPrice * t.multiplier).toFixed(2))
-      rows.push([`"${cat}"`, escapeName, p.b2bPrice.toFixed(2), ...tierPrices].join(','))
+      const escapeName = `"${String(p.product).replace(/"/g, '""')}"`
+      const tierPrices = TIER_COLUMNS.map(t => {
+        const value = Number(p?.[t.key])
+        return Number.isFinite(value) ? value.toFixed(2) : ''
+      })
+      rows.push([`"${cat}"`, escapeName, Number(p.b2bPrice).toFixed(2), ...tierPrices].join(','))
     }
   }
 
