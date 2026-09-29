@@ -7001,7 +7001,18 @@ const deleteApplication = async (row) => {
                 </button>
 
                 {isOpen && (
-                <div className="border-t border-slate-200 p-4">
+                <div className="flex flex-col border-t border-slate-200 p-4">
+                {isApproved && (
+                  <button
+                    type="button"
+                    onClick={() => toggleSection(row.id, 'moreDetails')}
+                    className="order-2 mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                  >
+                    {isSectionOpen(row.id, 'moreDetails', false) ? '▲ Hide contact info, history & notes' : '▼ Show contact info, history & notes'}
+                  </button>
+                )}
+                {(!isApproved || isSectionOpen(row.id, 'moreDetails', false)) && (
+                <div className={isApproved ? 'order-2' : undefined}>
                 <div className="space-y-4">
                   <div className="min-w-0">
                     <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-600">
@@ -7294,8 +7305,10 @@ const deleteApplication = async (row) => {
                     )}
                   </div>
                 )}
+                </div>
+                )}
                 {isApproved && (
-                  <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50/60 p-3">
+                  <div className="order-1 mt-3 rounded-lg border border-emerald-200 bg-emerald-50/60 p-3">
                     <button
                       type="button"
                       onClick={() => toggleSection(row.id, 'shipment')}
@@ -7604,7 +7617,14 @@ const deleteApplication = async (row) => {
                           })()}
                         </div>
                       )}
-                      {(() => {
+                      <button
+                        type="button"
+                        onClick={() => toggleSection(row.id, 'emailPreview')}
+                        className="text-left text-[11px] font-semibold text-sky-700 hover:underline"
+                      >
+                        {isSectionOpen(row.id, 'emailPreview', false) ? 'Hide email preview ▲' : (isShipmentLocked ? 'Show sent email ▼' : 'Preview shipment email ▼')}
+                      </button>
+                      {isSectionOpen(row.id, 'emailPreview', false) && (() => {
                         const previewDraft = {
                           tracking_number: shipVal(row, 'tracking_number'),
                           tracking_url: shipVal(row, 'tracking_url'),
@@ -7623,6 +7643,14 @@ const deleteApplication = async (row) => {
                       })()}
 
                       {/* Internal notes log (private, not emailed) */}
+                      <button
+                        type="button"
+                        onClick={() => toggleSection(row.id, 'shipmentNotes')}
+                        className="text-left text-[11px] font-semibold text-slate-500 hover:underline"
+                      >
+                        {isSectionOpen(row.id, 'shipmentNotes', false) ? 'Hide internal notes ▲' : `Internal notes (private)${noteEntries(row).length ? ` · ${noteEntries(row).length}` : ''} ▼`}
+                      </button>
+                      {isSectionOpen(row.id, 'shipmentNotes', false) && (
                       <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50 p-2">
                         <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">Internal notes (private)</p>
                         {noteEntries(row).length > 0 && (
@@ -7663,6 +7691,7 @@ const deleteApplication = async (row) => {
                           <button onClick={() => addNote(row)} disabled={saving === row.id || !(noteDraft[row.id] || '').trim()} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Add note</button>
                         </div>
                       </div>
+                      )}
                         </div>
                       )}
                     </div>
