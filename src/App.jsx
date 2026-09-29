@@ -2411,12 +2411,31 @@ class PortalModuleErrorBoundary extends Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('[PortalModuleErrorBoundary]', error, errorInfo)
+
+    // Fire-and-forget: alert admin (email + GitHub issue) so recurring portal
+    // crashes are visible instead of only surfacing as distributor complaints.
+    const email = String(this.props.distributorEmail || '').trim().toLowerCase()
+    if (email) {
+      fetch('/.netlify/functions/notify-admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          issueType: 'unexpected_error',
+          message: `${this.props.moduleLabel || 'Portal section'} crashed: ${error instanceof Error ? error.message : String(error)}`,
+        }),
+      }).catch(() => {})
+    }
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.resetKey !== this.props.resetKey && this.state.hasError) {
       this.setState({ hasError: false, errorMessage: '' })
     }
+  }
+
+  handleRetry = () => {
+    this.setState({ hasError: false, errorMessage: '' })
   }
 
   render() {
@@ -2428,6 +2447,13 @@ class PortalModuleErrorBoundary extends Component {
           {this.state.errorMessage && (
             <p className="mt-2 text-xs text-rose-600">Error: {this.state.errorMessage}</p>
           )}
+          <button
+            type="button"
+            onClick={this.handleRetry}
+            className="mt-3 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700"
+          >
+            Try Again
+          </button>
         </section>
       )
     }
@@ -19256,6 +19282,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
         <PortalModuleErrorBoundary
           resetKey={activeModule}
           moduleLabel={modules.find((module) => module.key === activeModule)?.label || 'Portal section'}
+          distributorEmail={portalUser?.email || ''}
         >
           {activeModule === 'products' || activeModule === 'catalog' || activeModule === 'profile' ? (
             <ProductsModule moduleView={activeModule} tier={effectiveTier} pricesAllocated={effectivePricesAllocated} />
