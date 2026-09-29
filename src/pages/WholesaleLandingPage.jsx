@@ -2,11 +2,11 @@ import { NavLink } from 'react-router-dom'
 import { useEffect } from 'react'
 
 const BENEFITS = [
-  { icon: '💰', title: 'Trade Pricing', detail: 'B2B wholesale rates from day one — no minimum order quantity required.' },
+  { icon: '💰', title: 'Trade Pricing', detail: 'B2B wholesale rates for distributors, salons and academies.' },
   { icon: '📦', title: '1,000+ Products', detail: 'Full range of gel polish, builder gels, base coats, top coats and nail art supplies.' },
-  { icon: '🚚', title: 'Free EU Shipping', detail: 'Free shipping on all wholesale orders across the EU.' },
+  { icon: '🌍', title: '15+ Countries', detail: 'A distributor network across Europe and worldwide, shipped from the EU.' },
   { icon: '🧪', title: 'HEMA-Free & EU Certified', detail: 'EC 1223/2009 compliant. Safer for your clients and your technicians.' },
-  { icon: '🐇', title: 'Approved by Cruelty Free International', detail: 'Cruelty-free certified. A brand your clients can feel good about.' },
+  { icon: '🐇', title: 'Approved by Cruelty Free International', detail: 'A cruelty-free brand your clients can feel good about.' },
   { icon: '💬', title: 'Dedicated Support', detail: 'WhatsApp & Viber support from a team that knows the industry.' },
 ]
 
@@ -18,16 +18,57 @@ const WHO_ITS_FOR = [
 ]
 
 const STEPS = [
-  { num: '1', title: 'Register free', detail: 'Fill in your details — takes under 2 minutes. No approval process, no waiting.' },
-  { num: '2', title: 'Access B2B pricing', detail: 'Instant access to wholesale pricing across the full 1,000+ product catalogue.' },
-  { num: '3', title: 'Place your first order', detail: 'Order online, pay by invoice or card. We ship across the EU and worldwide.' },
+  { num: '1', title: 'Apply', detail: 'Tell us about your business — it takes under 2 minutes.' },
+  { num: '2', title: 'We review your application', detail: 'Our team contacts you with trade pricing and the right package for your market.' },
+  { num: '3', title: 'Place your first order', detail: 'Order through your B2B account. We ship across the EU and worldwide.' },
 ]
+
+const FAQS = [
+  {
+    q: 'Who can buy wholesale from GEL.IT.UP?',
+    a: 'We supply distributors, wholesalers, nail salons, nail academies and professional nail technicians. Apply for a wholesale account and our team will contact you with trade pricing.',
+  },
+  {
+    q: 'How do I become a GEL.IT.UP distributor?',
+    a: 'Apply through our distributor application form. We review every application and match you with the right distributor package for your market.',
+  },
+  {
+    q: 'Is GEL.IT.UP gel polish HEMA-free and TPO-free?',
+    a: 'Yes. Our gel polishes, builder gels, base coats and top coats are HEMA-free and TPO-free, formulated for professionals who want safer chemistry without compromising performance.',
+  },
+  {
+    q: 'Is GEL.IT.UP cruelty-free?',
+    a: 'Yes. GEL.IT.UP is Approved by Cruelty Free International.',
+  },
+  {
+    q: 'Are GEL.IT.UP products EU compliant?',
+    a: 'Yes. All products are made in the EU in compliance with EU Cosmetics Regulation EC 1223/2009, and compliance documentation is available for distributors.',
+  },
+  {
+    q: 'Which countries do you supply?',
+    a: 'We supply professionals in 15+ countries. In Italy and Bulgaria, GEL.IT.UP is available through our official distributors at gelitup.it and gelitup.bg.',
+  },
+  {
+    q: 'Can I buy GEL.IT.UP products for personal use?',
+    a: 'Yes. Individual orders are available from our online shop at shop.gelitup.com.',
+  },
+]
+
+const FAQ_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQS.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+}
 
 export default function WholesaleLandingPage() {
   useEffect(() => {
-    document.title = 'Nail Supplies Wholesale | GEL.IT.UP by GIUP®'
+    document.title = 'Nail Supplies Wholesale | Wholesale Gel Polish | GEL.IT.UP by GIUP®'
     const meta = document.querySelector('meta[name="description"]')
-    if (meta) meta.setAttribute('content', 'Wholesale nail technician supplies from GEL.IT.UP. Gel polish, builder gel, base & top coats. HEMA-free, EU certified. Open a free B2B account and access trade pricing instantly.')
+    if (meta) meta.setAttribute('content', 'Nail supplies wholesale: 1,000+ gel polish shades, builder gels, base and top coats. HEMA-free, TPO-free, made in the EU. For distributors, salons and academies.')
   }, [])
 
   return (
@@ -57,7 +98,7 @@ export default function WholesaleLandingPage() {
         </h1>
         <p className="mt-5 mx-auto max-w-2xl text-base sm:text-lg" style={{ color: 'rgba(255,255,255,0.72)' }}>
           Trade pricing on 1,000+ gel polish shades, builder gels, base coats and more.
-          HEMA-free, EU certified, cruelty-free. Open your free B2B account today.
+          HEMA-free, TPO-free, EU certified, cruelty-free. Apply for your wholesale account today.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
           <NavLink
@@ -65,7 +106,7 @@ export default function WholesaleLandingPage() {
             className="rounded-xl px-8 py-4 text-base font-bold text-white transition hover:opacity-90"
             style={{ backgroundColor: '#D43790' }}
           >
-            Open Free Wholesale Account
+            Apply for a Wholesale Account
           </NavLink>
           <NavLink
             to="/full-catalogue"
@@ -76,7 +117,7 @@ export default function WholesaleLandingPage() {
           </NavLink>
         </div>
         <p className="mt-4 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          No minimum order · Instant access · Free EU shipping
+          HEMA-free · TPO-free · Approved by Cruelty Free International
         </p>
       </section>
 
@@ -142,13 +183,31 @@ export default function WholesaleLandingPage() {
         </div>
       </section>
 
+      {/* FAQ */}
+      <section className="px-5 py-14 sm:py-20" style={{ backgroundColor: '#fff', borderTop: '1px solid #e5e7eb' }}>
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-black text-center mb-10" style={{ color: '#1a1a1a' }}>
+            Wholesale FAQs
+          </h2>
+          <div className="flex flex-col gap-3">
+            {FAQS.map((f) => (
+              <details key={f.q} className="rounded-xl p-4" style={{ backgroundColor: '#f8f7f5', border: '1px solid #e5e7eb' }}>
+                <summary className="cursor-pointer text-sm font-bold" style={{ color: '#1a1a1a' }}>{f.q}</summary>
+                <p className="mt-2 text-sm leading-relaxed" style={{ color: '#6b7280' }}>{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA) }} />
+      </section>
+
       {/* Bottom CTA */}
       <section className="px-5 py-16 text-center" style={{ backgroundColor: '#1a1a1a' }}>
         <h2 className="text-2xl sm:text-3xl font-black text-white mb-2">
           Ready to open your wholesale account?
         </h2>
         <p className="text-sm mb-8" style={{ color: 'rgba(255,255,255,0.65)' }}>
-          Free registration. Instant access to trade pricing. No waiting, no approval process.
+          Apply in under 2 minutes — our team will be in touch with trade pricing.
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-3">
           <NavLink
@@ -156,7 +215,7 @@ export default function WholesaleLandingPage() {
             className="rounded-xl px-10 py-4 text-base font-bold text-white transition hover:opacity-90"
             style={{ backgroundColor: '#D43790' }}
           >
-            Open Free Wholesale Account
+            Apply for a Wholesale Account
           </NavLink>
           <NavLink
             to="/full-catalogue"

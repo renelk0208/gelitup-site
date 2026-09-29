@@ -16,8 +16,8 @@ export default function SchemaOrg({ type = 'organization', product = null }) {
       sameAs: [
         'https://www.instagram.com/gelitupinternational/',
         'https://www.tiktok.com/@gelitupinternational',
-        'https://gr.linkedin.com/company/gel-it-up-by-giup',
-        'https://www.facebook.com/GEL.IT.UP.Greece/',
+        'https://www.linkedin.com/company/gel-it-up-by-giup',
+        'https://www.facebook.com/gelitupinternational/',
         'https://www.youtube.com/@GELITUP',
       ],
     }

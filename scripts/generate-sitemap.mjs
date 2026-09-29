@@ -22,6 +22,7 @@ const ROUTES = [
   { path: '/contact',                    priority: '0.6', changefreq: 'monthly' },
 
   // Distribution
+  { path: '/wholesale',                  priority: '0.9', changefreq: 'monthly' },
   { path: '/distributor-packages',       priority: '0.8', changefreq: 'monthly' },
   { path: '/distributors',              priority: '0.7', changefreq: 'monthly' },
   { path: '/become-distributor',         priority: '0.8', changefreq: 'monthly' },

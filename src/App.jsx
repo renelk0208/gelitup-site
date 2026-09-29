@@ -7972,16 +7972,16 @@ function HomePage({ onOpenContactModal }) {
       a: 'Yes. All products are manufactured in compliance with EU Cosmetics Regulation EC 1223/2009 and produced under global GMP standards.',
     },
     {
-      q: 'How do I place a wholesale order?',
-      a: 'Visit the B2B portal at shop.gelitup.com. Access is instant: create your professional account and order immediately. There is no minimum order requirement.',
+      q: 'How do I open a wholesale account?',
+      a: 'Apply through our wholesale and distributor application at gelitup.com. Our team reviews every application and contacts you with trade pricing and the right package for your market.',
     },
     {
-      q: 'Is there a minimum order quantity?',
-      a: 'No. GEL.IT.UP® has no minimum order. You can order a single product or a full range at trade pricing with no thresholds.',
+      q: 'Can I buy GEL.IT.UP® for personal use?',
+      a: 'Yes. Individual orders are available from our online shop at shop.gelitup.com.',
     },
     {
-      q: 'Do you ship across the EU?',
-      a: 'Yes. EU shipping is free on qualifying orders. We distribute to over 15 countries through a selected distributor network and via direct wholesale.',
+      q: 'Which countries do you supply?',
+      a: 'We supply professionals in over 15 countries through our distributor network and direct wholesale accounts. In Italy and Bulgaria, GEL.IT.UP® is available through our official distributors at gelitup.it and gelitup.bg.',
     },
     {
       q: 'How long does GEL.IT.UP® gel polish take to cure?',
@@ -8340,7 +8340,7 @@ function HomePage({ onOpenContactModal }) {
             a cleaner chemistry approach, while GEL.IT.UP® is approved by Cruelty Free International for cruelty-free nail supplies.
           </p>
           <p>
-            Trade access is instant, with no minimum order for professional gel polish wholesale accounts. We support salons with
+            Wholesale accounts are open to distributors, salons, academies and nail professionals. We support salons with
             colour-led collections, academies with training-ready systems, and distributors with a scalable B2B range and direct
             support through WhatsApp and Viber.
           </p>
@@ -8475,6 +8475,20 @@ function HomePage({ onOpenContactModal }) {
             </details>
           ))}
         </div>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: HOME_FAQS.map((item) => ({
+                '@type': 'Question',
+                name: item.q,
+                acceptedAnswer: { '@type': 'Answer', text: item.a },
+              })),
+            }),
+          }}
+        />
       </div>
 
       <HowItWorks variant="section" freeShippingAt={getFreeShippingEur()} />

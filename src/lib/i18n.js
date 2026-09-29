@@ -109,7 +109,7 @@ export const it = {
     clean_label: 'SCIENZA PULITA',
     clean_body: 'La nostra politica clean-science applica standard di formulazione HEMA-free e TPO-free su tutte le linee di produzione attuali, dando priorità alla sicurezza professionale.',
     cruelty_label: 'CRUELTY-FREE',
-    cruelty_body: 'Etica senza compromessi. Siamo 100% approvati dal Leaping Bunny — il gold standard globale per i cosmetici cruelty-free.',
+    cruelty_body: 'Etica senza compromessi. GEL.IT.UP by GIUP® è approvato da Cruelty Free International — il riferimento globale per i cosmetici cruelty-free.',
     tagline: 'SCEGLIENDO GEL.IT.UP by GIUP®, HAI LA TOTALE TRANQUILLITÀ NORMATIVA.',
   },
 
