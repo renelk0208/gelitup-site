@@ -5,6 +5,14 @@ import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
 import tierPricingOverrides from '../data/tierPricingOverrides.json'
 import ambassadorLetterAttachmentUrl from '../lib/ambassadorletter/Gelitup Ambassador Letter.pdf?url'
 import { buildAmbassadorContractPdf, buildAmbassadorPackingListPdf, buildAmbassadorWelcomeLetterPdf } from '../lib/ambassadorContractPdf.js'
+import {
+  normalizeAdminSkuToken,
+  normalizeAdminNameToken,
+  extractOrderItemSkuToken,
+  buildNameAliasKeys,
+  buildTierPricingLookup,
+  buildItemCandidateKeys,
+} from '../lib/tierPricingResolver.js'
 
 const REGISTRATIONS_TABLE = import.meta.env.VITE_B2B_REGISTRATIONS_TABLE || 'b2b_registrations'
 const ORDERS_TABLE = import.meta.env.VITE_B2B_ORDERS_TABLE || 'b2b_orders'
@@ -1180,47 +1188,7 @@ function formatOrderStatusLabel(status) {
   return normalized.replace(/_/g, ' ')
 }
 
-function normalizeAdminSkuToken(value) {
-  return String(value || '').trim().toUpperCase().replace(/\s+/g, ' ')
-}
 
-function normalizeAdminNameToken(value) {
-  return normalizeAdminSkuToken(value)
-    .replace(/GEL\.?IT\.?UP|GEL\s*IT\s*UP|GIUP/gi, ' ')
-    .replace(/[^A-Z0-9]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
-function buildBrushOnBuilderBiabAlias(value) {
-  const normalized = normalizeAdminNameToken(value)
-    .replace(/\b15ML\b/g, ' ')
-    .replace(/\bHTF\b/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-
-  const match = normalized.match(/^BRUSH ON BUILDER GEL (.+)$/)
-  if (!match) return ''
-
-  return `BRUSH ON BUILDER BIAB ${match[1].trim()}`
-}
-
-function extractOrderItemSkuToken(value = '') {
-  const text = String(value || '').trim()
-  if (!text) return ''
-  const normalized = normalizeAdminSkuToken(text)
-
-  const giupMatch = normalized.match(/\bGIUP[-\s]*[A-Z0-9]+(?:[-\s]*[A-Z0-9]+)*\b/)
-  if (giupMatch) return normalizeAdminSkuToken(giupMatch[0].replace(/-/g, ' '))
-
-  const seriesMatch = normalized.match(/\b([A-Z]{2,6})\s*(\d{1,4}[A-Z]?)\b/)
-  if (seriesMatch) return `${seriesMatch[1]} ${seriesMatch[2]}`
-
-  const numericMatch = normalized.match(/^\d{1,4}[A-Z]?$/)
-  if (numericMatch) return numericMatch[0]
-
-  return ''
-}
 
 function parseOrderItemEntry(rawItem, index = 0) {
   if (rawItem && typeof rawItem === 'object') {
@@ -1396,111 +1364,6 @@ const SKU_OVERRIDE_MAP = {
 }
 // ────────────────────────────────────────────────────────────────────────────────────────────
 
-// Strips measurement units, variant suffixes and filler descriptor words from a price-list
-// product name to produce a shorter "content key" that can match loosely-stored order item
-// names (e.g. "Sugary Glitter pigment 3gr 01 -HTF" → "SUGARY GLITTER 01").
-function simplifyProductNameForIndex(name) {
-  const upper = normalizeAdminSkuToken(name)
-  return upper
-    .replace(/\s*-?\s*(HTF|HTE|HEMA[- ]FREE|NEW|-2025|2025)\s*$/i, '') // strip variant suffix
-    .replace(/\b\d+\s*(ML|GR|G|MG|KG|L|S)\b/g, '')                     // strip measurements (100ml, 30gr, 1000s)
-    .replace(/\b(BRUSH|SPATULA|PIGMENT|SYNTHOGEL|SYNTHOLIQUID|AND|OF|COLOR|COLOUR)\b/g, '') // strip filler words
-    .replace(/-/g, ' ')       // normalize dashes (9-11 → 9 11)
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
-// Generates every alias key a product NAME can be looked up under — short SKU
-// codes, GIUP-prefixed codes, embedded series tokens (e.g. "MC5", "SH07"),
-// simplified/loose names, etc. Shared by the B2B price-list lookup map and the
-// tier pricing sheet lookup map so both resolve order items stored as bare
-// codes (e.g. "giup-01", "mc5") the same way.
-function buildNameAliasKeys(name) {
-  const keys = new Set()
-  const addKey = (k) => { if (k) keys.add(k) }
-
-  addKey(normalizeAdminSkuToken(name))
-  addKey(normalizeAdminNameToken(name))
-
-  const bobBiabAlias = buildBrushOnBuilderBiabAlias(name)
-  if (bobBiabAlias) {
-    addKey(bobBiabAlias)
-    addKey(`${bobBiabAlias} 1`)
-  }
-
-  const numberPrefix = String(name || '').trim().match(/^(\d+[A-Z]?)\s/)
-  if (numberPrefix) {
-    const n = numberPrefix[1]
-    addKey(normalizeAdminSkuToken(n))
-    addKey(normalizeAdminSkuToken(n.replace(/^0+(\d)/, '$1')))
-    addKey(normalizeAdminSkuToken(n.padStart(2, '0')))
-    addKey(normalizeAdminSkuToken(`GIUP ${n}`))
-    addKey(normalizeAdminSkuToken(`GIUP ${n.replace(/^0+(\d)/, '$1')}`))
-    addKey(normalizeAdminSkuToken(`GIUP ${n.padStart(2, '0')}`))
-  }
-
-  // Index embedded alphanumeric series tokens so GIUP-prefixed order SKUs
-  // like "GIUP C01" or "GIUP ODA01" resolve from names containing #C01/#ODA01.
-  const embeddedSeriesMatches = [...normalizeAdminSkuToken(name).matchAll(/\b([A-Z]{1,5})(\d{1,4}[A-Z]?)\b/g)]
-  for (const match of embeddedSeriesMatches) {
-    const series = match[1]
-    const num = match[2]
-    const compact = `${series}${num}`
-    const spaced = `${series} ${num}`
-    addKey(normalizeAdminSkuToken(compact))
-    addKey(normalizeAdminSkuToken(spaced))
-    addKey(normalizeAdminSkuToken(`GIUP ${compact}`))
-    addKey(normalizeAdminSkuToken(`GIUP ${spaced}`))
-  }
-
-  // Also index by the extracted short SKU token from the full product name.
-  // This allows order items stored as "SH07" or "STF 01" to match price list
-  // entries like "Shimmer Collection #SH07 -HTF" or "Shimmer Top Fairy #STF 01 -HTF".
-  const shortToken = extractOrderItemSkuToken(name)
-  if (shortToken) {
-    addKey(shortToken)
-    // Also add compact (no-space) variant so "SH07" and "SH 07" both hit the same entry
-    const compact = normalizeAdminSkuToken(shortToken.replace(/\s+/g, ''))
-    if (compact !== shortToken) addKey(compact)
-  }
-
-  // Also index by "WORD NUMBER" prefix for products like "Polygel 2 Brush and Spatula..."
-  // so that order items stored as "POLYGEL 2" can find the price.
-  const wordNumPrefix = normalizeAdminSkuToken(name).match(/^([A-Z][A-Z0-9]{1,})\s+(\d{1,4})\b/)
-  if (wordNumPrefix) {
-    addKey(`${wordNumPrefix[1]} ${wordNumPrefix[2]}`)
-  }
-
-  // ── Simplified-name indexing for loose-name matching ───────────────────────────────
-  const simplified = simplifyProductNameForIndex(name)
-  if (simplified && simplified !== normalizeAdminSkuToken(name)) {
-    addKey(simplified)
-
-    // For names starting with a single-letter + 3-4 digit code (e.g. "N008 If The Shoe...")
-    // also index under just that short code so "GIUP N008" → strip GIUP → "N008" hits it.
-    const nSeriesMatch = simplified.match(/^([A-Z]\d{3,4})\b/)
-    if (nSeriesMatch) addKey(nSeriesMatch[1])
-
-    // For names with a leading product code (SP8001, TR01, CM12 etc.) also add the name
-    // without the code so "SP8001 Mirror Clear Powder" → "MIRROR CLEAR" is findable.
-    const withoutLeadingCode = simplified.replace(/^[A-Z]{1,4}\d{3,5}\s*/, '').trim()
-    if (withoutLeadingCode && withoutLeadingCode !== simplified) addKey(withoutLeadingCode)
-  }
-
-  // ── Cuticle oil word-reorder ─────────────────────────────────────────────────────────
-  // Price list: "Cooling Coconut Cuticle Oil 100ml" → stored as "cuticle oil coconut".
-  // Extract the flavor noun and index as "CUTICLE OIL [FLAVOR]".
-  if (simplified && simplified.includes('CUTICLE') && simplified.includes('OIL')) {
-    const flavorWord = simplified
-      .replace(/\bCUTICLE\b/g, '').replace(/\bOIL\b/g, '')
-      .replace(/\b(COOLING|CHILLED|PERKY|SATIN|WHITE|RICH)\b/g, '')
-      .replace(/\s+/g, ' ').trim()
-    if (flavorWord) addKey(`CUTICLE OIL ${flavorWord}`)
-  }
-
-  return [...keys]
-}
-
 function buildOrderPriceLookupMap(items = []) {
   const map = new Map()
   const setIfMissing = (key, entry) => {
@@ -1539,39 +1402,12 @@ function buildOrderPriceLookupMap(items = []) {
   return map
 }
 
-// Same alias-resolution technique as buildOrderPriceLookupMap, but built from
-// the tier pricing spreadsheet so order items stored as bare SKU codes (e.g.
-// "giup-01", "mc5", "GIUP N008") resolve directly to their sheet entry —
-// carrying all four tier prices (authority/professional/sales/country) plus
-// b2bPrice — rather than falling back to the B2B price list.
-function buildTierPricingLookup(entries = []) {
-  const map = new Map()
-  const setIfMissing = (key, entry) => {
-    if (!key || map.has(key)) return
-    map.set(key, entry)
-  }
-
-  for (const entry of entries) {
-    const product = entry?.product
-    if (!product) continue
-    for (const key of buildNameAliasKeys(product)) {
-      setIfMissing(key, entry)
-    }
-  }
-
-  for (const { codes, target } of PRODUCT_ALIAS_GROUPS) {
-    const targetEntry = map.get(normalizeAdminSkuToken(target)) ||
-                         map.get(normalizeAdminNameToken(target))
-    if (!targetEntry) continue
-    for (const c of codes) {
-      setIfMissing(normalizeAdminSkuToken(c), targetEntry)
-    }
-  }
-
-  return map
-}
-
-const TIER_PRICING_LOOKUP = buildTierPricingLookup(Array.isArray(tierPricingOverrides) ? tierPricingOverrides : [])
+// Tier pricing lookup — built once from the tier pricing spreadsheet so order
+// items stored under any alias (full name, bare SKU code like "giup-01"/"mc5",
+// or loose internal codes like "multimix_blue_glitter_color") resolve directly
+// to their sheet entry, carrying all four tier prices
+// (authority/professional/sales/country) plus b2bPrice.
+const TIER_PRICING_LOOKUP = buildTierPricingLookup(Array.isArray(tierPricingOverrides) ? tierPricingOverrides : [], PRODUCT_ALIAS_GROUPS)
 
 const ADMIN_TIER_PRICE_MULTIPLIERS = {
   authority: 1,
@@ -1626,9 +1462,8 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0, 
 
   const sku = normalizeAdminSkuToken(item?.sku)
   const name = String(item?.name || '').trim()
-  const nameNorm = normalizeAdminSkuToken(name)
-  const extractedSkuFromName = extractOrderItemSkuToken(name)
   const extractedSkuFromSku = extractOrderItemSkuToken(sku)
+  const extractedSkuFromName = extractOrderItemSkuToken(name)
   const skuWithoutCampaignPrefix = sku.replace(/^\d{4}[-\s]*NEW[-\s]*/i, '').trim()
   const resolvedTierKey = String(tierKey || '').trim().toLowerCase() || 'b2b'
 
@@ -1636,21 +1471,30 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0, 
     return { unitPrice: null, resolvedName: `${name} (image — not a product)`, resolvedSku: null, isImageAsset: true }
   }
 
-  const directTierProduct = TIER_PRICING_LOOKUP.get(nameNorm)
-    || TIER_PRICING_LOOKUP.get(sku)
-    || TIER_PRICING_LOOKUP.get(normalizeAdminSkuToken(extractedSkuFromName))
-    || TIER_PRICING_LOOKUP.get(normalizeAdminSkuToken(skuWithoutCampaignPrefix))
-  if (directTierProduct) {
-    const directValue = Number(directTierProduct?.[resolvedTierKey] ?? directTierProduct?.b2bPrice)
-    const finalPrice = Number.isFinite(directValue) ? directValue : null
-    return {
-      unitPrice: finalPrice != null ? Math.round(finalPrice * 100) / 100 : null,
-      resolvedName: directTierProduct.product || null,
-      resolvedSku: normalizeAdminSkuToken(sku || directTierProduct.product || ''),
+  // Unified candidate key list — every form an order item's stored name/sku
+  // might take (raw name, raw sku, GIUP-prefixed codes, embedded series
+  // tokens, underscore/loose "internal codes" like "multimix_blue_glitter_color",
+  // simplified/loose names, digit-stripped variants, etc). Tried against the
+  // tier pricing sheet FIRST, then SKU overrides, then the plain B2B price
+  // list — so any key that used to only match the B2B list now matches the
+  // tier sheet too. Shared with the audit script (scripts/audit-tier-pricing-coverage.mjs)
+  // so both use the exact same resolution logic.
+  const uniqueCandidates = buildItemCandidateKeys(item)
+
+  for (const key of uniqueCandidates) {
+    const directTierProduct = TIER_PRICING_LOOKUP.get(key)
+    if (directTierProduct) {
+      const directValue = Number(directTierProduct?.[resolvedTierKey] ?? directTierProduct?.b2bPrice)
+      const finalPrice = Number.isFinite(directValue) ? directValue : null
+      return {
+        unitPrice: finalPrice != null ? Math.round(finalPrice * 100) / 100 : null,
+        resolvedName: directTierProduct.product || null,
+        resolvedSku: normalizeAdminSkuToken(sku || directTierProduct.product || ''),
+      }
     }
   }
 
-  for (const key of [sku, nameNorm, extractedSkuFromSku, extractedSkuFromName, skuWithoutCampaignPrefix]) {
+  for (const key of [sku, normalizeAdminSkuToken(name), extractedSkuFromSku, extractedSkuFromName, skuWithoutCampaignPrefix]) {
     if (!key) continue
     const override = SKU_OVERRIDE_MAP[key]
     if (override) {
@@ -1674,45 +1518,7 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0, 
     return { unitPrice: null, resolvedName: null, resolvedSku: null }
   }
 
-  const candidates = [
-    sku,
-    nameNorm,
-    extractedSkuFromSku,
-    extractedSkuFromName,
-    skuWithoutCampaignPrefix,
-    normalizeAdminNameToken(name),
-    // Some stored colour-series SKUs are saved as "GIUP-COL-01"; strip the
-    // series label so they can fall through to the numeric shade key ("01").
-    sku.replace(/^GIUP[\s-]*(?:COL(?:OR|OUR)?)[\s-]*/i, '').trim(),
-    // Strip GIUP prefix from SKU: "GIUP 01" → "01", "GIUP N008" → "N008", "GIUP 8E" → "8E"
-    sku.replace(/^GIUP\s*/i, '').trim(),
-    nameNorm.replace(/^GIUP[\s-]*(?:COL(?:OR|OUR)?)[\s-]*/i, '').trim(),
-    // Simplified version of name: strips measurements, filler words, normalizes dashes
-    simplifyProductNameForIndex(name),
-    // Strip 3–5 digit shade numbers from name: "LINE IT UP 0002 WHITE" → "LINE IT UP WHITE"
-    nameNorm.replace(/\b\d{3,5}\b/g, '').replace(/\s+/g, ' ').trim(),
-    // Strip duplicate suffixes from display names: "... SKY SPRINKLE (1)" → "... SKY SPRINKLE"
-    nameNorm.replace(/\s+\d+$/, '').trim(),
-  ].filter(Boolean)
-
-  // Deduplicate while preserving order
-  const seen = new Set()
-  const uniqueCandidates = candidates.filter(c => { if (seen.has(c)) return false; seen.add(c); return true })
-
   for (const key of uniqueCandidates) {
-    const hit = priceLookupMap.get(key)
-    if (hit?.unitPrice != null) {
-      return {
-        unitPrice: Math.round(hit.unitPrice * tierMultiplier * 100) / 100,
-        resolvedName: hit.name || null,
-        resolvedSku: hit.sku || null,
-      }
-    }
-  }
-
-  const compactSkuMatch = sku.match(/^([A-Z]{2,6})\s*(\d{1,4}[A-Z]?)$/)
-  if (compactSkuMatch) {
-    const key = `${compactSkuMatch[1]} ${compactSkuMatch[2]}`
     const hit = priceLookupMap.get(key)
     if (hit?.unitPrice != null) {
       return {
