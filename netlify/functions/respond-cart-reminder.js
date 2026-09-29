@@ -5,6 +5,8 @@ const SITE_ORIGIN = process.env.SITE_ORIGIN || 'https://gelitup.com'
 const SUPABASE_URL = process.env.SUPABASE_URL || ''
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE || ''
 const CART_REMINDER_ACTION_SECRET = process.env.CART_REMINDER_ACTION_SECRET || SUPABASE_SERVICE_ROLE_KEY
+const DRAFT_CARTS_TABLE = process.env.VITE_B2B_DRAFT_CART_BACKUP_TABLE || 'b2b_draft_cart_snapshots'
+const LIVE_DRAFT_CARTS_TABLE = 'b2b_draft_carts'
 
 function escapeHtml(value) {
   return String(value || '')
@@ -148,16 +150,20 @@ export async function handler(event) {
         customer_action: 'delete',
         customer_action_at: nowIso,
         customer_action_note: 'Customer clicked "Delete contents of cart" from the abandoned cart reminder email.',
+        archived_at: nowIso,
+        archived_reason: 'Customer deleted cart contents from reminder email.',
       }
     : {
         updated_at: nowIso,
         customer_action: 'keep',
         customer_action_at: nowIso,
         customer_action_note: 'Customer clicked "I will check out later (keep contents)" from the abandoned cart reminder email.',
+        archived_at: null,
+        archived_reason: null,
       }
 
   const { error: updateError } = await supabase
-    .from('b2b_draft_carts')
+    .from(DRAFT_CARTS_TABLE)
     .update(updatePayload)
     .eq('id', cartId)
 
@@ -169,6 +175,14 @@ export async function handler(event) {
       ctaHref: `${SITE_ORIGIN}/portal/login`,
       ctaLabel: 'Open portal',
     }))
+  }
+
+  if (action === 'delete') {
+    await supabase
+      .from(LIVE_DRAFT_CARTS_TABLE)
+      .delete()
+      .eq('user_id', cart.user_id)
+      .eq('source', 'portal')
   }
 
   if (action === 'delete') {

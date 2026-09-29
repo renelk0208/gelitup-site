@@ -3604,7 +3604,8 @@ function downloadCSV(priceData, sortedCategories) {
 
 // ─── Draft Carts panel ────────────────────────────────────────────────────────
 
-const DRAFT_CARTS_TABLE = 'b2b_draft_carts'
+const LIVE_DRAFT_CARTS_TABLE = 'b2b_draft_carts'
+const DRAFT_CARTS_TABLE = import.meta.env.VITE_B2B_DRAFT_CART_BACKUP_TABLE || 'b2b_draft_cart_snapshots'
 
 function normalizeDraftCartItems(cart) {
   const rawItems = cart?.items
@@ -3693,12 +3694,25 @@ async function recoverDraftCartAsOrder(cart) {
 
   const cartId = cart?.id
   if (cartId != null) {
-    const { error: deleteError } = await supabase
-      .from(DRAFT_CARTS_TABLE)
-      .delete()
-      .eq('id', cartId)
+    const [{ error: archiveError }, { error: deleteError }] = await Promise.all([
+      supabase
+        .from(DRAFT_CARTS_TABLE)
+        .update({
+          archived_at: new Date().toISOString(),
+          archived_reason: 'Recovered as order from admin dashboard',
+        })
+        .eq('id', cartId),
+      supabase
+        .from(LIVE_DRAFT_CARTS_TABLE)
+        .delete()
+        .eq('user_id', cart.user_id)
+        .eq('source', cart.source),
+    ])
+    if (archiveError) {
+      return { ok: true, message: `Order recovered, but draft cart archive failed: ${archiveError.message}` }
+    }
     if (deleteError) {
-      return { ok: true, message: `Order recovered, but draft cart cleanup failed: ${deleteError.message}` }
+      return { ok: true, message: `Order recovered, but live draft cart cleanup failed: ${deleteError.message}` }
     }
   }
 
@@ -3737,6 +3751,7 @@ function DraftCartsPanel() {
     const { data, error: err } = await supabase
       .from(DRAFT_CARTS_TABLE)
       .select('*')
+      .is('archived_at', null)
       .order('updated_at', { ascending: false })
       .limit(200)
     if (err) setError(`Could not load draft carts: ${err.message}`)
@@ -4311,7 +4326,7 @@ function SearchPanel({ onOpenTab }) {
     setLoading(true)
     const [ordersRes, cartsRes, registrationsRes] = await Promise.all([
       supabase.from(ORDERS_TABLE).select('*').order('created_at', { ascending: false }).limit(300),
-      supabase.from(DRAFT_CARTS_TABLE).select('*').order('updated_at', { ascending: false }).limit(300),
+      supabase.from(DRAFT_CARTS_TABLE).select('*').is('archived_at', null).order('updated_at', { ascending: false }).limit(300),
       supabase.from(REGISTRATIONS_TABLE).select('*').order('created_at', { ascending: false }).limit(300),
     ])
 

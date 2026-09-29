@@ -10,6 +10,7 @@ const EMAIL_WEBHOOK_URL = process.env.VITE_EMAIL_WEBHOOK_URL || process.env.EMAI
 const SUPABASE_URL = process.env.SUPABASE_URL || ''
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE || ''
 const CART_REMINDER_ACTION_SECRET = process.env.CART_REMINDER_ACTION_SECRET || SUPABASE_SERVICE_ROLE_KEY
+const DRAFT_CARTS_TABLE = process.env.VITE_B2B_DRAFT_CART_BACKUP_TABLE || 'b2b_draft_cart_snapshots'
 const REMINDER_LOOKBACK_DAYS = 7
 const REMINDER_CUTOFF_MS = REMINDER_LOOKBACK_DAYS * 24 * 60 * 60 * 1000
 
@@ -180,13 +181,14 @@ export async function handler() {
 
   const cutoffIso = new Date(Date.now() - REMINDER_CUTOFF_MS).toISOString()
   const { data: carts, error } = await supabase
-    .from('b2b_draft_carts')
+    .from(DRAFT_CARTS_TABLE)
     .select('id,user_id,customer_email,items,total_units,total_estimated,source,updated_at,created_at,last_reminder_sent_at,reminder_count,customer_action,customer_action_at,customer_action_note')
     .not('customer_email', 'is', null)
     .neq('customer_email', '')
     .gt('total_units', 0)
     .lte('updated_at', cutoffIso)
     .or(`last_reminder_sent_at.is.null,last_reminder_sent_at.lte.${cutoffIso}`)
+    .is('archived_at', null)
     .order('updated_at', { ascending: true })
     .limit(100)
 
@@ -215,7 +217,7 @@ export async function handler() {
     try {
       await sendReminderEmail(cart, items)
       const { error: updateError } = await supabase
-        .from('b2b_draft_carts')
+        .from(DRAFT_CARTS_TABLE)
         .update({
           last_reminder_sent_at: new Date().toISOString(),
           reminder_count: Number(cart.reminder_count || 0) + 1,
