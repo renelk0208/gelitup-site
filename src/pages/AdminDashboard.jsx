@@ -1184,16 +1184,6 @@ function normalizeAdminSkuToken(value) {
   return String(value || '').trim().toUpperCase().replace(/\s+/g, ' ')
 }
 
-// Case/whitespace-insensitive lookup for the tier pricing spreadsheet: keys are
-// the canonical product names normalized the same way order item names/SKUs
-// are normalized elsewhere in this file, so a stored order item like
-// "2617 rose memoir -htf" still matches the sheet's "2617 Rose Memoir -HTF".
-const TIER_PRICING_LOOKUP = new Map(
-  (Array.isArray(tierPricingOverrides) ? tierPricingOverrides : [])
-    .map((entry) => [normalizeAdminSkuToken(entry?.product), entry])
-    .filter(([key]) => key),
-)
-
 function normalizeAdminNameToken(value) {
   return normalizeAdminSkuToken(value)
     .replace(/GEL\.?IT\.?UP|GEL\s*IT\s*UP|GIUP/gi, ' ')
@@ -1420,6 +1410,97 @@ function simplifyProductNameForIndex(name) {
     .trim()
 }
 
+// Generates every alias key a product NAME can be looked up under — short SKU
+// codes, GIUP-prefixed codes, embedded series tokens (e.g. "MC5", "SH07"),
+// simplified/loose names, etc. Shared by the B2B price-list lookup map and the
+// tier pricing sheet lookup map so both resolve order items stored as bare
+// codes (e.g. "giup-01", "mc5") the same way.
+function buildNameAliasKeys(name) {
+  const keys = new Set()
+  const addKey = (k) => { if (k) keys.add(k) }
+
+  addKey(normalizeAdminSkuToken(name))
+  addKey(normalizeAdminNameToken(name))
+
+  const bobBiabAlias = buildBrushOnBuilderBiabAlias(name)
+  if (bobBiabAlias) {
+    addKey(bobBiabAlias)
+    addKey(`${bobBiabAlias} 1`)
+  }
+
+  const numberPrefix = String(name || '').trim().match(/^(\d+[A-Z]?)\s/)
+  if (numberPrefix) {
+    const n = numberPrefix[1]
+    addKey(normalizeAdminSkuToken(n))
+    addKey(normalizeAdminSkuToken(n.replace(/^0+(\d)/, '$1')))
+    addKey(normalizeAdminSkuToken(n.padStart(2, '0')))
+    addKey(normalizeAdminSkuToken(`GIUP ${n}`))
+    addKey(normalizeAdminSkuToken(`GIUP ${n.replace(/^0+(\d)/, '$1')}`))
+    addKey(normalizeAdminSkuToken(`GIUP ${n.padStart(2, '0')}`))
+  }
+
+  // Index embedded alphanumeric series tokens so GIUP-prefixed order SKUs
+  // like "GIUP C01" or "GIUP ODA01" resolve from names containing #C01/#ODA01.
+  const embeddedSeriesMatches = [...normalizeAdminSkuToken(name).matchAll(/\b([A-Z]{1,5})(\d{1,4}[A-Z]?)\b/g)]
+  for (const match of embeddedSeriesMatches) {
+    const series = match[1]
+    const num = match[2]
+    const compact = `${series}${num}`
+    const spaced = `${series} ${num}`
+    addKey(normalizeAdminSkuToken(compact))
+    addKey(normalizeAdminSkuToken(spaced))
+    addKey(normalizeAdminSkuToken(`GIUP ${compact}`))
+    addKey(normalizeAdminSkuToken(`GIUP ${spaced}`))
+  }
+
+  // Also index by the extracted short SKU token from the full product name.
+  // This allows order items stored as "SH07" or "STF 01" to match price list
+  // entries like "Shimmer Collection #SH07 -HTF" or "Shimmer Top Fairy #STF 01 -HTF".
+  const shortToken = extractOrderItemSkuToken(name)
+  if (shortToken) {
+    addKey(shortToken)
+    // Also add compact (no-space) variant so "SH07" and "SH 07" both hit the same entry
+    const compact = normalizeAdminSkuToken(shortToken.replace(/\s+/g, ''))
+    if (compact !== shortToken) addKey(compact)
+  }
+
+  // Also index by "WORD NUMBER" prefix for products like "Polygel 2 Brush and Spatula..."
+  // so that order items stored as "POLYGEL 2" can find the price.
+  const wordNumPrefix = normalizeAdminSkuToken(name).match(/^([A-Z][A-Z0-9]{1,})\s+(\d{1,4})\b/)
+  if (wordNumPrefix) {
+    addKey(`${wordNumPrefix[1]} ${wordNumPrefix[2]}`)
+  }
+
+  // ── Simplified-name indexing for loose-name matching ───────────────────────────────
+  const simplified = simplifyProductNameForIndex(name)
+  if (simplified && simplified !== normalizeAdminSkuToken(name)) {
+    addKey(simplified)
+
+    // For names starting with a single-letter + 3-4 digit code (e.g. "N008 If The Shoe...")
+    // also index under just that short code so "GIUP N008" → strip GIUP → "N008" hits it.
+    const nSeriesMatch = simplified.match(/^([A-Z]\d{3,4})\b/)
+    if (nSeriesMatch) addKey(nSeriesMatch[1])
+
+    // For names with a leading product code (SP8001, TR01, CM12 etc.) also add the name
+    // without the code so "SP8001 Mirror Clear Powder" → "MIRROR CLEAR" is findable.
+    const withoutLeadingCode = simplified.replace(/^[A-Z]{1,4}\d{3,5}\s*/, '').trim()
+    if (withoutLeadingCode && withoutLeadingCode !== simplified) addKey(withoutLeadingCode)
+  }
+
+  // ── Cuticle oil word-reorder ─────────────────────────────────────────────────────────
+  // Price list: "Cooling Coconut Cuticle Oil 100ml" → stored as "cuticle oil coconut".
+  // Extract the flavor noun and index as "CUTICLE OIL [FLAVOR]".
+  if (simplified && simplified.includes('CUTICLE') && simplified.includes('OIL')) {
+    const flavorWord = simplified
+      .replace(/\bCUTICLE\b/g, '').replace(/\bOIL\b/g, '')
+      .replace(/\b(COOLING|CHILLED|PERKY|SATIN|WHITE|RICH)\b/g, '')
+      .replace(/\s+/g, ' ').trim()
+    if (flavorWord) addKey(`CUTICLE OIL ${flavorWord}`)
+  }
+
+  return [...keys]
+}
+
 function buildOrderPriceLookupMap(items = []) {
   const map = new Map()
   const setIfMissing = (key, entry) => {
@@ -1439,83 +1520,8 @@ function buildOrderPriceLookupMap(items = []) {
     }
 
     setIfMissing(normalizeAdminSkuToken(sku), entry)
-    setIfMissing(normalizeAdminSkuToken(name), entry)
-    setIfMissing(normalizeAdminNameToken(name), entry)
-
-    const bobBiabAlias = buildBrushOnBuilderBiabAlias(name)
-    if (bobBiabAlias) {
-      setIfMissing(bobBiabAlias, entry)
-      setIfMissing(`${bobBiabAlias} 1`, entry)
-    }
-
-    const numberPrefix = String(name || '').trim().match(/^(\d+[A-Z]?)\s/)
-    if (numberPrefix) {
-      const n = numberPrefix[1]
-      setIfMissing(normalizeAdminSkuToken(n), entry)
-      setIfMissing(normalizeAdminSkuToken(n.replace(/^0+(\d)/, '$1')), entry)
-      setIfMissing(normalizeAdminSkuToken(n.padStart(2, '0')), entry)
-      setIfMissing(normalizeAdminSkuToken(`GIUP ${n}`), entry)
-      setIfMissing(normalizeAdminSkuToken(`GIUP ${n.replace(/^0+(\d)/, '$1')}`), entry)
-      setIfMissing(normalizeAdminSkuToken(`GIUP ${n.padStart(2, '0')}`), entry)
-    }
-
-    // Index embedded alphanumeric series tokens so GIUP-prefixed order SKUs
-    // like "GIUP C01" or "GIUP ODA01" resolve from names containing #C01/#ODA01.
-    const embeddedSeriesMatches = [...normalizeAdminSkuToken(name).matchAll(/\b([A-Z]{1,5})(\d{1,4}[A-Z]?)\b/g)]
-    for (const match of embeddedSeriesMatches) {
-      const series = match[1]
-      const num = match[2]
-      const compact = `${series}${num}`
-      const spaced = `${series} ${num}`
-      setIfMissing(normalizeAdminSkuToken(compact), entry)
-      setIfMissing(normalizeAdminSkuToken(spaced), entry)
-      setIfMissing(normalizeAdminSkuToken(`GIUP ${compact}`), entry)
-      setIfMissing(normalizeAdminSkuToken(`GIUP ${spaced}`), entry)
-    }
-
-    // Also index by the extracted short SKU token from the full product name.
-    // This allows order items stored as "SH07" or "STF 01" to match price list
-    // entries like "Shimmer Collection #SH07 -HTF" or "Shimmer Top Fairy #STF 01 -HTF".
-    const shortToken = extractOrderItemSkuToken(name)
-    if (shortToken) {
-      setIfMissing(shortToken, entry)
-      // Also add compact (no-space) variant so "SH07" and "SH 07" both hit the same entry
-      const compact = normalizeAdminSkuToken(shortToken.replace(/\s+/g, ''))
-      if (compact !== shortToken) setIfMissing(compact, entry)
-    }
-
-    // Also index by "WORD NUMBER" prefix for products like "Polygel 2 Brush and Spatula..."
-    // so that order items stored as "POLYGEL 2" can find the price.
-    const wordNumPrefix = normalizeAdminSkuToken(name).match(/^([A-Z][A-Z0-9]{1,})\s+(\d{1,4})\b/)
-    if (wordNumPrefix) {
-      setIfMissing(`${wordNumPrefix[1]} ${wordNumPrefix[2]}`, entry)
-    }
-
-    // ── Simplified-name indexing for loose-name matching ───────────────────────────────
-    const simplified = simplifyProductNameForIndex(name)
-    if (simplified && simplified !== normalizeAdminSkuToken(name)) {
-      setIfMissing(simplified, entry)
-
-      // For names starting with a single-letter + 3-4 digit code (e.g. "N008 If The Shoe...")
-      // also index under just that short code so "GIUP N008" → strip GIUP → "N008" hits it.
-      const nSeriesMatch = simplified.match(/^([A-Z]\d{3,4})\b/)
-      if (nSeriesMatch) setIfMissing(nSeriesMatch[1], entry)
-
-      // For names with a leading product code (SP8001, TR01, CM12 etc.) also add the name
-      // without the code so "SP8001 Mirror Clear Powder" → "MIRROR CLEAR" is findable.
-      const withoutLeadingCode = simplified.replace(/^[A-Z]{1,4}\d{3,5}\s*/, '').trim()
-      if (withoutLeadingCode && withoutLeadingCode !== simplified) setIfMissing(withoutLeadingCode, entry)
-    }
-
-    // ── Cuticle oil word-reorder ─────────────────────────────────────────────────────────
-    // Price list: "Cooling Coconut Cuticle Oil 100ml" → stored as "cuticle oil coconut".
-    // Extract the flavor noun and index as "CUTICLE OIL [FLAVOR]".
-    if (simplified.includes('CUTICLE') && simplified.includes('OIL')) {
-      const flavorWord = simplified
-        .replace(/\bCUTICLE\b/g, '').replace(/\bOIL\b/g, '')
-        .replace(/\b(COOLING|CHILLED|PERKY|SATIN|WHITE|RICH)\b/g, '')
-        .replace(/\s+/g, ' ').trim()
-      if (flavorWord) setIfMissing(`CUTICLE OIL ${flavorWord}`, entry)
+    for (const key of buildNameAliasKeys(name)) {
+      setIfMissing(key, entry)
     }
   })
 
@@ -1532,6 +1538,40 @@ function buildOrderPriceLookupMap(items = []) {
 
   return map
 }
+
+// Same alias-resolution technique as buildOrderPriceLookupMap, but built from
+// the tier pricing spreadsheet so order items stored as bare SKU codes (e.g.
+// "giup-01", "mc5", "GIUP N008") resolve directly to their sheet entry —
+// carrying all four tier prices (authority/professional/sales/country) plus
+// b2bPrice — rather than falling back to the B2B price list.
+function buildTierPricingLookup(entries = []) {
+  const map = new Map()
+  const setIfMissing = (key, entry) => {
+    if (!key || map.has(key)) return
+    map.set(key, entry)
+  }
+
+  for (const entry of entries) {
+    const product = entry?.product
+    if (!product) continue
+    for (const key of buildNameAliasKeys(product)) {
+      setIfMissing(key, entry)
+    }
+  }
+
+  for (const { codes, target } of PRODUCT_ALIAS_GROUPS) {
+    const targetEntry = map.get(normalizeAdminSkuToken(target)) ||
+                         map.get(normalizeAdminNameToken(target))
+    if (!targetEntry) continue
+    for (const c of codes) {
+      setIfMissing(normalizeAdminSkuToken(c), targetEntry)
+    }
+  }
+
+  return map
+}
+
+const TIER_PRICING_LOOKUP = buildTierPricingLookup(Array.isArray(tierPricingOverrides) ? tierPricingOverrides : [])
 
 const ADMIN_TIER_PRICE_MULTIPLIERS = {
   authority: 1,
