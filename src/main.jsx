@@ -13,6 +13,35 @@ document.addEventListener('contextmenu', (e) => {
   if (e.target.tagName === 'IMG') e.preventDefault()
 }, true)
 
+// Guard against "Failed to execute 'removeChild'/'insertBefore' on 'Node'" crashes.
+// Browser translation tools (e.g. Chrome's "Translate this page") rewrite text nodes
+// outside of React's control. When React later reconciles that subtree, it can try to
+// remove/insert a node that translation already swapped out, throwing and tearing down
+// the whole module. Patch the DOM APIs so a stale reference is skipped instead of thrown.
+if (typeof Node === 'function' && Node.prototype) {
+  const originalRemoveChild = Node.prototype.removeChild
+  Node.prototype.removeChild = function patchedRemoveChild(child) {
+    if (child && child.parentNode !== this) {
+      if (typeof console !== 'undefined') {
+        console.warn('[DOM guard] Skipped removeChild on a node that is not a child (likely a translation tool mutation).')
+      }
+      return child
+    }
+    return originalRemoveChild.call(this, child)
+  }
+
+  const originalInsertBefore = Node.prototype.insertBefore
+  Node.prototype.insertBefore = function patchedInsertBefore(newNode, referenceNode) {
+    if (referenceNode && referenceNode.parentNode !== this) {
+      if (typeof console !== 'undefined') {
+        console.warn('[DOM guard] Skipped insertBefore with a stale reference node (likely a translation tool mutation).')
+      }
+      return this.appendChild(newNode)
+    }
+    return originalInsertBefore.call(this, newNode, referenceNode)
+  }
+}
+
 function isStaleBundleError(message) {
   const text = String(message || '').toLowerCase()
   return (
