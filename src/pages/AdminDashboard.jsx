@@ -4888,6 +4888,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   const [sectionOpenState, setSectionOpenState] = useState({})
   const [shipmentEntryOpen, setShipmentEntryOpen] = useState({})
   const [packingListPdfBusy, setPackingListPdfBusy] = useState(false)
+  const [dashboardOnTrackOpen, setDashboardOnTrackOpen] = useState(false)
   const reminderSweepStartedRef = useRef(false)
   const shipmentSaveInFlightRef = useRef(new Set())
   const [shipmentEmailLock, setShipmentEmailLock] = useState(() => {
@@ -6751,6 +6752,50 @@ const deleteApplication = async (row) => {
       })
     : rows
 
+  // "At a glance" dashboard — groups approved ambassadors by how urgently they
+  // need their next PR package so the admin can see who to act on first without
+  // opening every card.
+  const approvedAmbassadorRows = filteredRows.filter((row) => normalizeAmbassadorStatus(row.status) === 'approved')
+  const getAmbassadorDashboardMeta = (row) => {
+    const sentAtMeta = readMetaTag(row, 'SHIPMENT_SENT_AT')
+    const reminderAtMeta = readMetaTag(row, 'SHIPMENT_NEXT_REMINDER_AT')
+    const shipmentHistory = latestShipmentHistory(row)
+    const shipmentLockRaw = shipmentEmailLock[row.id]
+    const shipmentLock = (shipmentLockRaw && typeof shipmentLockRaw === 'object')
+      ? shipmentLockRaw
+      : (typeof shipmentLockRaw === 'string' ? { signature: shipmentLockRaw, sentAt: null } : null)
+    const sentAt = shipmentLock?.sentAt || sentAtMeta || shipmentHistory.sentAtIso || null
+    const nextReminderAt = reminderAtMeta || (sentAt ? addOneMonth(sentAt) : null)
+    const isDatePast = Boolean(nextReminderAt) && new Date(nextReminderAt).getTime() < Date.now()
+    const dueSoon = Boolean(nextReminderAt) && !isDatePast && (new Date(nextReminderAt).getTime() - Date.now()) <= 7 * 24 * 60 * 60 * 1000
+    const bucket = (!sentAt || isDatePast) ? 'needsNow' : (dueSoon ? 'dueSoon' : 'onTrack')
+    return { sentAt, nextReminderAt, isDatePast, dueSoon, bucket }
+  }
+  const ambassadorDashboardEntries = approvedAmbassadorRows
+    .map((row) => ({ row, meta: getAmbassadorDashboardMeta(row) }))
+    .sort((a, b) => {
+      const order = { needsNow: 0, dueSoon: 1, onTrack: 2 }
+      const bucketDiff = order[a.meta.bucket] - order[b.meta.bucket]
+      if (bucketDiff !== 0) return bucketDiff
+      const da = a.meta.nextReminderAt ? new Date(a.meta.nextReminderAt).getTime() : Number.POSITIVE_INFINITY
+      const db = b.meta.nextReminderAt ? new Date(b.meta.nextReminderAt).getTime() : Number.POSITIVE_INFINITY
+      return da - db
+    })
+  // Ambassadors who still need a package sent — used to power the "next ambassador" jump button.
+  const ambassadorActionQueue = ambassadorDashboardEntries.filter((entry) => entry.meta.bucket !== 'onTrack')
+  const jumpToAmbassador = (id) => {
+    setOpenIds((prev) => { const next = new Set(prev); next.add(id); return next })
+    setShipmentPanelOpen((prev) => ({ ...prev, [id]: true }))
+    requestAnimationFrame(() => {
+      document.getElementById(`ambassador-card-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
+  const AMBASSADOR_DASHBOARD_GROUPS = [
+    { key: 'needsNow', label: '🔴 Needs package now', empty: 'Nobody is overdue right now.' },
+    { key: 'dueSoon', label: '🟡 Due soon (next 7 days)', empty: 'Nothing due in the next week.' },
+    { key: 'onTrack', label: '🟢 On track', empty: 'No ambassadors on track yet.' },
+  ]
+
   return (
     <div className="space-y-4">
       <div className="space-y-3">
@@ -6815,6 +6860,55 @@ const deleteApplication = async (row) => {
           <span className="text-xs text-slate-400">{filteredRows.length} result{filteredRows.length === 1 ? '' : 's'}</span>
         </div>
       </div>
+
+      {!loading && !error && ambassadorDashboardEntries.length > 0 && (
+        <div className="rounded-xl border border-slate-200 bg-white p-3">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">At a glance — package status</h3>
+            <span className="text-[11px] font-semibold text-slate-500">{ambassadorActionQueue.length} need action</span>
+          </div>
+          <div className="space-y-3">
+            {AMBASSADOR_DASHBOARD_GROUPS.map((group) => {
+              const entries = ambassadorDashboardEntries.filter((entry) => entry.meta.bucket === group.key)
+              if (entries.length === 0) return null
+              const isOnTrack = group.key === 'onTrack'
+              const isExpanded = !isOnTrack || dashboardOnTrackOpen
+              return (
+                <div key={group.key}>
+                  <button
+                    type="button"
+                    onClick={() => isOnTrack && setDashboardOnTrackOpen((prev) => !prev)}
+                    className={`mb-1 flex w-full items-center justify-between text-left ${isOnTrack ? 'cursor-pointer' : 'cursor-default'}`}
+                  >
+                    <p className="text-[11px] font-bold text-slate-600">{group.label} ({entries.length})</p>
+                    {isOnTrack && (
+                      <span className="text-[11px] font-semibold text-slate-400">{isExpanded ? 'Hide' : 'Show'}</span>
+                    )}
+                  </button>
+                  {isExpanded && (
+                    <div className="space-y-1">
+                      {entries.map(({ row, meta }) => (
+                        <button
+                          key={row.id}
+                          type="button"
+                          onClick={() => jumpToAmbassador(row.id)}
+                          className="flex w-full flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-left text-xs hover:bg-slate-100"
+                        >
+                          <span className="font-semibold text-slate-800">{row.full_name}</span>
+                          <span className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                            <span>Last sent: {meta.sentAt ? fmtDate(meta.sentAt) : 'Never'}</span>
+                            <span>Next due: {meta.nextReminderAt ? fmtDate(meta.nextReminderAt) : '—'}</span>
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {loading && <p className="text-sm text-slate-500">Loading…</p>}
       {error && <p className="text-sm text-rose-600">{error}</p>}
@@ -6885,7 +6979,7 @@ const deleteApplication = async (row) => {
             const isShipmentSectionOpen = isSectionOpen(row.id, 'shipment', isApproved)
             const isHistorySectionOpen = isSectionOpen(row.id, 'history', shipmentEntries.length <= 1)
             return (
-              <div key={row.id} className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+              <div key={row.id} id={`ambassador-card-${row.id}`} className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
                 {/* Collapsible header — click anywhere to open/close */}
                 <button
                   type="button"
@@ -7495,6 +7589,19 @@ const deleteApplication = async (row) => {
                             Next package date: {fmtDate(nextReminderAt)}
                           </p>
                           <p className="text-slate-500">To send the next package, update shipment details or tracking and the send button will enable again.</p>
+                          {(() => {
+                            const nextInQueue = ambassadorActionQueue.find((entry) => entry.row.id !== row.id)
+                            if (!nextInQueue) return null
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => jumpToAmbassador(nextInQueue.row.id)}
+                                className="mt-2 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100"
+                              >
+                                Next ambassador needing a package → {nextInQueue.row.full_name}
+                              </button>
+                            )
+                          })()}
                         </div>
                       )}
                       {(() => {
