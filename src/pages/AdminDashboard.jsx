@@ -1184,6 +1184,16 @@ function normalizeAdminSkuToken(value) {
   return String(value || '').trim().toUpperCase().replace(/\s+/g, ' ')
 }
 
+// Case/whitespace-insensitive lookup for the tier pricing spreadsheet: keys are
+// the canonical product names normalized the same way order item names/SKUs
+// are normalized elsewhere in this file, so a stored order item like
+// "2617 rose memoir -htf" still matches the sheet's "2617 Rose Memoir -HTF".
+const TIER_PRICING_LOOKUP = new Map(
+  (Array.isArray(tierPricingOverrides) ? tierPricingOverrides : [])
+    .map((entry) => [normalizeAdminSkuToken(entry?.product), entry])
+    .filter(([key]) => key),
+)
+
 function normalizeAdminNameToken(value) {
   return normalizeAdminSkuToken(value)
     .replace(/GEL\.?IT\.?UP|GEL\s*IT\s*UP|GIUP/gi, ' ')
@@ -1544,9 +1554,9 @@ function getAuthorityItemMultiplier(name, sku, rules) {
 
 function getDirectTierPrice(tier, productName) {
   const normalizedTier = String(tier || '').trim().toLowerCase()
-  const normalizedName = String(productName || '').trim()
-  if (!normalizedName || !normalizedTier) return null
-  const entry = tierPricingOverrides.find((override) => String(override?.product || '').trim() === normalizedName)
+  const key = normalizeAdminSkuToken(productName)
+  if (!key || !normalizedTier) return null
+  const entry = TIER_PRICING_LOOKUP.get(key)
   if (!entry) return null
   const tierValue = Number(entry[normalizedTier])
   return Number.isFinite(tierValue) ? tierValue : Number(entry.b2bPrice)
@@ -1586,13 +1596,10 @@ function resolveOrderItemPriceEntry(item, priceLookupMap, tierMultiplier = 1.0, 
     return { unitPrice: null, resolvedName: `${name} (image — not a product)`, resolvedSku: null, isImageAsset: true }
   }
 
-  const directTierProduct = tierPricingOverrides.find((override) =>
-    String(override?.product || '').trim() === name ||
-    String(override?.product || '').trim() === sku ||
-    String(override?.product || '').trim() === nameNorm ||
-    String(override?.product || '').trim() === extractedSkuFromName ||
-    String(override?.product || '').trim() === skuWithoutCampaignPrefix,
-  )
+  const directTierProduct = TIER_PRICING_LOOKUP.get(nameNorm)
+    || TIER_PRICING_LOOKUP.get(sku)
+    || TIER_PRICING_LOOKUP.get(normalizeAdminSkuToken(extractedSkuFromName))
+    || TIER_PRICING_LOOKUP.get(normalizeAdminSkuToken(skuWithoutCampaignPrefix))
   if (directTierProduct) {
     const directValue = Number(directTierProduct?.[resolvedTierKey] ?? directTierProduct?.b2bPrice)
     const finalPrice = Number.isFinite(directValue) ? directValue : null
