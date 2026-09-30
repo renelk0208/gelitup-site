@@ -5512,7 +5512,10 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   }
   const downloadAllAmbassadorPackages = async () => {
     try {
-      const allRows = await loadAllAmbassadorRows()
+      const fetchedRows = await loadAllAmbassadorRows()
+      // Rejected applicants never receive a package — there's nothing useful
+      // to track for them in this workbook, so leave them out entirely.
+      const allRows = fetchedRows.filter((row) => normalizeAmbassadorStatus(row.status) !== 'rejected')
       const exportRows = allRows.map(ambassadorPackageExportRow)
       // Give every queued item its own column (Item 1, Item 2, ...) instead of
       // one long delimited cell — reading a package's contents used to mean
@@ -6389,6 +6392,7 @@ const deleteApplication = async (row) => {
     { key: 'pending', label: 'Pending' },
     { key: 'approved', label: 'Approved' },
     { key: 'paused', label: 'Paused' },
+    { key: 'rejected', label: 'Rejected' },
     { key: 'all', label: 'All' },
   ]
 
