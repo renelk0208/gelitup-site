@@ -4341,6 +4341,21 @@ const AMBASSADOR_DECLINE_PRESETS = [
 
 const escAmb = (v) => String(v ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
 
+function buildAmbassadorFactoryNotificationEmail(row, discountCode) {
+  const ackLink = `${window.location.origin}/portal/dashboard/ambassadors?tab=ambassadors&ambassador=${encodeURIComponent(row.id)}`
+  return {
+    subject: `New GEL.IT.UP Ambassador approved — ${row.full_name || 'New ambassador'}`,
+    html: `<p>A new ambassador has been approved and a PR package needs preparing.</p>
+      <p><strong>Name:</strong> ${escAmb(row.full_name || '')}<br/>
+      <strong>Instagram:</strong> ${escAmb(row.instagram || '')}<br/>
+      <strong>Country:</strong> ${escAmb(row.country || '')}<br/>
+      <strong>Address:</strong> ${escAmb(row.address || '')}, ${escAmb(row.city || '')} ${escAmb(row.postal_code || '')}<br/>
+      <strong>Ambassador code:</strong> ${escAmb(discountCode || '')}</p>
+      <p><a href="${ackLink}" style="display:inline-block;background:#111827;color:#ffffff;padding:10px 16px;border-radius:9999px;text-decoration:none;font-weight:700">View this ambassador &amp; mark acknowledged →</a></p>
+      <p>Click the link above, then use the "🏭 Mark factory acknowledged" button on their card once you've seen this.</p>`,
+  }
+}
+
 function buildAmbassadorDeclineEmail(row, reasonText) {
   const name = row?.full_name?.trim() || 'there'
   const reasonBlock = reasonText
@@ -4645,7 +4660,7 @@ async function ensureAmbassadorPortalAccount(row) {
   }
 }
 
-function AmbassadorApplicationsPanel() {
+function AmbassadorApplicationsPanel({ focusAmbassadorId } = {}) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -4682,6 +4697,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   const [dashboardOnTrackOpen, setDashboardOnTrackOpen] = useState(false)
   const reminderSweepStartedRef = useRef(false)
   const shipmentSaveInFlightRef = useRef(new Set())
+  const focusAmbassadorHandledRef = useRef(false)
   const [shipmentEmailLock, setShipmentEmailLock] = useState(() => {
     try {
       const parsed = JSON.parse(localStorage.getItem(SHIPMENT_EMAIL_LOCK_STORAGE_KEY) || '{}')
@@ -4878,6 +4894,24 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     void sweepAmbassadorPasswordReminders()
   }, [])
 
+  // Deep-link support: emails (e.g. the new-approval notification) link to
+  // ?tab=ambassadors&ambassador=<id>. Force the filter open wide enough to
+  // guarantee the target row loads, then jump to it once it's in `rows`.
+  useEffect(() => {
+    if (!focusAmbassadorId) return
+    setFilter('all')
+    setSearchQuery('')
+  }, [focusAmbassadorId])
+
+  useEffect(() => {
+    if (!focusAmbassadorId || focusAmbassadorHandledRef.current) return
+    const match = rows.find((r) => String(r.id) === String(focusAmbassadorId))
+    if (match) {
+      focusAmbassadorHandledRef.current = true
+      jumpToAmbassador(match.id)
+    }
+  }, [focusAmbassadorId, rows])
+
   const patchRow = (id, patch) => setRows(prev => prev.map(r => r.id === id ? { ...r, ...patch } : r))
   const setEmail = (id, state, message) => setEmailStatus(prev => ({ ...prev, [id]: { state, message } }))
   const normalizeAmbassadorStatus = (status) => String(status || '').trim().toLowerCase()
@@ -5067,8 +5101,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     const updatedRow = { ...row, status: 'approved', reviewed_at: reviewedAt, discount_code: discountCode }
     await sendWelcomeContractEmail(updatedRow)
     try {
-      const factorySubject = `New GEL.IT.UP Ambassador approved — ${updatedRow.full_name || 'New ambassador'}`
-      const factoryHtml = `<p>A new ambassador has been approved and a PR package needs preparing.</p><p><strong>Name:</strong> ${updatedRow.full_name || ''}<br/><strong>Instagram:</strong> ${updatedRow.instagram || ''}<br/><strong>Country:</strong> ${updatedRow.country || ''}<br/><strong>Address:</strong> ${updatedRow.address || ''}, ${updatedRow.city || ''} ${updatedRow.postal_code || ''}<br/><strong>Ambassador code:</strong> ${discountCode || ''}</p><p>Please mark it acknowledged in the admin panel once you've seen this.</p>`
+      const { subject: factorySubject, html: factoryHtml } = buildAmbassadorFactoryNotificationEmail(updatedRow, discountCode)
       await Promise.all(['leeukopf@gmail.com', 'acc1.leeukopf@gmail.com'].map((to) => sendAmbassadorEmail({ to, subject: factorySubject, html: factoryHtml })))
     } catch (_) {}
     setSaving(null)
@@ -5737,8 +5770,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     patchRow(row.id, { status: 'approved', reviewed_at: reviewedAt, discount_code: discountCode, discount_code_created_at: reviewedAt })
     await sendWelcomeContractEmail(updatedRow)
     try {
-      const factorySubject = `New GEL.IT.UP Ambassador approved — ${updatedRow.full_name || 'New ambassador'}`
-      const factoryHtml = `<p>A new ambassador has been approved and a PR package needs preparing.</p><p><strong>Name:</strong> ${updatedRow.full_name || ''}<br/><strong>Instagram:</strong> ${updatedRow.instagram || ''}<br/><strong>Country:</strong> ${updatedRow.country || ''}<br/><strong>Address:</strong> ${updatedRow.address || ''}, ${updatedRow.city || ''} ${updatedRow.postal_code || ''}<br/><strong>Ambassador code:</strong> ${discountCode || ''}</p><p>Please mark it acknowledged in the admin panel once you've seen this.</p>`
+      const { subject: factorySubject, html: factoryHtml } = buildAmbassadorFactoryNotificationEmail(updatedRow, discountCode)
       await Promise.all(['leeukopf@gmail.com', 'acc1.leeukopf@gmail.com'].map((to) => sendAmbassadorEmail({ to, subject: factorySubject, html: factoryHtml })))
     } catch (_) {}
   }
@@ -6414,7 +6446,6 @@ const deleteApplication = async (row) => {
     patchRow(pauseRow.id, { status: 'paused', shipment_details: null, tracking_number: null, tracking_url: null, admin_comment: nextComment })
     setShip((prev) => ({ ...prev, [pauseRow.id]: { shipment_details: '', tracking_number: '', tracking_url: '' } }))
     setNextPackageMode((prev) => ({ ...prev, [pauseRow.id]: false }))
-    setShipmentPanelOpen((prev) => ({ ...prev, [pauseRow.id]: false }))
     if (pauseSendEmail) {
       const { subject, html } = buildAmbassadorPauseEmail(pauseRow, timeframe, performanceDetails, senderName)
       const emailResult = await sendAmbassadorEmail({ to: pauseRow.email, subject, html })
@@ -6482,13 +6513,19 @@ const deleteApplication = async (row) => {
     const nextReminderAt = reminderAtMeta || (sentAt ? addOneMonth(sentAt) : null)
     const isDatePast = Boolean(nextReminderAt) && new Date(nextReminderAt).getTime() < Date.now()
     const dueSoon = Boolean(nextReminderAt) && !isDatePast && (new Date(nextReminderAt).getTime() - Date.now()) <= 7 * 24 * 60 * 60 * 1000
-    const bucket = (!sentAt || isDatePast) ? 'needsNow' : (dueSoon ? 'dueSoon' : 'onTrack')
-    return { sentAt, nextReminderAt, isDatePast, dueSoon, bucket }
+    const isFactoryAcked = Boolean(getFactoryAck(row))
+    // No package ever sent yet: split by whether the new-approval notification
+    // has been acknowledged, so unseen approvals stand out from ones that are
+    // simply waiting on their first package to be prepared.
+    const bucket = !sentAt
+      ? (isFactoryAcked ? 'acknowledgedNoPackage' : 'newApproval')
+      : (isDatePast ? 'needsNow' : (dueSoon ? 'dueSoon' : 'onTrack'))
+    return { sentAt, nextReminderAt, isDatePast, dueSoon, bucket, isFactoryAcked }
   }
   const ambassadorDashboardEntries = approvedAmbassadorRows
     .map((row) => ({ row, meta: getAmbassadorDashboardMeta(row) }))
     .sort((a, b) => {
-      const order = { needsNow: 0, dueSoon: 1, onTrack: 2 }
+      const order = { newApproval: 0, acknowledgedNoPackage: 1, needsNow: 2, dueSoon: 3, onTrack: 4 }
       const bucketDiff = order[a.meta.bucket] - order[b.meta.bucket]
       if (bucketDiff !== 0) return bucketDiff
       const da = a.meta.nextReminderAt ? new Date(a.meta.nextReminderAt).getTime() : Number.POSITIVE_INFINITY
@@ -6499,12 +6536,14 @@ const deleteApplication = async (row) => {
   const ambassadorActionQueue = ambassadorDashboardEntries.filter((entry) => entry.meta.bucket !== 'onTrack')
   const jumpToAmbassador = (id) => {
     setOpenIds((prev) => { const next = new Set(prev); next.add(id); return next })
-    setShipmentPanelOpen((prev) => ({ ...prev, [id]: true }))
+    setSectionOpenState((prev) => ({ ...prev, [sectionStateKey(id, 'shipment')]: true }))
     requestAnimationFrame(() => {
       document.getElementById(`ambassador-card-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     })
   }
   const AMBASSADOR_DASHBOARD_GROUPS = [
+    { key: 'newApproval', label: '🆕 New approval — needs acknowledgment', empty: 'No unacknowledged approvals.' },
+    { key: 'acknowledgedNoPackage', label: '🏭 Acknowledged — needs first package', empty: 'Nothing waiting on a first package.' },
     { key: 'needsNow', label: '🔴 Needs package now', empty: 'Nobody is overdue right now.' },
     { key: 'dueSoon', label: '🟡 Due soon (next 7 days)', empty: 'Nothing due in the next week.' },
     { key: 'onTrack', label: '🟢 On track', empty: 'No ambassadors on track yet.' },
@@ -6602,18 +6641,32 @@ const deleteApplication = async (row) => {
                   {isExpanded && (
                     <div className="space-y-1">
                       {entries.map(({ row, meta }) => (
-                        <button
+                        <div
                           key={row.id}
-                          type="button"
-                          onClick={() => jumpToAmbassador(row.id)}
-                          className="flex w-full flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-left text-xs hover:bg-slate-100"
+                          className="flex w-full flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs hover:bg-slate-100"
                         >
-                          <span className="font-semibold text-slate-800">{row.full_name}</span>
-                          <span className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-                            <span>Last sent: {meta.sentAt ? fmtDate(meta.sentAt) : 'Never'}</span>
-                            <span>Next due: {meta.nextReminderAt ? fmtDate(meta.nextReminderAt) : '—'}</span>
-                          </span>
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => jumpToAmbassador(row.id)}
+                            className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2 text-left"
+                          >
+                            <span className="font-semibold text-slate-800">{row.full_name}</span>
+                            <span className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                              <span>Last sent: {meta.sentAt ? fmtDate(meta.sentAt) : 'Never'}</span>
+                              <span>Next due: {meta.nextReminderAt ? fmtDate(meta.nextReminderAt) : '—'}</span>
+                            </span>
+                          </button>
+                          {group.key === 'newApproval' && (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); acknowledgeFactory(row) }}
+                              disabled={saving === row.id}
+                              className="shrink-0 rounded-lg border border-amber-300 bg-white px-2 py-1 text-[11px] font-semibold text-amber-700 hover:bg-amber-50 disabled:opacity-60"
+                            >
+                              🏭 Acknowledge
+                            </button>
+                          )}
+                        </div>
                       ))}
                     </div>
                   )}
@@ -7467,10 +7520,20 @@ const deleteApplication = async (row) => {
 export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
   const [tab, setTab] = useState(() => {
     try {
+      const urlTab = new URLSearchParams(window.location.search).get('tab')
+      if (ADMIN_TAB_KEYS.has(urlTab)) return urlTab
       const saved = localStorage.getItem(ADMIN_TAB_STORAGE_KEY)
       return ADMIN_TAB_KEYS.has(saved) ? saved : 'registrations'
     } catch {
       return 'registrations'
+    }
+  })
+  // Deep-link target from notification emails, e.g. ?tab=ambassadors&ambassador=123
+  const [focusAmbassadorId] = useState(() => {
+    try {
+      return new URLSearchParams(window.location.search).get('ambassador') || null
+    } catch {
+      return null
     }
   })
   const [ambassadorPending, setAmbassadorPending] = useState(0)
@@ -7575,7 +7638,7 @@ export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
         {tab === 'search' && <SearchPanel onOpenTab={setTab} />}
         {tab === 'admins' && <AdminsPanel />}
         {tab === 'pricing' && <TierPricingPanel />}
-        {tab === 'ambassadors' && <AmbassadorApplicationsPanel />}
+        {tab === 'ambassadors' && <AmbassadorApplicationsPanel focusAmbassadorId={focusAmbassadorId} />}
         {tab === 'guestbook' && <GuestbookPanel />}
         {tab === 'draft-carts' && <DraftCartsPanel />}
         {tab === 'studio-one' && <StudioOneRequestsPanel />}
