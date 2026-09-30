@@ -5487,14 +5487,14 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     }
   }
   const AMBASSADOR_TAG_COLUMN = 'Ambassador Tag (do not edit)'
+  // Only ever reflects what's actually queued for the NEXT package — never the
+  // default pack contents or previously shipped items — so an empty list
+  // always means "nothing queued yet", not "looks pre-filled".
+  const plannedItemsList = (row) => packNoteEntries(row).map((entry) => entry.text)
   const ambassadorPackageExportRow = (row) => {
     const type = getAmbassadorType(row)
     const pack = AMBASSADOR_PACKS_BY_TYPE[type] || null
     const history = shipmentHistoryEntries(row)
-    // Only ever show what's actually queued for the NEXT package — never fall
-    // back to the default pack contents or what was shipped last time, so a
-    // blank cell always means "nothing queued yet", not "looks pre-filled".
-    const plannedItems = packNoteEntries(row).map((entry) => entry.text).join(' | ')
     return {
       [AMBASSADOR_TAG_COLUMN]: row.id,
       'Ambassador name': row.full_name,
@@ -5504,7 +5504,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       Status: row.status,
       'Ambassador type': type,
       'New PR Pack': pack?.title || '',
-      Items: plannedItems,
+      items: plannedItemsList(row),
       'Date to be Sent': reminderDateVal(row, null),
       'Tracking number': history[0]?.trackingNumber || row.tracking_number || '',
       'Tracking URL': history[0]?.trackingUrl || row.tracking_url || '',
@@ -5514,8 +5514,20 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     try {
       const allRows = await loadAllAmbassadorRows()
       const exportRows = allRows.map(ambassadorPackageExportRow)
+      // Give every queued item its own column (Item 1, Item 2, ...) instead of
+      // one long delimited cell — reading a package's contents used to mean
+      // scrolling back and forth through a single unreadable run-on line.
+      const maxItemColumns = exportRows.reduce((max, r) => Math.max(max, r.items.length), 0)
+      const itemColumnNames = Array.from({ length: maxItemColumns }, (_, i) => `Item ${i + 1}`)
+      const summaryRows = exportRows.map(({ items, 'Date to be Sent': dateToBeSent, 'Tracking number': trackingNumber, 'Tracking URL': trackingUrl, ...rest }) => ({
+        ...rest,
+        ...Object.fromEntries(itemColumnNames.map((col, i) => [col, items[i] || ''])),
+        'Date to be Sent': dateToBeSent,
+        'Tracking number': trackingNumber,
+        'Tracking URL': trackingUrl,
+      }))
       const workbook = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(exportRows), 'Summary')
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(summaryRows), 'Summary')
       const usedSheetNames = new Set(['Summary'])
       allRows.forEach((row) => {
         const safeBase = String(row.full_name || row.email || `Ambassador ${row.id}`)
@@ -5540,7 +5552,9 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
           ['Country', exported.Country],
           ['Status', exported.Status],
           ['New PR Pack', exported['New PR Pack']],
-          ['Items', exported.Items],
+          ...(exported.items.length > 0
+            ? exported.items.map((item, i) => [`Item ${i + 1}`, item])
+            : [['Items', '(none queued yet)']]),
           ['Date to be Sent', exported['Date to be Sent']],
           ['Tracking number', exported['Tracking number']],
           ['Tracking URL', exported['Tracking URL']],
@@ -5591,8 +5605,19 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
             : requestedPack === 'extreme ambassador pack' || requestedPack === 'extreme ambassador'
               ? 'extreme_ambassador'
               : String(imported['Ambassador type'] || '').trim().toLowerCase()
-        const hasItemsColumn = Object.prototype.hasOwnProperty.call(imported, 'Items')
-        const items = String(imported.Items || '').trim()
+        // Preferred format: one item per "Item 1", "Item 2", ... column. Still
+        // accept the older single pipe-delimited "Items" column so a workbook
+        // downloaded before this change still uploads correctly.
+        const itemColumnKeys = Object.keys(imported)
+          .filter((key) => /^Item\s*\d+$/i.test(key))
+          .sort((a, b) => parseInt(a.match(/\d+/)[0], 10) - parseInt(b.match(/\d+/)[0], 10))
+        const hasLegacyItemsColumn = Object.prototype.hasOwnProperty.call(imported, 'Items')
+        const hasItemsColumn = itemColumnKeys.length > 0 || hasLegacyItemsColumn
+        const itemTexts = itemColumnKeys.length > 0
+          ? itemColumnKeys.map((key) => String(imported[key] || '').trim()).filter(Boolean)
+          : hasLegacyItemsColumn
+            ? String(imported.Items || '').trim().split('|').map((text) => text.trim()).filter(Boolean)
+            : []
         const dateToBeSent = String(imported['Date to be Sent'] || '').trim()
         const hasTrackingNumberColumn = Object.prototype.hasOwnProperty.call(imported, 'Tracking number')
         const hasTrackingUrlColumn = Object.prototype.hasOwnProperty.call(imported, 'Tracking URL')
@@ -5607,7 +5632,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
           && !/^\[PACK_NOTE:[^\]]+\]$/i.test(line.trim())
           && !/^\[SHIPMENT_NEXT_REMINDER_AT:[^\]]+\]$/i.test(line.trim()))
         const packLines = hasItemsColumn
-          ? items.split('|').map((text) => text.trim()).filter(Boolean).map((text) => createPackNoteLine({ stamp: fmtDate(new Date().toISOString()), author: getAdminDisplayLabel(), text }))
+          ? itemTexts.map((text) => createPackNoteLine({ stamp: fmtDate(new Date().toISOString()), author: getAdminDisplayLabel(), text }))
           : existingPackLines
         if (dateToBeSent) {
           const parsedDate = new Date(dateToBeSent)
@@ -5622,7 +5647,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
           .join('\n') || null
         const shipmentPatch = {
           admin_comment: finalComment,
-          ...(hasItemsColumn ? { shipment_details: items || null } : {}),
+          ...(hasItemsColumn ? { shipment_details: itemTexts.join(', ') || null } : {}),
           ...(hasTrackingNumberColumn ? { tracking_number: trackingNumber || null } : {}),
           ...(hasTrackingUrlColumn ? { tracking_url: trackingUrl || null } : {}),
         }
@@ -6364,7 +6389,6 @@ const deleteApplication = async (row) => {
     { key: 'pending', label: 'Pending' },
     { key: 'approved', label: 'Approved' },
     { key: 'paused', label: 'Paused' },
-    { key: 'rejected', label: 'Rejected' },
     { key: 'all', label: 'All' },
   ]
 
