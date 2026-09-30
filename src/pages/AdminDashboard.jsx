@@ -5486,14 +5486,17 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       if (!data || data.length < 1000) return allRows
     }
   }
+  const AMBASSADOR_TAG_COLUMN = 'Ambassador Tag (do not edit)'
   const ambassadorPackageExportRow = (row) => {
     const type = getAmbassadorType(row)
     const pack = AMBASSADOR_PACKS_BY_TYPE[type] || null
     const history = shipmentHistoryEntries(row)
+    // Only ever show what's actually queued for the NEXT package — never fall
+    // back to the default pack contents or what was shipped last time, so a
+    // blank cell always means "nothing queued yet", not "looks pre-filled".
     const plannedItems = packNoteEntries(row).map((entry) => entry.text).join(' | ')
-    const shippedProducts = history.map((entry) => entry.boxContents).filter(Boolean).join(' || ')
     return {
-      ID: row.id,
+      [AMBASSADOR_TAG_COLUMN]: row.id,
       'Ambassador name': row.full_name,
       Email: row.email,
       Instagram: row.instagram,
@@ -5501,7 +5504,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       Status: row.status,
       'Ambassador type': type,
       'New PR Pack': pack?.title || '',
-      Items: plannedItems || pack?.items?.join(' | ') || shippedProducts,
+      Items: plannedItems,
       'Date to be Sent': reminderDateVal(row, null),
       'Tracking number': history[0]?.trackingNumber || row.tracking_number || '',
       'Tracking URL': history[0]?.trackingUrl || row.tracking_url || '',
@@ -5530,7 +5533,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
         const exported = ambassadorPackageExportRow(row)
         const details = [
           ['Field', 'Value'],
-          ['ID', exported.ID],
+          [AMBASSADOR_TAG_COLUMN, exported[AMBASSADOR_TAG_COLUMN]],
           ['Ambassador name', exported['Ambassador name']],
           ['Email', exported.Email],
           ['Instagram', exported.Instagram],
@@ -5573,7 +5576,10 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
         return XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: '' })
       })
       for (const imported of importedRows) {
-        const row = byId.get(String(imported.ID || '').trim())
+        // Accept both the current tag column and the older "ID" header, so a
+        // workbook downloaded before this rename still uploads correctly.
+        const importedTag = imported[AMBASSADOR_TAG_COLUMN] ?? imported.ID
+        const row = byId.get(String(importedTag || '').trim())
           || byEmail.get(String(imported.Email || '').trim().toLowerCase())
           || byInstagram.get(String(imported.Instagram || '').replace(/^@+/, '').trim().toLowerCase())
         if (!row) { skipped += 1; continue }
@@ -5965,8 +5971,13 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       : completedAmbassadorType === 'standard_ambassador'
         ? 'Standard Ambassador'
         : 'Not set'
+  // The preset pack contents (Standard Sample Pack, etc.) only apply to the
+  // very first package ever sent to an ambassador. Every package after that is
+  // hand-picked via "Items for this package" — the type badge is all that
+  // carries forward, not the original starter-kit contents.
+  const isFollowUpPackage = getAmbassadorDashboardMeta(row).shipmentPreviouslySent
   const completedItems = [
-    ...(completedPack?.items || []),
+    ...(isFollowUpPackage ? [] : (completedPack?.items || [])),
     ...packNoteEntries(row).map((entry) => entry.text),
     ...(currentDraft.shipment_details ? [currentDraft.shipment_details] : []),
   ]
@@ -7066,21 +7077,25 @@ const deleteApplication = async (row) => {
                       </div>
                     )}
                     <div className="rounded-lg border border-fuchsia-200 bg-fuchsia-50/60 px-2.5 py-2">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">
-                        {selectedPack ? `${selectedPack.title} contents` : 'Pack contents'}
-                      </p>
-                      {selectedPack ? (
-                        selectedPack.items.length > 0 ? (
-                          <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-700">
-                            {selectedPack.items.map((item) => (
-                              <li key={item}>{item}</li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="mt-1 text-[11px] text-slate-600">Pack details not added yet for this type.</p>
-                        )
-                      ) : (
-                        <p className="mt-1 text-[11px] text-slate-500">Select an ambassador type above to view the pack contents.</p>
+                      {!shipmentPreviouslySent && (
+                        <>
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">
+                            {selectedPack ? `${selectedPack.title} contents` : 'Pack contents'}
+                          </p>
+                          {selectedPack ? (
+                            selectedPack.items.length > 0 ? (
+                              <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-700">
+                                {selectedPack.items.map((item) => (
+                                  <li key={item}>{item}</li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="mt-1 text-[11px] text-slate-600">Pack details not added yet for this type.</p>
+                            )
+                          ) : (
+                            <p className="mt-1 text-[11px] text-slate-500">Select an ambassador type above to view the pack contents.</p>
+                          )}
+                        </>
                       )}
                       <div className="mt-2">
                         <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Items for this package</p>
