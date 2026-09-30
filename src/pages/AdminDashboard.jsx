@@ -4673,10 +4673,8 @@ function AmbassadorApplicationsPanel() {
   const [codePerformanceByCode, setCodePerformanceByCode] = useState({})
   const [currentAdminEmail, setCurrentAdminEmail] = useState('')
   const [reminderDateDraft, setReminderDateDraft] = useState({})
-  const [reminderNoteDraft, setReminderNoteDraft] = useState({})
 const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail, date } forces a next-ship date before tracking saves
   const [openIds, setOpenIds] = useState(() => new Set()) // which applicant cards are expanded
-  const [shipmentPanelOpen, setShipmentPanelOpen] = useState({})
   const [nextPackageMode, setNextPackageMode] = useState({})
   const [sectionOpenState, setSectionOpenState] = useState({})
   const [shipmentEntryOpen, setShipmentEntryOpen] = useState({})
@@ -4914,60 +4912,6 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       return next
     })
   }
-  const openReminderDraft = (row, sentAtIso, sentAtLabel, nextReminderAtIso, nextReminderNoteText) => {
-    const dueLabel = nextReminderAtIso ? fmtDate(nextReminderAtIso) : 'in 1 month'
-    const body = [
-      `Ambassador: ${row?.full_name || '-'}`,
-      `Email: ${row?.email || '-'}`,
-      `Instagram: @${row?.instagram || '-'}`,
-      `Last shipment email sent: ${sentAtLabel || (sentAtIso ? fmtDateTime(sentAtIso) : 'Unknown')}`,
-      `Next sample kit due: ${dueLabel}`,
-      `What to send: ${String(nextReminderNoteText || '').trim() || '(not set)'}`,
-      '',
-      'Please prepare and send the next sample kit follow-up.',
-    ].join('\n')
-    const subject = `Reminder: Send next GEL.IT.UP sample kit to ${row?.full_name || row?.email || 'ambassador'}`
-    const href = `mailto:${encodeURIComponent(AMBASSADOR_REMINDER_EMAIL)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-    window.location.href = href
-  }
-  const startNextPackageFlow = async (row) => {
-    persistShipmentEmailLock((prev) => {
-      const next = { ...prev }
-      delete next[row.id]
-      return next
-    })
-    const nextPackageRow = { ...row, shipment_details: null, tracking_number: null, tracking_url: null }
-    const { error: resetError } = await supabase
-      .from(AMBASSADOR_TABLE)
-      .update({ shipment_details: null, tracking_number: null, tracking_url: null })
-      .eq('id', row.id)
-    if (resetError) {
-      alert(`Could not clear previous tracking details: ${resetError.message}`)
-      return
-    }
-    patchRow(row.id, { shipment_details: null, tracking_number: null, tracking_url: null })
-    setShip((prev) => ({ ...prev, [row.id]: { shipment_details: '', tracking_number: '', tracking_url: '' } }))
-    const metaResult = await saveShipmentMeta(nextPackageRow, {
-      sentAt: '',
-      nextReminderAt: '',
-      nextReminderNote: '',
-      nextPackageOpen: 'TRUE',
-    })
-    if (!metaResult.ok) {
-      alert(`Could not reset closed shipment flow: ${metaResult.error}`)
-      return
-    }
-    // Clear any products manually added for the package that was just sent so
-    // the next cycle starts blank — what was actually sent is preserved in
-    // the package history archive line, this only clears the editable list.
-    const cleared = await savePackNotes({ ...row, admin_comment: metaResult.comment }, [])
-    if (!cleared) return
-    setPackAdditionDraft((prev) => ({ ...prev, [row.id]: '' }))
-    setReminderDateDraft((prev) => ({ ...prev, [row.id]: '' }))
-    setReminderNoteDraft((prev) => ({ ...prev, [row.id]: '' }))
-    setNextPackageMode((prev) => ({ ...prev, [row.id]: true }))
-    setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: true }))
-  }
   const saveReminderDetails = async (row, sentAtIso, fallbackReminderAtIso) => {
     const rawDate = String(reminderDateVal(row, fallbackReminderAtIso) || '').trim()
     const parsedReminderAt = rawDate ? new Date(`${rawDate}T10:00:00Z`) : null
@@ -4983,31 +4927,17 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
           ? new Date(new Date(sentAtIso).getTime() + (Number(followUpPack.daysAfterDispatch || 28) * 24 * 60 * 60 * 1000)).toISOString()
           : addOneMonth(sentAtIso))
         : '')
-    const nextReminderNote = String(reminderNoteVal(row) || '').trim()
-    const previousReminderNote = decodeReminderNote(readMetaTag(row, 'SHIPMENT_REMINDER_NOTE'))
     setSaving(row.id)
-    const result = await saveShipmentMeta(row, { nextReminderAt, nextReminderNote })
+    const result = await saveShipmentMeta(row, { nextReminderAt })
     if (!result.ok) {
       setSaving(null)
       setEmail(row.id, 'error', `Could not save reminder details: ${result.error}`)
       alert(`Could not save reminder details: ${result.error}`)
       return
     }
-    const shouldNotify = nextReminderNote && nextReminderNote !== previousReminderNote
-    const emailResult = shouldNotify
-      ? await sendAmbassadorNoteNotifications({
-          row,
-          note: nextReminderNote,
-          noteType: 'next-package reminder note',
-          author: getAdminDisplayLabel(),
-          stamp: fmtDate(new Date().toISOString()),
-        })
-      : { ok: true }
     setSaving(null)
     setReminderDateDraft((prev) => ({ ...prev, [row.id]: nextReminderAt ? nextReminderAt.slice(0, 10) : '' }))
-    setReminderNoteDraft((prev) => ({ ...prev, [row.id]: nextReminderNote }))
-    setEmail(row.id, emailResult.ok ? 'sent' : 'error', emailResult.ok ? 'Reminder details saved' : 'Reminder saved; notification email failed')
-    if (!emailResult.ok) alert(`Reminder note saved, but notification email failed: ${emailResult.error}`)
+    setEmail(row.id, 'sent', 'Reminder date saved')
     await load()
   }
 
@@ -5289,11 +5219,6 @@ const after = text.slice(idx + m[0].length)
 return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] font-semibold" style={{ backgroundColor: swatch.bg, color: swatch.text, borderColor: swatch.border }}>{email}</span>{after}</>)
 }
   const readMetaTag = (row, tagName) => extractTaggedRawValue(row?.admin_comment, tagName)
-  const decodeReminderNote = (value) => {
-    const raw = String(value || '').trim()
-    if (!raw) return ''
-    try { return decodeURIComponent(raw) } catch (_) { return raw }
-  }
   const encodeReminderNote = (value) => {
     const raw = String(value || '').trim()
     return raw ? encodeURIComponent(raw) : ''
@@ -5303,12 +5228,6 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     return AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE[normalized] || null
   }
   const getFollowUpPackForRow = (row) => getFollowUpPackForType(getAmbassadorType(row))
-  const resolveFollowUpReminderNote = (row, fallbackText = '') => {
-    const explicit = String(reminderNoteVal(row) || fallbackText || '').trim()
-    if (explicit) return explicit
-    const followUpPack = getFollowUpPackForRow(row)
-    return followUpPack ? followUpPack.items.join(', ') : ''
-  }
   const getDefaultFollowUpDateValue = (row, baseIso = new Date().toISOString()) => {
     const followUpPack = getFollowUpPackForRow(row)
     if (!followUpPack) return ''
@@ -5325,9 +5244,6 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     }
     if (Object.prototype.hasOwnProperty.call(patch, 'nextReminderAt')) {
       nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_NEXT_REMINDER_AT', patch.nextReminderAt || '')
-    }
-    if (Object.prototype.hasOwnProperty.call(patch, 'nextReminderNote')) {
-      nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_REMINDER_NOTE', encodeReminderNote(patch.nextReminderNote))
     }
     if (Object.prototype.hasOwnProperty.call(patch, 'officeReminderAt')) {
       nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_OFFICE_REMINDER_AT', patch.officeReminderAt || '')
@@ -5453,10 +5369,6 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     }
     
     alert(`Updated ${updated.length} ambassadors sent this week:\n${updated.join('\n')}`)
-  }
-  const reminderNoteVal = (row) => {
-    if (Object.prototype.hasOwnProperty.call(reminderNoteDraft, row.id)) return reminderNoteDraft[row.id]
-    return decodeReminderNote(readMetaTag(row, 'SHIPMENT_REMINDER_NOTE'))
   }
   const reminderDateVal = (row, fallbackIso) => {
     if (Object.prototype.hasOwnProperty.call(reminderDateDraft, row.id)) return reminderDateDraft[row.id]
@@ -5884,7 +5796,17 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   const createPackNoteLine = ({ stamp, author, text }) => `[PACK_NOTE:${encodeURIComponent(JSON.stringify({ stamp, author, text }))}]`
   const savePackNotes = async (row, lines) => {
     const preserved = String(row.admin_comment || '').split('\n').filter((line) => line.trim() && !/^\[PACK_NOTE:[^\]]+\]$/i.test(line.trim()))
-    const newLog = [...preserved, ...lines].join('\n') || null
+    // Keep the internal office-reminder email (send-ambassador-pr-reminders.js)
+    // in sync with whatever is actually in the items list — default pack
+    // contents plus every extra item currently on the list — so that
+    // scheduled reminder never goes out blank.
+    const pack = AMBASSADOR_PACKS_BY_TYPE[getAmbassadorType(row)] || null
+    const itemsText = [
+      ...(pack?.items || []),
+      ...lines.map((line) => parsePackNote(line)?.text).filter(Boolean),
+    ].join(', ')
+    const nextComment = ensureTaggedValue([...preserved, ...lines].join('\n'), 'SHIPMENT_OFFICE_REMINDER_ITEMS', encodeReminderNote(itemsText))
+    const newLog = nextComment || null
     setSaving(row.id)
     const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: newLog }).eq('id', row.id)
     if (err) { setSaving(null); alert(err.message); return false }
@@ -6121,7 +6043,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       return
     }
     const currentShipmentItems = String(currentDraft.shipment_details || '').trim()
-    const nextReminderNote = ''
+    const packedItemsText = completedItems.join(', ')
     const { subject, html } = buildAmbassadorShipmentEmail(
       updatedRow,
       { ...draft, shipment_details: currentShipmentItems || draft.shipment_details || '' },
@@ -6154,12 +6076,11 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
         {
           sentAt,
           nextReminderAt,
-          nextReminderNote,
           officeReminderAt,
           officeReminderSentAt: '',
           officeReminderDispatchedAt: sentAt,
           officeReminderNextPackageAt: nextReminderAt,
-          officeReminderItems: nextReminderNote,
+          officeReminderItems: packedItemsText,
           nextPackageOpen: 'TRUE',
         },
       )
@@ -6192,7 +6113,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       const previousDispatchNotificationSignature = extractTaggedRawValue(nextPackageComment, 'SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SIGNATURE')
       let notificationResult = { ok: true }
       if (previousDispatchNotificationSignature !== dispatchNotificationSignature) {
-        const notification = buildAmbassadorShipmentNotificationEmail(updatedRow, draft, sentAt, nextReminderAt, nextReminderNote)
+        const notification = buildAmbassadorShipmentNotificationEmail(updatedRow, draft, sentAt, nextReminderAt, packedItemsText)
         notificationResult = await sendAmbassadorEmail({
           to: AMBASSADOR_SHIPMENT_NOTIFICATION_EMAIL,
           subject: notification.subject,
@@ -6215,9 +6136,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       setShip((prev) => ({ ...prev, [row.id]: { shipment_details: '', tracking_number: '', tracking_url: '' } }))
       setPackAdditionDraft((prev) => ({ ...prev, [row.id]: '' }))
       setReminderDateDraft((prev) => ({ ...prev, [row.id]: nextReminderAt ? nextReminderAt.slice(0, 10) : '' }))
-      setReminderNoteDraft((prev) => ({ ...prev, [row.id]: '' }))
       setNextPackageMode((prev) => ({ ...prev, [row.id]: true }))
-      setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: true }))
       setSectionOpenState((prev) => ({
         ...prev,
         [sectionStateKey(row.id, 'shipment')]: true,
@@ -6238,7 +6157,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   } else {
     const defaultFollowUpDate = getDefaultFollowUpDateValue(row, new Date().toISOString())
     const chosenReminderRawB = String(overrideReminderDate || reminderDateVal(row, defaultFollowUpDate) || defaultFollowUpDate || '').trim()
-    const nextReminderNote = ''
+    const packedItemsText = completedItems.join(', ')
     const sentAt = new Date().toISOString()
     const officeReminderAt = new Date(new Date(sentAt).getTime() + 28 * 24 * 60 * 60 * 1000).toISOString()
     if (chosenReminderRawB) {
@@ -6249,17 +6168,15 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
           ? {
               sentAt,
               nextReminderAt: chosenIso,
-              nextReminderNote,
               officeReminderAt,
               officeReminderSentAt: '',
               officeReminderDispatchedAt: sentAt,
               officeReminderNextPackageAt: chosenIso,
-              officeReminderItems: nextReminderNote,
+              officeReminderItems: packedItemsText,
               nextPackageOpen: 'TRUE',
             }
           : {
               nextReminderAt: chosenIso,
-              nextReminderNote,
             },
       )
       if (!metaResult.ok) {
@@ -6268,7 +6185,6 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
         return
       }
       setReminderDateDraft((prev) => ({ ...prev, [row.id]: chosenIso.slice(0, 10) }))
-      setReminderNoteDraft((prev) => ({ ...prev, [row.id]: '' }))
       if (hasShipmentInfo) {
         const nextPackageComment = String(metaResult.comment || '')
           .split('\n')
@@ -6297,7 +6213,6 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
         setShip((prev) => ({ ...prev, [row.id]: { shipment_details: '', tracking_number: '', tracking_url: '' } }))
         setPackAdditionDraft((prev) => ({ ...prev, [row.id]: '' }))
         setNextPackageMode((prev) => ({ ...prev, [row.id]: true }))
-        setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: true }))
         setSectionOpenState((prev) => ({
           ...prev,
           [sectionStateKey(row.id, 'shipment')]: true,
@@ -6317,11 +6232,11 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     shipmentSaveInFlightRef.current.delete(shipmentSaveKey)
   }
 } 
-const resendShipmentEmail = async (row, nextReminderAt) => {
-  const trackingNumber = String(row?.tracking_number || '').trim()
-  const trackingUrl = String(row?.tracking_url || '').trim()
+const resendShipmentEmail = async (row, nextReminderAt, trackingOverride) => {
+  const trackingNumber = String(trackingOverride?.trackingNumber || row?.tracking_number || '').trim()
+  const trackingUrl = String(trackingOverride?.trackingUrl || row?.tracking_url || '').trim()
   if (!trackingNumber || !trackingUrl) {
-    alert('Tracking number and tracking URL must be saved on this record before resending.')
+    alert('No tracking number/URL found for the last shipped package — nothing to resend.')
     return
   }
   const fullName = String(row?.full_name || '').trim()
@@ -6737,11 +6652,6 @@ const deleteApplication = async (row) => {
             const sentAtLabel = sentAt ? fmtDateTime(sentAt) : (shipmentHistory.sentAtLabel || null)
             const shipmentPreviouslySent = Boolean(sentAt || shipmentHistory.sentAtLabel)
             const nextReminderAt = reminderAtMeta || (sentAt ? addOneMonth(sentAt) : null)
-            const nextReminderNote = reminderNoteVal(row)
-            const nextPackageItems = (() => {
-              const noteText = String(nextReminderNote || '').trim()
-              return noteText ? noteText.split(',').map((item) => item.trim()).filter(Boolean) : []
-            })()
             const contractAlreadySent = hasWelcomeContractSent(row)
             const ambassadorType = getAmbassadorType(row)
             const factoryAckValue = getFactoryAck(row)
@@ -6753,10 +6663,6 @@ const deleteApplication = async (row) => {
                 ? 'Standard Ambassador'
                 : 'Not set'
             const selectedPack = AMBASSADOR_PACKS_BY_TYPE[ambassadorType] || null
-            const isNextPackageMode = Boolean(nextPackageMode[row.id])
-              || readMetaTag(row, 'SHIPMENT_NEXT_PACKAGE_OPEN').toUpperCase() === 'TRUE'
-            const isShipmentClosed = shipmentPreviouslySent && !isNextPackageMode
-            const isShipmentPanelExpanded = shipmentPanelOpen[row.id] ?? !isShipmentClosed
             const isDatePast = nextReminderAt && new Date(nextReminderAt) < new Date()
             const nextPackageDueBadge = nextReminderAt ? (
               <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
@@ -7115,11 +7021,11 @@ const deleteApplication = async (row) => {
                     >
                       <div>
                         <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">
-                          {shipmentPreviouslySent ? 'Next PR package & follow-up' : 'Initial PR package'}
+                          {shipmentPreviouslySent ? 'Next PR package' : 'Initial PR package'}
                         </p>
                         <p className="mt-0.5 text-[11px] text-slate-500">
                           {shipmentPreviouslySent
-                            ? 'Initial package complete. Add the next package date, planned items, and new tracking details here.'
+                            ? 'Add items, a ship-by date, and tracking details for the next package.'
                             : 'Only the tracking number & URL are emailed to the ambassador. Box contents and comments stay internal.'}
                         </p>
                       </div>
@@ -7127,110 +7033,53 @@ const deleteApplication = async (row) => {
                     </button>
                     {isShipmentSectionOpen && (
                       <div className="space-y-2">
-                    {!shipmentPreviouslySent && (
                     <div className="mt-2 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
                       <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Ambassador package type</p>
-                      <p className="mt-0.5 text-[11px] text-slate-500">Selected type: <span className="font-semibold text-slate-700">{ambassadorTypeLabel}</span></p>
-                      <div className="mt-1.5 flex flex-wrap gap-3 text-[11px]">
-                        <label className="inline-flex items-center gap-1.5 text-slate-700">
-                          <input
-                            type="checkbox"
-                            checked={ambassadorType === 'standard_ambassador'}
-                            disabled={saving === row.id}
-                            onChange={() => setAmbassadorType(row, ambassadorType === 'standard_ambassador' ? '' : 'standard_ambassador')}
-                          />
-                          Standard Ambassador
-                        </label>
-                        <label className="inline-flex items-center gap-1.5 text-slate-700">
-                          <input
-                            type="checkbox"
-                            checked={ambassadorType === 'super_ambassador'}
-                            disabled={saving === row.id}
-                            onChange={() => setAmbassadorType(row, ambassadorType === 'super_ambassador' ? '' : 'super_ambassador')}
-                          />
-                          Super Ambassador
-                        </label>
-                        <label className="inline-flex items-center gap-1.5 text-slate-700">
-                          <input
-                            type="checkbox"
-                            checked={ambassadorType === 'extreme_ambassador'}
-                            disabled={saving === row.id}
-                            onChange={() => setAmbassadorType(row, ambassadorType === 'extreme_ambassador' ? '' : 'extreme_ambassador')}
-                          />
-                          Extreme Ambassador
-                        </label>
-                      </div>
-                      {selectedPack ? (
-                        <div className="mt-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50/60 px-2.5 py-2">
-                          <p className="text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">{selectedPack.title} contents</p>
-                          {selectedPack.items.length > 0 ? (
-                            <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-700">
-                              {selectedPack.items.map((item) => (
-                                <li key={item}>{item}</li>
-                              ))}
-                            </ul>
-                          ) : (
-                            <p className="mt-1 text-[11px] text-slate-600">Pack details not added yet for this type.</p>
-                          )}
-                          <div className="mt-2">
-                            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Extra items to add</p>
-                            {packNoteEntries(row).length > 0 && (
-                              <div className="mt-1 space-y-1">
-                                {packNoteEntries(row).map((entry, idx) => {
-                                  const swatch = authorSwatch(entry.author)
-                                  return (
-                                    <div key={idx} className="flex items-start justify-between gap-2 rounded border border-fuchsia-100 bg-white px-2 py-1.5 text-[11px] text-slate-700">
-                                      <span className="min-w-0 whitespace-pre-line">
-                                        <span className="mb-0.5 flex flex-wrap items-center gap-1.5">
-                                          <span className="text-[10px] text-slate-400">{entry.stamp || '—'}</span>
-                                          <span
-                                            className="rounded border px-1.5 py-0.5 text-[10px] font-semibold"
-                                            style={{ backgroundColor: swatch.bg, color: swatch.text, borderColor: swatch.border }}
-                                          >
-                                            {entry.author || 'admin not recorded'}
-                                          </span>
-                                        </span>
-                                        <span>{entry.text}</span>
-                                      </span>
-                                      <span className="flex shrink-0 gap-1.5">
-                                        <button type="button" title="Edit" onClick={() => editPackNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-slate-700 disabled:opacity-50">✎</button>
-                                        <button type="button" title="Delete" onClick={() => deletePackNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-rose-600 disabled:opacity-50">🗑</button>
-                                      </span>
-                                    </div>
-                                  )
-                                })}
-                              </div>
-                            )}
-                            <textarea
-                              value={packAdditionDraft[row.id] || ''}
-                              onChange={(e) => setPackAdditionDraft((prev) => ({ ...prev, [row.id]: e.target.value }))}
-                              placeholder="Write anything extra to add to this pack..."
-                              rows={2}
-                              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => addPackNote(row)}
-                              disabled={saving === row.id || !String(packAdditionDraft[row.id] || '').trim()}
-                              className="mt-1.5 rounded-lg border border-fuchsia-300 bg-white px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-60"
-                            >
-                              Add item
-                            </button>
+                      {!shipmentPreviouslySent ? (
+                        <>
+                          <p className="mt-0.5 text-[11px] text-slate-500">Selected type: <span className="font-semibold text-slate-700">{ambassadorTypeLabel}</span></p>
+                          <div className="mt-1.5 flex flex-wrap gap-3 text-[11px]">
+                            <label className="inline-flex items-center gap-1.5 text-slate-700">
+                              <input
+                                type="checkbox"
+                                checked={ambassadorType === 'standard_ambassador'}
+                                disabled={saving === row.id}
+                                onChange={() => setAmbassadorType(row, ambassadorType === 'standard_ambassador' ? '' : 'standard_ambassador')}
+                              />
+                              Standard Ambassador
+                            </label>
+                            <label className="inline-flex items-center gap-1.5 text-slate-700">
+                              <input
+                                type="checkbox"
+                                checked={ambassadorType === 'super_ambassador'}
+                                disabled={saving === row.id}
+                                onChange={() => setAmbassadorType(row, ambassadorType === 'super_ambassador' ? '' : 'super_ambassador')}
+                              />
+                              Super Ambassador
+                            </label>
+                            <label className="inline-flex items-center gap-1.5 text-slate-700">
+                              <input
+                                type="checkbox"
+                                checked={ambassadorType === 'extreme_ambassador'}
+                                disabled={saving === row.id}
+                                onChange={() => setAmbassadorType(row, ambassadorType === 'extreme_ambassador' ? '' : 'extreme_ambassador')}
+                              />
+                              Extreme Ambassador
+                            </label>
                           </div>
-                        </div>
+                        </>
                       ) : (
-                        <p className="mt-2 text-[11px] text-slate-500">Select an ambassador type to view the pack contents.</p>
+                        <p className="mt-0.5 text-xs font-semibold text-slate-700">{ambassadorTypeLabel}</p>
                       )}
                     </div>
-                    )}
                     {shipmentEntries.length > 0 && (
-                      <div className="mt-2 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
+                      <div className="rounded-lg border border-slate-200 bg-white px-2.5 py-2">
                         <button
                           type="button"
                           onClick={() => toggleSection(row.id, 'history')}
                           className="flex w-full items-center justify-between text-left"
                         >
-                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Monthly package history</p>
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Package history</p>
                           <span className="text-[11px] font-semibold text-slate-600">{isHistorySectionOpen ? 'Hide' : `Show (${shipmentEntries.length})`}</span>
                         </button>
                         {isHistorySectionOpen && (
@@ -7263,72 +7112,72 @@ const deleteApplication = async (row) => {
                         )}
                       </div>
                     )}
-                    {isShipmentClosed && !isShipmentPanelExpanded && (
-                      <div className="mt-2 rounded-lg border border-emerald-200 bg-white px-2.5 py-2 text-[11px]">
-                        <p className="font-semibold text-emerald-700">✅ Shipment flow closed</p>
-                        <p className="text-slate-600">Last shipment email sent: {sentAtLabel || 'Recorded in history'}</p>
-                        <p className="text-slate-600">
-                          Next package date: {nextReminderAt ? fmtDate(nextReminderAt) : 'Set when shipment date is available'}
-                        </p>
-                        <p className="text-slate-600">What to send: {nextReminderNote || 'Not set'}</p>
-                        {nextPackageItems.length > 0 && (
-                          <div className="mt-2 rounded border border-fuchsia-200 bg-fuchsia-50/80 px-2 py-1.5">
-                            <p className="text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">Scheduled next package items</p>
-                            <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-700">
-                              {nextPackageItems.map((item) => (
-                                <li key={item}>{item}</li>
-                              ))}
-                            </ul>
+                    <div className="rounded-lg border border-fuchsia-200 bg-fuchsia-50/60 px-2.5 py-2">
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">
+                        {selectedPack ? `${selectedPack.title} contents` : 'Pack contents'}
+                      </p>
+                      {selectedPack ? (
+                        selectedPack.items.length > 0 ? (
+                          <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-700">
+                            {selectedPack.items.map((item) => (
+                              <li key={item}>{item}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="mt-1 text-[11px] text-slate-600">Pack details not added yet for this type.</p>
+                        )
+                      ) : (
+                        <p className="mt-1 text-[11px] text-slate-500">Select an ambassador type above to view the pack contents.</p>
+                      )}
+                      <div className="mt-2">
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Items for this package</p>
+                        {packNoteEntries(row).length > 0 && (
+                          <div className="mt-1 space-y-1">
+                            {packNoteEntries(row).map((entry, idx) => {
+                              const swatch = authorSwatch(entry.author)
+                              return (
+                                <div key={idx} className="flex items-start justify-between gap-2 rounded border border-fuchsia-100 bg-white px-2 py-1.5 text-[11px] text-slate-700">
+                                  <span className="min-w-0 whitespace-pre-line">
+                                    <span className="mb-0.5 flex flex-wrap items-center gap-1.5">
+                                      <span className="text-[10px] text-slate-400">{entry.stamp || '—'}</span>
+                                      <span
+                                        className="rounded border px-1.5 py-0.5 text-[10px] font-semibold"
+                                        style={{ backgroundColor: swatch.bg, color: swatch.text, borderColor: swatch.border }}
+                                      >
+                                        {entry.author || 'admin not recorded'}
+                                      </span>
+                                    </span>
+                                    <span>{entry.text}</span>
+                                  </span>
+                                  <span className="flex shrink-0 gap-1.5">
+                                    <button type="button" title="Edit" onClick={() => editPackNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-slate-700 disabled:opacity-50">✎</button>
+                                    <button type="button" title="Delete" onClick={() => deletePackNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-rose-600 disabled:opacity-50">🗑</button>
+                                  </span>
+                                </div>
+                              )
+                            })}
                           </div>
                         )}
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          <button onClick={() => setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: true }))} className="rounded-lg border border-slate-300 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">Expand details</button>
-                          <button onClick={() => resendShipmentEmail(row, nextReminderAt)} disabled={saving === row.id} className="rounded-lg border border-sky-300 px-2.5 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-50 disabled:opacity-60">Resend tracking email</button>
-                          <button onClick={() => startNextPackageFlow(row)} className="rounded-lg border border-fuchsia-300 px-2.5 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50">Start next package</button>
-                        </div>
-                        <div className="mt-2 flex gap-2">
-                          <input
-                            value={noteDraft[row.id] || ''}
-                            onChange={(e) => setNoteDraft(prev => ({ ...prev, [row.id]: e.target.value }))}
-                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addNote(row) } }}
-                            placeholder="Add a note about this shipment…"
-                            className="flex-1 rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-[11px]"
-                          />
-                          <button onClick={() => addNote(row)} disabled={saving === row.id || !(noteDraft[row.id] || '').trim()} className="rounded-lg border border-slate-300 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Add note</button>
-                        </div>
-                      </div>
-                    )}
-                    {isShipmentPanelExpanded && (
-                    <div className="mt-2 space-y-2">
-                      {isShipmentClosed && (
-                        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[11px]">
-                          <p className="text-emerald-700">Closed shipment record: {sentAtLabel || 'Recorded in history'}</p>
-                          <button onClick={() => setShipmentPanelOpen((prev) => ({ ...prev, [row.id]: false }))} className="rounded border border-emerald-300 px-2 py-0.5 font-semibold text-emerald-700 hover:bg-emerald-100">Collapse</button>
-                        </div>
-                      )}
-                      {shipmentPreviouslySent && (
-                        <div className="rounded-lg border border-slate-200 bg-white px-2.5 py-2">
-                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Ambassador type</p>
-                          <p className="mt-0.5 text-xs font-semibold text-slate-700">{ambassadorTypeLabel}</p>
-                        </div>
-                      )}
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <input
-                          value={shipVal(row, 'tracking_number')}
-                          onChange={(e) => setShipField(row.id, 'tracking_number', e.target.value)}
-                          placeholder="Tracking number"
-                          className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
+                        <textarea
+                          value={packAdditionDraft[row.id] || ''}
+                          onChange={(e) => setPackAdditionDraft((prev) => ({ ...prev, [row.id]: e.target.value }))}
+                          placeholder="Write anything extra to add to this pack..."
+                          rows={2}
+                          className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700"
                         />
-                        <input
-                          value={shipVal(row, 'tracking_url')}
-                          onChange={(e) => setShipField(row.id, 'tracking_url', e.target.value)}
-                          placeholder="Tracking URL"
-                          className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
-                        />
+                        <button
+                          type="button"
+                          onClick={() => addPackNote(row)}
+                          disabled={saving === row.id || !String(packAdditionDraft[row.id] || '').trim()}
+                          className="mt-1.5 rounded-lg border border-fuchsia-300 bg-white px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-60"
+                        >
+                          Add item
+                        </button>
                       </div>
-                      {shipmentPreviouslySent && (
+                    </div>
+                    {shipmentPreviouslySent && (
                       <div className="rounded-lg border border-slate-200 bg-white p-2.5">
-                        <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Next package</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Next package date</p>
                         <div className="mt-1.5 grid gap-2 sm:grid-cols-2">
                           <input
                             type="date"
@@ -7342,160 +7191,143 @@ const deleteApplication = async (row) => {
                             disabled={saving === row.id}
                             className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60"
                           >
-                            Save reminder details
+                            Save date
                           </button>
                         </div>
-                          <div className="mt-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50/60 p-2">
-                            <p className="text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">Products for this package</p>
-                            {nextPackageItems.length > 0 && (
-                              <div className="mt-1 rounded border border-fuchsia-200 bg-white px-2 py-1.5">
-                                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Default reminder pack</p>
-                                <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-700">
-                                  {nextPackageItems.map((item) => (
-                                    <li key={item}>{item}</li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            {packNoteEntries(row).length > 0 && (
-                              <div className="mt-2 space-y-1">
-                                {packNoteEntries(row).map((entry, idx) => (
-                                  <div key={idx} className="flex items-center justify-between gap-2 rounded border border-fuchsia-100 bg-white px-2 py-1.5 text-[11px] text-slate-700">
-                                    <span>{entry.text}</span>
-                                    <button type="button" title="Delete product" onClick={() => deletePackNote(row, idx)} disabled={saving === row.id} className="shrink-0 text-slate-400 hover:text-rose-600 disabled:opacity-50">×</button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            <div className="mt-1.5 flex gap-2">
-                              <input
-                                value={packAdditionDraft[row.id] || ''}
-                                onChange={(e) => setPackAdditionDraft((prev) => ({ ...prev, [row.id]: e.target.value }))}
-                                placeholder="Add a product"
-                                className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs"
-                              />
-                              <button type="button" onClick={() => addPackNote(row)} disabled={saving === row.id || !String(packAdditionDraft[row.id] || '').trim()} className="rounded-lg border border-fuchsia-300 bg-white px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-60">Add</button>
-                            </div>
-                          </div>
                       </div>
+                    )}
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <input
+                        value={shipVal(row, 'tracking_number')}
+                        onChange={(e) => setShipField(row.id, 'tracking_number', e.target.value)}
+                        placeholder="Tracking number"
+                        className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
+                      />
+                      <input
+                        value={shipVal(row, 'tracking_url')}
+                        onChange={(e) => setShipField(row.id, 'tracking_url', e.target.value)}
+                        placeholder="Tracking URL"
+                        className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
+                      />
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button onClick={() => requestShipmentSave(row, false)} disabled={saving === row.id || !trackingFlowReady} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60">Save package (no email)</button>
+                      <button onClick={() => requestShipmentSave(row, true)} disabled={saving === row.id || !trackingFlowReady} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
+                      {shipmentEntries.length > 0 && (
+                        <button
+                          onClick={() => resendShipmentEmail(row, nextReminderAt, { trackingNumber: shipmentEntries[0].trackingNumber, trackingUrl: shipmentEntries[0].trackingUrl })}
+                          disabled={saving === row.id}
+                          className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50 disabled:opacity-60"
+                        >
+                          Resend last tracking email
+                        </button>
                       )}
-                      <div className="flex flex-wrap gap-2">
-                        <button onClick={() => requestShipmentSave(row, false)} disabled={saving === row.id || (isShipmentClosed && !isNextPackageMode) || !trackingFlowReady} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60">Save package (no email)</button>
-                        <button onClick={() => requestShipmentSave(row, true)} disabled={saving === row.id || (isShipmentClosed && !isNextPackageMode) || !trackingFlowReady} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
-                        {isShipmentClosed && !isNextPackageMode && (
-                          <>
-                            <button onClick={() => resendShipmentEmail(row, nextReminderAt)} disabled={saving === row.id} className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50 disabled:opacity-60">Resend tracking email</button>
-                            <button onClick={() => startNextPackageFlow(row)} className="rounded-lg border border-fuchsia-300 px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50">Start next package</button>
-                          </>
-                        )}
-                      </div>
-                      {!trackingFlowReady && (
-                        <p className="text-[11px] font-semibold text-amber-700">
-                          To complete this flow, fill in both tracking number and tracking URL.
+                    </div>
+                    {!trackingFlowReady && (
+                      <p className="text-[11px] font-semibold text-amber-700">
+                        To complete this flow, fill in both tracking number and tracking URL.
+                      </p>
+                    )}
+                    {isShipmentLocked && (
+                      <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-[11px]">
+                        <p className="font-semibold text-emerald-700">✅ Email sent on {fmtDateTime(sentAt)}.</p>
+                        <p className="text-slate-600">
+                          Next package date: {fmtDate(nextReminderAt)}
                         </p>
-                      )}
-                      {isShipmentLocked && (
-                        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-[11px]">
-                          <p className="font-semibold text-emerald-700">✅ Email sent on {fmtDateTime(sentAt)}.</p>
-                          <p className="text-slate-600">
-                            Next package date: {fmtDate(nextReminderAt)}
-                          </p>
-                          <p className="text-slate-500">To send the next package, update shipment details or tracking and the send button will enable again.</p>
-                          {(() => {
-                            const nextInQueue = ambassadorActionQueue.find((entry) => entry.row.id !== row.id)
-                            if (!nextInQueue) return null
-                            return (
-                              <button
-                                type="button"
-                                onClick={() => jumpToAmbassador(nextInQueue.row.id)}
-                                className="mt-2 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100"
-                              >
-                                Next ambassador needing a package → {nextInQueue.row.full_name}
-                              </button>
-                            )
-                          })()}
-                        </div>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => toggleSection(row.id, 'emailPreview')}
-                        className="text-left text-[11px] font-semibold text-sky-700 hover:underline"
-                      >
-                        {isSectionOpen(row.id, 'emailPreview', false) ? 'Hide email preview ▲' : (isShipmentLocked ? 'Show sent email ▼' : 'Preview shipment email ▼')}
-                      </button>
-                      {isSectionOpen(row.id, 'emailPreview', false) && (() => {
-                        const previewDraft = {
-                          tracking_number: shipVal(row, 'tracking_number'),
-                          tracking_url: shipVal(row, 'tracking_url'),
-                        }
-                        const preview = buildAmbassadorShipmentEmail(row, previewDraft, null, reminderDateVal(row, nextReminderAt) ? new Date(`${reminderDateVal(row, nextReminderAt)}T10:00:00Z`).toISOString() : null)
-                        return (
-                          <div className="rounded-lg border border-sky-200 bg-white p-2.5">
-                            <p className="text-[10px] font-bold uppercase tracking-wide text-sky-700">{isShipmentLocked ? 'Shipment email status' : 'Shipment email preview'}</p>
-                            {isShipmentLocked && (
-                              <p className="mt-1 text-[11px] font-semibold text-emerald-700">Email sent ✓</p>
-                            )}
-                            <p className="mt-1 text-[11px] text-slate-600"><strong>Subject:</strong> {preview.subject}</p>
-                            <div className="mt-1 rounded border border-slate-200 bg-slate-50 p-2 text-[11px] text-slate-700" dangerouslySetInnerHTML={{ __html: preview.html }} />
-                          </div>
-                        )
-                      })()}
-
-                      {/* Internal notes log (private, not emailed) */}
-                      <button
-                        type="button"
-                        onClick={() => toggleSection(row.id, 'shipmentNotes')}
-                        className="text-left text-[11px] font-semibold text-slate-500 hover:underline"
-                      >
-                        {isSectionOpen(row.id, 'shipmentNotes', false) ? 'Hide internal notes ▲' : `Internal notes (private)${noteEntries(row).length ? ` · ${noteEntries(row).length}` : ''} ▼`}
-                      </button>
-                      {isSectionOpen(row.id, 'shipmentNotes', false) && (
-                      <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50 p-2">
-                        <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">Internal notes (private)</p>
-                        {noteEntries(row).length > 0 && (
-                          <div className="mb-1.5 max-h-32 space-y-1 overflow-y-auto">
-                            {noteEntries(row).map((entry, idx) => {
-                              const swatch = authorSwatch(entry.author)
-                              return (
-                              <div key={idx} className="flex items-start justify-between gap-2 rounded bg-white px-2 py-1 text-[11px] text-slate-600">
-                                <span className="min-w-0 whitespace-pre-line">
-                                  <span className="mb-0.5 flex flex-wrap items-center gap-1.5">
-                                    <span className="text-[10px] text-slate-400">{entry.stamp || '—'}</span>
-                                    <span
-                                      className="rounded border px-1.5 py-0.5 text-[10px] font-semibold"
-                                      style={{ backgroundColor: swatch.bg, color: swatch.text, borderColor: swatch.border }}
-                                    >
-                                      {entry.author || 'legacy note (email not recorded)'}
-                                    </span>
-                                  </span>
-                                  <span>{entry.text || entry.raw}</span>
-                                </span>
-                                <span className="flex shrink-0 gap-1.5">
-                                  <button type="button" title="Edit" onClick={() => editNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-slate-700 disabled:opacity-50">✎</button>
-                                  <button type="button" title="Delete" onClick={() => deleteNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-rose-600 disabled:opacity-50">🗑</button>
-                                </span>
-                              </div>
-                              )
-                            })}
-                          </div>
-                        )}
-                        <div className="flex gap-2">
-                          <input
-                            value={noteDraft[row.id] || ''}
-                            onChange={(e) => setNoteDraft(prev => ({ ...prev, [row.id]: e.target.value }))}
-                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addNote(row) } }}
-                            placeholder="Add a note…"
-                            className="flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
-                          />
-                          <button onClick={() => addNote(row)} disabled={saving === row.id || !(noteDraft[row.id] || '').trim()} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Add note</button>
-                        </div>
+                        <p className="text-slate-500">To send the next package, update shipment details or tracking and the send button will enable again.</p>
+                        {(() => {
+                          const nextInQueue = ambassadorActionQueue.find((entry) => entry.row.id !== row.id)
+                          if (!nextInQueue) return null
+                          return (
+                            <button
+                              type="button"
+                              onClick={() => jumpToAmbassador(nextInQueue.row.id)}
+                              className="mt-2 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100"
+                            >
+                              Next ambassador needing a package → {nextInQueue.row.full_name}
+                            </button>
+                          )
+                        })()}
                       </div>
-                      )}
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => toggleSection(row.id, 'emailPreview')}
+                      className="text-left text-[11px] font-semibold text-sky-700 hover:underline"
+                    >
+                      {isSectionOpen(row.id, 'emailPreview', false) ? 'Hide email preview ▲' : (isShipmentLocked ? 'Show sent email ▼' : 'Preview shipment email ▼')}
+                    </button>
+                    {isSectionOpen(row.id, 'emailPreview', false) && (() => {
+                      const previewDraft = {
+                        tracking_number: shipVal(row, 'tracking_number'),
+                        tracking_url: shipVal(row, 'tracking_url'),
+                      }
+                      const preview = buildAmbassadorShipmentEmail(row, previewDraft, null, reminderDateVal(row, nextReminderAt) ? new Date(`${reminderDateVal(row, nextReminderAt)}T10:00:00Z`).toISOString() : null)
+                      return (
+                        <div className="rounded-lg border border-sky-200 bg-white p-2.5">
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-sky-700">{isShipmentLocked ? 'Shipment email status' : 'Shipment email preview'}</p>
+                          {isShipmentLocked && (
+                            <p className="mt-1 text-[11px] font-semibold text-emerald-700">Email sent ✓</p>
+                          )}
+                          <p className="mt-1 text-[11px] text-slate-600"><strong>Subject:</strong> {preview.subject}</p>
+                          <div className="mt-1 rounded border border-slate-200 bg-slate-50 p-2 text-[11px] text-slate-700" dangerouslySetInnerHTML={{ __html: preview.html }} />
+                        </div>
+                      )
+                    })()}
+
+                    {/* Internal notes log (private, not emailed) */}
+                    <button
+                      type="button"
+                      onClick={() => toggleSection(row.id, 'shipmentNotes')}
+                      className="text-left text-[11px] font-semibold text-slate-500 hover:underline"
+                    >
+                      {isSectionOpen(row.id, 'shipmentNotes', false) ? 'Hide internal notes ▲' : `Internal notes (private)${noteEntries(row).length ? ` · ${noteEntries(row).length}` : ''} ▼`}
+                    </button>
+                    {isSectionOpen(row.id, 'shipmentNotes', false) && (
+                    <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50 p-2">
+                      <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">Internal notes (private)</p>
+                      {noteEntries(row).length > 0 && (
+                        <div className="mb-1.5 max-h-32 space-y-1 overflow-y-auto">
+                          {noteEntries(row).map((entry, idx) => {
+                            const swatch = authorSwatch(entry.author)
+                            return (
+                            <div key={idx} className="flex items-start justify-between gap-2 rounded bg-white px-2 py-1 text-[11px] text-slate-600">
+                              <span className="min-w-0 whitespace-pre-line">
+                                <span className="mb-0.5 flex flex-wrap items-center gap-1.5">
+                                  <span className="text-[10px] text-slate-400">{entry.stamp || '—'}</span>
+                                  <span
+                                    className="rounded border px-1.5 py-0.5 text-[10px] font-semibold"
+                                    style={{ backgroundColor: swatch.bg, color: swatch.text, borderColor: swatch.border }}
+                                  >
+                                    {entry.author || 'legacy note (email not recorded)'}
+                                  </span>
+                                </span>
+                                <span>{entry.text || entry.raw}</span>
+                              </span>
+                              <span className="flex shrink-0 gap-1.5">
+                                <button type="button" title="Edit" onClick={() => editNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-slate-700 disabled:opacity-50">✎</button>
+                                <button type="button" title="Delete" onClick={() => deleteNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-rose-600 disabled:opacity-50">🗑</button>
+                              </span>
+                            </div>
+                            )
+                          })}
                         </div>
                       )}
+                      <div className="flex gap-2">
+                        <input
+                          value={noteDraft[row.id] || ''}
+                          onChange={(e) => setNoteDraft(prev => ({ ...prev, [row.id]: e.target.value }))}
+                          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addNote(row) } }}
+                          placeholder="Add a note…"
+                          className="flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
+                        />
+                        <button onClick={() => addNote(row)} disabled={saving === row.id || !(noteDraft[row.id] || '').trim()} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Add note</button>
+                      </div>
                     </div>
                     )}
                   </div>
+                )}
+                </div>
                 )}
                 </div>
                 )}
