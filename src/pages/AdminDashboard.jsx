@@ -4666,7 +4666,7 @@ function AmbassadorApplicationsPanel({ focusAmbassadorId } = {}) {
   const [error, setError] = useState('')
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(false)
-  const [filter, setFilter] = useState('pending')
+  const [filter, setFilter] = useState('approved')
   const [searchQuery, setSearchQuery] = useState('')
   const [saving, setSaving] = useState(null)
   const [emailStatus, setEmailStatus] = useState({}) // { [id]: { state, message } }
@@ -5210,9 +5210,17 @@ const requestShipmentSave = (row, alsoEmail) => {
   }
   const trackingNumber = String(shipVal(row, 'tracking_number') || '').trim()
   const trackingUrl = String(shipVal(row, 'tracking_url') || '').trim()
-  if (alsoEmail && (!trackingNumber || !trackingUrl)) {
-    setEmail(row.id, 'error', 'Enter both tracking number and tracking URL before completing this shipment flow.')
-    alert('To complete this shipment flow, enter both the tracking number and tracking URL first.')
+  const requiresTracking = getShippingMethod(row) === 'courier'
+  if (alsoEmail && requiresTracking && (!trackingNumber || !trackingUrl)) {
+    setEmail(row.id, 'error', 'Enter both tracking number and tracking URL before completing this shipment flow (or switch shipping method to Post Office/Other if none is available).')
+    alert('To complete this shipment flow, enter both the tracking number and tracking URL first — or switch the shipping method to Post Office/Other if there is no tracking available.')
+    return
+  }
+  if (!alsoEmail) {
+    // Plain save — just persist whatever is currently in the fields. No next-
+    // ship-date prompt, no archiving, no clearing. That "shipped" behaviour is
+    // reserved for an actual dispatch (Save & send), never a routine save.
+    void saveShipment(row, false)
     return
   }
   const nextDate = String(reminderDateVal(row, getDefaultFollowUpDateValue(row)) || '').trim()
@@ -5321,88 +5329,6 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     patchRow(row.id, { admin_comment: nextComment || null })
     return { ok: true, comment: nextComment || null }
   }
-  const bulkFixPastPackageDates = async () => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const nextPackageDate = new Date(today)
-    nextPackageDate.setDate(nextPackageDate.getDate() + 21) // 3 weeks from today
-    const nextPackageDateIso = nextPackageDate.toISOString()
-    
-    const { data, error } = await supabase
-      .from(AMBASSADOR_TABLE)
-      .select('id, full_name, admin_comment')
-      .eq('status', 'approved')
-    
-    if (error) {
-      alert(`Error fetching ambassadors: ${error.message}`)
-      return
-    }
-    
-    const pastDates = data.filter(row => {
-      const adminComment = String(row.admin_comment || '')
-      const match = adminComment.match(/\[SHIPMENT_NEXT_REMINDER_AT:([^\]]+)\]/i)
-      if (!match) return false
-      const reminderAt = match[1]
-      return new Date(reminderAt) < today
-    })
-    
-    if (pastDates.length === 0) {
-      alert('No ambassadors found with past package dates.')
-      return
-    }
-    
-    const updated = []
-    for (const row of pastDates) {
-      const patch = { nextReminderAt: nextPackageDateIso }
-      const { ok, comment } = await saveShipmentMeta(row, patch)
-      if (ok) {
-        updated.push(row.full_name)
-        patchRow(row.id, { admin_comment: comment })
-      }
-    }
-    
-    alert(`Updated ${updated.length} ambassadors with past dates to Oct 7, 2026:\n${updated.join('\n')}`)
-  }
-  const bulkUpdateWeeklyPackageDates = async () => {
-    const weekStart = '2026-09-10T00:00:00Z'
-    const weekEnd = '2026-09-16T23:59:59Z'
-    const nextPackageDate = '2026-10-07T00:00:00Z'
-    
-    const { data, error } = await supabase
-      .from(AMBASSADOR_TABLE)
-      .select('id, full_name, admin_comment')
-      .eq('status', 'approved')
-    
-    if (error) {
-      alert(`Error fetching ambassadors: ${error.message}`)
-      return
-    }
-    
-    const sentThisWeek = data.filter(row => {
-      const adminComment = String(row.admin_comment || '')
-      const match = adminComment.match(/\[SHIPMENT_SENT_AT:([^\]]+)\]/i)
-      if (!match) return false
-      const sentAt = match[1]
-      return sentAt >= weekStart && sentAt <= weekEnd
-    })
-    
-    if (sentThisWeek.length === 0) {
-      alert('No ambassadors found sent between Sep 10-16, 2026')
-      return
-    }
-    
-    const updated = []
-    for (const row of sentThisWeek) {
-      const patch = { nextReminderAt: nextPackageDate }
-      const { ok, comment } = await saveShipmentMeta(row, patch)
-      if (ok) {
-        updated.push(row.full_name)
-        patchRow(row.id, { admin_comment: comment })
-      }
-    }
-    
-    alert(`Updated ${updated.length} ambassadors sent this week:\n${updated.join('\n')}`)
-  }
   const reminderDateVal = (row, fallbackIso) => {
     if (Object.prototype.hasOwnProperty.call(reminderDateDraft, row.id)) return reminderDateDraft[row.id]
     const tagged = readMetaTag(row, 'SHIPMENT_NEXT_REMINDER_AT') || fallbackIso || ''
@@ -5419,6 +5345,28 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (err) { alert(err.message); return }
     patchRow(row.id, { admin_comment: nextComment })
   }
+  const SHIPPING_METHODS = [
+    { key: 'courier', label: 'Courier (tracked)' },
+    { key: 'post_office', label: 'Post Office' },
+    { key: 'other', label: 'Other' },
+  ]
+  // Not every package can go out with a trackable courier — post office drop-offs
+  // and hand deliveries have no tracking number at all. Default to 'courier' so
+  // existing records keep requiring tracking exactly as before.
+  const getShippingMethod = (row) => {
+    const tagged = extractTaggedValue(row?.admin_comment, 'SHIPMENT_METHOD')
+    return SHIPPING_METHODS.some((m) => m.key === tagged) ? tagged : 'courier'
+  }
+  const setShippingMethod = async (row, method) => {
+    const normalized = SHIPPING_METHODS.some((m) => m.key === method) ? method : 'courier'
+    const nextComment = ensureTaggedValue(row.admin_comment, 'SHIPMENT_METHOD', normalized.toUpperCase())
+    setSaving(row.id)
+    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: nextComment }).eq('id', row.id)
+    setSaving(null)
+    if (err) { alert(err.message); return }
+    patchRow(row.id, { admin_comment: nextComment })
+  }
+  const shippingMethodLabel = (method) => SHIPPING_METHODS.find((m) => m.key === method)?.label || 'Courier (tracked)'
   const getFactoryAck = (row) => extractTaggedValue(row?.admin_comment, 'FACTORY_ACK')
   const formatAmbassadorAddress = (row) => [
     row?.address,
@@ -5812,7 +5760,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   // appended into admin_comment; we now keep them out of the editable notes and
   // surface them (plus the new message_log column) in the Messages section.
   const isAmbassadorMsgLine = (line) => String(line).includes('📧')
-  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|AMBASSADOR_PROGRAMME_PAUSED|PACK_NOTE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE|SHIPMENT_OFFICE_REMINDER_AT|SHIPMENT_OFFICE_REMINDER_SENT_AT|SHIPMENT_OFFICE_REMINDER_DISPATCHED_AT|SHIPMENT_OFFICE_REMINDER_NEXT_PACKAGE_AT|SHIPMENT_OFFICE_REMINDER_ITEMS|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SIGNATURE|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SENT_AT|SHIPMENT_NEXT_PACKAGE_OPEN):[^\]]+\]$/i.test(String(line).trim())
+  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|AMBASSADOR_PROGRAMME_PAUSED|PACK_NOTE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE|SHIPMENT_METHOD|FACTORY_ACK|SHIPMENT_OFFICE_REMINDER_AT|SHIPMENT_OFFICE_REMINDER_SENT_AT|SHIPMENT_OFFICE_REMINDER_DISPATCHED_AT|SHIPMENT_OFFICE_REMINDER_NEXT_PACKAGE_AT|SHIPMENT_OFFICE_REMINDER_ITEMS|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SIGNATURE|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SENT_AT|SHIPMENT_NEXT_PACKAGE_OPEN):[^\]]+\]$/i.test(String(line).trim())
   const packNoteLines = (row) => String(row.admin_comment || '').split('\n').filter((line) => /^\[PACK_NOTE:[^\]]+\]$/i.test(String(line).trim()))
   const parsePackNote = (line) => {
     const encoded = String(line || '').trim().match(/^\[PACK_NOTE:([^\]]+)\]$/i)?.[1]
@@ -5918,11 +5866,12 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     .map((line) => {
       const text = String(line || '')
       const stamp = text.match(/^\[([^\]]+)\]/)?.[1] || null
+      const method = text.match(/Method:\s*([^·]+)/i)?.[1]?.trim() || ''
       const trackingNumber = text.match(/Tracking:\s*([^·]+)/i)?.[1]?.trim() || ''
       const trackingUrl = text.match(/(https?:\/\/[^\s·]+)/i)?.[1] || ''
       const ambassadorType = text.match(/Status:\s*([^·]+)/i)?.[1]?.trim() || ''
       const boxContents = text.match(/(?:Items|Box):\s*(.+)$/i)?.[1]?.trim() || ''
-      return { raw: text, stamp, trackingNumber, trackingUrl, ambassadorType, boxContents }
+      return { raw: text, stamp, method, trackingNumber, trackingUrl, ambassadorType, boxContents }
     })
     .reverse()
   const hasWelcomeContractSent = (row) => messageLines(row).some((line) => {
@@ -6007,7 +5956,6 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   shipmentSaveInFlightRef.current.add(shipmentSaveKey)
   try {
   const currentDraft = getShipmentDraft(row)
-  const hasShipmentInfo = Boolean(currentDraft.tracking_number || currentDraft.tracking_url || currentDraft.shipment_details)
   const completedAmbassadorType = getAmbassadorType(row)
   const completedPack = AMBASSADOR_PACKS_BY_TYPE[completedAmbassadorType] || null
   const completedTypeLabel = completedAmbassadorType === 'super_ambassador'
@@ -6022,8 +5970,10 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     ...packNoteEntries(row).map((entry) => entry.text),
     ...(currentDraft.shipment_details ? [currentDraft.shipment_details] : []),
   ]
+  const completedShippingMethod = getShippingMethod(row)
   const buildArchiveLine = () => `[${fmtDate(new Date().toISOString())}] [${getAdminDisplayLabel()}] 📦 Shipped — ${[
     `Status: ${completedTypeLabel}`,
+    `Method: ${shippingMethodLabel(completedShippingMethod)}`,
     currentDraft.tracking_number ? `Tracking: ${currentDraft.tracking_number}` : null,
     currentDraft.tracking_url || null,
     `Items: ${completedItems.join(', ') || 'Not recorded'}`,
@@ -6039,15 +5989,10 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   patchRow(row.id, draft)
   // Track the latest admin_comment so subsequent saveShipmentMeta calls don't overwrite the archive line.
   let latestAdminComment = row.admin_comment
-  if (hasShipmentInfo && !alsoEmail) {
-    const archiveLine = buildArchiveLine()
-    const loggedComment = latestAdminComment ? `${latestAdminComment}\n${archiveLine}` : archiveLine
-    const { error: logErr } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: loggedComment }).eq('id', row.id)
-    if (!logErr) { patchRow(row.id, { admin_comment: loggedComment }); latestAdminComment = loggedComment }
-    if (!alsoEmail) {
-      setShip((prev) => ({ ...prev, [row.id]: { ...prev[row.id], shipment_details: '', tracking_number: '', tracking_url: '' } }))
-    }
-  }
+  // "Save package (no email)" is a plain save of the current fields — nothing
+  // more. Archiving a "📦 Shipped" history line and clearing these fields for
+  // the next cycle only ever happens once a package is genuinely marked sent
+  // (the alsoEmail branch below), never as a side effect of a routine save.
   if (alsoEmail) {
     const updatedRow = { ...row, ...draft }
     const fullName = String(updatedRow?.full_name || '').trim()
@@ -6187,72 +6132,12 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       }
     }
   } else {
-    const defaultFollowUpDate = getDefaultFollowUpDateValue(row, new Date().toISOString())
-    const chosenReminderRawB = String(overrideReminderDate || reminderDateVal(row, defaultFollowUpDate) || defaultFollowUpDate || '').trim()
-    const packedItemsText = completedItems.join(', ')
-    const sentAt = new Date().toISOString()
-    const officeReminderAt = new Date(new Date(sentAt).getTime() + 28 * 24 * 60 * 60 * 1000).toISOString()
-    if (chosenReminderRawB) {
-      const chosenIso = new Date(`${chosenReminderRawB}T10:00:00Z`).toISOString()
-      const metaResult = await saveShipmentMeta(
-        { ...row, admin_comment: latestAdminComment },
-        hasShipmentInfo
-          ? {
-              sentAt,
-              nextReminderAt: chosenIso,
-              officeReminderAt,
-              officeReminderSentAt: '',
-              officeReminderDispatchedAt: sentAt,
-              officeReminderNextPackageAt: chosenIso,
-              officeReminderItems: packedItemsText,
-              nextPackageOpen: 'TRUE',
-            }
-          : {
-              nextReminderAt: chosenIso,
-            },
-      )
-      if (!metaResult.ok) {
-        setEmail(row.id, 'error', `Could not complete package flow: ${metaResult.error}`)
-        setSaving(null)
-        return
-      }
-      setReminderDateDraft((prev) => ({ ...prev, [row.id]: chosenIso.slice(0, 10) }))
-      if (hasShipmentInfo) {
-        const nextPackageComment = String(metaResult.comment || '')
-          .split('\n')
-          .filter((line) => !/^\[PACK_NOTE:[^\]]+\]$/i.test(line.trim()))
-          .join('\n') || null
-        const { error: resetErr } = await supabase
-          .from(AMBASSADOR_TABLE)
-          .update({
-            shipment_details: null,
-            tracking_number: null,
-            tracking_url: null,
-            admin_comment: nextPackageComment,
-          })
-          .eq('id', row.id)
-        if (resetErr) {
-          setEmail(row.id, 'error', `Package logged, but could not open next package flow: ${resetErr.message}`)
-          setSaving(null)
-          return
-        }
-        patchRow(row.id, {
-          shipment_details: null,
-          tracking_number: null,
-          tracking_url: null,
-          admin_comment: nextPackageComment,
-        })
-        setShip((prev) => ({ ...prev, [row.id]: { shipment_details: '', tracking_number: '', tracking_url: '' } }))
-        setPackAdditionDraft((prev) => ({ ...prev, [row.id]: '' }))
-        setNextPackageMode((prev) => ({ ...prev, [row.id]: true }))
-        setSectionOpenState((prev) => ({
-          ...prev,
-          [sectionStateKey(row.id, 'shipment')]: true,
-          [sectionStateKey(row.id, 'history')]: false,
-        }))
-      }
-    }
-    setEmail(row.id, 'sent', hasShipmentInfo ? 'Shipment logged — next package flow opened' : 'Follow-up details saved')
+    // Plain "Save package (no email)" — the fields were already persisted
+    // above. Never treat this as a completed dispatch: no archive line, no
+    // SHIPMENT_SENT_AT stamp, and never null the tracking/shipment columns.
+    // Setting/advancing the next-package date has its own dedicated "Save
+    // date" control further down, so it isn't duplicated here.
+    setEmail(row.id, 'sent', 'Package details saved')
   }
   setSaving(null)
   } catch (err) {
@@ -6510,7 +6395,13 @@ const deleteApplication = async (row) => {
       ? shipmentLockRaw
       : (typeof shipmentLockRaw === 'string' ? { signature: shipmentLockRaw, sentAt: null } : null)
     const sentAt = shipmentLock?.sentAt || sentAtMeta || shipmentHistory.sentAtIso || null
-    const nextReminderAt = reminderAtMeta || (sentAt ? addOneMonth(sentAt) : null)
+    const sentAtLabel = sentAt ? fmtDateTime(sentAt) : (shipmentHistory.sentAtLabel || null)
+    const shipmentPreviouslySent = Boolean(sentAt)
+    // A next-package date only ever means something once a package has genuinely
+    // been sent — never derive one for an ambassador who hasn't (that was the
+    // source of ambassadors showing a red "overdue" badge despite nothing ever
+    // having been shipped to them).
+    const nextReminderAt = sentAt ? (reminderAtMeta || addOneMonth(sentAt)) : null
     const isDatePast = Boolean(nextReminderAt) && new Date(nextReminderAt).getTime() < Date.now()
     const dueSoon = Boolean(nextReminderAt) && !isDatePast && (new Date(nextReminderAt).getTime() - Date.now()) <= 7 * 24 * 60 * 60 * 1000
     const isFactoryAcked = Boolean(getFactoryAck(row))
@@ -6520,7 +6411,17 @@ const deleteApplication = async (row) => {
     const bucket = !sentAt
       ? (isFactoryAcked ? 'acknowledgedNoPackage' : 'newApproval')
       : (isDatePast ? 'needsNow' : (dueSoon ? 'dueSoon' : 'onTrack'))
-    return { sentAt, nextReminderAt, isDatePast, dueSoon, bucket, isFactoryAcked }
+    return { sentAt, sentAtLabel, shipmentPreviouslySent, nextReminderAt, isDatePast, dueSoon, bucket, isFactoryAcked }
+  }
+  // Single source of truth for the little status pill shown on every collapsed
+  // ambassador row — keeps it perfectly in sync with the "at a glance" groups
+  // above, so the two views can never disagree with each other.
+  const AMBASSADOR_BUCKET_BADGE_STYLE = {
+    newApproval: { className: 'border-slate-300 bg-slate-100 text-slate-600', label: () => '🆕 New approval' },
+    acknowledgedNoPackage: { className: 'border-sky-200 bg-sky-100 text-sky-700', label: () => '🏭 Acknowledged — no package yet' },
+    needsNow: { className: 'border-red-300 bg-red-100 text-red-700', label: (date) => `🔴 Overdue — ${fmtDate(date)}` },
+    dueSoon: { className: 'border-amber-200 bg-amber-100 text-amber-700', label: (date) => `🟡 Due soon — ${fmtDate(date)}` },
+    onTrack: { className: 'border-emerald-200 bg-emerald-100 text-emerald-700', label: (date) => `🟢 Next package ${fmtDate(date)}` },
   }
   const ambassadorDashboardEntries = approvedAmbassadorRows
     .map((row) => ({ row, meta: getAmbassadorDashboardMeta(row) }))
@@ -6575,22 +6476,6 @@ const deleteApplication = async (row) => {
               ↑ Upload ambassador workbook
               <input type="file" accept=".csv,.xlsx,.xls" onChange={importAllAmbassadorPackages} className="hidden" />
             </label>
-            <button
-              type="button"
-              onClick={bulkUpdateWeeklyPackageDates}
-              className="rounded-full border border-orange-300 bg-white px-3 py-1 text-xs font-semibold text-orange-700 hover:bg-orange-50"
-              title="Update next package dates for ambassadors sent this week (Sep 10-16) to Oct 7, 2026"
-            >
-              🔄 Update this week's dates
-            </button>
-            <button
-              type="button"
-              onClick={bulkFixPastPackageDates}
-              className="rounded-full border border-red-300 bg-white px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-50"
-              title="Fix all overdue/past package dates to Oct 7, 2026"
-            >
-              🚨 Fix past dates
-            </button>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -6698,13 +6583,10 @@ const deleteApplication = async (row) => {
               ? shipmentLockRaw
               : (typeof shipmentLockRaw === 'string' ? { signature: shipmentLockRaw, sentAt: null } : null)
             const isShipmentLocked = shipmentLock?.signature === shipmentSignature(row)
-            const sentAtMeta = readMetaTag(row, 'SHIPMENT_SENT_AT')
-            const reminderAtMeta = readMetaTag(row, 'SHIPMENT_NEXT_REMINDER_AT')
-            const shipmentHistory = latestShipmentHistory(row)
-            const sentAt = shipmentLock?.sentAt || sentAtMeta || shipmentHistory.sentAtIso || null
-            const sentAtLabel = sentAt ? fmtDateTime(sentAt) : (shipmentHistory.sentAtLabel || null)
-            const shipmentPreviouslySent = Boolean(sentAt || shipmentHistory.sentAtLabel)
-            const nextReminderAt = reminderAtMeta || (sentAt ? addOneMonth(sentAt) : null)
+            // Single source of truth (also drives the "at a glance" panel above) —
+            // never compute sent/next-package status separately from this.
+            const ambassadorMeta = getAmbassadorDashboardMeta(row)
+            const { sentAt, sentAtLabel, shipmentPreviouslySent, nextReminderAt } = ambassadorMeta
             const contractAlreadySent = hasWelcomeContractSent(row)
             const ambassadorType = getAmbassadorType(row)
             const factoryAckValue = getFactoryAck(row)
@@ -6716,23 +6598,23 @@ const deleteApplication = async (row) => {
                 ? 'Standard Ambassador'
                 : 'Not set'
             const selectedPack = AMBASSADOR_PACKS_BY_TYPE[ambassadorType] || null
-            const isDatePast = nextReminderAt && new Date(nextReminderAt) < new Date()
-            const nextPackageDueBadge = nextReminderAt ? (
-              <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
-                isDatePast 
-                  ? 'border-red-300 bg-red-100 text-red-700' 
-                  : 'border-violet-200 bg-violet-100 text-violet-700'
-              }`}>
-                {`Next package date ${fmtDate(nextReminderAt)}`}
+            const badgeStyle = isApproved ? AMBASSADOR_BUCKET_BADGE_STYLE[ambassadorMeta.bucket] : null
+            const nextPackageDueBadge = badgeStyle ? (
+              <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${badgeStyle.className}`}>
+                {badgeStyle.label(nextReminderAt)}
               </span>
             ) : null
             const setupSectionComplete = isApproved && contractAlreadySent && Boolean(ambassadorType) && shipmentPreviouslySent
             const shipmentEntries = shipmentHistoryEntries(row)
             const discountCodeKey = String(row?.discount_code || '').trim().toUpperCase()
             const codePerformance = discountCodeKey ? codePerformanceByCode[discountCodeKey] : null
+            const shippingMethod = getShippingMethod(row)
             const hasTrackingNumber = Boolean(String(shipVal(row, 'tracking_number') || '').trim())
             const hasTrackingUrl = Boolean(String(shipVal(row, 'tracking_url') || '').trim())
-            const trackingFlowReady = hasTrackingNumber && hasTrackingUrl
+            // Tracking is only required when shipping by a trackable courier —
+            // Post Office/hand-delivered ("Other") packages legitimately have
+            // no tracking number at all.
+            const trackingFlowReady = shippingMethod === 'courier' ? (hasTrackingNumber && hasTrackingUrl) : true
             const isMessagesSectionOpen = isSectionOpen(row.id, 'messages', false)
             const isShipmentSectionOpen = isSectionOpen(row.id, 'shipment', isApproved)
             const isHistorySectionOpen = isSectionOpen(row.id, 'history', shipmentEntries.length <= 1)
@@ -7086,6 +6968,24 @@ const deleteApplication = async (row) => {
                     </button>
                     {isShipmentSectionOpen && (
                       <div className="space-y-2">
+                    {shipmentPreviouslySent && shipmentEntries.length > 0 && (
+                      <div className="rounded-lg border border-slate-300 bg-slate-100 px-2.5 py-2">
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">✅ Last package sent</p>
+                        <p className="mt-0.5 text-[11px] text-slate-600">
+                          {shipmentEntries[0].stamp || sentAtLabel || 'Date not recorded'}
+                          {shipmentEntries[0].method ? ` · ${shipmentEntries[0].method}` : ''}
+                          {shipmentEntries[0].trackingNumber ? ` · Tracking: ${shipmentEntries[0].trackingNumber}` : ''}
+                        </p>
+                      </div>
+                    )}
+                    <div className="rounded-lg border border-fuchsia-300 bg-fuchsia-50 px-2.5 py-1.5">
+                      <p className="text-[11px] font-bold uppercase tracking-wide text-fuchsia-700">
+                        {shipmentPreviouslySent ? '🆕 Next package — waiting for input' : '🆕 Initial package — waiting for input'}
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-fuchsia-600">
+                        The fields below are blank and ready for you to fill in — add items, pick a ship date, choose a shipping method, and enter tracking (if applicable), then save.
+                      </p>
+                    </div>
                     <div className="mt-2 rounded-lg border border-slate-200 bg-white px-2.5 py-2">
                       <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Ambassador package type</p>
                       {!shipmentPreviouslySent ? (
@@ -7184,7 +7084,7 @@ const deleteApplication = async (row) => {
                       )}
                       <div className="mt-2">
                         <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Items for this package</p>
-                        {packNoteEntries(row).length > 0 && (
+                        {packNoteEntries(row).length > 0 ? (
                           <div className="mt-1 space-y-1">
                             {packNoteEntries(row).map((entry, idx) => {
                               const swatch = authorSwatch(entry.author)
@@ -7210,6 +7110,8 @@ const deleteApplication = async (row) => {
                               )
                             })}
                           </div>
+                        ) : (
+                          <p className="mt-1 text-[11px] italic text-slate-400">No items added yet — waiting for admin input.</p>
                         )}
                         <textarea
                           value={packAdditionDraft[row.id] || ''}
@@ -7249,20 +7151,41 @@ const deleteApplication = async (row) => {
                         </div>
                       </div>
                     )}
+                    <div className="rounded-lg border border-slate-200 bg-white p-2.5">
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Shipping method</p>
+                      <div className="mt-1.5 flex flex-wrap gap-3 text-[11px]">
+                        {SHIPPING_METHODS.map((method) => (
+                          <label key={method.key} className="inline-flex items-center gap-1.5 text-slate-700">
+                            <input
+                              type="checkbox"
+                              checked={shippingMethod === method.key}
+                              disabled={saving === row.id}
+                              onChange={() => setShippingMethod(row, method.key)}
+                            />
+                            {method.label}
+                          </label>
+                        ))}
+                      </div>
+                      {shippingMethod === 'other' && (
+                        <p className="mt-1 text-[11px] text-slate-500">No tracking details for "Other" deliveries.</p>
+                      )}
+                    </div>
+                    {shippingMethod !== 'other' && (
                     <div className="grid gap-2 sm:grid-cols-2">
                       <input
                         value={shipVal(row, 'tracking_number')}
                         onChange={(e) => setShipField(row.id, 'tracking_number', e.target.value)}
-                        placeholder="Tracking number"
+                        placeholder={shippingMethod === 'courier' ? 'Tracking number' : 'Tracking / reference number (optional)'}
                         className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
                       />
                       <input
                         value={shipVal(row, 'tracking_url')}
                         onChange={(e) => setShipField(row.id, 'tracking_url', e.target.value)}
-                        placeholder="Tracking URL"
+                        placeholder={shippingMethod === 'courier' ? 'Tracking URL' : 'Tracking URL (optional)'}
                         className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
                       />
                     </div>
+                    )}
                     <div className="flex flex-wrap gap-2">
                       <button onClick={() => requestShipmentSave(row, false)} disabled={saving === row.id || !trackingFlowReady} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60">Save package (no email)</button>
                       <button onClick={() => requestShipmentSave(row, true)} disabled={saving === row.id || !trackingFlowReady} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
