@@ -257,24 +257,6 @@ export default function GuestbookPage() {
         </div>
       </div>
 
-      {/* ─── Sample Pack Incentive ────────────────────────────────────── */}
-      <div className="flex flex-col items-center gap-5 rounded-2xl p-7 text-center sm:flex-row sm:text-left" style={{ background: 'linear-gradient(135deg, #D43790 0%, #9333ea 100%)' }}>
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/20 text-4xl">🎁</div>
-        <div className="flex-1">
-          <p className="text-base font-extrabold text-white sm:text-lg">Sign the guestbook, get a sample pack</p>
-          <p className="mt-1 text-sm text-white/80">
-            Leave a comment and you could receive a curated GEL.IT.UP sample pack — on us.
-          </p>
-        </div>
-        <a
-          href="#sign-guestbook"
-          className="shrink-0 rounded-xl bg-white px-5 py-2.5 text-sm font-bold transition hover:bg-white/90"
-          style={{ color: '#D43790' }}
-        >
-          Sign Now →
-        </a>
-      </div>
-
       {/* ─── All Entries ──────────────────────────────────────────────── */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
         <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#D43790' }}>FROM THE GEL.IT.UP COMMUNITY</p>
