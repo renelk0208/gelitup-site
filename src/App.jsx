@@ -887,6 +887,7 @@ const SHOP_CATEGORY_URLS = {
   topCoats: 'https://shop.gelitup.com/pages/ourproducts#top-coats',
   builders: 'https://shop.gelitup.com/pages/ourproducts#builder-systems',
   tools: 'https://shop.gelitup.com/collections/professional-tools',
+  equipment: 'https://shop.gelitup.com/collections/other',
   nailArt: 'https://shop.gelitup.com/pages/ourproducts#nail-art',
   consumables: 'https://shop.gelitup.com/pages/ourproducts#consumables',
   nailCare: 'https://shop.gelitup.com/pages/ourproducts#feet-hands-nail-care',
@@ -6614,7 +6615,18 @@ function FullCataloguePage() {
                       onMouseEnter={e => e.currentTarget.style.background = 'rgba(95,70,140,0.95)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'rgba(74,53,112,0.85)'}
                     >
-                      SHOP NOW!
+                      SHOP TOOLS
+                    </a>
+                    <a
+                      href={SHOP_CATEGORY_URLS.equipment}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
+                      style={{ background: 'rgba(74,53,112,0.85)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(95,70,140,0.95)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(74,53,112,0.85)'}
+                    >
+                      SHOP EQUIPMENT
                     </a>
                   </div>
                 </div>
