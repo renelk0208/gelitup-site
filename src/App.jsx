@@ -878,18 +878,18 @@ const COUNTRY_DIAL_CODES = {
 const SHOW_SERVICE_FLOW_SUBCATEGORY_MENU = false
 const CATALOGUE_RESULTS_ANCHOR_ID = 'catalogue-results-anchor'
 const SHOPIFY_OUR_PRODUCTS_URL = 'https://shop.gelitup.com/pages/ourproducts'
-// Catalogue banner "Shop Now" deep links — each banner opens its matching shop.gelitup.com category
+// Catalogue banner "Shop Now" deep links — categories with sub-categories open their sub-category panel on shop.gelitup.com/pages/ourproducts
 const SHOP_CATEGORY_URLS = {
-  newProducts: 'https://shop.gelitup.com/collections/new-2026',
-  gelPolish: 'https://shop.gelitup.com/collections/gel-polish',
-  gelPolishEffects: 'https://shop.gelitup.com/collections/gel-polish-effects',
+  newProducts: 'https://shop.gelitup.com/pages/ourproducts#new-2026',
+  gelPolish: 'https://shop.gelitup.com/pages/ourproducts#gel-polish',
+  gelPolishEffects: 'https://shop.gelitup.com/pages/ourproducts#gel-polish-effects',
   baseCoats: 'https://shop.gelitup.com/pages/ourproducts#classic-base-coats',
-  topCoats: 'https://shop.gelitup.com/collections/top-coats',
-  builders: 'https://shop.gelitup.com/collections/builder-systems',
+  topCoats: 'https://shop.gelitup.com/pages/ourproducts#top-coats',
+  builders: 'https://shop.gelitup.com/pages/ourproducts#builder-systems',
   tools: 'https://shop.gelitup.com/collections/professional-tools',
-  nailArt: 'https://shop.gelitup.com/collections/nail-art',
-  consumables: 'https://shop.gelitup.com/collections/consumables',
-  nailCare: 'https://shop.gelitup.com/collections/feet-hands-nail-care',
+  nailArt: 'https://shop.gelitup.com/pages/ourproducts#nail-art',
+  consumables: 'https://shop.gelitup.com/pages/ourproducts#consumables',
+  nailCare: 'https://shop.gelitup.com/pages/ourproducts#feet-hands-nail-care',
 }
 const HIDE_CATALOGUE_PRODUCTS = true
 
