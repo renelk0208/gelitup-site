@@ -878,6 +878,19 @@ const COUNTRY_DIAL_CODES = {
 const SHOW_SERVICE_FLOW_SUBCATEGORY_MENU = false
 const CATALOGUE_RESULTS_ANCHOR_ID = 'catalogue-results-anchor'
 const SHOPIFY_OUR_PRODUCTS_URL = 'https://shop.gelitup.com/pages/ourproducts'
+// Catalogue banner "Shop Now" deep links — each banner opens its matching shop.gelitup.com category
+const SHOP_CATEGORY_URLS = {
+  newProducts: 'https://shop.gelitup.com/collections/new-2026',
+  gelPolish: 'https://shop.gelitup.com/collections/gel-polish',
+  gelPolishEffects: 'https://shop.gelitup.com/collections/gel-polish-effects',
+  baseCoats: 'https://shop.gelitup.com/pages/ourproducts#classic-base-coats',
+  topCoats: 'https://shop.gelitup.com/collections/top-coats',
+  builders: 'https://shop.gelitup.com/collections/builder-systems',
+  tools: 'https://shop.gelitup.com/collections/professional-tools',
+  nailArt: 'https://shop.gelitup.com/collections/nail-art',
+  consumables: 'https://shop.gelitup.com/collections/consumables',
+  nailCare: 'https://shop.gelitup.com/collections/feet-hands-nail-care',
+}
 const HIDE_CATALOGUE_PRODUCTS = true
 
 function withCountryDialCode(phoneValue = '', country = '') {
@@ -6238,7 +6251,7 @@ function FullCataloguePage() {
                       </p>
                       <div className="mt-6 flex flex-wrap items-center gap-3">
                         <a
-                          href={SHOPIFY_OUR_PRODUCTS_URL}
+                          href={SHOP_CATEGORY_URLS.newProducts}
                           target="_blank"
                           rel="noreferrer"
                           className="inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-bold uppercase tracking-[0.1em] text-white transition duration-200"
@@ -6375,12 +6388,20 @@ function FullCataloguePage() {
                 </p>
                 <div className="mt-6 flex flex-wrap items-center gap-4">
                   <a
-                    href={SHOPIFY_OUR_PRODUCTS_URL}
+                    href={SHOP_CATEGORY_URLS.gelPolish}
                     target="_blank"
                     rel="noreferrer"
                     className="rounded-lg bg-fuchsia-600 px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
                   >
-                    SHOP NOW!
+                    SHOP GEL POLISH
+                  </a>
+                  <a
+                    href={SHOP_CATEGORY_URLS.gelPolishEffects}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-lg bg-fuchsia-600 px-6 py-2.5 text-sm font-semibold text-white transition duration-300 hover:bg-fuchsia-500"
+                  >
+                    SHOP GEL POLISH EFFECTS
                   </a>
                 </div>
               </div>
@@ -6427,7 +6448,7 @@ function FullCataloguePage() {
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
                     <a
-                      href={SHOPIFY_OUR_PRODUCTS_URL}
+                      href={SHOP_CATEGORY_URLS.baseCoats}
                       target="_blank"
                       rel="noreferrer"
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
@@ -6435,7 +6456,18 @@ function FullCataloguePage() {
                       onMouseEnter={e => e.currentTarget.style.background = 'rgba(205,120,150,0.95)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'rgba(185,100,130,0.85)'}
                     >
-                      SHOP NOW!
+                      SHOP BASE COATS
+                    </a>
+                    <a
+                      href={SHOP_CATEGORY_URLS.topCoats}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
+                      style={{ background: 'rgba(185,100,130,0.85)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(205,120,150,0.95)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(185,100,130,0.85)'}
+                    >
+                      SHOP TOP COATS
                     </a>
                   </div>
                 </div>
@@ -6511,7 +6543,7 @@ function FullCataloguePage() {
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
                     <a
-                      href={SHOPIFY_OUR_PRODUCTS_URL}
+                      href={SHOP_CATEGORY_URLS.builders}
                       target="_blank"
                       rel="noreferrer"
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
@@ -6574,7 +6606,7 @@ function FullCataloguePage() {
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
                     <a
-                      href={SHOPIFY_OUR_PRODUCTS_URL}
+                      href={SHOP_CATEGORY_URLS.tools}
                       target="_blank"
                       rel="noreferrer"
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
@@ -6637,7 +6669,7 @@ function FullCataloguePage() {
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
                     <a
-                      href={SHOPIFY_OUR_PRODUCTS_URL}
+                      href={SHOP_CATEGORY_URLS.nailArt}
                       target="_blank"
                       rel="noreferrer"
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
@@ -6692,7 +6724,7 @@ function FullCataloguePage() {
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
                     <a
-                      href={SHOPIFY_OUR_PRODUCTS_URL}
+                      href={SHOP_CATEGORY_URLS.consumables}
                       target="_blank"
                       rel="noreferrer"
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
@@ -6747,7 +6779,7 @@ function FullCataloguePage() {
                   </p>
                   <div className="mt-6 flex flex-wrap items-center gap-3">
                     <a
-                      href={SHOPIFY_OUR_PRODUCTS_URL}
+                      href={SHOP_CATEGORY_URLS.nailCare}
                       target="_blank"
                       rel="noreferrer"
                       className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition duration-300"
