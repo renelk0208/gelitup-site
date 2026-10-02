@@ -185,14 +185,14 @@ export default function GuestbookPage() {
 
   useEffect(() => { loadEntries() }, [loadEntries])
 
-  const formValid = name.trim().length > 0 && country.trim().length > 0 && role && comment.trim().length >= 10
+  const formValid = name.trim().length > 0 && country.trim().length > 0 && role && comment.trim().length >= 10 && rating > 0
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
 
     if (!formValid) {
-      setError(T ? 'Compila tutti i campi obbligatori. Il commento deve avere almeno 10 caratteri.' : 'Please fill in all required fields. Comment must be at least 10 characters.')
+      setError(T ? 'Compila tutti i campi obbligatori, seleziona una valutazione e scrivi un commento di almeno 10 caratteri.' : 'Please fill in all required fields, select a rating, and write a comment of at least 10 characters.')
       return
     }
     if (comment.trim().length > 1000) {
@@ -405,7 +405,8 @@ export default function GuestbookPage() {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">{guestbookT?.field_rating || 'Rating'} <span className="text-slate-400 font-normal">{guestbookT?.field_rating_optional || '(optional)'}</span></label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">{guestbookT?.field_rating || 'Rating'} *</label>
+              <p className="mb-1.5 text-xs text-slate-400">{guestbookT?.field_rating_scale || '1 = Bad · 5 = Excellent'}</p>
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((s) => (
                   <button
@@ -421,7 +422,7 @@ export default function GuestbookPage() {
                   </button>
                 ))}
                 {(hoverRating || rating) > 0 && (
-                  <span className="ml-2 text-xs text-slate-500">{starLabels[hoverRating || rating]}</span>
+                  <span className="ml-2 text-xs text-slate-500">{hoverRating || rating} — {starLabels[hoverRating || rating]}</span>
                 )}
               </div>
             </div>

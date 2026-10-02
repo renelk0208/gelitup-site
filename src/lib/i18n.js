@@ -238,7 +238,7 @@ export const it = {
     field_country: 'Paese',
     field_role: 'Ruolo',
     field_rating: 'Valutazione',
-    field_rating_optional: '(facoltativa)',
+    field_rating_scale: '1 = Scarso · 5 = Ottimo',
     field_comment: 'Commento',
     field_anonymous: 'Preferisco rimanere anonimo/a',
     placeholder_name: 'Il tuo nome',
