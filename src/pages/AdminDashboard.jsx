@@ -6488,6 +6488,24 @@ const deleteApplication = async (row) => {
     { key: 'dueSoon', label: '🟡 Due soon (next 7 days)', empty: 'Nothing due in the next week.' },
     { key: 'onTrack', label: '🟢 On track', empty: 'No ambassadors on track yet.' },
   ]
+  // The full ambassador list below used to just follow raw application date,
+  // which scattered overdue/due-soon/acknowledged/on-track ambassadors all
+  // over the place instead of grouping like statuses together. When viewing
+  // the Approved tab, group it by the same urgency buckets as the "at a
+  // glance" panel above (newest-first within each bucket is irrelevant here —
+  // soonest-due-first instead) so same-status ambassadors sit together.
+  const AMBASSADOR_BUCKET_ORDER = { newApproval: 0, acknowledgedNoPackage: 1, needsNow: 2, dueSoon: 3, onTrack: 4 }
+  const displayedAmbassadorRows = filter === 'approved'
+    ? [...filteredRows].sort((a, b) => {
+        const ma = getAmbassadorDashboardMeta(a)
+        const mb = getAmbassadorDashboardMeta(b)
+        const bucketDiff = AMBASSADOR_BUCKET_ORDER[ma.bucket] - AMBASSADOR_BUCKET_ORDER[mb.bucket]
+        if (bucketDiff !== 0) return bucketDiff
+        const da = ma.nextReminderAt ? new Date(ma.nextReminderAt).getTime() : Number.POSITIVE_INFINITY
+        const db = mb.nextReminderAt ? new Date(mb.nextReminderAt).getTime() : Number.POSITIVE_INFINITY
+        return da - db
+      })
+    : filteredRows
 
   return (
     <div className="space-y-4">
@@ -6610,7 +6628,7 @@ const deleteApplication = async (row) => {
 
       {!loading && filteredRows.length > 0 && (
         <div className="space-y-2">
-          {filteredRows.map((row) => {
+          {displayedAmbassadorRows.map((row) => {
             const es = emailStatus[row.id]
             const isOpen = openIds.has(row.id)
             const normalizedStatus = normalizeAmbassadorStatus(row.status)
