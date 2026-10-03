@@ -12713,15 +12713,17 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     || ''
 
   const clientValidation = useMemo(() => {
+    // VAT number is optional for distributors/clients — only flag it when a
+    // value has actually been entered and its format/prefix is wrong. Never
+    // require it to be present or VIES-verified to complete the profile.
     const vatPrefixError = validateVatPrefix(clientProfile.vatNumber, clientProfile.invoiceCountry)
-    const vatNotVerified = isEuCountry(clientProfile.invoiceCountry) && String(clientProfile.vatNumber || '').trim().length >= 4 && !vatPrefixError && (!viesResult || !viesResult.valid)
     const missing = {
       customerType: !String(clientProfile.customerType || '').trim(),
       shippingType: !String(clientProfile.shippingType || '').trim(),
       customerName: !String(clientProfile.customerName || '').trim(),
       contactFirstName: clientProfile.customerType === 'company' && !String(clientProfile.contactFirstName || '').trim(),
       contactLastName: clientProfile.customerType === 'company' && !String(clientProfile.contactLastName || '').trim(),
-      vatNumber: !String(clientProfile.vatNumber || '').trim() || Boolean(vatPrefixError) || vatNotVerified,
+      vatNumber: Boolean(vatPrefixError),
       contactPhone: !String(clientProfile.contactPhone || '').trim(),
       contactEmail: !String(clientProfile.contactEmail || '').trim(),
       invoiceAddressLine1: !String(clientProfile.invoiceAddressLine1 || '').trim(),
@@ -12765,7 +12767,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       .filter(([, isMissing]) => isMissing)
       .map(([field]) => {
         if (field === 'vatNumber' && vatPrefixError) return vatPrefixError
-        if (field === 'vatNumber' && vatNotVerified) return 'VAT number (click Verify to validate via VIES)'
         return labelByField[field]
       })
 
@@ -12802,7 +12803,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     clientProfile.vatNumber,
     invoiceAddressComposed,
     shippingAddressComposed,
-    viesResult,
   ])
 
   const hasClientFieldError = useCallback(
@@ -15757,7 +15757,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                 </label>
               </>
             )}
-            <label className="text-xs text-slate-700">VAT Number <span className="text-rose-600">*</span>
+            <label className="text-xs text-slate-700">VAT Number <span className="text-slate-400 font-normal">(optional)</span>
               <div className="mt-1 flex gap-1.5">
                 <input type="text" value={clientProfile.vatNumber} onChange={(e) => setClientField('vatNumber', e.target.value.toUpperCase())} className={`flex-1 rounded-lg border px-3 py-2 text-xs text-slate-700 ${hasClientFieldError('vatNumber') ? 'border-rose-400 bg-rose-50' : 'border-slate-300 bg-white'}`} placeholder={COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry] ? `${COUNTRY_VAT_PREFIX[clientProfile.invoiceCountry]}123456789` : 'VAT / Tax ID'} />
                 {isEuCountry(clientProfile.invoiceCountry) && (
@@ -16454,7 +16454,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
             </label>
 
             <label className="text-xs text-slate-700">
-              VAT Number <span className="text-rose-600">*</span>
+              VAT Number <span className="text-slate-400 font-normal">(optional)</span>
               <div className="mt-1 flex gap-1.5">
                 <input
                   type="text"
