@@ -5495,6 +5495,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const type = getAmbassadorType(row)
     const pack = AMBASSADOR_PACKS_BY_TYPE[type] || null
     const history = shipmentHistoryEntries(row)
+    const lastShipped = history[0] || null
     return {
       [AMBASSADOR_TAG_COLUMN]: row.id,
       'Ambassador name': row.full_name,
@@ -5502,12 +5503,20 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       Instagram: row.instagram,
       Country: row.country,
       Status: row.status,
+      // Read-only record of what actually went out under that tracking number —
+      // frozen at the moment it was shipped, never mixed with the next package.
+      'Last shipped tracking number': lastShipped?.trackingNumber || '',
+      'Last shipped tracking URL': lastShipped?.trackingUrl || '',
+      'Last shipped items': lastShipped?.boxContents || '',
       'Ambassador type': type,
       'New PR Pack': pack?.title || '',
       items: plannedItemsList(row),
       'Date to be Sent': reminderDateVal(row, null),
-      'Tracking number': history[0]?.trackingNumber || row.tracking_number || '',
-      'Tracking URL': history[0]?.trackingUrl || row.tracking_url || '',
+      // Only ever the in-progress draft for the NEXT package — never falls
+      // back to an already-shipped tracking number, so this stays editable
+      // and distinct from the "Last shipped" columns above.
+      'Tracking number': row.tracking_number || '',
+      'Tracking URL': row.tracking_url || '',
     }
   }
   const downloadAllAmbassadorPackages = async () => {
@@ -5554,6 +5563,9 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
           ['Instagram', exported.Instagram],
           ['Country', exported.Country],
           ['Status', exported.Status],
+          ['Last shipped tracking number', exported['Last shipped tracking number'] || '(nothing shipped yet)'],
+          ['Last shipped tracking URL', exported['Last shipped tracking URL']],
+          ['Last shipped items', exported['Last shipped items']],
           ['New PR Pack', exported['New PR Pack']],
           ...(exported.items.length > 0
             ? exported.items.map((item, i) => [`Item ${i + 1}`, item])
