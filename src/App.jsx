@@ -408,6 +408,7 @@ const PORTAL_FONT_TTF_URL = import.meta.env.VITE_PORTAL_FONT_TTF_URL || '/fonts/
 const CLIENT_PROFILE_STORAGE_KEY = 'gelitup.portal.client_profile.v1'
 const B2B_CART_STORAGE_KEY_PREFIX = 'gelitup.portal.b2b_cart.v1'
 const QUICK_CART_STORAGE_KEY = 'gelitup.catalogue.quick_cart.v1'
+const VISITOR_GATE_STORAGE_KEY = 'gelitup.visitor_type.v1'
 const CHECKOUT_DETAILS_STORAGE_KEY = 'gelitup.checkout.details.v1'
 const COMPLIANCE_DATE = '2025-12-01'
 const HERO_CINEMATIC_VIDEO_URL = 'https://gelitup.com/wp-content/uploads/2024/03/SarriGelItUp.mp4'
@@ -7459,6 +7460,17 @@ function Nav() {
 
       <MainMenu />
 
+      <NavLink
+        to="/portal/login?portal=distributor"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-amber-400 bg-amber-400/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-amber-300 transition duration-300 hover:bg-amber-400/20 hover:!text-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+      >
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-3.5 w-3.5 shrink-0">
+          <circle cx="12" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.8" />
+          <path d="M5 19.5c1.2-3.3 4-5 7-5s5.8 1.7 7 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        </svg>
+        Distributor Login
+      </NavLink>
+
       <a
         href="https://shop.gelitup.com/pages/ourproducts"
         target="_blank"
@@ -7532,6 +7544,18 @@ function MobileNav() {
           >
             SHOP NOW!
           </a>
+
+          <NavLink
+            to="/portal/login?portal=distributor"
+            onClick={() => setOpen(false)}
+            className="flex items-center justify-center gap-2 rounded-lg border border-amber-400 bg-amber-400/10 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.05em] !text-amber-300 transition duration-200 hover:bg-amber-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4 shrink-0">
+              <circle cx="12" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.8" />
+              <path d="M5 19.5c1.2-3.3 4-5 7-5s5.8 1.7 7 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
+            Distributor Login
+          </NavLink>
 
           {sortHamburgerMenuItems(navItems).map((item) => (
             item.href ? (
@@ -20098,6 +20122,23 @@ function App() {
   const lang = useLang()
   const EI = (getTranslations(lang) || {}).exit_intent || {}
 
+  // First-visit gate: ask new visitors whether they're a distributor (routes straight to
+  // portal login) or a client/shopper (just dismisses). Answer is remembered so it only
+  // shows once per browser, on whichever page the visitor lands on first.
+  const [showVisitorGate, setShowVisitorGate] = useState(false)
+  useEffect(() => {
+    if (routerLocation.pathname.startsWith('/portal') || routerLocation.pathname === '/admin-login') return
+    try {
+      if (!localStorage.getItem(VISITOR_GATE_STORAGE_KEY)) setShowVisitorGate(true)
+    } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  const handleVisitorGateChoice = useCallback((type) => {
+    try { localStorage.setItem(VISITOR_GATE_STORAGE_KEY, type) } catch { /* ignore */ }
+    setShowVisitorGate(false)
+    if (type === 'distributor') navigate('/portal/login?portal=distributor')
+  }, [navigate])
+
   // Global cart count — reactive across all pages via custom event from FullCataloguePage
   const [appCartCount, setAppCartCount] = useState(() => {
     try { const c = JSON.parse(localStorage.getItem(QUICK_CART_STORAGE_KEY) || '{}'); return Object.values(c).filter(q => Number(q) > 0).length } catch { return 0 }
@@ -21712,6 +21753,46 @@ function App() {
                 className="w-full pt-1 text-center text-xs text-white/40 transition hover:text-white/60"
               >
                 {EI.dismiss || "No thanks, I'll keep browsing"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* First-visit gate — routes distributors straight to the B2B portal instead of the e-shop */}
+      {showVisitorGate && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-[#111] shadow-2xl ring-1 ring-white/10">
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => handleVisitorGateChoice('client')}
+              className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white/60 transition hover:bg-white/20 hover:text-white"
+            >
+              <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+            <div className="border-b border-white/10 px-8 py-10 text-center">
+              <h2 className="text-2xl font-extrabold text-white">Welcome to GEL.IT.UP</h2>
+              <p className="mt-2 text-sm text-white/60">Tell us who you are so we can take you to the right place.</p>
+            </div>
+            <div className="space-y-3 px-8 py-6">
+              <button
+                type="button"
+                onClick={() => handleVisitorGateChoice('distributor')}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-400 bg-amber-400/10 px-5 py-3.5 text-sm font-bold uppercase tracking-wide text-amber-300 transition hover:bg-amber-400/20"
+              >
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4 shrink-0">
+                  <circle cx="12" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.8" />
+                  <path d="M5 19.5c1.2-3.3 4-5 7-5s5.8 1.7 7 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                </svg>
+                I'm a Distributor — Take me to login
+              </button>
+              <button
+                type="button"
+                onClick={() => handleVisitorGateChoice('client')}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-fuchsia-500 bg-fuchsia-600 px-5 py-3.5 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-fuchsia-500"
+              >
+                I'm a Client — Browse the shop
               </button>
             </div>
           </div>
