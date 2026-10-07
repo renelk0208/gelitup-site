@@ -21772,7 +21772,7 @@ function App() {
               <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
             </button>
             <div className="border-b border-white/10 px-8 py-10 text-center">
-              <h2 className="text-2xl font-extrabold text-white">Welcome to GEL.IT.UP</h2>
+              <h2 className="heading-on-dark text-2xl font-extrabold text-white">Welcome to GEL.IT.UP</h2>
               <p className="mt-2 text-sm text-white/60">Tell us who you are so we can take you to the right place.</p>
             </div>
             <div className="space-y-3 px-8 py-6">
