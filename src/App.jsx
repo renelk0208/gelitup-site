@@ -21845,16 +21845,16 @@ function App() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-white/55">Menu</p>
             <div className="mt-2 space-y-1.5">
-              <NavLink to="/" className="block transition duration-300 hover:text-fuchsia-300">Home</NavLink>
               <NavLink to="/about-us" className="block transition duration-300 hover:text-fuchsia-300">About Us</NavLink>
+              <NavLink to="/ambassadors" className="block transition duration-300 hover:text-fuchsia-300">Become an Ambassador</NavLink>
+              <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
+              <NavLink to="/portal/login?portal=distributor" className="block transition duration-300 hover:text-fuchsia-300">Distributor / B2B Login</NavLink>
+              <NavLink to="/distributors" className="block transition duration-300 hover:text-fuchsia-300">Distributor Registration</NavLink>
+              <NavLink to="/guestbook" className="block transition duration-300 hover:text-fuchsia-300">Guestbook</NavLink>
+              <NavLink to="/" className="block transition duration-300 hover:text-fuchsia-300">Home</NavLink>
               <NavLink to="/inspiration" className="block transition duration-300 hover:text-fuchsia-300">Inspiration</NavLink>
               <NavLink to="/full-catalogue" className="block transition duration-300 hover:text-fuchsia-300">Shop</NavLink>
-              <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
-              <NavLink to="/distributors" className="block transition duration-300 hover:text-fuchsia-300">Distributor Registration</NavLink>
-              <NavLink to="/ambassadors" className="block transition duration-300 hover:text-fuchsia-300">Become an Ambassador</NavLink>
               <NavLink to="/work-with-us" className="block transition duration-300 hover:text-fuchsia-300">Work With Us</NavLink>
-              <NavLink to="/guestbook" className="block transition duration-300 hover:text-fuchsia-300">Guestbook</NavLink>
-              <NavLink to="/portal/login?portal=distributor" className="block transition duration-300 hover:text-fuchsia-300">Distributor / B2B Login</NavLink>
             </div>
           </div>
 

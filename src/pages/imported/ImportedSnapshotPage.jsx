@@ -736,7 +736,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
             <div className="flex items-center px-5 py-12 sm:px-8 sm:py-16 lg:px-12 xl:px-[max(3rem,calc((100vw-80rem)/2))]">
               <div className="max-w-2xl">
                 <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#f168ae]">Who we are</p>
-                <h1 className="heading-on-dark mt-4 text-4xl font-black uppercase leading-[1.08] tracking-[0.04em] sm:text-5xl">
+                <h1 className="heading-on-dark mt-4 text-2xl leading-snug sm:text-4xl">
                   Professional colour. Built on science since 2011.
                 </h1>
                 <div className="mt-6 space-y-4 text-base leading-7 text-white/80 sm:text-lg sm:leading-8">
