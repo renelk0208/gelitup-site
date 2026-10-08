@@ -4,6 +4,65 @@ import { supabase, hasSupabaseConfig } from '../lib/supabaseClient'
 import InstagramFeed from '../components/InstagramFeed'
 import SocialProof from '../components/SocialProof'
 
+const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL || ''
+const EMAIL_WEBHOOK_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+const EMAIL_FROM = import.meta.env.VITE_EMAIL_FROM || 'GEL.IT.UP <info@gelitup.com>'
+const EMAIL_REPLY_TO = import.meta.env.VITE_EMAIL_REPLY_TO || import.meta.env.VITE_B2B_EMAIL || 'info@gelitup.com'
+const WORK_WITH_US_INBOX_EMAIL = 'info@gelitup.com'
+
+const escapeHtml = (value) => String(value ?? '')
+  .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+  .replaceAll('"', '&quot;').replaceAll("'", '&#39;')
+
+// Notifies the team inbox of a new application. Best-effort: any failure here
+// is swallowed so it never blocks the applicant's success screen — the lead
+// is already safely stored in Supabase by the time this is called.
+async function sendWorkWithUsNotification(record) {
+  if (!EMAIL_WEBHOOK_URL) return
+  const roleLabel = (key) => key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  const rows = [
+    ['Name', `${record.first_name} ${record.surname}`],
+    ['Email', record.email],
+    ['Phone', [record.phone_dial_code, record.phone_number].filter(Boolean).join(' ')],
+    ['Country', record.country],
+    ['Instagram', record.instagram_url || '—'],
+    ['TikTok', record.tiktok_url || '—'],
+    ['Interested in', (record.roles || []).map(roleLabel).concat(record.roles_other ? [record.roles_other] : []).join(', ') || '—'],
+  ]
+  const html = `
+    <h2 style="font-family:Arial,sans-serif;color:#1a1a1a">New Work With Us application</h2>
+    <table style="font-family:Arial,sans-serif;font-size:14px;border-collapse:collapse">
+      ${rows.map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#6b7280">${escapeHtml(k)}</td><td style="padding:4px 0;color:#1a1a1a"><strong>${escapeHtml(v)}</strong></td></tr>`).join('')}
+    </table>
+    <p style="font-family:Arial,sans-serif;font-size:14px;color:#374151"><strong>Why interested:</strong><br/>${escapeHtml(record.why_interested)}</p>
+    <p style="font-family:Arial,sans-serif;font-size:14px;color:#374151"><strong>Value they'd add:</strong><br/>${escapeHtml(record.value_add)}</p>
+    <p style="font-family:Arial,sans-serif;font-size:14px;color:#374151"><strong>What they can offer:</strong><br/>${escapeHtml(record.what_offer)}</p>
+  `
+  const headers = { 'Content-Type': 'application/json' }
+  if (EMAIL_WEBHOOK_ANON_KEY) {
+    headers.apikey = EMAIL_WEBHOOK_ANON_KEY
+    headers.Authorization = `Bearer ${EMAIL_WEBHOOK_ANON_KEY}`
+  }
+  try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 15000)
+    await fetch(EMAIL_WEBHOOK_URL, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        eventType: 'work_with_us_application_submitted',
+        to: WORK_WITH_US_INBOX_EMAIL,
+        subject: `New Work With Us application — ${record.first_name} ${record.surname} (${record.country})`,
+        html,
+        from: EMAIL_FROM,
+        replyTo: record.email || EMAIL_REPLY_TO,
+      }),
+      signal: controller.signal,
+    })
+    clearTimeout(timeoutId)
+  } catch { /* best-effort */ }
+}
+
 // Same country list used across the site's registration forms (B2B, academy sample kit, etc.)
 const COUNTRY_OPTIONS = [
   // Europe — EU
@@ -323,6 +382,9 @@ export default function WorkWithUs() {
         const { error: insertError } = await supabase.from('work_with_us_applications').insert(record)
         if (insertError) throw insertError
       }
+
+      // Email notification is best-effort — never blocks the applicant's success screen.
+      try { await sendWorkWithUsNotification(record) } catch { /* best-effort */ }
 
       if (typeof window !== 'undefined') {
         if (window.fbq) window.fbq('track', 'Lead', { content_name: 'work_with_us_application' })

@@ -33,7 +33,10 @@ const AMBASSADOR_PENDING_STATUSES = ['new', 'pending', 'submitted']
 const AMBASSADOR_LETTER_ATTACHMENT_URL = ambassadorLetterAttachmentUrl
 const SHIPMENT_EMAIL_LOCK_STORAGE_KEY = 'gelitup.admin.shipmentEmailLock.v1'
 const ADMIN_TAB_STORAGE_KEY = 'gelitup.admin.activeTab.v1'
-const ADMIN_TAB_KEYS = new Set(['registrations', 'orders', 'search', 'admins', 'pricing', 'ambassadors', 'guestbook', 'draft-carts', 'studio-one'])
+const ADMIN_TAB_KEYS = new Set(['registrations', 'orders', 'search', 'admins', 'pricing', 'ambassadors', 'work-with-us', 'guestbook', 'draft-carts', 'studio-one'])
+const WORK_WITH_US_TABLE = import.meta.env.VITE_WORK_WITH_US_TABLE || 'work_with_us_applications'
+// Statuses that count as "needs review" (form inserts default to 'new').
+const WORK_WITH_US_PENDING_STATUSES = ['new']
 
 function buildDistributorAccessEmail(row) {
   const tierLabel = titleCaseTierLabel(row?.distributor_tier || '') || 'Distributor'
@@ -3128,6 +3131,149 @@ function AdminsPanel() {
           </ul>
         )}
       </div>
+    </div>
+  )
+}
+
+// ─── Work With Us applications panel ─────────────────────────────────────────
+
+function WorkWithUsApplicationsPanel() {
+  const [rows, setRows] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState('new') // 'new' | 'contacted' | 'archived' | 'all'
+  const [savingId, setSavingId] = useState(null)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    let query = supabase.from(WORK_WITH_US_TABLE).select('*').order('created_at', { ascending: false }).limit(200)
+    if (filter === 'new') query = query.in('status', WORK_WITH_US_PENDING_STATUSES)
+    else if (filter === 'contacted') query = query.eq('status', 'contacted')
+    else if (filter === 'archived') query = query.eq('status', 'rejected')
+    const { data } = await query
+    setRows(data || [])
+    setLoading(false)
+  }, [filter])
+
+  useEffect(() => { load() }, [load])
+
+  const updateStatus = async (id, status) => {
+    setSavingId(id)
+    await supabase.from(WORK_WITH_US_TABLE).update({ status, reviewed_at: new Date().toISOString() }).eq('id', id)
+    setSavingId(null)
+    load()
+  }
+
+  const roleLabel = (key) => key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-base font-bold text-slate-900">Work With Us Applications</h2>
+        <div className="flex flex-wrap gap-1.5">
+          {[{ key: 'new', label: 'New' }, { key: 'contacted', label: 'Contacted' }, { key: 'archived', label: 'Archived' }, { key: 'all', label: 'All' }].map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${filter === f.key ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading && <p className="text-sm text-slate-500">Loading…</p>}
+
+      {!loading && rows.length === 0 && (
+        <p className="text-sm text-slate-500">{filter === 'new' ? 'No new applications.' : 'No applications found.'}</p>
+      )}
+
+      {!loading && rows.length > 0 && (
+        <div className="space-y-3">
+          {rows.map((row) => {
+            const phone = [row.phone_dial_code, row.phone_number].filter(Boolean).join(' ')
+            return (
+              <div key={row.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-slate-900">{row.first_name} {row.surname}</p>
+                      <span className="inline-flex rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-600">{row.country}</span>
+                      {row.status === 'contacted' && <span className="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-700">Contacted</span>}
+                      {row.status === 'rejected' && <span className="inline-flex items-center rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-500">Archived</span>}
+                    </div>
+                    <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+                      <a href={`mailto:${row.email}`} className="hover:underline">{row.email}</a>
+                      {phone && <span>{phone}</span>}
+                      {row.instagram_url && <a href={row.instagram_url} target="_blank" rel="noreferrer" className="text-fuchsia-600 hover:underline">Instagram</a>}
+                      {row.tiktok_url && <a href={row.tiktok_url} target="_blank" rel="noreferrer" className="text-fuchsia-600 hover:underline">TikTok</a>}
+                      <span>{fmtDate(row.created_at)}</span>
+                    </p>
+                    {Array.isArray(row.roles) && row.roles.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {row.roles.map((r) => (
+                          <span key={r} className="inline-flex rounded-full bg-fuchsia-100 px-2 py-0.5 text-[10px] font-semibold text-fuchsia-700">
+                            {roleLabel(r)}
+                          </span>
+                        ))}
+                        {row.roles_other && (
+                          <span className="inline-flex rounded-full bg-fuchsia-100 px-2 py-0.5 text-[10px] font-semibold text-fuchsia-700">
+                            {row.roles_other}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex shrink-0 gap-1.5">
+                    {row.status !== 'contacted' && (
+                      <button
+                        onClick={() => updateStatus(row.id, 'contacted')}
+                        disabled={savingId === row.id}
+                        className="rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-sky-500 disabled:opacity-60"
+                      >
+                        Mark Contacted
+                      </button>
+                    )}
+                    {row.status !== 'rejected' && (
+                      <button
+                        onClick={() => updateStatus(row.id, 'rejected')}
+                        disabled={savingId === row.id}
+                        className="rounded-lg bg-slate-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-400 disabled:opacity-60"
+                      >
+                        Archive
+                      </button>
+                    )}
+                    {row.status !== 'new' && (
+                      <button
+                        onClick={() => updateStatus(row.id, 'new')}
+                        disabled={savingId === row.id}
+                        className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
+                      >
+                        Reopen
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <dl className="mt-3 grid gap-2 border-t border-slate-200 pt-3 sm:grid-cols-3">
+                  <div>
+                    <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Why interested</dt>
+                    <dd className="mt-0.5 whitespace-pre-line text-xs text-slate-700">{row.why_interested}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Value they'd add</dt>
+                    <dd className="mt-0.5 whitespace-pre-line text-xs text-slate-700">{row.value_add}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">What they can offer</dt>
+                    <dd className="mt-0.5 whitespace-pre-line text-xs text-slate-700">{row.what_offer}</dd>
+                  </div>
+                </dl>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
@@ -7533,6 +7679,7 @@ export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
     }
   })
   const [ambassadorPending, setAmbassadorPending] = useState(0)
+  const [workWithUsPending, setWorkWithUsPending] = useState(0)
 
   useEffect(() => {
     try { localStorage.setItem(ADMIN_TAB_STORAGE_KEY, tab) } catch {}
@@ -7545,6 +7692,16 @@ export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
       .select('id', { count: 'exact', head: true })
       .in('status', AMBASSADOR_PENDING_STATUSES)
       .then(({ count }) => { if (active) setAmbassadorPending(count || 0) })
+    return () => { active = false }
+  }, [tab])
+
+  useEffect(() => {
+    let active = true
+    supabase
+      .from(WORK_WITH_US_TABLE)
+      .select('id', { count: 'exact', head: true })
+      .in('status', WORK_WITH_US_PENDING_STATUSES)
+      .then(({ count }) => { if (active) setWorkWithUsPending(count || 0) })
     return () => { active = false }
   }, [tab])
 
@@ -7608,6 +7765,17 @@ export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
             )}
           </button>
           <button
+            onClick={() => setTab('work-with-us')}
+            className={`relative w-full rounded-full px-3 py-2 text-center text-[11px] font-semibold leading-tight transition sm:w-auto sm:px-4 sm:py-1.5 sm:text-sm ${tab === 'work-with-us' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+          >
+            Work With Us
+            {workWithUsPending > 0 && (
+              <span className="ml-1.5 inline-flex min-w-[18px] items-center justify-center rounded-full bg-fuchsia-600 px-1.5 py-0.5 text-[10px] font-bold text-white align-middle">
+                {workWithUsPending}
+              </span>
+            )}
+          </button>
+          <button
             onClick={() => setTab('guestbook')}
             className={`w-full rounded-full px-3 py-2 text-center text-[11px] font-semibold leading-tight transition sm:w-auto sm:px-4 sm:py-1.5 sm:text-sm ${tab === 'guestbook' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
@@ -7635,6 +7803,7 @@ export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
         {tab === 'admins' && <AdminsPanel />}
         {tab === 'pricing' && <TierPricingPanel />}
         {tab === 'ambassadors' && <AmbassadorApplicationsPanel focusAmbassadorId={focusAmbassadorId} />}
+        {tab === 'work-with-us' && <WorkWithUsApplicationsPanel />}
         {tab === 'guestbook' && <GuestbookPanel />}
         {tab === 'draft-carts' && <DraftCartsPanel />}
         {tab === 'studio-one' && <StudioOneRequestsPanel />}
