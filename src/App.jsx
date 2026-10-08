@@ -7416,7 +7416,7 @@ function MainMenu() {
             onClick={() => setOpen(false)}
             className="mt-1 block rounded-lg border border-fuchsia-500/70 bg-fuchsia-600/10 px-3 py-2 text-sm font-bold uppercase tracking-[0.08em] text-fuchsia-200 transition duration-200 hover:bg-fuchsia-600/20"
           >
-            Distributor Login
+            Distributor / B2B Login
           </NavLink>
         </div>
       )}
@@ -7464,13 +7464,13 @@ function Nav() {
 
       <NavLink
         to="/portal/login?portal=distributor"
-        className="inline-flex items-center gap-1.5 rounded-lg border border-white/25 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-white/80 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-white shadow-[0_0_12px_rgba(212,55,144,0.28)] transition duration-300 hover:bg-fuchsia-500 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
       >
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-3.5 w-3.5 shrink-0">
           <circle cx="12" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.8" />
           <path d="M5 19.5c1.2-3.3 4-5 7-5s5.8 1.7 7 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
         </svg>
-        Distributor Login
+        Distributor / B2B Login
       </NavLink>
 
       <a
@@ -7550,13 +7550,13 @@ function MobileNav() {
           <NavLink
             to="/portal/login?portal=distributor"
             onClick={() => setOpen(false)}
-            className="flex items-center justify-center gap-2 rounded-lg border border-white/25 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.05em] !text-white/80 transition duration-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+            className="flex items-center justify-center gap-2 rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.05em] !text-white shadow-[0_0_6px_rgba(212,55,144,0.3)] transition duration-200 hover:bg-fuchsia-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
           >
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4 shrink-0">
               <circle cx="12" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.8" />
               <path d="M5 19.5c1.2-3.3 4-5 7-5s5.8 1.7 7 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
             </svg>
-            Distributor Login
+            Distributor / B2B Login
           </NavLink>
 
           {sortHamburgerMenuItems(navItems).map((item) => (
@@ -21854,7 +21854,7 @@ function App() {
               <NavLink to="/ambassadors" className="block transition duration-300 hover:text-fuchsia-300">Become an Ambassador</NavLink>
               <NavLink to="/work-with-us" className="block transition duration-300 hover:text-fuchsia-300">Work With Us</NavLink>
               <NavLink to="/guestbook" className="block transition duration-300 hover:text-fuchsia-300">Guestbook</NavLink>
-              <NavLink to="/portal/login?portal=distributor" className="block transition duration-300 hover:text-fuchsia-300">Distributor Login</NavLink>
+              <NavLink to="/portal/login?portal=distributor" className="block transition duration-300 hover:text-fuchsia-300">Distributor / B2B Login</NavLink>
             </div>
           </div>
 
