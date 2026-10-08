@@ -7368,7 +7368,7 @@ function MainMenu() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-[calc(100%+0.55rem)] z-50 w-64 rounded-2xl border border-white/15 bg-[#111111] p-2 shadow-[0_18px_48px_rgba(0,0,0,0.38)] backdrop-blur-xl">
+        <div className="absolute left-0 top-[calc(100%+0.55rem)] z-50 w-64 rounded-2xl border border-white/15 bg-[#111111] p-2 shadow-[0_18px_48px_rgba(0,0,0,0.38)] backdrop-blur-xl">
           {menuItems.map((item) => {
             if (item.href) {
               return (
@@ -7427,6 +7427,8 @@ function MainMenu() {
 function Nav() {
   return (
     <nav className="hidden items-center justify-end gap-2 xl:flex">
+      <MainMenu />
+
       <NavLink
         to="/blog"
         className={({ isActive }) =>
@@ -7459,8 +7461,6 @@ function Nav() {
       >
         Work With Us
       </NavLink>
-
-      <MainMenu />
 
       <NavLink
         to="/portal/login?portal=distributor"
