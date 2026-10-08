@@ -42,6 +42,7 @@ const AcademySampleKitPage = lazy(() => import('./pages/AcademySampleKitPage.jsx
 const AmbassadorPage = lazy(() => import('./pages/AmbassadorPage.jsx'))
 const AmbassadorAgreementPage = lazy(() => import('./pages/AmbassadorAgreementPage.jsx'))
 const AmbassadorDetailsPage = lazy(() => import('./pages/AmbassadorDetailsPage.jsx'))
+const WorkWithUsPage = lazy(() => import('./pages/WorkWithUs.jsx'))
 
 const B2B_EMAIL = import.meta.env.VITE_B2B_EMAIL || 'info@gelitup.com'
 const PRODUCT_CATEGORIES = ['Solid Colours', 'Builder Gels', 'Base & Top', 'Nail Care', 'Accessories']
@@ -7301,6 +7302,7 @@ const navItems = [
   { to: '/for-academies', label: 'Academies' },
   { to: '/distributor-packages', label: 'Distribution' },
   { to: '/ambassadors', label: 'Ambassadors' },
+  { to: '/work-with-us', label: 'Work With Us' },
   { to: '/pages/contact-us', label: 'Contact us' },
   { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
 ]
@@ -21592,6 +21594,7 @@ function App() {
           <Route path="/ambassadors" element={<AmbassadorPage />} />
           <Route path="/ambassador" element={<Navigate to="/ambassadors" replace />} />
           <Route path="/become-ambassador" element={<Navigate to="/ambassadors" replace />} />
+          <Route path="/work-with-us" element={<WorkWithUsPage />} />
           <Route path="/creators" element={<Navigate to="/ambassadors" replace />} />
           <Route path="/ambassador-agreement" element={<AmbassadorAgreementPage />} />
           <Route path="/ambassador-terms" element={<Navigate to="/ambassador-agreement" replace />} />
@@ -21849,6 +21852,7 @@ function App() {
               <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
               <NavLink to="/distributors" className="block transition duration-300 hover:text-fuchsia-300">Distributor Registration</NavLink>
               <NavLink to="/ambassadors" className="block transition duration-300 hover:text-fuchsia-300">Become an Ambassador</NavLink>
+              <NavLink to="/work-with-us" className="block transition duration-300 hover:text-fuchsia-300">Work With Us</NavLink>
               <NavLink to="/guestbook" className="block transition duration-300 hover:text-fuchsia-300">Guestbook</NavLink>
               <NavLink to="/portal/login?portal=distributor" className="block transition duration-300 hover:text-fuchsia-300">Distributor Login</NavLink>
             </div>

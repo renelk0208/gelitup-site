@@ -207,6 +207,11 @@ const ROUTE_SEO_MAP = {
     description: 'Join the GEL.IT.UP Ambassador Programme. Get your nail work featured on @gelitup, earn a personal discount code and receive free product drops. Apply in 60 seconds.',
     canonical:   'https://gelitup.com/ambassadors',
   },
+  '/work-with-us': {
+    title:       'Work With GEL.IT.UP | Distributors, Educators & Nail Masters Worldwide',
+    description: "Wherever you work, if you set the standard in your market, we'd love to hear from you. GEL.IT.UP is a professional gel brand, made in the EU and trusted by nail technicians in more than 15 countries.",
+    canonical:   'https://gelitup.com/work-with-us',
+  },
   '/ambassador-agreement': {
     title:       'Ambassador Agreement | GEL.IT.UP by GIUP®',
     description: 'The full GEL.IT.UP Ambassador Agreement — commitments, content permissions and how the partnership works.',

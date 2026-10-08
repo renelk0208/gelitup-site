@@ -31,6 +31,9 @@ const ROUTES = [
   // Ambassadors
   { path: '/ambassadors',                priority: '0.7', changefreq: 'monthly' },
 
+  // Work With Us
+  { path: '/work-with-us',               priority: '0.7', changefreq: 'monthly' },
+
   // Academies
   { path: '/for-academies',              priority: '0.7', changefreq: 'monthly' },
   { path: '/academies',                  priority: '0.6', changefreq: 'monthly' },

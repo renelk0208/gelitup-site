@@ -49,6 +49,14 @@
     <priority>0.7</priority>
   </url>
 
+  <!-- Work With Us -->
+  <url>
+    <loc>https://gelitup.com/work-with-us</loc>
+    <lastmod>2026-05-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- About Us -->
   <url>
     <loc>https://gelitup.com/pages/about-us</loc>
