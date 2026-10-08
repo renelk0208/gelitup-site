@@ -7348,7 +7348,7 @@ function MainMenu() {
 
   useEffect(() => { setOpen(false) }, [location.pathname, location.search])
 
-  const menuItems = sortHamburgerMenuItems(navItems.filter((item) => item.to !== '/blog' && item.to !== '/guestbook'))
+  const menuItems = sortHamburgerMenuItems(navItems.filter((item) => item.to !== '/blog' && item.to !== '/studio-one' && item.to !== '/work-with-us'))
 
   return (
     <div className="relative">
@@ -7439,17 +7439,6 @@ function Nav() {
       </NavLink>
 
       <NavLink
-        to="/guestbook"
-        className={({ isActive }) =>
-          `rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] transition duration-300 ${
-            isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
-          }`
-        }
-      >
-        Guestbook
-      </NavLink>
-
-      <NavLink
         to="/studio-one"
         className={({ isActive }) =>
           `rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] transition duration-300 ${
@@ -7460,11 +7449,22 @@ function Nav() {
         Studio One
       </NavLink>
 
+      <NavLink
+        to="/work-with-us"
+        className={({ isActive }) =>
+          `rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] transition duration-300 ${
+            isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
+          }`
+        }
+      >
+        Work With Us
+      </NavLink>
+
       <MainMenu />
 
       <NavLink
         to="/portal/login?portal=distributor"
-        className="inline-flex items-center gap-1.5 rounded-lg border border-amber-400 bg-amber-400/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-amber-300 transition duration-300 hover:bg-amber-400/20 hover:!text-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-white/25 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-white/80 transition duration-300 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
       >
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-3.5 w-3.5 shrink-0">
           <circle cx="12" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.8" />
@@ -7550,7 +7550,7 @@ function MobileNav() {
           <NavLink
             to="/portal/login?portal=distributor"
             onClick={() => setOpen(false)}
-            className="flex items-center justify-center gap-2 rounded-lg border border-amber-400 bg-amber-400/10 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.05em] !text-amber-300 transition duration-200 hover:bg-amber-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+            className="flex items-center justify-center gap-2 rounded-lg border border-white/25 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.05em] !text-white/80 transition duration-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
           >
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4 shrink-0">
               <circle cx="12" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.8" />
