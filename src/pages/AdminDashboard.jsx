@@ -5369,7 +5369,7 @@ const requestShipmentSave = (row, alsoEmail) => {
     void saveShipment(row, false)
     return
   }
-  const nextDate = String(reminderDateVal(row, getDefaultFollowUpDateValue(row)) || '').trim()
+  const nextDate = String(nextDispatchDateDefault(row) || '').trim()
   setShipDatePrompt({ rowId: row.id, alsoEmail, date: nextDate })
 }
   const setShipField = (id, field, value) => setShip(prev => ({ ...prev, [id]: { ...prev[id], [field]: value } }))
@@ -5479,6 +5479,19 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (Object.prototype.hasOwnProperty.call(reminderDateDraft, row.id)) return reminderDateDraft[row.id]
     const tagged = readMetaTag(row, 'SHIPMENT_NEXT_REMINDER_AT') || fallbackIso || ''
     return tagged ? String(tagged).slice(0, 10) : ''
+  }
+  // When starting a fresh dispatch, never default the "next reminder" prompt
+  // to a date that has already passed — that silently re-saves the stale,
+  // already-overdue schedule, so the "overdue" badge never clears even
+  // though a brand-new package was just sent. Only reuse the stored date
+  // when it's still in the future; otherwise propose a sensible new one.
+  const nextDispatchDateDefault = (row) => {
+    if (Object.prototype.hasOwnProperty.call(reminderDateDraft, row.id)) return reminderDateDraft[row.id]
+    const freshDefault = getDefaultFollowUpDateValue(row) || ''
+    const tagged = readMetaTag(row, 'SHIPMENT_NEXT_REMINDER_AT')
+    if (!tagged) return freshDefault
+    const taggedIsFuture = new Date(tagged).getTime() > Date.now()
+    return (taggedIsFuture ? String(tagged).slice(0, 10) : freshDefault) || freshDefault
   }
   const getAmbassadorType = (row) => extractTaggedValue(row?.admin_comment, 'AMBASSADOR_TYPE')
   const setAmbassadorType = async (row, type) => {
@@ -6202,7 +6215,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     setEmail(row.id, 'sending', '')
     try { await ensureAmbassadorPortalAccount(updatedRow) } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not provision ambassador portal account.'); return }
     const defaultFollowUpDate = getDefaultFollowUpDateValue(updatedRow, new Date().toISOString())
-    const chosenReminderRaw = String(overrideReminderDate || reminderDateVal(row, defaultFollowUpDate) || defaultFollowUpDate || '').trim()
+    const chosenReminderRaw = String(overrideReminderDate || nextDispatchDateDefault(row) || defaultFollowUpDate || '').trim()
     if (!chosenReminderRaw) {
       setSaving(null)
       setEmail(row.id, 'error', 'Set a next package reminder date before completing this shipment flow.')
