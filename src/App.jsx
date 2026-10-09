@@ -1123,7 +1123,7 @@ function getSilverFreeGuaranteeText(referenceDate = new Date()) {
 function setPageSEO({ title, description, canonical } = {}) {
   const SITE_NAME = 'GEL.IT.UP by GIUP®'
   const DEFAULT_TITLE = 'GEL.IT.UP® | Wholesale HEMA-Free Professional Gel Polish EU'
-  const DEFAULT_DESCRIPTION = 'Professional nail gel polish, builder gel systems and wholesale nail products for salons, technicians and academies. HEMA-free, TPO-free, EU certified.'
+  const DEFAULT_DESCRIPTION = 'Professional nail gel polish, builder gel systems and wholesale nail products for salons, technicians and academies. HEMA-free, TPO-free, Made in the EU.'
   const DEFAULT_CANONICAL = 'https://gelitup.com/'
 
   const resolvedTitle = title
@@ -2146,7 +2146,7 @@ function DistributorPackagesPage() {
 function ForAcademiesPage(){
   useEffect(() => setPageSEO({
     title: 'Nail Academy Supplies Wholesale | GEL.IT.UP Professional Nail Systems',
-    description: 'Professional nail academy supplies wholesale. GEL.IT.UP supplies certified gel systems, training materials and branded support to nail academies worldwide. HEMA-free, TPO-free, EU certified.',
+    description: 'Professional nail academy supplies wholesale. GEL.IT.UP supplies certified gel systems, training materials and branded support to nail academies worldwide. HEMA-free, TPO-free, Made in the EU.',
     canonical: 'https://gelitup.com/for-academies',
   }), [])
 
@@ -2176,7 +2176,7 @@ function ForAcademiesPage(){
                 The Professional Nail Brand<br className="hidden sm:block" /> Built for Academies
               </h1>
               <p className="hero-copy-shadow mt-3 max-w-xl text-sm leading-relaxed sm:text-base" style={{ color: 'rgba(255,255,255,0.82)' }}>
-                EU-certified, HEMA-free, and structured for training volume. From intake consumables to student kits — professional products your students can trust from day one.
+                Made in the EU, HEMA-free, and structured for training volume. From intake consumables to student kits — professional products your students can trust from day one.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <NavLink to="/academy-kit" className="btn-cta-rose inline-flex rounded-lg px-5 py-2.5 text-sm font-bold transition duration-300">
@@ -2208,7 +2208,7 @@ function ForAcademiesPage(){
             <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white">
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
             </div>
-            <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em]" style={{ color: '#D43790' }}>EU CERTIFIED</p>
+            <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.1em]" style={{ color: '#D43790' }}>MADE IN THE EU</p>
             <p className="mt-2 text-sm leading-relaxed text-white">Every formula is CPNP Notified and EC 1223/2009 compliant. Full safety documentation available — exactly what your academy’s compliance obligations require.</p>
           </article>
           <article className="rounded-xl border border-white/15 bg-black/20 p-4">
@@ -2317,7 +2317,7 @@ function ForAcademiesPage(){
             <ul className="mt-3 space-y-1">
               {[
                 '1,000+ professional shades',
-                'HEMA-free · EU certified · CPNP notified',
+                'HEMA-free · Made in the EU · CPNP notified',
                 'No MOQ · Sample packs available',
                 'SDS &amp; compliance docs on request',
               ].map((item) => (
@@ -3623,7 +3623,7 @@ const SUBCATEGORY_SEO = {
   },
   'mirror-powder': {
     title: 'Mirror Powder Wholesale | Chrome Nail Supplies | GEL.IT.UP Professional',
-    description: 'Professional mirror powder and chrome nail supplies available wholesale. HEMA-free, TPO-free, EU certified. For nail technicians, salons and academies. Open a wholesale account at gelitup.com.',
+    description: 'Professional mirror powder and chrome nail supplies available wholesale. HEMA-free, TPO-free, Made in the EU. For nail technicians, salons and academies. Open a wholesale account at gelitup.com.',
     canonical: 'https://gelitup.com/mirror-powder',
   },
   'by-the-ocean': {
@@ -3633,7 +3633,7 @@ const SUBCATEGORY_SEO = {
   },
   'bob': {
     title: 'BOB Collection | Professional Gel Polish Wholesale | GEL.IT.UP',
-    description: 'The BOB gel polish collection available wholesale for nail technicians and salons. HEMA-free, TPO-free, Approved by Cruelty Free International. EU certified. Open a B2B account at gelitup.com.',
+    description: 'The BOB gel polish collection available wholesale for nail technicians and salons. HEMA-free, TPO-free, Approved by Cruelty Free International. Made in the EU. Open a B2B account at gelitup.com.',
     canonical: 'https://gelitup.com/bob',
   },
   'premium-builder': {
@@ -3643,7 +3643,7 @@ const SUBCATEGORY_SEO = {
   },
   '3in1': {
     title: '3-in-1 Builder Gel Wholesale | Professional Nail Systems | GEL.IT.UP',
-    description: 'Professional 3-in-1 builder gel available wholesale for nail technicians, salons and academies. HEMA-free, TPO-free, EU certified, Approved by Cruelty Free International. Wholesale accounts available worldwide.',
+    description: 'Professional 3-in-1 builder gel available wholesale for nail technicians, salons and academies. HEMA-free, TPO-free, Made in the EU, Approved by Cruelty Free International. Wholesale accounts available worldwide.',
     canonical: 'https://gelitup.com/3in1',
   },
   '5in1-base': {
@@ -3989,8 +3989,8 @@ function FullCataloguePage() {
   useEffect(() => {
     const subSlug = (searchParams.get('subcategory') || '').toLowerCase().trim()
     const seo = SUBCATEGORY_SEO[subSlug] || {
-      title: 'GEL.IT.UP Gel Polish & Builder Gel | HEMA-Free, EU Certified',
-      description: 'Browse professional gel polish, builder gels and nail supplies wholesale. HEMA-free, TPO-free, EU certified for salons, technicians and academies.',
+      title: 'GEL.IT.UP Gel Polish & Builder Gel | HEMA & TPO-Free, Made in the EU',
+      description: 'Browse professional gel polish, builder gels and nail supplies wholesale. HEMA-free, TPO-free, Made in the EU for salons, technicians and academies.',
       canonical: 'https://gelitup.com/full-catalogue',
     }
     return setPageSEO(seo)
@@ -6372,7 +6372,7 @@ function FullCataloguePage() {
           <div id="catalogue-section-colours" className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen scroll-mt-28 overflow-hidden bg-[#7a1040] lg:min-h-[400px]">
             <img
               src="/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg"
-              alt="Professional UV/LED gel polish — 1,000+ shades, HEMA-free, EU certified"
+              alt="Professional UV/LED gel polish — 1,000+ shades, HEMA-free, Made in the EU"
               className="absolute right-0 top-0 hidden h-full w-[60%] object-cover object-right lg:block"
               style={{
                 maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 25%, black 50%)',
@@ -6415,7 +6415,7 @@ function FullCataloguePage() {
                   <div className="absolute -inset-2 rounded-full bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,rgba(212,55,144,0.3)_0%,transparent_70%)] blur-2xl" />
                   <img
                     src="/gelitup-content/catalog-heroes/gel-polish-category-hero.jpg"
-                    alt="Professional UV/LED gel polish — 1,000+ shades, HEMA-free, EU certified"
+                    alt="Professional UV/LED gel polish — 1,000+ shades, HEMA-free, Made in the EU"
                     className="relative w-full object-contain drop-shadow-[0_6px_32px_rgba(212,55,144,0.45)]"
                   />
                 </div>
@@ -8067,7 +8067,7 @@ function HomePage({ onOpenContactModal }) {
 
   useEffect(() => setPageSEO({
     title: 'GEL.IT.UP® | Wholesale HEMA-Free Professional Gel Polish EU',
-    description: 'Professional nail gel polish, builder gel systems and wholesale nail products for salons, technicians and academies. HEMA-free, TPO-free, EU certified.',
+    description: 'Professional nail gel polish, builder gel systems and wholesale nail products for salons, technicians and academies. HEMA-free, TPO-free, Made in the EU.',
     canonical: 'https://gelitup.com/',
   }), [])
 
@@ -8181,7 +8181,7 @@ function HomePage({ onOpenContactModal }) {
             />
             <img
               src={HOME_HERO_POSTER_URL || media.heroImage}
-              alt="GEL.IT.UP® professional gel nail supplies — wholesale B2B, HEMA-free, EU certified"
+              alt="GEL.IT.UP® professional gel nail supplies — wholesale B2B, HEMA-free, Made in the EU"
               className="h-full w-full object-cover object-[50%_35%]"
               width="1600"
               height="900"
@@ -8225,7 +8225,7 @@ function HomePage({ onOpenContactModal }) {
               </p>
               {/* Trust bar */}
               <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5">
-                {['1,000+ shades', 'HEMA-free', 'TPO-free', 'EU certified', '15+ countries'].map((badge) => (
+                {['1,000+ shades', 'HEMA-free', 'TPO-free', 'Made in the EU', '15+ countries'].map((badge) => (
                   <span key={badge} className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/70">
                     <span className="h-1 w-1 rounded-full bg-fuchsia-400" aria-hidden="true" />
                     {badge}
@@ -8377,7 +8377,7 @@ function HomePage({ onOpenContactModal }) {
           The range is built for wholesale buying, repeat salon use, and colour-led retail growth.
         </p>
         <p className="mt-3">
-          Our portfolio includes 1,000+ shades, HEMA-free and TPO-free options, and EU-certified professional nail systems
+          Our portfolio includes 1,000+ shades, HEMA-free and TPO-free options, and professional nail systems made in the EU
           designed to support structured services, training environments, and multi-country B2B supply.
         </p>
         <p className="mt-3">
@@ -8462,7 +8462,7 @@ function HomePage({ onOpenContactModal }) {
             <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">Professional Nail Salon Wholesale Access</h2>
             <p className="mt-2 max-w-lg text-sm text-white/90">Register free in under 2 minutes. No approval, no waiting — instant access to 1,000+ shades at wholesale B2B pricing from day one.</p>
             <ul className="mt-3 space-y-1">
-              {['1,000+ professional shades', 'B2B wholesale pricing — no MOQ', 'HEMA-free · EU certified', 'WhatsApp &amp; Viber support'].map(item => (
+              {['1,000+ professional shades', 'B2B wholesale pricing — no MOQ', 'HEMA-free · Made in the EU', 'WhatsApp &amp; Viber support'].map(item => (
                 <li key={item} className="flex items-center gap-2 text-sm text-white/90">
                   <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white/70" />
                   <span dangerouslySetInnerHTML={{ __html: item }} />
@@ -8490,7 +8490,7 @@ function HomePage({ onOpenContactModal }) {
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D43790]">For Nail Academies</p>
             <h2 className="heading-on-dark mt-1 text-xl font-extrabold text-white">Professional Nail Academy Supply & Training Support</h2>
-            <p className="mt-2 max-w-lg text-sm text-white/80">EU-certified, HEMA-free products built for training volume. From classroom consumables to student kits — with compliance documentation included.</p>
+            <p className="mt-2 max-w-lg text-sm text-white/80">Made in the EU, HEMA-free products built for training volume. From classroom consumables to student kits — with compliance documentation included.</p>
             <ul className="mt-3 space-y-1">
               {['CPNP notified · EU compliant', 'HEMA-free · SDS docs included', 'No MOQ · Sample packs available', 'Intake-cycle ordering support'].map((item) => (
                 <li key={item} className="flex items-center gap-2 text-sm text-white/80">
@@ -8541,7 +8541,7 @@ function HomePage({ onOpenContactModal }) {
         <h2 className="mt-1 text-xl font-semibold text-slate-900">Professional Nail Wholesale FAQs</h2>
         <p className="mt-2 max-w-3xl text-sm text-slate-600">
           Common questions from salons, academies, and distributors looking for HEMA-free professional nail products,
-          wholesale pricing, and EU-certified support.
+          wholesale pricing, and support — made in the EU.
         </p>
         <div className="mt-5 grid gap-3 md:grid-cols-2">
           {HOME_FAQS.map((item) => (
@@ -9436,7 +9436,7 @@ function BuyerRegister() {
   const navigate = useNavigate()
   useEffect(() => setPageSEO({
     title: 'Open a Wholesale Account | GEL.IT.UP Professional Nail Supplies',
-    description: 'Open a B2B wholesale account with GEL.IT.UP by GIUP®. Access 1,000+ professional nail products including gel polish, builder gel and nail systems. HEMA-free, TPO-free, EU certified.',
+    description: 'Open a B2B wholesale account with GEL.IT.UP by GIUP®. Access 1,000+ professional nail products including gel polish, builder gel and nail systems. HEMA-free, TPO-free, Made in the EU.',
     canonical: 'https://gelitup.com/register',
   }), [])
   const [form, setForm] = useState({ email: '', password: '', confirmPassword: '', companyName: '' })
@@ -9533,7 +9533,7 @@ function BuyerRegister() {
           </li>
           <li className="flex items-start gap-2.5 text-sm font-medium text-white">
             <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500 text-white text-xs">✓</span>
-            EU-certified, HEMA &amp; TPO-free formulas
+            Made in the EU, HEMA &amp; TPO-free formulas
           </li>
           <li className="flex items-start gap-2.5 text-sm font-medium text-white">
             <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500 text-white text-xs">✓</span>
@@ -10938,7 +10938,7 @@ function PortalRegister({ onRegister }) {
   const lang = useLang()
   useEffect(() => setPageSEO({
     title: 'Become a GEL.IT.UP Distributor | Wholesale Nail Supplies EU & Worldwide',
-    description: 'Apply to become an authorised GEL.IT.UP distributor. Join our verified wholesale network across 15+ countries. Professional nail supplies, EU certified, HEMA-free, TPO-free.',
+    description: 'Apply to become an authorised GEL.IT.UP distributor. Join our verified wholesale network across 15+ countries. Professional nail supplies, Made in the EU, HEMA-free, TPO-free.',
     canonical: 'https://gelitup.com/become-distributor',
   }), [])
   const R = (getTranslations(lang) || {}).register || {}
@@ -11098,7 +11098,7 @@ function PortalRegister({ onRegister }) {
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-300">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-400 text-xs">✓</span>
-                {R.b2b_b4 || 'EU-certified, dermatologist-tested formulas'}
+                {R.b2b_b4 || 'Made in the EU, dermatologist-tested formulas'}
               </li>
             </>
           )}

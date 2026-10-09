@@ -43,7 +43,7 @@ const AUDIENCES = [
 const TRUST_BADGES = [
   { label: 'HEMA-Free', sub: 'Safer for clients & techs' },
   { label: 'TPO-Free', sub: 'Superior light stability' },
-  { label: 'EU Certified', sub: 'EC 1223/2009 compliant' },
+  { label: 'Made in the EU', sub: 'EC 1223/2009 compliant' },
   { label: 'Leaping Bunny', sub: 'Cruelty-free approved' },
 ]
 
@@ -51,7 +51,7 @@ export default function GelColoursLandingPage() {
   useEffect(() => {
     document.title = 'Professional Gel Colours | GEL.IT.UP by GIUP®'
     const meta = document.querySelector('meta[name="description"]')
-    if (meta) meta.setAttribute('content', 'Wholesale professional gel colours for nail technicians, salons and academies. HEMA-free, EU certified, 200+ shades. Order online or register as a distributor.')
+    if (meta) meta.setAttribute('content', 'Wholesale professional gel colours for nail technicians, salons and academies. HEMA-free, Made in the EU, 200+ shades. Order online or register as a distributor.')
   }, [])
 
   return (
@@ -80,7 +80,7 @@ export default function GelColoursLandingPage() {
           200+ Professional<br />Gel Colours
         </h1>
         <p className="mt-5 mx-auto max-w-xl text-base sm:text-lg" style={{ color: 'rgba(255,255,255,0.72)' }}>
-          HEMA-free, EU certified gel polish built for nail technicians, salons and academies.
+          HEMA-free, Made in the EU gel polish built for nail technicians, salons and academies.
           Stunning pigment. Consistent cure. No compromises.
         </p>
 

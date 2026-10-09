@@ -77,7 +77,7 @@ export default function AcademySampleKitPage() {
   useEffect(() => {
     document.title = 'Free Academy Sample Kit | GEL.IT.UP for Nail Academies'
     const meta = document.querySelector('meta[name="description"]')
-    if (meta) meta.setAttribute('content', 'Claim a free GEL.IT.UP sample kit for your nail academy. HEMA-free, TPO-free, EU-certified gel samples plus the full compliance pack — shipped free to your school.')
+    if (meta) meta.setAttribute('content', 'Claim a free GEL.IT.UP sample kit for your nail academy. HEMA-free, TPO-free, Made in the EU gel samples plus the full compliance pack — shipped free to your school.')
   }, [])
 
   // Pre-fill country from visitor geo (only if it's a campaign market)

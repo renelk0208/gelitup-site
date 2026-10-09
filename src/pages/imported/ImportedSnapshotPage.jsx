@@ -360,7 +360,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
   const PAGE_SEO_MAP = {
     'about-us': {
       title: 'About GEL.IT.UP by GIUP® | Professional Gel Polish Brand',
-      description: 'Learn about GEL.IT.UP by GIUP® — a professional gel polish and nail systems brand known for 1,000+ shades, HEMA-free formulas, and EU-certified products for nail technicians worldwide.',
+      description: 'Learn about GEL.IT.UP by GIUP® — a professional gel polish and nail systems brand known for 1,000+ shades, HEMA-free formulas, and products made in the EU for nail technicians worldwide.',
       canonical: 'https://gelitup.com/pages/about-us',
     },
     'contact-us': {
@@ -373,7 +373,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
   useEffect(() => {
     const defaults = {
       title: 'GEL.IT.UP by GIUP® | Professional Gel Polish, Builder Gel & Nail Systems',
-      description: 'Professional gel polish with 1,000+ shades, builder gel systems, base coats and top coats. HEMA-free, TPO-free, EU certified. Available wholesale to professional nail technicians worldwide.',
+      description: 'Professional gel polish with 1,000+ shades, builder gel systems, base coats and top coats. HEMA-free, TPO-free, Made in the EU. Available wholesale to professional nail technicians worldwide.',
       canonical: `https://gelitup.com/pages/${slug}`,
     }
     const seo = PAGE_SEO_MAP[slug] || defaults
@@ -938,7 +938,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
                 <div className="flex-1">
                   <h3 className="text-lg font-extrabold uppercase tracking-[0.08em] text-white sm:text-xl">Full Compliance Documentation</h3>
                   <p className="mt-2 text-sm leading-relaxed text-white/90">
-                    EU-certified, HEMA-free and TPO-free products with complete compliance documentation for packaging, safety data sheets, and regulatory certifications.
+                    Made in the EU, HEMA-free and TPO-free products, CPNP-notified under EU Regulation (EC) No 1223/2009, with complete compliance documentation: packaging, safety data sheets and regulatory files.
                   </p>
                   <a
                     href="/gelitup-compliance-certification.html"

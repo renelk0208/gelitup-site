@@ -19,12 +19,12 @@ const DIST = path.resolve(__dirname, '../dist')
 const ROUTE_SEO_MAP = {
   '/': {
     title:       'GEL.IT.UP by GIUP® | Professional Gel Polish, Builder Gel & Nail Systems',
-    description: 'Wholesale gel polish, builder gel and nail systems for nail technicians, salons and academies. HEMA-free, TPO-free, EU certified, Approved by Cruelty Free International. 15+ countries.',
+    description: 'Wholesale gel polish, builder gel and nail systems for nail technicians, salons and academies. HEMA-free, TPO-free, Made in the EU, Approved by Cruelty Free International. 15+ countries.',
     canonical:   'https://gelitup.com/',
   },
   '/full-catalogue': {
     title:       'Full Product Catalogue | Wholesale Nail Supplies | GEL.IT.UP by GIUP®',
-    description: 'Browse the complete GEL.IT.UP wholesale catalogue. 1,000+ gel polish shades, builder gels, base coats, nail art and professional tools. HEMA-free, TPO-free, EU certified.',
+    description: 'Browse the complete GEL.IT.UP wholesale catalogue. 1,000+ gel polish shades, builder gels, base coats, nail art and professional tools. HEMA-free, TPO-free, Made in the EU.',
     canonical:   'https://gelitup.com/full-catalogue',
   },
   '/solid-gel-polish': {
@@ -49,7 +49,7 @@ const ROUTE_SEO_MAP = {
   },
   '/mirror-powder': {
     title:       'Mirror Powder Wholesale | Chrome Nail Supplies | GEL.IT.UP Professional',
-    description: 'Professional mirror powder and chrome nail supplies available wholesale. HEMA-free, TPO-free, EU certified. For nail technicians, salons and academies. Open a wholesale account at gelitup.com.',
+    description: 'Professional mirror powder and chrome nail supplies available wholesale. HEMA-free, TPO-free, Made in the EU. For nail technicians, salons and academies. Open a wholesale account at gelitup.com.',
     canonical:   'https://gelitup.com/mirror-powder',
   },
   '/by-the-ocean': {
@@ -59,7 +59,7 @@ const ROUTE_SEO_MAP = {
   },
   '/bob': {
     title:       'BOB Collection | Professional Gel Polish Wholesale | GEL.IT.UP',
-    description: 'The BOB gel polish collection available wholesale for nail technicians and salons. HEMA-free, TPO-free, Approved by Cruelty Free International. EU certified. Open a B2B account at gelitup.com.',
+    description: 'The BOB gel polish collection available wholesale for nail technicians and salons. HEMA-free, TPO-free, Approved by Cruelty Free International. Made in the EU. Open a B2B account at gelitup.com.',
     canonical:   'https://gelitup.com/bob',
   },
   '/premium-builder': {
@@ -69,7 +69,7 @@ const ROUTE_SEO_MAP = {
   },
   '/3in1': {
     title:       '3-in-1 Builder Gel Wholesale | Professional Nail Systems | GEL.IT.UP',
-    description: 'Professional 3-in-1 builder gel available wholesale for nail technicians, salons and academies. HEMA-free, TPO-free, EU certified, Approved by Cruelty Free International. Wholesale accounts available worldwide.',
+    description: 'Professional 3-in-1 builder gel available wholesale for nail technicians, salons and academies. HEMA-free, TPO-free, Made in the EU, Approved by Cruelty Free International. Wholesale accounts available worldwide.',
     canonical:   'https://gelitup.com/3in1',
   },
   '/5in1-base': {
@@ -84,7 +84,7 @@ const ROUTE_SEO_MAP = {
   },
   '/become-distributor': {
     title:       'Become a GEL.IT.UP Distributor | Wholesale Nail Supplies EU & Worldwide',
-    description: 'Apply to become an authorised GEL.IT.UP distributor. Join our verified wholesale network across 15+ countries. Professional nail supplies, EU certified, HEMA-free, TPO-free.',
+    description: 'Apply to become an authorised GEL.IT.UP distributor. Join our verified wholesale network across 15+ countries. Professional nail supplies, Made in the EU, HEMA-free, TPO-free.',
     canonical:   'https://gelitup.com/become-distributor',
   },
   '/distributor-packages': {
@@ -99,12 +99,12 @@ const ROUTE_SEO_MAP = {
   },
   '/for-academies': {
     title:       'Nail Academy Supplies Wholesale | GEL.IT.UP Professional Nail Systems',
-    description: 'Professional nail academy supplies wholesale. GEL.IT.UP supplies certified gel systems, training materials and branded support to nail academies worldwide. HEMA-free, TPO-free, EU certified.',
+    description: 'Professional nail academy supplies wholesale. GEL.IT.UP supplies certified gel systems, training materials and branded support to nail academies worldwide. HEMA-free, TPO-free, Made in the EU.',
     canonical:   'https://gelitup.com/for-academies',
   },
   '/academies': {
     title:       'GEL.IT.UP Nail Academies | Professional Training & Certified Gel Systems',
-    description: 'Find GEL.IT.UP certified nail academies worldwide. Professional training with EU-certified, HEMA-free, TPO-free gel systems. For academy partnerships contact us at gelitup.com.',
+    description: 'Find GEL.IT.UP certified nail academies worldwide. Professional training with Made in the EU, HEMA-free, TPO-free gel systems. For academy partnerships contact us at gelitup.com.',
     canonical:   'https://gelitup.com/academies',
   },
   '/guestbook': {
@@ -139,7 +139,7 @@ const ROUTE_SEO_MAP = {
   },
   '/about-us': {
     title:       'About GEL.IT.UP by GIUP® | Professional Nail Supplies EU',
-    description: 'Learn about GEL.IT.UP by GIUP® — professional nail supply brand trusted by technicians in 15+ countries. HEMA-free, TPO-free, EU certified, Approved by Cruelty Free International.',
+    description: 'Learn about GEL.IT.UP by GIUP® — professional nail supply brand trusted by technicians in 15+ countries. HEMA-free, TPO-free, Made in the EU, Approved by Cruelty Free International.',
     canonical:   'https://gelitup.com/about-us',
   },
   '/wholesale': {
@@ -154,12 +154,12 @@ const ROUTE_SEO_MAP = {
   },
   '/our-products': {
     title:       'Professional Nail Products Wholesale | GEL.IT.UP by GIUP®',
-    description: 'Browse the full GEL.IT.UP professional nail product range. Gel polish, builder gel, base coats, top coats, nail art and tools — all HEMA-free, TPO-free, EU certified. Wholesale accounts available.',
+    description: 'Browse the full GEL.IT.UP professional nail product range. Gel polish, builder gel, base coats, top coats, nail art and tools — all HEMA-free, TPO-free, Made in the EU. Wholesale accounts available.',
     canonical:   'https://gelitup.com/our-products',
   },
   '/our-products/colours': {
     title:       'Gel Polish Colours Wholesale | 1,000+ Shades | GEL.IT.UP Professional',
-    description: 'Over 1,000 professional gel polish colours available wholesale. HEMA-free, TPO-free, Approved by Cruelty Free International, EU certified. For nail technicians, salons and academies worldwide.',
+    description: 'Over 1,000 professional gel polish colours available wholesale. HEMA-free, TPO-free, Approved by Cruelty Free International, Made in the EU. For nail technicians, salons and academies worldwide.',
     canonical:   'https://gelitup.com/our-products/colours',
   },
   '/our-products/builder-gel': {
@@ -174,7 +174,7 @@ const ROUTE_SEO_MAP = {
   },
   '/our-products/nail-art': {
     title:       'Nail Art Supplies Wholesale | Professional Nail Art | GEL.IT.UP',
-    description: 'Professional nail art supplies available wholesale for nail technicians and salons. HEMA-free, TPO-free, EU certified, Approved by Cruelty Free International. Open a wholesale account at gelitup.com.',
+    description: 'Professional nail art supplies available wholesale for nail technicians and salons. HEMA-free, TPO-free, Made in the EU, Approved by Cruelty Free International. Open a wholesale account at gelitup.com.',
     canonical:   'https://gelitup.com/our-products/nail-art',
   },
   '/our-products/tools': {
@@ -184,17 +184,17 @@ const ROUTE_SEO_MAP = {
   },
   '/our-products/consumables': {
     title:       'Nail Consumables Wholesale | Professional Salon Supplies | GEL.IT.UP',
-    description: 'Professional nail consumables available wholesale for salons and nail technicians. HEMA-free, TPO-free, EU certified. Open a B2B wholesale account at gelitup.com.',
+    description: 'Professional nail consumables available wholesale for salons and nail technicians. HEMA-free, TPO-free, Made in the EU. Open a B2B wholesale account at gelitup.com.',
     canonical:   'https://gelitup.com/our-products/consumables',
   },
   '/our-products/nail-care': {
     title:       'Nail Care Products Wholesale | Professional Nail Supplies | GEL.IT.UP',
-    description: 'Professional nail care products available wholesale. For nail technicians, salons and academies. HEMA-free, TPO-free, EU certified, Approved by Cruelty Free International. Open an account at gelitup.com.',
+    description: 'Professional nail care products available wholesale. For nail technicians, salons and academies. HEMA-free, TPO-free, Made in the EU, Approved by Cruelty Free International. Open an account at gelitup.com.',
     canonical:   'https://gelitup.com/our-products/nail-care',
   },
   '/register': {
     title:       'Open a Wholesale Account | GEL.IT.UP Professional Nail Supplies',
-    description: 'Open a B2B wholesale account with GEL.IT.UP by GIUP®. Access 1,000+ professional nail products including gel polish, builder gel and nail systems. HEMA-free, TPO-free, EU certified.',
+    description: 'Open a B2B wholesale account with GEL.IT.UP by GIUP®. Access 1,000+ professional nail products including gel polish, builder gel and nail systems. HEMA-free, TPO-free, Made in the EU.',
     canonical:   'https://gelitup.com/register',
   },
   '/inspiration': {

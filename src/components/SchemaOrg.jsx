@@ -11,7 +11,7 @@ export default function SchemaOrg({ type = 'organization', product = null }) {
       url: 'https://gelitup.com',
       logo: 'https://gelitup.com/gelitup_logo.png',
       description:
-        'Professional gel polish with 1,000+ shades, builder gel systems, base coats and top coats. HEMA-free, TPO-free, EU certified. Wholesale to professional nail technicians worldwide.',
+        'Professional gel polish with 1,000+ shades, builder gel systems, base coats and top coats. HEMA-free, TPO-free, Made in the EU. Wholesale to professional nail technicians worldwide.',
       email: 'info@gelitup.com',
       sameAs: [
         'https://www.instagram.com/gelitupinternational/',
@@ -34,7 +34,7 @@ export default function SchemaOrg({ type = 'organization', product = null }) {
       '@context': 'https://schema.org',
       '@type': 'Product',
       name: product.name,
-      description: product.description || `Professional gel polish by GEL.IT.UP by GIUP®. HEMA-free, EU certified.`,
+      description: product.description || `Professional gel polish by GEL.IT.UP by GIUP®. HEMA-free, Made in the EU.`,
       brand: { '@type': 'Brand', name: 'GEL.IT.UP by GIUP®' },
       image: product.imageUrl ? [`https://gelitup.com${product.imageUrl}`] : [],
       sku: product.sku || product.code,

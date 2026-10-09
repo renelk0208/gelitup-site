@@ -16,7 +16,7 @@ All links UTM-tagged — see playbook §6.
 >
 > Quick question, because it affects academies more than anyone: since the EU's TPO ban took effect (September 2025), a lot of gel stock that schools trained with is no longer legal to supply. Have you had to switch products for your classes?
 >
-> I ask because we're GEL.IT.UP — an EU-certified professional gel brand (1,000+ shades, builder gels, full systems) that is **TPO-free and HEMA-free**, with CPNP notification and SDS documentation for every product. That last part matters for training: students over-expose themselves to uncured product while learning, so low-allergen chemistry isn't a nice-to-have in a classroom.
+> I ask because we're GEL.IT.UP — an EU-made professional gel brand (1,000+ shades, builder gels, full systems) that is **TPO-free and HEMA-free**, with CPNP notification and SDS documentation for every product. That last part matters for training: students over-expose themselves to uncured product while learning, so low-allergen chemistry isn't a nice-to-have in a classroom.
 >
 > For academies we offer wholesale pricing with **no minimum order**, free EU shipping, and samples before you commit anything — we'd genuinely rather you test it on one class first. We already supply training academies such as Nail Tales Academy in Greece.
 >
@@ -75,7 +75,7 @@ All links UTM-tagged — see playbook §6.
 
 Engage first: follow, like/comment on 1–2 recent student-work posts. Then:
 
-> Hi! We follow quite a few academies and your students' [builder/nail-art] work stands out 👏 We're GEL.IT.UP — EU-certified, HEMA-free & TPO-free professional gel (that ban caught a lot of schools off guard…). We supply academies with wholesale pricing, no minimums, and we send samples before you commit to anything. Would a sample pack for your instructors be interesting? 💅 gelitup.com/academy-kit
+> Hi! We follow quite a few academies and your students' [builder/nail-art] work stands out 👏 We're GEL.IT.UP — Made in the EU, HEMA-free & TPO-free professional gel (that ban caught a lot of schools off guard…). We supply academies with wholesale pricing, no minimums, and we send samples before you commit to anything. Would a sample pack for your instructors be interesting? 💅 gelitup.com/academy-kit
 
 Keep follow-ups to one. If no reply in 2 weeks, move on.
 

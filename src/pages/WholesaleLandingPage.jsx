@@ -5,7 +5,7 @@ const BENEFITS = [
   { icon: '💰', title: 'Trade Pricing', detail: 'B2B wholesale rates for distributors, salons and academies.' },
   { icon: '📦', title: '1,000+ Products', detail: 'Full range of gel polish, builder gels, base coats, top coats and nail art supplies.' },
   { icon: '🌍', title: '15+ Countries', detail: 'A distributor network across Europe and worldwide, shipped from the EU.' },
-  { icon: '🧪', title: 'HEMA-Free & EU Certified', detail: 'EC 1223/2009 compliant. Safer for your clients and your technicians.' },
+  { icon: '🧪', title: 'HEMA-Free & Made in the EU', detail: 'EC 1223/2009 compliant. Safer for your clients and your technicians.' },
   { icon: '🐇', title: 'Approved by Cruelty Free International', detail: 'A cruelty-free brand your clients can feel good about.' },
   { icon: '💬', title: 'Dedicated Support', detail: 'WhatsApp & Viber support from a team that knows the industry.' },
 ]
@@ -98,7 +98,7 @@ export default function WholesaleLandingPage() {
         </h1>
         <p className="mt-5 mx-auto max-w-2xl text-base sm:text-lg" style={{ color: 'rgba(255,255,255,0.72)' }}>
           Trade pricing on 1,000+ gel polish shades, builder gels, base coats and more.
-          HEMA-free, TPO-free, EU certified, cruelty-free. Apply for your wholesale account today.
+          HEMA-free, TPO-free, Made in the EU, cruelty-free. Apply for your wholesale account today.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
           <NavLink

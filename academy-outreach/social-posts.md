@@ -69,13 +69,13 @@ Link in every caption/bio/sticker: `https://gelitup.com/academy-kit?utm_source=<
 **Caption:**
 > Framed and ready for your reception wall 🖼️✨
 >
-> This one goes to every academy that checks what's actually inside the bottles their students hold for 6 hours a day: EU-certified, HEMA-free, TPO-free — with the CPNP notifications and SDS documents to prove it.
+> This one goes to every academy that checks what's actually inside the bottles their students hold for 6 hours a day: Made in the EU, HEMA-free, TPO-free — with the CPNP notifications and SDS documents to prove it.
 >
 > Claim yours: register your academy (free, 2 minutes) and we'll start with samples, not invoices.
 >
 > 🔗 gelitup.com/academy-kit
 
-**Hashtags:** #nailacademy #nailschool #naileducation #hemafree #eucertified #nailtech #gelitup
+**Hashtags:** #nailacademy #nailschool #naileducation #hemafree #madeintheeu #nailtech #gelitup
 
 ---
 

@@ -464,7 +464,7 @@ export default function PrivateLabelPage() {
           Your Brand <span className="font-serif italic text-[#9B1268]">&amp;</span> Our Signature
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-neutral-500">
-          The same superior, HEMA-free, EU-certified gel formula your clients already trust — now with
+          The same superior, HEMA-free gel formula your clients already trust — made in the EU, now with
           your logo on every bottle.
         </p>
         <p className="mt-3 text-[15px] text-neutral-500">Minimum order €{MIN_ORDER_EUR}</p>

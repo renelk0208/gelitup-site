@@ -319,7 +319,7 @@ for (const product of priceList.items) {
   items.push(`    <item>
       <g:id>${esc(product.sku)}</g:id>
       <g:title>${esc(title)}</g:title>
-      <g:description>${esc(`${title} — Professional ${category} by ${BRAND}. EU certified, vegan, HEMA-free.`)}</g:description>
+      <g:description>${esc(`${title} — Professional ${category} by ${BRAND}. Made in the EU, vegan, HEMA-free.`)}</g:description>
       <g:link>${SITE}/full-catalogue</g:link>
       <g:image_link>${esc(imageUrl)}</g:image_link>
       <g:brand>${BRAND}</g:brand>
@@ -337,7 +337,7 @@ const xml = `<?xml version="1.0" encoding="UTF-8"?>
   <channel>
     <title>GEL.IT.UP B2B Product Catalog</title>
     <link>${SITE}</link>
-    <description>Professional nail products by GEL.IT.UP — EU certified, vegan, HEMA-free</description>
+    <description>Professional nail products by GEL.IT.UP — Made in the EU, vegan, HEMA-free</description>
 ${items.join('\n')}
   </channel>
 </rss>
