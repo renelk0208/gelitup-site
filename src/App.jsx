@@ -2009,33 +2009,6 @@ function DistributorPackagesPage() {
         </span>
       </div>
 
-      {/* DISTRIBUTOR SOCIAL PROOF */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#D43790' }}>
-          What our distribution partners say
-        </p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          <blockquote className="rounded-xl bg-slate-50 p-4">
-            <p className="text-sm italic leading-relaxed text-slate-700">
-              "The EU documentation alone saved us weeks of work. Our clients trust the brand immediately."
-            </p>
-            <p className="mt-3 text-xs font-semibold text-slate-500">— Distributor, Germany</p>
-          </blockquote>
-          <blockquote className="rounded-xl bg-slate-50 p-4">
-            <p className="text-sm italic leading-relaxed text-slate-700">
-              "1,000+ shades means we never have to turn a client away. GEL.IT.UP is our core range."
-            </p>
-            <p className="mt-3 text-xs font-semibold text-slate-500">— Distributor, Netherlands</p>
-          </blockquote>
-          <blockquote className="rounded-xl bg-slate-50 p-4">
-            <p className="text-sm italic leading-relaxed text-slate-700">
-              "The social media content they supply keeps our salons posting. It sells itself."
-            </p>
-            <p className="mt-3 text-xs font-semibold text-slate-500">— Distributor, Poland</p>
-          </blockquote>
-        </div>
-      </div>
-
       {/* SALES TIER */}
       <article className="overflow-hidden rounded-2xl shadow-sm" style={{ border: '1px solid #374151', backgroundColor: '#ffffff' }}>
         <div className="px-6 py-4" style={{ backgroundColor: '#374151' }}>
