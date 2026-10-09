@@ -429,6 +429,16 @@ const HOME_CLOUD_DANCER_DEFAULT = {
 const LEEUKOPF_DISTRIBUTORS_SOURCE_URL = 'https://leeukopf.com/our-brands'
 const DISTRIBUTOR_DIRECTORY = [
   {
+    // New distributor — formal address/contact details to follow; pinned on
+    // the map by country center in the meantime.
+    country: 'Australia',
+    distributors: [
+      {
+        name: 'GEL.IT.UP Australia',
+      },
+    ],
+  },
+  {
     country: 'Belgium',
     distributors: [
       {
@@ -525,12 +535,33 @@ const DISTRIBUTOR_DIRECTORY = [
     ],
   },
   {
+    country: 'Italy',
+    distributors: [
+      {
+        name: 'GEL.IT.UP Italy',
+        address: 'Via Molise 6, Cagliari, SARDEGNA, 09127, Italy',
+        phone: '+39 333 996 6826',
+        email: 'topformyou.cagliari@gmail.com',
+      },
+    ],
+  },
+  {
     country: 'Kingdom of Saudi Arabia',
     distributors: [
       {
         name: 'GEL.IT.UP Saudi Arabia - BEAUTY ADDRESS TRADING CO.LTD',
         address: 'AL KHAYAT CENTER, AL TAHLIA STREET ROLEX BOUTIQUE, 2ND FLOOR # 405, Jeddah, 23322, Kingdom of Saudi Arabia',
         phone: '+966 55 337 4320',
+      },
+    ],
+  },
+  {
+    // New distributor — formal address/contact details to follow; pinned on
+    // the map by country center in the meantime.
+    country: 'Lebanon',
+    distributors: [
+      {
+        name: 'GEL.IT.UP Lebanon',
       },
     ],
   },
@@ -545,22 +576,21 @@ const DISTRIBUTOR_DIRECTORY = [
     ],
   },
   {
+    // New distributor — formal address/contact details to follow; pinned on
+    // the map by country center in the meantime.
+    country: 'South Africa',
+    distributors: [
+      {
+        name: 'GEL.IT.UP South Africa — Coming Soon!',
+      },
+    ],
+  },
+  {
     country: 'Spain',
     distributors: [
       {
         name: 'GEL.IT.UP Spain',
         address: 'Calle Hermanos Becerril n5, local, Trevi, Cuenca, Cuenca, 16004, Spain',
-      },
-    ],
-  },
-  {
-    country: 'Italy',
-    distributors: [
-      {
-        name: 'GEL.IT.UP Italy',
-        address: 'Via Molise 6, Cagliari, SARDEGNA, 09127, Italy',
-        phone: '+39 333 996 6826',
-        email: 'topformyou.cagliari@gmail.com',
       },
     ],
   },
@@ -579,13 +609,16 @@ const DISTRIBUTOR_DIRECTORY = [
 ]
 const VERIFIED_DISTRIBUTOR_COUNTRIES = DISTRIBUTOR_DIRECTORY.map((item) => item.country)
 const DISTRIBUTOR_COUNTRY_COORDINATES = {
+  Australia: [-25.2744, 133.7751],
   Belgium: [50.5039, 4.4699],
   Bulgaria: [42.7339, 25.4858],
   France: [46.2276, 2.2137],
   Greece: [39.0742, 21.8243],
   Italy: [39.2238, 9.1217],
   'Kingdom of Saudi Arabia': [23.8859, 45.0792],
+  Lebanon: [33.8547, 35.8623],
   Qatar: [25.3548, 51.1839],
+  'South Africa': [-30.5595, 22.9375],
   Spain: [40.0704, -2.1374],
   'United States': [39.8283, -98.5795],
 }
