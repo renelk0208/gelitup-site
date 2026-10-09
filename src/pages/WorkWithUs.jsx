@@ -153,7 +153,7 @@ const ROLE_OPTIONS = [
   { key: 'nail_artist', label: 'Nail Artist' },
   { key: 'nail_master', label: 'Nail Master / Competition Nail Artist' },
   { key: 'educator_trainer', label: 'Educator / Trainer' },
-  { key: 'academy_owner', label: 'Academy or School Owner' },
+  { key: 'academy_owner', label: 'Academy Owner' },
   { key: 'salon_owner', label: 'Salon / Studio Owner' },
   { key: 'distributor', label: 'Distributor / Wholesaler' },
   { key: 'content_creator', label: 'Content Creator' },
@@ -199,7 +199,7 @@ const WAYS_TO_WORK = [
   {
     key: 'educators',
     title: 'Educators & academies',
-    body: 'Teach with a professional, HEMA-free system. Certified gel systems, training materials and brand support for your students.',
+    body: 'Teach with a professional, HEMA-free system. Professionally approved gel systems, training materials and brand support for your students.',
     roles: ['educator_trainer', 'academy_owner'],
     secondaryTo: '/for-academies',
     secondaryLabel: 'Academy programme',
@@ -450,11 +450,11 @@ export default function WorkWithUs() {
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {WHY_ITEMS.map((item) => (
             <div key={item.title} className="rounded-2xl border border-black/5 bg-white p-6 shadow-sm">
-              <div className="flex h-14 w-14 items-start justify-start overflow-hidden rounded-lg">
+              <div className="flex h-14 items-center justify-start">
                 {item.photo ? (
-                  <img src={item.photo} alt={item.photoAlt} className="h-14 w-14 object-cover" loading="lazy" />
+                  <img src={item.photo} alt={item.photoAlt} className="h-14 w-14 rounded-lg object-cover" loading="lazy" />
                 ) : (
-                  <img src={item.badge} alt={item.badgeAlt} className="h-14 w-auto object-contain" loading="lazy" />
+                  <img src={item.badge} alt={item.badgeAlt} className="h-14 w-auto max-w-[160px] object-contain" loading="lazy" />
                 )}
               </div>
               <h3 className="mt-4 text-base font-black text-[#1A1A1A]">{item.title}</h3>
