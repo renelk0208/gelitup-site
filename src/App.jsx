@@ -18656,6 +18656,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     shipmentUpdatedAt: '',
     shipmentStatus: '',
     shipmentError: '',
+    shipmentHistory: [],
     error: '',
   })
   const [ambassadorCodeCopied, setAmbassadorCodeCopied] = useState(false)
@@ -18804,6 +18805,15 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
         }
       }
 
+      // Every package sent so far (step 1: ambassador_shipments), via a
+      // function that only returns this ambassador's own sent packages. If
+      // the function isn't there yet, the card simply shows what it did before.
+      let shipmentHistory = []
+      {
+        const { data: historyRows, error: historyError } = await supabase.rpc('get_my_ambassador_shipments')
+        if (!historyError && Array.isArray(historyRows)) shipmentHistory = historyRows
+      }
+
       setAmbassadorPortalInfo({
         isLoading: false,
         code: String(row.code || ''),
@@ -18819,6 +18829,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
         shipmentUpdatedAt,
         shipmentStatus,
         shipmentError,
+        shipmentHistory,
         error: '',
         checkedOnce: true,
       })
@@ -19528,8 +19539,28 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                               <p><a href={ambassadorPortalInfo.trackingUrl} target="_blank" rel="noreferrer" className="font-semibold text-emerald-700 hover:underline">Track your parcel →</a></p>
                             )}
                           </div>
-                        ) : (
+                        ) : (ambassadorPortalInfo.shipmentHistory || []).length === 0 ? (
                           <p className="mt-2 text-[12px] text-slate-500">No shipment details yet. Once your package is sent, tracking will appear here.</p>
+                        ) : null}
+                        {(ambassadorPortalInfo.shipmentHistory || []).length > 0 && (
+                          <div className="mt-3 border-t border-emerald-100 pt-3">
+                            <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">Packages sent to you</p>
+                            <ul className="mt-2 space-y-2 text-[12px] text-slate-700">
+                              {ambassadorPortalInfo.shipmentHistory.map((pkg) => (
+                                <li key={pkg.id} className="rounded-lg bg-emerald-50/60 px-3 py-2">
+                                  <p><strong>{pkg.sent_at ? new Date(pkg.sent_at).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }) : 'Sent'}</strong>
+                                    {pkg.tracking_number ? <> · Tracking {pkg.tracking_number}</> : null}
+                                  </p>
+                                  {Array.isArray(pkg.items) && pkg.items.length > 0 && (
+                                    <p className="mt-0.5 text-slate-600">{pkg.items.join(', ')}</p>
+                                  )}
+                                  {pkg.tracking_url && (
+                                    <a href={pkg.tracking_url} target="_blank" rel="noreferrer" className="mt-0.5 inline-block font-semibold text-emerald-700 hover:underline">Track this parcel →</a>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         )}
                         {ambassadorPortalInfo.shipmentError && (
                           <p className="mt-2 text-[11px] text-amber-700">Shipment details are temporarily unavailable.</p>
