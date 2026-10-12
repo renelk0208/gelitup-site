@@ -5906,6 +5906,37 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     setReviewModal(null)
     alert(err ? `Email sent, but it could not be saved as asked: ${err.message}` : `Review email sent to ${m.row.full_name}.`)
   }
+  // Ambassadors' chosen products wait for René's approval. Only her account can
+  // approve (also checked by the database); then they become the next package
+  // and the admin team is emailed.
+  const CHOICE_APPROVER_EMAIL = 'rene@gelitup.com'
+  const canApproveChoices = String(currentAdminEmail || '').trim().toLowerCase() === CHOICE_APPROVER_EMAIL
+  const approveChoices = async (row) => {
+    if (!canApproveChoices) { alert('Only René can approve chosen products.'); return }
+    const items = row.chosen_items || []
+    if (!window.confirm(`Approve ${row.full_name}'s choice for her next package?\n\n${items.map((i, n) => `${n + 1}. ${i}`).join('\n')}`)) return
+    setSaving(row.id)
+    const { data: result, error: err } = await supabase.rpc('approve_ambassador_choices', { p_id: row.id })
+    if (err || result !== 'ok') { setSaving(null); alert(`Not approved: ${err?.message || result}`); return }
+    const { data: fresh } = await supabase.from(AMBASSADOR_TABLE).select('admin_comment, choice_approved_at, choice_approved_by').eq('id', row.id).maybeSingle()
+    if (fresh) patchRow(row.id, fresh)
+    await sendAmbassadorEmail({
+      to: 'acc1.leeukopf@gmail.com',
+      subject: `${row.full_name}'s 5 PR products are approved`,
+      html: `<div style="font-family:Arial,sans-serif;font-size:14px"><p><strong>${escAmb(row.full_name)}</strong>'s chosen products have been approved for her next PR package. They are now in "What goes in this package" in the admin — please prepare them.</p><ol>${items.map((i) => `<li>${escAmb(i)}</li>`).join('')}</ol></div>`,
+    })
+    setSaving(null)
+  }
+  const rejectChoices = async (row) => {
+    if (!canApproveChoices) { alert('Only René can do this.'); return }
+    if (!window.confirm(`Clear ${row.full_name}'s choice so she chooses again?\n\nYou can then send her the "please choose again" email.`)) return
+    setSaving(row.id)
+    const patch = { chosen_items: null, choice_note_lines: null, choice_submitted_at: null, choice_approved_at: null, choice_approved_by: null, choice_redo_at: new Date().toISOString() }
+    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update(patch).eq('id', row.id)
+    setSaving(null)
+    if (err) { alert(`Could not clear: ${err.message}`); return }
+    patchRow(row.id, patch)
+  }
   // A package that never arrived: marked lost, its contents are copied into the
   // next package as a resend, and the next date becomes today.
   const markShipmentLost = async (row, shipment) => {
@@ -7429,8 +7460,9 @@ const deleteApplication = async (row) => {
                 {(() => {
                   const asked = rows.filter((r) => r.choice_requested_at && !r.choice_submitted_at).length
                   const chosen = rows.filter((r) => r.choice_submitted_at).length
+                  const toApprove = rows.filter((r) => r.choice_submitted_at && !r.choice_approved_at).length
                   const toAsk = getChoiceCandidates().length
-                  return `${toAsk} to ask (nothing planned) · ${asked} asked, waiting · ${chosen} have chosen`
+                  return `${toAsk} to ask (nothing planned) · ${asked} asked, waiting · ${chosen} have chosen${toApprove ? ` · ⏳ ${toApprove} waiting for René's approval` : ''}`
                 })()}
               </span>
             </div>
@@ -7450,6 +7482,9 @@ const deleteApplication = async (row) => {
               onEditNote={editShipmentNote}
               onAskChoice={askOneToChoose}
               onAskReviews={openReviewRequest}
+              canApproveChoices={canApproveChoices}
+              onApproveChoices={approveChoices}
+              onRejectChoices={rejectChoices}
               onOpen={(id) => {
                 setViewMode('cards')
                 jumpToAmbassador(id)

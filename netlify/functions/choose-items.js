@@ -15,7 +15,6 @@ import { normItem } from '../../src/lib/packageItems.js'
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || ''
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE
   || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
-const EMAIL_WEBHOOK_URL = process.env.VITE_EMAIL_WEBHOOK_URL || process.env.EMAIL_WEBHOOK_URL || ''
 const TOKEN_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const NEEDED = 5
 
@@ -105,25 +104,6 @@ draw();
 </script>`)
 }
 
-async function notifyOffice(name, items) {
-  if (!EMAIL_WEBHOOK_URL || !SUPABASE_KEY) return
-  try {
-    await fetch(EMAIL_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
-      body: JSON.stringify({
-        to: 'acc1.leeukopf@gmail.com', // the admin team prepares the packages
-        subject: `${name} chose their 5 PR products`,
-        html: `<div style="font-family:Arial,sans-serif;font-size:14px"><p><strong>${esc(name)}</strong> chose these products for their next PR package. They are now in "What goes in this package" in the admin — please prepare them for the next package.</p><ol>${items.map((i) => `<li>${esc(i)}</li>`).join('')}</ol></div>`,
-        from: 'GEL.IT.UP <info@gelitup.com>',
-        replyTo: 'info@gelitup.com',
-      }),
-    })
-  } catch (err) {
-    console.error('choose-items: office email failed', err?.message)
-  }
-}
-
 export async function handler(event) {
   const token = String(event.queryStringParameters?.t || '').trim()
   const isPost = event.httpMethod === 'POST'
@@ -145,7 +125,7 @@ export async function handler(event) {
   if (ctx.choice_submitted_at) {
     const list = (ctx.chosen_items || []).map((i) => `<li>${esc(i)}</li>`).join('')
     return isPost ? json(409, { error: 'Your choices were already sent.' })
-      : html('Thank you', `<h1>Thank you${ctx.full_name ? `, ${esc(String(ctx.full_name).split(' ')[0])}` : ''}! 💖</h1><p>We've got your ${NEEDED} choices for your next PR package:</p><ul class="done">${list}</ul><p>Need to change something? Just reply to the email.</p>`)
+      : html('Thank you', `<h1>Thank you${ctx.full_name ? `, ${esc(String(ctx.full_name).split(' ')[0])}` : ''}! 💖</h1><p>We've got your ${NEEDED} choices for your next PR package:</p><ul class="done">${list}</ul><p>We'll check your choice and confirm it before your package is prepared. Need to change something? Just reply to the email.</p>`)
   }
 
   if (!isPost) return pickerPage(token, ctx)
@@ -181,6 +161,6 @@ export async function handler(event) {
         : 'Something went wrong — please try again.'
     return json(400, { error: msg })
   }
-  await notifyOffice(ctx.full_name || 'An ambassador', items)
+  // The admin team is emailed once René approves the choice in the admin.
   return json(200, { ok: true })
 }
