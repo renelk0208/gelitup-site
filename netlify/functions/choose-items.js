@@ -111,9 +111,9 @@ async function notifyOffice(name, items) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
       body: JSON.stringify({
-        to: 'rene@gelitup.com',
+        to: 'acc1.leeukopf@gmail.com', // the admin team prepares the packages
         subject: `${name} chose their 5 PR products`,
-        html: `<div style="font-family:Arial,sans-serif;font-size:14px"><p><strong>${esc(name)}</strong> chose these products for their next PR package. They are now in "What goes in this package" in the admin.</p><ol>${items.map((i) => `<li>${esc(i)}</li>`).join('')}</ol></div>`,
+        html: `<div style="font-family:Arial,sans-serif;font-size:14px"><p><strong>${esc(name)}</strong> chose these products for their next PR package. They are now in "What goes in this package" in the admin — please prepare them for the next package.</p><ol>${items.map((i) => `<li>${esc(i)}</li>`).join('')}</ol></div>`,
         from: 'GEL.IT.UP <info@gelitup.com>',
         replyTo: 'info@gelitup.com',
       }),
