@@ -4621,6 +4621,26 @@ function buildAmbassadorReviewRequestEmail(row, products, lang) {
   }
 }
 
+// Sent when an ambassador's choice was cleared because it had too many
+// products of the same type.
+function buildAmbassadorChoiceRedoEmail(row) {
+  const firstName = String(row?.full_name || '').trim().split(/\s+/)[0] || 'there'
+  const name = firstName.charAt(0).toUpperCase() + firstName.slice(1)
+  const link = `https://gelitup.com/choose-items?t=${encodeURIComponent(row?.choice_token || '')}`
+  return {
+    subject: 'Please choose your 5 PR products again 💖',
+    html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.55">
+      <p>Hi ${escAmb(name)},</p>
+      <p>Thank you so much for sending your choices for your next GEL.IT.UP PR package!</p>
+      <p>We've had to make a small change: so that every ambassador gets to try and review a real mix of our range, each package can now include <strong>only one product of each type</strong> (for example one builder gel, one MultiMix, one base), plus up to <strong>3 gel polish colours or effects</strong>.</p>
+      <p>Your choice included several products of the same type, so we've cleared it — sorry for the extra step! Please choose your 5 products again using the button below. The page will guide you.</p>
+      <p style="margin:20px 0"><a href="${escAmb(link)}" style="display:inline-block;background:#d43790;color:#ffffff;padding:12px 20px;border-radius:9999px;text-decoration:none;font-weight:700">Choose my 5 products</a></p>
+      <p>Thank you for your understanding — we can't wait to see what you create! 💖</p>
+      <p>With love,<br/>René Krallis<br/>Marketing Director, GEL.IT.UP International</p>
+    </div>`,
+  }
+}
+
 function buildAmbassadorShipmentNotificationEmail(row, ship, sentAtIso, nextPackageIso, nextPackageItems) {
   const ambassadorName = String(row?.full_name || row?.email || 'Unknown ambassador').trim()
   const nextPackageDate = nextPackageIso
@@ -5785,18 +5805,22 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   const sendChoiceRequest = async (row) => {
     const email = String(row?.email || '').trim()
     if (!email || !row?.choice_token) return { ok: false, error: 'No email or link for this ambassador' }
-    const { subject, html } = buildAmbassadorChoiceRequestEmail(row)
+    // Choices cleared for too many of one type: this email explains why.
+    const { subject, html } = row.choice_redo_at ? buildAmbassadorChoiceRedoEmail(row) : buildAmbassadorChoiceRequestEmail(row)
     const res = await sendAmbassadorEmail({ to: email, subject, html })
     if (!res.ok) return res
     const requestedAt = new Date().toISOString()
-    await supabase.from(AMBASSADOR_TABLE).update({ choice_requested_at: requestedAt }).eq('id', row.id)
-    patchRow(row.id, { choice_requested_at: requestedAt })
+    await supabase.from(AMBASSADOR_TABLE).update({ choice_requested_at: requestedAt, choice_redo_at: null }).eq('id', row.id)
+    patchRow(row.id, { choice_requested_at: requestedAt, choice_redo_at: null })
     return { ok: true }
   }
   const askOneToChoose = async (row) => {
     if (!choiceEligible(row)) { alert('This ambassador has already chosen, is not active, or has not had a package yet.'); return }
     const again = row.choice_requested_at ? ' again' : ''
-    if (!window.confirm(`Email ${row.full_name} (${row.email})${again} asking her to choose 5 products for her next package?`)) return
+    const question = row.choice_redo_at
+      ? `Email ${row.full_name} (${row.email}) explaining that her choices were cleared (too many of one type) and asking her to choose again?`
+      : `Email ${row.full_name} (${row.email})${again} asking her to choose 5 products for her next package?`
+    if (!window.confirm(question)) return
     setSaving(row.id)
     const res = await sendChoiceRequest(row)
     setSaving(null)
