@@ -34,6 +34,28 @@ export function productUrl(handle) {
   return `${SHOP_URL}/products/${encodeURIComponent(handle)}#judgeme_product_reviews`
 }
 
+// The shop product(s) a written package line stands for, when it names them
+// exactly ("1 x Purple Buffer", "Blossom Flower Power 15ml"). Empty when the line
+// is generic ("3 different Cat Eye shades").
+export function matchItem(item, products) {
+  const byHandle = new Map((products || []).map((p) => [p.handle, p]))
+  const key = norm(stripQuantity(item))
+  if (ALIASES[key]) {
+    const hits = ALIASES[key].map((h) => byHandle.get(h)).filter(Boolean)
+    if (hits.length) return hits
+  }
+  const exact = (products || []).find((p) => norm(p.title) === key)
+  return exact ? [exact] : []
+}
+
+// How many products a generic line asks for: "3 different Cat Eye shades" -> 3,
+// "2 x Premium Builder Gel" -> 2, "5 x Autumn / Winter Colours" -> 5.
+export function suggestedCount(item) {
+  const m = String(item || '').trim().match(/^(\d+)\s*x?\b/i)
+  const n = m ? Number(m[1]) : 1
+  return n >= 1 && n <= 20 ? n : 1
+}
+
 // Every item from this ambassador's packages that were not lost, oldest first,
 // with the shop product(s) it matches (empty when it needs picking by hand).
 export function receivedItems(shipments, products) {
