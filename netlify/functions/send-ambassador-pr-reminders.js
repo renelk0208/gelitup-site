@@ -183,7 +183,7 @@ export async function handler() {
 
     const { data: shipments } = await supabase
       .from('ambassador_shipments')
-      .select('sent_at, tracking_number, items')
+      .select('sent_at, tracking_number, items, lost_at')
       .eq('application_id', row.id)
       .eq('status', 'sent')
       .order('sent_at', { ascending: false })
@@ -197,7 +197,7 @@ export async function handler() {
     const followUp = AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE[String(row.ambassador_type || '').toLowerCase()]
     // Only for the SECOND package (one package sent so far; the same tracking
     // number recorded twice counts once). Third packages are chosen by hand.
-    const packagesSent = new Set((shipments || []).map((sh) => String(sh.tracking_number || sh.sent_at || '').trim().toLowerCase())).size
+    const packagesSent = new Set((shipments || []).filter((sh) => !sh.lost_at).map((sh) => String(sh.tracking_number || sh.sent_at || '').trim().toLowerCase())).size
     if (!hasPlan && followUp && packagesSent === 1) {
       const toAdd = followUp.items.filter((item) => whereAlreadySent(item, shipments).length === 0)
       if (toAdd.length) {

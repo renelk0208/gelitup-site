@@ -16,7 +16,8 @@ export function whereAlreadySent(item, shipments) {
   const key = normItem(item)
   if (!key) return []
   const ordered = [...(shipments || [])]
-    .filter((s) => s && (s.status ? s.status === 'sent' : true))
+    // A lost package never arrived, so its items don't count as received.
+    .filter((s) => s && !s.lost_at && (s.status ? s.status === 'sent' : true))
     .sort((a, b) => new Date(a.sent_at || 0) - new Date(b.sent_at || 0))
   const hits = []
   ordered.forEach((s, i) => {
