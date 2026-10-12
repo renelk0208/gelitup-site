@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { carrierLabel, deliveryState, normalizeCountry } from '../lib/ambassadorShipping.js'
 import { instagramHandle, instagramUrl, tiktokHandle, tiktokUrl } from '../lib/socialLinks.js'
-import { normItem, whereAlreadySent } from '../lib/packageItems.js'
+import { whereAlreadySent } from '../lib/packageItems.js'
 
 // Shipments overview, grouped so every ambassador sits in exactly ONE section
 // with ONE status:
@@ -111,31 +111,28 @@ function NameCell({ line, getType, onOpen }) {
   )
 }
 
-// What goes in the next package: tick off suggestions with one click, type
-// anything else, remove with ✕. Saved straight away.
-function Planner({ line, suggestions, onAdd, onRemove, busy }) {
+// Items for the next package: type and Add, remove with ✕. Saved straight away.
+// Anything this ambassador already received is blocked unless ticked on purpose.
+function Planner({ line, onAdd, onRemove, busy }) {
   const [text, setText] = useState('')
   const items = line.planned
   const sentBefore = (item) => whereAlreadySent(item, line.shipments)
   const sentLabel = (hits) => hits.map((h) => `#${h.number}${h.sent_at ? ` (${fmt(h.sent_at)})` : ''}`).join(', ')
-  // Suggestions never offer something already planned or already sent before.
-  const remaining = suggestions.filter((sug) => !items.some((it) => normItem(it) === normItem(sug)) && sentBefore(sug).length === 0)
-  const add = async (values) => {
-    const clean = values.map((v) => String(v || '').trim()).filter(Boolean)
-    if (!clean.length) return
-    const repeats = clean.map((v) => ({ v, hits: sentBefore(v) })).filter((r) => r.hits.length)
-    if (repeats.length) {
-      const list = repeats.map((r) => `• ${r.v} — already sent in package ${sentLabel(r.hits)}`).join('\n')
-      if (!window.confirm(`Already sent to ${line.row.full_name || 'this ambassador'}:\n\n${list}\n\nAdd it again anyway?`)) return
-    }
-    const ok = await onAdd(line.row, clean)
-    if (ok) setText('')
-  }
+  // Anything already sent is blocked unless "send again on purpose" is ticked.
+  const [sendAgain, setSendAgain] = useState(false)
   const typedRepeat = text.trim() ? sentBefore(text) : []
+  const blocked = typedRepeat.length > 0 && !sendAgain
+  const add = async (values, { allowRepeat = false } = {}) => {
+    const clean = values.map((v) => String(v || '').trim()).filter(Boolean)
+      .filter((v) => allowRepeat || sentBefore(v).length === 0)
+    if (!clean.length) return
+    const ok = await onAdd(line.row, clean)
+    if (ok) { setText(''); setSendAgain(false) }
+  }
   return (
     <div className="min-w-[230px] space-y-1.5">
       {items.length === 0
-        ? <p className="font-semibold text-amber-700">Nothing planned yet</p>
+        ? <p className="text-slate-400">Nothing added</p>
         : (
           <ul className="space-y-1">
             {items.map((item, i) => (
@@ -151,30 +148,26 @@ function Planner({ line, suggestions, onAdd, onRemove, busy }) {
             ))}
           </ul>
         )}
-      {remaining.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {remaining.map((sug) => (
-            <button key={sug} type="button" onClick={() => add([sug])} disabled={busy} className="rounded-full border border-slate-300 bg-white px-2 py-0.5 text-[10px] text-slate-600 hover:border-fuchsia-400 hover:text-fuchsia-700 disabled:opacity-50">+ {sug}</button>
-          ))}
-          {remaining.length > 1 && (
-            <button type="button" onClick={() => add(remaining)} disabled={busy} className="rounded-full border border-fuchsia-300 bg-fuchsia-50 px-2 py-0.5 text-[10px] font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-50">+ Add all</button>
-          )}
-        </div>
-      )}
       <form
         className="flex gap-1"
-        onSubmit={(e) => { e.preventDefault(); add([text]) }}
+        onSubmit={(e) => { e.preventDefault(); if (!blocked) add([text], { allowRepeat: sendAgain }) }}
       >
         <input
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => { setText(e.target.value); setSendAgain(false) }}
           placeholder="Add an item…"
           className="min-w-0 flex-1 rounded border border-slate-300 px-2 py-1 text-[11px]"
         />
-        <button type="submit" disabled={busy || !text.trim()} className="rounded border border-fuchsia-300 bg-white px-2 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-50">Add</button>
+        <button type="submit" disabled={busy || !text.trim() || blocked} className="rounded border border-fuchsia-300 bg-white px-2 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-50">Add</button>
       </form>
       {typedRepeat.length > 0 && (
-        <p className="text-[10px] font-semibold text-amber-800">⚠ Already sent in package {sentLabel(typedRepeat)}</p>
+        <div className="rounded border border-red-200 bg-red-50 px-2 py-1 text-[10px] text-red-800">
+          <p className="font-semibold">Already sent in package {sentLabel(typedRepeat)} — can't be added.</p>
+          <label className="mt-0.5 flex items-center gap-1">
+            <input type="checkbox" checked={sendAgain} onChange={(e) => setSendAgain(e.target.checked)} />
+            Send it again on purpose
+          </label>
+        </div>
       )}
     </div>
   )
@@ -215,7 +208,7 @@ function PackageHistory({ line, open = false, onEditContents }) {
   )
 }
 
-export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plannedItems, suggestedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onOpen, onMarkReceived, busyShipmentId }) {
+export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onOpen, onMarkReceived, busyShipmentId }) {
   const [carrier, setCarrier] = useState('')
   // Package history (with what was in each package) is shown open by default.
   const [expandAll, setExpandAll] = useState(true)
@@ -267,7 +260,6 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
   const planner = (l) => (
     <Planner
       line={l}
-      suggestions={suggestedItems ? suggestedItems(l.row) : []}
       onAdd={onAddPlanned}
       onRemove={onRemovePlanned}
       busy={savingId === l.row.id}

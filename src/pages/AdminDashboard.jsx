@@ -4900,6 +4900,7 @@ function AmbassadorApplicationsPanel({ focusAmbassadorId } = {}) {
     try { return localStorage.getItem('gelitup.admin.ambassadorView') === 'shipments' ? 'shipments' : 'cards' } catch { return 'cards' }
   })
   const [busyShipmentId, setBusyShipmentId] = useState(null)
+  const [packRepeatOk, setPackRepeatOk] = useState({}) // { [rowId]: true } = send an already-sent item again on purpose
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -6246,16 +6247,11 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   // Flag items that already went out to this ambassador in an earlier package.
   const alreadySentLabel = (row, item) => whereAlreadySent(item, row?._shipments)
     .map((h) => `#${h.number}${h.sent_at ? ` (${fmtDate(h.sent_at)})` : ''}`).join(', ')
-  const confirmNotAlreadySent = (row, texts) => {
-    const repeats = texts.map((t) => ({ t, where: alreadySentLabel(row, t) })).filter((r) => r.where)
-    if (!repeats.length) return true
-    const list = repeats.map((r) => `• ${r.t} — already sent in package ${r.where}`).join('\n')
-    return window.confirm(`Already sent to ${row.full_name || 'this ambassador'}:\n\n${list}\n\nAdd it again anyway?`)
-  }
   const addPackNote = async (row) => {
     const text = String(packAdditionDraft[row.id] || '').trim()
     if (!text) return
-    if (!confirmNotAlreadySent(row, [text])) return
+    // Already sent before: blocked unless "send it again on purpose" is ticked.
+    if (alreadySentLabel(row, text) && !packRepeatOk[row.id]) return
     const stamp = fmtDate(new Date().toISOString())
     const author = getAdminDisplayLabel()
     const lines = packNoteLines(row)
@@ -6266,6 +6262,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     }))
     if (await savePackNotes(row, lines)) {
       setPackAdditionDraft((prev) => ({ ...prev, [row.id]: '' }))
+      setPackRepeatOk((prev) => ({ ...prev, [row.id]: false }))
       setSaving(row.id)
       const emailResult = await sendAmbassadorNoteNotifications({
         row,
@@ -6308,14 +6305,6 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (idx < 0 || idx >= lines.length) return
     lines.splice(idx, 1)
     await savePackNotes(row, lines)
-  }
-  // One-click suggestions: the usual follow-up pack for their type (Extreme
-  // gets the Super list), or the starter pack if nothing has been sent yet.
-  const suggestedPackItems = (row) => {
-    const type = getAmbassadorType(row)
-    if (!getAmbassadorDashboardMeta(row).shipmentPreviouslySent) return AMBASSADOR_PACKS_BY_TYPE[type]?.items || []
-    const followUp = AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE[type === 'extreme_ambassador' ? 'super_ambassador' : type]
-    return followUp?.items || []
   }
   const editPackNote = async (row, idx) => {
     const lines = packNoteLines(row)
@@ -7197,7 +7186,6 @@ const deleteApplication = async (row) => {
               getMeta={getAmbassadorDashboardMeta}
               getType={getAmbassadorType}
               plannedItems={plannedItemsList}
-              suggestedItems={suggestedPackItems}
               onAddPlanned={addPlannedItems}
               onRemovePlanned={removePlannedItem}
               savingId={saving}
@@ -7879,15 +7867,24 @@ const deleteApplication = async (row) => {
                         )}
                         <textarea
                           value={packAdditionDraft[row.id] || ''}
-                          onChange={(e) => setPackAdditionDraft((prev) => ({ ...prev, [row.id]: e.target.value }))}
+                          onChange={(e) => { const v = e.target.value; setPackAdditionDraft((prev) => ({ ...prev, [row.id]: v })); setPackRepeatOk((prev) => ({ ...prev, [row.id]: false })) }}
                           placeholder="Write anything extra to add to this pack..."
                           rows={2}
                           className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700"
                         />
+                        {alreadySentLabel(row, packAdditionDraft[row.id]) && (
+                          <div className="mt-1 rounded border border-red-200 bg-red-50 px-2 py-1 text-[11px] text-red-800">
+                            <p className="font-semibold">Already sent in package {alreadySentLabel(row, packAdditionDraft[row.id])} — can't be added.</p>
+                            <label className="mt-0.5 flex items-center gap-1">
+                              <input type="checkbox" checked={Boolean(packRepeatOk[row.id])} onChange={(e) => { const c = e.target.checked; setPackRepeatOk((prev) => ({ ...prev, [row.id]: c })) }} />
+                              Send it again on purpose
+                            </label>
+                          </div>
+                        )}
                         <button
                           type="button"
                           onClick={() => addPackNote(row)}
-                          disabled={saving === row.id || !String(packAdditionDraft[row.id] || '').trim()}
+                          disabled={saving === row.id || !String(packAdditionDraft[row.id] || '').trim() || (Boolean(alreadySentLabel(row, packAdditionDraft[row.id])) && !packRepeatOk[row.id])}
                           className="mt-1.5 rounded-lg border border-fuchsia-300 bg-white px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-60"
                         >
                           Add item
