@@ -5101,7 +5101,10 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
         .order('sent_at', { ascending: false, nullsFirst: false })
       const baseShipmentColumns = 'id, application_id, status, ambassador_type, items, method, tracking_number, tracking_url, planned_for, sent_at, created_by, created_at, legacy_source'
       // Step-2 columns (carrier, expected delivery, received) if they exist yet.
-      let { data: shipmentRows, error: shipmentErr } = await shipmentQuery(`${baseShipmentColumns}, carrier, expected_delivery, delivered_at, delivered_by`)
+      let { data: shipmentRows, error: shipmentErr } = await shipmentQuery(`${baseShipmentColumns}, carrier, expected_delivery, delivered_at, delivered_by, lost_at, lost_note`)
+      if (shipmentErr && /column .* does not exist/i.test(String(shipmentErr.message || ''))) {
+        ;({ data: shipmentRows, error: shipmentErr } = await shipmentQuery(`${baseShipmentColumns}, carrier, expected_delivery, delivered_at, delivered_by`))
+      }
       if (shipmentErr && /column .* does not exist/i.test(String(shipmentErr.message || ''))) {
         ;({ data: shipmentRows, error: shipmentErr } = await shipmentQuery(baseShipmentColumns))
       }
@@ -5709,6 +5712,30 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     setRows((prev) => prev.map((r) => (r.id === row.id
       ? { ...r, _shipments: (r._shipments || []).map((s) => (s.id === shipment.id ? { ...s, ...patch } : s)) }
       : r)))
+  }
+  // A package that never arrived: marked lost, its contents are copied into the
+  // next package as a resend, and the next date becomes today.
+  const markShipmentLost = async (row, shipment) => {
+    if (!shipment?.id) return
+    if (!window.confirm(`Mark the package sent to ${row.full_name || row.email} on ${fmtDate(shipment.sent_at)} as LOST (not received)?\n\nIts contents will be put into the next package as a resend, due today.`)) return
+    setBusyShipmentId(shipment.id)
+    const patch = { lost_at: new Date().toISOString(), lost_note: `Lost in transit — marked by ${getAdminDisplayLabel()}`, delivered_at: null, delivered_by: null }
+    const { error: err } = await supabase.from('ambassador_shipments').update(patch).eq('id', shipment.id)
+    if (err) { setBusyShipmentId(null); alert(`Could not mark as lost: ${err.message}`); return }
+    const updatedRow = { ...row, _shipments: (row._shipments || []).map((s) => (s.id === shipment.id ? { ...s, ...patch } : s)) }
+    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, _shipments: updatedRow._shipments } : r)))
+    const items = (Array.isArray(shipment.items) ? shipment.items : []).map((t) => String(t || '').trim()).filter(Boolean)
+    const already = new Set(packNoteEntries(row).map((e) => e.text.trim().toLowerCase()))
+    const toAdd = items.filter((t) => !already.has(t.toLowerCase()))
+    if (toAdd.length) {
+      const stamp = fmtDate(new Date().toISOString())
+      const author = `resend of lost package${shipment.tracking_number ? ` (${shipment.tracking_number})` : ''}`
+      await savePackNotes(row, [...packNoteLines(row), ...toAdd.map((text) => createPackNoteLine({ stamp, author, text }))])
+    }
+    const today = new Date().toISOString().slice(0, 10)
+    const latest = { ...row, admin_comment: (await supabase.from(AMBASSADOR_TABLE).select('admin_comment').eq('id', row.id).maybeSingle()).data?.admin_comment ?? row.admin_comment }
+    await saveShipmentMeta(latest, { nextReminderAt: `${today}T10:00:00.000Z` })
+    setBusyShipmentId(null)
   }
   const getAmbassadorType = (row) => String(row?.ambassador_type || '').trim().toLowerCase()
     || extractTaggedValue(row?.admin_comment, 'AMBASSADOR_TYPE')
@@ -6354,6 +6381,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       trackingUrl: s.tracking_url || '',
       ambassadorType: AMBASSADOR_TYPE_LABELS[String(s.ambassador_type || '').toLowerCase()] || '',
       boxContents: (Array.isArray(s.items) ? s.items : []).join(', '),
+      lost: Boolean(s.lost_at),
     }))
     const fromLegacy = legacyShipmentHistoryEntries(row)
       .filter((entry) => !copiedLines.has(String(entry.raw || '').trim()))
@@ -7180,6 +7208,7 @@ const deleteApplication = async (row) => {
               onSetType={setAmbassadorType}
               busyShipmentId={busyShipmentId}
               onMarkReceived={markShipmentReceived}
+              onMarkLost={markShipmentLost}
               onOpen={(id) => {
                 setViewMode('cards')
                 jumpToAmbassador(id)
@@ -7800,7 +7829,7 @@ const deleteApplication = async (row) => {
                                     onClick={() => toggleShipmentEntry(row.id, idx)}
                                     className="flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left"
                                   >
-                                    <span className="text-[11px] font-semibold text-slate-700">Package {rowIdx} · {entry.stamp || 'No date'}</span>
+                                    <span className="text-[11px] font-semibold text-slate-700">Package {rowIdx} · {entry.stamp || 'No date'}{entry.lost && <span className="ml-1.5 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-700">LOST — not received</span>}</span>
                                     <span className="text-[10px] font-semibold text-slate-500">{open ? 'Hide' : 'Show'}</span>
                                   </button>
                                   {open && (

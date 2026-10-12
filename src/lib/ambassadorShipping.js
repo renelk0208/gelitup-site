@@ -83,11 +83,13 @@ export function carrierLabel(carrier) {
 }
 
 // Delivery state of one sent package, for badges.
+//   lost:     never arrived, marked lost (to be sent again)
 //   received: confirmed by the ambassador or ticked by an admin
 //   late:     past its estimated delivery date and not confirmed
 //   on_the_way
 export function deliveryState(shipment, today = new Date()) {
   if (!shipment) return null
+  if (shipment.lost_at) return 'lost'
   if (shipment.delivered_at) return 'received'
   const eta = shipment.expected_delivery
   if (eta && new Date(`${eta}T23:59:59Z`).getTime() < today.getTime()) return 'late'
