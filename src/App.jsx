@@ -384,6 +384,65 @@ async function sendPortalEmailNotification({ eventType, to, subject, html, attac
   }
 }
 
+// ── Draft cart safety net ───────────────────────────────────────────────────
+// Every cart change is written to the live table (b2b_draft_carts) and to a
+// backup (b2b_draft_cart_snapshots). Emptied / ordered carts are removed from
+// the live table but only ARCHIVED in the backup, so admins can still see and
+// recover them. If the backup table doesn't exist yet, only its write fails
+// (logged to the console) and the live cart behaves exactly as before.
+const DRAFT_CART_BACKUP_TABLE = import.meta.env.VITE_B2B_DRAFT_CART_BACKUP_TABLE || 'b2b_draft_cart_snapshots'
+async function syncDraftCartMirror(supabaseClient, {
+  userId,
+  customerEmail,
+  items,
+  totalUnits,
+  totalEstimated,
+  source,
+  archived = false,
+  archivedReason = null,
+}) {
+  if (!supabaseClient || !userId) return { ok: false, currentError: null, backupError: null }
+  const updatedAt = new Date().toISOString()
+  const liveRequest = archived
+    ? supabaseClient.from('b2b_draft_carts').delete().eq('user_id', userId).eq('source', source)
+    : supabaseClient.from('b2b_draft_carts').upsert({
+      user_id: userId,
+      customer_email: customerEmail || null,
+      items,
+      total_units: Number(totalUnits || 0),
+      total_estimated: Number(totalEstimated || 0),
+      source,
+      updated_at: updatedAt,
+    }, { onConflict: 'user_id,source' })
+  // When archiving, keep the last real contents in the backup (only stamp it
+  // archived); otherwise mirror the live cart and clear any old archive mark.
+  const backupRequest = archived
+    ? supabaseClient.from(DRAFT_CART_BACKUP_TABLE)
+      .update({ archived_at: updatedAt, archived_reason: archivedReason })
+      .eq('user_id', userId).eq('source', source).is('archived_at', null)
+    : supabaseClient.from(DRAFT_CART_BACKUP_TABLE).upsert({
+      user_id: userId,
+      customer_email: customerEmail || null,
+      items,
+      total_units: Number(totalUnits || 0),
+      total_estimated: Number(totalEstimated || 0),
+      source,
+      updated_at: updatedAt,
+      archived_at: null,
+      archived_reason: null,
+      // The customer is active again, so abandoned-cart reminders start over.
+      last_reminder_sent_at: null,
+      reminder_count: 0,
+    }, { onConflict: 'user_id,source' })
+  const [liveResult, backupResult] = await Promise.all([liveRequest, backupRequest])
+  if (backupResult?.error) console.warn('[draft cart backup] write failed:', backupResult.error.message)
+  return {
+    ok: !liveResult?.error && !backupResult?.error,
+    currentError: liveResult?.error || null,
+    backupError: backupResult?.error || null,
+  }
+}
+
 const UPSELL_PRICE_FUNCTION_URL = import.meta.env.VITE_UPSELL_PRICE_FUNCTION_URL || '/.netlify/functions/get-upsell-price'
 const PROFORMA_COMPANY_NAME = import.meta.env.VITE_PROFORMA_COMPANY_NAME || 'GEL.IT.UP Factory Direct'
 const PROFORMA_VAT_TAX_ID = import.meta.env.VITE_PROFORMA_VAT_TAX_ID || 'VAT/TAX ID: EL999999999'
@@ -3695,6 +3754,7 @@ function FullCataloguePage() {
   const shippingToastTimerRef = useRef(null)
   const [cartRestoredToast, setCartRestoredToast] = useState(false)
   const quickCartTotalRef = useRef(0)
+  const catalogueCartHadItemsRef = useRef(false)
   const [outOfStockNames, setOutOfStockNames] = useState(new Set())
   const [productSizes, setProductSizes] = useState({})
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('portalAuth') === 'true')
@@ -3742,24 +3802,37 @@ function FullCataloguePage() {
     if (!isLoggedIn || !supabase) return
     const units = Object.values(quickCart).reduce((s, q) => s + Number(q || 0), 0)
     if (units === 0) {
+      // Same rule as the portal: only an emptied cart (it had items this
+      // session) archives the saved copy; an empty cart on load never does.
+      if (!catalogueCartHadItemsRef.current) return
+      catalogueCartHadItemsRef.current = false
       supabase.auth.getUser().then(({ data }) => {
-        if (data?.user?.id) supabase.from('b2b_draft_carts').delete().eq('user_id', data.user.id).eq('source', 'catalogue').then(() => {})
+        if (!data?.user?.id) return
+        void syncDraftCartMirror(supabase, {
+          userId: data.user.id,
+          customerEmail: data.user.email,
+          items: {},
+          totalUnits: 0,
+          totalEstimated: 0,
+          source: 'catalogue',
+          archived: true,
+          archivedReason: 'Catalogue cart emptied',
+        })
       })
       return
     }
+    catalogueCartHadItemsRef.current = true
     const timer = setTimeout(() => {
       supabase.auth.getUser().then(({ data }) => {
         if (!data?.user?.id) return
-        const now = new Date().toISOString()
-        supabase.from('b2b_draft_carts').upsert({
-          user_id: data.user.id,
-          customer_email: data.user.email,
+        void syncDraftCartMirror(supabase, {
+          userId: data.user.id,
+          customerEmail: data.user.email,
           items: quickCart,
-          total_units: units,
-          total_estimated: Number(quickCartTotalRef.current || 0),
+          totalUnits: units,
+          totalEstimated: Number(quickCartTotalRef.current || 0),
           source: 'catalogue',
-          updated_at: now,
-        }, { onConflict: 'user_id,source' }).then(() => {})
+        })
 
         // Abandoned cart recovery — send up to 2 reminder emails, 24h apart
         const reminderKey = `gelitup.catalogue.cart_reminder.v1_${data.user.id}`
@@ -12459,6 +12532,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
   const cartUserIdRef = useRef(null)
   const orderTotalRef = useRef(0)
   const restoredPortalCartUserIdRef = useRef('')
+  const portalCartHadItemsRef = useRef(false)
 
   const restorePortalCartForUser = useCallback(async (sessionUser = null) => {
     if (!hasSupabaseConfig || !supabase) return
@@ -12488,6 +12562,25 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           setSelectedCodes(codes)
           setItemQtys(qtys)
           setPackageCartItems(Array.isArray(items.packages) ? items.packages : [])
+          restoredPortalCartUserIdRef.current = uid
+          return
+        }
+        // Live cart row gone too: try the backup copy (not archived = not
+        // emptied or ordered by the customer).
+        const { data: backupCart } = await supabase
+          .from(DRAFT_CART_BACKUP_TABLE)
+          .select('items')
+          .eq('user_id', uid)
+          .eq('source', 'portal')
+          .is('archived_at', null)
+          .maybeSingle()
+        const backupItems = backupCart?.items
+        if (backupItems && ((backupItems.products || []).length || (backupItems.packages || []).length)) {
+          const codes = (backupItems.products || []).map(p => p.code).filter(Boolean)
+          const qtys = (backupItems.products || []).reduce((acc, p) => { if (p.code) acc[p.code] = p.qty || 1; return acc }, {})
+          setSelectedCodes(codes)
+          setItemQtys(qtys)
+          setPackageCartItems(Array.isArray(backupItems.packages) ? backupItems.packages : [])
           restoredPortalCartUserIdRef.current = uid
           return
         }
@@ -12619,23 +12712,36 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     if (!uid) return
     const totalUnitsForDraft = selectedCodes.reduce((s, c) => s + (itemQtys[c] || 1), 0) + packageCartItems.reduce((s, i) => s + (i.qty || 0), 0)
     if (totalUnitsForDraft === 0) {
-      supabase.from('b2b_draft_carts').delete().eq('user_id', uid).eq('source', 'portal').then(() => {})
+      // Only treat this as "the customer emptied their cart" if it had items
+      // in this session. An empty cart on page load (before the saved cart
+      // is restored, or on a new device) must never wipe the saved copy.
+      if (!portalCartHadItemsRef.current) return
+      portalCartHadItemsRef.current = false
+      void syncDraftCartMirror(supabase, {
+        userId: uid,
+        items: { products: [], packages: [] },
+        totalUnits: 0,
+        totalEstimated: 0,
+        source: 'portal',
+        archived: true,
+        archivedReason: 'Portal cart emptied',
+      })
       return
     }
+    portalCartHadItemsRef.current = true
     const timer = setTimeout(() => {
       supabase.auth.getUser().then(({ data }) => {
         if (!data?.user?.id) return
         const itemsSummary = selectedCodes.map(c => ({ code: c, qty: itemQtys[c] || 1 }))
         const pkgSummary = packageCartItems.map(i => ({ sku: i.sku, name: i.name, qty: i.qty, group: i.group }))
-        supabase.from('b2b_draft_carts').upsert({
-          user_id: data.user.id,
-          customer_email: data.user.email,
+        void syncDraftCartMirror(supabase, {
+          userId: data.user.id,
+          customerEmail: data.user.email,
           items: { products: itemsSummary, packages: pkgSummary },
-          total_units: totalUnitsForDraft,
-          total_estimated: Number(orderTotalRef.current || 0),
+          totalUnits: totalUnitsForDraft,
+          totalEstimated: Number(orderTotalRef.current || 0),
           source: 'portal',
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id,source' }).then(() => {})
+        })
       })
     }, 2000) // debounce 2s
     return () => clearTimeout(timer)
@@ -15607,8 +15713,19 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     const cartUid = cartUserIdRef.current || userData?.user?.id
     if (cartUid) {
       localStorage.removeItem(`${B2B_CART_STORAGE_KEY_PREFIX}_${cartUid}`)
-      // Also clear draft cart from Supabase
-      if (supabase) supabase.from('b2b_draft_carts').delete().eq('user_id', cartUid).eq('source', 'portal').then(() => {})
+      // Also clear the live draft cart, and mark the backup copy as ordered
+      portalCartHadItemsRef.current = false
+      if (supabase) {
+        void syncDraftCartMirror(supabase, {
+          userId: cartUid,
+          items: { products: [], packages: [] },
+          totalUnits: 0,
+          totalEstimated: 0,
+          source: 'portal',
+          archived: true,
+          archivedReason: 'Checkout completed',
+        })
+      }
     }
     setIsSubmittingOrder(false)
   }

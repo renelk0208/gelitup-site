@@ -5,6 +5,10 @@ const SITE_ORIGIN = process.env.SITE_ORIGIN || 'https://gelitup.com'
 const SUPABASE_URL = process.env.SUPABASE_URL || ''
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE || ''
 const CART_REMINDER_ACTION_SECRET = process.env.CART_REMINDER_ACTION_SECRET || SUPABASE_SERVICE_ROLE_KEY
+// Reminder emails link to the backup copy of the cart (b2b_draft_cart_snapshots);
+// the live cart (b2b_draft_carts) is removed when the customer asks to delete.
+const DRAFT_CARTS_TABLE = process.env.VITE_B2B_DRAFT_CART_BACKUP_TABLE || 'b2b_draft_cart_snapshots'
+const LIVE_DRAFT_CARTS_TABLE = 'b2b_draft_carts'
 
 function escapeHtml(value) {
   return String(value || '')
@@ -102,8 +106,8 @@ export async function handler(event) {
   })
 
   const { data: cart, error: cartError } = await supabase
-    .from('b2b_draft_carts')
-    .select('id,customer_email,updated_at,created_at')
+    .from(DRAFT_CARTS_TABLE)
+    .select('id,user_id,source,customer_email,updated_at,created_at')
     .eq('id', cartId)
     .maybeSingle()
 
@@ -148,6 +152,8 @@ export async function handler(event) {
         customer_action: 'delete',
         customer_action_at: nowIso,
         customer_action_note: 'Customer clicked "Delete contents of cart" from the abandoned cart reminder email.',
+        archived_at: nowIso,
+        archived_reason: 'Customer deleted cart contents from reminder email.',
       }
     : {
         updated_at: nowIso,
@@ -157,9 +163,17 @@ export async function handler(event) {
       }
 
   const { error: updateError } = await supabase
-    .from('b2b_draft_carts')
+    .from(DRAFT_CARTS_TABLE)
     .update(updatePayload)
     .eq('id', cartId)
+
+  if (!updateError && action === 'delete' && cart?.user_id) {
+    await supabase
+      .from(LIVE_DRAFT_CARTS_TABLE)
+      .delete()
+      .eq('user_id', cart.user_id)
+      .eq('source', cart.source || 'portal')
+  }
 
   if (updateError) {
     return htmlResponse(500, renderHtml({
