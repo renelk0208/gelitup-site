@@ -7,6 +7,7 @@ import ambassadorLetterAttachmentUrl from '../lib/ambassadorletter/Gelitup Ambas
 import { buildAmbassadorContractPdf, buildAmbassadorPackingListPdf, buildAmbassadorWelcomeLetterPdf } from '../lib/ambassadorContractPdf.js'
 import { detectCarrier, estimateDelivery } from '../lib/ambassadorShipping.js'
 import { instagramHandle, instagramUrl, tiktokHandle, tiktokUrl } from '../lib/socialLinks.js'
+import { whereAlreadySent } from '../lib/packageItems.js'
 import AmbassadorShipmentsTable from '../components/AmbassadorShipmentsTable.jsx'
 import {
   normalizeAdminSkuToken,
@@ -6242,9 +6243,19 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     setSaving(null)
     return true
   }
+  // Flag items that already went out to this ambassador in an earlier package.
+  const alreadySentLabel = (row, item) => whereAlreadySent(item, row?._shipments)
+    .map((h) => `#${h.number}${h.sent_at ? ` (${fmtDate(h.sent_at)})` : ''}`).join(', ')
+  const confirmNotAlreadySent = (row, texts) => {
+    const repeats = texts.map((t) => ({ t, where: alreadySentLabel(row, t) })).filter((r) => r.where)
+    if (!repeats.length) return true
+    const list = repeats.map((r) => `• ${r.t} — already sent in package ${r.where}`).join('\n')
+    return window.confirm(`Already sent to ${row.full_name || 'this ambassador'}:\n\n${list}\n\nAdd it again anyway?`)
+  }
   const addPackNote = async (row) => {
     const text = String(packAdditionDraft[row.id] || '').trim()
     if (!text) return
+    if (!confirmNotAlreadySent(row, [text])) return
     const stamp = fmtDate(new Date().toISOString())
     const author = getAdminDisplayLabel()
     const lines = packNoteLines(row)
@@ -7851,6 +7862,9 @@ const deleteApplication = async (row) => {
                                       </span>
                                     </span>
                                     <span>{entry.text}</span>
+                                    {alreadySentLabel(row, entry.text) && (
+                                      <span className="ml-1 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">⚠ already sent in {alreadySentLabel(row, entry.text)}</span>
+                                    )}
                                   </span>
                                   <span className="flex shrink-0 gap-1.5">
                                     <button type="button" title="Edit" onClick={() => editPackNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-slate-700 disabled:opacity-50">✎</button>

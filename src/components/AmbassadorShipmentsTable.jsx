@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { carrierLabel, deliveryState, normalizeCountry } from '../lib/ambassadorShipping.js'
 import { instagramHandle, instagramUrl, tiktokHandle, tiktokUrl } from '../lib/socialLinks.js'
+import { normItem, whereAlreadySent } from '../lib/packageItems.js'
 
 // Shipments overview, grouped so every ambassador sits in exactly ONE section
 // with ONE status:
@@ -115,13 +116,22 @@ function NameCell({ line, getType, onOpen }) {
 function Planner({ line, suggestions, onAdd, onRemove, busy }) {
   const [text, setText] = useState('')
   const items = line.planned
-  const remaining = suggestions.filter((sug) => !items.some((it) => it.trim().toLowerCase() === sug.trim().toLowerCase()))
+  const sentBefore = (item) => whereAlreadySent(item, line.shipments)
+  const sentLabel = (hits) => hits.map((h) => `#${h.number}${h.sent_at ? ` (${fmt(h.sent_at)})` : ''}`).join(', ')
+  // Suggestions never offer something already planned or already sent before.
+  const remaining = suggestions.filter((sug) => !items.some((it) => normItem(it) === normItem(sug)) && sentBefore(sug).length === 0)
   const add = async (values) => {
     const clean = values.map((v) => String(v || '').trim()).filter(Boolean)
     if (!clean.length) return
+    const repeats = clean.map((v) => ({ v, hits: sentBefore(v) })).filter((r) => r.hits.length)
+    if (repeats.length) {
+      const list = repeats.map((r) => `• ${r.v} — already sent in package ${sentLabel(r.hits)}`).join('\n')
+      if (!window.confirm(`Already sent to ${line.row.full_name || 'this ambassador'}:\n\n${list}\n\nAdd it again anyway?`)) return
+    }
     const ok = await onAdd(line.row, clean)
     if (ok) setText('')
   }
+  const typedRepeat = text.trim() ? sentBefore(text) : []
   return (
     <div className="min-w-[230px] space-y-1.5">
       {items.length === 0
@@ -130,7 +140,12 @@ function Planner({ line, suggestions, onAdd, onRemove, busy }) {
           <ul className="space-y-1">
             {items.map((item, i) => (
               <li key={`${i}-${item}`} className="flex items-start justify-between gap-2 rounded border border-fuchsia-100 bg-fuchsia-50/50 px-2 py-1 text-slate-800">
-                <span>{item}</span>
+                <span>
+                  {item}
+                  {sentBefore(item).length > 0 && (
+                    <span className="ml-1 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">⚠ already sent in {sentLabel(sentBefore(item))}</span>
+                  )}
+                </span>
                 <button type="button" title="Remove" onClick={() => onRemove(line.row, i)} disabled={busy} className="shrink-0 text-slate-400 hover:text-rose-600 disabled:opacity-50">✕</button>
               </li>
             ))}
@@ -158,6 +173,9 @@ function Planner({ line, suggestions, onAdd, onRemove, busy }) {
         />
         <button type="submit" disabled={busy || !text.trim()} className="rounded border border-fuchsia-300 bg-white px-2 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-50">Add</button>
       </form>
+      {typedRepeat.length > 0 && (
+        <p className="text-[10px] font-semibold text-amber-800">⚠ Already sent in package {sentLabel(typedRepeat)}</p>
+      )}
     </div>
   )
 }
