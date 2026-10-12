@@ -88,8 +88,6 @@ const SMALL_ORDER_MIN_EUR = 49
 const SMALL_ORDER_SHIPPING_ZONES = [
   { feeEur: 15, countries: ['Austria', 'Germany', 'Hungary', 'Belgium', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'Croatia', 'Czech Republic'] },
   { feeEur: 22, countries: ['Denmark', 'Spain', 'Luxembourg', 'Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Finland', 'Sweden', 'Norway', 'Switzerland', 'United Kingdom'] },
-  // Non-EU zone (from the July non-EU checkout fix, which was never merged).
-  { feeEur: 35, countries: ['Israel', 'Serbia', 'Turkey', 'Ukraine', 'Bosnia and Herzegovina', 'North Macedonia', 'Albania', 'Moldova', 'Georgia'] },
 ]
 const DISTRIBUTOR_COUNTRY_HANDOFF = {
   Italy: { url: 'https://www.gelitup.it', label: 'GEL.IT.UP Italy' },
