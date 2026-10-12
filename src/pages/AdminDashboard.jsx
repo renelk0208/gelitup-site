@@ -6,6 +6,7 @@ import tierPricingOverrides from '../data/tierPricingOverrides.json'
 import ambassadorLetterAttachmentUrl from '../lib/ambassadorletter/Gelitup Ambassador Letter.pdf?url'
 import { buildAmbassadorContractPdf, buildAmbassadorPackingListPdf, buildAmbassadorWelcomeLetterPdf } from '../lib/ambassadorContractPdf.js'
 import { detectCarrier, estimateDelivery } from '../lib/ambassadorShipping.js'
+import { instagramHandle, instagramUrl, tiktokHandle, tiktokUrl } from '../lib/socialLinks.js'
 import AmbassadorShipmentsTable from '../components/AmbassadorShipmentsTable.jsx'
 import {
   normalizeAdminSkuToken,
@@ -109,9 +110,11 @@ const AMBASSADOR_PACKS_BY_TYPE = {
   },
 }
 
+// Next PR package is due this many days after the last one is sent.
+const NEXT_PACKAGE_AFTER_DAYS = 28
+
 const AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE = {
   standard_ambassador: {
-    daysAfterDispatch: 21,
     items: [
       '1x Pink Buffer',
       '1 x Purple Buffer',
@@ -121,7 +124,6 @@ const AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE = {
     ],
   },
   super_ambassador: {
-    daysAfterDispatch: 21,
     items: [
       'New Dual Forms',
       '1 x roll of Gelitup Nail Forms',
@@ -176,14 +178,6 @@ function fmtDateTime(iso) {
     hour: '2-digit',
     minute: '2-digit',
   })
-}
-
-function addOneMonth(iso) {
-  const source = new Date(iso)
-  if (Number.isNaN(source.getTime())) return null
-  const next = new Date(source)
-  next.setMonth(next.getMonth() + 1)
-  return next.toISOString()
 }
 
 function parseDateLabelToIso(label) {
@@ -4910,7 +4904,9 @@ function AmbassadorApplicationsPanel({ focusAmbassadorId } = {}) {
   const [error, setError] = useState('')
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(false)
-  const [filter, setFilter] = useState('approved')
+  // The Shipments view always covers everyone; a remembered Shipments view
+  // with the Approved/Pending filter left the screen empty.
+  const [filter, setFilter] = useState(() => (viewMode === 'shipments' ? 'all' : 'approved'))
   const [searchQuery, setSearchQuery] = useState('')
   const [saving, setSaving] = useState(null)
   const [emailStatus, setEmailStatus] = useState({}) // { [id]: { state, message } }
@@ -5262,13 +5258,10 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       setEmail(row.id, 'error', 'Reminder date is invalid.')
       return
     }
-    const followUpPack = getFollowUpPackForRow(row)
     const nextReminderAt = parsedReminderAt
       ? parsedReminderAt.toISOString()
       : (sentAtIso
-        ? (followUpPack
-          ? new Date(new Date(sentAtIso).getTime() + (Number(followUpPack.daysAfterDispatch || 28) * 24 * 60 * 60 * 1000)).toISOString()
-          : addOneMonth(sentAtIso))
+        ? new Date(new Date(sentAtIso).getTime() + NEXT_PACKAGE_AFTER_DAYS * 24 * 60 * 60 * 1000).toISOString()
         : '')
     setSaving(row.id)
     const result = await saveShipmentMeta(row, { nextReminderAt })
@@ -5637,18 +5630,14 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const raw = String(value || '').trim()
     return raw ? encodeURIComponent(raw) : ''
   }
-  const getFollowUpPackForType = (type) => {
-    const normalized = String(type || '').trim().toLowerCase()
-    return AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE[normalized] || null
-  }
-  const getFollowUpPackForRow = (row) => getFollowUpPackForType(getAmbassadorType(row))
+  // Rule for every ambassador type: the next package is due 4 weeks after
+  // the day a package is sent. The database applies the same rule
+  // (supabase/sql/ambassador_step3_four_week_rule.sql).
   const getDefaultFollowUpDateValue = (row, baseIso = new Date().toISOString()) => {
-    const followUpPack = getFollowUpPackForRow(row)
-    if (!followUpPack) return ''
     const source = new Date(baseIso)
     if (Number.isNaN(source.getTime())) return ''
     const next = new Date(source)
-    next.setUTCDate(next.getUTCDate() + Number(followUpPack.daysAfterDispatch || 28))
+    next.setUTCDate(next.getUTCDate() + NEXT_PACKAGE_AFTER_DAYS)
     return next.toISOString().slice(0, 10)
   }
   const buildCommentWithMeta = (row, patch) => {
@@ -5711,18 +5700,12 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const tagged = readMetaTag(row, 'SHIPMENT_NEXT_REMINDER_AT') || fallbackIso || ''
     return tagged ? String(tagged).slice(0, 10) : ''
   }
-  // When starting a fresh dispatch, never default the "next reminder" prompt
-  // to a date that has already passed — that silently re-saves the stale,
-  // already-overdue schedule, so the "overdue" badge never clears even
-  // though a brand-new package was just sent. Only reuse the stored date
-  // when it's still in the future; otherwise propose a sensible new one.
+  // Default "next package" date when a package is being sent now.
   const nextDispatchDateDefault = (row) => {
     if (Object.prototype.hasOwnProperty.call(reminderDateDraft, row.id)) return reminderDateDraft[row.id]
-    const freshDefault = getDefaultFollowUpDateValue(row) || ''
-    const tagged = readMetaTag(row, 'SHIPMENT_NEXT_REMINDER_AT')
-    if (!tagged) return freshDefault
-    const taggedIsFuture = new Date(tagged).getTime() > Date.now()
-    return (taggedIsFuture ? String(tagged).slice(0, 10) : freshDefault) || freshDefault
+    // A package going out today always starts a new 4-week cycle; the old
+    // date belonged to the package being sent now.
+    return getDefaultFollowUpDateValue(row) || ''
   }
   // Admin ticks a package as received (the ambassador can also confirm it in
   // their portal).
@@ -6225,7 +6208,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   // appended into admin_comment; we now keep them out of the editable notes and
   // surface them (plus the new message_log column) in the Messages section.
   const isAmbassadorMsgLine = (line) => String(line).includes('📧')
-  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|AMBASSADOR_PROGRAMME_PAUSED|PACK_NOTE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE|SHIPMENT_METHOD|FACTORY_ACK|SHIPMENT_OFFICE_REMINDER_AT|SHIPMENT_OFFICE_REMINDER_SENT_AT|SHIPMENT_OFFICE_REMINDER_DISPATCHED_AT|SHIPMENT_OFFICE_REMINDER_NEXT_PACKAGE_AT|SHIPMENT_OFFICE_REMINDER_ITEMS|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SIGNATURE|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SENT_AT|SHIPMENT_NEXT_PACKAGE_OPEN):[^\]]+\]$/i.test(String(line).trim())
+  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|AMBASSADOR_PROGRAMME_PAUSED|PACK_NOTE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE|SHIPMENT_METHOD|FACTORY_ACK|SHIPMENT_OFFICE_REMINDER_AT|SHIPMENT_OFFICE_REMINDER_SENT_AT|SHIPMENT_OFFICE_REMINDER_DISPATCHED_AT|SHIPMENT_OFFICE_REMINDER_NEXT_PACKAGE_AT|SHIPMENT_OFFICE_REMINDER_ITEMS|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SIGNATURE|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SENT_AT|SHIPMENT_NEXT_PACKAGE_OPEN|SHIPMENT_OFFICE_REMINDER_SENT_FOR):[^\]]+\]$/i.test(String(line).trim())
   const packNoteLines = (row) => String(row.admin_comment || '').split('\n').filter((line) => /^\[PACK_NOTE:[^\]]+\]$/i.test(String(line).trim()))
   const parsePackNote = (line) => {
     const encoded = String(line || '').trim().match(/^\[PACK_NOTE:([^\]]+)\]$/i)?.[1]
@@ -6283,6 +6266,45 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       setSaving(null)
       if (!emailResult.ok) alert(`Package note saved, but notification email failed: ${emailResult.error}`)
     }
+  }
+  // Shipments view: add one or several items to the next package in one save
+  // (and one notification email), and remove items without a confirm box.
+  const addPlannedItems = async (row, texts) => {
+    const clean = (texts || []).map((t) => String(t || '').trim()).filter(Boolean)
+    if (!clean.length) return false
+    const stamp = fmtDate(new Date().toISOString())
+    const author = getAdminDisplayLabel()
+    const lines = [...packNoteLines(row), ...clean.map((text) => createPackNoteLine({ stamp, author, text }))]
+    if (!(await savePackNotes(row, lines))) return false
+    const emailResult = await sendAmbassadorNoteNotifications({ row, note: clean.join('\n'), noteType: 'package note', author, stamp })
+    if (!emailResult.ok) console.warn('Package items saved, but notification email failed:', emailResult.error)
+    return true
+  }
+  // Fill in (or correct) what was in a package already sent.
+  const editShipmentContents = async (row, shipment) => {
+    const current = Array.isArray(shipment?.items) ? shipment.items.join(', ') : ''
+    const entered = window.prompt(`What was in this package for ${row.full_name || 'this ambassador'}? Separate items with commas.`, current)
+    if (entered === null) return
+    const items = entered.split(/[,\n]/).map((t) => t.trim()).filter(Boolean)
+    const { error: err } = await supabase.from('ambassador_shipments').update({ items }).eq('id', shipment.id)
+    if (err) { alert(`Could not save the contents: ${err.message}`); return }
+    patchRow(row.id, {
+      _shipments: (row._shipments || []).map((s) => (s.id === shipment.id ? { ...s, items } : s)),
+    })
+  }
+  const removePlannedItem = async (row, idx) => {
+    const lines = packNoteLines(row)
+    if (idx < 0 || idx >= lines.length) return
+    lines.splice(idx, 1)
+    await savePackNotes(row, lines)
+  }
+  // One-click suggestions: the usual follow-up pack for their type (Extreme
+  // gets the Super list), or the starter pack if nothing has been sent yet.
+  const suggestedPackItems = (row) => {
+    const type = getAmbassadorType(row)
+    if (!getAmbassadorDashboardMeta(row).shipmentPreviouslySent) return AMBASSADOR_PACKS_BY_TYPE[type]?.items || []
+    const followUp = AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE[type === 'extreme_ambassador' ? 'super_ambassador' : type]
+    return followUp?.items || []
   }
   const editPackNote = async (row, idx) => {
     const lines = packNoteLines(row)
@@ -6472,6 +6494,11 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     ...packNoteEntries(row).map((entry) => entry.text),
     ...(currentDraft.shipment_details ? [currentDraft.shipment_details] : []),
   ]
+  // Every package must say what was in it, otherwise the history is useless.
+  if (isFollowUpPackage && completedItems.length === 0) {
+    alert('Add what is in this package first (under "Items for this package", or in the Shipments view), then save it.')
+    return
+  }
   const completedShippingMethod = getShippingMethod(row)
   const buildArchiveLine = () => `[${fmtDate(new Date().toISOString())}] [${getAdminDisplayLabel()}] 📦 Shipped — ${[
     `Status: ${completedTypeLabel}`,
@@ -7008,7 +7035,12 @@ const deleteApplication = async (row) => {
     // been sent — never derive one for an ambassador who hasn't (that was the
     // source of ambassadors showing a red "overdue" badge despite nothing ever
     // having been shipped to them).
-    const nextReminderAt = sentAt ? (reminderAtMeta || addOneMonth(sentAt)) : null
+    // next_package_due is kept by the database (4 weeks after the last package
+    // sent); the old tag and the 4-week rule are fallbacks.
+    const columnDue = row?.next_package_due ? `${String(row.next_package_due).slice(0, 10)}T10:00:00.000Z` : null
+    const nextReminderAt = sentAt
+      ? (columnDue || reminderAtMeta || new Date(new Date(sentAt).getTime() + NEXT_PACKAGE_AFTER_DAYS * 86400000).toISOString())
+      : null
     const isDatePast = Boolean(nextReminderAt) && new Date(nextReminderAt).getTime() < Date.now()
     const dueSoon = Boolean(nextReminderAt) && !isDatePast && (new Date(nextReminderAt).getTime() - Date.now()) <= 7 * 24 * 60 * 60 * 1000
     const isFactoryAcked = Boolean(getFactoryAck(row))
@@ -7101,7 +7133,7 @@ const deleteApplication = async (row) => {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
-            {FILTERS.map((f) => (
+            {viewMode === 'cards' && FILTERS.map((f) => (
               <button
                 key={f.key}
                 onClick={() => setFilter(f.key)}
@@ -7154,6 +7186,11 @@ const deleteApplication = async (row) => {
               getMeta={getAmbassadorDashboardMeta}
               getType={getAmbassadorType}
               plannedItems={plannedItemsList}
+              suggestedItems={suggestedPackItems}
+              onAddPlanned={addPlannedItems}
+              onRemovePlanned={removePlannedItem}
+              savingId={saving}
+              onEditContents={editShipmentContents}
               busyShipmentId={busyShipmentId}
               onMarkReceived={markShipmentReceived}
               onOpen={(id) => {
@@ -7314,7 +7351,18 @@ const deleteApplication = async (row) => {
                       {row.status || 'new'}
                     </span>
                     {nextPackageDueBadge}
-                    <span className="text-xs text-fuchsia-700">@{row.instagram}</span>
+                    {instagramHandle(row.instagram) && (
+                      <span
+                        role="link"
+                        tabIndex={0}
+                        title="Open Instagram profile"
+                        onClick={(e) => { e.stopPropagation(); window.open(instagramUrl(row.instagram), '_blank', 'noopener') }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); window.open(instagramUrl(row.instagram), '_blank', 'noopener') } }}
+                        className="cursor-pointer text-xs font-medium text-fuchsia-700 hover:underline"
+                      >
+                        IG @{instagramHandle(row.instagram)}
+                      </span>
+                    )}
                     <span className="text-[11px] text-slate-400">{row.country ? `${row.country} · ` : ''}{fmtDate(row.created_at)}</span>
                   </span>
                   <span className="ml-auto shrink-0 text-[11px] font-medium text-slate-400">{isOpen ? 'Close' : 'Open'}</span>
@@ -7336,8 +7384,8 @@ const deleteApplication = async (row) => {
                 <div className="space-y-4">
                   <div className="min-w-0">
                     <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-600">
-                      <a href={`https://instagram.com/${row.instagram}`} target="_blank" rel="noreferrer" className="font-medium text-fuchsia-700 hover:underline">@{row.instagram}</a>
-                      {row.tiktok && <a href={`https://tiktok.com/@${row.tiktok}`} target="_blank" rel="noreferrer" className="font-medium text-slate-700 hover:underline">TikTok @{row.tiktok}</a>}
+                      {instagramHandle(row.instagram) && <a href={instagramUrl(row.instagram)} target="_blank" rel="noreferrer" className="font-medium text-fuchsia-700 hover:underline">@{instagramHandle(row.instagram)}</a>}
+                      {tiktokHandle(row.tiktok) && <a href={tiktokUrl(row.tiktok)} target="_blank" rel="noreferrer" className="font-medium text-slate-700 hover:underline">TikTok @{tiktokHandle(row.tiktok)}</a>}
                       {row.followers && <span>{row.followers} followers</span>}
                       <a href={`mailto:${row.email}`} className="hover:underline">{row.email}</a>
                       {row.phone && <a href={`tel:${row.phone}`} className="hover:underline">📞 {row.phone}</a>}
@@ -7729,13 +7777,14 @@ const deleteApplication = async (row) => {
                           onClick={() => toggleSection(row.id, 'history')}
                           className="flex w-full items-center justify-between text-left"
                         >
-                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Package history</p>
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Package history — {row.full_name || row.email} <span className="normal-case font-medium">(newest first)</span></p>
                           <span className="text-[11px] font-semibold text-slate-600">{isHistorySectionOpen ? 'Hide' : `Show (${shipmentEntries.length})`}</span>
                         </button>
                         {isHistorySectionOpen && (
                           <div className="mt-2 space-y-1.5">
                             {shipmentEntries.map((entry, idx) => {
-                              const rowIdx = idx + 1
+                              // Newest is listed first, so the first package sent is #1 at the bottom.
+                              const rowIdx = shipmentEntries.length - idx
                               const open = isShipmentEntryOpen(row.id, idx, idx === 0)
                               return (
                                 <div key={`${row.id}-ship-${idx}`} className="rounded-lg border border-slate-200 bg-slate-50">
