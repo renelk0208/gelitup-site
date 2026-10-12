@@ -118,7 +118,7 @@ function TypePicker({ row, type, onSetType, busy }) {
   )
 }
 
-function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews, busy }) {
+function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews, canApproveChoices, onApproveChoices, onRejectChoices, busy }) {
   const { row, country } = line
   return (
     <td className="px-3 py-2.5">
@@ -128,7 +128,19 @@ function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews,
       <SocialLinks row={row} />
       <p className="text-slate-500">{[country, TYPE_LABEL[getType(row)], row.discount_code].filter(Boolean).join(' · ')}</p>
       {line.isFirst && onSetType && <TypePicker row={row} type={getType(row)} onSetType={onSetType} busy={busy} />}
-      {!line.isFirst && row.choice_submitted_at && <p className="mt-1 text-[11px] font-semibold text-emerald-700">✓ Chose 5 products {fmt(row.choice_submitted_at)}</p>}
+      {!line.isFirst && row.choice_submitted_at && row.choice_approved_at && <p className="mt-1 text-[11px] font-semibold text-emerald-700">✓ Chose 5 products {fmt(row.choice_submitted_at)} · approved</p>}
+      {!line.isFirst && row.choice_submitted_at && !row.choice_approved_at && (
+        <div className="mt-1 rounded border border-amber-300 bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900">
+          <p className="font-semibold">⏳ Chose 5 products {fmt(row.choice_submitted_at)} — waiting for René's approval</p>
+          <ol className="ml-4 list-decimal">{(row.chosen_items || []).map((i) => <li key={i}>{i}</li>)}</ol>
+          {canApproveChoices && (
+            <div className="mt-1 flex gap-2">
+              <button type="button" onClick={() => onApproveChoices(row)} disabled={busy} className="rounded bg-emerald-600 px-2 py-0.5 font-semibold text-white hover:bg-emerald-500">✓ Approve</button>
+              <button type="button" onClick={() => onRejectChoices(row)} disabled={busy} className="rounded border border-rose-300 px-2 py-0.5 font-semibold text-rose-700 hover:bg-rose-50">✕ Ask to choose again</button>
+            </div>
+          )}
+        </div>
+      )}
       {!line.isFirst && !row.choice_submitted_at && row.choice_redo_at && onAskChoice && (
         <p className="mt-1 text-[11px] text-rose-700">↺ Choices cleared (too many of one type) · <button type="button" onClick={() => onAskChoice(row)} disabled={busy} className="font-semibold underline">send "please choose again" email</button></p>
       )}
@@ -261,7 +273,7 @@ function PackageHistory({ line, open = false, onEditContents, onMarkLost, onEdit
   )
 }
 
-export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onSetType, onMarkLost, onEditNote, onAskChoice, onAskReviews, onOpen, onMarkReceived, busyShipmentId }) {
+export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onSetType, onMarkLost, onEditNote, onAskChoice, onAskReviews, canApproveChoices, onApproveChoices, onRejectChoices, onOpen, onMarkReceived, busyShipmentId }) {
   const [carrier, setCarrier] = useState('')
   // Package history (with what was in each package) is shown open by default.
   const [expandAll, setExpandAll] = useState(true)
@@ -327,7 +339,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} busy={savingId === l.row.id} />
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.nextAt)}</td>
                 <td className="px-3 py-2.5 font-bold text-red-700">{Math.abs(l.nextIn)} day{Math.abs(l.nextIn) === 1 ? '' : 's'}</td>
                 <td className={td}>{planner(l)}</td>
@@ -345,7 +357,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} busy={savingId === l.row.id} />
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
                 <td className={td}>
                   {l.isFirst
                     ? <span className="font-semibold text-amber-800">First package{l.firstAcknowledged ? '' : ' · factory not told yet'}</span>
@@ -366,7 +378,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} busy={savingId === l.row.id} />
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.last?.sent_at)}<br /><span className="text-slate-500">Package #{l.count}</span></td>
                 <td className={td}><Tracking pkg={l.last} /></td>
                 <td className={td}>
@@ -398,7 +410,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} busy={savingId === l.row.id} />
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.last?.sent_at)}<br /><span className="text-slate-500">Package #{l.count}</span></td>
                 <td className={td}>
                   <span className="font-semibold text-emerald-700">✓ {fmt(l.last?.delivered_at)}</span>
@@ -420,7 +432,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
         <tbody className="divide-y divide-slate-100 align-top">
           {list.map((l) => (
             <tr key={l.row.id}>
-              <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} busy={savingId === l.row.id} />
+              <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
               <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} onEditNote={onEditNote} /></td>
             </tr>
           ))}
