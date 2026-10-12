@@ -4584,7 +4584,7 @@ function buildAmbassadorChoiceRequestEmail(row) {
     html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.55">
       <p>Hi ${escAmb(name)},</p>
       <p>Thank you for being part of the GEL.IT.UP family! ${when}</p>
-      <p>Please pick the <strong>5 products</strong> you'd most like to try and review — <strong>one of each type</strong> (for example one builder gel, one MultiMix, one base), so you get to review a mix. Products you've already received are greyed out, so everything you choose is new to you.</p>
+      <p>Please pick the <strong>5 products</strong> you'd most like to try and review — <strong>one of each type</strong> (for example one builder gel, one MultiMix, one base) and up to <strong>3 gel polish colours or effects</strong>, so you get to review a mix. Products you've already received are greyed out, so everything you choose is new to you.</p>
       <p style="margin:20px 0"><a href="${escAmb(link)}" style="display:inline-block;background:#d43790;color:#ffffff;padding:12px 20px;border-radius:9999px;text-decoration:none;font-weight:700">Choose my 5 products</a></p>
       <p>We'd love to see honest reviews, tutorials and swatches — tag <strong>@gelitupinternational</strong>, subscribe to our YouTube channel <a href="https://www.youtube.com/@GELITUP" style="color:#d43790">@GELITUP</a> and join our <a href="https://www.facebook.com/groups/GELITUP.FAMILY" style="color:#d43790">GEL.IT.UP Family</a> group on Facebook.</p>
       <p>With love,<br/>René Krallis<br/>Marketing Director, GEL.IT.UP International</p>

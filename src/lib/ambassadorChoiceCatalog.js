@@ -31,13 +31,19 @@ const CATEGORY_LABELS = {
 }
 
 // The product line an item belongs to, from its photo folder, e.g.
-// BUILDER GEL/PREMIUM BUILDER or COLORS/SOLID GEL POLISH. Ambassadors may
-// choose one product of each type. Size folders (MultiMix 30gr / 60gr) count
+// BUILDER GEL/PREMIUM BUILDER. Ambassadors may choose one product of each
+// type (gel polish colours: up to 3). Size folders (MultiMix 30gr / 60gr) count
 // as one type. Products without a photo folder are their own type.
 const titleCase = (v) => String(v || '').toLowerCase().replace(/\b([a-z])/g, (m) => m.toUpperCase())
+// Gel polish colours and effects (solid, glitter, cat eye, French, By the Ocean…)
+// count as one type, and up to 3 of them can be chosen.
+const GEL_POLISH_CATEGORIES = new Set(['COLORS', 'BY THE OCEAN'])
+export const TYPE_LIMITS = { 'GEL POLISH': 3 }
+export const typeLimit = (type) => TYPE_LIMITS[type] || 1
 export function productType(parts, name) {
   if (!parts || parts.length <= 4) return { type: `item:${norm(name)}`, typeLabel: name }
   const category = parts[3]
+  if (GEL_POLISH_CATEGORIES.has(category)) return { type: 'GEL POLISH', typeLabel: 'gel polish colour' }
   const sub = parts.length > 5 ? parts[4] : ''
   const sizeFolder = /^\d+\s*(g|gr|ml)?$/i.test(sub)
   if (!sub || sizeFolder) return { type: category, typeLabel: CATEGORY_LABELS[category] || titleCase(category) }
