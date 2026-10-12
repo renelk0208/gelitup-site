@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE } from '../../src/lib/ambassadorFollowUpPacks.js'
 import { whereAlreadySent } from '../../src/lib/packageItems.js'
+import { trackingLink } from '../../src/lib/ambassadorShipping.js'
 
 // Daily email to the office about ambassador PR packages that are coming up
 // or overdue.
@@ -110,7 +111,7 @@ function buildReminderEmail(row, lastShipment, packageNumber, due, today) {
       <p><strong>Due date:</strong> ${escapeHtml(formatDate(due))} (4 weeks after the last package)<br/>
       <strong>Country:</strong> ${escapeHtml(row?.country || 'Not recorded')}<br/>
       <strong>Email:</strong> ${escapeHtml(row?.email || 'Not recorded')}<br/>
-      <strong>Last package sent:</strong> ${escapeHtml(formatDate(lastShipment?.sent_at))}${lastShipment?.tracking_number ? ` · tracking ${escapeHtml(lastShipment.tracking_number)}` : ''}</p>
+      <strong>Last package sent:</strong> ${escapeHtml(formatDate(lastShipment?.sent_at))}${lastShipment?.tracking_number ? ` · tracking <a href="${escapeHtml(trackingLink(lastShipment.tracking_number, lastShipment.tracking_url))}" style="color:#d43790">${escapeHtml(lastShipment.tracking_number)}</a>` : ''}</p>
       <p><strong>Planned for the next package:</strong></p>
       <div style="white-space:pre-wrap;border-left:3px solid #d43790;padding:8px 12px;background:#fdf0f5;">${escapeHtml(itemsBlock)}</div>
       ${lastItems.length ? `<p style="color:#666;font-size:12px">Last package contained: ${escapeHtml(lastItems.join(', '))}</p>` : ''}
@@ -183,7 +184,7 @@ export async function handler() {
 
     const { data: shipments } = await supabase
       .from('ambassador_shipments')
-      .select('sent_at, tracking_number, items, lost_at')
+      .select('sent_at, tracking_number, tracking_url, items, lost_at')
       .eq('application_id', row.id)
       .eq('status', 'sent')
       .order('sent_at', { ascending: false })

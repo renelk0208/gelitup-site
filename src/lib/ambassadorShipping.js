@@ -95,3 +95,28 @@ export function deliveryState(shipment, today = new Date()) {
   if (eta && new Date(`${eta}T23:59:59Z`).getTime() < today.getTime()) return 'late'
   return 'on_the_way'
 }
+
+// The tracking number on its own: drops a typed carrier name ("Geneki 5513…")
+// and spaces.
+export function cleanTrackingNumber(trackingNumber) {
+  const raw = String(trackingNumber || '').trim()
+  const tokens = raw.toUpperCase().match(/[A-Z0-9]+/g) || []
+  const withDigits = tokens.filter((t) => /\d/.test(t))
+  return (withDigits.sort((a, b) => b.length - a.length)[0] || raw.replace(/\s+/g, '')).trim()
+}
+
+// A link that opens the carrier's page with this parcel's tracking already
+// showing (Geniki, GLS) or filled in (Speedy). Bulgarian Post has no such
+// link, so its parcels open on 17TRACK. Falls back to the saved link.
+export function trackingLink(trackingNumber, trackingUrl, carrier) {
+  const num = cleanTrackingNumber(trackingNumber)
+  const c = carrier || detectCarrier(trackingNumber, trackingUrl)
+  if (num) {
+    const n = encodeURIComponent(num)
+    if (c === 'geniki') return `https://www.taxydromiki.com/en/track/${n}`
+    if (c === 'speedy') return `https://www.speedy.bg/en/track-shipment?shipmentNumber=${n}`
+    if (c === 'gls') return `https://gls-group.com/GROUP/en/parcel-tracking?match=${n}`
+    if (c === 'bgpost') return `https://t.17track.net/en#nums=${n}`
+  }
+  return String(trackingUrl || '').trim()
+}

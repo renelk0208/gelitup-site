@@ -5,7 +5,7 @@ import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
 import tierPricingOverrides from '../data/tierPricingOverrides.json'
 import ambassadorLetterAttachmentUrl from '../lib/ambassadorletter/Gelitup Ambassador Letter.pdf?url'
 import { buildAmbassadorContractPdf, buildAmbassadorPackingListPdf, buildAmbassadorWelcomeLetterPdf } from '../lib/ambassadorContractPdf.js'
-import { detectCarrier, estimateDelivery } from '../lib/ambassadorShipping.js'
+import { detectCarrier, estimateDelivery, trackingLink } from '../lib/ambassadorShipping.js'
 import { instagramHandle, instagramUrl, tiktokHandle, tiktokUrl } from '../lib/socialLinks.js'
 import { whereAlreadySent } from '../lib/packageItems.js'
 import { AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE } from '../lib/ambassadorFollowUpPacks.js'
@@ -4538,7 +4538,8 @@ function buildAmbassadorShipmentEmail(row, ship, setPasswordLink, nextPackageIso
     parts.push(`<p><strong>What's in your package:</strong></p><div style="border-left:3px solid #d43790;padding:8px 12px;background:#fdf0f5;">${itemList.length ? `<ul style="margin:0;padding-left:18px">${itemList.map((t) => `<li>${escAmb(t)}</li>`).join('')}</ul>` : ''}${extraText && !itemList.some((t) => t === extraText) ? `<div style="white-space:pre-wrap;${itemList.length ? 'margin-top:6px' : ''}">${escAmb(extraText)}</div>` : ''}</div>`)
   }
   if (ship.tracking_number) parts.push(`<p><strong>Tracking number:</strong> ${escAmb(ship.tracking_number)}</p>`)
-  if (ship.tracking_url) parts.push(`<p><a href="${escAmb(ship.tracking_url)}" style="color:#D43790">Track your parcel →</a></p>`)
+  const parcelLink = trackingLink(ship.tracking_number, ship.tracking_url)
+  if (parcelLink) parts.push(`<p><a href="${escAmb(parcelLink)}" style="color:#D43790">Track your parcel →</a></p>`)
   // One-click "I've received it" — opens a page on gelitup.com with a confirm button.
   if (receiptToken) parts.push(`<p style="margin:18px 0"><a href="https://gelitup.com/package-received?t=${encodeURIComponent(receiptToken)}" style="display:inline-block;background:#16a34a;color:#ffffff;padding:11px 18px;border-radius:9999px;text-decoration:none;font-weight:700">✅ I've received my package</a><br/><span style="font-size:12px;color:#555">Please click this as soon as your package arrives, so we know it reached you.</span></p>`)
   if (discountCode) parts.push(`<p><strong>Your ambassador code:</strong> <span style="font-size:15px;color:#D43790">${escAmb(discountCode)}</span><br/>This code can only be used on the <a href="https://www.gelitup.com" style="color:#D43790">www.gelitup.com</a> website.</p>`)
@@ -4610,7 +4611,7 @@ function buildAmbassadorShipmentNotificationEmail(row, ship, sentAtIso, nextPack
       <strong>Email:</strong> ${escAmb(row?.email || 'Not recorded')}<br/>
       <strong>Dispatched:</strong> ${escAmb(sentAt)}<br/>
       <strong>Tracking number:</strong> ${escAmb(ship?.tracking_number || 'Not recorded')}<br/>
-      <strong>Tracking URL:</strong> ${ship?.tracking_url ? `<a href="${escAmb(ship.tracking_url)}">${escAmb(ship.tracking_url)}</a>` : 'Not recorded'}<br/>
+      <strong>Tracking URL:</strong> ${trackingLink(ship?.tracking_number, ship?.tracking_url) ? `<a href="${escAmb(trackingLink(ship?.tracking_number, ship?.tracking_url))}">${escAmb(trackingLink(ship?.tracking_number, ship?.tracking_url))}</a>` : 'Not recorded'}<br/>
       <strong>Next package date:</strong> ${escAmb(nextPackageDate)}</p>
       <p><strong>Items for the next PR package:</strong></p>
       <div style="white-space:pre-wrap;border-left:3px solid #d43790;padding:8px 12px;background:#fdf0f5;">${escAmb(resolvedItems)}</div>
@@ -7871,7 +7872,7 @@ const deleteApplication = async (row) => {
                         <p className="mt-0.5 text-[11px] text-slate-600">
                           {shipmentEntries[0].stamp || sentAtLabel || 'Date not recorded'}
                           {shipmentEntries[0].method ? ` · ${shipmentEntries[0].method}` : ''}
-                          {shipmentEntries[0].trackingNumber ? ` · Tracking: ${shipmentEntries[0].trackingNumber}` : ''}
+                          {shipmentEntries[0].trackingNumber && <>{' · Tracking: '}<a href={trackingLink(shipmentEntries[0].trackingNumber, shipmentEntries[0].trackingUrl)} target="_blank" rel="noreferrer" className="text-fuchsia-700 hover:underline">{shipmentEntries[0].trackingNumber}</a></>}
                         </p>
                       </div>
                     )}
@@ -7950,8 +7951,9 @@ const deleteApplication = async (row) => {
                                   </button>
                                   {open && (
                                     <div className="space-y-1 border-t border-slate-200 px-2.5 py-1.5 text-[11px] text-slate-600">
-                                      <p><strong>Tracking:</strong> {entry.trackingNumber || '—'}</p>
-                                      <p><strong>URL:</strong> {entry.trackingUrl ? <a href={entry.trackingUrl} target="_blank" rel="noreferrer" className="text-fuchsia-700 hover:underline">{entry.trackingUrl}</a> : '—'}</p>
+                                      <p><strong>Tracking:</strong> {trackingLink(entry.trackingNumber, entry.trackingUrl)
+                                        ? <a href={trackingLink(entry.trackingNumber, entry.trackingUrl)} target="_blank" rel="noreferrer" title="Open the carrier's tracking page" className="text-fuchsia-700 hover:underline">{entry.trackingNumber || 'track'}</a>
+                                        : (entry.trackingNumber || '—')}</p>
                                       <p><strong>Status:</strong> {entry.ambassadorType || 'Not recorded'}</p>
                                       <p><strong>Items:</strong> {entry.boxContents || '—'}</p>
                                       {entry.note && <p className="rounded bg-amber-50 px-1.5 py-1 text-amber-900"><strong>Note:</strong> {entry.note}</p>}
