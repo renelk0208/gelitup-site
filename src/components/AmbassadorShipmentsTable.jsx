@@ -19,7 +19,7 @@ const TYPE_LABEL = {
 }
 
 const NEXT_BADGE = {
-  needsNow: { cls: 'bg-red-100 text-red-700', text: (d) => `Overdue · ${fmt(d)}` },
+  needsNow: { cls: 'bg-red-100 text-red-700', text: (d) => `Next package overdue · ${fmt(d)}` },
   dueSoon: { cls: 'bg-amber-100 text-amber-800', text: (d) => `Due soon · ${fmt(d)}` },
   onTrack: { cls: 'bg-emerald-100 text-emerald-700', text: (d) => fmt(d) },
   newApproval: { cls: 'bg-slate-100 text-slate-700', text: () => 'First package: not yet acknowledged' },
@@ -27,10 +27,12 @@ const NEXT_BADGE = {
   paused: { cls: 'bg-slate-100 text-slate-500', text: () => 'Paused' },
 }
 
+// Once a package has gone out it is always green here: red is kept for the
+// "Next package" column, i.e. something that still has to be sent.
 const DELIVERY_BADGE = {
-  received: { cls: 'bg-emerald-100 text-emerald-700', text: 'Received' },
-  late: { cls: 'bg-red-100 text-red-700', text: 'Not confirmed · past expected date' },
-  on_the_way: { cls: 'bg-sky-100 text-sky-800', text: 'On the way' },
+  received: { cls: 'bg-emerald-600 text-white', text: '✓ Received' },
+  late: { cls: 'bg-emerald-100 text-emerald-800', text: '✓ Sent · should have arrived' },
+  on_the_way: { cls: 'bg-emerald-100 text-emerald-800', text: '✓ Sent · on the way' },
 }
 
 const BUCKET_ORDER = { needsNow: 0, newApproval: 1, acknowledgedNoPackage: 2, dueSoon: 3, onTrack: 4, paused: 5 }
@@ -79,7 +81,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
   const visible = lines.filter((l) => {
     if (carrier && l.last?.carrier !== carrier) return false
     if (country && l.country !== country) return false
-    if (show === 'action') return ['needsNow', 'newApproval', 'acknowledgedNoPackage', 'dueSoon'].includes(l.bucket) || l.delivery === 'late'
+    if (show === 'action') return ['needsNow', 'newApproval', 'acknowledgedNoPackage', 'dueSoon'].includes(l.bucket)
     if (show === 'transit') return l.delivery === 'on_the_way' || l.delivery === 'late'
     if (show === 'paused') return l.bucket === 'paused'
     if (show === 'active') return l.bucket !== 'paused'
@@ -88,7 +90,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
 
   const SHOW = [
     { key: 'action', label: `Needs action (${counts.overdue + counts.firstPackage + counts.dueSoon})` },
-    { key: 'transit', label: `In transit (${counts.onTheWay + counts.late})` },
+    { key: 'transit', label: `Sent, not confirmed (${counts.onTheWay + counts.late})` },
     { key: 'active', label: 'All active' },
     { key: 'paused', label: 'Paused' },
     { key: 'all', label: 'Everyone' },
@@ -98,11 +100,11 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
     <section className="space-y-3" aria-label="Ambassador shipments">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
         {[
-          { label: 'Overdue', value: counts.overdue, cls: 'text-red-700' },
+          { label: 'Next package overdue', value: counts.overdue, cls: 'text-red-700' },
           { label: 'First package to send', value: counts.firstPackage, cls: 'text-sky-800' },
           { label: 'Due in 7 days', value: counts.dueSoon, cls: 'text-amber-800' },
-          { label: 'On the way', value: counts.onTheWay, cls: 'text-slate-900' },
-          { label: 'Not confirmed, past expected date', value: counts.late, cls: 'text-red-700' },
+          { label: 'Sent · on the way', value: counts.onTheWay, cls: 'text-emerald-700' },
+          { label: 'Sent · receipt not confirmed yet', value: counts.late, cls: 'text-slate-700' },
         ].map((s) => (
           <div key={s.label} className="rounded-xl border border-slate-200 bg-white px-3 py-2">
             <p className={`text-xl font-bold ${s.cls}`}>{s.value}</p>
@@ -227,7 +229,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
         </table>
       </div>
       <p className="text-[11px] text-slate-500">
-        Expected delivery is an estimate from the carrier and country. "Received" is confirmed by the ambassador in their portal, or ticked here.
+        Green = the package has been sent. "Received" is confirmed by the ambassador in their portal, or ticked here. Red only ever means a next package still has to go out. Expected delivery is an estimate from the carrier and country.
       </p>
     </section>
   )
