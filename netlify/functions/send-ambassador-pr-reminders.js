@@ -11,8 +11,8 @@ import { whereAlreadySent } from '../../src/lib/packageItems.js'
 // before that date. Ambassadors already past their date get one straight away.
 // Each due date is emailed only once ([SHIPMENT_OFFICE_REMINDER_SENT_FOR:date]).
 //
-// When a package comes into that window with nothing planned, the follow-up
-// pack for the ambassador's type (Standard / Super) is filled in automatically,
+// When a SECOND package comes into that window with nothing planned, the
+// follow-up pack for the ambassador's type (Standard / Super) is filled in automatically,
 // leaving out anything they already received. The admin can still remove or
 // add items. Extreme ambassadors are never filled in.
 
@@ -195,7 +195,10 @@ export async function handler() {
     const hasPlan = /\[PACK_NOTE:[^\]]+\]/i.test(String(row.admin_comment || ''))
       || extractTag(row.admin_comment, AUTOFILL_TAG) === due
     const followUp = AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE[String(row.ambassador_type || '').toLowerCase()]
-    if (!hasPlan && followUp && (shipments?.length || 0) > 0) {
+    // Only for the SECOND package (one package sent so far; the same tracking
+    // number recorded twice counts once). Third packages are chosen by hand.
+    const packagesSent = new Set((shipments || []).map((sh) => String(sh.tracking_number || sh.sent_at || '').trim().toLowerCase())).size
+    if (!hasPlan && followUp && packagesSent === 1) {
       const toAdd = followUp.items.filter((item) => whereAlreadySent(item, shipments).length === 0)
       if (toAdd.length) {
         const stamp = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric', timeZone: 'Europe/Athens' })
