@@ -8,6 +8,7 @@ import { buildAmbassadorContractPdf, buildAmbassadorPackingListPdf, buildAmbassa
 import { detectCarrier, estimateDelivery } from '../lib/ambassadorShipping.js'
 import { instagramHandle, instagramUrl, tiktokHandle, tiktokUrl } from '../lib/socialLinks.js'
 import { whereAlreadySent } from '../lib/packageItems.js'
+import { AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE } from '../lib/ambassadorFollowUpPacks.js'
 import AmbassadorShipmentsTable from '../components/AmbassadorShipmentsTable.jsx'
 import {
   normalizeAdminSkuToken,
@@ -113,30 +114,6 @@ const AMBASSADOR_PACKS_BY_TYPE = {
 
 // Next PR package is due this many days after the last one is sent.
 const NEXT_PACKAGE_AFTER_DAYS = 28
-
-const AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE = {
-  standard_ambassador: {
-    items: [
-      '1x Pink Buffer',
-      '1 x Purple Buffer',
-      '3 x Autumn / Winter Colours',
-      'Blossom',
-      '1 x Glitter Gel',
-    ],
-  },
-  super_ambassador: {
-    items: [
-      'New Dual Forms',
-      '1 x roll of Gelitup Nail Forms',
-      '1 Pink Buffer',
-      '1 x Purple Buffer',
-      '1 Line it up Black',
-      '1 Line it up White',
-      '5 x Autumn / Winter Colours',
-      '1 Glitter Builder Gel',
-    ],
-  },
-}
 
 function statusBadge(status) {
   const map = {
@@ -6210,7 +6187,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   // appended into admin_comment; we now keep them out of the editable notes and
   // surface them (plus the new message_log column) in the Messages section.
   const isAmbassadorMsgLine = (line) => String(line).includes('📧')
-  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|AMBASSADOR_PROGRAMME_PAUSED|PACK_NOTE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE|SHIPMENT_METHOD|FACTORY_ACK|SHIPMENT_OFFICE_REMINDER_AT|SHIPMENT_OFFICE_REMINDER_SENT_AT|SHIPMENT_OFFICE_REMINDER_DISPATCHED_AT|SHIPMENT_OFFICE_REMINDER_NEXT_PACKAGE_AT|SHIPMENT_OFFICE_REMINDER_ITEMS|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SIGNATURE|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SENT_AT|SHIPMENT_NEXT_PACKAGE_OPEN|SHIPMENT_OFFICE_REMINDER_SENT_FOR):[^\]]+\]$/i.test(String(line).trim())
+  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|AMBASSADOR_PROGRAMME_PAUSED|PACK_NOTE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE|SHIPMENT_METHOD|FACTORY_ACK|SHIPMENT_OFFICE_REMINDER_AT|SHIPMENT_OFFICE_REMINDER_SENT_AT|SHIPMENT_OFFICE_REMINDER_DISPATCHED_AT|SHIPMENT_OFFICE_REMINDER_NEXT_PACKAGE_AT|SHIPMENT_OFFICE_REMINDER_ITEMS|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SIGNATURE|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SENT_AT|SHIPMENT_NEXT_PACKAGE_OPEN|SHIPMENT_OFFICE_REMINDER_SENT_FOR|SHIPMENT_FOLLOW_UP_AUTOFILLED_FOR):[^\]]+\]$/i.test(String(line).trim())
   const packNoteLines = (row) => String(row.admin_comment || '').split('\n').filter((line) => /^\[PACK_NOTE:[^\]]+\]$/i.test(String(line).trim()))
   const parsePackNote = (line) => {
     const encoded = String(line || '').trim().match(/^\[PACK_NOTE:([^\]]+)\]$/i)?.[1]

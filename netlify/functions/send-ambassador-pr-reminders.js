@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
+import { AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE } from '../../src/lib/ambassadorFollowUpPacks.js'
+import { whereAlreadySent } from '../../src/lib/packageItems.js'
 
 // Daily email to the office about ambassador PR packages that are coming up
 // or overdue.
@@ -8,6 +10,11 @@ import { createClient } from '@supabase/supabase-js'
 // whenever a package is recorded). One email per ambassador goes out a week
 // before that date. Ambassadors already past their date get one straight away.
 // Each due date is emailed only once ([SHIPMENT_OFFICE_REMINDER_SENT_FOR:date]).
+//
+// When a package comes into that window with nothing planned, the follow-up
+// pack for the ambassador's type (Standard / Super) is filled in automatically,
+// leaving out anything they already received. The admin can still remove or
+// add items. Extreme ambassadors are never filled in.
 
 export const config = {
   schedule: '@daily',
@@ -27,6 +34,7 @@ const DAYS_BEFORE_DUE = 7
 // site sends, so each reminder arrives once rather than four times.
 const MAIN_SITE = 'https://gelitup.com'
 const SENT_FOR_TAG = 'SHIPMENT_OFFICE_REMINDER_SENT_FOR'
+const AUTOFILL_TAG = 'SHIPMENT_FOLLOW_UP_AUTOFILLED_FOR'
 
 function escapeHtml(value) {
   return String(value || '')
@@ -153,7 +161,7 @@ export async function handler() {
   const today = todayInAthens()
   const { data: rows, error } = await supabase
     .from(AMBASSADOR_TABLE)
-    .select('id, full_name, email, country, status, paused_at, admin_comment, next_package_due')
+    .select('id, full_name, email, country, status, paused_at, admin_comment, next_package_due, ambassador_type')
     .eq('status', 'approved')
     .is('paused_at', null)
     .not('next_package_due', 'is', null)
@@ -171,7 +179,7 @@ export async function handler() {
   for (const row of rows || []) {
     const due = String(row.next_package_due).slice(0, 10)
     if (daysBetween(today, due) > DAYS_BEFORE_DUE) continue
-    if (extractTag(row.admin_comment, SENT_FOR_TAG) === due) continue
+    const alreadyEmailed = extractTag(row.admin_comment, SENT_FOR_TAG) === due
 
     const { data: shipments } = await supabase
       .from('ambassador_shipments')
@@ -181,6 +189,24 @@ export async function handler() {
       .order('sent_at', { ascending: false })
     const lastShipment = shipments?.[0] || null
     const packageNumber = (shipments?.length || 0) + 1
+
+    // Fill in the follow-up pack once per due date, if nothing is planned yet
+    // (if the admin then removes items, they are not put back).
+    const hasPlan = /\[PACK_NOTE:[^\]]+\]/i.test(String(row.admin_comment || ''))
+      || extractTag(row.admin_comment, AUTOFILL_TAG) === due
+    const followUp = AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE[String(row.ambassador_type || '').toLowerCase()]
+    if (!hasPlan && followUp && (shipments?.length || 0) > 0) {
+      const toAdd = followUp.items.filter((item) => whereAlreadySent(item, shipments).length === 0)
+      if (toAdd.length) {
+        const stamp = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric', timeZone: 'Europe/Athens' })
+        const lines = toAdd.map((text) => `[PACK_NOTE:${encodeURIComponent(JSON.stringify({ stamp, author: 'automatic (follow-up pack)', text }))}]`)
+        const filled = ensureTag(`${String(row.admin_comment || '').trim() ? `${String(row.admin_comment).trim()}\n` : ''}${lines.join('\n')}`, AUTOFILL_TAG, due)
+        const { error: fillError } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: filled }).eq('id', row.id)
+        if (!fillError) row.admin_comment = filled
+        results.push({ id: row.id, status: fillError ? 'fill_failed' : 'follow_up_filled', items: toAdd.length })
+      }
+    }
+    if (alreadyEmailed) continue
 
     try {
       const email = buildReminderEmail(row, lastShipment, packageNumber, due, today)
