@@ -79,7 +79,7 @@ function pickerPage(token, ctx) {
   return html('Choose your 5 products', `
   <h1>Hi ${esc(firstName)}, choose ${NEEDED} products 💖</h1>
   <p>Pick the <strong>${NEEDED} products</strong> you'd most like to try and review in your next PR package${plannedForText(ctx.next_package_due)}.
-  Products you've already received are greyed out — each product is sent once.</p>
+  Choose <strong>one product of each type</strong> (for example one builder gel, one MultiMix, one base) so you can review a mix of products. Products you've already received are greyed out — each product is sent once.</p>
   ${received.length ? `<div class="card received"><strong>Already received:</strong><br>${received.map((r) => `<span>${esc(r)}</span>`).join('')}</div>` : ''}
   <div class="tools"><input id="q" type="search" placeholder="Search products, e.g. top coat, glitter, 2601…" autocomplete="off">
   <div class="cats" id="cats">${cats.map((c, i) => `<button type="button" data-c="${esc(c)}" class="${i ? '' : 'on'}">${esc(c)}</button>`).join('')}</div></div>
@@ -90,11 +90,12 @@ const P=${JSON.stringify(products).replace(/</g, '\\u003c')};const N=${NEEDED};c
 let cat='All',q='',sel=[];const g=document.getElementById('grid'),e=document.getElementById('empty');
 const h=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function draw(){const qq=q.toLowerCase();const list=P.filter(p=>(cat==='All'||p.category===cat)&&(!qq||p.name.toLowerCase().includes(qq)||p.category.toLowerCase().includes(qq))).slice(0,400);
-e.hidden=list.length>0;g.innerHTML=list.map(p=>'<button type="button" class="p'+(p.got?' got':'')+(sel.includes(p.name)?' sel':'')+'" data-n="'+h(p.name)+'"'+(p.got?' disabled':'')+'>'+(p.got?'<span class="tag">Already received</span>':'')+(p.image?'<img loading="lazy" alt="" src="'+encodeURI(p.image)+'">':'<div class="ph"></div>')+'<div class="n">'+h(p.name)+'</div></button>').join('');
+const selTypes=new Set(sel.map(s=>(P.find(x=>x.name===s)||{}).type));
+e.hidden=list.length>0;g.innerHTML=list.map(p=>{const taken=!sel.includes(p.name)&&selTypes.has(p.type);return '<button type="button" class="p'+(p.got||taken?' got':'')+(sel.includes(p.name)?' sel':'')+'" data-n="'+h(p.name)+'"'+(p.got?' disabled':'')+'>'+(p.got?'<span class="tag">Already received</span>':taken?'<span class="tag">1 per type chosen</span>':'')+(p.image?'<img loading="lazy" alt="" src="'+encodeURI(p.image)+'">':'<div class="ph"></div>')+'<div class="n">'+h(p.name)+'</div></button>'}).join('');
 document.getElementById('chips').innerHTML=sel.length?sel.map(s=>'<span>'+h(s)+'</span>').join(''):'Choose '+N+' products';
 const go=document.getElementById('go');go.disabled=sel.length!==N;go.textContent=sel.length===N?'Send my '+N+' choices':(N-sel.length)+' more to choose';}
 g.addEventListener('click',ev=>{const b=ev.target.closest('.p');if(!b||b.disabled)return;const n=b.dataset.n;const m=document.getElementById('msg');m.textContent='';
-if(sel.includes(n))sel=sel.filter(x=>x!==n);else if(sel.length>=N){m.textContent='You can choose '+N+' — untick one first.';return}else sel.push(n);draw()});
+if(sel.includes(n))sel=sel.filter(x=>x!==n);else if(sel.length>=N){m.textContent='You can choose '+N+' — untick one first.';return}else{const p=P.find(x=>x.name===n);const clash=sel.find(s=>(P.find(x=>x.name===s)||{}).type===p.type);if(clash){m.textContent='You already chose '+clash+' — one '+p.typeLabel+' per package. Untick it first to swap.';return}sel.push(n)}draw()});
 document.getElementById('q').addEventListener('input',ev=>{q=ev.target.value.trim();draw()});
 document.getElementById('cats').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;cat=b.dataset.c;[...document.querySelectorAll('#cats button')].forEach(x=>x.classList.toggle('on',x===b));draw()});
 document.getElementById('go').addEventListener('click',async()=>{const go=document.getElementById('go'),m=document.getElementById('msg');go.disabled=true;go.textContent='Sending…';
@@ -157,6 +158,12 @@ export async function handler(event) {
   const receivedKeys = new Set((ctx.received_items || []).map(normItem))
   const repeat = items.find((i) => receivedKeys.has(normItem(i)))
   if (repeat) return json(400, { error: `You've already received ${repeat} — please choose something else.` })
+  const typeSeen = new Map()
+  for (const i of items) {
+    const p = CATALOG_BY_NAME.get(i)
+    if (typeSeen.has(p.type)) return json(400, { error: `${typeSeen.get(p.type)} and ${i} are the same type (${p.typeLabel}) — please choose one product of each type.` })
+    typeSeen.set(p.type, i)
+  }
 
   const stamp = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric', timeZone: 'Europe/Athens' })
   const lines = items.map((text) => `[PACK_NOTE:${encodeURIComponent(JSON.stringify({ stamp, author: 'chosen by ambassador', text }))}]`)
