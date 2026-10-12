@@ -118,7 +118,7 @@ function TypePicker({ row, type, onSetType, busy }) {
   )
 }
 
-function NameCell({ line, getType, onOpen, onSetType, busy }) {
+function NameCell({ line, getType, onOpen, onSetType, onAskChoice, busy }) {
   const { row, country } = line
   return (
     <td className="px-3 py-2.5">
@@ -128,6 +128,13 @@ function NameCell({ line, getType, onOpen, onSetType, busy }) {
       <SocialLinks row={row} />
       <p className="text-slate-500">{[country, TYPE_LABEL[getType(row)], row.discount_code].filter(Boolean).join(' · ')}</p>
       {line.isFirst && onSetType && <TypePicker row={row} type={getType(row)} onSetType={onSetType} busy={busy} />}
+      {!line.isFirst && row.choice_submitted_at && <p className="mt-1 text-[11px] font-semibold text-emerald-700">✓ Chose 5 products {fmt(row.choice_submitted_at)}</p>}
+      {!line.isFirst && !row.choice_submitted_at && row.choice_requested_at && (
+        <p className="mt-1 text-[11px] text-amber-700">✉ Asked to choose {fmt(row.choice_requested_at)} · waiting{onAskChoice && <> · <button type="button" onClick={() => onAskChoice(row)} disabled={busy} className="underline">remind</button></>}</p>
+      )}
+      {!line.isFirst && !row.choice_submitted_at && !row.choice_requested_at && onAskChoice && String(row.status).toLowerCase() === 'approved' && (
+        <button type="button" onClick={() => onAskChoice(row)} disabled={busy} className="mt-1 text-[11px] font-semibold text-fuchsia-700 hover:underline">✉ Ask her to choose 5 products</button>
+      )}
     </td>
   )
 }
@@ -245,7 +252,7 @@ function PackageHistory({ line, open = false, onEditContents, onMarkLost, onEdit
   )
 }
 
-export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onSetType, onMarkLost, onEditNote, onOpen, onMarkReceived, busyShipmentId }) {
+export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onSetType, onMarkLost, onEditNote, onAskChoice, onOpen, onMarkReceived, busyShipmentId }) {
   const [carrier, setCarrier] = useState('')
   // Package history (with what was in each package) is shown open by default.
   const [expandAll, setExpandAll] = useState(true)
@@ -311,7 +318,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} busy={savingId === l.row.id} />
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.nextAt)}</td>
                 <td className="px-3 py-2.5 font-bold text-red-700">{Math.abs(l.nextIn)} day{Math.abs(l.nextIn) === 1 ? '' : 's'}</td>
                 <td className={td}>{planner(l)}</td>
@@ -329,7 +336,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} busy={savingId === l.row.id} />
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} busy={savingId === l.row.id} />
                 <td className={td}>
                   {l.isFirst
                     ? <span className="font-semibold text-amber-800">First package{l.firstAcknowledged ? '' : ' · factory not told yet'}</span>
@@ -350,7 +357,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} busy={savingId === l.row.id} />
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.last?.sent_at)}<br /><span className="text-slate-500">Package #{l.count}</span></td>
                 <td className={td}><Tracking pkg={l.last} /></td>
                 <td className={td}>
@@ -382,7 +389,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} busy={savingId === l.row.id} />
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.last?.sent_at)}<br /><span className="text-slate-500">Package #{l.count}</span></td>
                 <td className={td}>
                   <span className="font-semibold text-emerald-700">✓ {fmt(l.last?.delivered_at)}</span>
@@ -404,7 +411,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
         <tbody className="divide-y divide-slate-100 align-top">
           {list.map((l) => (
             <tr key={l.row.id}>
-              <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} busy={savingId === l.row.id} />
+              <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} busy={savingId === l.row.id} />
               <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} onEditNote={onEditNote} /></td>
             </tr>
           ))}
@@ -427,6 +434,17 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
         ))}
       </nav>
 
+      {(() => {
+        const missing = lines.flatMap((l) => l.shipments
+          .filter((pkg) => !pkg.lost_at && !(Array.isArray(pkg.items) && pkg.items.length))
+          .map((pkg) => `${l.row.full_name} (${fmt(pkg.sent_at)})`))
+        return missing.length > 0 && (
+          <div className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+            <strong>{missing.length} package{missing.length === 1 ? '' : 's'} with no contents recorded:</strong> {missing.join(', ')}.
+            {' '}Open the package history and click "+ Add what was in this package".
+          </div>
+        )
+      })()}
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"

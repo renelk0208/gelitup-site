@@ -59,7 +59,7 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
-        navigateFallbackDenylist: [/\.xml$/, /\.txt$/, /\.json$/, /\.csv$/, /^\/api\//, /^\/package-received/, /^\/\.netlify\//],
+        navigateFallbackDenylist: [/\.xml$/, /\.txt$/, /\.json$/, /\.csv$/, /^\/api\//, /^\/package-received/, /^\/choose-items/, /^\/\.netlify\//],
         runtimeCaching: [
           {
             urlPattern: /\/gelitup-media\/.+\.(?:png|jpg|jpeg|webp|gif|svg)$/i,

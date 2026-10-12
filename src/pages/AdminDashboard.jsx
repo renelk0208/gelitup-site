@@ -4567,6 +4567,28 @@ function buildAmbassadorShipmentEmail(row, ship, setPasswordLink, nextPackageIso
   }
 }
 
+// "Choose 5 products for your next PR package" — sent from the Shipments view.
+function buildAmbassadorChoiceRequestEmail(row) {
+  const firstName = String(row?.full_name || '').trim().split(/\s+/)[0] || 'there'
+  const name = firstName.charAt(0).toUpperCase() + firstName.slice(1)
+  const link = `https://gelitup.com/choose-items?t=${encodeURIComponent(row?.choice_token || '')}`
+  const due = row?.next_package_due ? new Date(`${String(row.next_package_due).slice(0, 10)}T12:00:00Z`) : null
+  const when = due && !Number.isNaN(due.getTime()) && due.getTime() > Date.now()
+    ? `Your next PR package is planned for around <strong>${escAmb(due.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }))}</strong>, and this time we'd love <strong>you</strong> to choose what's in it.`
+    : 'Your next PR package is coming up soon, and this time we\'d love <strong>you</strong> to choose what\'s in it.'
+  return {
+    subject: 'Choose 5 products for your next GEL.IT.UP PR package 💖',
+    html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.55">
+      <p>Hi ${escAmb(name)},</p>
+      <p>Thank you for being part of the GEL.IT.UP family! ${when}</p>
+      <p>Please pick the <strong>5 products</strong> you'd most like to try and review. Products you've already received are greyed out, so everything you choose is new to you.</p>
+      <p style="margin:20px 0"><a href="${escAmb(link)}" style="display:inline-block;background:#d43790;color:#ffffff;padding:12px 20px;border-radius:9999px;text-decoration:none;font-weight:700">Choose my 5 products</a></p>
+      <p>We'd love to see honest reviews, tutorials and swatches — tag <strong>@gelitupinternational</strong>, subscribe to our YouTube channel <a href="https://www.youtube.com/@GELITUP" style="color:#d43790">@GELITUP</a> and join our <a href="https://www.facebook.com/groups/GELITUP.FAMILY" style="color:#d43790">GEL.IT.UP Family</a> group on Facebook.</p>
+      <p>With love,<br/>René Krallis<br/>Marketing Director, GEL.IT.UP International</p>
+    </div>`,
+  }
+}
+
 function buildAmbassadorShipmentNotificationEmail(row, ship, sentAtIso, nextPackageIso, nextPackageItems) {
   const ambassadorName = String(row?.full_name || row?.email || 'Unknown ambassador').trim()
   const nextPackageDate = nextPackageIso
@@ -5722,6 +5744,43 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     setRows((prev) => prev.map((r) => (r.id === row.id
       ? { ...r, _shipments: (r._shipments || []).map((s) => (s.id === shipment.id ? { ...s, ...patch } : s)) }
       : r)))
+  }
+  // Ask ambassadors to choose the 5 products for their next package.
+  const choiceEligible = (row) => String(row?.status || '').toLowerCase() === 'approved'
+    && !row?.paused_at && (row?._shipments || []).length > 0 && row?.choice_token && !row?.choice_submitted_at
+  const sendChoiceRequest = async (row) => {
+    const email = String(row?.email || '').trim()
+    if (!email || !row?.choice_token) return { ok: false, error: 'No email or link for this ambassador' }
+    const { subject, html } = buildAmbassadorChoiceRequestEmail(row)
+    const res = await sendAmbassadorEmail({ to: email, subject, html })
+    if (!res.ok) return res
+    const requestedAt = new Date().toISOString()
+    await supabase.from(AMBASSADOR_TABLE).update({ choice_requested_at: requestedAt }).eq('id', row.id)
+    patchRow(row.id, { choice_requested_at: requestedAt })
+    return { ok: true }
+  }
+  const askOneToChoose = async (row) => {
+    if (!choiceEligible(row)) { alert('This ambassador has already chosen, is not active, or has not had a package yet.'); return }
+    const again = row.choice_requested_at ? ' again' : ''
+    if (!window.confirm(`Email ${row.full_name} (${row.email})${again} asking her to choose 5 products for her next package?`)) return
+    setSaving(row.id)
+    const res = await sendChoiceRequest(row)
+    setSaving(null)
+    if (!res.ok) alert(`Email not sent: ${res.error || 'unknown error'}`)
+  }
+  const [choiceBulkBusy, setChoiceBulkBusy] = useState(false)
+  const askAllToChoose = async () => {
+    const targets = rows.filter((row) => choiceEligible(row) && !row.choice_requested_at)
+    if (!targets.length) { alert('Everyone active has already been asked (or has chosen).'); return }
+    if (!window.confirm(`Email ${targets.length} ambassadors asking them to choose 5 products for their next package?\n\n${targets.map((r) => `• ${r.full_name}`).join('\n')}`)) return
+    setChoiceBulkBusy(true)
+    const failed = []
+    for (const row of targets) {
+      const res = await sendChoiceRequest(row)
+      if (!res.ok) failed.push(`${row.full_name}: ${res.error || 'failed'}`)
+    }
+    setChoiceBulkBusy(false)
+    alert(failed.length ? `Sent ${targets.length - failed.length} of ${targets.length}.\n\nNot sent:\n${failed.join('\n')}` : `Sent to all ${targets.length} ambassadors.`)
   }
   // A package that never arrived: marked lost, its contents are copied into the
   // next package as a resend, and the next date becomes today.
@@ -7224,7 +7283,25 @@ const deleteApplication = async (row) => {
         <>
           {loading && <p className="text-sm text-slate-500">Loading…</p>}
           {error && <p className="text-sm text-rose-600">{error}</p>}
-          {!loading && !error && (
+          {!loading && !error && (<>
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={askAllToChoose}
+                disabled={choiceBulkBusy}
+                className="rounded-full bg-fuchsia-600 px-4 py-2 text-xs font-semibold text-white hover:bg-fuchsia-500 disabled:opacity-60"
+              >
+                {choiceBulkBusy ? 'Sending…' : '✉ Ask ambassadors to choose 5 products'}
+              </button>
+              <span className="text-[11px] text-slate-500">
+                {(() => {
+                  const asked = rows.filter((r) => r.choice_requested_at && !r.choice_submitted_at).length
+                  const chosen = rows.filter((r) => r.choice_submitted_at).length
+                  const toAsk = rows.filter((r) => choiceEligible(r) && !r.choice_requested_at).length
+                  return `${toAsk} not asked yet · ${asked} asked, waiting · ${chosen} have chosen`
+                })()}
+              </span>
+            </div>
             <AmbassadorShipmentsTable
               rows={filteredRows}
               getMeta={getAmbassadorDashboardMeta}
@@ -7239,12 +7316,13 @@ const deleteApplication = async (row) => {
               onMarkReceived={markShipmentReceived}
               onMarkLost={markShipmentLost}
               onEditNote={editShipmentNote}
+              onAskChoice={askOneToChoose}
               onOpen={(id) => {
                 setViewMode('cards')
                 jumpToAmbassador(id)
               }}
             />
-          )}
+          </>)}
         </>
       )}
 
