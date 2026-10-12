@@ -3572,6 +3572,23 @@ function downloadCSV(sortedCategories, priceData) {
 // ─── Draft Carts panel ────────────────────────────────────────────────────────
 
 const DRAFT_CARTS_TABLE = 'b2b_draft_carts'
+// Backup copy of every cart (see supabase/sql/create_b2b_draft_cart_snapshots.sql).
+// Emptied / ordered carts are archived there instead of deleted.
+const DRAFT_CART_BACKUP_TABLE = import.meta.env.VITE_B2B_DRAFT_CART_BACKUP_TABLE || 'b2b_draft_cart_snapshots'
+// Open carts from the backup table; falls back to the live table if the
+// backup migration hasn't been run yet.
+async function loadOpenDraftCarts(limit) {
+  const backup = await supabase
+    .from(DRAFT_CART_BACKUP_TABLE)
+    .select('*')
+    .is('archived_at', null)
+    .gt('total_units', 0)
+    .order('updated_at', { ascending: false })
+    .limit(limit)
+  if (!backup.error) return { data: (backup.data || []).map((c) => ({ ...c, _fromBackup: true })), error: null }
+  if (!/does not exist|schema cache/i.test(String(backup.error.message || ''))) return backup
+  return supabase.from(DRAFT_CARTS_TABLE).select('*').order('updated_at', { ascending: false }).limit(limit)
+}
 
 function normalizeDraftCartItems(cart) {
   const rawItems = cart?.items
@@ -3659,7 +3676,18 @@ async function recoverDraftCartAsOrder(cart) {
   }
 
   const cartId = cart?.id
-  if (cartId != null) {
+  if (cart?._fromBackup) {
+    // Keep the backup row (archived) and remove the live cart.
+    const [{ error: archiveError }, { error: liveError }] = await Promise.all([
+      supabase.from(DRAFT_CART_BACKUP_TABLE)
+        .update({ archived_at: new Date().toISOString(), archived_reason: 'Recovered as order from admin dashboard' })
+        .eq('id', cartId),
+      supabase.from(DRAFT_CARTS_TABLE).delete().eq('user_id', cart.user_id).eq('source', cart.source),
+    ])
+    if (archiveError || liveError) {
+      return { ok: true, message: `Order recovered, but draft cart cleanup failed: ${(archiveError || liveError).message}` }
+    }
+  } else if (cartId != null) {
     const { error: deleteError } = await supabase
       .from(DRAFT_CARTS_TABLE)
       .delete()
@@ -3701,11 +3729,7 @@ function DraftCartsPanel() {
   const fetchCarts = useCallback(async () => {
     setLoading(true)
     setError('')
-    const { data, error: err } = await supabase
-      .from(DRAFT_CARTS_TABLE)
-      .select('*')
-      .order('updated_at', { ascending: false })
-      .limit(200)
+    const { data, error: err } = await loadOpenDraftCarts(200)
     if (err) setError(`Could not load draft carts: ${err.message}`)
     else setCarts(data || [])
     setLoading(false)
@@ -4278,7 +4302,7 @@ function SearchPanel({ onOpenTab }) {
     setLoading(true)
     const [ordersRes, cartsRes, registrationsRes] = await Promise.all([
       supabase.from(ORDERS_TABLE).select('*').order('created_at', { ascending: false }).limit(300),
-      supabase.from(DRAFT_CARTS_TABLE).select('*').order('updated_at', { ascending: false }).limit(300),
+      loadOpenDraftCarts(300),
       supabase.from(REGISTRATIONS_TABLE).select('*').order('created_at', { ascending: false }).limit(300),
     ])
 
