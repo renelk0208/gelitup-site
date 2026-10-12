@@ -195,7 +195,7 @@ function Planner({ line, onAdd, onRemove, busy }) {
 }
 
 // Every package this ambassador has had, newest first.
-function PackageHistory({ line, open = false, onEditContents, onMarkLost }) {
+function PackageHistory({ line, open = false, onEditContents, onMarkLost, onEditNote }) {
   const { shipments } = line
   if (!shipments.length) return <span className="text-slate-400">Nothing sent yet</span>
   const n = shipments.length
@@ -219,10 +219,17 @@ function PackageHistory({ line, open = false, onEditContents, onMarkLost }) {
             {Array.isArray(pkg.items) && pkg.items.length > 0
               ? <p className="mt-0.5 text-slate-600">{pkg.items.join(', ')}</p>
               : <p className="mt-0.5 text-amber-700">Contents not recorded</p>}
+            {pkg.note && <p className="mt-1 rounded bg-amber-50 px-1.5 py-1 text-amber-900">📝 {pkg.note}</p>}
+            {pkg.delivered_at && pkg.delivered_by === 'ambassador (email link)' && <p className="mt-0.5 text-[10px] text-emerald-700">Confirmed by the ambassador from the email link</p>}
             <div className="mt-1 flex flex-wrap gap-3">
               {onEditContents && pkg.id && (
                 <button type="button" onClick={() => onEditContents(line.row, pkg)} className="text-[10px] font-semibold text-fuchsia-700 hover:underline">
                   {Array.isArray(pkg.items) && pkg.items.length > 0 ? 'Edit contents' : '+ Add what was in this package'}
+                </button>
+              )}
+              {onEditNote && pkg.id && (
+                <button type="button" onClick={() => onEditNote(line.row, pkg)} className="text-[10px] font-semibold text-slate-600 hover:underline">
+                  {pkg.note ? 'Edit note' : '+ Note'}
                 </button>
               )}
               {onMarkLost && pkg.id && !pkg.lost_at && (
@@ -238,7 +245,7 @@ function PackageHistory({ line, open = false, onEditContents, onMarkLost }) {
   )
 }
 
-export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onSetType, onMarkLost, onOpen, onMarkReceived, busyShipmentId }) {
+export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onSetType, onMarkLost, onEditNote, onOpen, onMarkReceived, busyShipmentId }) {
   const [carrier, setCarrier] = useState('')
   // Package history (with what was in each package) is shown open by default.
   const [expandAll, setExpandAll] = useState(true)
@@ -308,7 +315,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
                 <td className={td}>{fmt(l.nextAt)}</td>
                 <td className="px-3 py-2.5 font-bold text-red-700">{Math.abs(l.nextIn)} day{Math.abs(l.nextIn) === 1 ? '' : 's'}</td>
                 <td className={td}>{planner(l)}</td>
-                <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} /></td>
+                <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} onEditNote={onEditNote} /></td>
               </tr>
             ))}
           </tbody>
@@ -329,7 +336,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
                     : <><span className="font-semibold">{fmt(l.nextAt)}</span><br /><span className="text-slate-500">{l.nextIn === 0 ? 'today' : `in ${l.nextIn} day${l.nextIn === 1 ? '' : 's'}`}</span></>}
                 </td>
                 <td className={td}>{planner(l)}</td>
-                <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} /></td>
+                <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} onEditNote={onEditNote} /></td>
               </tr>
             ))}
           </tbody>
@@ -361,7 +368,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
                   </button>
                 </td>
                 <td className={td}>{planner(l)}</td>
-                <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} /></td>
+                <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} onEditNote={onEditNote} /></td>
               </tr>
             ))}
           </tbody>
@@ -384,7 +391,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
                 <td className={td}><Tracking pkg={l.last} /></td>
                 <td className={td}>{l.nextAt ? <>{fmt(l.nextAt)}<br /><span className="text-slate-500">in {l.nextIn} days</span></> : <span className="text-slate-400">No date set</span>}</td>
                 <td className={td}>{planner(l)}</td>
-                <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} /></td>
+                <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} onEditNote={onEditNote} /></td>
               </tr>
             ))}
           </tbody>
@@ -398,7 +405,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           {list.map((l) => (
             <tr key={l.row.id}>
               <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} busy={savingId === l.row.id} />
-              <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} /></td>
+              <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} onEditNote={onEditNote} /></td>
             </tr>
           ))}
         </tbody>

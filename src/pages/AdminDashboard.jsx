@@ -4527,13 +4527,15 @@ function buildAmbassadorDeclineEmail(row, reasonText) {
   }
 }
 
-function buildAmbassadorShipmentEmail(row, ship, setPasswordLink, nextPackageIso) {
+function buildAmbassadorShipmentEmail(row, ship, setPasswordLink, nextPackageIso, receiptToken) {
   const name = (row?.full_name?.trim() || 'there').replace(/\b\w/g, (c) => c.toUpperCase())
   const discountCode = String(row?.discount_code || '').trim()
   const parts = []
   if (ship.shipment_details) parts.push(`<p><strong>What you'll receive:</strong></p><div style="white-space:pre-wrap;border-left:3px solid #d43790;padding:8px 12px;background:#fdf0f5;">${escAmb(ship.shipment_details)}</div>`)
   if (ship.tracking_number) parts.push(`<p><strong>Tracking number:</strong> ${escAmb(ship.tracking_number)}</p>`)
   if (ship.tracking_url) parts.push(`<p><a href="${escAmb(ship.tracking_url)}" style="color:#D43790">Track your parcel →</a></p>`)
+  // One-click "I've received it" — opens a page on gelitup.com with a confirm button.
+  if (receiptToken) parts.push(`<p style="margin:18px 0"><a href="https://gelitup.com/package-received?t=${encodeURIComponent(receiptToken)}" style="display:inline-block;background:#16a34a;color:#ffffff;padding:11px 18px;border-radius:9999px;text-decoration:none;font-weight:700">✅ I've received my package</a><br/><span style="font-size:12px;color:#555">Please click this as soon as your package arrives, so we know it reached you.</span></p>`)
   if (discountCode) parts.push(`<p><strong>Your ambassador code:</strong> <span style="font-size:15px;color:#D43790">${escAmb(discountCode)}</span><br/>This code can only be used on the <a href="https://www.gelitup.com" style="color:#D43790">www.gelitup.com</a> website.</p>`)
   if (setPasswordLink) parts.push(`<p><a href="${escAmb(setPasswordLink)}" style="display:inline-block;background:#111827;color:#ffffff;padding:10px 16px;border-radius:9999px;text-decoration:none;font-weight:700">Set password & access your ambassador portal</a></p>`)
   // Next package date range (±1 week) — shown when we have a reminder date.
@@ -5101,7 +5103,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
         .order('sent_at', { ascending: false, nullsFirst: false })
       const baseShipmentColumns = 'id, application_id, status, ambassador_type, items, method, tracking_number, tracking_url, planned_for, sent_at, created_by, created_at, legacy_source'
       // Step-2 columns (carrier, expected delivery, received) if they exist yet.
-      let { data: shipmentRows, error: shipmentErr } = await shipmentQuery(`${baseShipmentColumns}, carrier, expected_delivery, delivered_at, delivered_by, lost_at, lost_note`)
+      let { data: shipmentRows, error: shipmentErr } = await shipmentQuery(`${baseShipmentColumns}, carrier, expected_delivery, delivered_at, delivered_by, lost_at, lost_note, note, receipt_token`)
       if (shipmentErr && /column .* does not exist/i.test(String(shipmentErr.message || ''))) {
         ;({ data: shipmentRows, error: shipmentErr } = await shipmentQuery(`${baseShipmentColumns}, carrier, expected_delivery, delivered_at, delivered_by`))
       }
@@ -5719,7 +5721,9 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (!shipment?.id) return
     if (!window.confirm(`Mark the package sent to ${row.full_name || row.email} on ${fmtDate(shipment.sent_at)} as LOST (not received)?\n\nIts contents will be put into the next package as a resend, due today.`)) return
     setBusyShipmentId(shipment.id)
-    const patch = { lost_at: new Date().toISOString(), lost_note: `Lost in transit — marked by ${getAdminDisplayLabel()}`, delivered_at: null, delivered_by: null }
+    const reason = window.prompt('Note (optional) — e.g. lost in transit, returned to sender:', 'Lost in transit — not received')
+    if (reason === null) return
+    const patch = { lost_at: new Date().toISOString(), lost_note: `Lost — marked by ${getAdminDisplayLabel()}`, note: [shipment.note, reason.trim()].filter(Boolean).join(' · ') || null, delivered_at: null, delivered_by: null }
     const { error: err } = await supabase.from('ambassador_shipments').update(patch).eq('id', shipment.id)
     if (err) { setBusyShipmentId(null); alert(`Could not mark as lost: ${err.message}`); return }
     const updatedRow = { ...row, _shipments: (row._shipments || []).map((s) => (s.id === shipment.id ? { ...s, ...patch } : s)) }
@@ -6302,6 +6306,17 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (!emailResult.ok) console.warn('Package items saved, but notification email failed:', emailResult.error)
     return true
   }
+  // A free note on any package (lost, damaged, swapped item, resent…).
+  const editShipmentNote = async (row, shipment) => {
+    const entered = window.prompt(`Note for the package sent to ${row.full_name || 'this ambassador'} on ${fmtDate(shipment.sent_at)}:`, shipment?.note || '')
+    if (entered === null) return
+    const note = entered.trim() || null
+    const { error: err } = await supabase.from('ambassador_shipments').update({ note }).eq('id', shipment.id)
+    if (err) { alert(`Could not save the note: ${err.message}`); return }
+    setRows((prev) => prev.map((r) => (r.id === row.id
+      ? { ...r, _shipments: (r._shipments || []).map((s) => (s.id === shipment.id ? { ...s, note } : s)) }
+      : r)))
+  }
   // Fill in (or correct) what was in a package already sent.
   const editShipmentContents = async (row, shipment) => {
     const current = Array.isArray(shipment?.items) ? shipment.items.join(', ') : ''
@@ -6382,6 +6397,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       ambassadorType: AMBASSADOR_TYPE_LABELS[String(s.ambassador_type || '').toLowerCase()] || '',
       boxContents: (Array.isArray(s.items) ? s.items : []).join(', '),
       lost: Boolean(s.lost_at),
+      note: s.note || '',
     }))
     const fromLegacy = legacyShipmentHistoryEntries(row)
       .filter((entry) => !copiedLines.has(String(entry.raw || '').trim()))
@@ -6565,11 +6581,13 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     }
     const currentShipmentItems = String(currentDraft.shipment_details || '').trim()
     const packedItemsText = completedItems.join(', ')
+    const receiptToken = (globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`)
     const { subject, html } = buildAmbassadorShipmentEmail(
       updatedRow,
       { ...draft, shipment_details: currentShipmentItems || draft.shipment_details || '' },
       setPasswordLink,
       chosenReminderAt.toISOString(),
+      /^[0-9a-f-]{36}$/i.test(receiptToken) ? receiptToken : null,
     )
     let attachments = []
     try {
@@ -6602,6 +6620,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
         sent_at: sentAt,
         created_by: getAdminDisplayLabel(),
         legacy_source: archiveLine.trim(),
+        ...(/^[0-9a-f-]{36}$/i.test(receiptToken) ? { receipt_token: receiptToken } : {}),
       })
       persistShipmentEmailLock((prev) => ({ ...prev, [row.id]: { signature: JSON.stringify(currentDraft), sentAt }, }))
       const metaResult = await saveShipmentMeta(
@@ -6732,7 +6751,9 @@ const resendShipmentEmail = async (row, nextReminderAt, trackingOverride) => {
   const setPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(normalizedEmail)}`
   const reminderIso = nextReminderAt ? new Date(`${String(nextReminderAt).slice(0, 10)}T10:00:00Z`).toISOString() : null
   const draft = { tracking_number: trackingNumber, tracking_url: trackingUrl }
-  const { subject, html } = buildAmbassadorShipmentEmail(row, draft, setPasswordLink, reminderIso)
+  const resentShipment = (row?._shipments || []).find((s) => String(s.tracking_number || '').trim() === String(trackingNumber || '').trim())
+    || (row?._shipments || [])[0]
+  const { subject, html } = buildAmbassadorShipmentEmail(row, draft, setPasswordLink, reminderIso, resentShipment?.receipt_token || null)
   let attachments = []
   try {
     const letterPdf = await buildAmbassadorWelcomeLetterPdf({ fullName: row.full_name, discountCode: row.discount_code })
@@ -7209,6 +7230,7 @@ const deleteApplication = async (row) => {
               busyShipmentId={busyShipmentId}
               onMarkReceived={markShipmentReceived}
               onMarkLost={markShipmentLost}
+              onEditNote={editShipmentNote}
               onOpen={(id) => {
                 setViewMode('cards')
                 jumpToAmbassador(id)
@@ -7838,6 +7860,7 @@ const deleteApplication = async (row) => {
                                       <p><strong>URL:</strong> {entry.trackingUrl ? <a href={entry.trackingUrl} target="_blank" rel="noreferrer" className="text-fuchsia-700 hover:underline">{entry.trackingUrl}</a> : '—'}</p>
                                       <p><strong>Status:</strong> {entry.ambassadorType || 'Not recorded'}</p>
                                       <p><strong>Items:</strong> {entry.boxContents || '—'}</p>
+                                      {entry.note && <p className="rounded bg-amber-50 px-1.5 py-1 text-amber-900"><strong>Note:</strong> {entry.note}</p>}
                                     </div>
                                   )}
                                 </div>

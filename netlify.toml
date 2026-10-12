@@ -203,6 +203,13 @@
   to = "/compliance-certification.html"
   status = 200
 
+# Ambassador "I've received my package" link from the tracking email
+[[redirects]]
+  from = "/package-received"
+  to = "/.netlify/functions/package-received"
+  status = 200
+  force = true
+
 # SPA catch-all — must remain last
 [[redirects]]
   from = "/*"
