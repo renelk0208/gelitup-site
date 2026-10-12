@@ -5,6 +5,8 @@ import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
 import tierPricingOverrides from '../data/tierPricingOverrides.json'
 import ambassadorLetterAttachmentUrl from '../lib/ambassadorletter/Gelitup Ambassador Letter.pdf?url'
 import { buildAmbassadorContractPdf, buildAmbassadorPackingListPdf, buildAmbassadorWelcomeLetterPdf } from '../lib/ambassadorContractPdf.js'
+import { detectCarrier, estimateDelivery } from '../lib/ambassadorShipping.js'
+import AmbassadorShipmentsTable from '../components/AmbassadorShipmentsTable.jsx'
 import {
   normalizeAdminSkuToken,
   normalizeAdminNameToken,
@@ -4898,6 +4900,11 @@ async function ensureAmbassadorPortalAccount(row) {
 }
 
 function AmbassadorApplicationsPanel({ focusAmbassadorId } = {}) {
+  // Step 2: "Shipments" table view (one line per ambassador) next to the cards.
+  const [viewMode, setViewMode] = useState(() => {
+    try { return localStorage.getItem('gelitup.admin.ambassadorView') === 'shipments' ? 'shipments' : 'cards' } catch { return 'cards' }
+  })
+  const [busyShipmentId, setBusyShipmentId] = useState(null)
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -5105,12 +5112,18 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     // table = migration not run yet; history then comes from admin_comment.
     const loadedIds = nextRows.map((row) => row.id).filter((id) => id != null)
     if (loadedIds.length > 0) {
-      const { data: shipmentRows, error: shipmentErr } = await supabase
+      const shipmentQuery = (columns) => supabase
         .from('ambassador_shipments')
-        .select('id, application_id, status, ambassador_type, items, method, tracking_number, tracking_url, planned_for, sent_at, created_by, created_at, legacy_source')
+        .select(columns)
         .in('application_id', loadedIds)
         .eq('status', 'sent')
         .order('sent_at', { ascending: false, nullsFirst: false })
+      const baseShipmentColumns = 'id, application_id, status, ambassador_type, items, method, tracking_number, tracking_url, planned_for, sent_at, created_by, created_at, legacy_source'
+      // Step-2 columns (carrier, expected delivery, received) if they exist yet.
+      let { data: shipmentRows, error: shipmentErr } = await shipmentQuery(`${baseShipmentColumns}, carrier, expected_delivery, delivered_at, delivered_by`)
+      if (shipmentErr && /column .* does not exist/i.test(String(shipmentErr.message || ''))) {
+        ;({ data: shipmentRows, error: shipmentErr } = await shipmentQuery(baseShipmentColumns))
+      }
       if (!shipmentErr && Array.isArray(shipmentRows)) {
         const byApp = new Map()
         for (const s of shipmentRows) {
@@ -5597,11 +5610,18 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     return true
   }
   const recordShipmentRow = async (row, shipment) => {
-    const { data, error: err } = await supabase
+    const insertShipment = (payload) => supabase
       .from('ambassador_shipments')
-      .insert({ application_id: row.id, status: 'sent', ...shipment })
-      .select('id, application_id, status, ambassador_type, items, method, tracking_number, tracking_url, planned_for, sent_at, created_by, created_at, legacy_source')
+      .insert({ application_id: row.id, status: 'sent', ...payload })
+      .select('*')
       .maybeSingle()
+    // Step 2: carrier and expected delivery, worked out from the tracking link.
+    const carrier = detectCarrier(shipment.tracking_number, shipment.tracking_url) || null
+    const withDelivery = { ...shipment, carrier, expected_delivery: estimateDelivery(shipment.sent_at, carrier, row.country) }
+    let { data, error: err } = await insertShipment(withDelivery)
+    if (err && /column .* does not exist|schema cache/i.test(String(err.message || ''))) {
+      ;({ data, error: err } = await insertShipment(shipment))
+    }
     if (err) {
       if (!/does not exist|schema cache/i.test(String(err.message || ''))) {
         console.warn('[ambassador step1] shipment record failed:', err.message)
@@ -5703,6 +5723,20 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (!tagged) return freshDefault
     const taggedIsFuture = new Date(tagged).getTime() > Date.now()
     return (taggedIsFuture ? String(tagged).slice(0, 10) : freshDefault) || freshDefault
+  }
+  // Admin ticks a package as received (the ambassador can also confirm it in
+  // their portal).
+  const markShipmentReceived = async (row, shipment) => {
+    if (!shipment?.id) return
+    if (!window.confirm(`Mark the package sent to ${row.full_name || row.email} on ${fmtDate(shipment.sent_at)} as received?`)) return
+    setBusyShipmentId(shipment.id)
+    const patch = { delivered_at: new Date().toISOString(), delivered_by: getAdminDisplayLabel() }
+    const { error: err } = await supabase.from('ambassador_shipments').update(patch).eq('id', shipment.id)
+    setBusyShipmentId(null)
+    if (err) { alert(`Could not mark as received: ${err.message}`); return }
+    setRows((prev) => prev.map((r) => (r.id === row.id
+      ? { ...r, _shipments: (r._shipments || []).map((s) => (s.id === shipment.id ? { ...s, ...patch } : s)) }
+      : r)))
   }
   const getAmbassadorType = (row) => String(row?.ambassador_type || '').trim().toLowerCase()
     || extractTaggedValue(row?.admin_comment, 'AMBASSADOR_TYPE')
@@ -7045,7 +7079,27 @@ const deleteApplication = async (row) => {
     <div className="space-y-4">
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-base font-bold text-slate-900">Ambassador Applications</h2>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-base font-bold text-slate-900">Ambassador Applications</h2>
+            <div className="inline-flex rounded-full bg-slate-100 p-0.5" role="group" aria-label="View">
+              {[{ key: 'cards', label: 'Cards' }, { key: 'shipments', label: 'Shipments' }].map((v) => (
+                <button
+                  key={v.key}
+                  type="button"
+                  aria-pressed={viewMode === v.key}
+                  onClick={() => {
+                    setViewMode(v.key)
+                    try { localStorage.setItem('gelitup.admin.ambassadorView', v.key) } catch { /* ignore */ }
+                    // The Shipments view covers approved and paused ambassadors.
+                    if (v.key === 'shipments' && filter !== 'all') setFilter('all')
+                  }}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${viewMode === v.key ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="flex flex-wrap items-center gap-1.5">
             {FILTERS.map((f) => (
               <button
@@ -7090,6 +7144,28 @@ const deleteApplication = async (row) => {
         </div>
       </div>
 
+      {viewMode === 'shipments' && (
+        <>
+          {loading && <p className="text-sm text-slate-500">Loading…</p>}
+          {error && <p className="text-sm text-rose-600">{error}</p>}
+          {!loading && !error && (
+            <AmbassadorShipmentsTable
+              rows={filteredRows}
+              getMeta={getAmbassadorDashboardMeta}
+              getType={getAmbassadorType}
+              plannedItems={plannedItemsList}
+              busyShipmentId={busyShipmentId}
+              onMarkReceived={markShipmentReceived}
+              onOpen={(id) => {
+                setViewMode('cards')
+                jumpToAmbassador(id)
+              }}
+            />
+          )}
+        </>
+      )}
+
+      {viewMode === 'cards' && (<>
       {!loading && !error && ambassadorDashboardEntries.length > 0 && (
         <div className="rounded-xl border border-slate-200 bg-white p-3">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
@@ -7937,6 +8013,7 @@ const deleteApplication = async (row) => {
           })}
         </div>
       )}
+      </>)}
       {!loading && hasMore && (
         <button type="button" onClick={() => load(page + 1)} className="mt-4 w-full rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
           Load more ambassadors
