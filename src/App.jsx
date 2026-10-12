@@ -29,6 +29,7 @@ import { cleanProductName } from './utils/productUtils'
 import CatalogueSkeleton from './components/CatalogueSkeleton'
 import tierPricingOverrides from './data/tierPricingOverrides.json'
 import { buildTierPricingLookup, buildItemCandidateKeys } from './lib/tierPricingResolver.js'
+import { carrierLabel } from './lib/ambassadorShipping.js'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
@@ -18785,6 +18786,19 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     error: '',
   })
   const [ambassadorCodeCopied, setAmbassadorCodeCopied] = useState(false)
+  const [confirmingShipmentId, setConfirmingShipmentId] = useState(null)
+  // The ambassador confirms a package arrived (shows as "Received" in the admin).
+  const confirmAmbassadorShipmentReceived = useCallback(async (shipmentId) => {
+    if (!supabase || !shipmentId) return
+    setConfirmingShipmentId(shipmentId)
+    const { data, error } = await supabase.rpc('confirm_my_ambassador_shipment', { p_shipment_id: shipmentId })
+    setConfirmingShipmentId(null)
+    if (error || data !== true) return
+    setAmbassadorPortalInfo((prev) => ({
+      ...prev,
+      shipmentHistory: (prev.shipmentHistory || []).map((pkg) => (pkg.id === shipmentId ? { ...pkg, delivered_at: new Date().toISOString() } : pkg)),
+    }))
+  }, [])
   const [welcomeStep, setWelcomeStep] = useState(() => {
     try { return localStorage.getItem('gelitup.b2b.portal.welcome.v1') ? -1 : 0 } catch { return -1 }
   })
@@ -19679,9 +19693,30 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                                   {Array.isArray(pkg.items) && pkg.items.length > 0 && (
                                     <p className="mt-0.5 text-slate-600">{pkg.items.join(', ')}</p>
                                   )}
+                                  {(pkg.carrier || pkg.expected_delivery) && (
+                                    <p className="mt-0.5 text-slate-600">
+                                      {pkg.carrier ? carrierLabel(pkg.carrier) : null}
+                                      {pkg.carrier && pkg.expected_delivery && !pkg.delivered_at ? ' · ' : null}
+                                      {pkg.expected_delivery && !pkg.delivered_at
+                                        ? <>Expected around {new Date(`${pkg.expected_delivery}T12:00:00Z`).toLocaleDateString(undefined, { day: '2-digit', month: 'short' })}</>
+                                        : null}
+                                    </p>
+                                  )}
                                   {pkg.tracking_url && (
                                     <a href={pkg.tracking_url} target="_blank" rel="noreferrer" className="mt-0.5 inline-block font-semibold text-emerald-700 hover:underline">Track this parcel →</a>
                                   )}
+                                  {pkg.delivered_at ? (
+                                    <p className="mt-1 font-semibold text-emerald-700">✓ Received</p>
+                                  ) : Object.prototype.hasOwnProperty.call(pkg, 'delivered_at') ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => confirmAmbassadorShipmentReceived(pkg.id)}
+                                      disabled={confirmingShipmentId === pkg.id}
+                                      className="mt-1.5 block rounded-lg bg-emerald-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                                    >
+                                      {confirmingShipmentId === pkg.id ? 'Saving…' : "I've received this package"}
+                                    </button>
+                                  ) : null}
                                 </li>
                               ))}
                             </ul>
