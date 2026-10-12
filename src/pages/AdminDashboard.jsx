@@ -4620,7 +4620,9 @@ function buildAmbassadorShipmentNotificationEmail(row, ship, sentAtIso, nextPack
   }
 }
 
-function buildAmbassadorPauseEmail(row, timeframe, performanceDetails, senderName) {
+// The performance concerns typed in the Pause box are an internal note: they
+// are saved with the pause but never put in this email.
+function buildAmbassadorPauseEmail(row, timeframe, _internalNote, senderName) {
   const name = String(row?.full_name || '').trim().split(/\s+/)[0] || 'there'
   return {
     subject: 'A Quick Check-In About Your Ambassador Status',
@@ -4630,7 +4632,7 @@ function buildAmbassadorPauseEmail(row, timeframe, performanceDetails, senderNam
       <p>As you know, staying active with regular posts and videos is an important part of keeping the partnership going strong — it's how we grow together and how your work gets the visibility it deserves. Since we haven't seen recent posts, we've paused your ambassador status for now while we check in with you.</p>
       <p>We'd love to understand where things stand, so please let us know which of the following applies to you:</p>
       <p><strong>1. You have content ready to share</strong> — If you've created videos or posts you haven't submitted yet, just send them over and we'll happily review them and reactivate your status.</p>
-      <p><strong>2. You'd like to continue, but need a bit of support</strong> — If something has been holding you back (${escAmb(performanceDetails)}), let us know — we're happy to work with you on a plan going forward.</p>
+      <p><strong>2. You'd like to continue, but need a bit of support</strong> — If something has been holding you back, let us know — we're happy to work with you on a plan going forward.</p>
       <p><strong>3. You'd like to step back from the programme</strong> — That's completely okay too, and we appreciate you being part of our community. If this is the case, it would help us to know why, so we can keep improving — for example:</p>
       <ul style="margin:0 0 16px 20px;padding:0">
         <li style="margin:0 0 6px">The product wasn't the right fit for you</li>
@@ -8321,7 +8323,7 @@ const deleteApplication = async (row) => {
             <h3 className="text-base font-bold text-slate-900">Pause {pauseRow.full_name}</h3>
             <p className="mt-1 text-xs text-slate-500">This stops future PR packages, cancels the scheduled reminder, deactivates the discount code, and can optionally send the collaboration check-in letter.</p>
             <label className="mt-3 block text-xs font-semibold text-slate-700">
-              Timeframe
+              Reply within <span className="font-normal text-slate-500">(shown in the email: "we'd love to hear back from you within …")</span>
               <input
                 value={pauseTimeframe}
                 onChange={(e) => setPauseTimeframe(e.target.value)}
@@ -8330,7 +8332,7 @@ const deleteApplication = async (row) => {
               />
             </label>
             <label className="mt-3 block text-xs font-semibold text-slate-700">
-              Factual performance concerns
+              Reason for pausing <span className="font-normal text-slate-500">(internal note — never shown to the ambassador)</span>
               <textarea
                 value={pauseDetails}
                 onChange={(e) => setPauseDetails(e.target.value)}
