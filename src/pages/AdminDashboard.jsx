@@ -5772,10 +5772,26 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (!res.ok) alert(`Email not sent: ${res.error || 'unknown error'}`)
   }
   const [choiceBulkBusy, setChoiceBulkBusy] = useState(false)
-  const askAllToChoose = async () => {
-    const targets = rows.filter((row) => choiceEligible(row) && !row.choice_requested_at)
-    if (!targets.length) { alert('Everyone active has already been asked (or has chosen).'); return }
-    if (!window.confirm(`Email ${targets.length} ambassadors asking them to choose 5 products for their next package?\n\n${targets.map((r) => `• ${r.full_name}`).join('\n')}`)) return
+  // Pick exactly who gets the "choose 5 products" email. Anyone who already
+  // has items planned for their next package starts unticked.
+  const [choicePicker, setChoicePicker] = useState(null) // { ids: Set } while open
+  // A function (not a value): it uses helpers defined further down.
+  const getChoiceCandidates = () => rows
+    .filter(choiceEligible)
+    .map((row) => ({ row, planned: plannedItemsList(row), asked: row.choice_requested_at }))
+    .sort((a, b) => String(a.row.next_package_due || '9999').localeCompare(String(b.row.next_package_due || '9999')))
+  const askAllToChoose = () => {
+    if (!getChoiceCandidates().length) { alert('Everyone active has already chosen, or has not had a package yet.'); return }
+    setChoicePicker({ ids: new Set(getChoiceCandidates().filter((c) => !c.planned.length && !c.asked).map((c) => c.row.id)) })
+  }
+  const toggleChoicePick = (id) => setChoicePicker((prev) => {
+    const ids = new Set(prev.ids)
+    if (ids.has(id)) ids.delete(id); else ids.add(id)
+    return { ids }
+  })
+  const sendChoicePicks = async () => {
+    const targets = getChoiceCandidates().filter((c) => choicePicker?.ids.has(c.row.id)).map((c) => c.row)
+    if (!targets.length) return
     setChoiceBulkBusy(true)
     const failed = []
     for (const row of targets) {
@@ -5783,7 +5799,8 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       if (!res.ok) failed.push(`${row.full_name}: ${res.error || 'failed'}`)
     }
     setChoiceBulkBusy(false)
-    alert(failed.length ? `Sent ${targets.length - failed.length} of ${targets.length}.\n\nNot sent:\n${failed.join('\n')}` : `Sent to all ${targets.length} ambassadors.`)
+    setChoicePicker(null)
+    alert(failed.length ? `Sent ${targets.length - failed.length} of ${targets.length}.\n\nNot sent:\n${failed.join('\n')}` : `Sent to ${targets.length} ambassador${targets.length === 1 ? '' : 's'}.`)
   }
   // A package that never arrived: marked lost, its contents are copied into the
   // next package as a resend, and the next date becomes today.
@@ -7302,7 +7319,7 @@ const deleteApplication = async (row) => {
                 disabled={choiceBulkBusy}
                 className="rounded-full bg-fuchsia-600 px-4 py-2 text-xs font-semibold text-white hover:bg-fuchsia-500 disabled:opacity-60"
               >
-                {choiceBulkBusy ? 'Sending…' : '✉ Ask ambassadors to choose 5 products'}
+                {choiceBulkBusy ? 'Sending…' : '✉ Ask ambassadors to choose 5 products…'}
               </button>
               <span className="text-[11px] text-slate-500">
                 {(() => {
@@ -8311,6 +8328,43 @@ const deleteApplication = async (row) => {
                 className="rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-60"
               >
                 Decline &amp; email
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {choicePicker && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4" onClick={() => !choiceBulkBusy && setChoicePicker(null)}>
+          <div className="flex max-h-[85vh] w-full max-w-xl flex-col rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-bold text-slate-900">Who should choose 5 products?</h3>
+            <p className="mt-1 text-xs text-slate-500">Tick the ambassadors to email. Anyone who already has items planned for their next package, or was already asked, starts unticked.</p>
+            <div className="mt-3 flex gap-3 text-xs">
+              <button type="button" className="font-semibold text-fuchsia-700 hover:underline" onClick={() => setChoicePicker({ ids: new Set(getChoiceCandidates().map((c) => c.row.id)) })}>Tick all</button>
+              <button type="button" className="font-semibold text-slate-600 hover:underline" onClick={() => setChoicePicker({ ids: new Set() })}>Untick all</button>
+              <button type="button" className="font-semibold text-slate-600 hover:underline" onClick={() => setChoicePicker({ ids: new Set(getChoiceCandidates().filter((c) => !c.planned.length && !c.asked).map((c) => c.row.id)) })}>Only those with nothing planned</button>
+            </div>
+            <ul className="mt-2 flex-1 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200">
+              {getChoiceCandidates().map(({ row, planned, asked }) => (
+                <li key={row.id}>
+                  <label className="flex cursor-pointer items-start gap-3 px-3 py-2 hover:bg-slate-50">
+                    <input type="checkbox" className="mt-1" checked={choicePicker.ids.has(row.id)} onChange={() => toggleChoicePick(row.id)} disabled={choiceBulkBusy} />
+                    <span className="min-w-0 flex-1 text-xs">
+                      <span className="font-semibold text-slate-900">{row.full_name}</span>
+                      <span className="text-slate-500">{row.next_package_due ? ` · next package ${fmtDate(row.next_package_due)}` : ''}</span>
+                      {planned.length > 0
+                        ? <span className="mt-0.5 block text-amber-800">Already has {planned.length} item{planned.length === 1 ? '' : 's'} planned: {planned.slice(0, 3).join(', ')}{planned.length > 3 ? '…' : ''}</span>
+                        : <span className="mt-0.5 block text-slate-400">Nothing planned yet</span>}
+                      {asked && <span className="block text-sky-700">Already asked {fmtDate(asked)}</span>}
+                    </span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <button type="button" onClick={() => setChoicePicker(null)} disabled={choiceBulkBusy} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+              <button type="button" onClick={sendChoicePicks} disabled={choiceBulkBusy || choicePicker.ids.size === 0} className="rounded-lg bg-fuchsia-600 px-4 py-2 text-xs font-semibold text-white hover:bg-fuchsia-500 disabled:opacity-50">
+                {choiceBulkBusy ? 'Sending…' : `Send to ${choicePicker.ids.size} ambassador${choicePicker.ids.size === 1 ? '' : 's'}`}
               </button>
             </div>
           </div>
