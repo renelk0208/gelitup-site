@@ -5022,11 +5022,47 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       instagram: getRowInstagram(row),
     }))
     const emailLocalKey = (value) => normalizeLookupKey(String(value || '').split('@')[0] || '')
-    const { data: codeRows, error: codeErr } = await supabase
+    // Codes are linked to their ambassador by application_id (see
+    // supabase/sql/ambassador_step1_structured_data.sql), with an exact-email
+    // match as the only fallback. Until that migration has run, the old
+    // select (and the old name-based matching below) is used instead.
+    let { data: codeRows, error: codeErr } = await supabase
       .from('ambassador_codes')
-      .select('code, ambassador_name, ambassador_email, notes, active')
+      .select('id, code, ambassador_name, ambassador_email, notes, active, application_id, replaced_at, created_at')
       .limit(1000)
-    if (!codeErr && Array.isArray(codeRows) && codeRows.length > 0) {
+    const codesAreLinked = !codeErr
+    if (codeErr && /column .* does not exist/i.test(String(codeErr.message || ''))) {
+      ;({ data: codeRows, error: codeErr } = await supabase
+        .from('ambassador_codes')
+        .select('code, ambassador_name, ambassador_email, notes, active')
+        .limit(1000))
+    }
+    if (codesAreLinked && Array.isArray(codeRows)) {
+      const byApplication = new Map()
+      const byExactEmail = new Map()
+      for (const c of codeRows) {
+        if (c?.application_id != null) {
+          const key = String(c.application_id)
+          byApplication.set(key, [...(byApplication.get(key) || []), c])
+        }
+        const emailKey = String(c?.ambassador_email || '').trim().toLowerCase()
+        if (emailKey) byExactEmail.set(emailKey, [...(byExactEmail.get(emailKey) || []), c])
+      }
+      const newestFirst = (list) => [...list].sort((a, b) => {
+        if (Boolean(a.active) !== Boolean(b.active)) return a.active ? -1 : 1
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+      })
+      nextRows = nextRows.map((row) => {
+        const linked = byApplication.get(String(row.id)) || byExactEmail.get(getRowEmail(row)) || []
+        const ordered = newestFirst(linked)
+        const allCodes = [...new Set([
+          ...(row.discount_code ? [String(row.discount_code).trim().toUpperCase()] : []),
+          ...ordered.map((c) => String(c.code || '').trim().toUpperCase()).filter(Boolean),
+        ])]
+        const discountCode = row.discount_code || ordered[0]?.code || null
+        return { ...row, discount_code: discountCode, _allCodes: allCodes }
+      })
+    } else if (!codeErr && Array.isArray(codeRows) && codeRows.length > 0) {
       const byEmail = new Map()
       const byEmailLocal = new Map()
       const byName = new Map()
@@ -5065,9 +5101,29 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     } else if (codeErr) {
       setError((prev) => prev || `Could not load ambassador discount codes: ${codeErr.message}`)
     }
+    // Package history from ambassador_shipments (one row per package). Missing
+    // table = migration not run yet; history then comes from admin_comment.
+    const loadedIds = nextRows.map((row) => row.id).filter((id) => id != null)
+    if (loadedIds.length > 0) {
+      const { data: shipmentRows, error: shipmentErr } = await supabase
+        .from('ambassador_shipments')
+        .select('id, application_id, status, ambassador_type, items, method, tracking_number, tracking_url, planned_for, sent_at, created_by, created_at, legacy_source')
+        .in('application_id', loadedIds)
+        .eq('status', 'sent')
+        .order('sent_at', { ascending: false, nullsFirst: false })
+      if (!shipmentErr && Array.isArray(shipmentRows)) {
+        const byApp = new Map()
+        for (const s of shipmentRows) {
+          const key = String(s.application_id)
+          byApp.set(key, [...(byApp.get(key) || []), s])
+        }
+        nextRows = nextRows.map((row) => ({ ...row, _shipments: byApp.get(String(row.id)) || [] }))
+      }
+    }
     const distinctCodes = [...new Set(
       nextRows
-        .map((row) => String(row?.discount_code || '').trim().toUpperCase())
+        .flatMap((row) => [row?.discount_code, ...(row?._allCodes || [])])
+        .map((code) => String(code || '').trim().toUpperCase())
         .filter(Boolean),
     )]
     if (distinctCodes.length > 0) {
@@ -5525,6 +5581,38 @@ const after = text.slice(idx + m[0].length)
 return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] font-semibold" style={{ backgroundColor: swatch.bg, color: swatch.text, borderColor: swatch.border }}>{email}</span>{after}</>)
 }
   const readMetaTag = (row, tagName) => extractTaggedRawValue(row?.admin_comment, tagName)
+  // Step 1 of the ambassador clean-up: programme facts are written to real
+  // columns as well as the old admin_comment tags. Reads prefer the columns.
+  // If the step-1 migration hasn't been run yet the column write is skipped
+  // quietly, so the admin keeps working exactly as before.
+  const syncAmbassadorColumns = async (rowId, patch) => {
+    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update(patch).eq('id', rowId)
+    if (err) {
+      if (!/column .* does not exist|schema cache/i.test(String(err.message || ''))) {
+        console.warn('[ambassador step1] column sync failed:', err.message)
+      }
+      return false
+    }
+    patchRow(rowId, patch)
+    return true
+  }
+  const recordShipmentRow = async (row, shipment) => {
+    const { data, error: err } = await supabase
+      .from('ambassador_shipments')
+      .insert({ application_id: row.id, status: 'sent', ...shipment })
+      .select('id, application_id, status, ambassador_type, items, method, tracking_number, tracking_url, planned_for, sent_at, created_by, created_at, legacy_source')
+      .maybeSingle()
+    if (err) {
+      if (!/does not exist|schema cache/i.test(String(err.message || ''))) {
+        console.warn('[ambassador step1] shipment record failed:', err.message)
+      }
+      return null
+    }
+    if (data) {
+      setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, _shipments: [data, ...(r._shipments || [])] } : r)))
+    }
+    return data
+  }
   const encodeReminderNote = (value) => {
     const raw = String(value || '').trim()
     return raw ? encodeURIComponent(raw) : ''
@@ -5592,6 +5680,10 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: nextComment || null }).eq('id', row.id)
     if (err) return { ok: false, error: err.message }
     patchRow(row.id, { admin_comment: nextComment || null })
+    if (Object.prototype.hasOwnProperty.call(patch, 'nextReminderAt')) {
+      const due = patch.nextReminderAt ? String(patch.nextReminderAt).slice(0, 10) : null
+      await syncAmbassadorColumns(row.id, { next_package_due: due })
+    }
     return { ok: true, comment: nextComment || null }
   }
   const reminderDateVal = (row, fallbackIso) => {
@@ -5612,7 +5704,8 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const taggedIsFuture = new Date(tagged).getTime() > Date.now()
     return (taggedIsFuture ? String(tagged).slice(0, 10) : freshDefault) || freshDefault
   }
-  const getAmbassadorType = (row) => extractTaggedValue(row?.admin_comment, 'AMBASSADOR_TYPE')
+  const getAmbassadorType = (row) => String(row?.ambassador_type || '').trim().toLowerCase()
+    || extractTaggedValue(row?.admin_comment, 'AMBASSADOR_TYPE')
   const setAmbassadorType = async (row, type) => {
     const normalized = String(type || '').trim().toLowerCase()
     const value = ['standard_ambassador', 'super_ambassador', 'extreme_ambassador'].includes(normalized) ? normalized : ''
@@ -5622,6 +5715,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     setSaving(null)
     if (err) { alert(err.message); return }
     patchRow(row.id, { admin_comment: nextComment })
+    await syncAmbassadorColumns(row.id, { ambassador_type: value || null })
   }
   const SHIPPING_METHODS = [
     { key: 'courier', label: 'Courier (tracked)' },
@@ -5645,7 +5739,9 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     patchRow(row.id, { admin_comment: nextComment })
   }
   const shippingMethodLabel = (method) => SHIPPING_METHODS.find((m) => m.key === method)?.label || 'Courier (tracked)'
-  const getFactoryAck = (row) => extractTaggedValue(row?.admin_comment, 'FACTORY_ACK')
+  const getFactoryAck = (row) => (row?.factory_ack_at
+    ? [row.factory_ack_by, `on ${fmtDate(row.factory_ack_at)}`].filter(Boolean).join(' ')
+    : extractTaggedValue(row?.admin_comment, 'FACTORY_ACK'))
   const formatAmbassadorAddress = (row) => [
     row?.address,
     [row?.city, row?.postal_code].filter(Boolean).join(' '),
@@ -5933,10 +6029,15 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
             nextComment = ensureTaggedValue(nextComment, 'SHIPMENT_NEXT_REMINDER_AT', parsedDate.toISOString())
           }
         }
+        // A blank "Date to be Sent" cell used to wipe the stored next-package
+        // date. Keep the existing date unless the sheet gives a new valid one.
+        const importedDateValid = Boolean(dateToBeSent) && !Number.isNaN(new Date(dateToBeSent).getTime())
+        const existingReminderLines = String(row.admin_comment || '').split('\n')
+          .filter((line) => /^\[SHIPMENT_NEXT_REMINDER_AT:[^\]]+\]$/i.test(line.trim()))
         const finalComment = [...preservedLines, ...packLines]
-          .concat(dateToBeSent && !Number.isNaN(new Date(dateToBeSent).getTime())
+          .concat(importedDateValid
             ? [`[SHIPMENT_NEXT_REMINDER_AT:${new Date(dateToBeSent).toISOString()}]`]
-            : [])
+            : existingReminderLines)
           .join('\n') || null
         const shipmentPatch = {
           admin_comment: finalComment,
@@ -5947,6 +6048,11 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
         const { error: updateErr } = await supabase.from(AMBASSADOR_TABLE).update(shipmentPatch).eq('id', row.id)
         if (updateErr) throw updateErr
         patchRow(row.id, shipmentPatch)
+        const columnPatch = {
+          ...(requestedType && validTypes.has(requestedType) ? { ambassador_type: requestedType } : {}),
+          ...(importedDateValid ? { next_package_due: new Date(dateToBeSent).toISOString().slice(0, 10) } : {}),
+        }
+        if (Object.keys(columnPatch).length) await syncAmbassadorColumns(row.id, columnPatch)
         updated += 1
       }
       alert(`Updated ${updated} ambassador package records. ${skipped} rows could not be matched.`)
@@ -6054,6 +6160,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     setSaving(null)
     if (err) { alert(err.message); return }
     patchRow(row.id, { admin_comment: nextComment })
+    await syncAmbassadorColumns(row.id, { factory_ack_at: new Date().toISOString(), factory_ack_by: getAdminDisplayLabel() })
   }
 
   // Internal notes log — appends a timestamped entry to admin_comment and clears the input.
@@ -6184,7 +6291,37 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const sentAtIso = parseDateLabelToIso(sentAtLabel)
     return { sentAtIso, sentAtLabel }
   }
-  const shipmentHistoryEntries = (row) => String(row.admin_comment || '')
+  // Package history: rows from ambassador_shipments first, plus any old
+  // "📦 Shipped" lines that haven't been copied into the table yet (a copied
+  // line is recognised by its legacy_source, so nothing shows twice).
+  const AMBASSADOR_TYPE_LABELS = {
+    standard_ambassador: 'Standard Ambassador',
+    super_ambassador: 'Super Ambassador',
+    extreme_ambassador: 'Extreme Ambassador',
+  }
+  const shipmentHistoryEntries = (row) => {
+    const tableRows = Array.isArray(row?._shipments) ? row._shipments : []
+    const copiedLines = new Set(tableRows.map((s) => String(s.legacy_source || '').trim()).filter(Boolean))
+    const fromTable = tableRows.map((s) => ({
+      raw: s.legacy_source || '',
+      stamp: s.sent_at ? fmtDate(s.sent_at) : null,
+      sentAtIso: s.sent_at || null,
+      method: shippingMethodLabel(s.method),
+      trackingNumber: s.tracking_number || '',
+      trackingUrl: s.tracking_url || '',
+      ambassadorType: AMBASSADOR_TYPE_LABELS[String(s.ambassador_type || '').toLowerCase()] || '',
+      boxContents: (Array.isArray(s.items) ? s.items : []).join(', '),
+    }))
+    const fromLegacy = legacyShipmentHistoryEntries(row)
+      .filter((entry) => !copiedLines.has(String(entry.raw || '').trim()))
+      .map((entry) => ({ ...entry, sentAtIso: parseDateLabelToIso(entry.stamp) }))
+    return [...fromTable, ...fromLegacy].sort((a, b) => {
+      const ta = a.sentAtIso ? new Date(a.sentAtIso).getTime() : 0
+      const tb = b.sentAtIso ? new Date(b.sentAtIso).getTime() : 0
+      return tb - ta
+    })
+  }
+  const legacyShipmentHistoryEntries = (row) => String(row.admin_comment || '')
     .split('\n')
     .filter((line) => /📦\s*Shipped\s*—/i.test(String(line)))
     .map((line) => {
@@ -6378,6 +6515,18 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
         return
       }
       latestAdminComment = loggedComment
+      // Step 1: keep a proper record of this package. legacy_source is the
+      // archive line just written, so history never shows it twice.
+      await recordShipmentRow(updatedRow, {
+        ambassador_type: completedAmbassadorType || null,
+        items: completedItems,
+        method: completedShippingMethod,
+        tracking_number: draft.tracking_number,
+        tracking_url: draft.tracking_url,
+        sent_at: sentAt,
+        created_by: getAdminDisplayLabel(),
+        legacy_source: archiveLine.trim(),
+      })
       persistShipmentEmailLock((prev) => ({ ...prev, [row.id]: { signature: JSON.stringify(currentDraft), sentAt }, }))
       const metaResult = await saveShipmentMeta(
         { ...updatedRow, admin_comment: latestAdminComment },
@@ -6544,10 +6693,40 @@ const updateAmbassadorCodeAndNotify = async (row) => {
     ambassador_email: row.email,
     active: true,
   }
-  const { error: codeErr } = await supabase
-    .from('ambassador_codes')
-    .update(codeUpdate)
-    .eq('code', previousCode || nextCode)
+  // Step 1: keep the old code row (switched off, marked replaced) and add the
+  // new one linked to the same ambassador, so sales made with the old code
+  // still count for them. Falls back to the old rename-in-place behaviour if
+  // the step-1 migration hasn't been run yet.
+  const replaceCodeKeepingHistory = async () => {
+    const { data: oldRow, error: readErr } = previousCode
+      ? await supabase.from('ambassador_codes').select('*').eq('code', previousCode).maybeSingle()
+      : { data: null, error: null }
+    if (readErr) return readErr
+    const carried = oldRow
+      ? Object.fromEntries(Object.entries(oldRow).filter(([key]) => ![
+        'id', 'created_at', 'updated_at', 'code', 'redemption_count', 'replaced_at', 'active',
+      ].includes(key)))
+      : {}
+    const { error: insertErr } = await supabase
+      .from('ambassador_codes')
+      .insert({ ...carried, ...codeUpdate, application_id: row.id })
+    if (insertErr) return insertErr
+    if (oldRow) {
+      const { error: retireErr } = await supabase
+        .from('ambassador_codes')
+        .update({ active: false, replaced_at: new Date().toISOString(), application_id: row.id })
+        .eq('id', oldRow.id)
+      if (retireErr) return retireErr
+    }
+    return null
+  }
+  let codeErr = await replaceCodeKeepingHistory()
+  if (codeErr && /column .* does not exist|schema cache/i.test(String(codeErr.message || ''))) {
+    ;({ error: codeErr } = await supabase
+      .from('ambassador_codes')
+      .update(codeUpdate)
+      .eq('code', previousCode || nextCode))
+  }
   if (codeErr) {
     setSaving(null)
     setEmail(row.id, 'error', codeErr.message || 'Could not update ambassador code.')
@@ -6571,7 +6750,7 @@ const updateAmbassadorCodeAndNotify = async (row) => {
   }
 
   const updatedRow = { ...row, discount_code: nextCode, discount_code_created_at: reviewedAt }
-  patchRow(row.id, { discount_code: nextCode, discount_code_created_at: reviewedAt })
+  patchRow(row.id, { discount_code: nextCode, discount_code_created_at: reviewedAt, _allCodes: [...new Set([nextCode.toUpperCase(), ...(row._allCodes || [])])] })
   const { subject, html } = buildAmbassadorCodeUpdateEmail(row, previousCode, nextCode)
   const res = await sendAmbassadorEmail({ to: normalizedEmail, subject, html })
   setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Code updated and confirmation sent to ${normalizedEmail}` : res.error)
@@ -6654,6 +6833,12 @@ const deleteApplication = async (row) => {
       alert(`Could not pause the ambassador programme: ${appErr.message}`)
       return
     }
+    await syncAmbassadorColumns(pauseRow.id, {
+      paused_at: pausedAt,
+      paused_by: getAdminDisplayLabel(),
+      paused_reason: [timeframe, performanceDetails].filter(Boolean).join(' — '),
+      next_package_due: null,
+    })
 
     const discountCode = String(pauseRow.discount_code || '').trim()
     if (discountCode) {
@@ -6697,6 +6882,36 @@ const deleteApplication = async (row) => {
       setEmail(pauseRow.id, 'sent', 'Programme paused without sending a check-in email')
       setPauseRow(null)
     }
+    setSaving(null)
+  }
+
+  // Undo a pause: back to approved, discount code switched on again. No email
+  // is sent; use "✉ Message" if the ambassador should hear about it.
+  const reactivateAmbassador = async (row) => {
+    if (!window.confirm(`Reactivate ${row.full_name || row.email}? Their status goes back to Approved and their discount code is switched on again. No email is sent.`)) return
+    const nextComment = ensureTaggedValue(row.admin_comment, 'AMBASSADOR_PROGRAMME_PAUSED', '')
+    setSaving(row.id)
+    const { error: appErr } = await supabase
+      .from(AMBASSADOR_TABLE)
+      .update({ status: 'approved', admin_comment: nextComment })
+      .eq('id', row.id)
+    if (appErr) {
+      setSaving(null)
+      alert(`Could not reactivate: ${appErr.message}`)
+      return
+    }
+    patchRow(row.id, { status: 'approved', admin_comment: nextComment })
+    await syncAmbassadorColumns(row.id, { paused_at: null, paused_by: null, paused_reason: null })
+    const discountCode = String(row.discount_code || '').trim()
+    if (discountCode) {
+      const { error: codeErr } = await supabase.from('ambassador_codes').update({ active: true }).eq('code', discountCode)
+      if (codeErr) {
+        setSaving(null)
+        setEmail(row.id, 'error', `Reactivated, but the code could not be switched on: ${codeErr.message}`)
+        return
+      }
+    }
+    setEmail(row.id, 'sent', discountCode ? `Reactivated — code ${discountCode} is active again` : 'Reactivated')
     setSaving(null)
   }
 
@@ -6745,7 +6960,14 @@ const deleteApplication = async (row) => {
     const shipmentLock = (shipmentLockRaw && typeof shipmentLockRaw === 'object')
       ? shipmentLockRaw
       : (typeof shipmentLockRaw === 'string' ? { signature: shipmentLockRaw, sentAt: null } : null)
-    const sentAt = shipmentLock?.sentAt || sentAtMeta || shipmentHistory.sentAtIso || null
+    const latestRecordedSentAt = (Array.isArray(row?._shipments) ? row._shipments : [])
+      .map((s) => s.sent_at).filter(Boolean)
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] || null
+    // The shipments table is the same in every browser; the older sources are
+    // kept as fallbacks until the step-1 data is in. Newest date wins.
+    const legacySentAt = shipmentLock?.sentAt || sentAtMeta || shipmentHistory.sentAtIso || null
+    const sentAt = [latestRecordedSentAt, legacySentAt].filter(Boolean)
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] || null
     const sentAtLabel = sentAt ? fmtDateTime(sentAt) : (shipmentHistory.sentAtLabel || null)
     const shipmentPreviouslySent = Boolean(sentAt)
     // A next-package date only ever means something once a package has genuinely
@@ -6976,7 +7198,20 @@ const deleteApplication = async (row) => {
             const setupSectionComplete = isApproved && contractAlreadySent && Boolean(ambassadorType) && shipmentPreviouslySent
             const shipmentEntries = shipmentHistoryEntries(row)
             const discountCodeKey = String(row?.discount_code || '').trim().toUpperCase()
-            const codePerformance = discountCodeKey ? codePerformanceByCode[discountCodeKey] : null
+            // Sales are summed across every code this ambassador has had, so
+            // changing their code no longer hides their earlier sales.
+            const codePerformance = (() => {
+              const keys = [...new Set([discountCodeKey, ...(row?._allCodes || [])].filter(Boolean))]
+              const parts = keys.map((key) => codePerformanceByCode[key]).filter(Boolean)
+              if (!parts.length) return null
+              return parts.reduce((acc, p) => ({
+                orders: acc.orders + p.orders,
+                orderValueEur: acc.orderValueEur + p.orderValueEur,
+                commissionEur: acc.commissionEur + p.commissionEur,
+                lastRedemptionAt: [acc.lastRedemptionAt, p.lastRedemptionAt].filter(Boolean)
+                  .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] || '',
+              }), { orders: 0, orderValueEur: 0, commissionEur: 0, lastRedemptionAt: '' })
+            })()
             const shippingMethod = getShippingMethod(row)
             const hasTrackingNumber = Boolean(String(shipVal(row, 'tracking_number') || '').trim())
             const hasTrackingUrl = Boolean(String(shipVal(row, 'tracking_url') || '').trim())
@@ -7191,6 +7426,16 @@ const deleteApplication = async (row) => {
                           ⏸ Pause ambassador
                         </button>
                       )}
+                      {isPaused && (
+                        <button
+                          type="button"
+                          onClick={() => reactivateAmbassador(row)}
+                          disabled={saving === row.id}
+                          className="rounded-lg border border-emerald-400 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 disabled:opacity-60"
+                        >
+                          ▶ Reactivate ambassador
+                        </button>
+                      )}
                       {isApproved && (factoryAckValue ? (
                         <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">🏭 Factory acknowledged</span>
                       ) : (
@@ -7246,6 +7491,13 @@ const deleteApplication = async (row) => {
                   <div className="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
                     <p className="font-bold uppercase tracking-wide">Ambassador programme paused</p>
                     <p className="mt-1">Future PR packages and automated PR reminders are stopped. The ambassador discount code is inactive.</p>
+                    {(row.paused_at || row.paused_reason) && (
+                      <p className="mt-1">
+                        {row.paused_at ? `Paused ${fmtDate(row.paused_at)}${row.paused_by ? ` by ${row.paused_by}` : ''}. ` : ''}
+                        {row.paused_reason || ''}
+                      </p>
+                    )}
+                    <p className="mt-1">Use “▶ Reactivate ambassador” above to undo.</p>
                   </div>
                 )}
                 {row.status === 'rejected' && (
