@@ -112,6 +112,12 @@ const AMBASSADOR_PACKS_BY_TYPE = {
   },
 }
 
+const AMBASSADOR_TYPE_OPTIONS = [
+  { key: 'standard_ambassador', label: 'Standard' },
+  { key: 'super_ambassador', label: 'Super' },
+  { key: 'extreme_ambassador', label: 'Extreme' },
+]
+
 // Next PR package is due this many days after the last one is sent.
 const NEXT_PACKAGE_AFTER_DAYS = 28
 
@@ -5356,6 +5362,10 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   // details are still emailed separately later.
   const approveRow = async (row) => {
     if (String(row?.status || '').toLowerCase() === 'approved') return
+    if (!getAmbassadorType(row)) {
+      alert('Tick what type of ambassador this is (Standard, Super or Extreme) before approving.')
+      return
+    }
     if (!window.confirm(`Approve ${row.full_name} (@${row.instagram})?\n\nThis allocates/links their ambassador code and immediately emails them a welcome message with their Ambassador Agreement PDF attached.`)) return
     setSaving(row.id)
     const { data, error: err } = await supabase.rpc('approve_ambassador_application', { p_application_id: row.id })
@@ -7167,6 +7177,7 @@ const deleteApplication = async (row) => {
               onRemovePlanned={removePlannedItem}
               savingId={saving}
               onEditContents={editShipmentContents}
+              onSetType={setAmbassadorType}
               busyShipmentId={busyShipmentId}
               onMarkReceived={markShipmentReceived}
               onOpen={(id) => {
@@ -7461,6 +7472,26 @@ const deleteApplication = async (row) => {
                     </p>
                   </div>
                   <div className="border-t border-slate-200 pt-3">
+                    {!isRejected && !shipmentPreviouslySent && (
+                      <div className={`mb-2 rounded-lg border px-2.5 py-2 ${ambassadorType ? 'border-slate-200 bg-white' : 'border-amber-300 bg-amber-50'}`}>
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-slate-600">
+                          Type of ambassador {!ambassadorType && <span className="normal-case text-amber-800">— tick one{!isApproved ? ' before approving' : ''}</span>}
+                        </p>
+                        <div className="mt-1.5 flex flex-wrap gap-4 text-xs">
+                          {AMBASSADOR_TYPE_OPTIONS.map((opt) => (
+                            <label key={opt.key} className="inline-flex items-center gap-1.5 font-medium text-slate-800">
+                              <input
+                                type="checkbox"
+                                checked={ambassadorType === opt.key}
+                                disabled={saving === row.id}
+                                onChange={() => setAmbassadorType(row, ambassadorType === opt.key ? '' : opt.key)}
+                              />
+                              {opt.label}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     <div className="flex flex-wrap gap-1.5">
                       <button
                         onClick={() => openMessage(row)}

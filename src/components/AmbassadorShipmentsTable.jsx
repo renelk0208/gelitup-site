@@ -98,7 +98,26 @@ function SocialLinks({ row }) {
   )
 }
 
-function NameCell({ line, getType, onOpen }) {
+const TYPE_OPTIONS = [['standard_ambassador', 'Standard'], ['super_ambassador', 'Super'], ['extreme_ambassador', 'Extreme']]
+
+// Before the first package goes out, the type can be ticked right here.
+function TypePicker({ row, type, onSetType, busy }) {
+  return (
+    <div className={`mt-1 rounded border px-1.5 py-1 ${type ? 'border-slate-200' : 'border-amber-300 bg-amber-50'}`}>
+      {!type && <p className="text-[10px] font-semibold text-amber-800">Tick the type:</p>}
+      <div className="flex flex-wrap gap-2">
+        {TYPE_OPTIONS.map(([key, label]) => (
+          <label key={key} className="inline-flex items-center gap-1 text-[11px] text-slate-700">
+            <input type="checkbox" checked={type === key} disabled={busy} onChange={() => onSetType(row, type === key ? '' : key)} />
+            {label}
+          </label>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function NameCell({ line, getType, onOpen, onSetType, busy }) {
   const { row, country } = line
   return (
     <td className="px-3 py-2.5">
@@ -107,6 +126,7 @@ function NameCell({ line, getType, onOpen }) {
       </button>
       <SocialLinks row={row} />
       <p className="text-slate-500">{[country, TYPE_LABEL[getType(row)], row.discount_code].filter(Boolean).join(' · ')}</p>
+      {line.isFirst && onSetType && <TypePicker row={row} type={getType(row)} onSetType={onSetType} busy={busy} />}
     </td>
   )
 }
@@ -208,7 +228,7 @@ function PackageHistory({ line, open = false, onEditContents }) {
   )
 }
 
-export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onOpen, onMarkReceived, busyShipmentId }) {
+export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onSetType, onOpen, onMarkReceived, busyShipmentId }) {
   const [carrier, setCarrier] = useState('')
   // Package history (with what was in each package) is shown open by default.
   const [expandAll, setExpandAll] = useState(true)
@@ -274,7 +294,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} />
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.nextAt)}</td>
                 <td className="px-3 py-2.5 font-bold text-red-700">{Math.abs(l.nextIn)} day{Math.abs(l.nextIn) === 1 ? '' : 's'}</td>
                 <td className={td}>{planner(l)}</td>
@@ -292,7 +312,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} />
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} busy={savingId === l.row.id} />
                 <td className={td}>
                   {l.isFirst
                     ? <span className="font-semibold text-amber-800">First package{l.firstAcknowledged ? '' : ' · factory not told yet'}</span>
@@ -313,7 +333,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} />
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.last?.sent_at)}<br /><span className="text-slate-500">Package #{l.count}</span></td>
                 <td className={td}><Tracking pkg={l.last} /></td>
                 <td className={td}>
@@ -345,7 +365,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} />
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.last?.sent_at)}<br /><span className="text-slate-500">Package #{l.count}</span></td>
                 <td className={td}>
                   <span className="font-semibold text-emerald-700">✓ {fmt(l.last?.delivered_at)}</span>
@@ -367,7 +387,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
         <tbody className="divide-y divide-slate-100 align-top">
           {list.map((l) => (
             <tr key={l.row.id}>
-              <NameCell line={l} getType={getType} onOpen={onOpen} />
+              <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} busy={savingId === l.row.id} />
               <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} /></td>
             </tr>
           ))}
