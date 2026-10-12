@@ -6,6 +6,7 @@ import tierPricingOverrides from '../data/tierPricingOverrides.json'
 import ambassadorLetterAttachmentUrl from '../lib/ambassadorletter/Gelitup Ambassador Letter.pdf?url'
 import { buildAmbassadorContractPdf, buildAmbassadorPackingListPdf, buildAmbassadorWelcomeLetterPdf } from '../lib/ambassadorContractPdf.js'
 import { detectCarrier, estimateDelivery } from '../lib/ambassadorShipping.js'
+import { instagramHandle, instagramUrl, tiktokHandle, tiktokUrl } from '../lib/socialLinks.js'
 import AmbassadorShipmentsTable from '../components/AmbassadorShipmentsTable.jsx'
 import {
   normalizeAdminSkuToken,
@@ -7301,7 +7302,18 @@ const deleteApplication = async (row) => {
                       {row.status || 'new'}
                     </span>
                     {nextPackageDueBadge}
-                    <span className="text-xs text-fuchsia-700">@{row.instagram}</span>
+                    {instagramHandle(row.instagram) && (
+                      <span
+                        role="link"
+                        tabIndex={0}
+                        title="Open Instagram profile"
+                        onClick={(e) => { e.stopPropagation(); window.open(instagramUrl(row.instagram), '_blank', 'noopener') }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); window.open(instagramUrl(row.instagram), '_blank', 'noopener') } }}
+                        className="cursor-pointer text-xs font-medium text-fuchsia-700 hover:underline"
+                      >
+                        IG @{instagramHandle(row.instagram)}
+                      </span>
+                    )}
                     <span className="text-[11px] text-slate-400">{row.country ? `${row.country} · ` : ''}{fmtDate(row.created_at)}</span>
                   </span>
                   <span className="ml-auto shrink-0 text-[11px] font-medium text-slate-400">{isOpen ? 'Close' : 'Open'}</span>
@@ -7323,8 +7335,8 @@ const deleteApplication = async (row) => {
                 <div className="space-y-4">
                   <div className="min-w-0">
                     <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-600">
-                      <a href={`https://instagram.com/${row.instagram}`} target="_blank" rel="noreferrer" className="font-medium text-fuchsia-700 hover:underline">@{row.instagram}</a>
-                      {row.tiktok && <a href={`https://tiktok.com/@${row.tiktok}`} target="_blank" rel="noreferrer" className="font-medium text-slate-700 hover:underline">TikTok @{row.tiktok}</a>}
+                      {instagramHandle(row.instagram) && <a href={instagramUrl(row.instagram)} target="_blank" rel="noreferrer" className="font-medium text-fuchsia-700 hover:underline">@{instagramHandle(row.instagram)}</a>}
+                      {tiktokHandle(row.tiktok) && <a href={tiktokUrl(row.tiktok)} target="_blank" rel="noreferrer" className="font-medium text-slate-700 hover:underline">TikTok @{tiktokHandle(row.tiktok)}</a>}
                       {row.followers && <span>{row.followers} followers</span>}
                       <a href={`mailto:${row.email}`} className="hover:underline">{row.email}</a>
                       {row.phone && <a href={`tel:${row.phone}`} className="hover:underline">📞 {row.phone}</a>}

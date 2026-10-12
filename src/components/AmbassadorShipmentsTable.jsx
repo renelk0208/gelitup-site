@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { carrierLabel, deliveryState, normalizeCountry } from '../lib/ambassadorShipping.js'
+import { instagramHandle, instagramUrl, tiktokHandle, tiktokUrl } from '../lib/socialLinks.js'
 
 // Shipments overview, grouped so every ambassador sits in exactly ONE section
 // with ONE status:
@@ -83,6 +84,19 @@ function Tracking({ pkg }) {
   )
 }
 
+// Instagram (and TikTok) one click away, to check they are posting.
+function SocialLinks({ row }) {
+  const ig = instagramHandle(row.instagram)
+  const tt = tiktokHandle(row.tiktok)
+  if (!ig && !tt) return <p className="text-amber-700">No Instagram on file</p>
+  return (
+    <p className="flex flex-wrap gap-x-2">
+      {ig && <a href={instagramUrl(row.instagram)} target="_blank" rel="noreferrer" title="Open Instagram profile" className="font-medium text-fuchsia-700 hover:underline">IG @{ig}</a>}
+      {tt && <a href={tiktokUrl(row.tiktok)} target="_blank" rel="noreferrer" title="Open TikTok profile" className="text-slate-600 hover:underline">TikTok @{tt}</a>}
+    </p>
+  )
+}
+
 function NameCell({ line, getType, onOpen }) {
   const { row, country } = line
   return (
@@ -90,6 +104,7 @@ function NameCell({ line, getType, onOpen }) {
       <button type="button" onClick={() => onOpen(row.id)} className="text-left font-semibold text-slate-900 hover:text-fuchsia-700 hover:underline">
         {row.full_name || row.email}
       </button>
+      <SocialLinks row={row} />
       <p className="text-slate-500">{[country, TYPE_LABEL[getType(row)], row.discount_code].filter(Boolean).join(' · ')}</p>
     </td>
   )
