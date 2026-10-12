@@ -88,6 +88,8 @@ const SMALL_ORDER_MIN_EUR = 49
 const SMALL_ORDER_SHIPPING_ZONES = [
   { feeEur: 15, countries: ['Austria', 'Germany', 'Hungary', 'Belgium', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'Croatia', 'Czech Republic'] },
   { feeEur: 22, countries: ['Denmark', 'Spain', 'Luxembourg', 'Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Finland', 'Sweden', 'Norway', 'Switzerland', 'United Kingdom'] },
+  // Non-EU zone (from the July non-EU checkout fix, which was never merged).
+  { feeEur: 35, countries: ['Israel', 'Serbia', 'Turkey', 'Ukraine', 'Bosnia and Herzegovina', 'North Macedonia', 'Albania', 'Moldova', 'Georgia'] },
 ]
 const DISTRIBUTOR_COUNTRY_HANDOFF = {
   Italy: { url: 'https://www.gelitup.it', label: 'GEL.IT.UP Italy' },
@@ -4667,12 +4669,17 @@ function FullCataloguePage() {
       const codeToken = normalizeCatalogueToken(item.code)
       const subcategoryToken = normalizeCatalogueToken(item.subcategory)
       const pathToken = normalizeCatalogueToken(item.imageUrl)
+      // Also match the readable product name from the price list, so a search
+      // for e.g. "acrylic liquid" finds items whose file name is a code.
+      const priceEntry = cataloguePriceMap?.get(normalizeProductName(item.name))
+      const priceNameToken = priceEntry ? normalizeCatalogueToken(priceEntry.name) : ''
       return nameToken.includes(normalizedSearch)
         || codeToken.includes(normalizedSearch)
         || subcategoryToken.includes(normalizedSearch)
         || pathToken.includes(normalizedSearch)
+        || (priceNameToken && priceNameToken.includes(normalizedSearch))
     })
-  }, [activeColorFamily, activeCatEyeVariant, baseItems, isCatEye, isSolidGelPolish, solidGelColourFamilies, searchQuery])
+  }, [activeColorFamily, activeCatEyeVariant, baseItems, isCatEye, isSolidGelPolish, solidGelColourFamilies, searchQuery, cataloguePriceMap])
 
   useEffect(() => {
     setScrollTop(0)
@@ -4694,12 +4701,15 @@ function FullCataloguePage() {
           const subcategoryToken = normalizeCatalogueToken(sub.name)
           const pathToken = normalizeCatalogueToken(item.imageUrl)
           const categoryToken = normalizeCatalogueToken(section.category)
+          const priceEntry = cataloguePriceMap?.get(normalizeProductName(item.name))
+          const priceNameToken = priceEntry ? normalizeCatalogueToken(priceEntry.name) : ''
           if (
             nameToken.includes(normalizedSearch) ||
             codeToken.includes(normalizedSearch) ||
             subcategoryToken.includes(normalizedSearch) ||
             pathToken.includes(normalizedSearch) ||
-            categoryToken.includes(normalizedSearch)
+            categoryToken.includes(normalizedSearch) ||
+            (priceNameToken && priceNameToken.includes(normalizedSearch))
           ) {
             hits.push({ ...item, subcategory: sub.name, category: section.category })
           }
@@ -4707,7 +4717,7 @@ function FullCataloguePage() {
       }
     }
     return hits
-  }, [sections, searchQuery])
+  }, [sections, searchQuery, cataloguePriceMap])
 
   useEffect(() => {
     if (activeCategory && !activeSubcategory) {
@@ -20313,8 +20323,13 @@ function App() {
         // User arrived via a password-reset email link — flag recovery mode and send to
         // the create-password form.  The ?code= is already consumed by the SDK so we
         // cannot rely on URL params; this event is the only reliable signal.
+        // Carry the email along so the create-password form isn't left with an
+        // empty email field (which blocked recovery with "Business email is required").
+        const recoveryEmail = String(session?.user?.email || '').trim().toLowerCase()
         setPendingRecoverySession(true)
-        navigate('/portal/login?mode=create-password')
+        navigate(recoveryEmail
+          ? `/portal/login?mode=create-password&email=${encodeURIComponent(recoveryEmail)}`
+          : '/portal/login?mode=create-password')
         setAuthReady(true)
         return
       }
@@ -20876,10 +20891,6 @@ function App() {
     const normalizedEmail = String(email || '').trim().toLowerCase()
     const isInternalBypassEmail = PORTAL_INTERNAL_BYPASS_EMAILS.has(normalizedEmail)
 
-    if (!normalizedEmail) {
-      return { ok: false, message: 'Business email is required.' }
-    }
-
     if (!password || password.length < 8) {
       return { ok: false, message: 'Password must be at least 8 characters.' }
     }
@@ -20895,12 +20906,19 @@ function App() {
     // If the user arrived via a Supabase password-reset email link (isRecoveryFlow=true),
     // the SDK has already exchanged the code for a recovery session — call updateUser directly.
     if (isRecoveryFlow) {
+      // A recovery session already knows who the user is, so the email field
+      // may legitimately be empty here; it is only required for the other paths.
+      const { data: recoveryUserData } = await supabase.auth.getUser()
+      const recoveryEmail = String(recoveryUserData?.user?.email || normalizedEmail).trim().toLowerCase()
       const { error: updateError } = await supabase.auth.updateUser({ password })
       if (updateError) {
         if (/not exist|invalid|expired/i.test(updateError.message || '')) {
           return { ok: false, message: 'Your reset link has expired. Please request a new password reset email.' }
         }
         return { ok: false, message: updateError.message || 'Password update failed.' }
+      }
+      if (recoveryEmail) {
+        try { localStorage.setItem('portalRememberedEmail', recoveryEmail) } catch { /* storage unavailable */ }
       }
       await markAmbassadorPortalAccountCreated()
       setIsPortalAuthenticated(true)
@@ -20910,6 +20928,10 @@ function App() {
         navigateToDashboard: true,
         debugTrace: 'create-password -> recovery-updateUser',
       }
+    }
+
+    if (!normalizedEmail) {
+      return { ok: false, message: 'Business email is required.' }
     }
 
     // Check if user already has an active session — this happens when they clicked

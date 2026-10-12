@@ -6466,8 +6466,14 @@ const resendShipmentEmail = async (row, nextReminderAt, trackingOverride) => {
   const fullName = String(row?.full_name || '').trim()
   const discountCode = String(row?.discount_code || '').trim()
   const normalizedEmail = String(row?.email || '').trim().toLowerCase()
-  if (!fullName || !discountCode || !normalizedEmail) {
-    alert('Ambassador name, discount code, and email are all required to resend the tracking email.')
+  // Say exactly which field is missing instead of a general message.
+  const missingFields = [
+    !fullName && '• Ambassador name',
+    !discountCode && '• Discount code',
+    !normalizedEmail && '• Ambassador email',
+  ].filter(Boolean)
+  if (missingFields.length > 0) {
+    alert(`Cannot resend the tracking email. Missing:\n\n${missingFields.join('\n')}\n\nFill these in, save, and try again.`)
     return
   }
   if (!window.confirm(`Resend tracking email (with welcome letter) to ${normalizedEmail}?`)) return
