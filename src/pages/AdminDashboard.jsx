@@ -109,9 +109,11 @@ const AMBASSADOR_PACKS_BY_TYPE = {
   },
 }
 
+// Next PR package is due this many days after the last one is sent.
+const NEXT_PACKAGE_AFTER_DAYS = 28
+
 const AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE = {
   standard_ambassador: {
-    daysAfterDispatch: 21,
     items: [
       '1x Pink Buffer',
       '1 x Purple Buffer',
@@ -121,7 +123,6 @@ const AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE = {
     ],
   },
   super_ambassador: {
-    daysAfterDispatch: 21,
     items: [
       'New Dual Forms',
       '1 x roll of Gelitup Nail Forms',
@@ -176,14 +177,6 @@ function fmtDateTime(iso) {
     hour: '2-digit',
     minute: '2-digit',
   })
-}
-
-function addOneMonth(iso) {
-  const source = new Date(iso)
-  if (Number.isNaN(source.getTime())) return null
-  const next = new Date(source)
-  next.setMonth(next.getMonth() + 1)
-  return next.toISOString()
 }
 
 function parseDateLabelToIso(label) {
@@ -4910,7 +4903,9 @@ function AmbassadorApplicationsPanel({ focusAmbassadorId } = {}) {
   const [error, setError] = useState('')
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(false)
-  const [filter, setFilter] = useState('approved')
+  // The Shipments view always covers everyone; a remembered Shipments view
+  // with the Approved/Pending filter left the screen empty.
+  const [filter, setFilter] = useState(() => (viewMode === 'shipments' ? 'all' : 'approved'))
   const [searchQuery, setSearchQuery] = useState('')
   const [saving, setSaving] = useState(null)
   const [emailStatus, setEmailStatus] = useState({}) // { [id]: { state, message } }
@@ -5262,13 +5257,10 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       setEmail(row.id, 'error', 'Reminder date is invalid.')
       return
     }
-    const followUpPack = getFollowUpPackForRow(row)
     const nextReminderAt = parsedReminderAt
       ? parsedReminderAt.toISOString()
       : (sentAtIso
-        ? (followUpPack
-          ? new Date(new Date(sentAtIso).getTime() + (Number(followUpPack.daysAfterDispatch || 28) * 24 * 60 * 60 * 1000)).toISOString()
-          : addOneMonth(sentAtIso))
+        ? new Date(new Date(sentAtIso).getTime() + NEXT_PACKAGE_AFTER_DAYS * 24 * 60 * 60 * 1000).toISOString()
         : '')
     setSaving(row.id)
     const result = await saveShipmentMeta(row, { nextReminderAt })
@@ -5637,18 +5629,14 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const raw = String(value || '').trim()
     return raw ? encodeURIComponent(raw) : ''
   }
-  const getFollowUpPackForType = (type) => {
-    const normalized = String(type || '').trim().toLowerCase()
-    return AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE[normalized] || null
-  }
-  const getFollowUpPackForRow = (row) => getFollowUpPackForType(getAmbassadorType(row))
+  // Rule for every ambassador type: the next package is due 4 weeks after
+  // the day a package is sent. The database applies the same rule
+  // (supabase/sql/ambassador_step3_four_week_rule.sql).
   const getDefaultFollowUpDateValue = (row, baseIso = new Date().toISOString()) => {
-    const followUpPack = getFollowUpPackForRow(row)
-    if (!followUpPack) return ''
     const source = new Date(baseIso)
     if (Number.isNaN(source.getTime())) return ''
     const next = new Date(source)
-    next.setUTCDate(next.getUTCDate() + Number(followUpPack.daysAfterDispatch || 28))
+    next.setUTCDate(next.getUTCDate() + NEXT_PACKAGE_AFTER_DAYS)
     return next.toISOString().slice(0, 10)
   }
   const buildCommentWithMeta = (row, patch) => {
@@ -5711,18 +5699,12 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const tagged = readMetaTag(row, 'SHIPMENT_NEXT_REMINDER_AT') || fallbackIso || ''
     return tagged ? String(tagged).slice(0, 10) : ''
   }
-  // When starting a fresh dispatch, never default the "next reminder" prompt
-  // to a date that has already passed — that silently re-saves the stale,
-  // already-overdue schedule, so the "overdue" badge never clears even
-  // though a brand-new package was just sent. Only reuse the stored date
-  // when it's still in the future; otherwise propose a sensible new one.
+  // Default "next package" date when a package is being sent now.
   const nextDispatchDateDefault = (row) => {
     if (Object.prototype.hasOwnProperty.call(reminderDateDraft, row.id)) return reminderDateDraft[row.id]
-    const freshDefault = getDefaultFollowUpDateValue(row) || ''
-    const tagged = readMetaTag(row, 'SHIPMENT_NEXT_REMINDER_AT')
-    if (!tagged) return freshDefault
-    const taggedIsFuture = new Date(tagged).getTime() > Date.now()
-    return (taggedIsFuture ? String(tagged).slice(0, 10) : freshDefault) || freshDefault
+    // A package going out today always starts a new 4-week cycle; the old
+    // date belonged to the package being sent now.
+    return getDefaultFollowUpDateValue(row) || ''
   }
   // Admin ticks a package as received (the ambassador can also confirm it in
   // their portal).
@@ -6225,7 +6207,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   // appended into admin_comment; we now keep them out of the editable notes and
   // surface them (plus the new message_log column) in the Messages section.
   const isAmbassadorMsgLine = (line) => String(line).includes('📧')
-  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|AMBASSADOR_PROGRAMME_PAUSED|PACK_NOTE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE|SHIPMENT_METHOD|FACTORY_ACK|SHIPMENT_OFFICE_REMINDER_AT|SHIPMENT_OFFICE_REMINDER_SENT_AT|SHIPMENT_OFFICE_REMINDER_DISPATCHED_AT|SHIPMENT_OFFICE_REMINDER_NEXT_PACKAGE_AT|SHIPMENT_OFFICE_REMINDER_ITEMS|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SIGNATURE|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SENT_AT|SHIPMENT_NEXT_PACKAGE_OPEN):[^\]]+\]$/i.test(String(line).trim())
+  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|AMBASSADOR_PROGRAMME_PAUSED|PACK_NOTE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE|SHIPMENT_METHOD|FACTORY_ACK|SHIPMENT_OFFICE_REMINDER_AT|SHIPMENT_OFFICE_REMINDER_SENT_AT|SHIPMENT_OFFICE_REMINDER_DISPATCHED_AT|SHIPMENT_OFFICE_REMINDER_NEXT_PACKAGE_AT|SHIPMENT_OFFICE_REMINDER_ITEMS|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SIGNATURE|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SENT_AT|SHIPMENT_NEXT_PACKAGE_OPEN|SHIPMENT_OFFICE_REMINDER_SENT_FOR):[^\]]+\]$/i.test(String(line).trim())
   const packNoteLines = (row) => String(row.admin_comment || '').split('\n').filter((line) => /^\[PACK_NOTE:[^\]]+\]$/i.test(String(line).trim()))
   const parsePackNote = (line) => {
     const encoded = String(line || '').trim().match(/^\[PACK_NOTE:([^\]]+)\]$/i)?.[1]
@@ -7008,7 +6990,12 @@ const deleteApplication = async (row) => {
     // been sent — never derive one for an ambassador who hasn't (that was the
     // source of ambassadors showing a red "overdue" badge despite nothing ever
     // having been shipped to them).
-    const nextReminderAt = sentAt ? (reminderAtMeta || addOneMonth(sentAt)) : null
+    // next_package_due is kept by the database (4 weeks after the last package
+    // sent); the old tag and the 4-week rule are fallbacks.
+    const columnDue = row?.next_package_due ? `${String(row.next_package_due).slice(0, 10)}T10:00:00.000Z` : null
+    const nextReminderAt = sentAt
+      ? (columnDue || reminderAtMeta || new Date(new Date(sentAt).getTime() + NEXT_PACKAGE_AFTER_DAYS * 86400000).toISOString())
+      : null
     const isDatePast = Boolean(nextReminderAt) && new Date(nextReminderAt).getTime() < Date.now()
     const dueSoon = Boolean(nextReminderAt) && !isDatePast && (new Date(nextReminderAt).getTime() - Date.now()) <= 7 * 24 * 60 * 60 * 1000
     const isFactoryAcked = Boolean(getFactoryAck(row))
@@ -7101,7 +7088,7 @@ const deleteApplication = async (row) => {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
-            {FILTERS.map((f) => (
+            {viewMode === 'cards' && FILTERS.map((f) => (
               <button
                 key={f.key}
                 onClick={() => setFilter(f.key)}
