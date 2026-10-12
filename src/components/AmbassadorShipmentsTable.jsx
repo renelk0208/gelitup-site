@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { carrierLabel, deliveryState, normalizeCountry } from '../lib/ambassadorShipping.js'
+import { carrierLabel, deliveryState, normalizeCountry, trackingLink } from '../lib/ambassadorShipping.js'
 import { instagramHandle, instagramUrl, tiktokHandle, tiktokUrl } from '../lib/socialLinks.js'
 import { whereAlreadySent } from '../lib/packageItems.js'
 
@@ -79,8 +79,8 @@ function Tracking({ pkg }) {
   return (
     <span>
       <span className="font-semibold text-slate-700">{carrierLabel(pkg.carrier) || 'Carrier'}</span>{' '}
-      {pkg.tracking_url
-        ? <a href={pkg.tracking_url} target="_blank" rel="noreferrer" className="text-fuchsia-700 hover:underline">{pkg.tracking_number || 'track'}</a>
+      {trackingLink(pkg.tracking_number, pkg.tracking_url, pkg.carrier)
+        ? <a href={trackingLink(pkg.tracking_number, pkg.tracking_url, pkg.carrier)} target="_blank" rel="noreferrer" title="Open the carrier's tracking page" className="text-fuchsia-700 hover:underline">{pkg.tracking_number || 'track'}</a>
         : <span className="text-slate-600">{pkg.tracking_number}</span>}
     </span>
   )
