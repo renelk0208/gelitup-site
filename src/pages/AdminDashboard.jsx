@@ -4531,7 +4531,12 @@ function buildAmbassadorShipmentEmail(row, ship, setPasswordLink, nextPackageIso
   const name = (row?.full_name?.trim() || 'there').replace(/\b\w/g, (c) => c.toUpperCase())
   const discountCode = String(row?.discount_code || '').trim()
   const parts = []
-  if (ship.shipment_details) parts.push(`<p><strong>What you'll receive:</strong></p><div style="white-space:pre-wrap;border-left:3px solid #d43790;padding:8px 12px;background:#fdf0f5;">${escAmb(ship.shipment_details)}</div>`)
+  // What is in this package: the items recorded for it, plus any free text.
+  const itemList = (Array.isArray(ship.items) ? ship.items : []).map((t) => String(t || '').trim()).filter(Boolean)
+  const extraText = String(ship.shipment_details || '').trim()
+  if (itemList.length || extraText) {
+    parts.push(`<p><strong>What's in your package:</strong></p><div style="border-left:3px solid #d43790;padding:8px 12px;background:#fdf0f5;">${itemList.length ? `<ul style="margin:0;padding-left:18px">${itemList.map((t) => `<li>${escAmb(t)}</li>`).join('')}</ul>` : ''}${extraText && !itemList.some((t) => t === extraText) ? `<div style="white-space:pre-wrap;${itemList.length ? 'margin-top:6px' : ''}">${escAmb(extraText)}</div>` : ''}</div>`)
+  }
   if (ship.tracking_number) parts.push(`<p><strong>Tracking number:</strong> ${escAmb(ship.tracking_number)}</p>`)
   if (ship.tracking_url) parts.push(`<p><a href="${escAmb(ship.tracking_url)}" style="color:#D43790">Track your parcel →</a></p>`)
   // One-click "I've received it" — opens a page on gelitup.com with a confirm button.
@@ -4544,6 +4549,9 @@ function buildAmbassadorShipmentEmail(row, ship, setPasswordLink, nextPackageIso
     const earliest = new Date(center); earliest.setDate(earliest.getDate() - 7)
     const latest = new Date(center); latest.setDate(latest.getDate() + 7)
     const fmt = (d) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+    if (!Number.isNaN(center.getTime())) {
+      parts.push(`<p><strong>📅 Your next PR package:</strong> planned for around <strong>${escAmb(fmt(center))}</strong> (between ${escAmb(fmt(earliest))} and ${escAmb(fmt(latest))}). We'll send you a tracking email as soon as it's on its way.</p>`)
+    }
   }
   // NOTE: admin_comment is intentionally NOT included — it is an internal-only note.
   return {
@@ -6584,7 +6592,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const receiptToken = (globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`)
     const { subject, html } = buildAmbassadorShipmentEmail(
       updatedRow,
-      { ...draft, shipment_details: currentShipmentItems || draft.shipment_details || '' },
+      { ...draft, items: completedItems.filter((t) => t !== currentShipmentItems), shipment_details: currentShipmentItems || draft.shipment_details || '' },
       setPasswordLink,
       chosenReminderAt.toISOString(),
       /^[0-9a-f-]{36}$/i.test(receiptToken) ? receiptToken : null,
@@ -6753,7 +6761,7 @@ const resendShipmentEmail = async (row, nextReminderAt, trackingOverride) => {
   const draft = { tracking_number: trackingNumber, tracking_url: trackingUrl }
   const resentShipment = (row?._shipments || []).find((s) => String(s.tracking_number || '').trim() === String(trackingNumber || '').trim())
     || (row?._shipments || [])[0]
-  const { subject, html } = buildAmbassadorShipmentEmail(row, draft, setPasswordLink, reminderIso, resentShipment?.receipt_token || null)
+  const { subject, html } = buildAmbassadorShipmentEmail(row, { ...draft, items: resentShipment?.items || [] }, setPasswordLink, reminderIso, resentShipment?.receipt_token || null)
   let attachments = []
   try {
     const letterPdf = await buildAmbassadorWelcomeLetterPdf({ fullName: row.full_name, discountCode: row.discount_code })
@@ -8058,6 +8066,10 @@ const deleteApplication = async (row) => {
                       const previewDraft = {
                         tracking_number: shipVal(row, 'tracking_number'),
                         tracking_url: shipVal(row, 'tracking_url'),
+                        items: [
+                          ...(shipmentPreviouslySent ? [] : (selectedPack?.items || [])),
+                          ...packNoteEntries(row).map((entry) => entry.text),
+                        ],
                       }
                       const preview = buildAmbassadorShipmentEmail(row, previewDraft, null, reminderDateVal(row, nextReminderAt) ? new Date(`${reminderDateVal(row, nextReminderAt)}T10:00:00Z`).toISOString() : null)
                       return (
