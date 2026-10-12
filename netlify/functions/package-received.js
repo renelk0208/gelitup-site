@@ -64,7 +64,7 @@ export async function handler(event) {
     return page('Link not valid', '<h1>We couldn\'t find this package</h1><p>Please reply to your tracking email and we\'ll check it for you.</p>', 404)
   }
   const rawFirst = String(shipment.first_name || '').trim()
-  const firstName = rawFirst ? rawFirst.charAt(0).toUpperCase() + rawFirst.slice(1).toLowerCase() : ''
+  const firstName = rawFirst // full name, already capitalised by the database
   const sentLine = `${shipment.sent_at ? `sent on ${esc(fmtDate(shipment.sent_at))}` : ''}${shipment.tracking_number ? ` · tracking ${esc(shipment.tracking_number)}` : ''}`
 
   if (shipment.delivered_at) {
