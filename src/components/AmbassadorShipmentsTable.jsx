@@ -118,7 +118,7 @@ function TypePicker({ row, type, onSetType, busy }) {
   )
 }
 
-function NameCell({ line, getType, onOpen, onSetType, onAskChoice, busy }) {
+function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews, busy }) {
   const { row, country } = line
   return (
     <td className="px-3 py-2.5">
@@ -134,6 +134,12 @@ function NameCell({ line, getType, onOpen, onSetType, onAskChoice, busy }) {
       )}
       {!line.isFirst && !row.choice_submitted_at && !row.choice_requested_at && onAskChoice && String(row.status).toLowerCase() === 'approved' && (
         <button type="button" onClick={() => onAskChoice(row)} disabled={busy} className="mt-1 text-[11px] font-semibold text-fuchsia-700 hover:underline">✉ Ask her to choose 5 products</button>
+      )}
+      {onAskReviews && (row._shipments || []).some((s) => s.sent_at && !s.lost_at) && (
+        <p className="mt-1 text-[11px]">
+          {row.review_requested_at && <span className="text-sky-700">★ Asked for reviews {fmt(row.review_requested_at)} ({Object.keys(row.review_requests || {}).length}) · </span>}
+          <button type="button" onClick={() => onAskReviews(row)} disabled={busy} className="font-semibold text-fuchsia-700 hover:underline">★ {row.review_requested_at ? 'Ask for more reviews' : 'Ask for reviews'}</button>
+        </p>
       )}
     </td>
   )
@@ -252,7 +258,7 @@ function PackageHistory({ line, open = false, onEditContents, onMarkLost, onEdit
   )
 }
 
-export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onSetType, onMarkLost, onEditNote, onAskChoice, onOpen, onMarkReceived, busyShipmentId }) {
+export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onSetType, onMarkLost, onEditNote, onAskChoice, onAskReviews, onOpen, onMarkReceived, busyShipmentId }) {
   const [carrier, setCarrier] = useState('')
   // Package history (with what was in each package) is shown open by default.
   const [expandAll, setExpandAll] = useState(true)
@@ -318,7 +324,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} busy={savingId === l.row.id} />
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.nextAt)}</td>
                 <td className="px-3 py-2.5 font-bold text-red-700">{Math.abs(l.nextIn)} day{Math.abs(l.nextIn) === 1 ? '' : 's'}</td>
                 <td className={td}>{planner(l)}</td>
@@ -336,7 +342,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} busy={savingId === l.row.id} />
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} busy={savingId === l.row.id} />
                 <td className={td}>
                   {l.isFirst
                     ? <span className="font-semibold text-amber-800">First package{l.firstAcknowledged ? '' : ' · factory not told yet'}</span>
@@ -357,7 +363,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} busy={savingId === l.row.id} />
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.last?.sent_at)}<br /><span className="text-slate-500">Package #{l.count}</span></td>
                 <td className={td}><Tracking pkg={l.last} /></td>
                 <td className={td}>
@@ -389,7 +395,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} busy={savingId === l.row.id} />
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.last?.sent_at)}<br /><span className="text-slate-500">Package #{l.count}</span></td>
                 <td className={td}>
                   <span className="font-semibold text-emerald-700">✓ {fmt(l.last?.delivered_at)}</span>
@@ -411,7 +417,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
         <tbody className="divide-y divide-slate-100 align-top">
           {list.map((l) => (
             <tr key={l.row.id}>
-              <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} busy={savingId === l.row.id} />
+              <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} busy={savingId === l.row.id} />
               <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} onEditNote={onEditNote} /></td>
             </tr>
           ))}
