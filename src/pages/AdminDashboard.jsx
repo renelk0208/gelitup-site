@@ -9,6 +9,7 @@ import { detectCarrier, estimateDelivery, trackingLink } from '../lib/ambassador
 import { instagramHandle, instagramUrl, tiktokHandle, tiktokUrl } from '../lib/socialLinks.js'
 import { whereAlreadySent } from '../lib/packageItems.js'
 import { productUrl, receivedItems, searchProducts } from '../lib/reviewProducts.js'
+import { REVIEW_EMAIL_LANGUAGES, reviewEmailLang, reviewEmailText } from '../lib/reviewEmailText.js'
 import { AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE } from '../lib/ambassadorFollowUpPacks.js'
 import AmbassadorShipmentsTable from '../components/AmbassadorShipmentsTable.jsx'
 import {
@@ -4593,7 +4594,8 @@ function buildAmbassadorChoiceRequestEmail(row) {
 
 // One email with every product she received, each with a button to its review
 // form on shop.gelitup.com. The reviews are collected by Judge.me.
-function buildAmbassadorReviewRequestEmail(row, products) {
+function buildAmbassadorReviewRequestEmail(row, products, lang) {
+  const t = reviewEmailText(lang || row?.language)
   const firstName = String(row?.full_name || '').trim().split(/\s+/)[0] || 'there'
   const name = firstName.charAt(0).toUpperCase() + firstName.slice(1)
   const cards = (products || []).map((p) => `
@@ -4601,20 +4603,20 @@ function buildAmbassadorReviewRequestEmail(row, products) {
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
           <td width="72" valign="middle" style="padding-right:14px">${p.image ? `<img src="${escAmb(`${p.image}${String(p.image).includes('?') ? '&' : '?'}width=200`)}" width="64" height="64" alt="" style="display:block;width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #e8e8e8"/>` : ''}</td>
           <td valign="middle" style="font-size:14px;color:#1a1a1a;font-weight:700">${escAmb(p.title)}</td>
-          <td valign="middle" align="right" style="white-space:nowrap"><a href="${escAmb(productUrl(p.handle))}" style="display:inline-block;background:#d43790;color:#ffffff;padding:9px 14px;border-radius:9999px;text-decoration:none;font-weight:700;font-size:13px">Review ★</a></td>
+          <td valign="middle" align="right" style="white-space:nowrap"><a href="${escAmb(productUrl(p.handle))}" style="display:inline-block;background:#d43790;color:#ffffff;padding:9px 14px;border-radius:9999px;text-decoration:none;font-weight:700;font-size:13px">${t.button}</a></td>
         </tr></table>
       </td></tr>`).join('')
   return {
-    subject: `${name}, how are you finding your GEL.IT.UP products? 💖`,
+    subject: t.subject(name),
     html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#4a4a4a;line-height:1.6;max-width:600px">
-      <p style="color:#1a1a1a">Hi ${escAmb(name)},</p>
-      <p>Thank you for being part of the GEL.IT.UP Ambassador family! We hope you're enjoying the products from your PR package${(products || []).length > 1 ? 's' : ''}, and we'd love to hear what you think.</p>
-      <p>Please leave an honest review of each product below — what you loved, how it worked for you, and any tips for other nail techs. Photos of your work are very welcome!</p>
+      <p style="color:#1a1a1a">${t.hi(escAmb(name))}</p>
+      <p>${t.thanks}</p>
+      <p>${t.ask}</p>
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:18px 0">${cards}</table>
-      <p style="background:#f8f8f6;border-left:3px solid #d43790;padding:10px 14px;margin:18px 0"><strong style="color:#1a1a1a">How it works:</strong> tap <strong>Review</strong>, then <strong>Write a review</strong> on the product page. Our review system (Judge.me) will ask for your email address and send you a secure link to finish your review — please use <strong>${escAmb(row?.email || 'this email address')}</strong>.</p>
-      <p>As these products were gifted to you as an ambassador, please mention <strong>"gifted product"</strong> in your review.</p>
-      <p>It only takes a minute, and it really helps other nail professionals choose with confidence. Thank you! 💖</p>
-      <p>With love,<br/>René Krallis<br/>Marketing Director, GEL.IT.UP International</p>
+      <p style="background:#f8f8f6;border-left:3px solid #d43790;padding:10px 14px;margin:18px 0"><strong style="color:#1a1a1a">${t.howTitle}</strong> ${t.how(escAmb(row?.email || ''))}</p>
+      <p>${t.gifted}</p>
+      <p>${t.closing}</p>
+      <p>${t.love}<br/>René Krallis<br/>Marketing Director, GEL.IT.UP International</p>
     </div>`,
   }
 }
@@ -5853,7 +5855,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     }
   }
   const openReviewRequest = async (row) => {
-    setReviewModal({ row, picked: [], query: '', sending: false, preview: false, loading: true })
+    setReviewModal({ row, picked: [], query: '', sending: false, preview: false, loading: true, lang: reviewEmailLang(row.language) })
     const products = await loadShopProducts()
     const asked = row.review_requests || {}
     const picked = []
@@ -5869,7 +5871,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (!email) { alert('This ambassador has no email address.'); return }
     if (!window.confirm(`Send the review email to ${m.row.full_name} (${email}) for ${m.picked.length} product${m.picked.length === 1 ? '' : 's'}?`)) return
     setReviewModal({ ...m, sending: true })
-    const { subject, html } = buildAmbassadorReviewRequestEmail(m.row, m.picked)
+    const { subject, html } = buildAmbassadorReviewRequestEmail(m.row, m.picked, m.lang)
     const res = await sendAmbassadorEmail({ to: email, subject, html })
     if (!res.ok) { setReviewModal({ ...m, sending: false }); alert(`Email not sent: ${res.error || 'unknown error'}`); return }
     const at = new Date().toISOString()
@@ -8456,7 +8458,7 @@ const deleteApplication = async (row) => {
         const isPicked = (h) => m.picked.some((p) => p.handle === h)
         const toggle = (p) => setReviewModal((cur) => ({ ...cur, picked: isPicked(p.handle) ? cur.picked.filter((x) => x.handle !== p.handle) : [...cur.picked, p] }))
         const results = searchProducts(shopProducts || [], m.query)
-        const preview = m.preview ? buildAmbassadorReviewRequestEmail(m.row, m.picked) : null
+        const preview = m.preview ? buildAmbassadorReviewRequestEmail(m.row, m.picked, m.lang) : null
         return (
           <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4" onClick={() => !m.sending && setReviewModal(null)}>
             <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
@@ -8538,7 +8540,12 @@ const deleteApplication = async (row) => {
                 </>)}
               </div>
               <div className="mt-4 flex items-center justify-end gap-2">
-                <button type="button" onClick={() => setReviewModal((cur) => ({ ...cur, preview: !cur.preview }))} disabled={m.loading || !m.picked.length} className="mr-auto rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50">{m.preview ? 'Hide preview' : 'Preview email'}</button>
+                <label className="mr-auto flex items-center gap-1 text-xs text-slate-600">Language
+                  <select value={m.lang} onChange={(e) => setReviewModal((cur) => ({ ...cur, lang: e.target.value }))} disabled={m.sending} className="rounded border border-slate-300 px-1.5 py-1 text-xs">
+                    {REVIEW_EMAIL_LANGUAGES.map(([code, label]) => <option key={code} value={code}>{label}{code === reviewEmailLang(m.row.language) ? ' (hers)' : ''}</option>)}
+                  </select>
+                </label>
+                <button type="button" onClick={() => setReviewModal((cur) => ({ ...cur, preview: !cur.preview }))} disabled={m.loading || !m.picked.length} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50">{m.preview ? 'Hide preview' : 'Preview email'}</button>
                 <button type="button" onClick={() => setReviewModal(null)} disabled={m.sending} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
                 <button type="button" onClick={sendReviewRequest} disabled={m.sending || m.loading || !m.picked.length} className="rounded-lg bg-fuchsia-600 px-4 py-2 text-xs font-semibold text-white hover:bg-fuchsia-500 disabled:opacity-50">
                   {m.sending ? 'Sending…' : `Send review email (${m.picked.length})`}
