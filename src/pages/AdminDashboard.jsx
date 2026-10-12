@@ -8,6 +8,8 @@ import { buildAmbassadorContractPdf, buildAmbassadorPackingListPdf, buildAmbassa
 import { detectCarrier, estimateDelivery, trackingLink } from '../lib/ambassadorShipping.js'
 import { instagramHandle, instagramUrl, tiktokHandle, tiktokUrl } from '../lib/socialLinks.js'
 import { whereAlreadySent } from '../lib/packageItems.js'
+import { productUrl, receivedItems, searchProducts } from '../lib/reviewProducts.js'
+import { REVIEW_EMAIL_LANGUAGES, reviewEmailLang, reviewEmailText } from '../lib/reviewEmailText.js'
 import { AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE } from '../lib/ambassadorFollowUpPacks.js'
 import AmbassadorShipmentsTable from '../components/AmbassadorShipmentsTable.jsx'
 import {
@@ -4590,6 +4592,35 @@ function buildAmbassadorChoiceRequestEmail(row) {
   }
 }
 
+// One email with every product she received, each with a button to its review
+// form on shop.gelitup.com. The reviews are collected by Judge.me.
+function buildAmbassadorReviewRequestEmail(row, products, lang) {
+  const t = reviewEmailText(lang || row?.language)
+  const firstName = String(row?.full_name || '').trim().split(/\s+/)[0] || 'there'
+  const name = firstName.charAt(0).toUpperCase() + firstName.slice(1)
+  const cards = (products || []).map((p) => `
+      <tr><td style="padding:10px 0;border-bottom:1px solid #e8e8e8">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+          <td width="72" valign="middle" style="padding-right:14px">${p.image ? `<img src="${escAmb(`${p.image}${String(p.image).includes('?') ? '&' : '?'}width=200`)}" width="64" height="64" alt="" style="display:block;width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #e8e8e8"/>` : ''}</td>
+          <td valign="middle" style="font-size:14px;color:#1a1a1a;font-weight:700">${escAmb(p.title)}</td>
+          <td valign="middle" align="right" style="white-space:nowrap"><a href="${escAmb(productUrl(p.handle))}" style="display:inline-block;background:#d43790;color:#ffffff;padding:9px 14px;border-radius:9999px;text-decoration:none;font-weight:700;font-size:13px">${t.button}</a></td>
+        </tr></table>
+      </td></tr>`).join('')
+  return {
+    subject: t.subject(name),
+    html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#4a4a4a;line-height:1.6;max-width:600px">
+      <p style="color:#1a1a1a">${t.hi(escAmb(name))}</p>
+      <p>${t.thanks}</p>
+      <p>${t.ask}</p>
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:18px 0">${cards}</table>
+      <p style="background:#f8f8f6;border-left:3px solid #d43790;padding:10px 14px;margin:18px 0"><strong style="color:#1a1a1a">${t.howTitle}</strong> ${t.how(escAmb(row?.email || ''))}</p>
+      <p>${t.gifted}</p>
+      <p>${t.closing}</p>
+      <p>${t.love}<br/>René Krallis<br/>Marketing Director, GEL.IT.UP International</p>
+    </div>`,
+  }
+}
+
 function buildAmbassadorShipmentNotificationEmail(row, ship, sentAtIso, nextPackageIso, nextPackageItems) {
   const ambassadorName = String(row?.full_name || row?.email || 'Unknown ambassador').trim()
   const nextPackageDate = nextPackageIso
@@ -5803,6 +5834,53 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     setChoiceBulkBusy(false)
     setChoicePicker(null)
     alert(failed.length ? `Sent ${targets.length - failed.length} of ${targets.length}.\n\nNot sent:\n${failed.join('\n')}` : `Sent to ${targets.length} ambassador${targets.length === 1 ? '' : 's'}.`)
+  }
+  // Review request: one email with every product she received, each linking to
+  // its Judge.me review form on shop.gelitup.com.
+  const [shopProducts, setShopProducts] = useState(null)
+  const [shopProductsError, setShopProductsError] = useState('')
+  const [reviewModal, setReviewModal] = useState(null) // { row, picked, query, sending, preview }
+  const loadShopProducts = async () => {
+    if (shopProducts) return shopProducts
+    setShopProductsError('')
+    try {
+      const res = await fetch('/.netlify/functions/shop-products')
+      const json = await res.json()
+      if (!res.ok || !Array.isArray(json?.products)) throw new Error(json?.error || `HTTP ${res.status}`)
+      setShopProducts(json.products)
+      return json.products
+    } catch (e) {
+      setShopProductsError(`Could not load the shop products: ${e.message}`)
+      return []
+    }
+  }
+  const openReviewRequest = async (row) => {
+    setReviewModal({ row, picked: [], query: '', sending: false, preview: false, loading: true, lang: reviewEmailLang(row.language) })
+    const products = await loadShopProducts()
+    const asked = row.review_requests || {}
+    const picked = []
+    for (const it of receivedItems(row._shipments, products)) {
+      for (const p of it.matches) if (!asked[p.handle] && !picked.some((x) => x.handle === p.handle)) picked.push(p)
+    }
+    setReviewModal((m) => (m && m.row.id === row.id ? { ...m, picked, loading: false } : m))
+  }
+  const sendReviewRequest = async () => {
+    const m = reviewModal
+    if (!m?.picked.length) return
+    const email = String(m.row.email || '').trim()
+    if (!email) { alert('This ambassador has no email address.'); return }
+    if (!window.confirm(`Send the review email to ${m.row.full_name} (${email}) for ${m.picked.length} product${m.picked.length === 1 ? '' : 's'}?`)) return
+    setReviewModal({ ...m, sending: true })
+    const { subject, html } = buildAmbassadorReviewRequestEmail(m.row, m.picked, m.lang)
+    const res = await sendAmbassadorEmail({ to: email, subject, html })
+    if (!res.ok) { setReviewModal({ ...m, sending: false }); alert(`Email not sent: ${res.error || 'unknown error'}`); return }
+    const at = new Date().toISOString()
+    const next = { ...(m.row.review_requests || {}) }
+    for (const p of m.picked) next[p.handle] = { title: p.title, at }
+    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ review_requests: next, review_requested_at: at }).eq('id', m.row.id)
+    patchRow(m.row.id, { review_requests: next, review_requested_at: at })
+    setReviewModal(null)
+    alert(err ? `Email sent, but it could not be saved as asked: ${err.message}` : `Review email sent to ${m.row.full_name}.`)
   }
   // A package that never arrived: marked lost, its contents are copied into the
   // next package as a resend, and the next date becomes today.
@@ -7347,6 +7425,7 @@ const deleteApplication = async (row) => {
               onMarkLost={markShipmentLost}
               onEditNote={editShipmentNote}
               onAskChoice={askOneToChoose}
+              onAskReviews={openReviewRequest}
               onOpen={(id) => {
                 setViewMode('cards')
                 jumpToAmbassador(id)
@@ -8371,6 +8450,111 @@ const deleteApplication = async (row) => {
           </div>
         </div>
       )}
+
+      {reviewModal && (() => {
+        const m = reviewModal
+        const asked = m.row.review_requests || {}
+        const items = receivedItems(m.row._shipments, shopProducts || [])
+        const isPicked = (h) => m.picked.some((p) => p.handle === h)
+        const toggle = (p) => setReviewModal((cur) => ({ ...cur, picked: isPicked(p.handle) ? cur.picked.filter((x) => x.handle !== p.handle) : [...cur.picked, p] }))
+        const results = searchProducts(shopProducts || [], m.query)
+        const preview = m.preview ? buildAmbassadorReviewRequestEmail(m.row, m.picked, m.lang) : null
+        return (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4" onClick={() => !m.sending && setReviewModal(null)}>
+            <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-base font-bold text-slate-900">★ Ask {m.row.full_name} for reviews</h3>
+              <p className="mt-1 text-xs text-slate-500">One email with all the products below. Each has a button to its review form on shop.gelitup.com — the reviews go into Judge.me.</p>
+              {shopProductsError && <p className="mt-2 text-xs text-rose-600">{shopProductsError}</p>}
+              <div className="mt-3 flex-1 space-y-4 overflow-y-auto pr-1">
+                {m.loading ? <p className="text-xs text-slate-500">Loading the shop products…</p> : (<>
+                  <section>
+                    <h4 className="text-xs font-bold uppercase tracking-wide text-slate-600">In the email ({m.picked.length})</h4>
+                    {m.picked.length === 0 && <p className="mt-1 text-xs text-amber-700">No products yet — tick them below or search the shop.</p>}
+                    <ul className="mt-1 flex flex-wrap gap-2">
+                      {m.picked.map((p) => (
+                        <li key={p.handle} className="inline-flex items-center gap-1.5 rounded-full border border-fuchsia-200 bg-fuchsia-50 py-1 pl-1 pr-2 text-xs text-fuchsia-900">
+                          {p.image && <img src={p.image} alt="" className="h-6 w-6 rounded-full object-cover" />}
+                          {p.title}
+                          <button type="button" onClick={() => toggle(p)} disabled={m.sending} className="ml-1 text-fuchsia-500 hover:text-rose-600" title="Remove">✕</button>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                  <section>
+                    <h4 className="text-xs font-bold uppercase tracking-wide text-slate-600">What she received</h4>
+                    <ul className="mt-1 divide-y divide-slate-100 rounded-lg border border-slate-200 text-xs">
+                      {items.length === 0 && <li className="px-3 py-2 text-slate-500">No package contents recorded.</li>}
+                      {items.map((it) => (
+                        <li key={it.item} className="px-3 py-2">
+                          <span className="text-slate-800">{it.item}</span>
+                          <span className="text-slate-400">{it.sent_at ? ` · sent ${fmtDate(it.sent_at)}` : ''}</span>
+                          {it.matches.length === 0
+                            ? <span className="block text-amber-700">Not matched to one shop product — use the search below if you know which one it was.</span>
+                            : it.matches.map((p) => (
+                              <label key={p.handle} className="mt-1 flex items-center gap-2 text-slate-700">
+                                <input type="checkbox" checked={isPicked(p.handle)} onChange={() => toggle(p)} disabled={m.sending} />
+                                → {p.title}
+                                {asked[p.handle] && <span className="text-sky-700">(already asked {fmtDate(asked[p.handle].at)})</span>}
+                              </label>
+                            ))}
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                  <section>
+                    <h4 className="text-xs font-bold uppercase tracking-wide text-slate-600">Add a product from the shop</h4>
+                    <input
+                      type="search"
+                      value={m.query}
+                      onChange={(e) => setReviewModal((cur) => ({ ...cur, query: e.target.value }))}
+                      placeholder="e.g. cat eye, 3-in-1 clear, nipper…"
+                      className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-xs"
+                    />
+                    {results.length > 0 && (
+                      <ul className="mt-1 divide-y divide-slate-100 rounded-lg border border-slate-200 text-xs">
+                        {results.map((p) => (
+                          <li key={p.handle}>
+                            <label className="flex cursor-pointer items-center gap-2 px-3 py-1.5 hover:bg-slate-50">
+                              <input type="checkbox" checked={isPicked(p.handle)} onChange={() => toggle(p)} disabled={m.sending} />
+                              {p.image && <img src={p.image} alt="" className="h-6 w-6 rounded object-cover" />}
+                              {p.title}
+                              {asked[p.handle] && <span className="text-sky-700">(already asked {fmtDate(asked[p.handle].at)})</span>}
+                            </label>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                  {Object.keys(asked).length > 0 && (
+                    <section>
+                      <h4 className="text-xs font-bold uppercase tracking-wide text-slate-600">Already asked to review</h4>
+                      <p className="mt-1 text-xs text-slate-500">{Object.values(asked).map((a) => `${a.title} (${fmtDate(a.at)})`).join(' · ')}</p>
+                    </section>
+                  )}
+                  {preview && (
+                    <section>
+                      <h4 className="text-xs font-bold uppercase tracking-wide text-slate-600">Preview · {preview.subject}</h4>
+                      <iframe title="Email preview" srcDoc={preview.html} className="mt-1 h-96 w-full rounded-lg border border-slate-200 bg-white" />
+                    </section>
+                  )}
+                </>)}
+              </div>
+              <div className="mt-4 flex items-center justify-end gap-2">
+                <label className="mr-auto flex items-center gap-1 text-xs text-slate-600">Language
+                  <select value={m.lang} onChange={(e) => setReviewModal((cur) => ({ ...cur, lang: e.target.value }))} disabled={m.sending} className="rounded border border-slate-300 px-1.5 py-1 text-xs">
+                    {REVIEW_EMAIL_LANGUAGES.map(([code, label]) => <option key={code} value={code}>{label}{code === reviewEmailLang(m.row.language) ? ' (hers)' : ''}</option>)}
+                  </select>
+                </label>
+                <button type="button" onClick={() => setReviewModal((cur) => ({ ...cur, preview: !cur.preview }))} disabled={m.loading || !m.picked.length} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50">{m.preview ? 'Hide preview' : 'Preview email'}</button>
+                <button type="button" onClick={() => setReviewModal(null)} disabled={m.sending} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+                <button type="button" onClick={sendReviewRequest} disabled={m.sending || m.loading || !m.picked.length} className="rounded-lg bg-fuchsia-600 px-4 py-2 text-xs font-semibold text-white hover:bg-fuchsia-500 disabled:opacity-50">
+                  {m.sending ? 'Sending…' : `Send review email (${m.picked.length})`}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {pauseRow && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4" onClick={() => setPauseRow(null)}>
