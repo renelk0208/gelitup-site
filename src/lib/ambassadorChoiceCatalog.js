@@ -30,6 +30,20 @@ const CATEGORY_LABELS = {
   COBWEB: 'Cobweb',
 }
 
+// The product line an item belongs to, from its photo folder, e.g.
+// BUILDER GEL/PREMIUM BUILDER or COLORS/SOLID GEL POLISH. Ambassadors may
+// choose one product of each type. Size folders (MultiMix 30gr / 60gr) count
+// as one type. Products without a photo folder are their own type.
+const titleCase = (v) => String(v || '').toLowerCase().replace(/\b([a-z])/g, (m) => m.toUpperCase())
+export function productType(parts, name) {
+  if (!parts || parts.length <= 4) return { type: `item:${norm(name)}`, typeLabel: name }
+  const category = parts[3]
+  const sub = parts.length > 5 ? parts[4] : ''
+  const sizeFolder = /^\d+\s*(g|gr|ml)?$/i.test(sub)
+  if (!sub || sizeFolder) return { type: category, typeLabel: CATEGORY_LABELS[category] || titleCase(category) }
+  return { type: `${category}/${sub}`, typeLabel: titleCase(sub) }
+}
+
 export function buildChoiceCatalog({ priceList, imageMap, outOfStock = [], hidden = [] }) {
   const imageByName = new Map(Object.entries(imageMap || {}).map(([k, v]) => [norm(k), v]))
   const oos = new Set((outOfStock || []).map(normLoose))
@@ -47,7 +61,8 @@ export function buildChoiceCatalog({ priceList, imageMap, outOfStock = [], hidde
     const category = parts.length > 4 ? parts[3] : 'OTHER'
     if (EXCLUDED_CATEGORIES.has(category)) continue
     seen.add(key)
-    out.push({ name, category: CATEGORY_LABELS[category] || 'Other', image })
+    const { type, typeLabel } = productType(parts, name)
+    out.push({ name, category: CATEGORY_LABELS[category] || 'Other', image, type, typeLabel })
   }
   return out.sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name, undefined, { numeric: true }))
 }
