@@ -7777,13 +7777,14 @@ const deleteApplication = async (row) => {
                           onClick={() => toggleSection(row.id, 'history')}
                           className="flex w-full items-center justify-between text-left"
                         >
-                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Package history</p>
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Package history — {row.full_name || row.email} <span className="normal-case font-medium">(newest first)</span></p>
                           <span className="text-[11px] font-semibold text-slate-600">{isHistorySectionOpen ? 'Hide' : `Show (${shipmentEntries.length})`}</span>
                         </button>
                         {isHistorySectionOpen && (
                           <div className="mt-2 space-y-1.5">
                             {shipmentEntries.map((entry, idx) => {
-                              const rowIdx = idx + 1
+                              // Newest is listed first, so the first package sent is #1 at the bottom.
+                              const rowIdx = shipmentEntries.length - idx
                               const open = isShipmentEntryOpen(row.id, idx, idx === 0)
                               return (
                                 <div key={`${row.id}-ship-${idx}`} className="rounded-lg border border-slate-200 bg-slate-50">
