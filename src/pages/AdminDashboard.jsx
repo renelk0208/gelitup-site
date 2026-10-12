@@ -5030,8 +5030,8 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       .select('*')
       .order('created_at', { ascending: false })
       .range(requestedPage * 200, requestedPage * 200 + 199)
-    if (filter === 'pending') query = query.in('status', AMBASSADOR_PENDING_STATUSES)
-    else if (filter !== 'all') query = query.eq('status', filter)
+    // Every status is loaded; the Pending / Approved / … buttons filter on screen,
+    // so the search box can always find any ambassador.
     const { data, error: err } = await query
     setLoading(false)
     if (err) { setError(err.message); return }
@@ -5209,7 +5209,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     setRows((previous) => requestedPage === 0 ? nextRows : [...previous, ...nextRows])
     setPage(requestedPage)
     setHasMore(nextRows.length === 200)
-  }, [filter])
+  }, [])
 
   useEffect(() => { load() }, [load])
 
@@ -7087,7 +7087,15 @@ const deleteApplication = async (row) => {
     { key: 'all', label: 'All' },
   ]
 
-  const normalizedAmbassadorSearch = String(searchQuery || '').trim().toLowerCase()
+  // Accents and case don't matter: "lazar" finds "Lazăr", "nina" finds "Νίνα" only if typed in Greek.
+  const foldText = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  const normalizedAmbassadorSearch = foldText(String(searchQuery || '').trim())
+  const statusMatchesFilter = (row) => {
+    const st = String(row?.status || '').toLowerCase()
+    if (filter === 'all') return true
+    if (filter === 'pending') return AMBASSADOR_PENDING_STATUSES.includes(st)
+    return st === filter
+  }
   const filteredRows = normalizedAmbassadorSearch
     ? rows.filter((row) => {
         const haystack = [
@@ -7107,10 +7115,10 @@ const deleteApplication = async (row) => {
         ]
           .filter(Boolean)
           .join(' ')
-          .toLowerCase()
-        return normalizedAmbassadorSearch.split(/\s+/).every((token) => haystack.includes(token))
+        const folded = foldText(haystack)
+        return normalizedAmbassadorSearch.split(/\s+/).every((token) => folded.includes(token))
       })
-    : rows
+    : rows.filter(statusMatchesFilter)
 
   // "At a glance" dashboard — groups approved ambassadors by how urgently they
   // need their next PR package so the admin can see who to act on first without
