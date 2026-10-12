@@ -6267,6 +6267,45 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       if (!emailResult.ok) alert(`Package note saved, but notification email failed: ${emailResult.error}`)
     }
   }
+  // Shipments view: add one or several items to the next package in one save
+  // (and one notification email), and remove items without a confirm box.
+  const addPlannedItems = async (row, texts) => {
+    const clean = (texts || []).map((t) => String(t || '').trim()).filter(Boolean)
+    if (!clean.length) return false
+    const stamp = fmtDate(new Date().toISOString())
+    const author = getAdminDisplayLabel()
+    const lines = [...packNoteLines(row), ...clean.map((text) => createPackNoteLine({ stamp, author, text }))]
+    if (!(await savePackNotes(row, lines))) return false
+    const emailResult = await sendAmbassadorNoteNotifications({ row, note: clean.join('\n'), noteType: 'package note', author, stamp })
+    if (!emailResult.ok) console.warn('Package items saved, but notification email failed:', emailResult.error)
+    return true
+  }
+  // Fill in (or correct) what was in a package already sent.
+  const editShipmentContents = async (row, shipment) => {
+    const current = Array.isArray(shipment?.items) ? shipment.items.join(', ') : ''
+    const entered = window.prompt(`What was in this package for ${row.full_name || 'this ambassador'}? Separate items with commas.`, current)
+    if (entered === null) return
+    const items = entered.split(/[,\n]/).map((t) => t.trim()).filter(Boolean)
+    const { error: err } = await supabase.from('ambassador_shipments').update({ items }).eq('id', shipment.id)
+    if (err) { alert(`Could not save the contents: ${err.message}`); return }
+    patchRow(row.id, {
+      _shipments: (row._shipments || []).map((s) => (s.id === shipment.id ? { ...s, items } : s)),
+    })
+  }
+  const removePlannedItem = async (row, idx) => {
+    const lines = packNoteLines(row)
+    if (idx < 0 || idx >= lines.length) return
+    lines.splice(idx, 1)
+    await savePackNotes(row, lines)
+  }
+  // One-click suggestions: the usual follow-up pack for their type (Extreme
+  // gets the Super list), or the starter pack if nothing has been sent yet.
+  const suggestedPackItems = (row) => {
+    const type = getAmbassadorType(row)
+    if (!getAmbassadorDashboardMeta(row).shipmentPreviouslySent) return AMBASSADOR_PACKS_BY_TYPE[type]?.items || []
+    const followUp = AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE[type === 'extreme_ambassador' ? 'super_ambassador' : type]
+    return followUp?.items || []
+  }
   const editPackNote = async (row, idx) => {
     const lines = packNoteLines(row)
     const original = parsePackNote(lines[idx])
@@ -6455,6 +6494,11 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     ...packNoteEntries(row).map((entry) => entry.text),
     ...(currentDraft.shipment_details ? [currentDraft.shipment_details] : []),
   ]
+  // Every package must say what was in it, otherwise the history is useless.
+  if (isFollowUpPackage && completedItems.length === 0) {
+    alert('Add what is in this package first (under "Items for this package", or in the Shipments view), then save it.')
+    return
+  }
   const completedShippingMethod = getShippingMethod(row)
   const buildArchiveLine = () => `[${fmtDate(new Date().toISOString())}] [${getAdminDisplayLabel()}] 📦 Shipped — ${[
     `Status: ${completedTypeLabel}`,
@@ -7142,6 +7186,11 @@ const deleteApplication = async (row) => {
               getMeta={getAmbassadorDashboardMeta}
               getType={getAmbassadorType}
               plannedItems={plannedItemsList}
+              suggestedItems={suggestedPackItems}
+              onAddPlanned={addPlannedItems}
+              onRemovePlanned={removePlannedItem}
+              savingId={saving}
+              onEditContents={editShipmentContents}
               busyShipmentId={busyShipmentId}
               onMarkReceived={markShipmentReceived}
               onOpen={(id) => {
