@@ -8,7 +8,7 @@ import { buildAmbassadorContractPdf, buildAmbassadorPackingListPdf, buildAmbassa
 import { detectCarrier, estimateDelivery, trackingLink } from '../lib/ambassadorShipping.js'
 import { instagramHandle, instagramUrl, tiktokHandle, tiktokUrl } from '../lib/socialLinks.js'
 import { whereAlreadySent } from '../lib/packageItems.js'
-import { receivedItems, searchProducts } from '../lib/reviewProducts.js'
+import { matchItem, receivedItems, searchProducts, suggestedCount } from '../lib/reviewProducts.js'
 import { REVIEW_EMAIL_LANGUAGES, reviewEmailLang } from '../lib/reviewEmailText.js'
 import { buildAmbassadorReviewRequestEmail } from '../lib/reviewEmail.js'
 import { AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE } from '../lib/ambassadorFollowUpPacks.js'
@@ -6512,11 +6512,18 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       : r)))
   }
   // Fill in (or correct) what was in a package already sent.
+  // Past packages: first type what was in it (if nothing is recorded), then the
+  // packing list names the exact products, so review emails can be sent.
   const editShipmentContents = async (row, shipment) => {
-    const current = Array.isArray(shipment?.items) ? shipment.items.join(', ') : ''
-    const entered = window.prompt(`What was in this package for ${row.full_name || 'this ambassador'}? Separate items with commas.`, current)
-    if (entered === null) return
-    const items = entered.split(/[,\n]/).map((t) => t.trim()).filter(Boolean)
+    let lines = Array.isArray(shipment?.items) ? shipment.items.filter(Boolean) : []
+    if (!lines.length) {
+      const entered = window.prompt(`What was in this package for ${row.full_name || 'this ambassador'}? Separate items with commas.`, '')
+      if (entered === null) return
+      lines = entered.split(/[,\n]/).map((t) => t.trim()).filter(Boolean)
+      if (!lines.length) return
+    }
+    const items = await openPackingList(row, lines)
+    if (!items) return
     const { error: err } = await supabase.from('ambassador_shipments').update({ items }).eq('id', shipment.id)
     if (err) { alert(`Could not save the contents: ${err.message}`); return }
     patchRow(row.id, {
@@ -6693,6 +6700,37 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     await saveNotes(row, lines)
   }
 
+  // Packing list: before the tracking email goes out, every line of the package
+  // must name the exact shop product(s) — e.g. which 3 Cat Eye shades. Lines that
+  // already name a product are filled in automatically. Exact products are what
+  // the review emails use.
+  const [packingList, setPackingList] = useState(null) // { row, lines: [{ text, picks, keep, query }] }
+  const packingResolveRef = useRef(null)
+  const openPackingList = async (row, items) => {
+    const products = await loadShopProducts()
+    return new Promise((resolve) => {
+      packingResolveRef.current = resolve
+      setPackingList({
+        row,
+        lines: items.map((text) => {
+          const hits = matchItem(text, products)
+          const n = suggestedCount(text)
+          return { text, picks: hits.length ? (hits.length === 1 && n > 1 ? Array(n).fill(hits[0]) : hits) : [], keep: false, query: '', auto: hits.length > 0 }
+        }),
+      })
+    })
+  }
+  const closePackingList = (result) => {
+    const resolve = packingResolveRef.current
+    packingResolveRef.current = null
+    setPackingList(null)
+    if (resolve) resolve(result)
+  }
+  const finishPackingList = () => {
+    const lines = packingList?.lines || []
+    if (lines.some((l) => !l.keep && l.picks.length === 0)) return
+    closePackingList(lines.flatMap((l) => (l.keep ? [l.text] : l.picks.map((p) => p.title))))
+  }
   const saveShipment = async (row, alsoEmail, overrideReminderDate) => {
   const shipmentSaveKey = String(row?.id || '')
   if (!shipmentSaveKey) return
@@ -6714,7 +6752,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   // hand-picked via "Items for this package" — the type badge is all that
   // carries forward, not the original starter-kit contents.
   const isFollowUpPackage = getAmbassadorDashboardMeta(row).shipmentPreviouslySent
-  const completedItems = [
+  let completedItems = [
     ...(isFollowUpPackage ? [] : (completedPack?.items || [])),
     ...packNoteEntries(row).map((entry) => entry.text),
     ...(currentDraft.shipment_details ? [currentDraft.shipment_details] : []),
@@ -6773,7 +6811,11 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       alert('Reminder date is invalid.')
       return
     }
-    const currentShipmentItems = String(currentDraft.shipment_details || '').trim()
+    // Packing list: name the exact products before the email goes out.
+    const exactItems = await openPackingList(row, completedItems)
+    if (!exactItems) { setSaving(null); setEmail(row.id, 'error', 'Not sent: the packing list was not completed.'); return }
+    completedItems = exactItems
+    const currentShipmentItems = ''
     const packedItemsText = completedItems.join(', ')
     const receiptToken = (globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`)
     const { subject, html } = buildAmbassadorShipmentEmail(
@@ -8481,6 +8523,72 @@ const deleteApplication = async (row) => {
           </div>
         </div>
       )}
+
+      {packingList && (() => {
+        const pl = packingList
+        const setLine = (i, patch) => setPackingList((cur) => ({ ...cur, lines: cur.lines.map((l, n) => (n === i ? { ...l, ...patch } : l)) }))
+        const missing = pl.lines.filter((l) => !l.keep && l.picks.length === 0).length
+        return (
+          <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4">
+            <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-white p-5 shadow-xl">
+              <h3 className="text-base font-bold text-slate-900">📦 Packing list — {pl.row.full_name}</h3>
+              <p className="mt-1 text-xs text-slate-500">Name the exact product(s) packed for every line (e.g. which 3 Cat Eye shades). This is what the ambassador sees in her tracking email and what she'll be asked to review.</p>
+              {shopProductsError && <p className="mt-2 text-xs text-rose-600">{shopProductsError}</p>}
+              <ul className="mt-3 flex-1 space-y-2 overflow-y-auto pr-1">
+                {pl.lines.map((l, i) => {
+                  const want = suggestedCount(l.text)
+                  const done = l.keep || l.picks.length > 0
+                  const results = l.query ? searchProducts(shopProducts || [], l.query, 6) : []
+                  return (
+                    <li key={`${l.text}-${i}`} className={`rounded-lg border px-3 py-2 text-xs ${done ? 'border-emerald-200 bg-emerald-50/40' : 'border-amber-300 bg-amber-50'}`}>
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="font-semibold text-slate-900">{l.text}</span>
+                        <span className={done ? 'text-emerald-700' : 'text-amber-800'}>{done ? '✓' : want > 1 ? `choose ${want}` : 'which product?'}</span>
+                      </div>
+                      {l.picks.length > 0 && (
+                        <ul className="mt-1 flex flex-wrap gap-1.5">
+                          {l.picks.map((p, k) => (
+                            <li key={`${p.handle}-${k}`} className="inline-flex items-center gap-1 rounded-full border border-fuchsia-200 bg-white py-0.5 pl-1 pr-2">
+                              {p.image && <img src={p.image} alt="" className="h-5 w-5 rounded-full object-cover" />}
+                              {p.title}
+                              <button type="button" className="ml-1 text-fuchsia-500 hover:text-rose-600" onClick={() => setLine(i, { picks: l.picks.filter((_, j) => j !== k) })}>✕</button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {!l.keep && (
+                        <>
+                          <input type="search" value={l.query} onChange={(e) => setLine(i, { query: e.target.value })} placeholder={l.picks.length ? 'Add another product…' : 'Search the product, e.g. cat eye, 2601, all in one 100ml…'} className="mt-1.5 w-full rounded border border-slate-300 px-2 py-1 text-xs" />
+                          {results.length > 0 && (
+                            <ul className="mt-1 divide-y divide-slate-100 rounded border border-slate-200 bg-white">
+                              {results.map((p) => (
+                                <li key={p.handle}>
+                                  <button type="button" onClick={() => setLine(i, { picks: [...l.picks, p], query: '' })} className="flex w-full items-center gap-2 px-2 py-1 text-left hover:bg-fuchsia-50">
+                                    {p.image && <img src={p.image} alt="" className="h-5 w-5 rounded object-cover" />}{p.title}
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </>
+                      )}
+                      <label className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500">
+                        <input type="checkbox" checked={l.keep} onChange={(e) => setLine(i, { keep: e.target.checked })} />
+                        Not a shop product — keep as written
+                      </label>
+                    </li>
+                  )
+                })}
+              </ul>
+              <div className="mt-4 flex items-center justify-end gap-2">
+                {missing > 0 && <span className="mr-auto text-xs text-amber-800">{missing} line{missing === 1 ? '' : 's'} still to complete</span>}
+                <button type="button" onClick={() => closePackingList(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+                <button type="button" onClick={finishPackingList} disabled={missing > 0} className="rounded-lg bg-fuchsia-600 px-4 py-2 text-xs font-semibold text-white hover:bg-fuchsia-500 disabled:opacity-50">Packing list complete</button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {reviewModal && (() => {
         const m = reviewModal
