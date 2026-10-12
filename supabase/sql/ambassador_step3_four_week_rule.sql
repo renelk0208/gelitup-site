@@ -9,7 +9,8 @@
 -- Also records Anastogianni Eirini's second package (Geniki 5513756603, sent
 -- 14 Sep 2026), which was never entered.
 --
--- Run once in the Supabase SQL Editor. Safe to re-run.
+-- Run once in the Supabase SQL Editor. Safe to re-run; it never changes
+-- existing dates.
 
 -- ── 1. One function that works out the date for one ambassador ─────────────
 create or replace function public.refresh_ambassador_next_package_due(p_application_id bigint)
@@ -91,10 +92,6 @@ select 4, 'sent', app.ambassador_type, '{}', 'courier', '5513756603',
       where s.application_id = 4 and s.tracking_number = '5513756603'
    );
 
--- ── 4. Apply the 4-week rule to everyone who has had a package ──────────────
-select app.id, app.full_name, public.refresh_ambassador_next_package_due(app.id) as next_package_due
-  from public.ambassador_applications app
- where app.status = 'approved'
-   and app.paused_at is null
-   and exists (select 1 from public.ambassador_shipments s where s.application_id = app.id and s.status = 'sent')
- order by 3;
+-- (Existing dates are NOT recalculated: the rule applies from the next package
+-- sent. An earlier version of this file recalculated everyone; those dates were
+-- put back on 12 Oct 2026.)
