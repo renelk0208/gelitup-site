@@ -120,18 +120,17 @@ function Planner({ line, suggestions, onAdd, onRemove, busy }) {
   const sentLabel = (hits) => hits.map((h) => `#${h.number}${h.sent_at ? ` (${fmt(h.sent_at)})` : ''}`).join(', ')
   // Suggestions never offer something already planned or already sent before.
   const remaining = suggestions.filter((sug) => !items.some((it) => normItem(it) === normItem(sug)) && sentBefore(sug).length === 0)
-  const add = async (values) => {
-    const clean = values.map((v) => String(v || '').trim()).filter(Boolean)
-    if (!clean.length) return
-    const repeats = clean.map((v) => ({ v, hits: sentBefore(v) })).filter((r) => r.hits.length)
-    if (repeats.length) {
-      const list = repeats.map((r) => `• ${r.v} — already sent in package ${sentLabel(r.hits)}`).join('\n')
-      if (!window.confirm(`Already sent to ${line.row.full_name || 'this ambassador'}:\n\n${list}\n\nAdd it again anyway?`)) return
-    }
-    const ok = await onAdd(line.row, clean)
-    if (ok) setText('')
-  }
+  // Anything already sent is blocked unless "send again on purpose" is ticked.
+  const [sendAgain, setSendAgain] = useState(false)
   const typedRepeat = text.trim() ? sentBefore(text) : []
+  const blocked = typedRepeat.length > 0 && !sendAgain
+  const add = async (values, { allowRepeat = false } = {}) => {
+    const clean = values.map((v) => String(v || '').trim()).filter(Boolean)
+      .filter((v) => allowRepeat || sentBefore(v).length === 0)
+    if (!clean.length) return
+    const ok = await onAdd(line.row, clean)
+    if (ok) { setText(''); setSendAgain(false) }
+  }
   return (
     <div className="min-w-[230px] space-y-1.5">
       {items.length === 0
@@ -163,18 +162,24 @@ function Planner({ line, suggestions, onAdd, onRemove, busy }) {
       )}
       <form
         className="flex gap-1"
-        onSubmit={(e) => { e.preventDefault(); add([text]) }}
+        onSubmit={(e) => { e.preventDefault(); if (!blocked) add([text], { allowRepeat: sendAgain }) }}
       >
         <input
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => { setText(e.target.value); setSendAgain(false) }}
           placeholder="Add an item…"
           className="min-w-0 flex-1 rounded border border-slate-300 px-2 py-1 text-[11px]"
         />
-        <button type="submit" disabled={busy || !text.trim()} className="rounded border border-fuchsia-300 bg-white px-2 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-50">Add</button>
+        <button type="submit" disabled={busy || !text.trim() || blocked} className="rounded border border-fuchsia-300 bg-white px-2 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-50">Add</button>
       </form>
       {typedRepeat.length > 0 && (
-        <p className="text-[10px] font-semibold text-amber-800">⚠ Already sent in package {sentLabel(typedRepeat)}</p>
+        <div className="rounded border border-red-200 bg-red-50 px-2 py-1 text-[10px] text-red-800">
+          <p className="font-semibold">Already sent in package {sentLabel(typedRepeat)} — can't be added.</p>
+          <label className="mt-0.5 flex items-center gap-1">
+            <input type="checkbox" checked={sendAgain} onChange={(e) => setSendAgain(e.target.checked)} />
+            Send it again on purpose
+          </label>
+        </div>
       )}
     </div>
   )
