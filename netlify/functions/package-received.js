@@ -10,7 +10,10 @@ import { createClient } from '@supabase/supabase-js'
 // arrived. Only pressing the button confirms.
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || ''
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE || ''
+// Works with the public (anon) key: the two database functions below only ever
+// touch the one package whose private token is in the link.
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE
+  || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
 const TOKEN_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 function esc(value) {
@@ -49,25 +52,19 @@ export async function handler(event) {
   if (!TOKEN_RE.test(token)) {
     return page('Link not valid', '<h1>This link isn\'t valid</h1><p>Please use the button in your tracking email, or reply to that email and we\'ll sort it out.</p>', 400)
   }
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
     return page('Please try later', '<h1>Something went wrong</h1><p>Please try again later, or reply to your tracking email.</p>', 500)
   }
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } })
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } })
 
-  const { data: shipment, error } = await supabase
-    .from('ambassador_shipments')
-    .select('id, application_id, sent_at, tracking_number, delivered_at, lost_at')
-    .eq('receipt_token', token)
-    .maybeSingle()
+  const { data: found, error } = await supabase.rpc('get_package_by_receipt_token', { p_token: token })
+  const shipment = Array.isArray(found) ? found[0] : found
   if (error || !shipment) {
+    console.error('package-received: lookup failed', error?.message || 'no row')
     return page('Link not valid', '<h1>We couldn\'t find this package</h1><p>Please reply to your tracking email and we\'ll check it for you.</p>', 404)
   }
-  const { data: app } = await supabase
-    .from('ambassador_applications')
-    .select('full_name')
-    .eq('id', shipment.application_id)
-    .maybeSingle()
-  const firstName = String(app?.full_name || '').trim().split(/\s+/)[0] || ''
+  const rawFirst = String(shipment.first_name || '').trim()
+  const firstName = rawFirst ? rawFirst.charAt(0).toUpperCase() + rawFirst.slice(1).toLowerCase() : ''
   const sentLine = `${shipment.sent_at ? `sent on ${esc(fmtDate(shipment.sent_at))}` : ''}${shipment.tracking_number ? ` · tracking ${esc(shipment.tracking_number)}` : ''}`
 
   if (shipment.delivered_at) {
@@ -75,11 +72,7 @@ export async function handler(event) {
   }
 
   if (event.httpMethod === 'POST') {
-    const { error: updateError } = await supabase
-      .from('ambassador_shipments')
-      .update({ delivered_at: new Date().toISOString(), delivered_by: 'ambassador (email link)', lost_at: null })
-      .eq('id', shipment.id)
-      .is('delivered_at', null)
+    const { error: updateError } = await supabase.rpc('confirm_package_by_receipt_token', { p_token: token })
     if (updateError) {
       console.error('package-received: update failed', updateError.message)
       return page('Please try later', '<h1>Something went wrong</h1><p>Please try again in a moment, or reply to your tracking email.</p>', 500)
