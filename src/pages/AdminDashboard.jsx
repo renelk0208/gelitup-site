@@ -32,8 +32,9 @@ const AMBASSADOR_SHIPMENT_NOTIFICATION_EMAIL = 'rene@gelitup.com'
 const AMBASSADOR_PENDING_STATUSES = ['new', 'pending', 'submitted']
 const AMBASSADOR_LETTER_ATTACHMENT_URL = ambassadorLetterAttachmentUrl
 // Keep well under Resend's ~40MB request limit (attachments are base64-encoded,
-// which inflates size by ~33%) so a "message with attachments" never silently fails.
-const MAX_MESSAGE_ATTACHMENTS_BYTES = 20 * 1024 * 1024
+// which inflates size by ~33%) so a message/decline/pause send with attachments
+// never silently fails. Shared by every admin → ambassador compose modal.
+const MAX_ATTACHMENTS_BYTES = 20 * 1024 * 1024
 const SHIPMENT_EMAIL_LOCK_STORAGE_KEY = 'gelitup.admin.shipmentEmailLock.v1'
 const ADMIN_TAB_STORAGE_KEY = 'gelitup.admin.activeTab.v1'
 const ADMIN_TAB_KEYS = new Set(['registrations', 'orders', 'search', 'admins', 'pricing', 'ambassadors', 'work-with-us', 'guestbook', 'draft-carts', 'studio-one'])
@@ -4723,6 +4724,54 @@ async function fileToEmailAttachment(file) {
   return { filename: file.name, content: base64, contentType: file.type || 'application/octet-stream' }
 }
 
+const totalFileBytes = (files) => (files || []).reduce((sum, f) => sum + (f?.size || 0), 0)
+
+// Reusable attachment picker shared by the ambassador message, decline and pause
+// modals — lets an admin attach documents/images (e.g. a signed form, a photo)
+// to any outbound email to an ambassador.
+function AttachmentPicker({ files, setFiles }) {
+  const overLimit = totalFileBytes(files) > MAX_ATTACHMENTS_BYTES
+  return (
+    <div className="mt-2">
+      <label className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-50">
+        📎 Attach documents or images
+        <input
+          type="file"
+          multiple
+          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"
+          onChange={(e) => {
+            const picked = Array.from(e.target.files || [])
+            setFiles((prev) => [...prev, ...picked])
+            e.target.value = ''
+          }}
+          className="hidden"
+        />
+      </label>
+      {files.length > 0 && (
+        <div className="mt-2 space-y-1">
+          {files.map((file, idx) => (
+            <div key={`${file.name}-${idx}`} className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs text-slate-600">
+              <span className="min-w-0 truncate">{file.name} <span className="text-slate-400">({(file.size / 1024).toFixed(0)} KB)</span></span>
+              <button
+                type="button"
+                onClick={() => setFiles((prev) => prev.filter((_, i) => i !== idx))}
+                className="shrink-0 text-slate-400 hover:text-rose-600"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+          {overLimit && (
+            <p className="text-[11px] font-semibold text-rose-600">
+              Total attachments exceed {Math.round(MAX_ATTACHMENTS_BYTES / (1024 * 1024))} MB — remove a file before sending.
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // Sends an email (optionally with a PDF attachment) via the webhook. Returns {ok, error}.
 // If a row is supplied, the send is also logged to that ambassador profile so every
 // outbound message remains auditable in the shared communication history.
@@ -4747,7 +4796,8 @@ async function sendAmbassadorEmail({ to, subject, html, attachments, replyTo, ro
       if (rowEmail && rowEmail === targetEmail) {
         try {
           const messageBody = typeof logBody === 'string' ? logBody : (typeof html === 'string' ? htmlToText(html) : '')
-          await auditLog(row, { to: targetEmail, subject, body: messageBody })
+          const attachmentNames = (attachments || []).map((a) => a?.filename).filter(Boolean)
+          await auditLog(row, { to: targetEmail, subject, body: messageBody, attachmentNames })
         } catch (_) {
           // Best-effort logging must never block a successful email send.
         }
@@ -4836,11 +4886,13 @@ function AmbassadorApplicationsPanel({ focusAmbassadorId } = {}) {
   const [declineRow, setDeclineRow] = useState(null)
   const [declinePresets, setDeclinePresets] = useState([])
   const [declineNote, setDeclineNote] = useState('')
+  const [declineFiles, setDeclineFiles] = useState([]) // documents/images attached to the decline email
   const [pauseRow, setPauseRow] = useState(null)
   const [pauseTimeframe, setPauseTimeframe] = useState('')
   const [pauseDetails, setPauseDetails] = useState('')
   const [pauseSenderName, setPauseSenderName] = useState('')
   const [pauseSendEmail, setPauseSendEmail] = useState(true)
+  const [pauseFiles, setPauseFiles] = useState([]) // documents/images attached to the pause check-in email
   const [msgRow, setMsgRow] = useState(null)
   const [msgSubject, setMsgSubject] = useState('')
   const [msgBody, setMsgBody] = useState('')
@@ -5328,9 +5380,8 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     const row = msgRow
     if (!row) return
     if (!msgSubject.trim() || !msgBody.trim()) { alert('Add a subject and a message.'); return }
-    const totalBytes = msgFiles.reduce((sum, f) => sum + (f.size || 0), 0)
-    if (totalBytes > MAX_MESSAGE_ATTACHMENTS_BYTES) {
-      alert(`Attachments are too large (${(totalBytes / (1024 * 1024)).toFixed(1)} MB). Keep the total under ${Math.round(MAX_MESSAGE_ATTACHMENTS_BYTES / (1024 * 1024))} MB.`)
+    if (totalFileBytes(msgFiles) > MAX_ATTACHMENTS_BYTES) {
+      alert(`Attachments are too large. Keep the total under ${Math.round(MAX_ATTACHMENTS_BYTES / (1024 * 1024))} MB.`)
       return
     }
     setSaving(row.id)
@@ -5356,7 +5407,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     setSaving(null)
   }
 
-  const openDecline = (row) => { setDeclineRow(row); setDeclinePresets([]); setDeclineNote('') }
+  const openDecline = (row) => { setDeclineRow(row); setDeclinePresets([]); setDeclineNote(''); setDeclineFiles([]) }
 
   // DECLINE → set status + store reason, email the applicant why.
   const submitDecline = async () => {
@@ -5364,7 +5415,19 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     if (!row) return
     const reasonText = [...declinePresets, declineNote.trim()].filter(Boolean).join('\n')
     if (!reasonText) { alert('Please select at least one reason or add an explanation.'); return }
+    if (totalFileBytes(declineFiles) > MAX_ATTACHMENTS_BYTES) {
+      alert(`Attachments are too large. Keep the total under ${Math.round(MAX_ATTACHMENTS_BYTES / (1024 * 1024))} MB.`)
+      return
+    }
     setSaving(row.id)
+    let attachments = []
+    try {
+      attachments = await Promise.all(declineFiles.map(fileToEmailAttachment))
+    } catch (err) {
+      setSaving(null)
+      alert(err?.message || 'Could not read one of the attached files.')
+      return
+    }
     const { error: err } = await supabase
       .from(AMBASSADOR_TABLE)
       .update({ status: 'rejected', reviewed_at: new Date().toISOString(), decline_reason: reasonText })
@@ -5372,9 +5435,10 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     if (err) { setSaving(null); alert(err.message); return }
     patchRow(row.id, { status: 'rejected', decline_reason: reasonText })
     setDeclineRow(null)
+    setDeclineFiles([])
     setEmail(row.id, 'sending', '')
     const { subject, html } = buildAmbassadorDeclineEmail(row, reasonText)
-    const res = await sendAmbassadorEmail({ to: row.email, subject, html, row, logBody: `Declined — ${reasonText}`, auditLog: logAmbassadorSend })
+    const res = await sendAmbassadorEmail({ to: row.email, subject, html, attachments, row, logBody: `Declined — ${reasonText}`, auditLog: logAmbassadorSend })
     setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Decline email sent to ${row.email}` : res.error)
     setSaving(null)
   }
@@ -6505,6 +6569,7 @@ const deleteApplication = async (row) => {
     setPauseDetails('')
     setPauseSenderName('')
     setPauseSendEmail(true)
+    setPauseFiles([])
   }
 
   const submitPauseAmbassador = async () => {
@@ -6518,6 +6583,10 @@ const deleteApplication = async (row) => {
     }
     if (pauseSendEmail && !senderName) {
       alert('Sender name is required when sending the pause email.')
+      return
+    }
+    if (pauseSendEmail && totalFileBytes(pauseFiles) > MAX_ATTACHMENTS_BYTES) {
+      alert(`Attachments are too large. Keep the total under ${Math.round(MAX_ATTACHMENTS_BYTES / (1024 * 1024))} MB.`)
       return
     }
     if (!window.confirm(
@@ -6575,12 +6644,21 @@ const deleteApplication = async (row) => {
     setShip((prev) => ({ ...prev, [pauseRow.id]: { shipment_details: '', tracking_number: '', tracking_url: '' } }))
     setNextPackageMode((prev) => ({ ...prev, [pauseRow.id]: false }))
     if (pauseSendEmail) {
+      let attachments = []
+      try {
+        attachments = await Promise.all(pauseFiles.map(fileToEmailAttachment))
+      } catch (err) {
+        setEmail(pauseRow.id, 'error', `Programme paused, but could not read an attached file: ${err?.message || 'unknown error'}`)
+        setSaving(null)
+        return
+      }
       const { subject, html } = buildAmbassadorPauseEmail(pauseRow, timeframe, performanceDetails, senderName)
-      const emailResult = await sendAmbassadorEmail({ to: pauseRow.email, subject, html })
+      const emailResult = await sendAmbassadorEmail({ to: pauseRow.email, subject, html, attachments })
       if (emailResult.ok) {
-        logAmbassadorSend(pauseRow, { to: pauseRow.email, subject, body: htmlToText(html) })
+        logAmbassadorSend(pauseRow, { to: pauseRow.email, subject, body: htmlToText(html), attachmentNames: pauseFiles.map((f) => f.name) })
         setEmail(pauseRow.id, 'sent', `Programme paused and check-in email sent to ${pauseRow.email}`)
         setPauseRow(null)
+        setPauseFiles([])
       } else {
         setEmail(pauseRow.id, 'error', `Programme paused, but check-in email failed: ${emailResult.error}`)
         alert(`Programme paused, but the check-in email failed: ${emailResult.error}`)
@@ -7603,48 +7681,12 @@ const deleteApplication = async (row) => {
               rows={6}
               className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
             />
-            <div className="mt-2">
-              <label className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-50">
-                📎 Attach documents or images
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"
-                  onChange={(e) => {
-                    const files = Array.from(e.target.files || [])
-                    setMsgFiles((prev) => [...prev, ...files])
-                    e.target.value = ''
-                  }}
-                  className="hidden"
-                />
-              </label>
-              {msgFiles.length > 0 && (
-                <div className="mt-2 space-y-1">
-                  {msgFiles.map((file, idx) => (
-                    <div key={`${file.name}-${idx}`} className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs text-slate-600">
-                      <span className="min-w-0 truncate">{file.name} <span className="text-slate-400">({(file.size / 1024).toFixed(0)} KB)</span></span>
-                      <button
-                        type="button"
-                        onClick={() => setMsgFiles((prev) => prev.filter((_, i) => i !== idx))}
-                        className="shrink-0 text-slate-400 hover:text-rose-600"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                  {msgFiles.reduce((sum, f) => sum + (f.size || 0), 0) > MAX_MESSAGE_ATTACHMENTS_BYTES && (
-                    <p className="text-[11px] font-semibold text-rose-600">
-                      Total attachments exceed {Math.round(MAX_MESSAGE_ATTACHMENTS_BYTES / (1024 * 1024))} MB — remove a file before sending.
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
+            <AttachmentPicker files={msgFiles} setFiles={setMsgFiles} />
             <div className="mt-4 flex justify-end gap-2">
               <button onClick={() => setMsgRow(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
               <button
                 onClick={sendMessage}
-                disabled={saving === msgRow.id || msgFiles.reduce((sum, f) => sum + (f.size || 0), 0) > MAX_MESSAGE_ATTACHMENTS_BYTES}
+                disabled={saving === msgRow.id || totalFileBytes(msgFiles) > MAX_ATTACHMENTS_BYTES}
                 className="rounded-lg bg-[#D43790] px-3 py-2 text-sm font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60"
               >
                 Send message
@@ -7679,9 +7721,16 @@ const deleteApplication = async (row) => {
               rows={3}
               className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
             />
+            <AttachmentPicker files={declineFiles} setFiles={setDeclineFiles} />
             <div className="mt-4 flex justify-end gap-2">
               <button onClick={() => setDeclineRow(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-              <button onClick={submitDecline} disabled={saving === declineRow.id} className="rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-60">Decline &amp; email</button>
+              <button
+                onClick={submitDecline}
+                disabled={saving === declineRow.id || totalFileBytes(declineFiles) > MAX_ATTACHMENTS_BYTES}
+                className="rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-60"
+              >
+                Decline &amp; email
+              </button>
             </div>
           </div>
         </div>
@@ -7729,11 +7778,12 @@ const deleteApplication = async (row) => {
               />
               Send a check-in email
             </label>
+            {pauseSendEmail && <AttachmentPicker files={pauseFiles} setFiles={setPauseFiles} />}
             <div className="mt-4 flex justify-end gap-2">
               <button onClick={() => setPauseRow(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
               <button
                 onClick={submitPauseAmbassador}
-                disabled={saving === pauseRow.id || !pauseTimeframe.trim() || !pauseDetails.trim() || (pauseSendEmail && !pauseSenderName.trim())}
+                disabled={saving === pauseRow.id || !pauseTimeframe.trim() || !pauseDetails.trim() || (pauseSendEmail && !pauseSenderName.trim()) || (pauseSendEmail && totalFileBytes(pauseFiles) > MAX_ATTACHMENTS_BYTES)}
                 className="rounded-lg bg-amber-600 px-3 py-2 text-sm font-semibold text-white hover:bg-amber-500 disabled:opacity-60"
               >
                 {pauseSendEmail ? 'Pause & send email' : 'Pause without email'}
