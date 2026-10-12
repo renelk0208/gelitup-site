@@ -31,6 +31,9 @@ const AMBASSADOR_SHIPMENT_NOTIFICATION_EMAIL = 'rene@gelitup.com'
 // Statuses that count as "needs review" (form inserts default to 'new').
 const AMBASSADOR_PENDING_STATUSES = ['new', 'pending', 'submitted']
 const AMBASSADOR_LETTER_ATTACHMENT_URL = ambassadorLetterAttachmentUrl
+// Keep well under Resend's ~40MB request limit (attachments are base64-encoded,
+// which inflates size by ~33%) so a "message with attachments" never silently fails.
+const MAX_MESSAGE_ATTACHMENTS_BYTES = 20 * 1024 * 1024
 const SHIPMENT_EMAIL_LOCK_STORAGE_KEY = 'gelitup.admin.shipmentEmailLock.v1'
 const ADMIN_TAB_STORAGE_KEY = 'gelitup.admin.activeTab.v1'
 const ADMIN_TAB_KEYS = new Set(['registrations', 'orders', 'search', 'admins', 'pricing', 'ambassadors', 'work-with-us', 'guestbook', 'draft-carts', 'studio-one'])
@@ -4706,6 +4709,20 @@ async function buildPdfAttachment(pdfUrl, fallbackFilename) {
   }
 }
 
+// Converts a browser File (from an <input type="file">, e.g. a document or image
+// picked for an ambassador message) into the { filename, content, contentType } shape
+// the email webhook expects for attachments.
+async function fileToEmailAttachment(file) {
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result)
+    reader.onerror = () => reject(reader.error || new Error(`Could not read ${file.name}`))
+    reader.readAsDataURL(file)
+  })
+  const base64 = String(dataUrl || '').split(',')[1] || ''
+  return { filename: file.name, content: base64, contentType: file.type || 'application/octet-stream' }
+}
+
 // Sends an email (optionally with a PDF attachment) via the webhook. Returns {ok, error}.
 // If a row is supplied, the send is also logged to that ambassador profile so every
 // outbound message remains auditable in the shared communication history.
@@ -4827,6 +4844,7 @@ function AmbassadorApplicationsPanel({ focusAmbassadorId } = {}) {
   const [msgRow, setMsgRow] = useState(null)
   const [msgSubject, setMsgSubject] = useState('')
   const [msgBody, setMsgBody] = useState('')
+  const [msgFiles, setMsgFiles] = useState([]) // documents/images attached to the outgoing message
   const [ambassadorInfoDraft, setAmbassadorInfoDraft] = useState({})
   const [ship, setShip] = useState({}) // { [id]: { shipment_details, tracking_number, tracking_url } }
   const [noteDraft, setNoteDraft] = useState({}) // { [id]: 'new internal note being typed' }
@@ -5253,7 +5271,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     setSaving(null)
   }
 
-  const openMessage = (row) => { setMsgRow(row); setMsgSubject('A message from GEL.IT.UP'); setMsgBody('') }
+  const openMessage = (row) => { setMsgRow(row); setMsgSubject('A message from GEL.IT.UP'); setMsgBody(''); setMsgFiles([]) }
 
   const updateAmbassadorInfoField = (row, field, value) => {
     setAmbassadorInfoDraft((prev) => ({
@@ -5310,7 +5328,20 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     const row = msgRow
     if (!row) return
     if (!msgSubject.trim() || !msgBody.trim()) { alert('Add a subject and a message.'); return }
+    const totalBytes = msgFiles.reduce((sum, f) => sum + (f.size || 0), 0)
+    if (totalBytes > MAX_MESSAGE_ATTACHMENTS_BYTES) {
+      alert(`Attachments are too large (${(totalBytes / (1024 * 1024)).toFixed(1)} MB). Keep the total under ${Math.round(MAX_MESSAGE_ATTACHMENTS_BYTES / (1024 * 1024))} MB.`)
+      return
+    }
     setSaving(row.id)
+    let attachments = []
+    try {
+      attachments = await Promise.all(msgFiles.map(fileToEmailAttachment))
+    } catch (err) {
+      setEmail(row.id, 'error', err?.message || 'Could not read one of the attached files.')
+      setSaving(null)
+      return
+    }
     const firstName = String(row.full_name || '').split(' ')[0] || 'there'
     const html = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5">
       <p>Hi ${escAmb(firstName)},</p>
@@ -5318,10 +5349,10 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       <p>The GEL.IT.UP Team</p>
     </div>`
     setEmail(row.id, 'sending', '')
-    const res = await sendAmbassadorEmail({ to: row.email, subject: msgSubject.trim(), html, replyTo: AMBASSADOR_REPLY_TO })
+    const res = await sendAmbassadorEmail({ to: row.email, subject: msgSubject.trim(), html, replyTo: AMBASSADOR_REPLY_TO, attachments })
     setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Message sent to ${row.email} (replies go to ${AMBASSADOR_REPLY_TO})` : res.error)
-    if (res.ok) logAmbassadorSend(row, { to: row.email, subject: msgSubject.trim(), body: msgBody.trim() })
-    if (res.ok) setMsgRow(null)
+    if (res.ok) logAmbassadorSend(row, { to: row.email, subject: msgSubject.trim(), body: msgBody.trim(), attachmentNames: msgFiles.map((f) => f.name) })
+    if (res.ok) { setMsgRow(null); setMsgFiles([]) }
     setSaving(null)
   }
 
@@ -6089,12 +6120,14 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   // see the interaction (who emailed the ambassador, when, and what was said).
   // Stored as one line, kept apart from the editable internal notes.
   // Best-effort: a logging failure never affects the email already sent.
-  const logAmbassadorSend = async (row, { to, subject, body }) => {
+  const logAmbassadorSend = async (row, { to, subject, body, attachmentNames }) => {
     if (!row) return
     const stamp = fmtDate(new Date().toISOString())
     const who = currentAdminEmail ? ` by ${currentAdminEmail}` : ''
     const flat = String(body || '').replace(/\s*\n\s*/g, ' ⏎ ').trim()
-    const entry = `[${stamp}] 📧 Sent to ${to}${who} · “${subject}”${flat ? ` — ${flat}` : ''}`
+    const files = (attachmentNames || []).filter(Boolean)
+    const filesSuffix = files.length ? ` · 📎 ${files.join(', ')}` : ''
+    const entry = `[${stamp}] 📧 Sent to ${to}${who} · “${subject}”${flat ? ` — ${flat}` : ''}${filesSuffix}`
     const newLog = row.message_log ? `${row.message_log}\n${entry}` : entry
     const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ message_log: newLog }).eq('id', row.id)
     if (!err) { patchRow(row.id, { message_log: newLog }); return }
@@ -7570,9 +7603,52 @@ const deleteApplication = async (row) => {
               rows={6}
               className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
             />
+            <div className="mt-2">
+              <label className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-50">
+                📎 Attach documents or images
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || [])
+                    setMsgFiles((prev) => [...prev, ...files])
+                    e.target.value = ''
+                  }}
+                  className="hidden"
+                />
+              </label>
+              {msgFiles.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {msgFiles.map((file, idx) => (
+                    <div key={`${file.name}-${idx}`} className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs text-slate-600">
+                      <span className="min-w-0 truncate">{file.name} <span className="text-slate-400">({(file.size / 1024).toFixed(0)} KB)</span></span>
+                      <button
+                        type="button"
+                        onClick={() => setMsgFiles((prev) => prev.filter((_, i) => i !== idx))}
+                        className="shrink-0 text-slate-400 hover:text-rose-600"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  {msgFiles.reduce((sum, f) => sum + (f.size || 0), 0) > MAX_MESSAGE_ATTACHMENTS_BYTES && (
+                    <p className="text-[11px] font-semibold text-rose-600">
+                      Total attachments exceed {Math.round(MAX_MESSAGE_ATTACHMENTS_BYTES / (1024 * 1024))} MB — remove a file before sending.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
             <div className="mt-4 flex justify-end gap-2">
               <button onClick={() => setMsgRow(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-              <button onClick={sendMessage} disabled={saving === msgRow.id} className="rounded-lg bg-[#D43790] px-3 py-2 text-sm font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Send message</button>
+              <button
+                onClick={sendMessage}
+                disabled={saving === msgRow.id || msgFiles.reduce((sum, f) => sum + (f.size || 0), 0) > MAX_MESSAGE_ATTACHMENTS_BYTES}
+                className="rounded-lg bg-[#D43790] px-3 py-2 text-sm font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60"
+              >
+                Send message
+              </button>
             </div>
           </div>
         </div>
