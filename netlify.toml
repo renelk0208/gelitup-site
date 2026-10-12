@@ -210,6 +210,13 @@
   status = 200
   force = true
 
+# Ambassador "choose 5 products for your next package" page
+[[redirects]]
+  from = "/choose-items"
+  to = "/.netlify/functions/choose-items"
+  status = 200
+  force = true
+
 # SPA catch-all — must remain last
 [[redirects]]
   from = "/*"
