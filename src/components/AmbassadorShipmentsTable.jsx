@@ -100,25 +100,47 @@ function Planned({ items }) {
   return <ul className="list-disc space-y-0.5 pl-4 text-slate-700">{items.map((p, i) => <li key={i}>{p}</li>)}</ul>
 }
 
-function LastPackageNote({ line }) {
-  const { last, count } = line
-  if (!last) return <span className="text-slate-400">Nothing sent yet</span>
+// Every package this ambassador has had, newest first.
+function PackageHistory({ line, open = false }) {
+  const { shipments } = line
+  if (!shipments.length) return <span className="text-slate-400">Nothing sent yet</span>
+  const n = shipments.length
   return (
-    <span className="text-slate-500">
-      #{count} sent {fmt(last.sent_at)}{last.delivered_at ? ' · received' : ' · not confirmed yet'}
-    </span>
+    <details open={open} className="group">
+      <summary className="cursor-pointer list-none font-semibold text-slate-700 hover:text-fuchsia-700">
+        <span aria-hidden="true" className="group-open:hidden">▸</span><span aria-hidden="true" className="hidden group-open:inline">▾</span> {n} package{n === 1 ? '' : 's'} sent
+      </summary>
+      <ol className="mt-2 space-y-2">
+        {shipments.map((pkg, i) => (
+          <li key={pkg.id || i} className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="font-semibold text-slate-800">#{n - i} · {fmt(pkg.sent_at) || 'date not recorded'}</span>
+              {pkg.delivered_at
+                ? <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">✓ Received {fmt(pkg.delivered_at)}</span>
+                : <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-800">Sent · not confirmed</span>}
+            </div>
+            <p className="mt-0.5"><Tracking pkg={pkg} /></p>
+            {Array.isArray(pkg.items) && pkg.items.length > 0
+              ? <p className="mt-0.5 text-slate-600">{pkg.items.join(', ')}</p>
+              : <p className="mt-0.5 text-slate-400">Contents not recorded</p>}
+          </li>
+        ))}
+      </ol>
+    </details>
   )
 }
 
 export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plannedItems, onOpen, onMarkReceived, busyShipmentId }) {
   const [carrier, setCarrier] = useState('')
+  const [expandAll, setExpandAll] = useState(false)
   const [country, setCountry] = useState('')
 
   const lines = useMemo(() => (rows || [])
     .filter((row) => ['approved', 'paused'].includes(String(row.status || '').toLowerCase()))
     .map((row) => {
       const shipments = Array.isArray(row._shipments) ? row._shipments : []
-      const last = [...shipments].sort((a, b) => new Date(b.sent_at || 0) - new Date(a.sent_at || 0))[0] || null
+      const sorted = [...shipments].sort((a, b) => new Date(b.sent_at || 0) - new Date(a.sent_at || 0))
+      const last = sorted[0] || null
       const isPaused = String(row.status).toLowerCase() === 'paused'
       const meta = getMeta(row)
       const nextAt = isPaused ? null : meta.nextReminderAt
@@ -128,6 +150,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
       return {
         row,
         last,
+        shipments: sorted,
         count: shipments.length,
         nextAt,
         nextIn,
@@ -159,7 +182,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
     if (key === 'overdue') {
       return (
         <table className="w-full min-w-[820px] text-xs">
-          <thead><tr><th className={th}>Ambassador</th><th className={th}>Was due</th><th className={th}>Late by</th><th className={th}>Planned for this package</th><th className={th}>Previous package</th></tr></thead>
+          <thead><tr><th className={th}>Ambassador</th><th className={th}>Was due</th><th className={th}>Late by</th><th className={th}>Planned for this package</th><th className={th}>All packages</th></tr></thead>
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
@@ -167,7 +190,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
                 <td className={td}>{fmt(l.nextAt)}</td>
                 <td className="px-3 py-2.5 font-bold text-red-700">{Math.abs(l.nextIn)} day{Math.abs(l.nextIn) === 1 ? '' : 's'}</td>
                 <td className={td}><Planned items={l.planned} /></td>
-                <td className={td}><LastPackageNote line={l} /></td>
+                <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} /></td>
               </tr>
             ))}
           </tbody>
@@ -177,7 +200,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
     if (key === 'soon') {
       return (
         <table className="w-full min-w-[820px] text-xs">
-          <thead><tr><th className={th}>Ambassador</th><th className={th}>Due</th><th className={th}>Planned for this package</th><th className={th}>Previous package</th></tr></thead>
+          <thead><tr><th className={th}>Ambassador</th><th className={th}>Due</th><th className={th}>Planned for this package</th><th className={th}>All packages</th></tr></thead>
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
@@ -188,7 +211,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
                     : <><span className="font-semibold">{fmt(l.nextAt)}</span><br /><span className="text-slate-500">{l.nextIn === 0 ? 'today' : `in ${l.nextIn} day${l.nextIn === 1 ? '' : 's'}`}</span></>}
                 </td>
                 <td className={td}><Planned items={l.planned} /></td>
-                <td className={td}><LastPackageNote line={l} /></td>
+                <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} /></td>
               </tr>
             ))}
           </tbody>
@@ -198,7 +221,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
     if (key === 'transit') {
       return (
         <table className="w-full min-w-[820px] text-xs">
-          <thead><tr><th className={th}>Ambassador</th><th className={th}>Sent</th><th className={th}>Carrier &amp; tracking</th><th className={th}>Expected delivery</th><th className={th}></th></tr></thead>
+          <thead><tr><th className={th}>Ambassador</th><th className={th}>Sent</th><th className={th}>Carrier &amp; tracking</th><th className={th}>Expected delivery</th><th className={th}></th><th className={th}>All packages</th></tr></thead>
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
@@ -219,6 +242,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
                     Mark received
                   </button>
                 </td>
+                <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} /></td>
               </tr>
             ))}
           </tbody>
@@ -228,7 +252,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
     if (key === 'complete') {
       return (
         <table className="w-full min-w-[820px] text-xs">
-          <thead><tr><th className={th}>Ambassador</th><th className={th}>Last package</th><th className={th}>Received</th><th className={th}>Carrier &amp; tracking</th><th className={th}>Next package due</th></tr></thead>
+          <thead><tr><th className={th}>Ambassador</th><th className={th}>Last package</th><th className={th}>Received</th><th className={th}>Carrier &amp; tracking</th><th className={th}>Next package due</th><th className={th}>All packages</th></tr></thead>
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
@@ -240,6 +264,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
                 </td>
                 <td className={td}><Tracking pkg={l.last} /></td>
                 <td className={td}>{l.nextAt ? <>{fmt(l.nextAt)}<br /><span className="text-slate-500">in {l.nextIn} days</span></> : <span className="text-slate-400">No date set</span>}</td>
+                <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} /></td>
               </tr>
             ))}
           </tbody>
@@ -248,13 +273,12 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
     }
     return (
       <table className="w-full min-w-[820px] text-xs">
-        <thead><tr><th className={th}>Ambassador</th><th className={th}>Last package</th><th className={th}>Carrier &amp; tracking</th></tr></thead>
+        <thead><tr><th className={th}>Ambassador</th><th className={th}>All packages</th></tr></thead>
         <tbody className="divide-y divide-slate-100 align-top">
           {list.map((l) => (
             <tr key={l.row.id}>
               <NameCell line={l} getType={getType} onOpen={onOpen} />
-              <td className={td}><LastPackageNote line={l} /></td>
-              <td className={td}><Tracking pkg={l.last} /></td>
+              <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} /></td>
             </tr>
           ))}
         </tbody>
@@ -277,6 +301,13 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
       </nav>
 
       <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setExpandAll((v) => !v)}
+          className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          {expandAll ? 'Hide package history' : 'Show all package history'}
+        </button>
         <label className="flex items-center gap-1 text-xs text-slate-500">
           Carrier
           <select value={carrier} onChange={(e) => setCarrier(e.target.value)} className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-700">
