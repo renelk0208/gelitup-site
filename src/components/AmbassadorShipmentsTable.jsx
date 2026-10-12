@@ -129,10 +129,13 @@ function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews,
       <p className="text-slate-500">{[country, TYPE_LABEL[getType(row)], row.discount_code].filter(Boolean).join(' · ')}</p>
       {line.isFirst && onSetType && <TypePicker row={row} type={getType(row)} onSetType={onSetType} busy={busy} />}
       {!line.isFirst && row.choice_submitted_at && <p className="mt-1 text-[11px] font-semibold text-emerald-700">✓ Chose 5 products {fmt(row.choice_submitted_at)}</p>}
-      {!line.isFirst && !row.choice_submitted_at && row.choice_requested_at && (
+      {!line.isFirst && !row.choice_submitted_at && row.choice_redo_at && onAskChoice && (
+        <p className="mt-1 text-[11px] text-rose-700">↺ Choices cleared (too many of one type) · <button type="button" onClick={() => onAskChoice(row)} disabled={busy} className="font-semibold underline">send "please choose again" email</button></p>
+      )}
+      {!line.isFirst && !row.choice_submitted_at && !row.choice_redo_at && row.choice_requested_at && (
         <p className="mt-1 text-[11px] text-amber-700">✉ Asked to choose {fmt(row.choice_requested_at)} · waiting{onAskChoice && <> · <button type="button" onClick={() => onAskChoice(row)} disabled={busy} className="underline">remind</button></>}</p>
       )}
-      {!line.isFirst && !row.choice_submitted_at && !row.choice_requested_at && onAskChoice && String(row.status).toLowerCase() === 'approved' && (
+      {!line.isFirst && !row.choice_submitted_at && !row.choice_redo_at && !row.choice_requested_at && onAskChoice && String(row.status).toLowerCase() === 'approved' && (
         <button type="button" onClick={() => onAskChoice(row)} disabled={busy} className="mt-1 text-[11px] font-semibold text-fuchsia-700 hover:underline">✉ Ask her to choose 5 products</button>
       )}
       {onAskReviews && (row._shipments || []).some((s) => s.sent_at && !s.lost_at) && (
