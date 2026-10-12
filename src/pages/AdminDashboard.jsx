@@ -5776,13 +5776,15 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   // has items planned for their next package starts unticked.
   const [choicePicker, setChoicePicker] = useState(null) // { ids: Set } while open
   // A function (not a value): it uses helpers defined further down.
+  // Only ambassadors not asked yet and with nothing planned for their next package.
   const getChoiceCandidates = () => rows
     .filter(choiceEligible)
     .map((row) => ({ row, planned: plannedItemsList(row), asked: row.choice_requested_at }))
+    .filter((c) => !c.asked && c.planned.length === 0)
     .sort((a, b) => String(a.row.next_package_due || '9999').localeCompare(String(b.row.next_package_due || '9999')))
   const askAllToChoose = () => {
-    if (!getChoiceCandidates().length) { alert('Everyone active has already chosen, or has not had a package yet.'); return }
-    setChoicePicker({ ids: new Set(getChoiceCandidates().filter((c) => !c.planned.length && !c.asked).map((c) => c.row.id)) })
+    if (!getChoiceCandidates().length) { alert('No one to ask: everyone active has already been asked, has chosen, or already has items planned.'); return }
+    setChoicePicker({ ids: new Set(getChoiceCandidates().map((c) => c.row.id)) })
   }
   const toggleChoicePick = (id) => setChoicePicker((prev) => {
     const ids = new Set(prev.ids)
@@ -7325,8 +7327,8 @@ const deleteApplication = async (row) => {
                 {(() => {
                   const asked = rows.filter((r) => r.choice_requested_at && !r.choice_submitted_at).length
                   const chosen = rows.filter((r) => r.choice_submitted_at).length
-                  const toAsk = rows.filter((r) => choiceEligible(r) && !r.choice_requested_at).length
-                  return `${toAsk} not asked yet · ${asked} asked, waiting · ${chosen} have chosen`
+                  const toAsk = getChoiceCandidates().length
+                  return `${toAsk} to ask (nothing planned) · ${asked} asked, waiting · ${chosen} have chosen`
                 })()}
               </span>
             </div>
@@ -8338,11 +8340,10 @@ const deleteApplication = async (row) => {
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4" onClick={() => !choiceBulkBusy && setChoicePicker(null)}>
           <div className="flex max-h-[85vh] w-full max-w-xl flex-col rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-base font-bold text-slate-900">Who should choose 5 products?</h3>
-            <p className="mt-1 text-xs text-slate-500">Tick the ambassadors to email. Anyone who already has items planned for their next package, or was already asked, starts unticked.</p>
+            <p className="mt-1 text-xs text-slate-500">Ambassadors who were already asked, or already have items planned for their next package, are not listed.</p>
             <div className="mt-3 flex gap-3 text-xs">
               <button type="button" className="font-semibold text-fuchsia-700 hover:underline" onClick={() => setChoicePicker({ ids: new Set(getChoiceCandidates().map((c) => c.row.id)) })}>Tick all</button>
               <button type="button" className="font-semibold text-slate-600 hover:underline" onClick={() => setChoicePicker({ ids: new Set() })}>Untick all</button>
-              <button type="button" className="font-semibold text-slate-600 hover:underline" onClick={() => setChoicePicker({ ids: new Set(getChoiceCandidates().filter((c) => !c.planned.length && !c.asked).map((c) => c.row.id)) })}>Only those with nothing planned</button>
             </div>
             <ul className="mt-2 flex-1 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200">
               {getChoiceCandidates().map(({ row, planned, asked }) => (
