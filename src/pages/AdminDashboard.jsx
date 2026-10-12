@@ -6306,14 +6306,6 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     lines.splice(idx, 1)
     await savePackNotes(row, lines)
   }
-  // One-click suggestions: the usual follow-up pack for their type (Extreme
-  // gets the Super list), or the starter pack if nothing has been sent yet.
-  const suggestedPackItems = (row) => {
-    const type = getAmbassadorType(row)
-    if (!getAmbassadorDashboardMeta(row).shipmentPreviouslySent) return AMBASSADOR_PACKS_BY_TYPE[type]?.items || []
-    const followUp = AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE[type === 'extreme_ambassador' ? 'super_ambassador' : type]
-    return followUp?.items || []
-  }
   const editPackNote = async (row, idx) => {
     const lines = packNoteLines(row)
     const original = parsePackNote(lines[idx])
@@ -7194,7 +7186,6 @@ const deleteApplication = async (row) => {
               getMeta={getAmbassadorDashboardMeta}
               getType={getAmbassadorType}
               plannedItems={plannedItemsList}
-              suggestedItems={suggestedPackItems}
               onAddPlanned={addPlannedItems}
               onRemovePlanned={removePlannedItem}
               savingId={saving}
