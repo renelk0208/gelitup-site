@@ -7026,7 +7026,7 @@ const deleteApplication = async (row) => {
   const AMBASSADOR_BUCKET_BADGE_STYLE = {
     newApproval: { className: 'border-slate-300 bg-slate-100 text-slate-600', label: () => '🆕 New approval' },
     acknowledgedNoPackage: { className: 'border-sky-200 bg-sky-100 text-sky-700', label: () => '🏭 Acknowledged — no package yet' },
-    needsNow: { className: 'border-red-300 bg-red-100 text-red-700', label: (date) => `🔴 Overdue — ${fmtDate(date)}` },
+    needsNow: { className: 'border-red-300 bg-red-100 text-red-700', label: (date) => `🔴 Next package overdue — ${fmtDate(date)}` },
     dueSoon: { className: 'border-amber-200 bg-amber-100 text-amber-700', label: (date) => `🟡 Due soon — ${fmtDate(date)}` },
     onTrack: { className: 'border-emerald-200 bg-emerald-100 text-emerald-700', label: (date) => `🟢 Next package ${fmtDate(date)}` },
   }
