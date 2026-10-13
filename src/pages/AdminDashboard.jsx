@@ -5457,7 +5457,8 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     await sendWelcomeContractEmail(updatedRow)
     try {
       const { subject: factorySubject, html: factoryHtml } = buildAmbassadorFactoryNotificationEmail(updatedRow, discountCode)
-      await sendAmbassadorEmail({ to: AMBASSADOR_INBOX, subject: factorySubject, html: factoryHtml })
+      // The office staff see every newly approved ambassador; the programme inbox keeps a copy.
+      await Promise.all([AMBASSADOR_INBOX, 'acc1.leeukopf@gmail.com'].map((to) => sendAmbassadorEmail({ to, subject: factorySubject, html: factoryHtml })))
     } catch (_) {}
     setSaving(null)
   }
@@ -6383,7 +6384,8 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     await sendWelcomeContractEmail(updatedRow)
     try {
       const { subject: factorySubject, html: factoryHtml } = buildAmbassadorFactoryNotificationEmail(updatedRow, discountCode)
-      await sendAmbassadorEmail({ to: AMBASSADOR_INBOX, subject: factorySubject, html: factoryHtml })
+      // The office staff see every newly approved ambassador; the programme inbox keeps a copy.
+      await Promise.all([AMBASSADOR_INBOX, 'acc1.leeukopf@gmail.com'].map((to) => sendAmbassadorEmail({ to, subject: factorySubject, html: factoryHtml })))
     } catch (_) {}
   }
   const acknowledgeFactory = async (row) => {
