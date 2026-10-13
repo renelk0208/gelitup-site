@@ -36,7 +36,7 @@
   schedule = "5 * * * *"
 
 [functions."send-ambassador-new-logo-letter"]
-  schedule = "0 17 13 10 *"
+  schedule = "30 17 13 10 *"
 
 [[redirects]]
   from = "https://gelitup.netlify.app/*"

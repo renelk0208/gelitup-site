@@ -2,9 +2,9 @@ import { createClient } from '@supabase/supabase-js'
 import LETTERS from './letters.json'
 
 // One-off: the new high-resolution Ambassador logo letter.
-// Runs once at 17:00 UTC (20:00 Athens / Greek time) on 13 October 2026.
+// Runs once at 17:30 UTC (20:30 Athens / Greek time) on 13 October 2026.
 export const config = {
-  schedule: '0 17 13 10 *',
+  schedule: '30 17 13 10 *',
 }
 
 const AMBASSADOR_TABLE = process.env.AMBASSADOR_TABLE || 'ambassador_applications'
@@ -12,6 +12,7 @@ const EMAIL_WEBHOOK_URL = process.env.VITE_EMAIL_WEBHOOK_URL || process.env.EMAI
 const SUPABASE_URL = process.env.SUPABASE_URL || ''
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE || ''
 const MAIN_SITE = 'https://gelitup.com'
+const WEBHOOK_KEY = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || SUPABASE_SERVICE_ROLE_KEY
 const SEND_DATE_UTC = '2026-10-13'
 const MESSAGE_MARKER = '[AMBASSADOR_NEW_LOGO_LETTER_2026_10_SENT]'
 const SUBJECT = 'Your new GEL.IT.UP Ambassador logo 💕'
@@ -124,7 +125,10 @@ export async function handler(event) {
     try {
       const response = await fetch(EMAIL_WEBHOOK_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(WEBHOOK_KEY ? { apikey: WEBHOOK_KEY, Authorization: `Bearer ${WEBHOOK_KEY}` } : {}),
+        },
         body: JSON.stringify({
           eventType: 'ambassador_new_logo_letter',
           to: email,
