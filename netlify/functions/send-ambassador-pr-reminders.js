@@ -154,7 +154,15 @@ async function sendEmail(subject, html) {
   }
 }
 
-export async function handler() {
+// Only Netlify's scheduler may run this (its call carries "next_run" in the body).
+function isScheduledRun(event) {
+  try { return Boolean(JSON.parse(event?.body || '{}')?.next_run) } catch { return false }
+}
+
+export async function handler(event) {
+  if (!isScheduledRun(event)) {
+    return { statusCode: 403, body: JSON.stringify({ error: 'This job only runs on its schedule.' }) }
+  }
   const siteUrl = String(process.env.URL || '').replace(/\/+$/, '')
   if (siteUrl && siteUrl !== MAIN_SITE) {
     return { statusCode: 200, body: JSON.stringify({ ok: true, skipped: `not the main site (${siteUrl})` }) }
