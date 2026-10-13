@@ -7508,6 +7508,13 @@ function MainMenu() {
           >
             Distributor / B2B Login
           </NavLink>
+          <NavLink
+            to="/portal/register"
+            onClick={() => setOpen(false)}
+            className="mt-1 block rounded-lg px-3 py-2 text-sm font-bold uppercase tracking-[0.08em] text-white transition duration-200 hover:bg-white/10"
+          >
+            Register — B2B / Distributor
+          </NavLink>
         </div>
       )}
     </div>
@@ -7550,6 +7557,13 @@ function Nav() {
         }
       >
         Work With Us
+      </NavLink>
+
+      <NavLink
+        to="/portal/register"
+        className="inline-flex items-center rounded-lg border border-fuchsia-500 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-white transition duration-300 hover:bg-fuchsia-600/25 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+      >
+        Register
       </NavLink>
 
       <NavLink
@@ -7647,6 +7661,14 @@ function MobileNav() {
               <path d="M5 19.5c1.2-3.3 4-5 7-5s5.8 1.7 7 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
             </svg>
             Distributor / B2B Login
+          </NavLink>
+
+          <NavLink
+            to="/portal/register"
+            onClick={() => setOpen(false)}
+            className="flex items-center justify-center rounded-lg border border-fuchsia-500 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.05em] !text-white transition duration-200 hover:bg-fuchsia-600/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+          >
+            Register — B2B / Distributor
           </NavLink>
 
           {sortHamburgerMenuItems(navItems).map((item) => (
@@ -9522,6 +9544,43 @@ function PortalAdminLogin({ onAdminLogin, onAdminCreatePassword }) {
   )
 }
 
+// Registration type chooser — shown at the top of both registration forms so
+// visitors clearly pick B2B (instant wholesale account) or Distributor
+// (application reviewed by the team). Each option is its own page.
+function RegisterTypeChooser({ active }) {
+  const options = [
+    { key: 'b2b', to: '/portal/register', title: 'B2B Client', desc: 'Salons, nail techs & academies. Order at wholesale prices — instant access, no approval.' },
+    { key: 'distributor', to: '/become-distributor', title: 'Distributor', desc: 'Resell GEL.IT.UP in your region or country. Application reviewed in 1–2 business days.' },
+  ]
+  return (
+    <div className="mb-6">
+      <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">I want to register as</p>
+      <div className="mt-2 grid grid-cols-2 gap-2" role="tablist" aria-label="Registration type">
+        {options.map((option) => {
+          const isActive = option.key === active
+          return (
+            <NavLink
+              key={option.key}
+              to={option.to}
+              role="tab"
+              aria-selected={isActive}
+              className={`block rounded-xl border-2 p-3 text-left transition duration-200 ${isActive ? 'border-[#D43790] bg-fuchsia-50' : 'border-slate-200 bg-white hover:border-fuchsia-300 hover:bg-slate-50'}`}
+            >
+              <span className="flex items-center gap-2">
+                <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${isActive ? 'border-[#D43790]' : 'border-slate-300'}`}>
+                  {isActive && <span className="h-2 w-2 rounded-full bg-[#D43790]" />}
+                </span>
+                <span className={`text-sm font-bold ${isActive ? 'text-[#D43790]' : 'text-slate-900'}`}>{option.title}</span>
+              </span>
+              <span className="mt-1.5 block text-[11px] leading-snug text-slate-600">{option.desc}</span>
+            </NavLink>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 function BuyerRegister() {
   const navigate = useNavigate()
   useEffect(() => setPageSEO({
@@ -9643,6 +9702,7 @@ function BuyerRegister() {
       </div>
 
       <div className="p-5 sm:p-6 md:p-8">
+        <RegisterTypeChooser active="b2b" />
         <h3 className="text-xl font-semibold text-slate-900">Quick Registration</h3>
         <p className="mt-1 text-sm text-slate-500">Create your account in under a minute.</p>
 
@@ -11158,6 +11218,7 @@ function PortalRegister({ onRegister }) {
       </div>
 
       <div className="p-5 sm:p-6 md:p-8">
+        <RegisterTypeChooser active="distributor" />
         {/* Progress indicator */}
         <div className="mb-5 flex items-center gap-3">
           <div className="flex items-center gap-2">
@@ -21858,6 +21919,7 @@ function App() {
                 <Route path="/portal/sign-in" element={<Navigate to="/portal/login" replace />} />
                 <Route path="/portal-admin-login" element={<Navigate to="/portal/admin-login" replace />} />
                 <Route path="/portal/register" element={<BuyerRegister />} />
+                <Route path="/register" element={<BuyerRegister />} />
                 <Route path="/portal/buy" element={<ExternalRedirect to="https://shop.gelitup.com/pages/ourproducts" />} />
                 <Route path="/portal/forgot-password" element={<PortalForgotPassword />} />
                 <Route
