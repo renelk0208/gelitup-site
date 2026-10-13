@@ -51,7 +51,7 @@ export function matchItem(item, products) {
 // How many products a generic line asks for: "3 different Cat Eye shades" -> 3,
 // "2 x Premium Builder Gel" -> 2, "5 x Autumn / Winter Colours" -> 5.
 export function suggestedCount(item) {
-  const m = String(item || '').trim().match(/^(\d+)\s*x?\b/i)
+  const m = String(item || '').trim().match(/^(\d+)\s*(?:x\b|\s)/i)
   const n = m ? Number(m[1]) : 1
   return n >= 1 && n <= 20 ? n : 1
 }
