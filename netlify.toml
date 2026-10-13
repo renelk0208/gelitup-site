@@ -27,7 +27,7 @@
   schedule = "0 7 7 9 *"
 
 [functions."send-ambassador-pr-reminders"]
-  schedule = "@daily"
+  schedule = "0 5,6 * * *"
 
 [[redirects]]
   from = "https://gelitup.netlify.app/*"
