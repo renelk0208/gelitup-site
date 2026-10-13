@@ -10261,7 +10261,7 @@ function CheckoutPage() {
             p_order_ref: orderRef,
             p_customer_email: email,
             p_discount_amount: ambassadorDiscountEur,
-            p_order_total: productsSubtotalAfterWallet,
+            p_order_total: productsSubtotalAfterCode,
           })
         } catch { /* non-blocking: order already placed */ }
       }
@@ -18917,9 +18917,18 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
         if (!historyError && Array.isArray(historyRows)) shipmentHistory = historyRows
       }
 
+      // Orders placed with this ambassador's code (gelitup.com and shop.gelitup.com).
+      let codeOrders = []
+      {
+        const { data: orderRows, error: orderRowsError } = await supabase.rpc('get_my_ambassador_code_orders')
+        if (!orderRowsError && Array.isArray(orderRows)) codeOrders = orderRows
+      }
+
       setAmbassadorPortalInfo({
         isLoading: false,
         code: String(row.code || ''),
+        codeOrders,
+        earnedEur: Number(row.earned_eur || 0),
         availableEur: Number(row.available_eur || 0),
         commissionPct: Number(row.commission_pct || 0),
         discountPct: Number(row.discount_pct || 20),
@@ -19757,6 +19766,36 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                           </div>
                         )
                       })()}
+                      {/* Orders placed with her code */}
+                      <div className="mt-3 rounded-xl border border-emerald-200 bg-white p-4">
+                        <div className="flex flex-wrap items-baseline justify-between gap-2">
+                          <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">Orders with your code</p>
+                          <p className="text-[11px] text-slate-500">
+                            {(ambassadorPortalInfo.codeOrders || []).length} order{(ambassadorPortalInfo.codeOrders || []).length === 1 ? '' : 's'}
+                            {' · '}Credit available: <strong className="text-emerald-700">€{Number(ambassadorPortalInfo.availableEur || 0).toFixed(2)}</strong>
+                          </p>
+                        </div>
+                        {(ambassadorPortalInfo.codeOrders || []).length === 0 ? (
+                          <p className="mt-2 text-[12px] text-slate-500">No orders with your code yet. Share it with your followers — each order shows up here, with the credit you earned.</p>
+                        ) : (
+                          <ul className="mt-2 divide-y divide-emerald-50 text-[12px] text-slate-700">
+                            {ambassadorPortalInfo.codeOrders.map((o, idx) => (
+                              <li key={`${o.ordered_at}-${idx}`} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                                <span>
+                                  <strong>{o.ordered_at ? new Date(o.ordered_at).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }) : ''}</strong>
+                                  <span className="text-slate-500"> · {o.source === 'shop.gelitup.com' ? 'shop.gelitup.com' : 'gelitup.com'}{o.country ? ` · ${o.country}` : ''}</span>
+                                </span>
+                                <span>
+                                  Order €{Number(o.order_total_eur || 0).toFixed(2)}
+                                  {o.commission_amount_eur != null && (
+                                    <span className="ml-2 font-semibold text-emerald-700">+€{Number(o.commission_amount_eur).toFixed(2)} credit ({Number(o.commission_pct || 0)}%)</span>
+                                  )}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
                     </>
                   ) : ambassadorPortalInfo.error ? (
                     <p className="mt-2 text-sm text-slate-500">{ambassadorPortalInfo.error}</p>
