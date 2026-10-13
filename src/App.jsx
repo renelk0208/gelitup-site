@@ -78,7 +78,7 @@ function applyCatalogueDiscount(priceEur) {
 }
 // Public catalogue small-order model: orders of €49–99.99 ship at a flat zone fee;
 // €100+ keeps free shipping. Countries with exclusive distributors (Italy, France,
-// Bulgaria, Greece) and any country not listed below keep the €100 minimum.
+// Greece) and any country not listed below keep the €100 minimum.
 // B2B orders must keep the full €100 free-shipping threshold even when promotional
 // pricing or seasonal banners are active.
 const FREE_SHIPPING_EUR = 100
@@ -87,12 +87,13 @@ function getFreeShippingEur() {
 }
 const SMALL_ORDER_MIN_EUR = 49
 const SMALL_ORDER_SHIPPING_ZONES = [
-  { feeEur: 15, countries: ['Austria', 'Germany', 'Hungary', 'Belgium', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'Croatia', 'Czech Republic'] },
+  { feeEur: 15, countries: ['Austria', 'Germany', 'Hungary', 'Belgium', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'Croatia', 'Czech Republic', 'Bulgaria'] },
   { feeEur: 22, countries: ['Denmark', 'Spain', 'Luxembourg', 'Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Finland', 'Sweden', 'Norway', 'Switzerland', 'United Kingdom'] },
 ]
 const DISTRIBUTOR_COUNTRY_HANDOFF = {
+  // Italy: customers are offered the Italian distributor's site but may stay
+  // and order here. Bulgaria: no hand-off (customers order here as normal).
   Italy: { url: 'https://www.gelitup.it', label: 'GEL.IT.UP Italy' },
-  Bulgaria: { url: 'https://gelitup.bg', label: 'GEL.IT.UP Bulgaria' },
 }
 function getDistributorCountryHandoff(country) {
   const normalized = String(country || '').trim().toLowerCase()
@@ -9771,6 +9772,7 @@ function CheckoutPage() {
   const [useWalletCredit, setUseWalletCredit] = useState(false)
   const handoffPopupShownForCountryRef = useRef('')
   const [handoffModalOpen, setHandoffModalOpen] = useState(false)
+  const [stayOnSiteCountry, setStayOnSiteCountry] = useState('')
   const [checkoutMode, setCheckoutMode] = useState(
     localStorage.getItem('portalAuth') === 'true' ? 'form' : 'choose'
   )
@@ -9922,7 +9924,9 @@ function CheckoutPage() {
   // Zone shipping: every order is charged by delivery country.
   // null fee = country not configured yet (or not chosen yet).
   const deliveryCountry = (form.shipToDifferentAddress ? form.shippingCountry : form.invoiceCountry).trim()
-  const handoff = getDistributorCountryHandoff(deliveryCountry)
+  const localHandoff = getDistributorCountryHandoff(deliveryCountry)
+  // Once the customer chose to stay and order here, the hand-off no longer applies.
+  const handoff = localHandoff && stayOnSiteCountry !== deliveryCountry ? localHandoff : null
   const smallOrderFee = getSmallOrderShippingFee(deliveryCountry)
   const shippingFee = smallOrderFee ?? 0
   // Ambassador code discount — mutually exclusive with the site sale: the customer
@@ -10090,48 +10094,8 @@ function CheckoutPage() {
     if (!hasSupabaseConfig || !supabase) { setError('Order system is not configured. Please contact us.'); return }
 
     if (handoff) {
-      const fallbackName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim() || form.companyName.trim() || 'Client'
-      const leadPayload = {
-        customer_type: 'client',
-        company_name: form.companyName.trim() || fallbackName,
-        vat_number: form.vatNumber.trim() || 'N/A',
-        contact_name: fallbackName,
-        contact_email: email,
-        phone: form.phone.trim() || 'N/A',
-        shipping_type: 'road',
-        address: form.invoiceAddressLine1.trim() || 'N/A',
-        city: form.invoiceArea.trim() || 'N/A',
-        postal_code: form.invoicePostalCode.trim() || 'N/A',
-        country: form.invoiceCountry.trim() || deliveryCountry || 'N/A',
-        invoice_address_line1: form.invoiceAddressLine1.trim() || null,
-        invoice_address_line2: form.invoiceAddressLine2.trim() || null,
-        invoice_area: form.invoiceArea.trim() || null,
-        invoice_region: form.invoiceRegion.trim() || null,
-        invoice_country: form.invoiceCountry.trim() || null,
-        invoice_postal_code: form.invoicePostalCode.trim() || null,
-        shipping_same_as_invoice: !form.shipToDifferentAddress,
-        shipping_name: !form.shipToDifferentAddress ? fallbackName : (form.shippingName.trim() || null),
-        shipping_phone: !form.shipToDifferentAddress ? (form.phone.trim() || null) : (form.shippingPhone.trim() || null),
-        shipping_address_line1: !form.shipToDifferentAddress ? (form.invoiceAddressLine1.trim() || null) : (form.shippingAddressLine1.trim() || null),
-        shipping_address_line2: !form.shipToDifferentAddress ? (form.invoiceAddressLine2.trim() || null) : (form.shippingAddressLine2.trim() || null),
-        shipping_area: !form.shipToDifferentAddress ? (form.invoiceArea.trim() || null) : (form.shippingArea.trim() || null),
-        shipping_region: !form.shipToDifferentAddress ? (form.invoiceRegion.trim() || null) : (form.shippingRegion.trim() || null),
-        shipping_country: !form.shipToDifferentAddress ? (form.invoiceCountry.trim() || null) : (form.shippingCountry.trim() || null),
-        shipping_postal_code: !form.shipToDifferentAddress ? (form.invoicePostalCode.trim() || null) : (form.shippingPostalCode.trim() || null),
-        business_type: 'country_referral_checkout',
-        application_type: 'country_referral',
-        status: 'submitted',
-        notes: `[DISTRIBUTOR_REFERRAL:${handoff.url}]\nCaptured from public checkout handoff.\nCart units: ${cartUnits}\nCart subtotal: €${cartTotal.toFixed(2)}`,
-        admin_comment: `Checkout blocked and referred to local distributor: ${handoff.url}`,
-        order_action: 'referred_to_local_distributor',
-      }
-      const { error: handoffInsertError } = await supabase.from(registrationsTable).insert([leadPayload])
-      if (handoffInsertError) {
-        setError(`Your country is served by ${handoff.label}. Please continue your purchase on ${handoff.url}. We could not save your handoff lead automatically: ${handoffInsertError.message}`)
-        return
-      }
-      setError(`Your country is served by ${handoff.label}. We saved your details and will follow up if needed. Please continue your purchase on ${handoff.url}`)
-      window.open(handoff.url, '_blank', 'noopener,noreferrer')
+      // Customer hasn't chosen yet: ask again (stay here, or go to the local site).
+      setHandoffModalOpen(true)
       return
     }
 
@@ -10645,26 +10609,27 @@ function CheckoutPage() {
               Shop with your local distributor
             </h2>
             <p className="mb-2 text-base font-semibold text-slate-700">
-              <strong>{deliveryCountry}</strong> is served exclusively by <strong>{handoff.label}</strong>.
+              Customers in <strong>{deliveryCountry}</strong> can also shop with <strong>{handoff.label}</strong>.
             </p>
             <p className="mb-6 text-sm text-slate-600">
-              Please complete your purchase directly on their website:
+              Would you like to continue there, or stay and order here?
             </p>
-            <a
-              href={handoff.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mb-6 inline-block rounded-xl bg-black px-6 py-3 text-base font-bold text-white hover:opacity-80 transition"
-            >
-              {handoff.url}
-            </a>
-            <div>
+            <div className="flex flex-col gap-3">
               <button
-                onClick={() => setHandoffModalOpen(false)}
-                className="mt-2 rounded-lg border border-slate-300 px-6 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition"
+                type="button"
+                onClick={() => { setStayOnSiteCountry(deliveryCountry); setHandoffModalOpen(false) }}
+                className="rounded-xl bg-black px-6 py-3 text-base font-bold text-white hover:opacity-80 transition"
               >
-                Dismiss
+                Stay and order here
               </button>
+              <a
+                href={handoff.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-xl border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition"
+              >
+                Go to {handoff.label} ({handoff.url.replace(/^https?:\/\//, '')})
+              </a>
             </div>
           </div>
         </div>
@@ -10672,8 +10637,9 @@ function CheckoutPage() {
 
       {handoff && (
         <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          Your shipping country ({deliveryCountry}) is served by <strong>{handoff.label}</strong>. Please complete your order on{' '}
-          <a href={handoff.url} target="_blank" rel="noreferrer" className="font-semibold underline">{handoff.url}</a>.
+          Shipping to {deliveryCountry}? You can also order from <strong>{handoff.label}</strong> at{' '}
+          <a href={handoff.url} target="_blank" rel="noreferrer" className="font-semibold underline">{handoff.url}</a>, or{' '}
+          <button type="button" onClick={() => setStayOnSiteCountry(deliveryCountry)} className="font-semibold underline">stay and order here</button>.
         </div>
       )}
       {error && (
@@ -11885,7 +11851,7 @@ function PortalRegister({ onRegister }) {
                     rel="noreferrer"
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-fuchsia-800 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-fuchsia-200 transition hover:opacity-90"
                   >
-                    Continue on {submittedProfile.redirectLabel || 'your local GEL.IT.UP site'}
+                    Or shop with {submittedProfile.redirectLabel || 'your local GEL.IT.UP site'}
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
                       <path d="M7 17L17 7M9 7h8v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -21341,12 +21307,6 @@ function App() {
       if (application.notes?.trim()) {
         notesSections.push(`Additional notes: ${application.notes.trim()}`)
       }
-      if (handoff) {
-        notesSections.push(
-          `[DISTRIBUTOR_REFERRAL:${handoff.url}]`,
-          `Referred to local distributor checkout: ${handoff.url}`,
-        )
-      }
 
       const payload = {
         customer_type: application.customerType.trim(),
@@ -21380,9 +21340,9 @@ function App() {
         application_type: isDistributorApplication ? 'distributor' : 'b2b_order',
         distributor_tier: isDistributorApplication ? (application.distributorTier || null) : null,
         order_profile: isBusinessOrder ? 'business' : 'personal',
-        prices_allocated: !isDistributorApplication && !handoff,
-        admin_comment: handoff ? `Auto-referred to local distributor: ${handoff.url}` : null,
-        order_action: handoff ? 'referred_to_local_distributor' : null,
+        prices_allocated: !isDistributorApplication,
+        admin_comment: null,
+        order_action: null,
         order_payment_status: isDistributorApplication ? null : 'unpaid',
         order_shipping_status: isDistributorApplication ? null : 'not_ready',
         tracking_number: null,
@@ -21491,15 +21451,6 @@ function App() {
         }
       }
 
-      if (handoff) {
-        return {
-          ok: true,
-          message: `Thanks — we saved your details. Your country is served by ${handoff.label}. Please continue your purchase on ${handoff.url}.`,
-          redirectUrl: handoff.url,
-          redirectLabel: handoff.label,
-        }
-      }
-
       // For B2B orders: create the Supabase auth account immediately so that Supabase
       // sends the email-confirmation link. The link redirects to create-password.
       if (!isDistributorApplication) {
@@ -21521,6 +21472,8 @@ function App() {
         message: isDistributorApplication
           ? `Your distributor application has been received. Our team will review it and contact you by email once approved — usually within 1–2 business days.`
           : `check-inbox:${payload.contact_email}`,
+        // Italy: registered here as normal; the local site is offered as an option.
+        ...(handoff && !isDistributorApplication ? { redirectUrl: handoff.url, redirectLabel: handoff.label } : {}),
       }
     }
 
