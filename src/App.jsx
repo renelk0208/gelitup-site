@@ -91,8 +91,9 @@ const SMALL_ORDER_SHIPPING_ZONES = [
   { feeEur: 22, countries: ['Denmark', 'Spain', 'Luxembourg', 'Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Finland', 'Sweden', 'Norway', 'Switzerland', 'United Kingdom'] },
 ]
 const DISTRIBUTOR_COUNTRY_HANDOFF = {
-  // Italy: customers are offered the Italian distributor's site but may stay
-  // and order here. Bulgaria: no hand-off (customers order here as normal).
+  // Italy: orders for delivery to Italy go through the Italian distributor. Visitors
+  // are offered gelitup.it but may stay and browse here (never sent away automatically).
+  // Bulgaria: no hand-off (customers order here as normal).
   Italy: { url: 'https://www.gelitup.it', label: 'GEL.IT.UP Italy' },
 }
 function getDistributorCountryHandoff(country) {
@@ -9772,7 +9773,6 @@ function CheckoutPage() {
   const [useWalletCredit, setUseWalletCredit] = useState(false)
   const handoffPopupShownForCountryRef = useRef('')
   const [handoffModalOpen, setHandoffModalOpen] = useState(false)
-  const [stayOnSiteCountry, setStayOnSiteCountry] = useState('')
   const [checkoutMode, setCheckoutMode] = useState(
     localStorage.getItem('portalAuth') === 'true' ? 'form' : 'choose'
   )
@@ -9924,9 +9924,7 @@ function CheckoutPage() {
   // Zone shipping: every order is charged by delivery country.
   // null fee = country not configured yet (or not chosen yet).
   const deliveryCountry = (form.shipToDifferentAddress ? form.shippingCountry : form.invoiceCountry).trim()
-  const localHandoff = getDistributorCountryHandoff(deliveryCountry)
-  // Once the customer chose to stay and order here, the hand-off no longer applies.
-  const handoff = localHandoff && stayOnSiteCountry !== deliveryCountry ? localHandoff : null
+  const handoff = getDistributorCountryHandoff(deliveryCountry)
   const smallOrderFee = getSmallOrderShippingFee(deliveryCountry)
   const shippingFee = smallOrderFee ?? 0
   // Ambassador code discount — mutually exclusive with the site sale: the customer
@@ -10094,7 +10092,8 @@ function CheckoutPage() {
     if (!hasSupabaseConfig || !supabase) { setError('Order system is not configured. Please contact us.'); return }
 
     if (handoff) {
-      // Customer hasn't chosen yet: ask again (stay here, or go to the local site).
+      // Orders for delivery to Italy can't be placed here; offer the local site (no redirect).
+      setError(`Orders for delivery to ${deliveryCountry} are handled by ${handoff.label}. You're welcome to keep browsing here, and place your order at ${handoff.url}.`)
       setHandoffModalOpen(true)
       return
     }
@@ -10609,18 +10608,18 @@ function CheckoutPage() {
               Shop with your local distributor
             </h2>
             <p className="mb-2 text-base font-semibold text-slate-700">
-              Customers in <strong>{deliveryCountry}</strong> can also shop with <strong>{handoff.label}</strong>.
+              Orders for delivery to <strong>{deliveryCountry}</strong> are handled by <strong>{handoff.label}</strong>.
             </p>
             <p className="mb-6 text-sm text-slate-600">
-              Would you like to continue there, or stay and order here?
+              You can go to their website to order, or stay here and keep browsing.
             </p>
             <div className="flex flex-col gap-3">
               <button
                 type="button"
-                onClick={() => { setStayOnSiteCountry(deliveryCountry); setHandoffModalOpen(false) }}
+                onClick={() => setHandoffModalOpen(false)}
                 className="rounded-xl bg-black px-6 py-3 text-base font-bold text-white hover:opacity-80 transition"
               >
-                Stay and order here
+                Stay on this site
               </button>
               <a
                 href={handoff.url}
@@ -10637,9 +10636,8 @@ function CheckoutPage() {
 
       {handoff && (
         <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          Shipping to {deliveryCountry}? You can also order from <strong>{handoff.label}</strong> at{' '}
-          <a href={handoff.url} target="_blank" rel="noreferrer" className="font-semibold underline">{handoff.url}</a>, or{' '}
-          <button type="button" onClick={() => setStayOnSiteCountry(deliveryCountry)} className="font-semibold underline">stay and order here</button>.
+          Orders for delivery to {deliveryCountry} are handled by <strong>{handoff.label}</strong>. To order, please visit{' '}
+          <a href={handoff.url} target="_blank" rel="noreferrer" className="font-semibold underline">{handoff.url}</a>.
         </div>
       )}
       {error && (
@@ -11851,7 +11849,7 @@ function PortalRegister({ onRegister }) {
                     rel="noreferrer"
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-fuchsia-800 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-fuchsia-200 transition hover:opacity-90"
                   >
-                    Or shop with {submittedProfile.redirectLabel || 'your local GEL.IT.UP site'}
+                    Continue on {submittedProfile.redirectLabel || 'your local GEL.IT.UP site'}
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
                       <path d="M7 17L17 7M9 7h8v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -21307,6 +21305,12 @@ function App() {
       if (application.notes?.trim()) {
         notesSections.push(`Additional notes: ${application.notes.trim()}`)
       }
+      if (handoff) {
+        notesSections.push(
+          `[DISTRIBUTOR_REFERRAL:${handoff.url}]`,
+          `Referred to local distributor checkout: ${handoff.url}`,
+        )
+      }
 
       const payload = {
         customer_type: application.customerType.trim(),
@@ -21340,9 +21344,9 @@ function App() {
         application_type: isDistributorApplication ? 'distributor' : 'b2b_order',
         distributor_tier: isDistributorApplication ? (application.distributorTier || null) : null,
         order_profile: isBusinessOrder ? 'business' : 'personal',
-        prices_allocated: !isDistributorApplication,
-        admin_comment: null,
-        order_action: null,
+        prices_allocated: !isDistributorApplication && !handoff,
+        admin_comment: handoff ? `Auto-referred to local distributor: ${handoff.url}` : null,
+        order_action: handoff ? 'referred_to_local_distributor' : null,
         order_payment_status: isDistributorApplication ? null : 'unpaid',
         order_shipping_status: isDistributorApplication ? null : 'not_ready',
         tracking_number: null,
@@ -21451,6 +21455,15 @@ function App() {
         }
       }
 
+      if (handoff) {
+        return {
+          ok: true,
+          message: `Thanks — we saved your details. Orders for your country are handled by ${handoff.label}. You can place your order on ${handoff.url}.`,
+          redirectUrl: handoff.url,
+          redirectLabel: handoff.label,
+        }
+      }
+
       // For B2B orders: create the Supabase auth account immediately so that Supabase
       // sends the email-confirmation link. The link redirects to create-password.
       if (!isDistributorApplication) {
@@ -21472,8 +21485,6 @@ function App() {
         message: isDistributorApplication
           ? `Your distributor application has been received. Our team will review it and contact you by email once approved — usually within 1–2 business days.`
           : `check-inbox:${payload.contact_email}`,
-        // Italy: registered here as normal; the local site is offered as an option.
-        ...(handoff && !isDistributorApplication ? { redirectUrl: handoff.url, redirectLabel: handoff.label } : {}),
       }
     }
 
