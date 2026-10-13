@@ -343,7 +343,7 @@ function buildEmailHtml(row, t) {
       </tr>
       <tr>
         <td style="background-color:#f9fafb;padding:20px 32px;text-align:center;border-top:1px solid #f3f4f6;font-size:12px;color:#9ca3af;">
-          GEL.IT.UP · info@gelitup.com · WhatsApp/Viber: +30 694 071 5234
+          GEL.IT.UP · ambassadors@gelitup.com · WhatsApp/Viber: +30 694 071 5234
         </td>
       </tr>
     </table>
@@ -363,8 +363,8 @@ async function sendUpdateEmail(row) {
       to: row.email,
       subject: subject,
       html: buildEmailHtml(row, t),
-      from: 'GEL.IT.UP <info@gelitup.com>',
-      replyTo: 'info@gelitup.com',
+      from: 'GEL.IT.UP Ambassadors <ambassadors@gelitup.com>',
+      replyTo: 'ambassadors@gelitup.com',
       lang: langKey,
     }),
   })

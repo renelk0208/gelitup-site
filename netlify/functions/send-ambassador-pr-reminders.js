@@ -31,7 +31,7 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || proce
 // why no reminder email ever arrived.
 const WEBHOOK_KEY = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || SUPABASE_SERVICE_ROLE_KEY
 const AMBASSADOR_TABLE = process.env.VITE_AMBASSADOR_TABLE || 'ambassador_applications'
-const REMINDER_RECIPIENT = 'rene@gelitup.com'
+const REMINDER_RECIPIENT = 'ambassadors@gelitup.com'
 const DAYS_BEFORE_DUE = 7
 // The same repo is deployed to gelitup.com, .ch, .eu and .nl. Only the main
 // site sends, so each reminder arrives once rather than four times.
@@ -144,8 +144,8 @@ async function sendEmail(subject, html) {
       to: REMINDER_RECIPIENT,
       subject,
       html,
-      replyTo: 'info@gelitup.com',
-      from: 'GEL.IT.UP <info@gelitup.com>',
+      replyTo: 'ambassadors@gelitup.com',
+      from: 'GEL.IT.UP Ambassadors <ambassadors@gelitup.com>',
     }),
   })
   if (!response.ok) {
