@@ -35,6 +35,9 @@
 [functions."send-ambassador-code-order-congrats"]
   schedule = "5 * * * *"
 
+[functions."send-ambassador-new-logo-letter"]
+  schedule = "0 17 13 10 *"
+
 [[redirects]]
   from = "https://gelitup.netlify.app/*"
   to = "https://gelitup.com/:splat"
