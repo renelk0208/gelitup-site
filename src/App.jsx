@@ -78,7 +78,7 @@ function applyCatalogueDiscount(priceEur) {
 }
 // Public catalogue small-order model: orders of €49–99.99 ship at a flat zone fee;
 // €100+ keeps free shipping. Countries with exclusive distributors (Italy, France,
-// Greece) and any country not listed below keep the €100 minimum.
+// Greece, Bulgaria) and any country not listed below keep the €100 minimum.
 // B2B orders must keep the full €100 free-shipping threshold even when promotional
 // pricing or seasonal banners are active.
 const FREE_SHIPPING_EUR = 100
@@ -87,7 +87,7 @@ function getFreeShippingEur() {
 }
 const SMALL_ORDER_MIN_EUR = 49
 const SMALL_ORDER_SHIPPING_ZONES = [
-  { feeEur: 15, countries: ['Austria', 'Germany', 'Hungary', 'Belgium', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'Croatia', 'Czech Republic', 'Bulgaria'] },
+  { feeEur: 15, countries: ['Austria', 'Germany', 'Hungary', 'Belgium', 'Netherlands', 'Poland', 'Slovakia', 'Slovenia', 'Croatia', 'Czech Republic'] },
   { feeEur: 22, countries: ['Denmark', 'Spain', 'Luxembourg', 'Estonia', 'Ireland', 'Latvia', 'Lithuania', 'Portugal', 'Finland', 'Sweden', 'Norway', 'Switzerland', 'United Kingdom'] },
 ]
 const DISTRIBUTOR_COUNTRY_HANDOFF = {
