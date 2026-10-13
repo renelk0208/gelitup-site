@@ -29,8 +29,9 @@ const ELIGIBILITY_GATES = [
 
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL
 const EMAIL_WEBHOOK_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-const EMAIL_FROM = import.meta.env.VITE_AMBASSADOR_EMAIL_FROM || 'GEL.IT.UP <info@gelitup.com>'
-const ADMIN_INBOX = import.meta.env.VITE_AMBASSADOR_INBOX || 'info@gelitup.com'
+// The whole ambassador programme uses ambassadors@gelitup.com.
+const EMAIL_FROM = 'GEL.IT.UP Ambassadors <ambassadors@gelitup.com>'
+const ADMIN_INBOX = 'ambassadors@gelitup.com'
 
 const escapeHtml = (v) => String(v ?? '')
   .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
@@ -134,7 +135,7 @@ async function sendPartnerRedirectEmail(record, partner) {
       <p>Thank you so much for your interest in the GEL.IT.UP Ambassador Programme — we love that you want to create with us.</p>
       <p>${escapeHtml(blockedMessage)}</p>
       <p>${escapeHtml(supportMessage)} <a href="${partner.instagramUrl}" style="color:#D43790;font-weight:bold">${escapeHtml(partner.handle)}</a>.</p>
-      <p>If you need anything else, just email us at <a href="mailto:info@gelitup.com" style="color:#D43790;font-weight:bold">info@gelitup.com</a>.</p>
+      <p>If you need anything else, just email us at <a href="mailto:ambassadors@gelitup.com" style="color:#D43790;font-weight:bold">ambassadors@gelitup.com</a>.</p>
       <p>Warm wishes,<br/>The GEL.IT.UP Team</p>
     </div>`
   const headers = { 'Content-Type': 'application/json' }
@@ -435,7 +436,7 @@ export default function AmbassadorPage() {
               </p>
               <p className="mt-3 text-sm text-white/70">
                 If you need anything else, email us at{' '}
-                <a href="mailto:info@gelitup.com" className="font-semibold text-[#e879c4] hover:underline">info@gelitup.com</a>.
+                <a href="mailto:ambassadors@gelitup.com" className="font-semibold text-[#e879c4] hover:underline">ambassadors@gelitup.com</a>.
               </p>
               <a
                 href={partnerCountry.instagramUrl}

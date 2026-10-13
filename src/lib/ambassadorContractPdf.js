@@ -18,7 +18,7 @@ import { AGREEMENT_I18N } from '../data/ambassadorAgreementI18n.js'
 export const CONTRACT_COMPANY = {
   brand: 'Thermitek Ltd — GEL.IT.UP by GIUP®',
   addressLine: '8 Racho Dimchev, Sofia, Bulgaria, 2700 · VAT BG202102027',
-  contactLine: 'info@gelitup.com · gelitup.com',
+  contactLine: 'ambassadors@gelitup.com · gelitup.com',
   footer: 'Thermitek Ltd — GEL.IT.UP by GIUP® · VAT BG202102027 · Governed by the laws of Bulgaria.',
 }
 

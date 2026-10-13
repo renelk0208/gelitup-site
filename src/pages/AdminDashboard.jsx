@@ -30,12 +30,15 @@ const FROM_EMAIL = import.meta.env.VITE_EMAIL_FROM || 'GEL.IT.UP Distributors <d
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 const AMBASSADOR_TABLE = import.meta.env.VITE_AMBASSADOR_TABLE || 'ambassador_applications'
 // Reuse the working distributors@ sender (guaranteed deliverability), branded for ambassadors.
-// One address for everything — send from, and receive replies at, info@gelitup.com.
-const AMBASSADOR_REPLY_TO = import.meta.env.VITE_AMBASSADOR_INBOX || 'info@gelitup.com'
-const AMBASSADOR_FROM_EMAIL = import.meta.env.VITE_AMBASSADOR_EMAIL_FROM || 'GEL.IT.UP <info@gelitup.com>'
-const AMBASSADOR_REMINDER_EMAIL = 'info@gelitup.com'
-const AMBASSADOR_NOTE_NOTIFICATION_RECIPIENTS = ['leeukopf@gmail.com', 'acc1.leeukopf@gmail.com']
-const AMBASSADOR_SHIPMENT_NOTIFICATION_EMAIL = 'rene@gelitup.com'
+// One address for the whole ambassador programme: every ambassador email is
+// sent from ambassadors@gelitup.com, replies come back there, and every
+// internal ambassador notification goes there too.
+const AMBASSADOR_INBOX = 'ambassadors@gelitup.com'
+const AMBASSADOR_REPLY_TO = AMBASSADOR_INBOX
+const AMBASSADOR_FROM_EMAIL = `GEL.IT.UP Ambassadors <${AMBASSADOR_INBOX}>`
+const AMBASSADOR_REMINDER_EMAIL = AMBASSADOR_INBOX
+const AMBASSADOR_NOTE_NOTIFICATION_RECIPIENTS = [AMBASSADOR_INBOX]
+const AMBASSADOR_SHIPMENT_NOTIFICATION_EMAIL = AMBASSADOR_INBOX
 // Statuses that count as "needs review" (form inserts default to 'new').
 const AMBASSADOR_PENDING_STATUSES = ['new', 'pending', 'submitted']
 const AMBASSADOR_LETTER_ATTACHMENT_URL = ambassadorLetterAttachmentUrl
@@ -5454,7 +5457,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
     await sendWelcomeContractEmail(updatedRow)
     try {
       const { subject: factorySubject, html: factoryHtml } = buildAmbassadorFactoryNotificationEmail(updatedRow, discountCode)
-      await Promise.all(['leeukopf@gmail.com', 'acc1.leeukopf@gmail.com'].map((to) => sendAmbassadorEmail({ to, subject: factorySubject, html: factoryHtml })))
+      await sendAmbassadorEmail({ to: AMBASSADOR_INBOX, subject: factorySubject, html: factoryHtml })
     } catch (_) {}
     setSaving(null)
   }
@@ -5893,7 +5896,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const { data: fresh } = await supabase.from(AMBASSADOR_TABLE).select('admin_comment, choice_approved_at, choice_approved_by').eq('id', row.id).maybeSingle()
     if (fresh) patchRow(row.id, fresh)
     await sendAmbassadorEmail({
-      to: 'acc1.leeukopf@gmail.com',
+      to: AMBASSADOR_INBOX,
       subject: `${row.full_name}'s 5 PR products are approved`,
       html: `<div style="font-family:Arial,sans-serif;font-size:14px"><p><strong>${escAmb(row.full_name)}</strong>'s chosen products have been approved for her next PR package. They are now in "What goes in this package" in the admin — please prepare them.</p><ol>${items.map((i) => `<li>${escAmb(i)}</li>`).join('')}</ol></div>`,
     })
@@ -6380,7 +6383,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     await sendWelcomeContractEmail(updatedRow)
     try {
       const { subject: factorySubject, html: factoryHtml } = buildAmbassadorFactoryNotificationEmail(updatedRow, discountCode)
-      await Promise.all(['leeukopf@gmail.com', 'acc1.leeukopf@gmail.com'].map((to) => sendAmbassadorEmail({ to, subject: factorySubject, html: factoryHtml })))
+      await sendAmbassadorEmail({ to: AMBASSADOR_INBOX, subject: factorySubject, html: factoryHtml })
     } catch (_) {}
   }
   const acknowledgeFactory = async (row) => {

@@ -54,7 +54,7 @@ async function sendEmail(to, subject, html) {
   const res = await fetch(EMAIL_WEBHOOK_URL, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ to, subject, html, from: 'GEL.IT.UP <info@gelitup.com>', replyTo: 'info@gelitup.com' }),
+    body: JSON.stringify({ to, subject, html, from: 'GEL.IT.UP Ambassadors <ambassadors@gelitup.com>', replyTo: 'ambassadors@gelitup.com' }),
   })
   if (!res.ok) throw new Error(`email webhook ${res.status}: ${(await res.text().catch(() => '')).slice(0, 200)}`)
 }
