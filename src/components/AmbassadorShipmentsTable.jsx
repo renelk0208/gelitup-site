@@ -138,7 +138,7 @@ function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews,
       {line.isFirst && onSetType && <TypePicker row={row} type={getType(row)} onSetType={onSetType} busy={busy} />}
       {!line.isFirst && row.choice_submitted_at && row.choice_approved_at && <p className="mt-1 text-[11px] font-semibold text-emerald-700">✓ Chose 5 products {fmt(row.choice_submitted_at)} · approved</p>}
       {!line.isFirst && row.choice_submitted_at && !row.choice_approved_at && (
-        <div className="mt-1 rounded border border-amber-300 bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900">
+        <div id={`choice-approval-${row.id}`} className="mt-1 scroll-mt-24 rounded border border-amber-300 bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900 transition-shadow">
           <p className="font-semibold">⏳ Chose 5 products {fmt(row.choice_submitted_at)} — waiting for René's approval</p>
           <ol className="ml-4 list-decimal">{(row.chosen_items || []).map((i) => <li key={i}>{i}</li>)}</ol>
           {canApproveChoices && (

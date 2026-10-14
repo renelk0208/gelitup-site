@@ -5036,6 +5036,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   const [sectionOpenState, setSectionOpenState] = useState({})
   const [shipmentEntryOpen, setShipmentEntryOpen] = useState({})
   const [packingListPdfBusy, setPackingListPdfBusy] = useState(false)
+  const approvalJumpRef = useRef(0) // which waiting-for-approval ambassador to jump to next
   const [dashboardOnTrackOpen, setDashboardOnTrackOpen] = useState(false)
   const reminderSweepStartedRef = useRef(false)
   const shipmentSaveInFlightRef = useRef(new Set())
@@ -7580,15 +7581,53 @@ const deleteApplication = async (row) => {
               >
                 {choiceBulkBusy ? 'Sending…' : '✉ Ask ambassadors to choose 5 products…'}
               </button>
-              <span className="text-[11px] text-slate-500">
-                {(() => {
-                  const asked = rows.filter((r) => r.choice_requested_at && !r.choice_submitted_at).length
-                  const chosen = rows.filter((r) => r.choice_submitted_at).length
-                  const toApprove = rows.filter((r) => r.choice_submitted_at && !r.choice_approved_at).length
-                  const toAsk = getChoiceCandidates().length
-                  return `${toAsk} to ask (nothing planned) · ${asked} asked, waiting · ${chosen} have chosen${toApprove ? ` · ⏳ ${toApprove} waiting for René's approval` : ''}`
-                })()}
-              </span>
+              {(() => {
+                const asked = rows.filter((r) => r.choice_requested_at && !r.choice_submitted_at).length
+                const chosen = rows.filter((r) => r.choice_submitted_at).length
+                const waiting = rows.filter((r) => r.choice_submitted_at && !r.choice_approved_at)
+                const toAsk = getChoiceCandidates().length
+                // Jump straight to the (next) ambassador whose choice is waiting
+                // for approval: open her section, scroll to her, highlight it.
+                const goToApproval = () => {
+                  if (!waiting.length) return
+                  const target = waiting[approvalJumpRef.current % waiting.length]
+                  approvalJumpRef.current += 1
+                  const reveal = () => {
+                    const el = document.getElementById(`choice-approval-${target.id}`)
+                    if (!el) return false
+                    const section = el.closest('details')
+                    if (section) section.open = true
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    el.classList.add('ring-4', 'ring-amber-400')
+                    window.setTimeout(() => el.classList.remove('ring-4', 'ring-amber-400'), 2500)
+                    return true
+                  }
+                  if (!reveal()) {
+                    // Hidden by the search box or filter: clear them, then try again.
+                    setSearchQuery('')
+                    setFilter('all')
+                    window.setTimeout(reveal, 400)
+                  }
+                }
+                return (
+                  <span className="text-[11px] text-slate-500">
+                    {`${toAsk} to ask (nothing planned) · ${asked} asked, waiting · ${chosen} have chosen`}
+                    {waiting.length > 0 && (
+                      <>
+                        {' · '}
+                        <button
+                          type="button"
+                          onClick={goToApproval}
+                          title={waiting.map((r) => r.full_name).join(', ')}
+                          className="rounded-full border border-amber-400 bg-amber-50 px-2.5 py-0.5 font-semibold text-amber-900 hover:bg-amber-100"
+                        >
+                          ⏳ {waiting.length} waiting for René's approval{waiting.length > 1 ? ' — click for the next' : ''} →
+                        </button>
+                      </>
+                    )}
+                  </span>
+                )
+              })()}
             </div>
             <AmbassadorShipmentsTable
               rows={filteredRows}
