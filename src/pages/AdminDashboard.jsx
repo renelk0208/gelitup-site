@@ -5,7 +5,7 @@ import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
 import tierPricingOverrides from '../data/tierPricingOverrides.json'
 import ambassadorLetterAttachmentUrl from '../lib/ambassadorletter/Gelitup Ambassador Letter.pdf?url'
 import { buildAmbassadorContractPdf, buildAmbassadorPackingListPdf, buildAmbassadorWelcomeLetterPdf } from '../lib/ambassadorContractPdf.js'
-import { detectCarrier, estimateDelivery, trackingLink } from '../lib/ambassadorShipping.js'
+import { detectCarrier, estimateDelivery, normalizeCountry, trackingLink } from '../lib/ambassadorShipping.js'
 import { instagramHandle, instagramUrl, tiktokHandle, tiktokUrl } from '../lib/socialLinks.js'
 import { whereAlreadySent } from '../lib/packageItems.js'
 import { matchItem, receivedItems, searchProducts, suggestedCount } from '../lib/reviewProducts.js'
@@ -5036,6 +5036,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   const [sectionOpenState, setSectionOpenState] = useState({})
   const [shipmentEntryOpen, setShipmentEntryOpen] = useState({})
   const [packingListPdfBusy, setPackingListPdfBusy] = useState(false)
+  const [countryFilter, setCountryFilter] = useState(() => { try { return localStorage.getItem('gelitup.admin.ambassadorCountry') || '' } catch { return '' } })
   const approvalJumpRef = useRef(0) // which waiting-for-approval ambassador to jump to next
   const [dashboardOnTrackOpen, setDashboardOnTrackOpen] = useState(false)
   const reminderSweepStartedRef = useRef(false)
@@ -7376,7 +7377,15 @@ const deleteApplication = async (row) => {
     if (filter === 'pending') return AMBASSADOR_PENDING_STATUSES.includes(st)
     return st === filter
   }
-  const filteredRows = normalizedAmbassadorSearch
+  // Country filter: names typed in any language ("Ελλάδα", "Polska", "España")
+  // count as one country, so every ambassador in a country shows together.
+  const countryOptions = Object.entries(rows.reduce((acc, row) => {
+    const c = normalizeCountry(row.country)
+    if (c && statusMatchesFilter(row)) acc[c] = (acc[c] || 0) + 1
+    return acc
+  }, {})).sort((a, b) => a[0].localeCompare(b[0]))
+  const countryMatches = (row) => !countryFilter || normalizeCountry(row.country) === countryFilter
+  const filteredRows = (normalizedAmbassadorSearch
     ? rows.filter((row) => {
         const haystack = [
           row.full_name,
@@ -7399,6 +7408,7 @@ const deleteApplication = async (row) => {
         return normalizedAmbassadorSearch.split(/\s+/).every((token) => folded.includes(token))
       })
     : rows.filter(statusMatchesFilter)
+  ).filter(countryMatches)
 
   // "At a glance" dashboard — groups approved ambassadors by how urgently they
   // need their next PR package so the admin can see who to act on first without
@@ -7563,7 +7573,21 @@ const deleteApplication = async (row) => {
               Clear
             </button>
           )}
-          <span className="text-xs text-slate-400">{filteredRows.length} result{filteredRows.length === 1 ? '' : 's'}</span>
+          <select
+            value={countryFilter}
+            onChange={(e) => {
+              const value = e.target.value
+              setCountryFilter(value)
+              try { localStorage.setItem('gelitup.admin.ambassadorCountry', value) } catch { /* ignore */ }
+            }}
+            title="Show only ambassadors in one country"
+            className={`rounded-full border px-3 py-2 text-sm ${countryFilter ? 'border-fuchsia-400 bg-fuchsia-50 font-semibold text-fuchsia-800' : 'border-slate-200 text-slate-700'}`}
+          >
+            <option value="">🌍 All countries</option>
+            {countryFilter && !countryOptions.some(([c]) => c === countryFilter) && <option value={countryFilter}>{countryFilter} (0)</option>}
+            {countryOptions.map(([c, n]) => <option key={c} value={c}>{c} ({n})</option>)}
+          </select>
+          <span className="text-xs text-slate-400">{filteredRows.length} result{filteredRows.length === 1 ? '' : 's'}{countryFilter ? ` in ${countryFilter}` : ''}</span>
         </div>
       </div>
 
@@ -7606,6 +7630,7 @@ const deleteApplication = async (row) => {
                     // Hidden by the search box or filter: clear them, then try again.
                     setSearchQuery('')
                     setFilter('all')
+                    setCountryFilter('')
                     window.setTimeout(reveal, 400)
                   }
                 }
