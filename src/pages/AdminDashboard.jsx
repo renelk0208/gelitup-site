@@ -4675,7 +4675,7 @@ function buildAmbassadorPauseEmail(row, timeframe, _internalNote, senderName) {
 
 // Welcome email sent automatically when an application is approved. The signed
 // Ambassador Agreement PDF is attached so every ambassador has their contract.
-function buildAmbassadorWelcomeEmail(row) {
+function buildAmbassadorWelcomeEmail(row, setPasswordLink = '') {
   const name = String(row?.full_name || '').trim().split(' ')[0] || 'there'
   const discountCode = String(row?.discount_code || '').trim()
   const codeBlock = discountCode
@@ -4687,6 +4687,8 @@ function buildAmbassadorWelcomeEmail(row) {
       <p>Hi ${escAmb(name)},</p>
       <p>Great news — your GEL.IT.UP ambassador application has been <strong>approved</strong>! Welcome to the programme. 🎉</p>
       ${codeBlock}
+      ${setPasswordLink ? `<p><strong>Your ambassador portal account is ready.</strong> Create your password to log in, see your code and follow the orders made with it:</p>
+      <p><a href="${escAmb(setPasswordLink)}" style="display:inline-block;background:#D43790;color:#ffffff;padding:12px 20px;border-radius:9999px;text-decoration:none;font-weight:700">Create your password &amp; log in</a></p>` : ''}
       <p>📎 Your <strong>Ambassador Agreement</strong> is attached to this email as a PDF for your records.</p>
       <p>Your PR package is being prepared — we'll email you again with the tracking details as soon as it ships.</p>
       <p>If you have any questions in the meantime, just reply to this email.</p>
@@ -4713,10 +4715,10 @@ function buildAmbassadorCodeUpdateEmail(row, previousCode, nextCode) {
   }
 }
 
-function buildAmbassadorPasswordReminderEmail(row) {
+function buildAmbassadorPasswordReminderEmail(row, setPasswordLink = '') {
   const firstName = String(row?.full_name || '').trim().split(' ')[0] || 'there'
   const discountCode = String(row?.discount_code || '').trim()
-  const createPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(String(row?.email || '').trim())}`
+  const createPasswordLink = setPasswordLink || `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(String(row?.email || '').trim())}`
   return {
     subject: 'Reminder: set your GEL.IT.UP password',
     html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5">
@@ -4941,6 +4943,37 @@ async function ensureAmbassadorPortalAccount(row) {
   if (error && !/already registered|already been registered|user already registered/i.test(String(error.message || ''))) {
     throw new Error(`Could not create ambassador portal account: ${error.message}`)
   }
+}
+
+// The link an ambassador uses to set her own password. Her login is created by
+// the admin (with a random password), so the link carries a private one-time
+// token that lets the create-password page set the password on that existing
+// login (database function ambassador_set_portal_password). Once she has set
+// it, the link is simply the login page.
+const AMBASSADOR_SETUP_TOKEN_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+async function ensureAmbassadorSetupLink(row) {
+  const email = String(row?.email || '').trim().toLowerCase()
+  const origin = window.location.origin
+  const encodedEmail = encodeURIComponent(email)
+  if (row?.portal_password_set_at) {
+    return { link: `${origin}/portal/login?email=${encodedEmail}`, patch: null }
+  }
+  let token = String(row?.portal_setup_token || '').trim()
+  let patch = null
+  if (!AMBASSADOR_SETUP_TOKEN_RE.test(token)) {
+    token = crypto.randomUUID()
+    const createdAt = new Date().toISOString()
+    const { error } = await supabase
+      .from(AMBASSADOR_TABLE)
+      .update({ portal_setup_token: token, portal_setup_token_created_at: createdAt })
+      .eq('id', row.id)
+    if (error) {
+      console.warn('[ambassador] could not store password setup token:', error.message)
+      return { link: `${origin}/portal/login?mode=create-password&email=${encodedEmail}`, patch: null }
+    }
+    patch = { portal_setup_token: token, portal_setup_token_created_at: createdAt }
+  }
+  return { link: `${origin}/portal/login?mode=create-password&email=${encodedEmail}&t=${token}`, patch }
 }
 
 function AmbassadorApplicationsPanel({ focusAmbassadorId } = {}) {
@@ -5333,6 +5366,12 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
 
   // Sends the welcome email with the Ambassador Agreement PDF attached.
   // Used automatically on approval and manually via the "Send contract" button.
+  const getAmbassadorSetupLink = async (row) => {
+    const { link, patch } = await ensureAmbassadorSetupLink(row)
+    if (patch) patchRow(row.id, patch)
+    return link
+  }
+
   const sendWelcomeContractEmail = async (row) => {
     const email = String(row?.email || '').trim()
     if (!email) {
@@ -5340,6 +5379,12 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       return false
     }
     setEmail(row.id, 'sending', '')
+    // Approved = her portal login exists straight away, and the welcome email
+    // carries the link to create her password. If the login can't be created
+    // here, the link still works: the page then signs her up itself.
+    try { await ensureAmbassadorPortalAccount(row) } catch (e) { console.warn('[ambassador] portal account not created on approval:', e?.message || e) }
+    let setPasswordLink = ''
+    try { setPasswordLink = await getAmbassadorSetupLink(row) } catch (e) { console.warn('[ambassador] setup link failed:', e?.message || e) }
     let attachment
     try {
       attachment = await buildContractAttachmentForRow(row)
@@ -5347,14 +5392,14 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       setEmail(row.id, 'error', `Could not build the agreement PDF: ${e.message || e}`)
       return false
     }
-    const { subject, html } = buildAmbassadorWelcomeEmail(row)
+    const { subject, html } = buildAmbassadorWelcomeEmail(row, setPasswordLink)
     const res = await sendAmbassadorEmail({
       to: email,
       subject,
       html,
       attachments: [attachment],
       row,
-      logBody: 'Welcome email with Ambassador Agreement PDF attached.',
+      logBody: 'Welcome email with Ambassador Agreement PDF attached and the link to create her portal password.',
       auditLog: logAmbassadorSend,
     })
     setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Welcome email + agreement sent to ${email}` : res.error)
@@ -5364,7 +5409,9 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
   async function sendAmbassadorPasswordReminder(row) {
     const email = String(row?.email || '').trim().toLowerCase()
     if (!email) return false
-    const { subject, html } = buildAmbassadorPasswordReminderEmail(row)
+    let reminderLink = ''
+    try { reminderLink = await getAmbassadorSetupLink(row) } catch (_) { /* falls back to the plain link */ }
+    const { subject, html } = buildAmbassadorPasswordReminderEmail(row, reminderLink)
     setEmail(row.id, 'sending', '')
     const res = await sendAmbassadorEmail({ to: email, subject, html, row, logBody: htmlToText(html), auditLog: logAmbassadorSend })
     if (!res.ok) {
@@ -6800,12 +6847,13 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const fullName = String(updatedRow?.full_name || '').trim()
     const discountCode = String(updatedRow?.discount_code || '').trim()
     const normalizedEmail = String(updatedRow?.email || '').trim().toLowerCase()
-    const setPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(normalizedEmail)}`
+    let setPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(normalizedEmail)}`
     if (!fullName) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: ambassador name is missing.'); return }
     if (!discountCode) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: discount code is missing.'); return }
     if (!normalizedEmail) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: ambassador email is missing.'); return }
     setEmail(row.id, 'sending', '')
     try { await ensureAmbassadorPortalAccount(updatedRow) } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not provision ambassador portal account.'); return }
+    try { setPasswordLink = await getAmbassadorSetupLink(updatedRow) } catch (_) { /* keep the plain link */ }
     const defaultFollowUpDate = getDefaultFollowUpDateValue(updatedRow, new Date().toISOString())
     const chosenReminderRaw = String(overrideReminderDate || nextDispatchDateDefault(row) || defaultFollowUpDate || '').trim()
     if (!chosenReminderRaw) {
@@ -6994,7 +7042,8 @@ const resendShipmentEmail = async (row, nextReminderAt, trackingOverride) => {
   setSaving(row.id)
   setEmail(row.id, 'sending', '')
   try { await ensureAmbassadorPortalAccount(row) } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not provision ambassador portal account.'); return }
-  const setPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(normalizedEmail)}`
+  let setPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(normalizedEmail)}`
+  try { setPasswordLink = await getAmbassadorSetupLink(row) } catch (_) { /* keep the plain link */ }
   const reminderIso = nextReminderAt ? new Date(`${String(nextReminderAt).slice(0, 10)}T10:00:00Z`).toISOString() : null
   const draft = { tracking_number: trackingNumber, tracking_url: trackingUrl }
   const resentShipment = (row?._shipments || []).find((s) => String(s.tracking_number || '').trim() === String(trackingNumber || '').trim())

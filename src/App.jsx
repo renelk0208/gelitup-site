@@ -8958,6 +8958,9 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
   const loginParams = useMemo(() => new URLSearchParams(location.search), [location.search])
   const prefilledEmail = String(loginParams.get('email') || '').trim().toLowerCase()
   const isCreatePasswordMode = loginParams.get('mode') === 'create-password'
+  // Private token from the ambassador approval email (lets her set the password
+  // on the login the admin already created for her).
+  const setupToken = String(loginParams.get('t') || '').trim()
   const portalType = loginParams.get('portal') || 'b2b' // 'b2b' | 'distributor'
   const returnTo = loginParams.get('returnTo') || null // where to go after successful login
   // Reliable recovery detection: the PASSWORD_RECOVERY auth event sets pendingRecoverySession
@@ -9042,6 +9045,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
               password,
               confirmPassword,
               isRecoveryFlow: isPasswordResetFlow,
+              setupToken,
             })
 
             setIsSubmitting(false)
@@ -21134,7 +21138,7 @@ function App() {
     return true
   }
 
-  const handleCreatePortalPassword = async ({ email, password, confirmPassword, isRecoveryFlow = false }) => {
+  const handleCreatePortalPassword = async ({ email, password, confirmPassword, isRecoveryFlow = false, setupToken = '' }) => {
     const normalizedEmail = String(email || '').trim().toLowerCase()
     const isInternalBypassEmail = PORTAL_INTERNAL_BYPASS_EMAILS.has(normalizedEmail)
 
@@ -21179,6 +21183,46 @@ function App() {
 
     if (!normalizedEmail) {
       return { ok: false, message: 'Business email is required.' }
+    }
+
+    // Ambassador approval link: her login already exists (created by the admin),
+    // so set the password on it with the private token from her email, then
+    // sign her in. 'no_account' means the login was never created — carry on
+    // with the normal sign-up below.
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(setupToken)) {
+      const { data: setResult, error: setError } = await supabase.rpc('ambassador_set_portal_password', {
+        p_email: normalizedEmail,
+        p_token: setupToken,
+        p_password: password,
+      })
+      if (setError) {
+        return { ok: false, message: 'We could not set your password right now. Please try again in a moment.' }
+      }
+      if (setResult === 'invalid_link') {
+        return {
+          ok: false,
+          message: 'This link has already been used or has expired. If you already created your password, please sign in — otherwise use "Forgot password" or reply to your welcome email.',
+        }
+      }
+      if (setResult === 'weak_password') {
+        return { ok: false, message: 'Password must be at least 8 characters.' }
+      }
+      if (setResult === 'ok') {
+        const { error: tokenSignInError } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password })
+        if (tokenSignInError) {
+          return { ok: false, message: 'Your password is set. Please sign in with it now.' }
+        }
+        localStorage.setItem('portalRememberedEmail', normalizedEmail)
+        await markAmbassadorPortalAccountCreated()
+        setIsPortalAuthenticated(true)
+        return {
+          ok: true,
+          infoMessage: 'Password created. Welcome to your GEL.IT.UP ambassador portal!',
+          navigateToDashboard: true,
+          debugTrace: 'create-password -> ambassador-setup-token',
+        }
+      }
+      // 'no_account' falls through to the normal sign-up.
     }
 
     // Check if user already has an active session — this happens when they clicked
