@@ -7643,6 +7643,14 @@ const deleteApplication = async (row) => {
               onMarkReceived={markShipmentReceived}
               onMarkLost={markShipmentLost}
               onPrintSheet={exportPackingListPdfForRow}
+              notesApi={{
+                // Same internal notes as the card: dated, signed lines on her
+                // record (sent emails, package history and settings left out).
+                getNotes: (row) => noteEntries(row).filter((n) => !/📦 Shipped/.test(n.raw)),
+                draft: (id) => noteDraft[id] || '',
+                setDraft: (id, value) => setNoteDraft((prev) => ({ ...prev, [id]: value })),
+                add: (row) => addNote(row),
+              }}
               printBusy={packingListPdfBusy}
               onEditNote={editShipmentNote}
               onAskChoice={askOneToChoose}

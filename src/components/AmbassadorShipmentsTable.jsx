@@ -126,7 +126,55 @@ function TypePicker({ row, type, onSetType, busy }) {
   )
 }
 
-function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews, canApproveChoices, onApproveChoices, onRejectChoices, busy }) {
+// Admin notes for this ambassador — the same notes as on her card (stored on
+// her record, dated and signed). Newest first; older ones fold away.
+function NotesBlock({ row, notesApi, busy }) {
+  const [showAll, setShowAll] = useState(false)
+  if (!notesApi) return null
+  const notes = [...notesApi.getNotes(row)].reverse()
+  const shown = showAll ? notes : notes.slice(0, 3)
+  const draft = notesApi.draft(row.id)
+  return (
+    <div className="mt-1.5 rounded border border-slate-200 bg-slate-50 px-2 py-1.5">
+      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Notes{notes.length ? ` (${notes.length})` : ''}</p>
+      {shown.length > 0 && (
+        <ul className="mt-1 space-y-1">
+          {shown.map((n, i) => (
+            <li key={`${n.raw}-${i}`} className="text-[11px] leading-snug text-slate-700">
+              <span className="whitespace-pre-wrap">{n.text || n.raw}</span>
+              {(n.stamp || n.author) && <span className="text-[10px] text-slate-400"> — {[n.stamp, n.author].filter(Boolean).join(' · ')}</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+      {notes.length > 3 && (
+        <button type="button" onClick={() => setShowAll((v) => !v)} className="mt-0.5 text-[10px] font-semibold text-fuchsia-700 hover:underline">
+          {showAll ? 'Show fewer' : `Show all ${notes.length} notes`}
+        </button>
+      )}
+      <div className="mt-1 flex gap-1">
+        <textarea
+          rows={1}
+          value={draft}
+          onChange={(e) => notesApi.setDraft(row.id, e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && draft.trim()) { e.preventDefault(); notesApi.add(row) } }}
+          placeholder="Add a note…"
+          className="min-w-0 flex-1 resize-y rounded border border-slate-300 bg-white px-1.5 py-1 text-[11px]"
+        />
+        <button
+          type="button"
+          onClick={() => notesApi.add(row)}
+          disabled={busy || !draft.trim()}
+          className="rounded border border-fuchsia-300 bg-white px-2 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-50"
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews, canApproveChoices, onApproveChoices, onRejectChoices, busy, notesApi }) {
   const { row, country } = line
   return (
     <td className="px-3 py-2.5">
@@ -164,6 +212,7 @@ function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews,
           <button type="button" onClick={() => onAskReviews(row)} disabled={busy} className="font-semibold text-fuchsia-700 hover:underline">★ {row.review_requested_at ? 'Ask for more reviews' : 'Ask for reviews'}</button>
         </p>
       )}
+      <NotesBlock row={row} notesApi={notesApi} busy={busy} />
     </td>
   )
 }
@@ -281,7 +330,7 @@ function PackageHistory({ line, open = false, onEditContents, onMarkLost, onEdit
   )
 }
 
-export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onSetType, onMarkLost, onPrintSheet, printBusy, onEditNote, onAskChoice, onAskReviews, canApproveChoices, onApproveChoices, onRejectChoices, onOpen, onMarkReceived, busyShipmentId }) {
+export default function AmbassadorShipmentsTable({ notesApi, rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onSetType, onMarkLost, onPrintSheet, printBusy, onEditNote, onAskChoice, onAskReviews, canApproveChoices, onApproveChoices, onRejectChoices, onOpen, onMarkReceived, busyShipmentId }) {
   const [carrier, setCarrier] = useState('')
   // Package history (with what was in each package) is shown open by default.
   const [expandAll, setExpandAll] = useState(true)
@@ -361,7 +410,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
+                <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.nextAt)}</td>
                 <td className="px-3 py-2.5 font-bold text-red-700">{Math.abs(l.nextIn)} day{Math.abs(l.nextIn) === 1 ? '' : 's'}{printButton(l)}</td>
                 <td className={td}>{planner(l)}</td>
@@ -379,7 +428,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
+                <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
                 <td className={td}>
                   {l.isFirst
                     ? <span className="font-semibold text-amber-800">First package{l.firstAcknowledged ? '' : ' · factory not told yet'}</span>
@@ -401,7 +450,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
+                <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
                 <td className={td}>
                   <span className="font-semibold text-blue-800">{fmt(l.processingAt)}</span>
                   {l.row.package_processing_by && <><br /><span className="text-slate-500">by {l.row.package_processing_by}</span></>}
@@ -424,7 +473,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
+                <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.last?.sent_at)}<br /><span className="text-slate-500">Package #{l.count}</span></td>
                 <td className={td}><Tracking pkg={l.last} /></td>
                 <td className={td}>
@@ -456,7 +505,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
+                <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.last?.sent_at)}<br /><span className="text-slate-500">Package #{l.count}</span></td>
                 <td className={td}>
                   <span className="font-semibold text-emerald-700">✓ {fmt(l.last?.delivered_at)}</span>
@@ -478,7 +527,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
         <tbody className="divide-y divide-slate-100 align-top">
           {list.map((l) => (
             <tr key={l.row.id}>
-              <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
+              <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
               <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} onEditNote={onEditNote} /></td>
             </tr>
           ))}
