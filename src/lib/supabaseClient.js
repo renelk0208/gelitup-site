@@ -125,3 +125,25 @@ export const supabase = hasSupabaseConfig
       },
     })
   : null
+
+// Separate client for creating someone else's login (e.g. an ambassador's
+// portal account) from the admin. Its session lives only in memory under its
+// own key, so a sign-up that returns a session (Supabase "Confirm email" off)
+// can never replace the admin's own login in this browser.
+export const createIsolatedAuthClient = () => {
+  if (!hasSupabaseConfig) return null
+  const memory = new Map()
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+      storageKey: `gelitup.provision.${Date.now()}.${Math.random().toString(36).slice(2)}`,
+      storage: {
+        getItem: (key) => (memory.has(key) ? memory.get(key) : null),
+        setItem: (key, value) => { memory.set(key, value) },
+        removeItem: (key) => { memory.delete(key) },
+      },
+    },
+  })
+}

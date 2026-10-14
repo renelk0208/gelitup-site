@@ -18933,17 +18933,19 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
         shipmentDetails = String(shipmentRow?.shipment_details || '').trim()
         trackingNumber = String(shipmentRow?.tracking_number || '').trim()
         trackingUrl = String(shipmentRow?.tracking_url || '').trim()
-        shipmentUpdatedAt = String(shipmentRow?.updated_at || '').trim()
+        // ambassador_applications has no updated_at column; the dated history
+        // comes from get_my_ambassador_shipments below.
+        shipmentUpdatedAt = ''
         shipmentStatus = String(shipmentRow?.status || '').trim()
       }
 
       if (String(row.code || '').trim()) {
         const { data: shipmentByCode, error: shipmentByCodeError } = await supabase
           .from('ambassador_applications')
-          .select('shipment_details, tracking_number, tracking_url, updated_at, status')
+          .select('id, shipment_details, tracking_number, tracking_url, status')
           .eq('status', 'approved')
           .eq('discount_code', String(row.code).trim())
-          .order('updated_at', { ascending: false })
+          .order('id', { ascending: false })
           .limit(1)
           .maybeSingle()
         if (shipmentByCodeError) {
@@ -18956,10 +18958,10 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
       if (!trackingNumber && !shipmentDetails && portalEmail) {
         const { data: shipmentByEmail, error: shipmentByEmailError } = await supabase
           .from('ambassador_applications')
-          .select('shipment_details, tracking_number, tracking_url, updated_at, status')
+          .select('id, shipment_details, tracking_number, tracking_url, status')
           .eq('status', 'approved')
           .ilike('email', portalEmail)
-          .order('updated_at', { ascending: false })
+          .order('id', { ascending: false })
           .limit(1)
           .maybeSingle()
         if (shipmentByEmailError) {

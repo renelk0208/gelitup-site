@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { supabase, createIsolatedAuthClient } from '../lib/supabaseClient'
 import * as XLSX from 'xlsx'
 import { PRODUCT_ALIAS_GROUPS } from '../data/productAliases.js'
 import tierPricingOverrides from '../data/tierPricingOverrides.json'
@@ -4916,7 +4916,12 @@ async function ensureAmbassadorPortalAccount(row) {
   const firstName = fullName.split(' ')[0] || ''
   const lastName = fullName.split(' ').slice(1).join(' ')
 
-  const { error } = await supabase.auth.signUp({
+  // Never sign up from the admin's own client: with "Confirm email" off the
+  // sign-up returns a live session, which would replace the admin's login,
+  // throw the admin out mid-send and wipe the unsent form.
+  const provisionClient = createIsolatedAuthClient()
+  if (!provisionClient) throw new Error('Supabase is not configured.')
+  const { error } = await provisionClient.auth.signUp({
     email,
     password: tempPass,
     options: {
