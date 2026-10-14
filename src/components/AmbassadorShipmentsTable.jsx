@@ -7,6 +7,7 @@ import { whereAlreadySent } from '../lib/packageItems.js'
 // with ONE status:
 //   1. Overdue      – their next package should already have gone out
 //   2. To send soon – next package due within 14 days, or first package to send
+//   2b. Processing  – packing sheet printed, the factory is packing it
 //   3. On the way   – a package has been sent and isn't confirmed received yet
 //   4. Complete     – last package received, next one not due yet
 //   5. Paused
@@ -45,6 +46,12 @@ const SECTIONS = [
     tone: { bar: 'bg-amber-500', head: 'bg-amber-50 text-amber-900', count: 'bg-amber-500 text-white' },
   },
   {
+    key: 'processing',
+    title: 'Processing',
+    hint: 'Packing sheet printed — the factory is packing it. Moves to On the way when Save & send is pressed.',
+    tone: { bar: 'bg-blue-600', head: 'bg-blue-50 text-blue-900', count: 'bg-blue-600 text-white' },
+  },
+  {
     key: 'transit',
     title: 'On the way',
     hint: 'Package sent. Waiting for the ambassador to confirm it arrived.',
@@ -64,8 +71,9 @@ const SECTIONS = [
   },
 ]
 
-function sectionFor({ isPaused, hasEverShipped, nextIn, delivery }) {
+function sectionFor({ isPaused, hasEverShipped, nextIn, delivery, processing }) {
   if (isPaused) return 'paused'
+  if (processing) return 'processing' // packing sheet printed, not sent yet
   if (!hasEverShipped) return 'soon' // first package still to send
   if (delivery === 'lost') return 'overdue' // never arrived: resend now
   if (nextIn != null && nextIn < 0) return 'overdue'
@@ -273,7 +281,7 @@ function PackageHistory({ line, open = false, onEditContents, onMarkLost, onEdit
   )
 }
 
-export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onSetType, onMarkLost, onEditNote, onAskChoice, onAskReviews, canApproveChoices, onApproveChoices, onRejectChoices, onOpen, onMarkReceived, busyShipmentId }) {
+export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onSetType, onMarkLost, onPrintSheet, printBusy, onEditNote, onAskChoice, onAskReviews, canApproveChoices, onApproveChoices, onRejectChoices, onOpen, onMarkReceived, busyShipmentId }) {
   const [carrier, setCarrier] = useState('')
   // Package history (with what was in each package) is shown open by default.
   const [expandAll, setExpandAll] = useState(true)
@@ -303,7 +311,8 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
         firstAcknowledged: Boolean(meta.isFactoryAcked),
         country: normalizeCountry(row.country),
         planned: plannedItems(row),
-        section: sectionFor({ isPaused, hasEverShipped, nextIn, delivery }),
+        processingAt: row.package_processing_at || null,
+        section: sectionFor({ isPaused, hasEverShipped, nextIn, delivery, processing: Boolean(row.package_processing_at) }),
       }
     }), [rows, getMeta, plannedItems])
 
@@ -316,11 +325,24 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
   // Most urgent first inside each section.
   bySection.overdue.sort((a, b) => (a.nextIn ?? 0) - (b.nextIn ?? 0))
   bySection.soon.sort((a, b) => (a.isFirst === b.isFirst ? (a.nextIn ?? -999) - (b.nextIn ?? -999) : a.isFirst ? -1 : 1))
+  bySection.processing.sort((a, b) => new Date(a.processingAt || 0) - new Date(b.processingAt || 0))
   bySection.transit.sort((a, b) => new Date(a.last?.sent_at || 0) - new Date(b.last?.sent_at || 0))
   bySection.complete.sort((a, b) => (a.nextIn ?? 999) - (b.nextIn ?? 999))
 
   const th = 'px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500'
   const td = 'px-3 py-2.5 text-slate-700'
+
+  const printButton = (l, again = false) => onPrintSheet && (
+    <button
+      type="button"
+      onClick={() => onPrintSheet(l.row)}
+      disabled={printBusy}
+      title="Download the packing sheet (PDF) with her details and what goes in this package"
+      className="mt-1.5 block rounded-lg border border-blue-400 bg-white px-2.5 py-1 text-[11px] font-semibold text-blue-700 hover:bg-blue-50 disabled:opacity-60"
+    >
+      {printBusy ? 'Preparing…' : again ? '🖨 Print again' : '🖨 Print packing sheet'}
+    </button>
+  )
 
   const planner = (l) => (
     <Planner
@@ -341,7 +363,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
               <tr key={l.row.id}>
                 <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.nextAt)}</td>
-                <td className="px-3 py-2.5 font-bold text-red-700">{Math.abs(l.nextIn)} day{Math.abs(l.nextIn) === 1 ? '' : 's'}</td>
+                <td className="px-3 py-2.5 font-bold text-red-700">{Math.abs(l.nextIn)} day{Math.abs(l.nextIn) === 1 ? '' : 's'}{printButton(l)}</td>
                 <td className={td}>{planner(l)}</td>
                 <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} onEditNote={onEditNote} /></td>
               </tr>
@@ -362,6 +384,30 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
                   {l.isFirst
                     ? <span className="font-semibold text-amber-800">First package{l.firstAcknowledged ? '' : ' · factory not told yet'}</span>
                     : <><span className="font-semibold">{fmt(l.nextAt)}</span><br /><span className="text-slate-500">{l.nextIn === 0 ? 'today' : `in ${l.nextIn} day${l.nextIn === 1 ? '' : 's'}`}</span></>}
+                  {printButton(l)}
+                </td>
+                <td className={td}>{planner(l)}</td>
+                <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} onEditNote={onEditNote} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )
+    }
+    if (key === 'processing') {
+      return (
+        <table className="w-full min-w-[980px] text-xs">
+          <thead><tr><th className={th}>Ambassador</th><th className={th}>Sheet printed</th><th className={th}>What goes in this package</th><th className={th}>All packages</th></tr></thead>
+          <tbody className="divide-y divide-slate-100 align-top">
+            {list.map((l) => (
+              <tr key={l.row.id}>
+                <NameCell line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
+                <td className={td}>
+                  <span className="font-semibold text-blue-800">{fmt(l.processingAt)}</span>
+                  {l.row.package_processing_by && <><br /><span className="text-slate-500">by {l.row.package_processing_by}</span></>}
+                  <br /><span className="text-slate-500">{l.isFirst ? 'First package' : `Package #${l.count + 1}`}</span>
+                  {printButton(l, true)}
+                  <p className="mt-1 text-[10px] text-slate-500">When it ships, open the card and press Save &amp; send.</p>
                 </td>
                 <td className={td}>{planner(l)}</td>
                 <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} onEditNote={onEditNote} /></td>
@@ -443,7 +489,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
 
   return (
     <section className="space-y-4" aria-label="Ambassador shipments">
-      <nav className="grid grid-cols-2 gap-2 sm:grid-cols-5" aria-label="Sections">
+      <nav className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6" aria-label="Sections">
         {SECTIONS.map((s) => (
           <a key={s.key} href={`#ship-${s.key}`} className="overflow-hidden rounded-xl border border-slate-200 bg-white hover:border-slate-300">
             <div className={`h-1.5 ${s.tone.bar}`} />
@@ -508,6 +554,7 @@ export default function AmbassadorShipmentsTable({ rows, getMeta, getType, plann
 
       <p className="text-[11px] text-slate-500">
         Each ambassador appears in one section only. Expected delivery is an estimate from the carrier and country.
+        Printing the packing sheet moves a package to Processing; Save &amp; send moves it to On the way.
         A package moves to Complete when the ambassador confirms it in their portal or you press Mark received.
       </p>
     </section>

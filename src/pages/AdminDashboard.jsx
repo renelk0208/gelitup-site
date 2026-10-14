@@ -6034,6 +6034,23 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     [row?.city, row?.postal_code].filter(Boolean).join(' '),
     row?.country,
   ].filter(Boolean).join(', ')
+  // Exactly what goes in the NEXT package — the same list "Save & send" uses:
+  // the starter kit for a first package, plus every item added for this
+  // package (hand-picked, chosen by the ambassador, or a resend), plus any
+  // free-text shipment details.
+  const currentPackageItems = (row) => {
+    const pack = AMBASSADOR_PACKS_BY_TYPE[getAmbassadorType(row)] || null
+    const isFollowUp = getAmbassadorDashboardMeta(row).shipmentPreviouslySent
+    const details = String(getShipmentDraft(row).shipment_details || '').trim()
+    return [
+      ...(isFollowUp ? [] : (pack?.items || [])),
+      ...packNoteEntries(row).map((entry) => entry.text),
+      ...(details ? [details] : []),
+    ]
+  }
+  // Packing sheet for the factory (PDF): client details + what goes in the
+  // box, no prices. Printing it moves the package to "Processing" until it is
+  // sent with Save & send.
   const exportPackingListPdfForRow = async (row) => {
     if (packingListPdfBusy) return
     setPackingListPdfBusy(true)
@@ -6042,7 +6059,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
         throw new Error('Ambassador record is missing.')
       }
       if (normalizeAmbassadorStatus(row?.status) !== 'approved') {
-        alert('Approve this ambassador before printing a packing list.')
+        alert('Approve this ambassador before printing a packing sheet.')
         setPackingListPdfBusy(false)
         return
       }
@@ -6050,19 +6067,32 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       const ambassadorType = getAmbassadorType(row)
       const selectedPack = AMBASSADOR_PACKS_BY_TYPE[ambassadorType] || null
       const currentDraft = getShipmentDraft(row)
+      const isFollowUp = getAmbassadorDashboardMeta(row).shipmentPreviouslySent
+      const shipments = Array.isArray(row?._shipments) ? row._shipments : []
+      const resendNotes = [...new Set(packNoteEntries(row)
+        .map((entry) => String(entry.author || ''))
+        .filter((author) => /^resend of lost package/i.test(author)))]
+        .map((author) => `REPLACEMENT PACKAGE — ${author.replace(/^resend of lost package/i, 'resend of a damaged / lost package')}`)
+      const packageLabel = isFollowUp
+        ? `#${shipments.filter((s) => !s.lost_at).length + 1}${resendNotes.length ? ' (replacement)' : ''}`
+        : `First package — ${selectedPack?.title || 'starter kit'}`
       const ambassadors = [{
         fullName: String(row?.full_name || '').trim() || 'Unknown ambassador',
         instagram: String(row?.instagram || '').trim(),
         email: String(row?.email || '').trim().toLowerCase(),
+        phone: String(row?.phone || '').trim(),
         discountCode: String(row?.discount_code || '').trim().toUpperCase(),
         ambassadorType: ambassadorType || 'not_set',
-        packTitle: selectedPack?.title || 'Pack type not set',
-        packItems: selectedPack?.items || [],
+        packTitle: selectedPack?.title || 'Ambassador PR package',
+        packageLabel,
+        preparedBy: getAdminDisplayLabel(),
+        notes: resendNotes,
+        items: currentPackageItems(row),
         address: formatAmbassadorAddress(row) || 'Address not provided',
         status: normalizeAmbassadorStatus(row?.status) || 'unknown',
         createdAt: String(row?.created_at || ''),
-        trackingNumber: String(currentDraft?.tracking_number || row?.tracking_number || '').trim(),
-        trackingUrl: String(currentDraft?.tracking_url || row?.tracking_url || '').trim(),
+        trackingNumber: String(currentDraft?.tracking_number || '').trim(),
+        trackingUrl: String(currentDraft?.tracking_url || '').trim(),
       }]
 
       const { blob, filename } = await buildAmbassadorPackingListPdf({
@@ -6070,9 +6100,13 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
         generatedAt: new Date().toISOString(),
       })
       triggerFileDownload(blob, filename)
-      alert(`Packing list downloaded for ${row.full_name || 'ambassador'}.`)
+      const processingAt = new Date().toISOString()
+      const marked = await syncAmbassadorColumns(row.id, { package_processing_at: processingAt, package_processing_by: getAdminDisplayLabel() })
+      setEmail(row.id, 'sent', marked
+        ? `Packing sheet downloaded — ${row.full_name || 'this ambassador'}'s package is now Processing.`
+        : `Packing sheet downloaded for ${row.full_name || 'this ambassador'}.`)
     } catch (err) {
-      alert(`Packing list PDF export failed: ${err?.message || String(err)}`)
+      alert(`Packing sheet PDF failed: ${err?.message || String(err)}`)
     }
     setPackingListPdfBusy(false)
   }
@@ -6955,6 +6989,8 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
         tracking_url: null,
         admin_comment: nextPackageComment,
       })
+      // Sent: no longer "Processing".
+      await syncAmbassadorColumns(row.id, { package_processing_at: null, package_processing_by: null })
       const dispatchNotificationSignature = shipmentDispatchNotificationSignature(updatedRow, draft, nextReminderAt)
       const previousDispatchNotificationSignature = extractTaggedRawValue(nextPackageComment, 'SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SIGNATURE')
       let notificationResult = { ok: true }
@@ -7552,6 +7588,8 @@ const deleteApplication = async (row) => {
               busyShipmentId={busyShipmentId}
               onMarkReceived={markShipmentReceived}
               onMarkLost={markShipmentLost}
+              onPrintSheet={exportPackingListPdfForRow}
+              printBusy={packingListPdfBusy}
               onEditNote={editShipmentNote}
               onAskChoice={askOneToChoose}
               onAskReviews={openReviewRequest}
@@ -7903,8 +7941,13 @@ const deleteApplication = async (row) => {
                           disabled={packingListPdfBusy}
                           className="rounded-lg border border-fuchsia-300 bg-white px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-60"
                         >
-                          {packingListPdfBusy ? 'Preparing packing list…' : '↓ Download Packing List'}
+                          {packingListPdfBusy ? 'Preparing packing sheet…' : '🖨 Print packing sheet'}
                         </button>
+                      )}
+                      {isApproved && row.package_processing_at && (
+                        <span className="rounded-full bg-blue-100 px-2.5 py-1 text-[11px] font-semibold text-blue-800" title="Packing sheet printed. Clears when the package is sent with Save & send.">
+                          📦 Processing — sheet printed {fmtDate(row.package_processing_at)}{row.package_processing_by ? ` by ${row.package_processing_by}` : ''}
+                        </span>
                       )}
                       {isApproved && (
                         <button

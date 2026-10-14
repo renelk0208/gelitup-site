@@ -688,12 +688,14 @@ export async function buildAmbassadorPackingListPdf({ ambassadors = [], generate
     const addressLines = doc.splitTextToSize(ambassador?.address || 'Address not provided', colW - 4)
     doc.text(addressLines, margin, yLeft)
     yLeft += addressLines.length * 12 + 4
+    if (ambassador?.phone) { doc.text(`Tel: ${ambassador.phone}`, margin, yLeft); yLeft += 12 }
     if (ambassador?.email) { doc.text(ambassador.email, margin, yLeft); yLeft += 12 }
     if (ambassador?.instagram) { doc.text(`@${String(ambassador.instagram).replace(/^@+/, '')}`, margin, yLeft); yLeft += 12 }
 
     const shipmentRows = [
+      ambassador?.packageLabel ? ['Package', ambassador.packageLabel] : null,
       ambassador?.discountCode ? ['Ambassador code', ambassador.discountCode] : null,
-      ambassador?.status ? ['Status', String(ambassador.status).replace(/_/g, ' ')] : null,
+      ambassador?.preparedBy ? ['Printed by', ambassador.preparedBy] : null,
       ambassador?.trackingNumber ? ['Tracking number', ambassador.trackingNumber] : null,
     ].filter(Boolean)
     shipmentRows.forEach(([label, value]) => {
@@ -708,9 +710,26 @@ export async function buildAmbassadorPackingListPdf({ ambassadors = [], generate
 
     y = Math.max(yLeft, yRight) + 16
 
-    // ── Items table (description + quantity — no prices; these are gifted kits) ──
-    const qtyColW = 60
-    const descColW = contentW - qtyColW
+    // Resend / special notes for the factory (e.g. replacement of a damaged box).
+    const notes = (Array.isArray(ambassador?.notes) ? ambassador.notes : []).filter(Boolean)
+    if (notes.length) {
+      doc.setFont(FONT, 'normal')
+      doc.setFontSize(9)
+      const noteLines = notes.flatMap((n) => doc.splitTextToSize(String(n), contentW - 20))
+      const boxH = noteLines.length * 12 + 12
+      doc.setFillColor(254, 243, 199)
+      doc.setDrawColor(245, 158, 11)
+      doc.setLineWidth(0.8)
+      doc.rect(margin, y, contentW, boxH, 'FD')
+      doc.setTextColor(120, 53, 15)
+      doc.text(noteLines, margin + 10, y + 14)
+      y += boxH + 12
+    }
+
+    // ── Items table (description + quantity + tick box — no prices; gifted kits) ──
+    const qtyColW = 50
+    const tickColW = 50
+    const descColW = contentW - qtyColW - tickColW
     const drawTableHeader = () => {
       doc.setFillColor(...PACKING_LIST_HEADER_BG)
       doc.rect(margin, y, contentW, 22, 'F')
@@ -719,14 +738,19 @@ export async function buildAmbassadorPackingListPdf({ ambassadors = [], generate
       doc.setTextColor(255, 255, 255)
       doc.text('ITEM DESCRIPTION', margin + 10, y + 14)
       doc.text('QTY', margin + descColW + qtyColW / 2, y + 14, { align: 'center' })
+      doc.text('PACKED', margin + descColW + qtyColW + tickColW / 2, y + 14, { align: 'center' })
       y += 22
     }
     drawTableHeader()
 
-    const items = Array.isArray(ambassador?.packItems) ? ambassador.packItems : []
+    // `items` = exactly what goes in this package; `packItems` = older callers
+    // that only passed the starter kit for the ambassador type.
+    const items = Array.isArray(ambassador?.items) && ambassador.items.length
+      ? ambassador.items
+      : (Array.isArray(ambassador?.packItems) ? ambassador.packItems : [])
     const rows = items.length > 0
       ? items.map(splitPackingListItemQty)
-      : [{ qty: '—', desc: 'Ambassador package type is not set yet. Assign type in Admin before shipment.' }]
+      : [{ qty: '—', desc: 'Nothing listed for this package yet. Add the items in Admin before packing.' }]
 
     rows.forEach((row, i) => {
       doc.setFont(FONT, 'normal')
@@ -749,6 +773,11 @@ export async function buildAmbassadorPackingListPdf({ ambassadors = [], generate
       doc.setTextColor(...INK)
       doc.text(wrapped, margin + 10, y + 13)
       doc.text(row.qty, margin + descColW + qtyColW / 2, y + 13, { align: 'center' })
+      if (row.qty !== '—') {
+        doc.setDrawColor(120, 120, 120)
+        doc.setLineWidth(0.8)
+        doc.rect(margin + descColW + qtyColW + tickColW / 2 - 5, y + 4, 10, 10)
+      }
       doc.setDrawColor(...PACKING_LIST_BORDER)
       doc.setLineWidth(0.5)
       doc.line(margin, y + rowH, pageW - margin, y + rowH)
@@ -767,8 +796,20 @@ export async function buildAmbassadorPackingListPdf({ ambassadors = [], generate
     doc.setFont(FONT, 'normal')
     doc.setFontSize(9)
     doc.setTextColor(...MUTED)
-    doc.text('This packing list is for reference only and carries no monetary value.', margin, y)
+    doc.text('Gifted ambassador PR package — no charge, no commercial value.', margin, y)
+    y += 26
+    // Sign-off lines for the factory.
+    if (y + 40 > pageH - margin) { doc.addPage(); y = margin }
+    doc.setFont(FONT, 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(...INK)
+    const half = (contentW - 20) / 2
+    doc.text('Packed by: ______________________', margin, y)
+    doc.text('Date: ____________', margin + half + 20, y)
     y += 20
+    doc.text('Checked by: _____________________', margin, y)
+    doc.text('Boxes: ____  Weight: ________', margin + half + 20, y)
+    y += 24
     doc.setFont(FONT, 'bold')
     doc.setFontSize(9)
     doc.setTextColor(...PINK)
