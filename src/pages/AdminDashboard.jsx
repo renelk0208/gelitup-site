@@ -4950,6 +4950,21 @@ async function ensureAmbassadorPortalAccount(row) {
 // token that lets the create-password page set the password on that existing
 // login (database function ambassador_set_portal_password). Once she has set
 // it, the link is simply the login page.
+// Packing list lines that only describe a kind of product ("3 Autumn / Winter
+// Colours", "1 shimmer shade", "any dual form box", "based on current stock")
+// must be turned into the exact products before the tracking email goes out —
+// they can't be kept as written, and need as many picks as the line asks for.
+const GENERIC_PACKING_LINE_RE = /\b(colou?rs?|shades?|any|different|assorted|mixed|of choice|based on current stock|glitters?|cat ?eyes?)\b/i
+function packingLineNeedsExactProducts(text) {
+  const t = String(text || '').trim()
+  return GENERIC_PACKING_LINE_RE.test(t)
+}
+function packingLineDone(line) {
+  const want = suggestedCount(line.text)
+  if (packingLineNeedsExactProducts(line.text)) return line.picks.length >= want
+  return line.keep || line.picks.length >= want
+}
+
 const AMBASSADOR_SETUP_TOKEN_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 async function ensureAmbassadorSetupLink(row) {
   const email = String(row?.email || '').trim().toLowerCase()
@@ -6819,8 +6834,8 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   }
   const finishPackingList = () => {
     const lines = packingList?.lines || []
-    if (lines.some((l) => !l.keep && l.picks.length === 0)) return
-    closePackingList(lines.flatMap((l) => (l.keep ? [l.text] : l.picks.map((p) => p.title))))
+    if (lines.some((l) => !packingLineDone(l))) return
+    closePackingList(lines.flatMap((l) => (l.keep && !packingLineNeedsExactProducts(l.text) ? [l.text] : l.picks.map((p) => p.title))))
   }
   const saveShipment = async (row, alsoEmail, overrideReminderDate) => {
   const shipmentSaveKey = String(row?.id || '')
@@ -8629,23 +8644,26 @@ const deleteApplication = async (row) => {
       {packingList && (() => {
         const pl = packingList
         const setLine = (i, patch) => setPackingList((cur) => ({ ...cur, lines: cur.lines.map((l, n) => (n === i ? { ...l, ...patch } : l)) }))
-        const missing = pl.lines.filter((l) => !l.keep && l.picks.length === 0).length
+        const missing = pl.lines.filter((l) => !packingLineDone(l)).length
         return (
           <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4">
             <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-white p-5 shadow-xl">
               <h3 className="text-base font-bold text-slate-900">📦 Packing list — {pl.row.full_name}</h3>
-              <p className="mt-1 text-xs text-slate-500">Name the exact product(s) packed for every line (e.g. which 3 Cat Eye shades). This is what the ambassador sees in her tracking email and what she'll be asked to review.</p>
+              <p className="mt-1 text-xs text-slate-500">Name the exact product(s) packed for every line — e.g. which 3 Autumn / Winter colours, which Cat Eye shades. Lines that only describe a kind of product can't be kept as written. This is what the ambassador sees in her tracking email, what goes in her package history and what she'll be asked to review.</p>
               {shopProductsError && <p className="mt-2 text-xs text-rose-600">{shopProductsError}</p>}
               <ul className="mt-3 flex-1 space-y-2 overflow-y-auto pr-1">
                 {pl.lines.map((l, i) => {
                   const want = suggestedCount(l.text)
-                  const done = l.keep || l.picks.length > 0
+                  const exact = packingLineNeedsExactProducts(l.text)
+                  const done = packingLineDone(l)
+                  const keeping = l.keep && !exact
                   const results = l.query ? searchProducts(shopProducts || [], l.query, 6) : []
+                  const typed = String(l.query || '').trim()
                   return (
                     <li key={`${l.text}-${i}`} className={`rounded-lg border px-3 py-2 text-xs ${done ? 'border-emerald-200 bg-emerald-50/40' : 'border-amber-300 bg-amber-50'}`}>
                       <div className="flex items-start justify-between gap-2">
                         <span className="font-semibold text-slate-900">{l.text}</span>
-                        <span className={done ? 'text-emerald-700' : 'text-amber-800'}>{done ? '✓' : want > 1 ? `choose ${want}` : 'which product?'}</span>
+                        <span className={done ? 'text-emerald-700' : 'text-amber-800'}>{done ? '✓' : want > 1 ? `choose ${want} (${l.picks.length}/${want})` : exact ? 'which one exactly?' : 'which product?'}</span>
                       </div>
                       {l.picks.length > 0 && (
                         <ul className="mt-1 flex flex-wrap gap-1.5">
@@ -8658,7 +8676,7 @@ const deleteApplication = async (row) => {
                           ))}
                         </ul>
                       )}
-                      {!l.keep && (
+                      {!keeping && (
                         <>
                           <input type="search" value={l.query} onChange={(e) => setLine(i, { query: e.target.value })} placeholder={l.picks.length ? 'Add another product…' : 'Search the product, e.g. cat eye, 2601, all in one 100ml…'} className="mt-1.5 w-full rounded border border-slate-300 px-2 py-1 text-xs" />
                           {results.length > 0 && (
@@ -8672,12 +8690,21 @@ const deleteApplication = async (row) => {
                               ))}
                             </ul>
                           )}
+                          {typed.length >= 2 && (
+                            <button type="button" onClick={() => setLine(i, { picks: [...l.picks, { handle: `typed:${typed}:${Date.now()}`, title: typed }], query: '' })} className="mt-1 text-[11px] font-semibold text-fuchsia-700 hover:underline">
+                              + Add "{typed}" as typed (not in the shop list)
+                            </button>
+                          )}
                         </>
                       )}
-                      <label className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500">
-                        <input type="checkbox" checked={l.keep} onChange={(e) => setLine(i, { keep: e.target.checked })} />
-                        Not a shop product — keep as written
-                      </label>
+                      {exact
+                        ? <p className="mt-1 text-[11px] text-amber-800">Name the exact {want > 1 ? `${want} products` : 'product'} — this line can't be kept as written.</p>
+                        : (
+                          <label className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500">
+                            <input type="checkbox" checked={l.keep} onChange={(e) => setLine(i, { keep: e.target.checked })} />
+                            Not a shop product — keep as written
+                          </label>
+                        )}
                     </li>
                   )
                 })}
