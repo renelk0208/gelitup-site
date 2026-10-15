@@ -4842,7 +4842,7 @@ function AttachmentPicker({ files, setFiles }) {
 // Sends an email (optionally with a PDF attachment) via the webhook. Returns {ok, error}.
 // If a row is supplied, the send is also logged to that ambassador profile so every
 // outbound message remains auditable in the shared communication history.
-async function sendAmbassadorEmail({ to, subject, html, attachments, replyTo, row, logBody, auditLog }) {
+async function sendAmbassadorEmail({ to, subject, html, attachments, replyTo, row, logBody, auditLog, keepalive }) {
   if (!EMAIL_WEBHOOK_URL) return { ok: false, error: 'VITE_EMAIL_WEBHOOK_URL is not configured — email not sent.' }
   const headers = { 'Content-Type': 'application/json' }
   if (SUPABASE_ANON_KEY) {
@@ -4852,7 +4852,7 @@ async function sendAmbassadorEmail({ to, subject, html, attachments, replyTo, ro
   const body = { to, subject, html, from: AMBASSADOR_FROM_EMAIL, replyTo: replyTo || AMBASSADOR_REPLY_TO }
   if (attachments?.length) body.attachments = attachments
   try {
-    const res = await fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers, body: JSON.stringify(body) })
+    const res = await fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers, body: JSON.stringify(body), ...(keepalive ? { keepalive: true } : {}) })
     const json = await res.json().catch(() => null)
     if (!res.ok) {
       return { ok: false, error: json?.error || `HTTP ${res.status}` }
@@ -4904,6 +4904,57 @@ async function sendAmbassadorNoteNotifications({ row, note, noteType, author, st
         ok: false,
         error: failures.map(({ to, result }) => `${to}: ${result.error || 'Email failed'}`).join('; '),
       }
+}
+
+// Package items: one email per ambassador with everything added, not one per
+// product. Additions are collected and sent once nothing new has been added
+// for a minute — or straight away when the admin page is closed.
+const PACKAGE_NOTE_BATCH_DELAY_MS = 60 * 1000
+const pendingPackageNoteEmails = new Map() // row id -> { row, items: [{ text, author, stamp }], timer }
+function sendPackageNoteBatch(rowId, { keepalive = false } = {}) {
+  const batch = pendingPackageNoteEmails.get(rowId)
+  if (!batch) return Promise.resolve({ ok: true })
+  pendingPackageNoteEmails.delete(rowId)
+  clearTimeout(batch.timer)
+  const { row, items } = batch
+  if (!items.length) return Promise.resolve({ ok: true })
+  const ambassadorName = String(row?.full_name || row?.contact_name || 'Unknown ambassador').trim()
+  const ambassadorEmail = String(row?.email || row?.contact_email || '').trim()
+  const ambassadorInstagram = String(row?.instagram || row?.instagram_handle || '').trim()
+  const authors = [...new Set(items.map((i) => i.author).filter(Boolean))].join(', ')
+  const stamps = [...new Set(items.map((i) => i.stamp).filter(Boolean))].join(', ')
+  const n = items.length
+  const subject = `Ambassador package: ${n} item${n === 1 ? '' : 's'} added — ${ambassadorName}`
+  const html = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.5">
+    <p><strong>${n} item${n === 1 ? ' was' : 's were'}</strong> added to the next package for <strong>${escAmb(ambassadorName)}</strong>.</p>
+    <ul style="border-left:3px solid #d43790;padding:8px 12px 8px 28px;background:#fdf0f5;margin:0 0 12px">${items.map((i) => `<li>${escAmb(i.text)}</li>`).join('')}</ul>
+    <p><strong>Email:</strong> ${escAmb(ambassadorEmail || 'Not recorded')}<br/>
+    <strong>Instagram:</strong> ${escAmb(ambassadorInstagram || 'Not recorded')}<br/>
+    <strong>Added by:</strong> ${escAmb(authors)}<br/>
+    <strong>Date:</strong> ${escAmb(stamps)}</p>
+  </div>`
+  return Promise.all(AMBASSADOR_NOTE_NOTIFICATION_RECIPIENTS.map((to) => sendAmbassadorEmail({ to, subject, html, keepalive })))
+    .then((results) => {
+      const failed = results.filter((r) => !r.ok)
+      if (failed.length) console.warn('Package items notification failed:', failed.map((r) => r.error).join('; '))
+      return failed.length ? { ok: false, error: failed.map((r) => r.error).join('; ') } : { ok: true }
+    })
+}
+function queuePackageNoteNotification({ row, texts, author, stamp }) {
+  const rowId = String(row?.id || '')
+  if (!rowId) return
+  const batch = pendingPackageNoteEmails.get(rowId) || { row, items: [], timer: null }
+  batch.row = row
+  batch.items.push(...texts.map((text) => ({ text, author, stamp })))
+  clearTimeout(batch.timer)
+  batch.timer = setTimeout(() => { void sendPackageNoteBatch(rowId) }, PACKAGE_NOTE_BATCH_DELAY_MS)
+  pendingPackageNoteEmails.set(rowId, batch)
+}
+function flushPackageNoteNotifications() {
+  for (const rowId of [...pendingPackageNoteEmails.keys()]) void sendPackageNoteBatch(rowId, { keepalive: true })
+}
+if (typeof window !== 'undefined') {
+  window.addEventListener('pagehide', flushPackageNoteNotifications)
 }
 
 async function ensureAmbassadorPortalAccount(row) {
@@ -5667,10 +5718,10 @@ const requestShipmentSave = (row, alsoEmail) => {
     return
   }
   if (!alsoEmail) {
-    // Plain save — just persist whatever is currently in the fields. No next-
-    // ship-date prompt, no archiving, no clearing. That "shipped" behaviour is
-    // reserved for an actual dispatch (Save & send), never a routine save.
-    void saveShipment(row, false)
+    // "Mark as sent (no email)": record the package as sent on the date it
+    // really went out (e.g. a September package never entered), with no email
+    // to the ambassador. Ask for that date first.
+    setShipDatePrompt({ rowId: row.id, recordOnly: true, sentDate: new Date().toISOString().slice(0, 10), received: true })
     return
   }
   const nextDate = String(nextDispatchDateDefault(row) || '').trim()
@@ -6583,16 +6634,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (await savePackNotes(row, lines)) {
       setPackAdditionDraft((prev) => ({ ...prev, [row.id]: '' }))
       setPackRepeatOk((prev) => ({ ...prev, [row.id]: false }))
-      setSaving(row.id)
-      const emailResult = await sendAmbassadorNoteNotifications({
-        row,
-        note: text,
-        noteType: 'package note',
-        author,
-        stamp,
-      })
-      setSaving(null)
-      if (!emailResult.ok) alert(`Package note saved, but notification email failed: ${emailResult.error}`)
+      queuePackageNoteNotification({ row, texts: [text], author, stamp })
     }
   }
   // Shipments view: add one or several items to the next package in one save
@@ -6604,8 +6646,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const author = getAdminDisplayLabel()
     const lines = [...packNoteLines(row), ...clean.map((text) => createPackNoteLine({ stamp, author, text }))]
     if (!(await savePackNotes(row, lines))) return false
-    const emailResult = await sendAmbassadorNoteNotifications({ row, note: clean.join('\n'), noteType: 'package note', author, stamp })
-    if (!emailResult.ok) console.warn('Package items saved, but notification email failed:', emailResult.error)
+    queuePackageNoteNotification({ row, texts: clean, author, stamp })
     return true
   }
   // A free note on any package (lost, damaged, swapped item, resent…).
@@ -6839,7 +6880,9 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (lines.some((l) => !packingLineDone(l))) return
     closePackingList(lines.flatMap((l) => (l.keep && !packingLineNeedsExactProducts(l.text) ? [l.text] : l.picks.map((p) => p.title))))
   }
-  const saveShipment = async (row, alsoEmail, overrideReminderDate) => {
+  const saveShipment = async (row, alsoEmail, overrideReminderDate, recordOpts = null) => {
+  const recordOnly = Boolean(recordOpts?.recordOnly)
+  const recordSentIso = recordOnly && recordOpts?.sentDate ? new Date(`${recordOpts.sentDate}T10:00:00Z`).toISOString() : null
   const shipmentSaveKey = String(row?.id || '')
   if (!shipmentSaveKey) return
   if (shipmentSaveInFlightRef.current.has(shipmentSaveKey)) return
@@ -6871,7 +6914,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     return
   }
   const completedShippingMethod = getShippingMethod(row)
-  const buildArchiveLine = () => `[${fmtDate(new Date().toISOString())}] [${getAdminDisplayLabel()}] 📦 Shipped — ${[
+  const buildArchiveLine = (whenIso) => `[${fmtDate(whenIso || new Date().toISOString())}] [${getAdminDisplayLabel()}] 📦 Shipped${recordOnly ? ' (recorded, no email)' : ''} — ${[
     `Status: ${completedTypeLabel}`,
     `Method: ${shippingMethodLabel(completedShippingMethod)}`,
     currentDraft.tracking_number ? `Tracking: ${currentDraft.tracking_number}` : null,
@@ -6893,20 +6936,25 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   // more. Archiving a "📦 Shipped" history line and clearing these fields for
   // the next cycle only ever happens once a package is genuinely marked sent
   // (the alsoEmail branch below), never as a side effect of a routine save.
-  if (alsoEmail) {
+  if (alsoEmail || recordOnly) {
     const updatedRow = { ...row, ...draft }
     const fullName = String(updatedRow?.full_name || '').trim()
     const discountCode = String(updatedRow?.discount_code || '').trim()
     const normalizedEmail = String(updatedRow?.email || '').trim().toLowerCase()
     let setPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(normalizedEmail)}`
-    if (!fullName) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: ambassador name is missing.'); return }
-    if (!discountCode) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: discount code is missing.'); return }
-    if (!normalizedEmail) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: ambassador email is missing.'); return }
+    if (!recordOnly) {
+      if (!fullName) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: ambassador name is missing.'); return }
+      if (!discountCode) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: discount code is missing.'); return }
+      if (!normalizedEmail) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: ambassador email is missing.'); return }
+    }
     setEmail(row.id, 'sending', '')
-    try { await ensureAmbassadorPortalAccount(updatedRow) } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not provision ambassador portal account.'); return }
-    try { setPasswordLink = await getAmbassadorSetupLink(updatedRow) } catch (_) { /* keep the plain link */ }
-    const defaultFollowUpDate = getDefaultFollowUpDateValue(updatedRow, new Date().toISOString())
-    const chosenReminderRaw = String(overrideReminderDate || nextDispatchDateDefault(row) || defaultFollowUpDate || '').trim()
+    if (!recordOnly) {
+      try { await ensureAmbassadorPortalAccount(updatedRow) } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not provision ambassador portal account.'); return }
+      try { setPasswordLink = await getAmbassadorSetupLink(updatedRow) } catch (_) { /* keep the plain link */ }
+    }
+    const defaultFollowUpDate = getDefaultFollowUpDateValue(updatedRow, recordSentIso || new Date().toISOString())
+    // Recorded past package: next date follows the 4-week rule from the real sent date.
+    const chosenReminderRaw = String((recordOnly ? defaultFollowUpDate : '') || overrideReminderDate || nextDispatchDateDefault(row) || defaultFollowUpDate || '').trim()
     if (!chosenReminderRaw) {
       setSaving(null)
       setEmail(row.id, 'error', 'Set a next package reminder date before completing this shipment flow.')
@@ -6922,30 +6970,33 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     }
     // Packing list: name the exact products before the email goes out.
     const exactItems = await openPackingList(row, completedItems)
-    if (!exactItems) { setSaving(null); setEmail(row.id, 'error', 'Not sent: the packing list was not completed.'); return }
+    if (!exactItems) { setSaving(null); setEmail(row.id, 'error', recordOnly ? 'Not saved: the packing list was not completed.' : 'Not sent: the packing list was not completed.'); return }
     completedItems = exactItems
     const currentShipmentItems = ''
     const packedItemsText = completedItems.join(', ')
     const receiptToken = (globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`)
-    const { subject, html } = buildAmbassadorShipmentEmail(
+    const { subject, html } = recordOnly ? { subject: '', html: '' } : buildAmbassadorShipmentEmail(
       updatedRow,
       { ...draft, items: completedItems.filter((t) => t !== currentShipmentItems), shipment_details: currentShipmentItems || draft.shipment_details || '' },
       setPasswordLink,
       chosenReminderAt.toISOString(),
       /^[0-9a-f-]{36}$/i.test(receiptToken) ? receiptToken : null,
     )
-    let attachments = []
-    try {
-      const letterPdf = await buildAmbassadorWelcomeLetterPdf({ fullName: updatedRow.full_name, discountCode: updatedRow.discount_code })
-      attachments = [{ filename: letterPdf.filename, content: letterPdf.base64, contentType: 'application/pdf' }]
-    } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not build personalised welcome letter PDF.'); return }
-    const res = await sendAmbassadorEmail({ to: row.email, subject, html, attachments })
-    setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Shipment email + About Us letter sent to ${row.email}` : res.error)
+    let res = { ok: true }
+    if (!recordOnly) {
+      let attachments = []
+      try {
+        const letterPdf = await buildAmbassadorWelcomeLetterPdf({ fullName: updatedRow.full_name, discountCode: updatedRow.discount_code })
+        attachments = [{ filename: letterPdf.filename, content: letterPdf.base64, contentType: 'application/pdf' }]
+      } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not build personalised welcome letter PDF.'); return }
+      res = await sendAmbassadorEmail({ to: row.email, subject, html, attachments })
+      setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Shipment email + About Us letter sent to ${row.email}` : res.error)
+    }
     if (res.ok) {
-      const sentAt = new Date().toISOString()
+      const sentAt = recordSentIso || new Date().toISOString()
       const nextReminderAt = chosenReminderAt.toISOString()
       const officeReminderAt = new Date(new Date(sentAt).getTime() + 28 * 24 * 60 * 60 * 1000).toISOString()
-      const archiveLine = buildArchiveLine()
+      const archiveLine = buildArchiveLine(sentAt)
       const loggedComment = latestAdminComment ? `${latestAdminComment}\n${archiveLine}` : archiveLine
       const { error: logErr } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: loggedComment }).eq('id', row.id)
       if (logErr) {
@@ -6965,9 +7016,11 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
         sent_at: sentAt,
         created_by: getAdminDisplayLabel(),
         legacy_source: archiveLine.trim(),
-        ...(/^[0-9a-f-]{36}$/i.test(receiptToken) ? { receipt_token: receiptToken } : {}),
+        ...(!recordOnly && /^[0-9a-f-]{36}$/i.test(receiptToken) ? { receipt_token: receiptToken } : {}),
+        // Recorded past package she already has: mark it received too.
+        ...(recordOnly && recordOpts?.received ? { delivered_at: new Date().toISOString(), delivered_by: getAdminDisplayLabel() } : {}),
       })
-      persistShipmentEmailLock((prev) => ({ ...prev, [row.id]: { signature: JSON.stringify(currentDraft), sentAt }, }))
+      if (!recordOnly) persistShipmentEmailLock((prev) => ({ ...prev, [row.id]: { signature: JSON.stringify(currentDraft), sentAt }, }))
       const metaResult = await saveShipmentMeta(
         { ...updatedRow, admin_comment: latestAdminComment },
         {
@@ -7011,7 +7064,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       const dispatchNotificationSignature = shipmentDispatchNotificationSignature(updatedRow, draft, nextReminderAt)
       const previousDispatchNotificationSignature = extractTaggedRawValue(nextPackageComment, 'SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SIGNATURE')
       let notificationResult = { ok: true }
-      if (previousDispatchNotificationSignature !== dispatchNotificationSignature) {
+      if (!recordOnly && previousDispatchNotificationSignature !== dispatchNotificationSignature) {
         const notification = buildAmbassadorShipmentNotificationEmail(updatedRow, draft, sentAt, nextReminderAt, packedItemsText)
         notificationResult = await sendAmbassadorEmail({
           to: AMBASSADOR_SHIPMENT_NOTIFICATION_EMAIL,
@@ -7044,10 +7097,14 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       setShipmentEntryOpen((prev) => Object.fromEntries(
         Object.entries(prev).map(([key, value]) => [key, key.startsWith(`${row.id}:`) ? false : value]),
       ))
-      await logAmbassadorSend(
-        { ...updatedRow, admin_comment: nextPackageComment, message_log: row.message_log },
-        { to: row.email, subject, body: htmlToText(html) },
-      )
+      if (recordOnly) {
+        setEmail(row.id, 'sent', `Package recorded as sent on ${fmtDate(sentAt)} — no email sent.`)
+      } else {
+        await logAmbassadorSend(
+          { ...updatedRow, admin_comment: nextPackageComment, message_log: row.message_log },
+          { to: row.email, subject, body: htmlToText(html) },
+        )
+      }
       if (!notificationResult.ok) {
         setEmail(row.id, 'error', `Tracking sent, but the dispatch notification to ${AMBASSADOR_SHIPMENT_NOTIFICATION_EMAIL} failed: ${notificationResult.error}`)
         alert(`Tracking was sent to the ambassador, but the dispatch notification to ${AMBASSADOR_SHIPMENT_NOTIFICATION_EMAIL} failed: ${notificationResult.error}`)
@@ -8466,7 +8523,7 @@ const deleteApplication = async (row) => {
                     </div>
                     )}
                     <div className="flex flex-wrap gap-2">
-                      <button onClick={() => requestShipmentSave(row, false)} disabled={saving === row.id || !trackingFlowReady} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60">Save package (no email)</button>
+                      <button onClick={() => requestShipmentSave(row, false)} disabled={saving === row.id || !trackingFlowReady} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60">Mark as sent (no email)</button>
                       <button onClick={() => requestShipmentSave(row, true)} disabled={saving === row.id || !trackingFlowReady} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
                       {shipmentEntries.length > 0 && (
                         <button
@@ -8602,7 +8659,8 @@ const deleteApplication = async (row) => {
         </button>
       )}
 
-      {shipDatePrompt && (<div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4"><div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"><h3 className="text-base font-bold text-slate-900">When should the next package go out?</h3><p className="mt-1 text-xs text-slate-500">Pick the next ship date before saving these tracking details — this keeps follow-ups from being missed.</p><input type="date" value={shipDatePrompt.date || ''} onChange={(e) => setShipDatePrompt((prev) => ({ ...prev, date: e.target.value }))} className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /><div className="mt-4 flex justify-end gap-2"><button onClick={() => setShipDatePrompt(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button><button onClick={() => { const row = rows.find((r) => r.id === shipDatePrompt.rowId); if (!row || !shipDatePrompt.date) return; setReminderDateDraft((prev) => ({ ...prev, [row.id]: shipDatePrompt.date })); const alsoEmail = shipDatePrompt.alsoEmail; const chosenDate = shipDatePrompt.date; setShipDatePrompt(null); saveShipment(row, alsoEmail, chosenDate) }} disabled={!shipDatePrompt.date} className="rounded-lg bg-[#D43790] px-3 py-2 text-sm font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Confirm date &amp; save</button></div></div></div>)}
+      {shipDatePrompt?.recordOnly && (<div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4"><div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"><h3 className="text-base font-bold text-slate-900">When was this package sent?</h3><p className="mt-1 text-xs text-slate-500">It is saved in her package history with this date. No email goes to the ambassador. Her next package date will be 4 weeks after it.</p><input type="date" max={new Date().toISOString().slice(0, 10)} value={shipDatePrompt.sentDate || ''} onChange={(e) => setShipDatePrompt((prev) => ({ ...prev, sentDate: e.target.value }))} className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /><label className="mt-3 flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={Boolean(shipDatePrompt.received)} onChange={(e) => setShipDatePrompt((prev) => ({ ...prev, received: e.target.checked }))} />She has already received it</label><div className="mt-4 flex justify-end gap-2"><button onClick={() => setShipDatePrompt(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button><button onClick={() => { const row = rows.find((r) => r.id === shipDatePrompt.rowId); if (!row || !shipDatePrompt.sentDate) return; const opts = { recordOnly: true, sentDate: shipDatePrompt.sentDate, received: Boolean(shipDatePrompt.received) }; setShipDatePrompt(null); saveShipment(row, false, null, opts) }} disabled={!shipDatePrompt.sentDate} className="rounded-lg bg-[#D43790] px-3 py-2 text-sm font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save package (no email)</button></div></div></div>)}
+      {shipDatePrompt && !shipDatePrompt.recordOnly && (<div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4"><div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"><h3 className="text-base font-bold text-slate-900">When should the next package go out?</h3><p className="mt-1 text-xs text-slate-500">Pick the next ship date before saving these tracking details — this keeps follow-ups from being missed.</p><input type="date" value={shipDatePrompt.date || ''} onChange={(e) => setShipDatePrompt((prev) => ({ ...prev, date: e.target.value }))} className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /><div className="mt-4 flex justify-end gap-2"><button onClick={() => setShipDatePrompt(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button><button onClick={() => { const row = rows.find((r) => r.id === shipDatePrompt.rowId); if (!row || !shipDatePrompt.date) return; setReminderDateDraft((prev) => ({ ...prev, [row.id]: shipDatePrompt.date })); const alsoEmail = shipDatePrompt.alsoEmail; const chosenDate = shipDatePrompt.date; setShipDatePrompt(null); saveShipment(row, alsoEmail, chosenDate) }} disabled={!shipDatePrompt.date} className="rounded-lg bg-[#D43790] px-3 py-2 text-sm font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Confirm date &amp; save</button></div></div></div>)}
 {msgRow && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4" onClick={() => setMsgRow(null)}>
           <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
