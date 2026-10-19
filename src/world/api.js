@@ -235,7 +235,7 @@ export async function submitEntry({ userId, roundId, file, caption, products, fi
       country: 'XX', // replaced by the database with the profile's country
       image_path: path,
       caption: caption?.trim() || null,
-      products: (products || []).map(p => ({ name: p.name, sku: p.sku })),
+      products: (products || []).map(p => ({ name: p.name, ...(p.handle ? { handle: p.handle } : {}), ...(p.sku ? { sku: p.sku } : {}) })),
       first_prize_claim: Boolean(firstPrizeClaim),
       source_site: currentSourceSite(),
     })
@@ -246,6 +246,12 @@ export async function submitEntry({ userId, roundId, file, caption, products, fi
     throw error
   }
   return data.id
+}
+
+export async function claimFirstPrize(entryId) {
+  const { data, error } = await db().from('world_entries').update({ first_prize_claim: true }).eq('id', entryId).select('first_prize_claim').single()
+  if (error) throw error
+  return Boolean(data?.first_prize_claim)
 }
 
 export async function countMyEntries(userId, roundId) {

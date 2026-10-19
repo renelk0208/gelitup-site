@@ -31,7 +31,7 @@ const en = {
     ]],
     ['6. Winners', [
       'Prizes for each round: 1st place {p1}, 2nd place {p2}, 3rd place {p3}, in GEL.IT.UP products.',
-      '1st prize: only entrants who use GEL.IT.UP products and have left a review on gelitup.com for every product used in the winning look qualify. Tag those products when you upload and tick the 1st-prize box. GEL.IT.UP checks the reviews before awarding 1st place.',
+      '1st prize: only entrants who use GEL.IT.UP products (bought, or received as a GEL.IT.UP ambassador) and have left a review on gelitup.com for every product used in the winning look qualify. Tag those products when you upload and enter for 1st prize, either when uploading or later from your look’s page while the round is open. GEL.IT.UP checks the reviews before awarding 1st place.',
       '1st prize goes to the qualifying look with the most hearts. 2nd and 3rd prize go to the next looks with the most hearts and are open to everyone.',
       'In a tie, the look that reached that number of hearts first wins.',
       'GEL.IT.UP checks every winning entry against these rules before announcing it. Winners are contacted by email and must reply within 7 days, otherwise the prize passes to the next entry.',
@@ -81,7 +81,7 @@ const el = {
     ]],
     ['6. Νικητές', [
       'Δώρα κάθε γύρου: 1η θέση {p1}, 2η θέση {p2}, 3η θέση {p3}, σε προϊόντα GEL.IT.UP.',
-      '1ο βραβείο: διεκδικούν μόνο όσοι χρησιμοποιούν προϊόντα GEL.IT.UP και έχουν αφήσει κριτική στο gelitup.com για κάθε προϊόν που χρησιμοποιήθηκε στο νικητήριο look. Επίλεξε αυτά τα προϊόντα κατά το ανέβασμα και τσέκαρε το κουτάκι του 1ου βραβείου. Η GEL.IT.UP ελέγχει τις κριτικές πριν απονείμει την 1η θέση.',
+      '1ο βραβείο: διεκδικούν μόνο όσοι χρησιμοποιούν προϊόντα GEL.IT.UP (αγορασμένα ή ως ambassador της GEL.IT.UP) και έχουν αφήσει κριτική στο gelitup.com για κάθε προϊόν που χρησιμοποιήθηκε στο νικητήριο look. Επίλεξε αυτά τα προϊόντα κατά το ανέβασμα και τσέκαρε το κουτάκι του 1ου βραβείου. Η GEL.IT.UP ελέγχει τις κριτικές πριν απονείμει την 1η θέση.',
       'Το 1ο βραβείο πηγαίνει στο look που πληροί τις προϋποθέσεις με τις περισσότερες καρδιές. Το 2ο και το 3ο βραβείο πηγαίνουν στα επόμενα looks με τις περισσότερες καρδιές και είναι ανοιχτά σε όλους.',
       'Σε ισοπαλία κερδίζει το look που έφτασε πρώτο αυτόν τον αριθμό καρδιών.',
       'Η GEL.IT.UP ελέγχει κάθε νικήτρια συμμετοχή με βάση αυτούς τους κανόνες πριν την ανακοινώσει. Οι νικητές ειδοποιούνται με email και πρέπει να απαντήσουν μέσα σε 7 ημέρες, αλλιώς το δώρο περνά στην επόμενη συμμετοχή.',
@@ -131,7 +131,7 @@ const bg = {
     ]],
     ['6. Победители', [
       'Награди за всеки кръг: 1-во място {p1}, 2-ро място {p2}, 3-то място {p3}, в продукти GEL.IT.UP.',
-      '1-ва награда: право имат само участници, които използват продукти GEL.IT.UP и са оставили отзив в gelitup.com за всеки продукт, използван в печелившия дизайн. Отбележи тези продукти при качването и маркирай полето за 1-ва награда. GEL.IT.UP проверява отзивите, преди да присъди 1-во място.',
+      '1-ва награда: право имат само участници, които използват продукти GEL.IT.UP (купени или получени като амбасадор на GEL.IT.UP) и са оставили отзив в gelitup.com за всеки продукт, използван в печелившия дизайн. Отбележи тези продукти при качването и маркирай полето за 1-ва награда. GEL.IT.UP проверява отзивите, преди да присъди 1-во място.',
       '1-ва награда получава отговарящият на условията дизайн с най-много сърца. 2-ра и 3-та награда получават следващите дизайни с най-много сърца и са отворени за всички.',
       'При равенство печели дизайнът, който пръв е достигнал този брой сърца.',
       'GEL.IT.UP проверява всяко печелившо участие спрямо тези правила, преди да го обяви. Победителите се уведомяват по имейл и трябва да отговорят в рамките на 7 дни, иначе наградата преминава към следващото участие.',
@@ -181,7 +181,7 @@ const it = {
     ]],
     ['6. Vincitori', [
       'Premi di ogni round: 1° posto {p1}, 2° posto {p2}, 3° posto {p3}, in prodotti GEL.IT.UP.',
-      '1° premio: possono qualificarsi solo le partecipanti che usano prodotti GEL.IT.UP e hanno lasciato una recensione su gelitup.com per ogni prodotto usato nel look vincitore. Indica questi prodotti al caricamento e spunta la casella del 1° premio. GEL.IT.UP verifica le recensioni prima di assegnare il 1° posto.',
+      '1° premio: possono qualificarsi solo le partecipanti che usano prodotti GEL.IT.UP (acquistati o ricevuti come ambassador GEL.IT.UP) e hanno lasciato una recensione su gelitup.com per ogni prodotto usato nel look vincitore. Indica questi prodotti al caricamento e spunta la casella del 1° premio. GEL.IT.UP verifica le recensioni prima di assegnare il 1° posto.',
       'Il 1° premio va al look qualificato con più cuori. Il 2° e il 3° premio vanno ai look successivi con più cuori e sono aperti a tutti.',
       'In caso di parità vince il look che ha raggiunto per primo quel numero di cuori.',
       'GEL.IT.UP verifica ogni partecipazione vincitrice rispetto a questo regolamento prima di annunciarla. Le vincitrici vengono contattate via email e devono rispondere entro 7 giorni, altrimenti il premio passa alla partecipazione successiva.',
@@ -231,7 +231,7 @@ const es = {
     ]],
     ['6. Ganadores', [
       'Premios de cada ronda: 1.er puesto {p1}, 2.º puesto {p2}, 3.er puesto {p3}, en productos GEL.IT.UP.',
-      '1.er premio: solo pueden optar quienes usen productos GEL.IT.UP y hayan dejado una reseña en gelitup.com de cada producto usado en el look ganador. Indica esos productos al subir el look y marca la casilla del 1.er premio. GEL.IT.UP comprueba las reseñas antes de otorgar el 1.er puesto.',
+      '1.er premio: solo pueden optar quienes usen productos GEL.IT.UP (comprados o recibidos como embajadora de GEL.IT.UP) y hayan dejado una reseña en gelitup.com de cada producto usado en el look ganador. Indica esos productos al subir el look y marca la casilla del 1.er premio. GEL.IT.UP comprueba las reseñas antes de otorgar el 1.er puesto.',
       'El 1.er premio es para el look que cumple los requisitos con más corazones. El 2.º y el 3.er premio son para los siguientes looks con más corazones y están abiertos a todos.',
       'En caso de empate gana el look que alcanzó antes ese número de corazones.',
       'GEL.IT.UP revisa cada participación ganadora según estas bases antes de anunciarla. Las ganadoras reciben un email y deben responder en un plazo de 7 días; de lo contrario, el premio pasa a la siguiente participación.',
@@ -281,7 +281,7 @@ const ro = {
     ]],
     ['6. Câștigători', [
       'Premiile fiecărei runde: locul 1 {p1}, locul 2 {p2}, locul 3 {p3}, în produse GEL.IT.UP.',
-      'Premiul 1: se pot califica doar participanții care folosesc produse GEL.IT.UP și au lăsat o recenzie pe gelitup.com pentru fiecare produs folosit în look-ul câștigător. Marchează aceste produse la încărcare și bifează căsuța pentru premiul 1. GEL.IT.UP verifică recenziile înainte de a acorda locul 1.',
+      'Premiul 1: se pot califica doar participanții care folosesc produse GEL.IT.UP (cumpărate sau primite ca ambasador GEL.IT.UP) și au lăsat o recenzie pe gelitup.com pentru fiecare produs folosit în look-ul câștigător. Marchează aceste produse la încărcare și bifează căsuța pentru premiul 1. GEL.IT.UP verifică recenziile înainte de a acorda locul 1.',
       'Premiul 1 revine look-ului calificat cu cele mai multe inimi. Premiile 2 și 3 revin următoarelor look-uri cu cele mai multe inimi și sunt deschise tuturor.',
       'În caz de egalitate câștigă look-ul care a atins primul acel număr de inimi.',
       'GEL.IT.UP verifică fiecare participare câștigătoare conform acestui regulament înainte de anunțare. Câștigătoarele sunt contactate prin email și trebuie să răspundă în 7 zile, altfel premiul trece la următoarea participare.',
@@ -331,7 +331,7 @@ const pl = {
     ]],
     ['6. Zwycięzcy', [
       'Nagrody w każdej rundzie: 1. miejsce {p1}, 2. miejsce {p2}, 3. miejsce {p3}, w produktach GEL.IT.UP.',
-      '1. nagroda: mogą ją zdobyć tylko osoby, które używają produktów GEL.IT.UP i wystawiły na gelitup.com opinię każdemu produktowi użytemu w zwycięskiej stylizacji. Zaznacz te produkty przy dodawaniu zdjęcia i zaznacz pole 1. nagrody. GEL.IT.UP sprawdza opinie przed przyznaniem 1. miejsca.',
+      '1. nagroda: mogą ją zdobyć tylko osoby, które używają produktów GEL.IT.UP (kupionych lub otrzymanych jako ambasadorka GEL.IT.UP) i wystawiły na gelitup.com opinię każdemu produktowi użytemu w zwycięskiej stylizacji. Zaznacz te produkty przy dodawaniu zdjęcia i zaznacz pole 1. nagrody. GEL.IT.UP sprawdza opinie przed przyznaniem 1. miejsca.',
       '1. nagroda trafia do kwalifikującej się stylizacji z największą liczbą serc. 2. i 3. nagroda trafiają do kolejnych stylizacji z największą liczbą serc i są otwarte dla wszystkich.',
       'W przypadku remisu wygrywa stylizacja, która jako pierwsza osiągnęła tę liczbę serc.',
       'GEL.IT.UP sprawdza każde zwycięskie zgłoszenie pod kątem regulaminu przed ogłoszeniem. Zwyciężczynie są informowane e-mailem i muszą odpowiedzieć w ciągu 7 dni, w przeciwnym razie nagroda przechodzi na kolejne zgłoszenie.',
@@ -381,7 +381,7 @@ const fr = {
     ]],
     ['6. Gagnants', [
       'Prix de chaque manche : 1re place {p1}, 2e place {p2}, 3e place {p3}, en produits GEL.IT.UP.',
-      '1er prix : seules peuvent y prétendre les participantes qui utilisent des produits GEL.IT.UP et ont laissé un avis sur gelitup.com pour chaque produit utilisé dans le look gagnant. Indique ces produits lors de la publication et coche la case du 1er prix. GEL.IT.UP vérifie les avis avant d’attribuer la 1re place.',
+      '1er prix : seules peuvent y prétendre les participantes qui utilisent des produits GEL.IT.UP (achetés ou reçus en tant qu’ambassadrice GEL.IT.UP) et ont laissé un avis sur gelitup.com pour chaque produit utilisé dans le look gagnant. Indique ces produits lors de la publication et coche la case du 1er prix. GEL.IT.UP vérifie les avis avant d’attribuer la 1re place.',
       'Le 1er prix revient au look éligible ayant le plus de cœurs. Les 2e et 3e prix reviennent aux looks suivants ayant le plus de cœurs et sont ouverts à toutes.',
       'En cas d’égalité, le look qui a atteint ce nombre de cœurs en premier l’emporte.',
       'GEL.IT.UP vérifie chaque participation gagnante au regard de ce règlement avant de l’annoncer. Les gagnantes sont contactées par e-mail et doivent répondre sous 7 jours, sinon le prix passe à la participation suivante.',
@@ -431,7 +431,7 @@ const de = {
     ]],
     ['6. Gewinner', [
       'Preise jeder Runde: 1. Platz {p1}, 2. Platz {p2}, 3. Platz {p3}, in GEL.IT.UP-Produkten.',
-      '1. Preis: Teilnahmeberechtigt sind nur Teilnehmende, die GEL.IT.UP-Produkte verwenden und jedes im Gewinner-Look verwendete Produkt auf gelitup.com bewertet haben. Markiere diese Produkte beim Hochladen und setze das Häkchen für den 1. Preis. GEL.IT.UP prüft die Bewertungen, bevor der 1. Platz vergeben wird.',
+      '1. Preis: Teilnahmeberechtigt sind nur Teilnehmende, die GEL.IT.UP-Produkte verwenden (gekauft oder als GEL.IT.UP-Ambassador erhalten) und jedes im Gewinner-Look verwendete Produkt auf gelitup.com bewertet haben. Markiere diese Produkte beim Hochladen und setze das Häkchen für den 1. Preis. GEL.IT.UP prüft die Bewertungen, bevor der 1. Platz vergeben wird.',
       'Der 1. Preis geht an den berechtigten Look mit den meisten Herzen. Der 2. und 3. Preis gehen an die nächsten Looks mit den meisten Herzen und stehen allen offen.',
       'Bei Gleichstand gewinnt der Look, der diese Anzahl Herzen zuerst erreicht hat.',
       'GEL.IT.UP prüft jeden Gewinnerbeitrag anhand dieser Bedingungen, bevor er bekanntgegeben wird. Gewinnerinnen werden per E-Mail benachrichtigt und müssen innerhalb von 7 Tagen antworten, sonst geht der Preis an den nächsten Beitrag.',
@@ -481,7 +481,7 @@ const pt = {
     ]],
     ['6. Vencedores', [
       'Prémios de cada ronda: 1.º lugar {p1}, 2.º lugar {p2}, 3.º lugar {p3}, em produtos GEL.IT.UP.',
-      '1.º prémio: só se qualificam participantes que usam produtos GEL.IT.UP e deixaram uma avaliação em gelitup.com de cada produto usado no look vencedor. Indica esses produtos ao publicar e assinala a caixa do 1.º prémio. A GEL.IT.UP verifica as avaliações antes de atribuir o 1.º lugar.',
+      '1.º prémio: só se qualificam participantes que usam produtos GEL.IT.UP (comprados ou recebidos como embaixadora GEL.IT.UP) e deixaram uma avaliação em gelitup.com de cada produto usado no look vencedor. Indica esses produtos ao publicar e assinala a caixa do 1.º prémio. A GEL.IT.UP verifica as avaliações antes de atribuir o 1.º lugar.',
       'O 1.º prémio vai para o look qualificado com mais corações. O 2.º e o 3.º prémio vão para os looks seguintes com mais corações e estão abertos a todos.',
       'Em caso de empate ganha o look que atingiu primeiro esse número de corações.',
       'A GEL.IT.UP verifica cada participação vencedora segundo este regulamento antes de a anunciar. As vencedoras são contactadas por email e têm de responder no prazo de 7 dias; caso contrário, o prémio passa para a participação seguinte.',
@@ -531,7 +531,7 @@ const hu = {
     ]],
     ['6. Nyertesek', [
       'Minden forduló díjai: 1. hely {p1}, 2. hely {p2}, 3. hely {p3}, GEL.IT.UP termékekben.',
-      '1. díj: csak az a résztvevő indulhat érte, aki GEL.IT.UP termékeket használ, és a nyertes munkában felhasznált minden termékről értékelést írt a gelitup.com-on. Jelöld meg ezeket a termékeket a feltöltéskor, és pipáld be az 1. díj mezőt. A GEL.IT.UP az 1. hely odaítélése előtt ellenőrzi az értékeléseket.',
+      '1. díj: csak az a résztvevő indulhat érte, aki GEL.IT.UP termékeket használ (vásárolt vagy GEL.IT.UP nagykövetként kapott termékeket), és a nyertes munkában felhasznált minden termékről értékelést írt a gelitup.com-on. Jelöld meg ezeket a termékeket a feltöltéskor, és pipáld be az 1. díj mezőt. A GEL.IT.UP az 1. hely odaítélése előtt ellenőrzi az értékeléseket.',
       'Az 1. díjat a feltételeknek megfelelő, legtöbb szívet kapott munka nyeri. A 2. és 3. díjat a következő legtöbb szívet kapott munkák nyerik, ezek mindenki számára nyitottak.',
       'Holtverseny esetén az a munka nyer, amelyik előbb érte el az adott szívszámot.',
       'A GEL.IT.UP minden nyertes nevezést ellenőriz e szabályzat alapján a kihirdetés előtt. A nyerteseket e-mailben értesítjük, és 7 napon belül válaszolniuk kell, különben a díj a következő nevezésé.',

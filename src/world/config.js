@@ -35,8 +35,10 @@ export function shopFor(countryCode) {
   return COUNTRY_SHOPS[String(countryCode || '').toUpperCase()] || DEFAULT_SHOP
 }
 
-export function productShopLink(productName, countryCode) {
+export function productShopLink(productName, countryCode, handle) {
   const shop = shopFor(countryCode)
+  // Products picked from shop.gelitup.com link straight to their page there
+  if (handle && shop === DEFAULT_SHOP) return `${DEFAULT_SHOP.shopUrl}/products/${encodeURIComponent(handle)}`
   if (!shop.searchUrl) return shop.shopUrl
   return shop.searchUrl.replace('{q}', encodeURIComponent(cleanProductName(productName)))
 }

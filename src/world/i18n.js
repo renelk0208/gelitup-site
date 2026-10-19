@@ -2,6 +2,19 @@
 // Placeholders: {max} {n} {name} {email} {shop}
 
 const en = {
+  usedProductsQ: "Did you use GEL.IT.UP products for this look? (bought or received as an ambassador)",
+  yes: "Yes",
+  no: "No",
+  noProductsNote: "No problem, you can still win 2nd ({p2}) or 3rd prize ({p3}). 1st prize is for looks made with GEL.IT.UP products that you have reviewed.",
+  listProducts: "List the GEL.IT.UP products you used",
+  reviewIntro: "To qualify for 1st prize ({p1} in products), leave a review on gelitup.com for each product you used:",
+  leaveReview: "Leave a review",
+  reviewedAll: "I have left a review for every product listed. Enter me for 1st prize ({p1}).",
+  reviewLater: "Not reviewed yet? You can still publish now and qualify later from your look’s page, while the round is open.",
+  claimNow: "I’ve reviewed them all: enter me for 1st prize",
+  claimedTitle: "Entered for 1st prize.",
+  claimPending: "GEL.IT.UP will check your reviews.",
+  claimVerified: "Your reviews are verified.",
   instagram: "Instagram",
   rule1: "Upload a photo of nails you created for this round’s theme (up to {max} looks per round). Everyone can enter, whichever products you use today.",
   rule2: "There is one round of voting per theme, with one heart per person per look. Looks are not carried over: to take part in a new round, upload again.",
@@ -123,6 +136,19 @@ const en = {
 }
 
 const el = {
+  usedProductsQ: "Χρησιμοποίησες προϊόντα GEL.IT.UP για αυτό το look; (αγορασμένα ή ως ambassador)",
+  yes: "Ναι",
+  no: "Όχι",
+  noProductsNote: "Κανένα πρόβλημα, μπορείς να κερδίσεις το 2ο ({p2}) ή το 3ο βραβείο ({p3}). Το 1ο βραβείο είναι για looks με προϊόντα GEL.IT.UP που έχεις αξιολογήσει.",
+  listProducts: "Επίλεξε τα προϊόντα GEL.IT.UP που χρησιμοποίησες",
+  reviewIntro: "Για το 1ο βραβείο ({p1} σε προϊόντα), άφησε κριτική στο gelitup.com για κάθε προϊόν που χρησιμοποίησες:",
+  leaveReview: "Γράψε κριτική",
+  reviewedAll: "Έχω αφήσει κριτική για κάθε προϊόν της λίστας. Δηλώνω συμμετοχή για το 1ο βραβείο ({p1}).",
+  reviewLater: "Δεν έχεις γράψει ακόμη κριτικές; Μπορείς να δημοσιεύσεις τώρα και να δηλώσεις συμμετοχή αργότερα από τη σελίδα του look σου, όσο ο γύρος είναι ανοιχτός.",
+  claimNow: "Τις έγραψα όλες: δήλωσέ με για το 1ο βραβείο",
+  claimedTitle: "Συμμετέχεις για το 1ο βραβείο.",
+  claimPending: "Η GEL.IT.UP θα ελέγξει τις κριτικές σου.",
+  claimVerified: "Οι κριτικές σου επιβεβαιώθηκαν.",
   instagram: "Instagram",
   rule1: "Ανέβασε μια φωτογραφία από νύχια που έφτιαξες για το θέμα αυτού του γύρου (έως {max} looks ανά γύρο). Μπορούν να συμμετέχουν όλοι, όποια προϊόντα κι αν χρησιμοποιούν σήμερα.",
   rule2: "Υπάρχει ένας γύρος ψηφοφορίας ανά θέμα, με μία καρδιά ανά άτομο για κάθε look. Τα looks δεν μεταφέρονται: για να συμμετάσχεις σε νέο γύρο, ανέβασε ξανά.",
@@ -244,6 +270,19 @@ const el = {
 }
 
 const bg = {
+  usedProductsQ: "Използва ли продукти GEL.IT.UP за този дизайн? (купени или получени като амбасадор)",
+  yes: "Да",
+  no: "Не",
+  noProductsNote: "Няма проблем, пак можеш да спечелиш 2-ра ({p2}) или 3-та награда ({p3}). 1-ва награда е за дизайни с продукти GEL.IT.UP, за които си оставила отзив.",
+  listProducts: "Избери използваните продукти GEL.IT.UP",
+  reviewIntro: "За 1-ва награда ({p1} в продукти) остави отзив в gelitup.com за всеки използван продукт:",
+  leaveReview: "Остави отзив",
+  reviewedAll: "Оставила съм отзив за всеки продукт от списъка. Включете ме за 1-ва награда ({p1}).",
+  reviewLater: "Още нямаш отзиви? Можеш да публикуваш сега и да се включиш по-късно от страницата на дизайна, докато кръгът е отворен.",
+  claimNow: "Оставих всички отзиви: включете ме за 1-ва награда",
+  claimedTitle: "Участваш за 1-ва награда.",
+  claimPending: "GEL.IT.UP ще провери отзивите ти.",
+  claimVerified: "Отзивите ти са потвърдени.",
   instagram: "Instagram",
   rule1: "Качи снимка на маникюр, който си направила по темата на този кръг (до {max} дизайна на кръг). Всеки може да участва, с каквито и продукти да работи днес.",
   rule2: "Има един кръг на гласуване за всяка тема, с по едно сърце на човек за всеки дизайн. Дизайните не се пренасят: за нов кръг ги качи отново.",
@@ -365,6 +404,19 @@ const bg = {
 }
 
 const it = {
+  usedProductsQ: "Hai usato prodotti GEL.IT.UP per questo look? (acquistati o ricevuti come ambassador)",
+  yes: "Sì",
+  no: "No",
+  noProductsNote: "Nessun problema, puoi comunque vincere il 2° ({p2}) o il 3° premio ({p3}). Il 1° premio è per i look realizzati con prodotti GEL.IT.UP che hai recensito.",
+  listProducts: "Indica i prodotti GEL.IT.UP che hai usato",
+  reviewIntro: "Per il 1° premio ({p1} in prodotti), lascia una recensione su gelitup.com per ogni prodotto usato:",
+  leaveReview: "Lascia una recensione",
+  reviewedAll: "Ho lasciato una recensione per ogni prodotto in elenco. Iscrivimi al 1° premio ({p1}).",
+  reviewLater: "Non hai ancora recensito? Puoi pubblicare ora e iscriverti più tardi dalla pagina del tuo look, finché il round è aperto.",
+  claimNow: "Le ho recensite tutte: iscrivimi al 1° premio",
+  claimedTitle: "Iscritta al 1° premio.",
+  claimPending: "GEL.IT.UP controllerà le tue recensioni.",
+  claimVerified: "Le tue recensioni sono verificate.",
   instagram: "Instagram",
   rule1: "Carica una foto di unghie realizzate da te sul tema di questo round (fino a {max} look per round). Tutti possono partecipare, qualunque prodotto usino oggi.",
   rule2: "C’è un solo round di voto per ogni tema, con un cuore a persona per ogni look. I look non vengono riportati: per partecipare a un nuovo round, caricali di nuovo.",
@@ -486,6 +538,19 @@ const it = {
 }
 
 const es = {
+  usedProductsQ: "¿Usaste productos GEL.IT.UP en este look? (comprados o recibidos como embajadora)",
+  yes: "Sí",
+  no: "No",
+  noProductsNote: "No pasa nada, aún puedes ganar el 2.º ({p2}) o el 3.er premio ({p3}). El 1.er premio es para looks hechos con productos GEL.IT.UP que hayas reseñado.",
+  listProducts: "Indica los productos GEL.IT.UP que usaste",
+  reviewIntro: "Para optar al 1.er premio ({p1} en productos), deja una reseña en gelitup.com de cada producto usado:",
+  leaveReview: "Dejar reseña",
+  reviewedAll: "He dejado una reseña de cada producto de la lista. Inscríbeme al 1.er premio ({p1}).",
+  reviewLater: "¿Aún no has dejado las reseñas? Puedes publicar ahora e inscribirte más tarde desde la página de tu look, mientras la ronda esté abierta.",
+  claimNow: "Ya las he dejado todas: inscríbeme al 1.er premio",
+  claimedTitle: "Inscrita al 1.er premio.",
+  claimPending: "GEL.IT.UP revisará tus reseñas.",
+  claimVerified: "Tus reseñas están verificadas.",
   instagram: "Instagram",
   rule1: "Sube una foto de uñas hechas por ti según el tema de esta ronda (hasta {max} looks por ronda). Todo el mundo puede participar, use los productos que use hoy.",
   rule2: "Hay una sola ronda de votación por tema, con un corazón por persona para cada look. Los looks no pasan a la siguiente ronda: para participar en una nueva ronda, súbelos de nuevo.",
@@ -607,6 +672,19 @@ const es = {
 }
 
 const ro = {
+  usedProductsQ: "Ai folosit produse GEL.IT.UP pentru acest look? (cumpărate sau primite ca ambasador)",
+  yes: "Da",
+  no: "Nu",
+  noProductsNote: "Nicio problemă, poți câștiga în continuare premiul 2 ({p2}) sau 3 ({p3}). Premiul 1 este pentru look-uri realizate cu produse GEL.IT.UP pe care le-ai recenzat.",
+  listProducts: "Selectează produsele GEL.IT.UP folosite",
+  reviewIntro: "Pentru premiul 1 ({p1} în produse), lasă o recenzie pe gelitup.com pentru fiecare produs folosit:",
+  leaveReview: "Lasă o recenzie",
+  reviewedAll: "Am lăsat o recenzie pentru fiecare produs din listă. Înscrieți-mă la premiul 1 ({p1}).",
+  reviewLater: "Nu ai lăsat încă recenziile? Poți publica acum și te poți înscrie mai târziu din pagina look-ului, cât timp runda este deschisă.",
+  claimNow: "Le-am lăsat pe toate: înscrieți-mă la premiul 1",
+  claimedTitle: "Înscrisă la premiul 1.",
+  claimPending: "GEL.IT.UP îți va verifica recenziile.",
+  claimVerified: "Recenziile tale sunt verificate.",
   instagram: "Instagram",
   rule1: "Încarcă o fotografie cu unghii realizate de tine pe tema acestei runde (până la {max} look-uri pe rundă). Oricine poate participa, indiferent ce produse folosește azi.",
   rule2: "Există o singură rundă de vot pentru fiecare temă, cu o inimă de persoană pentru fiecare look. Look-urile nu se reportează: pentru o rundă nouă, încarcă-le din nou.",
@@ -728,6 +806,19 @@ const ro = {
 }
 
 const pl = {
+  usedProductsQ: "Czy użyłaś produktów GEL.IT.UP w tej stylizacji? (kupionych lub otrzymanych jako ambasadorka)",
+  yes: "Tak",
+  no: "Nie",
+  noProductsNote: "Nie ma problemu, nadal możesz wygrać 2. ({p2}) lub 3. nagrodę ({p3}). 1. nagroda jest dla stylizacji wykonanych produktami GEL.IT.UP, którym wystawiłaś opinię.",
+  listProducts: "Wybierz użyte produkty GEL.IT.UP",
+  reviewIntro: "Aby walczyć o 1. nagrodę ({p1} w produktach), wystaw na gelitup.com opinię każdemu użytemu produktowi:",
+  leaveReview: "Wystaw opinię",
+  reviewedAll: "Wystawiłam opinię każdemu produktowi z listy. Zgłoś mnie do 1. nagrody ({p1}).",
+  reviewLater: "Nie masz jeszcze opinii? Możesz opublikować teraz i zgłosić się później ze strony swojej stylizacji, dopóki runda jest otwarta.",
+  claimNow: "Wystawiłam wszystkie: zgłoś mnie do 1. nagrody",
+  claimedTitle: "Zgłoszona do 1. nagrody.",
+  claimPending: "GEL.IT.UP sprawdzi Twoje opinie.",
+  claimVerified: "Twoje opinie są zweryfikowane.",
   instagram: "Instagram",
   rule1: "Dodaj zdjęcie paznokci wykonanych przez Ciebie w temacie tej rundy (do {max} stylizacji na rundę). Może wziąć udział każdy, niezależnie od produktów, których dziś używa.",
   rule2: "Dla każdego tematu jest jedna runda głosowania, jedno serce na osobę dla każdej stylizacji. Stylizacje nie przechodzą do kolejnej rundy: aby wziąć udział w nowej rundzie, dodaj je ponownie.",
@@ -849,6 +940,19 @@ const pl = {
 }
 
 const fr = {
+  usedProductsQ: "As-tu utilisé des produits GEL.IT.UP pour ce look ? (achetés ou reçus en tant qu’ambassadrice)",
+  yes: "Oui",
+  no: "Non",
+  noProductsNote: "Pas de souci, tu peux quand même gagner le 2e ({p2}) ou le 3e prix ({p3}). Le 1er prix est réservé aux looks réalisés avec des produits GEL.IT.UP pour lesquels tu as laissé un avis.",
+  listProducts: "Indique les produits GEL.IT.UP utilisés",
+  reviewIntro: "Pour concourir au 1er prix ({p1} en produits), laisse un avis sur gelitup.com pour chaque produit utilisé :",
+  leaveReview: "Laisser un avis",
+  reviewedAll: "J’ai laissé un avis pour chaque produit de la liste. Inscris-moi au 1er prix ({p1}).",
+  reviewLater: "Pas encore d’avis ? Tu peux publier maintenant et t’inscrire plus tard depuis la page de ton look, tant que la manche est ouverte.",
+  claimNow: "J’ai laissé tous les avis : inscris-moi au 1er prix",
+  claimedTitle: "Inscrite au 1er prix.",
+  claimPending: "GEL.IT.UP va vérifier tes avis.",
+  claimVerified: "Tes avis sont vérifiés.",
   instagram: "Instagram",
   rule1: "Publie une photo d’ongles que tu as réalisés sur le thème de cette manche (jusqu’à {max} looks par manche). Tout le monde peut participer, quels que soient les produits utilisés aujourd’hui.",
   rule2: "Il y a une seule manche de vote par thème, avec un cœur par personne pour chaque look. Les looks ne sont pas reportés : pour participer à une nouvelle manche, publie-les à nouveau.",
@@ -970,6 +1074,19 @@ const fr = {
 }
 
 const de = {
+  usedProductsQ: "Hast du für diesen Look GEL.IT.UP-Produkte verwendet? (gekauft oder als Ambassador erhalten)",
+  yes: "Ja",
+  no: "Nein",
+  noProductsNote: "Kein Problem, du kannst trotzdem den 2. ({p2}) oder 3. Preis ({p3}) gewinnen. Der 1. Preis ist für Looks mit GEL.IT.UP-Produkten, die du bewertet hast.",
+  listProducts: "Wähle die verwendeten GEL.IT.UP-Produkte",
+  reviewIntro: "Für den 1. Preis ({p1} in Produkten) bewerte jedes verwendete Produkt auf gelitup.com:",
+  leaveReview: "Bewerten",
+  reviewedAll: "Ich habe jedes Produkt der Liste bewertet. Melde mich für den 1. Preis an ({p1}).",
+  reviewLater: "Noch nicht bewertet? Du kannst jetzt veröffentlichen und dich später auf der Seite deines Looks anmelden, solange die Runde offen ist.",
+  claimNow: "Alle bewertet: melde mich für den 1. Preis an",
+  claimedTitle: "Für den 1. Preis angemeldet.",
+  claimPending: "GEL.IT.UP prüft deine Bewertungen.",
+  claimVerified: "Deine Bewertungen sind bestätigt.",
   instagram: "Instagram",
   rule1: "Lade ein Foto von Nägeln hoch, die du zum Thema dieser Runde gestaltet hast (bis zu {max} Looks pro Runde). Jede kann mitmachen, egal welche Produkte sie heute verwendet.",
   rule2: "Pro Thema gibt es eine Abstimmungsrunde, mit einem Herz pro Person und Look. Looks werden nicht übernommen: Für eine neue Runde lade sie erneut hoch.",
@@ -1091,6 +1208,19 @@ const de = {
 }
 
 const pt = {
+  usedProductsQ: "Usaste produtos GEL.IT.UP neste look? (comprados ou recebidos como embaixadora)",
+  yes: "Sim",
+  no: "Não",
+  noProductsNote: "Não há problema, ainda podes ganhar o 2.º ({p2}) ou o 3.º prémio ({p3}). O 1.º prémio é para looks feitos com produtos GEL.IT.UP que avaliaste.",
+  listProducts: "Indica os produtos GEL.IT.UP que usaste",
+  reviewIntro: "Para o 1.º prémio ({p1} em produtos), deixa uma avaliação em gelitup.com de cada produto usado:",
+  leaveReview: "Deixar avaliação",
+  reviewedAll: "Deixei uma avaliação de cada produto da lista. Inscreve-me no 1.º prémio ({p1}).",
+  reviewLater: "Ainda não avaliaste? Podes publicar agora e inscrever-te mais tarde na página do teu look, enquanto a ronda estiver aberta.",
+  claimNow: "Já avaliei todos: inscreve-me no 1.º prémio",
+  claimedTitle: "Inscrita no 1.º prémio.",
+  claimPending: "A GEL.IT.UP vai verificar as tuas avaliações.",
+  claimVerified: "As tuas avaliações estão verificadas.",
   instagram: "Instagram",
   rule1: "Publica uma foto de unhas feitas por ti no tema desta ronda (até {max} looks por ronda). Todos podem participar, usem os produtos que usarem hoje.",
   rule2: "Há uma única ronda de votação por tema, com um coração por pessoa para cada look. Os looks não passam para a ronda seguinte: para participar numa nova ronda, publica-os de novo.",
@@ -1212,6 +1342,19 @@ const pt = {
 }
 
 const hu = {
+  usedProductsQ: "Használtál GEL.IT.UP termékeket ehhez a munkához? (vásárolt vagy nagykövetként kapott)",
+  yes: "Igen",
+  no: "Nem",
+  noProductsNote: "Semmi gond, a 2. ({p2}) vagy 3. díjat ({p3}) így is megnyerheted. Az 1. díj olyan munkáké, amelyekhez GEL.IT.UP termékeket használtál és értékelted őket.",
+  listProducts: "Válaszd ki a felhasznált GEL.IT.UP termékeket",
+  reviewIntro: "Az 1. díjhoz ({p1} értékű termék) írj értékelést a gelitup.com-on minden felhasznált termékről:",
+  leaveReview: "Értékelés írása",
+  reviewedAll: "A lista minden termékéről írtam értékelést. Nevezz az 1. díjra ({p1}).",
+  reviewLater: "Még nincs értékelésed? Most is közzéteheted, és később a munkád oldaláról nevezhetsz, amíg a forduló nyitva van.",
+  claimNow: "Mindet értékeltem: nevezz az 1. díjra",
+  claimedTitle: "Nevezve az 1. díjra.",
+  claimPending: "A GEL.IT.UP ellenőrzi az értékeléseidet.",
+  claimVerified: "Az értékeléseid ellenőrizve.",
   instagram: "Instagram",
   rule1: "Tölts fel egy fotót az általad e forduló témájára készített körmökről (fordulónként legfeljebb {max} munka). Bárki indulhat, bármilyen terméket használ ma.",
   rule2: "Témánként egy szavazási forduló van, munkánként személyenként egy szívvel. A munkák nem kerülnek át: új fordulóhoz töltsd fel őket újra.",

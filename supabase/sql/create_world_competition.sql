@@ -238,7 +238,17 @@ begin
   if not public.world_is_admin() then
     new.status := old.status;
     new.reviews_verified := old.reviews_verified;
-    new.first_prize_claim := old.first_prize_claim;
+    -- The entrant may claim 1st-prize eligibility after posting (reviews take time
+    -- to appear), only while the round is open and only with products tagged.
+    if new.first_prize_claim and not old.first_prize_claim then
+      if jsonb_array_length(coalesce(new.products, '[]'::jsonb)) = 0
+         or not exists (select 1 from public.world_rounds r where r.id = old.round_id and now() < r.ends_at) then
+        new.first_prize_claim := old.first_prize_claim;
+      end if;
+    end if;
+  end if;
+  if new.products is distinct from old.products then
+    new.reviews_verified := false;  -- changed products need checking again
   end if;
   new.id := old.id;
   new.round_id := old.round_id;

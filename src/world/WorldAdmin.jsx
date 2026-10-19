@@ -2,8 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { ENTRY_SELECT, entryUrl, imageUrl, thumbPath } from './api'
-import { COUNTRIES, THEMES, WORLD_BUCKET, WORLD_SITE, countryName, flagEmoji, productShopLink } from './config'
+import { COUNTRIES, THEMES, WORLD_BUCKET, WORLD_SITE, countryName, flagEmoji } from './config'
 import { computeWinners } from './winners'
+import { reviewLink } from './products'
 import { WORLD_LANGS } from './i18n'
 
 // Admin page for World of GEL.IT.UP: rounds, moderation, winners, embed codes.
@@ -302,7 +303,7 @@ export default function WorldAdmin() {
                           {e.reviews_verified ? 'Reviews verified' : 'Verify reviews'}
                         </label>
                         {(e.products || []).map(p => (
-                          <a key={p.name} href={productShopLink(p.name)} target="_blank" rel="noopener" className="block truncate text-[#D43790] underline">{p.name}</a>
+                          <a key={p.name} href={reviewLink(p)} target="_blank" rel="noopener" className="block truncate text-[#D43790] underline">{p.name}</a>
                         ))}
                       </div>
                     ) : <span className="text-neutral-400">not claimed</span>}

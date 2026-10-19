@@ -10,7 +10,7 @@ import {
 } from '../world/config'
 import * as api from '../world/api'
 import { Avatar, CountrySelect, EntryCard, HeartIcon, Hero, Tabs } from '../world/components'
-import { loadProducts, searchProducts } from '../world/products'
+import { loadProducts, reviewLink, searchProducts } from '../world/products'
 
 const WorldAdmin = lazy(() => import('../world/WorldAdmin.jsx'))
 
@@ -590,7 +590,7 @@ function ProductList({ t, products, country }) {
       <ul className="mt-3 divide-y divide-neutral-100 rounded-2xl border border-neutral-200 bg-white">
         {products.map((p, i) => (
           <li key={i}>
-            <a href={productShopLink(p.name, country)} target="_blank" rel="noopener" className="flex items-center gap-3 px-3 py-2.5 hover:bg-neutral-50">
+            <a href={productShopLink(p.name, country, p.handle)} target="_blank" rel="noopener" className="flex items-center gap-3 px-3 py-2.5 hover:bg-neutral-50">
               <span className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
                 {images[p.name] && <img src={images[p.name]} alt="" loading="lazy" className="h-full w-full object-contain" />}
               </span>
@@ -684,6 +684,27 @@ function EntryPage({ ctx }) {
           {entry.caption && <p className="whitespace-pre-line text-sm leading-relaxed text-neutral-700">{entry.caption}</p>}
 
           <ProductList t={t} products={entry.products || []} country={viewerCountry} />
+          {isOwner && (entry.products || []).length > 0 && (
+            <div className="rounded-2xl border border-[#E8E8E8] bg-[#F8F8F6] p-4 text-sm">
+              {entry.first_prize_claim ? (
+                <p className="text-[#1A1A1A]"><b>{t('claimedTitle')}</b> {entry.reviews_verified ? t('claimVerified') : t('claimPending')}</p>
+              ) : !entryRoundClosed ? (
+                <>
+                  <p className="text-[#4A4A4A]">{t('reviewIntro', { p1: (round?.prizes || [])[0] || '' })}</p>
+                  <ul className="mt-2 space-y-1">
+                    {entry.products.map(p => (
+                      <li key={p.name}><a href={reviewLink(p)} target="_blank" rel="noopener" className="text-xs font-semibold text-[#D43790] underline">{t('leaveReview')}: {p.name}</a></li>
+                    ))}
+                  </ul>
+                  <button type="button" onClick={async () => {
+                    try { const ok = await api.claimFirstPrize(entry.id); setEntry(e => ({ ...e, first_prize_claim: ok })) } catch { /* ignore */ }
+                  }} className="mt-3 rounded-xl bg-[#D43790] px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-white hover:bg-[#BF3182]">
+                    {t('claimNow')}
+                  </button>
+                </>
+              ) : null}
+            </div>
+          )}
           <ShareBox t={t} entry={entry} isOwner={isOwner} />
 
           <div className="flex items-center justify-between text-xs text-neutral-500">
@@ -705,7 +726,9 @@ function UploadPage({ ctx }) {
   const { t, lang, account, gate, round, navigate } = ctx
   const [file, setFile] = useState(null)
   const [themeOk, setThemeOk] = useState(false)
-  const [firstPrize, setFirstPrize] = useState(false)
+  const [usedProducts, setUsedProducts] = useState(null) // 'yes' | 'no'
+  const [reviewedAll, setReviewedAll] = useState(false)
+  const prizes = Array.isArray(round?.prizes) && round.prizes.length ? round.prizes : ['€1000', '€500', '€300']
   const [preview, setPreview] = useState('')
   const [caption, setCaption] = useState('')
   const [picked, setPicked] = useState([])
@@ -743,7 +766,7 @@ function UploadPage({ ctx }) {
     if (!file || !account.user || !round) return
     setBusy(true); setErr('')
     try {
-      const id = await api.submitEntry({ userId: account.user.id, roundId: round.id, file, caption, products: picked, firstPrizeClaim: firstPrize && picked.length > 0 })
+      const id = await api.submitEntry({ userId: account.user.id, roundId: round.id, file, caption, products: picked, firstPrizeClaim: usedProducts === 'yes' && picked.length > 0 && reviewedAll })
       navigate(`/world/${id}?posted=1`)
     } catch (ex) {
       setErr(t(api.errorKey(ex)))
@@ -778,63 +801,72 @@ function UploadPage({ ctx }) {
         <textarea value={caption} onChange={e => setCaption(e.target.value)} maxLength={600} rows={3} className={inputCls} />
       </label>
 
-      <div className="mt-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-600">{t('addProducts')}</p>
-        {picked.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {picked.map(p => (
-              <span key={p.name} className="inline-flex items-center gap-1.5 rounded-full bg-[#D43790]/10 px-3 py-1 text-xs font-semibold text-[#9c1f63]">
-                {p.name}
-                <button type="button" aria-label="Remove" onClick={() => setPicked(list => list.filter(x => x.name !== p.name))}>✕</button>
-              </span>
-            ))}
-          </div>
-        )}
-        <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('searchProducts')} className={inputCls} />
-        {results.length > 0 && (
-          <ul className="mt-1 max-h-64 overflow-y-auto rounded-xl border border-neutral-200 bg-white shadow-lg">
-            {results.map(p => (
-              <li key={p.name}>
-                <button type="button" onClick={() => { setPicked(list => [...list, p].slice(0, 15)); setQuery('') }}
-                  className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-neutral-50">
-                  <span className="h-8 w-8 shrink-0 overflow-hidden rounded bg-neutral-100">{p.image && <img src={p.image} alt="" className="h-full w-full object-contain" />}</span>
-                  {p.name}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
       <div className="mt-6 space-y-3 rounded-2xl border border-[#E8E8E8] bg-[#F8F8F6] p-4">
         <label className="flex items-start gap-3 text-sm text-[#1A1A1A]">
           <input type="checkbox" required checked={themeOk} onChange={e => setThemeOk(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#D43790]" />
           <span>{t('confirmTheme')}</span>
         </label>
-        <div className="border-t border-[#E8E8E8] pt-3">
-          <label className={`flex items-start gap-3 text-sm ${picked.length ? 'text-[#1A1A1A]' : 'text-[#4A4A4A] opacity-70'}`}>
-            <input type="checkbox" disabled={!picked.length} checked={firstPrize && picked.length > 0} onChange={e => setFirstPrize(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#D43790]" />
-            <span>
-              <b>{t('firstPrizeTitle', { prize: (round.prizes || [])[0] || '' })}</b>{' '}
-              {t('firstPrizeClaim')}
-            </span>
-          </label>
-          {!picked.length && <p className="ml-7 mt-1 text-xs text-[#4A4A4A]">{t('firstPrizeNeedsProducts')}</p>}
-          {firstPrize && picked.length > 0 && (
-            <ul className="ml-7 mt-2 space-y-1 text-xs">
-              {picked.map(p => (
-                <li key={p.name}>
-                  <a href={productShopLink(p.name)} target="_blank" rel="noopener" className="text-[#D43790] underline">{t('reviewOnShop', { product: p.name })}</a>
-                </li>
-              ))}
-            </ul>
-          )}
+      </div>
+
+      {/* Step: GEL.IT.UP products used → list them → review links → 1st-prize qualification */}
+      <div className="mt-4 rounded-2xl border border-[#E8E8E8] bg-white p-4">
+        <p className="text-sm font-bold text-[#1A1A1A]">{t('usedProductsQ')}</p>
+        <div className="mt-3 flex gap-2">
+          {[['yes', t('yes')], ['no', t('no')]].map(([v, label]) => (
+            <button key={v} type="button" onClick={() => { setUsedProducts(v); if (v === 'no') { setPicked([]); setReviewedAll(false) } }}
+              className={`rounded-xl border px-5 py-2 text-xs font-bold uppercase tracking-[0.12em] transition ${usedProducts === v ? 'border-[#D43790] bg-[#D43790] text-white' : 'border-[#E8E8E8] bg-white text-[#1A1A1A] hover:border-[#D43790]'}`}>
+              {label}
+            </button>
+          ))}
         </div>
+
+        {usedProducts === 'no' && <p className="mt-3 text-xs leading-relaxed text-[#4A4A4A]">{t('noProductsNote', { p2: prizes[1] || '', p3: prizes[2] || '' })}</p>}
+
+        {usedProducts === 'yes' && (
+          <div className="mt-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#4A4A4A]">{t('listProducts')}</p>
+            <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('searchProducts')} className={inputCls} />
+            {results.length > 0 && (
+              <ul className="mt-1 max-h-64 overflow-y-auto rounded-xl border border-neutral-200 bg-white shadow-lg">
+                {results.map(p => (
+                  <li key={p.name}>
+                    <button type="button" onClick={() => { setPicked(list => [...list, p].slice(0, 15)); setQuery(''); setReviewedAll(false) }}
+                      className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-neutral-50">
+                      <span className="h-8 w-8 shrink-0 overflow-hidden rounded bg-neutral-100">{p.image && <img src={p.image} alt="" className="h-full w-full object-contain" />}</span>
+                      {p.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {picked.length > 0 && (
+              <>
+                <p className="mt-4 text-xs leading-relaxed text-[#4A4A4A]">{t('reviewIntro', { p1: prizes[0] || '' })}</p>
+                <ul className="mt-2 divide-y divide-[#E8E8E8] rounded-xl border border-[#E8E8E8]">
+                  {picked.map(p => (
+                    <li key={p.name} className="flex items-center gap-3 px-3 py-2">
+                      <span className="h-9 w-9 shrink-0 overflow-hidden rounded bg-[#F8F8F6]">{p.image && <img src={p.image} alt="" className="h-full w-full object-contain" />}</span>
+                      <span className="min-w-0 flex-1 truncate text-sm text-[#1A1A1A]">{p.name}</span>
+                      <a href={reviewLink(p)} target="_blank" rel="noopener" className="shrink-0 rounded-lg border border-[#D43790] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#D43790] hover:bg-[#D43790] hover:text-white">{t('leaveReview')}</a>
+                      <button type="button" aria-label="Remove" onClick={() => { setPicked(list => list.filter(x => x.name !== p.name)); setReviewedAll(false) }} className="shrink-0 px-1 text-[#4A4A4A]">✕</button>
+                    </li>
+                  ))}
+                </ul>
+                <label className="mt-3 flex items-start gap-3 text-sm text-[#1A1A1A]">
+                  <input type="checkbox" checked={reviewedAll} onChange={e => setReviewedAll(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#D43790]" />
+                  <span>{t('reviewedAll', { p1: prizes[0] || '' })}</span>
+                </label>
+                {!reviewedAll && <p className="ml-7 mt-1 text-xs text-[#4A4A4A]">{t('reviewLater')}</p>}
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       <p className="mt-5 text-xs leading-relaxed text-neutral-500">{t('photoRights')}</p>
       {err && <p className="mt-3 text-sm text-rose-600">{err}</p>}
-      <button type="submit" disabled={busy || !file || !left || !themeOk || !isRegistered(account)} className={`${btnPrimary} mt-4`}>
+      <button type="submit" disabled={busy || !file || !left || !themeOk || !usedProducts || (usedProducts === 'yes' && !picked.length) || !isRegistered(account)} className={`${btnPrimary} mt-4`}>
         {busy ? t('submitting') : t('submit')}
       </button>
     </form>
