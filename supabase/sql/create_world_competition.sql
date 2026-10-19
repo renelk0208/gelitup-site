@@ -47,8 +47,9 @@ create table if not exists public.world_rounds (
   local_prizes jsonb not null default '{}'::jsonb,         -- {"GR": ["€300","€100","€50"]} — products provided by that country's distributor
   max_entries_per_user int not null default 3,
   -- Countries whose residents may enter: the EU plus the non-EU European countries
-  -- listed on gelitup.com. Anyone, anywhere, can register and vote.
-  eligible_countries text[] not null default array['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','AL','AD','BY','BA','GE','IS','XK','LI','MD','MC','ME','MK','NO','SM','RS','CH','TR','UA','GB','VA'],
+  -- listed on gelitup.com, excluding the United Kingdom and Türkiye.
+  -- Anyone, anywhere, can register and vote.
+  eligible_countries text[] not null default array['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','AL','AD','BY','BA','GE','IS','XK','LI','MD','MC','ME','MK','NO','SM','RS','CH','UA','VA'],
   is_published boolean not null default true,
   icon_month   date,                                      -- month the winners are named for ("GEL.IT.UP Icons of November 2026")
   finalists    int not null default 10 check (finalists between 1 and 50), -- looks with the most hearts that reach the final
