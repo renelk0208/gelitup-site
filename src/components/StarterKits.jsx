@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from 'react'
 import { useParams, useNavigate, NavLink } from 'react-router-dom'
+import { withCfiLink } from '../lib/cfiLink'
 
 /**
  * Starter Kits / Packages section — data-driven from /gelitup-content/starter-kits.json.
@@ -265,7 +266,7 @@ function KitBuilder({ kit, addOns = [], discount, onAddKit, onBack }) {
               {kit.guides.map((g) => (
                 <details key={g.title} className="group rounded-xl border border-neutral-200 bg-white p-4">
                   <summary className="flex cursor-pointer items-center justify-between text-[13px] font-medium tracking-tight text-neutral-900">{g.title} <span className="text-[11px] font-normal uppercase tracking-[0.12em] text-neutral-400">how to use</span></summary>
-                  {g.paragraphs.map((p, i) => (<p key={i} className="mt-2 text-[13px] leading-relaxed text-neutral-600">{p}</p>))}
+                  {g.paragraphs.map((p, i) => (<p key={i} className="mt-2 text-[13px] leading-relaxed text-neutral-600">{withCfiLink(p)}</p>))}
                   {g.application.length > 0 && (
                     <>
                       <p className="mt-3 text-[11px] font-medium uppercase tracking-[0.15em] text-[#9B1268]">Application</p>

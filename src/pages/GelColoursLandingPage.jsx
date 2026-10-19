@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
+import { CFI_URL } from '../lib/cfiLink'
 
 const COLOUR_SWATCHES = [
   '/gelitup-content/product-images/COLORS/SHIMMER COLORS/SH01.webp',
@@ -44,7 +45,7 @@ const TRUST_BADGES = [
   { label: 'HEMA-Free', sub: 'Safer for clients & techs' },
   { label: 'TPO-Free', sub: 'Superior light stability' },
   { label: 'Made in the EU', sub: 'EC 1223/2009 compliant' },
-  { label: 'Leaping Bunny', sub: 'Cruelty-free approved' },
+  { label: 'Approved by Cruelty Free International', sub: 'View our listing', href: CFI_URL },
 ]
 
 export default function GelColoursLandingPage() {
@@ -146,8 +147,17 @@ export default function GelColoursLandingPage() {
         <div className="max-w-3xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4">
           {TRUST_BADGES.map((b) => (
             <div key={b.label} className="text-center">
-              <p className="text-sm font-black" style={{ color: '#1a1a1a' }}>{b.label}</p>
-              <p className="text-xs mt-0.5" style={{ color: '#6b7280' }}>{b.sub}</p>
+              {b.href ? (
+                <a href={b.href} target="_blank" rel="noopener noreferrer" className="block hover:opacity-80">
+                  <p className="text-sm font-black underline" style={{ color: '#D43790' }}>{b.label}</p>
+                  <p className="text-xs mt-0.5" style={{ color: '#6b7280' }}>{b.sub}</p>
+                </a>
+              ) : (
+                <>
+                  <p className="text-sm font-black" style={{ color: '#1a1a1a' }}>{b.label}</p>
+                  <p className="text-xs mt-0.5" style={{ color: '#6b7280' }}>{b.sub}</p>
+                </>
+              )}
             </div>
           ))}
         </div>

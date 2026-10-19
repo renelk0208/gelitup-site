@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getBlogPost } from '../data/blogPosts'
+import { withCfiLink } from '../lib/cfiLink'
 
 function useArticleSeo(post) {
   useEffect(() => {
@@ -100,7 +101,7 @@ export default function BlogArticlePage() {
               <section key={section.title}>
                 <h2 className="font-serif text-3xl font-semibold leading-tight text-neutral-950 sm:text-4xl">{section.title}</h2>
                 <div className="mt-6 space-y-5 text-[1.05rem] leading-8 text-neutral-700">
-                  {section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+                  {section.paragraphs.map((paragraph) => <p key={paragraph}>{withCfiLink(paragraph)}</p>)}
                 </div>
                 {section.takeaway && (
                   <aside className="mt-7 rounded-2xl border border-[#D43790]/20 bg-white p-6 shadow-sm sm:p-7">

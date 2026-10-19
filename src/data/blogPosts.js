@@ -148,9 +148,9 @@ export const blogPosts = [
     category: 'Brand Standards & Ethics',
     title: 'What Sets GEL.IT.UP Apart: The Standard Every Professional Nail Brand Should Be Held To',
     shortTitle: 'What sets GEL.IT.UP apart?',
-    excerpt: 'Why professionals choose GEL.IT.UP: professional-only access, HEMA-free and TPO-free formulas, Leaping Bunny certification, and direct 1-on-1 support.',
+    excerpt: 'Why professionals choose GEL.IT.UP: professional-only access, HEMA-free and TPO-free formulas, approval by Cruelty Free International, and direct 1-on-1 support.',
     metaTitle: 'What Sets GEL.IT.UP Apart | Professional Nail Brand Standards',
-    metaDescription: 'Discover what makes GEL.IT.UP the professional nail brand of choice: certified cruelty-free standards, safer formulations, compliance, and genuine support.',
+    metaDescription: 'Discover what makes GEL.IT.UP the professional nail brand of choice: cruelty-free standards (Approved by Cruelty Free International), safer formulations, compliance, and genuine support.',
     publishedAt: '2026-09-23',
     publishedLabel: '23 September 2026',
     readTime: '7 min read',
@@ -162,7 +162,7 @@ export const blogPosts = [
     closingAlt: 'Explore GEL.IT.UP professional products built to higher standards.',
     ctaLabel: 'Explore the Full Catalogue — shop.gelitup.com',
     ctaUrl: 'https://shop.gelitup.com/pages/ourproducts',
-    tags: ['Professional-Only', 'HEMA-Free', 'TPO-Free', 'Leaping Bunny'],
+    tags: ['Professional-Only', 'HEMA-Free', 'TPO-Free', 'Cruelty Free International'],
     intro: [
       'There are thousands of gel polish brands on the market, but very few are built exclusively around professional standards from top to bottom.',
       'This guide explains what makes GEL.IT.UP different in real operational terms: formulation policy, certification scope, support model, and distributor practice.',
@@ -184,9 +184,9 @@ export const blogPosts = [
         takeaway: 'Consistency across base, colour, builder, and top layers is what makes a system reliably professional.',
       },
       {
-        title: 'Leaping Bunny Certification Across the Supply Chain',
+        title: 'Approved by Cruelty Free International, Across the Supply Chain',
         paragraphs: [
-          'Leaping Bunny coverage is not just a final-label claim. It extends through ingredient sourcing and manufacturing pathways.',
+          'GEL.IT.UP is Approved by Cruelty Free International. The approval is not just a final-label claim: it extends through ingredient sourcing and manufacturing pathways.',
           'For salons and distributors, this gives independently verified evidence of cruelty-free practice rather than marketing-only language.',
         ],
       },

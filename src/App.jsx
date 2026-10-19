@@ -30,6 +30,7 @@ import CatalogueSkeleton from './components/CatalogueSkeleton'
 import tierPricingOverrides from './data/tierPricingOverrides.json'
 import { buildTierPricingLookup, buildItemCandidateKeys } from './lib/tierPricingResolver.js'
 import { carrierLabel } from './lib/ambassadorShipping.js'
+import { withCfiLink } from './lib/cfiLink'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'))
 const DistributorMap = lazy(() => import('./pages/DistributorMap.jsx'))
@@ -5573,11 +5574,11 @@ function FullCataloguePage() {
               // Render text with **bold** markers → <strong>
               const renderRichText = (text) => {
                 const parts = String(text).split(/(\*\*[^*]+\*\*)/g)
-                if (parts.length === 1) return text
+                if (parts.length === 1) return withCfiLink(text)
                 return parts.map((part, i) =>
                   part.startsWith('**') && part.endsWith('**')
                     ? <strong key={i}>{part.slice(2, -2)}</strong>
-                    : part
+                    : <span key={i}>{withCfiLink(part)}</span>
                 )
               }
 

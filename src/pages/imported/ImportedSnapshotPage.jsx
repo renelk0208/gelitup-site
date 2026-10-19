@@ -6,6 +6,7 @@ import InspirationTeaser from '../../components/InspirationTeaser'
 import InstagramFeed from '../../components/InstagramFeed'
 import HomeHeroCarousel from '../../components/HomeHeroCarousel'
 import TikTokFeed from '../../components/TikTokFeed'
+import { withCfiLink } from '../../lib/cfiLink'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/gelitupinternational/'
 const INSTAGRAM_HANDLE = 'gelitupinternational'
@@ -1088,7 +1089,7 @@ export default function ImportedSnapshotPage({ slug, editorFile }) {
               <div className="space-y-2">
                 {section.paragraphs.length > 0
                   ? section.paragraphs.map((paragraph) => (
-                    <p key={paragraph} className="text-sm leading-relaxed text-slate-700">{paragraph}</p>
+                    <p key={paragraph} className="text-sm leading-relaxed text-slate-700">{withCfiLink(paragraph)}</p>
                   ))
                   : <p className="text-sm text-slate-500">Section placeholder ready for custom content.</p>}
               </div>

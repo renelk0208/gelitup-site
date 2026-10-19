@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { supabase, hasSupabaseConfig } from '../lib/supabaseClient'
 import InstagramFeed from '../components/InstagramFeed'
 import SocialProof from '../components/SocialProof'
+import { CFI_URL } from '../lib/cfiLink'
 
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL || ''
 const EMAIL_WEBHOOK_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
@@ -169,8 +170,9 @@ const WHY_ITEMS = [
   },
   {
     badge: '/badges/cruelty-free-international-leaping-bunny.png',
-    badgeAlt: 'Cruelty Free International — Leaping Bunny logo',
-    title: 'Cruelty Free International approved',
+    badgeAlt: 'Approved by Cruelty Free International logo',
+    title: 'Approved by Cruelty Free International',
+    href: CFI_URL,
     body: 'Ethically produced, start to finish.',
   },
   {
@@ -454,10 +456,20 @@ export default function WorkWithUs() {
                 {item.photo ? (
                   <img src={item.photo} alt={item.photoAlt} className="h-14 w-14 rounded-lg object-cover" loading="lazy" />
                 ) : (
-                  <img src={item.badge} alt={item.badgeAlt} className="h-14 w-auto max-w-[160px] object-contain" loading="lazy" />
+                  item.href ? (
+                    <a href={item.href} target="_blank" rel="noopener noreferrer">
+                      <img src={item.badge} alt={item.badgeAlt} className="h-14 w-auto max-w-[160px] object-contain" loading="lazy" />
+                    </a>
+                  ) : (
+                    <img src={item.badge} alt={item.badgeAlt} className="h-14 w-auto max-w-[160px] object-contain" loading="lazy" />
+                  )
                 )}
               </div>
-              <h3 className="mt-4 text-base font-black text-[#1A1A1A]">{item.title}</h3>
+              <h3 className="mt-4 text-base font-black text-[#1A1A1A]">
+                {item.href ? (
+                  <a href={item.href} target="_blank" rel="noopener noreferrer" className="text-[#D43790] underline hover:opacity-80">{item.title}</a>
+                ) : item.title}
+              </h3>
               <p className="mt-2 text-sm leading-relaxed text-black/65">{item.body}</p>
             </div>
           ))}
