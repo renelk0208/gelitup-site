@@ -24,7 +24,7 @@ export function Countdown({ endsAt, t }) {
     <span className="tabular-nums">
       {t('closesIn')}{' '}
       {parts.map(([n, u]) => (
-        <span key={u} className="mx-0.5 font-bold text-white">{n}{u}</span>
+        <span key={u} className="mx-0.5 font-bold text-[#1A1A1A]">{n}{u}</span>
       ))}
     </span>
   )
@@ -38,44 +38,62 @@ export function HeartIcon({ filled, className = 'h-4 w-4' }) {
   )
 }
 
-export function Hero({ round, lang, t, leader, onUpload, uploadHref, country, compact = false }) {
+export const BRAND = {
+  pink: '#D43790',
+  black: '#1A1A1A',
+  grey: '#4A4A4A',
+  light: '#E8E8E8',
+  gallery: '#F8F8F6',
+}
+
+const LOGO = '/NEW%20LOGO%202024-02.png'
+
+export function Hero({ round, lang, t, leader, onUpload, uploadHref, country, compact = false, logoBase = '' }) {
   const [showRules, setShowRules] = useState(false)
   const open = round && new Date(round.ends_at) > new Date()
   const title = round ? (localized(round.title, lang) || t(`theme_${round.theme}`)) : ''
   const prizes = Array.isArray(round?.prizes) ? round.prizes : []
   const localPrizes = country && round?.local_prizes?.[country]
+  const shownPrizes = (localPrizes || prizes).slice(0, 3)
   const UploadTag = uploadHref ? 'a' : 'button'
   const uploadProps = uploadHref
     ? { href: uploadHref, target: '_blank', rel: 'noopener' }
     : { type: 'button', onClick: onUpload }
 
   return (
-    <section className={`relative isolate overflow-hidden rounded-3xl bg-[#111] text-white ${compact ? 'px-5 py-7' : 'px-5 py-10 md:px-10 md:py-14'}`}>
-      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_20%,rgba(212,55,144,0.55),transparent_55%),radial-gradient(circle_at_90%_90%,rgba(212,55,144,0.25),transparent_50%)]" />
-      <div className="mx-auto max-w-2xl text-center">
-        <p className="inline-block rounded-full border border-white/25 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white/80">
+    <section className="overflow-hidden rounded-3xl border border-[#E8E8E8] bg-white">
+      <div aria-hidden="true" className="h-1.5 w-full bg-[#D43790]" />
+      <div className={`mx-auto max-w-2xl text-center ${compact ? 'px-5 py-7' : 'px-5 py-10 md:px-10 md:py-12'}`}>
+        <img src={`${logoBase}${LOGO}`} alt="GEL.IT.UP" className={`mx-auto w-auto ${compact ? 'h-12' : 'h-14 md:h-16'}`} />
+        <p className="mt-4 inline-block rounded-full border border-[#1A1A1A] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#1A1A1A]">
           {t('kicker')}{round ? ` · ${t(`theme_${round.theme}`)}` : ''}
         </p>
-        <h1 style={{ color: '#ffffff' }} className={`mt-4 font-black uppercase leading-[0.95] tracking-tight ${compact ? 'text-3xl' : 'text-4xl md:text-6xl'}`}>
-          {COMPETITION_NAME.replace('GEL.IT.UP', '')}
-          <span className="block" style={{ color: '#e55aa9' }}>GEL.IT.UP</span>
+        <h1 style={{ color: BRAND.black, letterSpacing: '0.12em' }} className={`mt-4 font-black uppercase leading-[1.05] ${compact ? 'text-2xl' : 'text-3xl md:text-5xl'}`}>
+          {COMPETITION_NAME.replace('GEL.IT.UP', '').trim()}{' '}
+          <span style={{ color: BRAND.pink }}>GEL.IT.UP</span>
         </h1>
-        {title && <p className="mt-3 text-lg font-semibold text-white">{title}</p>}
-        <p className="mt-1 text-sm text-white/75">{t('tagline')}</p>
+        {title && <p className="mt-3 text-base font-bold uppercase tracking-[0.14em] text-[#1A1A1A]">{title}</p>}
+        <p className="mt-1 text-sm text-[#4A4A4A]">{t('tagline')}</p>
 
-        {(localPrizes || prizes.length > 0) && (
-          <div className="mt-5 flex items-end justify-center gap-4">
-            {(localPrizes || prizes).slice(0, 3).map((p, i) => (
-              <span key={i} className={`font-black ${i === 0 ? 'text-3xl text-[#e55aa9]' : 'text-xl text-white'}`}>{p}</span>
-            ))}
+        {shownPrizes.length > 0 && (
+          <div className="mx-auto mt-6 max-w-md rounded-2xl bg-[#F8F8F6] px-4 py-4">
+            <div className="flex items-end justify-center gap-5">
+              {shownPrizes.map((p, i) => (
+                <span key={i} className="flex flex-col items-center">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#4A4A4A]">{i + 1}.</span>
+                  <span className={`font-black ${i === 0 ? 'text-3xl' : 'text-xl'}`} style={{ color: i === 0 ? BRAND.pink : BRAND.black }}>{p}</span>
+                </span>
+              ))}
+            </div>
+            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1A1A1A]">{t('prizesProducts')}</p>
+            {localPrizes && prizes.length > 0 && (
+              <p className="mt-1 text-[11px] text-[#4A4A4A]">{t('prizesLocal')} · {t('prizesIntl')}: {prizes.join(' / ')}</p>
+            )}
           </div>
-        )}
-        {localPrizes && prizes.length > 0 && (
-          <p className="mt-1 text-[11px] uppercase tracking-[0.15em] text-white/60">{t('prizesLocal')} · {t('prizesIntl')}: {prizes.join(' / ')}</p>
         )}
 
         {round && (
-          <p className="mt-4 text-xs uppercase tracking-[0.18em] text-white/70">
+          <p className="mt-5 text-xs uppercase tracking-[0.18em] text-[#4A4A4A]">
             {open ? <Countdown endsAt={round.ends_at} t={t} /> : t('closed')}
           </p>
         )}
@@ -83,19 +101,19 @@ export function Hero({ round, lang, t, leader, onUpload, uploadHref, country, co
         {open && (
           <UploadTag
             {...uploadProps}
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#D43790] px-6 py-3 text-sm font-bold uppercase tracking-[0.12em] text-white shadow-[0_8px_30px_rgba(212,55,144,0.45)] transition hover:bg-[#e04a9f]"
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#D43790] px-7 py-3.5 text-sm font-bold uppercase tracking-[0.12em] !text-white transition hover:bg-[#BF3182]"
           >
             <CameraIcon /> {t('upload')}
           </UploadTag>
         )}
 
         <div className="mt-4">
-          <button type="button" onClick={() => setShowRules(v => !v)} className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70 underline underline-offset-4 hover:text-white">
+          <button type="button" onClick={() => setShowRules(v => !v)} className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1A1A1A] underline decoration-[#D43790] decoration-2 underline-offset-4">
             {t('howItWorks')}
           </button>
         </div>
         {showRules && (
-          <ul className="mx-auto mt-4 max-w-md space-y-2 border-t border-white/15 pt-4 text-left text-sm text-white/85">
+          <ul className="mx-auto mt-4 max-w-md space-y-2 border-t border-[#E8E8E8] pt-4 text-left text-sm text-[#4A4A4A]">
             <li>• {t('rule1', { max: round?.max_entries_per_user || 3 })}</li>
             <li>• {t('rule2')}</li>
             <li>• {t('rule3')}</li>
@@ -103,10 +121,10 @@ export function Hero({ round, lang, t, leader, onUpload, uploadHref, country, co
         )}
 
         {leader && (
-          <p className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs text-white/80">
-            <span className="uppercase tracking-[0.15em] text-white/60">{t('leading')}</span>
-            <span className="font-semibold text-white">{flagEmoji(leader.country)} {leader.profile?.display_name}</span>
-            <span className="text-[#e55aa9]">♥ {leader.vote_count}</span>
+          <p className="mt-5 inline-flex flex-wrap items-center justify-center gap-2 rounded-full border border-[#E8E8E8] bg-white px-4 py-1.5 text-xs text-[#4A4A4A]">
+            <span className="font-bold uppercase tracking-[0.15em]">{t('leading')}</span>
+            <span className="font-semibold text-[#1A1A1A]">{flagEmoji(leader.country)} {leader.profile?.display_name}</span>
+            <span className="font-bold" style={{ color: BRAND.pink }}>♥ {leader.vote_count}</span>
           </p>
         )}
       </div>
@@ -126,7 +144,7 @@ function CameraIcon() {
 export function Avatar({ name, className = 'h-9 w-9 text-xs' }) {
   const initials = String(name || '?').split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase()
   return (
-    <span className={`inline-flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#D43790] to-[#5a1238] font-bold text-white ${className}`}>
+    <span className={`inline-flex shrink-0 items-center justify-center rounded-full bg-[#1A1A1A] font-bold text-white ${className}`}>
       {initials}
     </span>
   )
@@ -136,7 +154,7 @@ export function EntryCard({ entry, t, voted, onVote, href, linkProps = {}, voteD
   const [imgSrc, setImgSrc] = useState(() => imageUrl(entry.image_path, { thumb: true }))
   const p = entry.profile || {}
   return (
-    <article className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition hover:shadow-lg">
+    <article className="group overflow-hidden rounded-2xl border border-[#E8E8E8] bg-white transition hover:border-[#D43790]">
       <div className="flex items-center gap-2.5 px-3 py-2.5">
         <Avatar name={p.display_name} />
         <div className="min-w-0 flex-1">
@@ -146,7 +164,7 @@ export function EntryCard({ entry, t, voted, onVote, href, linkProps = {}, voteD
             {p.instagram ? <> · @{p.instagram}</> : null}
           </p>
         </div>
-        {rank ? <span className="rounded-full bg-neutral-900 px-2 py-0.5 text-[11px] font-bold text-white">#{rank}</span> : null}
+        {rank ? <span className="rounded-full bg-[#D43790] px-2 py-0.5 text-[11px] font-bold text-white">#{rank}</span> : null}
       </div>
       <a href={href} {...linkProps} className="block aspect-[4/5] overflow-hidden bg-neutral-100">
         <img

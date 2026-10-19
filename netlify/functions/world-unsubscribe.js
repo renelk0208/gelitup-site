@@ -11,12 +11,12 @@ const page = (title, text) => ({
   headers: { 'Content-Type': 'text/html; charset=utf-8', 'X-Robots-Tag': 'noindex' },
   body: `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${title}</title></head>
-<body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#111;color:#fff;font-family:Arial,sans-serif">
+<body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#F8F8F6;color:#1A1A1A;font-family:Arial,sans-serif">
 <div style="max-width:420px;padding:24px;text-align:center">
-<div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#bbb">World of</div>
-<div style="font-size:26px;font-weight:900;color:#e55aa9">GEL.IT.UP</div>
+<img src="/NEW%20LOGO%202024-02.png" alt="GEL.IT.UP" style="height:64px;width:auto">
+<div style="margin-top:8px;font-size:13px;font-weight:bold;letter-spacing:3px;text-transform:uppercase">World of <span style="color:#D43790">GEL.IT.UP</span></div>
 <p style="margin-top:20px;line-height:1.6">${text}</p>
-<p><a href="https://gelitup.com/world" style="color:#e55aa9">gelitup.com/world</a></p>
+<p><a href="https://gelitup.com/world" style="color:#D43790">gelitup.com/world</a></p>
 </div></body></html>`,
 })
 

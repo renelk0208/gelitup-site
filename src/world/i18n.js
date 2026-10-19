@@ -2,6 +2,16 @@
 // Placeholders: {max} {n} {name} {email} {shop}
 
 const en = {
+  requiredHeading: "Required to take part",
+  optionalHeading: "Optional",
+  adultOnly: "I am 18 or older",
+  acceptRules: "I have read and accept the competition rules.",
+  readRules: "Read the rules",
+  publicConsent: "I agree that my display name, username, Instagram, country, photos and captions are shown publicly on GEL.IT.UP websites and social media. My email address is never shown.",
+  privacyNote: "Your details are handled under our privacy policy.",
+  privacyLink: "Privacy policy",
+  prizesProducts: "Prizes in GEL.IT.UP products",
+  rule3: "The best look in each country wins GEL.IT.UP products from that country’s GEL.IT.UP team, and the top looks overall win international product prizes. Prizes are products, not cash.",
   kicker: 'Competition',
   tagline: 'Upload your look · collect hearts · win',
   closesIn: 'Closes in',
@@ -12,7 +22,6 @@ const en = {
   howItWorks: 'How it works',
   rule1: 'Upload a photo of nails you created (up to {max} looks per round). Everyone can enter, whichever products you use today.',
   rule2: 'The community votes with hearts. Every round starts from zero.',
-  rule3: 'The best look in each country wins prizes from that country’s GEL.IT.UP team, and the top looks overall win international prizes.',
   leading: 'Leading',
   tabNew: 'New',
   tabPopular: 'Popular',
@@ -102,6 +111,16 @@ const en = {
 }
 
 const el = {
+  requiredHeading: "Απαραίτητα για συμμετοχή",
+  optionalHeading: "Προαιρετικά",
+  adultOnly: "Είμαι 18 ετών και άνω",
+  acceptRules: "Διάβασα και αποδέχομαι τους κανόνες του διαγωνισμού.",
+  readRules: "Διάβασε τους κανόνες",
+  publicConsent: "Συμφωνώ να εμφανίζονται δημόσια στις ιστοσελίδες και τα social media της GEL.IT.UP το όνομα προβολής, το όνομα χρήστη, το Instagram, η χώρα, οι φωτογραφίες και οι λεζάντες μου. Το email μου δεν εμφανίζεται ποτέ.",
+  privacyNote: "Τα στοιχεία σου διαχειρίζονται σύμφωνα με την πολιτική απορρήτου μας.",
+  privacyLink: "Πολιτική απορρήτου",
+  prizesProducts: "Δώρα σε προϊόντα GEL.IT.UP",
+  rule3: "Το καλύτερο look κάθε χώρας κερδίζει προϊόντα GEL.IT.UP από την ομάδα GEL.IT.UP της χώρας του, και τα κορυφαία looks συνολικά κερδίζουν διεθνή δώρα σε προϊόντα. Τα δώρα είναι προϊόντα, όχι χρήματα.",
   kicker: 'Διαγωνισμός',
   tagline: 'Ανέβασε το look σου · μάζεψε καρδιές · κέρδισε',
   closesIn: 'Κλείνει σε',
@@ -112,7 +131,6 @@ const el = {
   howItWorks: 'Πώς λειτουργεί',
   rule1: 'Ανέβασε μια φωτογραφία από νύχια που έφτιαξες (έως {max} looks ανά γύρο). Μπορούν να συμμετέχουν όλοι, όποια προϊόντα κι αν χρησιμοποιούν σήμερα.',
   rule2: 'Η κοινότητα ψηφίζει με καρδιές. Κάθε γύρος ξεκινά από το μηδέν.',
-  rule3: 'Το καλύτερο look κάθε χώρας κερδίζει δώρα από την ομάδα GEL.IT.UP της χώρας του, και τα κορυφαία looks συνολικά κερδίζουν διεθνή δώρα.',
   leading: 'Προηγείται',
   tabNew: 'Νέα',
   tabPopular: 'Δημοφιλή',
@@ -202,6 +220,16 @@ const el = {
 }
 
 const bg = {
+  requiredHeading: "Задължително за участие",
+  optionalHeading: "По избор",
+  adultOnly: "Навършила съм 18 години",
+  acceptRules: "Прочетох и приемам правилата на конкурса.",
+  readRules: "Прочети правилата",
+  publicConsent: "Съгласна съм името за показване, потребителското име, Instagram, държавата, снимките и описанията ми да се показват публично на сайтовете и в социалните мрежи на GEL.IT.UP. Имейлът ми никога не се показва.",
+  privacyNote: "Данните ти се обработват съгласно нашата политика за поверителност.",
+  privacyLink: "Политика за поверителност",
+  prizesProducts: "Награди в продукти GEL.IT.UP",
+  rule3: "Най-добрият дизайн във всяка държава печели продукти GEL.IT.UP от екипа на GEL.IT.UP в тази държава, а най-добрите като цяло печелят международни награди в продукти. Наградите са продукти, не пари.",
   kicker: 'Конкурс',
   tagline: 'Качи своя дизайн · събери сърца · спечели',
   closesIn: 'Затваря след',
@@ -212,7 +240,6 @@ const bg = {
   howItWorks: 'Как работи',
   rule1: 'Качи снимка на маникюр, който си направила (до {max} дизайна на кръг). Всеки може да участва, с каквито и продукти да работи днес.',
   rule2: 'Общността гласува със сърца. Всеки кръг започва от нула.',
-  rule3: 'Най-добрият дизайн във всяка държава печели награди от екипа на GEL.IT.UP в тази държава, а най-добрите като цяло печелят международни награди.',
   leading: 'Води',
   tabNew: 'Нови',
   tabPopular: 'Популярни',
@@ -302,6 +329,16 @@ const bg = {
 }
 
 const it = {
+  requiredHeading: "Obbligatorio per partecipare",
+  optionalHeading: "Facoltativo",
+  adultOnly: "Ho almeno 18 anni",
+  acceptRules: "Ho letto e accetto il regolamento del concorso.",
+  readRules: "Leggi il regolamento",
+  publicConsent: "Accetto che il mio nome visualizzato, nome utente, Instagram, paese, foto e didascalie siano mostrati pubblicamente sui siti e sui social di GEL.IT.UP. La mia email non viene mai mostrata.",
+  privacyNote: "I tuoi dati sono trattati secondo la nostra informativa sulla privacy.",
+  privacyLink: "Informativa privacy",
+  prizesProducts: "Premi in prodotti GEL.IT.UP",
+  rule3: "Il miglior look di ogni paese vince prodotti GEL.IT.UP dal team GEL.IT.UP di quel paese, e i migliori look in assoluto vincono premi internazionali in prodotti. I premi sono prodotti, non denaro.",
   kicker: 'Concorso',
   tagline: 'Carica il tuo look · raccogli cuori · vinci',
   closesIn: 'Chiude tra',
@@ -312,7 +349,6 @@ const it = {
   howItWorks: 'Come funziona',
   rule1: 'Carica una foto di unghie realizzate da te (fino a {max} look per round). Tutti possono partecipare, qualunque prodotto usino oggi.',
   rule2: 'La community vota con i cuori. Ogni round riparte da zero.',
-  rule3: 'Il miglior look di ogni paese vince premi dal team GEL.IT.UP di quel paese, e i migliori look in assoluto vincono premi internazionali.',
   leading: 'In testa',
   tabNew: 'Nuovi',
   tabPopular: 'Popolari',
@@ -402,6 +438,16 @@ const it = {
 }
 
 const es = {
+  requiredHeading: "Obligatorio para participar",
+  optionalHeading: "Opcional",
+  adultOnly: "Tengo 18 años o más",
+  acceptRules: "He leído y acepto las bases del concurso.",
+  readRules: "Leer las bases",
+  publicConsent: "Acepto que mi nombre visible, nombre de usuario, Instagram, país, fotos y descripciones se muestren públicamente en las webs y redes sociales de GEL.IT.UP. Mi email nunca se muestra.",
+  privacyNote: "Tus datos se tratan según nuestra política de privacidad.",
+  privacyLink: "Política de privacidad",
+  prizesProducts: "Premios en productos GEL.IT.UP",
+  rule3: "El mejor look de cada país gana productos GEL.IT.UP del equipo GEL.IT.UP de ese país, y los mejores looks en general ganan premios internacionales en productos. Los premios son productos, no dinero.",
   kicker: 'Concurso',
   tagline: 'Sube tu look · consigue corazones · gana',
   closesIn: 'Cierra en',
@@ -412,7 +458,6 @@ const es = {
   howItWorks: 'Cómo funciona',
   rule1: 'Sube una foto de uñas que hayas hecho tú (hasta {max} looks por ronda). Todo el mundo puede participar, use los productos que use hoy.',
   rule2: 'La comunidad vota con corazones. Cada ronda empieza de cero.',
-  rule3: 'El mejor look de cada país gana premios del equipo GEL.IT.UP de ese país, y los mejores looks en general ganan premios internacionales.',
   leading: 'En cabeza',
   tabNew: 'Nuevos',
   tabPopular: 'Populares',
@@ -502,6 +547,16 @@ const es = {
 }
 
 const ro = {
+  requiredHeading: "Obligatoriu pentru participare",
+  optionalHeading: "Opțional",
+  adultOnly: "Am cel puțin 18 ani",
+  acceptRules: "Am citit și accept regulamentul concursului.",
+  readRules: "Citește regulamentul",
+  publicConsent: "Sunt de acord ca numele afișat, numele de utilizator, Instagram, țara, fotografiile și descrierile mele să fie afișate public pe site-urile și rețelele sociale GEL.IT.UP. Emailul meu nu este afișat niciodată.",
+  privacyNote: "Datele tale sunt prelucrate conform politicii noastre de confidențialitate.",
+  privacyLink: "Politica de confidențialitate",
+  prizesProducts: "Premii în produse GEL.IT.UP",
+  rule3: "Cel mai bun look din fiecare țară câștigă produse GEL.IT.UP de la echipa GEL.IT.UP din acea țară, iar cele mai bune look-uri per total câștigă premii internaționale în produse. Premiile sunt produse, nu bani.",
   kicker: 'Concurs',
   tagline: 'Încarcă look-ul tău · strânge inimi · câștigă',
   closesIn: 'Se închide în',
@@ -512,7 +567,6 @@ const ro = {
   howItWorks: 'Cum funcționează',
   rule1: 'Încarcă o fotografie cu unghii realizate de tine (până la {max} look-uri pe rundă). Oricine poate participa, indiferent ce produse folosește azi.',
   rule2: 'Comunitatea votează cu inimi. Fiecare rundă începe de la zero.',
-  rule3: 'Cel mai bun look din fiecare țară câștigă premii de la echipa GEL.IT.UP din acea țară, iar cele mai bune look-uri per total câștigă premii internaționale.',
   leading: 'Pe primul loc',
   tabNew: 'Noi',
   tabPopular: 'Populare',
@@ -602,6 +656,16 @@ const ro = {
 }
 
 const pl = {
+  requiredHeading: "Wymagane do udziału",
+  optionalHeading: "Opcjonalne",
+  adultOnly: "Mam ukończone 18 lat",
+  acceptRules: "Przeczytałam i akceptuję regulamin konkursu.",
+  readRules: "Przeczytaj regulamin",
+  publicConsent: "Zgadzam się, aby moja nazwa wyświetlana, nazwa użytkownika, Instagram, kraj, zdjęcia i opisy były publicznie pokazywane na stronach i w mediach społecznościowych GEL.IT.UP. Mój e-mail nigdy nie jest pokazywany.",
+  privacyNote: "Twoje dane są przetwarzane zgodnie z naszą polityką prywatności.",
+  privacyLink: "Polityka prywatności",
+  prizesProducts: "Nagrody w produktach GEL.IT.UP",
+  rule3: "Najlepsza stylizacja w każdym kraju wygrywa produkty GEL.IT.UP od zespołu GEL.IT.UP w tym kraju, a najlepsze stylizacje ogółem wygrywają międzynarodowe nagrody w produktach. Nagrody to produkty, nie pieniądze.",
   kicker: 'Konkurs',
   tagline: 'Dodaj swoją stylizację · zbieraj serca · wygrywaj',
   closesIn: 'Koniec za',
@@ -612,7 +676,6 @@ const pl = {
   howItWorks: 'Jak to działa',
   rule1: 'Dodaj zdjęcie paznokci, które wykonałaś (do {max} stylizacji na rundę). Może wziąć udział każdy, niezależnie od produktów, których dziś używa.',
   rule2: 'Społeczność głosuje sercami. Każda runda zaczyna się od zera.',
-  rule3: 'Najlepsza stylizacja w każdym kraju wygrywa nagrody od zespołu GEL.IT.UP w tym kraju, a najlepsze stylizacje ogółem wygrywają nagrody międzynarodowe.',
   leading: 'Prowadzi',
   tabNew: 'Nowe',
   tabPopular: 'Popularne',
@@ -702,6 +765,16 @@ const pl = {
 }
 
 const fr = {
+  requiredHeading: "Obligatoire pour participer",
+  optionalHeading: "Facultatif",
+  adultOnly: "J’ai 18 ans ou plus",
+  acceptRules: "J’ai lu et j’accepte le règlement du concours.",
+  readRules: "Lire le règlement",
+  publicConsent: "J’accepte que mon nom affiché, mon nom d’utilisateur, mon Instagram, mon pays, mes photos et mes légendes soient affichés publiquement sur les sites et réseaux sociaux GEL.IT.UP. Mon e-mail n’est jamais affiché.",
+  privacyNote: "Tes données sont traitées selon notre politique de confidentialité.",
+  privacyLink: "Politique de confidentialité",
+  prizesProducts: "Prix en produits GEL.IT.UP",
+  rule3: "Le meilleur look de chaque pays gagne des produits GEL.IT.UP offerts par l’équipe GEL.IT.UP du pays, et les meilleurs looks au classement général gagnent des prix internationaux en produits. Les prix sont des produits, pas de l’argent.",
   kicker: 'Concours',
   tagline: 'Publie ton look · récolte des cœurs · gagne',
   closesIn: 'Fin dans',
@@ -712,7 +785,6 @@ const fr = {
   howItWorks: 'Comment ça marche',
   rule1: 'Publie une photo d’ongles que tu as réalisés (jusqu’à {max} looks par manche). Tout le monde peut participer, quels que soient les produits utilisés aujourd’hui.',
   rule2: 'La communauté vote avec des cœurs. Chaque manche repart de zéro.',
-  rule3: 'Le meilleur look de chaque pays gagne des prix offerts par l’équipe GEL.IT.UP du pays, et les meilleurs looks au classement général gagnent des prix internationaux.',
   leading: 'En tête',
   tabNew: 'Nouveaux',
   tabPopular: 'Populaires',
@@ -802,6 +874,16 @@ const fr = {
 }
 
 const de = {
+  requiredHeading: "Erforderlich für die Teilnahme",
+  optionalHeading: "Optional",
+  adultOnly: "Ich bin mindestens 18 Jahre alt",
+  acceptRules: "Ich habe die Teilnahmebedingungen gelesen und akzeptiere sie.",
+  readRules: "Bedingungen lesen",
+  publicConsent: "Ich bin einverstanden, dass mein Anzeigename, Benutzername, Instagram, Land, meine Fotos und Beschreibungen öffentlich auf den Websites und Social-Media-Kanälen von GEL.IT.UP gezeigt werden. Meine E-Mail-Adresse wird nie angezeigt.",
+  privacyNote: "Deine Daten werden gemäß unserer Datenschutzerklärung verarbeitet.",
+  privacyLink: "Datenschutzerklärung",
+  prizesProducts: "Preise in GEL.IT.UP-Produkten",
+  rule3: "Der beste Look jedes Landes gewinnt GEL.IT.UP-Produkte vom GEL.IT.UP-Team dieses Landes, die besten Looks insgesamt gewinnen internationale Produktpreise. Die Preise sind Produkte, kein Bargeld.",
   kicker: 'Wettbewerb',
   tagline: 'Lade deinen Look hoch · sammle Herzen · gewinne',
   closesIn: 'Endet in',
@@ -812,7 +894,6 @@ const de = {
   howItWorks: 'So funktioniert’s',
   rule1: 'Lade ein Foto von Nägeln hoch, die du gestaltet hast (bis zu {max} Looks pro Runde). Jede kann mitmachen, egal welche Produkte sie heute verwendet.',
   rule2: 'Die Community stimmt mit Herzen ab. Jede Runde beginnt bei null.',
-  rule3: 'Der beste Look jedes Landes gewinnt Preise vom GEL.IT.UP-Team dieses Landes, die besten Looks insgesamt gewinnen internationale Preise.',
   leading: 'Führt',
   tabNew: 'Neu',
   tabPopular: 'Beliebt',
@@ -902,6 +983,16 @@ const de = {
 }
 
 const pt = {
+  requiredHeading: "Obrigatório para participar",
+  optionalHeading: "Opcional",
+  adultOnly: "Tenho 18 anos ou mais",
+  acceptRules: "Li e aceito o regulamento do concurso.",
+  readRules: "Ler o regulamento",
+  publicConsent: "Aceito que o meu nome de exibição, nome de utilizador, Instagram, país, fotos e legendas sejam mostrados publicamente nos sites e redes sociais da GEL.IT.UP. O meu email nunca é mostrado.",
+  privacyNote: "Os teus dados são tratados segundo a nossa política de privacidade.",
+  privacyLink: "Política de privacidade",
+  prizesProducts: "Prémios em produtos GEL.IT.UP",
+  rule3: "O melhor look de cada país ganha produtos GEL.IT.UP da equipa GEL.IT.UP desse país, e os melhores looks no geral ganham prémios internacionais em produtos. Os prémios são produtos, não dinheiro.",
   kicker: 'Concurso',
   tagline: 'Publica o teu look · recolhe corações · ganha',
   closesIn: 'Termina em',
@@ -912,7 +1003,6 @@ const pt = {
   howItWorks: 'Como funciona',
   rule1: 'Publica uma foto de unhas feitas por ti (até {max} looks por ronda). Todos podem participar, usem os produtos que usarem hoje.',
   rule2: 'A comunidade vota com corações. Cada ronda começa do zero.',
-  rule3: 'O melhor look de cada país ganha prémios da equipa GEL.IT.UP desse país, e os melhores looks no geral ganham prémios internacionais.',
   leading: 'Na frente',
   tabNew: 'Novos',
   tabPopular: 'Populares',
@@ -1002,6 +1092,16 @@ const pt = {
 }
 
 const hu = {
+  requiredHeading: "A részvételhez kötelező",
+  optionalHeading: "Nem kötelező",
+  adultOnly: "Elmúltam 18 éves",
+  acceptRules: "Elolvastam és elfogadom a versenyszabályzatot.",
+  readRules: "Szabályzat elolvasása",
+  publicConsent: "Hozzájárulok, hogy a megjelenített nevem, felhasználónevem, Instagramom, országom, fotóim és leírásaim nyilvánosan megjelenjenek a GEL.IT.UP weboldalain és közösségi médiájában. Az e-mail-címem soha nem jelenik meg.",
+  privacyNote: "Adataidat adatvédelmi szabályzatunk szerint kezeljük.",
+  privacyLink: "Adatvédelmi szabályzat",
+  prizesProducts: "Díjak GEL.IT.UP termékekben",
+  rule3: "Minden ország legjobb munkája GEL.IT.UP termékeket nyer az adott ország GEL.IT.UP csapatától, az összesítésben legjobbak pedig nemzetközi termékdíjat. A díjak termékek, nem készpénz.",
   kicker: 'Verseny',
   tagline: 'Töltsd fel a munkád · gyűjts szíveket · nyerj',
   closesIn: 'Zárás',
@@ -1012,7 +1112,6 @@ const hu = {
   howItWorks: 'Hogyan működik',
   rule1: 'Tölts fel egy fotót az általad készített körmökről (fordulónként legfeljebb {max} munka). Bárki indulhat, bármilyen terméket használ ma.',
   rule2: 'A közösség szívekkel szavaz. Minden forduló nulláról indul.',
-  rule3: 'Minden ország legjobb munkája az adott ország GEL.IT.UP csapatától nyer díjat, az összesítésben legjobbak pedig nemzetközi díjat nyernek.',
   leading: 'Vezet',
   tabNew: 'Új',
   tabPopular: 'Népszerű',

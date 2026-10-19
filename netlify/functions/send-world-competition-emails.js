@@ -61,12 +61,13 @@ function photoUrl(path) {
 
 function emailHtml({ lang, name, paragraphs, imagePath, button, unsubscribeToken }) {
   const unsubscribe = `${MAIN_SITE}/.netlify/functions/world-unsubscribe?t=${unsubscribeToken}`
-  return `<!doctype html><html><body style="margin:0;background:#f4f4f2">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f2"><tr><td align="center" style="padding:24px 12px">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:18px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;color:#1a1a1a">
-      <tr><td style="background:#111111;padding:22px 28px;text-align:center">
-        <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#bbbbbb">World of</div>
-        <div style="font-size:26px;font-weight:900;letter-spacing:1px;color:#e55aa9">GEL.IT.UP</div>
+  return `<!doctype html><html><body style="margin:0;background:#F8F8F6">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F8F8F6"><tr><td align="center" style="padding:24px 12px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:18px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;color:#1A1A1A;border:1px solid #E8E8E8">
+      <tr><td style="background:#D43790;height:6px;line-height:6px;font-size:0">&nbsp;</td></tr>
+      <tr><td style="background:#ffffff;padding:24px 28px 16px;text-align:center;border-bottom:1px solid #E8E8E8">
+        <img src="${MAIN_SITE}/NEW%20LOGO%202024-02.png" alt="GEL.IT.UP" height="48" style="display:inline-block;height:48px;width:auto">
+        <div style="margin-top:10px;font-size:13px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:#1A1A1A">World of <span style="color:#D43790">GEL.IT.UP</span></div>
       </td></tr>
       ${imagePath ? `<tr><td><img src="${escapeHtml(photoUrl(imagePath))}" alt="" width="560" style="display:block;width:100%;max-height:520px;object-fit:cover"></td></tr>` : ''}
       <tr><td style="padding:26px 28px 8px;font-size:15px;line-height:1.6">

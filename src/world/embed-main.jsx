@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './embed.css'
 import { hasWorldConfig } from './worldClient'
 import { makeT, WORLD_LANGS } from './i18n'
+import { detectWorldLang } from './lang'
 import { WORLD_SITE, countryName, flagEmoji } from './config'
 import { fetchCurrentRound, fetchEntries, fetchLeader } from './api'
 import { EntryCard, Hero, Tabs } from './components'
@@ -14,7 +15,9 @@ import { EntryCard, Hero, Tabs } from './components'
 
 const params = new URLSearchParams(window.location.search)
 const COUNTRY = /^[A-Z]{2}$/.test((params.get('country') || '').toUpperCase()) ? params.get('country').toUpperCase() : ''
-const LANG = WORLD_LANGS.includes(params.get('lang')) ? params.get('lang') : 'en'
+// Language follows the visitor's location; data-lang is only used when the location is unknown
+const SITE_LANG = WORLD_LANGS.includes(params.get('lang')) ? params.get('lang') : 'en'
+let LANG = 'en'
 const SRC = (params.get('src') || 'partner').toLowerCase().replace(/[^a-z0-9.-]/g, '').slice(0, 80)
 const LIMIT = Math.min(Math.max(parseInt(params.get('limit'), 10) || 9, 3), 24)
 const SHOW_HERO = params.get('hero') !== '0'
@@ -25,8 +28,8 @@ const link = (path, extra = {}) => {
   return `${WORLD_SITE}${path}?${qs.toString()}`
 }
 
-function EmbedApp() {
-  const t = useMemo(() => makeT(LANG), [])
+function EmbedApp({ lang }) {
+  const t = useMemo(() => makeT(lang), [lang])
   const [round, setRound] = useState(() => (hasWorldConfig ? undefined : null))
   const [scope, setScope] = useState(COUNTRY ? 'local' : 'global')
   const [sort, setSort] = useState('popular')
@@ -78,7 +81,7 @@ function EmbedApp() {
       {round && (
         <>
           {SHOW_HERO && (
-            <Hero compact round={round} lang={LANG} t={t} leader={leader} country={COUNTRY} uploadHref={link('/world/upload')} />
+            <Hero compact round={round} lang={lang} t={t} leader={leader} country={COUNTRY} uploadHref={link('/world/upload')} />
           )}
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <Tabs value={sort} onChange={setSort} tabs={[['popular', t('tabPopular')], ['new', t('tabNew')]]} />
@@ -116,8 +119,13 @@ function EmbedApp() {
   )
 }
 
-createRoot(document.getElementById('world-embed')).render(
-  <StrictMode>
-    <EmbedApp />
-  </StrictMode>,
-)
+detectWorldLang({ useExplicit: false, fallback: SITE_LANG })
+  .catch(() => ({ lang: SITE_LANG }))
+  .then(({ lang }) => {
+    LANG = lang
+    createRoot(document.getElementById('world-embed')).render(
+      <StrictMode>
+        <EmbedApp lang={lang} />
+      </StrictMode>,
+    )
+  })

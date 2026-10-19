@@ -10,6 +10,10 @@ export const WORLD_BUCKET = 'world-entries'
 export const COMPETITION_NAME = 'World of GEL.IT.UP'
 export const WINNER_TITLE = 'GEL.IT.UP Angel of the Month'
 
+// Version of the competition rules people accept at registration. Change it when
+// the rules change; everyone then re-accepts before their next entry or vote.
+export const RULES_VERSION = '2026-10'
+
 export const INSTAGRAM_TAG = '@gelitupinternational'
 export const HASHTAG = '#WorldOfGELITUP'
 

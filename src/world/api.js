@@ -165,6 +165,8 @@ export async function saveMyProfile(userId, profile, { isNew } = {}) {
     adult_confirmed: true,
     marketing_opt_in: Boolean(profile.marketing_opt_in),
     competition_emails_opt_in: Boolean(profile.competition_emails_opt_in),
+    public_display_consent: Boolean(profile.public_display_consent),
+    rules_version: profile.rules_version,
     preferred_lang: profile.preferred_lang || 'en',
   }
   if (isNew) row.signup_source = currentSourceSite()

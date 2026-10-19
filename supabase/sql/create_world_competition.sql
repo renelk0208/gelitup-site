@@ -37,8 +37,8 @@ create table if not exists public.world_rounds (
   description  jsonb not null default '{}'::jsonb,
   starts_at    timestamptz not null,
   ends_at      timestamptz not null,
-  prizes       jsonb not null default '["€300", "€100", "€50"]'::jsonb,  -- international prizes
-  local_prizes jsonb not null default '{}'::jsonb,         -- {"GR": ["€300","€100","€50"], "BG": [...]} — paid by that country
+  prizes       jsonb not null default '["€300", "€100", "€50"]'::jsonb,  -- international prizes: value of GEL.IT.UP products (no cash)
+  local_prizes jsonb not null default '{}'::jsonb,         -- {"GR": ["€300","€100","€50"]} — products provided by that country's distributor
   max_entries_per_user int not null default 3,
   is_published boolean not null default true,
   constraint world_rounds_dates check (ends_at > starts_at)
@@ -66,7 +66,11 @@ create table if not exists public.world_profiles (
   instagram        text check (instagram is null or instagram ~ '^[A-Za-z0-9._]{1,30}$'),
   country          char(2) not null check (country ~ '^[A-Z]{2}$'),
   adult_confirmed  boolean not null default false check (adult_confirmed),
-  terms_accepted_at timestamptz not null default now(),
+  -- Registration consents (all required to enter or vote)
+  rules_version    text not null,                             -- version of the competition rules accepted
+  terms_accepted_at timestamptz not null default now(),       -- when that version was accepted
+  public_display_consent boolean not null default false check (public_display_consent),
+  public_display_consent_at timestamptz not null default now(),
   marketing_opt_in boolean not null default false,
   -- Consent to automatic competition emails (entry live, progress, final call,
   -- results, new rounds). Unticked by default; the time of consent is recorded.
@@ -107,6 +111,8 @@ begin
       new.user_id := old.user_id;
     end if;
     new.email_unsubscribe_token := old.email_unsubscribe_token;
+    new.terms_accepted_at := case when new.rules_version is distinct from old.rules_version then now() else old.terms_accepted_at end;
+    new.public_display_consent_at := old.public_display_consent_at;
     if new.competition_emails_opt_in and not old.competition_emails_opt_in then
       new.competition_emails_consent_at := now();
     elsif not new.competition_emails_opt_in then
@@ -117,6 +123,8 @@ begin
   else
     new.competition_emails_consent_at := case when new.competition_emails_opt_in then now() else null end;
     new.email_unsubscribe_token := gen_random_uuid();
+    new.terms_accepted_at := now();
+    new.public_display_consent_at := now();
   end if;
   return new;
 end $$;
@@ -274,6 +282,10 @@ declare
 begin
   select * into e from public.world_entries where id = new.entry_id;
   if e.id is null or e.status <> 'published' then raise exception 'ENTRY_UNAVAILABLE'; end if;
+  -- Only registered people (profile with accepted rules and consents) can vote
+  if not exists (select 1 from public.world_profiles where user_id = new.user_id and not is_banned) then
+    raise exception 'PROFILE_REQUIRED';
+  end if;
   select * into r from public.world_rounds where id = e.round_id;
   if now() >= r.ends_at then raise exception 'ROUND_CLOSED'; end if;
   -- Light anti-abuse: max 60 hearts per account per hour

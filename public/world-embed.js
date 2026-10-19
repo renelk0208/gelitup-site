@@ -8,7 +8,8 @@
  *
  * Options (all optional) on the div:
  *   data-country  two-letter country code: shows that country's looks first (e.g. GR, BG, IT, ES)
- *   data-lang     en, el, bg, it, es, ro, pl, fr, de, pt, hu
+ *   data-lang     fallback language (en, el, bg, …) if the visitor's location can't be detected;
+ *                 normally the widget shows the language of the visitor's location, English otherwise
  *   data-limit    number of looks to show (3–24, default 9)
  *   data-hero     "0" to hide the big competition banner
  *
@@ -27,7 +28,7 @@
     var qs = new URLSearchParams()
     var country = (host.getAttribute('data-country') || '').toUpperCase()
     if (/^[A-Z]{2}$/.test(country)) qs.set('country', country)
-    var lang = host.getAttribute('data-lang') || (document.documentElement.lang || '').slice(0, 2).toLowerCase()
+    var lang = host.getAttribute('data-lang') // only used when the visitor's location is unknown
     if (lang) qs.set('lang', lang)
     var limit = host.getAttribute('data-limit')
     if (limit) qs.set('limit', limit)

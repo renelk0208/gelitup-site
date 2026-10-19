@@ -1,10 +1,10 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { useLang } from '../lib/i18n.js'
 import { hasWorldConfig } from '../world/worldClient'
-import { makeT, localized, WORLD_LANGS } from '../world/i18n'
+import { makeT, localized } from '../world/i18n'
+import { detectWorldLang } from '../world/lang'
 import {
-  COMPETITION_NAME, HASHTAG, INSTAGRAM_TAG, LANG_DEFAULT_COUNTRY, WINNER_TITLE,
+  COMPETITION_NAME, HASHTAG, INSTAGRAM_TAG, LANG_DEFAULT_COUNTRY, RULES_VERSION, WINNER_TITLE,
   countryName, flagEmoji, productShopLink, shopFor,
 } from '../world/config'
 import * as api from '../world/api'
@@ -124,13 +124,15 @@ function suggestHandle(name, email) {
   return base.slice(0, 24) || ''
 }
 
-function ProfileForm({ t, lang, user, profile, onSaved }) {
+function ProfileForm({ t, lang, visitorCountry, user, profile, onSaved }) {
   const [form, setForm] = useState(() => ({
     display_name: profile?.display_name || user?.user_metadata?.full_name || '',
     handle: profile?.handle || '',
     instagram: profile?.instagram || '',
-    country: profile?.country || LANG_DEFAULT_COUNTRY[lang] || '',
+    country: profile?.country || visitorCountry || LANG_DEFAULT_COUNTRY[lang] || '',
     adult: Boolean(profile),
+    rules: Boolean(profile && profile.rules_version === RULES_VERSION),
+    publicConsent: Boolean(profile?.public_display_consent),
     competition_emails_opt_in: profile ? Boolean(profile.competition_emails_opt_in) : false,
     marketing_opt_in: profile ? Boolean(profile.marketing_opt_in) : false,
   }))
@@ -139,7 +141,7 @@ function ProfileForm({ t, lang, user, profile, onSaved }) {
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const handleValid = /^[a-z0-9._]{2,30}$/.test(form.handle)
-  const canSave = form.display_name.trim().length >= 2 && handleValid && form.country && form.adult
+  const canSave = form.display_name.trim().length >= 2 && handleValid && form.country && form.adult && form.rules && form.publicConsent
 
   const submit = async (e) => {
     e.preventDefault()
@@ -153,6 +155,8 @@ function ProfileForm({ t, lang, user, profile, onSaved }) {
         country: form.country,
         competition_emails_opt_in: form.competition_emails_opt_in,
         marketing_opt_in: form.marketing_opt_in,
+        public_display_consent: form.publicConsent,
+        rules_version: RULES_VERSION,
         preferred_lang: lang,
       }, { isNew: !profile })
       onSaved(saved)
@@ -193,22 +197,40 @@ function ProfileForm({ t, lang, user, profile, onSaved }) {
         <CountrySelect value={form.country} onChange={v => set('country', v)} t={t} includeAll={false} className="mt-1 w-full py-2.5" />
       </label>
 
-      <div className="mt-5 space-y-3 rounded-2xl bg-neutral-50 p-4">
-        <label className="flex items-start gap-3 text-sm text-neutral-800">
-          <input type="checkbox" required checked={form.adult} onChange={e => set('adult', e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#D43790]" />
-          <span>
-            {t('adult')}{' '}
-            <Link to="/world/terms" target="_blank" className="text-[#D43790] underline">({t('termsLink')})</Link>
-          </span>
-        </label>
-        <label className="flex items-start gap-3 text-sm text-neutral-800">
-          <input type="checkbox" checked={form.competition_emails_opt_in} onChange={e => set('competition_emails_opt_in', e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#D43790]" />
-          <span>{t('emailsOptIn')}</span>
-        </label>
-        <label className="flex items-start gap-3 text-sm text-neutral-800">
-          <input type="checkbox" checked={form.marketing_opt_in} onChange={e => set('marketing_opt_in', e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#D43790]" />
-          <span>{t('marketingOptIn')}</span>
-        </label>
+      <div className="mt-5 rounded-2xl border border-[#E8E8E8] bg-[#F8F8F6] p-4">
+        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#1A1A1A]">{t('requiredHeading')}</p>
+        <div className="mt-3 space-y-3">
+          <label className="flex items-start gap-3 text-sm text-[#1A1A1A]">
+            <input type="checkbox" required checked={form.adult} onChange={e => set('adult', e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#D43790]" />
+            <span>{t('adultOnly')}</span>
+          </label>
+          <label className="flex items-start gap-3 text-sm text-[#1A1A1A]">
+            <input type="checkbox" required checked={form.rules} onChange={e => set('rules', e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#D43790]" />
+            <span>
+              {t('acceptRules')}{' '}
+              <Link to="/world/rules" target="_blank" className="font-semibold text-[#D43790] underline">{t('readRules')}</Link>
+            </span>
+          </label>
+          <label className="flex items-start gap-3 text-sm text-[#1A1A1A]">
+            <input type="checkbox" required checked={form.publicConsent} onChange={e => set('publicConsent', e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#D43790]" />
+            <span>{t('publicConsent')}</span>
+          </label>
+        </div>
+        <p className="mt-4 border-t border-[#E8E8E8] pt-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[#1A1A1A]">{t('optionalHeading')}</p>
+        <div className="mt-3 space-y-3">
+          <label className="flex items-start gap-3 text-sm text-[#4A4A4A]">
+            <input type="checkbox" checked={form.competition_emails_opt_in} onChange={e => set('competition_emails_opt_in', e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#D43790]" />
+            <span>{t('emailsOptIn')}</span>
+          </label>
+          <label className="flex items-start gap-3 text-sm text-[#4A4A4A]">
+            <input type="checkbox" checked={form.marketing_opt_in} onChange={e => set('marketing_opt_in', e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#D43790]" />
+            <span>{t('marketingOptIn')}</span>
+          </label>
+        </div>
+        <p className="mt-3 text-[11px] leading-relaxed text-[#4A4A4A]">
+          {t('privacyNote')}{' '}
+          <Link to="/privacy-policy" target="_blank" className="underline">{t('privacyLink')}</Link>
+        </p>
       </div>
 
       {err && <p className="mt-3 text-xs text-rose-600">{err}</p>}
@@ -217,30 +239,36 @@ function ProfileForm({ t, lang, user, profile, onSaved }) {
   )
 }
 
-/** Opens sign-in, then profile setup, then runs `then` once both are done. */
-function useGate(account, t, lang) {
+/** Registered = signed in, profile saved, current rules and public-display consent accepted. */
+function isRegistered(account) {
+  const p = account.profile
+  return Boolean(account.user && p && p.rules_version === RULES_VERSION && p.public_display_consent)
+}
+
+/** Opens sign-in, then registration, then runs `then` once both are done. */
+function useGate(account, t, lang, visitorCountry) {
   const [gate, setGate] = useState(null) // { next, then }
   const location = useLocation()
 
   const require = useCallback((then, next) => {
-    if (account.user && account.profile) { then?.(); return }
+    if (isRegistered(account)) { then?.(); return }
     setGate({ then, next: next || location.pathname + location.search })
-  }, [account.user, account.profile, location.pathname, location.search])
+  }, [account, location.pathname, location.search])
 
   // Finish the gate as soon as the person is signed in with a profile
   useEffect(() => {
-    if (gate && account.user && account.profile) {
+    if (gate && isRegistered(account)) {
       const fn = gate.then
       setGate(null)
       fn?.()
     }
-  }, [gate, account.user, account.profile])
+  }, [gate, account])
 
   const modal = gate ? (
     <Modal onClose={() => setGate(null)}>
       {!account.user
         ? <SignInForm t={t} nextPath={gate.next} />
-        : <ProfileForm t={t} lang={lang} user={account.user} profile={account.profile} onSaved={account.setProfile} />}
+        : <ProfileForm t={t} lang={lang} visitorCountry={visitorCountry} user={account.user} profile={account.profile} onSaved={account.setProfile} />}
     </Modal>
   ) : null
 
@@ -264,7 +292,7 @@ function AccountBar({ account, t, onEditProfile }) {
   }
   return (
     <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-xs text-neutral-600">
-      {p ? (
+      {isRegistered(account) ? (
         <Link to={`/world/u/${p.handle}`} className="inline-flex items-center gap-2 font-semibold text-neutral-900">
           <Avatar name={p.display_name} className="h-6 w-6 text-[9px]" /> @{p.handle}
         </Link>
@@ -510,7 +538,7 @@ function ShareBox({ t, entry, isOwner }) {
   ]
   const nativeShare = typeof navigator !== 'undefined' && navigator.share
   return (
-    <div className="rounded-2xl border border-[#D43790]/30 bg-[#D43790]/5 p-4">
+    <div className="rounded-2xl border border-[#E8E8E8] bg-[#F8F8F6] p-4">
       <p className="text-xs font-black uppercase tracking-[0.16em] text-[#D43790]">{isOwner ? t('voteForMe') : t('share')}</p>
       {isOwner && <p className="mt-1 text-sm text-neutral-700">{t('shareNudge')}</p>}
       <div className="mt-3 flex flex-wrap gap-2">
@@ -620,7 +648,7 @@ function EntryPage({ ctx }) {
       {justPosted && <p className="mt-3 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">{t('success')}</p>}
       <div className="mt-4 grid gap-6 md:grid-cols-[1.15fr_1fr]">
         <div>
-          <div className="overflow-hidden rounded-3xl bg-neutral-100 shadow-[0_20px_60px_rgba(212,55,144,0.18)]">
+          <div className="overflow-hidden rounded-3xl border border-[#E8E8E8] bg-[#F8F8F6]">
             <img src={api.imageUrl(entry.image_path)} alt={entry.caption || ''} className="w-full object-cover" />
           </div>
         </div>
@@ -680,7 +708,7 @@ function UploadPage({ ctx }) {
   useEffect(() => { loadProducts().then(setAllProducts) }, [])
   useEffect(() => {
     if (!account.ready) return
-    if (!account.user || !account.profile) gate.require(null, '/world/upload')
+    if (!isRegistered(account)) gate.require(null, '/world/upload')
   }, [account.ready, account.user, account.profile]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (account.user && round) api.countMyEntries(account.user.id, round.id).then(setUsed)
@@ -765,7 +793,7 @@ function UploadPage({ ctx }) {
 
       <p className="mt-5 text-xs leading-relaxed text-neutral-500">{t('photoRights')}</p>
       {err && <p className="mt-3 text-sm text-rose-600">{err}</p>}
-      <button type="submit" disabled={busy || !file || !left || !account.profile} className={`${btnPrimary} mt-4`}>
+      <button type="submit" disabled={busy || !file || !left || !isRegistered(account)} className={`${btnPrimary} mt-4`}>
         {busy ? t('submitting') : t('submit')}
       </button>
     </form>
@@ -824,23 +852,65 @@ function CreatorPage({ ctx }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Terms (English master text; country teams add local prize details)
+// Competition rules (English master text — accepted at registration).
+// Bump RULES_VERSION in world/config.js when these change: everyone is asked
+// to accept the new version before their next entry or vote.
 // ─────────────────────────────────────────────────────────────────────────────
-function TermsPage() {
+function RulesPage() {
+  const h = 'mt-6 text-sm font-black uppercase tracking-[0.14em] text-[#1A1A1A]'
   return (
-    <article className="prose prose-sm mx-auto max-w-2xl text-neutral-700">
-      <Link to="/world" className="text-[11px] font-bold uppercase tracking-[0.16em] text-neutral-500 no-underline hover:text-neutral-900">← {COMPETITION_NAME}</Link>
-      <h1 className="mt-3 text-2xl font-black text-neutral-900">{COMPETITION_NAME}: competition terms</h1>
-      <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm">
-        <li>The competition is organised by GEL.IT.UP International (Thermitek Ltd). Local prizes are provided and fulfilled by the GEL.IT.UP distributor in the winner’s country; international prizes by GEL.IT.UP International.</li>
-        <li>Entrants must be 18 or older. Anyone may enter, whether or not they currently use GEL.IT.UP products.</li>
-        <li>Each entrant may upload up to the number of looks shown for the round. Entries must be the entrant’s own work and own photograph, and must not show other people’s faces without their consent.</li>
-        <li>Votes are cast with one heart per account per look. Accounts or votes that appear automated, bought or otherwise manipulated may be removed, and the related entries disqualified.</li>
-        <li>Winners are the looks with the most hearts when the round closes: the top look per country (local prize) and the top looks overall (international prizes). Winners are contacted by email and announced on GEL.IT.UP channels.</li>
-        <li>By publishing, the entrant allows GEL.IT.UP and its official distributors to show the photo, name and Instagram handle on their websites and social media, with credit, for promotion of the competition and the brand.</li>
-        <li>GEL.IT.UP may hide or remove entries that break these terms or that are inappropriate.</li>
-        <li>Competition emails are only sent to people who opted in, and every email contains an unsubscribe link. Personal data is handled under the GEL.IT.UP <Link to="/privacy-policy">privacy policy</Link>.</li>
-      </ol>
+    <article className="mx-auto max-w-2xl text-sm leading-relaxed text-[#4A4A4A]">
+      <Link to="/world" className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#4A4A4A] hover:text-[#1A1A1A]">← {COMPETITION_NAME}</Link>
+      <h1 className="mt-3 text-2xl font-black uppercase tracking-[0.1em] text-[#1A1A1A]">Competition rules</h1>
+      <p className="mt-1 text-xs">{COMPETITION_NAME} · version {RULES_VERSION}</p>
+
+      <h2 className={h}>1. Organiser</h2>
+      <p className="mt-2">The competition is organised by GEL.IT.UP International (Thermitek Ltd). Official GEL.IT.UP distributors take part for their own countries and may show the competition on their websites.</p>
+
+      <h2 className={h}>2. Who can enter</h2>
+      <ul className="mt-2 list-disc space-y-1 pl-5">
+        <li>Entrants must be 18 or older and must register with a valid email address.</li>
+        <li>Entry is free and open to nail professionals and students worldwide, whether or not they currently use GEL.IT.UP products.</li>
+        <li>One account per person. Employees of GEL.IT.UP and of its official distributors may enter but cannot win prizes.</li>
+      </ul>
+
+      <h2 className={h}>3. How to enter</h2>
+      <ul className="mt-2 list-disc space-y-1 pl-5">
+        <li>Register, accept these rules, and upload a photo of a nail look during an open round. Each round has a theme and a maximum number of looks per person, shown on the competition page.</li>
+        <li>The look and the photo must be your own work. Photos must not be edited in a way that misrepresents the work, must not show another person’s face without their consent, and must not include other brands’ logos or offensive content.</li>
+        <li>By entering, you confirm you have the right to publish the photo.</li>
+      </ul>
+
+      <h2 className={h}>4. What is shown publicly</h2>
+      <p className="mt-2">Your display name, username, Instagram handle (if given), country, uploaded photos, captions, the products you tag and your number of hearts are shown publicly on gelitup.com and on official GEL.IT.UP websites and social media, with credit to you. Your email address is never shown.</p>
+
+      <h2 className={h}>5. Voting</h2>
+      <ul className="mt-2 list-disc space-y-1 pl-5">
+        <li>Registered visitors vote with one heart per look. Hearts reset to zero each round.</li>
+        <li>Buying votes, automated voting, multiple accounts or any other manipulation leads to removal of the votes and disqualification of the related entries.</li>
+      </ul>
+
+      <h2 className={h}>6. Winners</h2>
+      <ul className="mt-2 list-disc space-y-1 pl-5">
+        <li>When the round closes, the look with the most hearts in each country wins that country’s prize, and the looks with the most hearts overall win the international prizes. In a tie, the look that reached the total first wins.</li>
+        <li>GEL.IT.UP checks every winning entry against these rules before announcing it. Winners are contacted by email and must reply within 14 days, or the prize passes to the next entry.</li>
+      </ul>
+
+      <h2 className={h}>7. Prizes</h2>
+      <ul className="mt-2 list-disc space-y-1 pl-5">
+        <li>Prizes are GEL.IT.UP products, chosen from the stock available on the GEL.IT.UP website, up to the value shown for the round. Values refer to website retail prices.</li>
+        <li>Prizes are not paid in cash, cannot be exchanged for money and cannot be transferred.</li>
+        <li>Country prizes are provided and shipped by the official GEL.IT.UP distributor in the winner’s country; international prizes and prizes for countries without a distributor are provided by GEL.IT.UP International. Shipping to the winner is free.</li>
+      </ul>
+
+      <h2 className={h}>8. Removal of entries</h2>
+      <p className="mt-2">GEL.IT.UP may hide or remove entries, and close accounts, that break these rules or are inappropriate. You can delete your own looks at any time while a round is open.</p>
+
+      <h2 className={h}>9. Emails and personal data</h2>
+      <p className="mt-2">Competition emails are only sent to people who opt in, and every email has an unsubscribe link. Personal data is handled under the GEL.IT.UP <Link to="/privacy-policy" className="text-[#D43790] underline">privacy policy</Link>. To have your account and entries deleted, email ambassadors@gelitup.com.</p>
+
+      <h2 className={h}>10. Changes</h2>
+      <p className="mt-2">GEL.IT.UP may update these rules for future rounds. If the rules change, you will be asked to accept the new version before your next entry or vote.</p>
     </article>
   )
 }
@@ -849,20 +919,19 @@ function TermsPage() {
 // Root
 // ─────────────────────────────────────────────────────────────────────────────
 export default function WorldPage() {
-  const siteLang = useLang()
-  // Visitors arriving from a country site's widget carry ?lang=xx
-  const [lang] = useState(() => {
-    const q = new URLSearchParams(window.location.search).get('lang')
-    return q && WORLD_LANGS.includes(q) ? q : siteLang
-  })
+  // English by default; the visitor's language comes from their location
+  // (or from a language they picked with the site switcher / ?lang= in the link).
+  const [geo, setGeo] = useState(null) // { lang, country }
+  const lang = geo?.lang || 'en'
   const t = useMemo(() => makeT(lang), [lang])
   const navigate = useNavigate()
   const account = useWorldAccount()
-  const gate = useGate(account, t, lang)
+  const gate = useGate(account, t, lang, geo?.country || "")
   const voting = useVoting(account, gate, t)
   const [round, setRound] = useState(() => (hasWorldConfig ? undefined : null))
 
   useEffect(() => { api.currentSourceSite() }, []) // remember ?src= for vote/entry attribution
+  useEffect(() => { detectWorldLang().then(setGeo).catch(() => setGeo({ lang: 'en', country: '' })) }, [])
   useEffect(() => {
     if (!hasWorldConfig) return
     api.fetchCurrentRound().then(setRound).catch(() => setRound(null))
@@ -870,15 +939,16 @@ export default function WorldPage() {
   useEffect(() => { document.title = `${COMPETITION_NAME} | GEL.IT.UP` }, [])
 
   if (!hasWorldConfig) return <p className="py-20 text-center text-sm text-neutral-500">{t('setupMissing')}</p>
-  if (round === undefined) return <p className="py-20 text-center text-sm text-neutral-400">…</p>
+  if (round === undefined || !geo) return <p className="py-20 text-center text-sm text-neutral-400">…</p>
 
-  const ctx = { t, lang, account, gate, voting, round, navigate }
+  const ctx = { t, lang, visitorCountry: geo.country, account, gate, voting, round, navigate }
   return (
     <div className="pb-10">
       <Routes>
         <Route index element={<Feed ctx={ctx} />} />
         <Route path="upload" element={<UploadPage ctx={ctx} />} />
-        <Route path="terms" element={<TermsPage />} />
+        <Route path="rules" element={<RulesPage />} />
+        <Route path="terms" element={<RulesPage />} />
         <Route path="u/:handle" element={<CreatorPage ctx={ctx} />} />
         <Route path="admin" element={<Suspense fallback={null}><WorldAdmin /></Suspense>} />
         <Route path=":entryId" element={<EntryPage ctx={ctx} />} />
