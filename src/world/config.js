@@ -3,6 +3,11 @@
 
 export const WORLD_SITE = 'https://gelitup.com'
 export const WORLD_BASE_PATH = '/world'
+
+// LAUNCH SWITCH. While false, the competition (pages and widget) is only visible
+// to GEL.IT.UP admins logged in through the portal admin login; everyone else
+// sees a "coming soon" message. Set to true to go public.
+export const WORLD_PUBLIC = false
 export const WORLD_BUCKET = 'world-entries'
 
 // Names shown on the page. "Angel" naming is pending alignment with GEL.IT.UP Bulgaria

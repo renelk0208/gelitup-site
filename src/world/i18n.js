@@ -2,6 +2,7 @@
 // Placeholders: {max} {n} {name} {email} {shop}
 
 const en = {
+  comingSoon: "Coming soon.",
   usedProductsQ: "Did you use GEL.IT.UP products for this look? (bought or received as an ambassador)",
   yes: "Yes",
   no: "No",
@@ -136,6 +137,7 @@ const en = {
 }
 
 const el = {
+  comingSoon: "Έρχεται σύντομα.",
   usedProductsQ: "Χρησιμοποίησες προϊόντα GEL.IT.UP για αυτό το look; (αγορασμένα ή ως ambassador)",
   yes: "Ναι",
   no: "Όχι",
@@ -270,6 +272,7 @@ const el = {
 }
 
 const bg = {
+  comingSoon: "Очаквайте скоро.",
   usedProductsQ: "Използва ли продукти GEL.IT.UP за този дизайн? (купени или получени като амбасадор)",
   yes: "Да",
   no: "Не",
@@ -404,6 +407,7 @@ const bg = {
 }
 
 const it = {
+  comingSoon: "In arrivo.",
   usedProductsQ: "Hai usato prodotti GEL.IT.UP per questo look? (acquistati o ricevuti come ambassador)",
   yes: "Sì",
   no: "No",
@@ -538,6 +542,7 @@ const it = {
 }
 
 const es = {
+  comingSoon: "Muy pronto.",
   usedProductsQ: "¿Usaste productos GEL.IT.UP en este look? (comprados o recibidos como embajadora)",
   yes: "Sí",
   no: "No",
@@ -672,6 +677,7 @@ const es = {
 }
 
 const ro = {
+  comingSoon: "În curând.",
   usedProductsQ: "Ai folosit produse GEL.IT.UP pentru acest look? (cumpărate sau primite ca ambasador)",
   yes: "Da",
   no: "Nu",
@@ -806,6 +812,7 @@ const ro = {
 }
 
 const pl = {
+  comingSoon: "Już wkrótce.",
   usedProductsQ: "Czy użyłaś produktów GEL.IT.UP w tej stylizacji? (kupionych lub otrzymanych jako ambasadorka)",
   yes: "Tak",
   no: "Nie",
@@ -940,6 +947,7 @@ const pl = {
 }
 
 const fr = {
+  comingSoon: "Bientôt disponible.",
   usedProductsQ: "As-tu utilisé des produits GEL.IT.UP pour ce look ? (achetés ou reçus en tant qu’ambassadrice)",
   yes: "Oui",
   no: "Non",
@@ -1074,6 +1082,7 @@ const fr = {
 }
 
 const de = {
+  comingSoon: "Demnächst.",
   usedProductsQ: "Hast du für diesen Look GEL.IT.UP-Produkte verwendet? (gekauft oder als Ambassador erhalten)",
   yes: "Ja",
   no: "Nein",
@@ -1208,6 +1217,7 @@ const de = {
 }
 
 const pt = {
+  comingSoon: "Em breve.",
   usedProductsQ: "Usaste produtos GEL.IT.UP neste look? (comprados ou recebidos como embaixadora)",
   yes: "Sim",
   no: "Não",
@@ -1342,6 +1352,7 @@ const pt = {
 }
 
 const hu = {
+  comingSoon: "Hamarosan.",
   usedProductsQ: "Használtál GEL.IT.UP termékeket ehhez a munkához? (vásárolt vagy nagykövetként kapott)",
   yes: "Igen",
   no: "Nem",

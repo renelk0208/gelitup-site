@@ -4,6 +4,7 @@ import { hasWorldConfig } from '../world/worldClient'
 import { makeT, localized } from '../world/i18n'
 import { detectWorldLang } from '../world/lang'
 import { rulesFor } from '../world/rules'
+import { canSeeWorld } from '../world/access'
 import {
   COMPETITION_NAME, HASHTAG, INSTAGRAM_TAG, LANG_DEFAULT_COUNTRY, RULES_VERSION, WINNER_TITLE,
   countryName, flagEmoji, productShopLink, shopFor,
@@ -968,6 +969,8 @@ export default function WorldPage() {
   const voting = useVoting(account, gate, t)
   const [round, setRound] = useState(() => (hasWorldConfig ? undefined : null))
 
+  const [access, setAccess] = useState(null) // { allowed, preview }
+  useEffect(() => { canSeeWorld().then(setAccess) }, [])
   useEffect(() => { api.currentSourceSite() }, []) // remember ?src= for vote/entry attribution
   useEffect(() => { detectWorldLang().then(setGeo).catch(() => setGeo({ lang: 'en', country: '' })) }, [])
   useEffect(() => {
@@ -977,11 +980,25 @@ export default function WorldPage() {
   useEffect(() => { document.title = `${COMPETITION_NAME} | GEL.IT.UP` }, [])
 
   if (!hasWorldConfig) return <p className="py-20 text-center text-sm text-neutral-500">{t('setupMissing')}</p>
-  if (round === undefined || !geo) return <p className="py-20 text-center text-sm text-neutral-400">…</p>
+  if (round === undefined || !geo || !access) return <p className="py-20 text-center text-sm text-neutral-400">…</p>
+  if (!access.allowed) {
+    return (
+      <div className="mx-auto max-w-md py-24 text-center">
+        <img src="/NEW%20LOGO%202024-02.png" alt="GEL.IT.UP" className="mx-auto h-14 w-auto" />
+        <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-[#1A1A1A]">{COMPETITION_NAME}</p>
+        <p className="mt-2 text-sm text-[#4A4A4A]">{t('comingSoon')}</p>
+      </div>
+    )
+  }
 
   const ctx = { t, lang, visitorCountry: geo.country, account, gate, voting, round, navigate }
   return (
     <div className="pb-10">
+      {access.preview && (
+        <p className="mb-4 rounded-xl bg-[#1A1A1A] px-4 py-2 text-center text-xs font-bold uppercase tracking-[0.14em] text-white">
+          Hidden preview · only GEL.IT.UP admins can see this page
+        </p>
+      )}
       <Routes>
         <Route index element={<Feed ctx={ctx} />} />
         <Route path="upload" element={<UploadPage ctx={ctx} />} />

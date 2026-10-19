@@ -4,6 +4,7 @@ import './embed.css'
 import { hasWorldConfig } from './worldClient'
 import { makeT, WORLD_LANGS } from './i18n'
 import { detectWorldLang } from './lang'
+import { canSeeWorld } from './access'
 import { WORLD_SITE, countryName, flagEmoji } from './config'
 import { fetchCurrentRound, fetchEntries, fetchLeader } from './api'
 import { EntryCard, Hero, Tabs } from './components'
@@ -119,9 +120,16 @@ function EmbedApp({ lang }) {
   )
 }
 
-detectWorldLang({ useExplicit: false, fallback: SITE_LANG })
-  .catch(() => ({ lang: SITE_LANG }))
-  .then(({ lang }) => {
+Promise.all([
+  detectWorldLang({ useExplicit: false, fallback: SITE_LANG }).catch(() => ({ lang: SITE_LANG })),
+  canSeeWorld(),
+])
+  .then(([{ lang }, access]) => {
+    // Before launch the widget shows nothing (except to admins) and takes no space
+    if (!access.allowed) {
+      try { window.parent.postMessage({ type: 'gelitup-world:height', height: 0 }, '*') } catch { /* ignore */ }
+      return
+    }
     LANG = lang
     createRoot(document.getElementById('world-embed')).render(
       <StrictMode>

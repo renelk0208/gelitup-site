@@ -47,7 +47,7 @@
       if (ev.origin !== ORIGIN || ev.source !== iframe.contentWindow) return
       var d = ev.data
       if (d && d.type === 'gelitup-world:height' && typeof d.height === 'number') {
-        iframe.style.height = Math.max(200, Math.min(d.height + 4, 20000)) + 'px'
+        iframe.style.height = (d.height === 0 ? 0 : Math.max(200, Math.min(d.height + 4, 20000))) + 'px'
         iframe.style.minHeight = '0'
       }
     })

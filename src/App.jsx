@@ -7396,7 +7396,6 @@ const navItems = [
   { to: '/work-with-us', label: 'Work With Us' },
   { to: '/pages/contact-us', label: 'Contact us' },
   { to: '/inspiration', label: 'Inspiration', mobileOnly: true },
-  { to: '/world', label: 'World of GEL.IT.UP', mobileOnly: true },
 ]
 
 const sortHamburgerMenuItems = (items) => [...items].sort((left, right) => left.label.localeCompare(right.label, undefined, { sensitivity: 'base' }))
@@ -7537,17 +7536,6 @@ function Nav() {
         }
       >
         Blog
-      </NavLink>
-
-      <NavLink
-        to="/world"
-        className={({ isActive }) =>
-          `rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] transition duration-300 ${
-            isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
-          }`
-        }
-      >
-        World
       </NavLink>
 
       <NavLink
