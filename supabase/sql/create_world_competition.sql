@@ -1,8 +1,7 @@
 -- ─────────────────────────────────────────────────────────────────────────────
 -- World of GEL.IT.UP — international nail-look competition
 --
--- Run once in the Supabase SQL Editor (already applied to production on
--- 2026-10-19 as migration "create_world_competition").
+-- Applied to production as migration "create_world_competition".
 --
 -- Tables
 --   world_rounds    one row per competition round (monthly / themed)
@@ -10,6 +9,13 @@
 --   world_entries   uploaded nail looks (photo in storage bucket world-entries)
 --   world_votes     one heart per account per entry
 --   world_reports   "report this photo" flags for moderation
+--   world_wildcards jury wildcards: looks from outside the top 10 sent to the final
+--   world_placements the jury's 1st/2nd/3rd place per round (the month's GEL.IT.UP Icons)
+--
+-- How a round is decided: new looks wait for admin approval (status 'pending').
+-- When the round closes, the top 10 approved looks by hearts plus up to 2 jury
+-- wildcards form the final, and the jury chooses 1st, 2nd and 3rd place.
+-- Wildcards and placings stay private until the admin publishes them.
 --
 -- Community accounts are ordinary Supabase auth users, but they only get
 -- B2B portal access if they also have a b2b_registrations row — so this
@@ -40,7 +46,15 @@ create table if not exists public.world_rounds (
   prizes       jsonb not null default '["€1000", "€500", "€300"]'::jsonb, -- 1st/2nd/3rd: value of GEL.IT.UP products (no cash)
   local_prizes jsonb not null default '{}'::jsonb,         -- {"GR": ["€300","€100","€50"]} — products provided by that country's distributor
   max_entries_per_user int not null default 3,
+  -- Countries whose residents may enter: the EU plus the non-EU European countries
+  -- listed on gelitup.com. Anyone, anywhere, can register and vote.
+  eligible_countries text[] not null default array['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','AL','AD','BY','BA','GE','IS','XK','LI','MD','MC','ME','MK','NO','SM','RS','CH','TR','UA','GB','VA'],
   is_published boolean not null default true,
+  icon_month   date,                                      -- month the winners are named for ("GEL.IT.UP Icons of November 2026")
+  finalists    int not null default 10 check (finalists between 1 and 50), -- looks with the most hearts that reach the final
+  max_wildcards int not null default 2 check (max_wildcards between 0 and 10),
+  wildcards_published boolean not null default false,     -- show the jury's wildcards publicly
+  results_published   boolean not null default false,     -- show 1st/2nd/3rd publicly (Hall of Fame)
   cleaned_at   timestamptz,                               -- when non-winning looks were removed after the round
   constraint world_rounds_dates check (ends_at > starts_at)
 );
@@ -157,7 +171,8 @@ create table if not exists public.world_entries (
   caption      text check (caption is null or char_length(caption) <= 600),
   products     jsonb not null default '[]'::jsonb,   -- [{"name": "15 Total Eclipse", "sku": "..."}]
   source_site  text,                             -- e.g. gelitup.com, gelitup.gr
-  status       text not null default 'published' check (status in ('published', 'hidden')),
+  status       text not null default 'pending' check (status in ('pending', 'published', 'hidden', 'rejected')),
+  approved_at  timestamptz,                      -- when an admin first published the look
   -- 1st prize: entrant states she uses GEL.IT.UP and has reviewed every tagged product;
   -- GEL.IT.UP confirms the reviews before 1st place is awarded.
   first_prize_claim boolean not null default false,
@@ -209,6 +224,9 @@ begin
   select * into p from public.world_profiles where user_id = new.user_id;
   if p.user_id is null then raise exception 'PROFILE_REQUIRED'; end if;
   if p.is_banned then raise exception 'ACCOUNT_BLOCKED'; end if;
+  if cardinality(r.eligible_countries) > 0 and not (p.country = any(r.eligible_countries)) then
+    raise exception 'COUNTRY_NOT_ELIGIBLE';
+  end if;
   select count(*) into n from public.world_entries where round_id = new.round_id and user_id = new.user_id;
   if n >= r.max_entries_per_user then raise exception 'ENTRY_LIMIT'; end if;
   if new.image_path not like new.user_id::text || '/%' then raise exception 'BAD_IMAGE_PATH'; end if;
@@ -219,7 +237,8 @@ begin
   end if;
   new.vote_count := 0;
   new.report_count := 0;
-  new.status := 'published';
+  new.status := 'pending';      -- every look waits for admin approval
+  new.approved_at := null;
   new.created_at := now();
   return new;
 end $$;
@@ -237,6 +256,7 @@ begin
   end if;
   if not public.world_is_admin() then
     new.status := old.status;
+    new.approved_at := old.approved_at;
     new.reviews_verified := old.reviews_verified;
     -- The entrant may claim 1st-prize eligibility after posting (reviews take time
     -- to appear), only while the round is open and only with products tagged.
@@ -249,6 +269,11 @@ begin
   end if;
   if new.products is distinct from old.products then
     new.reviews_verified := false;  -- changed products need checking again
+  end if;
+  if new.status = 'published' and old.status <> 'published' and old.approved_at is null then
+    new.approved_at := now();       -- first approval (used for the "your look is live" email)
+  elsif new.approved_at is distinct from old.approved_at and new.approved_at is not null then
+    new.approved_at := old.approved_at;
   end if;
   new.id := old.id;
   new.round_id := old.round_id;
@@ -400,6 +425,80 @@ drop trigger if exists world_reports_after_insert on public.world_reports;
 create trigger world_reports_after_insert after insert on public.world_reports
   for each row execute function public.world_reports_after_insert();
 
+-- ── Jury: wildcards and placings ────────────────────────────────────────────
+create table if not exists public.world_wildcards (
+  entry_id   uuid primary key references public.world_entries(id) on delete cascade,
+  round_id   uuid not null references public.world_rounds(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.world_placements (
+  round_id   uuid not null references public.world_rounds(id) on delete cascade,
+  place      smallint not null check (place between 1 and 3),
+  entry_id   uuid not null unique references public.world_entries(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (round_id, place)
+);
+
+alter table public.world_wildcards enable row level security;
+alter table public.world_placements enable row level security;
+
+drop policy if exists world_wildcards_read on public.world_wildcards;
+create policy world_wildcards_read on public.world_wildcards
+  for select to anon, authenticated
+  using (public.world_is_admin() or exists (
+    select 1 from public.world_rounds r where r.id = round_id and (r.wildcards_published or r.results_published)));
+
+drop policy if exists world_wildcards_admin_write on public.world_wildcards;
+create policy world_wildcards_admin_write on public.world_wildcards
+  for all to authenticated
+  using (public.world_is_admin())
+  with check (public.world_is_admin());
+
+drop policy if exists world_placements_read on public.world_placements;
+create policy world_placements_read on public.world_placements
+  for select to anon, authenticated
+  using (public.world_is_admin() or exists (
+    select 1 from public.world_rounds r where r.id = round_id and r.results_published));
+
+drop policy if exists world_placements_admin_write on public.world_placements;
+create policy world_placements_admin_write on public.world_placements
+  for all to authenticated
+  using (public.world_is_admin())
+  with check (public.world_is_admin());
+
+-- Wildcards and placings must be approved looks from the same round;
+-- 1st place needs the 1st-prize claim with verified reviews; wildcards are capped per round.
+create or replace function public.world_jury_check()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  e public.world_entries;
+  r public.world_rounds;
+  n int;
+begin
+  select * into e from public.world_entries where id = new.entry_id;
+  if e.id is null or e.round_id <> new.round_id then raise exception 'WRONG_ROUND'; end if;
+  if e.status <> 'published' then raise exception 'ENTRY_NOT_APPROVED'; end if;
+  if tg_table_name = 'world_placements' then
+    if new.place = 1 and not (e.first_prize_claim and e.reviews_verified) then
+      raise exception 'FIRST_PRIZE_NOT_QUALIFIED';
+    end if;
+  else
+    select * into r from public.world_rounds where id = new.round_id;
+    select count(*) into n from public.world_wildcards where round_id = new.round_id and entry_id <> new.entry_id;
+    if n >= r.max_wildcards then raise exception 'WILDCARD_LIMIT'; end if;
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists world_placements_check on public.world_placements;
+create trigger world_placements_check before insert or update on public.world_placements
+  for each row execute function public.world_jury_check();
+
+drop trigger if exists world_wildcards_check on public.world_wildcards;
+create trigger world_wildcards_check before insert or update on public.world_wildcards
+  for each row execute function public.world_jury_check();
+
 -- ── Automatic email log (written only by the scheduled sender, service role) ─
 -- kind: entry_live | progress | final_call | results | new_round
 create table if not exists public.world_email_log (
@@ -429,6 +528,7 @@ begin
     'competition_emails_opt_in', (select count(*) from public.world_profiles where competition_emails_opt_in),
     'marketing_opt_in', (select count(*) from public.world_profiles where marketing_opt_in),
     'entries', (select count(*) from public.world_entries),
+    'pending', (select count(*) from public.world_entries where status = 'pending'),
     'votes', (select count(*) from public.world_votes),
     'profiles_by_source', (select coalesce(json_object_agg(src, n), '{}'::json) from (
         select coalesce(signup_source, 'unknown') src, count(*) n from public.world_profiles group by 1) s),
@@ -457,14 +557,15 @@ create policy world_entries_delete_own on storage.objects
   for delete to authenticated
   using (bucket_id = 'world-entries' and ((storage.foldername(name))[1] = auth.uid()::text or public.world_is_admin()));
 
--- ── First round (Halloween / October 2026) ─────────────────────────────────
-insert into public.world_rounds (slug, theme, title, description, starts_at, ends_at)
+-- ── First round: Anything Autumn (26 Oct – 14 Nov 2026, Icons of November 2026)
+insert into public.world_rounds (slug, theme, title, description, starts_at, ends_at, icon_month)
 values (
-  '2026-10-halloween',
-  'halloween',
-  '{"en": "Spooky Season", "el": "Spooky Season", "bg": "Spooky Season", "it": "Spooky Season", "es": "Spooky Season"}',
-  '{"en": "Your best Halloween and autumn looks."}',
-  '2026-10-19 00:00:00+03',
-  '2026-11-01 00:00:00+02'
+  '2026-11-anything-autumn',
+  'autumn',
+  '{"en": "Anything Autumn"}',
+  '{"en": "Burnt oranges, deep berries, cosy nudes, falling-leaf art: show us your autumn in nails."}',
+  '2026-10-26 00:00:00+02',
+  '2026-11-15 00:00:00+02',
+  '2026-11-01'
 )
 on conflict (slug) do nothing;
