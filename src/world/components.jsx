@@ -166,7 +166,12 @@ export function EntryCard({ entry, t, voted, onVote, href, linkProps = {}, voteD
         </div>
         {rank ? <span className="rounded-full bg-[#D43790] px-2 py-0.5 text-[11px] font-bold text-white">#{rank}</span> : null}
       </div>
-      <a href={href} {...linkProps} className="block aspect-[4/5] overflow-hidden bg-neutral-100">
+      <a href={href} {...linkProps} className="relative block aspect-[4/5] overflow-hidden bg-neutral-100">
+        {entry.status && entry.status !== 'published' && (
+          <span className="absolute left-2 top-2 z-10 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-neutral-900 shadow">
+            {t(entry.status === 'rejected' ? 'rejectedBadge' : 'pendingBadge')}
+          </span>
+        )}
         <img
           src={imgSrc}
           onError={() => setImgSrc(imageUrl(entry.image_path))}
@@ -179,7 +184,7 @@ export function EntryCard({ entry, t, voted, onVote, href, linkProps = {}, voteD
         <button
           type="button"
           onClick={onVote}
-          disabled={voteDisabled}
+          disabled={voteDisabled || (entry.status && entry.status !== 'published')}
           aria-pressed={voted}
           className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.08em] transition disabled:opacity-50 ${
             voted ? 'bg-[#D43790] text-white' : 'border border-[#D43790] text-[#D43790] hover:bg-[#D43790]/10'

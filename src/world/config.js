@@ -103,6 +103,22 @@ export function canEnterFrom(countryCode, round) {
   return list.includes(String(countryCode || '').toUpperCase())
 }
 
+// No other brands may be named in captions (competition rules, section 3).
+// Every look is also checked by the team before it goes live; this list just
+// stops the obvious cases before upload. Add names here as needed.
+export const OTHER_BRANDS = [
+  'opi', 'gelish', 'cnd', 'shellac', 'essie', 'kiara sky', 'bluesky', 'semilac', 'neonail', 'madam glam',
+  'gelbottle', 'gel bottle', 'kokoist', 'saviland', 'beetles', 'modelones', 'born pretty', 'makartt',
+  'gellen', 'dnd gel', 'luxio', 'akzentz', 'bio sculpture', 'young nails', 'victoria vynn', 'nailberry',
+  'orly', 'sally hansen', 'ibd', 'gelcare', 'mia secret', 'gelx', 'gel-x',
+]
+
+/** Does the text name another nail brand? */
+export function mentionsOtherBrand(text) {
+  const s = ` ${String(text || '').toLowerCase().replace(/[^a-z0-9à-ÿ]+/gi, ' ')} `
+  return OTHER_BRANDS.some(b => s.includes(` ${b.replace(/[^a-z0-9à-ÿ]+/gi, ' ').trim()} `))
+}
+
 const COUNTRY_NAME = Object.fromEntries(COUNTRIES)
 
 export function countryName(code) {

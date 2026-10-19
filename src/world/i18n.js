@@ -145,6 +145,7 @@ const en = {
   theme_autumn: "Anything Autumn",
   err_COUNTRY_NOT_ELIGIBLE: "Entries are open to residents of the EU and selected European countries. You can still vote for your favourite looks.",
   entryCountriesNote: "Entries are open to residents of the EU and selected European countries. Everyone can register and vote.",
+  err_OTHER_BRAND: "Please remove other brand names from your caption. Only GEL.IT.UP products can be mentioned.",
 }
 
 const el = {
@@ -291,6 +292,7 @@ const el = {
   theme_autumn: "Anything Autumn",
   err_COUNTRY_NOT_ELIGIBLE: "Οι συμμετοχές είναι ανοιχτές σε κατοίκους της ΕΕ και επιλεγμένων ευρωπαϊκών χωρών. Μπορείς όμως να ψηφίσεις τα αγαπημένα σου looks.",
   entryCountriesNote: "Οι συμμετοχές είναι ανοιχτές σε κατοίκους της ΕΕ και επιλεγμένων ευρωπαϊκών χωρών. Εγγραφή και ψηφοφορία είναι ανοιχτές σε όλους.",
+  err_OTHER_BRAND: "Αφαίρεσε ονόματα άλλων μαρκών από τη λεζάντα σου. Μπορείς να αναφέρεις μόνο προϊόντα GEL.IT.UP.",
 }
 
 const bg = {
@@ -437,6 +439,7 @@ const bg = {
   theme_autumn: "Anything Autumn",
   err_COUNTRY_NOT_ELIGIBLE: "Участието е отворено за жители на ЕС и избрани европейски държави. Все пак можеш да гласуваш за любимите си look-ове.",
   entryCountriesNote: "Участието е отворено за жители на ЕС и избрани европейски държави. Всеки може да се регистрира и да гласува.",
+  err_OTHER_BRAND: "Моля, премахни имената на други марки от описанието. Може да се споменават само продукти GEL.IT.UP.",
 }
 
 const it = {
@@ -583,6 +586,7 @@ const it = {
   theme_autumn: "Anything Autumn",
   err_COUNTRY_NOT_ELIGIBLE: "La partecipazione è aperta ai residenti nell’UE e in alcuni Paesi europei selezionati. Puoi comunque votare i tuoi look preferiti.",
   entryCountriesNote: "La partecipazione è aperta ai residenti nell’UE e in alcuni Paesi europei selezionati. Chiunque può registrarsi e votare.",
+  err_OTHER_BRAND: "Rimuovi i nomi di altri marchi dalla didascalia. Puoi citare solo prodotti GEL.IT.UP.",
 }
 
 const es = {
@@ -729,6 +733,7 @@ const es = {
   theme_autumn: "Anything Autumn",
   err_COUNTRY_NOT_ELIGIBLE: "La participación está abierta a residentes de la UE y de algunos países europeos seleccionados. Aun así, puedes votar tus looks favoritos.",
   entryCountriesNote: "La participación está abierta a residentes de la UE y de algunos países europeos seleccionados. Cualquiera puede registrarse y votar.",
+  err_OTHER_BRAND: "Elimina los nombres de otras marcas de tu texto. Solo se pueden mencionar productos GEL.IT.UP.",
 }
 
 const ro = {
@@ -875,6 +880,7 @@ const ro = {
   theme_autumn: "Anything Autumn",
   err_COUNTRY_NOT_ELIGIBLE: "Înscrierile sunt deschise rezidenților din UE și din anumite țări europene. Poți totuși vota look-urile tale preferate.",
   entryCountriesNote: "Înscrierile sunt deschise rezidenților din UE și din anumite țări europene. Oricine se poate înregistra și vota.",
+  err_OTHER_BRAND: "Te rugăm să elimini numele altor mărci din descriere. Poți menționa doar produse GEL.IT.UP.",
 }
 
 const pl = {
@@ -1021,6 +1027,7 @@ const pl = {
   theme_autumn: "Anything Autumn",
   err_COUNTRY_NOT_ELIGIBLE: "Udział mogą wziąć mieszkańcy UE i wybranych krajów europejskich. Nadal możesz głosować na ulubione looki.",
   entryCountriesNote: "Udział mogą wziąć mieszkańcy UE i wybranych krajów europejskich. Zarejestrować się i głosować może każdy.",
+  err_OTHER_BRAND: "Usuń nazwy innych marek z opisu. Można wymieniać tylko produkty GEL.IT.UP.",
 }
 
 const fr = {
@@ -1167,6 +1174,7 @@ const fr = {
   theme_autumn: "Anything Autumn",
   err_COUNTRY_NOT_ELIGIBLE: "La participation est ouverte aux résidents de l’UE et de certains pays européens. Tu peux tout de même voter pour tes looks préférés.",
   entryCountriesNote: "La participation est ouverte aux résidents de l’UE et de certains pays européens. Tout le monde peut s’inscrire et voter.",
+  err_OTHER_BRAND: "Retire les noms d’autres marques de ta légende. Seuls les produits GEL.IT.UP peuvent être cités.",
 }
 
 const de = {
@@ -1313,6 +1321,7 @@ const de = {
   theme_autumn: "Anything Autumn",
   err_COUNTRY_NOT_ELIGIBLE: "Teilnehmen können Personen mit Wohnsitz in der EU und in ausgewählten europäischen Ländern. Abstimmen kannst du trotzdem.",
   entryCountriesNote: "Teilnehmen können Personen mit Wohnsitz in der EU und in ausgewählten europäischen Ländern. Registrieren und abstimmen kann jede:r.",
+  err_OTHER_BRAND: "Bitte entferne andere Markennamen aus deiner Beschreibung. Nur GEL.IT.UP-Produkte dürfen genannt werden.",
 }
 
 const pt = {
@@ -1459,6 +1468,7 @@ const pt = {
   theme_autumn: "Anything Autumn",
   err_COUNTRY_NOT_ELIGIBLE: "A participação está aberta a residentes na UE e em alguns países europeus selecionados. Podes, ainda assim, votar nos teus looks favoritos.",
   entryCountriesNote: "A participação está aberta a residentes na UE e em alguns países europeus selecionados. Qualquer pessoa se pode registar e votar.",
+  err_OTHER_BRAND: "Remove os nomes de outras marcas da tua legenda. Só podem ser mencionados produtos GEL.IT.UP.",
 }
 
 const hu = {
@@ -1605,6 +1615,7 @@ const hu = {
   theme_autumn: "Anything Autumn",
   err_COUNTRY_NOT_ELIGIBLE: "A részvétel az EU-ban és kiválasztott európai országokban élők számára nyitott. Szavazni azonban te is tudsz a kedvenc lookjaidra.",
   entryCountriesNote: "A részvétel az EU-ban és kiválasztott európai országokban élők számára nyitott. Regisztrálni és szavazni bárki tud.",
+  err_OTHER_BRAND: "Kérjük, töröld a más márkák nevét a leírásból. Csak GEL.IT.UP termékek említhetők.",
 }
 
 export const WORLD_STRINGS = { en, el, bg, it, es, ro, pl, fr, de, pt, hu }
