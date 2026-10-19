@@ -10,10 +10,21 @@ export const WORLD_BASE_PATH = '/world'
 export const WORLD_PUBLIC = false
 export const WORLD_BUCKET = 'world-entries'
 
-// Names shown on the page. "Angel" naming is pending alignment with GEL.IT.UP Bulgaria
-// (owners of GEL.IT.UP Angels) — change WINNER_TITLE here if a different title is agreed.
+// Names shown on the page. Winners are the "GEL.IT.UP Icons" of the month the
+// round is named for (world_rounds.icon_month, else the month the round ends),
+// shown in the Hall of Fame. "Angels" stays GEL.IT.UP Greece's own term.
 export const COMPETITION_NAME = 'World of GEL.IT.UP'
-export const WINNER_TITLE = 'GEL.IT.UP Angel of the Month'
+
+/** The month a round's winners are named for, e.g. "November 2026" in the visitor's language. */
+export function iconMonth(round, lang = 'en') {
+  if (!round) return ''
+  const base = round.icon_month ? new Date(`${round.icon_month}T12:00:00Z`) : new Date(round.ends_at)
+  try {
+    return base.toLocaleDateString(lang, { month: 'long', year: 'numeric', timeZone: 'UTC' })
+  } catch {
+    return base.toLocaleDateString('en', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+  }
+}
 
 // Version of the competition rules people accept at registration. Change it when
 // the rules change; everyone then re-accepts before their next entry or vote.
@@ -65,6 +76,7 @@ export const COUNTRIES = [
   ['ZA', 'South Africa'], ['US', 'United States'],
   ['AL', 'Albania'], ['AT', 'Austria'], ['BE', 'Belgium'], ['BA', 'Bosnia and Herzegovina'],
   ['BR', 'Brazil'], ['CA', 'Canada'], ['HR', 'Croatia'], ['CY', 'Cyprus'], ['CZ', 'Czechia'],
+  ['AD', 'Andorra'], ['GE', 'Georgia'], ['LI', 'Liechtenstein'], ['MC', 'Monaco'], ['SM', 'San Marino'], ['VA', 'Vatican City'],
   ['DK', 'Denmark'], ['EG', 'Egypt'], ['EE', 'Estonia'], ['FI', 'Finland'], ['FR', 'France'],
   ['DE', 'Germany'], ['HU', 'Hungary'], ['IS', 'Iceland'], ['IN', 'India'], ['IE', 'Ireland'],
   ['IL', 'Israel'], ['JO', 'Jordan'], ['KE', 'Kenya'], ['XK', 'Kosovo'], ['LV', 'Latvia'],
@@ -74,6 +86,22 @@ export const COUNTRIES = [
   ['SK', 'Slovakia'], ['SI', 'Slovenia'], ['SE', 'Sweden'], ['CH', 'Switzerland'],
   ['TR', 'Türkiye'], ['UA', 'Ukraine'], ['AE', 'United Arab Emirates'], ['GB', 'United Kingdom'],
 ]
+
+// Who may ENTER (the database enforces each round's eligible_countries; this is the
+// default shown in the profile form). Everyone, anywhere, may register and vote.
+// The EU plus the non-EU European countries listed on gelitup.com, excluding the
+// United Kingdom, Türkiye, Belarus and Ukraine.
+export const ENTRY_COUNTRIES = [
+  'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU',
+  'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE',
+  'AL', 'AD', 'BA', 'GE', 'IS', 'XK', 'LI', 'MD', 'MC', 'ME', 'MK', 'NO', 'SM', 'RS', 'CH', 'VA',
+]
+
+/** Can someone from this country enter the given round? */
+export function canEnterFrom(countryCode, round) {
+  const list = round?.eligible_countries?.length ? round.eligible_countries : ENTRY_COUNTRIES
+  return list.includes(String(countryCode || '').toUpperCase())
+}
 
 const COUNTRY_NAME = Object.fromEntries(COUNTRIES)
 
@@ -94,5 +122,5 @@ export const LANG_DEFAULT_COUNTRY = {
 }
 
 export const THEMES = [
-  'everyday', 'halloween', 'best-french', '3d-design', 'movember', 'christmas', 'valentines', 'summer', 'chrome', 'other',
+  'autumn', 'everyday', 'halloween', 'best-french', '3d-design', 'movember', 'christmas', 'valentines', 'summer', 'chrome', 'other',
 ]

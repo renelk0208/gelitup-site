@@ -74,7 +74,10 @@ export async function fetchPastRounds(limit = 12) {
 
 // ── Entries ─────────────────────────────────────────────────────────────────
 export async function fetchEntries({ roundId, country, sort = 'new', limit = 48, offset = 0, userIds } = {}) {
-  let q = db().from('world_entries').select(ENTRY_SELECT).eq('status', 'published')
+  // A creator's own looks include those still waiting for approval (the database
+  // only returns other people's approved looks).
+  let q = db().from('world_entries').select(ENTRY_SELECT)
+  if (!userIds) q = q.eq('status', 'published')
   if (roundId) q = q.eq('round_id', roundId)
   if (country) q = q.eq('country', country)
   if (userIds) q = q.in('user_id', userIds)
@@ -97,10 +100,35 @@ export async function fetchLeader(roundId, country) {
   return rows[0] || null
 }
 
-/** Winners of a finished round (see winners.js for the 1st-prize rule). */
+async function fetchEntriesByIds(ids) {
+  if (!ids.length) return []
+  const { data, error } = await db().from('world_entries').select(ENTRY_SELECT).in('id', ids)
+  if (error) throw error
+  return data || []
+}
+
+/** The jury's wildcards for a round (visible once the admin publishes them). */
+export async function fetchWildcards(roundId) {
+  const { data, error } = await db().from('world_wildcards').select('entry_id').eq('round_id', roundId)
+  if (error) throw error
+  return fetchEntriesByIds((data || []).map(w => w.entry_id))
+}
+
+/**
+ * Winners of a finished round: the jury's 1st/2nd/3rd place (visible once the
+ * admin publishes the results) and the best look per country by hearts.
+ */
 export async function fetchRoundWinners(roundId) {
-  const top = await fetchEntries({ roundId, sort: 'popular', limit: 500 })
-  return computeWinners(top)
+  const [top, placementsRes] = await Promise.all([
+    fetchEntries({ roundId, sort: 'popular', limit: 500 }),
+    db().from('world_placements').select('entry_id, place').eq('round_id', roundId),
+  ])
+  if (placementsRes.error) throw placementsRes.error
+  const placements = placementsRes.data || []
+  const known = new Set(top.map(e => e.id))
+  const missing = placements.map(p => p.entry_id).filter(id => !known.has(id))
+  const all = missing.length ? [...top, ...(await fetchEntriesByIds(missing))] : top
+  return { ...computeWinners(all, placements), published: placements.length > 0 }
 }
 
 export async function fetchProfileByHandle(handle) {
@@ -134,6 +162,16 @@ export async function sendSignInLink(email, nextPath) {
       emailRedirectTo: `${window.location.origin}/world-auth.html?next=${encodeURIComponent(next)}`,
       shouldCreateUser: true,
     },
+  })
+  if (error) throw error
+}
+
+/** Sign in with Google. Lands on the same /world-auth.html page as the email link. */
+export async function signInWithGoogle(nextPath) {
+  const next = nextPath && nextPath.startsWith('/world') ? nextPath : '/world'
+  const { error } = await db().auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: `${window.location.origin}/world-auth.html?next=${encodeURIComponent(next)}` },
   })
   if (error) throw error
 }
@@ -273,7 +311,7 @@ export async function deleteMyEntry(entry) {
 /** Map database error codes raised by the triggers to translation keys. */
 export function errorKey(err) {
   const msg = String(err?.message || err || '')
-  for (const k of ['PRODUCTS_REQUIRED', 'ROUND_CLOSED', 'ENTRY_LIMIT', 'PROFILE_REQUIRED', 'ACCOUNT_BLOCKED', 'VOTE_RATE_LIMIT', 'ENTRY_UNAVAILABLE']) {
+  for (const k of ['PRODUCTS_REQUIRED', 'ROUND_CLOSED', 'ENTRY_LIMIT', 'PROFILE_REQUIRED', 'ACCOUNT_BLOCKED', 'VOTE_RATE_LIMIT', 'ENTRY_UNAVAILABLE', 'COUNTRY_NOT_ELIGIBLE']) {
     if (msg.includes(k)) return `err_${k}`
   }
   if (/duplicate key.*handle/i.test(msg) || /world_profiles_handle_key/.test(msg)) return 'err_HANDLE_TAKEN'

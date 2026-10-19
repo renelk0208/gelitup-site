@@ -51,7 +51,9 @@ export async function handler(event) {
       .order('vote_count', { ascending: false })
       .order('created_at', { ascending: true })
       .limit(10000)
-    const keep = winningIds(entries || [])
+    const { data: placements } = await db.from('world_placements').select('entry_id, place').eq('round_id', round.id)
+    const { data: wildcards } = await db.from('world_wildcards').select('entry_id').eq('round_id', round.id)
+    const keep = winningIds(entries || [], placements || [], (wildcards || []).map(w => w.entry_id))
     const remove = (entries || []).filter(e => !keep.has(e.id))
 
     for (let i = 0; i < remove.length; i += 100) {
