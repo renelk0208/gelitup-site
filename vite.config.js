@@ -2,6 +2,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 
 const manifest = JSON.parse(
   readFileSync(new URL('./public/manifest.json', import.meta.url), 'utf-8'),
@@ -32,6 +33,13 @@ const PRERENDER_ROUTES = [
 export default defineConfig({
   build: {
     rollupOptions: {
+      // Extra standalone pages for World of GEL.IT.UP: the embeddable widget and
+      // the sign-in landing page (kept outside the main app on purpose).
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        'world-embed': fileURLToPath(new URL('./world-embed.html', import.meta.url)),
+        'world-auth': fileURLToPath(new URL('./world-auth.html', import.meta.url)),
+      },
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
@@ -59,7 +67,7 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
-        navigateFallbackDenylist: [/\.xml$/, /\.txt$/, /\.json$/, /\.csv$/, /^\/api\//, /^\/package-received/, /^\/choose-items/, /^\/\.netlify\//],
+        navigateFallbackDenylist: [/\.xml$/, /\.txt$/, /\.json$/, /\.csv$/, /^\/api\//, /^\/package-received/, /^\/choose-items/, /^\/\.netlify\//, /^\/world-embed/, /^\/world-auth/],
         runtimeCaching: [
           {
             urlPattern: /\/gelitup-media\/.+\.(?:png|jpg|jpeg|webp|gif|svg)$/i,
