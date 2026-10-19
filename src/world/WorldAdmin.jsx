@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { ENTRY_SELECT, entryUrl, imageUrl, thumbPath } from './api'
-import { COUNTRIES, THEMES, WORLD_BUCKET, WORLD_SITE, countryName, flagEmoji } from './config'
+import { COUNTRIES, THEMES, WORLD_BUCKET, WORLD_SITE, countryName, flagEmoji, productShopLink } from './config'
+import { computeWinners } from './winners'
 import { WORLD_LANGS } from './i18n'
 
 // Admin page for World of GEL.IT.UP: rounds, moderation, winners, embed codes.
@@ -27,7 +28,7 @@ const emptyRound = () => {
   const end = new Date(start.getFullYear(), start.getMonth() + 1, 1)
   return {
     slug: '', theme: 'everyday', titles: { en: '' }, starts_at: toLocalInput(start.toISOString()),
-    ends_at: toLocalInput(end.toISOString()), prizes: '€300, €100, €50', local_prizes: '',
+    ends_at: toLocalInput(end.toISOString()), prizes: '€1000, €500, €300', local_prizes: '',
     max_entries_per_user: 3, is_published: true,
   }
 }
@@ -124,11 +125,13 @@ export default function WorldAdmin() {
     loadEntries()
   }
 
-  const winnersByCountry = useMemo(() => {
-    const top = {}
-    for (const e of entries) if (e.status === 'published' && !top[e.country]) top[e.country] = e
-    return Object.values(top)
-  }, [entries])
+  const winners = useMemo(() => computeWinners(entries), [entries])
+  const winnersByCountry = Object.values(winners.byCountry)
+
+  const setReviewsVerified = async (entry, value) => {
+    const { error } = await supabase.from('world_entries').update({ reviews_verified: value }).eq('id', entry.id)
+    if (error) flash(error.message); else loadEntries()
+  }
 
   const exportCsv = () => {
     const rows = [['rank', 'name', 'handle', 'instagram', 'country', 'hearts', 'reports', 'status', 'source_site', 'link']]
@@ -261,6 +264,16 @@ export default function WorldAdmin() {
           <button type="button" onClick={exportCsv} className={`${btn} border border-neutral-300`}>Export CSV</button>
         </div>
 
+        <div className="mt-3 grid gap-2 text-xs sm:grid-cols-3">
+          {winners.podium.map((e, i) => (
+            <div key={i} className="rounded-xl bg-neutral-50 p-3">
+              <p className="font-black uppercase tracking-[0.12em]">{i + 1}. place · {(rounds.find(r => r.id === roundId)?.prizes || [])[i] || ''}</p>
+              <p className="mt-1">{e ? `${flagEmoji(e.country)} ${e.profile?.display_name} (♥ ${e.vote_count})` : (i === 0 ? 'No look with verified reviews yet' : '—')}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-neutral-500">1st prize only goes to looks that claimed it and whose reviews you have verified (column “1st prize”).</p>
+
         {winnersByCountry.length > 0 && (
           <p className="mt-3 text-xs text-neutral-600">
             <b>Leading per country:</b>{' '}
@@ -271,7 +284,7 @@ export default function WorldAdmin() {
         <div className="mt-3 overflow-x-auto">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="text-xs uppercase text-neutral-500">
-              <tr><th className="py-1">#</th><th>Look</th><th>Creator</th><th>Country</th><th>Hearts</th><th>Reports</th><th>From</th><th /></tr>
+              <tr><th className="py-1">#</th><th>Look</th><th>Creator</th><th>Country</th><th>Hearts</th><th>1st prize</th><th>Reports</th><th>From</th><th /></tr>
             </thead>
             <tbody>
               {entries.map((e, i) => (
@@ -281,6 +294,19 @@ export default function WorldAdmin() {
                   <td><b>{e.profile?.display_name}</b><br /><span className="text-xs text-neutral-500">@{e.profile?.handle}{e.profile?.instagram ? ` · IG @${e.profile.instagram}` : ''}</span></td>
                   <td>{flagEmoji(e.country)} {countryName(e.country)}</td>
                   <td className="font-bold">{e.vote_count}</td>
+                  <td className="text-xs">
+                    {e.first_prize_claim ? (
+                      <div className="space-y-1">
+                        <label className="flex items-center gap-1 font-semibold">
+                          <input type="checkbox" checked={e.reviews_verified} onChange={ev => setReviewsVerified(e, ev.target.checked)} />
+                          {e.reviews_verified ? 'Reviews verified' : 'Verify reviews'}
+                        </label>
+                        {(e.products || []).map(p => (
+                          <a key={p.name} href={productShopLink(p.name)} target="_blank" rel="noopener" className="block truncate text-[#D43790] underline">{p.name}</a>
+                        ))}
+                      </div>
+                    ) : <span className="text-neutral-400">not claimed</span>}
+                  </td>
                   <td className={e.report_count ? 'font-bold text-rose-600' : ''}>{e.report_count}</td>
                   <td className="text-xs">{e.source_site || '—'}</td>
                   <td className="space-x-1 whitespace-nowrap text-right">

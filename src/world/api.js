@@ -1,5 +1,6 @@
 import { worldSupabase } from './worldClient'
 import { WORLD_BUCKET, WORLD_SITE } from './config'
+import { computeWinners } from './winners'
 
 const db = () => {
   if (!worldSupabase) throw new Error('NOT_CONFIGURED')
@@ -7,7 +8,7 @@ const db = () => {
 }
 
 export const ENTRY_SELECT =
-  'id, created_at, round_id, user_id, country, image_path, caption, products, vote_count, status, source_site, ' +
+  'id, created_at, round_id, user_id, country, image_path, caption, products, vote_count, status, source_site, first_prize_claim, reviews_verified, ' +
   'profile:world_profiles!world_entries_user_id_fkey(handle, display_name, instagram, country)'
 
 /** Public photo URL. thumb=true gives the 600px version made at upload time. */
@@ -96,15 +97,10 @@ export async function fetchLeader(roundId, country) {
   return rows[0] || null
 }
 
-/** Winners of a finished round: top 3 overall plus the top entry per country. */
+/** Winners of a finished round (see winners.js for the 1st-prize rule). */
 export async function fetchRoundWinners(roundId) {
-  const top = await fetchEntries({ roundId, sort: 'popular', limit: 200 })
-  const overall = top.slice(0, 3)
-  const byCountry = {}
-  for (const e of top) {
-    if (!byCountry[e.country]) byCountry[e.country] = e
-  }
-  return { overall, byCountry }
+  const top = await fetchEntries({ roundId, sort: 'popular', limit: 500 })
+  return computeWinners(top)
 }
 
 export async function fetchProfileByHandle(handle) {
@@ -223,7 +219,7 @@ export async function compressImage(file, maxSide = 1600, quality = 0.86) {
   return blob || file
 }
 
-export async function submitEntry({ userId, roundId, file, caption, products }) {
+export async function submitEntry({ userId, roundId, file, caption, products, firstPrizeClaim }) {
   const [blob, thumb] = await Promise.all([compressImage(file), compressImage(file, 600, 0.8)])
   const path = `${userId}/${roundId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`
   const opts = { contentType: 'image/jpeg', cacheControl: '31536000', upsert: false }
@@ -240,6 +236,7 @@ export async function submitEntry({ userId, roundId, file, caption, products }) 
       image_path: path,
       caption: caption?.trim() || null,
       products: (products || []).map(p => ({ name: p.name, sku: p.sku })),
+      first_prize_claim: Boolean(firstPrizeClaim),
       source_site: currentSourceSite(),
     })
     .select('id')
@@ -270,7 +267,7 @@ export async function deleteMyEntry(entry) {
 /** Map database error codes raised by the triggers to translation keys. */
 export function errorKey(err) {
   const msg = String(err?.message || err || '')
-  for (const k of ['ROUND_CLOSED', 'ENTRY_LIMIT', 'PROFILE_REQUIRED', 'ACCOUNT_BLOCKED', 'VOTE_RATE_LIMIT', 'ENTRY_UNAVAILABLE']) {
+  for (const k of ['PRODUCTS_REQUIRED', 'ROUND_CLOSED', 'ENTRY_LIMIT', 'PROFILE_REQUIRED', 'ACCOUNT_BLOCKED', 'VOTE_RATE_LIMIT', 'ENTRY_UNAVAILABLE']) {
     if (msg.includes(k)) return `err_${k}`
   }
   if (/duplicate key.*handle/i.test(msg) || /world_profiles_handle_key/.test(msg)) return 'err_HANDLE_TAKEN'

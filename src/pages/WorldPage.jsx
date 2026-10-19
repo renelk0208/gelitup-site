@@ -3,6 +3,7 @@ import { Link, Route, Routes, useLocation, useNavigate, useParams } from 'react-
 import { hasWorldConfig } from '../world/worldClient'
 import { makeT, localized } from '../world/i18n'
 import { detectWorldLang } from '../world/lang'
+import { rulesFor } from '../world/rules'
 import {
   COMPETITION_NAME, HASHTAG, INSTAGRAM_TAG, LANG_DEFAULT_COUNTRY, RULES_VERSION, WINNER_TITLE,
   countryName, flagEmoji, productShopLink, shopFor,
@@ -141,7 +142,8 @@ function ProfileForm({ t, lang, visitorCountry, user, profile, onSaved }) {
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const handleValid = /^[a-z0-9._]{2,30}$/.test(form.handle)
-  const canSave = form.display_name.trim().length >= 2 && handleValid && form.country && form.adult && form.rules && form.publicConsent
+  const igValid = /^[A-Za-z0-9._]{1,30}$/.test(form.instagram.replace(/^@/, '').trim())
+  const canSave = form.display_name.trim().length >= 2 && handleValid && igValid && form.country && form.adult && form.rules && form.publicConsent
 
   const submit = async (e) => {
     e.preventDefault()
@@ -151,7 +153,7 @@ function ProfileForm({ t, lang, visitorCountry, user, profile, onSaved }) {
       const saved = await api.saveMyProfile(user.id, {
         display_name: form.display_name.trim(),
         handle: form.handle,
-        instagram: form.instagram.replace(/^@/, '').trim() || null,
+        instagram: form.instagram.replace(/^@/, '').trim(),
         country: form.country,
         competition_emails_opt_in: form.competition_emails_opt_in,
         marketing_opt_in: form.marketing_opt_in,
@@ -190,7 +192,7 @@ function ProfileForm({ t, lang, visitorCountry, user, profile, onSaved }) {
       </label>
       <label className={label}>
         {t('instagram')}
-        <input value={form.instagram} maxLength={31} onChange={e => set('instagram', e.target.value)} placeholder="@" className={inputCls} />
+        <input required value={form.instagram} maxLength={31} onChange={e => set('instagram', e.target.value.replace(/\s/g, ''))} placeholder="@" className={inputCls} />
       </label>
       <label className={label}>
         {t('country')}
@@ -496,9 +498,16 @@ function WinnersView({ t, lang, rounds, roundId, setRoundId, winners }) {
           <h2 className="mt-6 text-sm font-black uppercase tracking-[0.16em] text-neutral-900">{t('winnersOverall')}</h2>
           <p className="text-xs text-neutral-500">{WINNER_TITLE}</p>
           <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {winners.overall.map((e, i) => (
-              <EntryCard key={e.id} entry={e} t={t} rank={i + 1} href={`/world/${e.id}`} voteDisabled onVote={() => {}} />
-            ))}
+            {winners.podium.map((e, i) => (e ? (
+              <div key={e.id}>
+                <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-[#1A1A1A]">{t(`place${i + 1}`)} · <span className="text-[#D43790]">{(rounds.find(r => r.id === roundId)?.prizes || [])[i] || ''}</span></p>
+                <EntryCard entry={e} t={t} rank={i + 1} href={`/world/${e.id}`} voteDisabled onVote={() => {}} />
+              </div>
+            ) : (
+              <div key={`empty-${i}`} className="flex min-h-40 items-center justify-center rounded-2xl border border-dashed border-[#E8E8E8] p-6 text-center text-xs text-[#4A4A4A]">
+                {t(`place${i + 1}`)} · {t('beingVerified')}
+              </div>
+            )))}
           </div>
           {countries.length > 0 && (
             <>
@@ -693,8 +702,10 @@ function EntryPage({ ctx }) {
 // Upload
 // ─────────────────────────────────────────────────────────────────────────────
 function UploadPage({ ctx }) {
-  const { t, account, gate, round, navigate } = ctx
+  const { t, lang, account, gate, round, navigate } = ctx
   const [file, setFile] = useState(null)
+  const [themeOk, setThemeOk] = useState(false)
+  const [firstPrize, setFirstPrize] = useState(false)
   const [preview, setPreview] = useState('')
   const [caption, setCaption] = useState('')
   const [picked, setPicked] = useState([])
@@ -732,7 +743,7 @@ function UploadPage({ ctx }) {
     if (!file || !account.user || !round) return
     setBusy(true); setErr('')
     try {
-      const id = await api.submitEntry({ userId: account.user.id, roundId: round.id, file, caption, products: picked })
+      const id = await api.submitEntry({ userId: account.user.id, roundId: round.id, file, caption, products: picked, firstPrizeClaim: firstPrize && picked.length > 0 })
       navigate(`/world/${id}?posted=1`)
     } catch (ex) {
       setErr(t(api.errorKey(ex)))
@@ -745,8 +756,12 @@ function UploadPage({ ctx }) {
     <form onSubmit={submit} className="mx-auto max-w-xl">
       <Link to="/world" className="text-[11px] font-bold uppercase tracking-[0.16em] text-neutral-500 hover:text-neutral-900">← {COMPETITION_NAME}</Link>
       <h1 className="mt-3 text-3xl font-black uppercase tracking-tight text-neutral-900">{t('upload')}</h1>
+      <p className="mt-3 rounded-2xl border border-[#D43790] bg-white px-4 py-3 text-sm text-[#1A1A1A]">
+        <span className="font-bold uppercase tracking-[0.12em] text-[#D43790]">{t('themeLabel')}: {localized(round.title, lang) || t(`theme_${round.theme}`)}</span>
+        <span className="mt-1 block text-[#4A4A4A]">{t('themeMustMatch')}</span>
+      </p>
       {account.user && (
-        <p className={`mt-1 text-sm ${left ? 'text-neutral-600' : 'font-semibold text-rose-600'}`}>
+        <p className={`mt-3 text-sm ${left ? 'text-neutral-600' : 'font-semibold text-rose-600'}`}>
           {left ? t('entriesLeft', { n: left, max }) : t('limitReached')}
         </p>
       )}
@@ -791,9 +806,35 @@ function UploadPage({ ctx }) {
         )}
       </div>
 
+      <div className="mt-6 space-y-3 rounded-2xl border border-[#E8E8E8] bg-[#F8F8F6] p-4">
+        <label className="flex items-start gap-3 text-sm text-[#1A1A1A]">
+          <input type="checkbox" required checked={themeOk} onChange={e => setThemeOk(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#D43790]" />
+          <span>{t('confirmTheme')}</span>
+        </label>
+        <div className="border-t border-[#E8E8E8] pt-3">
+          <label className={`flex items-start gap-3 text-sm ${picked.length ? 'text-[#1A1A1A]' : 'text-[#4A4A4A] opacity-70'}`}>
+            <input type="checkbox" disabled={!picked.length} checked={firstPrize && picked.length > 0} onChange={e => setFirstPrize(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#D43790]" />
+            <span>
+              <b>{t('firstPrizeTitle', { prize: (round.prizes || [])[0] || '' })}</b>{' '}
+              {t('firstPrizeClaim')}
+            </span>
+          </label>
+          {!picked.length && <p className="ml-7 mt-1 text-xs text-[#4A4A4A]">{t('firstPrizeNeedsProducts')}</p>}
+          {firstPrize && picked.length > 0 && (
+            <ul className="ml-7 mt-2 space-y-1 text-xs">
+              {picked.map(p => (
+                <li key={p.name}>
+                  <a href={productShopLink(p.name)} target="_blank" rel="noopener" className="text-[#D43790] underline">{t('reviewOnShop', { product: p.name })}</a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
       <p className="mt-5 text-xs leading-relaxed text-neutral-500">{t('photoRights')}</p>
       {err && <p className="mt-3 text-sm text-rose-600">{err}</p>}
-      <button type="submit" disabled={busy || !file || !left || !isRegistered(account)} className={`${btnPrimary} mt-4`}>
+      <button type="submit" disabled={busy || !file || !left || !themeOk || !isRegistered(account)} className={`${btnPrimary} mt-4`}>
         {busy ? t('submitting') : t('submit')}
       </button>
     </form>
@@ -856,61 +897,26 @@ function CreatorPage({ ctx }) {
 // Bump RULES_VERSION in world/config.js when these change: everyone is asked
 // to accept the new version before their next entry or vote.
 // ─────────────────────────────────────────────────────────────────────────────
-function RulesPage() {
-  const h = 'mt-6 text-sm font-black uppercase tracking-[0.14em] text-[#1A1A1A]'
+function RulesPage({ ctx }) {
+  const { lang, round } = ctx
+  const rules = rulesFor(lang)
+  const prizes = Array.isArray(round?.prizes) && round.prizes.length ? round.prizes : ['€1000', '€500', '€300']
+  const fill = (text) => text
+    .replaceAll('{p1}', prizes[0] || '').replaceAll('{p2}', prizes[1] || '').replaceAll('{p3}', prizes[2] || '')
+    .replaceAll('{email}', 'ambassadors@gelitup.com')
   return (
     <article className="mx-auto max-w-2xl text-sm leading-relaxed text-[#4A4A4A]">
       <Link to="/world" className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#4A4A4A] hover:text-[#1A1A1A]">← {COMPETITION_NAME}</Link>
-      <h1 className="mt-3 text-2xl font-black uppercase tracking-[0.1em] text-[#1A1A1A]">Competition rules</h1>
-      <p className="mt-1 text-xs">{COMPETITION_NAME} · version {RULES_VERSION}</p>
-
-      <h2 className={h}>1. Organiser</h2>
-      <p className="mt-2">The competition is organised by GEL.IT.UP International (Thermitek Ltd). Official GEL.IT.UP distributors take part for their own countries and may show the competition on their websites.</p>
-
-      <h2 className={h}>2. Who can enter</h2>
-      <ul className="mt-2 list-disc space-y-1 pl-5">
-        <li>Entrants must be 18 or older and must register with a valid email address.</li>
-        <li>Entry is free and open to nail professionals and students worldwide, whether or not they currently use GEL.IT.UP products.</li>
-        <li>One account per person. Employees of GEL.IT.UP and of its official distributors may enter but cannot win prizes.</li>
-      </ul>
-
-      <h2 className={h}>3. How to enter</h2>
-      <ul className="mt-2 list-disc space-y-1 pl-5">
-        <li>Register, accept these rules, and upload a photo of a nail look during an open round. Each round has a theme and a maximum number of looks per person, shown on the competition page.</li>
-        <li>The look and the photo must be your own work. Photos must not be edited in a way that misrepresents the work, must not show another person’s face without their consent, and must not include other brands’ logos or offensive content.</li>
-        <li>By entering, you confirm you have the right to publish the photo.</li>
-      </ul>
-
-      <h2 className={h}>4. What is shown publicly</h2>
-      <p className="mt-2">Your display name, username, Instagram handle (if given), country, uploaded photos, captions, the products you tag and your number of hearts are shown publicly on gelitup.com and on official GEL.IT.UP websites and social media, with credit to you. Your email address is never shown.</p>
-
-      <h2 className={h}>5. Voting</h2>
-      <ul className="mt-2 list-disc space-y-1 pl-5">
-        <li>Registered visitors vote with one heart per look. Hearts reset to zero each round.</li>
-        <li>Buying votes, automated voting, multiple accounts or any other manipulation leads to removal of the votes and disqualification of the related entries.</li>
-      </ul>
-
-      <h2 className={h}>6. Winners</h2>
-      <ul className="mt-2 list-disc space-y-1 pl-5">
-        <li>When the round closes, the look with the most hearts in each country wins that country’s prize, and the looks with the most hearts overall win the international prizes. In a tie, the look that reached the total first wins.</li>
-        <li>GEL.IT.UP checks every winning entry against these rules before announcing it. Winners are contacted by email and must reply within 14 days, or the prize passes to the next entry.</li>
-      </ul>
-
-      <h2 className={h}>7. Prizes</h2>
-      <ul className="mt-2 list-disc space-y-1 pl-5">
-        <li>Prizes are GEL.IT.UP products, chosen from the stock available on the GEL.IT.UP website, up to the value shown for the round. Values refer to website retail prices.</li>
-        <li>Prizes are not paid in cash, cannot be exchanged for money and cannot be transferred.</li>
-        <li>Country prizes are provided and shipped by the official GEL.IT.UP distributor in the winner’s country; international prizes and prizes for countries without a distributor are provided by GEL.IT.UP International. Shipping to the winner is free.</li>
-      </ul>
-
-      <h2 className={h}>8. Removal of entries</h2>
-      <p className="mt-2">GEL.IT.UP may hide or remove entries, and close accounts, that break these rules or are inappropriate. You can delete your own looks at any time while a round is open.</p>
-
-      <h2 className={h}>9. Emails and personal data</h2>
-      <p className="mt-2">Competition emails are only sent to people who opt in, and every email has an unsubscribe link. Personal data is handled under the GEL.IT.UP <Link to="/privacy-policy" className="text-[#D43790] underline">privacy policy</Link>. To have your account and entries deleted, email ambassadors@gelitup.com.</p>
-
-      <h2 className={h}>10. Changes</h2>
-      <p className="mt-2">GEL.IT.UP may update these rules for future rounds. If the rules change, you will be asked to accept the new version before your next entry or vote.</p>
+      <h1 className="mt-3 text-2xl font-black uppercase tracking-[0.1em] text-[#1A1A1A]">{rules.title}</h1>
+      <p className="mt-1 text-xs">{COMPETITION_NAME} · {rules.version} {RULES_VERSION}</p>
+      {rules.sections.map(([heading, paras]) => (
+        <section key={heading}>
+          <h2 className="mt-6 text-sm font-black uppercase tracking-[0.14em] text-[#1A1A1A]">{heading}</h2>
+          {paras.length === 1
+            ? <p className="mt-2">{fill(paras[0])}</p>
+            : <ul className="mt-2 list-disc space-y-1 pl-5">{paras.map((x, i) => <li key={i}>{fill(x)}</li>)}</ul>}
+        </section>
+      ))}
     </article>
   )
 }
@@ -947,8 +953,8 @@ export default function WorldPage() {
       <Routes>
         <Route index element={<Feed ctx={ctx} />} />
         <Route path="upload" element={<UploadPage ctx={ctx} />} />
-        <Route path="rules" element={<RulesPage />} />
-        <Route path="terms" element={<RulesPage />} />
+        <Route path="rules" element={<RulesPage ctx={ctx} />} />
+        <Route path="terms" element={<RulesPage ctx={ctx} />} />
         <Route path="u/:handle" element={<CreatorPage ctx={ctx} />} />
         <Route path="admin" element={<Suspense fallback={null}><WorldAdmin /></Suspense>} />
         <Route path=":entryId" element={<EntryPage ctx={ctx} />} />

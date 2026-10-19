@@ -37,10 +37,11 @@ create table if not exists public.world_rounds (
   description  jsonb not null default '{}'::jsonb,
   starts_at    timestamptz not null,
   ends_at      timestamptz not null,
-  prizes       jsonb not null default '["€300", "€100", "€50"]'::jsonb,  -- international prizes: value of GEL.IT.UP products (no cash)
+  prizes       jsonb not null default '["€1000", "€500", "€300"]'::jsonb, -- 1st/2nd/3rd: value of GEL.IT.UP products (no cash)
   local_prizes jsonb not null default '{}'::jsonb,         -- {"GR": ["€300","€100","€50"]} — products provided by that country's distributor
   max_entries_per_user int not null default 3,
   is_published boolean not null default true,
+  cleaned_at   timestamptz,                               -- when non-winning looks were removed after the round
   constraint world_rounds_dates check (ends_at > starts_at)
 );
 
@@ -63,7 +64,7 @@ create table if not exists public.world_profiles (
   created_at       timestamptz not null default now(),
   handle           text not null unique check (handle ~ '^[a-z0-9._]{2,30}$'),
   display_name     text not null check (char_length(display_name) between 2 and 60),
-  instagram        text check (instagram is null or instagram ~ '^[A-Za-z0-9._]{1,30}$'),
+  instagram        text not null check (instagram ~ '^[A-Za-z0-9._]{1,30}$'),
   country          char(2) not null check (country ~ '^[A-Z]{2}$'),
   adult_confirmed  boolean not null default false check (adult_confirmed),
   -- Registration consents (all required to enter or vote)
@@ -157,6 +158,10 @@ create table if not exists public.world_entries (
   products     jsonb not null default '[]'::jsonb,   -- [{"name": "15 Total Eclipse", "sku": "..."}]
   source_site  text,                             -- e.g. gelitup.com, gelitup.gr
   status       text not null default 'published' check (status in ('published', 'hidden')),
+  -- 1st prize: entrant states she uses GEL.IT.UP and has reviewed every tagged product;
+  -- GEL.IT.UP confirms the reviews before 1st place is awarded.
+  first_prize_claim boolean not null default false,
+  reviews_verified  boolean not null default false,
   vote_count   int not null default 0,
   report_count int not null default 0
 );
@@ -208,6 +213,10 @@ begin
   if n >= r.max_entries_per_user then raise exception 'ENTRY_LIMIT'; end if;
   if new.image_path not like new.user_id::text || '/%' then raise exception 'BAD_IMAGE_PATH'; end if;
   new.country := p.country;
+  new.reviews_verified := false;
+  if new.first_prize_claim and jsonb_array_length(coalesce(new.products, '[]'::jsonb)) = 0 then
+    raise exception 'PRODUCTS_REQUIRED';
+  end if;
   new.vote_count := 0;
   new.report_count := 0;
   new.status := 'published';
@@ -228,6 +237,8 @@ begin
   end if;
   if not public.world_is_admin() then
     new.status := old.status;
+    new.reviews_verified := old.reviews_verified;
+    new.first_prize_claim := old.first_prize_claim;
   end if;
   new.id := old.id;
   new.round_id := old.round_id;
