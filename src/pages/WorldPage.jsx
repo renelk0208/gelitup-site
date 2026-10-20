@@ -803,6 +803,16 @@ function UploadPage({ ctx }) {
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
 
   const results = useMemo(() => searchProducts(allProducts, query).filter(p => !picked.some(x => x.name === p.name)), [allProducts, query, picked])
+  // The basics, always on show as one-tap buttons (matched by keywords, so small title changes in the shop don't break them)
+  const basics = useMemo(() => [
+    ['5-in-1', 'base', 'clear'],
+    ['perfect shape'],
+    ['non wipe top coat 15ml'],
+    ['superbond', 'acid free'],
+  ].map(words => searchProducts(allProducts, words.join(' '), 50)
+    .filter(p => words.every(w => p.name.toLowerCase().includes(w)))
+    .filter(p => words[0] !== 'non wipe top coat 15ml' || !/perfect shape|milky|aurora|flakes/i.test(p.name))[0])
+    .filter(Boolean), [allProducts])
   const max = round?.max_entries_per_user || 1
   const left = Math.max(0, max - used)
   const open = round && new Date(round.ends_at) > new Date()
@@ -883,6 +893,23 @@ function UploadPage({ ctx }) {
         {usedProducts === 'yes' && (
           <div className="mt-4">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#4A4A4A]">{t('listProducts')}</p>
+            {basics.length > 0 && (
+              <div className="mt-2">
+                <p className="text-[11px] text-[#4A4A4A]">{t('basicsLabel')}</p>
+                <div className="mt-1.5 flex flex-wrap gap-2">
+                  {basics.map(p => {
+                    const on = picked.some(x => x.name === p.name)
+                    return (
+                      <button key={p.name} type="button" aria-pressed={on}
+                        onClick={() => { setPicked(list => on ? list.filter(x => x.name !== p.name) : [...list, p].slice(0, 15)); setReviewedAll(false) }}
+                        className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${on ? 'border-[#D43790] bg-[#D43790] text-white' : 'border-[#E8E8E8] bg-white text-[#1A1A1A] hover:border-[#D43790]'}`}>
+                        {on ? '✓ ' : '+ '}{p.name}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
             <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('searchProducts')} className={inputCls} />
             {results.length > 0 && (
               <ul className="mt-1 max-h-64 overflow-y-auto rounded-xl border border-neutral-200 bg-white shadow-lg">
