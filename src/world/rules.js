@@ -8,7 +8,7 @@ const en = {
   version: 'Version',
   sections: [
     ['1. Organiser', [
-      'The competition is organised by GEL.IT.UP International (Thermitek Ltd). Official GEL.IT.UP distributors take part for their own countries and may show the competition on their websites.',
+      'The competition is organised by GEL.IT.UP International. Official GEL.IT.UP distributors take part for their own countries and may show the competition on their websites.',
     ]],
     ['2. Who can enter', [
       'Entrants must be 18 or older and register with a valid email address and their Instagram account.',
@@ -61,7 +61,7 @@ const el = {
   version: 'Έκδοση',
   sections: [
     ['1. Διοργανωτής', [
-      'Τον διαγωνισμό διοργανώνει η GEL.IT.UP International (Thermitek Ltd). Οι επίσημοι διανομείς της GEL.IT.UP συμμετέχουν για τις χώρες τους και μπορούν να προβάλλουν τον διαγωνισμό στις ιστοσελίδες τους.',
+      'Τον διαγωνισμό διοργανώνει η GEL.IT.UP International. Οι επίσημοι διανομείς της GEL.IT.UP συμμετέχουν για τις χώρες τους και μπορούν να προβάλλουν τον διαγωνισμό στις ιστοσελίδες τους.',
     ]],
     ['2. Ποιος μπορεί να συμμετάσχει', [
       'Οι συμμετέχοντες πρέπει να είναι 18 ετών και άνω και να εγγραφούν με έγκυρο email και τον λογαριασμό τους στο Instagram.',
@@ -114,7 +114,7 @@ const bg = {
   version: 'Версия',
   sections: [
     ['1. Организатор', [
-      'Конкурсът се организира от GEL.IT.UP International (Thermitek Ltd). Официалните дистрибутори на GEL.IT.UP участват за своите държави и могат да показват конкурса на своите сайтове.',
+      'Конкурсът се организира от GEL.IT.UP International. Официалните дистрибутори на GEL.IT.UP участват за своите държави и могат да показват конкурса на своите сайтове.',
     ]],
     ['2. Кой може да участва', [
       'Участниците трябва да са навършили 18 години и да се регистрират с валиден имейл и своя Instagram профил.',
@@ -167,7 +167,7 @@ const it = {
   version: 'Versione',
   sections: [
     ['1. Organizzatore', [
-      'Il concorso è organizzato da GEL.IT.UP International (Thermitek Ltd). I distributori ufficiali GEL.IT.UP partecipano per i propri paesi e possono mostrare il concorso sui loro siti.',
+      'Il concorso è organizzato da GEL.IT.UP International. I distributori ufficiali GEL.IT.UP partecipano per i propri paesi e possono mostrare il concorso sui loro siti.',
     ]],
     ['2. Chi può partecipare', [
       'I partecipanti devono avere almeno 18 anni e registrarsi con un indirizzo email valido e il proprio account Instagram.',
@@ -220,7 +220,7 @@ const es = {
   version: 'Versión',
   sections: [
     ['1. Organizador', [
-      'El concurso lo organiza GEL.IT.UP International (Thermitek Ltd). Los distribuidores oficiales de GEL.IT.UP participan por sus países y pueden mostrar el concurso en sus webs.',
+      'El concurso lo organiza GEL.IT.UP International. Los distribuidores oficiales de GEL.IT.UP participan por sus países y pueden mostrar el concurso en sus webs.',
     ]],
     ['2. Quién puede participar', [
       'Los participantes deben tener 18 años o más y registrarse con un email válido y su cuenta de Instagram.',
@@ -273,7 +273,7 @@ const ro = {
   version: 'Versiunea',
   sections: [
     ['1. Organizator', [
-      'Concursul este organizat de GEL.IT.UP International (Thermitek Ltd). Distribuitorii oficiali GEL.IT.UP participă pentru țările lor și pot afișa concursul pe site-urile lor.',
+      'Concursul este organizat de GEL.IT.UP International. Distribuitorii oficiali GEL.IT.UP participă pentru țările lor și pot afișa concursul pe site-urile lor.',
     ]],
     ['2. Cine poate participa', [
       'Participanții trebuie să aibă cel puțin 18 ani și să se înregistreze cu o adresă de email validă și contul lor de Instagram.',
@@ -326,7 +326,7 @@ const pl = {
   version: 'Wersja',
   sections: [
     ['1. Organizator', [
-      'Organizatorem konkursu jest GEL.IT.UP International (Thermitek Ltd). Oficjalni dystrybutorzy GEL.IT.UP uczestniczą w imieniu swoich krajów i mogą pokazywać konkurs na swoich stronach.',
+      'Organizatorem konkursu jest GEL.IT.UP International. Oficjalni dystrybutorzy GEL.IT.UP uczestniczą w imieniu swoich krajów i mogą pokazywać konkurs na swoich stronach.',
     ]],
     ['2. Kto może wziąć udział', [
       'Uczestnicy muszą mieć ukończone 18 lat i zarejestrować się z ważnym adresem e-mail oraz kontem na Instagramie.',
@@ -379,7 +379,7 @@ const fr = {
   version: 'Version',
   sections: [
     ['1. Organisateur', [
-      'Le concours est organisé par GEL.IT.UP International (Thermitek Ltd). Les distributeurs officiels GEL.IT.UP participent pour leur pays et peuvent afficher le concours sur leurs sites.',
+      'Le concours est organisé par GEL.IT.UP International. Les distributeurs officiels GEL.IT.UP participent pour leur pays et peuvent afficher le concours sur leurs sites.',
     ]],
     ['2. Qui peut participer', [
       'Les participants doivent avoir 18 ans ou plus et s’inscrire avec une adresse e-mail valide et leur compte Instagram.',
@@ -432,7 +432,7 @@ const de = {
   version: 'Version',
   sections: [
     ['1. Veranstalter', [
-      'Veranstalter des Wettbewerbs ist GEL.IT.UP International (Thermitek Ltd). Die offiziellen GEL.IT.UP-Distributoren nehmen für ihre Länder teil und können den Wettbewerb auf ihren Websites zeigen.',
+      'Veranstalter des Wettbewerbs ist GEL.IT.UP International. Die offiziellen GEL.IT.UP-Distributoren nehmen für ihre Länder teil und können den Wettbewerb auf ihren Websites zeigen.',
     ]],
     ['2. Wer teilnehmen kann', [
       'Teilnehmende müssen mindestens 18 Jahre alt sein und sich mit einer gültigen E-Mail-Adresse und ihrem Instagram-Konto registrieren.',
@@ -485,7 +485,7 @@ const pt = {
   version: 'Versão',
   sections: [
     ['1. Organizador', [
-      'O concurso é organizado pela GEL.IT.UP International (Thermitek Ltd). Os distribuidores oficiais GEL.IT.UP participam pelos seus países e podem mostrar o concurso nos seus sites.',
+      'O concurso é organizado pela GEL.IT.UP International. Os distribuidores oficiais GEL.IT.UP participam pelos seus países e podem mostrar o concurso nos seus sites.',
     ]],
     ['2. Quem pode participar', [
       'Os participantes têm de ter 18 anos ou mais e registar-se com um email válido e a sua conta de Instagram.',
@@ -538,7 +538,7 @@ const hu = {
   version: 'Verzió',
   sections: [
     ['1. Szervező', [
-      'A versenyt a GEL.IT.UP International (Thermitek Ltd) szervezi. A GEL.IT.UP hivatalos forgalmazói saját országukért vesznek részt, és a versenyt megjeleníthetik weboldalukon.',
+      'A versenyt a GEL.IT.UP International szervezi. A GEL.IT.UP hivatalos forgalmazói saját országukért vesznek részt, és a versenyt megjeleníthetik weboldalukon.',
     ]],
     ['2. Ki vehet részt', [
       'A résztvevőknek legalább 18 évesnek kell lenniük, és érvényes e-mail-címmel és Instagram-fiókjukkal kell regisztrálniuk.',
