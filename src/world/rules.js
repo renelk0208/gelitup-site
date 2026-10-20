@@ -13,7 +13,7 @@ const en = {
     ['2. Who can enter', [
       'Entrants must be 18 or older and register with a valid email address and their Instagram account.',
       "Entry is free and open to nail professionals and students who live in the European Union or in one of the other European countries offered in the entry form, whether or not they currently use GEL.IT.UP products. Prizes are only shipped to these countries. Everyone, anywhere, can register and vote.",
-      'One account per person. Employees of GEL.IT.UP and of its official distributors may enter but cannot win prizes.',
+      'One account per person. Employees and staff of GEL.IT.UP and of its official distributors may not enter.',
     ]],
     ['3. How to enter', [
       'Register, accept these rules and upload a photo of a nail look while a round is open.',
@@ -66,7 +66,7 @@ const el = {
     ['2. Ποιος μπορεί να συμμετάσχει', [
       'Οι συμμετέχοντες πρέπει να είναι 18 ετών και άνω και να εγγραφούν με έγκυρο email και τον λογαριασμό τους στο Instagram.',
       "Η συμμετοχή είναι δωρεάν και ανοιχτή σε επαγγελματίες και σπουδάστριες νυχιών που ζουν στην Ευρωπαϊκή Ένωση ή σε μία από τις άλλες ευρωπαϊκές χώρες της φόρμας συμμετοχής, είτε χρησιμοποιούν ήδη προϊόντα GEL.IT.UP είτε όχι. Τα δώρα αποστέλλονται μόνο σε αυτές τις χώρες. Εγγραφή και ψηφοφορία είναι ανοιχτές σε όλους, από οπουδήποτε.",
-      'Ένας λογαριασμός ανά άτομο. Οι εργαζόμενοι της GEL.IT.UP και των επίσημων διανομέων της μπορούν να συμμετέχουν αλλά δεν μπορούν να κερδίσουν δώρα.',
+      'Ένας λογαριασμός ανά άτομο. Οι εργαζόμενοι και το προσωπικό της GEL.IT.UP και των επίσημων διανομέων της δεν μπορούν να συμμετέχουν.',
     ]],
     ['3. Πώς συμμετέχω', [
       'Κάνε εγγραφή, αποδέξου αυτούς τους κανόνες και ανέβασε μια φωτογραφία με nail look όσο ένας γύρος είναι ανοιχτός.',
@@ -119,7 +119,7 @@ const bg = {
     ['2. Кой може да участва', [
       'Участниците трябва да са навършили 18 години и да се регистрират с валиден имейл и своя Instagram профил.',
       "Участието е безплатно и отворено за професионалисти и студенти по маникюр, които живеят в Европейския съюз или в някоя от другите европейски държави във формуляра за участие, независимо дали в момента използват продукти GEL.IT.UP. Наградите се изпращат само до тези държави. Всеки, от всяка точка на света, може да се регистрира и да гласува.",
-      'Един профил на човек. Служители на GEL.IT.UP и на официалните ѝ дистрибутори могат да участват, но не могат да печелят награди.',
+      'Един профил на човек. Служители и персонал на GEL.IT.UP и на официалните ѝ дистрибутори не могат да участват.',
     ]],
     ['3. Как да участвам', [
       'Регистрирай се, приеми тези правила и качи снимка на маникюр, докато даден кръг е отворен.',
@@ -172,7 +172,7 @@ const it = {
     ['2. Chi può partecipare', [
       'I partecipanti devono avere almeno 18 anni e registrarsi con un indirizzo email valido e il proprio account Instagram.',
       "La partecipazione è gratuita e aperta a professioniste e studentesse del settore unghie che vivono nell’Unione europea o in uno degli altri Paesi europei indicati nel modulo di partecipazione, che usino già o meno i prodotti GEL.IT.UP. I premi vengono spediti solo in questi Paesi. Chiunque, da qualsiasi luogo, può registrarsi e votare.",
-      'Un account per persona. I dipendenti di GEL.IT.UP e dei suoi distributori ufficiali possono partecipare ma non possono vincere premi.',
+      'Un account per persona. I dipendenti e il personale di GEL.IT.UP e dei suoi distributori ufficiali non possono partecipare.',
     ]],
     ['3. Come partecipare', [
       'Registrati, accetta questo regolamento e carica la foto di un nail look mentre un round è aperto.',
@@ -225,7 +225,7 @@ const es = {
     ['2. Quién puede participar', [
       'Los participantes deben tener 18 años o más y registrarse con un email válido y su cuenta de Instagram.',
       "La participación es gratuita y está abierta a profesionales y estudiantes de uñas que vivan en la Unión Europea o en alguno de los otros países europeos indicados en el formulario de participación, usen o no productos GEL.IT.UP. Los premios solo se envían a estos países. Cualquier persona, desde cualquier lugar, puede registrarse y votar.",
-      'Una cuenta por persona. Los empleados de GEL.IT.UP y de sus distribuidores oficiales pueden participar, pero no pueden ganar premios.',
+      'Una cuenta por persona. Los empleados y el personal de GEL.IT.UP y de sus distribuidores oficiales no pueden participar.',
     ]],
     ['3. Cómo participar', [
       'Regístrate, acepta estas bases y sube una foto de un diseño de uñas mientras haya una ronda abierta.',
@@ -278,7 +278,7 @@ const ro = {
     ['2. Cine poate participa', [
       'Participanții trebuie să aibă cel puțin 18 ani și să se înregistreze cu o adresă de email validă și contul lor de Instagram.',
       "Participarea este gratuită și deschisă profesioniștilor și cursanților din domeniul unghiilor care locuiesc în Uniunea Europeană sau într-una dintre celelalte țări europene din formularul de înscriere, indiferent dacă folosesc sau nu produse GEL.IT.UP. Premiile se trimit doar în aceste țări. Oricine, de oriunde, se poate înregistra și vota.",
-      'Un cont de persoană. Angajații GEL.IT.UP și ai distribuitorilor săi oficiali pot participa, dar nu pot câștiga premii.',
+      'Un cont de persoană. Angajații și personalul GEL.IT.UP și ai distribuitorilor săi oficiali nu pot participa.',
     ]],
     ['3. Cum particip', [
       'Înregistrează-te, acceptă acest regulament și încarcă o fotografie cu un look de unghii cât timp o rundă este deschisă.',
@@ -331,7 +331,7 @@ const pl = {
     ['2. Kto może wziąć udział', [
       'Uczestnicy muszą mieć ukończone 18 lat i zarejestrować się z ważnym adresem e-mail oraz kontem na Instagramie.',
       "Udział jest bezpłatny i otwarty dla stylistek paznokci i kursantek mieszkających w Unii Europejskiej lub w jednym z pozostałych krajów europejskich dostępnych w formularzu zgłoszeniowym, niezależnie od tego, czy używają produktów GEL.IT.UP. Nagrody wysyłamy wyłącznie do tych krajów. Zarejestrować się i głosować może każdy, z dowolnego miejsca.",
-      'Jedno konto na osobę. Pracownicy GEL.IT.UP i jej oficjalnych dystrybutorów mogą brać udział, ale nie mogą wygrywać nagród.',
+      'Jedno konto na osobę. Pracownicy i personel GEL.IT.UP oraz jej oficjalnych dystrybutorów nie mogą brać udziału.',
     ]],
     ['3. Jak wziąć udział', [
       'Zarejestruj się, zaakceptuj regulamin i dodaj zdjęcie stylizacji paznokci, gdy runda jest otwarta.',
@@ -384,7 +384,7 @@ const fr = {
     ['2. Qui peut participer', [
       'Les participants doivent avoir 18 ans ou plus et s’inscrire avec une adresse e-mail valide et leur compte Instagram.',
       "La participation est gratuite et ouverte aux professionnelles et élèves de l’onglerie qui résident dans l’Union européenne ou dans l’un des autres pays européens proposés dans le formulaire de participation, qu’elles utilisent ou non les produits GEL.IT.UP. Les prix ne sont envoyés que vers ces pays. Tout le monde, partout, peut s’inscrire et voter.",
-      'Un compte par personne. Les employés de GEL.IT.UP et de ses distributeurs officiels peuvent participer mais ne peuvent pas gagner de prix.',
+      'Un compte par personne. Les employés et le personnel de GEL.IT.UP et de ses distributeurs officiels ne peuvent pas participer.',
     ]],
     ['3. Comment participer', [
       'Inscris-toi, accepte ce règlement et publie une photo d’un nail look pendant qu’une manche est ouverte.',
@@ -437,7 +437,7 @@ const de = {
     ['2. Wer teilnehmen kann', [
       'Teilnehmende müssen mindestens 18 Jahre alt sein und sich mit einer gültigen E-Mail-Adresse und ihrem Instagram-Konto registrieren.',
       "Die Teilnahme ist kostenlos und offen für Nageldesignerinnen und Auszubildende mit Wohnsitz in der Europäischen Union oder in einem der anderen europäischen Länder aus dem Teilnahmeformular, unabhängig davon, ob sie bereits GEL.IT.UP-Produkte verwenden. Preise werden nur in diese Länder versendet. Registrieren und abstimmen kann jede:r, von überall.",
-      'Ein Konto pro Person. Mitarbeitende von GEL.IT.UP und seinen offiziellen Distributoren dürfen teilnehmen, aber keine Preise gewinnen.',
+      'Ein Konto pro Person. Mitarbeitende und Personal von GEL.IT.UP und seinen offiziellen Distributoren dürfen nicht teilnehmen.',
     ]],
     ['3. So nimmst du teil', [
       'Registriere dich, akzeptiere diese Bedingungen und lade ein Foto eines Nagel-Looks hoch, solange eine Runde offen ist.',
@@ -490,7 +490,7 @@ const pt = {
     ['2. Quem pode participar', [
       'Os participantes têm de ter 18 anos ou mais e registar-se com um email válido e a sua conta de Instagram.',
       "A participação é gratuita e aberta a profissionais e estudantes de unhas que vivam na União Europeia ou num dos outros países europeus indicados no formulário de participação, quer usem ou não produtos GEL.IT.UP. Os prémios só são enviados para estes países. Qualquer pessoa, em qualquer lugar, se pode registar e votar.",
-      'Uma conta por pessoa. Os colaboradores da GEL.IT.UP e dos seus distribuidores oficiais podem participar, mas não podem ganhar prémios.',
+      'Uma conta por pessoa. Os colaboradores e o pessoal da GEL.IT.UP e dos seus distribuidores oficiais não podem participar.',
     ]],
     ['3. Como participar', [
       'Regista-te, aceita este regulamento e publica uma foto de um look de unhas enquanto uma ronda estiver aberta.',
@@ -543,7 +543,7 @@ const hu = {
     ['2. Ki vehet részt', [
       'A résztvevőknek legalább 18 évesnek kell lenniük, és érvényes e-mail-címmel és Instagram-fiókjukkal kell regisztrálniuk.',
       "A részvétel ingyenes, és nyitott minden körmös szakember és tanuló számára, aki az Európai Unióban vagy a jelentkezési űrlapon szereplő más európai országok egyikében él, függetlenül attól, hogy jelenleg GEL.IT.UP termékeket használ-e. A nyereményeket csak ezekbe az országokba küldjük. Regisztrálni és szavazni bárki tud, bárhonnan.",
-      'Személyenként egy fiók. A GEL.IT.UP és hivatalos forgalmazóinak munkatársai részt vehetnek, de díjat nem nyerhetnek.',
+      'Személyenként egy fiók. A GEL.IT.UP és hivatalos forgalmazóinak munkatársai és személyzete nem vehetnek részt.',
     ]],
     ['3. Hogyan vehetsz részt', [
       'Regisztrálj, fogadd el ezt a szabályzatot, és tölts fel egy fotót egy köröm-munkáról, amíg egy forduló nyitva van.',
