@@ -558,7 +558,7 @@ create policy world_entries_delete_own on storage.objects
   for delete to authenticated
   using (bucket_id = 'world-entries' and ((storage.foldername(name))[1] = auth.uid()::text or public.world_is_admin()));
 
--- ── First round: Anything Autumn (26 Oct – 14 Nov 2026, Icons of November 2026)
+-- ── First round: Anything Autumn (26 Oct – 15 Nov 2026, Icons of November 2026)
 insert into public.world_rounds (slug, theme, title, description, starts_at, ends_at, icon_month, max_entries_per_user)
 values (
   '2026-11-anything-autumn',
@@ -566,7 +566,7 @@ values (
   '{"en": "Anything Autumn"}',
   '{"en": "Burnt oranges, deep berries, cosy nudes, falling-leaf art: show us your autumn in nails."}',
   '2026-10-26 00:00:00+02',
-  '2026-11-15 00:00:00+02',
+  '2026-11-16 00:00:00+02',
   '2026-11-01',
   1
 )
