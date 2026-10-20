@@ -114,9 +114,9 @@ export function Hero({ round, lang, t, leader, onUpload, uploadHref, country, co
         </div>
         {showRules && (
           <ul className="mx-auto mt-4 max-w-md space-y-2 border-t border-[#E8E8E8] pt-4 text-left text-sm text-[#4A4A4A]">
-            <li>• {t('rule1', { max: round?.max_entries_per_user || 3 })}</li>
-            <li>• {t('rule2')}</li>
-            <li>• {t('rule3')}</li>
+            <li>• <strong className="text-[#1A1A1A]">{t('howEnter')}</strong> {t('rule1', { max: round?.max_entries_per_user || 1 })}</li>
+            <li>• <strong className="text-[#1A1A1A]">{t('howVote')}</strong> {t('rule2')}</li>
+            <li>• <strong className="text-[#1A1A1A]">{t('howWin')}</strong> {t('rule3', { p1: prizes[0] || '€1000', p2: prizes[1] || '€500', p3: prizes[2] || '€300' })}</li>
           </ul>
         )}
 
