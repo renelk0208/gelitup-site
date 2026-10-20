@@ -1607,7 +1607,7 @@ function buildProformaFromCart({
 
     return {
       sku: normalized,
-      description: product?.name || 'Catalog item',
+      description: product?.name || normalized,
       qty,
       unitPriceEur,
       discountPct: 0,
@@ -7704,8 +7704,25 @@ function MobileNav() {
   )
 }
 
+// B2B clients and distributors order ONLY through the portal — never through the
+// retail Shopify shop (shop.gelitup.com), which has retail prices, its own stock
+// and online payment. Anyone logged in to the portal is kept on the portal.
+const B2B_PORTAL_ORDER_PATH = '/portal/dashboard/products'
+function isPortalUserLoggedIn() {
+  try { return localStorage.getItem('portalAuth') === 'true' } catch { return false }
+}
+function isRetailShopUrl(href) {
+  try {
+    const url = new URL(href, window.location.href)
+    // Product review links (Judge.me) are allowed — they are not purchases.
+    return url.hostname === 'shop.gelitup.com' && !url.hash.toLowerCase().includes('judgeme')
+  } catch { return false }
+}
+
 function ExternalRedirect({ to }) {
-  useEffect(() => { window.location.href = to }, [to])
+  useEffect(() => {
+    window.location.href = isPortalUserLoggedIn() && isRetailShopUrl(to) ? B2B_PORTAL_ORDER_PATH : to
+  }, [to])
   return null
 }
 
@@ -8834,7 +8851,7 @@ function PortalLanding() {
             </svg>
           </div>
           <h3 className="mt-3 text-sm font-semibold text-slate-900">Order Management</h3>
-          <p className="mt-1.5 text-xs text-slate-500">Place wholesale orders, track intake status, receive shipment updates and proforma invoices.</p>
+          <p className="mt-1.5 text-xs text-slate-500">Place wholesale orders, track intake status, receive order confirmations and shipment updates.</p>
         </article>
         <article className="rounded-xl border border-slate-200 bg-white p-5">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-fuchsia-100">
@@ -9638,18 +9655,8 @@ function BuyerRegister() {
       if (signUpData?.session) {
         localStorage.setItem('portalAuth', 'true')
         if (window.gtag) window.gtag('event', 'sign_up', { method: 'email' })
-        try {
-          const savedCart = localStorage.getItem(QUICK_CART_STORAGE_KEY)
-          const cartObj = savedCart ? JSON.parse(savedCart) : {}
-          const hasItems = Object.values(cartObj).some(q => q > 0)
-          if (hasItems) {
-            window.location.href = 'https://shop.gelitup.com/pages/ourproducts'
-          } else {
-            navigate('/full-catalogue')
-          }
-        } catch {
-          navigate('/full-catalogue')
-        }
+        // B2B clients order through the portal only — never the retail shop.
+        navigate(B2B_PORTAL_ORDER_PATH)
         return
       }
 
@@ -14687,283 +14694,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
     setCheckoutMessage(`${title} preview popup was blocked by the browser. A printable HTML file was downloaded instead.`)
   }
 
-  const exportProformaPdf = async () => {
-    if (!lastProformaInvoice) return
-    const { jsPDF } = await import('jspdf')
-    const { default: autoTable } = await import('jspdf-autotable')
-
-    const getImageFormat = (dataUrl) => dataUrl.includes('image/jpeg') ? 'JPEG' : 'PNG'
-
-    const uint8ArrayToBinary = (uint8Array) => {
-      const chunkSize = 0x8000
-      let result = ''
-
-      for (let index = 0; index < uint8Array.length; index += chunkSize) {
-        result += String.fromCharCode(...uint8Array.subarray(index, index + chunkSize))
-      }
-
-      return result
-    }
-
-    const loadImageAsDataUrl = async (imagePath) => {
-      const response = await fetch(imagePath)
-      if (!response.ok) {
-        throw new Error(`Unable to load image ${imagePath}`)
-      }
-
-      const blob = await response.blob()
-
-      const dataUrl = await new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onloadend = () => resolve(reader.result)
-        reader.onerror = reject
-        reader.readAsDataURL(blob)
-      })
-
-      if (typeof dataUrl !== 'string') {
-        throw new Error(`Invalid image data for ${imagePath}`)
-      }
-
-      return dataUrl
-    }
-
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' })
-
-    const hasPdfCustomFont = await (async () => {
-      try {
-        const response = await fetch(PORTAL_FONT_TTF_URL)
-        if (!response.ok) return false
-
-        const fontBuffer = await response.arrayBuffer()
-        const fontBinary = uint8ArrayToBinary(new Uint8Array(fontBuffer))
-
-        doc.addFileToVFS('PF-Futura-Neu.ttf', fontBinary)
-        doc.addFont('PF-Futura-Neu.ttf', 'PFFuturaNeu', 'normal')
-        doc.setFont('PFFuturaNeu', 'normal')
-        return true
-      }
-      catch {
-        return false
-      }
-    })()
-
-    if (!hasPdfCustomFont) {
-      doc.setFont('helvetica', 'normal')
-    }
-
-    const pageWidth = doc.internal.pageSize.getWidth()
-    const pageHeight = doc.internal.pageSize.getHeight()
-    const margin = 40
-    const leftLogoMaxWidth = 168
-    const leftLogoMaxHeight = 44
-    const rightLogoMaxWidth = 124
-    const rightLogoMaxHeight = 34
-    const logoY = 24
-    const textColor = [17, 24, 39]
-    let cursorY = 84
-
-    const getContainedSize = (width, height, maxWidth, maxHeight) => {
-      if (!width || !height) {
-        return { width: maxWidth, height: maxHeight }
-      }
-
-      const ratio = Math.min(maxWidth / width, maxHeight / height)
-      return {
-        width: Math.max(1, width * ratio),
-        height: Math.max(1, height * ratio),
-      }
-    }
-
-    const loadImageAsset = async (imagePath, maxWidth, maxHeight) => {
-      const dataUrl = await loadImageAsDataUrl(imagePath)
-      const dimensions = await new Promise((resolve, reject) => {
-        const image = new Image()
-        image.onload = () => {
-          resolve({ width: image.naturalWidth || image.width, height: image.naturalHeight || image.height })
-        }
-        image.onerror = () => reject(new Error(`Unable to read image dimensions for ${imagePath}`))
-        image.src = dataUrl
-      })
-
-      const contained = getContainedSize(dimensions.width, dimensions.height, maxWidth, maxHeight)
-
-      return {
-        dataUrl,
-        format: getImageFormat(dataUrl),
-        width: contained.width,
-        height: contained.height,
-      }
-    }
-
-    const [leftLogoResult, rightLogoResult] = await Promise.allSettled([
-      loadImageAsset(PROFORMA_HEADER.leftLogoPath, leftLogoMaxWidth, leftLogoMaxHeight),
-      loadImageAsset(PROFORMA_HEADER.rightLogoPath, rightLogoMaxWidth, rightLogoMaxHeight),
-    ])
-
-    let leftLogoBottomY = logoY
-    let rightLogoBottomY = logoY
-
-    if (leftLogoResult.status === 'fulfilled') {
-      doc.addImage(
-        leftLogoResult.value.dataUrl,
-        leftLogoResult.value.format,
-        margin,
-        logoY,
-        leftLogoResult.value.width,
-        leftLogoResult.value.height,
-      )
-      leftLogoBottomY = logoY + leftLogoResult.value.height
-    }
-
-    if (rightLogoResult.status === 'fulfilled') {
-      doc.addImage(
-        rightLogoResult.value.dataUrl,
-        rightLogoResult.value.format,
-        pageWidth - margin - rightLogoResult.value.width,
-        logoY,
-        rightLogoResult.value.width,
-        rightLogoResult.value.height,
-      )
-      rightLogoBottomY = logoY + rightLogoResult.value.height
-    }
-
-    doc.setTextColor(...textColor)
-    doc.setFontSize(8)
-    const companyLines = [
-      PROFORMA_HEADER.leeukopfCompany,
-      PROFORMA_HEADER.leeukopfAddress,
-      `Phone: ${PROFORMA_HEADER.leeukopfPhone}`,
-      `Email: ${PROFORMA_HEADER.leeukopfEmail}`,
-    ].filter(Boolean)
-
-    const companyBlockStartY = Math.max(leftLogoBottomY, rightLogoBottomY) + 8
-    const companyLineHeight = 10
-
-    companyLines.forEach((line, index) => {
-      doc.text(String(line), pageWidth - margin, companyBlockStartY + (index * companyLineHeight), {
-        align: 'right',
-      })
-    })
-
-    const companyBlockBottomY = companyBlockStartY + (companyLines.length * companyLineHeight)
-    const headerDividerY = Math.max(companyBlockBottomY, leftLogoBottomY, rightLogoBottomY) + 8
-    cursorY = headerDividerY + 24
-
-    doc.setFontSize(16)
-    doc.text('Pro-Forma / Commercial Invoice (Non-Fiscal)', margin, cursorY)
-    cursorY += 20
-
-    doc.setFontSize(10)
-    const orderMetaLines = [
-      `Order ID: ${lastProformaInvoice.orderId}`,
-      `Date: ${new Date(lastProformaInvoice.createdAtIso).toLocaleString()}`,
-      `Customer: ${lastProformaInvoice.customer.companyName}`,
-      `VIES/VAT: ${lastProformaInvoice.customer.vatNumber}`,
-      `Country: ${lastProformaInvoice.customer.country}`,
-      `Region: ${lastProformaInvoice.customer.region}`,
-      PROFORMA_HEADER.vatTaxId,
-      PROFORMA_HEADER.bankDetails,
-      PROFORMA_HEADER.swiftBic ? `SWIFT/BIC: ${PROFORMA_HEADER.swiftBic}` : null,
-    ]
-
-    orderMetaLines.forEach((line) => {
-      doc.text(line, margin, cursorY)
-      cursorY += 13
-    })
-
-    autoTable(doc, {
-      startY: cursorY + 8,
-      margin: { left: margin, right: margin },
-      styles: {
-        font: hasPdfCustomFont ? 'PFFuturaNeu' : 'helvetica',
-        fontSize: 9,
-        cellPadding: 5,
-        textColor,
-      },
-      headStyles: {
-        fillColor: [241, 245, 249],
-        textColor,
-      },
-      head: [['#', 'SKU', 'Item Name', 'Qty', 'Unit Price (EUR)', 'Discount', 'Subtotal (EUR)']],
-      body: lastProformaInvoice.lines.map((line, index) => ([
-        index + 1,
-        line.sku,
-        line.description,
-        line.qty,
-        formatOptionalCurrency(line.unitPriceEur),
-        line.discountPct ? `${line.discountPct}%` : '-',
-        formatOptionalCurrency(line.subtotalEur),
-      ])),
-      columnStyles: {
-        0: { cellWidth: 26 },
-        1: { cellWidth: 84 },
-        2: { cellWidth: 170 },
-        3: { cellWidth: 42, halign: 'right' },
-        4: { cellWidth: 86, halign: 'right' },
-        5: { cellWidth: 56, halign: 'right' },
-        6: { cellWidth: 86, halign: 'right' },
-      },
-      didDrawPage: () => {
-        doc.setDrawColor(226, 232, 240)
-        doc.line(margin, headerDividerY, pageWidth - margin, headerDividerY)
-      },
-    })
-
-    const tableEndY = doc.lastAutoTable?.finalY || cursorY + 8
-    const footerY = Math.min(tableEndY + 22, pageHeight - 100)
-    const silverFreeBadge = getSilverFreeGuaranteeText(lastProformaInvoice?.createdAtIso)
-
-    // Subtotal, VAT, Grand Total block
-    doc.setFontSize(10)
-    doc.text(`Subtotal (EUR): ${currencyFormatter(lastProformaInvoice.subtotalEur)}`, pageWidth - margin, footerY, { align: 'right' })
-    doc.setFontSize(9)
-    if (lastProformaInvoice.vatPct > 0) {
-      doc.text(`VAT ${lastProformaInvoice.vatPct}%: ${currencyFormatter(lastProformaInvoice.vatAmountEur)}`, pageWidth - margin, footerY + 13, { align: 'right' })
-    } else {
-      doc.setTextColor(80, 100, 80)
-      doc.text(`VAT: ${lastProformaInvoice.vatLabel}`, pageWidth - margin, footerY + 13, { align: 'right' })
-      doc.setTextColor(...textColor)
-    }
-    doc.setFontSize(12)
-    doc.setFont(hasPdfCustomFont ? 'PFFuturaNeu' : 'helvetica', 'bold')
-    doc.text(`Grand Total (EUR): ${currencyFormatter(lastProformaInvoice.grandTotalEur)}`, pageWidth - margin, footerY + 28, { align: 'right' })
-    doc.setFont(hasPdfCustomFont ? 'PFFuturaNeu' : 'helvetica', 'normal')
-
-    // VAT treatment note
-    doc.setFontSize(8)
-    doc.setTextColor(80, 100, 80)
-    doc.text(lastProformaInvoice.vatNote, margin, footerY + 14, { maxWidth: pageWidth - margin * 2 - 180 })
-    doc.setTextColor(...textColor)
-
-    if (silverFreeBadge) {
-      doc.setFontSize(9)
-      doc.setTextColor(217, 70, 239)
-      doc.text(silverFreeBadge, margin, footerY + 28)
-      doc.setTextColor(...textColor)
-    }
-
-    doc.setFontSize(9)
-    doc.text(
-      'This is a Pro-Forma invoice for bank transfer purposes. Production begins upon payment confirmation.',
-      margin,
-      Math.min(footerY + 18, pageHeight - 52),
-    )
-    doc.setTextColor(180, 83, 9)
-    doc.text(
-      'IMPORTANT: Shipping costs are NOT included in this total. Final shipping charges will be calculated and invoiced',
-      margin,
-      Math.min(footerY + 30, pageHeight - 40),
-    )
-    doc.text(
-      'separately once your order is packed. You will be notified of the final shipping amount before dispatch.',
-      margin,
-      Math.min(footerY + 41, pageHeight - 29),
-    )
-    doc.setTextColor(...textColor)
-
-    doc.save(`proforma-order-${lastProformaInvoice.orderId}.pdf`)
-  }
-
   const exportPackingListCsv = () => {
     if (!lastPackingList) return
 
@@ -15418,7 +15148,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
       })
     }
 
-    // Build a SKU → unit price map from the proforma so Zoho uses portal prices,
+    // Build a SKU → unit price map from the order lines so Zoho uses portal prices,
     // not Zoho's own stored list prices, which are almost always different.
     const itemRates = Object.fromEntries(
       proformaInvoice.lines
@@ -15677,7 +15407,6 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         </div>
 
         <div style="background:#f3f3f3;padding:16px 28px;border:1px solid #e5e5e5;border-top:none;border-radius:0 0 4px 4px">
-          <p style="margin:0 0 6px;font-size:12px;color:#444">You can download your pro-forma invoice PDF directly from the B2B portal.</p>
           <p style="margin:0;font-size:12px;color:#888">If you have any questions about your order, please reply to this email.</p>
           <p style="margin:14px 0 0;font-size:12px;color:#1a1a1a">Best regards,<br/><strong>GEL.IT.UP Distribution Team</strong></p>
         </div>
@@ -16060,7 +15789,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                   </li>
                   <li className="flex items-start gap-4">
                     <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-base font-bold text-fuchsia-700">2</span>
-                    <p className="pt-2 text-base leading-relaxed text-slate-700"><strong className="text-slate-900">We confirm &amp; invoice</strong> — a pro-forma invoice is emailed within 1–2 business days.</p>
+                    <p className="pt-2 text-base leading-relaxed text-slate-700"><strong className="text-slate-900">We confirm your order</strong> — you receive an order confirmation by email, and our team confirms stock availability within 1–2 business days.</p>
                   </li>
                   <li className="flex items-start gap-4">
                     <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-base font-bold text-fuchsia-700">3</span>
@@ -16564,7 +16293,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                 </li>
                 <li className="flex items-start gap-4">
                   <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-base font-bold text-fuchsia-700">2</span>
-                  <p className="pt-2 text-base leading-relaxed text-slate-700"><strong className="text-slate-900">We confirm &amp; invoice</strong> — a pro-forma invoice is emailed within 1–2 business days. Stock availability is confirmed at this stage.</p>
+                  <p className="pt-2 text-base leading-relaxed text-slate-700"><strong className="text-slate-900">We confirm your order</strong> — you receive an order confirmation by email, and our team confirms stock availability within 1–2 business days.</p>
                 </li>
                 <li className="flex items-start gap-4">
                   <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-base font-bold text-fuchsia-700">3</span>
@@ -17010,7 +16739,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
         {checkoutMessage && lastProformaInvoice && (
           <div className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 p-2">
             <p className="text-xs text-emerald-900">
-              Pro-Forma ready — Base product total ({EUR_CURRENCY_CODE}): {currencyFormatter(lastProformaInvoice.grandTotalEur)}
+              Order confirmation #{lastProformaInvoice.orderId} — order total ({EUR_CURRENCY_CODE}): {currencyFormatter(lastProformaInvoice.grandTotalEur)}
             </p>
           </div>
         )}
@@ -20372,6 +20101,19 @@ function FooterSocialIcon({ platform }) {
 function App() {
   const routerLocation = useLocation()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const keepPortalUsersOffRetailShop = (event) => {
+      if (event.defaultPrevented || event.button !== 0) return
+      const link = event.target?.closest?.('a[href]')
+      if (!link || !isRetailShopUrl(link.href) || !isPortalUserLoggedIn()) return
+      event.preventDefault()
+      event.stopPropagation()
+      navigate(B2B_PORTAL_ORDER_PATH)
+    }
+    document.addEventListener('click', keepPortalUsersOffRetailShop, true)
+    return () => document.removeEventListener('click', keepPortalUsersOffRetailShop, true)
+  }, [navigate])
   const [isPortalAuthenticated, setIsPortalAuthenticated] = useState(() => localStorage.getItem('portalAuth') === 'true')
   // IMPORTANT: never bootstrap isAdminSession from localStorage.
   // Always verify against the DB before routing. Defaulting to false means a legitimate

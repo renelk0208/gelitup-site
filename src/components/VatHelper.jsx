@@ -65,7 +65,7 @@ export default function VatHelper({
       )}
       {verifyError && <p className="mt-1.5 text-xs text-rose-600">{verifyError}</p>}
       <p className="mt-1 text-[11px] text-slate-400">
-        VAT is optional — add it to appear on your pro forma invoices.
+        VAT is optional — add it to appear on your invoices.
       </p>
     </div>
   )

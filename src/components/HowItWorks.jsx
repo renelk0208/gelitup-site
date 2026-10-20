@@ -2,7 +2,7 @@
  * HowItWorks
  *
  * Explains the B2B ordering process clearly so visitors are
- * never surprised by the pro forma invoice model.
+ * never surprised by how ordering works.
  *
  * Two variants:
  *   variant="banner"   — compact horizontal strip for checkout sidebar (default)
