@@ -209,7 +209,7 @@ function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews,
       {onAskReviews && (row._shipments || []).some((s) => s.sent_at && !s.lost_at) && (
         <p className="mt-1 text-[11px]">
           {row.review_requested_at && <span className="text-sky-700">★ Asked for reviews {fmt(row.review_requested_at)} ({Object.keys(row.review_requests || {}).length}) · </span>}
-          <button type="button" onClick={() => onAskReviews(row)} disabled={busy} className="font-semibold text-fuchsia-700 hover:underline">★ {row.review_requested_at ? 'Ask for more reviews' : 'Ask for reviews'}</button>
+          <button type="button" onClick={() => onAskReviews(row)} disabled={busy} className="font-semibold text-fuchsia-700 hover:underline">★ {row.review_draft?.items?.length ? 'Review email ready to send' : row.review_requested_at ? 'Ask for more reviews' : 'Ask for reviews'}</button>
         </p>
       )}
       <NotesBlock row={row} notesApi={notesApi} busy={busy} />

@@ -5,6 +5,8 @@ const escAmb = (v) => String(v ?? '').replaceAll('&', '&amp;').replaceAll('<', '
 
 // One email with every product she received, each with a button to its review
 // form on shop.gelitup.com. The reviews are collected by Judge.me.
+// A product may carry its own `url` (e.g. a collection page when the exact
+// product she received isn't known).
 export function buildAmbassadorReviewRequestEmail(row, products, lang) {
   const t = reviewEmailText(lang || row?.language)
   const firstName = String(row?.full_name || '').trim().split(/\s+/)[0] || 'there'
@@ -14,7 +16,7 @@ export function buildAmbassadorReviewRequestEmail(row, products, lang) {
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
           <td width="72" valign="middle" style="padding-right:14px">${p.image ? `<img src="${escAmb(`${p.image}${String(p.image).includes('?') ? '&' : '?'}width=200`)}" width="64" height="64" alt="" style="display:block;width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #e8e8e8"/>` : ''}</td>
           <td valign="middle" style="font-size:14px;color:#1a1a1a;font-weight:700">${escAmb(p.title)}</td>
-          <td valign="middle" align="right" style="white-space:nowrap"><a href="${escAmb(productUrl(p.handle))}" style="display:inline-block;background:#d43790;color:#ffffff;padding:9px 14px;border-radius:9999px;text-decoration:none;font-weight:700;font-size:13px">${t.button}</a></td>
+          <td valign="middle" align="right" style="white-space:nowrap"><a href="${escAmb(p.url || productUrl(p.handle))}" style="display:inline-block;background:#d43790;color:#ffffff;padding:9px 14px;border-radius:9999px;text-decoration:none;font-weight:700;font-size:13px">${t.button}</a></td>
         </tr></table>
       </td></tr>`).join('')
   return {

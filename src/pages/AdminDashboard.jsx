@@ -5974,7 +5974,17 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       return []
     }
   }
+  // The name used in the email greeting: a prepared email may set it (e.g. her
+  // first name when the profile has the surname first).
+  const reviewNameRow = (m) => (m.draftName ? { ...m.row, full_name: m.draftName } : m.row)
   const openReviewRequest = async (row) => {
+    const draft = row.review_draft
+    if (Array.isArray(draft?.items) && draft.items.length) {
+      // A review email prepared in advance: open it ready to send, with its preview.
+      setReviewModal({ row, picked: draft.items, query: '', sending: false, preview: true, loading: false, lang: draft.lang || reviewEmailLang(row.language), draftName: draft.name || '', fromDraft: true })
+      loadShopProducts()
+      return
+    }
     setReviewModal({ row, picked: [], query: '', sending: false, preview: false, loading: true, lang: reviewEmailLang(row.language) })
     const products = await loadShopProducts()
     const asked = row.review_requests || {}
@@ -5991,14 +6001,14 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (!email) { alert('This ambassador has no email address.'); return }
     if (!window.confirm(`Send the review email to ${m.row.full_name} (${email}) for ${m.picked.length} product${m.picked.length === 1 ? '' : 's'}?`)) return
     setReviewModal({ ...m, sending: true })
-    const { subject, html } = buildAmbassadorReviewRequestEmail(m.row, m.picked, m.lang)
+    const { subject, html } = buildAmbassadorReviewRequestEmail(reviewNameRow(m), m.picked, m.lang)
     const res = await sendAmbassadorEmail({ to: email, subject, html })
     if (!res.ok) { setReviewModal({ ...m, sending: false }); alert(`Email not sent: ${res.error || 'unknown error'}`); return }
     const at = new Date().toISOString()
     const next = { ...(m.row.review_requests || {}) }
     for (const p of m.picked) next[p.handle] = { title: p.title, at }
-    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ review_requests: next, review_requested_at: at }).eq('id', m.row.id)
-    patchRow(m.row.id, { review_requests: next, review_requested_at: at })
+    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ review_requests: next, review_requested_at: at, review_draft: null }).eq('id', m.row.id)
+    patchRow(m.row.id, { review_requests: next, review_requested_at: at, review_draft: null })
     setReviewModal(null)
     alert(err ? `Email sent, but it could not be saved as asked: ${err.message}` : `Review email sent to ${m.row.full_name}.`)
   }
@@ -8856,12 +8866,13 @@ const deleteApplication = async (row) => {
         const isPicked = (h) => m.picked.some((p) => p.handle === h)
         const toggle = (p) => setReviewModal((cur) => ({ ...cur, picked: isPicked(p.handle) ? cur.picked.filter((x) => x.handle !== p.handle) : [...cur.picked, p] }))
         const results = searchProducts(shopProducts || [], m.query)
-        const preview = m.preview ? buildAmbassadorReviewRequestEmail(m.row, m.picked, m.lang) : null
+        const preview = m.preview ? buildAmbassadorReviewRequestEmail(reviewNameRow(m), m.picked, m.lang) : null
         return (
           <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4" onClick={() => !m.sending && setReviewModal(null)}>
             <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
               <h3 className="text-base font-bold text-slate-900">★ Ask {m.row.full_name} for reviews</h3>
               <p className="mt-1 text-xs text-slate-500">One email with all the products below. Each has a button to its review form on shop.gelitup.com — the reviews go into Judge.me.</p>
+              {m.fromDraft && <p className="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-800">This email was prepared in advance and is ready to send. Products marked "choose the one you received" link to their collection page.</p>}
               {shopProductsError && <p className="mt-2 text-xs text-rose-600">{shopProductsError}</p>}
               <div className="mt-3 flex-1 space-y-4 overflow-y-auto pr-1">
                 {m.loading ? <p className="text-xs text-slate-500">Loading the shop products…</p> : (<>
