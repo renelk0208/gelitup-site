@@ -42,7 +42,7 @@ const en = {
     ['7. Prizes', [
       'Prizes are GEL.IT.UP products, chosen from the stock available on the GEL.IT.UP website, up to the value of the prize. Values refer to website retail prices.',
       'Prizes are not paid in cash, cannot be exchanged for money and cannot be transferred.',
-      'Prizes are shipped free of charge by the official GEL.IT.UP distributor in the winner’s country, or by GEL.IT.UP International where there is no distributor.',
+      'Prizes are shipped free of charge by GEL.IT.UP International. For winners outside the EU customs area (for example Switzerland, Norway, Serbia or Albania, and some EU territories such as the Canary Islands), import VAT, duties or customs fees may apply on arrival and are paid by the winner.',
     ]],
     ['8. Removal of entries', [
       'GEL.IT.UP may hide or remove entries, and close accounts, that break these rules or are inappropriate. You can delete your own looks at any time while a round is open.',
@@ -95,7 +95,7 @@ const el = {
     ['7. Δώρα', [
       'Τα δώρα είναι προϊόντα GEL.IT.UP, από το απόθεμα της ιστοσελίδας GEL.IT.UP, έως την αξία του δώρου. Οι αξίες αφορούν τις λιανικές τιμές της ιστοσελίδας.',
       'Τα δώρα δεν δίνονται σε μετρητά, δεν ανταλλάσσονται με χρήματα και δεν μεταβιβάζονται.',
-      'Τα δώρα αποστέλλονται δωρεάν από τον επίσημο διανομέα GEL.IT.UP της χώρας του νικητή ή από τη GEL.IT.UP International όπου δεν υπάρχει διανομέας.',
+      'Τα δώρα αποστέλλονται δωρεάν από τη GEL.IT.UP International. Για νικήτριες εκτός της τελωνειακής περιοχής της ΕΕ (για παράδειγμα Ελβετία, Νορβηγία, Σερβία ή Αλβανία, καθώς και ορισμένα εδάφη της ΕΕ όπως τα Κανάρια Νησιά), ενδέχεται να ισχύουν ΦΠΑ εισαγωγής, δασμοί ή τελωνειακά τέλη κατά την παραλαβή, τα οποία πληρώνει η νικήτρια.',
     ]],
     ['8. Αφαίρεση συμμετοχών', [
       'Η GEL.IT.UP μπορεί να αποκρύψει ή να αφαιρέσει συμμετοχές και να κλείσει λογαριασμούς που παραβιάζουν αυτούς τους κανόνες ή είναι ακατάλληλοι. Μπορείς να διαγράψεις τα δικά σου looks όποτε θέλεις όσο ο γύρος είναι ανοιχτός.',
@@ -148,7 +148,7 @@ const bg = {
     ['7. Награди', [
       'Наградите са продукти GEL.IT.UP, избрани от наличните на сайта на GEL.IT.UP, до стойността на наградата. Стойностите се отнасят до цените на дребно в сайта.',
       'Наградите не се изплащат в брой, не могат да се заменят за пари и не могат да се прехвърлят.',
-      'Наградите се изпращат безплатно от официалния дистрибутор на GEL.IT.UP в държавата на победителя или от GEL.IT.UP International, където няма дистрибутор.',
+      'Наградите се изпращат безплатно от GEL.IT.UP International. За победители извън митническата територия на ЕС (например Швейцария, Норвегия, Сърбия или Албания, както и някои територии на ЕС като Канарските острови) при получаване може да се дължат ДДС при внос, мита или митнически такси, които се заплащат от победителя.',
     ]],
     ['8. Премахване на участия', [
       'GEL.IT.UP може да скрие или премахне участия и да закрие профили, които нарушават тези правила или са неподходящи. Можеш да изтриеш собствените си дизайни по всяко време, докато кръгът е отворен.',
@@ -201,7 +201,7 @@ const it = {
     ['7. Premi', [
       'I premi sono prodotti GEL.IT.UP, scelti tra quelli disponibili sul sito GEL.IT.UP, fino al valore del premio. I valori si riferiscono ai prezzi al dettaglio del sito.',
       'I premi non sono pagati in contanti, non possono essere convertiti in denaro e non sono trasferibili.',
-      'I premi vengono spediti gratuitamente dal distributore ufficiale GEL.IT.UP del paese della vincitrice, oppure da GEL.IT.UP International dove non c’è un distributore.',
+      'I premi vengono spediti gratuitamente da GEL.IT.UP International. Per le vincitrici al di fuori del territorio doganale dell’UE (ad esempio Svizzera, Norvegia, Serbia o Albania, e alcuni territori UE come le Isole Canarie), all’arrivo possono essere applicati IVA all’importazione, dazi o spese doganali, a carico della vincitrice.',
     ]],
     ['8. Rimozione delle partecipazioni', [
       'GEL.IT.UP può nascondere o rimuovere partecipazioni e chiudere account che violano questo regolamento o sono inappropriati. Puoi eliminare i tuoi look in qualsiasi momento mentre il round è aperto.',
@@ -254,7 +254,7 @@ const es = {
     ['7. Premios', [
       'Los premios son productos GEL.IT.UP, elegidos entre el stock disponible en la web de GEL.IT.UP, hasta el valor del premio. Los valores corresponden a los precios de venta de la web.',
       'Los premios no se pagan en efectivo, no se pueden canjear por dinero y son intransferibles.',
-      'Los premios se envían gratis desde el distribuidor oficial de GEL.IT.UP en el país de la ganadora, o desde GEL.IT.UP International donde no haya distribuidor.',
+      'Los premios se envían gratis desde GEL.IT.UP International. Para ganadoras fuera del territorio aduanero de la UE (por ejemplo Suiza, Noruega, Serbia o Albania, y algunos territorios de la UE como las Islas Canarias), a la llegada pueden aplicarse IVA de importación, aranceles o gastos de aduana, que paga la ganadora.',
     ]],
     ['8. Retirada de participaciones', [
       'GEL.IT.UP puede ocultar o retirar participaciones y cerrar cuentas que incumplan estas bases o sean inapropiadas. Puedes eliminar tus looks en cualquier momento mientras la ronda esté abierta.',
@@ -307,7 +307,7 @@ const ro = {
     ['7. Premii', [
       'Premiile sunt produse GEL.IT.UP, alese din stocul disponibil pe site-ul GEL.IT.UP, până la valoarea premiului. Valorile se referă la prețurile de vânzare de pe site.',
       'Premiile nu se acordă în bani, nu pot fi schimbate pe bani și nu sunt transferabile.',
-      'Premiile sunt trimise gratuit de distribuitorul oficial GEL.IT.UP din țara câștigătoarei sau de GEL.IT.UP International acolo unde nu există distribuitor.',
+      'Premiile sunt trimise gratuit de GEL.IT.UP International. Pentru câștigătoarele din afara teritoriului vamal al UE (de exemplu Elveția, Norvegia, Serbia sau Albania, precum și unele teritorii ale UE, cum ar fi Insulele Canare), la sosire se pot aplica TVA la import, taxe vamale sau comisioane vamale, plătite de câștigătoare.',
     ]],
     ['8. Eliminarea participărilor', [
       'GEL.IT.UP poate ascunde sau elimina participări și închide conturi care încalcă acest regulament sau sunt nepotrivite. Îți poți șterge oricând propriile look-uri cât timp runda este deschisă.',
@@ -360,7 +360,7 @@ const pl = {
     ['7. Nagrody', [
       'Nagrodami są produkty GEL.IT.UP wybrane z asortymentu dostępnego na stronie GEL.IT.UP, do wartości nagrody. Wartości odnoszą się do cen detalicznych na stronie.',
       'Nagrody nie są wypłacane w gotówce, nie można ich wymienić na pieniądze ani przekazać innej osobie.',
-      'Nagrody wysyła bezpłatnie oficjalny dystrybutor GEL.IT.UP w kraju zwyciężczyni lub GEL.IT.UP International, jeśli w danym kraju nie ma dystrybutora.',
+      'Nagrody wysyła bezpłatnie GEL.IT.UP International. W przypadku zwyciężczyń spoza obszaru celnego UE (na przykład Szwajcaria, Norwegia, Serbia lub Albania oraz niektóre terytoria UE, takie jak Wyspy Kanaryjskie) przy odbiorze mogą zostać naliczone VAT importowy, cło lub opłaty celne, które pokrywa zwyciężczyni.',
     ]],
     ['8. Usuwanie zgłoszeń', [
       'GEL.IT.UP może ukryć lub usunąć zgłoszenia oraz zamknąć konta naruszające regulamin lub niestosowne. Możesz usunąć swoje stylizacje w każdej chwili, dopóki runda jest otwarta.',
@@ -413,7 +413,7 @@ const fr = {
     ['7. Prix', [
       'Les prix sont des produits GEL.IT.UP choisis parmi le stock disponible sur le site GEL.IT.UP, jusqu’à la valeur du prix. Les valeurs correspondent aux prix de vente du site.',
       'Les prix ne sont pas versés en espèces, ne peuvent pas être échangés contre de l’argent et ne sont pas transférables.',
-      'Les prix sont envoyés gratuitement par le distributeur officiel GEL.IT.UP du pays de la gagnante, ou par GEL.IT.UP International en l’absence de distributeur.',
+      'Les prix sont envoyés gratuitement par GEL.IT.UP International. Pour les gagnantes situées hors du territoire douanier de l’UE (par exemple la Suisse, la Norvège, la Serbie ou l’Albanie, ainsi que certains territoires de l’UE comme les îles Canaries), la TVA à l’importation, des droits ou des frais de douane peuvent s’appliquer à la livraison et sont à la charge de la gagnante.',
     ]],
     ['8. Retrait des participations', [
       'GEL.IT.UP peut masquer ou supprimer des participations et fermer des comptes qui enfreignent ce règlement ou sont inappropriés. Tu peux supprimer tes looks à tout moment tant que la manche est ouverte.',
@@ -466,7 +466,7 @@ const de = {
     ['7. Preise', [
       'Die Preise sind GEL.IT.UP-Produkte aus dem auf der GEL.IT.UP-Website verfügbaren Sortiment, bis zum Wert des Preises. Die Werte beziehen sich auf die Verkaufspreise der Website.',
       'Die Preise werden nicht in bar ausgezahlt, können nicht gegen Geld eingetauscht und nicht übertragen werden.',
-      'Die Preise werden kostenlos vom offiziellen GEL.IT.UP-Distributor im Land der Gewinnerin versendet, oder von GEL.IT.UP International, wenn es dort keinen Distributor gibt.',
+      'Die Preise werden kostenlos von GEL.IT.UP International versendet. Für Gewinnerinnen außerhalb des EU-Zollgebiets (zum Beispiel Schweiz, Norwegen, Serbien oder Albanien sowie einige EU-Gebiete wie die Kanarischen Inseln) können bei der Zustellung Einfuhrumsatzsteuer, Zölle oder Zollgebühren anfallen, die von der Gewinnerin zu tragen sind.',
     ]],
     ['8. Entfernung von Beiträgen', [
       'GEL.IT.UP kann Beiträge ausblenden oder entfernen und Konten schließen, die gegen diese Bedingungen verstoßen oder unangemessen sind. Du kannst deine eigenen Looks jederzeit löschen, solange die Runde offen ist.',
@@ -519,7 +519,7 @@ const pt = {
     ['7. Prémios', [
       'Os prémios são produtos GEL.IT.UP, escolhidos do stock disponível no site da GEL.IT.UP, até ao valor do prémio. Os valores referem-se aos preços de venda do site.',
       'Os prémios não são pagos em dinheiro, não podem ser trocados por dinheiro e são intransmissíveis.',
-      'Os prémios são enviados gratuitamente pelo distribuidor oficial GEL.IT.UP do país da vencedora, ou pela GEL.IT.UP International onde não exista distribuidor.',
+      'Os prémios são enviados gratuitamente pela GEL.IT.UP International. Para vencedoras fora do território aduaneiro da UE (por exemplo Suíça, Noruega, Sérvia ou Albânia, e alguns territórios da UE como as Ilhas Canárias), à chegada podem ser cobrados IVA de importação, direitos ou taxas aduaneiras, pagos pela vencedora.',
     ]],
     ['8. Remoção de participações', [
       'A GEL.IT.UP pode ocultar ou remover participações e encerrar contas que violem este regulamento ou sejam inadequadas. Podes eliminar os teus looks a qualquer momento enquanto a ronda estiver aberta.',
@@ -572,7 +572,7 @@ const hu = {
     ['7. Díjak', [
       'A díjak GEL.IT.UP termékek, a GEL.IT.UP weboldalán elérhető készletből, a díj értékéig. Az értékek a weboldal kiskereskedelmi áraira vonatkoznak.',
       'A díjak készpénzben nem fizethetők ki, pénzre nem válthatók és nem ruházhatók át.',
-      'A díjakat a nyertes országában működő hivatalos GEL.IT.UP forgalmazó küldi ki ingyenesen, vagy a GEL.IT.UP International, ha ott nincs forgalmazó.',
+      'A díjakat a GEL.IT.UP International küldi ki ingyenesen. Az EU vámterületén kívüli nyertesek esetében (például Svájc, Norvégia, Szerbia vagy Albánia, valamint egyes uniós területek, például a Kanári-szigetek) átvételkor behozatali áfa, vám vagy vámkezelési díj merülhet fel, amelyet a nyertes fizet.',
     ]],
     ['8. Nevezések eltávolítása', [
       'A GEL.IT.UP elrejtheti vagy eltávolíthatja a szabályzatot sértő vagy nem megfelelő nevezéseket, és megszüntetheti az ilyen fiókokat. Saját munkáidat bármikor törölheted, amíg a forduló nyitva van.',
