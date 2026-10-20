@@ -15793,7 +15793,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                   </li>
                   <li className="flex items-start gap-4">
                     <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-base font-bold text-fuchsia-700">3</span>
-                    <p className="pt-2 text-base leading-relaxed text-slate-700"><strong className="text-slate-900">Pay &amp; receive</strong> — once payment is received, your order is packed and dispatched.</p>
+                    <p className="pt-2 text-base leading-relaxed text-slate-700"><strong className="text-slate-900">Packed &amp; dispatched</strong> — once your order is confirmed, our team packs and dispatches it to you.</p>
                   </li>
                 </ol>
               </div>
@@ -16297,7 +16297,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
                 </li>
                 <li className="flex items-start gap-4">
                   <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-fuchsia-100 text-base font-bold text-fuchsia-700">3</span>
-                  <p className="pt-2 text-base leading-relaxed text-slate-700"><strong className="text-slate-900">Pay &amp; receive</strong> — once payment is received, your order is packed and dispatched.</p>
+                  <p className="pt-2 text-base leading-relaxed text-slate-700"><strong className="text-slate-900">Packed &amp; dispatched</strong> — once your order is confirmed, our team packs and dispatches it to you.</p>
                 </li>
               </ol>
             </div>
