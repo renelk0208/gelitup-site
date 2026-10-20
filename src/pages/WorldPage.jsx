@@ -803,7 +803,7 @@ function UploadPage({ ctx }) {
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
 
   const results = useMemo(() => searchProducts(allProducts, query).filter(p => !picked.some(x => x.name === p.name)), [allProducts, query, picked])
-  const max = round?.max_entries_per_user || 3
+  const max = round?.max_entries_per_user || 1
   const left = Math.max(0, max - used)
   const open = round && new Date(round.ends_at) > new Date()
 

@@ -18,7 +18,7 @@ const en = {
     ['3. How to enter', [
       'Register, accept these rules and upload a photo of a nail look while a round is open.',
       'Every round has a theme (for example Halloween, Best French or Christmas). Your nails must match the theme of the round. Looks that do not match the theme may be removed.',
-      'Each round has a maximum number of looks per person, shown on the competition page.',
+      'Each person may enter one look per round.',
       'The look and the photo must be your own work. Photos must not be edited in a way that misrepresents the work, must not show another person’s face without their consent, and must not include other brands’ logos or offensive content.',
       "Captions, product tags and photos must not name, show or promote any brand other than GEL.IT.UP.",
       "Every new look is checked by our team before it appears in the competition, usually within 24 hours. Only approved looks can receive hearts.",

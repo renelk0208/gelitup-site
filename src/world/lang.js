@@ -1,13 +1,9 @@
 import { WORLD_LANGS } from './i18n'
 
 // Language for World of GEL.IT.UP.
-// English by default; otherwise the language of the visitor's location.
-//
-// Order:
-//   1. ?lang=xx in the link (carried over from the widget on country sites)
-//   2. a language the visitor picked with the site's language switcher
-//   3. the visitor's country (Netlify geo lookup) → that country's language
-//   4. English
+// Always English. The only exception is a link that explicitly asks for a
+// language with ?lang=xx (used later by the embed on country sites).
+// The visitor's location and the site's language switcher do NOT change it.
 
 export const COUNTRY_LANG = {
   GR: 'el', CY: 'el',
@@ -49,11 +45,6 @@ function explicitLang() {
     const q = new URLSearchParams(window.location.search).get('lang')
     if (q && WORLD_LANGS.includes(q)) return q
   } catch { /* ignore */ }
-  try {
-    // Only set when the visitor chooses a language with the site's switcher
-    const picked = localStorage.getItem('gelitup_lang')
-    if (picked && WORLD_LANGS.includes(picked)) return picked
-  } catch { /* ignore */ }
   return ''
 }
 
@@ -61,6 +52,7 @@ function explicitLang() {
 export async function detectWorldLang({ fallback = 'en', useExplicit = true } = {}) {
   const country = await detectCountry()
   const explicit = useExplicit ? explicitLang() : ''
-  const lang = explicit || COUNTRY_LANG[country] || (WORLD_LANGS.includes(fallback) ? fallback : 'en')
+  // Country is still detected (eligibility, default country), never the language.
+  const lang = explicit || (WORLD_LANGS.includes(fallback) ? fallback : 'en')
   return { lang, country }
 }
