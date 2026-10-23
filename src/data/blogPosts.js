@@ -4,9 +4,197 @@ const HEMA_GUIDE_MEDIA = '/gelitup-media/blog/what-is-hema-in-gel-polish'
 const WHAT_SETS_US_APART_MEDIA = '/gelitup-media/blog/what-makes-us-different'
 const BIAB_COMPARISON_MEDIA = '/gelitup-media/blog/biab-vs-builder-gel-vs-polygel'
 
+const SUPPLIER_CHECKLIST_MEDIA = '/gelitup-media/blog/wholesale-gel-polish-supplier-checklist'
+
 const SHOP = 'https://shop.gelitup.com'
 
 export const blogPosts = [
+  {
+    slug: 'wholesale-gel-polish-supplier-checklist',
+    category: 'Buying & business',
+    title: "How to Choose a Wholesale Gel Polish Supplier in the EU: A Buyer's Checklist for Salons and Resellers",
+    shortTitle: 'How to Choose a Wholesale Gel Polish Supplier in the EU',
+    excerpt: 'A 10-point checklist to verify compliance, ingredients, terms and support before you place your first wholesale gel polish order in the EU.',
+    metaTitle: 'Wholesale Gel Polish Supplier Checklist for the EU | GEL.IT.UP',
+    metaDescription: 'Buying wholesale gel polish in the EU? Use this 10-point checklist to verify compliance, ingredients, terms and support before you place your first order.',
+    // Goes live automatically at 00:00 Athens time on this date (see isPostLive below).
+    publishedAt: '2026-11-09',
+    publishedLabel: '9 November 2026',
+    readTime: '7 min read',
+    heroImage: `${SUPPLIER_CHECKLIST_MEDIA}/hero.jpg`,
+    heroAlt: 'Wholesale gel polish supplier checklist for salons and resellers in the EU',
+    calloutImage: `${SUPPLIER_CHECKLIST_MEDIA}/hero.jpg`,
+    calloutAfterSection: -1, // same image as the header, so no mid-article repeat
+    closingImage: `${SUPPLIER_CHECKLIST_MEDIA}/hero.jpg`,
+    closingAlt: 'Apply for a GEL.IT.UP trade account for salons, academies and resellers.',
+    ctaLabel: 'Apply for a GEL.IT.UP® trade account — gelitup.com',
+    ctaUrl: 'https://gelitup.com/wholesale',
+    tags: ['Wholesale', 'EU Compliance', 'Buyer Checklist'],
+    intro: [
+      'Your supplier decides what goes on your clients’ hands. It also decides your margins, your stock levels and your reputation.',
+      'Pick well and you get consistent product, clean paperwork and a partner who answers the phone. Pick badly and you inherit compliance risk, patchy batches and delayed orders.',
+      'This checklist covers what to verify before you order wholesale gel polish in the EU. Use it for every new supplier, and re-run it on the ones you already have.',
+    ],
+    sections: [
+      {
+        title: '1. EC 1223/2009 compliance and CPNP notification',
+        paragraphs: [
+          'Gel polish sold in the EU is a cosmetic product. That means it must comply with Regulation (EC) No 1223/2009.',
+          'Ask the supplier:',
+        ],
+        bullets: [
+          'Is every product notified on the CPNP (Cosmetic Products Notification Portal)?',
+          'Is there a Responsible Person established in the EU?',
+          'Can they supply the safety documentation on request?',
+        ],
+        after: [
+          'A supplier who hesitates on any of these is a risk to your business. Responsible Persons carry legal duties. If you resell, you carry some of them too.',
+        ],
+      },
+      {
+        title: '2. Full INCI lists for every SKU',
+        paragraphs: [
+          'Not one hero product. Every SKU.',
+          'A professional supplier publishes the full ingredient list for each polish, base coat, top coat and builder gel. If you have to chase for them, treat that as a warning sign.',
+          'Why it matters: your clients ask what is in the bottle. So do your insurers. For a deeper look at reading labels, see our guide on [Why Ingredient Labels Matter More Than Ever](/blog/why-ingredient-labels-matter).',
+        ],
+      },
+      {
+        title: '3. HEMA and TPO status across the whole system',
+        paragraphs: [
+          'Many brands advertise one “free” polish and quietly leave HEMA or TPO in the base, top coat or builder.',
+          'Check the entire system:',
+        ],
+        bullets: [
+          'Colour gels',
+          'Base and top coats',
+          'Builder gels and extension products',
+        ],
+        after: [
+          'Mixed systems create mixed risk. Sensitisation builds up across every layer a client wears, not just the colour. Read the ingredient list of each product you plan to layer, including builders and specialist gels.',
+          'New to the terminology? Start with [What is HEMA in Gel Polish?](/blog/what-is-hema-in-gel-polish) and [What is TPO in Gel Nails?](/blog/what-is-tpo-in-gel-nails).',
+        ],
+        takeaway: 'Worth knowing: TPO-free formulations cure more slowly. GEL.IT.UP® gel polish cures in 60–90 seconds per coat under a 48W UV/LED lamp. That is the trade-off for cleaner chemistry, and it is one your techs can plan around.',
+      },
+      {
+        title: '4. Cruelty-free: check who approves it, and the scope',
+        paragraphs: [
+          '“Cruelty-free” on a label is a claim. Independent approval is proof.',
+          'Ask who approves it, and what it covers. Some marks cover only the finished product. Cruelty Free International’s approval covers the supply chain, from raw materials to finished product.',
+          'GEL.IT.UP® is Approved by Cruelty Free International.',
+        ],
+      },
+      {
+        title: '5. Professional vetting for trade accounts',
+        paragraphs: [
+          'Does the supplier check who is buying at trade prices?',
+          'Platforms that give trade pricing to anyone sell the same product to hobbyists and discounters. That undercuts the professionals who depend on trade pricing and trade support.',
+          'Vetted trade access protects your market. It also signals a supplier that takes training, safety and product handling seriously. GEL.IT.UP® trade accounts are for nail technicians, salons, academies and resellers: you apply, we review, and approved accounts get trade pricing.',
+        ],
+      },
+      {
+        title: '6. Minimum order terms',
+        paragraphs: ['Read the terms before you fall for the headline price.'],
+        bullets: [
+          'Is there a minimum order value or quantity?',
+          'Are there hidden restocking or account fees?',
+          'Can you test with a small first order?',
+        ],
+        after: [
+          'No minimum order lets a new salon trial a range and lets a reseller scale up gradually. GEL.IT.UP® has no minimum order.',
+        ],
+      },
+      {
+        title: '7. Shipping and delivery',
+        paragraphs: ['Check three things:'],
+        bullets: [
+          '**Cost.** What does delivery cost to your country, and from what order value is it free?',
+          '**Speed.** What are the realistic dispatch and delivery times to your country?',
+          '**Tracking.** Do you get it, and who handles problems?',
+        ],
+        after: [
+          'GEL.IT.UP® orders are shipped from the EU, with clear delivery rates per country and free delivery above a set order value.',
+        ],
+      },
+      {
+        title: '8. Support quality',
+        paragraphs: [
+          'Test it before you buy. Send a question about a product and time the reply.',
+          'Good wholesale support means a real person, on the channels you already use. You want answers on ingredients, compatibility and order issues without a ticket queue.',
+          'GEL.IT.UP® offers genuine one-to-one support on WhatsApp and Viber.',
+        ],
+      },
+      {
+        title: '9. Batch consistency',
+        paragraphs: [
+          'A shade that changes between orders costs you rebooked clients and wasted time.',
+          'Ask how the supplier manufactures and checks product. GMP (Good Manufacturing Practice) standards are the baseline to look for. GEL.IT.UP® is manufactured to global GMP standards.',
+          'Then test it yourself. Order the same shade twice, a few weeks apart, and compare.',
+        ],
+      },
+      {
+        title: '10. Shade range and system depth',
+        paragraphs: ['A wide range lets you serve every client from one supplier. Look for depth in:'],
+        bullets: [
+          'Core colour families',
+          'Builder and extension systems',
+          'Nail art products',
+        ],
+        after: [
+          'GEL.IT.UP® carries 1,000+ shades, plus builder gels, polygels and nail art supplies.',
+        ],
+      },
+      {
+        title: 'Quick checklist',
+        table: {
+          head: ['Check', 'What good looks like'],
+          rows: [
+            ['EC 1223/2009 and CPNP', 'Notified, with a named EU Responsible Person'],
+            ['INCI lists', 'Published for every SKU'],
+            ['HEMA/TPO', 'Clearly stated for every product layer'],
+            ['Cruelty-free', 'Independently approved, with clear scope'],
+            ['Trade accounts', 'Buyers are vetted'],
+            ['Minimum order', 'None, or clearly stated'],
+            ['Shipping', 'Transparent cost and tracking'],
+            ['Support', 'Fast, human, on WhatsApp or Viber'],
+            ['Batch consistency', 'GMP manufacturing'],
+            ['Shade range', 'Deep and current'],
+          ],
+        },
+      },
+      {
+        title: 'Where GEL.IT.UP® fits',
+        paragraphs: [
+          'We built GEL.IT.UP® by GIUP® around this checklist. Founded in 2011, we are EU compliant under EC 1223/2009 and Approved by Cruelty Free International. Our gel polish is HEMA-free and TPO-free, and every product lists its full ingredients so you can check each layer. Trade accounts are vetted, there is no minimum order, and orders are shipped from the EU.',
+          'Do not take our word for it. Hold us to the same checklist as everyone else. For more on how we work, read [What Sets GEL.IT.UP® Apart](/blog/what-sets-gelitup-apart).',
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: 'What should I check before buying wholesale gel polish in the EU?',
+        a: 'Check EC 1223/2009 compliance, CPNP notification, full INCI lists per SKU, HEMA and TPO status across the system, the scope of any cruelty-free approval, minimum order terms, shipping, support and batch consistency.',
+      },
+      {
+        q: 'How do I know if a gel polish supplier is EU compliant?',
+        a: 'Ask for proof that products are notified on the CPNP and that a Responsible Person is established in the EU. A compliant supplier provides this without delay.',
+      },
+      {
+        q: 'Is independent cruelty-free approval better than a "cruelty-free" label?',
+        a: 'Yes. Independent approval, such as Cruelty Free International’s, is checked by a third party and has a defined scope. A self-declared label carries no such verification.',
+      },
+      {
+        q: 'Do wholesale nail suppliers require a minimum order?',
+        a: 'Many do. Some set value or quantity thresholds. GEL.IT.UP® has no minimum order, so you can start small and scale up.',
+      },
+    ],
+    verdict: {
+      title: 'Ready to check us against the list?',
+      paragraphs: [
+        'Apply for a GEL.IT.UP® trade account on gelitup.com. Once your account is approved, you get trade pricing on the full range.',
+      ],
+    },
+  },
   {
     slug: 'biab-vs-builder-gel-vs-polygel',
     category: 'Product guides',

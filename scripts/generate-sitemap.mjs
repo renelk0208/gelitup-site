@@ -19,6 +19,7 @@ const ROUTES = [
   { path: '/blog/why-ingredient-labels-matter', priority: '0.8', changefreq: 'monthly' },
   { path: '/blog/hema-free-tpo-free-gel-salon-liability-guide', priority: '0.8', changefreq: 'monthly' },
   { path: '/blog/biab-vs-builder-gel-vs-polygel', priority: '0.8', changefreq: 'monthly', publishFrom: '2026-10-26' },
+  { path: '/blog/wholesale-gel-polish-supplier-checklist', priority: '0.8', changefreq: 'monthly', publishFrom: '2026-11-09' },
   { path: '/about-us',                   priority: '0.6', changefreq: 'monthly' },
   { path: '/contact',                    priority: '0.6', changefreq: 'monthly' },
 

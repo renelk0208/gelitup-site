@@ -138,6 +138,12 @@ const ROUTE_SEO_MAP = {
     canonical:   'https://gelitup.com/blog/biab-vs-builder-gel-vs-polygel',
     publishFrom: '2026-10-26',
   },
+  '/blog/wholesale-gel-polish-supplier-checklist': {
+    title:       'Wholesale Gel Polish Supplier Checklist for the EU | GEL.IT.UP',
+    description: 'Buying wholesale gel polish in the EU? Use this 10-point checklist to verify compliance, ingredients, terms and support before you place your first order.',
+    canonical:   'https://gelitup.com/blog/wholesale-gel-polish-supplier-checklist',
+    publishFrom: '2026-11-09',
+  },
   '/blog/hema-free-tpo-free-gel-salon-liability-guide': {
     title:       'HEMA-Free, TPO-Free Gels: Salon Liability & EU Compliance Guide',
     description: 'Understand the liability risks of non-EU compliant nail gels containing HEMA and TPO. How salon owners can protect their business with HEMA-free, TPO-free formulations.',
