@@ -6,8 +6,8 @@ import { detectWorldLang } from '../world/lang'
 import { rulesFor } from '../world/rules'
 import { canSeeWorld } from '../world/access'
 import {
-  COMPETITION_NAME, HASHTAG, INSTAGRAM_TAG, LANG_DEFAULT_COUNTRY, RULES_VERSION, WINNER_TITLE,
-  countryName, flagEmoji, productShopLink, shopFor,
+  COMPETITION_NAME, HASHTAG, INSTAGRAM_TAG, LANG_DEFAULT_COUNTRY, RULES_VERSION,
+  canEnterFrom, countryName, flagEmoji, iconMonth, mentionsOtherBrand, productShopLink, shopFor,
 } from '../world/config'
 import * as api from '../world/api'
 import { Avatar, CountrySelect, EntryCard, HeartIcon, Hero, Tabs } from '../world/components'
@@ -105,11 +105,27 @@ function SignInForm({ t, nextPath }) {
       </div>
     )
   }
+  const google = async () => {
+    setBusy(true); setErr('')
+    try {
+      await api.signInWithGoogle(nextPath)   // leaves the page for Google, then returns via /world-auth.html
+    } catch (ex) {
+      setErr(t(api.errorKey(ex)))
+      setBusy(false)
+    }
+  }
+
   return (
     <form onSubmit={submit}>
       <h2 className="text-xl font-black uppercase tracking-tight text-neutral-900">{t('signInTitle')}</h2>
+      <button type="button" onClick={google} disabled={busy}
+        className="mt-5 inline-flex w-full items-center justify-center gap-3 rounded-xl border border-neutral-300 bg-white px-5 py-3 text-sm font-semibold text-neutral-900 transition hover:border-neutral-900 disabled:opacity-50">
+        <svg viewBox="0 0 48 48" aria-hidden="true" className="h-5 w-5"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" /><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" /><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" /><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" /></svg>
+        {t('googleSignIn')}
+      </button>
+      <p className="mt-4 text-center text-xs uppercase tracking-[0.12em] text-neutral-400">{t('orEmail')}</p>
       <p className="mt-1 text-sm text-neutral-600">{t('signInText')}</p>
-      <label className="mt-5 block text-xs font-semibold uppercase tracking-[0.12em] text-neutral-600">
+      <label className="mt-3 block text-xs font-semibold uppercase tracking-[0.12em] text-neutral-600">
         {t('email')}
         <input type="email" required autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} className={inputCls} />
       </label>
@@ -198,6 +214,9 @@ function ProfileForm({ t, lang, visitorCountry, user, profile, onSaved }) {
       <label className={label}>
         {t('country')}
         <CountrySelect value={form.country} onChange={v => set('country', v)} t={t} includeAll={false} className="mt-1 w-full py-2.5" />
+        <span className={`mt-1 block text-[11px] normal-case tracking-normal ${form.country && !canEnterFrom(form.country) ? 'font-semibold text-[#D43790]' : 'text-neutral-500'}`}>
+          {t('entryCountriesNote')}
+        </span>
       </label>
 
       <div className="mt-5 rounded-2xl border border-[#E8E8E8] bg-[#F8F8F6] p-4">
@@ -384,6 +403,7 @@ function Feed({ ctx }) {
   const [hasMore, setHasMore] = useState(false)
   const [leader, setLeader] = useState(null)
   const [winners, setWinners] = useState(null)
+  const [wildcards, setWildcards] = useState([])
   const [pastRounds, setPastRounds] = useState([])
   const [winnersRoundId, setWinnersRoundId] = useState('')
 
@@ -430,8 +450,9 @@ function Feed({ ctx }) {
   }, [tab])
 
   useEffect(() => {
-    if (tab !== 'winners' || !winnersRoundId) { setWinners(null); return }
+    if (tab !== 'winners' || !winnersRoundId) { setWinners(null); setWildcards([]); return }
     api.fetchRoundWinners(winnersRoundId).then(setWinners).catch(() => setWinners(null))
+    api.fetchWildcards(winnersRoundId).then(setWildcards).catch(() => setWildcards([]))
   }, [tab, winnersRoundId])
 
   const updateCount = (id, delta) => setEntries(list => list.map(e => (e.id === id ? { ...e, vote_count: e.vote_count + delta } : e)))
@@ -453,7 +474,7 @@ function Feed({ ctx }) {
       </div>
 
       {tab === 'winners' ? (
-        <WinnersView t={t} lang={lang} rounds={pastRounds} roundId={winnersRoundId} setRoundId={setWinnersRoundId} winners={winners} />
+        <WinnersView t={t} lang={lang} rounds={pastRounds} roundId={winnersRoundId} setRoundId={setWinnersRoundId} winners={winners} wildcards={wildcards} />
       ) : (
         <>
           {!loading && entries.length === 0 && (
@@ -482,47 +503,72 @@ function Feed({ ctx }) {
   )
 }
 
-function WinnersView({ t, lang, rounds, roundId, setRoundId, winners }) {
+// Hall of Fame: the jury's 1st/2nd/3rd place of each finished round (the month's
+// GEL.IT.UP Icons), shown once the admin publishes the results. Before that,
+// the round shows that the jury is choosing, plus any published wildcards.
+function WinnersView({ t, lang, rounds, roundId, setRoundId, winners, wildcards = [] }) {
   if (!rounds.length) return <p className="py-16 text-center text-sm text-neutral-500">{t('noWinnersYet')}</p>
+  const round = rounds.find(r => r.id === roundId) || rounds[0]
   const countries = winners ? Object.entries(winners.byCountry) : []
+  const published = Boolean(winners?.published)
   return (
     <div className="mt-5">
-      <select value={roundId} onChange={e => setRoundId(e.target.value)} className="rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm">
-        {rounds.map(r => (
-          <option key={r.id} value={r.id}>
-            {localized(r.title, lang) || t(`theme_${r.theme}`)} · {new Date(r.ends_at).toLocaleDateString(lang, { month: 'long', year: 'numeric' })}
-          </option>
-        ))}
-      </select>
-      {winners && (
+      {rounds.length > 1 && (
+        <select value={roundId} onChange={e => setRoundId(e.target.value)} className="rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm">
+          {rounds.map(r => (
+            <option key={r.id} value={r.id}>
+              {t('iconOfMonth', { month: iconMonth(r, lang) })} · {localized(r.title, lang) || t(`theme_${r.theme}`)}
+            </option>
+          ))}
+        </select>
+      )}
+      <h2 className="mt-6 text-2xl font-black uppercase tracking-tight text-neutral-900">{t('iconOfMonth', { month: iconMonth(round, lang) })}</h2>
+      <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">{localized(round.title, lang) || t(`theme_${round.theme}`)}</p>
+
+      {winners && published && (
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {winners.podium.map((e, i) => (e ? (
+            <div key={e.id}>
+              <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-[#1A1A1A]">👑 {t(`place${i + 1}`)} · <span className="text-[#D43790]">{(round.prizes || [])[i] || ''}</span></p>
+              <EntryCard entry={e} t={t} rank={i + 1} href={`/world/${e.id}`} voteDisabled onVote={() => {}} />
+            </div>
+          ) : (
+            <div key={`empty-${i}`} className="flex min-h-40 items-center justify-center rounded-2xl border border-dashed border-[#E8E8E8] p-6 text-center text-xs text-[#4A4A4A]">
+              {t(`place${i + 1}`)} · {t('beingVerified')}
+            </div>
+          )))}
+        </div>
+      )}
+
+      {winners && !published && (
+        <p className="mt-4 rounded-2xl border border-[#E8E8E8] bg-[#F8F8F6] px-4 py-3 text-sm text-[#4A4A4A]">{t('judgingNote')}</p>
+      )}
+
+      {wildcards.length > 0 && (
         <>
-          <h2 className="mt-6 text-sm font-black uppercase tracking-[0.16em] text-neutral-900">{t('winnersOverall')}</h2>
-          <p className="text-xs text-neutral-500">{WINNER_TITLE}</p>
-          <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {winners.podium.map((e, i) => (e ? (
-              <div key={e.id}>
-                <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-[#1A1A1A]">{t(`place${i + 1}`)} · <span className="text-[#D43790]">{(rounds.find(r => r.id === roundId)?.prizes || [])[i] || ''}</span></p>
-                <EntryCard entry={e} t={t} rank={i + 1} href={`/world/${e.id}`} voteDisabled onVote={() => {}} />
-              </div>
-            ) : (
-              <div key={`empty-${i}`} className="flex min-h-40 items-center justify-center rounded-2xl border border-dashed border-[#E8E8E8] p-6 text-center text-xs text-[#4A4A4A]">
-                {t(`place${i + 1}`)} · {t('beingVerified')}
-              </div>
-            )))}
+          <h3 className="mt-8 text-sm font-black uppercase tracking-[0.16em] text-neutral-900">★ {t('wildcardsTitle')}</h3>
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {wildcards.map(e => (
+              <Link key={e.id} to={`/world/${e.id}`} className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+                <img src={api.imageUrl(e.image_path, { thumb: true })} alt="" loading="lazy" className="aspect-square w-full object-cover" />
+                <p className="truncate px-3 py-2 text-xs"><span className="mr-1">{flagEmoji(e.country)}</span><b>{e.profile?.display_name}</b></p>
+              </Link>
+            ))}
           </div>
-          {countries.length > 0 && (
-            <>
-              <h2 className="mt-8 text-sm font-black uppercase tracking-[0.16em] text-neutral-900">{t('winnersByCountry')}</h2>
-              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {countries.map(([c, e]) => (
-                  <Link key={c} to={`/world/${e.id}`} className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
-                    <img src={api.imageUrl(e.image_path, { thumb: true })} alt="" loading="lazy" className="aspect-square w-full object-cover" />
-                    <p className="truncate px-3 py-2 text-xs"><span className="mr-1">{flagEmoji(c)}</span><b>{e.profile?.display_name}</b> · ♥ {e.vote_count}</p>
-                  </Link>
-                ))}
-              </div>
-            </>
-          )}
+        </>
+      )}
+
+      {published && countries.length > 0 && (
+        <>
+          <h2 className="mt-8 text-sm font-black uppercase tracking-[0.16em] text-neutral-900">{t('winnersByCountry')}</h2>
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {countries.map(([c, e]) => (
+              <Link key={c} to={`/world/${e.id}`} className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+                <img src={api.imageUrl(e.image_path, { thumb: true })} alt="" loading="lazy" className="aspect-square w-full object-cover" />
+                <p className="truncate px-3 py-2 text-xs"><span className="mr-1">{flagEmoji(c)}</span><b>{e.profile?.display_name}</b> · ♥ {e.vote_count}</p>
+              </Link>
+            ))}
+          </div>
         </>
       )}
     </div>
@@ -641,6 +687,7 @@ function EntryPage({ ctx }) {
   const voted = voting.myVotes.has(entry.id)
   const entryRoundClosed = round && entry.round_id === round.id ? new Date(round.ends_at) <= new Date() : entry.round_id !== round?.id
   const viewerCountry = account.profile?.country || entry.country
+  const isLive = entry.status === 'published'
 
   const doReport = () => gate.require(async () => {
     await api.reportEntry(account.user.id, entry.id).catch(() => {})
@@ -656,6 +703,11 @@ function EntryPage({ ctx }) {
     <div className="mx-auto max-w-5xl">
       <Link to="/world" className="text-[11px] font-bold uppercase tracking-[0.16em] text-neutral-500 hover:text-neutral-900">← {COMPETITION_NAME}</Link>
       {justPosted && <p className="mt-3 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">{t('success')}</p>}
+      {!isLive && isOwner && !justPosted && (
+        <p className="mt-3 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <b>{t(entry.status === 'rejected' ? 'rejectedBadge' : 'pendingBadge')}.</b> {entry.status === 'rejected' ? '' : t('pendingNote')}
+        </p>
+      )}
       <div className="mt-4 grid gap-6 md:grid-cols-[1.15fr_1fr]">
         <div>
           <div className="overflow-hidden rounded-3xl border border-[#E8E8E8] bg-[#F8F8F6]">
@@ -674,7 +726,7 @@ function EntryPage({ ctx }) {
             )}
           </Link>
 
-          <button type="button" disabled={entryRoundClosed || voting.busyId === entry.id}
+          <button type="button" disabled={!isLive || entryRoundClosed || voting.busyId === entry.id}
             onClick={() => voting.toggle(entry, d => setEntry(e => ({ ...e, vote_count: e.vote_count + d })))}
             className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black uppercase tracking-[0.14em] transition disabled:opacity-60 ${
               voted ? 'bg-[#D43790] text-white' : 'bg-neutral-900 text-white hover:bg-[#D43790]'
@@ -706,7 +758,7 @@ function EntryPage({ ctx }) {
               ) : null}
             </div>
           )}
-          <ShareBox t={t} entry={entry} isOwner={isOwner} />
+          {isLive && <ShareBox t={t} entry={entry} isOwner={isOwner} />}
 
           <div className="flex items-center justify-between text-xs text-neutral-500">
             {reported ? <span>{t('reported')}</span> : (
@@ -751,7 +803,17 @@ function UploadPage({ ctx }) {
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
 
   const results = useMemo(() => searchProducts(allProducts, query).filter(p => !picked.some(x => x.name === p.name)), [allProducts, query, picked])
-  const max = round?.max_entries_per_user || 3
+  // The basics, always on show as one-tap buttons (matched by keywords, so small title changes in the shop don't break them)
+  const basics = useMemo(() => [
+    ['5-in-1', 'base', 'clear'],
+    ['perfect shape'],
+    ['non wipe top coat 15ml'],
+    ['superbond', 'acid free'],
+  ].map(words => searchProducts(allProducts, words.join(' '), 50)
+    .filter(p => words.every(w => p.name.toLowerCase().includes(w)))
+    .filter(p => words[0] !== 'non wipe top coat 15ml' || !/perfect shape|milky|aurora|flakes/i.test(p.name))[0])
+    .filter(Boolean), [allProducts])
+  const max = round?.max_entries_per_user || 1
   const left = Math.max(0, max - used)
   const open = round && new Date(round.ends_at) > new Date()
 
@@ -762,9 +824,12 @@ function UploadPage({ ctx }) {
     setPreview(URL.createObjectURL(f))
   }
 
+  const eligible = !account.profile || canEnterFrom(account.profile.country, round)
+
   const submit = async (e) => {
     e.preventDefault()
     if (!file || !account.user || !round) return
+    if (mentionsOtherBrand(caption)) { setErr(t('err_OTHER_BRAND')); return }
     setBusy(true); setErr('')
     try {
       const id = await api.submitEntry({ userId: account.user.id, roundId: round.id, file, caption, products: picked, firstPrizeClaim: usedProducts === 'yes' && picked.length > 0 && reviewedAll })
@@ -784,11 +849,12 @@ function UploadPage({ ctx }) {
         <span className="font-bold uppercase tracking-[0.12em] text-[#D43790]">{t('themeLabel')}: {localized(round.title, lang) || t(`theme_${round.theme}`)}</span>
         <span className="mt-1 block text-[#4A4A4A]">{t('themeMustMatch')}</span>
       </p>
-      {account.user && (
+      {account.user && eligible && (
         <p className={`mt-3 text-sm ${left ? 'text-neutral-600' : 'font-semibold text-rose-600'}`}>
           {left ? t('entriesLeft', { n: left, max }) : t('limitReached')}
         </p>
       )}
+      {!eligible && <p className="mt-3 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900">{t('err_COUNTRY_NOT_ELIGIBLE')}</p>}
 
       <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic" className="hidden" onChange={e => choose(e.target.files?.[0])} />
       <button type="button" onClick={() => fileRef.current?.click()}
@@ -801,6 +867,7 @@ function UploadPage({ ctx }) {
         {t('caption')}
         <textarea value={caption} onChange={e => setCaption(e.target.value)} maxLength={600} rows={3} className={inputCls} />
       </label>
+      {mentionsOtherBrand(caption) && <p className="mt-1 text-xs font-semibold text-rose-600">{t('err_OTHER_BRAND')}</p>}
 
       <div className="mt-6 space-y-3 rounded-2xl border border-[#E8E8E8] bg-[#F8F8F6] p-4">
         <label className="flex items-start gap-3 text-sm text-[#1A1A1A]">
@@ -826,6 +893,23 @@ function UploadPage({ ctx }) {
         {usedProducts === 'yes' && (
           <div className="mt-4">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#4A4A4A]">{t('listProducts')}</p>
+            {basics.length > 0 && (
+              <div className="mt-2">
+                <p className="text-[11px] text-[#4A4A4A]">{t('basicsLabel')}</p>
+                <div className="mt-1.5 flex flex-wrap gap-2">
+                  {basics.map(p => {
+                    const on = picked.some(x => x.name === p.name)
+                    return (
+                      <button key={p.name} type="button" aria-pressed={on}
+                        onClick={() => { setPicked(list => on ? list.filter(x => x.name !== p.name) : [...list, p].slice(0, 15)); setReviewedAll(false) }}
+                        className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${on ? 'border-[#D43790] bg-[#D43790] text-white' : 'border-[#E8E8E8] bg-white text-[#1A1A1A] hover:border-[#D43790]'}`}>
+                        {on ? '✓ ' : '+ '}{p.name}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
             <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('searchProducts')} className={inputCls} />
             {results.length > 0 && (
               <ul className="mt-1 max-h-64 overflow-y-auto rounded-xl border border-neutral-200 bg-white shadow-lg">
@@ -867,7 +951,7 @@ function UploadPage({ ctx }) {
 
       <p className="mt-5 text-xs leading-relaxed text-neutral-500">{t('photoRights')}</p>
       {err && <p className="mt-3 text-sm text-rose-600">{err}</p>}
-      <button type="submit" disabled={busy || !file || !left || !themeOk || !usedProducts || (usedProducts === 'yes' && !picked.length) || !isRegistered(account)} className={`${btnPrimary} mt-4`}>
+      <button type="submit" disabled={busy || !eligible || mentionsOtherBrand(caption) || !file || !left || !themeOk || !usedProducts || (usedProducts === 'yes' && !picked.length) || !isRegistered(account)} className={`${btnPrimary} mt-4`}>
         {busy ? t('submitting') : t('submit')}
       </button>
     </form>

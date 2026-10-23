@@ -100,7 +100,7 @@ async function sendEmail(to, subject, html) {
 async function rankRound(db, roundId) {
   const { data } = await db
     .from('world_entries')
-    .select('id, user_id, country, vote_count, image_path, created_at')
+    .select('id, user_id, country, vote_count, image_path, created_at, approved_at')
     .eq('round_id', roundId)
     .eq('status', 'published')
     .order('vote_count', { ascending: false })
@@ -177,9 +177,9 @@ export async function handler(event) {
     const { entries, best } = await rankRound(db, round.id)
     const endsInMs = new Date(round.ends_at).getTime() - now
 
-    // entry_live: looks published in the last 48 hours
+    // entry_live: looks approved in the last 48 hours (looks wait for admin approval)
     for (const e of entries) {
-      if (now - new Date(e.created_at).getTime() > 48 * 3600000) continue
+      if (now - new Date(e.approved_at || e.created_at).getTime() > 48 * 3600000) continue
       add(e.user_id, 'entry_live', e.id, (p, lang) => ({
         subject: tr(lang, 'entry_live_subject', { round: localizedTitle(round, lang) }),
         paragraphs: [tr(lang, 'entry_live_body', { round: localizedTitle(round, lang) })],
@@ -239,7 +239,8 @@ export async function handler(event) {
         }
         const paragraphs = []
         if (b.rankCountry === 1 && b.vote_count > 0) paragraphs.push(tr(lang, 'results_country_winner', v))
-        if (b.rankGlobal <= 3 && b.vote_count > 0) paragraphs.push(tr(lang, 'results_top', v))
+        // The top looks by hearts reach the jury's final (winners are announced later in the Hall of Fame)
+        if (b.rankGlobal <= (round.finalists || 10) && b.vote_count > 0) paragraphs.push(tr(lang, 'results_top', v))
         paragraphs.push(tr(lang, 'results_body', v))
         return {
           subject: tr(lang, 'results_subject', v),
