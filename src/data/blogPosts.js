@@ -26,9 +26,9 @@ export const blogPosts = [
     calloutImage: `${SUPPLIER_CHECKLIST_MEDIA}/hero.jpg`,
     calloutAfterSection: -1, // same image as the header, so no mid-article repeat
     closingImage: `${SUPPLIER_CHECKLIST_MEDIA}/hero.jpg`,
-    closingAlt: 'Apply for a GEL.IT.UP trade account for salons, academies and resellers.',
-    ctaLabel: 'Apply for a GEL.IT.UP® trade account — gelitup.com',
-    ctaUrl: 'https://gelitup.com/wholesale',
+    closingAlt: 'Register for a GEL.IT.UP B2B or distributor account on gelitup.com.',
+    ctaLabel: 'Register — B2B / Distributor on gelitup.com',
+    ctaUrl: 'https://gelitup.com/portal/register',
     tags: ['Wholesale', 'EU Compliance', 'Buyer Checklist'],
     intro: [
       'Your supplier decides what goes on your clients’ hands. It also decides your margins, your stock levels and your reputation.',
@@ -85,11 +85,11 @@ export const blogPosts = [
         ],
       },
       {
-        title: '5. Professional vetting for trade accounts',
+        title: '5. Trade pricing for professionals',
         paragraphs: [
-          'Does the supplier check who is buying at trade prices?',
+          'Who does the supplier sell to at trade prices?',
           'Platforms that give trade pricing to anyone sell the same product to hobbyists and discounters. That undercuts the professionals who depend on trade pricing and trade support.',
-          'Vetted trade access protects your market. It also signals a supplier that takes training, safety and product handling seriously. GEL.IT.UP® trade accounts are for nail technicians, salons, academies and resellers: you apply, we review, and approved accounts get trade pricing.',
+          'A clear professional channel protects your market. It also signals a supplier that takes training, safety and product handling seriously. GEL.IT.UP® trade pricing is for nail technicians, salons, academies and resellers. B2B accounts open instantly on gelitup.com, and distributor applications are reviewed by our team.',
         ],
       },
       {
@@ -153,7 +153,7 @@ export const blogPosts = [
             ['INCI lists', 'Published for every SKU'],
             ['HEMA/TPO', 'Clearly stated for every product layer'],
             ['Cruelty-free', 'Independently approved, with clear scope'],
-            ['Trade accounts', 'Buyers are vetted'],
+            ['Trade accounts', 'Trade pricing for professionals only'],
             ['Minimum order', 'None, or clearly stated'],
             ['Shipping', 'Transparent cost and tracking'],
             ['Support', 'Fast, human, on WhatsApp or Viber'],
@@ -165,7 +165,7 @@ export const blogPosts = [
       {
         title: 'Where GEL.IT.UP® fits',
         paragraphs: [
-          'We built GEL.IT.UP® by GIUP® around this checklist. Founded in 2011, we are EU compliant under EC 1223/2009 and Approved by Cruelty Free International. Our gel polish is HEMA-free and TPO-free, and every product lists its full ingredients so you can check each layer. Trade accounts are vetted, there is no minimum order, and orders are shipped from the EU.',
+          'We built GEL.IT.UP® by GIUP® around this checklist. Founded in 2011, we are EU compliant under EC 1223/2009 and Approved by Cruelty Free International. Our gel polish is HEMA-free and TPO-free, and every product lists its full ingredients so you can check each layer. Trade pricing is for professionals, B2B access is instant, there is no minimum order, and orders are shipped from the EU.',
           'Do not take our word for it. Hold us to the same checklist as everyone else. For more on how we work, read [What Sets GEL.IT.UP® Apart](/blog/what-sets-gelitup-apart).',
         ],
       },
@@ -191,7 +191,7 @@ export const blogPosts = [
     verdict: {
       title: 'Ready to check us against the list?',
       paragraphs: [
-        'Apply for a GEL.IT.UP® trade account on gelitup.com. Once your account is approved, you get trade pricing on the full range.',
+        'Register on gelitup.com: open a B2B account instantly for trade pricing on the full range, or apply to become a GEL.IT.UP® distributor in your country.',
       ],
     },
   },
