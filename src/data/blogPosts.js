@@ -141,7 +141,7 @@ export const blogPosts = [
           'Nail art products',
         ],
         after: [
-          'GEL.IT.UP® carries 1,000+ shades, plus builder gels, polygels and nail art supplies.',
+          'GEL.IT.UP® carries 1,000+ shades, plus builder gels, polygels, acrylic systems and nail art supplies.',
         ],
       },
       {
