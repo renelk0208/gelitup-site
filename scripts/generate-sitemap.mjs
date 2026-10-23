@@ -18,6 +18,7 @@ const ROUTES = [
   { path: '/blog',                       priority: '0.7', changefreq: 'weekly'  },
   { path: '/blog/why-ingredient-labels-matter', priority: '0.8', changefreq: 'monthly' },
   { path: '/blog/hema-free-tpo-free-gel-salon-liability-guide', priority: '0.8', changefreq: 'monthly' },
+  { path: '/blog/biab-vs-builder-gel-vs-polygel', priority: '0.8', changefreq: 'monthly', publishFrom: '2026-10-26' },
   { path: '/about-us',                   priority: '0.6', changefreq: 'monthly' },
   { path: '/contact',                    priority: '0.6', changefreq: 'monthly' },
 
@@ -70,7 +71,7 @@ const now = new Date().toISOString().split('T')[0]
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${ROUTES.map(r => `  <url>
+${ROUTES.filter(r => !r.publishFrom || Date.now() >= Date.parse(`${r.publishFrom}T00:00:00+02:00`)).map(r => `  <url>
     <loc>${BASE_URL}${r.path}</loc>
     <lastmod>${now}</lastmod>
     <changefreq>${r.changefreq}</changefreq>

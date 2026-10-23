@@ -2,8 +2,220 @@ const INGREDIENT_LABELS_MEDIA = '/gelitup-media/blog/why-ingredient-labels-matte
 const TPO_GUIDE_MEDIA = '/gelitup-media/blog/tpo-guide'
 const HEMA_GUIDE_MEDIA = '/gelitup-media/blog/what-is-hema-in-gel-polish'
 const WHAT_SETS_US_APART_MEDIA = '/gelitup-media/blog/what-makes-us-different'
+const BIAB_COMPARISON_MEDIA = '/gelitup-media/blog/biab-vs-builder-gel-vs-polygel'
+
+const SHOP = 'https://shop.gelitup.com'
 
 export const blogPosts = [
+  {
+    slug: 'biab-vs-builder-gel-vs-polygel',
+    category: 'Product guides',
+    title: 'BIAB vs Builder Gel vs Polygel: Which Should Your Salon Offer?',
+    shortTitle: 'BIAB vs Builder Gel vs Polygel',
+    excerpt: 'An honest comparison of BIAB, builder gel and polygel: strength, skill level, handling and removal, so you can decide which system suits your salon.',
+    metaTitle: 'BIAB vs Builder Gel vs Polygel: Which Should Your Salon Offer?',
+    metaDescription: "BIAB vs polygel vs builder gel: compare strength, skill level, handling and removal to decide which system suits your salon and your clients' nail types.",
+    // Goes live automatically at 00:00 Athens time on this date (see isPostLive below).
+    publishedAt: '2026-10-26',
+    publishedLabel: '26 October 2026',
+    readTime: '6 min read',
+    heroImage: `${BIAB_COMPARISON_MEDIA}/hero.jpg`,
+    heroAlt: 'Which product? BIAB vs builder gel vs polygel – GEL.IT.UP MultiMix Synthogel tubes and builder gel pots',
+    calloutImage: `${BIAB_COMPARISON_MEDIA}/hero.jpg`,
+    calloutAlt: 'BIAB, builder gel or polygel: choose the system that matches your clients and your team.',
+    calloutAfterSection: -1, // same image as the header, so no mid-article repeat
+    closingImage: `${BIAB_COMPARISON_MEDIA}/hero.jpg`,
+    closingAlt: 'Explore GEL.IT.UP Brush on Builder (BIAB), 3-in-1 Builder Gels and MultiMix Synthogel.',
+    ctaLabel: 'Shop GEL.IT.UP® professional nail supplies — shop.gelitup.com',
+    ctaUrl: `${SHOP}/pages/ourproducts`,
+    tags: ['BIAB', 'Builder Gel', 'Polygel'],
+    intro: [
+      'Three products dominate strong-nail services right now: BIAB, builder gel in a pot, and polygel. They overlap, and they get confused constantly.',
+      'Pick the wrong one and you lose time, product and clients. Pick the right one and you build a service menu that runs smoothly.',
+      'Here is an honest comparison for nail professionals. No hype.',
+    ],
+    sections: [
+      {
+        title: 'What is each product?',
+        groups: [
+          {
+            title: 'BIAB (brush on builder gel)',
+            paragraphs: [
+              'BIAB stands for Builder In A Bottle. It is a builder gel in a bottle with a brush, applied like a thick polish. It is built for strengthening and structure on the natural nail.',
+              `GEL.IT.UP® range: [Brush on Builder - BIAB](${SHOP}/collections/brush-on-builder-biab).`,
+            ],
+          },
+          {
+            title: 'Builder gel (pot or tube)',
+            paragraphs: [
+              'A traditional soak-off builder gel, usually thicker and more controllable than a bottle product. Techs use it for overlays, apex building and extensions over tips or forms.',
+              `GEL.IT.UP® range: [3-in-1 Builder Gels](${SHOP}/collections/3-in-1-builder-system).`,
+            ],
+          },
+          {
+            title: 'Polygel',
+            paragraphs: [
+              'A hybrid of acrylic and gel. It is a putty-like paste you shape, usually with a slip solution, then cure under a lamp. It is built for extensions and sculpting.',
+              `GEL.IT.UP® range: [MultiMix Synthogel](${SHOP}/collections/polygel).`,
+            ],
+          },
+        ],
+      },
+      {
+        title: 'BIAB: strengths and limits',
+        groups: [
+          {
+            title: 'Strengths',
+            bullets: [
+              'Fast application, with minimal handling',
+              'Self-levelling feel suits a quick overlay',
+              'Easy to learn for techs moving up from gel polish',
+              'Good for clients who want strength without length',
+            ],
+          },
+          {
+            title: 'Limits',
+            bullets: [
+              'Less suited to major length or sculpting',
+              'Needs careful application at the cuticle and sidewalls to avoid flooding',
+              'Not the first choice for structured extensions',
+            ],
+          },
+        ],
+        takeaway: 'Best for: natural nail overlays, growing out natural nails, and maintaining shorter clients.',
+      },
+      {
+        title: 'Builder gel: strengths and limits',
+        groups: [
+          {
+            title: 'Strengths',
+            bullets: [
+              'Good control over apex and structure',
+              'Versatile across overlays, extensions and repairs',
+              'Works well over tips or forms',
+              'A solid core product for a busy salon',
+            ],
+          },
+          {
+            title: 'Limits',
+            bullets: [
+              'A steeper learning curve than BIAB',
+              'Takes practice to place and shape cleanly',
+              'Pot handling needs good hygiene discipline',
+            ],
+          },
+        ],
+        takeaway: 'Best for: overlays that need structure, extensions, and repairing broken nails.',
+      },
+      {
+        title: 'Polygel: strengths and limits',
+        groups: [
+          {
+            title: 'Strengths',
+            bullets: [
+              'Sculpting freedom, because you can shape and move the product',
+              'Strong choice for length and shape work',
+              'Familiar to techs with acrylic experience',
+            ],
+          },
+          {
+            title: 'Limits',
+            bullets: [
+              'Slip solution and tool technique add a learning step',
+              'Product can be inconsistent in the hands of a beginner',
+              'Needs good tool care and clean-up discipline',
+            ],
+          },
+        ],
+        takeaway: 'Best for: extensions, shaping, and clients who want sculpted length.',
+      },
+      {
+        title: 'Skill level and learning curve',
+        table: {
+          head: ['Skill level', 'Best starting point'],
+          rows: [
+            ['Newer tech, gel polish background', 'BIAB'],
+            ['Intermediate, comfortable with structure', 'Builder gel'],
+            ['Experienced, comfortable sculpting', 'Polygel'],
+          ],
+        },
+        after: [
+          'Start with what your team can do consistently. A confident tech with one system beats a nervous tech with three.',
+        ],
+      },
+      {
+        title: 'Product handling',
+        bullets: [
+          '**BIAB:** brush application. Watch the product near skin and cuticles.',
+          '**Builder gel:** scoop or squeeze, then place and shape with a brush. Keep tools clean and pots closed.',
+          '**Polygel:** apply with a brush or tool, using slip solution to shape. Work in small sections so the product does not move before curing.',
+        ],
+        paragraphs: [
+          "Whatever you choose, follow the manufacturer's instructions for prep, application and curing. Lamp compatibility and cure times vary by product, so check each product's guidance rather than assuming. For what to look for on the label, see [Why Ingredient Labels Matter More Than Ever](/blog/why-ingredient-labels-matter).",
+        ],
+      },
+      {
+        title: 'Removal',
+        paragraphs: [
+          'Removal method differs by product. Always check the individual product guidance before you promise a removal method to a client.',
+          'Good removal protects the natural nail. Rushed removal damages it, whatever system you use. Allow enough appointment time and never peel or force product off.',
+        ],
+      },
+      {
+        title: 'Quick comparison table',
+        table: {
+          head: ['', 'BIAB', 'Builder gel', 'Polygel'],
+          rows: [
+            ['Format', 'Bottle with brush', 'Pot or tube', 'Paste (tube)'],
+            ['Best use', 'Natural nail overlays', 'Overlays, extensions, repairs', 'Extensions and sculpting'],
+            ['Learning curve', 'Lowest', 'Medium', 'Highest'],
+            ['Speed of application', 'Fastest', 'Medium', 'Slower'],
+            ['Length work', 'Limited', 'Good', 'Excellent'],
+            ['Handling', 'Simple', 'Moderate', 'Technique-dependent'],
+            ['GEL.IT.UP® range', 'Brush on Builder - BIAB', '3-in-1 Builder Gels', 'MultiMix Synthogel'],
+          ],
+        },
+      },
+      {
+        title: 'Which should your salon offer?',
+        paragraphs: ['Use your client base as the guide.'],
+        bullets: [
+          '**Mostly natural nail clients:** start with BIAB.',
+          '**A mix of overlays and extensions:** add builder gel.',
+          '**Clients asking for length and shape:** add polygel.',
+        ],
+        after: [
+          'Most busy salons end up offering two. Many offer all three, with each tech specialising.',
+          'Whichever you choose, product quality matters. The GEL.IT.UP® Brush on Builder, 3-in-1 Builder Gels and MultiMix Synthogel are HEMA-free and TPO-free, EU compliant under EC 1223/2009, and manufactured to GMP standards. That cleaner chemistry protects your clients and your reputation. For the reasoning, read [What is HEMA in Gel Polish?](/blog/what-is-hema-in-gel-polish) and [What is TPO in Gel Nails?](/blog/what-is-tpo-in-gel-nails).',
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: 'What is the difference between BIAB and builder gel?',
+        a: 'BIAB is a builder gel supplied in a bottle with a brush, so it applies like a polish. Traditional builder gel comes in a pot or tube and gives more control for building structure and length.',
+      },
+      {
+        q: 'Is polygel stronger than builder gel?',
+        a: 'Strength depends on the product, the application and the nail prep, not the category alone. Polygel suits sculpting and length. Builder gel suits structured overlays. Choose by use case.',
+      },
+      {
+        q: 'What is the best builder gel for salons?',
+        a: 'The best choice is the one your techs can apply consistently, that suits your service menu and is professionally formulated. Many salons use BIAB for overlays and builder gel for extensions.',
+      },
+      {
+        q: 'Can beginners use polygel?',
+        a: 'They can, but polygel usually has the steepest learning curve. Slip solution, tool technique and timing take practice. BIAB is generally the easiest place to start.',
+      },
+    ],
+    verdict: {
+      title: 'Build your strong-nail menu',
+      paragraphs: [
+        'See the full range of builder gels, BIAB and MultiMix Synthogel, with no minimum order, on the GEL.IT.UP® shop.',
+        'Want to know what makes the range different? Read [What Sets GEL.IT.UP® Apart](/blog/what-sets-gelitup-apart).',
+      ],
+    },
+  },
   {
     slug: 'what-is-hema-in-gel-polish',
     category: 'Ingredients & compliance',
@@ -299,6 +511,18 @@ export const blogPosts = [
     },
   },
 ]
+
+// A post appears on the site from 00:00 Athens time (UTC+2 in winter) on its publishedAt date.
+// Before that it is hidden from the blog list and its page shows "not found"
+// (add ?preview=1 to the article URL to check it in advance).
+export function isPostLive(post, now = Date.now()) {
+  if (!post?.publishedAt) return true
+  return now >= Date.parse(`${post.publishedAt}T00:00:00+02:00`)
+}
+
+export function getLivePosts(now = Date.now()) {
+  return blogPosts.filter((post) => isPostLive(post, now))
+}
 
 export function getBlogPost(slug) {
   return blogPosts.find((post) => post.slug === slug)

@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { getBlogPost } from '../data/blogPosts'
-import { withCfiLink } from '../lib/cfiLink'
+import { Link, useLocation, useParams } from 'react-router-dom'
+import { getBlogPost, isPostLive } from '../data/blogPosts'
+import { renderInline, plainText } from '../lib/blogRichText'
 
 function useArticleSeo(post) {
   useEffect(() => {
@@ -33,18 +33,79 @@ function useArticleSeo(post) {
     })
     document.head.appendChild(schema)
 
+    let faqSchema = null
+    if (post.faqs?.length) {
+      faqSchema = document.createElement('script')
+      faqSchema.type = 'application/ld+json'
+      faqSchema.dataset.blogFaqSchema = 'true'
+      faqSchema.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: post.faqs.map((faq) => ({
+          '@type': 'Question',
+          name: plainText(faq.q),
+          acceptedAnswer: { '@type': 'Answer', text: plainText(faq.a) },
+        })),
+      })
+      document.head.appendChild(faqSchema)
+    }
+
     return () => {
       document.title = previousTitle
       if (previousDescription) metaDescription?.setAttribute('content', previousDescription)
       if (previousCanonical) canonicalLink?.setAttribute('href', previousCanonical)
       schema.remove()
+      faqSchema?.remove()
     }
   }, [post])
 }
 
+function ArticleBullets({ items }) {
+  return (
+    <ul className="mt-4 space-y-2.5 text-[1.05rem] leading-7 text-neutral-700">
+      {items.map((item) => (
+        <li key={item} className="flex gap-3">
+          <span aria-hidden="true" className="mt-[0.7rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[#D43790]" />
+          <span>{renderInline(item)}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function ArticleTable({ table }) {
+  return (
+    <div className="mt-6 overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-sm">
+      <table className="w-full min-w-[32rem] border-collapse text-left text-[0.98rem] leading-6">
+        <thead className="bg-neutral-950 text-white">
+          <tr>
+            {table.head.map((cell, i) => (
+              <th key={i} scope="col" className="px-4 py-3 font-bold">{cell}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-neutral-200 text-neutral-700">
+          {table.rows.map((row) => (
+            <tr key={row.join('|')} className="even:bg-[#fbf8f5]">
+              {row.map((cell, i) => (
+                i === 0
+                  ? <th key={i} scope="row" className="px-4 py-3 font-semibold text-neutral-950">{renderInline(cell)}</th>
+                  : <td key={i} className="px-4 py-3">{renderInline(cell)}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 export default function BlogArticlePage() {
   const { slug } = useParams()
-  const post = getBlogPost(slug)
+  const { search } = useLocation()
+  const found = getBlogPost(slug)
+  const preview = new URLSearchParams(search).get('preview') === '1'
+  const post = found && (isPostLive(found) || preview) ? found : undefined
   useArticleSeo(post)
 
   if (!post) {
@@ -68,7 +129,7 @@ export default function BlogArticlePage() {
             <span aria-hidden="true">←</span> Back to all articles
           </Link>
           <div className="mt-8 overflow-hidden rounded-[1.5rem] bg-[#f7f0f3] shadow-[0_24px_80px_rgba(46,16,36,0.18)] sm:rounded-[2rem]">
-            <img src={post.heroImage} alt={post.title} className="aspect-video w-full object-contain p-2 sm:p-3" />
+            <img src={post.heroImage} alt={post.heroAlt || post.title} className="aspect-video w-full object-contain p-2 sm:p-3" />
           </div>
           <div className="mx-auto mt-8 max-w-4xl">
             <div className="flex flex-wrap items-center gap-3 text-sm text-neutral-500">
@@ -93,19 +154,39 @@ export default function BlogArticlePage() {
 
         <div className="mx-auto max-w-4xl px-4 pb-20 sm:px-6 lg:px-8 lg:pb-28">
           <div className="space-y-6 border-l-4 border-[#D43790] pl-6 text-xl leading-9 text-neutral-700 sm:pl-8">
-            {post.intro.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            {post.intro.map((paragraph) => <p key={paragraph}>{renderInline(paragraph)}</p>)}
           </div>
 
           <div className="mt-14 space-y-14">
             {post.sections.map((section, index) => (
               <section key={section.title}>
                 <h2 className="font-serif text-3xl font-semibold leading-tight text-neutral-950 sm:text-4xl">{section.title}</h2>
-                <div className="mt-6 space-y-5 text-[1.05rem] leading-8 text-neutral-700">
-                  {section.paragraphs.map((paragraph) => <p key={paragraph}>{withCfiLink(paragraph)}</p>)}
-                </div>
+                {section.groups?.map((group) => (
+                  <div key={group.title} className="mt-7">
+                    <h3 className="text-xl font-bold leading-snug text-neutral-950">{group.title}</h3>
+                    {group.paragraphs && (
+                      <div className="mt-3 space-y-4 text-[1.05rem] leading-8 text-neutral-700">
+                        {group.paragraphs.map((paragraph) => <p key={paragraph}>{renderInline(paragraph)}</p>)}
+                      </div>
+                    )}
+                    {group.bullets && <ArticleBullets items={group.bullets} />}
+                  </div>
+                ))}
+                {section.paragraphs && (
+                  <div className="mt-6 space-y-5 text-[1.05rem] leading-8 text-neutral-700">
+                    {section.paragraphs.map((paragraph) => <p key={paragraph}>{renderInline(paragraph)}</p>)}
+                  </div>
+                )}
+                {section.bullets && <ArticleBullets items={section.bullets} />}
+                {section.table && <ArticleTable table={section.table} />}
+                {section.after && (
+                  <div className="mt-6 space-y-5 text-[1.05rem] leading-8 text-neutral-700">
+                    {section.after.map((paragraph) => <p key={paragraph}>{renderInline(paragraph)}</p>)}
+                  </div>
+                )}
                 {section.takeaway && (
                   <aside className="mt-7 rounded-2xl border border-[#D43790]/20 bg-white p-6 shadow-sm sm:p-7">
-                    <p className="text-base font-semibold leading-7 text-neutral-800">{section.takeaway}</p>
+                    <p className="text-base font-semibold leading-7 text-neutral-800">{renderInline(section.takeaway)}</p>
                   </aside>
                 )}
                 {index === (post.calloutAfterSection ?? 3) && (
@@ -120,11 +201,28 @@ export default function BlogArticlePage() {
             ))}
           </div>
 
+          {post.faqs?.length > 0 && (
+            <section className="mt-16">
+              <h2 className="font-serif text-3xl font-semibold leading-tight text-neutral-950 sm:text-4xl">Frequently asked questions</h2>
+              <div className="mt-6 divide-y divide-neutral-200 rounded-2xl border border-neutral-200 bg-white">
+                {post.faqs.map((faq) => (
+                  <details key={faq.q} className="group p-5 sm:p-6">
+                    <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-lg font-bold leading-snug text-neutral-950">
+                      <span>{faq.q}</span>
+                      <span aria-hidden="true" className="mt-0.5 text-[#D43790] transition group-open:rotate-45">+</span>
+                    </summary>
+                    <p className="mt-3 text-[1.02rem] leading-7 text-neutral-700">{renderInline(faq.a)}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          )}
+
           <section className="mt-16 rounded-[2rem] bg-neutral-950 px-6 py-10 text-white sm:px-10 sm:py-12">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#f168ae]">Professional standard</p>
-            <h2 className="mt-3 font-serif text-3xl font-semibold sm:text-4xl">{post.verdict.title}</h2>
+            <h2 className="heading-on-dark mt-3 font-serif text-3xl font-semibold sm:text-4xl">{post.verdict.title}</h2>
             <div className="mt-6 space-y-5 text-[1.05rem] leading-8 text-white/75">
-              {post.verdict.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+              {post.verdict.paragraphs.map((paragraph) => <p key={paragraph}>{renderInline(paragraph)}</p>)}
             </div>
           </section>
 

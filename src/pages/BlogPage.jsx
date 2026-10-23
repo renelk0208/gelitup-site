@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { blogPosts } from '../data/blogPosts'
+import { getLivePosts } from '../data/blogPosts'
 
 const SEO = {
   title: 'Professional Nail Industry Blog | GEL.IT.UP by GIUP®',
@@ -70,7 +70,7 @@ function BlogCard({ post }) {
 export default function BlogPage() {
   usePageSeo()
 
-  const posts = [...blogPosts].sort(
+  const posts = getLivePosts().sort(
     (a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)
   )
 

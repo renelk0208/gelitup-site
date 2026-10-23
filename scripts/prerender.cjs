@@ -132,6 +132,12 @@ const ROUTE_SEO_MAP = {
     description: 'Learn what HEMA and TPO are, why ingredient labels matter, and how nail professionals can evaluate safer, compliant gel polish formulations.',
     canonical:   'https://gelitup.com/blog/why-ingredient-labels-matter',
   },
+  '/blog/biab-vs-builder-gel-vs-polygel': {
+    title:       'BIAB vs Builder Gel vs Polygel: Which Should Your Salon Offer?',
+    description: "BIAB vs polygel vs builder gel: compare strength, skill level, handling and removal to decide which system suits your salon and your clients' nail types.",
+    canonical:   'https://gelitup.com/blog/biab-vs-builder-gel-vs-polygel',
+    publishFrom: '2026-10-26',
+  },
   '/blog/hema-free-tpo-free-gel-salon-liability-guide': {
     title:       'HEMA-Free, TPO-Free Gels: Salon Liability & EU Compliance Guide',
     description: 'Understand the liability risks of non-EU compliant nail gels containing HEMA and TPO. How salon owners can protect their business with HEMA-free, TPO-free formulations.',
@@ -260,7 +266,10 @@ function injectSeo(html, { title, description, canonical }) {
 
 const template = fs.readFileSync(path.join(DIST, 'index.html'), 'utf-8')
 
-const routes = Object.keys(ROUTE_SEO_MAP)
+// Blog posts with publishFrom are only prerendered from 00:00 Athens time on that date
+// (a rebuild on the day adds them).
+const isLive = (seo) => !seo.publishFrom || Date.now() >= Date.parse(`${seo.publishFrom}T00:00:00+02:00`)
+const routes = Object.keys(ROUTE_SEO_MAP).filter((route) => isLive(ROUTE_SEO_MAP[route]))
 let count = 0
 
 for (const route of routes) {
