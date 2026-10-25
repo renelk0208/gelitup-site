@@ -21956,6 +21956,10 @@ function App() {
           </div>
         </div>
 
+        <p className="text-sm text-white/80">
+          <strong className="text-fuchsia-300">For professional use only.</strong> All GEL.IT.UP products are intended for use by trained nail professionals.
+        </p>
+
         <p className="border-t border-white/15 pt-3 text-white/55">— 2026 GEL.IT.UP by GIUP®</p>
       </footer>
 
