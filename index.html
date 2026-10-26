@@ -4,8 +4,71 @@
     <meta charset="UTF-8" />
     <meta name="google" content="notranslate" />
 
-    <!-- Cookiebot CMP - loads asynchronously before consent-managed marketing tags -->
-    <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="59083403-cf9d-4bd1-9ce4-c99ced9d883d" data-blockingmode="auto" type="text/javascript" async></script>
+    <!-- GEL.IT.UP cookie consent (replaces Cookiebot, Oct 2026).
+         MUST stay before Google Tag Manager / gtag: sets Google Consent Mode
+         defaults (all optional storage denied) and re-applies a stored choice.
+         The banner itself is /giup-consent.js. -->
+    <script>
+      (function () {
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+        var KEY = 'giup_cookie_consent';
+        var MAX_AGE = 365 * 24 * 60 * 60 * 1000; // ask again after 12 months
+        var stored = null;
+        try {
+          stored = JSON.parse(localStorage.getItem(KEY) || 'null');
+          if (!stored || stored.v !== 1 || !stored.ts || Date.now() - stored.ts > MAX_AGE) stored = null;
+        } catch (e) { stored = null; }
+
+        gtag('consent', 'default', {
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+          analytics_storage: 'denied',
+          functionality_storage: 'granted',
+          security_storage: 'granted',
+          wait_for_update: 500
+        });
+        gtag('set', 'ads_data_redaction', true);
+
+        // Meta Pixel: loaded only after marketing consent.
+        window.giupLoadMetaPixel = function () {
+          if (window.fbq) return;
+          !function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window,document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init','1877478442933298');
+          fbq('track','PageView');
+        };
+
+        // Apply a choice: {analytics: bool, marketing: bool}
+        window.giupApplyConsent = function (c) {
+          window.giupConsent = c;
+          gtag('consent', 'update', {
+            analytics_storage: c.analytics ? 'granted' : 'denied',
+            ad_storage: c.marketing ? 'granted' : 'denied',
+            ad_user_data: c.marketing ? 'granted' : 'denied',
+            ad_personalization: c.marketing ? 'granted' : 'denied'
+          });
+          // Same dataLayer events Cookiebot used, so existing GTM triggers keep working.
+          window.dataLayer.push({ event: 'cookie_consent_preferences' });
+          if (c.analytics) window.dataLayer.push({ event: 'cookie_consent_statistics' });
+          if (c.marketing) window.dataLayer.push({ event: 'cookie_consent_marketing' });
+          window.dataLayer.push({ event: 'giup_consent_update', consent_analytics: !!c.analytics, consent_marketing: !!c.marketing });
+          if (c.marketing) window.giupLoadMetaPixel();
+          try { window.dispatchEvent(new CustomEvent('giup:consent', { detail: c })); } catch (e) {}
+        };
+
+        window.giupConsent = stored;
+        if (stored) window.giupApplyConsent(stored);
+      })();
+    </script>
+    <script src="/giup-consent.js" defer></script>
 
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -195,19 +258,7 @@
         ]
       }
     </script>
-    <!-- Meta Pixel loads only after Cookiebot marketing consent. -->
-    <script type="text/plain" data-cookieconsent="marketing">
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window,document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init','1877478442933298');
-      fbq('track','PageView');
-    </script>
+    <!-- Meta Pixel: loaded by giupLoadMetaPixel() (top of <head>) only after marketing consent. -->
 
     <!-- Canonical -->
     <link rel="canonical" href="https://gelitup.com/" />
@@ -267,123 +318,9 @@
     <link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)" href="/pwa-512x512.png" />
     <!-- iPad Pro 12.9" 1024x1366 -->
     <link rel="apple-touch-startup-image" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" href="/pwa-512x512.png" />
-    <!-- Cookiebot Banner Styling - Custom Look (Dark theme with pink accent) -->
-    <style>
-      /* Override Cookiebot default styles */
-      #CookiebotMainContainer {
-        background-color: rgb(36, 36, 39) !important;
-        opacity: 0.95 !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-      }
-
-      #CookiebotMainContainer * {
-        font-family: Arial, sans-serif !important;
-      }
-
-      /* Message text styling */
-      #CookiebotMainContainer p,
-      #CookiebotMainContainer span {
-        color: #999 !important;
-        font-size: 14px !important;
-        line-height: 1.4 !important;
-      }
-
-      /* Link styling */
-      #CookiebotMainContainer a {
-        color: #D43790 !important;
-        font-weight: bold !important;
-        text-decoration: underline !important;
-      }
-
-      #CookiebotMainContainer a:hover {
-        color: #fff !important;
-      }
-
-      /* Accept button styling */
-      #CookiebotMainContainer button[id*="Accept"],
-      .CookieboxButtonAccept,
-      #CookiebotMainContainer .CookieboxButtonAccept {
-        background-color: rgb(212, 55, 144) !important; /* Pink #D43790 */
-        color: #fff !important;
-        border: none !important;
-        border-radius: 4px !important;
-        padding: 12px 30px !important;
-        font-size: 16px !important;
-        font-weight: bold !important;
-        cursor: pointer !important;
-        transition: 0.2s !important;
-      }
-
-      #CookiebotMainContainer button[id*="Accept"]:hover,
-      .CookieboxButtonAccept:hover,
-      #CookiebotMainContainer .CookieboxButtonAccept:hover {
-        background-color: #c0236f !important;
-        box-shadow: 0 2px 8px rgba(212, 55, 144, 0.3) !important;
-      }
-
-      /* Reject button (if present) */
-      #CookiebotMainContainer button[id*="Reject"],
-      .CookieboxButtonReject,
-      #CookiebotMainContainer .CookieboxButtonReject {
-        background-color: transparent !important;
-        color: #999 !important;
-        border: 1px solid #666 !important;
-        border-radius: 4px !important;
-        padding: 12px 30px !important;
-        font-size: 14px !important;
-        cursor: pointer !important;
-        transition: 0.2s !important;
-      }
-
-      #CookiebotMainContainer button[id*="Reject"]:hover,
-      .CookieboxButtonReject:hover,
-      #CookiebotMainContainer .CookieboxButtonReject:hover {
-        color: #fff !important;
-        border-color: #999 !important;
-      }
-
-      /* Container layout */
-      #CookiebotMainContainer {
-        padding: 25px 40px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        flex-wrap: wrap !important;
-        gap: 20px !important;
-      }
-
-      /* Mobile responsive */
-      @media screen and (max-width: 720px) {
-        #CookiebotMainContainer {
-          flex-direction: column !important;
-          align-items: flex-start !important;
-          padding: 25px 20px !important;
-        }
-
-        #CookiebotMainContainer button {
-          width: 100% !important;
-          text-align: center !important;
-        }
-
-        #CookiebotMainContainer p,
-        #CookiebotMainContainer span {
-          margin-bottom: 15px !important;
-        }
-      }
-
-      @media screen and (min-width: 720px) {
-        #CookiebotMainContainer {
-          flex-direction: row !important;
-        }
-      }
-    </style>
 
   </head>
   <body>
-    <!-- Meta Pixel noscript fallback -->
-    <noscript><img height="1" width="1" style="display:none"
-      src="https://www.facebook.com/tr?id=1877478442933298&ev=PageView&noscript=1"
-    /></noscript>
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MJM4S2B"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
