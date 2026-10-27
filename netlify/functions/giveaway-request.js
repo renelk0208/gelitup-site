@@ -17,6 +17,8 @@ import {
 //        -> { eligible, reasons[], reviewed[], months[], openRequest, lastGiveaway, allowedFrom }
 //   POST { products: [handle…], preferredMonth, idea, followers, otherLinks, notes }
 //        -> saves the request (status 'requested') after checking everything again.
+//   GET ?view=reviews -> her "My reviews" list (reviewed / still to review), any time.
+//   GET ?overview=1   -> admins: giveaway readiness of every approved ambassador.
 //
 // Admins (b2b_admins) can preview any ambassador with GET ?applicationId=<id>.
 //
@@ -138,7 +140,7 @@ function reviewDetails(reviews, products, receivedProducts) {
   }).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
 }
 
-async function buildStatus(supabase, ambassador, { detail = false } = {}) {
+async function buildStatus(supabase, ambassador, { detail = false, shopProducts = null } = {}) {
   const [{ data: shipments, error: shipErr }, { data: requests, error: reqErr }] = await Promise.all([
     supabase.from('ambassador_shipments').select('items, sent_at, delivered_at, lost_at, status').eq('application_id', ambassador.id),
     supabase.from('ambassador_giveaway_requests').select('*').eq('application_id', ambassador.id).order('created_at', { ascending: false }),
@@ -146,7 +148,7 @@ async function buildStatus(supabase, ambassador, { detail = false } = {}) {
   if (shipErr) throw new Error(shipErr.message)
   if (reqErr) throw new Error(reqErr.message)
 
-  const products = await loadShopProducts()
+  const products = shopProducts || await loadShopProducts()
   const { reviews, emailChecked } = await loadJudgeMeReviews(ambassador.email)
   // Every exact shop product from the packages she has received. Generic
   // package lines ("3 different Cat Eye shades") can't be checked until the
@@ -237,8 +239,48 @@ export async function handler(event) {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } })
   const fields = 'id, full_name, email, status, paused_at, followers, tiktok, instagram, ambassador_type, country'
 
+  const qs = event.queryStringParameters || {}
+
+  // ── Admin: giveaway readiness of every approved ambassador at a glance ──
+  if (qs.overview && event.httpMethod === 'GET') {
+    const { data: admin } = await supabase.from('b2b_admins').select('email').ilike('email', userEmail).maybeSingle()
+    if (!admin) return json(403, { error: 'Admins only.' })
+    const { data: people, error: peopleError } = await supabase.from(AMBASSADOR_TABLE)
+      .select(`${fields}, opt_out_type`).ilike('status', 'approved').order('full_name')
+    if (peopleError) return json(500, { error: peopleError.message })
+    let shopProducts
+    try { shopProducts = await loadShopProducts() } catch { return json(502, { error: 'Shop products unavailable right now.' }) }
+    const out = new Array((people || []).length)
+    let next = 0
+    const worker = async () => {
+      while (next < out.length) {
+        const i = next++
+        const a = people[i]
+        const base = { id: a.id, full_name: a.full_name, country: a.country, instagram: a.instagram, paused: Boolean(a.paused_at), opt_out_type: a.opt_out_type || null }
+        try {
+          const st = await buildStatus(supabase, a, { shopProducts })
+          out[i] = {
+            ...base,
+            eligible: st.eligible,
+            reasons: st.reasons,
+            packagesReceived: st.packagesReceived,
+            reviewedCount: st.reviewed.length,
+            notReviewedCount: st.notReviewed.length,
+            openRequest: st.openRequest,
+            upcoming: st.upcoming ? { slot_start: st.upcoming.slot_start, slot_end: st.upcoming.slot_end } : null,
+            allowedFrom: st.allowedFrom,
+          }
+        } catch (err) {
+          out[i] = { ...base, error: err.message }
+        }
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(6, out.length) }, worker))
+    return json(200, { ambassadors: out, needed: { packages: GIVEAWAY_MIN_PACKAGES, reviews: GIVEAWAY_MAX_PRODUCTS } })
+  }
+
   let ambassador = null
-  const previewId = Number(event.queryStringParameters?.applicationId || 0)
+  const previewId = Number(qs.applicationId || 0)
   if (previewId && event.httpMethod === 'GET') {
     const { data: admin } = await supabase.from('b2b_admins').select('email').ilike('email', userEmail).maybeSingle()
     if (!admin) return json(403, { error: 'Admins only.' })
@@ -250,6 +292,17 @@ export async function handler(event) {
     ambassador = data
   }
   if (!ambassador) return json(404, { error: 'No ambassador profile found for this account.' })
+
+  // ── Ambassador: "My reviews" in her profile (works whatever the giveaway switch) ──
+  if (qs.view === 'reviews' && event.httpMethod === 'GET') {
+    try {
+      const st = await buildStatus(supabase, ambassador)
+      return json(200, { reviewed: st.reviewed, notReviewed: st.notReviewed })
+    } catch (err) {
+      console.error('giveaway-request: reviews view failed', err.message)
+      return json(502, { error: 'We could not load your reviews right now.' })
+    }
+  }
 
   // On/off switch (Shipments → Giveaway requests). While off, ambassadors see
   // nothing and can't send requests; the admin preview still works.

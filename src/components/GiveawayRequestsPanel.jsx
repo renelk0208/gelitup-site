@@ -96,6 +96,20 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
   const [cardVisible, setCardVisible] = useState(null) // null = loading
   const [switchBusy, setSwitchBusy] = useState(false)
   const [checkId, setCheckId] = useState('')
+  // Giveaway readiness of every approved ambassador (who could be offered a week).
+  const [readiness, setReadiness] = useState({ loading: false, error: '', data: null })
+  const loadReadiness = async () => {
+    setReadiness({ loading: true, error: '', data: null })
+    try {
+      const { data: sess } = await supabase.auth.getSession()
+      const res = await fetch('/.netlify/functions/giveaway-request?overview=1', { headers: { Authorization: `Bearer ${sess?.session?.access_token || ''}` } })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json?.error || `HTTP ${res.status}`)
+      setReadiness({ loading: false, error: '', data: json })
+    } catch (err) {
+      setReadiness({ loading: false, error: err.message, data: null })
+    }
+  }
   useEffect(() => {
     let alive = true
     supabase.from('app_settings').select('value').eq('key', 'giveaway_card_visible').maybeSingle()
@@ -404,6 +418,57 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
               </select>
             </label>
             {checkId && renderDetails(details[Number(checkId)])}
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white p-3 text-xs">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="font-semibold text-slate-800">Who could do a giveaway now?</p>
+              <button type="button" onClick={loadReadiness} disabled={readiness.loading} className="rounded-full bg-fuchsia-600 px-3 py-1 font-semibold text-white hover:bg-fuchsia-500 disabled:opacity-60">
+                {readiness.loading ? 'Checking reviews…' : readiness.data ? 'Refresh' : 'Show giveaway readiness'}
+              </button>
+              {readiness.data && <span className="text-slate-500">{readiness.data.ambassadors.filter((a) => a.eligible).length} ready of {readiness.data.ambassadors.length}</span>}
+            </div>
+            {readiness.error && <p className="mt-2 text-rose-600">Could not check: {readiness.error}</p>}
+            {readiness.data && (() => {
+              const need = readiness.data.needed || { packages: 2, reviews: 10 }
+              const rank = (a) => (a.eligible ? 0 : a.openRequest ? 1 : a.upcoming ? 2 : a.paused ? 9 : 5)
+              const list = [...readiness.data.ambassadors].sort((x, y) => rank(x) - rank(y) || (y.reviewedCount || 0) - (x.reviewedCount || 0))
+              const pill = (ok, text) => <span className={`rounded-full px-2 py-0.5 font-semibold ${ok ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}`}>{text}</span>
+              return (
+                <div className="mt-2 overflow-x-auto">
+                  <table className="w-full min-w-[620px] text-left">
+                    <thead><tr className="text-[10px] uppercase tracking-wide text-slate-500">
+                      <th className="py-1.5 pr-2">Ambassador</th><th className="py-1.5 pr-2">Giveaway</th><th className="py-1.5 pr-2">Packages confirmed</th><th className="py-1.5 pr-2">Products reviewed</th><th className="py-1.5">Note</th>
+                    </tr></thead>
+                    <tbody className="divide-y divide-slate-100 align-top">
+                      {list.map((a) => {
+                        let status
+                        if (a.error) status = <span className="font-semibold text-rose-600">Could not check</span>
+                        else if (a.paused) status = <span className="rounded-full bg-slate-200 px-2 py-0.5 font-semibold text-slate-600">{a.opt_out_type === 'end' ? 'Ending' : 'Paused'}</span>
+                        else if (a.eligible) status = <span className="rounded-full bg-emerald-600 px-2 py-0.5 font-bold text-white">✓ Ready</span>
+                        else if (a.openRequest) status = <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-800">Requested</span>
+                        else if (a.upcoming) status = <span className="rounded-full bg-sky-100 px-2 py-0.5 font-semibold text-sky-800">Booked</span>
+                        else status = <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-600">Not yet</span>
+                        const note = a.error ? a.error
+                          : a.upcoming ? `Booked ${formatGiveawayDate(a.upcoming.slot_start)}`
+                          : a.openRequest ? `Waiting for your decision (${formatGiveawayMonth(a.openRequest.preferred_month)})`
+                          : (a.reasons || []).includes('recent_giveaway') && a.allowedFrom ? `Next giveaway from ${formatGiveawayDate(a.allowedFrom)}`
+                          : a.notReviewedCount ? `${a.notReviewedCount} received product${a.notReviewedCount === 1 ? '' : 's'} not reviewed yet` : ''
+                        return (
+                          <tr key={a.id}>
+                            <td className="py-1.5 pr-2"><span className="font-semibold text-slate-900">{a.full_name}</span><span className="block text-slate-400">{[a.country, a.instagram && `@${String(a.instagram).replace(/^@/, '')}`].filter(Boolean).join(' · ')}</span></td>
+                            <td className="py-1.5 pr-2">{status}</td>
+                            <td className="py-1.5 pr-2 tabular-nums">{a.error ? '—' : pill((a.packagesReceived || 0) >= need.packages, `${a.packagesReceived || 0} / ${need.packages}`)}</td>
+                            <td className="py-1.5 pr-2 tabular-nums">{a.error ? '—' : pill((a.reviewedCount || 0) >= need.reviews, `${a.reviewedCount || 0} / ${need.reviews}`)}</td>
+                            <td className="py-1.5 text-slate-500">{note}</td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                  <p className="mt-2 text-slate-500">Ready = at least {need.packages} packages confirmed and {need.reviews} received products reviewed, no giveaway in the last 6 months, no request waiting. Use "Check any ambassador" above for her full picture.</p>
+                </div>
+              )
+            })()}
           </div>
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Waiting for a decision</p>
