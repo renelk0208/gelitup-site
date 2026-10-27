@@ -102,21 +102,43 @@ async function loadJudgeMeReviews(email) {
   return { reviews: counted, emailChecked }
 }
 
-function reviewedProducts(reviews, products) {
+function productForReview(r, products) {
   const byHandle = new Map(products.map((p) => [p.handle, p]))
   const byId = new Map(products.map((p) => [p.id, p]))
   const byTitle = new Map(products.map((p) => [norm(p.title), p]))
+  return byHandle.get(r?.product_handle)
+    || byId.get(String(r?.product_external_id || ''))
+    || byTitle.get(norm(String(r?.product_title || '').replace(/\s*-\s*HTF\s*$/i, '')))
+    || null
+}
+
+function reviewedProducts(reviews, products) {
   const out = new Map()
   for (const r of reviews) {
-    const p = byHandle.get(r?.product_handle)
-      || byId.get(String(r?.product_external_id || ''))
-      || byTitle.get(norm(String(r?.product_title || '').replace(/\s*-\s*HTF\s*$/i, '')))
+    const p = productForReview(r, products)
     if (p && !out.has(p.handle)) out.set(p.handle, { handle: p.handle, title: p.title, image: p.image })
   }
   return [...out.values()].sort((a, b) => a.title.localeCompare(b.title))
 }
 
-async function buildStatus(supabase, ambassador) {
+// Admin view: every review she wrote, with stars and text.
+function reviewDetails(reviews, products, receivedProducts) {
+  return reviews.map((r) => {
+    const p = productForReview(r, products)
+    return {
+      title: p?.title || String(r?.product_title || 'Unknown product'),
+      handle: p?.handle || '',
+      received: Boolean(p && receivedProducts.has(p.handle)),
+      rating: Number(r?.rating || 0) || null,
+      heading: String(r?.title || ''),
+      body: String(r?.body || '').slice(0, 1500),
+      created_at: r?.created_at || '',
+      published: r?.published !== false,
+    }
+  }).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
+}
+
+async function buildStatus(supabase, ambassador, { detail = false } = {}) {
   const [{ data: shipments, error: shipErr }, { data: requests, error: reqErr }] = await Promise.all([
     supabase.from('ambassador_shipments').select('items, sent_at, delivered_at, lost_at, status').eq('application_id', ambassador.id),
     supabase.from('ambassador_giveaway_requests').select('*').eq('application_id', ambassador.id).order('created_at', { ascending: false }),
@@ -157,7 +179,35 @@ async function buildStatus(supabase, ambassador) {
   if (lastGiveaway) reasons.push('recent_giveaway')
   if (openRequest) reasons.push('open_request')
 
+  let admin = null
+  if (detail) {
+    // Everything René needs to decide: packages and contents, every review,
+    // orders with her code, past giveaways.
+    const { data: codes } = await supabase.from('ambassador_codes').select('code').ilike('ambassador_email', ambassador.email)
+    const codeList = (codes || []).map((c) => String(c.code || '').toUpperCase()).filter(Boolean)
+    const { data: orders } = codeList.length
+      ? await supabase.from('ambassador_redemptions').select('created_at, order_total_eur, commission_amount_eur, source, country, code').in('code', codeList)
+      : { data: [] }
+    admin = {
+      packages: [...(shipments || [])]
+        .filter((s) => s.sent_at && String(s.status || 'sent').toLowerCase() === 'sent')
+        .sort((a, b) => String(b.sent_at).localeCompare(String(a.sent_at)))
+        .map((s) => ({ sent_at: s.sent_at, delivered_at: s.delivered_at, lost: Boolean(s.lost_at), items: s.items || [] })),
+      receivedProductCount: receivedProducts.size,
+      reviews: reviewDetails(reviews, products, receivedProducts),
+      codeOrders: {
+        count: (orders || []).length,
+        totalEur: Math.round((orders || []).reduce((n, o) => n + Number(o.order_total_eur || 0), 0) * 100) / 100,
+        creditEur: Math.round((orders || []).reduce((n, o) => n + Number(o.commission_amount_eur || 0), 0) * 100) / 100,
+        last: [...(orders || [])].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))).slice(0, 5),
+      },
+      pastGiveaways: (requests || []).filter((r) => r.status === 'approved').map((r) => ({ slot_start: r.slot_start, slot_end: r.slot_end, products: r.products })),
+      profile: { instagram: ambassador.instagram || '', tiktok: ambassador.tiktok || '', followers: ambassador.followers || '', type: ambassador.ambassador_type || '', country: ambassador.country || '' },
+    }
+  }
+
   return {
+    admin,
     eligible: reasons.length === 0,
     reasons,
     packagesReceived: packages,
@@ -185,7 +235,7 @@ export async function handler(event) {
   const userEmail = String(user.email).trim().toLowerCase()
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } })
-  const fields = 'id, full_name, email, status, paused_at, followers, tiktok, instagram'
+  const fields = 'id, full_name, email, status, paused_at, followers, tiktok, instagram, ambassador_type, country'
 
   let ambassador = null
   const previewId = Number(event.queryStringParameters?.applicationId || 0)
@@ -203,7 +253,7 @@ export async function handler(event) {
 
   let status
   try {
-    status = await buildStatus(supabase, ambassador)
+    status = await buildStatus(supabase, ambassador, { detail: Boolean(previewId && event.httpMethod === 'GET') })
   } catch (err) {
     console.error('giveaway-request: status failed', err.message)
     return json(502, { error: 'We could not check your reviews right now. Please try again later.' })

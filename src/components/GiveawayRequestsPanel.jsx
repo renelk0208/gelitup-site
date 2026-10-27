@@ -89,6 +89,30 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
   const [busy, setBusy] = useState(null)
   const [approving, setApproving] = useState(null) // { id, month, slot }
   const [showPast, setShowPast] = useState(false)
+  // Full ambassador picture per request: { [applicationId]: { loading, error, data } }
+  const [details, setDetails] = useState({})
+  const [openDetails, setOpenDetails] = useState(null) // request id
+
+  const loadDetails = async (applicationId) => {
+    if (details[applicationId]?.data || details[applicationId]?.loading) return
+    setDetails((prev) => ({ ...prev, [applicationId]: { loading: true } }))
+    try {
+      const { data: s } = await supabase.auth.getSession()
+      const res = await fetch(`/.netlify/functions/giveaway-request?applicationId=${encodeURIComponent(applicationId)}`, {
+        headers: { Authorization: `Bearer ${s?.session?.access_token || ''}` },
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json?.error || `HTTP ${res.status}`)
+      setDetails((prev) => ({ ...prev, [applicationId]: { data: json } }))
+    } catch (err) {
+      setDetails((prev) => ({ ...prev, [applicationId]: { error: err.message } }))
+    }
+  }
+  const toggleDetails = (req) => {
+    if (openDetails === req.id) { setOpenDetails(null); return }
+    setOpenDetails(req.id)
+    loadDetails(req.application_id)
+  }
 
   useEffect(() => {
     let alive = true
@@ -166,6 +190,88 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
     return a ? `${a.full_name || a.email}${a.country ? ` · ${a.country}` : ''}` : `Ambassador #${req.application_id}`
   }
 
+  const fmt = (v) => (v ? new Date(v).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '')
+  const stars = (n) => (n ? '★'.repeat(Math.round(n)) + '☆'.repeat(Math.max(0, 5 - Math.round(n))) : '')
+  const renderDetails = (d) => {
+    if (!d || d.loading) return <p className="mt-2 text-xs text-slate-500">Loading her packages and reviews…</p>
+    if (d.error) return <p className="mt-2 text-xs text-rose-600">Could not load: {d.error}</p>
+    const s = d.data || {}
+    const a = s.admin || {}
+    const other = (s.reasons || []).filter((r) => r !== 'open_request')
+    const reasonText = { not_active: 'not active / paused', packages: `only ${s.packagesReceived} package(s) received`, reviews: `fewer than ${s.maxProducts} received products reviewed`, recent_giveaway: 'had a giveaway in the last 6 months' }
+    return (
+      <div className="mt-2 space-y-3 rounded-lg bg-slate-50 p-3 text-[12px] text-slate-700">
+        <p>
+          {other.length ? <span className="font-semibold text-rose-700">Does not meet the rules now: {other.map((r) => reasonText[r] || r).join(', ')}</span>
+            : <span className="font-semibold text-emerald-700">Meets all the rules</span>}
+        </p>
+        <div className="grid gap-2 sm:grid-cols-4">
+          <div><p className="text-[10px] uppercase text-slate-500">Type</p><p className="font-semibold">{a.profile?.type || '—'}</p></div>
+          <div><p className="text-[10px] uppercase text-slate-500">Packages received</p><p className="font-semibold">{s.packagesReceived}</p></div>
+          <div><p className="text-[10px] uppercase text-slate-500">Reviewed / received products</p><p className="font-semibold">{(s.reviewed || []).length} / {a.receivedProductCount ?? '—'}</p></div>
+          <div><p className="text-[10px] uppercase text-slate-500">Orders with her code</p><p className="font-semibold">{a.codeOrders?.count ?? 0} · €{Number(a.codeOrders?.totalEur || 0).toFixed(2)}</p></div>
+        </div>
+        <p className="text-slate-500">
+          {a.profile?.instagram ? `Instagram: ${a.profile.instagram}` : ''}{a.profile?.tiktok ? ` · TikTok: ${a.profile.tiktok}` : ''}{a.profile?.followers ? ` · Followers (application): ${a.profile.followers}` : ''}
+        </p>
+
+        <div>
+          <p className="font-semibold text-slate-800">Her reviews ({(a.reviews || []).length})</p>
+          {(a.reviews || []).length === 0 ? <p className="text-slate-500">No reviews found on shop.gelitup.com.</p> : (
+            <ul className="mt-1 divide-y divide-slate-200">
+              {a.reviews.map((r, i) => (
+                <li key={`${r.handle}-${i}`} className="py-1.5">
+                  <span className="font-semibold">{r.title}</span>
+                  <span className="ml-2 text-amber-500">{stars(r.rating)}</span>
+                  <span className="ml-2 text-slate-400">{fmt(r.created_at)}{r.received ? '' : ' · not from her packages'}{r.published ? '' : ' · unpublished'}</span>
+                  {(r.heading || r.body) && <p className="mt-0.5 text-slate-600">{r.heading ? <strong>{r.heading}. </strong> : null}{r.body}</p>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {(s.notReviewed || []).length > 0 && (
+          <div>
+            <p className="font-semibold text-slate-800">Received but not reviewed ({s.notReviewed.length})</p>
+            <p className="text-slate-600">{s.notReviewed.map((p) => p.title).join(', ')}</p>
+          </div>
+        )}
+
+        <div>
+          <p className="font-semibold text-slate-800">Packages ({(a.packages || []).length})</p>
+          <ul className="mt-1 space-y-1">
+            {(a.packages || []).map((p, i) => (
+              <li key={i}>
+                <span className="font-semibold">{fmt(p.sent_at)}</span>
+                <span className="text-slate-400"> · {p.lost ? 'lost' : p.delivered_at ? `received ${fmt(p.delivered_at)}` : 'not confirmed'}</span>
+                <span className="text-slate-600"> — {(p.items || []).join(', ')}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {(a.codeOrders?.last || []).length > 0 && (
+          <div>
+            <p className="font-semibold text-slate-800">Latest orders with her code</p>
+            <ul className="mt-1">
+              {a.codeOrders.last.map((o, i) => (
+                <li key={i}>{fmt(o.created_at)} · {o.source || 'gelitup.com'}{o.country ? ` · ${o.country}` : ''} · €{Number(o.order_total_eur || 0).toFixed(2)}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {(a.pastGiveaways || []).length > 0 && (
+          <div>
+            <p className="font-semibold text-slate-800">Past giveaways</p>
+            <ul>{a.pastGiveaways.map((g, i) => <li key={i}>{formatGiveawayDate(g.slot_start)} – {formatGiveawayDate(g.slot_end)}</li>)}</ul>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   const Card = ({ req }) => (
     <li className="rounded-xl border border-slate-200 bg-white p-3 text-[13px]">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -184,6 +290,11 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
       {req.other_links && <p className="mt-1 text-slate-500">Other accounts: {req.other_links}</p>}
       {req.notes && <p className="mt-1 text-slate-500">Notes: {req.notes}</p>}
       {req.decision_note && <p className="mt-1 text-slate-500">Reason given: {req.decision_note}</p>}
+
+      <button type="button" onClick={() => toggleDetails(req)} className="mt-2 text-xs font-semibold text-fuchsia-700 underline">
+        {openDetails === req.id ? 'Hide her full picture' : 'Show her full picture (packages, reviews, code orders)'}
+      </button>
+      {openDetails === req.id && renderDetails(details[req.application_id])}
 
       {(req.status === 'requested' || req.status === 'waitlisted') && (
         approving?.id === req.id ? (
