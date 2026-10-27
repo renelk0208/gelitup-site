@@ -19217,6 +19217,291 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
         ? handoffPricesAllocated
         : !isUnreleasedDistributor
 
+  // The ambassador box (packages, receipt button, code, code orders, credit,
+  // pause/end). Used on the ambassador-only page below and on Overview.
+  const ambassadorSection = (
+      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5">
+        <div className="flex items-center gap-2">
+          <span className="text-xl" aria-hidden="true">🌟</span>
+          <p className="text-sm font-bold uppercase tracking-wide text-emerald-800">GEL.IT.UP® Ambassador</p>
+        </div>
+        {ambassadorPortalInfo.isLoading ? (
+          <p className="mt-3 text-sm text-emerald-700">Loading your ambassador details…</p>
+        ) : ambassadorPortalInfo.code ? (
+          <>
+            {/* Latest package not confirmed yet: next package on hold until she confirms */}
+            <AmbassadorReceiptBanner onConfirmed={(id) => setAmbassadorPortalInfo((prev) => ({
+              ...prev,
+              shipmentHistory: (prev.shipmentHistory || []).map((pkg) => (pkg.id === id ? { ...pkg, delivered_at: new Date().toISOString() } : pkg)),
+            }))} />
+            {/* Stats row */}
+            <div className="mt-3 grid gap-3 sm:grid-cols-4">
+              {/* Discount code + copy */}
+              <div className="rounded-xl border border-emerald-200 bg-white p-3">
+                <p className="text-[11px] text-slate-500">Your Discount Code</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <p className="font-mono text-lg font-bold text-emerald-700">{ambassadorPortalInfo.code}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(ambassadorPortalInfo.code).then(() => {
+                        setAmbassadorCodeCopied(true)
+                        setTimeout(() => setAmbassadorCodeCopied(false), 2000)
+                      }).catch(() => {})
+                    }}
+                    className="ml-auto shrink-0 rounded-md bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700 transition hover:bg-emerald-200"
+                  >
+                    {ambassadorCodeCopied ? '✓ Copied!' : 'Copy'}
+                  </button>
+                </div>
+                <p className="mt-1 text-[10px] text-slate-400">Clients enter this at checkout</p>
+              </div>
+              {/* Client discount */}
+              <div className="rounded-xl border border-emerald-200 bg-white p-3">
+                <p className="text-[11px] text-slate-500">Client Discount</p>
+                <p className="mt-1 text-lg font-bold text-emerald-700">20% off</p>
+                <p className="mt-0.5 text-[10px] text-slate-400">Fixed ambassador code discount for clients at checkout</p>
+              </div>
+              {/* Commission rate */}
+              <div className="rounded-xl border border-emerald-200 bg-white p-3">
+                <p className="text-[11px] text-slate-500">Your Commission</p>
+                <p className="mt-1 text-lg font-bold text-emerald-700">{ambassadorPortalInfo.commissionPct}%</p>
+                <p className="mt-0.5 text-[10px] text-slate-400">Earned per client order</p>
+              </div>
+            </div>
+            {/* How it works */}
+            <div className="mt-4 rounded-xl border border-emerald-200 bg-white p-3">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">How it works</p>
+              <div className="mt-2 grid gap-3 sm:grid-cols-3">
+                <div className="flex gap-2">
+                  <span className="mt-0.5 shrink-0 text-base" aria-hidden="true">📲</span>
+                  <p className="text-[11px] text-slate-600"><strong>Share your code</strong><br />Give <span className="font-mono font-bold text-emerald-700">{ambassadorPortalInfo.code}</span> to your clients — they enter it at checkout</p>
+                </div>
+                <div className="flex gap-2">
+                  <span className="mt-0.5 shrink-0 text-base" aria-hidden="true">💸</span>
+                  <p className="text-[11px] text-slate-600"><strong>Clients save 20%</strong><br />The discount is applied automatically to their order total</p>
+                </div>
+                <div className="flex gap-2">
+                  <span className="mt-0.5 shrink-0 text-base" aria-hidden="true">💳</span>
+                  <p className="text-[11px] text-slate-600"><strong>You earn credit</strong><br />Added to your wallet and deducted from your next order at checkout</p>
+                </div>
+              </div>
+            </div>
+            <p className="mt-3 text-[11px] text-emerald-700">
+              💡 <strong>Tip:</strong> Share your code on Instagram, TikTok or WhatsApp — every order placed with your code earns you credit!
+            </p>
+            <div className="mt-3 rounded-xl border border-emerald-200 bg-white p-4">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">My shipment</p>
+              {ambassadorPortalInfo.trackingNumber || ambassadorPortalInfo.trackingUrl || ambassadorPortalInfo.shipmentDetails ? (
+                <div className="mt-2 space-y-1.5 text-[12px] text-slate-700">
+                  {ambassadorPortalInfo.shipmentStatus && (
+                    <p><strong>Status:</strong> <span className="capitalize">{ambassadorPortalInfo.shipmentStatus.replaceAll('_', ' ')}</span></p>
+                  )}
+                  {ambassadorPortalInfo.shipmentUpdatedAt && (
+                    <p><strong>Last updated:</strong> {new Date(ambassadorPortalInfo.shipmentUpdatedAt).toLocaleString()}</p>
+                  )}
+                  {ambassadorPortalInfo.shipmentDetails && (
+                    <p className="whitespace-pre-line"><strong>What's in your package:</strong> {ambassadorPortalInfo.shipmentDetails}</p>
+                  )}
+                  {ambassadorPortalInfo.trackingNumber && (
+                    <p><strong>Tracking number:</strong> {ambassadorPortalInfo.trackingNumber}</p>
+                  )}
+                  {ambassadorPortalInfo.trackingUrl && (
+                    <p><a href={ambassadorPortalInfo.trackingUrl} target="_blank" rel="noreferrer" className="font-semibold text-emerald-700 hover:underline">Track your parcel →</a></p>
+                  )}
+                </div>
+              ) : (ambassadorPortalInfo.shipmentHistory || []).length === 0 ? (
+                <p className="mt-2 text-[12px] text-slate-500">No shipment details yet. Once your package is sent, tracking will appear here.</p>
+              ) : null}
+              {(ambassadorPortalInfo.shipmentHistory || []).length > 0 && (
+                <div className="mt-3 border-t border-emerald-100 pt-3">
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">Packages sent to you</p>
+                  <ul className="mt-2 space-y-2 text-[12px] text-slate-700">
+                    {ambassadorPortalInfo.shipmentHistory.map((pkg) => (
+                      <li key={pkg.id} className="rounded-lg bg-emerald-50/60 px-3 py-2">
+                        <p><strong>{pkg.sent_at ? new Date(pkg.sent_at).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }) : 'Sent'}</strong>
+                          {pkg.tracking_number ? <> · Tracking {pkg.tracking_number}</> : null}
+                        </p>
+                        {Array.isArray(pkg.items) && pkg.items.length > 0 && (
+                          <p className="mt-0.5 text-slate-600">{pkg.items.join(', ')}</p>
+                        )}
+                        {(pkg.carrier || pkg.expected_delivery) && (
+                          <p className="mt-0.5 text-slate-600">
+                            {pkg.carrier ? carrierLabel(pkg.carrier) : null}
+                            {pkg.carrier && pkg.expected_delivery && !pkg.delivered_at ? ' · ' : null}
+                            {pkg.expected_delivery && !pkg.delivered_at
+                              ? <>Expected around {new Date(`${pkg.expected_delivery}T12:00:00Z`).toLocaleDateString(undefined, { day: '2-digit', month: 'short' })}</>
+                              : null}
+                          </p>
+                        )}
+                        {pkg.tracking_url && (
+                          <a href={pkg.tracking_url} target="_blank" rel="noreferrer" className="mt-0.5 inline-block font-semibold text-emerald-700 hover:underline">Track this parcel →</a>
+                        )}
+                        {pkg.delivered_at ? (
+                          <p className="mt-1 font-semibold text-emerald-700">✓ Received</p>
+                        ) : Object.prototype.hasOwnProperty.call(pkg, 'delivered_at') ? (
+                          <button
+                            type="button"
+                            onClick={() => confirmAmbassadorShipmentReceived(pkg.id)}
+                            disabled={confirmingShipmentId === pkg.id}
+                            className="mt-1.5 block rounded-lg bg-emerald-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                          >
+                            {confirmingShipmentId === pkg.id ? 'Saving…' : "I've received this package"}
+                          </button>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {ambassadorPortalInfo.shipmentError && (
+                <p className="mt-2 text-[11px] text-amber-700">Shipment details are temporarily unavailable.</p>
+              )}
+            </div>
+            {/* Progress journey */}
+            {(() => {
+              const total = ambassadorPortalInfo.totalRedeemedEur
+              const progressPct = Math.min(100, (total / 2000) * 100)
+              const tiers = [
+                { label: 'Starter', pct: 10, at: 0, icon: '🌱' },
+                { label: 'Rising', pct: 15, at: 1000, icon: '🌟' },
+                { label: 'Elite', pct: 20, at: 2000, icon: '🏆' },
+              ]
+              const currentTierIdx = total >= 2000 ? 2 : total >= 1000 ? 1 : 0
+              return (
+                <div className="mt-3 rounded-xl border border-emerald-200 bg-white p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">Your journey</p>
+                    <p className="text-[11px] text-slate-500">€{total.toFixed(0)} total client orders</p>
+                  </div>
+                  {/* Track */}
+                  <div className="relative mt-4 mb-7">
+                    {/* Background rail */}
+                    <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
+                      {/* Filled portion */}
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-700"
+                        style={{ width: `${progressPct}%` }}
+                      />
+                    </div>
+                    {/* Milestone dots */}
+                    {tiers.map((tier, idx) => {
+                      const pos = (tier.at / 2000) * 100
+                      const reached = total >= tier.at
+                      const isCurrent = idx === currentTierIdx
+                      return (
+                        <div key={tier.at} className="absolute top-0 -translate-x-1/2" style={{ left: `${pos}%` }}>
+                          <div className={`flex h-3 w-3 items-center justify-center rounded-full border-2 ${reached ? 'border-emerald-600 bg-emerald-500' : 'border-slate-300 bg-white'}`} />
+                          <div className="mt-2 -translate-x-1/3 text-center" style={{ minWidth: '52px' }}>
+                            <p className="text-base leading-none">{tier.icon}</p>
+                            <p className={`mt-0.5 text-[10px] font-bold ${isCurrent ? 'text-emerald-700' : reached ? 'text-emerald-600' : 'text-slate-400'}`}>{tier.pct}%</p>
+                            <p className={`text-[9px] ${isCurrent ? 'text-emerald-600' : 'text-slate-400'}`}>{tier.label}</p>
+                            {tier.at > 0 && <p className={`text-[9px] ${reached ? 'text-emerald-500' : 'text-slate-300'}`}>€{tier.at.toLocaleString()}</p>}
+                            {isCurrent && <p className="text-[9px] font-bold text-emerald-600">◀ Now</p>}
+                          </div>
+                        </div>
+                      )
+                    })}
+                    {/* Thumb marker */}
+                    {progressPct > 0 && progressPct < 100 && (
+                      <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ left: `${progressPct}%` }}>
+                        <div className="h-5 w-5 rounded-full border-2 border-white bg-emerald-600 shadow-md shadow-emerald-200" />
+                      </div>
+                    )}
+                  </div>
+                  {/* Next milestone callout */}
+                  {ambassadorPortalInfo.nextTierAt != null && (
+                    <div className="mt-1 rounded-lg bg-emerald-50 px-3 py-2 text-center">
+                      <p className="text-xs text-emerald-800">
+                        <strong>€{Math.max(0, ambassadorPortalInfo.nextTierAt - total).toFixed(0)} more</strong> in client orders unlocks your <strong>next milestone</strong> 🚀
+                      </p>
+                    </div>
+                  )}
+                  {ambassadorPortalInfo.nextTierAt == null && (
+                    <div className="mt-1 rounded-lg bg-emerald-100 px-3 py-2 text-center">
+                      <p className="text-xs font-bold text-emerald-800">🏆 Elite milestone reached — amazing progress!</p>
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
+            {/* Orders placed with her code */}
+            <div className="mt-3 rounded-xl border border-emerald-200 bg-white p-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">Orders with your code</p>
+                <p className="text-[11px] text-slate-500">
+                  {(ambassadorPortalInfo.codeOrders || []).length} order{(ambassadorPortalInfo.codeOrders || []).length === 1 ? '' : 's'}
+                  {' · '}Credit available: <strong className="text-emerald-700">€{Number(ambassadorPortalInfo.availableEur || 0).toFixed(2)}</strong>
+                </p>
+              </div>
+              {(ambassadorPortalInfo.codeOrders || []).length === 0 ? (
+                <p className="mt-2 text-[12px] text-slate-500">No orders with your code yet. Share it with your followers — each order shows up here, with the credit you earned.</p>
+              ) : (
+                <ul className="mt-2 divide-y divide-emerald-50 text-[12px] text-slate-700">
+                  {ambassadorPortalInfo.codeOrders.map((o, idx) => (
+                    <li key={`${o.ordered_at}-${idx}`} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                      <span>
+                        <strong>{o.ordered_at ? new Date(o.ordered_at).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }) : ''}</strong>
+                        <span className="text-slate-500"> · {o.source === 'shop.gelitup.com' ? 'shop.gelitup.com' : 'gelitup.com'}{o.country ? ` · ${o.country}` : ''}</span>
+                      </span>
+                      <span>
+                        Order €{Number(o.order_total_eur || 0).toFixed(2)}
+                        {o.commission_amount_eur != null && (
+                          <span className="ml-2 font-semibold text-emerald-700">+€{Number(o.commission_amount_eur).toFixed(2)} credit ({Number(o.commission_pct || 0)}%)</span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            {/* "Request a giveaway" (hidden until switched on in admin) */}
+            <AmbassadorGiveawayCard />
+            {/* "Pause or end my collaboration" */}
+            <AmbassadorOptOut />
+          </>
+        ) : ambassadorPortalInfo.error ? (
+          <p className="mt-2 text-sm text-slate-500">{ambassadorPortalInfo.error}</p>
+        ) : null}
+      </div>
+  )
+
+  // Ambassadors only ever see their own Ambassador page — never the
+  // distributor / B2B portal (shop, orders, prices, distributor info).
+  // An active ambassador code means the login belongs to an ambassador.
+  // Wait for that check before showing anything, so the B2B portal never
+  // flashes up for an ambassador.
+  if (hasSupabaseConfig && supabase && !ambassadorPortalInfo.code && !ambassadorPortalInfo.checkedOnce) {
+    return (
+      <section className="mx-auto max-w-2xl py-16 px-4 text-center">
+        <p className="text-sm text-slate-500">Loading your account…</p>
+      </section>
+    )
+  }
+  if (ambassadorPortalInfo.code) {
+    if (!location.pathname.endsWith('/portal/dashboard/ambassador')) {
+      return <Navigate to="/portal/dashboard/ambassador" replace />
+    }
+    return (
+      <section className="mx-auto max-w-3xl space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">My Ambassador Profile</p>
+            <p className="text-sm font-semibold text-slate-800">{portalUser?.user_metadata?.full_name || portalUser?.email || ''}</p>
+          </div>
+          <button onClick={onLogout} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-[#4A4A4A]">
+            Sign Out
+          </button>
+        </div>
+        {ambassadorSection}
+        <p className="px-1 text-center text-[12px] text-slate-500">
+          Need help? Email <a href="mailto:ambassadors@gelitup.com" className="font-semibold text-emerald-700 hover:underline">ambassadors@gelitup.com</a>
+        </p>
+      </section>
+    )
+  }
+
+
   // Ambassador logins are created as 'buyer' accounts. They must land on the
   // full dashboard, where their ambassador section (packages, code, credit,
   // confirm-receipt banner, giveaways) lives — not the plain buyer page.
@@ -19376,252 +19661,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                 </article>
               </div>
 
-              {activeModule === 'overview' && (ambassadorPortalInfo.isLoading || ambassadorPortalInfo.code || ambassadorPortalInfo.error) && (
-                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl" aria-hidden="true">🌟</span>
-                    <p className="text-sm font-bold uppercase tracking-wide text-emerald-800">GEL.IT.UP® Ambassador</p>
-                  </div>
-                  {ambassadorPortalInfo.isLoading ? (
-                    <p className="mt-3 text-sm text-emerald-700">Loading your ambassador details…</p>
-                  ) : ambassadorPortalInfo.code ? (
-                    <>
-                      {/* Latest package not confirmed yet: next package on hold until she confirms */}
-                      <AmbassadorReceiptBanner onConfirmed={(id) => setAmbassadorPortalInfo((prev) => ({
-                        ...prev,
-                        shipmentHistory: (prev.shipmentHistory || []).map((pkg) => (pkg.id === id ? { ...pkg, delivered_at: new Date().toISOString() } : pkg)),
-                      }))} />
-                      {/* Stats row */}
-                      <div className="mt-3 grid gap-3 sm:grid-cols-4">
-                        {/* Discount code + copy */}
-                        <div className="rounded-xl border border-emerald-200 bg-white p-3">
-                          <p className="text-[11px] text-slate-500">Your Discount Code</p>
-                          <div className="mt-1 flex items-center gap-2">
-                            <p className="font-mono text-lg font-bold text-emerald-700">{ambassadorPortalInfo.code}</p>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                navigator.clipboard.writeText(ambassadorPortalInfo.code).then(() => {
-                                  setAmbassadorCodeCopied(true)
-                                  setTimeout(() => setAmbassadorCodeCopied(false), 2000)
-                                }).catch(() => {})
-                              }}
-                              className="ml-auto shrink-0 rounded-md bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700 transition hover:bg-emerald-200"
-                            >
-                              {ambassadorCodeCopied ? '✓ Copied!' : 'Copy'}
-                            </button>
-                          </div>
-                          <p className="mt-1 text-[10px] text-slate-400">Clients enter this at checkout</p>
-                        </div>
-                        {/* Client discount */}
-                        <div className="rounded-xl border border-emerald-200 bg-white p-3">
-                          <p className="text-[11px] text-slate-500">Client Discount</p>
-                          <p className="mt-1 text-lg font-bold text-emerald-700">20% off</p>
-                          <p className="mt-0.5 text-[10px] text-slate-400">Fixed ambassador code discount for clients at checkout</p>
-                        </div>
-                        {/* Commission rate */}
-                        <div className="rounded-xl border border-emerald-200 bg-white p-3">
-                          <p className="text-[11px] text-slate-500">Your Commission</p>
-                          <p className="mt-1 text-lg font-bold text-emerald-700">{ambassadorPortalInfo.commissionPct}%</p>
-                          <p className="mt-0.5 text-[10px] text-slate-400">Earned per client order</p>
-                        </div>
-                      </div>
-                      {/* How it works */}
-                      <div className="mt-4 rounded-xl border border-emerald-200 bg-white p-3">
-                        <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">How it works</p>
-                        <div className="mt-2 grid gap-3 sm:grid-cols-3">
-                          <div className="flex gap-2">
-                            <span className="mt-0.5 shrink-0 text-base" aria-hidden="true">📲</span>
-                            <p className="text-[11px] text-slate-600"><strong>Share your code</strong><br />Give <span className="font-mono font-bold text-emerald-700">{ambassadorPortalInfo.code}</span> to your clients — they enter it at checkout</p>
-                          </div>
-                          <div className="flex gap-2">
-                            <span className="mt-0.5 shrink-0 text-base" aria-hidden="true">💸</span>
-                            <p className="text-[11px] text-slate-600"><strong>Clients save 20%</strong><br />The discount is applied automatically to their order total</p>
-                          </div>
-                          <div className="flex gap-2">
-                            <span className="mt-0.5 shrink-0 text-base" aria-hidden="true">💳</span>
-                            <p className="text-[11px] text-slate-600"><strong>You earn credit</strong><br />Added to your wallet and deducted from your next order at checkout</p>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="mt-3 text-[11px] text-emerald-700">
-                        💡 <strong>Tip:</strong> Share your code on Instagram, TikTok or WhatsApp — every order placed with your code earns you credit!
-                      </p>
-                      <div className="mt-3 rounded-xl border border-emerald-200 bg-white p-4">
-                        <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">My shipment</p>
-                        {ambassadorPortalInfo.trackingNumber || ambassadorPortalInfo.trackingUrl || ambassadorPortalInfo.shipmentDetails ? (
-                          <div className="mt-2 space-y-1.5 text-[12px] text-slate-700">
-                            {ambassadorPortalInfo.shipmentStatus && (
-                              <p><strong>Status:</strong> <span className="capitalize">{ambassadorPortalInfo.shipmentStatus.replaceAll('_', ' ')}</span></p>
-                            )}
-                            {ambassadorPortalInfo.shipmentUpdatedAt && (
-                              <p><strong>Last updated:</strong> {new Date(ambassadorPortalInfo.shipmentUpdatedAt).toLocaleString()}</p>
-                            )}
-                            {ambassadorPortalInfo.shipmentDetails && (
-                              <p className="whitespace-pre-line"><strong>What's in your package:</strong> {ambassadorPortalInfo.shipmentDetails}</p>
-                            )}
-                            {ambassadorPortalInfo.trackingNumber && (
-                              <p><strong>Tracking number:</strong> {ambassadorPortalInfo.trackingNumber}</p>
-                            )}
-                            {ambassadorPortalInfo.trackingUrl && (
-                              <p><a href={ambassadorPortalInfo.trackingUrl} target="_blank" rel="noreferrer" className="font-semibold text-emerald-700 hover:underline">Track your parcel →</a></p>
-                            )}
-                          </div>
-                        ) : (ambassadorPortalInfo.shipmentHistory || []).length === 0 ? (
-                          <p className="mt-2 text-[12px] text-slate-500">No shipment details yet. Once your package is sent, tracking will appear here.</p>
-                        ) : null}
-                        {(ambassadorPortalInfo.shipmentHistory || []).length > 0 && (
-                          <div className="mt-3 border-t border-emerald-100 pt-3">
-                            <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">Packages sent to you</p>
-                            <ul className="mt-2 space-y-2 text-[12px] text-slate-700">
-                              {ambassadorPortalInfo.shipmentHistory.map((pkg) => (
-                                <li key={pkg.id} className="rounded-lg bg-emerald-50/60 px-3 py-2">
-                                  <p><strong>{pkg.sent_at ? new Date(pkg.sent_at).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }) : 'Sent'}</strong>
-                                    {pkg.tracking_number ? <> · Tracking {pkg.tracking_number}</> : null}
-                                  </p>
-                                  {Array.isArray(pkg.items) && pkg.items.length > 0 && (
-                                    <p className="mt-0.5 text-slate-600">{pkg.items.join(', ')}</p>
-                                  )}
-                                  {(pkg.carrier || pkg.expected_delivery) && (
-                                    <p className="mt-0.5 text-slate-600">
-                                      {pkg.carrier ? carrierLabel(pkg.carrier) : null}
-                                      {pkg.carrier && pkg.expected_delivery && !pkg.delivered_at ? ' · ' : null}
-                                      {pkg.expected_delivery && !pkg.delivered_at
-                                        ? <>Expected around {new Date(`${pkg.expected_delivery}T12:00:00Z`).toLocaleDateString(undefined, { day: '2-digit', month: 'short' })}</>
-                                        : null}
-                                    </p>
-                                  )}
-                                  {pkg.tracking_url && (
-                                    <a href={pkg.tracking_url} target="_blank" rel="noreferrer" className="mt-0.5 inline-block font-semibold text-emerald-700 hover:underline">Track this parcel →</a>
-                                  )}
-                                  {pkg.delivered_at ? (
-                                    <p className="mt-1 font-semibold text-emerald-700">✓ Received</p>
-                                  ) : Object.prototype.hasOwnProperty.call(pkg, 'delivered_at') ? (
-                                    <button
-                                      type="button"
-                                      onClick={() => confirmAmbassadorShipmentReceived(pkg.id)}
-                                      disabled={confirmingShipmentId === pkg.id}
-                                      className="mt-1.5 block rounded-lg bg-emerald-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
-                                    >
-                                      {confirmingShipmentId === pkg.id ? 'Saving…' : "I've received this package"}
-                                    </button>
-                                  ) : null}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {ambassadorPortalInfo.shipmentError && (
-                          <p className="mt-2 text-[11px] text-amber-700">Shipment details are temporarily unavailable.</p>
-                        )}
-                      </div>
-                      {/* Progress journey */}
-                      {(() => {
-                        const total = ambassadorPortalInfo.totalRedeemedEur
-                        const progressPct = Math.min(100, (total / 2000) * 100)
-                        const tiers = [
-                          { label: 'Starter', pct: 10, at: 0, icon: '🌱' },
-                          { label: 'Rising', pct: 15, at: 1000, icon: '🌟' },
-                          { label: 'Elite', pct: 20, at: 2000, icon: '🏆' },
-                        ]
-                        const currentTierIdx = total >= 2000 ? 2 : total >= 1000 ? 1 : 0
-                        return (
-                          <div className="mt-3 rounded-xl border border-emerald-200 bg-white p-4">
-                            <div className="flex items-center justify-between">
-                              <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">Your journey</p>
-                              <p className="text-[11px] text-slate-500">€{total.toFixed(0)} total client orders</p>
-                            </div>
-                            {/* Track */}
-                            <div className="relative mt-4 mb-7">
-                              {/* Background rail */}
-                              <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
-                                {/* Filled portion */}
-                                <div
-                                  className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-700"
-                                  style={{ width: `${progressPct}%` }}
-                                />
-                              </div>
-                              {/* Milestone dots */}
-                              {tiers.map((tier, idx) => {
-                                const pos = (tier.at / 2000) * 100
-                                const reached = total >= tier.at
-                                const isCurrent = idx === currentTierIdx
-                                return (
-                                  <div key={tier.at} className="absolute top-0 -translate-x-1/2" style={{ left: `${pos}%` }}>
-                                    <div className={`flex h-3 w-3 items-center justify-center rounded-full border-2 ${reached ? 'border-emerald-600 bg-emerald-500' : 'border-slate-300 bg-white'}`} />
-                                    <div className="mt-2 -translate-x-1/3 text-center" style={{ minWidth: '52px' }}>
-                                      <p className="text-base leading-none">{tier.icon}</p>
-                                      <p className={`mt-0.5 text-[10px] font-bold ${isCurrent ? 'text-emerald-700' : reached ? 'text-emerald-600' : 'text-slate-400'}`}>{tier.pct}%</p>
-                                      <p className={`text-[9px] ${isCurrent ? 'text-emerald-600' : 'text-slate-400'}`}>{tier.label}</p>
-                                      {tier.at > 0 && <p className={`text-[9px] ${reached ? 'text-emerald-500' : 'text-slate-300'}`}>€{tier.at.toLocaleString()}</p>}
-                                      {isCurrent && <p className="text-[9px] font-bold text-emerald-600">◀ Now</p>}
-                                    </div>
-                                  </div>
-                                )
-                              })}
-                              {/* Thumb marker */}
-                              {progressPct > 0 && progressPct < 100 && (
-                                <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ left: `${progressPct}%` }}>
-                                  <div className="h-5 w-5 rounded-full border-2 border-white bg-emerald-600 shadow-md shadow-emerald-200" />
-                                </div>
-                              )}
-                            </div>
-                            {/* Next milestone callout */}
-                            {ambassadorPortalInfo.nextTierAt != null && (
-                              <div className="mt-1 rounded-lg bg-emerald-50 px-3 py-2 text-center">
-                                <p className="text-xs text-emerald-800">
-                                  <strong>€{Math.max(0, ambassadorPortalInfo.nextTierAt - total).toFixed(0)} more</strong> in client orders unlocks your <strong>next milestone</strong> 🚀
-                                </p>
-                              </div>
-                            )}
-                            {ambassadorPortalInfo.nextTierAt == null && (
-                              <div className="mt-1 rounded-lg bg-emerald-100 px-3 py-2 text-center">
-                                <p className="text-xs font-bold text-emerald-800">🏆 Elite milestone reached — amazing progress!</p>
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })()}
-                      {/* Orders placed with her code */}
-                      <div className="mt-3 rounded-xl border border-emerald-200 bg-white p-4">
-                        <div className="flex flex-wrap items-baseline justify-between gap-2">
-                          <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">Orders with your code</p>
-                          <p className="text-[11px] text-slate-500">
-                            {(ambassadorPortalInfo.codeOrders || []).length} order{(ambassadorPortalInfo.codeOrders || []).length === 1 ? '' : 's'}
-                            {' · '}Credit available: <strong className="text-emerald-700">€{Number(ambassadorPortalInfo.availableEur || 0).toFixed(2)}</strong>
-                          </p>
-                        </div>
-                        {(ambassadorPortalInfo.codeOrders || []).length === 0 ? (
-                          <p className="mt-2 text-[12px] text-slate-500">No orders with your code yet. Share it with your followers — each order shows up here, with the credit you earned.</p>
-                        ) : (
-                          <ul className="mt-2 divide-y divide-emerald-50 text-[12px] text-slate-700">
-                            {ambassadorPortalInfo.codeOrders.map((o, idx) => (
-                              <li key={`${o.ordered_at}-${idx}`} className="flex flex-wrap items-center justify-between gap-2 py-2">
-                                <span>
-                                  <strong>{o.ordered_at ? new Date(o.ordered_at).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }) : ''}</strong>
-                                  <span className="text-slate-500"> · {o.source === 'shop.gelitup.com' ? 'shop.gelitup.com' : 'gelitup.com'}{o.country ? ` · ${o.country}` : ''}</span>
-                                </span>
-                                <span>
-                                  Order €{Number(o.order_total_eur || 0).toFixed(2)}
-                                  {o.commission_amount_eur != null && (
-                                    <span className="ml-2 font-semibold text-emerald-700">+€{Number(o.commission_amount_eur).toFixed(2)} credit ({Number(o.commission_pct || 0)}%)</span>
-                                  )}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                      {/* "Request a giveaway" (hidden until switched on in admin) */}
-                      <AmbassadorGiveawayCard />
-                      {/* "Pause or end my collaboration" */}
-                      <AmbassadorOptOut />
-                    </>
-                  ) : ambassadorPortalInfo.error ? (
-                    <p className="mt-2 text-sm text-slate-500">{ambassadorPortalInfo.error}</p>
-                  ) : null}
-                </div>
-              )}
+              {activeModule === 'overview' && (ambassadorPortalInfo.isLoading || ambassadorPortalInfo.code || ambassadorPortalInfo.error) && ambassadorSection}
 
               {activeModule === 'overview' && (() => {
                 const tier = effectiveTier
