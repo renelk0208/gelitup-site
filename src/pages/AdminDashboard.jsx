@@ -4598,6 +4598,33 @@ function buildAmbassadorChoiceRequestEmail(row) {
   }
 }
 
+// "Your ambassador profile" — personal login link (Shipments → Send profile login links).
+function buildAmbassadorProfileLinkEmail(row, link, hasPassword) {
+  const firstName = String(row?.full_name || '').trim().split(/\s+/)[0] || 'there'
+  const name = firstName.charAt(0).toUpperCase() + firstName.slice(1)
+  const button = hasPassword ? 'Log in to my profile' : 'Create my password'
+  return {
+    subject: 'Your GEL.IT.UP ambassador profile — your personal login link 🔑',
+    html: `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.6">
+      <p>Hi ${escAmb(name)},</p>
+      <p>You have your own <strong>GEL.IT.UP ambassador profile</strong> on gelitup.com, and we'd love you to start using it — something very exciting is coming for our ambassadors soon! 🎁</p>
+      <p>In your profile you can see:</p>
+      <ul>
+        <li>📦 your PR packages, their tracking, and when your next one is due</li>
+        <li>✅ what's still pending from you — confirming you received your package, and reviewing your products</li>
+        <li>💳 your discount code, the orders placed with it and the credit you've earned</li>
+      </ul>
+      <p style="margin:20px 0"><a href="${escAmb(link)}" style="display:inline-block;background:#d43790;color:#ffffff;padding:12px 20px;border-radius:9999px;text-decoration:none;font-weight:700">${button}</a></p>
+      ${hasPassword
+        ? '<p style="font-size:13px;color:#555">Forgotten your password? Use "Forgot password" on the login page.</p>'
+        : '<p style="font-size:13px;color:#555">This link is personal to you — please don\'t share it. Use the email address this message was sent to. Already created a password? Just sign in, or use "Forgot password" on the login page.</p>'}
+      <p><strong>Please always confirm when your package arrives and review your products</strong> — only ambassadors who are up to date will qualify for what's coming next. 💖</p>
+      <p>Save <a href="mailto:ambassadors@gelitup.com" style="color:#d43790">ambassadors@gelitup.com</a> as a contact and check your spam folder, so you never miss our emails.</p>
+      <p>With love,<br/>René Krallis<br/>Marketing Director, GEL.IT.UP International</p>
+    </div>`,
+  }
+}
+
 // Sent when an ambassador's choice was cleared because it had too many
 // products of the same type.
 function buildAmbassadorChoiceRedoEmail(row) {
@@ -5923,6 +5950,36 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const res = await sendChoiceRequest(row)
     setSaving(null)
     if (!res.ok) alert(`Email not sent: ${res.error || 'unknown error'}`)
+  }
+  // "Send profile login links": every active (approved, not paused) ambassador.
+  const [linkPicker, setLinkPicker] = useState(null) // { ids: Set, preview: false } while open
+  const [linkBulkBusy, setLinkBulkBusy] = useState(false)
+  const getLinkCandidates = () => rows
+    .filter((r) => String(r?.status || '').toLowerCase() === 'approved' && !r?.paused_at && String(r?.email || '').trim())
+    .sort((a, b) => String(a.full_name || '').localeCompare(String(b.full_name || '')))
+  const openLinkPicker = () => setLinkPicker({ ids: new Set(getLinkCandidates().map((r) => r.id)), preview: false })
+  const sendProfileLinks = async () => {
+    const targets = getLinkCandidates().filter((r) => linkPicker?.ids.has(r.id))
+    if (!targets.length) return
+    if (!window.confirm(`Email ${targets.length} ambassador${targets.length === 1 ? '' : 's'} her personal profile login link now?`)) return
+    setLinkBulkBusy(true)
+    const failed = []
+    for (const row of targets) {
+      try {
+        const link = await getAmbassadorSetupLink(row)
+        const { subject, html } = buildAmbassadorProfileLinkEmail(row, link, Boolean(row.portal_password_set_at))
+        const res = await sendAmbassadorEmail({ to: String(row.email).trim(), subject, html })
+        if (!res.ok) { failed.push(`${row.full_name}: ${res.error || 'failed'}`); continue }
+        const sentAt = new Date().toISOString()
+        await supabase.from(AMBASSADOR_TABLE).update({ portal_link_sent_at: sentAt }).eq('id', row.id)
+        patchRow(row.id, { portal_link_sent_at: sentAt })
+      } catch (e) {
+        failed.push(`${row.full_name}: ${e?.message || 'failed'}`)
+      }
+    }
+    setLinkBulkBusy(false)
+    setLinkPicker(null)
+    alert(failed.length ? `Sent ${targets.length - failed.length} of ${targets.length}.\n\nNot sent:\n${failed.join('\n')}` : `Sent to ${targets.length} ambassador${targets.length === 1 ? '' : 's'}.`)
   }
   const [choiceBulkBusy, setChoiceBulkBusy] = useState(false)
   // Pick exactly who gets the "choose 5 products" email. Anyone who already
@@ -7692,6 +7749,14 @@ const deleteApplication = async (row) => {
               >
                 {choiceBulkBusy ? 'Sending…' : '✉ Ask ambassadors to choose 5 products…'}
               </button>
+              <button
+                type="button"
+                onClick={openLinkPicker}
+                disabled={linkBulkBusy}
+                className="rounded-full bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700 disabled:opacity-60"
+              >
+                {linkBulkBusy ? 'Sending…' : '🔑 Send profile login links…'}
+              </button>
               {(() => {
                 const asked = rows.filter((r) => r.choice_requested_at && !r.choice_submitted_at).length
                 const chosen = rows.filter((r) => r.choice_submitted_at).length
@@ -8764,6 +8829,55 @@ const deleteApplication = async (row) => {
           </div>
         </div>
       )}
+
+      {linkPicker && (() => {
+        const candidates = getLinkCandidates()
+        const sample = candidates.find((r) => linkPicker.ids.has(r.id)) || candidates[0]
+        const preview = sample ? buildAmbassadorProfileLinkEmail(sample, 'https://gelitup.com/portal/login?mode=create-password&email=…', Boolean(sample.portal_password_set_at)) : null
+        return (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4" onClick={() => !linkBulkBusy && setLinkPicker(null)}>
+            <div className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-base font-bold text-slate-900">Send profile login links</h3>
+              <p className="mt-1 text-xs text-slate-500">Every active ambassador (approved, not paused). Each gets her own personal link — "Create my password", or "Log in" if she already has a password. Nothing is sent until you press Send.</p>
+              <div className="mt-3 flex gap-3 text-xs">
+                <button type="button" className="font-semibold text-fuchsia-700 hover:underline" onClick={() => setLinkPicker({ ...linkPicker, ids: new Set(candidates.map((r) => r.id)) })}>Tick all</button>
+                <button type="button" className="font-semibold text-slate-600 hover:underline" onClick={() => setLinkPicker({ ...linkPicker, ids: new Set() })}>Untick all</button>
+                <button type="button" className="ml-auto font-semibold text-slate-600 hover:underline" onClick={() => setLinkPicker({ ...linkPicker, preview: !linkPicker.preview })}>{linkPicker.preview ? 'Hide email preview' : 'Preview the email'}</button>
+              </div>
+              {linkPicker.preview && preview && (
+                <div className="mt-2 max-h-72 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs">
+                  <p className="mb-2 font-semibold">Subject: {preview.subject}</p>
+                  <div dangerouslySetInnerHTML={{ __html: preview.html }} />
+                </div>
+              )}
+              <ul className="mt-2 flex-1 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200">
+                {candidates.map((row) => (
+                  <li key={row.id}>
+                    <label className="flex cursor-pointer items-start gap-3 px-3 py-2 hover:bg-slate-50">
+                      <input type="checkbox" className="mt-1" disabled={linkBulkBusy} checked={linkPicker.ids.has(row.id)} onChange={() => setLinkPicker((prev) => {
+                        const ids = new Set(prev.ids)
+                        if (ids.has(row.id)) ids.delete(row.id); else ids.add(row.id)
+                        return { ...prev, ids }
+                      })} />
+                      <span className="min-w-0 flex-1 text-xs">
+                        <span className="font-semibold text-slate-900">{row.full_name}</span>
+                        <span className="text-slate-500"> · {row.email}</span>
+                        <span className="block text-slate-400">{row.portal_password_set_at ? 'Has a password — gets a "Log in" link' : 'No password yet — gets a "Create my password" link'}{row.portal_link_sent_at ? ` · link last sent ${fmtDate(row.portal_link_sent_at)}` : ''}</span>
+                      </span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4 flex items-center justify-end gap-2">
+                <button type="button" onClick={() => setLinkPicker(null)} disabled={linkBulkBusy} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+                <button type="button" onClick={sendProfileLinks} disabled={linkBulkBusy || linkPicker.ids.size === 0} className="rounded-lg bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700 disabled:opacity-50">
+                  {linkBulkBusy ? 'Sending…' : `Send to ${linkPicker.ids.size} ambassador${linkPicker.ids.size === 1 ? '' : 's'}`}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {choicePicker && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4" onClick={() => !choiceBulkBusy && setChoicePicker(null)}>
