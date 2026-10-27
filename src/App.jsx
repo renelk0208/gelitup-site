@@ -19216,7 +19216,17 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
         ? handoffPricesAllocated
         : !isUnreleasedDistributor
 
-  if (portalUser?.user_metadata?.role === 'buyer') {
+  // Ambassador logins are created as 'buyer' accounts. They must land on the
+  // full dashboard, where their ambassador section (packages, code, credit,
+  // confirm-receipt banner, giveaways) lives — not the plain buyer page.
+  if (portalUser?.user_metadata?.role === 'buyer' && !ambassadorPortalInfo.code && !ambassadorPortalInfo.checkedOnce) {
+    return (
+      <section className="mx-auto max-w-2xl py-16 px-4 text-center">
+        <p className="text-sm text-slate-500">Loading your account…</p>
+      </section>
+    )
+  }
+  if (portalUser?.user_metadata?.role === 'buyer' && !ambassadorPortalInfo.code) {
     return (
       <BuyerPortal
         onLogout={onLogout}
