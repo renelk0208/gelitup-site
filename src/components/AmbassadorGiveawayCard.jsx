@@ -88,7 +88,7 @@ export default function AmbassadorGiveawayCard() {
       <Box>
         <p className="mt-2 text-[13px] text-slate-700">Approved ambassadors can host an official GEL.IT.UP giveaway, with the prize supplied and shipped by us. To request one:</p>
         <ul className="mt-2 space-y-1 text-[12px] text-slate-600">
-          <li>{r.includes('packages') ? '○' : '✓'} Received at least {data.packagesNeeded} PR packages {r.includes('packages') ? `(you have ${data.packagesReceived})` : ''}</li>
+          <li>{r.includes('packages') ? '○' : '✓'} Confirmed you received at least {data.packagesNeeded} PR packages {r.includes('packages') ? `(you have ${data.packagesReceived})` : ''}</li>
           <li>{r.includes('reviews') ? '○' : '✓'} Reviewed at least <strong>{data.maxProducts} products</strong> you have received, on shop.gelitup.com {r.includes('reviews') ? `(you have reviewed ${(data.reviewed || []).length})` : ''}</li>
           {r.includes('recent_giveaway') && data.allowedFrom && (
             <li>○ One giveaway every 6 months — you can request your next one from {formatGiveawayDate(data.allowedFrom)}</li>

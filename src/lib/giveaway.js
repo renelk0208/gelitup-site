@@ -6,7 +6,7 @@
 // Week 1 starts on the first Monday of the month.
 //
 // Eligibility (all must be true):
-//   - at least 2 packages received (marked received, or sent 21+ days ago and not lost)
+//   - at least 2 packages confirmed as received (not lost)
 //   - at least 10 products she received in her packages AND reviewed on
 //     shop.gelitup.com (Judge.me); she picks the 10 prize items from these
 //   - no approved giveaway in the last 6 months
@@ -18,17 +18,16 @@ export const GIVEAWAY_GAP_MONTHS = 6
 // 10 prize items per giveaway, chosen from products she received and reviewed.
 export const GIVEAWAY_MAX_PRODUCTS = 10
 const DAY = 24 * 60 * 60 * 1000
-const SENT_COUNTS_AS_RECEIVED_DAYS = 21
 
-export function packageCountsAsReceived(shipment, now = Date.now()) {
+// Only packages she (or the admin) CONFIRMED as received count.
+export function packageCountsAsReceived(shipment) {
   if (!shipment?.sent_at || shipment.lost_at) return false
   if (String(shipment.status || 'sent').toLowerCase() !== 'sent') return false
-  if (shipment.delivered_at) return true
-  return now - new Date(shipment.sent_at).getTime() >= SENT_COUNTS_AS_RECEIVED_DAYS * DAY
+  return Boolean(shipment.delivered_at)
 }
 
-export function receivedPackageCount(shipments, now = Date.now()) {
-  return (shipments || []).filter((s) => packageCountsAsReceived(s, now)).length
+export function receivedPackageCount(shipments) {
+  return (shipments || []).filter((s) => packageCountsAsReceived(s)).length
 }
 
 const pad = (n) => String(n).padStart(2, '0')

@@ -14,6 +14,7 @@ import { buildAmbassadorReviewRequestEmail } from '../lib/reviewEmail.js'
 import { AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE } from '../lib/ambassadorFollowUpPacks.js'
 import AmbassadorShipmentsTable from '../components/AmbassadorShipmentsTable.jsx'
 import GiveawayRequestsPanel from '../components/GiveawayRequestsPanel.jsx'
+import AdminSettingSwitch from '../components/AdminSettingSwitch.jsx'
 import {
   normalizeAdminSkuToken,
   normalizeAdminNameToken,
@@ -6896,6 +6897,14 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   const recordSentIso = recordOnly && recordOpts?.sentDate ? new Date(`${recordOpts.sentDate}T10:00:00Z`).toISOString() : null
   const shipmentSaveKey = String(row?.id || '')
   if (!shipmentSaveKey) return
+  // Rule: no next package until she confirms she received the last one.
+  if (!recordOnly) {
+    const lastSent = [...(row?._shipments || [])]
+      .filter((s) => s?.sent_at && String(s.status || 'sent').toLowerCase() === 'sent')
+      .sort((a, b) => String(b.sent_at).localeCompare(String(a.sent_at)))[0]
+    if (lastSent && !lastSent.lost_at && !lastSent.delivered_at
+      && !window.confirm(`ON HOLD: ${row.full_name || row.email} has not confirmed she received her last package (sent ${fmtDate(lastSent.sent_at)}).\n\nThe rule is no next package until she confirms. Send this one anyway?`)) return
+  }
   if (shipmentSaveInFlightRef.current.has(shipmentSaveKey)) return
   shipmentSaveInFlightRef.current.add(shipmentSaveKey)
   try {
@@ -7664,6 +7673,15 @@ const deleteApplication = async (row) => {
           {loading && <p className="text-sm text-slate-500">Loading…</p>}
           {error && <p className="text-sm text-rose-600">{error}</p>}
           {!loading && !error && (<>
+            <AdminSettingSwitch
+              settingKey="receipt_reminders_on"
+              adminLabel={getAdminDisplayLabel()}
+              label="“Please confirm you received your package” reminders:"
+              onText="Ambassadors see a banner in their profile, and get ONE reminder email (10:00) when a package should have arrived but isn't confirmed."
+              offText="Off — no banner, no reminder emails. Packages not confirmed still show ON HOLD here."
+              confirmOn={'Turn on receipt reminders?\n\nAmbassadors whose latest package should have arrived but is not confirmed will see a banner in their profile, and get ONE reminder email at 10:00 tomorrow (one per package).'}
+              confirmOff="Turn off receipt reminders (no banner, no emails)?"
+            />
             <GiveawayRequestsPanel ambassadors={rows} sendEmail={sendAmbassadorEmail} adminLabel={getAdminDisplayLabel()} />
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <button

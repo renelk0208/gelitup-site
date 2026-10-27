@@ -183,6 +183,11 @@ function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews,
       </button>
       <SocialLinks row={row} />
       <p className="text-slate-500">{[country, TYPE_LABEL[getType(row)], row.discount_code].filter(Boolean).join(' · ')}</p>
+      {line.last?.sent_at && !line.last?.lost_at && !line.last?.delivered_at && (
+        <p className="mt-1 inline-block rounded bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold text-white" title="No next package until she confirms she received the last one">
+          ON HOLD · last package not confirmed
+        </p>
+      )}
       {line.isFirst && onSetType && <TypePicker row={row} type={getType(row)} onSetType={onSetType} busy={busy} />}
       {!line.isFirst && row.choice_submitted_at && row.choice_approved_at && <p className="mt-1 text-[11px] font-semibold text-emerald-700">✓ Chose 5 products {fmt(row.choice_submitted_at)} · approved</p>}
       {!line.isFirst && row.choice_submitted_at && !row.choice_approved_at && (

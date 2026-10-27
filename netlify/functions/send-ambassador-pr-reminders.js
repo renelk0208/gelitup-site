@@ -100,7 +100,7 @@ function plannedItemsOf(row) {
 }
 
 function ambassadorBlock(entry, today) {
-  const { row, lastShipment, packageNumber, due, isNew } = entry
+  const { row, lastShipment, packageNumber, due, isNew, onHold } = entry
   const name = String(row?.full_name || row?.email || 'Unknown ambassador').trim()
   const daysLeft = daysBetween(today, due)
   const when = daysLeft < 0
@@ -111,6 +111,7 @@ function ambassadorBlock(entry, today) {
       <strong>${escapeHtml(name)}</strong>${isNew ? ' <span style="background:#d43790;color:#fff;border-radius:9px;padding:1px 7px;font-size:11px">NEW</span>' : ''}
       <span style="color:#666"> · package ${packageNumber} · ${escapeHtml(row?.country || '')}</span><br/>
       ${when} — ${escapeHtml(formatDate(due))}${lastShipment?.sent_at ? ` <span style="color:#666">(last sent ${escapeHtml(formatDate(lastShipment.sent_at))})</span>` : ''}<br/>
+      ${onHold ? '<span style="display:inline-block;margin:3px 0;background:#c0392b;color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700">ON HOLD — she has not confirmed she received her last package. Do not send until she confirms.</span><br/>' : ''}
       <span style="font-size:13px">${planned.length ? `<strong>Planned:</strong> ${escapeHtml(planned.join(', '))}` : '<span style="color:#c0392b">Nothing planned yet</span>'}</span>
     </td></tr>`
 }
@@ -209,12 +210,14 @@ export async function handler(event) {
 
     const { data: shipments } = await supabase
       .from('ambassador_shipments')
-      .select('sent_at, tracking_number, tracking_url, items, lost_at')
+      .select('sent_at, tracking_number, tracking_url, items, lost_at, delivered_at')
       .eq('application_id', row.id)
       .eq('status', 'sent')
       .order('sent_at', { ascending: false })
     const lastShipment = shipments?.[0] || null
     const packageNumber = (shipments?.length || 0) + 1
+    // Rule: no next package until she confirms she received the last one.
+    const onHold = Boolean(lastShipment && !lastShipment.lost_at && !lastShipment.delivered_at)
 
     // Fill in the follow-up pack once per due date, if nothing is planned yet
     // (if the admin then removes items, they are not put back).
@@ -224,7 +227,7 @@ export async function handler(event) {
     // Only for the SECOND package (one package sent so far; the same tracking
     // number recorded twice counts once). Third packages are chosen by hand.
     const packagesSent = new Set((shipments || []).filter((sh) => !sh.lost_at).map((sh) => String(sh.tracking_number || sh.sent_at || '').trim().toLowerCase())).size
-    if (!hasPlan && followUp && packagesSent === 1) {
+    if (!onHold && !hasPlan && followUp && packagesSent === 1) {
       const toAdd = followUp.items.filter((item) => whereAlreadySent(item, shipments).length === 0)
       if (toAdd.length) {
         const stamp = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric', timeZone: 'Europe/Athens' })
@@ -235,7 +238,7 @@ export async function handler(event) {
         results.push({ id: row.id, status: fillError ? 'fill_failed' : 'follow_up_filled', items: toAdd.length })
       }
     }
-    entries.push({ row, lastShipment, packageNumber, due, isNew: !alreadyEmailed })
+    entries.push({ row, lastShipment, packageNumber, due, isNew: !alreadyEmailed, onHold })
   }
 
   // One summary, only when someone is new to the list.

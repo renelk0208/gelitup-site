@@ -19,6 +19,7 @@ import SocialProof from './components/SocialProof'
 import InstagramFeed from './components/InstagramFeed'
 import AmbassadorCTA from './components/AmbassadorCTA'
 import AmbassadorGiveawayCard from './components/AmbassadorGiveawayCard'
+import AmbassadorReceiptBanner from './components/AmbassadorReceiptBanner'
 import InspirationTeaser from './components/InspirationTeaser'
 import AcademyFAQ from './components/AcademyFAQ'
 import ProductImage from './components/ProductImage'
@@ -19374,6 +19375,11 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                     <p className="mt-3 text-sm text-emerald-700">Loading your ambassador details…</p>
                   ) : ambassadorPortalInfo.code ? (
                     <>
+                      {/* Latest package not confirmed yet: next package on hold until she confirms */}
+                      <AmbassadorReceiptBanner onConfirmed={(id) => setAmbassadorPortalInfo((prev) => ({
+                        ...prev,
+                        shipmentHistory: (prev.shipmentHistory || []).map((pkg) => (pkg.id === id ? { ...pkg, delivered_at: new Date().toISOString() } : pkg)),
+                      }))} />
                       {/* Stats row */}
                       <div className="mt-3 grid gap-3 sm:grid-cols-4">
                         {/* Discount code + copy */}
