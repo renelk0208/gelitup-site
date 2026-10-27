@@ -183,6 +183,17 @@ function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews,
       </button>
       <SocialLinks row={row} />
       <p className="text-slate-500">{[country, TYPE_LABEL[getType(row)], row.discount_code].filter(Boolean).join(' · ')}</p>
+      {row.opt_out_type === 'end' && (
+        <p className="mt-1 inline-block rounded bg-slate-800 px-1.5 py-0.5 text-[10px] font-bold text-white" title={row.opt_out_reason || ''}>
+          ASKED TO END the collaboration · {fmt(row.opt_out_at)}
+        </p>
+      )}
+      {row.opt_out_type === 'pause' && (
+        <p className="mt-1 inline-block rounded bg-slate-500 px-1.5 py-0.5 text-[10px] font-bold text-white" title={row.opt_out_reason || ''}>
+          PAUSED BY HER{row.opt_out_until ? ` until ${fmt(row.opt_out_until)}` : ' until she is ready'}
+        </p>
+      )}
+      {row.opt_out_reason && <p className="mt-0.5 text-[11px] italic text-slate-500">“{row.opt_out_reason}”</p>}
       {line.last?.sent_at && !line.last?.lost_at && !line.last?.delivered_at && (
         <p className="mt-1 inline-block rounded bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold text-white" title="No next package until she confirms she received the last one">
           ON HOLD · last package not confirmed

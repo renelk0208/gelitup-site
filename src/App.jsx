@@ -20,6 +20,7 @@ import InstagramFeed from './components/InstagramFeed'
 import AmbassadorCTA from './components/AmbassadorCTA'
 import AmbassadorGiveawayCard from './components/AmbassadorGiveawayCard'
 import AmbassadorReceiptBanner from './components/AmbassadorReceiptBanner'
+import AmbassadorOptOut from './components/AmbassadorOptOut'
 import InspirationTeaser from './components/InspirationTeaser'
 import AcademyFAQ from './components/AcademyFAQ'
 import ProductImage from './components/ProductImage'
@@ -19613,6 +19614,8 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                       </div>
                       {/* "Request a giveaway" (hidden until switched on in admin) */}
                       <AmbassadorGiveawayCard />
+                      {/* "Pause or end my collaboration" */}
+                      <AmbassadorOptOut />
                     </>
                   ) : ambassadorPortalInfo.error ? (
                     <p className="mt-2 text-sm text-slate-500">{ambassadorPortalInfo.error}</p>
