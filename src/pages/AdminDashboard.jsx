@@ -13,6 +13,7 @@ import { REVIEW_EMAIL_LANGUAGES, reviewEmailLang } from '../lib/reviewEmailText.
 import { buildAmbassadorReviewRequestEmail } from '../lib/reviewEmail.js'
 import { AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE } from '../lib/ambassadorFollowUpPacks.js'
 import AmbassadorShipmentsTable from '../components/AmbassadorShipmentsTable.jsx'
+import GiveawayRequestsPanel from '../components/GiveawayRequestsPanel.jsx'
 import {
   normalizeAdminSkuToken,
   normalizeAdminNameToken,
@@ -7663,6 +7664,7 @@ const deleteApplication = async (row) => {
           {loading && <p className="text-sm text-slate-500">Loading…</p>}
           {error && <p className="text-sm text-rose-600">{error}</p>}
           {!loading && !error && (<>
+            <GiveawayRequestsPanel ambassadors={rows} sendEmail={sendAmbassadorEmail} adminLabel={getAdminDisplayLabel()} />
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <button
                 type="button"
