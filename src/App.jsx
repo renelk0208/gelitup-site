@@ -18,6 +18,7 @@ import HeroCTA from './components/HeroCTA'
 import SocialProof from './components/SocialProof'
 import InstagramFeed from './components/InstagramFeed'
 import AmbassadorCTA from './components/AmbassadorCTA'
+import AmbassadorGiveawayCard from './components/AmbassadorGiveawayCard'
 import InspirationTeaser from './components/InspirationTeaser'
 import AcademyFAQ from './components/AcademyFAQ'
 import ProductImage from './components/ProductImage'
@@ -19594,6 +19595,8 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                           </ul>
                         )}
                       </div>
+                      {/* "Request a giveaway" (hidden until switched on in admin) */}
+                      <AmbassadorGiveawayCard />
                     </>
                   ) : ambassadorPortalInfo.error ? (
                     <p className="mt-2 text-sm text-slate-500">{ambassadorPortalInfo.error}</p>

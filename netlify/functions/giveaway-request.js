@@ -251,6 +251,15 @@ export async function handler(event) {
   }
   if (!ambassador) return json(404, { error: 'No ambassador profile found for this account.' })
 
+  // On/off switch (Shipments → Giveaway requests). While off, ambassadors see
+  // nothing and can't send requests; the admin preview still works.
+  if (!previewId) {
+    const { data: setting } = await supabase.from('app_settings').select('value').eq('key', 'giveaway_card_visible').maybeSingle()
+    if (setting?.value !== true) {
+      return event.httpMethod === 'GET' ? json(200, { hidden: true }) : json(403, { error: 'Giveaway requests are not open yet.' })
+    }
+  }
+
   let status
   try {
     status = await buildStatus(supabase, ambassador, { detail: Boolean(previewId && event.httpMethod === 'GET') })

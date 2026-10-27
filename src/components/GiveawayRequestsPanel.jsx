@@ -92,6 +92,29 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
   // Full ambassador picture per request: { [applicationId]: { loading, error, data } }
   const [details, setDetails] = useState({})
   const [openDetails, setOpenDetails] = useState(null) // request id
+  // On/off switch: whether ambassadors see the "Request a giveaway" card.
+  const [cardVisible, setCardVisible] = useState(null) // null = loading
+  const [switchBusy, setSwitchBusy] = useState(false)
+  const [checkId, setCheckId] = useState('')
+  useEffect(() => {
+    let alive = true
+    supabase.from('app_settings').select('value').eq('key', 'giveaway_card_visible').maybeSingle()
+      .then(({ data }) => { if (alive) setCardVisible(data?.value === true) })
+    return () => { alive = false }
+  }, [])
+  const flipCard = async () => {
+    const next = !cardVisible
+    const msg = next
+      ? 'Show the "Request a giveaway" card to ALL ambassadors in their profile now?\n\nNo emails are sent — they will only see it when they log in.'
+      : 'Hide the "Request a giveaway" card from all ambassadors?'
+    if (!window.confirm(msg)) return
+    setSwitchBusy(true)
+    const { error: err } = await supabase.from('app_settings')
+      .upsert({ key: 'giveaway_card_visible', value: next, updated_at: new Date().toISOString(), updated_by: adminLabel })
+    setSwitchBusy(false)
+    if (err) { alert(`Not changed: ${err.message}`); return }
+    setCardVisible(next)
+  }
 
   const loadDetails = async (applicationId) => {
     if (details[applicationId]?.data || details[applicationId]?.loading) return
@@ -354,6 +377,34 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
       {error && <p className="mt-2 text-xs text-rose-600">{error}</p>}
       {!loading && !error && (
         <div className="mt-3 space-y-4">
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-white p-3 text-xs">
+            <span className="font-semibold text-slate-800">Ambassadors can see the "Request a giveaway" card:</span>
+            {cardVisible === null ? <span className="text-slate-400">…</span> : (
+              <>
+                <span className={`rounded-full px-2 py-0.5 font-bold ${cardVisible ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}>{cardVisible ? 'ON' : 'OFF'}</span>
+                <button type="button" disabled={switchBusy} onClick={flipCard} className={`rounded-full px-3 py-1 font-semibold text-white disabled:opacity-60 ${cardVisible ? 'bg-slate-600 hover:bg-slate-500' : 'bg-emerald-600 hover:bg-emerald-500'}`}>
+                  {cardVisible ? 'Hide it' : 'Show it to ambassadors'}
+                </button>
+                {!cardVisible && <span className="text-slate-500">Hidden — ambassadors see nothing yet.</span>}
+              </>
+            )}
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white p-3 text-xs">
+            <label className="flex flex-wrap items-center gap-2 font-semibold text-slate-800">
+              Check any ambassador:
+              <select
+                value={checkId}
+                onChange={(e) => { setCheckId(e.target.value); if (e.target.value) loadDetails(Number(e.target.value)) }}
+                className="rounded border border-slate-300 px-2 py-1 font-normal"
+              >
+                <option value="">Choose…</option>
+                {[...ambassadors].filter((a) => String(a.status || '').toLowerCase() === 'approved')
+                  .sort((x, y) => String(x.full_name || '').localeCompare(String(y.full_name || '')))
+                  .map((a) => <option key={a.id} value={a.id}>{a.full_name || a.email}</option>)}
+              </select>
+            </label>
+            {checkId && renderDetails(details[Number(checkId)])}
+          </div>
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Waiting for a decision</p>
             {open.length === 0 ? <p className="mt-1 text-xs text-slate-500">No requests waiting.</p> : (

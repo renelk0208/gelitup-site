@@ -53,7 +53,7 @@ export default function AmbassadorGiveawayCard() {
 
   const { loading, error, data } = state
   if (loading) return null
-  if (error || !data) return null // never block the profile because of this card
+  if (error || !data || data.hidden) return null // never block the profile because of this card
 
   // Approved giveaway coming up or running now.
   if (data.upcoming) {

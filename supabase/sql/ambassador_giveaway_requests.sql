@@ -50,3 +50,22 @@ create policy "giveaway_requests_admin_update" on public.ambassador_giveaway_req
   for update to authenticated
   using (exists (select 1 from public.b2b_admins a where lower(a.email) = lower(auth.email())))
   with check (exists (select 1 from public.b2b_admins a where lower(a.email) = lower(auth.email())));
+
+-- ── On/off switch for the "Request a giveaway" card in ambassador profiles.
+-- Starts OFF: ambassadors see nothing until an admin turns it on (Shipments →
+-- Giveaway requests).
+create table if not exists public.app_settings (
+  key         text primary key,
+  value       jsonb not null default 'null'::jsonb,
+  updated_at  timestamptz not null default now(),
+  updated_by  text
+);
+alter table public.app_settings enable row level security;
+drop policy if exists "app_settings_admin_all" on public.app_settings;
+create policy "app_settings_admin_all" on public.app_settings
+  for all to authenticated
+  using (exists (select 1 from public.b2b_admins a where lower(a.email) = lower(auth.email())))
+  with check (exists (select 1 from public.b2b_admins a where lower(a.email) = lower(auth.email())));
+insert into public.app_settings (key, value, updated_by)
+values ('giveaway_card_visible', 'false'::jsonb, 'setup')
+on conflict (key) do nothing;
