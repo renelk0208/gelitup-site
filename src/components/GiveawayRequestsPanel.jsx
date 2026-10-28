@@ -42,13 +42,13 @@ function approvedEmail(row, req, start, end) {
         <li>Publish it on your start date as an Instagram <strong>Collab</strong> with <strong>@gelitup</strong> and turn on the <strong>Paid partnership</strong> label (or add #ad).</li>
         <li>Start the caption with <strong>GEL.IT.UP</strong> and use #gelitup #gelituprofessional #salons #nailtech #madeineu.</li>
         <li>To enter, followers follow you and @gelitup, like the post and tag 1–2 nail tech friends.</li>
-        <li>On the last day, pick the winner with a random comment picker and show the draw in your stories.</li>
-        <li>Email the winner's name, Instagram, full address and phone number to <a href="mailto:ambassadors@gelitup.com">ambassadors@gelitup.com</a>. We ship the prize.</li>
-        ${code ? `<li>After the draw, post a story: "Didn't win this time? Use my code <strong>${esc(code)}</strong> for 20% off."</li>` : ''}
+        <li><strong>GEL.IT.UP draws the winner</strong> at random from the comments the day after your giveaway ends, checks that she follows both accounts and is a nail professional, and lets you know who won. Please don't pick a winner yourself.</li>
+        <li>Announce the winner in your stories once we tell you. We contact her and ship the prize.</li>
+        ${code ? `<li>Then post a story for everyone else: "Didn't win this time? Use my code <strong>${esc(code)}</strong> for 20% off."</li>` : ''}
       </ol>
       <p><strong>Please add these terms at the end of your caption:</strong></p>
       <div style="border-left:3px solid #d43790;padding:8px 12px;background:#fdf0f5">
-        Giveaway terms: Runs from ${esc(formatGiveawayDate(start))} to ${esc(formatGiveawayDate(end))} (Greek time). Open to nail technicians, nail students and salons aged 18+ in countries GEL.IT.UP EU ships to; not open to the USA or Italy. No purchase necessary. One winner, chosen at random from valid entries and announced in ${esc(handle)}'s stories. The prize is supplied and shipped by GEL.IT.UP and cannot be exchanged for cash. The winner will only be contacted by ${esc(handle)} or @gelitup, and we will never ask for payment. This giveaway is not sponsored, endorsed or administered by, or associated with, Instagram or Meta.
+        Giveaway terms: Runs from ${esc(formatGiveawayDate(start))} to ${esc(formatGiveawayDate(end))} (Greek time). Open to nail technicians, nail students and salons aged 18+ in countries GEL.IT.UP EU ships to; not open to the USA or Italy. No purchase necessary. One winner, drawn at random by GEL.IT.UP from valid entries and announced in ${esc(handle)}'s and @gelitup's stories. The winner must reply within 48 hours and show she is a nail professional (qualification certificate, or salon/studio details and an Instagram account showing her nail work), otherwise a new winner is drawn. The prize is supplied and shipped by GEL.IT.UP and cannot be exchanged for cash. The winner will only be contacted by @gelitup, and we will never ask for payment. This giveaway is not sponsored, endorsed or administered by, or associated with, Instagram or Meta.
       </div>
       <p>We can't wait to see it! 💖</p>
       ${sign}`),
@@ -110,11 +110,11 @@ function inviteEmail(row) {
 
       <p><strong>4. After the giveaway</strong></p>
       <ul>
-        <li>Pick the winner with a random comment picker and show the draw in your stories.</li>
-        <li>Email the winner's name, Instagram, full address and phone number to <a href="mailto:ambassadors@gelitup.com" style="color:#d43790">ambassadors@gelitup.com</a>. We supply and ship the prize.</li>
-        <li>Post a story for everyone else: "Didn't win this time? Use my code ${code ? `<strong>${esc(code)}</strong>` : 'YOURCODE'} for 20% off." Every order with your code earns you credit.</li>
+        <li><strong>GEL.IT.UP draws the winner</strong> at random from the comments, so every entrant gets a fair chance. We check that she follows both accounts and is a nail professional, then tell you who won.</li>
+        <li>Announce the winner in your stories. We contact her and supply and ship the prize.</li>
+        <li>Then post a story for everyone else: "Didn't win this time? Use my code ${code ? `<strong>${esc(code)}</strong>` : 'YOURCODE'} for 20% off." Every order with your code earns you credit.</li>
       </ul>
-      <p>Protect your followers from fake accounts: add "The winner will only be contacted by me or @gelitup. We will never ask for payment." We'll send you the full caption terms with your confirmed dates.</p>
+      <p>The winner must show she is a nail professional within 48 hours, otherwise we draw again. Protect your followers from fake accounts: add "The winner will only be contacted by @gelitup. We will never ask for payment or card details." We'll send you the full caption terms with your confirmed dates.</p>
 
       <p>Thank you for being such an active part of the GEL.IT.UP family! 💖</p>
       ${sign}`),
