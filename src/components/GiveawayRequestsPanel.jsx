@@ -224,14 +224,30 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
   // Credit a shop review (no product) to one product she received.
   const [creditPick, setCreditPick] = useState({}) // { [reviewId]: handle }
   const [creditBusy, setCreditBusy] = useState(null)
-  const creditReview = async (applicationId, review, receivedList) => {
-    const handle = creditPick[review.id]
+  const creditReview = async (applicationId, review, productList) => {
+    const handle = creditPick[review.id] ?? review.guess
     if (!handle) return
-    const title = (receivedList || []).find((p) => p.handle === handle)?.title || handle
+    const title = (productList || []).find((p) => p.handle === handle)?.title || handle
     setCreditBusy(review.id)
     const { error: err } = await supabase.from('ambassador_review_credits').insert({
       application_id: applicationId, judgeme_review_id: review.id, product_handle: handle, product_title: title, credited_by: adminLabel,
     })
+    setCreditBusy(null)
+    if (err) { alert(`Not saved: ${err.message}`); return }
+    loadDetails(applicationId, true)
+  }
+  // Count every shop review that has a product chosen or suggested, in one go.
+  const creditAll = async (applicationId, reviews, productList) => {
+    const rows = (reviews || [])
+      .filter((r) => r.shopReview && !r.creditedTo && (creditPick[r.id] ?? r.guess))
+      .map((r) => {
+        const handle = creditPick[r.id] ?? r.guess
+        return { application_id: applicationId, judgeme_review_id: r.id, product_handle: handle, product_title: (productList || []).find((p) => p.handle === handle)?.title || handle, credited_by: adminLabel }
+      })
+    if (!rows.length) return
+    if (!window.confirm(`Count ${rows.length} shop review${rows.length === 1 ? '' : 's'} for the products shown?`)) return
+    setCreditBusy('all')
+    const { error: err } = await supabase.from('ambassador_review_credits').insert(rows)
     setCreditBusy(null)
     if (err) { alert(`Not saved: ${err.message}`); return }
     loadDetails(applicationId, true)
@@ -344,7 +360,17 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
         </p>
 
         <div>
-          <p className="font-semibold text-slate-800">Her reviews ({(a.reviews || []).length})</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-semibold text-slate-800">Her reviews ({(a.reviews || []).length})</p>
+            {(a.reviews || []).some((r) => r.shopReview && !r.creditedTo) && (
+              <>
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-800">{(a.reviews || []).filter((r) => r.shopReview && !r.creditedTo).length} shop reviews not counted</span>
+                <button type="button" disabled={creditBusy === 'all'} onClick={() => creditAll(applicationId, a.reviews, a.allProducts)} className="rounded-full bg-emerald-600 px-3 py-0.5 font-semibold text-white disabled:opacity-50">
+                  {creditBusy === 'all' ? 'Saving…' : 'Count all with a product chosen'}
+                </button>
+              </>
+            )}
+          </div>
           {(a.reviews || []).length === 0 ? <p className="text-slate-500">No reviews found on shop.gelitup.com.</p> : (
             <ul className="mt-1 divide-y divide-slate-200">
               {a.reviews.map((r, i) => (
@@ -358,11 +384,17 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
                     : (
                       <div className="mt-1 flex flex-wrap items-center gap-2 rounded bg-amber-50 px-2 py-1">
                         <span className="font-semibold text-amber-900">Not counted. Which product is it about?</span>
-                        <select value={creditPick[r.id] || ''} onChange={(e) => setCreditPick((prev) => ({ ...prev, [r.id]: e.target.value }))} className="rounded border border-slate-300 px-2 py-0.5">
-                          <option value="">Choose a product she received…</option>
-                          {(a.receivedList || []).map((p) => <option key={p.handle} value={p.handle}>{p.title}</option>)}
+                        <select value={creditPick[r.id] ?? r.guess ?? ''} onChange={(e) => setCreditPick((prev) => ({ ...prev, [r.id]: e.target.value }))} className="max-w-[16rem] rounded border border-slate-300 px-2 py-0.5">
+                          <option value="">Choose the product…</option>
+                          <optgroup label="From her packages">
+                            {(a.receivedList || []).map((p) => <option key={`r-${p.handle}`} value={p.handle}>{p.title}</option>)}
+                          </optgroup>
+                          <optgroup label="All shop products">
+                            {(a.allProducts || []).map((p) => <option key={`a-${p.handle}`} value={p.handle}>{p.title}</option>)}
+                          </optgroup>
                         </select>
-                        <button type="button" disabled={!creditPick[r.id] || creditBusy === r.id} onClick={() => creditReview(applicationId, r, a.receivedList)} className="rounded-full bg-emerald-600 px-3 py-0.5 font-semibold text-white disabled:opacity-50">
+                        {r.guess && (creditPick[r.id] ?? r.guess) === r.guess && <span className="text-amber-800">suggested from her text</span>}
+                        <button type="button" disabled={!(creditPick[r.id] ?? r.guess) || creditBusy === r.id} onClick={() => creditReview(applicationId, r, a.allProducts)} className="rounded-full bg-emerald-600 px-3 py-0.5 font-semibold text-white disabled:opacity-50">
                           {creditBusy === r.id ? 'Saving…' : 'Count it'}
                         </button>
                       </div>
@@ -551,6 +583,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
                           : a.upcoming ? `Booked ${formatGiveawayDate(a.upcoming.slot_start)}`
                           : a.openRequest ? `Waiting for your decision (${formatGiveawayMonth(a.openRequest.preferred_month)})`
                           : (a.reasons || []).includes('recent_giveaway') && a.allowedFrom ? `Next giveaway from ${formatGiveawayDate(a.allowedFrom)}`
+                          : a.shopReviewsToCount ? `${a.shopReviewsToCount} shop review${a.shopReviewsToCount === 1 ? '' : 's'} to count — click her name`
                           : a.unconfirmedCount ? `${a.unconfirmedCount} package${a.unconfirmedCount === 1 ? '' : 's'} not confirmed as received${a.notReviewedCount ? ` · ${a.notReviewedCount} products not reviewed` : ''}`
                           : a.notReviewedCount ? `${a.notReviewedCount} received product${a.notReviewedCount === 1 ? '' : 's'} not reviewed yet` : ''
                         return (

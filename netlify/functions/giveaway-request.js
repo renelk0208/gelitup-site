@@ -161,6 +161,28 @@ function reviewedProducts(reviews, products) {
 }
 
 // Admin view: every review she wrote, with stars and text.
+// Best guess at which product a shop review (no product) is about, from its
+// title and text: the product whose name words appear most, preferring the
+// products she received. Empty when nothing matches well.
+const STOP = new Set(['gel', 'the', 'and', 'with', 'for', 'ml', 'gr', 'g', '15ml', '30gr', '40gr', '40g', 'gelitup', 'it', 'up', 'new', 'clear', 'pro'])
+// Keeps numbers, so colour numbers ("2619") can match.
+const normWords = (v) => String(v || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim()
+function guessProduct(r, products, receivedProducts) {
+  const text = ` ${normWords(`${r?.title || ''} ${r?.body || ''}`)} `
+  if (text.trim().length < 3) return ''
+  let best = null
+  for (const p of products) {
+    const words = normWords(p.title).split(' ').filter((w) => (w.length > 2 || /^\d+$/.test(w)) && !STOP.has(w))
+    if (!words.length) continue
+    const hits = words.filter((w) => text.includes(` ${w} `)).length
+    if (!hits) continue
+    const score = hits / words.length + (receivedProducts.has(p.handle) ? 0.5 : 0) + hits * 0.05
+    const numberHit = words.some((w) => /^\d{2,}$/.test(w) && text.includes(` ${w} `))
+    if ((hits >= Math.min(2, words.length) || numberHit) && (!best || score > best.score)) best = { handle: p.handle, score: score + (numberHit ? 1 : 0) }
+  }
+  return best ? best.handle : ''
+}
+
 function reviewDetails(reviews, products, receivedProducts, credits = []) {
   const creditBy = new Map((credits || []).map((c) => [String(c.judgeme_review_id), c.product_handle]))
   const byHandle = new Map(products.map((p) => [p.handle, p]))
@@ -170,6 +192,7 @@ function reviewDetails(reviews, products, receivedProducts, credits = []) {
     return {
       id: String(r?.id || ''),
       shopReview: !p && !r?.product_external_id && !r?.product_handle,
+      guess: !p && !credited ? guessProduct(r, products, receivedProducts) : '',
       creditedTo: credited ? (byHandle.get(credited)?.title || credited) : '',
       reviewerName: String(r?.reviewer?.name || ''),
       title: p?.title || String(r?.product_title || 'Unknown product'),
@@ -239,6 +262,8 @@ export async function buildStatus(supabase, ambassador, { detail = false, shopPr
   for (const c of credits || []) {
     const p = byHandleAll.get(c.product_handle)
     if (p && !reviewed.some((x) => x.handle === p.handle)) reviewed.push({ handle: p.handle, title: p.title, image: p.image })
+    // An admin counted this review for this product: she received it too.
+    if (p && !receivedProducts.has(p.handle)) receivedProducts.set(p.handle, p)
   }
   reviewed.sort((a, b) => a.title.localeCompare(b.title))
   // Prize products must be ones she received in her packages AND reviewed.
@@ -281,6 +306,7 @@ export async function buildStatus(supabase, ambassador, { detail = false, shopPr
         .map((s) => ({ sent_at: s.sent_at, delivered_at: s.delivered_at, lost: Boolean(s.lost_at), items: s.items || [] })),
       receivedProductCount: receivedProducts.size,
       reviews: reviewDetails(reviews, products, receivedProducts, credits),
+      allProducts: products.map((p) => ({ handle: p.handle, title: p.title })).sort((x, y) => x.title.localeCompare(y.title)),
       // Products from every package sent (confirmed or not), for crediting shop reviews.
       receivedList: (() => {
         const m = new Map()
@@ -308,6 +334,7 @@ export async function buildStatus(supabase, ambassador, { detail = false, shopPr
     notReviewed,
     unmatchedLines,
     unconfirmedPackages,
+    shopReviewsToCount: reviews.filter((r) => !productForReview(r, products) && !r?.product_external_id && !r?.product_handle && !(credits || []).some((c) => String(c.judgeme_review_id) === String(r?.id))).length,
     reportedItems: (reported || []).map((r) => ({ id: r.id, line: r.line, handle: r.product_handle, title: productByHandle.get(r.product_handle)?.title || r.product_title || r.product_handle, created_at: r.created_at })),
     invited: Boolean(ambassador.giveaway_invited_at),
     maxProducts: GIVEAWAY_MAX_PRODUCTS,
@@ -362,6 +389,7 @@ export async function handler(event) {
             reviewedCount: st.reviewed.length,
             notReviewedCount: st.notReviewed.length,
             unconfirmedCount: (st.unconfirmedPackages || []).length,
+            shopReviewsToCount: st.shopReviewsToCount || 0,
             openRequest: st.openRequest,
             upcoming: st.upcoming ? { slot_start: st.upcoming.slot_start, slot_end: st.upcoming.slot_end } : null,
             allowedFrom: st.allowedFrom,
