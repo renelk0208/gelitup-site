@@ -80,8 +80,8 @@ async function loadShopProducts() {
 // Reviews she wrote on the shop, from Judge.me.
 // Returns { reviews, emailChecked } — emailChecked is true when Judge.me's
 // answer carries the reviewer's email, so we could confirm each one is hers.
-async function fetchJudgeMePage(domain, email, page) {
-  const qs = new URLSearchParams({ api_token: JUDGEME_TOKEN, shop_domain: domain, reviewer_email: email, per_page: '100', page: String(page) })
+async function fetchJudgeMePage(domain, page) {
+  const qs = new URLSearchParams({ api_token: JUDGEME_TOKEN, shop_domain: domain, per_page: '100', page: String(page) })
   const res = await fetch(`https://api.judge.me/api/v1/reviews?${qs}`, { headers: { Accept: 'application/json' } })
   if (!res.ok) {
     const text = (await res.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 160)
@@ -92,21 +92,27 @@ async function fetchJudgeMePage(domain, email, page) {
   return (await res.json())?.reviews || []
 }
 
-async function loadJudgeMeReviews(email) {
+// Every review in the store, kept for 5 minutes while the function is warm.
+// Ambassadors who "Continue with Shop" when writing a review end up with their
+// Shop app email on it, so reviews are matched to her by email OR by name,
+// instead of asking Judge.me for one email only.
+let storeReviews = null // { at, list }
+async function loadStoreReviews() {
+  if (storeReviews && Date.now() - storeReviews.at < 5 * 60 * 1000) return storeReviews.list
   if (!JUDGEME_TOKEN) throw new Error('JUDGEME_PRIVATE_TOKEN is not set in Netlify')
-  const want = String(email || '').trim().toLowerCase()
   const domains = judgeMeDomain ? [judgeMeDomain] : JUDGEME_SHOP_DOMAINS
   let lastError = null
   for (const domain of domains) {
     try {
       const all = []
-      for (let page = 1; page <= 10; page += 1) {
-        const list = await fetchJudgeMePage(domain, want, page)
+      for (let page = 1; page <= 50; page += 1) {
+        const list = await fetchJudgeMePage(domain, page)
         all.push(...list)
         if (list.length < 100) break
       }
       judgeMeDomain = domain
-      return finishJudgeMeReviews(all, want)
+      storeReviews = { at: Date.now(), list: all }
+      return all
     } catch (err) {
       lastError = err
       console.error(`giveaway-request: Judge.me failed for ${domain}:`, err.message)
@@ -116,15 +122,22 @@ async function loadJudgeMeReviews(email) {
   throw lastError || new Error('Judge.me unavailable')
 }
 
-function finishJudgeMeReviews(all, want) {
-  const withEmail = all.filter((r) => r?.reviewer?.email || r?.reviewer_email)
-  const emailChecked = withEmail.length > 0
-  const mine = emailChecked
-    ? all.filter((r) => String(r?.reviewer?.email || r?.reviewer_email || '').trim().toLowerCase() === want)
-    : all
+const normName = (v) => String(v || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z]+/g, ' ').trim()
+
+// Her reviews: same email, or the same full name (first + last, any order).
+async function loadJudgeMeReviews(ambassador) {
+  const want = String(ambassador?.email || '').trim().toLowerCase()
+  const nameKey = normName(ambassador?.full_name).split(' ').filter(Boolean).sort().join(' ')
+  const all = await loadStoreReviews()
+  const mine = all.filter((r) => {
+    const email = String(r?.reviewer?.email || r?.reviewer_email || '').trim().toLowerCase()
+    if (want && email === want) return true
+    const rn = normName(r?.reviewer?.name || r?.reviewer_name).split(' ').filter(Boolean).sort().join(' ')
+    return Boolean(nameKey && nameKey.includes(' ') && rn === nameKey)
+  })
   // Spam or hidden reviews don't count.
   const counted = mine.filter((r) => r?.hidden !== true && String(r?.curated || '').toLowerCase() !== 'spam')
-  return { reviews: counted, emailChecked }
+  return { reviews: counted, emailChecked: true }
 }
 
 function productForReview(r, products) {
@@ -147,10 +160,17 @@ function reviewedProducts(reviews, products) {
 }
 
 // Admin view: every review she wrote, with stars and text.
-function reviewDetails(reviews, products, receivedProducts) {
+function reviewDetails(reviews, products, receivedProducts, credits = []) {
+  const creditBy = new Map((credits || []).map((c) => [String(c.judgeme_review_id), c.product_handle]))
+  const byHandle = new Map(products.map((p) => [p.handle, p]))
   return reviews.map((r) => {
     const p = productForReview(r, products)
+    const credited = creditBy.get(String(r?.id))
     return {
+      id: String(r?.id || ''),
+      shopReview: !p && !r?.product_external_id && !r?.product_handle,
+      creditedTo: credited ? (byHandle.get(credited)?.title || credited) : '',
+      reviewerName: String(r?.reviewer?.name || ''),
       title: p?.title || String(r?.product_title || 'Unknown product'),
       handle: p?.handle || '',
       received: Boolean(p && receivedProducts.has(p.handle)),
@@ -164,15 +184,16 @@ function reviewDetails(reviews, products, receivedProducts) {
 }
 
 async function buildStatus(supabase, ambassador, { detail = false, shopProducts = null } = {}) {
-  const [{ data: shipments, error: shipErr }, { data: requests, error: reqErr }] = await Promise.all([
+  const [{ data: shipments, error: shipErr }, { data: requests, error: reqErr }, { data: credits }] = await Promise.all([
     supabase.from('ambassador_shipments').select('items, sent_at, delivered_at, lost_at, status').eq('application_id', ambassador.id),
     supabase.from('ambassador_giveaway_requests').select('*').eq('application_id', ambassador.id).order('created_at', { ascending: false }),
+    supabase.from('ambassador_review_credits').select('judgeme_review_id, product_handle').eq('application_id', ambassador.id),
   ])
   if (shipErr) throw new Error(shipErr.message)
   if (reqErr) throw new Error(reqErr.message)
 
   const products = shopProducts || await loadShopProducts()
-  const { reviews, emailChecked } = await loadJudgeMeReviews(ambassador.email)
+  const { reviews, emailChecked } = await loadJudgeMeReviews(ambassador)
   // Every exact shop product from the packages she has received. Generic
   // package lines ("3 different Cat Eye shades") can't be checked until the
   // admin completes them with "Edit contents".
@@ -182,6 +203,13 @@ async function buildStatus(supabase, ambassador, { detail = false, shopProducts 
     for (const p of it.matches) if (!receivedProducts.has(p.handle)) receivedProducts.set(p.handle, p)
   }
   let reviewed = reviewedProducts(reviews, products)
+  // Shop reviews (no product) an admin credited to a product she received.
+  const byHandleAll = new Map(products.map((p) => [p.handle, p]))
+  for (const c of credits || []) {
+    const p = byHandleAll.get(c.product_handle)
+    if (p && !reviewed.some((x) => x.handle === p.handle)) reviewed.push({ handle: p.handle, title: p.title, image: p.image })
+  }
+  reviewed.sort((a, b) => a.title.localeCompare(b.title))
   // Prize products must be ones she received in her packages AND reviewed.
   // (This also means nobody can offer a product someone else reviewed.)
   reviewed = reviewed.filter((p) => receivedProducts.has(p.handle))
@@ -219,7 +247,13 @@ async function buildStatus(supabase, ambassador, { detail = false, shopProducts 
         .sort((a, b) => String(b.sent_at).localeCompare(String(a.sent_at)))
         .map((s) => ({ sent_at: s.sent_at, delivered_at: s.delivered_at, lost: Boolean(s.lost_at), items: s.items || [] })),
       receivedProductCount: receivedProducts.size,
-      reviews: reviewDetails(reviews, products, receivedProducts),
+      reviews: reviewDetails(reviews, products, receivedProducts, credits),
+      // Products from every package sent (confirmed or not), for crediting shop reviews.
+      receivedList: (() => {
+        const m = new Map()
+        for (const it of receivedItems((shipments || []).filter((sh) => sh.sent_at && !sh.lost_at), products)) for (const p of it.matches) m.set(p.handle, { handle: p.handle, title: p.title })
+        return [...m.values()].sort((a, b) => a.title.localeCompare(b.title))
+      })(),
       codeOrders: {
         count: (orders || []).length,
         totalEur: Math.round((orders || []).reduce((n, o) => n + Number(o.order_total_eur || 0), 0) * 100) / 100,

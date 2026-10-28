@@ -137,8 +137,8 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
     setCardVisible(next)
   }
 
-  const loadDetails = async (applicationId) => {
-    if (details[applicationId]?.data || details[applicationId]?.loading) return
+  const loadDetails = async (applicationId, force = false) => {
+    if (!force && (details[applicationId]?.data || details[applicationId]?.loading)) return
     setDetails((prev) => ({ ...prev, [applicationId]: { loading: true } }))
     try {
       const { data: s } = await supabase.auth.getSession()
@@ -151,6 +151,21 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
     } catch (err) {
       setDetails((prev) => ({ ...prev, [applicationId]: { error: err.message } }))
     }
+  }
+  // Credit a shop review (no product) to one product she received.
+  const [creditPick, setCreditPick] = useState({}) // { [reviewId]: handle }
+  const [creditBusy, setCreditBusy] = useState(null)
+  const creditReview = async (applicationId, review, receivedList) => {
+    const handle = creditPick[review.id]
+    if (!handle) return
+    const title = (receivedList || []).find((p) => p.handle === handle)?.title || handle
+    setCreditBusy(review.id)
+    const { error: err } = await supabase.from('ambassador_review_credits').insert({
+      application_id: applicationId, judgeme_review_id: review.id, product_handle: handle, product_title: title, credited_by: adminLabel,
+    })
+    setCreditBusy(null)
+    if (err) { alert(`Not saved: ${err.message}`); return }
+    loadDetails(applicationId, true)
   }
   const toggleDetails = (req) => {
     if (openDetails === req.id) { setOpenDetails(null); return }
@@ -236,7 +251,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
 
   const fmt = (v) => (v ? new Date(v).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '')
   const stars = (n) => (n ? '★'.repeat(Math.round(n)) + '☆'.repeat(Math.max(0, 5 - Math.round(n))) : '')
-  const renderDetails = (d) => {
+  const renderDetails = (d, applicationId) => {
     if (!d || d.loading) return <p className="mt-2 text-xs text-slate-500">Loading her packages and reviews…</p>
     if (d.error) return <p className="mt-2 text-xs text-rose-600">Could not load: {d.error}</p>
     const s = d.data || {}
@@ -265,10 +280,24 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
             <ul className="mt-1 divide-y divide-slate-200">
               {a.reviews.map((r, i) => (
                 <li key={`${r.handle}-${i}`} className="py-1.5">
-                  <span className="font-semibold">{r.title}</span>
+                  <span className="font-semibold">{r.shopReview ? 'Shop review (no product)' : r.title}</span>
                   <span className="ml-2 text-amber-500">{stars(r.rating)}</span>
-                  <span className="ml-2 text-slate-400">{fmt(r.created_at)}{r.received ? '' : ' · not from her packages'}{r.published ? '' : ' · unpublished'}</span>
+                  <span className="ml-2 text-slate-400">{fmt(r.created_at)}{r.reviewerName ? ` · as "${r.reviewerName}"` : ''}{!r.shopReview && !r.received ? ' · not from her packages' : ''}{r.published ? '' : ' · unpublished'}</span>
                   {(r.heading || r.body) && <p className="mt-0.5 text-slate-600">{r.heading ? <strong>{r.heading}. </strong> : null}{r.body}</p>}
+                  {r.shopReview && (r.creditedTo
+                    ? <p className="mt-1 font-semibold text-emerald-700">✓ Counted as a review of {r.creditedTo}</p>
+                    : (
+                      <div className="mt-1 flex flex-wrap items-center gap-2 rounded bg-amber-50 px-2 py-1">
+                        <span className="font-semibold text-amber-900">Not counted. Which product is it about?</span>
+                        <select value={creditPick[r.id] || ''} onChange={(e) => setCreditPick((prev) => ({ ...prev, [r.id]: e.target.value }))} className="rounded border border-slate-300 px-2 py-0.5">
+                          <option value="">Choose a product she received…</option>
+                          {(a.receivedList || []).map((p) => <option key={p.handle} value={p.handle}>{p.title}</option>)}
+                        </select>
+                        <button type="button" disabled={!creditPick[r.id] || creditBusy === r.id} onClick={() => creditReview(applicationId, r, a.receivedList)} className="rounded-full bg-emerald-600 px-3 py-0.5 font-semibold text-white disabled:opacity-50">
+                          {creditBusy === r.id ? 'Saving…' : 'Count it'}
+                        </button>
+                      </div>
+                    ))}
                 </li>
               ))}
             </ul>
@@ -338,7 +367,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
       <button type="button" onClick={() => toggleDetails(req)} className="mt-2 text-xs font-semibold text-fuchsia-700 underline">
         {openDetails === req.id ? 'Hide her full picture' : 'Show her full picture (packages, reviews, code orders)'}
       </button>
-      {openDetails === req.id && renderDetails(details[req.application_id])}
+      {openDetails === req.id && renderDetails(details[req.application_id], req.application_id)}
 
       {(req.status === 'requested' || req.status === 'waitlisted') && (
         approving?.id === req.id ? (
@@ -481,7 +510,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
                   .map((a) => <option key={a.id} value={a.id}>{a.full_name || a.email}</option>)}
               </select>
             </label>
-            {checkId && renderDetails(details[Number(checkId)])}
+            {checkId && renderDetails(details[Number(checkId)], Number(checkId))}
           </div>
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Waiting for a decision</p>

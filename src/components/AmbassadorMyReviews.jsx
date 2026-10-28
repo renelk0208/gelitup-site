@@ -56,7 +56,16 @@ export default function AmbassadorMyReviews() {
               </li>
             ))}
           </ul>
-          <p className="mt-1 text-[11px] text-slate-500">After writing a review, confirm your email in the message Judge.me sends you, or it won't appear here.</p>
+          <div className="mt-2 rounded-lg bg-fuchsia-50 p-3 text-[12px] text-slate-700">
+            <p className="font-semibold text-slate-900">How to review so it counts</p>
+            <ol className="ml-4 mt-1 list-decimal space-y-0.5">
+              <li>Tap <strong>Review</strong> next to the product, then <strong>Write a Review</strong> on its page.</li>
+              <li>When asked <em>"How would you like to continue?"</em>, choose <strong>Continue without signing in</strong> (not "Continue with Shop").</li>
+              <li>Give your stars and write your review, and use the <strong>same email you log in with here</strong>.</li>
+              <li>Confirm your email in the message Judge.me sends you.</li>
+            </ol>
+            <p className="mt-1 text-slate-500">Reviews written another way may not be counted.</p>
+          </div>
         </>
       ) : (
         <p className="mt-3 text-[12px] font-semibold text-emerald-700">✓ You've reviewed everything you received. Thank you! 💖</p>
