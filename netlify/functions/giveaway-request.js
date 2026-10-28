@@ -16,7 +16,7 @@ import {
 //
 //   GET  (Authorization: Bearer <her portal session>)
 //        -> { eligible, reasons[], reviewed[], months[], openRequest, lastGiveaway, allowedFrom }
-//   POST { products: [handle…], preferredMonth, idea, followers, otherLinks, notes }
+//   POST { products: [handle…], preferredMonth, idea, videoType, videoUrl, followers, otherLinks, notes }
 //        -> saves the request (status 'requested') after checking everything again.
 //   GET ?view=reviews -> her "My reviews" list (reviewed / still to review), any time.
 //   GET ?overview=1   -> admins: giveaway readiness of every approved ambassador.
@@ -528,12 +528,23 @@ export async function handler(event) {
   if (!status.months.includes(month)) return json(400, { error: 'Please choose a month.' })
   const idea = clean(body.idea)
   if (idea.length < 10) return json(400, { error: 'Please tell us a little about the look you will create.' })
+  // Her qualifying video: a mini nail art tutorial, a how-to, or a GEL.IT.UP
+  // product presentation, made with products she received. Shared as a
+  // full-quality link (YouTube, Google Drive, WeTransfer, Dropbox), not Instagram.
+  const VIDEO_TYPES = ['tutorial', 'howto', 'presentation']
+  const videoType = clean(body.videoType, 20)
+  if (!VIDEO_TYPES.includes(videoType)) return json(400, { error: 'Please choose what kind of video you made.' })
+  const videoUrl = clean(body.videoUrl, 500)
+  if (!/^https?:\/\/\S+\.\S+/i.test(videoUrl)) return json(400, { error: 'Please add the link to your video.' })
+  if (/instagram\.com|tiktok\.com/i.test(videoUrl)) return json(400, { error: 'Please share the full-quality video file (YouTube, Google Drive, WeTransfer or Dropbox link), not an Instagram or TikTok link.' })
 
   const row = {
     application_id: ambassador.id,
     products: picked.map((h) => reviewedByHandle.get(h)),
     preferred_month: month,
     idea,
+    video_type: videoType,
+    video_url: videoUrl,
     followers: clean(body.followers, 100) || clean(ambassador.followers, 100) || null,
     other_links: clean(body.otherLinks, 500) || null,
     notes: clean(body.notes, 1000) || null,

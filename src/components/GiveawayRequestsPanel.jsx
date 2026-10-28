@@ -98,8 +98,11 @@ function inviteEmail(row) {
       <ol>
         <li>Log in to your ambassador page on <a href="https://gelitup.com/portal/login" style="color:#d43790">gelitup.com</a> and open <strong>Request a giveaway</strong>.</li>
         <li>Choose <strong>8 to 10 products</strong> for the prize. You can only choose products you've received <strong>and reviewed</strong> — to add more, review them first.</li>
+        <li>Make one <strong>quality video</strong> with the products you received: a <strong>mini nail art tutorial</strong>, a <strong>"how to"</strong> video, or a <strong>presentation of GEL.IT.UP products</strong>. It should be good enough for our YouTube channel: clear, well lit, no text on the video, and GEL.IT.UP products only (no other brands in shot). Take your time to prepare it.</li>
+        <li>Add the link to your video (YouTube, Google Drive, WeTransfer or Dropbox, full quality, not Instagram) when you send your request.</li>
         <li>Pick your preferred month and tell us the look you'll create.</li>
       </ol>
+      <p>Your giveaway is approved once we've seen your video.</p>
       <p>We run 3 giveaways a month, one week each, so every giveaway gets our full support. Each giveaway runs from <strong>Monday to Sunday night</strong>, and the winner is announced on the <strong>Monday afternoon</strong> after. We'll email you your exact week. <strong>Please don't announce anything until we confirm your dates.</strong></p>
 
       <p><strong>2. Your giveaway post</strong></p>
@@ -517,6 +520,9 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
       </p>
       <p className="mt-1 text-slate-700">Prize: {(req.products || []).map((p) => p.title).join(', ')}</p>
       {req.idea && <p className="mt-1 text-slate-700">Idea: {req.idea}</p>}
+      {req.video_url
+        ? <p className="mt-1 text-slate-700">🎬 Video ({({ tutorial: 'mini nail art tutorial', howto: 'how-to', presentation: 'product presentation' })[req.video_type] || 'video'}): <a href={req.video_url} target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-700 underline">watch it</a> — check it's good enough before approving.</p>
+        : <p className="mt-1 text-amber-700">🎬 No qualifying video sent (request made before videos were required).</p>}
       {req.other_links && <p className="mt-1 text-slate-500">Other accounts: {req.other_links}</p>}
       {req.notes && <p className="mt-1 text-slate-500">Notes: {req.notes}</p>}
       {req.decision_note && <p className="mt-1 text-slate-500">Reason given: {req.decision_note}</p>}

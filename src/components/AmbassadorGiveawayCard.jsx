@@ -37,6 +37,9 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
   const [picked, setPicked] = useState([])
   const [month, setMonth] = useState('')
   const [idea, setIdea] = useState('')
+  const [videoType, setVideoType] = useState('')
+  const [videoUrl, setVideoUrl] = useState('')
+  const [videoOk, setVideoOk] = useState(false)
   const [followers, setFollowers] = useState('')
   const [otherLinks, setOtherLinks] = useState('')
   const [notes, setNotes] = useState('')
@@ -130,10 +133,14 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
     if (picked.length < least || picked.length > needed) { setFormError(`Please choose between ${least} and ${needed} prize products.`); return }
     if (!month) { setFormError('Please choose a month.'); return }
     if (idea.trim().length < 10) { setFormError('Please tell us a little about the look you will create.'); return }
+    if (!videoType) { setFormError('Please choose what kind of video you made.'); return }
+    if (!/^https?:\/\/\S+\.\S+/i.test(videoUrl.trim())) { setFormError('Please add the link to your video.'); return }
+    if (/instagram\.com|tiktok\.com/i.test(videoUrl)) { setFormError('Please share the full-quality video (YouTube, Google Drive, WeTransfer or Dropbox link), not an Instagram or TikTok link.'); return }
+    if (!videoOk) { setFormError('Please confirm your video uses GEL.IT.UP products only.'); return }
     if (previewId) { setFormError('Preview only — nothing is sent.'); return }
     setSending(true)
     try {
-      const res = await call('POST', { products: picked, preferredMonth: month, idea, followers, otherLinks, notes })
+      const res = await call('POST', { products: picked, preferredMonth: month, idea, videoType, videoUrl: videoUrl.trim(), followers, otherLinks, notes })
       if (!res.ok) throw new Error(res.error || 'Your request could not be sent.')
       setJustSent(true)
     } catch (err) {
@@ -149,6 +156,15 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
         You can host an official <strong>GEL.IT.UP EU giveaway</strong> as a Collab post with @gelitup. We supply and ship the prize.
         Choose {least}–{data.maxProducts} prize products from the products you have received and reviewed. To add more, review them first.
       </p>
+      <div className="mt-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50 p-3 text-[12px] text-slate-700">
+        <p className="font-semibold text-slate-900">🎬 To qualify, first make one quality video with the products you received:</p>
+        <ul className="mt-1 list-disc space-y-0.5 pl-5">
+          <li>a <strong>mini nail art tutorial</strong>, or</li>
+          <li>a <strong>"how to"</strong> video (e.g. how to apply or use a product), or</li>
+          <li>a <strong>presentation of GEL.IT.UP products</strong>.</li>
+        </ul>
+        <p className="mt-1">It should be good enough for our YouTube channel: clear, well lit, steady, with no text on the video and <strong>GEL.IT.UP products only</strong> (no other brands in shot). Send it with your request as a full-quality link (YouTube, Google Drive, WeTransfer or Dropbox). Take your time to prepare it.</p>
+      </div>
       {!open ? (
         <button
           type="button"
@@ -194,6 +210,27 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
             Your content idea
             <textarea value={idea} onChange={(e) => setIdea(e.target.value)} rows={3} placeholder="The look you'll create with the prize products" className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-[13px] font-normal" />
           </label>
+
+          <fieldset className="rounded-lg border border-slate-200 p-3">
+            <legend className="px-1 text-[12px] font-semibold text-slate-800">Your qualifying video</legend>
+            <div className="space-y-1 text-[12px] text-slate-700">
+              {[['tutorial', 'Mini nail art tutorial'], ['howto', '"How to" video'], ['presentation', 'Presentation of GEL.IT.UP products']].map(([v, label]) => (
+                <label key={v} className="flex cursor-pointer items-center gap-2">
+                  <input type="radio" name="giveaway-video-type" value={v} checked={videoType === v} onChange={() => setVideoType(v)} />
+                  <span>{label}</span>
+                </label>
+              ))}
+            </div>
+            <label className="mt-2 block text-[12px] font-semibold text-slate-800">
+              Link to your video
+              <input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="YouTube, Google Drive, WeTransfer or Dropbox link" className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-[13px] font-normal" />
+              <span className="mt-1 block font-normal text-slate-500">Full quality, please. Instagram and TikTok links lose quality, so we can't use them.</span>
+            </label>
+            <label className="mt-2 flex cursor-pointer items-start gap-2 text-[12px] text-slate-700">
+              <input type="checkbox" checked={videoOk} onChange={(e) => setVideoOk(e.target.checked)} className="mt-0.5" />
+              <span>My video is my own work, made with GEL.IT.UP products I received, with no other brands in shot. GEL.IT.UP may use it on its YouTube channel and social media, credited to me.</span>
+            </label>
+          </fieldset>
 
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block text-[12px] font-semibold text-slate-800">
