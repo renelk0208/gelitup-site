@@ -27,6 +27,12 @@ const sign = '<p>With love,<br/>René Krallis<br/>Marketing Director, GEL.IT.UP 
 const wrap = (inner) => `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.6">${inner}</div>`
 const productList = (req) => `<ul>${(req.products || []).map((p) => `<li>${esc(p.title)}</li>`).join('')}</ul>`
 
+function nextDay(ymd) {
+  const d = new Date(`${String(ymd).slice(0, 10)}T12:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + 1)
+  return d.toISOString().slice(0, 10)
+}
+
 function approvedEmail(row, req, start, end) {
   const code = String(row?.discount_code || '').trim()
   const handle = String(row?.instagram || '').trim().replace(/^@?/, '@').replace(/^@$/, '@youraccount')
@@ -34,22 +40,23 @@ function approvedEmail(row, req, start, end) {
     subject: 'Your GEL.IT.UP giveaway is approved 🎁',
     html: wrap(`
       <p>Hi ${esc(firstName(row))},</p>
-      <p>Great news — your giveaway is approved! Your dates are <strong>${esc(formatGiveawayDate(start))}</strong> to <strong>${esc(formatGiveawayDate(end))}</strong>.</p>
+      <p>Great news — your giveaway is approved! Your giveaway runs from <strong>${esc(formatGiveawayDate(start))}</strong> to <strong>${esc(formatGiveawayDate(end))} at 23:59</strong> (Greek time).</p>
+      <p>The winner is <strong>announced on Monday afternoon</strong>, ${esc(formatGiveawayDate(nextDay(end)))}.</p>
       <p><strong>Prize</strong> (supplied and shipped by GEL.IT.UP to the winner):</p>
       ${productList(req)}
       <p><strong>What to do</strong></p>
       <ol>
         <li>Create your post with real nail content using the prize products — a finished look, not just the boxes.</li>
-        <li>Publish it on your start date as an Instagram <strong>Collab</strong> with <strong>@gelitup</strong> and turn on the <strong>Paid partnership</strong> label (or add #ad).</li>
+        <li>Publish it on <strong>Monday</strong>, your start date, as an Instagram <strong>Collab</strong> with <strong>@gelitup</strong> and turn on the <strong>Paid partnership</strong> label (or add #ad).</li>
         <li>Start the caption with <strong>GEL.IT.UP</strong>, say clearly that the giveaway is <strong>for qualified nail technicians only</strong>, and use #gelitup #gelituprofessional #salons #nailtech #madeineu.</li>
         <li>To enter, followers follow you and @gelitup, like the post and tag 1–2 nail tech friends.</li>
-        <li><strong>GEL.IT.UP draws the winner</strong> at random from the comments the day after your giveaway ends, checks that she follows both accounts and is a qualified nail technician, and lets you know who won. Please don't pick a winner yourself.</li>
-        <li>Announce the winner in your stories once we tell you. We contact her and ship the prize.</li>
+        <li><strong>GEL.IT.UP draws the winner</strong> at random from the comments on Monday morning after your giveaway ends, checks that she follows both accounts and is a qualified nail technician, and lets you know who won. Please don't pick a winner yourself.</li>
+        <li>Announce the winner in your stories on <strong>Monday afternoon</strong>, once we tell you who won. We contact her and ship the prize.</li>
         ${code ? `<li>Then post a story for everyone else: "Didn't win this time? Use my code <strong>${esc(code)}</strong> for 20% off."</li>` : ''}
       </ol>
       <p><strong>Please add these terms at the end of your caption:</strong></p>
       <div style="border-left:3px solid #d43790;padding:8px 12px;background:#fdf0f5">
-        Giveaway terms: Runs from ${esc(formatGiveawayDate(start))} to ${esc(formatGiveawayDate(end))} (Greek time). Open to qualified nail technicians only, aged 18+, in countries GEL.IT.UP EU ships to; not open to the USA or Italy. No purchase necessary. One winner, drawn at random by GEL.IT.UP from valid entries and announced in ${esc(handle)}'s and @gelitup's stories. The winner must reply within 48 hours and show she is a qualified nail technician (a photo of her nail qualification or certificate, plus an Instagram account showing her nail work), otherwise a new winner is drawn. The prize is supplied and shipped by GEL.IT.UP and cannot be exchanged for cash. The winner will only be contacted by @gelitup, and we will never ask for payment. This giveaway is not sponsored, endorsed or administered by, or associated with, Instagram or Meta.
+        Giveaway terms: Runs from ${esc(formatGiveawayDate(start))} to ${esc(formatGiveawayDate(end))} at 23:59 (Greek time). Winner announced on ${esc(formatGiveawayDate(nextDay(end)))} in the afternoon. Open to qualified nail technicians only, aged 18+, in countries GEL.IT.UP EU ships to; not open to the USA or Italy. No purchase necessary. One winner, drawn at random by GEL.IT.UP from valid entries and announced in ${esc(handle)}'s and @gelitup's stories. The winner must reply within 48 hours and show she is a qualified nail technician (a photo of her nail qualification or certificate, plus an Instagram account showing her nail work), otherwise a new winner is drawn. The prize is supplied and shipped by GEL.IT.UP and cannot be exchanged for cash. The winner will only be contacted by @gelitup, and we will never ask for payment. This giveaway is not sponsored, endorsed or administered by, or associated with, Instagram or Meta.
       </div>
       <p>We can't wait to see it! 💖</p>
       ${sign}`),
@@ -93,7 +100,7 @@ function inviteEmail(row) {
         <li>Choose <strong>8 to 10 products</strong> for the prize. You can only choose products you've received <strong>and reviewed</strong> — to add more, review them first.</li>
         <li>Pick your preferred month and tell us the look you'll create.</li>
       </ol>
-      <p>We run 3 giveaways a month, one week each, so every giveaway gets our full support. We'll email you your exact week. <strong>Please don't announce anything until we confirm your dates.</strong></p>
+      <p>We run 3 giveaways a month, one week each, so every giveaway gets our full support. Each giveaway runs from <strong>Monday to Sunday night</strong>, and the winner is announced on the <strong>Monday afternoon</strong> after. We'll email you your exact week. <strong>Please don't announce anything until we confirm your dates.</strong></p>
 
       <p><strong>2. Your giveaway post</strong></p>
       <ul>

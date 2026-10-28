@@ -61,8 +61,8 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
     return (
       <Box>
         <p className="mt-2 text-[13px] text-slate-700">
-          Your giveaway is booked for <strong>{formatGiveawayDate(data.upcoming.slot_start)}</strong> to <strong>{formatGiveawayDate(data.upcoming.slot_end)}</strong>.
-          Post it as a Collab with @gelitup, and send the winner's details to ambassadors@gelitup.com.
+          Your giveaway is booked from <strong>{formatGiveawayDate(data.upcoming.slot_start)}</strong> to <strong>{formatGiveawayDate(data.upcoming.slot_end)} at 23:59</strong> (Greek time).
+          Post it on the Monday as a Collab with @gelitup. GEL.IT.UP draws the winner on the following Monday morning, and you announce her in your stories that Monday afternoon.
         </p>
       </Box>
     )
@@ -187,7 +187,7 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
               <option value="">Choose…</option>
               {data.months.map((m) => <option key={m} value={m}>{formatGiveawayMonth(m)}</option>)}
             </select>
-            <span className="mt-1 block font-normal text-slate-500">We run 3 giveaways a month, one week each. We'll confirm your exact week.</span>
+            <span className="mt-1 block font-normal text-slate-500">We run 3 giveaways a month, each from Monday to Sunday night, with the winner announced on the Monday afternoon after. We'll confirm your exact week.</span>
           </label>
 
           <label className="block text-[12px] font-semibold text-slate-800">
