@@ -4,6 +4,7 @@ import AmbassadorReceiptBanner from './AmbassadorReceiptBanner'
 import AmbassadorMyReviews from './AmbassadorMyReviews'
 import AmbassadorGiveawayCard from './AmbassadorGiveawayCard'
 import AmbassadorOptOut from './AmbassadorOptOut'
+import { buildAmbassadorReviewRequestEmail } from '../lib/reviewEmail.js'
 import {
   GIVEAWAY_SLOTS,
   formatGiveawayDate,
@@ -144,6 +145,38 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
   const [switchBusy, setSwitchBusy] = useState(false)
   const [checkId, setCheckId] = useState('')
   const [previewId, setPreviewId] = useState(null) // "Preview her page" modal
+  // Review requests for paused ambassadors: { loading, error, list, ids:Set, preview, sending }
+  const [pausedReq, setPausedReq] = useState(null)
+  const openPausedRequests = async () => {
+    setPausedReq({ loading: true })
+    try {
+      const { data: sess } = await supabase.auth.getSession()
+      const res = await fetch('/.netlify/functions/giveaway-request?view=reviewTargets', { headers: { Authorization: `Bearer ${sess?.session?.access_token || ''}` } })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json?.error || `HTTP ${res.status}`)
+      const list = json.ambassadors || []
+      setPausedReq({ list, ids: new Set(list.filter((a) => a.products.length).map((a) => a.id)), preview: null })
+    } catch (err) { setPausedReq({ error: err.message }) }
+  }
+  const sendPausedRequests = async () => {
+    const targets = (pausedReq?.list || []).filter((a) => pausedReq.ids.has(a.id) && a.products.length)
+    if (!targets.length) return
+    if (!window.confirm(`Send a review request to ${targets.length} paused ambassador${targets.length === 1 ? '' : 's'}? One email each, listing her products.`)) return
+    setPausedReq((prev) => ({ ...prev, sending: true }))
+    const failed = []
+    for (const a of targets) {
+      const row = byId.get(a.id) || a
+      const { subject, html } = buildAmbassadorReviewRequestEmail({ ...row, email: a.email }, a.products, a.language || row.language, { giveaway: false })
+      const res = sendEmail ? await sendEmail({ to: a.email, subject, html }) : { ok: false, error: 'No email sender' }
+      if (!res.ok) { failed.push(`${a.full_name}: ${res.error || 'failed'}`); continue }
+      const at = new Date().toISOString()
+      const asked = { ...(row.review_requests || {}) }
+      for (const p of a.products) asked[p.handle] = at
+      await supabase.from('ambassador_applications').update({ review_requested_at: at, review_requests: asked }).eq('id', a.id)
+    }
+    setPausedReq(null)
+    alert(failed.length ? `Sent ${targets.length - failed.length} of ${targets.length}.\n\nNot sent:\n${failed.join('\n')}` : `Sent to ${targets.length} ambassador${targets.length === 1 ? '' : 's'}.`)
+  }
   // Giveaway readiness of every approved ambassador (who could be offered a week).
   const [readiness, setReadiness] = useState({ loading: false, error: '', data: null })
   const loadReadiness = async () => {
@@ -545,6 +578,9 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
       {!loading && !error && (
         <div className="mt-3 space-y-4">
           <div className="rounded-lg border border-slate-200 bg-white p-3 text-xs">
+            <div className="mb-2">
+              <button type="button" onClick={openPausedRequests} className="rounded-full bg-slate-800 px-3 py-1 font-semibold text-white hover:bg-slate-700">★ Review requests for paused ambassadors…</button>
+            </div>
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-sm font-bold text-slate-900">Who can do a giveaway now?</p>
               <button type="button" onClick={loadReadiness} disabled={readiness.loading} className="rounded-full bg-fuchsia-600 px-3 py-1 font-semibold text-white hover:bg-fuchsia-500 disabled:opacity-60">
@@ -663,6 +699,54 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
               {showPast && <ul className="mt-2 space-y-2">{past.map((r) => <Card key={r.id} req={r} />)}</ul>}
             </div>
           )}
+        </div>
+      )}
+      {pausedReq && (
+        <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4" onClick={() => !pausedReq.sending && setPausedReq(null)}>
+          <div className="flex max-h-[88vh] w-full max-w-2xl flex-col rounded-2xl bg-white p-5 text-xs shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-bold text-slate-900">Review requests for paused ambassadors</h3>
+            <p className="mt-1 text-slate-500">One email each, in her language, listing the products she was sent and hasn't reviewed yet (from every package, confirmed or not), with the new review steps. No giveaway mention, as paused ambassadors can't take part. Ambassadors who paused or ended it themselves are not listed. Nothing is sent until you press Send.</p>
+            {pausedReq.loading && <p className="mt-3 text-slate-500">Checking their packages and reviews… (about 20 seconds)</p>}
+            {pausedReq.error && <p className="mt-3 text-rose-600">Could not load: {pausedReq.error}</p>}
+            {pausedReq.list && (
+              <>
+                <ul className="mt-3 flex-1 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200">
+                  {pausedReq.list.map((a) => (
+                    <li key={a.id} className="flex items-start gap-3 px-3 py-2">
+                      <input type="checkbox" className="mt-1" disabled={!a.products.length || pausedReq.sending} checked={pausedReq.ids.has(a.id)} onChange={() => setPausedReq((prev) => {
+                        const ids = new Set(prev.ids)
+                        if (ids.has(a.id)) ids.delete(a.id); else ids.add(a.id)
+                        return { ...prev, ids }
+                      })} />
+                      <span className="min-w-0 flex-1">
+                        <span className="font-semibold text-slate-900">{a.full_name}</span>
+                        <span className="text-slate-500">{a.country ? ` · ${a.country}` : ''} · {a.email}</span>
+                        <span className="block text-slate-500">
+                          {a.error ? <span className="text-rose-600">Could not check: {a.error}</span>
+                            : a.products.length ? `${a.products.length} product${a.products.length === 1 ? '' : 's'} to review: ${a.products.slice(0, 4).map((p) => p.title).join(', ')}${a.products.length > 4 ? '…' : ''}`
+                            : a.packages ? 'Nothing to ask: everything reviewed, or her packing list has no exact products (use Edit contents)'
+                            : 'No packages recorded'}
+                        </span>
+                        {a.products.length > 0 && <button type="button" onClick={() => setPausedReq((prev) => ({ ...prev, preview: buildAmbassadorReviewRequestEmail(byId.get(a.id) || a, a.products, a.language, { giveaway: false }) }))} className="text-fuchsia-700 underline">preview her email</button>}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                {pausedReq.preview && (
+                  <div className="mt-2 max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3">
+                    <p className="mb-2 font-semibold">Subject: {pausedReq.preview.subject}</p>
+                    <div dangerouslySetInnerHTML={{ __html: pausedReq.preview.html }} />
+                  </div>
+                )}
+                <div className="mt-3 flex justify-end gap-2">
+                  <button type="button" onClick={() => setPausedReq(null)} disabled={pausedReq.sending} className="rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-600">Cancel</button>
+                  <button type="button" onClick={sendPausedRequests} disabled={pausedReq.sending || !pausedReq.ids.size} className="rounded-lg bg-fuchsia-600 px-4 py-2 font-semibold text-white disabled:opacity-50">
+                    {pausedReq.sending ? 'Sending…' : `Send to ${pausedReq.ids.size}`}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
       {previewId && (() => {

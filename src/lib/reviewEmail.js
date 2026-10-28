@@ -7,7 +7,9 @@ const escAmb = (v) => String(v ?? '').replaceAll('&', '&amp;').replaceAll('<', '
 // form on shop.gelitup.com. The reviews are collected by Judge.me.
 // A product may carry its own `url` (e.g. a collection page when the exact
 // product she received isn't known).
-export function buildAmbassadorReviewRequestEmail(row, products, lang, { monthly = false } = {}) {
+// monthly: the monthly reminder subject. giveaway: add the giveaway note
+// (left out for paused ambassadors, who can't take part in giveaways).
+export function buildAmbassadorReviewRequestEmail(row, products, lang, { monthly = false, giveaway = monthly } = {}) {
   const t = reviewEmailText(lang || row?.language)
   const firstName = String(row?.full_name || '').trim().split(/\s+/)[0] || 'there'
   const name = firstName.charAt(0).toUpperCase() + firstName.slice(1)
@@ -25,7 +27,7 @@ export function buildAmbassadorReviewRequestEmail(row, products, lang, { monthly
       <p style="color:#1a1a1a">${t.hi(escAmb(name))}</p>
       <p>${t.thanks}</p>
       <p>${t.ask}</p>
-      ${monthly && t.giveawayNote ? `<p style="background:#fdf0f5;border-left:3px solid #d43790;padding:10px 14px;margin:18px 0;color:#1a1a1a">🎁 ${t.giveawayNote}</p>` : ''}
+      ${giveaway && t.giveawayNote ? `<p style="background:#fdf0f5;border-left:3px solid #d43790;padding:10px 14px;margin:18px 0;color:#1a1a1a">🎁 ${t.giveawayNote}</p>` : ''}
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:18px 0">${cards}</table>
       <p style="background:#f8f8f6;border-left:3px solid #d43790;padding:10px 14px;margin:18px 0"><strong style="color:#1a1a1a">${t.howTitle}</strong> ${t.how(escAmb(row?.email || ''))}</p>
       <p>${t.gifted}</p>

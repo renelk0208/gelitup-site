@@ -404,6 +404,46 @@ export async function handler(event) {
     return json(200, { ambassadors: out, needed: { packages: GIVEAWAY_MIN_PACKAGES, reviews: GIVEAWAY_MIN_REVIEWS } })
   }
 
+  // ── Admin: who to send a review request to (paused ambassadors) ──
+  // Products from EVERY package sent (confirmed or not, not lost), minus the
+  // ones she has reviewed. Ambassadors who asked to end/pause it themselves are left out.
+  if (qs.view === 'reviewTargets' && event.httpMethod === 'GET') {
+    const { data: admin } = await supabase.from('b2b_admins').select('email').ilike('email', userEmail).maybeSingle()
+    if (!admin) return json(403, { error: 'Admins only.' })
+    const { data: people, error: pErr } = await supabase.from(AMBASSADOR_TABLE)
+      .select('id, full_name, email, status, paused_at, paused_reason, language, country, opt_out_type, review_requested_at')
+      .or('paused_at.not.is.null,status.ilike.paused')
+    if (pErr) return json(500, { error: pErr.message })
+    let shop
+    try { shop = await loadShopProducts() } catch { return json(502, { error: 'Shop products unavailable right now.' }) }
+    const targets = (people || []).filter((a) => !a.opt_out_type && String(a.email || '').trim() && !/declin|reject/i.test(String(a.status || '')))
+    const out = []
+    for (const a of targets) {
+      try {
+        const [{ data: ships }, { data: credits }, { data: reported }] = await Promise.all([
+          supabase.from('ambassador_shipments').select('items, sent_at, lost_at, status').eq('application_id', a.id),
+          supabase.from('ambassador_review_credits').select('product_handle').eq('application_id', a.id),
+          supabase.from('ambassador_reported_items').select('product_handle').eq('application_id', a.id),
+        ])
+        const sent = (ships || []).filter((sh) => sh.sent_at && !sh.lost_at && String(sh.status || 'sent').toLowerCase() === 'sent')
+        const got = new Map()
+        for (const it of receivedItems(sent, shop, { expandStarter: true })) for (const p of it.matches) got.set(p.handle, p)
+        const byH = new Map(shop.map((p) => [p.handle, p]))
+        for (const r of reported || []) if (byH.get(r.product_handle)) got.set(r.product_handle, byH.get(r.product_handle))
+        const { reviews } = await loadJudgeMeReviews(a)
+        const done = new Set(reviewedProducts(reviews, shop).map((p) => p.handle))
+        for (const c of credits || []) done.add(c.product_handle)
+        const products = [...got.values()].filter((p) => !done.has(p.handle)).map((p) => ({ handle: p.handle, title: p.title, image: p.image }))
+          .sort((x, y) => x.title.localeCompare(y.title))
+        out.push({ id: a.id, full_name: a.full_name, email: a.email, language: a.language, country: a.country, paused_reason: a.paused_reason, review_requested_at: a.review_requested_at, packages: sent.length, products })
+      } catch (err) {
+        out.push({ id: a.id, full_name: a.full_name, email: a.email, error: err.message, products: [] })
+      }
+    }
+    out.sort((x, y) => String(x.full_name || '').localeCompare(String(y.full_name || '')))
+    return json(200, { ambassadors: out })
+  }
+
   let ambassador = null
   const previewId = Number(qs.applicationId || 0)
   if (previewId && event.httpMethod === 'GET') {

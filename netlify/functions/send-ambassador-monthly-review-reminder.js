@@ -2,8 +2,8 @@ import { createClient } from '@supabase/supabase-js'
 import { buildStatus, loadShopProducts } from './giveaway-request.js'
 import { buildAmbassadorReviewRequestEmail } from '../../src/lib/reviewEmail.js'
 
-// Once a month (1st of the month, 10:00 Greece): ONE email to each active
-// ambassador who still has received products she hasn't reviewed, listing
+// Once a month (1st of the month, 10:00 Greece): ONE email to each active or
+// paused (by us) ambassador who still has received products she hasn't reviewed, listing
 // them, and reminding her that without reviews she can't host a giveaway.
 // Only runs when switched on in admin (app_settings 'monthly_review_reminder_on').
 // Never more than one per ambassador in 25 days (monthly_review_reminder_at).
@@ -34,8 +34,9 @@ export async function handler(event) {
   if (setting?.value !== true) return { statusCode: 200, body: JSON.stringify({ ok: true, skipped: 'switched off' }) }
 
   const { data: people, error } = await supabase.from(AMBASSADOR_TABLE)
-    .select('id, full_name, email, status, paused_at, language, followers, tiktok, instagram, ambassador_type, country, giveaway_invited_at, monthly_review_reminder_at')
-    .ilike('status', 'approved').is('paused_at', null)
+    .select('id, full_name, email, status, paused_at, language, followers, tiktok, instagram, ambassador_type, country, giveaway_invited_at, monthly_review_reminder_at, opt_out_type')
+    .or('status.ilike.approved,status.ilike.paused')
+    .is('opt_out_type', null) // paused by us still get it; those who paused/ended it themselves don't
   if (error) return { statusCode: 500, body: JSON.stringify({ error: error.message }) }
 
   let shopProducts
@@ -51,7 +52,7 @@ export async function handler(event) {
     let st
     try { st = await buildStatus(supabase, a, { shopProducts }) } catch (err) { failed.push({ id: a.id, reason: err.message }); continue }
     if (!(st.notReviewed || []).length) continue
-    const { subject, html } = buildAmbassadorReviewRequestEmail(a, st.notReviewed, a.language, { monthly: true })
+    const { subject, html } = buildAmbassadorReviewRequestEmail(a, st.notReviewed, a.language, { monthly: true, giveaway: !a.paused_at && String(a.status || '').toLowerCase() !== 'paused' })
     try {
       const res = await fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers, body: JSON.stringify({ to: a.email, subject, html, from: `GEL.IT.UP Ambassadors <${INBOX}>`, replyTo: INBOX }) })
       if (!res.ok) throw new Error(`email ${res.status}`)
