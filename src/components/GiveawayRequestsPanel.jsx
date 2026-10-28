@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import AmbassadorReceiptBanner from './AmbassadorReceiptBanner'
+import AmbassadorMyReviews from './AmbassadorMyReviews'
+import AmbassadorGiveawayCard from './AmbassadorGiveawayCard'
+import AmbassadorOptOut from './AmbassadorOptOut'
 import {
   GIVEAWAY_SLOTS,
   formatGiveawayDate,
@@ -85,7 +89,7 @@ function inviteEmail(row) {
       <p><strong>1. Request your giveaway</strong></p>
       <ol>
         <li>Log in to your ambassador page on <a href="https://gelitup.com/portal/login" style="color:#d43790">gelitup.com</a> and open <strong>Request a giveaway</strong>.</li>
-        <li>Choose the <strong>10 products</strong> for the prize. You can only choose products you've received <strong>and reviewed</strong>.</li>
+        <li>Choose <strong>8 to 10 products</strong> for the prize. You can only choose products you've received <strong>and reviewed</strong> — to add more, review them first.</li>
         <li>Pick your preferred month and tell us the look you'll create.</li>
       </ol>
       <p>We run 3 giveaways a month, one week each, so every giveaway gets our full support. We'll email you your exact week. <strong>Please don't announce anything until we confirm your dates.</strong></p>
@@ -139,6 +143,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
   const [cardVisible, setCardVisible] = useState(null) // null = loading
   const [switchBusy, setSwitchBusy] = useState(false)
   const [checkId, setCheckId] = useState('')
+  const [previewId, setPreviewId] = useState(null) // "Preview her page" modal
   // Giveaway readiness of every approved ambassador (who could be offered a week).
   const [readiness, setReadiness] = useState({ loading: false, error: '', data: null })
   const loadReadiness = async () => {
@@ -321,7 +326,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
     const s = d.data || {}
     const a = s.admin || {}
     const other = (s.reasons || []).filter((r) => r !== 'open_request')
-    const reasonText = { not_active: 'not active / paused', packages: `only ${s.packagesReceived} package(s) received`, reviews: `fewer than ${s.maxProducts} received products reviewed`, recent_giveaway: 'had a giveaway in the last 6 months' }
+    const reasonText = { not_active: 'not active / paused', packages: `only ${s.packagesReceived} package(s) received`, reviews: `fewer than ${s.minReviews || 8} received products reviewed`, recent_giveaway: 'had a giveaway in the last 6 months' }
     return (
       <div className="mt-2 space-y-3 rounded-lg bg-slate-50 p-3 text-[12px] text-slate-700">
         <p>
@@ -597,6 +602,11 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
                   .map((a) => <option key={a.id} value={a.id}>{a.full_name || a.email}</option>)}
               </select>
             </label>
+            {checkId && (
+              <button type="button" onClick={() => setPreviewId(Number(checkId))} className="mt-2 rounded-full bg-slate-800 px-3 py-1 font-semibold text-white hover:bg-slate-700">
+                👁 Preview her page (what she sees)
+              </button>
+            )}
             {checkId && renderDetails(details[Number(checkId)], Number(checkId))}
           </div>
           <div>
@@ -621,6 +631,38 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
           )}
         </div>
       )}
+      {previewId && (() => {
+        const row = byId.get(previewId) || {}
+        const latest = [...(row._shipments || [])]
+          .filter((sh) => sh?.sent_at && !sh.lost_at && String(sh.status || 'sent').toLowerCase() === 'sent')
+          .sort((x, y) => String(y.sent_at).localeCompare(String(x.sent_at)))[0]
+        const unconfirmed = latest && !latest.delivered_at ? latest : null
+        const invited = Boolean(row.giveaway_invited_at || details[previewId]?.data?.invited)
+        return (
+          <div className="fixed inset-0 z-[130] flex items-start justify-center overflow-y-auto bg-black/60 p-4" onClick={() => setPreviewId(null)}>
+            <div className="my-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+              <div className="mb-2 flex items-center justify-between rounded-lg bg-slate-900 px-3 py-2 text-xs text-white">
+                <span>Preview — what <strong>{row.full_name}</strong> sees on her ambassador page. Buttons don't save anything.</span>
+                <button type="button" onClick={() => setPreviewId(null)} className="ml-2 rounded-full bg-white/20 px-2 py-0.5 font-bold">Close</button>
+              </div>
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl" aria-hidden="true">🌟</span>
+                  <p className="text-sm font-bold uppercase tracking-wide text-emerald-800">GEL.IT.UP® Ambassador</p>
+                </div>
+                <AmbassadorReceiptBanner previewPkg={unconfirmed} />
+                <div className="mt-3 rounded-xl border border-dashed border-emerald-300 bg-white/60 p-3 text-[11px] text-slate-500">
+                  Here she also sees her discount code{row.discount_code ? ` (${row.discount_code})` : ''}, 20% client discount, her commission, "How it works", her shipments and tracking, her credit and the orders placed with her code.
+                </div>
+                <AmbassadorMyReviews previewId={previewId} />
+                <AmbassadorGiveawayCard previewId={previewId} previewVisible={cardVisible || invited} />
+                {!(cardVisible || invited) && <p className="mt-3 rounded-lg bg-white/60 p-2 text-center text-[11px] text-slate-500">The 🎁 Giveaways card is hidden for her (not invited, and the card is switched off).</p>}
+                <AmbassadorOptOut preview />
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </details>
   )
 }

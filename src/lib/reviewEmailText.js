@@ -10,6 +10,8 @@ export const REVIEW_EMAIL_LANGUAGES = [
 
 const TEXT = {
   en: {
+    giveawayNote: "Reminder: only ambassadors with at least <strong>8 reviewed products</strong> can host a GEL.IT.UP giveaway, and a giveaway prize can only include products you've reviewed. Products you haven't reviewed don't count.",
+    monthlySubject: (n) => `You still have products to review, ${n} 💖`,
     subject: (n) => `${n}, how are you finding your GEL.IT.UP products? 💖`,
     hi: (n) => `Hi ${n},`,
     thanks: "Thank you for being part of the GEL.IT.UP Ambassador family! We hope you're enjoying the products from your PR package, and we'd love to hear what you think.",
@@ -22,6 +24,8 @@ const TEXT = {
     love: 'With love,',
   },
   el: {
+    giveawayNote: "Υπενθύμιση: μόνο οι Ambassadors με τουλάχιστον <strong>8 προϊόντα με κριτική</strong> μπορούν να κάνουν giveaway της GEL.IT.UP, και το δώρο μπορεί να περιλαμβάνει μόνο προϊόντα που έχεις αξιολογήσει. Τα προϊόντα χωρίς κριτική δεν μετράνε.",
+    monthlySubject: (n) => `Έχεις ακόμα προϊόντα για κριτική, ${n} 💖`,
     subject: (n) => `${n}, πώς σου φαίνονται τα προϊόντα GEL.IT.UP; 💖`,
     hi: (n) => `Γεια σου ${n},`,
     thanks: 'Σε ευχαριστούμε που είσαι μέλος της οικογένειας των Ambassadors της GEL.IT.UP! Ελπίζουμε να απολαμβάνεις τα προϊόντα από το PR πακέτο σου και θα θέλαμε πολύ να μάθουμε τη γνώμη σου.',
@@ -34,6 +38,8 @@ const TEXT = {
     love: 'Με αγάπη,',
   },
   ro: {
+    giveawayNote: "Reamintire: doar ambasadoarele cu cel puțin <strong>8 produse recenzate</strong> pot organiza un concurs GEL.IT.UP, iar premiul poate include doar produse pe care le-ai recenzat. Produsele fără recenzie nu se iau în calcul.",
+    monthlySubject: (n) => `Mai ai produse de recenzat, ${n} 💖`,
     subject: (n) => `${n}, cum ți se par produsele GEL.IT.UP? 💖`,
     hi: (n) => `Bună, ${n},`,
     thanks: 'Îți mulțumim că faci parte din familia de Ambasadori GEL.IT.UP! Sperăm că te bucuri de produsele din pachetul tău PR și ne-ar plăcea mult să aflăm părerea ta.',
@@ -46,6 +52,8 @@ const TEXT = {
     love: 'Cu drag,',
   },
   pl: {
+    giveawayNote: "Przypomnienie: tylko ambasadorki, które oceniły co najmniej <strong>8 produktów</strong>, mogą zorganizować giveaway GEL.IT.UP, a nagroda może zawierać tylko produkty, które oceniłaś. Produkty bez opinii się nie liczą.",
+    monthlySubject: (n) => `Masz jeszcze produkty do oceny, ${n} 💖`,
     subject: (n) => `${n}, jak sprawdzają się produkty GEL.IT.UP? 💖`,
     hi: (n) => `Cześć ${n},`,
     thanks: 'Dziękujemy, że jesteś częścią rodziny Ambasadorek GEL.IT.UP! Mamy nadzieję, że produkty z Twojej paczki PR przypadły Ci do gustu – bardzo chcemy poznać Twoją opinię.',
@@ -58,6 +66,8 @@ const TEXT = {
     love: 'Serdecznie,',
   },
   fr: {
+    giveawayNote: "Rappel : seules les ambassadrices ayant donné leur avis sur au moins <strong>8 produits</strong> peuvent organiser un giveaway GEL.IT.UP, et le lot ne peut contenir que des produits que tu as évalués. Les produits sans avis ne comptent pas.",
+    monthlySubject: (n) => `Il te reste des produits à évaluer, ${n} 💖`,
     subject: (n) => `${n}, comment trouves-tu tes produits GEL.IT.UP ? 💖`,
     hi: (n) => `Bonjour ${n},`,
     thanks: "Merci de faire partie de la famille des Ambassadrices GEL.IT.UP ! Nous espérons que tu apprécies les produits de ton colis PR, et nous aimerions beaucoup avoir ton avis.",
@@ -70,6 +80,8 @@ const TEXT = {
     love: 'Avec amour,',
   },
   es: {
+    giveawayNote: "Recordatorio: solo las embajadoras con al menos <strong>8 productos reseñados</strong> pueden organizar un sorteo de GEL.IT.UP, y el premio solo puede incluir productos que hayas reseñado. Los productos sin reseña no cuentan.",
+    monthlySubject: (n) => `Todavía tienes productos por reseñar, ${n} 💖`,
     subject: (n) => `${n}, ¿qué te parecen tus productos GEL.IT.UP? 💖`,
     hi: (n) => `Hola ${n},`,
     thanks: '¡Gracias por formar parte de la familia de Embajadoras de GEL.IT.UP! Esperamos que estés disfrutando de los productos de tu paquete PR y nos encantaría saber tu opinión.',
@@ -82,6 +94,8 @@ const TEXT = {
     love: 'Con cariño,',
   },
   pt: {
+    giveawayNote: "Lembrete: só as embaixadoras com pelo menos <strong>8 produtos avaliados</strong> podem organizar um giveaway GEL.IT.UP, e o prémio só pode incluir produtos que avaliaste. Produtos sem avaliação não contam.",
+    monthlySubject: (n) => `Ainda tens produtos para avaliar, ${n} 💖`,
     subject: (n) => `${n}, o que estás a achar dos produtos GEL.IT.UP? 💖`,
     hi: (n) => `Olá ${n},`,
     thanks: 'Obrigada por fazeres parte da família de Embaixadoras GEL.IT.UP! Esperamos que estejas a gostar dos produtos do teu pacote PR e adorávamos saber a tua opinião.',

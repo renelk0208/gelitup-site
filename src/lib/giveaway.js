@@ -7,15 +7,18 @@
 //
 // Eligibility (all must be true):
 //   - at least 2 packages confirmed as received (not lost)
-//   - at least 10 products she received in her packages AND reviewed on
-//     shop.gelitup.com (Judge.me); she picks the 10 prize items from these
+//   - at least 8 products she received in her packages AND reviewed on
+//     shop.gelitup.com (Judge.me); she picks 8–10 prize items from these
 //   - no approved giveaway in the last 6 months
 //   - no request already waiting (requested / waitlisted)
 
 export const GIVEAWAY_SLOTS = [1, 2, 3]
 export const GIVEAWAY_MIN_PACKAGES = 2
 export const GIVEAWAY_GAP_MONTHS = 6
-// 10 prize items per giveaway, chosen from products she received and reviewed.
+// To qualify: at least 8 products she received AND reviewed.
+// Prize: up to 10 products, every one of them received and reviewed by her
+// (so to put more than 8 in the prize she reviews more first).
+export const GIVEAWAY_MIN_REVIEWS = 8
 export const GIVEAWAY_MAX_PRODUCTS = 10
 const DAY = 24 * 60 * 60 * 1000
 

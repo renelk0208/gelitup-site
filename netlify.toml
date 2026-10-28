@@ -47,6 +47,9 @@
 [functions."send-ambassador-receipt-reminders"]
   schedule = "0 7,8 * * *"
 
+[functions."send-ambassador-monthly-review-reminder"]
+  schedule = "0 7,8 1 * *"
+
 [[redirects]]
   from = "https://gelitup.netlify.app/*"
   to = "https://gelitup.com/:splat"

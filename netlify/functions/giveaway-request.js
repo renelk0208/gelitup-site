@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { productUrl, receivedItems, suggestedCount } from '../../src/lib/reviewProducts.js'
 import {
   GIVEAWAY_MAX_PRODUCTS,
+  GIVEAWAY_MIN_REVIEWS,
   GIVEAWAY_MIN_PACKAGES,
   nextGiveawayAllowedFrom,
   openGiveawayRequest,
@@ -58,7 +59,7 @@ async function userFromToken(token) {
   return user?.email ? user : null
 }
 
-async function loadShopProducts() {
+export async function loadShopProducts() {
   const out = []
   for (let page = 1; page <= 20; page += 1) {
     const res = await fetch(`${SHOP}/products.json?limit=250&page=${page}`, { headers: { Accept: 'application/json' } })
@@ -183,7 +184,7 @@ function reviewDetails(reviews, products, receivedProducts, credits = []) {
   }).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
 }
 
-async function buildStatus(supabase, ambassador, { detail = false, shopProducts = null } = {}) {
+export async function buildStatus(supabase, ambassador, { detail = false, shopProducts = null } = {}) {
   const [{ data: shipments, error: shipErr }, { data: requests, error: reqErr }, { data: credits }, { data: reported }] = await Promise.all([
     supabase.from('ambassador_shipments').select('items, sent_at, delivered_at, lost_at, status').eq('application_id', ambassador.id),
     supabase.from('ambassador_giveaway_requests').select('*').eq('application_id', ambassador.id).order('created_at', { ascending: false }),
@@ -244,7 +245,7 @@ async function buildStatus(supabase, ambassador, { detail = false, shopProducts 
   const reasons = []
   if (String(ambassador.status || '').toLowerCase() !== 'approved' || ambassador.paused_at) reasons.push('not_active')
   if (packages < GIVEAWAY_MIN_PACKAGES) reasons.push('packages')
-  if (reviewed.length < GIVEAWAY_MAX_PRODUCTS) reasons.push('reviews')
+  if (reviewed.length < GIVEAWAY_MIN_REVIEWS) reasons.push('reviews')
   if (lastGiveaway) reasons.push('recent_giveaway')
   if (openRequest) reasons.push('open_request')
 
@@ -293,6 +294,7 @@ async function buildStatus(supabase, ambassador, { detail = false, shopProducts 
     reportedItems: (reported || []).map((r) => ({ id: r.id, line: r.line, handle: r.product_handle, title: productByHandle.get(r.product_handle)?.title || r.product_title || r.product_handle, created_at: r.created_at })),
     invited: Boolean(ambassador.giveaway_invited_at),
     maxProducts: GIVEAWAY_MAX_PRODUCTS,
+    minReviews: GIVEAWAY_MIN_REVIEWS,
     months: upcomingGiveawayMonths(3),
     openRequest: openRequest
       ? { id: openRequest.id, status: openRequest.status, created_at: openRequest.created_at, preferred_month: openRequest.preferred_month, products: openRequest.products }
@@ -353,7 +355,7 @@ export async function handler(event) {
       }
     }
     await Promise.all(Array.from({ length: Math.min(6, out.length) }, worker))
-    return json(200, { ambassadors: out, needed: { packages: GIVEAWAY_MIN_PACKAGES, reviews: GIVEAWAY_MAX_PRODUCTS } })
+    return json(200, { ambassadors: out, needed: { packages: GIVEAWAY_MIN_PACKAGES, reviews: GIVEAWAY_MIN_REVIEWS } })
   }
 
   let ambassador = null
@@ -374,7 +376,7 @@ export async function handler(event) {
   if (qs.view === 'reviews' && event.httpMethod === 'GET') {
     try {
       const st = await buildStatus(supabase, ambassador)
-      return json(200, { reviewed: st.reviewed, notReviewed: st.notReviewed, unmatchedLines: st.unmatchedLines, reviewsNeeded: GIVEAWAY_MAX_PRODUCTS })
+      return json(200, { reviewed: st.reviewed, notReviewed: st.notReviewed, unmatchedLines: st.unmatchedLines, reviewsNeeded: GIVEAWAY_MIN_REVIEWS })
     } catch (err) {
       console.error('giveaway-request: reviews view failed', err.message)
       return json(502, { error: 'We could not load your reviews right now.' })
@@ -428,9 +430,9 @@ export async function handler(event) {
 
   const reviewedByHandle = new Map(status.reviewed.map((p) => [p.handle, p]))
   const picked = [...new Set((Array.isArray(body.products) ? body.products : []).map(String))]
-  // Exactly 10 prize products, all received and reviewed by her.
-  const needed = Math.min(GIVEAWAY_MAX_PRODUCTS, status.reviewed.length)
-  if (picked.length !== needed) return json(400, { error: `Please choose ${needed} product${needed === 1 ? '' : 's'}.` })
+  // 8 to 10 prize products, all received and reviewed by her.
+  const most = Math.min(GIVEAWAY_MAX_PRODUCTS, status.reviewed.length)
+  if (picked.length < GIVEAWAY_MIN_REVIEWS || picked.length > most) return json(400, { error: `Please choose between ${GIVEAWAY_MIN_REVIEWS} and ${most} products.` })
   if (picked.some((h) => !reviewedByHandle.has(h))) return json(400, { error: 'Only products you have received and reviewed can be given away.' })
   const month = clean(body.preferredMonth, 7)
   if (!status.months.includes(month)) return json(400, { error: 'Please choose a month.' })

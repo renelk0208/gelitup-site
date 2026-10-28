@@ -10,7 +10,8 @@ const fmt = (v) => {
   return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-export default function AmbassadorReceiptBanner({ onConfirmed }) {
+// previewPkg: admin preview — show the banner for this package (read-only).
+export default function AmbassadorReceiptBanner({ onConfirmed, previewPkg = undefined }) {
   const [pkg, setPkg] = useState(null)
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState(false)
@@ -18,6 +19,7 @@ export default function AmbassadorReceiptBanner({ onConfirmed }) {
 
   useEffect(() => {
     let alive = true
+    if (previewPkg !== undefined) { Promise.resolve().then(() => { if (alive) setPkg(previewPkg || null) }); return () => { alive = false } }
     if (!supabase) return undefined
     supabase.rpc('get_my_unconfirmed_ambassador_shipment').then(({ data, error: err }) => {
       if (!alive || err) return
@@ -30,7 +32,7 @@ export default function AmbassadorReceiptBanner({ onConfirmed }) {
       if (Date.now() >= due) setPkg(row)
     })
     return () => { alive = false }
-  }, [])
+  }, [previewPkg])
 
   if (done) {
     return (
@@ -42,6 +44,7 @@ export default function AmbassadorReceiptBanner({ onConfirmed }) {
   if (!pkg) return null
 
   const confirm = async () => {
+    if (previewPkg !== undefined) { setError('Preview only — nothing is saved.'); return }
     setBusy(true)
     setError('')
     const { data, error: err } = await supabase.rpc('confirm_my_ambassador_shipment', { p_shipment_id: pkg.id })

@@ -7729,7 +7729,18 @@ const deleteApplication = async (row) => {
         <>
           {loading && <p className="text-sm text-slate-500">Loading…</p>}
           {error && <p className="text-sm text-rose-600">{error}</p>}
-          {!loading && !error && <GiveawayRequestsPanel standalone ambassadors={rows} sendEmail={sendAmbassadorEmail} adminLabel={getAdminDisplayLabel()} />}
+          {!loading && !error && (<>
+            <AdminSettingSwitch
+              settingKey="monthly_review_reminder_on"
+              adminLabel={getAdminDisplayLabel()}
+              label="Monthly “you still have products to review” email:"
+              onText="On the 1st of each month at 10:00, ambassadors with unreviewed products get ONE email listing them, reminding them that without reviews they can't host a giveaway."
+              offText="Off — no monthly review emails. Unreviewed products still show on their page."
+              confirmOn={'Turn on the monthly review reminder?\n\nOn the 1st of each month at 10:00, every active ambassador who still has products to review gets ONE email listing them (never more than once a month).'}
+              confirmOff="Turn off the monthly review reminder?"
+            />
+            <GiveawayRequestsPanel standalone ambassadors={rows} sendEmail={sendAmbassadorEmail} adminLabel={getAdminDisplayLabel()} />
+          </>)}
         </>
       )}
 

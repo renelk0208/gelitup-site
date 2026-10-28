@@ -12,7 +12,8 @@ const fmt = (v) => {
   return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-export default function AmbassadorOptOut() {
+// preview: admin preview (read-only).
+export default function AmbassadorOptOut({ preview = false } = {}) {
   const [state, setState] = useState(null) // { opt_out_type, opt_out_until, paused_by } | {}
   const [open, setOpen] = useState(false)
   const [choice, setChoice] = useState('pause-1')
@@ -23,6 +24,7 @@ export default function AmbassadorOptOut() {
 
   useEffect(() => {
     let alive = true
+    if (preview) { Promise.resolve().then(() => { if (alive) setState({}) }); return () => { alive = false } }
     if (!supabase) return undefined
     supabase.rpc('get_my_ambassador_opt_out').then(({ data, error: err }) => {
       if (!alive) return
@@ -30,11 +32,12 @@ export default function AmbassadorOptOut() {
       setState((Array.isArray(data) ? data[0] : data) || {})
     })
     return () => { alive = false }
-  }, [])
+  }, [preview])
 
   if (state === null) return null
 
   const submit = async () => {
+    if (preview) { setError('Preview only — nothing is saved.'); return }
     setBusy(true)
     setError('')
     const type = choice === 'end' ? 'end' : 'pause'

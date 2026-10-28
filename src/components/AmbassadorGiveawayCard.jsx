@@ -9,11 +9,11 @@ import { formatGiveawayDate, formatGiveawayMonth } from '../lib/giveaway'
 
 const ENDPOINT = '/.netlify/functions/giveaway-request'
 
-async function call(method, body) {
+async function call(method, body, previewId) {
   const { data } = await supabase.auth.getSession()
   const token = data?.session?.access_token
   if (!token) throw new Error('Please log in again.')
-  const res = await fetch(ENDPOINT, {
+  const res = await fetch(previewId ? `${ENDPOINT}?applicationId=${encodeURIComponent(previewId)}` : ENDPOINT, {
     method,
     headers: { Authorization: `Bearer ${token}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
     body: body ? JSON.stringify(body) : undefined,
@@ -30,7 +30,8 @@ const Box = ({ children }) => (
   </div>
 )
 
-export default function AmbassadorGiveawayCard() {
+// previewId: admin preview of this ambassador's card (read-only).
+export default function AmbassadorGiveawayCard({ previewId = null, previewVisible = true } = {}) {
   const [state, setState] = useState({ loading: true, error: '', data: null })
   const [open, setOpen] = useState(false)
   const [picked, setPicked] = useState([])
@@ -45,11 +46,11 @@ export default function AmbassadorGiveawayCard() {
 
   useEffect(() => {
     let alive = true
-    call('GET')
-      .then((data) => { if (alive) setState({ loading: false, error: '', data }) })
+    call('GET', undefined, previewId)
+      .then((data) => { if (alive) setState({ loading: false, error: '', data: previewId && !previewVisible ? { hidden: true } : data }) })
       .catch((err) => { if (alive) setState({ loading: false, error: err.message, data: null }) })
     return () => { alive = false }
-  }, [])
+  }, [previewId, previewVisible])
 
   const { loading, error, data } = state
   if (loading) return null
@@ -89,7 +90,7 @@ export default function AmbassadorGiveawayCard() {
         <p className="mt-2 text-[13px] text-slate-700">Approved ambassadors can host an official GEL.IT.UP giveaway, with the prize supplied and shipped by us. To request one:</p>
         <ul className="mt-2 space-y-1 text-[12px] text-slate-600">
           <li>{r.includes('packages') ? '○' : '✓'} Confirmed you received at least {data.packagesNeeded} PR packages {r.includes('packages') ? `(you have ${data.packagesReceived})` : ''}</li>
-          <li>{r.includes('reviews') ? '○' : '✓'} Reviewed at least <strong>{data.maxProducts} products</strong> you have received, on shop.gelitup.com {r.includes('reviews') ? `(you have reviewed ${(data.reviewed || []).length})` : ''}</li>
+          <li>{r.includes('reviews') ? '○' : '✓'} Reviewed at least <strong>{data.minReviews || 8} products</strong> you have received, on shop.gelitup.com {r.includes('reviews') ? `(you have reviewed ${(data.reviewed || []).length})` : ''}</li>
           {r.includes('recent_giveaway') && data.allowedFrom && (
             <li>○ One giveaway every 6 months — you can request your next one from {formatGiveawayDate(data.allowedFrom)}</li>
           )}
@@ -116,7 +117,8 @@ export default function AmbassadorGiveawayCard() {
   }
 
   // 10 prize products, only from products she received and reviewed.
-  const needed = Math.min(data.maxProducts, data.reviewed.length)
+  const needed = Math.min(data.maxProducts, data.reviewed.length) // the most she can pick
+  const least = data.minReviews || 8
   const toggle = (handle) => setPicked((prev) => (prev.includes(handle)
     ? prev.filter((h) => h !== handle)
     : prev.length >= needed ? prev : [...prev, handle]))
@@ -124,9 +126,10 @@ export default function AmbassadorGiveawayCard() {
   const submit = async (e) => {
     e.preventDefault()
     setFormError('')
-    if (picked.length !== needed) { setFormError(`Please choose ${needed} prize product${needed === 1 ? '' : 's'}.`); return }
+    if (picked.length < least || picked.length > needed) { setFormError(`Please choose between ${least} and ${needed} prize products.`); return }
     if (!month) { setFormError('Please choose a month.'); return }
     if (idea.trim().length < 10) { setFormError('Please tell us a little about the look you will create.'); return }
+    if (previewId) { setFormError('Preview only — nothing is sent.'); return }
     setSending(true)
     try {
       const res = await call('POST', { products: picked, preferredMonth: month, idea, followers, otherLinks, notes })
@@ -143,7 +146,7 @@ export default function AmbassadorGiveawayCard() {
     <Box>
       <p className="mt-2 text-[13px] text-slate-700">
         You can host an official <strong>GEL.IT.UP EU giveaway</strong> as a Collab post with @gelitup. We supply and ship the prize.
-        Choose {data.maxProducts} prize products from the products you have received and reviewed.
+        Choose {least}–{data.maxProducts} prize products from the products you have received and reviewed. To add more, review them first.
       </p>
       {!open ? (
         <button
@@ -157,7 +160,7 @@ export default function AmbassadorGiveawayCard() {
         <form onSubmit={submit} className="mt-3 space-y-4">
           <div>
             <p className="text-[12px] font-semibold text-slate-800">
-              Choose {needed} prize product{needed === 1 ? '' : 's'} <span className="font-normal text-slate-500">from the products you have reviewed — {picked.length} of {needed} chosen</span>
+              Choose {least}–{needed} prize products <span className="font-normal text-slate-500">from the products you have reviewed — {picked.length} chosen</span>
             </p>
             <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
               {data.reviewed.map((p) => {

@@ -12,7 +12,7 @@ async function authHeader() {
 }
 
 // "Which ones did you get?" for a general package line, e.g. "3 different Cat Eye shades".
-function LinePicker({ line, onSaved }) {
+function LinePicker({ line, onSaved, preview = false }) {
   const [open, setOpen] = useState(false)
   const [shop, setShop] = useState(null)
   const [q, setQ] = useState('')
@@ -38,6 +38,7 @@ function LinePicker({ line, onSaved }) {
     ? prev.filter((x) => x.handle !== p.handle)
     : prev.length >= left ? prev : [...prev, p]))
   const save = async () => {
+    if (preview) { setError('Preview only — nothing is saved.'); return }
     setBusy(true); setError('')
     try {
       const h = await authHeader()
@@ -90,7 +91,8 @@ function LinePicker({ line, onSaved }) {
   )
 }
 
-export default function AmbassadorMyReviews() {
+// previewId: admin preview of this ambassador's "My reviews" (read-only).
+export default function AmbassadorMyReviews({ previewId = null } = {}) {
   const [data, setData] = useState(null)
   const [showDone, setShowDone] = useState(false)
   const [tick, setTick] = useState(0)
@@ -101,18 +103,20 @@ export default function AmbassadorMyReviews() {
       try {
         const h = await authHeader()
         if (!h) return
-        const res = await fetch('/.netlify/functions/giveaway-request?view=reviews', { headers: h })
+        const url = previewId ? `/.netlify/functions/giveaway-request?applicationId=${encodeURIComponent(previewId)}` : '/.netlify/functions/giveaway-request?view=reviews'
+        const res = await fetch(url, { headers: h })
         const json = await res.json().catch(() => null)
-        if (alive && res.ok && json) setData(json)
+        if (alive && res.ok && json) setData(previewId ? { reviewed: json.reviewed, notReviewed: json.notReviewed, unmatchedLines: json.unmatchedLines, reviewsNeeded: json.minReviews } : json)
       } catch { /* the profile never breaks because of this card */ }
     })()
     return () => { alive = false }
-  }, [tick])
+  }, [tick, previewId])
 
   if (!data) return null
   const done = data.reviewed || []
   const todo = data.notReviewed || []
   const lines = (data.unmatchedLines || []).filter((l) => l.max > (l.picked || []).length)
+  const need = Number(data.reviewsNeeded) || 8
   const total = done.length + todo.length
   if (!total && !lines.length) return null
   const pct = Math.round((done.length / total) * 100)
@@ -123,12 +127,12 @@ export default function AmbassadorMyReviews() {
         <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">⭐ My reviews</p>
         <p className="text-[12px] text-slate-600"><strong>{done.length} of {total}</strong> products reviewed</p>
       </div>
-      <div className={`mt-2 rounded-lg p-3 text-[12px] ${done.length >= 10 ? 'bg-emerald-50 text-emerald-900' : 'bg-amber-50 text-amber-900'}`}>
+      <div className={`mt-2 rounded-lg p-3 text-[12px] ${done.length >= need ? 'bg-emerald-50 text-emerald-900' : 'bg-amber-50 text-amber-900'}`}>
         <p className="font-bold">🎁 Your reviews decide if you can host a GEL.IT.UP giveaway</p>
         <p className="mt-0.5">
-          {done.length >= 10
-            ? <>You've reviewed {done.length} products — you meet the review requirement for a giveaway. ✓</>
-            : <>You need at least <strong>10 reviewed products</strong> to qualify. You have <strong>{done.length}</strong> — <strong>{10 - done.length} to go</strong>. Without your reviews you can't take part.</>}
+          {done.length >= need
+            ? <>You've reviewed {done.length} products — you meet the review requirement for a giveaway. ✓ A giveaway prize can only include products you've reviewed, so review more to add them.</>
+            : <>You need at least <strong>{need} reviewed products</strong> to qualify. You have <strong>{done.length}</strong> — <strong>{need - done.length} to go</strong>. Without your reviews you can't take part.</>}
         </p>
       </div>
       <p className="mt-1 text-[11px] text-slate-500">Products from a package appear here once you've confirmed you received it.</p>
@@ -141,7 +145,7 @@ export default function AmbassadorMyReviews() {
           <p className="text-[12px] font-semibold text-slate-900">Tell us what you received</p>
           <p className="mt-0.5 text-[11px] text-slate-500">Some lines on your packing list don't name the exact products. Choose the ones you got, then they'll appear below for you to review.</p>
           <ul className="mt-1 divide-y divide-slate-100">
-            {lines.map((l) => <LinePicker key={l.line} line={l} onSaved={() => setTick((t) => t + 1)} />)}
+            {lines.map((l) => <LinePicker key={l.line} line={l} preview={Boolean(previewId)} onSaved={() => setTick((t) => t + 1)} />)}
           </ul>
         </div>
       )}
