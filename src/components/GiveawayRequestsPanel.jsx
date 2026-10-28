@@ -326,7 +326,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
     const s = d.data || {}
     const a = s.admin || {}
     const other = (s.reasons || []).filter((r) => r !== 'open_request')
-    const reasonText = { not_active: 'not active / paused', packages: `only ${s.packagesReceived} package(s) received`, reviews: `fewer than ${s.minReviews || 8} received products reviewed`, recent_giveaway: 'had a giveaway in the last 6 months' }
+    const reasonText = { not_active: 'not active / paused', packages: `only ${s.packagesReceived} package(s) received`, reviews: `fewer than ${s.minReviews || 8} received products reviewed`, recent_giveaway: 'had a giveaway in the last 6 months', unconfirmed: 'a package is not confirmed as received' }
     return (
       <div className="mt-2 space-y-3 rounded-lg bg-slate-50 p-3 text-[12px] text-slate-700">
         <p>
@@ -551,6 +551,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
                           : a.upcoming ? `Booked ${formatGiveawayDate(a.upcoming.slot_start)}`
                           : a.openRequest ? `Waiting for your decision (${formatGiveawayMonth(a.openRequest.preferred_month)})`
                           : (a.reasons || []).includes('recent_giveaway') && a.allowedFrom ? `Next giveaway from ${formatGiveawayDate(a.allowedFrom)}`
+                          : a.unconfirmedCount ? `${a.unconfirmedCount} package${a.unconfirmedCount === 1 ? '' : 's'} not confirmed as received${a.notReviewedCount ? ` · ${a.notReviewedCount} products not reviewed` : ''}`
                           : a.notReviewedCount ? `${a.notReviewedCount} received product${a.notReviewedCount === 1 ? '' : 's'} not reviewed yet` : ''
                         return (
                           <tr key={a.id}>
@@ -571,7 +572,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
                       })}
                     </tbody>
                   </table>
-                  <p className="mt-2 text-slate-500">Click a name to see her full picture (packages, every review, shop reviews to count). Ready = at least {need.packages} packages confirmed and {need.reviews} received products reviewed, no giveaway in the last 6 months, no request waiting. Use "Check any ambassador" above for her full picture.</p>
+                  <p className="mt-2 text-slate-500">Click a name to see her full picture (packages, every review, shop reviews to count). Ready = at least {need.packages} packages confirmed, every package confirmed as received, {need.reviews} received products reviewed, no giveaway in the last 6 months, no request waiting. Use "Check any ambassador" above for her full picture.</p>
                 </div>
               )
             })()}

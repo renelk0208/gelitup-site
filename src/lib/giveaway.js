@@ -6,7 +6,8 @@
 // Week 1 starts on the first Monday of the month.
 //
 // Eligibility (all must be true):
-//   - at least 2 packages confirmed as received (not lost)
+//   - at least 2 packages confirmed as received (not lost), and EVERY package
+//     sent to her confirmed (none waiting)
 //   - at least 8 products she received in her packages AND reviewed on
 //     shop.gelitup.com (Judge.me); she picks 8–10 prize items from these
 //   - no approved giveaway in the last 6 months

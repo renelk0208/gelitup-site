@@ -186,7 +186,7 @@ function reviewDetails(reviews, products, receivedProducts, credits = []) {
 
 export async function buildStatus(supabase, ambassador, { detail = false, shopProducts = null } = {}) {
   const [{ data: shipments, error: shipErr }, { data: requests, error: reqErr }, { data: credits }, { data: reported }] = await Promise.all([
-    supabase.from('ambassador_shipments').select('items, sent_at, delivered_at, lost_at, status').eq('application_id', ambassador.id),
+    supabase.from('ambassador_shipments').select('id, items, sent_at, delivered_at, lost_at, status').eq('application_id', ambassador.id),
     supabase.from('ambassador_giveaway_requests').select('*').eq('application_id', ambassador.id).order('created_at', { ascending: false }),
     supabase.from('ambassador_review_credits').select('judgeme_review_id, product_handle').eq('application_id', ambassador.id),
     supabase.from('ambassador_reported_items').select('id, line, product_handle, product_title, created_at').eq('application_id', ambassador.id),
@@ -211,6 +211,20 @@ export async function buildStatus(supabase, ambassador, { detail = false, shopPr
     const p = productByHandle.get(r.product_handle)
     if (p && !receivedProducts.has(p.handle)) receivedProducts.set(p.handle, p)
   }
+  // Packages sent to her that she hasn't confirmed yet: their products only
+  // count (and appear to review) once she confirms she received them.
+  const unconfirmedPackages = (shipments || [])
+    .filter((sh) => sh.sent_at && !sh.lost_at && !sh.delivered_at && String(sh.status || 'sent').toLowerCase() === 'sent')
+    .sort((x, y) => String(y.sent_at).localeCompare(String(x.sent_at)))
+    .map((sh) => {
+      const its = receivedItems([sh], products, { expandStarter: true })
+      return {
+        id: sh.id,
+        sent_at: sh.sent_at,
+        lines: its.map((it) => it.item),
+        products: [...new Map(its.flatMap((it) => it.matches).map((p) => [p.handle, p.title])).values()],
+      }
+    })
   // General lines from her confirmed packages that don't name exact products yet.
   const unmatchedLines = lineItems
     .filter((it) => !it.matches.length)
@@ -246,6 +260,8 @@ export async function buildStatus(supabase, ambassador, { detail = false, shopPr
   if (String(ambassador.status || '').toLowerCase() !== 'approved' || ambassador.paused_at) reasons.push('not_active')
   if (packages < GIVEAWAY_MIN_PACKAGES) reasons.push('packages')
   if (reviewed.length < GIVEAWAY_MIN_REVIEWS) reasons.push('reviews')
+  // Every package sent to her must be confirmed as received.
+  if (unconfirmedPackages.length) reasons.push('unconfirmed')
   if (lastGiveaway) reasons.push('recent_giveaway')
   if (openRequest) reasons.push('open_request')
 
@@ -291,6 +307,7 @@ export async function buildStatus(supabase, ambassador, { detail = false, shopPr
     reviewed,
     notReviewed,
     unmatchedLines,
+    unconfirmedPackages,
     reportedItems: (reported || []).map((r) => ({ id: r.id, line: r.line, handle: r.product_handle, title: productByHandle.get(r.product_handle)?.title || r.product_title || r.product_handle, created_at: r.created_at })),
     invited: Boolean(ambassador.giveaway_invited_at),
     maxProducts: GIVEAWAY_MAX_PRODUCTS,
@@ -344,6 +361,7 @@ export async function handler(event) {
             packagesReceived: st.packagesReceived,
             reviewedCount: st.reviewed.length,
             notReviewedCount: st.notReviewed.length,
+            unconfirmedCount: (st.unconfirmedPackages || []).length,
             openRequest: st.openRequest,
             upcoming: st.upcoming ? { slot_start: st.upcoming.slot_start, slot_end: st.upcoming.slot_end } : null,
             allowedFrom: st.allowedFrom,
@@ -376,7 +394,7 @@ export async function handler(event) {
   if (qs.view === 'reviews' && event.httpMethod === 'GET') {
     try {
       const st = await buildStatus(supabase, ambassador)
-      return json(200, { reviewed: st.reviewed, notReviewed: st.notReviewed, unmatchedLines: st.unmatchedLines, reviewsNeeded: GIVEAWAY_MIN_REVIEWS })
+      return json(200, { reviewed: st.reviewed, notReviewed: st.notReviewed, unmatchedLines: st.unmatchedLines, unconfirmedPackages: st.unconfirmedPackages, reviewsNeeded: GIVEAWAY_MIN_REVIEWS })
     } catch (err) {
       console.error('giveaway-request: reviews view failed', err.message)
       return json(502, { error: 'We could not load your reviews right now.' })

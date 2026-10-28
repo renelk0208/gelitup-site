@@ -96,6 +96,8 @@ export default function AmbassadorMyReviews({ previewId = null } = {}) {
   const [data, setData] = useState(null)
   const [showDone, setShowDone] = useState(false)
   const [tick, setTick] = useState(0)
+  const [confirming, setConfirming] = useState(null)
+  const [confirmMsg, setConfirmMsg] = useState('')
 
   useEffect(() => {
     let alive = true
@@ -106,7 +108,7 @@ export default function AmbassadorMyReviews({ previewId = null } = {}) {
         const url = previewId ? `/.netlify/functions/giveaway-request?applicationId=${encodeURIComponent(previewId)}` : '/.netlify/functions/giveaway-request?view=reviews'
         const res = await fetch(url, { headers: h })
         const json = await res.json().catch(() => null)
-        if (alive && res.ok && json) setData(previewId ? { reviewed: json.reviewed, notReviewed: json.notReviewed, unmatchedLines: json.unmatchedLines, reviewsNeeded: json.minReviews } : json)
+        if (alive && res.ok && json) setData(previewId ? { reviewed: json.reviewed, notReviewed: json.notReviewed, unmatchedLines: json.unmatchedLines, unconfirmedPackages: json.unconfirmedPackages, reviewsNeeded: json.minReviews } : json)
       } catch { /* the profile never breaks because of this card */ }
     })()
     return () => { alive = false }
@@ -117,8 +119,19 @@ export default function AmbassadorMyReviews({ previewId = null } = {}) {
   const todo = data.notReviewed || []
   const lines = (data.unmatchedLines || []).filter((l) => l.max > (l.picked || []).length)
   const need = Number(data.reviewsNeeded) || 8
+  const waiting = data.unconfirmedPackages || []
   const total = done.length + todo.length
-  if (!total && !lines.length) return null
+  if (!total && !lines.length && !waiting.length) return null
+
+  const confirmPackage = async (id) => {
+    if (previewId) { setConfirmMsg('Preview only — nothing is saved.'); return }
+    setConfirming(id)
+    const { data: ok, error: err } = await supabase.rpc('confirm_my_ambassador_shipment', { p_shipment_id: id })
+    setConfirming(null)
+    if (err || ok !== true) { setConfirmMsg('Could not save — please try again.'); return }
+    setConfirmMsg('')
+    setTick((t) => t + 1)
+  }
   const pct = Math.round((done.length / total) * 100)
 
   return (
@@ -132,13 +145,34 @@ export default function AmbassadorMyReviews({ previewId = null } = {}) {
         <p className="mt-0.5">
           {done.length >= need
             ? <>You've reviewed {done.length} products — you meet the review requirement for a giveaway. ✓ A giveaway prize can only include products you've reviewed, so review more to add them.</>
-            : <>You need at least <strong>{need} reviewed products</strong> to qualify. You have <strong>{done.length}</strong> — <strong>{need - done.length} to go</strong>. Without your reviews you can't take part.</>}
+            : <>You need at least <strong>{need} reviewed products</strong>, and every package confirmed as received, to qualify. You have <strong>{done.length}</strong> — <strong>{need - done.length} to go</strong>. Without your reviews you can't take part.</>}
         </p>
       </div>
       <p className="mt-1 text-[11px] text-slate-500">Products from a package appear here once you've confirmed you received it.</p>
       <div className="mt-2 h-2 overflow-hidden rounded-full bg-emerald-100" aria-hidden="true">
         <div className="h-full rounded-full bg-emerald-600" style={{ width: `${pct}%` }} />
       </div>
+
+      {waiting.length > 0 && (
+        <div className="mt-3 rounded-lg border-2 border-amber-300 bg-amber-50 p-3 text-[12px] text-amber-900">
+          <p className="font-bold">📦 Not counted yet: confirm you received {waiting.length === 1 ? 'this package' : 'these packages'}</p>
+          <p className="mt-0.5">The products below only count, and appear here to review, once you confirm the package arrived. <strong>You can't qualify for a giveaway until every package is confirmed.</strong></p>
+          <ul className="mt-2 space-y-2">
+            {waiting.map((w) => (
+              <li key={w.id} className="rounded bg-white p-2 text-slate-700">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span><strong>Package sent {new Date(w.sent_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</strong> · <span className="text-amber-800">not confirmed</span></span>
+                  <button type="button" onClick={() => confirmPackage(w.id)} disabled={confirming === w.id} className="rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-bold text-white hover:bg-emerald-500 disabled:opacity-60">
+                    {confirming === w.id ? 'Saving…' : "✅ I've received it"}
+                  </button>
+                </div>
+                <p className="mt-1 text-[11px] text-slate-500">{(w.products.length ? w.products : w.lines).join(', ')}</p>
+              </li>
+            ))}
+          </ul>
+          {confirmMsg && <p className="mt-1 text-rose-700">{confirmMsg}</p>}
+        </div>
+      )}
 
       {lines.length > 0 && (
         <div className="mt-3 rounded-lg border border-fuchsia-200 p-3">
