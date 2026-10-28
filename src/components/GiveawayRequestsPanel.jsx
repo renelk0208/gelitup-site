@@ -75,19 +75,43 @@ function declineEmail(row, reason) {
 }
 
 function inviteEmail(row) {
+  const code = String(row?.discount_code || '').trim()
   return {
     subject: 'You qualify to host a GEL.IT.UP giveaway! 🎁',
     html: wrap(`
       <p>Hi ${esc(firstName(row))},</p>
-      <p>Congratulations! Thanks to your reviews and your work with our products, you now qualify to host an official <strong>GEL.IT.UP giveaway</strong> on your Instagram account. 🎉</p>
-      <p><strong>How it works</strong></p>
+      <p>Congratulations! Thanks to your reviews and your work with our products, you now qualify to host an official <strong>GEL.IT.UP giveaway</strong> on your Instagram account. 🎉 Your account gains new followers and recognition, GEL.IT.UP reaches more nail professionals, and your followers get a reason to try the products with your code.</p>
+
+      <p><strong>1. Request your giveaway</strong></p>
       <ol>
         <li>Log in to your ambassador page on <a href="https://gelitup.com/portal/login" style="color:#d43790">gelitup.com</a> and open <strong>Request a giveaway</strong>.</li>
-        <li>Choose the <strong>10 products</strong> for the prize. You can only choose products you've received and reviewed.</li>
+        <li>Choose the <strong>10 products</strong> for the prize. You can only choose products you've received <strong>and reviewed</strong>.</li>
         <li>Pick your preferred month and tell us the look you'll create.</li>
       </ol>
-      <p>We'll confirm your giveaway week by email. The prize is supplied and shipped by GEL.IT.UP, and your giveaway runs as a Collab post with @gelitup. Please don't announce anything until we confirm your dates.</p>
-      <p>Open to nail professionals aged 18+ in countries GEL.IT.UP EU ships to (not the USA or Italy).</p>
+      <p>We run 3 giveaways a month, one week each, so every giveaway gets our full support. We'll email you your exact week. <strong>Please don't announce anything until we confirm your dates.</strong></p>
+
+      <p><strong>2. Your giveaway post</strong></p>
+      <ul>
+        <li>An Instagram <strong>Collab post</strong> with <strong>@gelitup</strong>, so it appears on both your feed and ours. Turn on the <strong>Paid partnership</strong> label (or add #ad).</li>
+        <li>Real nail content: a finished look or short video made with the prize products, clearly visible — not just the boxes.</li>
+        <li>Start the caption with <strong>GEL.IT.UP</strong> and use #gelitup #gelituprofessional #salons #nailtech #madeineu.</li>
+      </ul>
+
+      <p><strong>3. How followers enter</strong></p>
+      <ul>
+        <li>Follow you and @gelitup, like the post, and comment tagging 1–2 nail tech friends.</li>
+        <li>Bonus entry (optional): share the post to their story, tagging you and @gelitup.</li>
+        <li>Open to nail technicians, students and salons aged 18+ in countries GEL.IT.UP EU ships to — <strong>not the USA or Italy</strong>.</li>
+      </ul>
+
+      <p><strong>4. After the giveaway</strong></p>
+      <ul>
+        <li>Pick the winner with a random comment picker and show the draw in your stories.</li>
+        <li>Email the winner's name, Instagram, full address and phone number to <a href="mailto:ambassadors@gelitup.com" style="color:#d43790">ambassadors@gelitup.com</a>. We supply and ship the prize.</li>
+        <li>Post a story for everyone else: "Didn't win this time? Use my code ${code ? `<strong>${esc(code)}</strong>` : 'YOURCODE'} for 20% off." Every order with your code earns you credit.</li>
+      </ul>
+      <p>Protect your followers from fake accounts: add "The winner will only be contacted by me or @gelitup. We will never ask for payment." We'll send you the full caption terms with your confirmed dates.</p>
+
       <p>Thank you for being such an active part of the GEL.IT.UP family! 💖</p>
       ${sign}`),
   }
