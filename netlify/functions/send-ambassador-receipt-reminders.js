@@ -49,7 +49,8 @@ export function buildReceiptReminderEmail(row, shipment) {
       <p>Hi ${esc(name)},</p>
       <p>Your GEL.IT.UP PR package was sent on <strong>${esc(fmt(shipment.sent_at))}</strong> and should have arrived by now, but we haven't had your confirmation yet.</p>
       ${items ? `<ul>${items}</ul>` : ''}
-      <p><strong>Please confirm you received it.</strong> Your next package can only be sent once you've confirmed this one.</p>
+      <p><strong>Please confirm you received it.</strong> Your next package can only be sent once you've confirmed this one, and only confirmed packages count towards a GEL.IT.UP giveaway.</p>
+      <p>It's important for us to know your packages arrived. If we don't hear from you, we'll assume you're not active and your collaboration may be paused.</p>
       <p style="margin:20px 0"><a href="${esc(link)}" style="display:inline-block;background:#16a34a;color:#ffffff;padding:12px 20px;border-radius:9999px;text-decoration:none;font-weight:700">✅ I've received my package</a></p>
       <p>If it hasn't arrived, just reply to this email and we'll look into it.</p>
       <p>With love,<br/>René Krallis<br/>Marketing Director, GEL.IT.UP International</p>

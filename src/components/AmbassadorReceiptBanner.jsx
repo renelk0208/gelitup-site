@@ -58,6 +58,7 @@ export default function AmbassadorReceiptBanner({ onConfirmed }) {
         Your PR package sent on <strong>{fmt(pkg.sent_at)}</strong>{(pkg.items || []).length ? <> ({(pkg.items || []).slice(0, 4).join(', ')}{(pkg.items || []).length > 4 ? '…' : ''})</> : null} hasn't been confirmed yet.
       </p>
       <p className="mt-1 font-semibold">Your next package can only be sent once you confirm you received this one.</p>
+      <p className="mt-1">It's important for us to know your packages arrived. Unconfirmed packages also don't count towards a giveaway, and if we don't hear from you we'll assume you're not active and your collaboration may be paused.</p>
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <button type="button" onClick={confirm} disabled={busy} className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-500 disabled:opacity-60">
           {busy ? 'Saving…' : "✅ I've received my package"}
