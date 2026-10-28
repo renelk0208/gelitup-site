@@ -56,7 +56,7 @@ function LinePicker({ line, onSaved, preview = false }) {
   return (
     <li className="py-2 text-[12px] text-slate-700">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span><strong>“{line.line}”</strong>{(line.picked || []).length ? <span className="text-emerald-700"> · added: {line.picked.map((p) => p.title).join(', ')}</span> : null}</span>
+        <span><strong>{line.line === 'Received but not on my packing list' ? 'Add a product' : `“${line.line}”`}</strong>{(line.picked || []).length ? <span className="text-emerald-700"> · added: {line.picked.map((p) => p.title).join(', ')}</span> : null}</span>
         {left > 0 && !open && <button type="button" onClick={start} className="rounded-full border border-fuchsia-400 px-3 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50">Which ones did you get?</button>}
       </div>
       {open && (
@@ -121,7 +121,6 @@ export default function AmbassadorMyReviews({ previewId = null } = {}) {
   const need = Number(data.reviewsNeeded) || 8
   const waiting = data.unconfirmedPackages || []
   const total = done.length + todo.length
-  if (!total && !lines.length && !waiting.length) return null
 
   const confirmPackage = async (id) => {
     if (previewId) { setConfirmMsg('Preview only — nothing is saved.'); return }
@@ -132,7 +131,7 @@ export default function AmbassadorMyReviews({ previewId = null } = {}) {
     setConfirmMsg('')
     setTick((t) => t + 1)
   }
-  const pct = Math.round((done.length / total) * 100)
+  const pct = total ? Math.round((done.length / total) * 100) : 0
 
   return (
     <div className="mt-3 rounded-xl border border-emerald-200 bg-white p-4">
@@ -183,6 +182,14 @@ export default function AmbassadorMyReviews({ previewId = null } = {}) {
           </ul>
         </div>
       )}
+
+      <div className="mt-3 rounded-lg border border-slate-200 p-3">
+        <p className="text-[12px] font-semibold text-slate-900">Received a product that isn't listed here?</p>
+        <p className="mt-0.5 text-[11px] text-slate-500">Add any product you received from us that's missing, so you can review it. Only add products you actually received.</p>
+        <ul>
+          <LinePicker line={{ line: 'Received but not on my packing list', max: 15, picked: [] }} preview={Boolean(previewId)} onSaved={() => setTick((t) => t + 1)} />
+        </ul>
+      </div>
 
       {todo.length > 0 ? (
         <>

@@ -4618,6 +4618,7 @@ function buildAmbassadorProfileLinkEmail(row, link, hasPassword) {
       ${hasPassword
         ? '<p style="font-size:13px;color:#555">Forgotten your password? Use "Forgot password" on the login page.</p>'
         : '<p style="font-size:13px;color:#555">This link is personal to you — please don\'t share it. Use the email address this message was sent to. Already created a password? Just sign in, or use "Forgot password" on the login page.</p>'}
+      <p><strong>Check your products:</strong> under <strong>My reviews</strong> on your page you'll see every product we've recorded for you. If you received anything that isn't listed, please add it there ("Received a product that isn't listed here?"), so you can review it too.</p>
       <p><strong>Please always confirm when your package arrives and review your products</strong> — only ambassadors who are up to date will qualify for what's coming next. 💖</p>
       <p>Save <a href="mailto:ambassadors@gelitup.com" style="color:#d43790">ambassadors@gelitup.com</a> as a contact and check your spam folder, so you never miss our emails.</p>
       <p>With love,<br/>René Krallis<br/>Marketing Director, GEL.IT.UP International</p>

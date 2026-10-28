@@ -475,7 +475,11 @@ export async function handler(event) {
     try { body = JSON.parse(event.body || '{}') } catch { return json(400, { error: 'Invalid request.' }) }
     let st
     try { st = await buildStatus(supabase, ambassador) } catch { return json(502, { error: 'Please try again in a moment.' }) }
-    const line = (st.unmatchedLines || []).find((l) => l.line === String(body.line || ''))
+    // "Received but not on my packing list": products she got that no packing-list line covers (up to 15).
+    const isExtra = String(body.line || '') === 'Received but not on my packing list'
+    const line = isExtra
+      ? { line: 'Received but not on my packing list', max: 15, picked: (st.reportedItems || []).filter((r) => r.line === 'Received but not on my packing list') }
+      : (st.unmatchedLines || []).find((l) => l.line === String(body.line || ''))
     if (!line) return json(400, { error: 'That package line is not waiting for products.' })
     let shop
     try { shop = await loadShopProducts() } catch { return json(502, { error: 'Shop products unavailable right now.' }) }
