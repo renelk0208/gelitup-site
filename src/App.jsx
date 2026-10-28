@@ -7515,6 +7515,13 @@ function MainMenu() {
             Distributor / B2B Login
           </NavLink>
           <NavLink
+            to="/portal/login?portal=ambassador"
+            onClick={() => setOpen(false)}
+            className="mt-1 block rounded-lg border border-fuchsia-500/70 px-3 py-2 text-sm font-bold uppercase tracking-[0.08em] text-fuchsia-200 transition duration-200 hover:bg-fuchsia-600/20"
+          >
+            Ambassador Login
+          </NavLink>
+          <NavLink
             to="/portal/register"
             onClick={() => setOpen(false)}
             className="mt-1 block rounded-lg px-3 py-2 text-sm font-bold uppercase tracking-[0.08em] text-white transition duration-200 hover:bg-white/10"
@@ -7581,6 +7588,13 @@ function Nav() {
           <path d="M5 19.5c1.2-3.3 4-5 7-5s5.8 1.7 7 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
         </svg>
         Distributor / B2B Login
+      </NavLink>
+
+      <NavLink
+        to="/portal/login?portal=ambassador"
+        className="inline-flex items-center rounded-lg border border-fuchsia-500 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-white transition duration-300 hover:bg-fuchsia-600/25 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+      >
+        Ambassador Login
       </NavLink>
 
       <a
@@ -7667,6 +7681,14 @@ function MobileNav() {
               <path d="M5 19.5c1.2-3.3 4-5 7-5s5.8 1.7 7 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
             </svg>
             Distributor / B2B Login
+          </NavLink>
+
+          <NavLink
+            to="/portal/login?portal=ambassador"
+            onClick={() => setOpen(false)}
+            className="flex items-center justify-center rounded-lg border border-fuchsia-500 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.05em] !text-white transition duration-200 hover:bg-fuchsia-600/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+          >
+            Ambassador Login
           </NavLink>
 
           <NavLink
@@ -9038,6 +9060,7 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
           {isCreatePasswordMode
             ? (T?.portal?.create_password ?? 'Create Password')
             : portalType === 'distributor' ? 'Distributor Portal'
+            : portalType === 'ambassador' ? 'Ambassador Login'
             : (T?.portal?.login_title ?? 'B2B Portal')}
         </h2>
       </div>
@@ -9048,6 +9071,8 @@ function PortalLogin({ onLogin, onCreatePassword, pendingRecoverySession = false
         <p className="mb-5 text-center text-xs text-slate-500">
           {isCreatePasswordMode
             ? <>{T?.portal?.already_account ?? 'Returning client?'}{' '}<NavLink to={prefilledEmail ? `/portal/login?portal=${portalType}&email=${encodeURIComponent(prefilledEmail)}` : `/portal/login?portal=${portalType}`} className="font-semibold text-slate-800 hover:underline">{T?.portal?.login_btn ?? 'Sign in'}</NavLink></>
+            : portalType === 'ambassador'
+                ? <>Use the email you applied with. First time? Use the <strong>"Create my password"</strong> link in your email from ambassadors@gelitup.com, or <strong>Forgot password</strong> below.</>
             : portalType === 'distributor'
                 ? <>{T?.portal?.no_account ?? 'No account?'}{' '}<NavLink to="/distributors" className="font-semibold text-slate-800 hover:underline">Start on the distribution page</NavLink></>
               : <>{T?.portal?.no_account ?? 'New client?'}{' '}<NavLink to="/portal/register" className="font-semibold text-slate-800 hover:underline">{T?.portal?.register_btn ?? 'Register'}</NavLink></>
@@ -21977,6 +22002,7 @@ function App() {
             <div className="mt-2 space-y-1.5">
               <NavLink to="/about-us" className="block transition duration-300 hover:text-fuchsia-300">About Us</NavLink>
               <NavLink to="/ambassadors" className="block transition duration-300 hover:text-fuchsia-300">Become an Ambassador</NavLink>
+              <NavLink to="/portal/login?portal=ambassador" className="block transition duration-300 hover:text-fuchsia-300">Ambassador Login</NavLink>
               <NavLink to="/distributor-packages" className="block transition duration-300 hover:text-fuchsia-300">Distribution Options</NavLink>
               <NavLink to="/portal/login?portal=distributor" className="block transition duration-300 hover:text-fuchsia-300">Distributor / B2B Login</NavLink>
               <NavLink to="/distributors" className="block transition duration-300 hover:text-fuchsia-300">Distributor Registration</NavLink>
