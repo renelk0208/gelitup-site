@@ -3,7 +3,7 @@
 // /ambassador-agreement page. Bump AGREEMENT_VERSION whenever the terms change
 // so stored consents stay traceable to the exact wording that was agreed.
 
-export const AGREEMENT_VERSION = 'v8-2026-09'
+export const AGREEMENT_VERSION = 'v9-2026-10'
 
 // Minimum content commitment. Change this number to adjust the requirement
 // everywhere it appears (summary, full terms, and helper copy).
@@ -26,8 +26,8 @@ export const AGREEMENT_SUMMARY = [
   `Send the content you create to our official WhatsApp/Viber number (${CONTENT_SUBMISSION_NUMBER}) so we can save it to our library.`,
   'You are welcome to add GEL.IT.UP as a collaborator on your Instagram and TikTok posts so they are shared to our profiles too.',
   'STRICT — NO EXCEPTIONS: no other nail brand’s products may appear in the same photo, video, frame or post as GEL.IT.UP. Other brands are fine in separate, unrelated content — never together with GEL.IT.UP in the same piece of content.',
-  `Your personal code gives genuine nail-technician followers a flat ${FOLLOWER_DISCOUNT_PCT}% off (valid on www.gelitup.com only).`,
-  'You may share your code publicly, but any link used with it must lead only to www.gelitup.com — never to coupon, deal or reseller sites.',
+  `Your personal code gives genuine nail-technician followers a flat ${FOLLOWER_DISCOUNT_PCT}% off (valid on shop.gelitup.com only).`,
+  'You may share your code publicly, but any link used with it must lead only to shop.gelitup.com — never to coupon, deal or reseller sites.',
   'You will receive a GEL.IT.UP Portal B2B account automatically (gelitup.com/portal/login), with activation sent by email.',
   'Commission from orders placed with your code is added as account credit toward your next order: 10% by default, 15% once total referred orders reach €1,000, and 20% once they reach €2,000.',
   'Represent GEL.IT.UP professionally — use the products as directed, keep your content and conduct in line with our brand and reputation, and never resell, relabel or make misleading claims about them.',
@@ -71,7 +71,7 @@ export const AGREEMENT_SECTIONS = [
       'This minimum is set considering the amount of product you receive in each PR package — the quantity provided is enough to support this level of content.',
       'Every post must include the hashtag #gelitup, and mention @gelitupinternational on Instagram or @gelitupofficial on TikTok.',
       `Send the content you create to our WhatsApp/Viber (${CONTENT_SUBMISSION_NUMBER}) so we can save and feature it.`,
-      'When you share your discount code, please note that it is only valid for the www.gelitup.com website.',
+      'When you share your discount code, please note that it is only valid for the shop.gelitup.com website.',
       'You are also welcome to add GEL.IT.UP as a collaborator on your Instagram and TikTok posts, so they are shared directly to our profiles too.',
       'Where the rules ask (e.g. because a product was gifted), simply mark it as a partnership — #ad or "gifted".',
     ],
@@ -91,7 +91,7 @@ export const AGREEMENT_SECTIONS = [
     heading: 'Your discount code & earnings',
     points: [
       `You get a personal discount code to give to your followers who are genuine nail technicians, so they can buy GEL.IT.UP at a flat ${FOLLOWER_DISCOUNT_PCT}% off.`,
-      'You are welcome to share and post your code publicly. Any link you use alongside it must lead only to www.gelitup.com — never to coupon, deal or reseller sites. Codes that are misused will be switched off.',
+      'You are welcome to share and post your code publicly. Any link you use alongside it must lead only to shop.gelitup.com — never to coupon, deal or reseller sites. Codes that are misused will be switched off.',
       'You are automatically given a B2B account on the GEL.IT.UP Portal (gelitup.com/portal/login) — no separate registration needed. You will receive an email to activate your account and set your password.',
       'Every order placed with your code earns commission as account credit, automatically applied toward your own next order. Commission starts at 10%, rises to 15% once total orders placed through your code reach €1,000, and 20% once they reach €2,000.',
     ],

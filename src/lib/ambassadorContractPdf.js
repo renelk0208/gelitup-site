@@ -541,7 +541,7 @@ export async function buildAmbassadorWelcomeLetterPdf(applicant = {}) {
     ['1. Film before you open it.', ' Start recording before you cut the tape — the reveal is the best part, and your audience will want to see it too.'],
     ['2. Show every piece.', ' Take a moment to show off each shade and product clearly — good lighting works best.'],
     ['3. Share your first impressions.', ' Tell your audience what you\'re most excited to try first.'],
-    ['4. Use your code' + (discountCode ? ` ${discountCode}.` : '.'), ' Your personal discount code is included in this box — share it with your followers for 20% off. Please note that the discount code can only be used on www.gelitup.com.'],
+    ['4. Use your code' + (discountCode ? ` ${discountCode}.` : '.'), ' Your personal discount code is included in this box — share it with your followers for 20% off. Please note that the discount code can only be used on shop.gelitup.com.'],
     ['5. Post it.', ' Share your unboxing on Instagram or TikTok.'],
   ]
   steps.forEach(([label, rest]) => boldPara(label, rest, 10, 10))

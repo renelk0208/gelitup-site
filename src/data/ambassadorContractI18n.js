@@ -16,8 +16,8 @@ export const CONTRACT_I18N = {
       'Send the content you create to our WhatsApp/Viber (+30 694 071 5234) so we can save and feature it.',
       'You are welcome to add GEL.IT.UP as a collaborator on your Instagram and TikTok posts.',
       'Disclose the partnership where advertising rules require it (e.g. #ad or “gifted”).',
-      'Your followers who are genuine nail technicians receive a flat 20% discount with your personal code (valid on www.gelitup.com only).',
-      'You may share your code publicly, but links used with it must lead only to www.gelitup.com — never to coupon, deal or reseller sites.',
+      'Your followers who are genuine nail technicians receive a flat 20% discount with your personal code (valid on shop.gelitup.com only).',
+      'You may share your code publicly, but links used with it must lead only to shop.gelitup.com — never to coupon, deal or reseller sites.',
       'You get a GEL.IT.UP Portal B2B account automatically, and commission from code orders is credited to your account (10%, then 15% from €1,000 total referred orders, then 20% from €2,000).',
       'Allow GEL.IT.UP to repost, feature and reuse content you tag us in, with credit.',
       'Do not create your own GEL.IT.UP logos — official black and white logos are provided for your media.',
@@ -36,7 +36,7 @@ export const CONTRACT_I18N = {
     obligations: [
       'Publică cel puțin 10 conținuturi proprii în fiecare lună (cel puțin 4 videoclipuri/reels) folosind produsele GEL.IT.UP și etichetând #gelitup și @gelitupinternational.',
       'Menționează parteneriatul acolo unde regulile de publicitate o cer (de ex. #ad sau „primit cadou”).',
-      'Folosește codul tău personal de reducere doar pentru tine și pentru clienți/urmăritori reali — valabil exclusiv pe www.gelitup.com.',
+      'Folosește codul tău personal de reducere doar pentru tine și pentru clienți/urmăritori reali — valabil exclusiv pe shop.gelitup.com.',
       'Permite GEL.IT.UP să reposteze, să prezinte și să refolosească conținutul în care ne etichetezi, cu menționarea ta.',
       'Nu crea propriile logo-uri — folosește doar logo-urile oficiale puse la dispoziție în alb și negru.',
       'Produsele gratuite sunt cadouri pentru a-ți susține conținutul și depind de respectarea postărilor lunare.',
@@ -54,7 +54,7 @@ export const CONTRACT_I18N = {
     obligations: [
       'Publikoni të paktën 10 postime origjinale çdo muaj (të paktën 4 video/reels) me produktet GEL.IT.UP duke etiketuar #gelitup dhe @gelitupinternational.',
       'Shënoni partneritetin kur rregullat e kërkojnë (p.sh. #ad ose «gifted»).',
-      'Përdorni kodin tuaj personal të zbritjes vetëm në www.gelitup.com — kurrë në faqe kuponësh apo rishitjesh.',
+      'Përdorni kodin tuaj personal të zbritjes vetëm në shop.gelitup.com — kurrë në faqe kuponësh apo rishitjesh.',
       'Lejoni GEL.IT.UP të ripostojë dhe promovojë materialet tuaja duke ju kredituar.',
       'Mos krijoni logot tuaja — përdorni vetëm logot zyrtare bardh e zi të siguruara.',
       'Paketat PR falas janë dhurata për të mbështetur krijimtarinë tuaj dhe varen nga postimet mujore.',
@@ -72,7 +72,7 @@ export const CONTRACT_I18N = {
     obligations: [
       'Publier au moins 10 contenus originaux chaque mois (dont au moins 4 vidéos/reels) avec les produits GEL.IT.UP en identifiant #gelitup et @gelitupinternational.',
       'Indiquer le partenariat lorsque la réglementation publicitaire l’exige (par ex. #ad ou « offert »).',
-      'Utiliser votre code de réduction personnel uniquement pour vous et vos clients/abonnés réels — valable uniquement sur www.gelitup.com.',
+      'Utiliser votre code de réduction personnel uniquement pour vous et vos clients/abonnés réels — valable uniquement sur shop.gelitup.com.',
       'Autoriser GEL.IT.UP à repartager, mettre en avant et réutiliser les contenus où vous nous identifiez, avec mention de votre compte.',
       'Ne créez pas vos propres logos — utilisez uniquement les logos officiels fournis en noir et blanc.',
       'Les envois de produits gratuits sont des cadeaux pour soutenir votre contenu et dépendent du respect des publications mensuelles.',
@@ -90,7 +90,7 @@ export const CONTRACT_I18N = {
     obligations: [
       'Poste jeden Monat mindestens 10 eigene Inhalte (mindestens 4 Videos/Reels) mit GEL.IT.UP-Produkten und markiere #gelitup und @gelitupinternational.',
       'Kennzeichne die Partnerschaft, wo die Werberegeln es verlangen (z. B. #ad oder „gesponsert“).',
-      'Nutze deinen persönlichen Rabattcode nur für dich und echte Kund:innen/Follower — ausschließlich gültig auf www.gelitup.com.',
+      'Nutze deinen persönlichen Rabattcode nur für dich und echte Kund:innen/Follower — ausschließlich gültig auf shop.gelitup.com.',
       'Erlaube GEL.IT.UP, Inhalte, in denen du uns markierst, mit Namensnennung zu reposten, zu zeigen und wiederzuverwenden.',
       'Erstelle keine eigenen Logos — nutze ausschließlich die bereitgestellten offiziellen Logos in Schwarz und Weiß.',
       'Kostenlose Produktsendungen sind Geschenke zur Unterstützung deiner Inhalte und hängen von den monatlichen Posts ab.',
@@ -108,7 +108,7 @@ export const CONTRACT_I18N = {
     obligations: [
       'Publica al menos 10 contenidos propios cada mes (al menos 4 vídeos/reels) usando productos GEL.IT.UP y etiquetando #gelitup y @gelitupinternational.',
       'Indica la colaboración cuando las normas de publicidad lo exijan (p. ej. #ad o «regalo»).',
-      'Usa tu código de descuento personal solo en www.gelitup.com — nunca en sitios de cupones o reventa.',
+      'Usa tu código de descuento personal solo en shop.gelitup.com — nunca en sitios de cupones o reventa.',
       'Permite que GEL.IT.UP vuelva a publicar, destaque y reutilice el contenido en el que nos etiquetes, con mención a tu cuenta.',
       'No crees tus propios logos — utiliza únicamente los logos oficiales proporcionados en blanco y negro.',
       'Los envíos de producto gratuito son regalos para apoyar tu contenido y dependen de que mantengas las publicaciones mensuales.',
@@ -126,7 +126,7 @@ export const CONTRACT_I18N = {
     obligations: [
       'Publica pelo menos 10 conteúdos próprios por mês (pelo menos 4 vídeos/reels) usando produtos GEL.IT.UP e marcando #gelitup e @gelitupinternational.',
       'Divulga a parceria quando as regras de publicidade o exigirem (por ex. #ad ou «oferta»).',
-      'Usa o teu código de desconto pessoal apenas em www.gelitup.com — nunca em sites de cupões ou revenda.',
+      'Usa o teu código de desconto pessoal apenas em shop.gelitup.com — nunca em sites de cupões ou revenda.',
       'Permite que a GEL.IT.UP republique, destaque e reutilize os conteúdos onde nos marcas, com crédito.',
       'Não cries os teus próprios logótipos — usa apenas os logótipos oficiais fornecidos em preto e branco.',
       'Os envios de produtos gratuitos são ofertas para apoiar o teu conteúdo e dependem de manteres as publicações mensais.',
@@ -144,7 +144,7 @@ export const CONTRACT_I18N = {
     obligations: [
       'Publikuj co najmniej 10 własnych treści miesięcznie (w tym co najmniej 4 filmy/reels) z produktami GEL.IT.UP, oznaczając #gelitup i @gelitupinternational.',
       'Oznaczaj współpracę tam, gdzie wymagają tego przepisy reklamowe (np. #ad lub „prezent”).',
-      'Używaj swojego osobistego kodu rabatowego wyłącznie na www.gelitup.com.',
+      'Używaj swojego osobistego kodu rabatowego wyłącznie na shop.gelitup.com.',
       'Zezwól GEL.IT.UP na udostępnianie, prezentowanie i wykorzystywanie treści, w których nas oznaczasz, z podaniem Twojego konta.',
       'Nie twórz własnych logo — korzystaj wyłącznie z dostarczonych oficjalnych logo w kolorze czarnym i białym.',
       'Darmowe produkty są prezentami wspierającymi Twoje treści i zależą od utrzymania comiesięcznych publikacji.',
@@ -162,7 +162,7 @@ export const CONTRACT_I18N = {
     obligations: [
       'Havonta legalább 10 saját tartalmat tegyél közzé (ebből legalább 4 videó/reel) GEL.IT.UP termékekkel, a #gelitup és @gelitupinternational megjelölésével.',
       'Tüntesd fel az együttműködést, ahol a reklámszabályok megkövetelik (pl. #ad vagy „ajándékba kaptam”).',
-      'Személyes kedvezménykódodat kizárólag a www.gelitup.com oldalon használd.',
+      'Személyes kedvezménykódodat kizárólag a shop.gelitup.com oldalon használd.',
       'Engedélyezd, hogy a GEL.IT.UP újraposztolja, kiemelje és felhasználja azokat a tartalmakat, amelyekben megjelölsz minket, feltüntetve téged.',
       'Ne készíts saját logókat — kizárólag a mellékelt hivatalos fekete és fehér logókat használd.',
       'Az ingyenes termékek ajándékok a tartalmaid támogatására, és a havi posztok teljesítésétől függenek.',
@@ -180,7 +180,7 @@ export const CONTRACT_I18N = {
     obligations: [
       'Δημοσίευε τουλάχιστον 10 δικά σου περιεχόμενα κάθε μήνα (τουλάχιστον 4 βίντεο/reels) με προϊόντα GEL.IT.UP και ετικέτες #gelitup και @gelitupinternational.',
       'Δήλωσε τη συνεργασία όπου το απαιτούν οι κανόνες διαφήμισης (π.χ. #ad ή «δώρο»).',
-      'Χρησιμοποίησε τον προσωπικό σου κωδικό έκπτωσης αποκλειστικά για το www.gelitup.com.',
+      'Χρησιμοποίησε τον προσωπικό σου κωδικό έκπτωσης αποκλειστικά για το shop.gelitup.com.',
       'Επίτρεψε στην GEL.IT.UP να αναδημοσιεύει, να προβάλλει και να επαναχρησιμοποιεί περιεχόμενο όπου μας κάνεις tag, με αναφορά σε εσένα.',
       'Μη δημιουργείς δικά σου λογότυπα — χρησιμοποίησε μόνο τα επίσημα λογότυπα σε μαύρο και λευκό χρώμα.',
       'Τα δωρεάν προϊόντα είναι δώρα για την υποστήριξη του περιεχομένου σου και εξαρτώνται από τις μηνιαίες δημοσιεύσεις.',
@@ -198,7 +198,7 @@ export const CONTRACT_I18N = {
     obligations: [
       'Публикувай поне 10 свои съдържания всеки месец (поне 4 видеа/reels) с продукти на GEL.IT.UP, като отбелязваш #gelitup и @gelitupinternational.',
       'Обявявай партньорството, когато рекламните правила го изискват (напр. #ad или „подарък“).',
-      'Използвай личния си код за отстъпка само за сайта www.gelitup.com.',
+      'Използвай личния си код за отстъпка само за сайта shop.gelitup.com.',
       'Разреши на GEL.IT.UP да републикува, представя и използва съдържанието, в което ни отбелязваш, с посочване на твоя профил.',
       'Не създавай собствени лога — използвай единствено официалните черно и бяло лога.',
       'Безплатните продукти са подаръци в подкрепа на съдържанието ти и зависят от спазването на месечните публикации.',
