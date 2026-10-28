@@ -409,6 +409,11 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
             </div>
             {readiness.error && <p className="mt-2 text-rose-600">Could not check: {readiness.error}</p>}
             {readiness.data && (() => {
+              const failed = readiness.data.ambassadors.filter((a) => a.error)
+              if (!failed.length) return null
+              return <p className="mt-2 rounded bg-rose-50 px-2 py-1 font-semibold text-rose-700">Reviews could not be checked for {failed.length} ambassador{failed.length === 1 ? '' : 's'}: {failed[0].error}</p>
+            })()}
+            {readiness.data && (() => {
               const need = readiness.data.needed || { packages: 2, reviews: 10 }
               const rank = (a) => (a.eligible ? 0 : a.openRequest ? 1 : a.upcoming ? 2 : a.paused ? 9 : 5)
               const list = [...readiness.data.ambassadors].sort((x, y) => rank(x) - rank(y) || (y.reviewedCount || 0) - (x.reviewedCount || 0))

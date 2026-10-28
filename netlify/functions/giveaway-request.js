@@ -32,7 +32,11 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || proce
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
 const AMBASSADOR_TABLE = process.env.VITE_AMBASSADOR_TABLE || 'ambassador_applications'
 const JUDGEME_TOKEN = process.env.JUDGEME_PRIVATE_TOKEN || ''
-const JUDGEME_SHOP_DOMAIN = process.env.JUDGEME_SHOP_DOMAIN || 'gel-it-up-2.myshopify.com'
+// Judge.me needs the shop's own *.myshopify.com address. shop.gelitup.com's is
+// 9tx96d-2b.myshopify.com (not "gel-it-up-2"); a different value set in Netlify
+// is tried second.
+const JUDGEME_SHOP_DOMAINS = [...new Set(['9tx96d-2b.myshopify.com', String(process.env.JUDGEME_SHOP_DOMAIN || '').trim()].filter(Boolean))]
+let judgeMeDomain = null // the address that worked, remembered while the function is warm
 const SHOP = 'https://shop.gelitup.com'
 
 const json = (statusCode, body) => ({
@@ -76,24 +80,43 @@ async function loadShopProducts() {
 // Reviews she wrote on the shop, from Judge.me.
 // Returns { reviews, emailChecked } — emailChecked is true when Judge.me's
 // answer carries the reviewer's email, so we could confirm each one is hers.
+async function fetchJudgeMePage(domain, email, page) {
+  const qs = new URLSearchParams({ api_token: JUDGEME_TOKEN, shop_domain: domain, reviewer_email: email, per_page: '100', page: String(page) })
+  const res = await fetch(`https://api.judge.me/api/v1/reviews?${qs}`, { headers: { Accept: 'application/json' } })
+  if (!res.ok) {
+    const text = (await res.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 160)
+    const err = new Error(`Judge.me ${res.status}${text ? `: ${text}` : ''}`)
+    err.status = res.status
+    throw err
+  }
+  return (await res.json())?.reviews || []
+}
+
 async function loadJudgeMeReviews(email) {
   if (!JUDGEME_TOKEN) throw new Error('JUDGEME_PRIVATE_TOKEN is not set in Netlify')
   const want = String(email || '').trim().toLowerCase()
-  const all = []
-  for (let page = 1; page <= 10; page += 1) {
-    const qs = new URLSearchParams({
-      api_token: JUDGEME_TOKEN,
-      shop_domain: JUDGEME_SHOP_DOMAIN,
-      reviewer_email: want,
-      per_page: '100',
-      page: String(page),
-    })
-    const res = await fetch(`https://api.judge.me/api/v1/reviews?${qs}`, { headers: { Accept: 'application/json' } })
-    if (!res.ok) throw new Error(`Judge.me ${res.status}`)
-    const list = (await res.json())?.reviews || []
-    all.push(...list)
-    if (list.length < 100) break
+  const domains = judgeMeDomain ? [judgeMeDomain] : JUDGEME_SHOP_DOMAINS
+  let lastError = null
+  for (const domain of domains) {
+    try {
+      const all = []
+      for (let page = 1; page <= 10; page += 1) {
+        const list = await fetchJudgeMePage(domain, want, page)
+        all.push(...list)
+        if (list.length < 100) break
+      }
+      judgeMeDomain = domain
+      return finishJudgeMeReviews(all, want)
+    } catch (err) {
+      lastError = err
+      console.error(`giveaway-request: Judge.me failed for ${domain}:`, err.message)
+      if (err.status && err.status >= 500) break
+    }
   }
+  throw lastError || new Error('Judge.me unavailable')
+}
+
+function finishJudgeMeReviews(all, want) {
   const withEmail = all.filter((r) => r?.reviewer?.email || r?.reviewer_email)
   const emailChecked = withEmail.length > 0
   const mine = emailChecked
