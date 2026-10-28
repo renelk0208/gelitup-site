@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { productUrl, receivedItems } from '../../src/lib/reviewProducts.js'
+import { productUrl, receivedItems, suggestedCount } from '../../src/lib/reviewProducts.js'
 import {
   GIVEAWAY_MAX_PRODUCTS,
   GIVEAWAY_MIN_PACKAGES,
@@ -184,10 +184,11 @@ function reviewDetails(reviews, products, receivedProducts, credits = []) {
 }
 
 async function buildStatus(supabase, ambassador, { detail = false, shopProducts = null } = {}) {
-  const [{ data: shipments, error: shipErr }, { data: requests, error: reqErr }, { data: credits }] = await Promise.all([
+  const [{ data: shipments, error: shipErr }, { data: requests, error: reqErr }, { data: credits }, { data: reported }] = await Promise.all([
     supabase.from('ambassador_shipments').select('items, sent_at, delivered_at, lost_at, status').eq('application_id', ambassador.id),
     supabase.from('ambassador_giveaway_requests').select('*').eq('application_id', ambassador.id).order('created_at', { ascending: false }),
     supabase.from('ambassador_review_credits').select('judgeme_review_id, product_handle').eq('application_id', ambassador.id),
+    supabase.from('ambassador_reported_items').select('id, line, product_handle, product_title, created_at').eq('application_id', ambassador.id),
   ])
   if (shipErr) throw new Error(shipErr.message)
   if (reqErr) throw new Error(reqErr.message)
@@ -199,9 +200,24 @@ async function buildStatus(supabase, ambassador, { detail = false, shopProducts 
   // admin completes them with "Edit contents".
   const receivedShipments = (shipments || []).filter((s) => packageCountsAsReceived(s))
   const receivedProducts = new Map()
-  for (const it of receivedItems(receivedShipments, products, { expandStarter: true })) {
+  const lineItems = receivedItems(receivedShipments, products, { expandStarter: true })
+  for (const it of lineItems) {
     for (const p of it.matches) if (!receivedProducts.has(p.handle)) receivedProducts.set(p.handle, p)
   }
+  // Products she told us she got for a general line ("3 different Cat Eye shades").
+  const productByHandle = new Map(products.map((p) => [p.handle, p]))
+  for (const r of reported || []) {
+    const p = productByHandle.get(r.product_handle)
+    if (p && !receivedProducts.has(p.handle)) receivedProducts.set(p.handle, p)
+  }
+  // General lines from her confirmed packages that don't name exact products yet.
+  const unmatchedLines = lineItems
+    .filter((it) => !it.matches.length)
+    .map((it) => ({
+      line: it.item,
+      max: Math.min(10, Math.max(3, suggestedCount(it.item))),
+      picked: (reported || []).filter((r) => r.line === it.item).map((r) => ({ handle: r.product_handle, title: productByHandle.get(r.product_handle)?.title || r.product_title || r.product_handle })),
+    }))
   let reviewed = reviewedProducts(reviews, products)
   // Shop reviews (no product) an admin credited to a product she received.
   const byHandleAll = new Map(products.map((p) => [p.handle, p]))
@@ -273,6 +289,9 @@ async function buildStatus(supabase, ambassador, { detail = false, shopProducts 
     packagesNeeded: GIVEAWAY_MIN_PACKAGES,
     reviewed,
     notReviewed,
+    unmatchedLines,
+    reportedItems: (reported || []).map((r) => ({ id: r.id, line: r.line, handle: r.product_handle, title: productByHandle.get(r.product_handle)?.title || r.product_title || r.product_handle, created_at: r.created_at })),
+    invited: Boolean(ambassador.giveaway_invited_at),
     maxProducts: GIVEAWAY_MAX_PRODUCTS,
     months: upcomingGiveawayMonths(3),
     openRequest: openRequest
@@ -294,7 +313,7 @@ export async function handler(event) {
   const userEmail = String(user.email).trim().toLowerCase()
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } })
-  const fields = 'id, full_name, email, status, paused_at, followers, tiktok, instagram, ambassador_type, country'
+  const fields = 'id, full_name, email, status, paused_at, followers, tiktok, instagram, ambassador_type, country, giveaway_invited_at'
 
   const qs = event.queryStringParameters || {}
 
@@ -326,6 +345,7 @@ export async function handler(event) {
             openRequest: st.openRequest,
             upcoming: st.upcoming ? { slot_start: st.upcoming.slot_start, slot_end: st.upcoming.slot_end } : null,
             allowedFrom: st.allowedFrom,
+            invitedAt: a.giveaway_invited_at || null,
           }
         } catch (err) {
           out[i] = { ...base, error: err.message }
@@ -354,18 +374,39 @@ export async function handler(event) {
   if (qs.view === 'reviews' && event.httpMethod === 'GET') {
     try {
       const st = await buildStatus(supabase, ambassador)
-      return json(200, { reviewed: st.reviewed, notReviewed: st.notReviewed })
+      return json(200, { reviewed: st.reviewed, notReviewed: st.notReviewed, unmatchedLines: st.unmatchedLines, reviewsNeeded: GIVEAWAY_MAX_PRODUCTS })
     } catch (err) {
       console.error('giveaway-request: reviews view failed', err.message)
       return json(502, { error: 'We could not load your reviews right now.' })
     }
   }
 
+  // ── Ambassador: "Which ones did you get?" for a general package line ──
+  if (qs.action === 'report' && event.httpMethod === 'POST') {
+    let body = {}
+    try { body = JSON.parse(event.body || '{}') } catch { return json(400, { error: 'Invalid request.' }) }
+    let st
+    try { st = await buildStatus(supabase, ambassador) } catch { return json(502, { error: 'Please try again in a moment.' }) }
+    const line = (st.unmatchedLines || []).find((l) => l.line === String(body.line || ''))
+    if (!line) return json(400, { error: 'That package line is not waiting for products.' })
+    let shop
+    try { shop = await loadShopProducts() } catch { return json(502, { error: 'Shop products unavailable right now.' }) }
+    const byH = new Map(shop.map((p) => [p.handle, p]))
+    const handles = [...new Set((Array.isArray(body.handles) ? body.handles : []).map(String))].filter((h) => byH.has(h))
+    if (!handles.length) return json(400, { error: 'Please choose at least one product.' })
+    if (handles.length + line.picked.length > line.max) return json(400, { error: `Please choose up to ${line.max} products for this line.` })
+    const rows = handles.map((h) => ({ application_id: ambassador.id, line: line.line, product_handle: h, product_title: byH.get(h).title }))
+    const { error: insErr } = await supabase.from('ambassador_reported_items').upsert(rows, { onConflict: 'application_id,product_handle', ignoreDuplicates: true })
+    if (insErr) return json(500, { error: 'Could not save. Please try again.' })
+    return json(200, { ok: true })
+  }
+
   // On/off switch (Shipments → Giveaway requests). While off, ambassadors see
   // nothing and can't send requests; the admin preview still works.
   if (!previewId) {
     const { data: setting } = await supabase.from('app_settings').select('value').eq('key', 'giveaway_card_visible').maybeSingle()
-    if (setting?.value !== true) {
+    // An ambassador René invited (she qualifies) sees the card anyway.
+    if (setting?.value !== true && !ambassador.giveaway_invited_at) {
       return event.httpMethod === 'GET' ? json(200, { hidden: true }) : json(403, { error: 'Giveaway requests are not open yet.' })
     }
   }

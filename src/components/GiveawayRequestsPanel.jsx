@@ -74,6 +74,25 @@ function declineEmail(row, reason) {
   }
 }
 
+function inviteEmail(row) {
+  return {
+    subject: 'You qualify to host a GEL.IT.UP giveaway! 🎁',
+    html: wrap(`
+      <p>Hi ${esc(firstName(row))},</p>
+      <p>Congratulations! Thanks to your reviews and your work with our products, you now qualify to host an official <strong>GEL.IT.UP giveaway</strong> on your Instagram account. 🎉</p>
+      <p><strong>How it works</strong></p>
+      <ol>
+        <li>Log in to your ambassador page on <a href="https://gelitup.com/portal/login" style="color:#d43790">gelitup.com</a> and open <strong>Request a giveaway</strong>.</li>
+        <li>Choose the <strong>10 products</strong> for the prize. You can only choose products you've received and reviewed.</li>
+        <li>Pick your preferred month and tell us the look you'll create.</li>
+      </ol>
+      <p>We'll confirm your giveaway week by email. The prize is supplied and shipped by GEL.IT.UP, and your giveaway runs as a Collab post with @gelitup. Please don't announce anything until we confirm your dates.</p>
+      <p>Open to nail professionals aged 18+ in countries GEL.IT.UP EU ships to (not the USA or Italy).</p>
+      <p>Thank you for being such an active part of the GEL.IT.UP family! 💖</p>
+      ${sign}`),
+  }
+}
+
 const STATUS_STYLE = {
   requested: 'bg-amber-100 text-amber-800',
   waitlisted: 'bg-sky-100 text-sky-800',
@@ -109,6 +128,27 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
     } catch (err) {
       setReadiness({ loading: false, error: err.message, data: null })
     }
+  }
+  const [inviteBusy, setInviteBusy] = useState(null)
+  const invite = async (a) => {
+    const row = byId.get(a.id)
+    if (!row?.email) { alert('This ambassador has no email address.'); return }
+    if (!window.confirm(`Email ${row.full_name} that she qualifies and can now request a giveaway from her page?`)) return
+    setInviteBusy(a.id)
+    const { subject, html } = inviteEmail(row)
+    const res = sendEmail ? await sendEmail({ to: row.email, subject, html }) : { ok: false, error: 'No email sender' }
+    if (!res.ok) { setInviteBusy(null); alert(`Not sent: ${res.error || 'unknown error'}`); return }
+    const at = new Date().toISOString()
+    await supabase.from('ambassador_applications').update({ giveaway_invited_at: at }).eq('id', a.id)
+    setInviteBusy(null)
+    setReadiness((prev) => (prev.data ? { ...prev, data: { ...prev.data, ambassadors: prev.data.ambassadors.map((x) => (x.id === a.id ? { ...x, invitedAt: at } : x)) } } : prev))
+  }
+  // Remove a product an ambassador added herself for a general package line.
+  const removeReported = async (applicationId, item) => {
+    if (!window.confirm(`Remove "${item.title}" from what she says she received?`)) return
+    const { error: err } = await supabase.from('ambassador_reported_items').delete().eq('id', item.id)
+    if (err) { alert(`Not removed: ${err.message}`); return }
+    loadDetails(applicationId, true)
   }
   // On the Giveaways tab the readiness list loads by itself.
   useEffect(() => {
@@ -304,6 +344,22 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
           )}
         </div>
 
+        {(s.reportedItems || []).length > 0 && (
+          <div>
+            <p className="font-semibold text-slate-800">Products she added herself ({s.reportedItems.length})</p>
+            <p className="text-slate-500">For general lines on her packing list. They count as received — remove any she didn't get.</p>
+            <ul className="mt-1">
+              {s.reportedItems.map((it) => (
+                <li key={it.id} className="flex flex-wrap items-center gap-2 py-0.5">
+                  <span>{it.title}</span>
+                  <span className="text-slate-400">for “{it.line}”</span>
+                  <button type="button" onClick={() => removeReported(applicationId, it)} className="text-rose-600 underline">remove</button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {(s.notReviewed || []).length > 0 && (
           <div>
             <p className="font-semibold text-slate-800">Received but not reviewed ({s.notReviewed.length})</p>
@@ -473,7 +529,14 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
                             <td className="py-1.5 pr-2">{status}</td>
                             <td className="py-1.5 pr-2 tabular-nums">{a.error ? '—' : pill((a.packagesReceived || 0) >= need.packages, `${a.packagesReceived || 0} / ${need.packages}`)}</td>
                             <td className="py-1.5 pr-2 tabular-nums">{a.error ? '—' : pill((a.reviewedCount || 0) >= need.reviews, `${a.reviewedCount || 0} / ${need.reviews}`)}</td>
-                            <td className="py-1.5 text-slate-500">{note}</td>
+                            <td className="py-1.5 text-slate-500">
+                              {note}
+                              {a.eligible && !a.paused && (
+                                a.invitedAt
+                                  ? <span className="ml-1 font-semibold text-emerald-700">Invited {fmt(a.invitedAt)} <button type="button" onClick={() => invite(a)} disabled={inviteBusy === a.id} className="ml-1 font-normal text-slate-500 underline">send again</button></span>
+                                  : <button type="button" onClick={() => invite(a)} disabled={inviteBusy === a.id} className="rounded-full bg-fuchsia-600 px-3 py-0.5 font-semibold text-white hover:bg-fuchsia-500 disabled:opacity-60">{inviteBusy === a.id ? 'Sending…' : '✉ Invite to request a giveaway'}</button>
+                              )}
+                            </td>
                           </tr>
                         )
                       })}
