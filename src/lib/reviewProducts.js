@@ -58,7 +58,25 @@ export function suggestedCount(item) {
 
 // Every item from this ambassador's packages that were not lost, oldest first,
 // with the shop product(s) it matches (empty when it needs picking by hand).
-export function receivedItems(shipments, products) {
+//
+// expandStarter: count the starter-kit lines ("Standard Sample Box", "Nail
+// file", …) as the individual products they always contain. Only the colours
+// in the box vary, so those still need "Edit contents".
+export const STARTER_LINE_PRODUCTS = {
+  standardsamplebox: [
+    'Non Wipe Top Coat 15ml', 'Base Coat 15ml', 'Perfect Shape Non Wipe Top Coat 15ml',
+    '5-in-1 Superior Base 15ml Clear', 'Brush on Builder Gel Nude 15ml', 'MultiMix Synthogel 30gr Clear',
+    'Cushion Pro Gel White', 'Cushion Pro Gel Black', '3-in-1 Builder Gel Clear 40g', 'Premium Builder Gel Pink 40gr',
+  ],
+  '3in1allinoneliquid': ['All-In-One Liquid 200ml'],
+  in1allinoneliquid: ['All-In-One Liquid 200ml'], // "3-in-1 All in One Liquid" after the quantity is stripped
+  allinoneliquid: ['All-In-One Liquid 200ml'],
+  nailfile: ['Nail Files 100/100'],
+  photoperfectcreamcuticleoilbasedoncurrentstock: ['Photo Perfect Cuticle Oil', 'Cooling Coconut Cuticle Oil 5ml', 'GEL.IT.UP Hand & Body Cream 100ml – Silky Bliss'],
+}
+STARTER_LINE_PRODUCTS.standardsamplepack = STARTER_LINE_PRODUCTS.standardsamplebox
+
+export function receivedItems(shipments, products, { expandStarter = false } = {}) {
   const byHandle = new Map((products || []).map((p) => [p.handle, p]))
   const byTitle = new Map((products || []).map((p) => [norm(p.title), p]))
   const out = []
@@ -75,6 +93,9 @@ export function receivedItems(shipments, products) {
       let matches = []
       if (ALIASES[key]) matches = ALIASES[key].map((h) => byHandle.get(h)).filter(Boolean)
       if (!matches.length && byTitle.get(key)) matches = [byTitle.get(key)]
+      if (!matches.length && expandStarter && STARTER_LINE_PRODUCTS[key]) {
+        matches = STARTER_LINE_PRODUCTS[key].map((t) => byTitle.get(norm(t))).filter(Boolean)
+      }
       out.push({ item, sent_at: s.sent_at, matches })
     }
   }

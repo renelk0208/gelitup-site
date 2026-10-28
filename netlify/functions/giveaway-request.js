@@ -199,7 +199,7 @@ async function buildStatus(supabase, ambassador, { detail = false, shopProducts 
   // admin completes them with "Edit contents".
   const receivedShipments = (shipments || []).filter((s) => packageCountsAsReceived(s))
   const receivedProducts = new Map()
-  for (const it of receivedItems(receivedShipments, products)) {
+  for (const it of receivedItems(receivedShipments, products, { expandStarter: true })) {
     for (const p of it.matches) if (!receivedProducts.has(p.handle)) receivedProducts.set(p.handle, p)
   }
   let reviewed = reviewedProducts(reviews, products)
@@ -251,7 +251,7 @@ async function buildStatus(supabase, ambassador, { detail = false, shopProducts 
       // Products from every package sent (confirmed or not), for crediting shop reviews.
       receivedList: (() => {
         const m = new Map()
-        for (const it of receivedItems((shipments || []).filter((sh) => sh.sent_at && !sh.lost_at), products)) for (const p of it.matches) m.set(p.handle, { handle: p.handle, title: p.title })
+        for (const it of receivedItems((shipments || []).filter((sh) => sh.sent_at && !sh.lost_at), products, { expandStarter: true })) for (const p of it.matches) m.set(p.handle, { handle: p.handle, title: p.title })
         return [...m.values()].sort((a, b) => a.title.localeCompare(b.title))
       })(),
       codeOrders: {
