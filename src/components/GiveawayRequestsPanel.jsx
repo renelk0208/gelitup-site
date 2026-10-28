@@ -525,7 +525,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
                           : a.notReviewedCount ? `${a.notReviewedCount} received product${a.notReviewedCount === 1 ? '' : 's'} not reviewed yet` : ''
                         return (
                           <tr key={a.id}>
-                            <td className="py-1.5 pr-2"><span className="font-semibold text-slate-900">{a.full_name}</span><span className="block text-slate-400">{[a.country, a.instagram && `@${String(a.instagram).replace(/^@/, '')}`].filter(Boolean).join(' · ')}</span></td>
+                            <td className="py-1.5 pr-2"><button type="button" onClick={() => { setCheckId(String(a.id)); loadDetails(a.id, true); setTimeout(() => document.getElementById('giveaway-check-any')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }} className="text-left font-semibold text-fuchsia-700 underline hover:text-fuchsia-900">{a.full_name}</button><span className="block text-slate-400">{[a.country, a.instagram && `@${String(a.instagram).replace(/^@/, '')}`].filter(Boolean).join(' · ')}</span></td>
                             <td className="py-1.5 pr-2">{status}</td>
                             <td className="py-1.5 pr-2 tabular-nums">{a.error ? '—' : pill((a.packagesReceived || 0) >= need.packages, `${a.packagesReceived || 0} / ${need.packages}`)}</td>
                             <td className="py-1.5 pr-2 tabular-nums">{a.error ? '—' : pill((a.reviewedCount || 0) >= need.reviews, `${a.reviewedCount || 0} / ${need.reviews}`)}</td>
@@ -542,7 +542,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
                       })}
                     </tbody>
                   </table>
-                  <p className="mt-2 text-slate-500">Ready = at least {need.packages} packages confirmed and {need.reviews} received products reviewed, no giveaway in the last 6 months, no request waiting. Use "Check any ambassador" above for her full picture.</p>
+                  <p className="mt-2 text-slate-500">Click a name to see her full picture (packages, every review, shop reviews to count). Ready = at least {need.packages} packages confirmed and {need.reviews} received products reviewed, no giveaway in the last 6 months, no request waiting. Use "Check any ambassador" above for her full picture.</p>
                 </div>
               )
             })()}
@@ -559,7 +559,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
               </>
             )}
           </div>
-          <div className="rounded-lg border border-slate-200 bg-white p-3 text-xs">
+          <div id="giveaway-check-any" className="scroll-mt-24 rounded-lg border border-slate-200 bg-white p-3 text-xs">
             <label className="flex flex-wrap items-center gap-2 font-semibold text-slate-800">
               Check any ambassador:
               <select
