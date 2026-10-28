@@ -530,13 +530,14 @@ export async function handler(event) {
   if (idea.length < 10) return json(400, { error: 'Please tell us a little about the look you will create.' })
   // Her qualifying video: a mini nail art tutorial, a how-to, or a GEL.IT.UP
   // product presentation, made with products she received. Shared as a
-  // full-quality link (YouTube, Google Drive, WeTransfer, Dropbox), not Instagram.
+  // She posts it on Instagram (link here) and uploads the original file to her
+  // personal folder in the GEL.IT.UP Google Drive for YouTube.
   const VIDEO_TYPES = ['tutorial', 'howto', 'presentation']
   const videoType = clean(body.videoType, 20)
   if (!VIDEO_TYPES.includes(videoType)) return json(400, { error: 'Please choose what kind of video you made.' })
   const videoUrl = clean(body.videoUrl, 500)
   if (!/^https?:\/\/\S+\.\S+/i.test(videoUrl)) return json(400, { error: 'Please add the link to your video.' })
-  if (/instagram\.com|tiktok\.com/i.test(videoUrl)) return json(400, { error: 'Please share the full-quality video file (YouTube, Google Drive, WeTransfer or Dropbox link), not an Instagram or TikTok link.' })
+  if (body.driveUploaded !== true) return json(400, { error: 'Please upload the original video to your folder in our Google Drive first.' })
 
   const row = {
     application_id: ambassador.id,

@@ -40,6 +40,7 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
   const [videoType, setVideoType] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
   const [videoOk, setVideoOk] = useState(false)
+  const [driveOk, setDriveOk] = useState(false)
   const [followers, setFollowers] = useState('')
   const [otherLinks, setOtherLinks] = useState('')
   const [notes, setNotes] = useState('')
@@ -135,12 +136,12 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
     if (idea.trim().length < 10) { setFormError('Please tell us a little about the look you will create.'); return }
     if (!videoType) { setFormError('Please choose what kind of video you made.'); return }
     if (!/^https?:\/\/\S+\.\S+/i.test(videoUrl.trim())) { setFormError('Please add the link to your video.'); return }
-    if (/instagram\.com|tiktok\.com/i.test(videoUrl)) { setFormError('Please share the full-quality video (YouTube, Google Drive, WeTransfer or Dropbox link), not an Instagram or TikTok link.'); return }
+    if (!driveOk) { setFormError('Please upload the original video to your folder in our Google Drive first.'); return }
     if (!videoOk) { setFormError('Please confirm your video uses GEL.IT.UP products only.'); return }
     if (previewId) { setFormError('Preview only — nothing is sent.'); return }
     setSending(true)
     try {
-      const res = await call('POST', { products: picked, preferredMonth: month, idea, videoType, videoUrl: videoUrl.trim(), followers, otherLinks, notes })
+      const res = await call('POST', { products: picked, preferredMonth: month, idea, videoType, videoUrl: videoUrl.trim(), driveUploaded: driveOk, followers, otherLinks, notes })
       if (!res.ok) throw new Error(res.error || 'Your request could not be sent.')
       setJustSent(true)
     } catch (err) {
@@ -163,7 +164,8 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
           <li>a <strong>"how to"</strong> video (e.g. how to apply or use a product), or</li>
           <li>a <strong>presentation of GEL.IT.UP products</strong>.</li>
         </ul>
-        <p className="mt-1">It should be good enough for our YouTube channel: clear, well lit, steady, with no text on the video and <strong>GEL.IT.UP products only</strong> (no other brands in shot). Send it with your request as a full-quality link (YouTube, Google Drive, WeTransfer or Dropbox). Take your time to prepare it.</p>
+        <p className="mt-1">It should be good enough for our YouTube channel: clear, well lit, steady, with no text on the video and <strong>GEL.IT.UP products only</strong> (no other brands in shot). Take your time to prepare it.</p>
+        <p className="mt-1"><strong>Post it on your Instagram</strong>, then <strong>upload the original, full-quality video to your personal folder</strong> in our <a href="https://drive.google.com/drive/folders/1VKpSyxpEaKW3n4czWdAL5INUdOQ0mBWe?usp=sharing" target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-700 underline">GEL.IT.UP Google Drive</a> so we can add it to our YouTube channel (Instagram lowers the quality).</p>
       </div>
       {!open ? (
         <button
@@ -222,9 +224,12 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
               ))}
             </div>
             <label className="mt-2 block text-[12px] font-semibold text-slate-800">
-              Link to your video
-              <input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="YouTube, Google Drive, WeTransfer or Dropbox link" className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-[13px] font-normal" />
-              <span className="mt-1 block font-normal text-slate-500">Full quality, please. Instagram and TikTok links lose quality, so we can't use them.</span>
+              Link to your video on Instagram
+              <input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://www.instagram.com/reel/…" className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-[13px] font-normal" />
+            </label>
+            <label className="mt-2 flex cursor-pointer items-start gap-2 text-[12px] text-slate-700">
+              <input type="checkbox" checked={driveOk} onChange={(e) => setDriveOk(e.target.checked)} className="mt-0.5" />
+              <span>I've uploaded the original, full-quality video to my personal folder in the <a href="https://drive.google.com/drive/folders/1VKpSyxpEaKW3n4czWdAL5INUdOQ0mBWe?usp=sharing" target="_blank" rel="noreferrer" className="font-semibold text-fuchsia-700 underline">GEL.IT.UP Google Drive</a> (for YouTube).</span>
             </label>
             <label className="mt-2 flex cursor-pointer items-start gap-2 text-[12px] text-slate-700">
               <input type="checkbox" checked={videoOk} onChange={(e) => setVideoOk(e.target.checked)} className="mt-0.5" />
