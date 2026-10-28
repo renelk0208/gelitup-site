@@ -82,7 +82,7 @@ const STATUS_STYLE = {
   cancelled: 'bg-slate-100 text-slate-600',
 }
 
-export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adminLabel = 'admin' }) {
+export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adminLabel = 'admin', standalone = false }) {
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -110,6 +110,13 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
       setReadiness({ loading: false, error: err.message, data: null })
     }
   }
+  // On the Giveaways tab the readiness list loads by itself.
+  useEffect(() => {
+    if (!standalone) return undefined
+    let alive = true
+    Promise.resolve().then(() => { if (alive) loadReadiness() })
+    return () => { alive = false }
+  }, [standalone])
   useEffect(() => {
     let alive = true
     supabase.from('app_settings').select('value').eq('key', 'giveaway_card_visible').maybeSingle()
@@ -381,7 +388,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
   )
 
   return (
-    <details className="mb-4 rounded-2xl border border-fuchsia-200 bg-fuchsia-50/40 p-3" open={open.length > 0}>
+    <details className="mb-4 rounded-2xl border border-fuchsia-200 bg-fuchsia-50/40 p-3" open={standalone || open.length > 0}>
       <summary className="cursor-pointer text-sm font-semibold text-fuchsia-800">
         🎁 Giveaway requests
         {open.length > 0 && <span className="ml-2 rounded-full bg-amber-500 px-2 py-0.5 text-[11px] text-white">{open.length} waiting</span>}
@@ -391,41 +398,14 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
       {error && <p className="mt-2 text-xs text-rose-600">{error}</p>}
       {!loading && !error && (
         <div className="mt-3 space-y-4">
-          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-white p-3 text-xs">
-            <span className="font-semibold text-slate-800">Ambassadors can see the "Request a giveaway" card:</span>
-            {cardVisible === null ? <span className="text-slate-400">…</span> : (
-              <>
-                <span className={`rounded-full px-2 py-0.5 font-bold ${cardVisible ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}>{cardVisible ? 'ON' : 'OFF'}</span>
-                <button type="button" disabled={switchBusy} onClick={flipCard} className={`rounded-full px-3 py-1 font-semibold text-white disabled:opacity-60 ${cardVisible ? 'bg-slate-600 hover:bg-slate-500' : 'bg-emerald-600 hover:bg-emerald-500'}`}>
-                  {cardVisible ? 'Hide it' : 'Show it to ambassadors'}
-                </button>
-                {!cardVisible && <span className="text-slate-500">Hidden — ambassadors see nothing yet.</span>}
-              </>
-            )}
-          </div>
-          <div className="rounded-lg border border-slate-200 bg-white p-3 text-xs">
-            <label className="flex flex-wrap items-center gap-2 font-semibold text-slate-800">
-              Check any ambassador:
-              <select
-                value={checkId}
-                onChange={(e) => { setCheckId(e.target.value); if (e.target.value) loadDetails(Number(e.target.value)) }}
-                className="rounded border border-slate-300 px-2 py-1 font-normal"
-              >
-                <option value="">Choose…</option>
-                {[...ambassadors].filter((a) => String(a.status || '').toLowerCase() === 'approved')
-                  .sort((x, y) => String(x.full_name || '').localeCompare(String(y.full_name || '')))
-                  .map((a) => <option key={a.id} value={a.id}>{a.full_name || a.email}</option>)}
-              </select>
-            </label>
-            {checkId && renderDetails(details[Number(checkId)])}
-          </div>
           <div className="rounded-lg border border-slate-200 bg-white p-3 text-xs">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="font-semibold text-slate-800">Who could do a giveaway now?</p>
+              <p className="text-sm font-bold text-slate-900">Who can do a giveaway now?</p>
               <button type="button" onClick={loadReadiness} disabled={readiness.loading} className="rounded-full bg-fuchsia-600 px-3 py-1 font-semibold text-white hover:bg-fuchsia-500 disabled:opacity-60">
-                {readiness.loading ? 'Checking reviews…' : readiness.data ? 'Refresh' : 'Show giveaway readiness'}
+                {readiness.loading ? 'Checking everyone’s packages and reviews… (about 20 seconds)' : readiness.data ? 'Refresh' : 'Show giveaway readiness'}
               </button>
-              {readiness.data && <span className="text-slate-500">{readiness.data.ambassadors.filter((a) => a.eligible).length} ready of {readiness.data.ambassadors.length}</span>}
+              {readiness.data && <span className="rounded-full bg-emerald-600 px-2 py-0.5 font-bold text-white">{readiness.data.ambassadors.filter((a) => a.eligible).length} ready</span>}
+              {readiness.data && <span className="text-slate-500">of {readiness.data.ambassadors.length} ambassadors</span>}
             </div>
             {readiness.error && <p className="mt-2 text-rose-600">Could not check: {readiness.error}</p>}
             {readiness.data && (() => {
@@ -469,6 +449,34 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
                 </div>
               )
             })()}
+          </div>
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-white p-3 text-xs">
+            <span className="font-semibold text-slate-800">Ambassadors can see the "Request a giveaway" card:</span>
+            {cardVisible === null ? <span className="text-slate-400">…</span> : (
+              <>
+                <span className={`rounded-full px-2 py-0.5 font-bold ${cardVisible ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}>{cardVisible ? 'ON' : 'OFF'}</span>
+                <button type="button" disabled={switchBusy} onClick={flipCard} className={`rounded-full px-3 py-1 font-semibold text-white disabled:opacity-60 ${cardVisible ? 'bg-slate-600 hover:bg-slate-500' : 'bg-emerald-600 hover:bg-emerald-500'}`}>
+                  {cardVisible ? 'Hide it' : 'Show it to ambassadors'}
+                </button>
+                {!cardVisible && <span className="text-slate-500">Hidden — ambassadors see nothing yet.</span>}
+              </>
+            )}
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white p-3 text-xs">
+            <label className="flex flex-wrap items-center gap-2 font-semibold text-slate-800">
+              Check any ambassador:
+              <select
+                value={checkId}
+                onChange={(e) => { setCheckId(e.target.value); if (e.target.value) loadDetails(Number(e.target.value)) }}
+                className="rounded border border-slate-300 px-2 py-1 font-normal"
+              >
+                <option value="">Choose…</option>
+                {[...ambassadors].filter((a) => String(a.status || '').toLowerCase() === 'approved')
+                  .sort((x, y) => String(x.full_name || '').localeCompare(String(y.full_name || '')))
+                  .map((a) => <option key={a.id} value={a.id}>{a.full_name || a.email}</option>)}
+              </select>
+            </label>
+            {checkId && renderDetails(details[Number(checkId)])}
           </div>
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Waiting for a decision</p>

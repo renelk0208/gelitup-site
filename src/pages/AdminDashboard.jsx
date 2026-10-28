@@ -5074,7 +5074,7 @@ async function ensureAmbassadorSetupLink(row) {
 function AmbassadorApplicationsPanel({ focusAmbassadorId } = {}) {
   // Step 2: "Shipments" table view (one line per ambassador) next to the cards.
   const [viewMode, setViewMode] = useState(() => {
-    try { return localStorage.getItem('gelitup.admin.ambassadorView') === 'shipments' ? 'shipments' : 'cards' } catch { return 'cards' }
+    try { const v = localStorage.getItem('gelitup.admin.ambassadorView'); return v === 'shipments' || v === 'giveaways' ? v : 'cards' } catch { return 'cards' }
   })
   const [busyShipmentId, setBusyShipmentId] = useState(null)
   const [packRepeatOk, setPackRepeatOk] = useState({}) // { [rowId]: true } = send an already-sent item again on purpose
@@ -5085,7 +5085,7 @@ function AmbassadorApplicationsPanel({ focusAmbassadorId } = {}) {
   const [hasMore, setHasMore] = useState(false)
   // The Shipments view always covers everyone; a remembered Shipments view
   // with the Approved/Pending filter left the screen empty.
-  const [filter, setFilter] = useState(() => (viewMode === 'shipments' ? 'all' : 'approved'))
+  const [filter, setFilter] = useState(() => (viewMode !== 'cards' ? 'all' : 'approved'))
   const [searchQuery, setSearchQuery] = useState('')
   const [saving, setSaving] = useState(null)
   const [emailStatus, setEmailStatus] = useState({}) // { [id]: { state, message } }
@@ -7649,7 +7649,7 @@ const deleteApplication = async (row) => {
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-base font-bold text-slate-900">Ambassador Applications</h2>
             <div className="inline-flex rounded-full bg-slate-100 p-0.5" role="group" aria-label="View">
-              {[{ key: 'cards', label: 'Cards' }, { key: 'shipments', label: 'Shipments' }].map((v) => (
+              {[{ key: 'cards', label: 'Cards' }, { key: 'shipments', label: 'Shipments' }, { key: 'giveaways', label: '🎁 Giveaways' }].map((v) => (
                 <button
                   key={v.key}
                   type="button"
@@ -7658,7 +7658,7 @@ const deleteApplication = async (row) => {
                     setViewMode(v.key)
                     try { localStorage.setItem('gelitup.admin.ambassadorView', v.key) } catch { /* ignore */ }
                     // The Shipments view covers approved and paused ambassadors.
-                    if (v.key === 'shipments' && filter !== 'all') setFilter('all')
+                    if (v.key !== 'cards' && filter !== 'all') setFilter('all')
                   }}
                   className={`rounded-full px-3 py-1 text-xs font-semibold ${viewMode === v.key ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
                 >
@@ -7725,6 +7725,14 @@ const deleteApplication = async (row) => {
         </div>
       </div>
 
+      {viewMode === 'giveaways' && (
+        <>
+          {loading && <p className="text-sm text-slate-500">Loading…</p>}
+          {error && <p className="text-sm text-rose-600">{error}</p>}
+          {!loading && !error && <GiveawayRequestsPanel standalone ambassadors={rows} sendEmail={sendAmbassadorEmail} adminLabel={getAdminDisplayLabel()} />}
+        </>
+      )}
+
       {viewMode === 'shipments' && (
         <>
           {loading && <p className="text-sm text-slate-500">Loading…</p>}
@@ -7739,7 +7747,9 @@ const deleteApplication = async (row) => {
               confirmOn={'Turn on receipt reminders?\n\nAmbassadors whose latest package should have arrived but is not confirmed will see a banner in their profile, and get ONE reminder email at 10:00 tomorrow (one per package).'}
               confirmOff="Turn off receipt reminders (no banner, no emails)?"
             />
-            <GiveawayRequestsPanel ambassadors={rows} sendEmail={sendAmbassadorEmail} adminLabel={getAdminDisplayLabel()} />
+            <button type="button" onClick={() => { setViewMode('giveaways'); try { localStorage.setItem('gelitup.admin.ambassadorView', 'giveaways') } catch { /* ignore */ } }} className="mb-3 text-xs font-semibold text-fuchsia-700 underline">
+              🎁 Giveaway requests and who can do a giveaway → open the Giveaways tab
+            </button>
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <button
                 type="button"
