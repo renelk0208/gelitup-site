@@ -1,20 +1,19 @@
 // TEMPORARY diagnostic — remove after use.
+import { createClient } from '@supabase/supabase-js'
+import { buildStatus, loadShopProducts } from './giveaway-request.js'
 const KEY = 'fd0eda69a11fe89290873a590653538f'
 export const handler = async (event) => {
   if ((event.queryStringParameters || {}).k !== KEY) return { statusCode: 404, body: 'Not found' }
-  const token = process.env.JUDGEME_PRIVATE_TOKEN
-  const all = []
-  let meta = null
-  for (let page = 1; page <= 50; page += 1) {
-    const qs = new URLSearchParams({ api_token: token, shop_domain: '9tx96d-2b.myshopify.com', per_page: '100', page: String(page) })
-    const res = await fetch('https://api.judge.me/api/v1/reviews?' + qs)
-    const d = await res.json()
-    if (page === 1) meta = { status: res.status, keys: Object.keys(d || {}), current_page: d.current_page, per_page: d.per_page }
-    const list = d.reviews || []
-    all.push(...list)
-    if (list.length < 100) break
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } })
+  const ids = String(event.queryStringParameters.ids || '').split(',').map(Number).filter(Boolean)
+  const { data: people } = await supabase.from('ambassador_applications').select('id, full_name, email, status, paused_at, instagram, ambassador_type, country, giveaway_invited_at').in('id', ids)
+  const shopProducts = await loadShopProducts()
+  const out = []
+  for (const a of people || []) {
+    try {
+      const st = await buildStatus(supabase, a, { shopProducts, detail: true })
+      out.push({ id: a.id, name: a.full_name, eligible: st.eligible, reasons: st.reasons, reviewed: (st.reviewed || []).map((p) => p.title), notReviewed: (st.notReviewed || []).map((p) => p.title), shopReviewsToCount: st.shopReviewsToCount, unmatched: (st.unmatchedLines || []).map((l) => l.line || l), reviews: (st.reviewDetails || st.reviews || []).map((r) => [r.title, r.received, r.shopReview]) })
+    } catch (e) { out.push({ id: a.id, error: e.message }) }
   }
-  const sorted = [...all].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
-  const pick = (r) => ({ id: r.id, name: r.reviewer?.name, email: r.reviewer?.email, at: r.created_at, published: r.published, hidden: r.hidden, curated: r.curated, product: r.product_title, handle: r.product_handle, ext: r.product_external_id })
-  return { statusCode: 200, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ meta, total: all.length, newest: sorted.slice(0, 80).map(pick), oldest: all.slice(0, 3).map(pick) }) }
+  return { statusCode: 200, headers: { 'content-type': 'application/json' }, body: JSON.stringify(out) }
 }
