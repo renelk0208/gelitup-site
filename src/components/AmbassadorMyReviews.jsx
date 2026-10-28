@@ -37,6 +37,14 @@ export default function AmbassadorMyReviews() {
         <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-700">⭐ My reviews</p>
         <p className="text-[12px] text-slate-600"><strong>{done.length} of {total}</strong> products reviewed</p>
       </div>
+      <div className={`mt-2 rounded-lg p-3 text-[12px] ${done.length >= 10 ? 'bg-emerald-50 text-emerald-900' : 'bg-amber-50 text-amber-900'}`}>
+        <p className="font-bold">🎁 Your reviews decide if you can host a GEL.IT.UP giveaway</p>
+        <p className="mt-0.5">
+          {done.length >= 10
+            ? <>You've reviewed {done.length} products — you meet the review requirement for a giveaway. ✓</>
+            : <>You need at least <strong>10 reviewed products</strong> to qualify. You have <strong>{done.length}</strong> — <strong>{10 - done.length} to go</strong>. Without your reviews you can't take part.</>}
+        </p>
+      </div>
       <p className="mt-1 text-[11px] text-slate-500">Products from a package appear here once you've confirmed you received it.</p>
       <div className="mt-2 h-2 overflow-hidden rounded-full bg-emerald-100" aria-hidden="true">
         <div className="h-full rounded-full bg-emerald-600" style={{ width: `${pct}%` }} />
