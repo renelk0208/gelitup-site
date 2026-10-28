@@ -210,7 +210,7 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
             <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-[13px] font-normal" />
           </label>
 
-          <p className="text-[11px] text-slate-500">Open to nail professionals aged 18+ in countries GEL.IT.UP EU ships to. Not open to the USA or Italy. Please don't announce anything until we confirm your dates.</p>
+          <p className="text-[11px] text-slate-500">Open to qualified nail technicians only, aged 18+, in countries GEL.IT.UP EU ships to. Not open to the USA or Italy. Please don't announce anything until we confirm your dates.</p>
           {formError && <p className="text-[12px] text-rose-600">{formError}</p>}
           <div className="flex gap-2">
             <button type="submit" disabled={sending} className="rounded-full bg-fuchsia-600 px-4 py-2 text-xs font-semibold text-white hover:bg-fuchsia-500 disabled:opacity-60">

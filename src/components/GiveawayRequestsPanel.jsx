@@ -40,15 +40,15 @@ function approvedEmail(row, req, start, end) {
       <ol>
         <li>Create your post with real nail content using the prize products — a finished look, not just the boxes.</li>
         <li>Publish it on your start date as an Instagram <strong>Collab</strong> with <strong>@gelitup</strong> and turn on the <strong>Paid partnership</strong> label (or add #ad).</li>
-        <li>Start the caption with <strong>GEL.IT.UP</strong> and use #gelitup #gelituprofessional #salons #nailtech #madeineu.</li>
+        <li>Start the caption with <strong>GEL.IT.UP</strong>, say clearly that the giveaway is <strong>for qualified nail technicians only</strong>, and use #gelitup #gelituprofessional #salons #nailtech #madeineu.</li>
         <li>To enter, followers follow you and @gelitup, like the post and tag 1–2 nail tech friends.</li>
-        <li><strong>GEL.IT.UP draws the winner</strong> at random from the comments the day after your giveaway ends, checks that she follows both accounts and is a nail professional, and lets you know who won. Please don't pick a winner yourself.</li>
+        <li><strong>GEL.IT.UP draws the winner</strong> at random from the comments the day after your giveaway ends, checks that she follows both accounts and is a qualified nail technician, and lets you know who won. Please don't pick a winner yourself.</li>
         <li>Announce the winner in your stories once we tell you. We contact her and ship the prize.</li>
         ${code ? `<li>Then post a story for everyone else: "Didn't win this time? Use my code <strong>${esc(code)}</strong> for 20% off."</li>` : ''}
       </ol>
       <p><strong>Please add these terms at the end of your caption:</strong></p>
       <div style="border-left:3px solid #d43790;padding:8px 12px;background:#fdf0f5">
-        Giveaway terms: Runs from ${esc(formatGiveawayDate(start))} to ${esc(formatGiveawayDate(end))} (Greek time). Open to nail technicians, nail students and salons aged 18+ in countries GEL.IT.UP EU ships to; not open to the USA or Italy. No purchase necessary. One winner, drawn at random by GEL.IT.UP from valid entries and announced in ${esc(handle)}'s and @gelitup's stories. The winner must reply within 48 hours and show she is a nail professional (qualification certificate, or salon/studio details and an Instagram account showing her nail work), otherwise a new winner is drawn. The prize is supplied and shipped by GEL.IT.UP and cannot be exchanged for cash. The winner will only be contacted by @gelitup, and we will never ask for payment. This giveaway is not sponsored, endorsed or administered by, or associated with, Instagram or Meta.
+        Giveaway terms: Runs from ${esc(formatGiveawayDate(start))} to ${esc(formatGiveawayDate(end))} (Greek time). Open to qualified nail technicians only, aged 18+, in countries GEL.IT.UP EU ships to; not open to the USA or Italy. No purchase necessary. One winner, drawn at random by GEL.IT.UP from valid entries and announced in ${esc(handle)}'s and @gelitup's stories. The winner must reply within 48 hours and show she is a qualified nail technician (a photo of her nail qualification or certificate, plus an Instagram account showing her nail work), otherwise a new winner is drawn. The prize is supplied and shipped by GEL.IT.UP and cannot be exchanged for cash. The winner will only be contacted by @gelitup, and we will never ask for payment. This giveaway is not sponsored, endorsed or administered by, or associated with, Instagram or Meta.
       </div>
       <p>We can't wait to see it! 💖</p>
       ${sign}`),
@@ -105,16 +105,16 @@ function inviteEmail(row) {
       <ul>
         <li>Follow you and @gelitup, like the post, and comment tagging 1–2 nail tech friends.</li>
         <li>Bonus entry (optional): share the post to their story, tagging you and @gelitup.</li>
-        <li>Open to nail technicians, students and salons aged 18+ in countries GEL.IT.UP EU ships to — <strong>not the USA or Italy</strong>.</li>
+        <li><strong>Only qualified nail technicians can enter</strong> (aged 18+, in countries GEL.IT.UP EU ships to, <strong>not the USA or Italy</strong>). Please say this clearly at the start of your caption, e.g. "🎁 GIVEAWAY for qualified nail technicians only".</li>
       </ul>
 
       <p><strong>4. After the giveaway</strong></p>
       <ul>
-        <li><strong>GEL.IT.UP draws the winner</strong> at random from the comments, so every entrant gets a fair chance. We check that she follows both accounts and is a nail professional, then tell you who won.</li>
+        <li><strong>GEL.IT.UP draws the winner</strong> at random from the comments, so every entrant gets a fair chance. We check that she follows both accounts and is a qualified nail technician, then tell you who won.</li>
         <li>Announce the winner in your stories. We contact her and supply and ship the prize.</li>
         <li>Then post a story for everyone else: "Didn't win this time? Use my code ${code ? `<strong>${esc(code)}</strong>` : 'YOURCODE'} for 20% off." Every order with your code earns you credit.</li>
       </ul>
-      <p>The winner must show she is a nail professional within 48 hours, otherwise we draw again. Protect your followers from fake accounts: add "The winner will only be contacted by @gelitup. We will never ask for payment or card details." We'll send you the full caption terms with your confirmed dates.</p>
+      <p>The winner must show us she is a qualified nail technician within 48 hours, otherwise we draw again. Protect your followers from fake accounts: add "The winner will only be contacted by @gelitup. We will never ask for payment or card details." We'll send you the full caption terms with your confirmed dates.</p>
 
       <p>Thank you for being such an active part of the GEL.IT.UP family! 💖</p>
       ${sign}`),
