@@ -121,9 +121,20 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
     )
   }
 
-  // 10 prize products, only from products she received and reviewed.
+  // She qualifies but René hasn't invited her yet: no form until she's invited.
+  if (!data.invited) {
+    return (
+      <Box>
+        <p className="mt-2 text-[13px] text-slate-700">
+          <strong>You qualify for a giveaway!</strong> 🎉 We run 3 giveaways a month, and we'll email you an invitation as soon as a week is free for you.
+        </p>
+      </Box>
+    )
+  }
+
+  // 1–10 prize products, only from products she received and reviewed.
   const needed = Math.min(data.maxProducts, data.reviewed.length) // the most she can pick
-  const least = data.minReviews || 8
+  const least = data.minProducts || 1
   const toggle = (handle) => setPicked((prev) => (prev.includes(handle)
     ? prev.filter((h) => h !== handle)
     : prev.length >= needed ? prev : [...prev, handle]))

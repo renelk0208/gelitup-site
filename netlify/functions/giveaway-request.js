@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { productUrl, receivedItems, suggestedCount } from '../../src/lib/reviewProducts.js'
 import {
   GIVEAWAY_MAX_PRODUCTS,
+  GIVEAWAY_MIN_PRODUCTS,
   GIVEAWAY_MIN_REVIEWS,
   GIVEAWAY_MIN_PACKAGES,
   nextGiveawayAllowedFrom,
@@ -338,6 +339,7 @@ export async function buildStatus(supabase, ambassador, { detail = false, shopPr
     reportedItems: (reported || []).map((r) => ({ id: r.id, line: r.line, handle: r.product_handle, title: productByHandle.get(r.product_handle)?.title || r.product_title || r.product_handle, created_at: r.created_at })),
     invited: Boolean(ambassador.giveaway_invited_at),
     maxProducts: GIVEAWAY_MAX_PRODUCTS,
+    minProducts: GIVEAWAY_MIN_PRODUCTS,
     minReviews: GIVEAWAY_MIN_REVIEWS,
     months: upcomingGiveawayMonths(3),
     openRequest: openRequest
@@ -515,14 +517,16 @@ export async function handler(event) {
 
   // ── POST: save the request ───────────────────────────────────────────────
   if (!status.eligible) return json(409, { error: 'You are not able to request a giveaway right now.', ...status })
+  // Only ambassadors René has invited can send a request, even with the card switched on.
+  if (!ambassador.giveaway_invited_at) return json(403, { error: "We'll email you an invitation as soon as a giveaway week is free for you." })
   let body = {}
   try { body = JSON.parse(event.body || '{}') } catch { return json(400, { error: 'Invalid request.' }) }
 
   const reviewedByHandle = new Map(status.reviewed.map((p) => [p.handle, p]))
   const picked = [...new Set((Array.isArray(body.products) ? body.products : []).map(String))]
-  // 8 to 10 prize products, all received and reviewed by her.
+  // 1 to 10 prize products, all received and reviewed by her.
   const most = Math.min(GIVEAWAY_MAX_PRODUCTS, status.reviewed.length)
-  if (picked.length < GIVEAWAY_MIN_REVIEWS || picked.length > most) return json(400, { error: `Please choose between ${GIVEAWAY_MIN_REVIEWS} and ${most} products.` })
+  if (picked.length < GIVEAWAY_MIN_PRODUCTS || picked.length > most) return json(400, { error: `Please choose between ${GIVEAWAY_MIN_PRODUCTS} and ${most} products.` })
   if (picked.some((h) => !reviewedByHandle.has(h))) return json(400, { error: 'Only products you have received and reviewed can be given away.' })
   const month = clean(body.preferredMonth, 7)
   if (!status.months.includes(month)) return json(400, { error: 'Please choose a month.' })

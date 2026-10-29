@@ -97,7 +97,7 @@ function inviteEmail(row) {
       <p><strong>1. Request your giveaway</strong></p>
       <ol>
         <li>Log in to your ambassador page on <a href="https://gelitup.com/portal/login" style="color:#d43790">gelitup.com</a> and open <strong>Request a giveaway</strong>.</li>
-        <li>Choose <strong>8 to 10 products</strong> for the prize. You can only choose products you've received <strong>and reviewed</strong> — to add more, review them first.</li>
+        <li>Choose <strong>1 to 10 products</strong> for the prize. You can only choose products you've received <strong>and reviewed</strong> — to add more, review them first.</li>
         <li>Make one <strong>quality video</strong> with the products you received: a <strong>mini nail art tutorial</strong>, a <strong>"how to"</strong> video, or a <strong>presentation of GEL.IT.UP products</strong>. It should be good enough for our YouTube channel: clear, well lit, no text on the video, and GEL.IT.UP products only (no other brands in shot). Take your time to prepare it.</li>
         <li><strong>Post it on your Instagram</strong>, then <strong>upload the original, full-quality video to your personal folder</strong> in our <a href="https://drive.google.com/drive/folders/1VKpSyxpEaKW3n4czWdAL5INUdOQ0mBWe?usp=sharing" style="color:#d43790">GEL.IT.UP Google Drive</a> so we can add it to our YouTube channel. Add the Instagram link when you send your request.</li>
         <li>Pick your preferred month and tell us the look you'll create.</li>
