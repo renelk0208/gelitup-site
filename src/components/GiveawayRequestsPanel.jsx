@@ -33,13 +33,14 @@ function nextDay(ymd) {
   return d.toISOString().slice(0, 10)
 }
 
-function approvedEmail(row, req, start, end) {
+function approvedEmail(row, req, start, end, note = '') {
   const code = String(row?.discount_code || '').trim()
   const handle = String(row?.instagram || '').trim().replace(/^@?/, '@').replace(/^@$/, '@youraccount')
   return {
     subject: 'Your GEL.IT.UP giveaway is approved 🎁',
     html: wrap(`
       <p>Hi ${esc(firstName(row))},</p>
+      ${String(note || '').trim() ? `<div style="border-left:3px solid #0f766e;padding:8px 12px;background:#f0fdfa;margin:12px 0">${esc(String(note).trim()).replace(/\n/g, '<br/>')}</div>` : ''}
       <p>Great news — your giveaway is approved! Your giveaway runs from <strong>${esc(formatGiveawayDate(start))}</strong> to <strong>${esc(formatGiveawayDate(end))} at 23:59</strong> (Greek time).</p>
       <p>The winner is <strong>announced on Monday afternoon</strong>, ${esc(formatGiveawayDate(nextDay(end)))}.</p>
       <p><strong>Prize</strong> (supplied and shipped by GEL.IT.UP to the winner):</p>
@@ -345,15 +346,15 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
     if (!res.ok) alert(`Saved, but the email was not sent: ${res.error || 'unknown error'}`)
   }
 
-  const approve = (req, month, slot) => {
+  const approve = (req, month, slot, note = '') => {
     const dates = giveawaySlotDates(month, slot)
     if (!dates) return
     if (takenStarts.has(dates.start)) { alert('That week is already booked.'); return }
     return decide(
       req,
-      { status: 'approved', slot_start: dates.start, slot_end: dates.end },
-      (row) => approvedEmail(row, req, dates.start, dates.end),
-      (row) => `Approve ${row.full_name}'s giveaway for ${formatGiveawayDate(dates.start)} – ${formatGiveawayDate(dates.end)} and email her?`,
+      { status: 'approved', slot_start: dates.start, slot_end: dates.end, decision_note: String(note || '').trim() || null },
+      (row) => approvedEmail(row, req, dates.start, dates.end, note),
+      (row) => `Approve ${row.full_name}'s giveaway for ${formatGiveawayDate(dates.start)} – ${formatGiveawayDate(dates.end)} and email her${String(note || '').trim() ? ' (with your personal note)' : ''}?`,
     )
   }
   const waitlist = (req) => {
@@ -525,7 +526,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
         : <p className="mt-1 text-amber-700">🎬 No qualifying video sent (request made before videos were required).</p>}
       {req.other_links && <p className="mt-1 text-slate-500">Other accounts: {req.other_links}</p>}
       {req.notes && <p className="mt-1 text-slate-500">Notes: {req.notes}</p>}
-      {req.decision_note && <p className="mt-1 text-slate-500">Reason given: {req.decision_note}</p>}
+      {req.decision_note && <p className="mt-1 text-slate-500">Note sent to her: {req.decision_note}</p>}
 
       <button type="button" onClick={() => toggleDetails(req)} className="mt-2 text-xs font-semibold text-fuchsia-700 underline">
         {openDetails === req.id ? 'Hide her full picture' : 'Show her full picture (packages, reviews, code orders)'}
@@ -547,7 +548,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
                     key={s}
                     type="button"
                     disabled={taken || busy === req.id}
-                    onClick={() => approve(req, approving.month, s)}
+                    onClick={() => approve(req, approving.month, s, approving.note)}
                     className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-500 disabled:bg-slate-300"
                   >
                     Week {s}: {d.start.slice(8)}–{d.end.slice(8)}{taken ? ' (booked)' : ''}
@@ -556,6 +557,34 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
               })}
               <button type="button" onClick={() => setApproving(null)} className="text-xs text-slate-500 underline">Cancel</button>
             </div>
+            <label className="mt-2 block text-[12px] font-semibold text-slate-700">
+              Personal note to her (optional) — shown at the top of the approval email
+              <textarea
+                value={approving.note || ''}
+                onChange={(e) => setApproving({ ...approving, note: e.target.value })}
+                rows={4}
+                placeholder="e.g. We love your work! The Halloween video won't fit a December giveaway, so please create a winter/Christmas video instead…"
+                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-[13px] font-normal"
+              />
+            </label>
+            <button type="button" onClick={() => setApproving({ ...approving, preview: !approving.preview })} className="mt-1 text-xs font-semibold text-fuchsia-700 underline">
+              {approving.preview ? 'Hide email preview' : 'Preview the email'}
+            </button>
+            {approving.preview && (() => {
+              const d = giveawaySlotDates(approving.month, approving.slot || 1)
+              const a = byId.get(req.application_id) || {}
+              return (
+                <div className="mt-2">
+                  <div className="flex flex-wrap gap-2 text-[11px] text-slate-600">
+                    Preview for week:
+                    {GIVEAWAY_SLOTS.map((s) => (
+                      <button key={s} type="button" onClick={() => setApproving({ ...approving, slot: s })} className={`rounded-full border px-2 ${Number(approving.slot || 1) === s ? 'border-fuchsia-500 text-fuchsia-700' : 'border-slate-300'}`}>{s}</button>
+                    ))}
+                  </div>
+                  <iframe title="Approval email preview" srcDoc={approvedEmail(a, req, d.start, d.end, approving.note).html} className="mt-1 h-96 w-full rounded border border-slate-200 bg-white" />
+                </div>
+              )
+            })()}
           </div>
         ) : (
           <div className="mt-2 flex flex-wrap gap-2">
