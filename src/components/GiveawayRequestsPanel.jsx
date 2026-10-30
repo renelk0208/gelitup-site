@@ -33,6 +33,14 @@ function nextDay(ymd) {
   return d.toISOString().slice(0, 10)
 }
 
+// Typing here only re-renders this box; the text is passed up when you leave
+// the box, so the card and email preview don't redraw on
+// every key and the page doesn't jump.
+function NoteBox({ initial = '', onCommit, ...rest }) {
+  const [text, setText] = useState(initial)
+  return <textarea {...rest} value={text} onChange={(e) => setText(e.target.value)} onBlur={() => onCommit(text)} />
+}
+
 function approvedEmail(row, req, start, end, note = '') {
   const code = String(row?.discount_code || '').trim()
   const handle = String(row?.instagram || '').trim().replace(/^@?/, '@').replace(/^@$/, '@youraccount')
@@ -561,9 +569,9 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
             </div>
             <label className="mt-2 block text-[12px] font-semibold text-slate-700">
               Personal note to her (optional) — shown at the top of the approval email
-              <textarea
-                value={approving.note || ''}
-                onChange={(e) => setApproving({ ...approving, note: e.target.value })}
+              <NoteBox
+                initial={approving.note || ''}
+                onCommit={(v) => setApproving((prev) => (prev ? { ...prev, note: v } : prev))}
                 rows={4}
                 placeholder="e.g. We love your work! The Halloween video won't fit a December giveaway, so please create a winter/Christmas video instead…"
                 className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-[13px] font-normal"
