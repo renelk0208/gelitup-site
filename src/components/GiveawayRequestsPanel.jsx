@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import AmbassadorReceiptBanner from './AmbassadorReceiptBanner'
 import AmbassadorMyReviews from './AmbassadorMyReviews'
@@ -506,7 +506,9 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
     )
   }
 
-  const Card = ({ req }) => (
+  // Rendered as a plain function (not <Card />) so typing in the note box
+  // doesn't remount the card and lose focus.
+  const renderCard = (req) => (
     <li className="rounded-xl border border-slate-200 bg-white p-3 text-[13px]">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <strong>{name(req)}</strong>
@@ -724,13 +726,13 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Waiting for a decision</p>
             {open.length === 0 ? <p className="mt-1 text-xs text-slate-500">No requests waiting.</p> : (
-              <ul className="mt-2 space-y-2">{open.map((r) => <Card key={r.id} req={r} />)}</ul>
+              <ul className="mt-2 space-y-2">{open.map((r) => <Fragment key={r.id}>{renderCard(r)}</Fragment>)}</ul>
             )}
           </div>
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Booked</p>
             {booked.length === 0 ? <p className="mt-1 text-xs text-slate-500">No giveaways booked.</p> : (
-              <ul className="mt-2 space-y-2">{booked.map((r) => <Card key={r.id} req={r} />)}</ul>
+              <ul className="mt-2 space-y-2">{booked.map((r) => <Fragment key={r.id}>{renderCard(r)}</Fragment>)}</ul>
             )}
           </div>
           {past.length > 0 && (
@@ -738,7 +740,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
               <button type="button" onClick={() => setShowPast((v) => !v)} className="text-xs text-slate-500 underline">
                 {showPast ? 'Hide' : 'Show'} past and declined ({past.length})
               </button>
-              {showPast && <ul className="mt-2 space-y-2">{past.map((r) => <Card key={r.id} req={r} />)}</ul>}
+              {showPast && <ul className="mt-2 space-y-2">{past.map((r) => <Fragment key={r.id}>{renderCard(r)}</Fragment>)}</ul>}
             </div>
           )}
         </div>
