@@ -81,21 +81,21 @@
     {
       "sku": "GIUP-COL-06",
       "code": "06",
-      "name": "Ballerina",
+      "name": "Spring Breath",
       "category": "Pinks",
       "group": "Pod_1"
     },
     {
       "sku": "GIUP-COL-11",
       "code": "11",
-      "name": "Pinky Promise",
+      "name": "Nimbus",
       "category": "Pinks",
       "group": "Pod_1"
     },
     {
       "sku": "GIUP-COL-1801",
       "code": "1801",
-      "name": "Sweet Pea",
+      "name": "2 Hot 2 Handle",
       "category": "Pinks",
       "group": "Pod_1"
     },
@@ -114,16 +114,16 @@
       "group": "Pod_1"
     },
     {
-      "sku": "GIUP-COL-023",
-      "code": "023",
-      "name": "Classic Red",
+      "sku": "GIUP-COL-23",
+      "code": "23",
+      "name": "Jupe-Jupe",
       "category": "Reds",
       "group": "Pod_1"
     },
     {
-      "sku": "GIUP-COL-025",
-      "code": "025",
-      "name": "Cherry Bomb",
+      "sku": "GIUP-COL-25",
+      "code": "25",
+      "name": "Glowstick",
       "category": "Reds",
       "group": "Pod_1"
     },
@@ -137,14 +137,14 @@
     {
       "sku": "GIUP-COL-1802",
       "code": "1802",
-      "name": "Grey Matter",
+      "name": "Bite Your Lip",
       "category": "Darks",
       "group": "Pod_1"
     },
     {
-      "sku": "GIUP-COL-019",
-      "code": "019",
-      "name": "Slate",
+      "sku": "GIUP-COL-19",
+      "code": "19",
+      "name": "Kelp Me",
       "category": "Darks",
       "group": "Pod_1"
     },
@@ -172,7 +172,7 @@
     {
       "sku": "GIUP-COL-2020",
       "code": "2020",
-      "name": "Soft n Sweet",
+      "name": "Soft and Sweet",
       "category": "Pastels",
       "group": "Pod_1"
     },
@@ -200,7 +200,7 @@
     {
       "sku": "GIUP-COL-GCE01",
       "code": "GCE01",
-      "name": "Glass Cat Eye Clear",
+      "name": "Glass Cat Eye #GCE01",
       "category": "Effect",
       "group": "Pod_1"
     }
@@ -272,7 +272,7 @@
     {
       "sku": "GIUP-COL-2521",
       "code": "2521",
-      "name": "Chopco Veil",
+      "name": "Choco Veil",
       "category": "Berries",
       "group": "Pod_2"
     },
@@ -300,7 +300,7 @@
     {
       "sku": "GIUP-COL-2526",
       "code": "2526",
-      "name": "Double Leopardy",
+      "name": "Double Jeopardy",
       "category": "Trends",
       "group": "Pod_2"
     },
@@ -328,28 +328,28 @@
     {
       "sku": "GIUP-COL-2113G",
       "code": "2113G",
-      "name": "Golden Hour",
+      "name": "Jessica Rabbit Dress",
       "category": "Flash",
       "group": "Pod_2"
     },
     {
       "sku": "GIUP-COL-GCE02",
       "code": "GCE02",
-      "name": "Glass Cat Eye Rose",
+      "name": "Glass Cat Eye #GCE02",
       "category": "Effect",
       "group": "Pod_2"
     },
     {
       "sku": "GIUP-COL-GCE05",
       "code": "GCE05",
-      "name": "Glass Cat Eye Ocean",
+      "name": "Glass Cat Eye #GCE05",
       "category": "Effect",
       "group": "Pod_2"
     },
     {
       "sku": "GIUP-COL-112",
       "code": "112",
-      "name": "Vintage Rose",
+      "name": "Moscow Pink",
       "category": "Pinks",
       "group": "Pod_2"
     },
@@ -363,28 +363,28 @@
     {
       "sku": "GIUP-COL-141",
       "code": "141",
-      "name": "Peachy Keen",
+      "name": "Sands of Time",
       "category": "Pastels",
       "group": "Pod_2"
     },
     {
       "sku": "GIUP-COL-2022",
       "code": "2022",
-      "name": "Lemon Squeeze",
+      "name": "PhiPhi Island",
       "category": "Pastels",
       "group": "Pod_2"
     },
     {
       "sku": "GIUP-COL-2023",
       "code": "2023",
-      "name": "Minty Fresh",
+      "name": "PickNickers",
       "category": "Pastels",
       "group": "Pod_2"
     },
     {
       "sku": "GIUP-COL-2025",
       "code": "2025",
-      "name": "Lilac Love",
+      "name": "Calm Palm",
       "category": "Pastels",
       "group": "Pod_2"
     }
