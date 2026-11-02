@@ -51,7 +51,7 @@ async function notifyAdminOfApplication(record, pdf) {
     ['1,000+ followers', 'Yes'],
     ['Country', record.country || '—'],
     ['Language', record.language || '—'],
-    ['Agreement', `${record.agreement_version || ''} (signed)`],
+    ['Guidelines', `${record.agreement_version || ''} (confirmed)`],
   ]
   const html = `
     <h2 style="font-family:Arial,sans-serif;color:#1a1a1a">New ambassador application</h2>
@@ -59,7 +59,7 @@ async function notifyAdminOfApplication(record, pdf) {
       ${rows.map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#6b7280">${escapeHtml(k)}</td><td style="padding:4px 0;color:#1a1a1a"><strong>${escapeHtml(v)}</strong></td></tr>`).join('')}
     </table>
     ${record.message ? `<p style="font-family:Arial,sans-serif;font-size:14px;color:#374151"><em>"${escapeHtml(record.message)}"</em></p>` : ''}
-    <p style="font-family:Arial,sans-serif;font-size:12px;color:#9ca3af">The applicant's signed agreement (English, governing version) is attached as a PDF.</p>
+    <p style="font-family:Arial,sans-serif;font-size:12px;color:#9ca3af">The applicant's confirmed Ambassador Guidelines (English reference version) are attached as a PDF.</p>
   `
   const headers = { 'Content-Type': 'application/json' }
   if (EMAIL_WEBHOOK_ANON_KEY) {
@@ -569,15 +569,15 @@ export default function AmbassadorPage() {
                 <textarea rows={4} value={form.message} onChange={update('message')} placeholder="Tell us a little about your work…" className={inputClass} />
               </div>
 
-              {/* Initial terms — summary + agree checkbox (full contract is sent on approval) */}
+              {/* Ambassador Guidelines — summary + confirm checkbox (full guidelines PDF sent on approval) */}
               <div className="rounded-2xl border border-white/15 bg-white/[0.03] p-4 sm:p-5">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#e879c4]">
-                    Initial Terms &amp; Conditions
+                    Ambassador Guidelines
                   </p>
                 </div>
                 <p className="mt-2 text-[11px] leading-relaxed text-white/45">
-                  These are the initial terms for applying. If your application is approved, we&rsquo;ll email you your full GEL.IT.UP Ambassador Agreement to keep &mdash; in your language where available.
+                  How we expect our ambassadors to present GEL.IT.UP and themselves. If your application is approved, we&rsquo;ll email you the full <a href="/ambassador-guidelines" target="_blank" rel="noreferrer" className="underline">GEL.IT.UP Ambassador Guidelines</a> to keep &mdash; in your language where available.
                 </p>
                 <div className="mt-3 max-h-44 space-y-2.5 overflow-y-auto pr-2">
                   {AGREEMENT_SUMMARY.map((point, i) => (
@@ -598,12 +598,12 @@ export default function AmbassadorPage() {
                   className="mt-0.5 h-4 w-4 shrink-0 accent-[#D43790]"
                 />
                 <span>
-                  I have read and agree to the initial terms and conditions above, and I understand the monthly posting commitment.
+                  I have read the Ambassador Guidelines above and will present GEL.IT.UP, and myself, in this way, including at least 5 quality posts a month.
                 </span>
               </label>
 
               <p className="text-xs text-white/45">
-                Submitting signs this agreement as{' '}
+                Submitting confirms this as{' '}
                 <span className="font-semibold text-white/70">{form.fullName.trim() || 'your full name above'}</span>
                 {' '}on {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}.
               </p>

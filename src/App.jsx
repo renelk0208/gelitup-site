@@ -18563,8 +18563,8 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
     commissionPct: 0,
     discountPct: 20,
     totalRedeemedEur: 0,
-    nextTierAt: 1000,
-    nextTierPct: 15,
+    nextTierAt: 500,
+    nextTierPct: 25,
     shipmentDetails: '',
     trackingNumber: '',
     trackingUrl: '',
@@ -18647,8 +18647,8 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
           commissionPct: 0,
           discountPct: 20,
           totalRedeemedEur: 0,
-          nextTierAt: 1000,
-          nextTierPct: 15,
+          nextTierAt: 500,
+          nextTierPct: 25,
           shipmentDetails: '',
           trackingNumber: '',
           trackingUrl: '',
@@ -18670,8 +18670,8 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
           commissionPct: 0,
           discountPct: 20,
           totalRedeemedEur: 0,
-          nextTierAt: 1000,
-          nextTierPct: 15,
+          nextTierAt: 500,
+          nextTierPct: 25,
           shipmentDetails: '',
           trackingNumber: '',
           trackingUrl: '',
@@ -19387,13 +19387,13 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
             {/* Progress journey */}
             {(() => {
               const total = ambassadorPortalInfo.totalRedeemedEur
-              const progressPct = Math.min(100, (total / 2000) * 100)
+              const progressPct = Math.min(100, (total / 1500) * 100)
               const tiers = [
-                { label: 'Starter', pct: 10, at: 0, icon: '🌱' },
-                { label: 'Rising', pct: 15, at: 1000, icon: '🌟' },
-                { label: 'Elite', pct: 20, at: 2000, icon: '🏆' },
+                { label: 'Starter', pct: 20, at: 0, icon: '🌱' },
+                { label: 'Rising', pct: 25, at: 500, icon: '🌟' },
+                { label: 'Elite', pct: 30, at: 1500, icon: '🏆' },
               ]
-              const currentTierIdx = total >= 2000 ? 2 : total >= 1000 ? 1 : 0
+              const currentTierIdx = total >= 1500 ? 2 : total >= 500 ? 1 : 0
               return (
                 <div className="mt-3 rounded-xl border border-emerald-200 bg-white p-4">
                   <div className="flex items-center justify-between">
@@ -19412,7 +19412,7 @@ function PortalDashboard({ onLogout, tierOverride = null, pricesAllocatedOverrid
                     </div>
                     {/* Milestone dots */}
                     {tiers.map((tier, idx) => {
-                      const pos = (tier.at / 2000) * 100
+                      const pos = (tier.at / 1500) * 100
                       const reached = total >= tier.at
                       const isCurrent = idx === currentTierIdx
                       return (
@@ -21751,6 +21751,7 @@ function App() {
           <Route path="/creators" element={<Navigate to="/ambassadors" replace />} />
           <Route path="/ambassador-agreement" element={<AmbassadorAgreementPage />} />
           <Route path="/ambassador-terms" element={<Navigate to="/ambassador-agreement" replace />} />
+          <Route path="/ambassador-guidelines" element={<AmbassadorAgreementPage />} />
           <Route path="/ambassador-details" element={<AmbassadorDetailsPage />} />
           <Route path="/ambassador-shipping" element={<Navigate to="/ambassador-details" replace />} />
           <Route path="/sample-kit" element={<Navigate to="/academy-kit" replace />} />

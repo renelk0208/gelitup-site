@@ -4,12 +4,12 @@ import { AGREEMENT_SECTIONS, AGREEMENT_VERSION } from '../data/ambassadorAgreeme
 
 export default function AmbassadorAgreementPage() {
   useEffect(() => {
-    document.title = 'Ambassador Agreement | GEL.IT.UP by GIUP®'
+    document.title = 'Ambassador Guidelines | GEL.IT.UP by GIUP®'
     const meta = document.querySelector('meta[name="description"]')
     if (meta) {
       meta.setAttribute(
         'content',
-        'The full GEL.IT.UP Ambassador Agreement — commitments, content permissions and how the partnership works.',
+        'The GEL.IT.UP Ambassador Guidelines — how our ambassadors present GEL.IT.UP and themselves, what we expect and what they gain.',
       )
     }
   }, [])
@@ -21,8 +21,9 @@ export default function AmbassadorAgreementPage() {
           GEL.IT.UP by GIUP®
         </p>
         <h1 className="mt-2 text-2xl font-semibold text-slate-900 sm:text-3xl">
-          Ambassador Agreement
+          Ambassador Guidelines
         </h1>
+        <p className="mt-1 text-sm text-slate-600">How we expect our ambassadors to present GEL.IT.UP, and themselves.</p>
         <p className="mt-2 text-sm text-slate-500">
           Version {AGREEMENT_VERSION} · Please read this before applying to the{' '}
           <NavLink to="/ambassadors" className="font-medium text-[#D43790] hover:underline">Ambassador Programme</NavLink>.

@@ -165,7 +165,7 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
     doc.setFont(FONT, 'bold')
     doc.setFontSize(16)
     doc.setTextColor(...INK)
-    doc.text(tr.title || 'Ambassador Agreement', margin, y)
+    doc.text(tr.title || 'Ambassador Guidelines', margin, y)
     y += 14
     doc.setFont(FONT, 'normal')
     doc.setFontSize(8.5)
@@ -215,17 +215,17 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
   doc.setFont(FONT, 'bold')
   doc.setFontSize(16)
   doc.setTextColor(...INK)
-  doc.text('Ambassador Agreement', margin, y)
+  doc.text('Ambassador Guidelines', margin, y)
   y += 13
   doc.setFont(FONT, 'normal')
   doc.setFontSize(8.5)
   doc.setTextColor(...MUTED)
-  doc.text(`Version ${AGREEMENT_VERSION} — English (governing version)`, margin, y)
+  doc.text(`Version ${AGREEMENT_VERSION} — English (reference version)`, margin, y)
   y += 16
 
   // ── Applicant / signature block ──
   const boxLines = [
-    ['Name (electronic signature)', applicant.fullName || '—'],
+    ['Name (confirmed)', applicant.fullName || '—'],
     ['Email', applicant.email || '—'],
     ['Phone', applicant.phone || '—'],
     ['Instagram', applicant.instagram ? `@${applicant.instagram}` : '—'],
@@ -234,7 +234,7 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
     ['Shows own work on profile', applicant.workShown ? 'Yes' : (applicant.workShown === false ? 'No' : '—')],
     ['More than 1,000 followers', applicant.followersOver500 ? 'Yes' : (applicant.followersOver500 === false ? 'No' : '—')],
     ['Shipping address', applicant.address || '—'],
-    ['Signed on', applicant.signedDate || '—'],
+    ['Confirmed on', applicant.signedDate || '—'],
   ]
   const boxPad = 9
   const rowH = 13
@@ -323,7 +323,7 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
   doc.setFontSize(8.5)
   doc.setTextColor(...MUTED)
   const confirm = doc.splitTextToSize(
-    `Signed electronically by ${applicant.fullName || '—'} on ${applicant.signedDate || '—'} by submitting the ambassador application at gelitup.com/ambassadors. This English version is the governing version of the agreement.`,
+    `Confirmed by ${applicant.fullName || '—'} on ${applicant.signedDate || '—'} by submitting the ambassador application at gelitup.com/ambassadors. This English version is the reference version of the GEL.IT.UP Ambassador Guidelines.`,
     contentW,
   )
   doc.text(confirm, margin, y)
@@ -345,7 +345,7 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
   }
 
   const safeName = String(applicant.fullName || 'applicant').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'applicant'
-  const filename = `GELITUP-Ambassador-Agreement-${safeName}.pdf`
+  const filename = `GELITUP-Ambassador-Guidelines-${safeName}.pdf`
 
   const dataUri = doc.output('datauristring')
   const base64 = dataUri.includes('base64,') ? dataUri.split('base64,')[1] : ''
@@ -541,7 +541,7 @@ export async function buildAmbassadorWelcomeLetterPdf(applicant = {}) {
     ['1. Film before you open it.', ' Start recording before you cut the tape — the reveal is the best part, and your audience will want to see it too.'],
     ['2. Show every piece.', ' Take a moment to show off each shade and product clearly — good lighting works best.'],
     ['3. Share your first impressions.', ' Tell your audience what you\'re most excited to try first.'],
-    ['4. Use your code' + (discountCode ? ` ${discountCode}.` : '.'), ' Your personal discount code is included in this box — share it with your followers for 20% off. Please note that the discount code can only be used on shop.gelitup.com.'],
+    ['4. Use your code' + (discountCode ? ` ${discountCode}.` : '.'), ' Your personal discount code is included in this box — share it with your followers for 20% off. It works on shop.gelitup.com only. Put your personal link in your bio: shop.gelitup.com/discount/' + (discountCode || 'YOURCODE') + '.'],
     ['5. Post it.', ' Share your unboxing on Instagram or TikTok.'],
   ]
   steps.forEach(([label, rest]) => boldPara(label, rest, 10, 10))

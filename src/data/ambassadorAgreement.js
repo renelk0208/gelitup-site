@@ -1,138 +1,154 @@
-// Single source of truth for the GEL.IT.UP Ambassador Agreement.
+// Single source of truth for the GEL.IT.UP Ambassador Guidelines — an advisory
+// on how we expect ambassadors to present GEL.IT.UP and themselves (formerly
+// called the "Ambassador Agreement"; file and export names kept for history).
 // Rendered both as the summary panel on the application form and as the full
 // /ambassador-agreement page. Bump AGREEMENT_VERSION whenever the terms change
 // so stored consents stay traceable to the exact wording that was agreed.
 
-export const AGREEMENT_VERSION = 'v9-2026-10'
+export const AGREEMENT_VERSION = 'v10-2026-11'
 
 // Minimum content commitment. Change this number to adjust the requirement
 // everywhere it appears (summary, full terms, and helper copy).
-export const POST_MIN_PER_MONTH = 10
+export const POST_MIN_PER_MONTH = 5
 
-// Minimum videos/reels required each month.
-export const VIDEO_MIN_PER_MONTH = 4
+// No separate video minimum any more (kept for older imports).
+export const VIDEO_MIN_PER_MONTH = 0
 
-// Where ambassadors must send their content for our library.
+// Kept for older imports; content now goes to the Google Drive folder below.
 export const CONTENT_SUBMISSION_NUMBER = '+30 694 071 5234'
+
+// Ambassadors upload original, full-quality videos to their personal folder here.
+export const CONTENT_DRIVE_URL = 'https://drive.google.com/drive/folders/1VKpSyxpEaKW3n4czWdAL5INUdOQ0mBWe?usp=sharing'
+
+// Minimum followers to join.
+export const FOLLOWER_MIN = '1,000'
+
+// Credit on her own orders, by total orders placed with her code.
+export const CREDIT_LEVELS = [
+  { from: 0, pct: 20 },
+  { from: 500, pct: 25 },
+  { from: 1500, pct: 30 },
+]
 
 // The discount their personal code gives to their nail-tech followers.
 export const FOLLOWER_DISCOUNT_PCT = 20
 
-// Short bullets shown inside the form's scrollable agreement panel.
+// Short bullets shown inside the application form's guidelines panel.
 export const AGREEMENT_SUMMARY = [
-  `Post at least ${POST_MIN_PER_MONTH} pieces of your own content each month using GEL.IT.UP products, including at least ${VIDEO_MIN_PER_MONTH} videos/reels across Instagram and TikTok (if you have a TikTok account). This minimum reflects the amount of product provided in each PR package.`,
-  'Every post must include #gelitup and mention @gelitupinternational on Instagram or @gelitupofficial on TikTok.',
-  'Disclose the partnership where advertising rules require it (e.g. #ad / "gifted").',
-  `Send the content you create to our official WhatsApp/Viber number (${CONTENT_SUBMISSION_NUMBER}) so we can save it to our library.`,
-  'You are welcome to add GEL.IT.UP as a collaborator on your Instagram and TikTok posts so they are shared to our profiles too.',
-  'STRICT — NO EXCEPTIONS: no other nail brand’s products may appear in the same photo, video, frame or post as GEL.IT.UP. Other brands are fine in separate, unrelated content — never together with GEL.IT.UP in the same piece of content.',
-  `Your personal code gives genuine nail-technician followers a flat ${FOLLOWER_DISCOUNT_PCT}% off (valid on shop.gelitup.com only).`,
-  'You may share your code publicly, but any link used with it must lead only to shop.gelitup.com — never to coupon, deal or reseller sites.',
-  'You will receive a GEL.IT.UP Portal B2B account automatically (gelitup.com/portal/login), with activation sent by email.',
-  'Commission from orders placed with your code is added as account credit toward your next order: 10% by default, 15% once total referred orders reach €1,000, and 20% once they reach €2,000.',
-  'Represent GEL.IT.UP professionally — use the products as directed, keep your content and conduct in line with our brand and reputation, and never resell, relabel or make misleading claims about them.',
-  'Do not create your own GEL.IT.UP logos — this is strictly against our policy. You will be provided with official black and white logos to use unchanged, only on media created with GEL.IT.UP products.',
-  'Let GEL.IT.UP save, repost, feature and reuse your content — including what you send us and what you tag — across our channels, marketing and other platforms, credited with your social media tags.',
-  'Your content may also be shared to a central drive used by GEL.IT.UP teams in other countries, who may repost it to local social media with credit to your own handles.',
-  'Should another country upload your media, they may do so provided they tag the relevant ambassador — please note your discount code will not apply to that country.',
-  'You keep ownership of your work — except that anything uploaded with our logo becomes the property of GEL.IT.UP by GIUP®, as the name is a registered trademark.',
-  'PR packages are sent about once a month — sometimes more often around new product drops — as gifts to support your content, depending on you keeping up your monthly posts.',
-  'Non-exclusive and month-to-month — you can work with others, and either side can end it anytime.',
+  'GEL.IT.UP ambassadors help the brand grow in their country — more nail technicians, salons and academies using our products — not only follower numbers.',
+  `Share at least ${POST_MIN_PER_MONTH} quality feed posts, reels or carousels a month made with GEL.IT.UP products. Stories don't count.`,
+  'Add @gelitupinternational as a Collab collaborator on these posts, use #gelitup, and mention @gelitupofficial on TikTok.',
+  'Create content good enough for our YouTube channel — mini tutorials, "how to" videos and product presentations — and upload the original files to your personal Google Drive folder.',
+  `Put your personal code in your captions and your personal link in your bio. Your followers get ${FOLLOWER_DISCOUNT_PCT}% off at shop.gelitup.com.`,
+  'Review every product you receive on shop.gelitup.com and confirm every package on your ambassador page.',
+  'STRICT — NO EXCEPTIONS: no other nail brand’s products in the same photo, video or post as GEL.IT.UP.',
+  'Use only the official GEL.IT.UP logos, unchanged. Never make your own.',
+  'Earn credit on your own orders for every order placed with your code: 20%, rising to 25% from €500 and 30% from €1,500.',
+  'Your best work is shared internationally on our YouTube channel and social media, always credited to you.',
+  'Packages and giveaways go to active ambassadors. Non-exclusive and month to month — either side can stop at any time.',
 ]
 
-// Full agreement, section by section. Kept short, warm and plain — a friendly
-// one-page working agreement rather than dense legalese.
+// Full guidelines, section by section. Warm, plain and short.
 //
 // A section may set `strict: true` to mark it as a firm, non-negotiable rule.
-// Renderers (the /ambassador-agreement page and the contract PDF) style
-// `strict` sections in bold + underline + a red highlight so they visually
-// stand out as serious, no-exceptions terms.
+// Renderers (the guidelines page and the PDF) style `strict` sections in
+// bold + underline + a red highlight so they stand out.
 export const AGREEMENT_SECTIONS = [
   {
     heading: 'Welcome',
     points: [
-      'This is a friendly working agreement between you and GEL.IT.UP (GIUP®) as part of our Ambassador Programme — a collaboration between professionals, not a job. Here’s what we each do.',
+      'A GEL.IT.UP ambassador is a qualified nail technician who helps the brand grow in her country, through professional content, real results and a good name for GEL.IT.UP. It is a professional partnership between professionals, not general influencer promotion. These guidelines explain how we present GEL.IT.UP, and ourselves, together.',
     ],
   },
   {
-    heading: 'Who this is for',
+    heading: 'Why the programme exists',
     points: [
-      'The Ambassador Programme is exclusively for qualified nail technicians. To be accepted, every applicant must meet all three of these requirements — they are firm and non-negotiable:',
-      'You are a qualified nail technician, holding a recognised nail qualification or certification.',
-      'You actively show your own nail work on your public social profiles — sets you have created yourself, not reposted.',
-      'You have more than 1,000 followers on the profile where you post your nail work.',
-      'Becoming an ambassador is a serious professional collaboration, not general influencer promotion. Applicants who do not meet all three requirements can’t be accepted.',
+      'We measure an ambassador by how she helps GEL.IT.UP expand, not by her follower count.',
+      'New countries and new customers: ambassadors make GEL.IT.UP known among nail professionals where we are not yet strong, so salons, academies and nail technicians start ordering.',
+      'Distribution: interest built by ambassadors helps us find and support distributors, so the brand can grow in each market.',
+      'Trust: honest reviews and real work by qualified technicians show other professionals what our products can do.',
+      'Content for the whole brand: the best ambassador content is shared internationally on our YouTube channel and all our social media platforms, in every country GEL.IT.UP works in.',
     ],
   },
   {
-    heading: 'What you do',
+    heading: 'Who can become an ambassador',
     points: [
-      `Share at least ${POST_MIN_PER_MONTH} pieces of your own content each month using GEL.IT.UP products — including a minimum of ${VIDEO_MIN_PER_MONTH} videos/reels across Instagram and TikTok (if you hold a TikTok account).`,
-      'This minimum is set considering the amount of product you receive in each PR package — the quantity provided is enough to support this level of content.',
-      'Every post must include the hashtag #gelitup, and mention @gelitupinternational on Instagram or @gelitupofficial on TikTok.',
-      `Send the content you create to our WhatsApp/Viber (${CONTENT_SUBMISSION_NUMBER}) so we can save and feature it.`,
-      'When you share your discount code, please note that it is only valid for the shop.gelitup.com website.',
-      'You are also welcome to add GEL.IT.UP as a collaborator on your Instagram and TikTok posts, so they are shared directly to our profiles too.',
-      'Where the rules ask (e.g. because a product was gifted), simply mark it as a partnership — #ad or "gifted".',
+      'The programme is for qualified nail technicians only. Every applicant meets all three requirements:',
+      'You hold a recognised nail qualification or certification.',
+      'You show your own nail work on your public social profiles, not reposts.',
+      `You have more than ${FOLLOWER_MIN} followers on the profile where you post your nail work.`,
+    ],
+  },
+  {
+    heading: 'What we expect from you',
+    points: [
+      `At least ${POST_MIN_PER_MONTH} quality posts a month: share at least ${POST_MIN_PER_MONTH} feed posts, reels or carousels made with GEL.IT.UP products each month. Your first package holds 10 to 15 products and later packages add more, so there is plenty to create with. Stories don't count towards the ${POST_MIN_PER_MONTH}.`,
+      'Quality first: clean, professional photos and videos of your own work — well lit, in focus, with the products clearly shown.',
+      'GEL.IT.UP products only in any post that features GEL.IT.UP (see the strict rule below).',
+      'Tag us every time: use #gelitup and add @gelitupinternational as a Collab collaborator on each of these posts, so they also appear on our profile. Only Collab posts count. On TikTok, mention @gelitupofficial.',
+      'Your code in every post: mention your personal code in your captions and keep your personal link in your bio (shop.gelitup.com/discount/YOURCODE). Add it as a link sticker on stories that show GEL.IT.UP.',
+      'Review what you receive: leave an honest review on shop.gelitup.com for every product you are sent.',
+      'Confirm every package on your ambassador page as soon as it arrives.',
+      'Mark the partnership where advertising rules ask for it, e.g. #ad or "gifted".',
+    ],
+  },
+  {
+    heading: 'Content good enough for our YouTube channel',
+    points: [
+      'Your best videos are shown internationally, on the GEL.IT.UP YouTube channel and all our social media platforms, always credited to you.',
+      'What we love to receive: mini nail art tutorials, "how to" videos (how to apply or use a product) and presentations of GEL.IT.UP products.',
+      'The standard: good light, a steady camera, clean hands and nails, the products clearly visible, and no text on the video. Photos carry minimal text, with the product name or number in the description.',
+      'Name your files by colour name and number, or by the key product.',
+      `Post on Instagram, then upload the original: Instagram lowers the quality, so please upload the original, full-quality file to your personal folder in the GEL.IT.UP Google Drive (${CONTENT_DRIVE_URL}).`,
+      'Shared across countries: GEL.IT.UP teams in other countries may repost your content, always tagging you. Your discount code does not apply in those countries.',
+    ],
+  },
+  {
+    heading: 'What you gain',
+    points: [
+      'International exposure: your work, credited to you, in front of nail professionals in every country GEL.IT.UP works in.',
+      'Growth as a professional: creating tutorials and product content builds your skills, your portfolio and your name as an educator.',
+      'PR packages of professional GEL.IT.UP products to create with. They are gifts, not a sale, and go to ambassadors who stay active: posting quality content, using their code, reviewing and confirming their packages.',
+      `Your personal code: your followers get ${FOLLOWER_DISCOUNT_PCT}% off at shop.gelitup.com.`,
+      'Credit on your own orders for every order placed with your code: 20% from the first order, 25% once total orders with your code reach €500, and 30% once they reach €1,500.',
+      'Giveaways: active ambassadors who review their products and send a quality video can host an official GEL.IT.UP giveaway as a Collab with @gelitup. We supply and ship the prize.',
+      'A GEL.IT.UP Portal account (gelitup.com/portal/login?portal=ambassador), where you see your packages, reviews, code orders and credit.',
     ],
   },
   {
     heading: 'NO OTHER BRANDS IN YOUR CONTENT — STRICT, NO EXCEPTIONS',
     strict: true,
     points: [
-      'This rule is absolute and non-negotiable: no product from any other nail brand may appear in the same photo, video, frame, reel or post as any GEL.IT.UP product. Not in the foreground, not in the background, not visible on a table or shelf in shot — no other brand may be present anywhere in the same piece of content.',
-      'This is because your followers see these posts and ask what products are being used — and we cannot have another company named, shown or implied alongside our brand. Every post you make featuring GEL.IT.UP must feature GEL.IT.UP products only.',
-      'You are free to use other brands’ products in your own separate content — just never together with, alongside, or in the same post as GEL.IT.UP. It is one or the other, never both in the same content.',
-      'Any content that breaks this rule will not be approved and will not be posted or featured by us under any circumstances. Content mixing brands is rejected outright, with no exceptions and no case-by-case review.',
-      'Repeated or knowing breaches of this rule are treated as a serious violation of this agreement and may result in immediate removal from the Ambassador Programme.',
+      'No product from any other nail brand may appear in any photo, video, frame, reel or post that shows GEL.IT.UP — not in the foreground, not in the background, not on a table or shelf in shot.',
+      'Your followers ask what products are being used, and we cannot have another company named, shown or implied alongside our brand.',
+      'You are free to use other brands in your own separate content — just never together with GEL.IT.UP in the same piece of content.',
+      'Content that mixes brands is never featured, and repeated breaches may end the collaboration.',
     ],
   },
   {
-    heading: 'Your discount code & earnings',
+    heading: 'Firm rules',
     points: [
-      `You get a personal discount code to give to your followers who are genuine nail technicians, so they can buy GEL.IT.UP at a flat ${FOLLOWER_DISCOUNT_PCT}% off.`,
-      'You are welcome to share and post your code publicly. Any link you use alongside it must lead only to shop.gelitup.com — never to coupon, deal or reseller sites. Codes that are misused will be switched off.',
-      'You are automatically given a B2B account on the GEL.IT.UP Portal (gelitup.com/portal/login) — no separate registration needed. You will receive an email to activate your account and set your password.',
-      'Every order placed with your code earns commission as account credit, automatically applied toward your own next order. Commission starts at 10%, rises to 15% once total orders placed through your code reach €1,000, and 20% once they reach €2,000.',
+      'Official logos only: use the black and white GEL.IT.UP logos we give you, unchanged, and only on media made with GEL.IT.UP products. Never make your own logo. Anything uploaded with our logo becomes the property of GEL.IT.UP by GIUP®, a registered trademark.',
+      'Your code belongs on shop.gelitup.com: any link you share with it leads only to shop.gelitup.com, never to coupon, deal or reseller sites. Misused codes are switched off.',
+      'Use the products professionally, as directed and safely. Never resell, decant, relabel or alter them, and never make medical or misleading claims.',
+      'Represent GEL.IT.UP well: keep your content and public conduct respectful and on-brand. We may ask you to adjust or remove off-brand content.',
     ],
   },
   {
-    heading: 'Representing us well',
+    heading: 'How we review activity',
     points: [
-      'As an ambassador you’re a face of GEL.IT.UP, so we ask that everything you do with our products reflects the brand well.',
-      'Use the products professionally and as directed, following correct application and safety guidance. Don’t resell, decant, relabel or tamper with them, and don’t make medical or misleading claims.',
-      'Keep your content and public conduct respectful and on-brand — nothing that could reasonably harm GEL.IT.UP’s name or reputation. If something you post is off-brand, we may ask you to adjust or remove it, and we can end the partnership if the brand is being misrepresented.',
-      'Do not create your own GEL.IT.UP logos — this is strictly against our policy. You will be provided with official logos you can use in black and white. No changes to the logo are allowed — no colour changes, no distortion or misuse, and it is only allowed to be used on media you create with GEL.IT.UP products.',
+      "We look at ambassadors' Instagram accounts regularly, along with their reviews, code orders and confirmed packages.",
+      'Your next package is sent only after you confirm the last one arrived.',
+      "If we see no activity, we may pause the collaboration. Paused ambassadors receive no new packages and can't host giveaways.",
+      'You can pause or end the collaboration yourself at any time from your ambassador page.',
+      'The partnership is non-exclusive and runs month to month. You are free to work with other brands, in separate content.',
+      'You keep ownership of your work. If you stop, your code is switched off, and GEL.IT.UP may keep using content already shared, with credit to you.',
     ],
   },
   {
-    heading: 'What we do',
+    heading: 'Your confirmation',
     points: [
-      'Feature your work on our channels and give you your personal discount code to share.',
-      'Send you PR packages to create with — usually about once a month, and sometimes more often when there’s a new product drop. These are gifts to support your content, not a sale, and depend on you meeting your monthly posting minimums above. This is fair given the quality of the kits we provide — if these minimums are not being met, we can end the collaboration with immediate effect.',
-    ],
-  },
-  {
-    heading: 'Using your content',
-    points: [
-      'You let us save, repost, edit for format and reuse the content you send us or tag us in — across our channels, website, marketing and other platforms, always credited with your tags.',
-      'Your content may also be uploaded to a shared central drive accessible by GEL.IT.UP teams in other countries, who may repost it to their own local social media, provided they credit you using your own social media handles.',
-      'Should another country upload your media (photos/videos) they are entitled to do so provided that they tag the relevant ambassador. Please note that when this happens, your discount code will not apply to that country.',
-      'The work must be your own; you keep ownership, and this stays true for anything already shared even if you later stop.',
-      'Please note that anything uploaded with our logo becomes property of GEL.IT.UP by GIUP®, as the name is a registered trademark.',
-    ],
-  },
-  {
-    heading: 'The simple stuff',
-    points: [
-      'You’re free to work with other brands — this isn’t employment and there’s no guaranteed payment.',
-      'It runs month to month and either of us can stop anytime. If you stop, your discount code is switched off; permission for content already shared continues.',
-    ],
-  },
-  {
-    heading: 'Your signature',
-    points: [
-      'By ticking the box and submitting your application, you agree to this. Your typed name is your signature, dated the day you apply.',
+      'By ticking the box and submitting your application, you confirm you have read these guidelines and will present GEL.IT.UP, and yourself, in this way. Your typed name and the date you apply are recorded with your application.',
     ],
   },
 ]

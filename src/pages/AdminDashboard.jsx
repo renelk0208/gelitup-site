@@ -4719,7 +4719,7 @@ function buildAmbassadorWelcomeEmail(row, setPasswordLink = '') {
       ${codeBlock}
       ${setPasswordLink ? `<p><strong>Your ambassador portal account is ready.</strong> Create your password to log in, see your code and follow the orders made with it:</p>
       <p><a href="${escAmb(setPasswordLink)}" style="display:inline-block;background:#D43790;color:#ffffff;padding:12px 20px;border-radius:9999px;text-decoration:none;font-weight:700">Create your password &amp; log in</a></p>` : ''}
-      <p>📎 Your <strong>Ambassador Agreement</strong> is attached to this email as a PDF for your records.</p>
+      <p>📎 Your <strong>Ambassador Guidelines</strong> are attached to this email as a PDF. They explain how we present GEL.IT.UP, and ourselves, together: at least 5 quality posts a month with @gelitupinternational as a Collab, your code in every post and your personal link in your bio, and content good enough for our YouTube channel.</p>
       <p>Your PR package is being prepared — we'll email you again with the tracking details as soon as it ships.</p>
       <p>If you have any questions in the meantime, just reply to this email.</p>
       <p>With love,<br/>The GEL.IT.UP Team</p>
@@ -5500,7 +5500,7 @@ const [shipDatePrompt, setShipDatePrompt] = useState(null) // { rowId, alsoEmail
       logBody: 'Welcome email with Ambassador Agreement PDF attached and the link to create her portal password.',
       auditLog: logAmbassadorSend,
     })
-    setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Welcome email + agreement sent to ${email}` : res.error)
+    setEmail(row.id, res.ok ? 'sent' : 'error', res.ok ? `Welcome email + guidelines sent to ${email}` : res.error)
     return res.ok
   }
 
@@ -8144,8 +8144,8 @@ const deleteApplication = async (row) => {
                     )}
                     <p className="mt-1.5 text-[11px] text-slate-400">
                       {row.agreed_terms
-                        ? <>✓ Signed the Ambassador Agreement {row.agreement_version ? `(${row.agreement_version})` : ''} on {fmtDate(row.created_at)}</>
-                        : <span className="text-rose-500">⚠ No agreement on record</span>}
+                        ? <>✓ Confirmed the Ambassador Guidelines {row.agreement_version ? `(${row.agreement_version})` : ''} on {fmtDate(row.created_at)}</>
+                        : <span className="text-rose-500">⚠ No guidelines confirmation on record</span>}
                     </p>
                   </div>
                   <div className="border-t border-slate-200 pt-3">
@@ -8192,7 +8192,7 @@ const deleteApplication = async (row) => {
                               : 'border-fuchsia-300 text-fuchsia-700 hover:bg-fuchsia-50'
                           }`}
                         >
-                          {contractAlreadySent ? '📄 Contract sent' : '📄 Send contract'}
+                          {contractAlreadySent ? '📄 Guidelines sent' : '📄 Send guidelines'}
                         </button>
                       )}
                       {isApproved && (
