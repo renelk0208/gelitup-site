@@ -361,20 +361,6 @@
       "group": "Pod_2"
     },
     {
-      "sku": "GIUP-COL-061",
-      "code": "061",
-      "name": "Deep Sangria",
-      "category": "Berries",
-      "group": "Pod_2"
-    },
-    {
-      "sku": "GIUP-COL-088",
-      "code": "088",
-      "name": "Midnight Sky",
-      "category": "Darks",
-      "group": "Pod_2"
-    },
-    {
       "sku": "GIUP-COL-141",
       "code": "141",
       "name": "Peachy Keen",

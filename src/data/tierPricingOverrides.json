@@ -10636,23 +10636,5 @@
         "professional": 3.29,
         "sales": 7.57,
         "country": 2.49
-    },
-    {
-        "category": "SOLID GEL POLISH",
-        "product": "Deep Sangria",
-        "b2bPrice": 8.9,
-        "authority": 1.96,
-        "professional": 3.29,
-        "sales": 7.57,
-        "country": 2.49
-    },
-    {
-        "category": "SOLID GEL POLISH",
-        "product": "Midnight Sky",
-        "b2bPrice": 8.9,
-        "authority": 1.96,
-        "professional": 3.29,
-        "sales": 7.57,
-        "country": 2.49
     }
 ]
