@@ -48,10 +48,10 @@ export function giveawaySlotDates(month, slot) {
   return { start: ymd(start), end: ymd(end) }
 }
 
-// The next `count` calendar months, starting with next month: ['YYYY-MM', ...]
+// The next `count` calendar months, starting with the current month: ['YYYY-MM', ...]
 export function upcomingGiveawayMonths(count = 3, now = new Date()) {
   const out = []
-  for (let i = 1; i <= count; i += 1) {
+  for (let i = 0; i < count; i += 1) {
     const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + i, 1))
     out.push(`${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}`)
   }
