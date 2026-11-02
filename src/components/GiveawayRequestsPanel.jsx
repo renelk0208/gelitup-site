@@ -64,7 +64,7 @@ function approvedEmail(row, req, start, end, note = '') {
         <li>To enter, followers follow you and @gelitup, like the post and tag 1–2 nail tech friends.</li>
         <li><strong>GEL.IT.UP draws the winner</strong> at random from the comments on Monday morning after your giveaway ends, checks that she follows both accounts and is a qualified nail technician, and lets you know who won. Please don't pick a winner yourself.</li>
         <li>Announce the winner in your stories on <strong>Monday afternoon</strong>, once we tell you who won. We contact her and ship the prize.</li>
-        ${code ? `<li>Then post a story for everyone else: "Didn't win this time? Use my code <strong>${esc(code)}</strong> for 20% off."</li>` : ''}
+        ${code ? `<li>Then post a story for everyone else: "Didn't win this time? Use my code <strong>${esc(code)}</strong> for 20% off at shop.gelitup.com." Add your personal link as a <strong>link sticker</strong>, so followers tap straight through with the discount already applied: <a href="https://shop.gelitup.com/discount/${encodeURIComponent(code)}" style="color:#d43790">shop.gelitup.com/discount/${esc(code)}</a></li>` : ''}
       </ol>
       <p><strong>Please add these terms at the end of your caption:</strong></p>
       <div style="border-left:3px solid #d43790;padding:8px 12px;background:#fdf0f5">
@@ -151,7 +151,7 @@ function inviteEmail(row, requests = []) {
       <ul>
         <li><strong>GEL.IT.UP draws the winner</strong> at random from the comments, so every entrant gets a fair chance. We check that she follows both accounts and is a qualified nail technician, then tell you who won.</li>
         <li>Announce the winner in your stories. We contact her and supply and ship the prize.</li>
-        <li>Then post a story for everyone else: "Didn't win this time? Use my code ${code ? `<strong>${esc(code)}</strong>` : 'YOURCODE'} for 20% off." Every order with your code earns you credit.</li>
+        <li>Then post a story for everyone else: "Didn't win this time? Use my code ${code ? `<strong>${esc(code)}</strong>` : 'YOURCODE'} for 20% off at shop.gelitup.com." Add your personal link as a <strong>link sticker</strong>, so followers tap straight through with the discount already applied: ${code ? `<a href="https://shop.gelitup.com/discount/${encodeURIComponent(code)}" style="color:#d43790">shop.gelitup.com/discount/${esc(code)}</a>` : 'shop.gelitup.com/discount/YOURCODE'}. Every order with your code earns you credit.</li>
       </ul>
       <p>The winner must show us she is a qualified nail technician within 48 hours, otherwise we draw again. Protect your followers from fake accounts: add "The winner will only be contacted by @gelitup. We will never ask for payment or card details." We'll send you the full caption terms with your confirmed dates.</p>
 
