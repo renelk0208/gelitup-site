@@ -382,20 +382,6 @@
       "group": "Pod_2"
     },
     {
-      "sku": "GIUP-COL-ST01",
-      "code": "ST01",
-      "name": "Spider Gel Black",
-      "category": "Art",
-      "group": "Pod_2"
-    },
-    {
-      "sku": "GIUP-COL-ST02",
-      "code": "ST02",
-      "name": "Spider Gel White",
-      "category": "Art",
-      "group": "Pod_2"
-    },
-    {
       "sku": "GIUP-COL-2022",
       "code": "2022",
       "name": "Lemon Squeeze",
