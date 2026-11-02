@@ -11,6 +11,7 @@ import {
   receivedPackageCount,
   recentApprovedGiveaway,
   upcomingGiveawayMonths,
+  giveawayAvailability,
 } from '../../src/lib/giveaway.js'
 
 // "Request a giveaway" card in the ambassador portal.
@@ -215,6 +216,8 @@ export async function buildStatus(supabase, ambassador, { detail = false, shopPr
     supabase.from('ambassador_review_credits').select('judgeme_review_id, product_handle').eq('application_id', ambassador.id),
     supabase.from('ambassador_reported_items').select('id, line, product_handle, product_title, created_at').eq('application_id', ambassador.id),
   ])
+  // Every booked / requested week, so she can see which weeks are free.
+  const { data: allRequests } = await supabase.from('ambassador_giveaway_requests').select('id, status, slot_start, preferred_month, preferred_slot').in('status', ['approved', 'requested', 'waitlisted'])
   if (shipErr) throw new Error(shipErr.message)
   if (reqErr) throw new Error(reqErr.message)
 
@@ -342,8 +345,9 @@ export async function buildStatus(supabase, ambassador, { detail = false, shopPr
     minProducts: GIVEAWAY_MIN_PRODUCTS,
     minReviews: GIVEAWAY_MIN_REVIEWS,
     months: upcomingGiveawayMonths(3),
+    availability: giveawayAvailability(upcomingGiveawayMonths(3), allRequests || []),
     openRequest: openRequest
-      ? { id: openRequest.id, status: openRequest.status, created_at: openRequest.created_at, preferred_month: openRequest.preferred_month, products: openRequest.products }
+      ? { id: openRequest.id, status: openRequest.status, created_at: openRequest.created_at, preferred_month: openRequest.preferred_month, preferred_slot: openRequest.preferred_slot, products: openRequest.products }
       : null,
     lastGiveaway: lastGiveaway ? { slot_start: lastGiveaway.slot_start, slot_end: lastGiveaway.slot_end, products: lastGiveaway.products } : null,
     allowedFrom: nextGiveawayAllowedFrom(lastGiveaway),
@@ -530,6 +534,10 @@ export async function handler(event) {
   if (picked.some((h) => !reviewedByHandle.has(h))) return json(400, { error: 'Only products you have received and reviewed can be given away.' })
   const month = clean(body.preferredMonth, 7)
   if (!status.months.includes(month)) return json(400, { error: 'Please choose a month.' })
+  const slot = Number(body.preferredSlot)
+  const week = (status.availability || []).find((m) => m.month === month)?.weeks.find((w) => w.slot === slot)
+  if (!week) return json(400, { error: 'Please choose a week.' })
+  if (week.state !== 'free') return json(409, { error: 'Sorry, that week has just been taken. Please choose another free week.' })
   const idea = clean(body.idea)
   if (idea.length < 10) return json(400, { error: 'Please tell us a little about the look you will create.' })
   // Her qualifying video: a mini nail art tutorial, a how-to, or a GEL.IT.UP
@@ -547,6 +555,7 @@ export async function handler(event) {
     application_id: ambassador.id,
     products: picked.map((h) => reviewedByHandle.get(h)),
     preferred_month: month,
+    preferred_slot: slot,
     idea,
     video_type: videoType,
     video_url: videoUrl,

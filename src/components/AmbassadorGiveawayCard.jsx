@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
-import { formatGiveawayDate, formatGiveawayMonth } from '../lib/giveaway'
+import { formatGiveawayDate, formatGiveawayMonth, giveawayMonthTheme } from '../lib/giveaway'
 
 // "Request a giveaway" card in the ambassador's profile.
 // Shows the request form only when she is eligible, offering only products she
@@ -36,6 +36,7 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
   const [open, setOpen] = useState(false)
   const [picked, setPicked] = useState([])
   const [month, setMonth] = useState('')
+  const [slot, setSlot] = useState(0)
   const [idea, setIdea] = useState('')
   const [videoType, setVideoType] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
@@ -79,7 +80,7 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
         <p className="mt-2 text-[13px] text-slate-700">
           {req?.status === 'waitlisted'
             ? <>Your giveaway request is on the <strong>waiting list</strong>. You have priority for next month, and we'll email you your dates.</>
-            : <><strong>Request received</strong> — thank you! We'll confirm your dates by email{req?.preferred_month ? <> (you asked for {formatGiveawayMonth(req.preferred_month)})</> : null}.</>}
+            : <><strong>Request received</strong> — thank you! We'll confirm your dates by email{req?.preferred_month ? <> (you asked for {formatGiveawayMonth(req.preferred_month)}{req?.preferred_slot ? `, week ${req.preferred_slot}` : ''})</> : null}.</>}
         </p>
       </Box>
     )
@@ -143,7 +144,7 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
     e.preventDefault()
     setFormError('')
     if (picked.length < least || picked.length > needed) { setFormError(`Please choose between ${least} and ${needed} prize products.`); return }
-    if (!month) { setFormError('Please choose a month.'); return }
+    if (!month || !slot) { setFormError('Please choose a free week.'); return }
     if (idea.trim().length < 10) { setFormError('Please tell us a little about the look you will create.'); return }
     if (!videoType) { setFormError('Please choose what kind of video you made.'); return }
     if (!/^https?:\/\/\S+\.\S+/i.test(videoUrl.trim())) { setFormError('Please add the link to your video.'); return }
@@ -152,7 +153,7 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
     if (previewId) { setFormError('Preview only — nothing is sent.'); return }
     setSending(true)
     try {
-      const res = await call('POST', { products: picked, preferredMonth: month, idea, videoType, videoUrl: videoUrl.trim(), driveUploaded: driveOk, followers, otherLinks, notes })
+      const res = await call('POST', { products: picked, preferredMonth: month, preferredSlot: slot, idea, videoType, videoUrl: videoUrl.trim(), driveUploaded: driveOk, followers, otherLinks, notes })
       if (!res.ok) throw new Error(res.error || 'Your request could not be sent.')
       setJustSent(true)
     } catch (err) {
@@ -210,18 +211,42 @@ export default function AmbassadorGiveawayCard({ previewId = null, previewVisibl
             </div>
           </div>
 
-          <label className="block text-[12px] font-semibold text-slate-800">
-            Preferred month
-            <select value={month} onChange={(e) => setMonth(e.target.value)} className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-[13px] font-normal">
-              <option value="">Choose…</option>
-              {data.months.map((m) => <option key={m} value={m}>{formatGiveawayMonth(m)}</option>)}
-            </select>
-            <span className="mt-1 block font-normal text-slate-500">We run 3 giveaways a month, each from Monday to Sunday night, with the winner announced on the Monday afternoon after. We'll confirm your exact week.</span>
-          </label>
+          <div>
+            <p className="text-[12px] font-semibold text-slate-800">Choose your week</p>
+            <p className="mt-0.5 text-[11px] text-slate-500">Each giveaway runs from Monday to Sunday night, and the winner is announced on the Monday afternoon after. Grey weeks are already booked.</p>
+            <div className="mt-2 space-y-2">
+              {(data.availability || []).map((m) => (
+                <div key={m.month}>
+                  <p className="text-[12px] font-semibold text-slate-700">{formatGiveawayMonth(m.month)} {m.theme ? <span className="font-normal text-slate-500">· theme: {m.theme}</span> : null}</p>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {m.weeks.map((w) => {
+                      const on = month === m.month && slot === w.slot
+                      const free = w.state === 'free'
+                      return (
+                        <button
+                          key={w.slot}
+                          type="button"
+                          disabled={!free}
+                          onClick={() => { setMonth(m.month); setSlot(w.slot) }}
+                          className={`rounded-lg border px-3 py-1.5 text-[12px] ${on ? 'border-fuchsia-500 bg-fuchsia-50 font-semibold text-fuchsia-800 ring-1 ring-fuchsia-500' : free ? 'border-slate-300 bg-white text-slate-700 hover:border-fuchsia-300' : 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400 line-through'}`}
+                        >
+                          {new Date(`${w.start}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })} – {new Date(`${w.end}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}
+                          {w.state === 'booked' ? ' · booked' : w.state === 'held' ? ' · requested' : ''}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
           <label className="block text-[12px] font-semibold text-slate-800">
-            Your content idea
-            <textarea value={idea} onChange={(e) => setIdea(e.target.value)} rows={3} placeholder="The look you'll create with the prize products" className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-[13px] font-normal" />
+            Your theme and look{month ? ` for ${formatGiveawayMonth(month)}` : ''}
+            <span className="mt-0.5 block font-normal text-slate-500">
+              Your giveaway look must suit the month you choose{month && giveawayMonthTheme(month) ? ` (${formatGiveawayMonth(month)}: ${giveawayMonthTheme(month)})` : ''}. For example, no Halloween nails in December.
+            </span>
+            <textarea value={idea} onChange={(e) => setIdea(e.target.value)} rows={3} placeholder="The seasonal look you'll create with the prize products" className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-[13px] font-normal" />
           </label>
 
           <fieldset className="rounded-lg border border-slate-200 p-3">

@@ -12,6 +12,8 @@ import {
   giveawaySlotDates,
   nextMonth,
   upcomingGiveawayMonths,
+  giveawayAvailability,
+  giveawayMonthTheme,
 } from '../lib/giveaway'
 
 // Admin: giveaway requests from ambassadors (Shipments view).
@@ -50,6 +52,7 @@ function approvedEmail(row, req, start, end, note = '') {
       <p>Hi ${esc(firstName(row))},</p>
       ${String(note || '').trim() ? `<div style="border-left:3px solid #0f766e;padding:8px 12px;background:#f0fdfa;margin:12px 0">${esc(String(note).trim()).replace(/\n/g, '<br/>')}</div>` : ''}
       <p>Great news — your giveaway is approved! Your giveaway runs from <strong>${esc(formatGiveawayDate(start))}</strong> to <strong>${esc(formatGiveawayDate(end))} at 23:59</strong> (Greek time).</p>
+      ${giveawayMonthTheme(start) ? `<p><strong>Theme:</strong> your giveaway look must suit ${esc(formatGiveawayMonth(String(start).slice(0, 7)))} — ${esc(giveawayMonthTheme(start))}.</p>` : ''}
       <p>The winner is <strong>announced on Monday afternoon</strong>, ${esc(formatGiveawayDate(nextDay(end)))}.</p>
       <p><strong>Prize</strong> (supplied and shipped by GEL.IT.UP to the winner):</p>
       ${productList(req)}
@@ -95,7 +98,21 @@ function declineEmail(row, reason) {
   }
 }
 
-function inviteEmail(row) {
+// Which weeks are free / booked over the next 3 months, as an email table.
+function availabilityHtml(requests) {
+  const rows = giveawayAvailability(upcomingGiveawayMonths(3), requests).map((m) => {
+    const weeks = m.weeks.map((w) => {
+      const label = `${formatGiveawayDate(w.start).replace(/^\w+, /, '')} – ${formatGiveawayDate(w.end).replace(/^\w+, /, '').replace(/ \d{4}$/, '')}`
+      return w.state === 'free'
+        ? `<li style="color:#047857"><strong>✓ Free:</strong> ${esc(label)}</li>`
+        : `<li style="color:#9ca3af"><s>${esc(label)}</s> — ${w.state === 'booked' ? 'booked' : 'requested'}</li>`
+    }).join('')
+    return `<p style="margin:10px 0 2px"><strong>${esc(formatGiveawayMonth(m.month))}</strong>${m.theme ? ` <span style="color:#6b7280">· theme: ${esc(m.theme)}</span>` : ''}</p><ul style="margin:0;padding-left:18px">${weeks}</ul>`
+  }).join('')
+  return `<div style="border:1px solid #f0d3e3;border-radius:8px;padding:8px 14px;background:#fff9fc">${rows}</div>`
+}
+
+function inviteEmail(row, requests = []) {
   const code = String(row?.discount_code || '').trim()
   return {
     subject: 'You qualify to host a GEL.IT.UP giveaway! 🎁',
@@ -109,10 +126,12 @@ function inviteEmail(row) {
         <li>Choose <strong>1 to 10 products</strong> for the prize. You can only choose products you've received <strong>and reviewed</strong> — to add more, review them first.</li>
         <li>Make one <strong>quality video</strong> with the products you received: a <strong>mini nail art tutorial</strong>, a <strong>"how to"</strong> video, or a <strong>presentation of GEL.IT.UP products</strong>. It should be good enough for our YouTube channel: clear, well lit, no text on the video, and GEL.IT.UP products only (no other brands in shot). Take your time to prepare it.</li>
         <li><strong>Post it on your Instagram</strong>, then <strong>upload the original, full-quality video to your personal folder</strong> in our <a href="https://drive.google.com/drive/folders/1VKpSyxpEaKW3n4czWdAL5INUdOQ0mBWe?usp=sharing" style="color:#d43790">GEL.IT.UP Google Drive</a> so we can add it to our YouTube channel. Add the Instagram link when you send your request.</li>
-        <li>Pick your preferred month and tell us the look you'll create.</li>
+        <li>Choose a <strong>free week</strong> and tell us the look you'll create. <strong>Your giveaway look must suit the month you choose</strong> (for example Christmas or winter nails in December, not Halloween).</li>
       </ol>
+      <p><strong>Weeks available right now</strong> (first come, first served; your page always shows the latest):</p>
+      ${availabilityHtml(requests)}
       <p>Your giveaway is approved once we've seen your video.</p>
-      <p>We run 3 giveaways a month, one week each, so every giveaway gets our full support. Each giveaway runs from <strong>Monday to Sunday night</strong>, and the winner is announced on the <strong>Monday afternoon</strong> after. We'll email you your exact week. <strong>Please don't announce anything until we confirm your dates.</strong></p>
+      <p>We run 3 giveaways a month, one week each, so every giveaway gets our full support. Each giveaway runs from <strong>Monday to Sunday night</strong>, and the winner is announced on the <strong>Monday afternoon</strong> after. We'll confirm your week by email. <strong>Please don't announce anything until we confirm your dates.</strong></p>
 
       <p><strong>2. Your giveaway post</strong></p>
       <ul>
@@ -216,7 +235,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
     if (!row?.email) { alert('This ambassador has no email address.'); return }
     if (!window.confirm(`Email ${row.full_name} that she qualifies and can now request a giveaway from her page?`)) return
     setInviteBusy(a.id)
-    const { subject, html } = inviteEmail(row)
+    const { subject, html } = inviteEmail(row, requests)
     const res = sendEmail ? await sendEmail({ to: row.email, subject, html }) : { ok: false, error: 'No email sender' }
     if (!res.ok) { setInviteBusy(null); alert(`Not sent: ${res.error || 'unknown error'}`); return }
     const at = new Date().toISOString()
@@ -525,7 +544,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
         </span>
       </div>
       <p className="mt-1 text-slate-600">
-        Wants: <strong>{formatGiveawayMonth(req.preferred_month) || '—'}</strong>
+        Wants: <strong>{formatGiveawayMonth(req.preferred_month) || '—'}{req.preferred_slot ? `, week ${req.preferred_slot} (${(() => { const d = giveawaySlotDates(req.preferred_month, req.preferred_slot); return d ? `${d.start.slice(8)}–${d.end.slice(8)}` : '' })()})` : ''}</strong>
         {req.followers ? ` · ${req.followers} followers` : ''}
         {' · '}sent {new Date(req.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
       </p>
@@ -561,7 +580,7 @@ export default function GiveawayRequestsPanel({ ambassadors = [], sendEmail, adm
                     onClick={() => approve(req, approving.month, s, approving.note)}
                     className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-500 disabled:bg-slate-300"
                   >
-                    Week {s}: {d.start.slice(8)}–{d.end.slice(8)}{taken ? ' (booked)' : ''}
+                    {approving.month === req.preferred_month && req.preferred_slot === s ? '★ ' : ''}Week {s}: {d.start.slice(8)}–{d.end.slice(8)}{taken ? ' (booked)' : ''}
                   </button>
                 )
               })}

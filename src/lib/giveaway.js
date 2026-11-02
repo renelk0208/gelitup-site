@@ -95,3 +95,44 @@ export function nextGiveawayAllowedFrom(approved) {
   const d = new Date(`${approved.slot_start}T12:00:00Z`)
   return ymd(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + GIVEAWAY_GAP_MONTHS, d.getUTCDate())))
 }
+
+// What fits each month, so the giveaway look suits the season.
+const MONTH_THEMES = {
+  1: 'winter / New Year',
+  2: "winter / Valentine's Day",
+  3: 'spring',
+  4: 'spring / Easter',
+  5: 'spring',
+  6: 'summer',
+  7: 'summer',
+  8: 'summer',
+  9: 'early autumn / back to work',
+  10: 'autumn / Halloween',
+  11: 'autumn',
+  12: 'Christmas / winter',
+}
+export function giveawayMonthTheme(month) {
+  const m = Number(String(month || '').split('-')[1])
+  return MONTH_THEMES[m] || ''
+}
+
+// Every week of the given months: booked (approved), held (someone asked
+// for that week and is waiting for a reply) or free.
+// requests: rows with status, slot_start, preferred_month, preferred_slot.
+// Weeks starting in less than 7 days are left out, so there's time to prepare.
+export function giveawayAvailability(months, requests, { excludeId = null, now = new Date() } = {}) {
+  const earliest = ymd(new Date(now.getTime() + 7 * DAY))
+  const rows = (requests || []).filter((r) => r.id !== excludeId)
+  const booked = new Set(rows.filter((r) => r.status === 'approved' && r.slot_start).map((r) => String(r.slot_start).slice(0, 10)))
+  const held = new Set(rows.filter((r) => (r.status === 'requested' || r.status === 'waitlisted') && r.preferred_month && r.preferred_slot)
+    .map((r) => `${r.preferred_month}#${r.preferred_slot}`))
+  return (months || []).map((month) => ({
+    month,
+    theme: giveawayMonthTheme(month),
+    weeks: GIVEAWAY_SLOTS.map((slot) => {
+      const d = giveawaySlotDates(month, slot)
+      const state = booked.has(d.start) ? 'booked' : held.has(`${month}#${slot}`) ? 'held' : 'free'
+      return { slot, start: d.start, end: d.end, state }
+    }).filter((w) => w.start >= earliest),
+  })).filter((m) => m.weeks.length)
+}
