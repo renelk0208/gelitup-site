@@ -232,7 +232,7 @@ export async function buildAmbassadorContractPdf(applicant = {}) {
     ['TikTok', applicant.tiktok ? `@${applicant.tiktok}` : '—'],
     ['Qualified nail technician', applicant.qualifiedTech ? 'Yes' : (applicant.qualifiedTech === false ? 'No' : '—')],
     ['Shows own work on profile', applicant.workShown ? 'Yes' : (applicant.workShown === false ? 'No' : '—')],
-    ['More than 500 followers', applicant.followersOver500 ? 'Yes' : (applicant.followersOver500 === false ? 'No' : '—')],
+    ['More than 1,000 followers', applicant.followersOver500 ? 'Yes' : (applicant.followersOver500 === false ? 'No' : '—')],
     ['Shipping address', applicant.address || '—'],
     ['Signed on', applicant.signedDate || '—'],
   ]

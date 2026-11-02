@@ -60,7 +60,7 @@ export const AGREEMENT_SECTIONS = [
       'The Ambassador Programme is exclusively for qualified nail technicians. To be accepted, every applicant must meet all three of these requirements — they are firm and non-negotiable:',
       'You are a qualified nail technician, holding a recognised nail qualification or certification.',
       'You actively show your own nail work on your public social profiles — sets you have created yourself, not reposted.',
-      'You have more than 500 followers on the profile where you post your nail work.',
+      'You have more than 1,000 followers on the profile where you post your nail work.',
       'Becoming an ambassador is a serious professional collaboration, not general influencer promotion. Applicants who do not meet all three requirements can’t be accepted.',
     ],
   },

@@ -28,7 +28,7 @@ export const AGREEMENT_I18N = {
         'Programul de Ambasadori este exclusiv pentru tehnicieni de unghii calificați. Pentru a fi acceptat, fiecare aplicant trebuie să îndeplinească toate cele trei cerințe — sunt ferme și nenegociabile:',
         'Ești tehnician de unghii calificat, deținând o calificare sau certificare recunoscută în domeniul unghiilor.',
         'Îți prezinți activ propriile lucrări de unghii pe profilurile tale publice de social media — modele create de tine, nu repostate.',
-        'Ai peste 500 de urmăritori pe profilul unde îți postezi lucrările de unghii.',
+        'Ai peste 1.000 de urmăritori pe profilul unde îți postezi lucrările de unghii.',
         'A deveni ambasador este o colaborare profesională serioasă, nu o simplă promovare de tip influencer. Aplicanții care nu îndeplinesc toate cele trei cerințe nu pot fi acceptați.',
       ] },
       { heading: 'Ce faci tu', points: [
@@ -85,7 +85,7 @@ export const AGREEMENT_I18N = {
         'Programi i Ambasadorëve është ekskluzivisht për teknikë të kualifikuar të thonjve. Për t’u pranuar, çdo aplikant duhet të plotësojë këto tri kushte të panegociueshme:',
         'Jeni teknik/e i/e kualifikuar me një certifikatë ose diplomë të njohur.',
         'Tregoni aktivisht punën tuaj origjinale në profilet tuaja publike në rrjetet sociale.',
-        'Keni mbi 500 ndjekës në profilin ku publikoni punimet tuaja.',
+        'Keni mbi 1.000 ndjekës në profilin ku publikoni punimet tuaja.',
       ] },
       { heading: 'Çfarë bëni ju', points: [
         `Publikoni të paktën ${POST_MIN} postime origjinale çdo muaj me produktet GEL.IT.UP, duke përfshirë të paktën ${VIDEO_MIN} video/reels në Instagram dhe TikTok (nëse keni llogari TikTok).`,
@@ -141,7 +141,7 @@ export const AGREEMENT_I18N = {
         'Le Programme Ambassadeurs est réservé exclusivement aux prothésistes ongulaires qualifié·e·s. Pour être accepté·e, chaque candidat·e doit remplir ces trois conditions — elles sont fermes et non négociables :',
         'Vous êtes prothésiste ongulaire qualifié·e, titulaire d’une qualification ou certification reconnue.',
         'Vous montrez activement vos propres réalisations d’ongles sur vos profils publics — des créations réalisées par vous, non repartagées.',
-        'Vous avez plus de 500 abonnés sur le profil où vous publiez vos réalisations d’ongles.',
+        'Vous avez plus de 1 000 abonnés sur le profil où vous publiez vos réalisations d’ongles.',
         'Devenir ambassadeur est une collaboration professionnelle sérieuse, pas une simple promotion d’influenceur. Les candidat·e·s qui ne remplissent pas les trois conditions ne peuvent pas être accepté·e·s.',
       ] },
       { heading: 'Ce que vous faites', points: [
@@ -198,7 +198,7 @@ export const AGREEMENT_I18N = {
         'Das Ambassador-Programm ist ausschließlich für qualifizierte Nageldesigner:innen. Um angenommen zu werden, muss jede:r Bewerber:in alle drei Voraussetzungen erfüllen — sie sind verbindlich und nicht verhandelbar:',
         'Du bist qualifizierte:r Nageldesigner:in mit einer anerkannten Nagelqualifikation oder Zertifizierung.',
         'Du zeigst aktiv deine eigene Nagelarbeit auf deinen öffentlichen Profilen — von dir selbst erstellte Sets, keine Reposts.',
-        'Du hast mehr als 500 Follower auf dem Profil, auf dem du deine Nagelarbeit postest.',
+        'Du hast mehr als 1.000 Follower auf dem Profil, auf dem du deine Nagelarbeit postest.',
         'Ambassador zu werden ist eine ernsthafte professionelle Zusammenarbeit, keine allgemeine Influencer-Werbung. Bewerber:innen, die nicht alle drei Voraussetzungen erfüllen, können nicht angenommen werden.',
       ] },
       { heading: 'Was du tust', points: [
@@ -255,7 +255,7 @@ export const AGREEMENT_I18N = {
         'El Programa de Embajadores es exclusivamente para técnicos/as de uñas cualificados/as. Para ser aceptado/a, cada solicitante debe cumplir los tres requisitos — son firmes y no negociables:',
         'Eres técnico/a de uñas cualificado/a, con una cualificación o certificación de uñas reconocida.',
         'Muestras activamente tu propio trabajo de uñas en tus perfiles públicos — diseños creados por ti, no reposteados.',
-        'Tienes más de 500 seguidores en el perfil donde publicas tu trabajo de uñas.',
+        'Tienes más de 1.000 seguidores en el perfil donde publicas tu trabajo de uñas.',
         'Ser embajador/a es una colaboración profesional seria, no una promoción de influencer general. No se puede aceptar a solicitantes que no cumplan los tres requisitos.',
       ] },
       { heading: 'Lo que haces', points: [
@@ -312,7 +312,7 @@ export const AGREEMENT_I18N = {
         'O Programa de Embaixadores é exclusivamente para técnicos/as de unhas qualificados/as. Para seres aceite, cada candidato/a tem de cumprir os três requisitos — são firmes e não negociáveis:',
         'És técnico/a de unhas qualificado/a, com uma qualificação ou certificação reconhecida na área.',
         'Mostras ativamente o teu próprio trabalho de unhas nos teus perfis públicos — trabalhos criados por ti, não repostados.',
-        'Tens mais de 500 seguidores no perfil onde publicas o teu trabalho de unhas.',
+        'Tens mais de 1000 seguidores no perfil onde publicas o teu trabalho de unhas.',
         'Tornar-se embaixador/a é uma colaboração profissional séria, não uma promoção de influenciador comum. Candidatos/as que não cumpram os três requisitos não podem ser aceites.',
       ] },
       { heading: 'O que tu fazes', points: [
@@ -369,7 +369,7 @@ export const AGREEMENT_I18N = {
         'Program Ambasadorów jest przeznaczony wyłącznie dla wykwalifikowanych stylistek/ów paznokci. Aby zostać przyjętym, każdy kandydat musi spełnić wszystkie trzy wymagania — są one stanowcze i nienegocjowalne:',
         'Jesteś wykwalifikowaną/ym stylistką/em paznokci, posiadającą/ym uznane kwalifikacje lub certyfikat.',
         'Aktywnie pokazujesz własne prace paznokciowe na swoich publicznych profilach — zestawy stworzone przez Ciebie, nie udostępnione ponownie.',
-        'Masz ponad 500 obserwujących na profilu, na którym publikujesz swoje prace paznokciowe.',
+        'Masz ponad 1000 obserwujących na profilu, na którym publikujesz swoje prace paznokciowe.',
         'Zostanie ambasadorem to poważna współpraca zawodowa, a nie zwykła promocja influencerska. Kandydaci, którzy nie spełniają wszystkich trzech wymagań, nie mogą zostać przyjęci.',
       ] },
       { heading: 'Co robisz', points: [
@@ -426,7 +426,7 @@ export const AGREEMENT_I18N = {
         'A Nagykövet Program kizárólag képzett műkörmösöknek szól. Az elfogadáshoz minden jelentkezőnek mindhárom feltételt teljesítenie kell — ezek szilárdak és nem alku tárgyai:',
         'Képzett műkörmös vagy, elismert körmös képesítéssel vagy tanúsítvánnyal.',
         'Aktívan bemutatod saját körmös munkáidat a nyilvános profiljaidon — általad készített munkák, nem újraosztott tartalmak.',
-        'Több mint 500 követőd van azon a profilon, ahol a körmös munkáidat közzéteszed.',
+        'Több mint 1000 követőd van azon a profilon, ahol a körmös munkáidat közzéteszed.',
         'A nagykövetté válás komoly szakmai együttműködés, nem általános influencer-promóció. Azok a jelentkezők, akik nem teljesítik mindhárom feltételt, nem fogadhatók el.',
       ] },
       { heading: 'Amit te teszel', points: [
@@ -483,7 +483,7 @@ export const AGREEMENT_I18N = {
         'Το Πρόγραμμα Πρεσβευτών απευθύνεται αποκλειστικά σε πιστοποιημένους/ες τεχνίτες/τριες νυχιών. Για να γίνει δεκτός/ή, κάθε αιτών/ούσα πρέπει να πληροί και τις τρεις προϋποθέσεις — είναι απαρέγκλιτες και μη διαπραγματεύσιμες:',
         'Είσαι πιστοποιημένος/η τεχνίτης/τρια νυχιών, με αναγνωρισμένη κατάρτιση ή πιστοποίηση.',
         'Παρουσιάζεις ενεργά τη δική σου δουλειά στα νύχια στα δημόσια προφίλ σου — δημιουργίες δικές σου, όχι αναδημοσιεύσεις.',
-        'Έχεις πάνω από 500 ακόλουθους στο προφίλ όπου δημοσιεύεις τη δουλειά σου στα νύχια.',
+        'Έχεις πάνω από 1.000 ακόλουθους στο προφίλ όπου δημοσιεύεις τη δουλειά σου στα νύχια.',
         'Το να γίνεις πρεσβευτής είναι μια σοβαρή επαγγελματική συνεργασία, όχι απλή προώθηση influencer. Οι αιτούντες που δεν πληρούν και τις τρεις προϋποθέσεις δεν μπορούν να γίνουν δεκτοί.',
       ] },
       { heading: 'Τι κάνεις εσύ', points: [
@@ -540,7 +540,7 @@ export const AGREEMENT_I18N = {
         'Програмата за посланици е предназначена изключително за квалифицирани маникюристи. За да бъде приет, всеки кандидат трябва да отговаря и на трите изисквания — те са твърди и не подлежат на договаряне:',
         'Ти си квалифициран маникюрист с призната квалификация или сертификат.',
         'Активно показваш собствената си работа върху ноктите в публичните си профили — авторски дизайни, а не препубликувани.',
-        'Имаш повече от 500 последователи в профила, в който публикуваш работата си върху ноктите.',
+        'Имаш повече от 1000 последователи в профила, в който публикуваш работата си върху ноктите.',
         'Да станеш посланик е сериозно професионално сътрудничество, а не обикновена инфлуенсър промоция. Кандидати, които не отговарят и на трите изисквания, не могат да бъдат приети.',
       ] },
       { heading: 'Какво правиш ти', points: [

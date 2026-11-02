@@ -22,7 +22,7 @@ const ELIGIBILITY_GATES = [
   },
   {
     key: 'followers500',
-    question: 'Do you have more than 500 followers?',
+    question: 'Do you have more than 1,000 followers?',
     help: 'On the profile where you post your nail work.',
   },
 ]
@@ -48,7 +48,7 @@ async function notifyAdminOfApplication(record, pdf) {
     ['TikTok', record.tiktok ? '@' + record.tiktok : '—'],
     ['Qualified nail tech', 'Yes'],
     ['Shows own work on profile', 'Yes'],
-    ['500+ followers', 'Yes'],
+    ['1,000+ followers', 'Yes'],
     ['Country', record.country || '—'],
     ['Language', record.language || '—'],
     ['Agreement', `${record.agreement_version || ''} (signed)`],
@@ -646,7 +646,7 @@ export default function AmbassadorPage() {
               We&apos;re so sorry! Being a GEL.IT.UP ambassador is a serious professional venture,
               so every ambassador must be a <span className="font-semibold text-white">qualified nail technician</span>,
               <span className="font-semibold text-white"> showing their own nail work</span> to an audience of
-              <span className="font-semibold text-white"> more than 500 followers</span>.
+              <span className="font-semibold text-white"> more than 1,000 followers</span>.
             </p>
             <p className="mt-3 text-sm text-white/70">
               As that isn&apos;t the case right now, we&apos;re not able to accept your application — but you&apos;re
