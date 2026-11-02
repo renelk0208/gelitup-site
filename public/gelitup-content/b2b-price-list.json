@@ -2,7 +2,7 @@
   "_meta": {
     "source": "price-list-export.csv + products_export_1.csv",
     "generated": "2026-09-28T07:17:46.042Z",
-    "count": 1168
+    "count": 1180
   },
   "items": [
     {
@@ -2598,7 +2598,7 @@
     {
       "name": "3-in-1 Glitter Builder Gels Cosmic Glitter 20g -HTF",
       "sku": "3-in-1 Glitter Builder Gels Cosmic Glitter 20g -HTF",
-      "price": 33.4
+      "price": 25.8
     },
     {
       "name": "3-in-1 Glitter Builder Gels Deep Sea Galaxy 20g -HTF",
@@ -2623,7 +2623,7 @@
     {
       "name": "3-in-1 Glitter Builder Gels Sunshine 20g -HTF",
       "sku": "3-in-1 Glitter Builder Gels Sunshine 20g -HTF",
-      "price": 33.4
+      "price": 25.8
     },
     {
       "name": "3-in-1 Glitter Builder Gels Supernova Indigo 20g -HTF",
@@ -2638,22 +2638,22 @@
     {
       "name": "3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF",
       "sku": "3-in-1 Shimmery Builder Gel 40g Clear Iridescent -HTF",
-      "price": 27.8
+      "price": 31.2
     },
     {
       "name": "3-in-1 Shimmery Builder Gel 40g Cover -HTF",
       "sku": "3-in-1 Shimmery Builder Gel 40g Cover -HTF",
-      "price": 27.8
+      "price": 31.2
     },
     {
       "name": "3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF",
       "sku": "3-in-1 Shimmery Builder Gel 40g Light Lilac -HTF",
-      "price": 27.8
+      "price": 31.2
     },
     {
       "name": "3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF",
       "sku": "3-in-1 Shimmery Builder Gel 40g Pink Marmalade -HTF",
-      "price": 27.8
+      "price": 31.2
     },
     {
       "name": "30 Manilla Buff -HTF",
@@ -3603,7 +3603,7 @@
     {
       "name": "Crystal Clear Builder Gel 40gr -HTF",
       "sku": "Crystal Clear Builder Gel 40gr -HTF",
-      "price": 29.4
+      "price": 33
     },
     {
       "name": "Cushion Pro Gel Black -HTF",
@@ -5208,22 +5208,22 @@
     {
       "name": "Premium Builder Gel Blush 40gr -HTF",
       "sku": "Premium Builder Gel Blush 40gr -HTF",
-      "price": 29.4
+      "price": 33
     },
     {
       "name": "Premium Builder Gel Clear 40gr -HTF",
       "sku": "Premium Builder Gel Clear 40gr -HTF",
-      "price": 29.4
+      "price": 33
     },
     {
       "name": "Premium Builder Gel Cover 40gr -HTF",
       "sku": "Premium Builder Gel Cover 40gr -HTF",
-      "price": 29.4
+      "price": 33
     },
     {
       "name": "Premium Builder Gel Milky 40gr -HTF",
       "sku": "Premium Builder Gel Milky 40gr -HTF",
-      "price": 29.4
+      "price": 33
     },
     {
       "name": "Premium Builder Gel Mint - 20g -HTF",
@@ -5233,27 +5233,27 @@
     {
       "name": "Premium Builder Gel Nude 40gr -HTF",
       "sku": "Premium Builder Gel Nude 40gr -HTF",
-      "price": 29.4
+      "price": 33
     },
     {
       "name": "Premium Builder Gel Nude II 40gr -HTF",
       "sku": "Premium Builder Gel Nude II 40gr -HTF",
-      "price": 29.4
+      "price": 33
     },
     {
       "name": "Premium Builder Gel Pearly Nude 40gr -HTF",
       "sku": "Premium Builder Gel Pearly Nude 40gr -HTF",
-      "price": 29.4
+      "price": 33
     },
     {
       "name": "Premium Builder Gel Pearly Pink 40gr -HTF",
       "sku": "Premium Builder Gel Pearly Pink 40gr -HTF",
-      "price": 29.4
+      "price": 33
     },
     {
       "name": "Premium Builder Gel Pink 40gr -HTF",
       "sku": "Premium Builder Gel Pink 40gr -HTF",
-      "price": 29.4
+      "price": 33
     },
     {
       "name": "Premium Builder Gel Purple - 20g -HTF",
@@ -5263,12 +5263,12 @@
     {
       "name": "Premium Builder Gel White 40gr -HTF",
       "sku": "Premium Builder Gel White 40gr -HTF",
-      "price": 29.4
+      "price": 33
     },
     {
       "name": "Premium Plus Fiber Glass Builder Gel 40gr -HTF",
       "sku": "Premium Plus Fiber Glass Builder Gel 40gr -HTF",
-      "price": 29.4
+      "price": 33
     },
     {
       "name": "Probes Stainless Steel Rounded 1222 New",
@@ -5829,6 +5829,81 @@
       "name": "Wooden File Super thin 100/100 with Logo",
       "sku": "Wooden File Super thin 100/100 with Logo",
       "price": 0.72
+    },
+    {
+      "name": "Premium Builder Gel Vitro Blue - 20g -HTF",
+      "sku": "Premium Builder Gel Vitro Blue - 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Premium Builder Gel Vitro Pink - 20g -HTF",
+      "sku": "Premium Builder Gel Vitro Pink - 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Premium Builder Gel Vitro Purple - 20g -HTF",
+      "sku": "Premium Builder Gel Vitro Purple - 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Premium Builder Gel Vitro Red - 20g -HTF",
+      "sku": "Premium Builder Gel Vitro Red - 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Premium Builder Gel Vitro Teak Jade - 20g -HTF",
+      "sku": "Premium Builder Gel Vitro Teak Jade - 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Floral Builder Gel Fuchsia 20g -HTF",
+      "sku": "Floral Builder Gel Fuchsia 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Floral Builder Gel Orange 20g -HTF",
+      "sku": "Floral Builder Gel Orange 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Floral Builder Gel Pink 20g -HTF",
+      "sku": "Floral Builder Gel Pink 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Floral Builder Gel Purple 20g -HTF",
+      "sku": "Floral Builder Gel Purple 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Floral Builder Gel Yellow 20g -HTF",
+      "sku": "Floral Builder Gel Yellow 20g -HTF",
+      "price": 25.8
+    },
+    {
+      "name": "Pearl Cushion Gel Lilac",
+      "sku": "Pearl Cushion Gel Lilac",
+      "price": 9.2
+    },
+    {
+      "name": "Pearl Cushion Gel Baby Blue",
+      "sku": "Pearl Cushion Gel Baby Blue",
+      "price": 9.2
+    },
+    {
+      "name": "Pearl Cushion Gel Gold",
+      "sku": "Pearl Cushion Gel Gold",
+      "price": 9.2
+    },
+    {
+      "name": "Pearl Cushion Gel Pink",
+      "sku": "Pearl Cushion Gel Pink",
+      "price": 9.2
+    },
+    {
+      "name": "Pearl Cushion Gel White",
+      "sku": "Pearl Cushion Gel White",
+      "price": 9.2
     }
   ]
 }
