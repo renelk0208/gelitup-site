@@ -11,7 +11,7 @@
     {
       "sku": "GIUP-COL-102",
       "code": "102",
-      "name": "Marsh Mallow",
+      "name": "Marshmallow",
       "category": "Whites",
       "group": "Pod_1"
     },
@@ -44,8 +44,8 @@
       "group": "Pod_1"
     },
     {
-      "sku": "GIUP-COL-010",
-      "code": "010",
+      "sku": "GIUP-COL-10",
+      "code": "10",
       "name": "Bridal Bliss",
       "category": "Nudes",
       "group": "Pod_1"
@@ -100,8 +100,8 @@
       "group": "Pod_1"
     },
     {
-      "sku": "GIUP-COL-051A",
-      "code": "051A",
+      "sku": "GIUP-COL-51A",
+      "code": "51A",
       "name": "Raspberry Ripple",
       "category": "Reds",
       "group": "Pod_1"
@@ -109,7 +109,7 @@
     {
       "sku": "GIUP-COL-1803",
       "code": "1803",
-      "name": "Don’t Pout",
+      "name": "Dont Pout",
       "category": "Reds",
       "group": "Pod_1"
     },
@@ -128,8 +128,8 @@
       "group": "Pod_1"
     },
     {
-      "sku": "GIUP-COL-015",
-      "code": "015",
+      "sku": "GIUP-COL-15",
+      "code": "15",
       "name": "Total Eclipse",
       "category": "Darks",
       "group": "Pod_1"
@@ -186,7 +186,7 @@
     {
       "sku": "GIUP-COL-2026",
       "code": "2026",
-      "name": "Whaat? Pistachio?",
+      "name": "Whaat Pistachio",
       "category": "Trends",
       "group": "Pod_1"
     },
@@ -307,7 +307,7 @@
     {
       "sku": "GIUP-COL-2034",
       "code": "2034",
-      "name": "Smurf's Baby",
+      "name": "Smurfs Baby",
       "category": "Blues",
       "group": "Pod_2"
     },
