@@ -19,6 +19,33 @@ https://www.gelitup.com/*  https://gelitup.com/:splat  301!
 /our-products/consumables     /full-catalogue?category=consumables   301!
 /our-products/nail-care       /full-catalogue?category=nail-care     301!
 
+# Keyword pages → matching shop.gelitup.com collection (products live on the shop;
+# gelitup.com hides catalogue products via HIDE_CATALOGUE_PRODUCTS)
+/solid-gel-polish     https://shop.gelitup.com/collections/solid-gel-polish  301!
+/cat-eye              https://shop.gelitup.com/collections/cat-eye  301!
+/shimmer              https://shop.gelitup.com/collections/shimmer-collection  301!
+/glitters             https://shop.gelitup.com/collections/glitters  301!
+/mirror-powder        https://shop.gelitup.com/collections/mirror-powders  301!
+/by-the-ocean         https://shop.gelitup.com/collections/by-the-ocean  301!
+/bob                  https://shop.gelitup.com/collections/brush-on-builder-biab  301!
+/brush-on-builder     https://shop.gelitup.com/collections/brush-on-builder-biab  301!
+/premium-builder      https://shop.gelitup.com/collections/3-in-1-premium-builder-gel  301!
+/3in1                 https://shop.gelitup.com/collections/3-in-1-builder-system  301!
+/5in1-base            https://shop.gelitup.com/collections/superior-base-coats  301!
+/liquid-polygel       https://shop.gelitup.com/collections/liquid-polygel  301!
+/jelly                https://shop.gelitup.com/collections/jelly  301!
+/metallic             https://shop.gelitup.com/collections/metallic-collection  301!
+/pearl                https://shop.gelitup.com/collections/pearl  301!
+/glass-effect         https://shop.gelitup.com/collections/glass-collection  301!
+/spix                 https://shop.gelitup.com/collections/spix-spex  301!
+/snowflake            https://shop.gelitup.com/collections/snowflake  301!
+/tutti-frutti         https://shop.gelitup.com/collections/tutti-frutti-glass  301!
+/pma                  https://shop.gelitup.com/collections/pma-pop-my-art  301!
+/cobweb               https://shop.gelitup.com/collections/cobweb-gel  301!
+/line-it-up           https://shop.gelitup.com/collections/line-it-up  301!
+/cushion-gel          https://shop.gelitup.com/collections/cushion-gel  301!
+/classic-base         https://shop.gelitup.com/collections/classic-base-coats  301!
+
 # Common nav alias redirects
 /colours    /full-catalogue?category=colours    301
 /colors     /full-catalogue?category=colours    301

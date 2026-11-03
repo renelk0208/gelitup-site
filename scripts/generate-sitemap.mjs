@@ -37,22 +37,7 @@ const ROUTES = [
   // Academies
   { path: '/for-academies',              priority: '0.7', changefreq: 'monthly' },
 
-  // Gel polish subcategory vanity routes
-  { path: '/solid-gel-polish',           priority: '0.8', changefreq: 'weekly'  },
-  { path: '/cat-eye',                    priority: '0.8', changefreq: 'weekly'  },
-  { path: '/shimmer',                    priority: '0.7', changefreq: 'weekly'  },
-  { path: '/glitters',                   priority: '0.7', changefreq: 'weekly'  },
-  { path: '/mirror-powder',              priority: '0.7', changefreq: 'weekly'  },
-  { path: '/by-the-ocean',               priority: '0.7', changefreq: 'weekly'  },
-  { path: '/bob',                        priority: '0.7', changefreq: 'weekly'  },
-
-  // Builder gel vanity routes
-  { path: '/premium-builder',            priority: '0.7', changefreq: 'weekly'  },
-  { path: '/3in1',                       priority: '0.7', changefreq: 'weekly'  },
-  { path: '/liquid-polygel',             priority: '0.7', changefreq: 'weekly'  },
-
-  // Base coat vanity routes
-  { path: '/5in1-base',                  priority: '0.7', changefreq: 'weekly'  },
+  // Keyword pages now 301 to shop.gelitup.com collections (see public/_redirects)
 ]
 
 const now = new Date().toISOString().split('T')[0]
