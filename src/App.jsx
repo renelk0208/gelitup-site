@@ -4077,8 +4077,8 @@ function FullCataloguePage({ vanitySlug = '' } = {}) {
   useEffect(() => {
     const subSlug = (searchParams.get('subcategory') || (searchParams.get('category') ? '' : vanitySlug) || '').toLowerCase().trim()
     const seo = SUBCATEGORY_SEO[subSlug] || {
-      title: 'GEL.IT.UP Gel Polish & Builder Gel | HEMA & TPO-Free, Made in the EU',
-      description: 'Browse professional gel polish, builder gels and nail supplies wholesale. HEMA-free, TPO-free, Made in the EU for salons, technicians and academies.',
+      title: 'GEL.IT.UP by GIUP® | Professional Gel Polish, Builder Gel & Nail Systems',
+      description: 'Wholesale gel polish, builder gel and nail systems for nail technicians, salons and academies. HEMA-free, TPO-free, made in the EU. Supplying 15+ countries.',
       canonical: 'https://gelitup.com/',
     }
     return setPageSEO(seo)

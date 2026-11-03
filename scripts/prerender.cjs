@@ -19,7 +19,7 @@ const DIST = path.resolve(__dirname, '../dist')
 const ROUTE_SEO_MAP = {
   '/': {
     title:       'GEL.IT.UP by GIUP® | Professional Gel Polish, Builder Gel & Nail Systems',
-    description: 'Wholesale gel polish, builder gel and nail systems for nail technicians, salons and academies. HEMA-free, TPO-free, Made in the EU, Approved by Cruelty Free International. 15+ countries.',
+    description: 'Wholesale gel polish, builder gel and nail systems for nail technicians, salons and academies. HEMA-free, TPO-free, made in the EU. Supplying 15+ countries.',
     canonical:   'https://gelitup.com/',
   },
   '/full-catalogue': {
