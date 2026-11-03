@@ -461,6 +461,7 @@ export const blogPosts = [
       title: 'The takeaway',
       paragraphs: [
         'HEMA is a useful ingredient, but it comes with a real sensitisation risk when application control is poor or curing is incomplete. For salons, the safer long-term answer is to understand the ingredient, use better labels and documentation, and move toward complete HEMA-free systems where possible.',
+        'Ready to switch? Browse the [HEMA-free gel polish range on the GEL.IT.UP® shop](https://shop.gelitup.com/pages/hema-free-gel-polish), and see why it pairs with our [TPO-free gel polish](https://shop.gelitup.com/pages/tpo-free-gel-polish).',
       ],
     },
   },
@@ -540,6 +541,7 @@ export const blogPosts = [
       paragraphs: [
         'TPO is not a minor ingredient detail. It is one of the core photoinitiators in many conventional gel systems, and it is now being revisited through the lens of occupational health, client safety and EU compliance.',
         'A salon selecting TPO-free, HEMA-free and CPNP-notified products is choosing a safer, more resilient, more future-proof formulation strategy. That is the direction professional nail services are moving in.',
+        'Browse the [TPO-free gel polish range on the GEL.IT.UP® shop](https://shop.gelitup.com/pages/tpo-free-gel-polish), and our [HEMA-free gel polish](https://shop.gelitup.com/pages/hema-free-gel-polish) guide.',
       ],
     },
   },
