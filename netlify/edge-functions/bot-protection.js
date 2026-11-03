@@ -101,6 +101,19 @@ export default async (request, context) => {
     return context.next()
   }
 
+  // One URL per page: 301 "/page/" → "/page" so Google stops indexing both.
+  // Runs before the bot checks so Googlebot gets the redirect too.
+  // /shop/ is a proxy to Shopify and is left alone.
+  if (
+    url.pathname.length > 1 &&
+    url.pathname.endsWith('/') &&
+    !url.pathname.startsWith('/shop/') &&
+    (request.method === 'GET' || request.method === 'HEAD')
+  ) {
+    url.pathname = url.pathname.replace(/\/+$/, '') || '/'
+    return Response.redirect(url.toString(), 301)
+  }
+
   const ua = request.headers.get('user-agent') || ''
   const country = context.geo?.country?.code?.toUpperCase() || ''
   const referer = request.headers.get('referer') || ''

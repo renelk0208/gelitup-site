@@ -1,6 +1,24 @@
 # Subdomain proxy — consolidates shop-main.gelitup.com under gelitup.com/shop/
 /shop/*  https://shop-main.gelitup.com/:splat  200
 
+# ── Duplicate-URL cleanup (Search Console, Nov 2026) ──────────────────────
+# Real 301s so Google merges these into one URL instead of indexing copies.
+# Forced (!) because prerender writes files at some of these paths.
+https://www.gelitup.com/*  https://gelitup.com/:splat  301!
+/index.php                 /                           301!
+/about-us                  /pages/about-us             301!
+/about                     /pages/about-us             301!
+/contact                   /become-distributor         301!
+/academies                 /for-academies              301!
+/our-products              /distributor-packages       301!
+/our-products/colours         /full-catalogue?category=colours       301!
+/our-products/builder-gel     /full-catalogue?category=builder-gel   301!
+/our-products/bases-and-tops  /full-catalogue?category=essentials    301!
+/our-products/nail-art        /full-catalogue?category=nail-art      301!
+/our-products/tools           /full-catalogue?category=tools         301!
+/our-products/consumables     /full-catalogue?category=consumables   301!
+/our-products/nail-care       /full-catalogue?category=nail-care     301!
+
 # Common nav alias redirects
 /colours    /full-catalogue?category=colours    301
 /colors     /full-catalogue?category=colours    301

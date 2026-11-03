@@ -25,7 +25,7 @@ const ROUTE_SEO_MAP = {
   '/full-catalogue': {
     title:       'Full Product Catalogue | Wholesale Nail Supplies | GEL.IT.UP by GIUP®',
     description: 'Browse the complete GEL.IT.UP wholesale catalogue. 1,000+ gel polish shades, builder gels, base coats, nail art and professional tools. HEMA-free, TPO-free, Made in the EU.',
-    canonical:   'https://gelitup.com/full-catalogue',
+    canonical:   'https://gelitup.com/', // same page as the homepage — Google should index / only
   },
   '/solid-gel-polish': {
     title:       'Wholesale Gel Polish Supplier | 1,000+ Shades | GEL.IT.UP Professional',
@@ -149,20 +149,20 @@ const ROUTE_SEO_MAP = {
     description: 'Understand the liability risks of non-EU compliant nail gels containing HEMA and TPO. How salon owners can protect their business with HEMA-free, TPO-free formulations.',
     canonical:   'https://gelitup.com/blog/hema-free-tpo-free-gel-salon-liability-guide',
   },
-  '/about-us': {
+  '/pages/about-us': {
     title:       'About GEL.IT.UP by GIUP® | Professional Nail Supplies EU',
     description: 'Learn about GEL.IT.UP by GIUP® — professional nail supply brand trusted by technicians in 15+ countries. HEMA-free, TPO-free, Made in the EU, Approved by Cruelty Free International.',
-    canonical:   'https://gelitup.com/about-us',
+    canonical:   'https://gelitup.com/pages/about-us',
   },
   '/wholesale': {
     title:       'Nail Supplies Wholesale | Wholesale Gel Polish | GEL.IT.UP by GIUP®',
     description: 'Nail supplies wholesale: 1,000+ gel polish shades, builder gels, base and top coats. HEMA-free, TPO-free, made in the EU. For distributors, salons and academies.',
     canonical:   'https://gelitup.com/wholesale',
   },
-  '/contact': {
+  '/pages/contact-us': {
     title:       'Contact GEL.IT.UP | Wholesale Nail Supply Enquiries',
     description: 'Contact GEL.IT.UP by GIUP® for wholesale account enquiries, distributor partnerships and academy supply. Professional nail supplies for 15+ countries. Email info@gelitup.com.',
-    canonical:   'https://gelitup.com/contact',
+    canonical:   'https://gelitup.com/pages/contact-us',
   },
   '/our-products': {
     title:       'Professional Nail Products Wholesale | GEL.IT.UP by GIUP®',

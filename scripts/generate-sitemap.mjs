@@ -13,22 +13,20 @@ const BASE_URL = 'https://gelitup.com'
 const ROUTES = [
   // Core pages
   { path: '/',                           priority: '1.0', changefreq: 'daily'   },
-  { path: '/full-catalogue',             priority: '0.9', changefreq: 'weekly'  },
   { path: '/guestbook',                  priority: '0.6', changefreq: 'weekly'  },
   { path: '/blog',                       priority: '0.7', changefreq: 'weekly'  },
   { path: '/blog/why-ingredient-labels-matter', priority: '0.8', changefreq: 'monthly' },
   { path: '/blog/hema-free-tpo-free-gel-salon-liability-guide', priority: '0.8', changefreq: 'monthly' },
   { path: '/blog/biab-vs-builder-gel-vs-polygel', priority: '0.8', changefreq: 'monthly', publishFrom: '2026-10-26' },
   { path: '/blog/wholesale-gel-polish-supplier-checklist', priority: '0.8', changefreq: 'monthly', publishFrom: '2026-11-09' },
-  { path: '/about-us',                   priority: '0.6', changefreq: 'monthly' },
-  { path: '/contact',                    priority: '0.6', changefreq: 'monthly' },
+  { path: '/pages/about-us',             priority: '0.6', changefreq: 'monthly' },
+  { path: '/pages/contact-us',           priority: '0.6', changefreq: 'monthly' },
 
   // Distribution
   { path: '/wholesale',                  priority: '0.9', changefreq: 'monthly' },
   { path: '/distributor-packages',       priority: '0.8', changefreq: 'monthly' },
   { path: '/distributors',              priority: '0.7', changefreq: 'monthly' },
   { path: '/become-distributor',         priority: '0.8', changefreq: 'monthly' },
-  { path: '/register',                   priority: '0.7', changefreq: 'monthly' },
 
   // Ambassadors
   { path: '/ambassadors',                priority: '0.7', changefreq: 'monthly' },
@@ -38,17 +36,6 @@ const ROUTES = [
 
   // Academies
   { path: '/for-academies',              priority: '0.7', changefreq: 'monthly' },
-  { path: '/academies',                  priority: '0.6', changefreq: 'monthly' },
-
-  // Our Products category pages
-  { path: '/our-products',              priority: '0.8', changefreq: 'weekly'  },
-  { path: '/our-products/colours',       priority: '0.8', changefreq: 'weekly'  },
-  { path: '/our-products/builder-gel',   priority: '0.7', changefreq: 'weekly'  },
-  { path: '/our-products/bases-and-tops',priority: '0.7', changefreq: 'weekly'  },
-  { path: '/our-products/nail-art',      priority: '0.6', changefreq: 'weekly'  },
-  { path: '/our-products/tools',         priority: '0.6', changefreq: 'weekly'  },
-  { path: '/our-products/consumables',   priority: '0.6', changefreq: 'weekly'  },
-  { path: '/our-products/nail-care',     priority: '0.6', changefreq: 'weekly'  },
 
   // Gel polish subcategory vanity routes
   { path: '/solid-gel-polish',           priority: '0.8', changefreq: 'weekly'  },

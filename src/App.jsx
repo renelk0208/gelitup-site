@@ -3739,7 +3739,7 @@ function buildShopSearchUrl(itemName) {
   return `https://shop.gelitup.com/search?q=${encodeURIComponent(cleanName)}&type=product`
 }
 
-function FullCataloguePage() {
+function FullCataloguePage({ vanitySlug = '' } = {}) {
   // Prices are hidden here — customers purchase via shop.gelitup.com to avoid price discrepancies.
   const SHOW_CATALOGUE_PRICES = false
   const location = useLocation()
@@ -4075,14 +4075,14 @@ function FullCataloguePage() {
   }, [isLoading, searchParams])
 
   useEffect(() => {
-    const subSlug = (searchParams.get('subcategory') || '').toLowerCase().trim()
+    const subSlug = (searchParams.get('subcategory') || (searchParams.get('category') ? '' : vanitySlug) || '').toLowerCase().trim()
     const seo = SUBCATEGORY_SEO[subSlug] || {
       title: 'GEL.IT.UP Gel Polish & Builder Gel | HEMA & TPO-Free, Made in the EU',
       description: 'Browse professional gel polish, builder gels and nail supplies wholesale. HEMA-free, TPO-free, Made in the EU for salons, technicians and academies.',
-      canonical: 'https://gelitup.com/full-catalogue',
+      canonical: 'https://gelitup.com/',
     }
     return setPageSEO(seo)
-  }, [searchParams])
+  }, [searchParams, vanitySlug])
 
   // Load B2B price list for public price display
   useEffect(() => {
@@ -5215,7 +5215,7 @@ function FullCataloguePage() {
 
   // Handle ?subcategory= deep-link — e.g. gelitup.com/cat-eye resolves here via a vanity route
   useEffect(() => {
-    const subSlug = (searchParams.get('subcategory') || '').toLowerCase().trim()
+    const subSlug = (searchParams.get('subcategory') || (searchParams.get('category') ? '' : vanitySlug) || '').toLowerCase().trim()
     if (!subSlug || isLoading) return
     // Maps URL slug → [categoryName, subcategoryName] using exact folder names from product-images/
     const SUBSLUG_MAP = {
@@ -5292,7 +5292,7 @@ function FullCataloguePage() {
       })
       if (found) { openCatalogueCategory(section.category, found.name); return }
     }
-  }, [isLoading, searchParams, openCatalogueCategory, sections])
+  }, [isLoading, searchParams, vanitySlug, openCatalogueCategory, sections])
 
   const getCategoryCoverImage = useCallback((categoryName = '', fallbackImageUrl = '') => {
     const candidates = buildCategoryHeroImageCandidates(categoryName, fallbackImageUrl)
@@ -21698,29 +21698,29 @@ function App() {
           <Route path="/nail-care"         element={<Navigate to="/full-catalogue?category=nail-care"            replace />} />
           <Route path="/tools"             element={<Navigate to="/full-catalogue?category=tools"                replace />} />
           {/* Subcategory vanity routes — land directly on a specific subcategory */}
-          <Route path="/cat-eye"           element={<Navigate to="/full-catalogue?subcategory=cat-eye"           replace />} />
-          <Route path="/shimmer"           element={<Navigate to="/full-catalogue?subcategory=shimmer"           replace />} />
-          <Route path="/glitters"          element={<Navigate to="/full-catalogue?subcategory=glitters"          replace />} />
+          <Route path="/cat-eye"           element={<FullCataloguePage vanitySlug="cat-eye" />} />
+          <Route path="/shimmer"           element={<FullCataloguePage vanitySlug="shimmer" />} />
+          <Route path="/glitters"          element={<FullCataloguePage vanitySlug="glitters" />} />
           <Route path="/jelly"             element={<Navigate to="/full-catalogue?subcategory=jelly"             replace />} />
           <Route path="/metallic"          element={<Navigate to="/full-catalogue?subcategory=metallic"          replace />} />
           <Route path="/pearl"             element={<Navigate to="/full-catalogue?subcategory=pearl"             replace />} />
           <Route path="/glass-effect"      element={<Navigate to="/full-catalogue?subcategory=glass-effect"      replace />} />
           <Route path="/spix"              element={<Navigate to="/full-catalogue?subcategory=spix"              replace />} />
           <Route path="/snowflake"         element={<Navigate to="/full-catalogue?subcategory=snowflake"         replace />} />
-          <Route path="/by-the-ocean"      element={<Navigate to="/full-catalogue?subcategory=by-the-ocean"      replace />} />
-          <Route path="/bob"               element={<Navigate to="/full-catalogue?subcategory=bob"               replace />} />
+          <Route path="/by-the-ocean"      element={<FullCataloguePage vanitySlug="by-the-ocean" />} />
+          <Route path="/bob"               element={<FullCataloguePage vanitySlug="bob" />} />
           <Route path="/brush-on-builder"  element={<Navigate to="/full-catalogue?subcategory=brush-on-builder"  replace />} />
-          <Route path="/3in1"              element={<Navigate to="/full-catalogue?subcategory=3in1"              replace />} />
-          <Route path="/premium-builder"   element={<Navigate to="/full-catalogue?subcategory=premium-builder"   replace />} />
-          <Route path="/liquid-polygel"    element={<Navigate to="/full-catalogue?subcategory=liquid-polygel"    replace />} />
+          <Route path="/3in1"              element={<FullCataloguePage vanitySlug="3in1" />} />
+          <Route path="/premium-builder"   element={<FullCataloguePage vanitySlug="premium-builder" />} />
+          <Route path="/liquid-polygel"    element={<FullCataloguePage vanitySlug="liquid-polygel" />} />
           <Route path="/multimix"          element={<Navigate to="/full-catalogue?subcategory=multimix"          replace />} />
-          <Route path="/mirror-powder"     element={<Navigate to="/full-catalogue?subcategory=mirror-powder"     replace />} />
+          <Route path="/mirror-powder"     element={<FullCataloguePage vanitySlug="mirror-powder" />} />
           <Route path="/cobweb"            element={<Navigate to="/full-catalogue?subcategory=cobweb"            replace />} />
           <Route path="/line-it-up"        element={<Navigate to="/full-catalogue?subcategory=line-it-up"        replace />} />
           <Route path="/marble-ink"        element={<Navigate to="/full-catalogue?subcategory=marble-ink"        replace />} />
           <Route path="/aquarelle"         element={<Navigate to="/full-catalogue?subcategory=aquarelle"         replace />} />
           {/* Remaining gel polish subcategories */}
-          <Route path="/solid-gel-polish"  element={<Navigate to="/full-catalogue?subcategory=solid-gel-polish"  replace />} />
+          <Route path="/solid-gel-polish"  element={<FullCataloguePage vanitySlug="solid-gel-polish" />} />
           <Route path="/new-york"          element={<Navigate to="/full-catalogue?subcategory=new-york"          replace />} />
           <Route path="/tutti-frutti"      element={<Navigate to="/full-catalogue?subcategory=tutti-frutti"      replace />} />
           <Route path="/pma"               element={<Navigate to="/full-catalogue?subcategory=pma"               replace />} />
@@ -21730,7 +21730,7 @@ function App() {
           <Route path="/stickers"          element={<Navigate to="/full-catalogue?subcategory=stickers"          replace />} />
           <Route path="/glitter-effects"   element={<Navigate to="/full-catalogue?subcategory=glitter-effects"   replace />} />
           {/* Bases subcategories */}
-          <Route path="/5in1-base"         element={<Navigate to="/full-catalogue?subcategory=5in1-base"         replace />} />
+          <Route path="/5in1-base"         element={<FullCataloguePage vanitySlug="5in1-base" />} />
           <Route path="/classic-base"      element={<Navigate to="/full-catalogue?subcategory=classic-base"      replace />} />
           <Route path="/flexi-base"        element={<Navigate to="/full-catalogue?subcategory=flexi-base"        replace />} />
           <Route path="/superbond"         element={<Navigate to="/full-catalogue?subcategory=superbond"         replace />} />
