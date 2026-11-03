@@ -19,6 +19,25 @@ https://www.gelitup.com/*  https://gelitup.com/:splat  301!
 /our-products/consumables     /full-catalogue?category=consumables   301!
 /our-products/nail-care       /full-catalogue?category=nail-care     301!
 
+# Old WordPress-era URLs (Search Console "Soft 404", Nov 2026) → matching shop collection
+/our-products/nail-art/chrome-powders          https://shop.gelitup.com/collections/mirror-powders  301!
+/our-products/nail-art/*                       https://shop.gelitup.com/collections/nail-art  301!
+/our-products/skin-and-nail-care/nail-oil      https://shop.gelitup.com/collections/cuticle-oils-and-cuticle-remover  301!
+/our-products/skin-and-nail-care/*             https://shop.gelitup.com/collections/feet-hands-nail-care  301!
+/our-products/soak-off-gel-polish/*            https://shop.gelitup.com/collections/gel-polish  301!
+/our-products/soak-off-gel-polish              https://shop.gelitup.com/collections/gel-polish  301!
+/our-products/base-and-top-coats/primers       https://shop.gelitup.com/collections/primer  301!
+/our-products/base-and-top-coats/bases         https://shop.gelitup.com/collections/classic-base-coats  301!
+/our-products/base-and-top-coats/*             https://shop.gelitup.com/collections/classic-base-coats  301!
+/our-products/builder-system/builder-gels      https://shop.gelitup.com/collections/3-in-1-builder-system  301!
+/our-products/builder-system/multimix          https://shop.gelitup.com/collections/polygel  301!
+/our-products/builder-system/apper-forms       https://shop.gelitup.com/collections/nail-tips  301!
+/our-products/builder-system/*                 https://shop.gelitup.com/collections/builder-systems  301!
+/our-products/builder-system                   https://shop.gelitup.com/collections/builder-systems  301!
+/contact-us                /pages/contact-us           301!
+/uk/contact                /pages/contact-us           301!
+/cy/contact                /pages/contact-us           301!
+
 # Keyword pages → matching shop.gelitup.com collection (products live on the shop;
 # gelitup.com hides catalogue products via HIDE_CATALOGUE_PRODUCTS)
 /solid-gel-polish     https://shop.gelitup.com/collections/solid-gel-polish  301!
