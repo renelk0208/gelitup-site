@@ -6185,6 +6185,23 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (err) { alert(err.message); return }
     patchRow(row.id, { admin_comment: nextComment })
   }
+  // Educator: stays live (portal, code, reviews, giveaways) but has no monthly
+  // packages — no next package date, not overdue, no auto follow-up pack.
+  const setAmbassadorEducator = async (row, on) => {
+    const name = row.full_name || row.email
+    if (!window.confirm(on
+      ? `Make ${name} an Educator?\n\nShe keeps her portal, code, credit, review requests and giveaways, but gets no monthly packages: her next package date is cleared and she won't show as overdue. You can still send her a package whenever needed.`
+      : `Move ${name} back to monthly packages?\n\nHer next package date will be 4 weeks after her last package.`)) return
+    setSaving(row.id)
+    const ok = await syncAmbassadorColumns(row.id, { is_educator: on })
+    if (!ok) { setSaving(null); alert('Could not save the Educator setting.'); return }
+    const lastSent = [...(row._shipments || [])]
+      .filter((s) => s?.sent_at && String(s.status || 'sent').toLowerCase() === 'sent')
+      .sort((a, b) => String(b.sent_at).localeCompare(String(a.sent_at)))[0]
+    const nextReminderAt = on || !lastSent ? '' : `${new Date(new Date(lastSent.sent_at).getTime() + NEXT_PACKAGE_AFTER_DAYS * 86400000).toISOString().slice(0, 10)}T10:00:00.000Z`
+    await saveShipmentMeta({ ...row, is_educator: on }, { nextReminderAt })
+    setSaving(null)
+  }
   const SHIPPING_METHODS = [
     { key: 'courier', label: 'Courier (tracked)' },
     { key: 'post_office', label: 'Post Office' },
@@ -7018,7 +7035,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   const shipmentSaveKey = String(row?.id || '')
   if (!shipmentSaveKey) return
   // Rule: no next package until she confirms she received the last one.
-  if (!recordOnly) {
+  if (!recordOnly && !row?.is_educator) {
     const lastSent = [...(row?._shipments || [])]
       .filter((s) => s?.sent_at && String(s.status || 'sent').toLowerCase() === 'sent')
       .sort((a, b) => String(b.sent_at).localeCompare(String(a.sent_at)))[0]
@@ -7094,14 +7111,16 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const defaultFollowUpDate = getDefaultFollowUpDateValue(updatedRow, recordSentIso || new Date().toISOString())
     // Recorded past package: next date follows the 4-week rule from the real sent date.
     const chosenReminderRaw = String((recordOnly ? defaultFollowUpDate : '') || overrideReminderDate || nextDispatchDateDefault(row) || defaultFollowUpDate || '').trim()
-    if (!chosenReminderRaw) {
+    const isEducator = Boolean(row?.is_educator)
+    if (!chosenReminderRaw && !isEducator) {
       setSaving(null)
       setEmail(row.id, 'error', 'Set a next package reminder date before completing this shipment flow.')
       alert('Set a next package reminder date before completing this shipment flow.')
       return
     }
-    const chosenReminderAt = new Date(`${chosenReminderRaw}T10:00:00Z`)
-    if (Number.isNaN(chosenReminderAt.getTime())) {
+    // Educators have no next package date.
+    const chosenReminderAt = isEducator ? null : new Date(`${chosenReminderRaw}T10:00:00Z`)
+    if (chosenReminderAt && Number.isNaN(chosenReminderAt.getTime())) {
       setSaving(null)
       setEmail(row.id, 'error', 'Reminder date is invalid.')
       alert('Reminder date is invalid.')
@@ -7118,7 +7137,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       updatedRow,
       { ...draft, items: completedItems.filter((t) => t !== currentShipmentItems), shipment_details: currentShipmentItems || draft.shipment_details || '' },
       setPasswordLink,
-      chosenReminderAt.toISOString(),
+      chosenReminderAt ? chosenReminderAt.toISOString() : null,
       /^[0-9a-f-]{36}$/i.test(receiptToken) ? receiptToken : null,
     )
     let res = { ok: true }
@@ -7133,8 +7152,8 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     }
     if (res.ok) {
       const sentAt = recordSentIso || new Date().toISOString()
-      const nextReminderAt = chosenReminderAt.toISOString()
-      const officeReminderAt = new Date(new Date(sentAt).getTime() + 28 * 24 * 60 * 60 * 1000).toISOString()
+      const nextReminderAt = chosenReminderAt ? chosenReminderAt.toISOString() : ''
+      const officeReminderAt = isEducator ? '' : new Date(new Date(sentAt).getTime() + 28 * 24 * 60 * 60 * 1000).toISOString()
       const archiveLine = buildArchiveLine(sentAt)
       const loggedComment = latestAdminComment ? `${latestAdminComment}\n${archiveLine}` : archiveLine
       const { error: logErr } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: loggedComment }).eq('id', row.id)
@@ -7635,7 +7654,7 @@ const deleteApplication = async (row) => {
     // next_package_due is kept by the database (4 weeks after the last package
     // sent); the old tag and the 4-week rule are fallbacks.
     const columnDue = row?.next_package_due ? `${String(row.next_package_due).slice(0, 10)}T10:00:00.000Z` : null
-    const nextReminderAt = sentAt
+    const nextReminderAt = sentAt && !row?.is_educator
       ? (columnDue || reminderAtMeta || new Date(new Date(sentAt).getTime() + NEXT_PACKAGE_AFTER_DAYS * 86400000).toISOString())
       : null
     const isDatePast = Boolean(nextReminderAt) && new Date(nextReminderAt).getTime() < Date.now()
@@ -7901,6 +7920,7 @@ const deleteApplication = async (row) => {
               savingId={saving}
               onEditContents={editShipmentContents}
               onSetType={setAmbassadorType}
+              onSetEducator={setAmbassadorEducator}
               busyShipmentId={busyShipmentId}
               onMarkReceived={markShipmentReceived}
               onMarkLost={markShipmentLost}

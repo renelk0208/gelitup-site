@@ -66,6 +66,12 @@ const SECTIONS = [
     tone: { bar: 'bg-emerald-600', head: 'bg-emerald-50 text-emerald-900', count: 'bg-emerald-600 text-white' },
   },
   {
+    key: 'educator',
+    title: 'Educators',
+    hint: 'No monthly packages — send one when needed. Reviews, code and giveaways work as normal.',
+    tone: { bar: 'bg-violet-600', head: 'bg-violet-50 text-violet-900', count: 'bg-violet-600 text-white' },
+  },
+  {
     key: 'paused',
     title: 'Paused',
     hint: 'No packages are sent while paused.',
@@ -73,9 +79,12 @@ const SECTIONS = [
   },
 ]
 
-function sectionFor({ isPaused, hasEverShipped, nextIn, delivery, processing }) {
+function sectionFor({ isPaused, isEducator, hasEverShipped, nextIn, delivery, processing }) {
   if (isPaused) return 'paused'
   if (processing) return 'processing' // packing sheet printed, not sent yet
+  // Educators: no monthly cycle. While a package is on its way she shows under
+  // On the way (so it can be marked received); otherwise under Educators.
+  if (isEducator) return delivery && delivery !== 'received' && delivery !== 'lost' ? 'transit' : 'educator'
   if (!hasEverShipped) return 'soon' // first package still to send
   if (delivery === 'lost') return 'overdue' // never arrived: resend now
   if (nextIn != null && nextIn < 0) return 'overdue'
@@ -176,7 +185,19 @@ function NotesBlock({ row, notesApi, busy }) {
   )
 }
 
-function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews, canApproveChoices, onApproveChoices, onRejectChoices, busy, notesApi }) {
+// Educator: stays live (reviews, code, giveaways) but has no monthly packages.
+function EducatorSwitch({ row, onSetEducator, busy }) {
+  if (!onSetEducator) return null
+  const on = Boolean(row.is_educator)
+  return (
+    <label className="mt-1 flex items-center gap-1 text-[11px] text-slate-600" title="Educators get packages only when needed — no next package date, not in the overdue list. Reviews, code and giveaways stay on.">
+      <input type="checkbox" checked={on} disabled={busy} onChange={() => onSetEducator(row, !on)} />
+      Educator (no monthly packages)
+    </label>
+  )
+}
+
+function NameCell({ line, getType, onOpen, onSetType, onSetEducator, onAskChoice, onAskReviews, canApproveChoices, onApproveChoices, onRejectChoices, busy, notesApi }) {
   const { row, country } = line
   return (
     <td className="px-3 py-2.5">
@@ -196,7 +217,10 @@ function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews,
         </p>
       )}
       {row.opt_out_reason && <p className="mt-0.5 text-[11px] italic text-slate-500">“{row.opt_out_reason}”</p>}
-      {line.last?.sent_at && !line.last?.lost_at && !line.last?.delivered_at && (
+      {line.isEducator && (
+        <p className="mt-1 inline-block rounded bg-violet-600 px-1.5 py-0.5 text-[10px] font-bold text-white">EDUCATOR · packages when needed</p>
+      )}
+      {!line.isEducator && line.last?.sent_at && !line.last?.lost_at && !line.last?.delivered_at && (
         <p className="mt-1 inline-block rounded bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold text-white" title="No next package until she confirms she received the last one">
           ON HOLD · last package not confirmed
         </p>
@@ -221,7 +245,7 @@ function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews,
       {!line.isFirst && !row.choice_submitted_at && !row.choice_redo_at && row.choice_requested_at && (
         <p className="mt-1 text-[11px] text-amber-700">✉ Asked to choose {fmt(row.choice_requested_at)} · waiting{onAskChoice && <> · <button type="button" onClick={() => onAskChoice(row)} disabled={busy} className="underline">remind</button></>}</p>
       )}
-      {!line.isFirst && !row.choice_submitted_at && !row.choice_redo_at && !row.choice_requested_at && onAskChoice && String(row.status).toLowerCase() === 'approved' && (
+      {!line.isFirst && !line.isEducator && !row.choice_submitted_at && !row.choice_redo_at && !row.choice_requested_at && onAskChoice && String(row.status).toLowerCase() === 'approved' && (
         <button type="button" onClick={() => onAskChoice(row)} disabled={busy} className="mt-1 text-[11px] font-semibold text-fuchsia-700 hover:underline">✉ Ask her to choose 5 products</button>
       )}
       {onAskReviews && (row._shipments || []).some((s) => s.sent_at && !s.lost_at) && (
@@ -230,6 +254,7 @@ function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews,
           <button type="button" onClick={() => onAskReviews(row)} disabled={busy} className="font-semibold text-fuchsia-700 hover:underline">★ {row.review_draft?.items?.length ? 'Review email ready to send' : row.review_requested_at ? 'Ask for more reviews' : 'Ask for reviews'}</button>
         </p>
       )}
+      {String(row.status).toLowerCase() === 'approved' && <EducatorSwitch row={row} onSetEducator={onSetEducator} busy={busy} />}
       <NotesBlock row={row} notesApi={notesApi} busy={busy} />
     </td>
   )
@@ -349,7 +374,7 @@ function PackageHistory({ line, open = false, onEditContents, onMarkLost, onEdit
   )
 }
 
-export default function AmbassadorShipmentsTable({ notesApi, rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, onSwapPlanned, loadProducts, savingId, onEditContents, onSetType, onMarkLost, onPrintSheet, printBusy, onEditNote, onAskChoice, onAskReviews, canApproveChoices, onApproveChoices, onRejectChoices, onOpen, onMarkReceived, busyShipmentId }) {
+export default function AmbassadorShipmentsTable({ notesApi, rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, onSwapPlanned, loadProducts, savingId, onEditContents, onSetType, onSetEducator, onMarkLost, onPrintSheet, printBusy, onEditNote, onAskChoice, onAskReviews, canApproveChoices, onApproveChoices, onRejectChoices, onOpen, onMarkReceived, busyShipmentId }) {
   const [carrier, setCarrier] = useState('')
   // Package history (with what was in each package) is shown open by default.
   const [expandAll, setExpandAll] = useState(true)
@@ -362,8 +387,9 @@ export default function AmbassadorShipmentsTable({ notesApi, rows, getMeta, getT
       const sorted = [...shipments].sort((a, b) => new Date(b.sent_at || 0) - new Date(a.sent_at || 0))
       const last = sorted[0] || null
       const isPaused = String(row.status).toLowerCase() === 'paused'
+      const isEducator = Boolean(row.is_educator)
       const meta = getMeta(row)
-      const nextAt = isPaused ? null : meta.nextReminderAt
+      const nextAt = isPaused || isEducator ? null : meta.nextReminderAt
       const nextIn = daysFromToday(nextAt)
       const delivery = deliveryState(last)
       const hasEverShipped = Boolean(last) || Boolean(meta.shipmentPreviouslySent)
@@ -377,10 +403,11 @@ export default function AmbassadorShipmentsTable({ notesApi, rows, getMeta, getT
         delivery,
         isFirst: !hasEverShipped,
         firstAcknowledged: Boolean(meta.isFactoryAcked),
+        isEducator,
         country: normalizeCountry(row.country),
         planned: plannedItems(row),
         processingAt: row.package_processing_at || null,
-        section: sectionFor({ isPaused, hasEverShipped, nextIn, delivery, processing: Boolean(row.package_processing_at) }),
+        section: sectionFor({ isPaused, isEducator, hasEverShipped, nextIn, delivery, processing: Boolean(row.package_processing_at) }),
       }
     }), [rows, getMeta, plannedItems])
 
@@ -431,7 +458,7 @@ export default function AmbassadorShipmentsTable({ notesApi, rows, getMeta, getT
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
+                <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onSetEducator={onSetEducator} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.nextAt)}</td>
                 <td className="px-3 py-2.5 font-bold text-red-700">{Math.abs(l.nextIn)} day{Math.abs(l.nextIn) === 1 ? '' : 's'}{printButton(l)}</td>
                 <td className={td}>{planner(l)}</td>
@@ -449,7 +476,7 @@ export default function AmbassadorShipmentsTable({ notesApi, rows, getMeta, getT
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
+                <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onSetEducator={onSetEducator} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
                 <td className={td}>
                   {l.isFirst
                     ? <span className="font-semibold text-amber-800">First package{l.firstAcknowledged ? '' : ' · factory not told yet'}</span>
@@ -471,7 +498,7 @@ export default function AmbassadorShipmentsTable({ notesApi, rows, getMeta, getT
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
+                <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onSetEducator={onSetEducator} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
                 <td className={td}>
                   <span className="font-semibold text-blue-800">{fmt(l.processingAt)}</span>
                   {l.row.package_processing_by && <><br /><span className="text-slate-500">by {l.row.package_processing_by}</span></>}
@@ -494,7 +521,7 @@ export default function AmbassadorShipmentsTable({ notesApi, rows, getMeta, getT
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
+                <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onSetEducator={onSetEducator} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.last?.sent_at)}<br /><span className="text-slate-500">Package #{l.count}</span></td>
                 <td className={td}><Tracking pkg={l.last} /></td>
                 <td className={td}>
@@ -526,7 +553,7 @@ export default function AmbassadorShipmentsTable({ notesApi, rows, getMeta, getT
           <tbody className="divide-y divide-slate-100 align-top">
             {list.map((l) => (
               <tr key={l.row.id}>
-                <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
+                <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onSetEducator={onSetEducator} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
                 <td className={td}>{fmt(l.last?.sent_at)}<br /><span className="text-slate-500">Package #{l.count}</span></td>
                 <td className={td}>
                   <span className="font-semibold text-emerald-700">✓ {fmt(l.last?.delivered_at)}</span>
@@ -542,13 +569,37 @@ export default function AmbassadorShipmentsTable({ notesApi, rows, getMeta, getT
         </table>
       )
     }
+    if (key === 'educator') {
+      return (
+        <table className="w-full min-w-[980px] text-xs">
+          <thead><tr><th className={th}>Educator</th><th className={th}>Last package</th><th className={th}>Plan a package</th><th className={th}>All packages</th></tr></thead>
+          <tbody className="divide-y divide-slate-100 align-top">
+            {list.map((l) => (
+              <tr key={l.row.id}>
+                <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onSetEducator={onSetEducator} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
+                <td className={td}>
+                  {l.last?.sent_at
+                    ? <>{fmt(l.last.sent_at)}<br /><span className="text-slate-500">Package #{l.count}</span>
+                      {l.last.delivered_at && <><br /><span className="font-semibold text-emerald-700">✓ received {fmt(l.last.delivered_at)}</span></>}
+                      {l.last.lost_at && <><br /><span className="font-semibold text-red-700">lost</span></>}</>
+                    : <span className="text-slate-400">No package yet</span>}
+                  {printButton(l)}
+                </td>
+                <td className={td}>{planner(l)}</td>
+                <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} onEditNote={onEditNote} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )
+    }
     return (
       <table className="w-full min-w-[980px] text-xs">
         <thead><tr><th className={th}>Ambassador</th><th className={th}>All packages</th></tr></thead>
         <tbody className="divide-y divide-slate-100 align-top">
           {list.map((l) => (
             <tr key={l.row.id}>
-              <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
+              <NameCell notesApi={notesApi} line={l} getType={getType} onOpen={onOpen} onSetType={onSetType} onSetEducator={onSetEducator} onAskChoice={onAskChoice} onAskReviews={onAskReviews} canApproveChoices={canApproveChoices} onApproveChoices={onApproveChoices} onRejectChoices={onRejectChoices} busy={savingId === l.row.id} />
               <td className={td}><PackageHistory key={`h-${l.row.id}-${expandAll}`} line={l} open={expandAll} onEditContents={onEditContents} onMarkLost={onMarkLost} onEditNote={onEditNote} /></td>
             </tr>
           ))}
@@ -559,7 +610,7 @@ export default function AmbassadorShipmentsTable({ notesApi, rows, getMeta, getT
 
   return (
     <section className="space-y-4" aria-label="Ambassador shipments">
-      <nav className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6" aria-label="Sections">
+      <nav className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-7" aria-label="Sections">
         {SECTIONS.map((s) => (
           <a key={s.key} href={`#ship-${s.key}`} className="overflow-hidden rounded-xl border border-slate-200 bg-white hover:border-slate-300">
             <div className={`h-1.5 ${s.tone.bar}`} />
