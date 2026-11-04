@@ -336,7 +336,8 @@ function BookingPanel({ seminar, onClose }) {
   const checkout = () => {
     const items = [`${data.seat.id}:${qty}`]
     if (withKit && kitVariant) items.push(`${kitVariant.id}:${qty}`)
-    window.location.href = `${data.checkoutBase}${items.join(',')}`
+    // storefront=true opens the shop's cart first, so the buyer can still remove or change items before paying.
+    window.location.href = `${data.checkoutBase}${items.join(',')}?storefront=true`
   }
 
   return (
@@ -438,9 +439,9 @@ function BookingPanel({ seminar, onClose }) {
                   : `I ask for the seminar to be provided on the booked date and for access to the recording to start after it, even if this is within the 14-day withdrawal period. I understand that I lose my right of withdrawal once the seminar has been provided and the recording made available, and that cancellations follow the ${CANCEL_HOURS}-hour rule above.`}</span>
               </label>
             </div>
-            <Button type="button" onClick={checkout} disabled={!agreed || !consented || (withKit && (!kitVariant || !kitVariant.available))} className="w-full mt-4">Continue to secure payment →</Button>
+            <Button type="button" onClick={checkout} disabled={!agreed || !consented || (withKit && (!kitVariant || !kitVariant.available))} className="w-full mt-4">Continue to your cart →</Button>
             {(!agreed || !consented) && <p className="text-xs text-black/50 mt-2 text-center">Please tick both boxes to continue.</p>}
-            <p className="text-xs text-black/50 mt-3 text-center">Payment is processed securely by Shopify. Your access code is emailed straight after payment.</p>
+            <p className="text-xs text-black/50 mt-3 text-center">You can check or change your items in the cart, then pay securely with Shopify. Your access code is emailed straight after payment.</p>
           </>
         )}
       </div>
