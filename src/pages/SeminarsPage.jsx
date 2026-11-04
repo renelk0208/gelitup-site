@@ -263,6 +263,19 @@ function SeminarCard({ s, onBook }) {
 const money = (n) => (n == null ? '' : `€${Number(n).toFixed(2)}`)
 
 // Booking panel: seat + optional kit with its choices, then straight to Shopify checkout.
+// Countries where the shop does not ship: the seminar kit comes from the local distributor.
+// Fill in contact/email per country when known; until then buyers are pointed to info@gelitup.com.
+const KIT_DISTRIBUTOR_COUNTRIES = {
+  BG: { name: 'Bulgaria', contact: '', email: '' },
+}
+const guessDistributorCountry = () => {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    if (tz === 'Europe/Sofia') return 'BG'
+  } catch { /* ignore */ }
+  return ''
+}
+
 function BookingPanel({ seminar, onClose }) {
   const isRec = seminar.mode === 'recording'
   const recDays = seminar.recording_days || 30
@@ -270,6 +283,9 @@ function BookingPanel({ seminar, onClose }) {
   const [error, setError] = useState('')
   const [qty, setQty] = useState(1)
   const [withKit, setWithKit] = useState(false)
+  const [kitCountry, setKitCountry] = useState(guessDistributorCountry)
+  const [pickCountry, setPickCountry] = useState(false)
+  const distributor = KIT_DISTRIBUTOR_COUNTRIES[kitCountry]
   const [choice, setChoice] = useState([])
   const [agreed, setAgreed] = useState(false)
   const [consented, setConsented] = useState(false)
@@ -292,10 +308,12 @@ function BookingPanel({ seminar, onClose }) {
         // combinations from /seminars/kit-variants/<handle>.json; price and stock follow a
         // listed variant with the same last option (e.g. the forms choice).
         let optionImages = null
+        let contents = null
         if (kitP?.variants?.length) {
           try {
             const extra = await fetch(`/seminars/kit-variants/${handle(row.kit_url)}.json`).then((r) => (r.ok ? r.json() : null))
             optionImages = extra?.optionImages || null
+            contents = Array.isArray(extra?.contents) ? extra.contents : null
             const have = new Set(kitP.variants.map((x) => x.options.join('|')))
             const last = (opts) => opts[opts.length - 1]
             for (const ev of extra?.variants || []) {
@@ -311,6 +329,7 @@ function BookingPanel({ seminar, onClose }) {
           kit: kitP ? {
             options: (kitP.options || []).map((o) => ({ name: o.name, values: o.values })),
             images: optionImages,
+            contents,
             variants: (kitP.variants || []).map((x) => ({ id: x.id, options: x.options, price: x.price / 100, compareAt: x.compare_at_price ? x.compare_at_price / 100 : null, available: x.available })),
           } : null,
           checkoutBase: `${SHOP_URL}/cart/`,
@@ -334,13 +353,14 @@ function BookingPanel({ seminar, onClose }) {
   const kitVariant = data?.kit?.variants?.find((v) => v.options.every((o, i) => o === choice[i]))
   const bookingClosed = !isRec && new Date(seminar.starts_at).getTime() - BOOKING_CUTOFF_HOURS * 3600000 < Date.now()
   const seatOk = data?.seat && data.seat.available && !data.soldOut && !bookingClosed
-  const total = (seatOk ? data.seat.price * qty : 0) + (withKit && kitVariant ? kitVariant.price * qty : 0)
+  const kitOn = withKit && !distributor
+  const total = (seatOk ? data.seat.price * qty : 0) + (kitOn && kitVariant ? kitVariant.price * qty : 0)
 
   const checkout = () => {
     // Add to the shop cart (keeps anything already in it, e.g. a kit added earlier) and open
     // the cart, where the buyer can still remove or change items before paying.
     const items = [{ id: data.seat.id, quantity: qty }]
-    if (withKit && kitVariant) items.push({ id: kitVariant.id, quantity: qty })
+    if (withKit && kitVariant && !distributor) items.push({ id: kitVariant.id, quantity: qty })
     const form = document.createElement('form')
     form.method = 'POST'
     form.action = `${SHOP_URL}/cart/add`
@@ -384,8 +404,36 @@ function BookingPanel({ seminar, onClose }) {
             </div>
             {qty > 1 && <p className="text-xs text-black/50 mt-1">Each {isRec ? 'one' : 'seat'} gets its own access code — forward one to each person.</p>}
 
-            {data.kit && (
-              <div className={`mt-4 border rounded-xl p-4 ${withKit ? 'border-[#D43790] bg-[#D43790]/[0.03]' : ''}`}>
+            {data.kit && distributor && (
+              <div className="mt-4 rounded-xl border border-[#D43790] bg-[#F9D3E6]/40 p-4 text-sm">
+                <p className="font-semibold" style={{ color: '#9E1F63' }}>Seminar kit in {distributor.name}</p>
+                <p className="mt-1 text-black/70">The shop does not deliver to {distributor.name} — the products used in the seminar are supplied by your local GEL.IT.UP distributor. Book your seat here and order the kit from them in good time before the seminar.</p>
+                {data.kit.contents?.length > 0 && (
+                  <div className="mt-3 rounded-lg bg-white p-3">
+                    <p className="text-xs font-bold uppercase tracking-wider" style={{ color: '#9E1F63' }}>What's in the seminar kit</p>
+                    <ul className="mt-1 list-disc pl-5 text-black/80">{data.kit.contents.map((c) => <li key={c}>{c}</li>)}</ul>
+                    <p className="mt-1 text-xs text-black/50">Show this list to your distributor so you get exactly what the trainer uses.</p>
+                  </div>
+                )}
+                <p className="mt-2 text-black/80">
+                  {distributor.contact && <><strong>{distributor.contact}</strong>{distributor.email ? ' · ' : ''}</>}
+                  {distributor.email
+                    ? <a className="font-semibold underline" style={{ color: BRAND }} href={`mailto:${distributor.email}?subject=${encodeURIComponent(`Seminar kit: ${seminar.title}`)}`}>{distributor.email}</a>
+                    : <>Email <a className="font-semibold underline" style={{ color: BRAND }} href={`mailto:info@gelitup.com?subject=${encodeURIComponent(`Seminar kit in ${distributor.name}: ${seminar.title}`)}`}>info@gelitup.com</a> and we will put you in touch with your distributor.</>}
+                </p>
+                <button type="button" className="mt-2 text-xs underline text-black/50" onClick={() => { setKitCountry(''); setPickCountry(false) }}>Not in {distributor.name}? Show the kit</button>
+              </div>
+            )}
+            {data.kit && !distributor && (
+              <p className="mt-4 text-xs text-black/50">
+                Ordering from Bulgaria?{' '}
+                {pickCountry
+                  ? Object.entries(KIT_DISTRIBUTOR_COUNTRIES).map(([code, c]) => <button key={code} type="button" className="ml-1 font-semibold underline" style={{ color: BRAND }} onClick={() => { setKitCountry(code); setWithKit(false) }}>{c.name}</button>)
+                  : <button type="button" className="font-semibold underline" style={{ color: BRAND }} onClick={() => setPickCountry(true)}>The kit comes from your local distributor →</button>}
+              </p>
+            )}
+            {data.kit && !distributor && (
+              <div className={`mt-2 border rounded-xl p-4 ${withKit ? 'border-[#D43790] bg-[#D43790]/[0.03]' : ''}`}>
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input type="checkbox" checked={withKit} onChange={(e) => setWithKit(e.target.checked)} className="mt-1" />
                   <span className="flex-1">
@@ -430,7 +478,7 @@ function BookingPanel({ seminar, onClose }) {
             )}
 
             <div className="mt-6 flex items-center justify-between">
-              <p className="text-sm text-black/60">Total{withKit ? ' (shipping added at checkout)' : ''}</p>
+              <p className="text-sm text-black/60">Total{kitOn ? ' (shipping added at checkout)' : ''}</p>
               <p className="text-2xl font-bold">{money(total)}</p>
             </div>
             <div className="mt-5 rounded-xl bg-black/[0.03] p-4 text-xs text-black/70">
@@ -449,7 +497,7 @@ function BookingPanel({ seminar, onClose }) {
                 <li><strong>Free cancellation</strong> with a full refund of the seat up to {CANCEL_HOURS} hours before the start, in My seminars. <strong>Within {CANCEL_HOURS} hours</strong> the seat cannot be cancelled or refunded, including if you do not attend.</li>
                 <li>Your access code is <strong>personal and non-transferable</strong> once used, works on one device at a time, and may not be shared. Recording or redistributing the seminar is not allowed.</li>
                 <li>Replay access for {30} days after the seminar. Participants must be 18 or older.</li>
-                {withKit && <li>The kit is a physical product: normal 14-day right of withdrawal and shop returns policy apply; it is not refunded automatically when a seat is cancelled.</li>}
+                {kitOn && <li>The kit is a physical product: normal 14-day right of withdrawal and shop returns policy apply; it is not refunded automatically when a seat is cancelled.</li>}
               </ul>
               )}
               <a href="/seminars/terms" target="_blank" rel="noopener" className="inline-block mt-2 underline" style={{ color: BRAND }}>Read the full seminar terms &amp; conditions</a>
@@ -464,7 +512,7 @@ function BookingPanel({ seminar, onClose }) {
                   : `I ask for the seminar to be provided on the booked date and for access to the recording to start after it, even if this is within the 14-day withdrawal period. I understand that I lose my right of withdrawal once the seminar has been provided and the recording made available, and that cancellations follow the ${CANCEL_HOURS}-hour rule above.`}</span>
               </label>
             </div>
-            <Button type="button" onClick={checkout} disabled={!agreed || !consented || (withKit && (!kitVariant || !kitVariant.available))} className="w-full mt-4">Continue to your cart →</Button>
+            <Button type="button" onClick={checkout} disabled={!agreed || !consented || (kitOn && (!kitVariant || !kitVariant.available))} className="w-full mt-4">Continue to your cart →</Button>
             {(!agreed || !consented) && <p className="text-xs text-black/50 mt-2 text-center">Please tick both boxes to continue.</p>}
             <p className="text-xs text-black/50 mt-3 text-center">You can check or change your items in the cart, then pay securely with Shopify. Your access code is emailed straight after payment.</p>
           </>
