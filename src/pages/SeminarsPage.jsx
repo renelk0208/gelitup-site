@@ -138,7 +138,7 @@ function SeminarCard({ s, onBook }) {
   const clickable = recording || (!soldOut && !past && !closed)
   const inner = (
     <>
-      <div className="relative aspect-[4/5] bg-black/5 overflow-hidden rounded-2xl">
+      <div className="relative aspect-square bg-black/5 overflow-hidden rounded-2xl">
         {s.image_url
           ? <img src={s.image_url} alt={s.title} loading="lazy" className={`h-full w-full object-cover transition-transform duration-500 ${clickable ? 'group-hover:scale-[1.03]' : ''} ${(soldOut || past) && !recording ? 'grayscale-[60%] opacity-80' : ''}`} />
           : <div className="h-full w-full flex items-center justify-center text-black/30 text-sm p-6 text-center">Seminar image<br />1200 × 1500 px</div>}
@@ -505,7 +505,7 @@ function MySeminars({ session }) {
           const canEnter = s.phase === 'live' || s.phase === 'replay' || s.phase === 'upcoming' || s.phase === 'replay_pending'
           return (
             <div key={s.id} className="border rounded-2xl p-5 flex gap-4 items-center">
-              {s.image_url && <img src={s.image_url} alt="" className="w-16 h-20 object-cover rounded-lg hidden sm:block" />}
+              {s.image_url && <img src={s.image_url} alt="" className="w-16 h-16 object-cover rounded-lg hidden sm:block" />}
               <div className="flex-1 min-w-0">
                 <span className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full ${cls}`} style={s.phase === 'live' ? { background: BRAND } : undefined}>{label}</span>
                 <h2 className="font-bold mt-1">{s.title}</h2>
