@@ -884,14 +884,14 @@ function SeminarAdminSignIn({ initialMode = 'signin' }) {
       <Shell>
         <div className="max-w-sm mx-auto border rounded-2xl p-6 text-center">
           <p className="font-semibold">Signed in as {signedInAs}</p>
-          <p className="text-sm text-black/60 mt-2">This account doesn't have access to the seminar admin. Sign out and sign in with the seminar account (e.g. seminars@gelitup.com).</p>
+          <p className="text-sm text-black/60 mt-2">This account doesn't have access here. Sign out and sign in with your seminar team or trainer account.</p>
           <Button type="button" className="w-full mt-4" onClick={async () => { await supabase.auth.signOut(); window.location.reload() }}>Sign out</Button>
         </div>
       </Shell>
     )
   }
 
-  const titles = { signin: 'Seminar admin sign-in', create: 'Create your password', forgot: 'Reset your password', newpass: 'Choose a new password' }
+  const titles = { signin: 'Seminar team sign-in', create: 'Create your password', forgot: 'Reset your password', newpass: 'Choose a new password' }
   return (
     <Shell>
       <form onSubmit={submit} className="max-w-sm mx-auto border rounded-2xl p-6 grid gap-3">
@@ -908,6 +908,140 @@ function SeminarAdminSignIn({ initialMode = 'signin' }) {
           </div>
         )}
       </form>
+    </Shell>
+  )
+}
+
+// ── Trainer: my schedule, bookings and what attendees see ────────────────────
+function countdownText(iso, now) {
+  const ms = new Date(iso).getTime() - now
+  if (ms <= 0) return ''
+  const d = Math.floor(ms / 86400000), h = Math.floor((ms % 86400000) / 3600000), m = Math.floor((ms % 3600000) / 60000)
+  return d > 0 ? `in ${d} day${d === 1 ? '' : 's'} ${h} h` : h > 0 ? `in ${h} h ${m} min` : `in ${m} min`
+}
+function icsHref({ at, minutes, title, kind }) {
+  const f = (d) => new Date(d).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
+  const end = new Date(new Date(at).getTime() + (minutes || 120) * 60000)
+  const body = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//GEL.IT.UP//Seminars//EN', 'BEGIN:VEVENT', `UID:${f(at)}-${kind}@gelitup.com`, `DTSTAMP:${f(new Date())}`, `DTSTART:${f(at)}`, `DTEND:${f(end)}`, `SUMMARY:${kind === 'group' ? 'Online group' : 'Private 1-on-1'}: ${title}`, `URL:${SEMINAR_SITE_URL}/seminars/trainer`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n')
+  return `data:text/calendar;charset=utf-8,${encodeURIComponent(body)}`
+}
+const vimeoEventPage = (embed) => { const m = String(embed || '').match(/vimeo\.com\/event\/(\d+)/); return m ? `https://vimeo.com/event/${m[1]}` : '' }
+
+function TrainerPage() {
+  const [state, setState] = useState('checking') // checking | signin | ready
+  const [rows, setRows] = useState([])
+  const [open, setOpen] = useState(null)
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    ;(async () => {
+      if (!hasSupabaseConfig) { setState('signin'); return }
+      const { data: sess } = await supabase.auth.getSession()
+      if (!sess?.session) { setState('signin'); return }
+      const { data, error } = await supabase.rpc('seminar_trainer_dashboard')
+      if (error) { setState('signin'); return }
+      setRows(Array.isArray(data) ? data : [])
+      setState('ready')
+    })()
+    const t = setInterval(() => setNow(Date.now()), 60000)
+    return () => clearInterval(t)
+  }, [])
+
+  if (state === 'checking') return <Shell><p className="text-center text-black/40">Loading…</p></Shell>
+  if (state === 'signin') return <SeminarAdminSignIn />
+
+  const endOf = (r) => new Date(r.starts_at).getTime() + (r.duration_minutes || 120) * 60000
+  const upcoming = rows.filter((r) => endOf(r) >= now)
+  const past = rows.filter((r) => endOf(r) < now).reverse()
+  // Schedule = group seminars + confirmed private sessions, in time order.
+  const schedule = [
+    ...upcoming.map((r) => ({ at: r.starts_at, kind: 'group', title: r.title, minutes: r.duration_minutes, extra: `${r.seats_booked} booked` })),
+    ...rows.flatMap((r) => (r.private_sessions || []).filter((p) => new Date(p.start).getTime() + (r.private_minutes || 120) * 60000 >= now)
+      .map((p) => ({ at: p.start, kind: 'private', title: r.title, minutes: r.private_minutes || 120, extra: `${p.name}${p.country ? `, ${p.country}` : ''} · ${p.status === 'paid' ? 'paid' : 'awaiting payment'}${p.wants_kit ? ' · wants kit' : ''}` }))),
+  ].sort((a, b) => new Date(a.at) - new Date(b.at))
+
+  const Card = ({ r }) => {
+    const live = now >= new Date(r.starts_at).getTime() - 30 * 60000 && now <= endOf(r) + 60 * 60000
+    const ev = vimeoEventPage(r.live_embed_url)
+    return (
+      <div className="border rounded-2xl p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-wider text-black/50">{whenEET(r.starts_at)} · {Math.round((r.duration_minutes || 120) / 60 * 10) / 10} h{countdownText(r.starts_at, now) ? ` · ${countdownText(r.starts_at, now)}` : ''}</p>
+            <h3 className="font-bold text-lg">{r.title}</h3>
+            {live && <span className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs font-bold text-white" style={{ background: BRAND }}>● LIVE WINDOW OPEN</span>}
+          </div>
+          <div className="flex gap-2 text-center">
+            <div className="rounded-xl px-4 py-2" style={{ background: BRAND, color: '#fff' }}><p className="text-2xl font-extrabold leading-none">{r.seats_booked}</p><p className="text-[11px] font-semibold uppercase">seats booked</p></div>
+            <div className="rounded-xl px-4 py-2" style={{ background: '#F9D3E6', color: '#9E1F63' }}><p className="text-2xl font-extrabold leading-none">{r.seats_signed_in}</p><p className="text-[11px] font-semibold uppercase">signed in</p></div>
+          </div>
+        </div>
+        <p className="mt-2 text-sm text-black/60">{r.recordings_sold > 0 ? `${r.recordings_sold} recording${r.recordings_sold === 1 ? '' : 's'} sold · ` : ''}{r.cancellations > 0 ? `${r.cancellations} cancelled · ` : ''}{r.private_pending > 0 ? `${r.private_pending} private request${r.private_pending === 1 ? '' : 's'} waiting for a reply` : ''}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {ev && <a href={ev} target="_blank" rel="noreferrer" className="rounded-xl px-4 py-2 text-sm font-bold text-white" style={{ background: '#111' }}>Open the Vimeo event (go live) ↗</a>}
+          <button type="button" onClick={() => setOpen(open === r.id ? null : r.id)} className="rounded-xl px-4 py-2 text-sm font-bold border" style={{ borderColor: BRAND, color: BRAND }}>{open === r.id ? 'Hide' : 'See what attendees see'}</button>
+        </div>
+        {!ev && <p className="mt-2 text-sm text-black/50">The Vimeo live link hasn't been added yet — it will appear here once the seminar team adds it.</p>}
+        {open === r.id && (
+          r.live_embed_url || r.replay_embed_url ? (
+            <div className="mt-4 grid gap-3 lg:grid-cols-3">
+              <div className="lg:col-span-2 relative aspect-video rounded-2xl overflow-hidden bg-black"><iframe title={`${r.title} preview`} src={r.live_embed_url || r.replay_embed_url} className="absolute inset-0 h-full w-full" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen /></div>
+              {r.chat_embed_url ? <div className="relative min-h-[320px] rounded-2xl overflow-hidden border"><iframe title="Chat and Q&A" src={r.chat_embed_url} className="absolute inset-0 h-full w-full" /></div> : <div className="rounded-2xl border p-4 text-sm text-black/50">Chat / Q&amp;A appears here once the Vimeo event link is added.</div>}
+            </div>
+          ) : <p className="mt-3 text-sm text-black/50">Nothing to preview yet — no Vimeo link added.</p>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <Shell wide>
+      <p className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND }}>GEL.IT.UP Seminars · Trainer</p>
+      <h1 className="text-3xl font-bold mt-1">My schedule</h1>
+      <p className="text-black/60 mt-1">All times are EET (Greece / Bulgaria / Romania time), 24-hour clock.</p>
+
+      {rows.length === 0 && <div className="mt-8 border rounded-2xl p-8 text-center text-black/60">No seminars are linked to this account yet. Ask the seminar team to add your email to your seminar.</div>}
+
+      {schedule.length > 0 && (
+        <section className="mt-6">
+          <h2 className="font-bold text-lg">Coming up</h2>
+          <div className="mt-2 border rounded-2xl divide-y">
+            {schedule.map((x, i) => (
+              <div key={i} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 text-sm">
+                <span className="font-bold w-56">{whenEET(x.at)}</span>
+                <span className="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase" style={x.kind === 'group' ? { background: BRAND, color: '#fff' } : { background: '#F9D3E6', color: '#9E1F63' }}>{x.kind === 'group' ? 'Online group' : 'Private 1-on-1'}</span>
+                <span className="flex-1">{x.title} · {Math.round((x.minutes || 120) / 60 * 10) / 10} h</span>
+                <span className="text-black/60">{x.extra}</span>
+                <a href={icsHref(x)} download={`${x.kind}-${String(x.at).slice(0, 10)}.ics`} className="text-xs font-semibold underline" style={{ color: BRAND }}>+ Add to calendar</a>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {upcoming.length > 0 && (
+        <section className="mt-8">
+          <h2 className="font-bold text-lg">Group seminars</h2>
+          <div className="mt-2 grid gap-4">{upcoming.map((r) => <Card key={r.id} r={r} />)}</div>
+          <div className="mt-4 rounded-2xl bg-black/[0.03] p-4 text-sm">
+            <p className="font-semibold">Before you go live</p>
+            <ul className="mt-1 list-disc pl-5 text-black/70 space-y-0.5">
+              <li>Test your stream with the seminar team at least a day before.</li>
+              <li>Camera and light set up; a second close-up angle on the nails if you use OBS.</li>
+              <li>All products from the seminar kit ready and in reach.</li>
+              <li>Go live 10–15 minutes early — attendees can enter the room 30 minutes before the start.</li>
+              <li>Keep the chat / Q&amp;A open to answer questions.</li>
+            </ul>
+          </div>
+        </section>
+      )}
+
+      {past.length > 0 && (
+        <section className="mt-8">
+          <h2 className="font-bold text-lg">Past seminars</h2>
+          <div className="mt-2 grid gap-4">{past.map((r) => <Card key={r.id} r={r} />)}</div>
+        </section>
+      )}
     </Shell>
   )
 }
@@ -973,7 +1107,7 @@ function AdminPage() {
   const save = async (e) => {
     e.preventDefault(); setMsg('Saving…')
     const { vimeo_event, replay_video, id } = editing
-    const FIELDS = ['title', 'trainer_name', 'description', 'duration_minutes', 'replay_days', 'status', 'kind', 'shopify_sku', 'shop_url', 'kit_url', 'image_url', 'sold_out', 'recording_sku', 'recording_shop_url', 'recording_days', 'recording_on_sale', 'private_price', 'private_minutes', 'private_variant_id']
+    const FIELDS = ['title', 'trainer_name', 'description', 'duration_minutes', 'replay_days', 'status', 'kind', 'shopify_sku', 'shop_url', 'kit_url', 'image_url', 'sold_out', 'recording_sku', 'recording_shop_url', 'recording_days', 'recording_on_sale', 'private_price', 'private_minutes', 'private_variant_id', 'trainer_email']
     const rest = Object.fromEntries(FIELDS.map((f) => [f, editing[f] === '' ? null : editing[f]]))
     const row = { ...rest, starts_at: new Date(editing.starts_at).toISOString(), shopify_sku: rest.shopify_sku?.trim() || null, duration_minutes: Number(rest.duration_minutes), replay_days: Number(rest.replay_days), recording_days: Number(rest.recording_days) || 30, recording_sku: rest.recording_sku?.trim() || null, updated_at: new Date().toISOString() }
     const q = id ? supabase.from('seminars').update(row).eq('id', id).select().single() : supabase.from('seminars').insert(row).select().single()
@@ -1022,7 +1156,7 @@ function AdminPage() {
     <Shell wide>
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-2xl md:text-3xl font-bold">Seminars admin</h1>
-        <Button onClick={() => startEdit(null)}>+ New seminar</Button>
+        <div className="flex items-center gap-3"><Link to="/seminars/trainer" className="text-sm font-semibold underline" style={{ color: BRAND }}>Trainer view (schedule &amp; bookings) →</Link><Button onClick={() => startEdit(null)}>+ New seminar</Button></div>
       </div>
       {msg && <p className="mt-3 text-sm bg-black/5 rounded-lg px-3 py-2">{msg}</p>}
 
@@ -1031,6 +1165,7 @@ function AdminPage() {
           <h2 className="md:col-span-2 font-bold text-lg">{editing.id ? 'Edit seminar' : 'New seminar'}</h2>
           <div className="md:col-span-2">{F({ label: 'Title *', k: 'title', required: true })}</div>
           {F({ label: 'Trainer', k: 'trainer_name' })}
+          {F({ label: 'Trainer login email (sees bookings & schedule at /seminars/trainer)', k: 'trainer_email', type: 'email' })}
           {F({ label: 'Starts (your local time) *', k: 'starts_at', type: 'datetime-local', required: true })}
           {F({ label: 'Duration (minutes)', k: 'duration_minutes', type: 'number', min: 15 })}
           {F({ label: 'Replay days after seminar', k: 'replay_days', type: 'number', min: 0 })}
@@ -1193,7 +1328,7 @@ function PrivateReply() {
       const { data: r } = await supabase.from('seminar_private_requests').select('*').eq('id', id).maybeSingle()
       setReq(r || false)
       if (r?.seminar_id) {
-        const { data: sm } = await supabase.from('seminars').select('id, title, trainer_name, private_price, private_minutes, private_variant_id, kit_url').eq('id', r.seminar_id).maybeSingle()
+        const { data: sm } = await supabase.from('seminars').select('id, title, trainer_name, trainer_email, private_price, private_minutes, private_variant_id, kit_url').eq('id', r.seminar_id).maybeSingle()
         setSeminar(sm || null)
       }
       const picked = r && slot != null ? (r.preferred_slots || [])[Number(slot)] : null
@@ -1225,6 +1360,10 @@ function PrivateReply() {
       ? { status: 'declined', reply_comment: comment.trim() || null, replied_at: new Date().toISOString() }
       : { status: 'confirmed', confirmed_start: startIso, reply_comment: comment.trim() || null, replied_at: new Date().toISOString() }
     const { error } = await supabase.from('seminar_private_requests').update(patch).eq('id', req.id)
+    // Tell the trainer the date the client has been offered (it also appears in her schedule).
+    if (!decline && seminar?.trainer_email) {
+      await sendMail(seminar.trainer_email, `Private 1-on-1 booked in — ${whenEET(startIso)}`, brandEmail(`<p>Hi ${escapeHtml(seminar.trainer_name || 'there')},</p><p>A private 1-on-1 session has been agreed and the client has been sent the payment link:</p><p style="font-size:17px;background:#f6f6f6;border-radius:8px;padding:12px;text-align:center"><strong>${escapeHtml(whenEET(startIso))}</strong><br/><span style="color:#666">${escapeHtml(seminar.title)} · ${Math.round((seminar.private_minutes || 120) / 60 * 10) / 10} h · ${escapeHtml(String(req.name || '').split(' ')[0])}${req.country ? `, ${escapeHtml(req.country)}` : ''}</span></p>${comment.trim() ? `<p style="color:#555">Note sent to the client: <em>${escapeHtml(comment.trim())}</em></p>` : ''}<p>You'll see it in your schedule, marked as paid once the client pays: <a href="${SEMINAR_SITE_URL}/seminars/trainer" style="color:${BRAND}">gelitup.com/seminars/trainer</a></p>`, 'Trainer notification'), PRIVATE_INBOX)
+    }
     setMsg(error ? `Email sent, but the request could not be updated: ${error.message}` : decline ? 'Sent. The request is marked as declined.' : 'Sent. The client has the agreed time and the payment link; you will get an email when they pay.')
     setReq((r) => ({ ...r, ...patch }))
   }
@@ -1374,6 +1513,7 @@ export default function SeminarsPage() {
       <Route path="terms" element={<TermsPage session={session} />} />
       <Route path="admin" element={<AdminPage />} />
       <Route path="admin/private/:id" element={<PrivateReply />} />
+      <Route path="trainer" element={<TrainerPage />} />
       <Route path="*" element={<Navigate to="/seminars" replace />} />
     </Routes>
   )
