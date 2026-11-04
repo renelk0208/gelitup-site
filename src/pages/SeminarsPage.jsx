@@ -822,7 +822,7 @@ function PrivateRequest({ session }) {
   const [seminar, setSeminar] = useState(null)
   useEffect(() => {
     if (!seminarId || !hasSupabaseConfig) return
-    supabase.from('seminars').select('id, title, trainer_name, private_price, private_minutes').eq('id', seminarId).maybeSingle()
+    supabase.from('seminars').select('id, title, trainer_name, trainer_email, private_price, private_minutes').eq('id', seminarId).maybeSingle()
       .then(({ data }) => { if (data?.private_price != null) setSeminar(data) })
   }, [seminarId])
   const hours = seminar ? Math.round((seminar.private_minutes || 120) / 60 * 10) / 10 : 0
@@ -852,9 +852,10 @@ function PrivateRequest({ session }) {
         <h3 style="margin:20px 0 4px">Preferred times — click the one you agree</h3>
         <table style="font-size:14px">${slotRows}</table>
         <p style="margin:18px 0"><a href="${replyUrl}" style="color:${BRAND};font-weight:bold">Reply with another time or a comment →</a></p>
-        <p style="font-size:12px;color:#777">Each button opens the reply page (admin sign-in needed), where you can add a comment for the client and send the confirmation with the €${seminar ? Number(seminar.private_price).toFixed(0) : ''} payment link.</p>
+        <p style="font-size:12px;color:#777">Each button opens the reply page (trainer or seminar-team sign-in needed), where you can add a comment for the client and send the confirmation with the €${seminar ? Number(seminar.private_price).toFixed(0) : ''} payment link.</p>
       </div>`, 'Internal notification — private session request')
-      fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: EMAIL_ANON_KEY, Authorization: `Bearer ${EMAIL_ANON_KEY}` }, body: JSON.stringify({ to: PRIVATE_INBOX, subject: seminar ? `Private 1-on-1 request — ${seminar.title} — ${record.name}` : `Private seminar request — ${record.name}`, html, from: 'GEL.IT.UP Seminars <info@gelitup.com>', replyTo: record.email }) }).catch(() => {})
+      const inboxes = [PRIVATE_INBOX, ...(seminar?.trainer_email && seminar.trainer_email.toLowerCase() !== PRIVATE_INBOX ? [seminar.trainer_email] : [])]
+      inboxes.forEach((to) => fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: EMAIL_ANON_KEY, Authorization: `Bearer ${EMAIL_ANON_KEY}` }, body: JSON.stringify({ to, subject: seminar ? `Private 1-on-1 request — ${seminar.title} — ${record.name}` : `Private seminar request — ${record.name}`, html, from: 'GEL.IT.UP Seminars <info@gelitup.com>', replyTo: record.email }) }).catch(() => {}))
     }
     setState('done')
   }
@@ -1055,7 +1056,7 @@ function TrainerPage() {
   const schedule = [
     ...upcoming.map((r) => ({ at: r.starts_at, kind: 'group', title: r.title, minutes: r.duration_minutes, extra: `${r.seats_booked} booked` })),
     ...rows.flatMap((r) => (r.private_sessions || []).filter((p) => new Date(p.start).getTime() + (r.private_minutes || 120) * 60000 >= now)
-      .map((p) => ({ at: p.start, kind: 'private', title: r.title, minutes: r.private_minutes || 120, extra: `${p.name}${p.country ? `, ${p.country}` : ''} · ${p.status === 'paid' ? 'paid' : 'awaiting payment'}${p.wants_kit ? ' · wants kit' : ''}` }))),
+      .map((p) => ({ id: p.id, at: p.start, kind: 'private', title: r.title, minutes: r.private_minutes || 120, extra: `${p.name}${p.country ? `, ${p.country}` : ''} · ${p.status === 'paid' ? 'paid' : 'awaiting payment'}${p.wants_kit ? ' · wants kit' : ''}` }))),
   ].sort((a, b) => new Date(a.at) - new Date(b.at))
 
   const Card = ({ r }) => {
@@ -1100,6 +1101,26 @@ function TrainerPage() {
 
       {rows.length === 0 && <div className="mt-8 border rounded-2xl p-8 text-center text-black/60">No seminars are linked to this account yet. Ask the seminar team to add your email to your seminar.</div>}
 
+      {(() => {
+        const waiting = rows.flatMap((r) => (r.private_requests || []).map((q) => ({ ...q, title: r.title })))
+        return waiting.length > 0 && (
+          <section className="mt-6 rounded-2xl border-2 p-4" style={{ borderColor: BRAND }}>
+            <h2 className="font-bold text-lg">Private 1-on-1 requests waiting for your reply</h2>
+            <div className="mt-2 divide-y">
+              {waiting.map((q) => (
+                <div key={q.id} className="flex flex-wrap items-center gap-3 py-2 text-sm">
+                  <span className="font-semibold">{q.name}</span>
+                  <span className="text-black/50">{q.country || ''}{q.wants_kit ? ' · wants kit' : ''}</span>
+                  <span className="text-black/70">{q.title}</span>
+                  <span className="text-xs text-black/40">received {fmtDate(q.created_at)}</span>
+                  <Link to={`/seminars/admin/private/${q.id}`} className="ml-auto rounded-full px-4 py-1.5 text-sm font-bold text-white" style={{ background: BRAND }}>Reply →</Link>
+                </div>
+              ))}
+            </div>
+          </section>
+        )
+      })()}
+
       <TeamCalendar items={calendar} now={now} />
 
       {schedule.length > 0 && (
@@ -1112,6 +1133,7 @@ function TrainerPage() {
                 <span className="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase" style={x.kind === 'group' ? { background: BRAND, color: '#fff' } : { background: '#F9D3E6', color: '#9E1F63' }}>{x.kind === 'group' ? 'Online group' : 'Private 1-on-1'}</span>
                 <span className="flex-1">{x.title} · {Math.round((x.minutes || 120) / 60 * 10) / 10} h</span>
                 <span className="text-black/60">{x.extra}</span>
+                {x.id && <Link to={`/seminars/admin/private/${x.id}`} className="text-xs font-semibold underline" style={{ color: BRAND }}>Reschedule / cancel</Link>}
                 <a href={icsHref(x)} download={`${x.kind}-${String(x.at).slice(0, 10)}.ics`} className="text-xs font-semibold underline" style={{ color: BRAND }}>+ Add to calendar</a>
               </div>
             ))}
@@ -1465,27 +1487,32 @@ function AdminPage() {
 }
 
 // ── Admin: reply to a private-session request ────────────────────────────────
-function privateReplyEmail({ req, seminar, startIso, comment, decline, payUrl }) {
+function privateReplyEmail({ req, seminar, startIso, comment, decline, payUrl, reschedule = false, cancel = false }) {
   const tz = req.timezone || 'Europe/Athens'
   const hours = seminar ? Math.round((seminar.private_minutes || 120) / 60 * 10) / 10 : null
   const title = seminar?.title || 'your private seminar'
   const commentHtml = comment ? `<p style="background:#f6f6f6;border-radius:8px;padding:12px 14px;white-space:pre-wrap">${escapeHtml(comment)}</p>` : ''
+  const paid = req.status === 'paid'
+  if (cancel) {
+    return { subject: `Your private session has been cancelled — ${title}`, html: brandEmail(`<p>Hi ${escapeHtml(req.name || 'there')},</p><p>We're sorry — your private 1-on-1 session of <strong>${escapeHtml(title)}</strong>${req.confirmed_start ? ` on <strong>${escapeHtml(whenEET(req.confirmed_start))}</strong>` : ''} has been cancelled.</p>${commentHtml}${paid ? '<p>As the session was cancelled by us, you will receive a <strong>full refund</strong> to your original payment method. You will get a confirmation from the shop once it has been processed.</p>' : ''}<p>If you'd like to book a new time, just reply to this email.</p><p>Warm regards,<br/>GEL.IT.UP Seminars</p>`) }
+  }
   if (decline) {
     return { subject: `Your private session request — ${title}`, html: brandEmail(`<p>Hi ${escapeHtml(req.name || 'there')},</p><p>Thank you for your request for a private session${seminar ? ` of <strong>${escapeHtml(title)}</strong>` : ''}.</p>${commentHtml}<p>Just reply to this email and we'll find a solution together.</p><p>Warm regards,<br/>GEL.IT.UP Seminars</p>`) }
   }
   const tzLine = fmtTime(startIso, tz) !== fmtTime(startIso) ? `<br/><span style="color:#666">${escapeHtml(whenIn(startIso, tz))} your time</span>` : ''
   return {
-    subject: `Your private session is reserved — ${title}`,
+    subject: reschedule ? `New time for your private session — ${title}` : `Your private session is reserved — ${title}`,
     html: brandEmail(`
       <p style="color:${BRAND};font-weight:bold;letter-spacing:2px;font-size:12px;margin:0">PRIVATE 1-ON-1 SESSION</p>
       <h1 style="font-size:22px;margin:4px 0 12px">${escapeHtml(title)}</h1>
       <p>Hi ${escapeHtml(req.name || 'there')},</p>
-      <p>Good news — ${seminar?.trainer_name ? escapeHtml(seminar.trainer_name) : 'our trainer'} is available. We have reserved this time for you:</p>
+      <p>${reschedule ? `Your session has been moved. Your <strong>new time</strong> is:` : `Good news — ${seminar?.trainer_name ? escapeHtml(seminar.trainer_name) : 'our trainer'} is available. We have reserved this time for you:`}</p>${reschedule && req.confirmed_start ? `<p style="text-align:center;color:#999;margin:0 0 6px"><s>${escapeHtml(whenEET(req.confirmed_start))}</s></p>` : ''}
       <p style="font-size:18px;background:#f6f6f6;border-radius:8px;padding:14px;text-align:center"><strong>${escapeHtml(whenEET(startIso))}</strong>${tzLine}${hours ? `<br/><span style="color:#666">${hours} hours, live online, 1-on-1</span>` : ''}</p>
       ${commentHtml}
-      <p style="text-align:center;margin:24px 0 10px"><a href="${payUrl}" style="display:inline-block;margin:4px;background:${BRAND};color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:bold">Pay${seminar?.private_price != null ? ` €${Number(seminar.private_price).toFixed(0)}` : ''} to book your session</a>${seminar?.kit_url ? `<a href="${seminar.kit_url}" style="display:inline-block;margin:4px;background:#ffffff;color:${BRAND};border:2px solid ${BRAND};padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold">Shop the seminar kit</a>` : ''}</p>
+      ${paid ? `<p style="text-align:center;color:#2e7d32;font-weight:bold">Your payment has been received — nothing more to pay.</p>` : ''}
+      <p style="text-align:center;margin:24px 0 10px">${paid ? '' : `<a href="${payUrl}" style="display:inline-block;margin:4px;background:${BRAND};color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:bold">Pay${seminar?.private_price != null ? ` €${Number(seminar.private_price).toFixed(0)}` : ''} to book your session</a>`}${seminar?.kit_url ? `<a href="${seminar.kit_url}" style="display:inline-block;margin:4px;background:#ffffff;color:${BRAND};border:2px solid ${BRAND};padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold">Shop the seminar kit</a>` : ''}</p>
       ${seminar?.kit_url ? `<p style="text-align:center;font-size:13px;color:#555;margin:0 0 20px">${req.wants_kit ? 'You asked about the products — ' : ''}the kit has every product used in the session, 15% off the products bought separately. Delivery time depends on your country, so please order it soon to have it in time for your session.</p>` : ''}
-      <p style="font-size:13px;color:#555">Your session is booked once payment is received. We'll then send you the link to join. Free cancellation with a full refund up to ${PRIVATE_CANCEL_HOURS} hours before the start; after that, or if you don't attend, it can't be refunded. You can move the session once, free of charge, with at least ${PRIVATE_CANCEL_HOURS} hours' notice. Full terms: <a href="${SEMINAR_SITE_URL}/seminars/terms" style="color:${BRAND}">gelitup.com/seminars/terms</a>.</p>
+      <p style="font-size:13px;color:#555">${paid ? `We'll send you the link to join before the session.` : `Your session is booked once payment is received. We'll then send you the link to join.`} Free cancellation with a full refund up to ${PRIVATE_CANCEL_HOURS} hours before the start; after that, or if you don't attend, it can't be refunded. You can move the session once, free of charge, with at least ${PRIVATE_CANCEL_HOURS} hours' notice. Full terms: <a href="${SEMINAR_SITE_URL}/seminars/terms" style="color:${BRAND}">gelitup.com/seminars/terms</a>.</p>
       <p style="font-size:13px;color:#555">Questions? Just reply to this email.</p>
       <p>Warm regards,<br/>GEL.IT.UP Seminars</p>`),
   }
@@ -1494,6 +1521,8 @@ function privateReplyEmail({ req, seminar, startIso, comment, decline, payUrl })
 function PrivateReply() {
   const { id } = useParams()
   const [authState, setAuthState] = useState('checking')
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [me, setMe] = useState('')
   const [req, setReq] = useState(null)
   const [seminar, setSeminar] = useState(null)
   const [slot] = useState(() => (typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('slot')))
@@ -1508,102 +1537,143 @@ function PrivateReply() {
       if (!hasSupabaseConfig) { setAuthState('no'); return }
       const step = await seminarAuthStep()
       if (step !== 'ok') { setAuthState('no'); return }
-      const { data: ok } = await supabase.rpc('seminar_is_admin')
-      if (!ok) { setAuthState('no'); return }
+      const [{ data: ok }, { data: u }] = await Promise.all([supabase.rpc('seminar_is_admin'), supabase.auth.getUser()])
+      setIsAdmin(Boolean(ok))
+      setMe(String(u?.user?.email || '').toLowerCase())
+      // Admins see every request; a trainer only the requests for her own seminars (enforced by the database).
+      const { data: r } = await supabase.from('seminar_private_requests').select('*').eq('id', id).maybeSingle()
+      if (!ok && !r) { setAuthState('no'); return }
       setAuthState('yes')
       supabase.rpc('seminar_team_calendar').then(({ data }) => setBusy(Array.isArray(data) ? data : []))
-      const { data: r } = await supabase.from('seminar_private_requests').select('*').eq('id', id).maybeSingle()
       setReq(r || false)
       if (r?.seminar_id) {
         const { data: sm } = await supabase.from('seminars').select('id, title, trainer_name, trainer_email, private_price, private_minutes, private_variant_id, kit_url').eq('id', r.seminar_id).maybeSingle()
         setSeminar(sm || null)
       }
+      if (r && ['confirmed', 'paid'].includes(r.status)) setMode('reschedule')
       const picked = r && slot != null ? (r.preferred_slots || [])[Number(slot)] : null
       if (picked) {
         const pIso = picked.time ? wallTimeToIso(picked.date, picked.time, picked.tz || r.timezone || EET_ZONE) : null
         setWhen(pIso ? { date: new Date(pIso).toLocaleDateString('en-CA', { timeZone: EET_ZONE }), time: fmtTime(pIso) } : { date: picked.date || '', time: '' })
       }
-      if (r?.reply_comment) setComment(r.reply_comment)
     })()
   }, [id, slot])
 
   if (authState === 'checking') return <Shell><p className="text-center text-black/40">Checking access…</p></Shell>
-  if (authState === 'no') return <SeminarAdminSignIn />
+  if (authState === 'no') return <SeminarAdminSignIn signInTitle="Sign in to reply" kicker="GEL.IT.UP Seminars · Trainers & team" />
   if (req === null) return <Shell><p className="text-center text-black/40">Loading request…</p></Shell>
-  if (req === false) return <Shell><p className="text-center">Request not found. <Link className="underline" to="/seminars/admin">Back to seminar admin</Link></p></Shell>
+  const back = isAdmin ? { to: '/seminars/admin', label: '← Seminar admin' } : { to: '/seminars/trainer', label: '← My schedule' }
+  if (req === false) return <Shell><p className="text-center">Request not found. <Link className="underline" to={back.to}>{back.label}</Link></p></Shell>
 
   const tz = req.timezone || 'Europe/Athens'
+  const booked = ['confirmed', 'paid'].includes(req.status)
+  const closed = ['declined', 'cancelled'].includes(req.status)
   const startIso = when.date && when.time ? wallTimeToIso(when.date, when.time, EET_ZONE) : null
   const payUrl = seminar?.private_variant_id ? privatePayUrl(seminar.private_variant_id, req.email, req.id) : ''
   const decline = mode === 'decline'
-  const ready = decline ? Boolean(comment.trim()) : Boolean(startIso && payUrl)
-  const preview = ready ? privateReplyEmail({ req, seminar, startIso, comment: comment.trim(), decline, payUrl }) : null
+  const cancel = mode === 'cancel'
+  const reschedule = mode === 'reschedule'
+  const pickTime = mode === 'confirm' || reschedule
+  const ready = decline || cancel ? Boolean(comment.trim()) : Boolean(startIso && (payUrl || req.status === 'paid') && startIso !== req.confirmed_start)
+  const preview = ready ? privateReplyEmail({ req, seminar, startIso, comment: comment.trim(), decline, payUrl, reschedule, cancel }) : null
+  const who = isAdmin ? 'seminar team' : (seminar?.trainer_name || me)
 
   const send = async () => {
     if (!preview) return
     setMsg('Sending…')
     await sendMail(req.email, preview.subject, preview.html, PRIVATE_INBOX)
-    const patch = decline
-      ? { status: 'declined', reply_comment: comment.trim() || null, replied_at: new Date().toISOString() }
-      : { status: 'confirmed', confirmed_start: startIso, reply_comment: comment.trim() || null, replied_at: new Date().toISOString() }
+    const nowIso = new Date().toISOString()
+    const patch = cancel
+      ? { status: 'cancelled', cancelled_at: nowIso, cancel_reason: comment.trim(), handled_by: me || null }
+      : decline
+        ? { status: 'declined', reply_comment: comment.trim() || null, replied_at: nowIso, handled_by: me || null }
+        : { status: req.status === 'paid' ? 'paid' : 'confirmed', confirmed_start: startIso, previous_start: reschedule ? req.confirmed_start : req.previous_start || null, reply_comment: comment.trim() || null, replied_at: nowIso, handled_by: me || null }
     const { error } = await supabase.from('seminar_private_requests').update(patch).eq('id', req.id)
-    // Tell the trainer the date the client has been offered (it also appears in her schedule).
-    if (!decline && seminar?.trainer_email) {
-      await sendMail(seminar.trainer_email, `Private 1-on-1 booked in — ${whenEET(startIso)}`, brandEmail(`<p>Hi ${escapeHtml(seminar.trainer_name || 'there')},</p><p>A private 1-on-1 session has been agreed and the client has been sent the payment link:</p><p style="font-size:17px;background:#f6f6f6;border-radius:8px;padding:12px;text-align:center"><strong>${escapeHtml(whenEET(startIso))}</strong><br/><span style="color:#666">${escapeHtml(seminar.title)} · ${Math.round((seminar.private_minutes || 120) / 60 * 10) / 10} h · ${escapeHtml(String(req.name || '').split(' ')[0])}${req.country ? `, ${escapeHtml(req.country)}` : ''}</span></p>${comment.trim() ? `<p style="color:#555">Note sent to the client: <em>${escapeHtml(comment.trim())}</em></p>` : ''}<p>You'll see it in your schedule, marked as paid once the client pays: <a href="${SEMINAR_SITE_URL}/seminars/trainer" style="color:${BRAND}">gelitup.com/seminars/trainer</a></p>`, 'Trainer notification'), PRIVATE_INBOX)
-    }
-    setMsg(error ? `Email sent, but the request could not be updated: ${error.message}` : decline ? 'Sent. The request is marked as declined.' : 'Sent. The client has the agreed time and the payment link; you will get an email when they pay.')
+    const line = `${escapeHtml(seminar?.title || 'Private session')} · ${escapeHtml(req.name || '')}${req.country ? `, ${escapeHtml(req.country)}` : ''} · <a href="mailto:${escapeHtml(req.email)}">${escapeHtml(req.email)}</a>`
+    const note = comment.trim() ? `<p style="color:#555">Message to the client: <em>${escapeHtml(comment.trim())}</em></p>` : ''
+    // Keep the seminar team informed of everything a trainer does (and the trainer of what the team does).
+    const team = cancel
+      ? { subject: `${req.status === 'paid' ? 'REFUND NEEDED — ' : ''}Private 1-on-1 cancelled — ${req.name}`, body: `<p>Cancelled by <strong>${escapeHtml(who)}</strong>.</p><p>${line}</p>${req.confirmed_start ? `<p>Was booked for <strong>${escapeHtml(whenEET(req.confirmed_start))}</strong></p>` : ''}${note}${req.status === 'paid' ? `<p style="color:#b00020;font-weight:bold">The client had paid (${escapeHtml(req.order_ref || 'order')}). Please refund the full amount in Shopify.</p>` : ''}` }
+      : decline
+        ? { subject: `Private 1-on-1 request answered — ${req.name}`, body: `<p>Replied by <strong>${escapeHtml(who)}</strong> (no time agreed).</p><p>${line}</p>${note}` }
+        : { subject: `Private 1-on-1 ${reschedule ? 'moved' : 'booked in'} — ${whenEET(startIso)}`, body: `<p>${reschedule ? 'Moved' : 'Agreed'} by <strong>${escapeHtml(who)}</strong>${req.status === 'paid' ? ' (already paid)' : ' — payment link sent to the client'}.</p><p style="font-size:17px;background:#f6f6f6;border-radius:8px;padding:12px;text-align:center">${reschedule && req.confirmed_start ? `<s style="color:#999">${escapeHtml(whenEET(req.confirmed_start))}</s><br/>` : ''}<strong>${escapeHtml(whenEET(startIso))}</strong></p><p>${line}</p>${note}<p>Schedule: <a href="${SEMINAR_SITE_URL}/seminars/trainer" style="color:${BRAND}">gelitup.com/seminars/trainer</a></p>` }
+    const recipients = new Set([PRIVATE_INBOX.toLowerCase()])
+    if (seminar?.trainer_email) recipients.add(seminar.trainer_email.toLowerCase())
+    recipients.delete(me)
+    for (const to of recipients) await sendMail(to, team.subject, brandEmail(team.body, 'Seminar team notification'), PRIVATE_INBOX)
+    setMsg(error ? `Email sent, but the request could not be updated: ${error.message}` : cancel ? 'Cancelled. The client has been told' + (req.status === 'paid' ? ' and the seminar team has been asked to refund.' : '.') : decline ? 'Sent. The request is marked as answered.' : reschedule ? 'Moved. The client has the new time.' : 'Sent. The client has the agreed time and the payment link; you will get an email when they pay.')
     setReq((r) => ({ ...r, ...patch }))
+    setComment('')
   }
+
+  const tabs = closed ? [] : booked
+    ? [['reschedule', 'Reschedule'], ['cancel', 'Cancel session']]
+    : [['confirm', 'Confirm a time'], ['decline', "Can't do it / reply only"]]
 
   return (
     <Shell>
-      <p className="text-sm"><Link to="/seminars/admin" className="underline">← Seminar admin</Link></p>
-      <h1 className="text-2xl font-bold mt-3">{seminar ? 'Private 1-on-1 request' : 'Private seminar request'}</h1>
-      {seminar && <p className="text-black/60">{seminar.title} · €{Number(seminar.private_price).toFixed(0)}</p>}
+      <p className="text-sm"><Link to={back.to} className="underline">{back.label}</Link></p>
+      <h1 className="text-2xl font-bold mt-3">{seminar ? 'Private 1-on-1' : 'Private seminar request'}</h1>
+      {seminar && <p className="text-black/60">{seminar.title}{seminar.trainer_name ? ` · ${seminar.trainer_name}` : ''}</p>}
       <div className="mt-4 border rounded-2xl p-4 text-sm grid gap-1">
         <p><strong>{req.name}</strong> · <a className="underline" href={`mailto:${req.email}`}>{req.email}</a>{req.phone ? ` · ${req.phone}` : ''}{req.country ? ` · ${req.country}` : ''}</p>
         <p className="text-black/70">{req.topic}</p>
         {req.notes && <p className="italic text-black/60">{req.notes}</p>}
-        <p className="text-black/50">Kit: {req.wants_kit ? 'yes' : 'no'} · Status: <strong>{req.status}</strong>{req.paid_at ? ` · paid ${req.order_ref || ''}` : ''}</p>
+        <p className="text-black/50">Kit: {req.wants_kit ? 'yes' : 'no'} · Status: <strong>{{ new: 'new request', contacted: 'waiting for a reply', confirmed: 'time agreed — awaiting payment', paid: 'booked & paid', declined: 'answered, no time agreed', cancelled: 'cancelled' }[req.status] || req.status}</strong>{req.paid_at ? ` · ${req.order_ref || ''}` : ''}</p>
+        {req.confirmed_start && !closed && <p className="font-semibold" style={{ color: BRAND }}>{whenEET(req.confirmed_start)}</p>}
+        {req.handled_by && <p className="text-xs text-black/40">Last handled by {req.handled_by}</p>}
       </div>
 
-      <div className="mt-6 flex gap-2">
-        <button type="button" onClick={() => setMode('confirm')} className={`rounded-full px-4 py-2 text-sm font-semibold border ${!decline ? 'text-white' : ''}`} style={!decline ? { background: BRAND, borderColor: BRAND } : {}}>Confirm a time</button>
-        <button type="button" onClick={() => setMode('decline')} className={`rounded-full px-4 py-2 text-sm font-semibold border ${decline ? 'text-white bg-black border-black' : ''}`}>Can't do it / reply only</button>
-      </div>
+      {closed && <p className="mt-6 rounded-xl bg-black/[0.04] p-4 text-sm">This request is {req.status}. {req.cancel_reason ? <>Reason given: <em>{req.cancel_reason}</em></> : ''}</p>}
 
-      {!decline && (
+      {tabs.length > 0 && (
+        <div className="mt-6 flex flex-wrap gap-2">
+          {tabs.map(([k, label]) => (
+            <button key={k} type="button" onClick={() => { setMode(k); setMsg('') }} className={`rounded-full px-4 py-2 text-sm font-semibold border ${mode === k ? 'text-white' : ''}`} style={mode === k ? (k === 'cancel' || k === 'decline' ? { background: '#111', borderColor: '#111' } : { background: BRAND, borderColor: BRAND }) : {}}>{label}</button>
+          ))}
+        </div>
+      )}
+
+      {!closed && pickTime && (
         <div className="mt-4">
-          <p className="text-sm font-medium">Their preferred times — pick one, or type another below</p>
-          <div className="mt-2 grid gap-2">
-            {(req.preferred_slots || []).map((sl, i) => {
-              const iso = sl.time ? wallTimeToIso(sl.date, sl.time, sl.tz || tz) : null
-              const on = iso ? startIso === iso : (when.date === sl.date && !when.time)
-              return (
-                <label key={i} className={`flex items-center gap-3 border rounded-xl px-3 py-2 text-sm cursor-pointer ${on ? 'border-[#D43790] bg-[#D43790]/5' : ''}`}>
-                  <input type="radio" name="slot" checked={on} onChange={() => setWhen({ date: iso ? new Date(iso).toLocaleDateString('en-CA', { timeZone: EET_ZONE }) : sl.date, time: iso ? fmtTime(iso) : '' })} />
-                  <span>{iso ? <><strong>{whenEET(iso)}</strong>{fmtTime(iso, tz) !== fmtTime(iso) && <span className="text-black/50"> · {fmtTime(iso, tz)} their time</span>}</> : <>{sl.date} <span className="text-black/50">(no time given — add one below)</span></>}</span>
-                </label>
-              )
-            })}
-          </div>
+          {!reschedule && <p className="text-sm font-medium">Their preferred times — pick one, or type another below</p>}
+          {reschedule && <p className="text-sm font-medium">Choose the new date and time{req.status === 'paid' ? ' — the client has already paid, so no new payment link is sent' : ''}</p>}
+          {!reschedule && (
+            <div className="mt-2 grid gap-2">
+              {(req.preferred_slots || []).map((sl, i) => {
+                const iso = sl.time ? wallTimeToIso(sl.date, sl.time, sl.tz || tz) : null
+                const on = iso ? startIso === iso : (when.date === sl.date && !when.time)
+                return (
+                  <label key={i} className={`flex items-center gap-3 border rounded-xl px-3 py-2 text-sm cursor-pointer ${on ? 'border-[#D43790] bg-[#D43790]/5' : ''}`}>
+                    <input type="radio" name="slot" checked={on} onChange={() => setWhen({ date: iso ? new Date(iso).toLocaleDateString('en-CA', { timeZone: EET_ZONE }) : sl.date, time: iso ? fmtTime(iso) : '' })} />
+                    <span>{iso ? <><strong>{whenEET(iso)}</strong>{fmtTime(iso, tz) !== fmtTime(iso) && <span className="text-black/50"> · {fmtTime(iso, tz)} their time</span>}</> : <>{sl.date} <span className="text-black/50">(no time given — add one below)</span></>}</span>
+                  </label>
+                )
+              })}
+            </div>
+          )}
           <div className="mt-3 flex flex-wrap items-end gap-2">
             <label className="block"><span className="text-xs text-black/60">Date</span><input type="date" value={when.date} onChange={(e) => setWhen((w) => ({ ...w, date: e.target.value }))} className={inputCls} /></label>
             <label className="block"><span className="text-xs text-black/60">Time — EET, 24-hour</span><Time24 value={when.time} onChange={(v) => setWhen((w) => ({ ...w, time: v }))} className="mt-0.5" /></label>
           </div>
           {startIso && (() => {
             const s0 = new Date(startIso).getTime(), s1 = s0 + (seminar?.private_minutes || 120) * 60000
-            const clash = busy.filter((b) => new Date(b.start).getTime() < s1 && new Date(b.end).getTime() > s0)
+            const own = req.confirmed_start ? new Date(req.confirmed_start).getTime() : null
+            const clash = busy.filter((b) => new Date(b.start).getTime() < s1 && new Date(b.end).getTime() > s0 && new Date(b.start).getTime() !== own)
             return clash.length ? <p className="mt-2 rounded-lg bg-amber-50 border border-amber-300 px-3 py-2 text-sm text-amber-900"><strong>Heads-up — overlaps with:</strong> {clash.map((c) => `${fmtTime(c.start)}–${fmtTime(c.end)} ${c.kind === 'group' ? 'Online group' : 'Private 1-on-1'}${c.title ? ` (${c.title})` : ''}`).join('; ')}</p> : null
           })()}
-          {startIso && <p className="mt-2 text-sm">Agreed time: <strong>{whenEET(startIso)}</strong>{fmtTime(startIso, tz) !== fmtTime(startIso) ? ` · ${fmtTime(startIso, tz)} for the client (${tz})` : ''}</p>}
-          {!payUrl && <p className="mt-2 text-sm text-red-600">This seminar has no private-session product linked yet, so a payment link can't be added.</p>}
+          {startIso && <p className="mt-2 text-sm">{reschedule ? 'New time' : 'Agreed time'}: <strong>{whenEET(startIso)}</strong>{fmtTime(startIso, tz) !== fmtTime(startIso) ? ` · ${fmtTime(startIso, tz)} for the client (${tz})` : ''}</p>}
+          {!payUrl && req.status !== 'paid' && <p className="mt-2 text-sm text-red-600">This seminar has no private-session product linked yet, so a payment link can't be added.</p>}
         </div>
       )}
 
-      <label className="block mt-5"><span className="text-sm font-medium">{decline ? 'Your message to the client *' : 'Comment for the client (optional)'}</span>
-        <textarea rows={4} value={comment} onChange={(e) => setComment(e.target.value)} className={`${inputCls} mt-1`} placeholder={decline ? 'e.g. Daniela is away that week — could you do 1 or 2 December instead?' : 'e.g. Please have your products and dual forms ready before we start.'} />
-      </label>
+      {!closed && cancel && <p className="mt-4 rounded-xl border border-black/20 p-3 text-sm">The client will be told the session is cancelled.{req.status === 'paid' ? ' They have paid, so the seminar team is asked to refund them in full.' : ''} Please give a short reason.</p>}
+
+      {!closed && (
+        <label className="block mt-5"><span className="text-sm font-medium">{decline || cancel ? 'Your message to the client *' : 'Comment for the client (optional)'}</span>
+          <textarea rows={4} value={comment} onChange={(e) => setComment(e.target.value)} className={`${inputCls} mt-1`} placeholder={cancel ? "e.g. I'm unwell that day — I'm so sorry. Reply and we'll find a new time." : decline ? 'e.g. I am away that week — could you do 1 or 2 December instead?' : reschedule ? 'e.g. Sorry for the change — see you then!' : 'e.g. Please have your products and dual forms ready before we start.'} />
+        </label>
+      )}
 
       {preview && (
         <div className="mt-6">
@@ -1611,7 +1681,7 @@ function PrivateReply() {
           <div className="mt-2 border rounded-2xl p-4 bg-white" dangerouslySetInnerHTML={{ __html: preview.html }} />
         </div>
       )}
-      <div className="mt-4"><Button type="button" disabled={!ready || msg === 'Sending…'} onClick={send} className="w-full">{decline ? 'Send reply' : 'Send confirmation with payment link'}</Button></div>
+      {!closed && <div className="mt-4"><Button type="button" disabled={!ready || msg === 'Sending…'} onClick={send} className="w-full">{cancel ? 'Cancel the session & tell the client' : decline ? 'Send reply' : reschedule ? 'Send the new time' : 'Send confirmation with payment link'}</Button></div>}
       {msg && <p className="mt-3 text-sm text-center">{msg}</p>}
     </Shell>
   )
