@@ -267,11 +267,13 @@ const money = (n) => (n == null ? '' : `€${Number(n).toFixed(2)}`)
 // Fill in contact/email per country when known; until then buyers are pointed to info@gelitup.com.
 const KIT_DISTRIBUTOR_COUNTRIES = {
   BG: { name: 'Bulgaria', contact: '', email: '' },
+  IT: { name: 'Italy', contact: '', email: '' },
 }
 const guessDistributorCountry = () => {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
     if (tz === 'Europe/Sofia') return 'BG'
+    if (tz === 'Europe/Rome' || tz === 'Europe/Vatican' || tz === 'Europe/San_Marino') return 'IT'
   } catch { /* ignore */ }
   return ''
 }
@@ -426,7 +428,7 @@ function BookingPanel({ seminar, onClose }) {
             )}
             {data.kit && !distributor && (
               <p className="mt-4 text-xs text-black/50">
-                Ordering from Bulgaria?{' '}
+                Ordering from Bulgaria or Italy?{' '}
                 {pickCountry
                   ? Object.entries(KIT_DISTRIBUTOR_COUNTRIES).map(([code, c]) => <button key={code} type="button" className="ml-1 font-semibold underline" style={{ color: BRAND }} onClick={() => { setKitCountry(code); setWithKit(false) }}>{c.name}</button>)
                   : <button type="button" className="font-semibold underline" style={{ color: BRAND }} onClick={() => setPickCountry(true)}>The kit comes from your local distributor →</button>}
