@@ -267,7 +267,7 @@ const money = (n) => (n == null ? '' : `€${Number(n).toFixed(2)}`)
 // Fill in contact/email per country when known; until then buyers are pointed to info@gelitup.com.
 const KIT_DISTRIBUTOR_COUNTRIES = {
   BG: { name: 'Bulgaria', contact: '', email: '' },
-  IT: { name: 'Italy', contact: '', email: '' },
+  IT: { name: 'Italy', contact: 'GEL.IT.UP Italia', email: 'info@gelitup.it' },
 }
 const guessDistributorCountry = () => {
   try {
